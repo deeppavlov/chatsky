@@ -23,8 +23,7 @@ import copy
 import sentry_sdk
 from dff import DialogueFlow, NatexNLG, Macro, NatexNLU, KnowledgeBase
 
-import common.dialogflow_framework.stdm.utils as utils
-from common.dialogflow_framework.programy.model import MindfulDataFileBot
+import dff.dialogflow.utils as utils
 
 sentry_sdk.init(os.getenv("SENTRY_DSN"))
 
@@ -189,14 +188,7 @@ class DFEasyFilling:
             self.df.add_user_transition(state_from, state_to, intent)
 
         elif callable(intent):
-            if isinstance(intent, MindfulDataFileBot):  # using programy as intent
-
-                def handler(ngrams, vars):
-                    # TODO: n turns
-                    return intent([ngrams.text()])
-
-            else:
-                handler = intent  # intent(ngrams=ngrams, vars=vars) -> bool
+            handler = intent  # intent(ngrams=ngrams, vars=vars) -> bool
 
             class IntentMacro(Macro):
                 def run(self, ngrams, vars, args):

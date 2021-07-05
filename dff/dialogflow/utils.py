@@ -17,7 +17,7 @@ import logging
 
 from dff import NatexNLU
 
-import common.dialogflow_framework.stdm.cached_functions as cached_functions
+import dff.dialogflow.cached_functions as cached_functions
 
 logger = logging.getLogger(__name__)
 
