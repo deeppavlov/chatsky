@@ -8,3 +8,6 @@ from dff.state_transition_dialogue_manager.composite_dialogue_flow import (
     CompositeDialogueFlow,
 )
 from dff.state_transition_dialogue_manager.update_rules import UpdateRule, UpdateRules
+
+import dff.dialogflow.dialogflow_extention as dialogflow_extention
+import dff.dialogflow.cached_functions as cached_functions
