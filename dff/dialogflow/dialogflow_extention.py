@@ -14,18 +14,15 @@
 
 import logging
 import uuid
-import os
 from typing import Union, Dict, List
 from enum import Enum
 import collections
 import copy
 
-import sentry_sdk
 from dff import DialogueFlow, NatexNLG, Macro, NatexNLU, KnowledgeBase
 
 import dff.dialogflow.utils as utils
 
-sentry_sdk.init(os.getenv("SENTRY_DSN"))
 
 logger = logging.getLogger(__name__)
 
@@ -115,7 +112,6 @@ class DFEasyFilling:
                         text = "#+#".join(texts)
                         return text
                     except Exception as exc:
-                        sentry_sdk.capture_exception(exc)
                         logger.exception(exc)
                         return ""
 
@@ -195,7 +191,6 @@ class DFEasyFilling:
                     try:
                         is_match = handler(ngrams=ngrams, vars=vars)
                     except Exception as exc:
-                        sentry_sdk.capture_exception(exc)
                         logger.exception(exc)
                         is_match = False
                     if is_match:
