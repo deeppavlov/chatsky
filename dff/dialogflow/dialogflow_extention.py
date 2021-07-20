@@ -19,7 +19,7 @@ from enum import Enum
 import collections
 import copy
 
-from dff import DialogueFlow, NatexNLG, Macro, NatexNLU, KnowledgeBase
+from dff import DialogueFlow, NatexNLG, Macro, NatexNLU
 
 import dff.dialogflow.utils as utils
 
@@ -33,7 +33,7 @@ class DFEasyFilling:
         initial_state: Union[Enum, str, tuple] = "",
         initial_speaker=DialogueFlow.Speaker.USER,
         macros: Dict[str, Macro] = None,
-        kb: Union[KnowledgeBase, str, List[str]] = None,
+        kb: Union[str, List[str]] = None,
         default_system_state=None,
         end_state="__end__",
         all_multi_hop=True,
