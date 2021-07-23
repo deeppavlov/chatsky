@@ -79,10 +79,34 @@ class Condition(BaseModel):
             return Condition(callback=obj)
         elif isinstance(obj, re.Pattern):
             return Condition(pattern=obj.pattern)
-        elif isinstance(obj, list) or isinstance(obj, list):
+        elif isinstance(obj, tuple()) or isinstance(obj, list):
             return Condition(complex_condition=obj)
         else:
             return Condition(string=obj)
+
+    def hash(self):
+        return hash_obj(self)
+
+class Response(BaseModel):
+    candidates: Union[list[str], tuple[str]] = None
+    candidate: str = None
+    callback: Callable = None
+
+    @root_validator
+    def check_empty(cls, fields: dict) -> dict:
+        if not any(fields.values()):
+            raise ValueError(f"one of {list(fields.keys())} expected not None but all of them are None")
+        return fields
+
+    @validate_arguments
+    def parse(obj: Union[tuple, list, str, Callable]):
+        print(obj)
+        if isinstance(obj, Callable):
+            return Response(callback=obj)
+        elif isinstance(obj, tuple) or isinstance(obj, list):
+            return Response(candidates=obj)
+        else:
+            return Response(candidate=obj)
 
     def hash(self):
         return hash_obj(self)
@@ -98,7 +122,7 @@ class Transition(BaseModel):
 
     @validator("to_states")
     @validator("global_to_states")
-    def check_ts(cls, field: dict[ToStateType, ConditionType]) -> dict[ToStateType, ConditionType]:
+    def save_ts(cls, field: dict[ToStateType, ConditionType]) -> dict[ToStateType, ConditionType]:
         ts2conds = {}
         for key, val in field.items():
             to_st = ToState.parse(key)
@@ -112,6 +136,10 @@ class Transition(BaseModel):
 class Node(Transition):
     response: Union[tuple, list, str, Callable] = None
     processing: Callable = None
+
+    @validator("response")
+    def parse_response(cls, field: Union[tuple, list, str, Callable]) -> Response:
+        return Response.parse(field)
 
 
 to_states = {}
@@ -135,13 +163,9 @@ script = {
     "globals": {
         GLOBAL_TO_STATES: {"213": any},
         TO_STATES: {"213": any},
-        GRAPH: {"node": {GLOBAL_TO_STATES: {"213": any}, RESPONSE: "qweqwdqwd", PROCESSING: any}},
+        GRAPH: {"node": {GLOBAL_TO_STATES: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}},
     }
 }
 s1 = Script(flows=script)
 s1.dict()
 # %%
-list(zip(*list(conditions.values())[0]))
-
-# %%
-list(conditions.values())[0].hash()
