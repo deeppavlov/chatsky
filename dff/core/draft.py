@@ -33,6 +33,7 @@ script = {
 
 }
 
+
 # script = {
 #     # Example of global transitions
 #     "globals": {
@@ -61,7 +62,7 @@ script = {
 #                 TO_STATES: {
 #                     "reaction_on_hobby": [
 #                         any,
-#                         [r"hobbies", custom.COMPILED_PATTERN.pattern, has_entities("wiki:Q24423")],
+#                         [r"hobbies", custom.COMPILED_PATTERN, has_entities("wiki:Q24423")],
 #                     ],
 #                     forward: intents.always_true,  # to_next gets "have_you_slot" as target state
 #                 },
