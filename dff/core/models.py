@@ -6,7 +6,10 @@ import re
 
 from pydantic import BaseModel, ValidationError, root_validator, validate_arguments, validator
 
+from keywords import GLOBAL_TO_STATES, TO_STATES, RESPONSE, PROCESSING, GRAPH
 
+# TODO:
+# - добавить нормальный вывод ошибок
 def hash_obj(obj):
     field_names, field_values = list(zip(*obj))
     return ":".join(["" if val is None else repr(val) for val in field_values])
@@ -63,7 +66,7 @@ class ToState(BaseModel):
 
 
 class Condition(BaseModel):
-    string: str = None
+    match_str: str = None
     pattern: str = None
     complex_condition: Union[list, tuple] = None
     callback: Callable = None
@@ -82,10 +85,17 @@ class Condition(BaseModel):
         elif isinstance(obj, tuple()) or isinstance(obj, list):
             return Condition(complex_condition=obj)
         else:
-            return Condition(string=obj)
+            return Condition(match_str=obj)
+
+    @validator("complex_condition")
+    def check_empty_iterable(cls, field: Union[list[str], tuple[str]]) -> Union[list[str], tuple[str]]:
+        if any((isinstance(field, tuple), isinstance(field, list))) and not field:
+            raise ValueError("complex_condition expected not empty")
+        return field
 
     def hash(self):
         return hash_obj(self)
+
 
 class Response(BaseModel):
     candidates: Union[list[str], tuple[str]] = None
@@ -98,9 +108,14 @@ class Response(BaseModel):
             raise ValueError(f"one of {list(fields.keys())} expected not None but all of them are None")
         return fields
 
+    @validator("candidates")
+    def check_empty_iterable(cls, field: Union[list[str], tuple[str]]) -> Union[list[str], tuple[str]]:
+        if any((isinstance(field, tuple), isinstance(field, list))) and not field:
+            raise ValueError("candidates expected not empty")
+        return field
+
     @validate_arguments
     def parse(obj: Union[tuple, list, str, Callable]):
-        print(obj)
         if isinstance(obj, Callable):
             return Response(callback=obj)
         elif isinstance(obj, tuple) or isinstance(obj, list):
@@ -116,12 +131,15 @@ ToStateType = Union[str, tuple, Callable]
 ConditionType = Union[tuple, list, str, Callable]
 
 
+to_states = {}
+conditions = {}
+
+
 class Transition(BaseModel):
     global_to_states: dict[ToStateType, ConditionType] = None
     to_states: dict[ToStateType, ConditionType] = None
 
-    @validator("to_states")
-    @validator("global_to_states")
+    @validator("global_to_states","to_states")
     def save_ts(cls, field: dict[ToStateType, ConditionType]) -> dict[ToStateType, ConditionType]:
         ts2conds = {}
         for key, val in field.items():
@@ -134,16 +152,12 @@ class Transition(BaseModel):
 
 
 class Node(Transition):
-    response: Union[tuple, list, str, Callable] = None
+    response: Union[tuple, list, str, Callable]
     processing: Callable = None
 
     @validator("response")
     def parse_response(cls, field: Union[tuple, list, str, Callable]) -> Response:
         return Response.parse(field)
-
-
-to_states = {}
-conditions = {}
 
 
 class Flow(Transition):
@@ -154,11 +168,6 @@ class Script(BaseModel):
     flows: dict[str, Flow]
 
 
-GLOBAL_TO_STATES = "global_to_states"
-TO_STATES = "to_states"
-RESPONSE = "response"
-PROCESSING = "processing"
-GRAPH = "graph"
 script = {
     "globals": {
         GLOBAL_TO_STATES: {"213": any},
