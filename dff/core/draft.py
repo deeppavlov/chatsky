@@ -1,20 +1,7 @@
 # %%
 from keywords import GLOBAL_TO_STATES, TO_STATES, GRAPH, RESPONSE, PROCESSING
-from models_v2 import Flows
+from flows import Flows, normalize_node_label
 
-
-# from dff.utils import forward, back, repeat, previous  # , to_root
-# from dff.core import compile_actor
-# import dff.PRIORITIES_AS_PRIORITIES
-
-# from extentions import intents
-# from extentions import custom
-# from extentions import providers
-# from extentions import handlers
-# from extentions import generic_responses
-
-# import custom
-# from custom.annotators.entities import has_entities
 
 kwargs1 = {}
 kwargs2 = {}
@@ -25,6 +12,8 @@ PRIORITIES_LOW = 0.5
 #
 def template_func_dict(*args, **kwargs):
     return {}
+
+
 def template_func_tuple(*args, **kwargs):
     return ["123"]
 
@@ -52,7 +41,7 @@ CUSTOM_HAS_ENTITIES = template_func_dict
 CUSTOM_SF_OPEN = template_func_dict
 forward = back = repeat = previous = template_func_dict
 
-script = {
+flows = {
     # Example of global transitions
     "globals": {
         GLOBAL_TO_STATES: {
@@ -127,27 +116,54 @@ script = {
         GRAPH: {"facts": {RESPONSE: PROVIDERS_FACT_PROVIDER("weather"), TO_STATES: {"facts": INTENTS_FACTS}}},
     },
 }
-# %%
 
-s1 = Script(flows=script)
-s1.json()
-
-class Context(BaseModel):
-    history : list[str] = []
-
-
-class Actor():
-    def __init__(self, script: dict, start_state=Union[tuple, list, str, Callable, ToState]):
-        self.script = Script(flows=script)
-        self.start_state = start_state if isinstance(start_state, ToState) else ToState.parse(start_state)
-
-    def turn(context: Union[Context, dict, str], return_dict=False, return_json=False) -> Union[Context, dict, str]:
-        
 
 # get state
 # ....
 # actor.run(state)
 # responce ....
 # ....
+# Flows.parse_obj({"flows": script})
+flows1 = Flows(flows=flows)
+flows1.dict()
+import pprint
+
+pprint.pprint(flows1.get_transitions(1, global_transition_flag=False))
 # %%
-Flows.parse_obj({"flows":script})
+from typing import Union, Any, Optional
+from pydantic import BaseModel, validate_arguments, conlist
+from flows import Flows, NodeLabelType
+from context import Context
+
+
+class Actor:
+    @validate_arguments
+    def __init__(self, flows: Union[Flows, dict], start_node_label=NodeLabelType, default_priority=1.0):
+        self.flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
+        self.flows.run_flows_verification()
+        self.start_node_label = normalize_node_label(start_node_label, flow_label="", default_priority=default_priority)
+        self.default_priority = default_priority
+
+    @validate_arguments
+    def turn(
+        self,
+        context: Union[Context, dict, str] = {},
+        return_dict=False,
+        return_json=False,
+    ) -> Union[Context, dict, str]:
+        if not context:
+            context = Context()
+            context.add_human_utterance("")
+        elif isinstance(context, dict):
+            context = Context.parse_raw(context)
+        elif isinstance(context, str):
+            context = Context.parse_raw(context)
+        elif not issubclass(type(context), Context):
+            raise ValueError(
+                f"context expexted as sub class of Context class or object of dict/str(json) type, but got {context}"
+            )
+
+        self.flows.get_transitions(self.default_priority, global_transition_flag=False)
+
+
+Actor(flows)
