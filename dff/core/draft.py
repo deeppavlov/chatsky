@@ -14,6 +14,14 @@ def template_func_dict(*args, **kwargs):
     return {}
 
 
+def template_func_label(*args, **kwargs):
+    return ("hobbies", "have_you_hobby", PRIORITIES_HIGH)
+
+
+def template_func_str(*args, **kwargs):
+    return "asdasda"
+
+
 def template_func_tuple(*args, **kwargs):
     return ["123"]
 
@@ -35,11 +43,11 @@ PROVIDERS_FACT_PROVIDER = template_func_tuple
 CUSTOM_REQUEST = template_func_dict
 CUSTOM_STATE_PROCESSING = template_func_dict
 CUSTOM_ENTITIES_TO_SLOTS_PROCESSING = template_func_func
-CUSTOM_RESPONSE = template_func_dict
+CUSTOM_RESPONSE = template_func_str
 CUSTOM_COMPILED_PATTERN = template_func_dict
 CUSTOM_HAS_ENTITIES = template_func_dict
 CUSTOM_SF_OPEN = template_func_dict
-forward = back = repeat = previous = template_func_dict
+forward = back = repeat = previous = template_func_label
 
 flows = {
     # Example of global transitions
@@ -47,7 +55,7 @@ flows = {
         GLOBAL_TO_STATES: {
             ("helper", "commit_suicide", PRIORITIES_HIGH): r"i want to commit suicide",
             ("not_understand", PRIORITIES_HIGH): r"i did not understan",
-            ("generic_responses_for_extrav", "root", PRIORITIES_MIDDLE): GENERIC_RESPONSES_INTENT,
+            ("helper", "commit_suicide", PRIORITIES_MIDDLE): GENERIC_RESPONSES_INTENT,
         },
         GRAPH: {
             "not_understand": {
@@ -88,7 +96,7 @@ flows = {
             "custom_answer": {
                 RESPONSE: CUSTOM_RESPONSE,
                 TO_STATES: {
-                    ("friends", "have_you_friends"): r"friends",
+                    ("hobbies", "have_you_hobby"): r"friends",
                     ("facts", "facts"): r"facts",
                     repeat: INTENTS_ALWAYS_TRUE,  # repeat gets "have_you_slot" as target state
                 },
@@ -126,10 +134,9 @@ flows = {
 # Flows.parse_obj({"flows": script})
 flows1 = Flows(flows=flows)
 flows1.dict()
-import pprint
+# import pprint
 
-pprint.pprint(flows1.get_transitions(1, global_transition_flag=False))
-# %%
+# pprint.pprint(flows1.get_transitions(1, global_transition_flag=False))
 from typing import Union, Any, Optional
 from pydantic import BaseModel, validate_arguments, conlist
 from flows import Flows, NodeLabelType
@@ -140,7 +147,11 @@ class Actor:
     @validate_arguments
     def __init__(self, flows: Union[Flows, dict], start_node_label=NodeLabelType, default_priority=1.0):
         self.flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
-        self.flows.run_flows_verification()
+        errors = self.flows.validate_flows()
+        if errors:
+            raise ValueError(
+                f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
+            )
         self.start_node_label = normalize_node_label(start_node_label, flow_label="", default_priority=default_priority)
         self.default_priority = default_priority
 

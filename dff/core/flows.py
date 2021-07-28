@@ -171,67 +171,82 @@ class Flow(Transition):
         return transitions
 
 
+def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
+    error_msgs.append(msg)
+    logging_flag and logger.error(msg, exc_info=exception)
+
+
 class Flows(BaseModel):
     flows: dict[str, Flow]
 
     @validator("flows")
-    def validate_flows(cls, fields: dict) -> dict:
+    def is_not_empty(cls, fields: dict) -> dict:
         if not any(fields.values()):
             raise ValueError("expected not empty flows")
         return fields
 
     @validate_arguments
-    def run_flows_verification(
+    def validate_flows(
         self,
         validate_responses_flag: Optional[bool] = None,
-        logging_off: bool = False,
+        logging_flag: bool = True,
     ):
         transitions = self.get_transitions(-1, False) | self.get_transitions(-1, True)
-        summary_errors = []
-        for node_label, condition in transitions.items():
+        error_msgs = []
+        for callable_node_label, condition in transitions.items():
             context = Context()
             context.add_human_utterance("text")
             flows = Flows.parse_obj({"flows": {"globals": {}}})
-            # check logging
-            node_label = node_label(context, flows) if isinstance(node_label, Callable) else node_label
-            node = self.get_node(node_label)
-            if not isinstance(self.get_node(node_label), Node):
-                error_msg = f"Could not find node with node_label={node_label[:2]}"
-                summary_errors += [error_msg]
-                if not logging_off:
-                    logger.error(error_msg)
+            node_label = (
+                callable_node_label(context, flows)
+                if isinstance(callable_node_label, Callable)
+                else callable_node_label
+            )
+
+            # validate node_label
+            try:
+                node = self.get_node(node_label)
+            except Exception as exc:
+                node = None
+                msg = f"Got exception '''{exc}''' for {callable_node_label=}"
+                error_handler(error_msgs, msg, exc, logging_flag)
+
+            if not isinstance(node, Node):
+                msg = f"Could not find node with node_label={node_label[:2]}"
+                error_handler(error_msgs, msg, None, logging_flag)
+                continue
+
+            # validate response
             if validate_responses_flag or validate_responses_flag is None:
                 response_func = normalize_response(node.response)
-                n_errors = len(summary_errors)
+                n_errors = len(error_msgs)
                 try:
                     response_result = response_func(context, flows)
                     if not isinstance(response_result, str):
-                        error_msg = f"Expected type of response_result needed str but got {type(response_result)=}"
-                        summary_errors += [error_msg]
-                        if not logging_off:
-                            logger.error(error_msg)
-
+                        msg = (
+                            f"Expected type of response_result needed str but got {type(response_result)=}"
+                            f" for node_label={node_label[:2]}"
+                        )
+                        error_handler(error_msgs, msg, None, logging_flag)
                 except Exception as exc:
-                    error_msg = (
+                    msg = (
                         f"Got exception '''{exc}''' during response execution "
                         f"for {node_label=} and {node.response=}"
                     )
-                    summary_errors += [error_msg]
-                    if not logging_off:
-                        logger.error(error_msg, exc_info=exc)
-                if n_errors != len(summary_errors) and validate_responses_flag is None:
+                    error_handler(error_msgs, msg, exc, logging_flag)
+                if n_errors != len(error_msgs) and validate_responses_flag is None:
                     logger.info(
                         "validate_responses_flag was not setuped, by default responses validation is enabled. "
                         "It's service message can be switched off by manually setting validate_responses_flag"
                     )
+
+            # validate condition
             try:
                 bool(condition(context, flows))
             except Exception as exc:
-                error_msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
-                summary_errors += [error_msg]
-                if not logging_off:
-                    logger.error(error_msg, exc_info=exc)
-        return transitions
+                msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
+                error_handler(error_msgs, msg, exc, logging_flag)
+        return error_msgs
 
     @validate_arguments
     def get_transitions(

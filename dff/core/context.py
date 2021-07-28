@@ -1,13 +1,15 @@
 import logging
+from uuid import UUID, uuid4
 
-from typing import Any, Optional
+from typing import Any, Optional, Union
 
-from pydantic import BaseModel, validate_arguments
+from pydantic import BaseModel, validate_arguments, Field
 
 
 logger = logging.getLogger(__name__)
 
 class Context(BaseModel):
+    id: Union[UUID, int, str] = Field(default_factory=uuid4)
     node_label_history: dict[int, tuple[str, str]] = {}
     human_utterances: dict[int, str] = {}
     human_annotations: dict[int, Any] = {}

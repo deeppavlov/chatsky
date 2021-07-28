@@ -10,7 +10,7 @@ from flows import Flows, Flow, Node, Transition
 from context import Context
 from keywords import GLOBAL_TO_STATES, TO_STATES, RESPONSE, PROCESSING, GRAPH
 
-# TODO: full, correct test for normalize_*
+# TODO: full, correct test for normalize_* , validate_flows
 
 
 def positive_test(samples, func):
