@@ -31,8 +31,8 @@ def normalize_node_label(
     if isinstance(node_label, Callable):
 
         @validate_arguments
-        def get_node_label_handler(context: Context, flows: Flows, *args, **kwargs):
-            return node_label(context, flows, *args, **kwargs)
+        def get_node_label_handler(ctx: Context, flows: Flows, *args, **kwargs):
+            return node_label(ctx, flows, *args, **kwargs)
 
         return get_node_label_handler  # create wrap to get uniq key for dictionary
     elif isinstance(node_label, str):
@@ -53,16 +53,16 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
     elif isinstance(conditions, Pattern):
 
         @validate_arguments
-        def regexp_condition_handler(context: Context, flows: Flows, *args, **kwargs) -> bool:
-            human_text, annotations = context.get_current_human_annotated_utterance()
+        def regexp_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+            human_text, annotations = ctx.get_current_human_annotated_utterance()
             return bool(conditions.search(human_text))
 
         return regexp_condition_handler
     elif isinstance(conditions, str):
 
         @validate_arguments
-        def str_condition_handler(context: Context, flows: Flows, *args, **kwargs) -> bool:
-            human_text, annotations = context.get_current_human_annotated_utterance()
+        def str_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+            human_text, annotations = ctx.get_current_human_annotated_utterance()
             return conditions in human_text
 
         return str_condition_handler
@@ -75,7 +75,7 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
         ]
         if function_expression_indexes:
 
-            def reduce_func(context: Context, flows: Flows, *args, **kwargs) -> bool:
+            def reduce_func(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
                 # function closure
                 local_conditions = conditions[:]
                 local_function_expression_indexes = function_expression_indexes[:]
@@ -91,10 +91,10 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
                     local_conditions[start_func_index : start_func_index + 2] = []
 
                     normalized_condition = normalize_conditions(sub_conditions, sub_reduce_function)
-                    reduced_bools += [normalized_condition(context, flows, *args, **kwargs)]
+                    reduced_bools += [normalized_condition(ctx, flows, *args, **kwargs)]
                 unreduced_conditions = [normalize_conditions(cond) for cond in local_conditions]
                 # apply unreduced functions
-                unreduced_bools = [cond(context, flows, *args, **kwargs) for cond in unreduced_conditions]
+                unreduced_bools = [cond(ctx, flows, *args, **kwargs) for cond in unreduced_conditions]
 
                 bools = unreduced_bools + reduced_bools
                 return local_reduce_function(bools)
@@ -103,8 +103,8 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
         else:
 
             @validate_arguments
-            def iterable_condition_handler(context: Context, flows: Flows, *args, **kwargs) -> bool:
-                bools = [normalize_conditions(cond)(context, flows, *args, **kwargs) for cond in conditions]
+            def iterable_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+                bools = [normalize_conditions(cond)(ctx, flows, *args, **kwargs) for cond in conditions]
                 return reduce_function(bools)
 
             return iterable_condition_handler
@@ -118,14 +118,14 @@ def normalize_response(response: Union[conlist(str, min_items=1), str, Callable]
     elif isinstance(response, str):
 
         @validate_arguments
-        def get_str_response_handler(context: Context, flows: Flows, *args, **kwargs):
+        def get_str_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
             return response
 
         return get_str_response_handler
     elif isinstance(response, list):
 
         @validate_arguments
-        def get_list_response_handler(context: Context, flows: Flows, *args, **kwargs):
+        def get_list_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
             return random.choice(response)
 
         return get_list_response_handler
@@ -188,19 +188,17 @@ class Flows(BaseModel):
     @validate_arguments
     def validate_flows(
         self,
-        validate_responses_flag: Optional[bool] = None,
+        response_validation_flag: Optional[bool] = None,
         logging_flag: bool = True,
     ):
         transitions = self.get_transitions(-1, False) | self.get_transitions(-1, True)
         error_msgs = []
         for callable_node_label, condition in transitions.items():
-            context = Context()
-            context.add_human_utterance("text")
+            ctx = Context()
+            ctx.add_human_utterance("text")
             flows = Flows.parse_obj({"flows": {"globals": {}}})
             node_label = (
-                callable_node_label(context, flows)
-                if isinstance(callable_node_label, Callable)
-                else callable_node_label
+                callable_node_label(ctx, flows) if isinstance(callable_node_label, Callable) else callable_node_label
             )
 
             # validate node_label
@@ -217,11 +215,11 @@ class Flows(BaseModel):
                 continue
 
             # validate response
-            if validate_responses_flag or validate_responses_flag is None:
+            if response_validation_flag or response_validation_flag is None:
                 response_func = normalize_response(node.response)
                 n_errors = len(error_msgs)
                 try:
-                    response_result = response_func(context, flows)
+                    response_result = response_func(ctx, flows)
                     if not isinstance(response_result, str):
                         msg = (
                             f"Expected type of response_result needed str but got {type(response_result)=}"
@@ -234,15 +232,15 @@ class Flows(BaseModel):
                         f"for {node_label=} and {node.response=}"
                     )
                     error_handler(error_msgs, msg, exc, logging_flag)
-                if n_errors != len(error_msgs) and validate_responses_flag is None:
+                if n_errors != len(error_msgs) and response_validation_flag is None:
                     logger.info(
-                        "validate_responses_flag was not setuped, by default responses validation is enabled. "
-                        "It's service message can be switched off by manually setting validate_responses_flag"
+                        "response_validation_flag was not setuped, by default responses validation is enabled. "
+                        "It's service message can be switched off by manually setting response_validation_flag"
                     )
 
             # validate condition
             try:
-                bool(condition(context, flows))
+                bool(condition(ctx, flows))
             except Exception as exc:
                 msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
                 error_handler(error_msgs, msg, exc, logging_flag)

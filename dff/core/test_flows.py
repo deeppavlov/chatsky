@@ -66,8 +66,8 @@ def test_trasition():
         res.get_transitions("root", 1.0, True) for res in results
     ]
     flows = Flows.parse_obj({"flows": {"globals": {}}})
-    context = Context()
-    context.add_human_utterance("text")
+    ctx = Context()
+    ctx.add_human_utterance("text")
     for res in results:
         for node_label, cond in res.items():
             if not (
@@ -75,7 +75,7 @@ def test_trasition():
                 or (isinstance(node_label[0], str) and isinstance(node_label[1], str), isinstance(node_label[2], float))
             ):
                 raise ValueError(f"unecpected {node_label=}")
-            if not (isinstance(cond, Callable) and isinstance(cond(context, flows), bool)):
+            if not (isinstance(cond, Callable) and isinstance(cond(ctx, flows), bool)):
                 raise ValueError(f"unecpected {cond=}")
 
     # negative sampling
@@ -103,13 +103,13 @@ def test_node():
     ]
     results = positive_test(samples, Node.parse_obj)
     flows = Flows.parse_obj({"flows": {"globals": {}}})
-    context = Context()
+    ctx = Context()
     for res in results:
         response = res.get_response()
         if not isinstance(response, Callable):
             raise ValueError(f"unecpected {response=} for node {res}")
         random.seed(31415)
-        response_res = response(context, flows)
+        response_res = response(ctx, flows)
         if not isinstance(response_res, str):
             raise ValueError(f"unecpected {response_res=} for node {res}")
     # negative sampling

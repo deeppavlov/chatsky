@@ -145,9 +145,16 @@ from context import Context
 
 class Actor:
     @validate_arguments
-    def __init__(self, flows: Union[Flows, dict], start_node_label=NodeLabelType, default_priority=1.0):
+    def __init__(
+        self,
+        flows: Union[Flows, dict],
+        start_node_label=NodeLabelType,
+        default_priority=1.0,
+        response_validation_flag: Optional[bool] = None,
+        validation_logging_flag: bool = True,
+    ):
         self.flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
-        errors = self.flows.validate_flows()
+        errors = self.flows.validate_flows(response_validation_flag, validation_logging_flag)
         if errors:
             raise ValueError(
                 f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
@@ -158,23 +165,24 @@ class Actor:
     @validate_arguments
     def turn(
         self,
-        context: Union[Context, dict, str] = {},
+        ctx: Union[Context, dict, str] = {},
         return_dict=False,
         return_json=False,
     ) -> Union[Context, dict, str]:
-        if not context:
-            context = Context()
-            context.add_human_utterance("")
-        elif isinstance(context, dict):
-            context = Context.parse_raw(context)
-        elif isinstance(context, str):
-            context = Context.parse_raw(context)
-        elif not issubclass(type(context), Context):
+        if not ctx:
+            ctx = Context()
+            ctx.add_human_utterance("")
+        elif isinstance(ctx, dict):
+            ctx = Context.parse_raw(ctx)
+        elif isinstance(ctx, str):
+            ctx = Context.parse_raw(ctx)
+        elif not issubclass(type(ctx), Context):
             raise ValueError(
-                f"context expexted as sub class of Context class or object of dict/str(json) type, but got {context}"
+                f"context expexted as sub class of Context class or object of dict/str(json) type, but got {ctx}"
             )
 
-        self.flows.get_transitions(self.default_priority, global_transition_flag=False)
+        transitions = self.flows.get_transitions(self.default_priority, global_transition_flag=False)
+        global_transitions = self.flows.get_transitions(self.default_priority, global_transition_flag=True)
 
 
 Actor(flows)

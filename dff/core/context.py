@@ -8,6 +8,7 @@ from pydantic import BaseModel, validate_arguments, Field
 
 logger = logging.getLogger(__name__)
 
+
 class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     node_label_history: dict[int, tuple[str, str]] = {}
@@ -61,17 +62,17 @@ class Context(BaseModel):
         self.node_label_history[self.current_history_index] = node_label
 
     @validate_arguments
-    def clean_context(self, hold_last_n_index: int, fields: list[str] = ["human", "actor"]):
+    def clean(self, hold_last_n_indexes: int, fields: list[str] = ["human", "actor"]):
         if "human" in fields:
-            for index in list(self.human_utterances.keys())[:-hold_last_n_index]:
+            for index in list(self.human_utterances.keys())[:-hold_last_n_indexes]:
                 del self.human_utterances[index]
                 del self.human_annotations[index]
         if "actor" in fields:
-            for index in list(self.actor_utterances.keys())[:-hold_last_n_index]:
+            for index in list(self.actor_utterances.keys())[:-hold_last_n_indexes]:
                 del self.actor_utterances[index]
                 del self.actor_annotations[index]
         if "share" in fields:
             self.shared_memory.clear()
         if "labels" in fields:
-            for index in list(self.node_label_history.keys())[:-hold_last_n_index]:
+            for index in list(self.node_label_history.keys())[:-hold_last_n_indexes]:
                 del self.node_label_history[index]
