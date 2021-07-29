@@ -31,8 +31,17 @@ def normalize_node_label(
     if isinstance(node_label, Callable):
 
         @validate_arguments
-        def get_node_label_handler(ctx: Context, flows: Flows, *args, **kwargs):
-            return node_label(ctx, flows, *args, **kwargs)
+        def get_node_label_handler(ctx: Context, flows: Flows, *args, **kwargs) -> tuple[str, str, float]:
+            try:
+                res = node_label(ctx, flows, *args, **kwargs)
+                res = (str(res[0]), str(res[1]), float(res[2]))
+                node = flows.get_node(res)
+                if not node:
+                    raise Exception(f"Unknown transitions {res} {flows}")
+            except Exception as exc:
+                res = None
+                logger.error(f"Exception {exc} of function {node_label}", exc_info=exc)
+            return res
 
         return get_node_label_handler  # create wrap to get uniq key for dictionary
     elif isinstance(node_label, str):
@@ -49,12 +58,13 @@ def normalize_node_label(
 @validate_arguments
 def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Callable:
     if isinstance(conditions, Callable):
+        # TODO: add try/exc
         return conditions
     elif isinstance(conditions, Pattern):
 
         @validate_arguments
         def regexp_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
-            human_text, annotations = ctx.get_current_human_annotated_utterance()
+            human_text, annotations = ctx.current_human_annotated_utterance
             return bool(conditions.search(human_text))
 
         return regexp_condition_handler
@@ -62,7 +72,7 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
 
         @validate_arguments
         def str_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
-            human_text, annotations = ctx.get_current_human_annotated_utterance()
+            human_text, annotations = ctx.current_human_annotated_utterance
             return conditions in human_text
 
         return str_condition_handler
@@ -118,18 +128,46 @@ def normalize_response(response: Union[conlist(str, min_items=1), str, Callable]
     elif isinstance(response, str):
 
         @validate_arguments
-        def get_str_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
+        def str_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
             return response
 
-        return get_str_response_handler
+        return str_response_handler
     elif isinstance(response, list):
 
         @validate_arguments
-        def get_list_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
+        def list_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
             return random.choice(response)
 
-        return get_list_response_handler
+        return list_response_handler
     raise NotImplementedError(f"Unexpected response {response}")
+
+
+# TODO: add exeption handling for processing
+@validate_arguments
+def normalize_processing(processing: Optional[Union[Callable, conlist(Callable, min_items=1)]]) -> Callable:
+    if isinstance(processing, Callable):
+        return processing
+    elif isinstance(processing, list):
+
+        @validate_arguments
+        def list_processing_handler(
+            flow_label: str, node: Node, ctx: Context, flows: Flows, *args, **kwargs
+        ) -> Optional[tuple[str, Node]]:
+            for proc in processing:
+                flow_label, node = proc(flow_label, node, ctx, flows, *args, **kwargs)
+            return flow_label, node
+
+        return list_processing_handler
+    elif processing is None:
+
+        @validate_arguments
+        def none_handler(
+            flow_label: str, node: Node, ctx: Context, flows: Flows, *args, **kwargs
+        ) -> Optional[tuple[str, Node]]:
+            return flow_label, node
+
+        return none_handler
+    raise NotImplementedError(f"Unexpected processing {processing}")
 
 
 class Transition(BaseModel):
@@ -151,11 +189,13 @@ class Transition(BaseModel):
 
 class Node(Transition):
     response: Union[conlist(str, min_items=1), str, Callable]
-    processing: Callable = None
+    processing: Union[Callable, conlist(Callable, min_items=1)] = None
 
-    @validate_arguments
     def get_response(self):
         return normalize_response(self.response)
+
+    def get_processing(self):
+        return normalize_processing(self.processing)
 
 
 class Flow(Transition):
@@ -196,7 +236,7 @@ class Flows(BaseModel):
         for callable_node_label, condition in transitions.items():
             ctx = Context()
             ctx.add_human_utterance("text")
-            flows = Flows.parse_obj({"flows": {"globals": {}}})
+            flows = self.copy(deep=True)
             node_label = (
                 callable_node_label(ctx, flows) if isinstance(callable_node_label, Callable) else callable_node_label
             )
@@ -262,7 +302,7 @@ class Flows(BaseModel):
         node_label = normalized_node_label[1]
         node = self.flows.get(flow_label, Flow()).graph.get(node_label)
         if node is None:
-            logger.warn(f"Unkown pair(flow_label:node_label) = {flow_label}:{node_label}")
+            logger.warn(f"Unknown pair(flow_label:node_label) = {flow_label}:{node_label}")
         return node
 
 

@@ -1,7 +1,7 @@
 from dff.key_words import (
     triggers as TRIGGERS,
-    entry_points as TO_STATES,
-    global_entry_points as GLOBAL_TO_STATES,
+    entry_points as TRANSITIONS,
+    global_entry_points as GLOBAL_TRANSITIONS,
     graph as GRAPH,
     response as RESPONSE,
     state_processing as PROCESSING,
@@ -25,7 +25,7 @@ kwargs2 = {}
 script = {
     # Example of global transitions
     "globals": {
-        GLOBAL_TO_STATES: {
+        GLOBAL_TRANSITIONS: {
             ("helper", "commit_suicide", priorities.high): r"i want to commit suicide",
             ("not_understand", priorities.high): r"i did not understan",
             ("generic_responses_for_extrav", "root", priorities.middle): generic_responses.intent,
@@ -33,13 +33,13 @@ script = {
         GRAPH: {
             "not_understand": {
                 RESPONSE: "Sorry for not being clear",
-                TO_STATES: {previous: intents.always_true},
+                TRANSITIONS: {previous: intents.always_true},
             }
         },
     },
     "hobbies": {
         TRIGGERS: [any, [r"hobbies", intents.yes_intent, speech_functions.open]],  # an optional param
-        TO_STATES: {
+        TRANSITIONS: {
             "have_you_hobby": r"hobbies",
             "reaction_on_hobby": [all, [r"hobbies", intents.yes_intent, speech_functions.open]],
             "custom_answer": custom.request,
@@ -47,7 +47,7 @@ script = {
         GRAPH: {
             "have_you_hobby": {
                 RESPONSE: ["Do you have any hobbies?", "Do you have favorite hobbies?"],  # choices by random
-                TO_STATES: {
+                TRANSITIONS: {
                     "reaction_on_hobby": [
                         any,
                         [r"hobbies", custom.COMPILED_PATTERN.pattern, has_entities("wiki:Q24423")],
@@ -59,16 +59,16 @@ script = {
                 RESPONSE: ["Do you have {SLOT1}?", "Do you have {SLOT2}?"],
                 # TODO: What is the best way to put user parameters into state? For example SLOT1 and SLOT2
                 PROCESSING: custom.state_processing,  # processing fills SLOT* , can be list of funcs or func
-                TO_STATES: {back: intents.yes_intent},
+                TRANSITIONS: {back: intents.yes_intent},
             },
             "reaction_on_hobby": {
                 RESPONSE: "I like {SLOT1} and {SLOT2}",
                 PROCESSING: custom.entities_to_slots_processing(SLOT1="wiki:Q24423", SLOT2="cobot_entities:Location"),
-                TO_STATES: {forward: intents.always_true},
+                TRANSITIONS: {forward: intents.always_true},
             },
             "custom_answer": {
                 RESPONSE: custom.response,
-                TO_STATES: [
+                TRANSITIONS: [
                     {
                         ("friends", "have_you_friends"): r"friends",
                         ("facts", "facts"): r"facts",
@@ -95,8 +95,8 @@ script = {
         },
     },
     "facts": {
-        TO_STATES: {"facts": intents.facts},
-        GRAPH: {"facts": {RESPONSE: providers.fact_provider("weather"), TO_STATES: {"facts": intents.facts}}},
+        TRANSITIONS: {"facts": intents.facts},
+        GRAPH: {"facts": {RESPONSE: providers.fact_provider("weather"), TRANSITIONS: {"facts": intents.facts}}},
     },
 }
 

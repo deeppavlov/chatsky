@@ -1,5 +1,5 @@
-GLOBAL_TO_STATES = "global_transitions"
-TO_STATES = "transitions"
+GLOBAL_TRANSITIONS = "global_transitions"
+TRANSITIONS = "transitions"
 RESPONSE = "response"
 PROCESSING = "processing"
 GRAPH = "graph"

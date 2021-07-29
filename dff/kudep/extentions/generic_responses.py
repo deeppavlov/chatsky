@@ -2,8 +2,8 @@ import copy
 
 from dff.key_words import (
     triggers as TRIGGERS,
-    entry_points as TO_STATES,
-    global_entry_points as GLOBAL_TO_STATES,
+    entry_points as TRANSITIONS,
+    global_entry_points as GLOBAL_TRANSITIONS,
     graph as GRAPH,
     response as RESPONSE,
     state_processing as PROCESSING,
@@ -131,15 +131,15 @@ GENERIC_REACTION_TO_USER_SPEECH_FUNCTION = {
 }
 markup_template = (
     {
-        TO_STATES: {"facts": intents.facts},
-        GRAPH: {"facts": {RESPONSE: providers.fact_provider("weather"), TO_STATES: {"facts": intents.facts}}},
+        TRANSITIONS: {"facts": intents.facts},
+        GRAPH: {"facts": {RESPONSE: providers.fact_provider("weather"), TRANSITIONS: {"facts": intents.facts}}},
     },
 )
 
 def create_new_flow(**kwargs):
-    new_flow = {TO_STATES:{}}
+    new_flow = {TRANSITIONS:{}}
     for label, answer in GENERIC_REACTION_TO_USER_SPEECH_FUNCTION.items():
-        # new_flow[TO_STATES][label] = any ....
+        # new_flow[TRANSITIONS][label] = any ....
         # ..
         pass
     #...

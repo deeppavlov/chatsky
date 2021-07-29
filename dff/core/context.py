@@ -36,29 +36,16 @@ class Context(BaseModel):
         self.human_annotations[self.current_history_index] = annotation
 
     @validate_arguments
-    def get_current_human_annotated_utterance(self) -> tuple[str, Optional[Any]]:
-        return self.human_utterances[self.current_history_index], self.human_annotations.get(self.current_history_index)
+    def add_actor_utterance(self, text: str):
+        self.actor_utterances[self.current_history_index] = text
 
     @validate_arguments
-    def get_previous_human_annotated_utterance(self) -> tuple[str, Optional[Any]]:
-        return self.human_utterances[self.previous_history_index], self.human_annotations.get(
-            self.previous_history_index
-        )
-
-    @validate_arguments
-    def get_previous_actor_annotated_utterance(self) -> tuple[str, Optional[Any]]:
-        return self.actor_utterances[self.previous_history_index], self.actor_annotations.get(
-            self.previous_history_index
-        )
-
-    @validate_arguments
-    def add_actor_utterance(self, text: str, annotation: Optional[Any] = None):
-        self.previous_history_index = self.current_history_index
-        self.actor_utterances[self.previous_history_index] = text
-        self.actor_annotations[self.previous_history_index] = annotation
+    def add_actor_annotation(self, annotation: Any):
+        self.actor_annotations[self.current_history_index] = annotation
 
     @validate_arguments
     def add_node_label(self, node_label: tuple[str, str]):
+        self.previous_history_index = self.current_history_index
         self.node_label_history[self.current_history_index] = node_label
 
     @validate_arguments
@@ -76,3 +63,23 @@ class Context(BaseModel):
         if "labels" in fields:
             for index in list(self.node_label_history.keys())[:-hold_last_n_indexes]:
                 del self.node_label_history[index]
+
+    @property
+    def previous_node_label(self):
+        return self.node_label_history.get(self.previous_history_index)
+
+    @property
+    def current_human_annotated_utterance(self) -> tuple[str, Optional[Any]]:
+        return self.human_utterances[self.current_history_index], self.human_annotations.get(self.current_history_index)
+
+    @property
+    def previous_human_annotated_utterance(self) -> tuple[str, Optional[Any]]:
+        return self.human_utterances[self.previous_history_index], self.human_annotations.get(
+            self.previous_history_index
+        )
+
+    @property
+    def previous_actor_annotated_utterance(self) -> tuple[str, Optional[Any]]:
+        return self.actor_utterances[self.previous_history_index], self.actor_annotations.get(
+            self.previous_history_index
+        )

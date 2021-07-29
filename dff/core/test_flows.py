@@ -8,7 +8,7 @@ from pydantic import ValidationError
 
 from flows import Flows, Flow, Node, Transition
 from context import Context
-from keywords import GLOBAL_TO_STATES, TO_STATES, RESPONSE, PROCESSING, GRAPH
+from keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
 
 # TODO: full, correct test for normalize_* , validate_flows
 
@@ -56,8 +56,8 @@ def test_trasition():
     samples = list(itertools.product(node_label_samples, condition_samples))
     samples = [
         {
-            GLOBAL_TO_STATES: {sample[0]: sample[1]},
-            TO_STATES: {sample[0]: sample[1]},
+            GLOBAL_TRANSITIONS: {sample[0]: sample[1]},
+            TRANSITIONS: {sample[0]: sample[1]},
         }
         for sample in samples
     ]
@@ -81,13 +81,13 @@ def test_trasition():
     # negative sampling
     samples = [
         {
-            GLOBAL_TO_STATES: {None: "asd"},
+            GLOBAL_TRANSITIONS: {None: "asd"},
         },
         {
-            TO_STATES: {"asd": []},
+            TRANSITIONS: {"asd": []},
         },
         {
-            GLOBAL_TO_STATES: {"asd": []},
+            GLOBAL_TRANSITIONS: {"asd": []},
         },
     ]
     negative_test(samples, Transition.parse_obj)
@@ -157,10 +157,10 @@ def test_flows():
         {
             "flows": {
                 "globals": {
-                    GLOBAL_TO_STATES: {"213": any},
-                    TO_STATES: {"213": any},
+                    GLOBAL_TRANSITIONS: {"213": any},
+                    TRANSITIONS: {"213": any},
                     GRAPH: {
-                        "node": {GLOBAL_TO_STATES: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}
+                        "node": {GLOBAL_TRANSITIONS: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}
                     },
                 }
             }

@@ -7,17 +7,19 @@ def test_context():
     ctx = Context()
     for index in range(0, 30, 2):
         ctx.add_human_utterance(str(index), [index])
-        ctx.add_actor_utterance(str(index + 1), [index + 1])
         ctx.add_node_label([str(index), str(index + 1)])
+        ctx.add_actor_utterance(str(index + 1))
+        ctx.add_actor_annotation([index + 1])
     ctx.shared_memory[123] = 312
     ctx.clean(5, ["human", "actor", "share", "labels"])
     ctx.shared_memory[1001] = "11111"
     ctx.add_human_utterance(str(1000), [1000])
-    ctx.add_actor_utterance(str(1000 + 1), [1000 + 1])
     ctx.add_node_label([str(1000), str(1000 + 1)])
-    assert ctx.get_current_human_annotated_utterance() == ("1000", [1000])
-    assert ctx.get_previous_human_annotated_utterance() == ("1000", [1000])
-    assert ctx.get_previous_actor_annotated_utterance() == ("1001", [1001])
+    ctx.add_actor_utterance(str(1000 + 1))
+    ctx.add_actor_annotation([1000 + 1])
+    assert ctx.current_human_annotated_utterance == ("1000", [1000])
+    assert ctx.previous_human_annotated_utterance == ("1000", [1000])
+    assert ctx.previous_actor_annotated_utterance == ("1001", [1001])
     assert ctx.node_label_history == {
         10: ("20", "21"),
         11: ("22", "23"),
