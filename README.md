@@ -8,6 +8,6 @@ Links: [Github](https://github.com/deepmipt/dialog_flow_framework)
 
 ## Installation
 ```
-pip install dff
+pip install git+https://github.com/deepmipt/dialog_flow_framework.git@dev
 ```
 
