@@ -3,7 +3,7 @@ import logging
 import random
 from typing import Union, Callable, Pattern, Optional
 
-from pydantic import BaseModel, conlist, validator, validate_arguments
+from pydantic import BaseModel, conlist, validator, validate_arguments, Extra
 
 from dff.core.context import Context
 
@@ -170,16 +170,15 @@ def normalize_processing(processing: Optional[Union[Callable, conlist(Callable, 
     raise NotImplementedError(f"Unexpected processing {processing}")
 
 
-class Transition(BaseModel):
-    global_transitions: dict[NodeLabelType, ConditionType] = {}
-    transitions: dict[NodeLabelType, ConditionType] = {}
-
+class Transition(BaseModel, extra=Extra.forbid):
     @validate_arguments
     def get_transitions(
         self, flow_label: str, default_priority: float, global_transition_flag=False
     ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
         transitions = {}
-        items = self.global_transitions if global_transition_flag else self.transitions
+        gtrs = self.global_transitions if hasattr(self, "global_transitions") else {}
+        trs = self.transitions if hasattr(self, "transitions") else {}
+        items = gtrs if global_transition_flag else trs
         for node_label in items:
             normalized_node_label = normalize_node_label(node_label, flow_label, default_priority)
             normalized_conditions = normalize_conditions(items[node_label])
@@ -188,6 +187,7 @@ class Transition(BaseModel):
 
 
 class Node(Transition):
+    transitions: dict[NodeLabelType, ConditionType] = {}
     response: Union[conlist(str, min_items=1), str, Callable]
     processing: Union[Callable, conlist(Callable, min_items=1)] = None
 
@@ -199,6 +199,7 @@ class Node(Transition):
 
 
 class Flow(Transition):
+    global_transitions: dict[NodeLabelType, ConditionType] = {}
     graph: dict[str, Node] = {}
 
     @validate_arguments
@@ -216,7 +217,7 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     logging_flag and logger.error(msg, exc_info=exception)
 
 
-class Flows(BaseModel):
+class Flows(BaseModel, extra=Extra.forbid):
     flows: dict[str, Flow]
 
     @validator("flows")

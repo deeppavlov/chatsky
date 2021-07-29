@@ -6,34 +6,34 @@ import random
 
 from pydantic import ValidationError
 
-from dff.core.flows import Flows, Flow, Node, Transition
+from dff.core.flows import Flows, Flow, Node
 from dff.core.context import Context
 from dff.core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
 
 # TODO: full, correct test for normalize_* , validate_flows
 
 
-def positive_test(samples, func):
+def positive_test(samples, custom_class):
     results = []
     for sample in samples:
         try:
-            res = func(sample)
+            res = custom_class(**sample)
             results += [res]
-        except ValidationError as exeption:
+        except Exception as exeption:
             raise Exception(f"For {sample} got {exeption=}")
     return results
 
 
-def negative_test(samples, func):
+def negative_test(samples, custom_class):
     for sample in samples:
         try:
-            res = func(sample)
+            res = custom_class(**sample)
             raise Exception(f"{sample} couldn't be passed but get {res.dict()}")
-        except ValidationError:
+        except Exception:
             continue
 
 
-def test_trasition():
+def test_trasition(model, transition_name, additional_data):
     true_graph_name = ["flow_name", "123"]
     true_node_name = ["state_name", "123"]
     true_node_name_with_lambda = true_node_name + [lambda c, f: "state"]
@@ -54,14 +54,8 @@ def test_trasition():
         123,
     ]
     samples = list(itertools.product(node_label_samples, condition_samples))
-    samples = [
-        {
-            GLOBAL_TRANSITIONS: {sample[0]: sample[1]},
-            TRANSITIONS: {sample[0]: sample[1]},
-        }
-        for sample in samples
-    ]
-    results = positive_test(samples, Transition.parse_obj)
+    samples = [{transition_name: {sample[0]: sample[1]}, **additional_data} for sample in samples]
+    results = positive_test(samples, model)
     results = [res.get_transitions("root", 1.0) for res in results] + [
         res.get_transitions("root", 1.0, True) for res in results
     ]
@@ -80,28 +74,22 @@ def test_trasition():
 
     # negative sampling
     samples = [
-        {
-            GLOBAL_TRANSITIONS: {None: "asd"},
-        },
-        {
-            TRANSITIONS: {"asd": []},
-        },
-        {
-            GLOBAL_TRANSITIONS: {"asd": []},
-        },
+        {transition_name: {None: "asd"}, **additional_data},
+        {transition_name: {"asd": []}, **additional_data},
     ]
-    negative_test(samples, Transition.parse_obj)
+    negative_test(samples, model)
     print(f"{test_trasition.__name__} passed")
 
 
 def test_node():
+    test_trasition(Node, TRANSITIONS, {RESPONSE: ["123", 123], PROCESSING: any})
     samples = [
         {RESPONSE: ["123", 123], PROCESSING: any},
         {RESPONSE: "asd", PROCESSING: any},
         {RESPONSE: lambda c, f: "response", PROCESSING: any},
         {RESPONSE: lambda c, f: "response"},
     ]
-    results = positive_test(samples, Node.parse_obj)
+    results = positive_test(samples, Node)
     flows = Flows.parse_obj({"flows": {"globals": {}}})
     ctx = Context()
     for res in results:
@@ -116,15 +104,17 @@ def test_node():
     samples = [
         {RESPONSE: [], PROCESSING: any},
         {RESPONSE: None, PROCESSING: any},
+        {RESPONSE: "zxczxc", PROCESSING: any, "asdasdas": any},
         {RESPONSE: "zxczxc", PROCESSING: "asd"},
         {RESPONSE: "zxczxc", PROCESSING: []},
         {RESPONSE: "zxczxc", PROCESSING: ["123"]},
     ]
-    negative_test(samples, Node.parse_obj)
+    negative_test(samples, Node)
     print(f"{test_node.__name__} passed")
 
 
 def test_flow():
+    test_trasition(Flow, GLOBAL_TRANSITIONS, {GRAPH: {}})
     samples = [
         {
             GRAPH: {},
@@ -138,17 +128,22 @@ def test_flow():
             },
         },
     ]
-    positive_test(samples, Flow.parse_obj)
+    positive_test(samples, Flow)
     # negative sampling
     samples = [
         {
             GRAPH: {
                 "node1": {RESPONSE: None, PROCESSING: any},
             },
-        }
+        },
+        {
+            GRAPH: {
+                "node1": {RESPONSE: "", PROCESSING: any, "asdasdas": any},
+            },
+        },
     ]
 
-    negative_test(samples, Flow.parse_obj)
+    negative_test(samples, Flow)
     print(f"{test_flow.__name__} passed")
 
 
@@ -158,22 +153,20 @@ def test_flows():
             "flows": {
                 "globals": {
                     GLOBAL_TRANSITIONS: {"213": any},
-                    TRANSITIONS: {"213": any},
                     GRAPH: {
-                        "node": {GLOBAL_TRANSITIONS: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}
+                        "node": {TRANSITIONS: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}
                     },
                 }
             }
         }
     ]
-    positive_test(samples, Flows.parse_obj)
+    positive_test(samples, Flows)
     # negative sampling
     samples = [{"flows": {}}]
-    negative_test(samples, Flows.parse_obj)
+    negative_test(samples, Flows)
     print(f"{test_flows.__name__} passed")
 
 
-test_trasition()
 test_node()
 test_flow()
 test_flows()

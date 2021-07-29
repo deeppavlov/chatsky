@@ -80,7 +80,7 @@ flows = {
     },
     "hobbies": {
         # TRIGGERS: [any, [r"hobbies", INTENTS_YES_INTENT, CUSTOM_SF_OPEN]],  # an optional param
-        TRANSITIONS: {
+        GLOBAL_TRANSITIONS: {
             "have_you_hobby": r"hobbies",
             # "reaction_on_hobby": [all, [r"hobbies", INTENTS_YES_INTENT, CUSTOM_SF_OPEN]],
             "custom_answer": CUSTOM_REQUEST,
@@ -134,7 +134,7 @@ flows = {
         },
     },
     "facts": {
-        TRANSITIONS: {"facts": INTENTS_FACTS},
+        GLOBAL_TRANSITIONS: {"facts": INTENTS_FACTS},
         GRAPH: {"facts": {RESPONSE: PROVIDERS_FACT_PROVIDER("weather"), TRANSITIONS: {"facts": INTENTS_FACTS}}},
     },
 }
