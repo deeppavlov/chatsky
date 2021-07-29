@@ -1,0 +1,5 @@
+GLOBAL_TRANSITIONS = "global_transitions"
+TRANSITIONS = "transitions"
+RESPONSE = "response"
+PROCESSING = "processing"
+GRAPH = "graph"
