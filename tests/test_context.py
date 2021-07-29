@@ -1,6 +1,6 @@
 # %%
 
-from context import Context
+from dff.core.context import Context
 
 
 def test_context():
@@ -35,6 +35,7 @@ def test_context():
     assert ctx.previous_history_index == 15
     assert ctx.current_history_index == 15
     assert ctx.shared_memory == {1001: "11111"}
+    print(f"{test_context.__name__} passed")
 
 
 test_context()

@@ -5,7 +5,7 @@ from typing import Union, Callable, Pattern, Optional
 
 from pydantic import BaseModel, conlist, validator, validate_arguments
 
-from context import Context
+from dff.core.context import Context
 
 logger = logging.getLogger(__name__)
 

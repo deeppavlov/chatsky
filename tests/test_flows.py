@@ -6,9 +6,9 @@ import random
 
 from pydantic import ValidationError
 
-from flows import Flows, Flow, Node, Transition
-from context import Context
-from keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
+from dff.core.flows import Flows, Flow, Node, Transition
+from dff.core.context import Context
+from dff.core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
 
 # TODO: full, correct test for normalize_* , validate_flows
 

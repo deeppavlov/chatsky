@@ -83,3 +83,9 @@ class Context(BaseModel):
         return self.actor_utterances[self.previous_history_index], self.actor_annotations.get(
             self.previous_history_index
         )
+
+    @property
+    def actor_text_response(self) -> Optional[str]:
+        last_utt = list(self.actor_utterances.values())[-1:]
+        if last_utt:
+            return last_utt[0]

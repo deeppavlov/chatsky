@@ -1,10 +1,11 @@
 import heapq
-
 from typing import Union, Optional, Callable
+
 from pydantic import validate_arguments
-from flows import Flows, Node, normalize_node_label
-from context import Context
-from condition_handlers import deep_copy_condition_handler
+
+from dff.core.flows import Flows, Node, normalize_node_label
+from dff.core.context import Context
+from dff.core.condition_handlers import deep_copy_condition_handler
 
 # TODO: add texts
 
