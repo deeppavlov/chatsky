@@ -136,11 +136,12 @@ markup_template = (
     },
 )
 
+
 def create_new_flow(**kwargs):
-    new_flow = {TRANSITIONS:{}}
+    new_flow = {TRANSITIONS: {}}
     for label, answer in GENERIC_REACTION_TO_USER_SPEECH_FUNCTION.items():
         # new_flow[TRANSITIONS][label] = any ....
         # ..
         pass
-    #...
+    # ...
     return new_flow

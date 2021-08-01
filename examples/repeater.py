@@ -1,19 +1,19 @@
 from dff import TRANSITIONS, GRAPH, RESPONSE, GLOBAL_TRANSITIONS
-from dff import Context, Flows, Actor
+from dff import Context, Actor
 
 # custom functions
-def always_true(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 
 
 def inline_function(keyword):
-    def cond(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+    def cond(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return keyword in ctx.current_human_annotated_utterance[0]
 
     return cond
 
 
-def repeater(ctx: Context, flows: Flows, *args, **kwargs) -> str:
+def repeater(ctx: Context, actor: Actor, *args, **kwargs) -> str:
     return f"Repeat: {ctx.current_human_annotated_utterance[0]}"
 
 

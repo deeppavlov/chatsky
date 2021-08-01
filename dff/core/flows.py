@@ -31,13 +31,13 @@ def normalize_node_label(
     if isinstance(node_label, Callable):
 
         @validate_arguments
-        def get_node_label_handler(ctx: Context, flows: Flows, *args, **kwargs) -> tuple[str, str, float]:
+        def get_node_label_handler(ctx: Context, actor: "Actor", *args, **kwargs) -> tuple[str, str, float]:
             try:
-                res = node_label(ctx, flows, *args, **kwargs)
+                res = node_label(ctx, actor, *args, **kwargs)
                 res = (str(res[0]), str(res[1]), float(res[2]))
-                node = flows.get_node(res)
+                node = actor.flows.get_node(res)
                 if not node:
-                    raise Exception(f"Unknown transitions {res} {flows}")
+                    raise Exception(f"Unknown transitions {res} {actor.flows}")
             except Exception as exc:
                 res = None
                 logger.error(f"Exception {exc} of function {node_label}", exc_info=exc)
@@ -63,7 +63,7 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
     elif isinstance(conditions, Pattern):
 
         @validate_arguments
-        def regexp_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+        def regexp_condition_handler(ctx: Context, actor: "Actor", *args, **kwargs) -> bool:
             human_text, annotations = ctx.current_human_annotated_utterance
             return bool(conditions.search(human_text))
 
@@ -71,7 +71,7 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
     elif isinstance(conditions, str):
 
         @validate_arguments
-        def str_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+        def str_condition_handler(ctx: Context, actor: "Actor", *args, **kwargs) -> bool:
             human_text, annotations = ctx.current_human_annotated_utterance
             return conditions in human_text
 
@@ -85,7 +85,7 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
         ]
         if function_expression_indexes:
 
-            def reduce_func(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
+            def reduce_func(ctx: Context, actor: "Actor", *args, **kwargs) -> bool:
                 # function closure
                 local_conditions = conditions[:]
                 local_function_expression_indexes = function_expression_indexes[:]
@@ -101,10 +101,10 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
                     local_conditions[start_func_index : start_func_index + 2] = []
 
                     normalized_condition = normalize_conditions(sub_conditions, sub_reduce_function)
-                    reduced_bools += [normalized_condition(ctx, flows, *args, **kwargs)]
+                    reduced_bools += [normalized_condition(ctx, actor, *args, **kwargs)]
                 unreduced_conditions = [normalize_conditions(cond) for cond in local_conditions]
                 # apply unreduced functions
-                unreduced_bools = [cond(ctx, flows, *args, **kwargs) for cond in unreduced_conditions]
+                unreduced_bools = [cond(ctx, actor, *args, **kwargs) for cond in unreduced_conditions]
 
                 bools = unreduced_bools + reduced_bools
                 return local_reduce_function(bools)
@@ -113,8 +113,8 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
         else:
 
             @validate_arguments
-            def iterable_condition_handler(ctx: Context, flows: Flows, *args, **kwargs) -> bool:
-                bools = [normalize_conditions(cond)(ctx, flows, *args, **kwargs) for cond in conditions]
+            def iterable_condition_handler(ctx: Context, actor: "Actor", *args, **kwargs) -> bool:
+                bools = [normalize_conditions(cond)(ctx, actor, *args, **kwargs) for cond in conditions]
                 return reduce_function(bools)
 
             return iterable_condition_handler
@@ -128,14 +128,14 @@ def normalize_response(response: Union[conlist(str, min_items=1), str, Callable]
     elif isinstance(response, str):
 
         @validate_arguments
-        def str_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
+        def str_response_handler(ctx: Context, actor: "Actor", *args, **kwargs):
             return response
 
         return str_response_handler
     elif isinstance(response, list):
 
         @validate_arguments
-        def list_response_handler(ctx: Context, flows: Flows, *args, **kwargs):
+        def list_response_handler(ctx: Context, actor: "Actor", *args, **kwargs):
             return random.choice(response)
 
         return list_response_handler
@@ -151,10 +151,10 @@ def normalize_processing(processing: Optional[Union[Callable, conlist(Callable, 
 
         @validate_arguments
         def list_processing_handler(
-            flow_label: str, node: Node, ctx: Context, flows: Flows, *args, **kwargs
+            flow_label: str, node: Node, ctx: Context, actor: "Actor", *args, **kwargs
         ) -> Optional[tuple[str, Node]]:
             for proc in processing:
-                flow_label, node = proc(flow_label, node, ctx, flows, *args, **kwargs)
+                flow_label, node = proc(flow_label, node, ctx, actor, *args, **kwargs)
             return flow_label, node
 
         return list_processing_handler
@@ -162,7 +162,7 @@ def normalize_processing(processing: Optional[Union[Callable, conlist(Callable, 
 
         @validate_arguments
         def none_handler(
-            flow_label: str, node: Node, ctx: Context, flows: Flows, *args, **kwargs
+            flow_label: str, node: Node, ctx: Context, actor: "Actor", *args, **kwargs
         ) -> Optional[tuple[str, Node]]:
             return flow_label, node
 

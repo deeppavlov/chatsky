@@ -153,9 +153,7 @@ def test_flows():
             "flows": {
                 "globals": {
                     GLOBAL_TRANSITIONS: {"213": any},
-                    GRAPH: {
-                        "node": {TRANSITIONS: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}
-                    },
+                    GRAPH: {"node": {TRANSITIONS: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any}},
                 }
             }
         }

@@ -1,4 +1,3 @@
-
 # description
 def yes_intent(vars):
     return True
@@ -7,6 +6,7 @@ def yes_intent(vars):
 # description
 def no_intent(vars):
     return True
+
 
 # description
 def always_true(vars):
