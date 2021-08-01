@@ -1,6 +1,6 @@
-from dff.core.actor import Actor
 from dff.core.context import Context
-from dff.core.flows import (
+from dff.core.actor import (
+    Actor,
     Flows,
     Flow,
     Node,

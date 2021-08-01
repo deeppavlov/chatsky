@@ -45,6 +45,7 @@ flows = {
 ctx = Context()
 print(f"{ctx=}")
 actor = Actor(flows, start_node_label=("start", "start"))
+print(f"{actor=}")
 while True:
     in_text = input("you: ")
     ctx.add_human_utterance(in_text)

@@ -4,11 +4,10 @@ import itertools
 import re
 import random
 
-from pydantic import ValidationError
-
-from dff.core.flows import Flows, Flow, Node
+from dff.core.actor import Flows, Flow, Node, Actor
 from dff.core.context import Context
 from dff.core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
+
 
 # TODO: full, correct test for normalize_* , validate_flows
 
@@ -59,7 +58,7 @@ def test_trasition(model, transition_name, additional_data):
     results = [res.get_transitions("root", 1.0) for res in results] + [
         res.get_transitions("root", 1.0, True) for res in results
     ]
-    flows = Flows.parse_obj({"flows": {"globals": {}}})
+    actor = Actor({"globals": {GRAPH: {"globals": {RESPONSE: "123"}}}}, ("globals", "globals"))
     ctx = Context()
     ctx.add_human_utterance("text")
     for res in results:
@@ -69,7 +68,7 @@ def test_trasition(model, transition_name, additional_data):
                 or (isinstance(node_label[0], str) and isinstance(node_label[1], str), isinstance(node_label[2], float))
             ):
                 raise ValueError(f"unecpected {node_label=}")
-            if not (isinstance(cond, Callable) and isinstance(cond(ctx, flows), bool)):
+            if not (isinstance(cond, Callable) and isinstance(cond(ctx, actor), bool)):
                 raise ValueError(f"unecpected {cond=}")
 
     # negative sampling
@@ -90,14 +89,14 @@ def test_node():
         {RESPONSE: lambda c, f: "response"},
     ]
     results = positive_test(samples, Node)
-    flows = Flows.parse_obj({"flows": {"globals": {}}})
+    actor = Actor({"globals": {GRAPH: {"globals": {RESPONSE: "123"}}}}, ("globals", "globals"))
     ctx = Context()
     for res in results:
         response = res.get_response()
         if not isinstance(response, Callable):
             raise ValueError(f"unecpected {response=} for node {res}")
         random.seed(31415)
-        response_res = response(ctx, flows)
+        response_res = response(ctx, actor)
         if not isinstance(response_res, str):
             raise ValueError(f"unecpected {response_res=} for node {res}")
     # negative sampling
