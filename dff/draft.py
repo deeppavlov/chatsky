@@ -329,7 +329,7 @@ actor = Actor(flows, ("start", "start"))
 for in_text in range(10):
     in_text = "in_text " + str(in_text)
     ctx.add_human_utterance(in_text)
-    ctx = actor.turn(ctx)
+    ctx = actor(ctx)
     print(f"{in_text=}")
     # print(f"out_text={ctx.}")
     print(f"{ctx.actor_utterances=}")

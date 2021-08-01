@@ -1,7 +1,7 @@
 import heapq
 from typing import Union, Optional, Callable
 
-from pydantic import validate_arguments
+from pydantic import validate_arguments, BaseModel
 
 from dff.core.flows import Flows, Node, normalize_node_label
 from dff.core.context import Context
@@ -10,7 +10,14 @@ from dff.core.condition_handlers import deep_copy_condition_handler
 # TODO: add texts
 
 
-class Actor:
+class Actor(BaseModel):
+    flows: Union[Flows, dict]
+    start_node_label: tuple[str, str, float]
+    fallback_node_label: Optional[tuple[str, str, float]] = None
+    default_priority: float = 1.0
+    response_validation_flag: Optional[bool] = None
+    validation_logging_flag: bool = True
+
     @validate_arguments
     def __init__(
         self,
@@ -23,30 +30,43 @@ class Actor:
         *args,
         **kwargs,
     ):
-        self.flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
-        errors = self.flows.validate_flows(response_validation_flag, validation_logging_flag)
+        # flows validation
+        flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
+        errors = flows.validate_flows(response_validation_flag, validation_logging_flag)
         if errors:
             raise ValueError(
                 f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
             )
-        self.start_node_label = normalize_node_label(start_node_label, flow_label="", default_priority=default_priority)
-        if self.flows.get_node(self.start_node_label) is None:
-            raise ValueError(f"Unkown start_node_label = {self.start_node_label}")
+
+        # node lables validation
+        start_node_label = normalize_node_label(start_node_label, flow_label="", default_priority=default_priority)
+        if flows.get_node(start_node_label) is None:
+            raise ValueError(f"Unkown {start_node_label=}")
         if fallback_node_label is None:
-            self.fallback_node_label = self.start_node_label
+            fallback_node_label = start_node_label
         else:
-            self.fallback_node_label = normalize_node_label(
+            fallback_node_label = normalize_node_label(
                 fallback_node_label,
                 flow_label="",
                 default_priority=default_priority,
             )
-            if self.flows.get_node(self.fallback_node_label) is None:
-                raise ValueError(f"Unkown fallback_node_label = {self.fallback_node_label}")
+            if flows.get_node(fallback_node_label) is None:
+                raise ValueError(f"Unkown {fallback_node_label}")
 
-        self.default_priority = default_priority
+        # etc.
+        default_priority = default_priority
+
+        return super(Actor, self).__init__(
+            flows=flows,
+            start_node_label=start_node_label,
+            fallback_node_label=fallback_node_label,
+            default_priority=default_priority,
+            response_validation_flag=response_validation_flag,
+            validation_logging_flag=validation_logging_flag,
+        )
 
     @validate_arguments
-    def turn(
+    def __call__(
         self,
         ctx: Union[Context, dict, str] = {},
         return_dict=False,

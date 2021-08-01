@@ -48,5 +48,5 @@ actor = Actor(flows, start_node_label=("start", "start"))
 while True:
     in_text = input("you: ")
     ctx.add_human_utterance(in_text)
-    ctx = actor.turn(ctx)
+    ctx = actor(ctx)
     print(f"bot: {ctx.actor_text_response}")
