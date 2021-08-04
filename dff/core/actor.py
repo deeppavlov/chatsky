@@ -249,8 +249,23 @@ class Flows(BaseModel, extra=Extra.forbid):
             logger.warn(f"Unknown pair(flow_label:node_label) = {flow_label}:{node_label}")
         return node
 
-    def __getitem__(self, key):
-        return self.flows[key]
+    def __getitem__(self, k):
+        return self.flows[k]
+
+    def get(self, k, item=None):
+        return self.flows.get(k, item)
+
+    def keys(self):
+        return self.flows.keys()
+
+    def items(self):
+        return self.flows.items()
+
+    def values(self):
+        return self.flows.values()
+
+    def __iter__(self):
+        return self.flows
 
 
 class Actor(BaseModel):
@@ -486,21 +501,3 @@ class Actor(BaseModel):
                 msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
                 error_handler(error_msgs, msg, exc, logging_flag)
         return error_msgs
-
-    def __getitem__(self, k):
-        return self.flows[k]
-
-    def get(self, k, item=None):
-        return self.flows.get(k, item)
-
-    def keys(self):
-        return self.flows.keys()
-
-    def items(self):
-        return self.flows.items()
-
-    def values(self):
-        return self.flows.values()
-
-    def __iter__(self):
-        return self.flows
