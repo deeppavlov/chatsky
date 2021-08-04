@@ -1,6 +1,4 @@
-import logging
-
-from dff import TRANSITIONS, GRAPH, RESPONSE, GLOBAL_TRANSITIONS
+from dff import GRAPH, RESPONSE, GLOBAL_TRANSITIONS
 from dff import Context, Actor
 from dff import repeat, previous, to_start, to_fallback, forward, back
 
