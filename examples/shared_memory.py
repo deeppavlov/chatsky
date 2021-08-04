@@ -37,5 +37,5 @@ while True:
     in_text = input("you: ")
     ctx.add_human_utterance(in_text)
     ctx = actor(ctx)
-    # print(f"{ctx.shared_memory=}")
+    print(f"{ctx.shared_memory=}")
     print(f"bot: {ctx.actor_text_response}")
