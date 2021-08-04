@@ -155,20 +155,20 @@ def normalize_processing(processing: Optional[Union[Callable, conlist(Callable, 
 
         @validate_arguments
         def list_processing_handler(
-            flow_label: str, node: Node, ctx: Context, actor: Actor, *args, **kwargs
+            node_label: NodeLabelTupledType, node: Node, ctx: Context, actor: Actor, *args, **kwargs
         ) -> Optional[tuple[str, Node]]:
             for proc in processing:
-                flow_label, node = proc(flow_label, node, ctx, actor, *args, **kwargs)
-            return flow_label, node
+                node_label, node = proc(node_label, node, ctx, actor, *args, **kwargs)
+            return node_label, node
 
         return list_processing_handler
     elif processing is None:
 
         @validate_arguments
         def none_handler(
-            flow_label: str, node: Node, ctx: Context, actor: Actor, *args, **kwargs
+            node_label: NodeLabelTupledType, node: Node, ctx: Context, actor: Actor, *args, **kwargs
         ) -> Optional[tuple[str, Node]]:
-            return flow_label, node
+            return node_label, node
 
         return none_handler
     raise NotImplementedError(f"Unexpected processing {processing}")
@@ -362,7 +362,7 @@ class Actor(BaseModel):
         ctx.add_node_label(true_node_label[:2])
         flow_label, next_node = self._get_node(true_node_label)
         processing = next_node.get_processing()
-        _, tmp_node = processing(flow_label, next_node, ctx, self, *args, **kwargs)
+        _, tmp_node = processing(true_node_label, next_node, ctx, self, *args, **kwargs)
 
         response = tmp_node.get_response()
         text = response(ctx, self, *args, **kwargs)
