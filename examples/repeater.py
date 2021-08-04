@@ -1,5 +1,10 @@
-from dff import TRANSITIONS, GRAPH, RESPONSE, GLOBAL_TRANSITIONS
+import logging
+
+from dff import TRANSITIONS, GRAPH, RESPONSE
 from dff import Context, Actor
+
+logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
+logger = logging.getLogger(__name__)
 
 # custom functions
 def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -20,7 +25,6 @@ def repeater(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 # a dialog script
 flows = {
     "start": {
-        GLOBAL_TRANSITIONS: {"start": always_true},
         GRAPH: {
             "start": {
                 RESPONSE: "hi",
@@ -43,9 +47,7 @@ flows = {
 
 
 ctx = Context()
-print(f"{ctx=}")
 actor = Actor(flows, start_node_label=("start", "start"))
-print(f"{actor=}")
 while True:
     in_text = input("you: ")
     ctx.add_human_utterance(in_text)

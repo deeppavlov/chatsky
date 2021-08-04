@@ -10,7 +10,6 @@ logger = logging.getLogger(__name__)
 
 # custom functions
 def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    #
     return True
 
 
