@@ -24,22 +24,22 @@ def repeater(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 
 # a dialog script
 flows = {
-    "start": {
+    "flow_start": {
         GRAPH: {
-            "start": {
+            "node_start": {
                 RESPONSE: "hi",
                 TRANSITIONS: {
-                    ("repeat", "repeat"): inline_function("repeat"),
-                    ("start", "start"): always_true,
+                    ("flow_repeat", "node_repeat"): inline_function("repeat"),
+                    ("flow_start", "node_start"): always_true,
                 },
             }
         },
     },
-    "repeat": {
+    "flow_repeat": {
         GRAPH: {
-            "repeat": {
+            "node_repeat": {
                 RESPONSE: repeater,
-                TRANSITIONS: {("repeat", "repeat"): always_true},
+                TRANSITIONS: {("flow_repeat", "node_repeat"): always_true},
             }
         },
     },
@@ -47,7 +47,7 @@ flows = {
 
 
 ctx = Context()
-actor = Actor(flows, start_node_label=("start", "start"))
+actor = Actor(flows, start_node_label=("flow_start", "node_start"))
 while True:
     in_text = input("you: ")
     ctx.add_human_utterance(in_text)
