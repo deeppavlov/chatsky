@@ -67,9 +67,9 @@ def test_trasition(model, transition_name, additional_data):
                 isinstance(node_label, Callable)
                 or (isinstance(node_label[0], str) and isinstance(node_label[1], str), isinstance(node_label[2], float))
             ):
-                raise ValueError(f"unecpected {node_label=}")
+                raise ValueError(f"unexpected {node_label=}")
             if not (isinstance(cond, Callable) and isinstance(cond(ctx, actor), bool)):
-                raise ValueError(f"unecpected {cond=}")
+                raise ValueError(f"unexpected {cond=}")
 
     # negative sampling
     samples = [
@@ -94,11 +94,11 @@ def test_node():
     for res in results:
         response = res.get_response()
         if not isinstance(response, Callable):
-            raise ValueError(f"unecpected {response=} for node {res}")
+            raise ValueError(f"unexpected {response=} for node {res}")
         random.seed(31415)
         response_res = response(ctx, actor)
         if not isinstance(response_res, str):
-            raise ValueError(f"unecpected {response_res=} for node {res}")
+            raise ValueError(f"unexpected {response_res=} for node {res}")
     # negative sampling
     samples = [
         {RESPONSE: [], PROCESSING: any},
