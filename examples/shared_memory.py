@@ -11,7 +11,7 @@ logger = logging.getLogger(__name__)
 def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 
-def responce(ctx: Context, actor: Actor, *args, **kwargs) -> str:
+def response(ctx: Context, actor: Actor, *args, **kwargs) -> str:
     request_len = len(ctx.current_human_annotated_utterance[0])
     ctx.shared_memory["lens"] = ctx.shared_memory.get("lens", []) + [request_len]
     return ctx.shared_memory.get("prompt", "") + f"{request_len}"
@@ -23,7 +23,7 @@ flows = {
         GLOBAL_TRANSITIONS: {repeat(): always_true},
         GRAPH: {
             "start": {
-                RESPONSE: responce,
+                RESPONSE: response,
             },
         },
     },
