@@ -1,4 +1,3 @@
-import heapq
 import logging
 import random
 from typing import Union, Callable, Pattern, Optional
@@ -12,7 +11,6 @@ from pydantic import BaseModel, conlist, validator, validate_arguments, Extra
 
 logger = logging.getLogger(__name__)
 # TODO: add texts
-logger = logging.getLogger(__name__)
 
 CONDITION_DEPTH_TYPE_CHECKING = 20
 # Callable = str
@@ -251,6 +249,9 @@ class Flows(BaseModel, extra=Extra.forbid):
             logger.warn(f"Unknown pair(flow_label:node_label) = {flow_label}:{node_label}")
         return node
 
+    def __getitem__(self, key):
+        return self.flows[key]
+
 
 class Actor(BaseModel):
     flows: Union[Flows, dict]
@@ -339,10 +340,22 @@ class Actor(BaseModel):
 
         # TODO: deepcopy for node_label
         global_transitions = self.flows.get_transitions(self.default_priority, True)
-        global_true_node_label = self._get_true_node_label(global_transitions, ctx, condition_handler, flow_label)
+        global_true_node_label = self._get_true_node_label(
+            global_transitions,
+            ctx,
+            condition_handler,
+            flow_label,
+            "global",
+        )
 
         local_transitions = node.get_transitions(flow_label, self.default_priority, False)
-        local_true_node_label = self._get_true_node_label(local_transitions, ctx, condition_handler, flow_label)
+        local_true_node_label = self._get_true_node_label(
+            local_transitions,
+            ctx,
+            condition_handler,
+            flow_label,
+            "local",
+        )
 
         true_node_label = self._choose_true_node_label(local_true_node_label, global_true_node_label)
 
@@ -364,19 +377,23 @@ class Actor(BaseModel):
         ctx: Context,
         condition_handler: Callable,
         flow_label: str,
+        transition_info: str = "",
         *args,
         **kwargs,
     ) -> Optional[tuple[str, str, float]]:
         true_node_labels = []
         for node_label, condition in transitions.items():
-            if condition_handler(condition, ctx, self.flows, *args, **kwargs):
+            if condition_handler(condition, ctx, self, *args, **kwargs):
                 if isinstance(node_label, Callable):
-                    node_label = node_label(ctx, self.flows, *args, **kwargs)
+                    node_label = node_label(ctx, self, *args, **kwargs)
+                    # TODO: explisit handling of errors
                     if node_label is None:
                         continue
                 node_label = normalize_node_label(node_label, flow_label, self.default_priority)
-                heapq.heappush(true_node_labels, (node_label[2], node_label))
-        true_node_label = true_node_labels[0][1] if true_node_labels else None
+                true_node_labels += [node_label]
+        true_node_labels.sort(key=lambda label: -label[2])
+        true_node_label = true_node_labels[0] if true_node_labels else None
+        logger.debug(f"{transition_info} transitions sorted by priority = {true_node_labels}")
         return true_node_label
 
     @validate_arguments
@@ -469,3 +486,21 @@ class Actor(BaseModel):
                 msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
                 error_handler(error_msgs, msg, exc, logging_flag)
         return error_msgs
+
+    def __getitem__(self, k):
+        return self.flows[k]
+
+    def get(self, k, item=None):
+        return self.flows.get(k, item)
+
+    def keys(self):
+        return self.flows.keys()
+
+    def items(self):
+        return self.flows.items()
+
+    def values(self):
+        return self.flows.values()
+
+    def __iter__(self):
+        return self.flows

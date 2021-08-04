@@ -1,5 +1,7 @@
-from dff.core.context import Context
-from dff.core.actor import (
+from .core.transitions import repeat, previous, to_start, to_fallback, forward, back
+from .core.context import Context
+
+from .core.actor import (
     Actor,
     Flows,
     Flow,
@@ -11,4 +13,4 @@ from dff.core.actor import (
     normalize_processing,
 )
 
-from dff.core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
+from .core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
