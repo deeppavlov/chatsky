@@ -32,8 +32,8 @@ setuptools.setup(
     description="Library for creating state-machine-based chatbots.",
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="",
-    packages=setuptools.find_packages(),
+    url="https://github.com/deepmipt/dialog_flow_framework",
+    packages=setuptools.find_packages(exclude=("docs", "examples", "tests")),
     classifiers=[
         "Programming Language :: Python :: 3",
         "License :: OSI Approved :: Apache Software License",

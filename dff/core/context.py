@@ -49,18 +49,18 @@ class Context(BaseModel):
         self.node_label_history[self.current_history_index] = node_label
 
     @validate_arguments
-    def clean(self, hold_last_n_indexes: int, fields: list[str] = ["human", "actor"]):
-        if "human" in fields:
+    def clean(self, hold_last_n_indexes: int, field_names: list[str] = ["human", "actor"]):
+        if "human" in field_names:
             for index in list(self.human_utterances.keys())[:-hold_last_n_indexes]:
                 del self.human_utterances[index]
                 del self.human_annotations[index]
-        if "actor" in fields:
+        if "actor" in field_names:
             for index in list(self.actor_utterances.keys())[:-hold_last_n_indexes]:
                 del self.actor_utterances[index]
                 del self.actor_annotations[index]
-        if "share" in fields:
+        if "share" in field_names:
             self.shared_memory.clear()
-        if "labels" in fields:
+        if "labels" in field_names:
             for index in list(self.node_label_history.keys())[:-hold_last_n_indexes]:
                 del self.node_label_history[index]
 
