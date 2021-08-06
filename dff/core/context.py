@@ -3,9 +3,8 @@ from uuid import UUID, uuid4
 
 from typing import Any, Optional, Union
 
-from pydantic import validate_arguments, Field
+from pydantic import BaseModel, validate_arguments, Field
 
-from dff.core.basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 

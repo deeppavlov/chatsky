@@ -6,9 +6,8 @@ from typing import Union, Callable, Pattern, Optional
 from dff.core.context import Context
 from dff.core.condition_handlers import deep_copy_condition_handler
 
-from pydantic import conlist, validator, validate_arguments, Extra
+from pydantic import BaseModel, conlist, validator, validate_arguments, Extra
 
-from dff.core.basemodel import BaseModel
 
 logger = logging.getLogger(__name__)
 # TODO: add texts
