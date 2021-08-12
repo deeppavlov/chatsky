@@ -53,10 +53,13 @@ class Context(BaseModel):
         if "human" in field_names:
             for index in list(self.human_utterances.keys())[:-hold_last_n_indexes]:
                 del self.human_utterances[index]
+            for index in list(self.human_annotations.keys())[:-hold_last_n_indexes]:
                 del self.human_annotations[index]
         if "actor" in field_names:
             for index in list(self.actor_utterances.keys())[:-hold_last_n_indexes]:
                 del self.actor_utterances[index]
+            for index in list(self.actor_annotations.keys())[:-hold_last_n_indexes]:
+                del self.actor_annotations[index]
                 del self.actor_annotations[index]
         if "share" in field_names:
             self.shared_memory.clear()
