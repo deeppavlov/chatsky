@@ -1,6 +1,6 @@
 import logging
 import random
-from typing import Union, Callable, Pattern, Optional
+from typing import Union, Callable, Pattern, Optional, Any
 
 
 from dff.core.context import Context
@@ -194,6 +194,7 @@ class Node(Transition):
     transitions: dict[NodeLabelType, ConditionType] = {}
     response: Union[conlist(str, min_items=1), str, Callable]
     processing: Union[Callable, conlist(Callable, min_items=1)] = None
+    misc: Optional[Any] = None
 
     def get_response(self):
         return normalize_response(self.response)

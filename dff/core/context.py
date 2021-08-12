@@ -60,7 +60,6 @@ class Context(BaseModel):
                 del self.actor_utterances[index]
             for index in list(self.actor_annotations.keys())[:-hold_last_n_indexes]:
                 del self.actor_annotations[index]
-                del self.actor_annotations[index]
         if "share" in field_names:
             self.shared_memory.clear()
         if "labels" in field_names:

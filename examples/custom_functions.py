@@ -1,6 +1,6 @@
 import logging
 
-from dff import TRANSITIONS, GRAPH, RESPONSE
+from dff import TRANSITIONS, GRAPH, RESPONSE, PROCESSING, MISC
 from dff import Context, Actor
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
@@ -38,8 +38,9 @@ flows = {
     "flow_repeat": {
         GRAPH: {
             "node_repeat": {
-                RESPONSE: repeater,
+                RESPONSE: "hi",
                 TRANSITIONS: {("flow_repeat", "node_repeat"): always_true},
+                MISC: {"speech_functions":["Open.Attend"]}
             }
         },
     },
