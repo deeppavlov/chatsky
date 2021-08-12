@@ -275,6 +275,8 @@ class Actor(BaseModel):
     default_priority: float = 1.0
     response_validation_flag: Optional[bool] = None
     validation_logging_flag: bool = True
+    pre_handlers: list[Callable] = []
+    post_handlers: list[Callable] = []
 
     @validate_arguments
     def __init__(
@@ -285,6 +287,8 @@ class Actor(BaseModel):
         default_priority: float = 1.0,
         response_validation_flag: Optional[bool] = None,
         validation_logging_flag: bool = True,
+        pre_handlers: list[Callable] = [],
+        post_handlers: list[Callable] = [],
         *args,
         **kwargs,
     ):
@@ -316,6 +320,8 @@ class Actor(BaseModel):
             default_priority=default_priority,
             response_validation_flag=response_validation_flag,
             validation_logging_flag=validation_logging_flag,
+            pre_handlers=pre_handlers,
+            post_handlers=post_handlers,
         )
         errors = self.validate_flows(response_validation_flag, validation_logging_flag)
         if errors:
@@ -346,6 +352,7 @@ class Actor(BaseModel):
                 f"context expexted as sub class of Context class or object of dict/str(json) type, but got {ctx}"
             )
 
+        [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         previous_node_label = (
             normalize_node_label(ctx.previous_node_label, "", self.default_priority)
             if ctx.previous_node_label
@@ -383,6 +390,7 @@ class Actor(BaseModel):
         text = response(ctx, self, *args, **kwargs)
         ctx.add_actor_utterance(text)
 
+        [handler(ctx, self, *args, **kwargs) for handler in self.post_handlers]
         return ctx
 
     @validate_arguments
