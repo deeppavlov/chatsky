@@ -49,7 +49,7 @@ class Context(BaseModel):
         self.node_label_history[self.current_history_index] = node_label
 
     @validate_arguments
-    def clean(self, hold_last_n_indexes: int, field_names: list[str] = ["human", "actor"]):
+    def clear(self, hold_last_n_indexes: int, field_names: list[str] = ["human", "actor", "labels"]):
         if "human" in field_names:
             for index in list(self.human_utterances.keys())[:-hold_last_n_indexes]:
                 del self.human_utterances[index]

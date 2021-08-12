@@ -11,7 +11,7 @@ def test_context():
         ctx.add_actor_utterance(str(index + 1))
         ctx.add_actor_annotation([index + 1])
     ctx.shared_memory[123] = 312
-    ctx.clean(5, ["human", "actor", "share", "labels"])
+    ctx.clear(5, ["human", "actor", "share", "labels"])
     ctx.shared_memory[1001] = "11111"
     ctx.add_human_utterance(str(1000), [1000])
     ctx.add_node_label([str(1000), str(1000 + 1)])
