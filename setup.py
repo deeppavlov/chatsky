@@ -25,7 +25,7 @@ long_description = readme_file.open(encoding="utf8").read()
 
 setuptools.setup(
     name="dff",
-    version="0.6.0",
+    version="0.1.0",
     scripts=[],
     author="Denis Kuznetsov",
     author_email="kuznetsov.den.p@gmail.com",
@@ -41,5 +41,6 @@ setuptools.setup(
     ],
     package_data={},
     include_package_data=True,
+    python_requires=">=3.9",
     **read_requirements()
 )
