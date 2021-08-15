@@ -1,6 +1,6 @@
 from typing import Optional
-from dff.core.actor import Actor
-from dff.core.context import Context
+from .core.actor import Actor
+from .core.context import Context
 
 
 def repeat(priority: Optional[float] = None, *args, **kwargs):

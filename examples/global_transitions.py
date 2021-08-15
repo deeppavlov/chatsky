@@ -1,8 +1,8 @@
 import logging
 
-from dff import GRAPH, RESPONSE, GLOBAL_TRANSITIONS
-from dff import Context, Actor
-from dff import repeat, previous, to_start, to_fallback, forward, back
+from dff.core.keywords import GRAPH, RESPONSE, GLOBAL_TRANSITIONS
+from dff.core import Context, Actor
+from dff.transitions import repeat, previous, to_start, to_fallback, forward, back
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)

@@ -1,8 +1,8 @@
 import logging
 import json
 
-from dff import TRANSITIONS, GRAPH, RESPONSE
-from dff import Context, Actor
+from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
+from dff.core import Context, Actor
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)

@@ -4,8 +4,7 @@ import itertools
 import re
 import random
 
-from dff.core.actor import Flows, Flow, Node, Actor
-from dff.core.context import Context
+from dff.core import Flows, Flow, Node, Actor, Context
 from dff.core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
 
 

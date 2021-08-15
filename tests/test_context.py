@@ -1,6 +1,6 @@
 # %%
 
-from dff.core.context import Context
+from dff.core import Context
 
 
 def test_context():

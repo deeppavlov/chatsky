@@ -1,6 +1,6 @@
-from dff import GRAPH, RESPONSE, GLOBAL_TRANSITIONS
-from dff import Context, Actor
-from dff import repeat, previous, to_start, to_fallback, forward, back
+from dff.core.keywords import GRAPH, RESPONSE, GLOBAL_TRANSITIONS
+from dff.core import Context, Actor
+from dff.transitions import repeat, previous, to_start, to_fallback, forward, back
 
 
 def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:

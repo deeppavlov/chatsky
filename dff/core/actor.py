@@ -70,7 +70,6 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
             human_text, annotations = ctx.current_human_annotated_utterance
             return bool(conditions.search(human_text))
 
-        # regexp_condition_handler.update_forward_refs()
         return regexp_condition_handler
     elif isinstance(conditions, str):
 

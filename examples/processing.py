@@ -3,9 +3,9 @@ from typing import Optional
 import datetime
 
 
-from dff import GRAPH, RESPONSE, TRANSITIONS, PROCESSING
-from dff import Context, Actor, Node
-from dff import repeat, previous, to_start, to_fallback, forward, back
+from dff.core.keywords import GRAPH, RESPONSE, TRANSITIONS, PROCESSING
+from dff.core import Context, Actor, Node
+from dff.transitions import repeat, previous, to_start, to_fallback, forward, back
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
