@@ -18,29 +18,16 @@ venv:
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt
 	$(VENV_PATH)/bin/pip install -r requirements_test.txt
 
-dist: venv
-	rm -rf dist build
-	$(VENV_PATH)/bin/python setup.py sdist bdist_wheel
-
-.PHONY: dist
 
 format: venv
 	@$(VENV_PATH)/bin/python -m black --line-length=120 .
 .PHONY: format
 
-test: venv
-	@$(VENV_PATH)/bin/python -m pytest --cov=dff tests/
-.PHONY: test
-
-test-all: venv test
-	@$(VENV_PATH)/bin/python -m black --line-length=120 --check .
-.PHONY: test-all
-
 check: lint test
 .PHONY: check
 
 lint: venv
-	@set -e && $(VENV_PATH)/bin/tox -e linters || ( \
+	@set -e && $(VENV_PATH)/bin/python -m black --line-length=120 --check . || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -48,13 +35,26 @@ lint: venv
 
 .PHONY: lint
 
-docs: venv
-	@$(VENV_PATH)/bin/pip install --editable .
-	@$(VENV_PATH)/bin/pip install -U -r ./docs-requirements.txt
-	@$(VENV_PATH)/bin/sphinx-build -W -b html docs/ docs/_build
-.PHONY: docs
+test: venv
+	@$(VENV_PATH)/bin/python -m pytest --cov=dff tests/
+.PHONY: test
 
-docs-hotfix: docs
-	@$(VENV_PATH)/bin/pip install ghp-import
-	@$(VENV_PATH)/bin/ghp-import -pf docs/_build
-.PHONY: docs-hotfix
+test-all: venv test lint
+`.PHONY: test-all
+
+# dist: venv
+# 	rm -rf dist build
+# 	$(VENV_PATH)/bin/python setup.py sdist bdist_wheel
+
+# .PHONY: dist
+
+# docs: venv
+# 	@$(VENV_PATH)/bin/pip install --editable .
+# 	@$(VENV_PATH)/bin/pip install -U -r ./docs-requirements.txt
+# 	@$(VENV_PATH)/bin/sphinx-build -W -b html docs/ docs/_build
+# .PHONY: docs
+
+# docs-hotfix: docs
+# 	@$(VENV_PATH)/bin/pip install ghp-import
+# 	@$(VENV_PATH)/bin/ghp-import -pf docs/_build
+# .PHONY: docs-hotfix
