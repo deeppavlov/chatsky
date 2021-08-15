@@ -24,3 +24,4 @@ _globals.py
 venv
 .vscode
 .coverage
+.pytest_cache
