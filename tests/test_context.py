@@ -36,7 +36,5 @@ def test_context():
     assert ctx.current_history_index == 15
     assert ctx.shared_memory == {1001: "11111"}
     ctx.json()
-    print(f"{test_context.__name__} passed")
+    # print(f"{test_context.__name__} passed")
 
-
-test_context()

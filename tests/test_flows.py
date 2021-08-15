@@ -31,7 +31,7 @@ def negative_test(samples, custom_class):
             continue
 
 
-def test_trasition(model, transition_name, additional_data):
+def trasition_test(model, transition_name, additional_data):
     true_graph_name = ["flow_name", "123"]
     true_node_name = ["state_name", "123"]
     true_node_name_with_lambda = true_node_name + [lambda c, f: "state"]
@@ -76,11 +76,11 @@ def test_trasition(model, transition_name, additional_data):
         {transition_name: {"asd": []}, **additional_data},
     ]
     negative_test(samples, model)
-    print(f"{test_trasition.__name__} passed")
+    # print(f"{trasition_test.__name__} passed")
 
 
 def test_node():
-    test_trasition(Node, TRANSITIONS, {RESPONSE: ["123", 123], PROCESSING: any})
+    trasition_test(Node, TRANSITIONS, {RESPONSE: ["123", 123], PROCESSING: any})
     samples = [
         {RESPONSE: ["123", 123], PROCESSING: any},
         {RESPONSE: "asd", PROCESSING: any},
@@ -108,11 +108,11 @@ def test_node():
         {RESPONSE: "zxczxc", PROCESSING: ["123"]},
     ]
     negative_test(samples, Node)
-    print(f"{test_node.__name__} passed")
+    # print(f"{test_node.__name__} passed")
 
 
 def test_flow():
-    test_trasition(Flow, GLOBAL_TRANSITIONS, {GRAPH: {}})
+    trasition_test(Flow, GLOBAL_TRANSITIONS, {GRAPH: {}})
     samples = [
         {
             GRAPH: {},
@@ -142,7 +142,7 @@ def test_flow():
     ]
 
     negative_test(samples, Flow)
-    print(f"{test_flow.__name__} passed")
+    # print(f"{test_flow.__name__} passed")
 
 
 def test_flows():
@@ -160,12 +160,4 @@ def test_flows():
     # negative sampling
     samples = [{"flows": {}}]
     negative_test(samples, Flows)
-    print(f"{test_flows.__name__} passed")
-
-
-test_node()
-test_flow()
-test_flows()
-
-
-# %%
+    # print(f"{test_flows.__name__} passed")

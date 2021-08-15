@@ -25,16 +25,15 @@ dist: venv
 .PHONY: dist
 
 format: venv
-	$(VENV_PATH)/bin/tox -e linters --notest
-	.tox/linters/bin/black .
+	@$(VENV_PATH)/bin/python -m black --line-length=120 .
 .PHONY: format
 
 test: venv
-	@$(VENV_PATH)/bin/tox -e py2.7,py3.7
+	@$(VENV_PATH)/bin/python -m pytest --cov=dff tests/
 .PHONY: test
 
-test-all: venv
-	@TOXPATH=$(VENV_PATH)/bin/tox sh ./scripts/runtox.sh
+test-all: venv test
+	@$(VENV_PATH)/bin/python -m black --line-length=120 --check .
 .PHONY: test-all
 
 check: lint test

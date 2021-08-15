@@ -49,28 +49,28 @@ flows = {
         },
     },
 }
-
-ctx = Context()
-actor = Actor(flows, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
-for in_text, out_text in [
-    ("start", "s"),
-    ("left", "l2"),
-    ("left", "l2"),
-    ("123", "l2"),
-    ("asd", "l2"),
-    ("right", "r2"),
-    ("fallback", "f"),
-    ("left", "l2"),
-    ("forward", "l3"),
-    ("forward", "l4"),
-    ("forward", "f"),
-    ("right", "r2"),
-    ("back", "r1"),
-    ("back", "r0"),
-    ("back", "f"),
-    ("start", "s"),
-]:
-    ctx.add_human_utterance(in_text)
-    ctx = actor(ctx)
-    if ctx.actor_text_response != out_text:
-        raise Exception(f" expected {out_text=} but got {ctx.actor_text_response=} for {in_text=}")
+def test_transitions():
+    ctx = Context()
+    actor = Actor(flows, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
+    for in_text, out_text in [
+        ("start", "s"),
+        ("left", "l2"),
+        ("left", "l2"),
+        ("123", "l2"),
+        ("asd", "l2"),
+        ("right", "r2"),
+        ("fallback", "f"),
+        ("left", "l2"),
+        ("forward", "l3"),
+        ("forward", "l4"),
+        ("forward", "f"),
+        ("right", "r2"),
+        ("back", "r1"),
+        ("back", "r0"),
+        ("back", "f"),
+        ("start", "s"),
+    ]:
+        ctx.add_human_utterance(in_text)
+        ctx = actor(ctx)
+        if ctx.actor_text_response != out_text:
+            raise Exception(f" expected {out_text=} but got {ctx.actor_text_response=} for {in_text=}")

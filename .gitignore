@@ -23,3 +23,4 @@ dff/modules/emora
 _globals.py
 venv
 .vscode
+.coverage
