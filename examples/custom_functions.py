@@ -40,7 +40,7 @@ flows = {
             "node_repeat": {
                 RESPONSE: "hi",
                 TRANSITIONS: {("flow_repeat", "node_repeat"): always_true},
-                MISC: {"speech_functions":["Open.Attend"]}
+                MISC: {"speech_functions": ["Open.Attend"]},
             }
         },
     },

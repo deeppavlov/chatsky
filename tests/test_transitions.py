@@ -49,6 +49,8 @@ flows = {
         },
     },
 }
+
+
 def test_transitions():
     ctx = Context()
     actor = Actor(flows, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))

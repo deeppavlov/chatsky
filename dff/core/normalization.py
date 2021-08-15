@@ -31,6 +31,7 @@ for _ in range(CONDITION_DEPTH_TYPE_CHECKING):
 Actor = BaseModel  # ForwardRef("Actor")
 Node = BaseModel  # ForwardRef("Node")
 
+
 @validate_arguments
 def normalize_node_label(
     node_label: NodeLabelType, flow_label: str, default_priority: float
