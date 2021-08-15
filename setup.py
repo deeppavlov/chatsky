@@ -58,10 +58,10 @@ setup(
     install_requires=["pydantic==1.8.2"],  # Optional
     # extras_require={"dev": ["check-manifest"], "test": ["coverage"]}, # Optional
     # package_data={"sample": ["package_data.dat"]}, # Optional
-    data_files=[("my_data", ["data/data_file"])],  # Optional
+    # data_files=[("my_data", ["data/data_file"])],  # Optional
     #
     # For example, the following would provide a command called `sample` which
     # executes the function `main` from this package when invoked:
-    entry_points={"console_scripts": ["sample=sample:main"]},  # Optional
-    project_urls={},  # Optional
+    # entry_points={"console_scripts": ["sample=sample:main"]},  # Optional
+    # project_urls={},  # Optional
 )
