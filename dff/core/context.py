@@ -15,8 +15,8 @@ Context = ForwardRef("Context")
 class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     node_labels: dict[int, tuple[str, str]] = {}
-    requests: dict[int, str] = {}
-    responses: dict[int, str] = {}
+    requests: dict[int, Any] = {}
+    responses: dict[int, Any] = {}
     previous_index: int = -1
     current_index: int = -1
     misc: dict[str, Any] = {}

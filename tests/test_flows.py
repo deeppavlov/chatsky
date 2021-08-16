@@ -6,6 +6,7 @@ import random
 
 from dff.core import Flows, Flow, Node, Actor, Context
 from dff.core.keywords import GLOBAL_TRANSITIONS, TRANSITIONS, RESPONSE, PROCESSING, GRAPH
+from dff.response import choice
 
 
 # TODO: full, correct test for normalize_* , validate_flows
@@ -80,9 +81,9 @@ def trasition_test(model, transition_name, additional_data):
 
 
 def test_node():
-    trasition_test(Node, TRANSITIONS, {RESPONSE: ["123", 123], PROCESSING: any})
+    trasition_test(Node, TRANSITIONS, {RESPONSE: choice(["123", "123"]), PROCESSING: any})
     samples = [
-        {RESPONSE: ["123", 123], PROCESSING: any},
+        {RESPONSE: choice(["123", "123"]), PROCESSING: any},
         {RESPONSE: "asd", PROCESSING: any},
         {RESPONSE: lambda c, f: "response", PROCESSING: any},
         {RESPONSE: lambda c, f: "response"},
@@ -119,7 +120,7 @@ def test_flow():
         },
         {
             GRAPH: {
-                "node1": {RESPONSE: [123, "123"], PROCESSING: any},
+                "node1": {RESPONSE: choice([123, "123"]), PROCESSING: any},
                 "node2": {RESPONSE: any, PROCESSING: any},
                 "node3": {RESPONSE: any},
                 "node4": {RESPONSE: "123", PROCESSING: any},
