@@ -1,56 +1,82 @@
 import logging
 
-from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE, MISC
+from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
+
+from . import basics
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
 
-# custom functions
+
+# There are two types of custom functions covered here.
+# All custom functions have current signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> ...```
+
+# The first type of custom functions is condition functions and they return true/false.
+# Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
+
+
 def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    # This is a custom contition function. It always returns true.
     return True
 
 
-def inline_function(keyword):
+def condition_wrapper(keyword):
+    # This is a wrapper of a contition function. It uses ```keyword``` to setup a custom function.
     def cond(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        # if the input phrase contains the keyword then the function will return true else false
         return keyword in ctx.current_human_annotated_utterance[0]
 
     return cond
 
 
+# The second type of custom functions is response functions.
+# Response functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> Any```
 def repeater(ctx: Context, actor: Actor, *args, **kwargs) -> str:
-    return f"Repeat: {ctx.current_human_annotated_utterance[0]}"
+    return f"repeat: {ctx.current_human_annotated_utterance[0]}"
 
 
-# a dialog script
+# This dialog graph consists of two flows (start_flow and repeat_flow)
+# The first start_flow is looped using the always_true function.
+# But from start_flow you can go to repeat_flow if the user passes the phrase with the keyword = `repeat`
+# The second repeat_flow is also looped and will always return the user's phrase with a prefix `repeat: `
 flows = {
-    "flow_start": {
+    "start_flow": {
         GRAPH: {
-            "node_start": {
-                RESPONSE: "hi",
+            "start_node": {
+                RESPONSE: "nope",
                 TRANSITIONS: {
-                    ("flow_repeat", "node_repeat"): inline_function("repeat"),
-                    ("flow_start", "node_start"): always_true,
+                    ("repeat_flow", "repeat_node"): condition_wrapper("repeat"),
+                    ("start_flow", "start_node"): always_true,
                 },
             }
         },
     },
-    "flow_repeat": {
+    "repeat_flow": {
         GRAPH: {
-            "node_repeat": {
-                RESPONSE: "hi",
-                TRANSITIONS: {("flow_repeat", "node_repeat"): always_true},
-                MISC: {"speech_functions": ["Open.Attend"]},
+            "repeat_node": {
+                RESPONSE: repeater,
+                TRANSITIONS: {("repeat_flow", "repeat_node"): always_true},
             }
         },
     },
 }
 
 
-ctx = Context()
-actor = Actor(flows, start_node_label=("flow_start", "node_start"))
-while True:
-    in_text = input("you: ")
-    ctx.add_human_utterance(in_text)
-    ctx = actor(ctx)
-    print(f"bot: {ctx.actor_text_response}")
+actor = Actor(flows, start_node_label=("start_flow", "start_node"))
+
+
+# testing
+in_requests = ["hi", "repeat", "how are you?", "ok", "good"]
+out_responses = ["nope"] + [f"repeat: {req}" for req in in_requests[1:]]
+
+
+def run_test():
+    ctx = {}
+    for in_request, true_out_response in zip(in_requests, out_responses):
+        _, ctx = basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
+
+
+if __name__ == "__main__":
+    run_test()
+    basics.run_interactive_mode(actor)
