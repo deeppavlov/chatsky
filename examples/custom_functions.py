@@ -25,7 +25,7 @@ def condition_wrapper(keyword):
     # This is a wrapper of a contition function. It uses ```keyword``` to setup a custom function.
     def cond(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         # if the input phrase contains the keyword then the function will return true else false
-        return keyword in ctx.current_human_annotated_utterance[0]
+        return keyword in ctx.last_request
 
     return cond
 
@@ -33,7 +33,7 @@ def condition_wrapper(keyword):
 # The second type of custom functions is response functions.
 # Response functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> Any```
 def repeater(ctx: Context, actor: Actor, *args, **kwargs) -> str:
-    return f"repeat: {ctx.current_human_annotated_utterance[0]}"
+    return f"repeat: {ctx.last_request}"
 
 
 # This dialog graph consists of two flows (start_flow and repeat_flow)

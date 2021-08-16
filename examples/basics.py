@@ -58,9 +58,9 @@ actor = Actor(flows, start_node_label=("greeting_flow", "node0"))
 
 def turn_handler(in_request: str, ctx: Context, actor: Actor, true_out_response: Optional[str] = None):
     ctx = Context.cast(ctx)
-    ctx.add_human_utterance(in_request)
+    ctx.add_request(in_request)
     ctx = actor(ctx)
-    out_response = ctx.actor_text_response
+    out_response = ctx.last_response
     if true_out_response is not None and true_out_response != out_response:
         raise Exception(f"{in_request=} -> true_out_response != out_response: {true_out_response} != {out_response}")
     else:

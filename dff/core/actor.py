@@ -91,9 +91,9 @@ class Actor(BaseModel):
         **kwargs,
     ) -> Union[Context, dict, str]:
         ctx = Context.cast(ctx)
-        if not ctx.human_utterances:
+        if not ctx.requests:
             ctx.add_node_label(self.start_node_label[:2])
-            ctx.add_human_utterance("")
+            ctx.add_request("")
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         previous_node_label = (
@@ -131,7 +131,7 @@ class Actor(BaseModel):
 
         response = tmp_node.get_response()
         text = response(ctx, self, *args, **kwargs)
-        ctx.add_actor_utterance(text)
+        ctx.add_response(text)
 
         [handler(ctx, self, *args, **kwargs) for handler in self.post_handlers]
         return ctx
@@ -201,7 +201,7 @@ class Actor(BaseModel):
         error_msgs = []
         for callable_node_label, condition in transitions.items():
             ctx = Context()
-            ctx.add_human_utterance("text")
+            ctx.add_request("text")
             actor = self.copy(deep=True)
 
             if hasattr(callable_node_label, "update_forward_refs"):

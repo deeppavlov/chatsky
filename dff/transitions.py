@@ -5,8 +5,8 @@ from .core.context import Context
 
 def repeat(priority: Optional[float] = None, *args, **kwargs):
     def repeat_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
-        turn_index = ctx.previous_history_index
-        flow_label, node_label = ctx.node_label_history.get(turn_index, actor.fallback_node_label[:2])
+        turn_index = ctx.previous_index
+        flow_label, node_label = ctx.node_labels.get(turn_index, actor.fallback_node_label[:2])
         current_priority = actor.default_priority if priority is None else priority
         return (flow_label, node_label, current_priority)
 
@@ -15,8 +15,8 @@ def repeat(priority: Optional[float] = None, *args, **kwargs):
 
 def previous(priority: Optional[float] = None, *args, **kwargs):
     def previous_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
-        turn_index = ctx.previous_history_index - 1
-        flow_label, node_label = ctx.node_label_history.get(turn_index, actor.fallback_node_label[:2])
+        turn_index = ctx.previous_index - 1
+        flow_label, node_label = ctx.node_labels.get(turn_index, actor.fallback_node_label[:2])
         current_priority = actor.default_priority if priority is None else priority
         return (flow_label, node_label, current_priority)
 
@@ -47,8 +47,8 @@ def _get_node_label_by_index_shifting(
     *args,
     **kwargs,
 ):
-    turn_index = ctx.previous_history_index
-    tgt_flow_label, node_label = ctx.node_label_history.get(turn_index, actor.fallback_node_label[:2])
+    turn_index = ctx.previous_index
+    tgt_flow_label, node_label = ctx.node_labels.get(turn_index, actor.fallback_node_label[:2])
     flows = actor.flows
     flow = flows[tgt_flow_label]
     node_labels = list(flow.graph)

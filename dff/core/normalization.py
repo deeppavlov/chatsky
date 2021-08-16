@@ -1,8 +1,7 @@
 import logging
-import random
 
 # from typing import ForwardRef
-from typing import Union, Callable, Pattern, Optional
+from typing import Union, Callable, Pattern, Optional, Any
 
 
 from .context import Context
@@ -72,16 +71,16 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
 
         @validate_arguments
         def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-            human_text, annotations = ctx.current_human_annotated_utterance
-            return bool(conditions.search(human_text))
+            request = ctx.last_request
+            return bool(conditions.search(request))
 
         return regexp_condition_handler
     elif isinstance(conditions, str):
 
         @validate_arguments
         def str_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-            human_text, annotations = ctx.current_human_annotated_utterance
-            return conditions in human_text
+            request = ctx.last_request
+            return conditions in request
 
         return str_condition_handler
     elif isinstance(conditions, list):
@@ -130,24 +129,16 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
 
 
 @validate_arguments
-def normalize_response(response: Union[conlist(str, min_items=1), str, Callable]) -> Callable:
+def normalize_response(response: Any) -> Callable:
     if isinstance(response, Callable):
         return response
-    elif isinstance(response, str):
+    else:
 
         @validate_arguments
-        def str_response_handler(ctx: Context, actor: Actor, *args, **kwargs):
+        def response_handler(ctx: Context, actor: Actor, *args, **kwargs):
             return response
 
-        return str_response_handler
-    elif isinstance(response, list):
-
-        @validate_arguments
-        def list_response_handler(ctx: Context, actor: Actor, *args, **kwargs):
-            return random.choice(response)
-
-        return list_response_handler
-    raise NotImplementedError(f"Unexpected response {response}")
+        return response_handler
 
 
 # TODO: add exeption handling for processing

@@ -14,7 +14,7 @@ def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 
 
 def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return f"answer {len(ctx.human_utterances)}"
+    return f"answer {len(ctx.requests)}"
 
 
 # a dialog script

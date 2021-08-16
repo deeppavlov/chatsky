@@ -72,7 +72,7 @@ def test_transitions():
         # ("back", "f"),
         # ("start", "s"),
     ]:
-        ctx.add_human_utterance(in_text)
+        ctx.add_request(in_text)
         ctx = actor(ctx)
-        if ctx.actor_text_response != out_text:
-            raise Exception(f" expected {out_text=} but got {ctx.actor_text_response=} for {in_text=}")
+        if ctx.last_response != out_text:
+            raise Exception(f" expected {out_text=} but got {ctx.last_response=} for {in_text=}")

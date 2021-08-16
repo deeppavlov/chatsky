@@ -59,7 +59,7 @@ def trasition_test(model, transition_name, additional_data):
     ]
     actor = Actor({"globals": {GRAPH: {"globals": {RESPONSE: "123"}}}}, ("globals", "globals"))
     ctx = Context()
-    ctx.add_human_utterance("text")
+    ctx.add_request("text")
     for res in results:
         for node_label, cond in res.items():
             if not (

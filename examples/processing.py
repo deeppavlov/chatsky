@@ -90,8 +90,8 @@ ctx = Context()
 actor = Actor(flows, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
 while True:
     in_text = input("you: ")
-    ctx.add_human_utterance(in_text)
+    ctx.add_request(in_text)
     ctx = actor(ctx)
-    print(f"bot: {ctx.actor_text_response}")
+    print(f"bot: {ctx.last_response}")
 
 # Outputs:

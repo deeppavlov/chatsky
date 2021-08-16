@@ -13,9 +13,9 @@ def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 
 
 def response(ctx: Context, actor: Actor, *args, **kwargs) -> str:
-    request_len = len(ctx.current_human_annotated_utterance[0])
-    ctx.shared_memory["lens"] = ctx.shared_memory.get("lens", []) + [request_len]
-    return ctx.shared_memory.get("prompt", "") + f"{request_len}"
+    request_len = len(ctx.last_request)
+    ctx.misc["lens"] = ctx.misc.get("lens", []) + [request_len]
+    return ctx.misc.get("prompt", "") + f"{request_len}"
 
 
 # a dialog script
@@ -33,10 +33,10 @@ flows = {
 
 ctx = Context()
 actor = Actor(flows, start_node_label=("start", "start"))
-ctx.shared_memory["prompt"] = "Lenght of request "
+ctx.misc["prompt"] = "Lenght of request "
 while True:
     in_text = input("you: ")
-    ctx.add_human_utterance(in_text)
+    ctx.add_request(in_text)
     ctx = actor(ctx)
-    print(f"{ctx.shared_memory=}")
-    print(f"bot: {ctx.actor_text_response}")
+    print(f"{ctx.misc=}")
+    print(f"bot: {ctx.last_response}")
