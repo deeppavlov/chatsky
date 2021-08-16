@@ -78,7 +78,7 @@ def run_test():
     in_request, true_out_response = next(iterator)
     # pass as empty context
     _, ctx = turn_handler(in_request, ctx={}, true_out_response=true_out_response)
-    # pass as context json string
+    # ontext serialize to json str
     ctx = ctx.json()
     if isinstance(ctx, str):
         logging.info("context serialize to json str")
