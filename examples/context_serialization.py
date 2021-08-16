@@ -78,12 +78,25 @@ def run_test():
     in_request, true_out_response = next(iterator)
     # pass as empty context
     _, ctx = turn_handler(in_request, ctx={}, true_out_response=true_out_response)
-    # ontext serialize to json str
+    # serialize context to json str
     ctx = ctx.json()
     if isinstance(ctx, str):
-        logging.info("context serialize to json str")
+        logging.info("context serialized to json str")
     else:
-        logging.error(f"{ctx=} has to be serializeed to json string")
+        logging.error(f"{ctx=} has to be serialized to json string")
+    in_request, true_out_response = next(iterator)
+    _, ctx = turn_handler(in_request, ctx=ctx, true_out_response=true_out_response)
+    # serialize context to dict
+    ctx = ctx.dict()
+    if isinstance(ctx, dict):
+        logging.info("context serialized to dict")
+    else:
+        logging.error(f"{ctx=} has to be serialized to dict")
+    in_request, true_out_response = next(iterator)
+    _, ctx = turn_handler(in_request, ctx=ctx, true_out_response=true_out_response)
+    # context without serialization
+    if not isinstance(ctx, Context):
+        logging.error(f"{ctx=} has to have Context type")
     in_request, true_out_response = next(iterator)
     _, ctx = turn_handler(in_request, ctx=ctx, true_out_response=true_out_response)
 
