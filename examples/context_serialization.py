@@ -33,28 +33,6 @@ flows = {
 actor = Actor(flows, start_node_label=("flow_start", "node_start"))
 
 
-# def turn_handler(in_text, ctx=None):
-#     if
-#     request_json = "{}"
-#     # Start
-#     for _ in range(10):
-#         print(f"incomming data={request_json}")
-#         # deserialization
-#         data_dict = json.loads(request_json)
-#         ctx = Context.parse_obj(data_dict) if data_dict else Context()
-#         # or you can use ctx = Context.parse_raw(request_json)
-
-#         in_text = "yep"
-#         print(f"you: {in_text}")
-#         ctx.add_human_utterance(in_text)
-#         ctx = actor(ctx)
-#         print(f"bot: {ctx.actor_text_response}")
-
-#         # serialization
-#         request_json = ctx.json()
-#         # if you want to get serializable obj jusc use `data_dict = json.loads(ctx.json())`
-
-
 def turn_handler(in_request, ctx={}, true_out_response=None):
     ctx = Context.cast(ctx)
     ctx.add_human_utterance(in_request)
@@ -77,7 +55,7 @@ def run_test():
     iterator = zip(in_requests, out_responses)
     in_request, true_out_response = next(iterator)
     # pass as empty context
-    _, ctx = turn_handler(in_request, ctx={}, true_out_response=true_out_response)
+    _, ctx = turn_handler(in_request, ctx=ctx, true_out_response=true_out_response)
     # serialize context to json str
     ctx = ctx.json()
     if isinstance(ctx, str):
@@ -101,5 +79,13 @@ def run_test():
     _, ctx = turn_handler(in_request, ctx=ctx, true_out_response=true_out_response)
 
 
+def run_interactive_mode():
+    ctx = {}
+    while True:
+        in_request = input("type your answer: ")
+        _, ctx = turn_handler(in_request, ctx=ctx)
+
+
 if __name__ == "__main__":
     run_test()
+    run_interactive_mode()
