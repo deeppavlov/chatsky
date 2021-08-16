@@ -90,18 +90,10 @@ class Actor(BaseModel):
         *args,
         **kwargs,
     ) -> Union[Context, dict, str]:
-        if not ctx:
-            ctx = Context()
+        ctx = Context.cast(ctx)
+        if not ctx.human_utterances:
             ctx.add_node_label(self.start_node_label[:2])
             ctx.add_human_utterance("")
-        elif isinstance(ctx, dict):
-            ctx = Context.parse_raw(ctx)
-        elif isinstance(ctx, str):
-            ctx = Context.parse_raw(ctx)
-        elif not issubclass(type(ctx), Context):
-            raise ValueError(
-                f"context expexted as sub class of Context class or object of dict/str(json) type, but got {ctx}"
-            )
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         previous_node_label = (

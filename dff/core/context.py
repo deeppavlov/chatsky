@@ -1,12 +1,15 @@
 import logging
 from uuid import UUID, uuid4
 
+from typing import ForwardRef
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, validate_arguments, Field
 
 
 logger = logging.getLogger(__name__)
+
+Context = ForwardRef("Context")
 
 
 class Context(BaseModel):
@@ -19,6 +22,25 @@ class Context(BaseModel):
     previous_history_index: int = -1
     current_history_index: int = -1
     shared_memory: dict[str, Any] = {}
+
+    @classmethod
+    def cast(
+        cls,
+        ctx: Union[Context, dict, str] = {},
+        *args,
+        **kwargs,
+    ) -> Union[Context, dict, str]:
+        if not ctx:
+            ctx = Context()
+        elif isinstance(ctx, dict):
+            ctx = Context.parse_obj(ctx)
+        elif isinstance(ctx, str):
+            ctx = Context.parse_raw(ctx)
+        elif not issubclass(type(ctx), Context):
+            raise ValueError(
+                f"context expected as sub class of Context class or object of dict/str(json) type, but got {ctx}"
+            )
+        return ctx
 
     @validate_arguments
     def add_human_utterance(
@@ -91,3 +113,6 @@ class Context(BaseModel):
         last_utt = list(self.actor_utterances.values())[-1:]
         if last_utt:
             return last_utt[0]
+
+
+Context.update_forward_refs()

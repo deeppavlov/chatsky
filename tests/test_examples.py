@@ -1,4 +1,3 @@
 def test_context_serialization():
-    from .examples import context_serialization
-
-    context_serialization.__name__
+    from .examples.context_serialization import run_test
+    run_test()
