@@ -65,14 +65,22 @@ def normalize_node_label(
 @validate_arguments
 def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Callable:
     if isinstance(conditions, Callable):
-        # TODO: add try/exc
-        return conditions
+        @validate_arguments
+        def callable_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+            try:
+                return conditions(ctx, actor, *args, **kwargs)
+            except Exception as exc:
+                logger.error(f"Exception {exc} of function {conditions}", exc_info=exc)
+        return callable_condition_handler
     elif isinstance(conditions, Pattern):
 
         @validate_arguments
         def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
             request = ctx.last_request
-            return bool(conditions.search(request))
+            try:
+                return bool(conditions.search(request))
+            except Exception as exc:
+                logger.error(f"Exception {exc} for {request=}", exc_info=exc)
 
         return regexp_condition_handler
     elif isinstance(conditions, str):
@@ -80,7 +88,10 @@ def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Call
         @validate_arguments
         def str_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
             request = ctx.last_request
-            return conditions in request
+            try:
+                return conditions in request
+            except Exception as exc:
+                logger.error(f"Exception {exc} for {request=}", exc_info=exc)
 
         return str_condition_handler
     elif isinstance(conditions, list):

@@ -3,7 +3,7 @@ import logging
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
 
-from . import basics
+from examples import example_1_basics
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
@@ -34,17 +34,20 @@ flows = {
 actor = Actor(flows, start_node_label=("flow_start", "node_start"))
 
 
-# testing
-in_requests = ["hi", "how are you?", "ok", "good"]
-out_responses = ["answer 1", "answer 2", "answer 3", "answer 4"]
+testing_dialog = [
+    ("hi", "answer 1"),
+    ("how are you?", "answer 2"),
+    ("ok", "answer 3"),
+    ("good", "answer 4"),
+]
 
 
 def run_test():
     ctx = {}
-    iterator = zip(in_requests, out_responses)
+    iterator = iter(testing_dialog)
     in_request, true_out_response = next(iterator)
     # pass as empty context
-    _, ctx = basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
+    _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
     # serialize context to json str
     ctx = ctx.json()
     if isinstance(ctx, str):
@@ -52,7 +55,7 @@ def run_test():
     else:
         raise Exception(f"{ctx=} has to be serialized to json string")
     in_request, true_out_response = next(iterator)
-    _, ctx = basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
+    _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
     # serialize context to dict
     ctx = ctx.dict()
     if isinstance(ctx, dict):
@@ -60,14 +63,14 @@ def run_test():
     else:
         raise Exception(f"{ctx=} has to be serialized to dict")
     in_request, true_out_response = next(iterator)
-    _, ctx = basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
+    _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
     # context without serialization
     if not isinstance(ctx, Context):
         raise Exception(f"{ctx=} has to have Context type")
     in_request, true_out_response = next(iterator)
-    _, ctx = basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
+    _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
 
 
 if __name__ == "__main__":
     run_test()
-    basics.run_interactive_mode(actor)
+    example_1_basics.run_interactive_mode(actor)

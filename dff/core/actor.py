@@ -4,7 +4,6 @@ from typing import Union, Callable, Optional
 
 from pydantic import BaseModel, validate_arguments
 
-from ..condition_handlers import deep_copy_condition_handler
 from .context import Context
 from .flows import Flows, Node
 from .normalization import normalize_node_label, normalize_response
@@ -86,7 +85,7 @@ class Actor(BaseModel):
         ctx: Union[Context, dict, str] = {},
         return_dict=False,
         return_json=False,
-        condition_handler: Callable = deep_copy_condition_handler,
+        condition_handler: Optional[Callable] = None,
         *args,
         **kwargs,
     ) -> Union[Context, dict, str]:
@@ -94,6 +93,8 @@ class Actor(BaseModel):
         if not ctx.requests:
             ctx.add_node_label(self.start_node_label[:2])
             ctx.add_request("")
+        if condition_handler is None:
+            condition_handler = deep_copy_condition_handler
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         previous_node_label = (
@@ -254,3 +255,8 @@ class Actor(BaseModel):
                 msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
                 error_handler(error_msgs, msg, exc, logging_flag)
         return error_msgs
+
+
+@validate_arguments()
+def deep_copy_condition_handler(condition: Callable, ctx: Context, actor: Actor, *args, **kwargs):
+    return condition(ctx.copy(deep=True), actor.copy(deep=True), *args, **kwargs)

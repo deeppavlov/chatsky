@@ -3,7 +3,7 @@ import logging
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
 
-from . import basics
+from examples import example_1_basics
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
 logger = logging.getLogger(__name__)
@@ -66,17 +66,21 @@ flows = {
 actor = Actor(flows, start_node_label=("start_flow", "start_node"))
 
 
-# testing
-in_requests = ["hi", "repeat", "how are you?", "ok", "good"]
-out_responses = ["nope"] + [f"repeat: {req}" for req in in_requests[1:]]
+testing_dialog = [
+    ("hi","nope"),
+    ("repeat","repeat: repeat"),
+    ("how are you?","repeat: how are you?"),
+    ("ok","repeat: ok"),
+    ("good","repeat: good"),
+]
 
 
 def run_test():
     ctx = {}
-    for in_request, true_out_response in zip(in_requests, out_responses):
-        _, ctx = basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
+    for in_request, true_out_response in testing_dialog:
+        _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
 
 
 if __name__ == "__main__":
     run_test()
-    basics.run_interactive_mode(actor)
+    example_1_basics.run_interactive_mode(actor)

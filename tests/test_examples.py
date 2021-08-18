@@ -1,5 +1,11 @@
 def test_basics():
-    from .examples.basics import run_test
+    from .examples.example_1_basics import run_test
+
+    run_test()
+
+
+def test_conditions():
+    from .examples.example_2_conditions import run_test
 
     run_test()
 
