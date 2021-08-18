@@ -67,11 +67,11 @@ actor = Actor(flows, start_node_label=("start_flow", "start_node"))
 
 
 testing_dialog = [
-    ("hi","nope"),
-    ("repeat","repeat: repeat"),
-    ("how are you?","repeat: how are you?"),
-    ("ok","repeat: ok"),
-    ("good","repeat: good"),
+    ("hi", "nope"),
+    ("repeat", "repeat: repeat"),
+    ("how are you?", "repeat: how are you?"),
+    ("ok", "repeat: ok"),
+    ("good", "repeat: good"),
 ]
 
 

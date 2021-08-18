@@ -65,12 +65,14 @@ def normalize_node_label(
 @validate_arguments
 def normalize_conditions(conditions: ConditionType, reduce_function=any) -> Callable:
     if isinstance(conditions, Callable):
+
         @validate_arguments
         def callable_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
             try:
                 return conditions(ctx, actor, *args, **kwargs)
             except Exception as exc:
                 logger.error(f"Exception {exc} of function {conditions}", exc_info=exc)
+
         return callable_condition_handler
     elif isinstance(conditions, Pattern):
 
