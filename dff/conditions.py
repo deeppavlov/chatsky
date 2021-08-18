@@ -25,7 +25,7 @@ def exact_match(match: Any, *args, **kwargs):
 
 
 @validate_arguments
-def regexp(pattern: Union[Pattern, str], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs):
+def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs):
     pattern = re.compile(pattern, flags)
 
     def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
