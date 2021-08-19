@@ -1,9 +1,10 @@
 import logging
 import re
 
-from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
+from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE, GLOBAL_TRANSITIONS
 from dff.core import Context, Actor
-from dff.conditions import regexp
+from dff.conditions import regexp, isin_flow, negation
+import dff.conditions as cond
 from dff.transitions import to_fallback, forward, repeat, back, previous
 
 from examples import example_1_basics
@@ -15,10 +16,6 @@ def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 
 
-def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-    return ("greeting_flow", "node2", 1.0)
-
-
 def high_priority_node_transition(flow_label, node_label):
     def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         return (flow_label, node_label, 2.0)
@@ -28,96 +25,61 @@ def high_priority_node_transition(flow_label, node_label):
 
 flows = {
     "global_flow": {
+        GLOBAL_TRANSITIONS: {
+            ("greeting_flow", "node1", 1.1): regexp(r"\b(hi|hello)\b", re.I),
+            ("music_flow", "node1", 1.1): regexp(r"talk about music"),
+            to_fallback(0.1): always_true_condition,
+            forward(): cond.all([regexp(r"next\b"), isin_flow(nodes=[("music_flow", i) for i in ["node2", "node3"]])]),
+            repeat(0.2): cond.all([regexp(r"repeat", re.I), negation(isin_flow(flows=["global_flow"]))]),
+        },
         GRAPH: {
             "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
                 RESPONSE: "",
-                TRANSITIONS: {
-                    ("music_flow", "node1"): regexp(r"talk about music"),  # first check
-                    ("greeting_flow", "node1"): regexp(r"hi|hello", re.IGNORECASE),  # second check
-                    "fallback_node": always_true_condition,  # third check
-                    # "fallback_node" is equivalent to ("global_flow", "fallback_node")
-                },
             },
             "fallback_node": {  # We get to this node if an error occurred while the agent was running
                 RESPONSE: "Ooops",
-                TRANSITIONS: {
-                    ("music_flow", "node1"): regexp(r"talk about music"),  # first check
-                    ("greeting_flow", "node1"): regexp(r"hi|hello", re.IGNORECASE),  # second check
-                    previous(): regexp(r"previous", re.IGNORECASE),  # third check
-                    # previous() is equivalent to ("PREVIOUS_flow", "PREVIOUS_node")
-                    repeat(): always_true_condition,  # fourth check
-                    # repeat() is equivalent to ("global_flow", "fallback_node")
-                },
+                TRANSITIONS: {previous(): regexp(r"previous", re.I)},
             },
-        }
+        },
     },
     "greeting_flow": {
         GRAPH: {
             "node1": {
                 RESPONSE: "Hi, how are you?",  # When the agent goes to node1, we return "Hi, how are you?"
-                TRANSITIONS: {
-                    ("global_flow", "fallback_node", 0.1): always_true_condition,  # second check
-                    "node2": regexp(r"how are you"),  # first check
-                    # "node2" is equivalent to ("greeting_flow", "node2", 1.0)
-                },
+                TRANSITIONS: {"node2": regexp(r"how are you")},
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
                 TRANSITIONS: {
-                    to_fallback(0.1): always_true_condition,  # third check
-                    # to_fallback(0.1) is equivalent to ("global_flow", "fallback_node", 0.1)
-                    forward(0.5): regexp(r"talk about"),  # second check
-                    # forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
-                    ("music_flow", "node1"): regexp(r"talk about music"),  # first check
-                    previous(): regexp(r"previous", re.IGNORECASE),  # third check
-                    # ("music_flow", "node1") is equivalent to ("music_flow", "node1", 1.0)
+                    forward(0.5): regexp(r"talk about"),
+                    previous(): regexp(r"previous", re.I),
                 },
             },
             "node3": {
                 RESPONSE: "Sorry, I can not talk about that now.",
                 TRANSITIONS: {forward(): regexp(r"bye")},
             },
-            "node4": {
-                RESPONSE: "bye",
-                TRANSITIONS: {
-                    "node1": regexp(r"hi|hello", re.IGNORECASE),  # first check
-                    to_fallback(): always_true_condition,  # second check
-                },
-            },
+            "node4": {RESPONSE: "bye"},
         }
     },
     "music_flow": {
         GRAPH: {
             "node1": {
                 RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
-                TRANSITIONS: {
-                    forward(): regexp(r"yes|yep|ok", re.IGNORECASE),
-                    to_fallback(): always_true_condition,
-                },
+                TRANSITIONS: {forward(): regexp(r"yes|yep|ok", re.I)},
             },
             "node2": {
                 RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
-                TRANSITIONS: {
-                    forward(): regexp(r"next", re.IGNORECASE),
-                    repeat(): regexp(r"repeat", re.IGNORECASE),
-                    to_fallback(): always_true_condition,
-                },
             },
             "node3": {
                 RESPONSE: "The band achieved commercial success with the release of five studio albums.",
-                TRANSITIONS: {
-                    forward(): regexp(r"next", re.IGNORECASE),
-                    back(): regexp(r"back", re.IGNORECASE),
-                    repeat(): regexp(r"repeat", re.IGNORECASE),
-                    to_fallback(): always_true_condition,
-                },
+                TRANSITIONS: {back(): regexp(r"back", re.I)},
             },
             "node4": {
                 RESPONSE: "That's all what I know",
                 TRANSITIONS: {
-                    greeting_flow_n2_transition: regexp(r"next", re.IGNORECASE),  # second check
-                    high_priority_node_transition("greeting_flow", "node4"): regexp(r"next time", re.IGNORECASE),
-                    to_fallback(): always_true_condition,  # third check
+                    ("greeting_flow", "node4"): regexp(r"next time", re.I),
+                    ("greeting_flow", "node2"): regexp(r"next", re.I),
                 },
             },
         }
@@ -167,7 +129,7 @@ def run_test():
 if __name__ == "__main__":
     logging.basicConfig(
         format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.DEBUG,
+        level=logging.INFO,
     )
     run_test()
     example_1_basics.run_interactive_mode(actor)

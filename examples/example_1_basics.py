@@ -121,6 +121,9 @@ def run_interactive_mode(actor):
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+    logging.basicConfig(
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
+        level=logging.INFO,
+    )
     run_test()
     run_interactive_mode(actor)

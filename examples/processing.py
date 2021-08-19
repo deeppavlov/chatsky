@@ -7,7 +7,9 @@ from dff.core.keywords import GRAPH, RESPONSE, TRANSITIONS, PROCESSING
 from dff.core import Context, Actor, Node
 from dff.transitions import repeat, previous, to_start, to_fallback, forward, back
 
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
+logging.basicConfig(
+    format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
+)
 logger = logging.getLogger(__name__)
 
 

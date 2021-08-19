@@ -22,13 +22,13 @@ def test_transitions():
     run_test()
 
 
-def test_context_serialization():
-    from .examples.context_serialization import run_test
+def test_global_transitions():
+    from .examples.example_5_global_transitions import run_test
 
     run_test()
 
 
-def test_custom_functions():
-    from .examples.custom_functions import run_test
+def test_context_serialization():
+    from .examples.example_6_context_serialization import run_test
 
     run_test()

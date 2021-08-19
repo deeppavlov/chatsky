@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 # If the function returns the value `true`, then the actor performs the corresponding transition.
 # Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
 
-# Out of the box, dff offers 5 options for setting conditions:
+# Out of the box, dff offers 8 options for setting conditions:
 # - `exact_match` - will return `true` if the user's request completely matches the value passed to the function.
 # - `regexp` - will return `true` if the pattern matches the user's request, while the user's request must be a string.
 # -            `regexp` has same signature as `re.compile` function.
@@ -28,6 +28,9 @@ logger = logging.getLogger(__name__)
 #           any(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=any)
 # - `all` - will return `true` if all elements of  input sequence of condtions are `true`
 #           all(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=all)
+# - `negation` - return a negation of passed function
+#              `negation` has alias `neg`
+# - `isin_flow` - covered in the following examples.
 
 
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -59,7 +62,7 @@ flows = {
             },
             "node1": {
                 RESPONSE: "Hi, how are you?",
-                TRANSITIONS: {"node2": regexp(r".*how are you", re.IGNORECASE)},  # pattern matching
+                TRANSITIONS: {"node2": regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
@@ -125,6 +128,9 @@ def run_test():
 
 
 if __name__ == "__main__":
-    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
+    logging.basicConfig(
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
+        level=logging.INFO,
+    )
     run_test()
     example_1_basics.run_interactive_mode(actor)
