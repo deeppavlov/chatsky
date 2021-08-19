@@ -3,7 +3,8 @@ import re
 
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Actor, Context
-from dff.conditions import exact_match, regexp, reduce
+from dff.conditions import exact_match, regexp
+import dff.conditions as cond
 
 
 from examples import example_1_basics
@@ -15,15 +16,20 @@ logger = logging.getLogger(__name__)
 # Here we will consider different options for setting transition conditions.
 
 # The transition condition is set by the function.
-# If the function returns the value `True`, then the actor performs the corresponding transition.
+# If the function returns the value `true`, then the actor performs the corresponding transition.
 # Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
 
-# Out of the box, dff offers 3 options for setting conditions:
-# - `exact_match` - will return true if the user's request completely matches the value passed to the function.
-# - `regexp` - will return true if the pattern matches the user's request, while the user's request must be a string.
+# Out of the box, dff offers 5 options for setting conditions:
+# - `exact_match` - will return `true` if the user's request completely matches the value passed to the function.
+# - `regexp` - will return `true` if the pattern matches the user's request, while the user's request must be a string.
 # -            `regexp` has same signature as `re.compile` function.
-# - `reduce` - returns bool value as result after reduce by `reduce_func` for input sequence of condtions.
-#              `reduce_func` == any by default
+# - `aggregate` - returns bool value as result after aggregate by `aggregate_func` for input sequence of condtions.
+#              `aggregate_func` == any by default
+#              `aggregate` has alias `agg`
+# - `any` - will return `true` if an one element of  input sequence of condtions is `true`
+#           any(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=any)
+# - `all` - will return `true` if all elements of  input sequence of condtions are `true`
+#           all(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=all)
 
 
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -59,9 +65,9 @@ flows = {
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
-                TRANSITIONS: {"node3": reduce([regexp(r"talk"), regexp(r"about.*music")], reduce_func=all)},
-                # mix sequence of condtions by `reduce`, reassignment `reduce_func` by `all`
-                # because `reduce_func` == any by default
+                TRANSITIONS: {"node3": cond.all([regexp(r"talk"), regexp(r"about.*music")])},
+                # mix sequence of condtions by cond.all
+                # all is alias `aggregate` with `aggregate_func` == `all`
             },
             "node3": {
                 RESPONSE: "Sorry, I can not talk about music now.",
@@ -69,9 +75,9 @@ flows = {
             },
             "node4": {
                 RESPONSE: "bye",
-                TRANSITIONS: {"node1": reduce([hi_lower_case_condition, exact_match("hello")])},
-                # mix sequence of condtions by `reduce`, `reduce_func` == any by default
-                # because `reduce_func` == any by default
+                TRANSITIONS: {"node1": cond.any([hi_lower_case_condition, exact_match("hello")])},
+                # mix sequence of condtions by cond.any
+                # any is alias `aggregate` with `aggregate_func` == `any`
             },
             "fallback_node": {  # We get to this node if an error occurred while the agent was running
                 RESPONSE: "Ooops",

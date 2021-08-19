@@ -39,17 +39,35 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 
 
 @validate_arguments
-def reduce(iterable: Iterable, reduce_func: Callable = any, *args, **kwargs):
+def aggregate(iterable: Iterable, aggregate_func: Callable = any, *args, **kwargs):
     iterable = list(iterable)
     for cond in iterable:
         if not isinstance(cond, Callable):
             raise Exception(f"{iterable=} has to consist of callable objects")
 
-    def reduce_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def aggregate_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
         try:
-            return bool(reduce_func([cond(ctx, actor, *args, **kwargs) for cond in iterable]))
+            return bool(aggregate_func([cond(ctx, actor, *args, **kwargs) for cond in iterable]))
         except Exception as exc:
-            logger.error(f"Exception {exc} for {iterable=}, {reduce_func=} and {request=}", exc_info=exc)
+            logger.error(f"Exception {exc} for {iterable=}, {aggregate_func=} and {request=}", exc_info=exc)
 
-    return reduce_condition_handler
+    return aggregate_condition_handler
+
+
+@validate_arguments
+def any(iterable: Iterable, *args, **kwargs):
+    def any_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        return aggregate(iterable, aggregate_func=any, *args, **kwargs)
+    return any_condition_handler
+
+
+@validate_arguments
+def all(iterable: Iterable, *args, **kwargs):
+    def all_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        return aggregate(iterable, aggregate_func=all, *args, **kwargs)
+    return all_condition_handler
+
+
+# aliases
+agg = aggregate
