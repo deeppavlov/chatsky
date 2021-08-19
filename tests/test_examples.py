@@ -16,6 +16,12 @@ def test_responses():
     run_test()
 
 
+def test_transitions():
+    from .examples.example_4_transitions import run_test
+
+    run_test()
+
+
 def test_context_serialization():
     from .examples.context_serialization import run_test
 

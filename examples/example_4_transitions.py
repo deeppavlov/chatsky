@@ -1,38 +1,29 @@
 import logging
-from typing import Optional, Union
 import re
 
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
-from dff.conditions import exact_match, regexp
-from dff.transitions import to_fallback, forward
+from dff.conditions import regexp
+from dff.transitions import to_fallback, forward, repeat, back, previous
 
 from examples import example_1_basics
 
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
-
-# First of all, to create a dialog agent, we need to create a dialog script.
-# Below, `flows` is the dialog script.
-# A dialog script is a flow dictionary that can contain multiple flows .
-# Flows are needed in order to divide a dialog into sub-dialogs and process them separately.
-# For example, the separation can be tied to the topic of the dialog.
-# In our example, there is one flow called greeting_flow.
-
-# Inside each flow, we can describe a sub-dialog using keyword `GRAPH` from dff.core.keywords module.
-# Here we can also use keyword `GLOBAL_TRANSITIONS`, which we have considered in other examples.
-
-# `GRAPH` describes a sub-dialog using linked nodes, each node has the keywords `RESPONSE` and `TRANSITIONS`.
-
-# `RESPONSE` - contains the response that the dialog agent will return when transitioning to this node.
-# `TRANSITIONS` - describes transitions from the current node to other nodes.
-# `TRANSITIONS` are described in pairs:
-#      - the node to which the agent will perform the transition
-#      - the condition under which to make the transition
 
 
 def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
+
+
+def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
+    return ("greeting_flow", "node2", 1.0)
+
+
+def high_priority_node_transition(flow_label, node_label):
+    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
+        return (flow_label, node_label, 2.0)
+
+    return transition
 
 
 flows = {
@@ -42,13 +33,21 @@ flows = {
                 RESPONSE: "",
                 TRANSITIONS: {
                     ("music_flow", "node1"): regexp(r"talk about music"),  # first check
-                    ("greeting_flow", "node1"): regexp(r"[(hi)(hello)]", re.IGNORECASE),  # second check
+                    ("greeting_flow", "node1"): regexp(r"hi|hello", re.IGNORECASE),  # second check
                     "fallback_node": always_true_condition,  # third check
+                    # "fallback_node" is equivalent to ("global_flow", "fallback_node")
                 },
             },
             "fallback_node": {  # We get to this node if an error occurred while the agent was running
                 RESPONSE: "Ooops",
-                TRANSITIONS: {"node1": regexp(r"[(hi)(hello)]", re.IGNORECASE)},
+                TRANSITIONS: {
+                    ("music_flow", "node1"): regexp(r"talk about music"),  # first check
+                    ("greeting_flow", "node1"): regexp(r"hi|hello", re.IGNORECASE),  # second check
+                    previous(): regexp(r"previous", re.IGNORECASE),  # third check
+                    # previous() is equivalent to ("PREVIOUS_flow", "PREVIOUS_node")
+                    repeat(): always_true_condition,  # fourth check
+                    # repeat() is equivalent to ("global_flow", "fallback_node")
+                },
             },
         }
     },
@@ -57,81 +56,105 @@ flows = {
             "node1": {
                 RESPONSE: "Hi, how are you?",  # When the agent goes to node1, we return "Hi, how are you?"
                 TRANSITIONS: {
-                    (
-                        "global_flow",
-                        "fallback_node",
-                    ): always_true_condition,
-                    "node2": exact_match("i'm fine, how are you?"),
-                    # forward(): exact_match("i'm fine, how are you?"),
-                    # to_fallback(): always_true_condition,
+                    ("global_flow", "fallback_node", 0.1): always_true_condition,  # second check
+                    "node2": regexp(r"how are you"),  # first check
+                    # "node2" is equivalent to ("greeting_flow", "node2", 1.0)
                 },
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
-                TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
+                TRANSITIONS: {
+                    to_fallback(0.1): always_true_condition,  # third check
+                    # to_fallback(0.1) is equivalent to ("global_flow", "fallback_node", 0.1)
+                    forward(0.5): regexp(r"talk about"),  # second check
+                    # forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
+                    ("music_flow", "node1"): regexp(r"talk about music"),  # first check
+                    previous(): regexp(r"previous", re.IGNORECASE),  # third check
+                    # ("music_flow", "node1") is equivalent to ("music_flow", "node1", 1.0)
+                },
             },
             "node3": {
-                RESPONSE: "Sorry, I can not talk about music now.",
-                TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
+                RESPONSE: "Sorry, I can not talk about that now.",
+                TRANSITIONS: {forward(): regexp(r"bye")},
             },
             "node4": {
                 RESPONSE: "bye",
-                TRANSITIONS: {"node1": exact_match("Hi")},
-            },
-            "fallback_node": {  # We get to this node if an error occurred while the agent was running
-                RESPONSE: "Ooops",
-                TRANSITIONS: {"node1": exact_match("Hi")},
+                TRANSITIONS: {
+                    "node1": regexp(r"hi|hello", re.IGNORECASE),  # first check
+                    to_fallback(): always_true_condition,  # second check
+                },
             },
         }
     },
     "music_flow": {
         GRAPH: {
             "node1": {
-                RESPONSE: "I like music. What genre of music do you like?",
-                TRANSITIONS: {"node2": exact_match("i'm fine, how are you?")},
+                RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
+                TRANSITIONS: {
+                    forward(): regexp(r"yes|yep|ok", re.IGNORECASE),
+                    to_fallback(): always_true_condition,
+                },
             },
             "node2": {
-                RESPONSE: "Good. What do you want to talk about?",
-                TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
+                RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
+                TRANSITIONS: {
+                    forward(): regexp(r"next", re.IGNORECASE),
+                    repeat(): regexp(r"repeat", re.IGNORECASE),
+                    to_fallback(): always_true_condition,
+                },
             },
             "node3": {
-                RESPONSE: "Sorry, I can not talk about music now.",
-                TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
+                RESPONSE: "The band achieved commercial success with the release of five studio albums.",
+                TRANSITIONS: {
+                    forward(): regexp(r"next", re.IGNORECASE),
+                    back(): regexp(r"back", re.IGNORECASE),
+                    repeat(): regexp(r"repeat", re.IGNORECASE),
+                    to_fallback(): always_true_condition,
+                },
             },
             "node4": {
-                RESPONSE: "bye",
-                TRANSITIONS: {"node1": exact_match("Hi")},
-            },
-            "fallback_node": {  # We get to this node if an error occurred while the agent was running
-                RESPONSE: "Ooops",
-                TRANSITIONS: {"node1": exact_match("Hi")},
+                RESPONSE: "That's all what I know",
+                TRANSITIONS: {
+                    greeting_flow_n2_transition: regexp(r"next", re.IGNORECASE),  # second check
+                    high_priority_node_transition("greeting_flow", "node4"): regexp(r"next time", re.IGNORECASE),
+                    to_fallback(): always_true_condition,  # third check
+                },
             },
         }
     },
 }
 actor = Actor(
     flows,
-    start_node_label=("greeting_flow", "start_node"),
-    fallback_node_label=("greeting_flow", "fallback_node"),
-    default_transition_priority=1.0,  #
+    start_node_label=("global_flow", "start_node"),
+    fallback_node_label=("global_flow", "fallback_node"),
+    default_transition_priority=1.0,  # default_transition_priority == 1 by dafault
 )
 
 
 # testing
 testing_dialog = [
-    ("Hi", "Hi, how are you?"),  # start_node -> node1
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
-    ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
-    ("Ok, goodbye.", "bye"),  # node3 -> node4
-    ("Hi", "Hi, how are you?"),  # node4 -> node1
-    ("stop", "Ooops"),  # node1 -> fallback_node
-    ("one", "Ooops"),  # fallback_node -> fallback_node
-    ("help", "Ooops"),  # fallback_node -> fallback_node
-    ("nope", "Ooops"),  # fallback_node -> fallback_node
-    ({"some_key": "some_value"}, "Hi, how are you?"),  # fallback_node -> node1
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
-    ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
-    ("Ok, goodbye.", "bye"),  # node3 -> node4
+    ("hi", "Hi, how are you?"),
+    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
+    ("talk about music.", "I love `System of a Down` group, would you like to tell about it? "),
+    ("yes", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("next", "The band achieved commercial success with the release of five studio albums."),
+    ("back", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("repeat", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("next", "The band achieved commercial success with the release of five studio albums."),
+    ("next", "That's all what I know"),
+    ("next", "Good. What do you want to talk about?"),
+    ("previous", "That's all what I know"),
+    ("next time", "bye"),
+    ("stop", "Ooops"),
+    ("previous", "bye"),
+    ("stop", "Ooops"),
+    ("nope", "Ooops"),
+    ("hi", "Hi, how are you?"),
+    ("stop", "Ooops"),
+    ("previous", "Hi, how are you?"),
+    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
+    ("let's talk about something.", "Sorry, I can not talk about that now."),
+    ("Ok, goodbye.", "bye"),
 ]
 
 
@@ -142,5 +165,6 @@ def run_test():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.DEBUG)
     run_test()
     example_1_basics.run_interactive_mode(actor)

@@ -4,7 +4,7 @@ from .core.context import Context
 
 
 def repeat(priority: Optional[float] = None, *args, **kwargs):
-    def repeat_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
+    def repeat_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         turn_index = ctx.previous_index
         flow_label, node_label = ctx.node_labels.get(turn_index, actor.fallback_node_label[:2])
         current_priority = actor.default_transition_priority if priority is None else priority
@@ -14,7 +14,7 @@ def repeat(priority: Optional[float] = None, *args, **kwargs):
 
 
 def previous(priority: Optional[float] = None, *args, **kwargs):
-    def previous_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
+    def previous_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         turn_index = ctx.previous_index - 1
         flow_label, node_label = ctx.node_labels.get(turn_index, actor.fallback_node_label[:2])
         current_priority = actor.default_transition_priority if priority is None else priority
@@ -24,7 +24,7 @@ def previous(priority: Optional[float] = None, *args, **kwargs):
 
 
 def to_start(priority: Optional[float] = None, *args, **kwargs):
-    def to_start_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
+    def to_start_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         current_priority = actor.default_transition_priority if priority is None else priority
         return (*actor.start_node_label[:2], current_priority)
 
@@ -32,7 +32,7 @@ def to_start(priority: Optional[float] = None, *args, **kwargs):
 
 
 def to_fallback(priority: Optional[float] = None, *args, **kwargs):
-    def to_fallback_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
+    def to_fallback_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         current_priority = actor.default_transition_priority if priority is None else priority
         return (*actor.fallback_node_label[:2], current_priority)
 
@@ -67,14 +67,14 @@ def _get_node_label_by_index_shifting(
 
 
 def forward(priority: Optional[float] = None, *args, **kwargs):
-    def forward_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
+    def forward_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         return _get_node_label_by_index_shifting(ctx, actor, priority, increment_flag=True)
 
     return forward_transition
 
 
 def back(priority: Optional[float] = None, *args, **kwargs):
-    def back_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str]:
+    def back_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         return _get_node_label_by_index_shifting(ctx, actor, priority, increment_flag=False)
 
     return back_transition

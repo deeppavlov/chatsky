@@ -5,7 +5,6 @@ from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
 from dff.conditions import exact_match
 
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 # First of all, to create a dialog agent, we need to create a dialog script.
@@ -122,5 +121,6 @@ def run_interactive_mode(actor):
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
     run_test()
     run_interactive_mode(actor)

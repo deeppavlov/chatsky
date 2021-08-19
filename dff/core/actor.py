@@ -46,7 +46,9 @@ class Actor(BaseModel):
         flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
 
         # node lables validation
-        start_node_label = normalize_node_label(start_node_label, flow_label="", default_transition_priority=default_transition_priority)
+        start_node_label = normalize_node_label(
+            start_node_label, flow_label="", default_transition_priority=default_transition_priority
+        )
         if flows.get_node(start_node_label) is None:
             raise ValueError(f"Unkown {start_node_label=}")
         if fallback_node_label is None:

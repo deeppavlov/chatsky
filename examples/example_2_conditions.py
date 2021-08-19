@@ -8,7 +8,6 @@ import dff.conditions as cond
 
 from examples import example_1_basics
 
-logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
 logger = logging.getLogger(__name__)
 
 
@@ -126,5 +125,6 @@ def run_test():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
     run_test()
     example_1_basics.run_interactive_mode(actor)
