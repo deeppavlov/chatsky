@@ -59,6 +59,7 @@ def aggregate(iterable: Iterable, aggregate_func: Callable = any, *args, **kwarg
 def any(iterable: Iterable, *args, **kwargs):
     def any_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return aggregate(iterable, aggregate_func=any, *args, **kwargs)
+
     return any_condition_handler
 
 
@@ -66,6 +67,7 @@ def any(iterable: Iterable, *args, **kwargs):
 def all(iterable: Iterable, *args, **kwargs):
     def all_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return aggregate(iterable, aggregate_func=all, *args, **kwargs)
+
     return all_condition_handler
 
 
