@@ -6,7 +6,6 @@ from dff.core import Actor, Context
 from dff.conditions import exact_match, regexp
 import dff.conditions as cond
 
-
 from examples import example_1_basics
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)

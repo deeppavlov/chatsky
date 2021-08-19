@@ -8,7 +8,6 @@ from dff.core import Actor, Context
 from dff.conditions import exact_match
 from dff.response import choice
 
-
 from examples import example_1_basics
 
 logging.basicConfig(format="%(asctime)s - %(name)s - %(levelname)s - %(message)s", level=logging.INFO)
