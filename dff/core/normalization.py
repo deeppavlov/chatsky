@@ -33,7 +33,7 @@ Node = BaseModel  # ForwardRef("Node")
 
 @validate_arguments
 def normalize_node_label(
-    node_label: NodeLabelType, flow_label: str, default_priority: float
+    node_label: NodeLabelType, flow_label: str, default_transition_priority: float
 ) -> Union[Callable, tuple[str, str, float]]:
     if isinstance(node_label, Callable):
 
@@ -52,11 +52,11 @@ def normalize_node_label(
 
         return get_node_label_handler  # create wrap to get uniq key for dictionary
     elif isinstance(node_label, str):
-        return (flow_label, node_label, default_priority)
+        return (flow_label, node_label, default_transition_priority)
     elif isinstance(node_label, tuple) and len(node_label) == 2 and isinstance(node_label[-1], float):
         return (flow_label, node_label[0], node_label[-1])
     elif isinstance(node_label, tuple) and len(node_label) == 2 and isinstance(node_label[-1], str):
-        return (node_label[0], node_label[-1], default_priority)
+        return (node_label[0], node_label[-1], default_transition_priority)
     elif isinstance(node_label, tuple) and len(node_label) == 3:
         return (node_label[0], node_label[1], node_label[2])
     raise NotImplementedError(f"Unexpected node label {node_label}")

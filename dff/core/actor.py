@@ -22,7 +22,7 @@ class Actor(BaseModel):
     flows: Union[Flows, dict]
     start_node_label: tuple[str, str, float]
     fallback_node_label: Optional[tuple[str, str, float]] = None
-    default_priority: float = 1.0
+    default_transition_priority: float = 1.0
     response_validation_flag: Optional[bool] = None
     validation_logging_flag: bool = True
     pre_handlers: list[Callable] = []
@@ -34,7 +34,7 @@ class Actor(BaseModel):
         flows: Union[Flows, dict],
         start_node_label: tuple[str, str],
         fallback_node_label: Optional[tuple[str, str]] = None,
-        default_priority: float = 1.0,
+        default_transition_priority: float = 1.0,
         response_validation_flag: Optional[bool] = None,
         validation_logging_flag: bool = True,
         pre_handlers: list[Callable] = [],
@@ -46,7 +46,7 @@ class Actor(BaseModel):
         flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
 
         # node lables validation
-        start_node_label = normalize_node_label(start_node_label, flow_label="", default_priority=default_priority)
+        start_node_label = normalize_node_label(start_node_label, flow_label="", default_transition_priority=default_transition_priority)
         if flows.get_node(start_node_label) is None:
             raise ValueError(f"Unkown {start_node_label=}")
         if fallback_node_label is None:
@@ -55,19 +55,19 @@ class Actor(BaseModel):
             fallback_node_label = normalize_node_label(
                 fallback_node_label,
                 flow_label="",
-                default_priority=default_priority,
+                default_transition_priority=default_transition_priority,
             )
             if flows.get_node(fallback_node_label) is None:
                 raise ValueError(f"Unkown {fallback_node_label}")
 
         # etc.
-        default_priority = default_priority
+        default_transition_priority = default_transition_priority
 
         super(Actor, self).__init__(
             flows=flows,
             start_node_label=start_node_label,
             fallback_node_label=fallback_node_label,
-            default_priority=default_priority,
+            default_transition_priority=default_transition_priority,
             response_validation_flag=response_validation_flag,
             validation_logging_flag=validation_logging_flag,
             pre_handlers=pre_handlers,
@@ -98,14 +98,14 @@ class Actor(BaseModel):
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         previous_node_label = (
-            normalize_node_label(ctx.previous_node_label, "", self.default_priority)
+            normalize_node_label(ctx.previous_node_label, "", self.default_transition_priority)
             if ctx.previous_node_label
             else self.start_node_label
         )
         flow_label, node = self._get_node(previous_node_label)
 
         # TODO: deepcopy for node_label
-        global_transitions = self.flows.get_transitions(self.default_priority, True)
+        global_transitions = self.flows.get_transitions(self.default_transition_priority, True)
         global_true_node_label = self._get_true_node_label(
             global_transitions,
             ctx,
@@ -114,7 +114,7 @@ class Actor(BaseModel):
             "global",
         )
 
-        local_transitions = node.get_transitions(flow_label, self.default_priority, False)
+        local_transitions = node.get_transitions(flow_label, self.default_transition_priority, False)
         local_true_node_label = self._get_true_node_label(
             local_transitions,
             ctx,
@@ -156,7 +156,7 @@ class Actor(BaseModel):
                     # TODO: explisit handling of errors
                     if node_label is None:
                         continue
-                node_label = normalize_node_label(node_label, flow_label, self.default_priority)
+                node_label = normalize_node_label(node_label, flow_label, self.default_transition_priority)
                 true_node_labels += [node_label]
         true_node_labels.sort(key=lambda label: -label[2])
         true_node_label = true_node_labels[0] if true_node_labels else None

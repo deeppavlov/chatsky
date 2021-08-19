@@ -14,14 +14,14 @@ logger = logging.getLogger(__name__)
 class Transition(BaseModel, extra=Extra.forbid):
     @validate_arguments
     def get_transitions(
-        self, flow_label: str, default_priority: float, global_transition_flag=False
+        self, flow_label: str, default_transition_priority: float, global_transition_flag=False
     ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
         transitions = {}
         gtrs = self.global_transitions if hasattr(self, "global_transitions") else {}
         trs = self.transitions if hasattr(self, "transitions") else {}
         items = gtrs if global_transition_flag else trs
         for node_label in items:
-            normalized_node_label = normalize_node_label(node_label, flow_label, default_priority)
+            normalized_node_label = normalize_node_label(node_label, flow_label, default_transition_priority)
             normalized_conditions = normalize_conditions(items[node_label])
             transitions[normalized_node_label] = normalized_conditions
         return transitions
@@ -46,11 +46,11 @@ class Flow(Transition):
 
     @validate_arguments
     def get_transitions(
-        self, flow_label: str, default_priority: float, global_transition_flag=False
+        self, flow_label: str, default_transition_priority: float, global_transition_flag=False
     ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
-        transitions = super(Flow, self).get_transitions(flow_label, default_priority, global_transition_flag)
+        transitions = super(Flow, self).get_transitions(flow_label, default_transition_priority, global_transition_flag)
         for node in self.graph.values():
-            transitions |= node.get_transitions(flow_label, default_priority, global_transition_flag)
+            transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)
         return transitions
 
 
@@ -70,11 +70,11 @@ class Flows(BaseModel, extra=Extra.forbid):
 
     @validate_arguments
     def get_transitions(
-        self, default_priority: float, global_transition_flag=False
+        self, default_transition_priority: float, global_transition_flag=False
     ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
         transitions = {}
         for flow_label, node in self.flows.items():
-            transitions |= node.get_transitions(flow_label, default_priority, global_transition_flag)
+            transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)
         return transitions
 
     @validate_arguments
