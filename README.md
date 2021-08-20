@@ -10,6 +10,7 @@ The Dialog Flow Framework (DFF) is a dialogue systems development environment th
 ## Installation
 ```bash
 pip install git+https://github.com/deepmipt/dialog_flow_framework.git@dev
+make venv
 ```
 
 ## Extentions 
