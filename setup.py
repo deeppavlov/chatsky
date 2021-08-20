@@ -52,7 +52,7 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="chatbots",  # Optional
-    package_dir={"": "dff"},  # Optional
+    # package_dir={"": "dff"},  # Optional
     packages=find_packages(where="."),  # Required
     python_requires=">=3.9, <4",
     install_requires=["pydantic==1.8.2"],  # Optional
