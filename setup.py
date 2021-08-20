@@ -53,7 +53,7 @@ setup(
     ],
     keywords="chatbots",  # Optional
     package_dir={"": "dff"},  # Optional
-    packages=find_packages(where="dff"),  # Required
+    packages=find_packages(where="."),  # Required
     python_requires=">=3.9, <4",
     install_requires=["pydantic==1.8.2"],  # Optional
     # extras_require={"dev": ["check-manifest"], "test": ["coverage"]}, # Optional
