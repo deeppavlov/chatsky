@@ -25,7 +25,7 @@ long_description = readme_file.open(encoding="utf8").read()
 
 setuptools.setup(
     name="dff",
-    version="0.1.a1",
+    version="0.1.0",
     scripts=[],
     author="Denis Kuznetsov",
     author_email="kuznetsov.den.p@gmail.com",
