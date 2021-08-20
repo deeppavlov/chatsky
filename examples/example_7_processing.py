@@ -40,7 +40,7 @@ def add_node_label_processing(
     *args,
     **kwargs,
 ) -> Optional[tuple[str, Node]]:
-    node.response = [f"{node_label}: {resp}" for resp in node.response]
+    node.response = f"{node_label}: {node.response}"
     return node_label, node
 
 
@@ -53,7 +53,7 @@ def add_time_processing(
     **kwargs,
 ) -> Optional[tuple[str, Node]]:
     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
-    node.response = [f"{timestamp}: {resp}" for resp in node.response]
+    node.response = f"{timestamp}: {node.response}"
     return node_label, node
 
 
@@ -62,7 +62,7 @@ flows = {
     "root": {
         GRAPH: {
             "start": {
-                RESPONSE: "start",
+                RESPONSE: "",
                 TRANSITIONS: {("greeting", "step_0"): always_true},
             },
             "fallback": {RESPONSE: "the end"},
@@ -72,17 +72,17 @@ flows = {
         GRAPH: {
             "step_0": {
                 PROCESSING: [add_node_label_processing, add_time_processing],
-                RESPONSE: ["hi", "hello"],
+                RESPONSE: "hi",
                 TRANSITIONS: {forward(): always_true},
             },
             "step_1": {
                 PROCESSING: [add_node_label_processing, add_time_processing],
-                RESPONSE: ["how are you", "what's up"],
+                RESPONSE: "what's up",
                 TRANSITIONS: {forward(): always_true},
             },
             "step_2": {
                 PROCESSING: [add_node_label_processing, add_time_processing],
-                RESPONSE: ["ok", "good"],
+                RESPONSE: "ok",
             },
         },
     },
@@ -95,5 +95,3 @@ while True:
     ctx.add_request(in_text)
     ctx = actor(ctx)
     print(f"bot: {ctx.last_response}")
-
-# Outputs:
