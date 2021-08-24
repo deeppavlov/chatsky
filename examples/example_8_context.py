@@ -2,7 +2,7 @@ import logging
 
 from dff.core.keywords import GLOBAL_TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
-from dff.transitions import repeat
+import dff.transitions as trn
 
 logging.basicConfig(
     format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
@@ -23,7 +23,7 @@ def response(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 # a dialog script
 flows = {
     "start": {
-        GLOBAL_TRANSITIONS: {repeat(): always_true},
+        GLOBAL_TRANSITIONS: {trn.repeat(): always_true},
         GRAPH: {
             "start": {
                 RESPONSE: response,

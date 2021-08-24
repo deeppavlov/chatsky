@@ -3,8 +3,7 @@ import re
 
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Actor, Context
-from dff.conditions import exact_match, regexp
-import dff.conditions as cond
+import dff.conditions as cnd
 
 from examples import example_1_basics
 
@@ -31,6 +30,8 @@ logger = logging.getLogger(__name__)
 # - `negation` - return a negation of passed function
 #              `negation` has alias `neg`
 # - `isin_flow` - covered in the following examples.
+# - `true` - returns true
+# - `false` - returns false
 
 
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -58,25 +59,27 @@ flows = {
         GRAPH: {
             "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
                 RESPONSE: "",
-                TRANSITIONS: {"node1": exact_match("Hi")},  # If "Hi" == request of user then we make the transition
+                TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
             },
             "node1": {
                 RESPONSE: "Hi, how are you?",
-                TRANSITIONS: {"node2": regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
+                TRANSITIONS: {"node2": cnd.regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
-                TRANSITIONS: {"node3": cond.all([regexp(r"talk"), regexp(r"about.*music")])},
+                TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
                 # mix sequence of condtions by cond.all
                 # all is alias `aggregate` with `aggregate_func` == `all`
             },
             "node3": {
                 RESPONSE: "Sorry, I can not talk about music now.",
-                TRANSITIONS: {"node4": regexp(re.compile(r"Ok, goodbye."))},  # pattern matching by precompiled pattern
+                TRANSITIONS: {
+                    "node4": cnd.regexp(re.compile(r"Ok, goodbye."))
+                },  # pattern matching by precompiled pattern
             },
             "node4": {
                 RESPONSE: "bye",
-                TRANSITIONS: {"node1": cond.any([hi_lower_case_condition, exact_match("hello")])},
+                TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match("hello")])},
                 # mix sequence of condtions by cond.any
                 # any is alias `aggregate` with `aggregate_func` == `any`
             },
@@ -88,7 +91,7 @@ flows = {
                     # if the value is True then we will go to `node1`
                     # if the value is False then
                     # we will check a result of `predetermined_condition(True)` for `fallback_node`
-                    "fallback_node": predetermined_condition(True),
+                    "fallback_node": predetermined_condition(True),  # or you can use cnd.true
                     # last condition function will return true and will repeat fallback_node
                     # if complex_user_answer_condition return false
                 },

@@ -4,6 +4,7 @@ from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Context, Actor
 
 from examples import example_1_basics
+import dff.conditions as cnd
 
 logging.basicConfig(
     format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
@@ -27,7 +28,9 @@ flows = {
             "node_start": {
                 RESPONSE: response_handler,
                 TRANSITIONS: {
-                    ("flow_start", "node_start"): always_true,
+                    # ("flow_start", "node_start"): always_true,
+                    # or
+                    ("flow_start", "node_start"): cnd.true,
                 },
             }
         },

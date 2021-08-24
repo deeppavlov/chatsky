@@ -3,9 +3,8 @@ import re
 
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE, GLOBAL_TRANSITIONS
 from dff.core import Context, Actor
-from dff.conditions import regexp, isin_flow, negation
-import dff.conditions as cond
-from dff.transitions import to_fallback, forward, repeat, back, previous
+import dff.conditions as cnd
+import dff.transitions as trn
 
 from examples import example_1_basics
 
@@ -26,11 +25,13 @@ def high_priority_node_transition(flow_label, node_label):
 flows = {
     "global_flow": {
         GLOBAL_TRANSITIONS: {
-            ("greeting_flow", "node1", 1.1): regexp(r"\b(hi|hello)\b", re.I),
-            ("music_flow", "node1", 1.1): regexp(r"talk about music"),
-            to_fallback(0.1): always_true_condition,
-            forward(): cond.all([regexp(r"next\b"), isin_flow(nodes=[("music_flow", i) for i in ["node2", "node3"]])]),
-            repeat(0.2): cond.all([regexp(r"repeat", re.I), negation(isin_flow(flows=["global_flow"]))]),
+            ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),
+            ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),
+            trn.to_fallback(0.1): always_true_condition,
+            trn.forward(): cnd.all(
+                [cnd.regexp(r"next\b"), cnd.isin_flow(nodes=[("music_flow", i) for i in ["node2", "node3"]])]
+            ),
+            trn.repeat(0.2): cnd.all([cnd.regexp(r"repeat", re.I), cnd.negation(cnd.isin_flow(flows=["global_flow"]))]),
         },
         GRAPH: {
             "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
@@ -38,7 +39,7 @@ flows = {
             },
             "fallback_node": {  # We get to this node if an error occurred while the agent was running
                 RESPONSE: "Ooops",
-                TRANSITIONS: {previous(): regexp(r"previous", re.I)},
+                TRANSITIONS: {trn.previous(): cnd.regexp(r"previous", re.I)},
             },
         },
     },
@@ -46,18 +47,18 @@ flows = {
         GRAPH: {
             "node1": {
                 RESPONSE: "Hi, how are you?",  # When the agent goes to node1, we return "Hi, how are you?"
-                TRANSITIONS: {"node2": regexp(r"how are you")},
+                TRANSITIONS: {"node2": cnd.regexp(r"how are you")},
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
                 TRANSITIONS: {
-                    forward(0.5): regexp(r"talk about"),
-                    previous(): regexp(r"previous", re.I),
+                    trn.forward(0.5): cnd.regexp(r"talk about"),
+                    trn.previous(): cnd.regexp(r"previous", re.I),
                 },
             },
             "node3": {
                 RESPONSE: "Sorry, I can not talk about that now.",
-                TRANSITIONS: {forward(): regexp(r"bye")},
+                TRANSITIONS: {trn.forward(): cnd.regexp(r"bye")},
             },
             "node4": {RESPONSE: "bye"},
         }
@@ -66,20 +67,20 @@ flows = {
         GRAPH: {
             "node1": {
                 RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
-                TRANSITIONS: {forward(): regexp(r"yes|yep|ok", re.I)},
+                TRANSITIONS: {trn.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
             },
             "node2": {
                 RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
             },
             "node3": {
                 RESPONSE: "The band achieved commercial success with the release of five studio albums.",
-                TRANSITIONS: {back(): regexp(r"back", re.I)},
+                TRANSITIONS: {trn.back(): cnd.regexp(r"back", re.I)},
             },
             "node4": {
                 RESPONSE: "That's all what I know",
                 TRANSITIONS: {
-                    ("greeting_flow", "node4"): regexp(r"next time", re.I),
-                    ("greeting_flow", "node2"): regexp(r"next", re.I),
+                    ("greeting_flow", "node4"): cnd.regexp(r"next time", re.I),
+                    ("greeting_flow", "node2"): cnd.regexp(r"next", re.I),
                 },
             },
         }

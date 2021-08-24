@@ -5,8 +5,8 @@ from typing import Any
 
 from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
 from dff.core import Actor, Context
-from dff.conditions import exact_match
-from dff.response import choice
+import dff.response as rsp
+import dff.conditions as cnd
 
 from examples import example_1_basics
 
@@ -60,27 +60,27 @@ flows = {
         GRAPH: {
             "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
                 RESPONSE: "",
-                TRANSITIONS: {"node1": exact_match("Hi")},  # If "Hi" == request of user then we make the transition
+                TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
             },
             "node1": {
-                RESPONSE: choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
-                TRANSITIONS: {"node2": exact_match("i'm fine, how are you?")},
+                RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
+                TRANSITIONS: {"node2": cnd.exact_match("i'm fine, how are you?")},
             },
             "node2": {
                 RESPONSE: "Good. What do you want to talk about?",
-                TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
+                TRANSITIONS: {"node3": cnd.exact_match("Let's talk about music.")},
             },
             "node3": {
                 RESPONSE: cannot_talk_about_topic_response,
-                TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
+                TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
             },
             "node4": {
                 RESPONSE: upper_case_response("bye"),
-                TRANSITIONS: {"node1": exact_match("Hi")},
+                TRANSITIONS: {"node1": cnd.exact_match("Hi")},
             },
             "fallback_node": {  # We get to this node if an error occurred while the agent was running
                 RESPONSE: fallback_trace_response,
-                TRANSITIONS: {"node1": exact_match("Hi")},
+                TRANSITIONS: {"node1": cnd.exact_match("Hi")},
             },
         }
     },

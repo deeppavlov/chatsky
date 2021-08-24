@@ -5,7 +5,7 @@ import datetime
 
 from dff.core.keywords import GRAPH, RESPONSE, TRANSITIONS, PROCESSING
 from dff.core import Context, Actor, Node
-from dff.transitions import repeat, previous, to_start, to_fallback, forward, back
+import dff.transitions as trn
 
 logging.basicConfig(
     format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
@@ -22,13 +22,13 @@ def create_transitions():
     return {
         ("left", "step_2"): "left",
         ("right", "step_2"): "right",
-        previous(): "previous",
-        to_start(): "start",
-        forward(): "forward",
-        back(): "back",
-        previous(): "previous",
-        repeat(): "repeat",
-        to_fallback(): always_true,
+        trn.previous(): "previous",
+        trn.to_start(): "start",
+        trn.forward(): "forward",
+        trn.back(): "back",
+        trn.previous(): "previous",
+        trn.repeat(): "repeat",
+        trn.to_fallback(): always_true,
     }
 
 
@@ -73,12 +73,12 @@ flows = {
             "step_0": {
                 PROCESSING: [add_node_label_processing, add_time_processing],
                 RESPONSE: "hi",
-                TRANSITIONS: {forward(): always_true},
+                TRANSITIONS: {trn.forward(): always_true},
             },
             "step_1": {
                 PROCESSING: [add_node_label_processing, add_time_processing],
                 RESPONSE: "what's up",
-                TRANSITIONS: {forward(): always_true},
+                TRANSITIONS: {trn.forward(): always_true},
             },
             "step_2": {
                 PROCESSING: [add_node_label_processing, add_time_processing],

@@ -98,6 +98,14 @@ def isin_flow(flows: list[str] = [], nodes: list[Tuple[str, str]] = [], *args, *
 
     return isin_flow_condition_handler
 
+@validate_arguments
+def true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    return True
+
+@validate_arguments
+def false(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    return False
+
 
 # aliases
 agg = aggregate
