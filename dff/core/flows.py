@@ -29,7 +29,7 @@ class Transition(BaseModel, extra=Extra.forbid):
 
 class Node(Transition):
     transitions: dict[NodeLabelType, ConditionType] = {}
-    response: Union[conlist(str, min_items=1), str, Callable]
+    response: Union[Any, Callable]
     processing: Union[Callable, conlist(Callable, min_items=1)] = None
     misc: Optional[Any] = None
 

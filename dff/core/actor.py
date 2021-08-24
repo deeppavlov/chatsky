@@ -232,9 +232,9 @@ class Actor(BaseModel):
                 n_errors = len(error_msgs)
                 try:
                     response_result = response_func(ctx, actor)
-                    if not isinstance(response_result, str):
+                    if isinstance(response_result, Callable):
                         msg = (
-                            f"Expected type of response_result needed str but got {type(response_result)=}"
+                            f"Expected type of response_result needed not Callable but got {type(response_result)=}"
                             f" for node_label={node_label[:2]}"
                         )
                         error_handler(error_msgs, msg, None, logging_flag)
