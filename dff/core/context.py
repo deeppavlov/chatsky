@@ -20,6 +20,7 @@ class Context(BaseModel):
     previous_index: int = -1
     current_index: int = -1
     misc: dict[str, Any] = {}
+    validation: bool = False
 
     @classmethod
     def cast(

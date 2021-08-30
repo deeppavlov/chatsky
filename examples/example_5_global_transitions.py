@@ -74,7 +74,7 @@ flows = {
             },
             "node3": {
                 RESPONSE: "The band achieved commercial success with the release of five studio albums.",
-                TRANSITIONS: {trn.back(): cnd.regexp(r"back", re.I)},
+                TRANSITIONS: {trn.backward(): cnd.regexp(r"back", re.I)},
             },
             "node4": {
                 RESPONSE: "That's all what I know",

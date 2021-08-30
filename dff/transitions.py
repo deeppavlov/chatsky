@@ -73,7 +73,7 @@ def forward(priority: Optional[float] = None, *args, **kwargs):
     return forward_transition
 
 
-def back(priority: Optional[float] = None, *args, **kwargs):
+def backward(priority: Optional[float] = None, *args, **kwargs):
     def back_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         return _get_node_label_by_index_shifting(ctx, actor, priority, increment_flag=False)
 

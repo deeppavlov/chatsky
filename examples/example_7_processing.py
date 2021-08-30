@@ -25,7 +25,7 @@ def create_transitions():
         trn.previous(): "previous",
         trn.to_start(): "start",
         trn.forward(): "forward",
-        trn.back(): "back",
+        trn.backward(): "back",
         trn.previous(): "previous",
         trn.repeat(): "repeat",
         trn.to_fallback(): always_true,

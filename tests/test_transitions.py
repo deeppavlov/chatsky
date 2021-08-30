@@ -1,6 +1,6 @@
 from dff.core.keywords import GRAPH, RESPONSE, GLOBAL_TRANSITIONS
 from dff.core import Context, Actor
-from dff.transitions import repeat, previous, to_start, to_fallback, forward, back
+from dff.transitions import repeat, previous, to_start, to_fallback, forward, backward
 
 
 def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -15,7 +15,7 @@ def create_transitions():
         to_start(): "start",
         to_fallback(): "fallback",
         forward(): "forward",
-        back(): "back",
+        backward(): "back",
         previous(): "previous",
         repeat(): always_true,
     }

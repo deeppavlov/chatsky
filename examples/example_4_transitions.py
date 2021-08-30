@@ -107,7 +107,7 @@ flows = {
                 RESPONSE: "The band achieved commercial success with the release of five studio albums.",
                 TRANSITIONS: {
                     trn.forward(): cnd.regexp(r"next", re.IGNORECASE),
-                    trn.back(): cnd.regexp(r"back", re.IGNORECASE),
+                    trn.backward(): cnd.regexp(r"back", re.IGNORECASE),
                     trn.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
                     trn.to_fallback(): always_true_condition,
                 },

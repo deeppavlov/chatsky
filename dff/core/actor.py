@@ -204,6 +204,7 @@ class Actor(BaseModel):
         error_msgs = []
         for callable_node_label, condition in transitions.items():
             ctx = Context()
+            ctx.validation = True
             ctx.add_request("text")
             actor = self.copy(deep=True)
 
