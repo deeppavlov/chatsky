@@ -4,12 +4,17 @@ from uuid import UUID, uuid4
 from typing import ForwardRef
 from typing import Any, Optional, Union
 
-from pydantic import BaseModel, validate_arguments, Field
+from pydantic import BaseModel, validate_arguments, Field, validator
 
 
 logger = logging.getLogger(__name__)
 
 Context = ForwardRef("Context")
+
+
+@validate_arguments
+def sort_dict_keys(dictionary: dict) -> dict:
+    return {key: dictionary[key] for key in sorted(dictionary)}
 
 
 class Context(BaseModel):
@@ -21,6 +26,11 @@ class Context(BaseModel):
     current_index: int = -1
     misc: dict[str, Any] = {}
     validation: bool = False
+
+    # validators
+    _sort_node_labels = validator("node_labels", allow_reuse=True)(sort_dict_keys)
+    _sort_requests = validator("requests", allow_reuse=True)(sort_dict_keys)
+    _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
 
     @classmethod
     def cast(
