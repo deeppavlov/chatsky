@@ -1,6 +1,11 @@
 # %%
+import random
 
 from dff.core import Context
+
+
+def shuffle_dict_keys(dictionary: dict) -> dict:
+    return {key: dictionary[key] for key in sorted(dictionary, key=lambda k: random.random())}
 
 
 def test_context():
@@ -9,6 +14,10 @@ def test_context():
         ctx.add_request(str(index))
         ctx.add_node_label([str(index), str(index + 1)])
         ctx.add_response(str(index + 1))
+    ctx.node_labels = shuffle_dict_keys(ctx.node_labels)
+    ctx.requests = shuffle_dict_keys(ctx.requests)
+    ctx.responses = shuffle_dict_keys(ctx.responses)
+    ctx = Context.cast(ctx.json())
     ctx.misc[123] = 312
     ctx.clear(5, ["requests", "responses", "mics", "node_labels"])
     ctx.misc[1001] = "11111"
