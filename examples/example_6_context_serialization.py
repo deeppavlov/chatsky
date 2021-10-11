@@ -1,6 +1,6 @@
 import logging
 
-from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
+from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 
 from examples import example_1_basics
@@ -22,22 +22,21 @@ def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 
 
 # a dialog script
-flows = {
+plot = {
     "flow_start": {
-        GRAPH: {
-            "node_start": {
-                RESPONSE: response_handler,
-                TRANSITIONS: {
-                    # ("flow_start", "node_start"): always_true,
-                    # or
-                    ("flow_start", "node_start"): cnd.true,
-                },
-            }
-        },
+        "node_start": {
+            RESPONSE: response_handler,
+            TRANSITIONS: {
+                # ("flow_start", "node_start"): always_true,
+                # or
+                ("flow_start", "node_start"): cnd.true,
+            },
+        }
     },
 }
 
-actor = Actor(flows, start_node_label=("flow_start", "node_start"))
+
+actor = Actor(plot, start_node_label=("flow_start", "node_start"))
 
 
 testing_dialog = [

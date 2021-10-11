@@ -1,11 +1,13 @@
 import logging
 from typing import Union, Callable, Optional
+import copy
 
 
 from pydantic import BaseModel, validate_arguments
 
+from .keywords import GLOBAL, GRAPH, LOCAL, GLOBAL_TRANSITIONS, MISC, PROCESSING, RESPONSE, TRANSITIONS
 from .context import Context
-from .flows import Flows, Node
+from .plot import Plot, Node
 from .normalization import normalize_node_label, normalize_response
 
 
@@ -18,8 +20,119 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     logging_flag and logger.error(msg, exc_info=exception)
 
 
+@validate_arguments
+def check_cond_seq(cond_seq):
+    for cond in cond_seq:
+        if not isinstance(cond, Callable):
+            raise Exception(f"{cond_seq=} has to consist of callable objects")
+
+
+def aggregate(cond_seq: list, *args, **kwargs):
+    check_cond_seq(cond_seq)
+
+    def aggregate_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        try:
+            return bool(all([cond(ctx, actor, *args, **kwargs) for cond in cond_seq]))
+        except Exception as exc:
+            logger.error(f"Exception {exc} for {cond_seq=}, {all=} and {ctx.last_request=}", exc_info=exc)
+
+    return aggregate_condition_handler
+
+
+@validate_arguments
+def isin_flow(flows: list[str] = [], nodes: list[tuple[str, str]] = [], *args, **kwargs):
+    def isin_flow_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        node_label = list(ctx.node_labels.values())
+        node_label = node_label[-1][:2] if node_label else (None, None)
+        return node_label[0] in flows or node_label in nodes
+
+    return isin_flow_condition_handler
+
+
+@validate_arguments
+def downgrade_plot_version(plot: dict):
+    plot = copy.deepcopy(plot)
+    global_flow = {}
+    for plot_key in list(plot.keys()):
+        if GLOBAL == plot_key:
+            node = plot[plot_key]
+            del plot[plot_key]
+            node[GLOBAL_TRANSITIONS] = node[TRANSITIONS]
+            del node[TRANSITIONS]
+            global_flow[plot_key] = node
+        else:
+            for flow_key in plot[plot_key].keys():
+                if flow_key == LOCAL:
+                    node = plot[plot_key][flow_key]
+                    del plot[plot_key][flow_key]
+                    node[GLOBAL_TRANSITIONS] = node[TRANSITIONS]
+                    del node[TRANSITIONS]
+                    node[GLOBAL_TRANSITIONS] = {
+                        tr_key: aggregate([tr_val, isin_flow([flow_key])])
+                        for tr_key, tr_val in node[GLOBAL_TRANSITIONS].items()
+                    }
+                    global_flow[plot_key] = node
+
+    for plot_key in list(plot.keys()):
+        for flow_key in plot[plot_key].keys():
+            processing = global_flow.get(GLOBAL, {}).get(PROCESSING, {}).copy()
+            upd_processing = global_flow.get(plot_key, {}).get(PROCESSING, {})
+            if isinstance(processing, dict) and isinstance(upd_processing, dict):
+                processing.update(upd_processing)
+            else:
+                processing = upd_processing
+
+            upd_processing = plot[plot_key][flow_key].get(PROCESSING, {})
+            if isinstance(processing, dict) and isinstance(upd_processing, dict):
+                processing.update(upd_processing)
+            else:
+                processing = upd_processing
+            plot[plot_key][flow_key][PROCESSING] = processing
+
+    for plot_key in list(plot.keys()):
+        for flow_key in plot[plot_key].keys():
+            misc = global_flow.get(GLOBAL, {}).get(MISC, {}).copy()
+            upd_misc = global_flow.get(plot_key, {}).get(MISC, {})
+            if isinstance(misc, dict) and isinstance(upd_misc, dict):
+                misc.update(upd_misc)
+            else:
+                misc = upd_misc
+
+            upd_misc = plot[plot_key][flow_key].get(MISC, {})
+            if isinstance(misc, dict) and isinstance(upd_misc, dict):
+                misc.update(upd_misc)
+            else:
+                misc = upd_misc
+            plot[plot_key][flow_key][MISC] = misc
+
+    for plot_key in list(plot.keys()):
+        for flow_key in plot[plot_key].keys():
+            response = global_flow.get(GLOBAL, {}).get(RESPONSE, "")
+            response = global_flow.get(plot_key, {}).get(RESPONSE, response)
+            response = plot[plot_key][flow_key].get(RESPONSE, response)
+            plot[plot_key][flow_key][RESPONSE] = response
+
+    plot["global.flow"] = global_flow
+
+    for plot_key in list(plot.keys()):
+        for flow_key in plot[plot_key].keys():
+            processing = plot[plot_key][flow_key].get(PROCESSING, {})
+            if isinstance(processing, dict):
+                plot[plot_key][flow_key][PROCESSING] = list(processing.values())
+            if not plot[plot_key][flow_key][PROCESSING]:
+                del plot[plot_key][flow_key][PROCESSING]
+    global_flow = plot["global.flow"]
+    del plot["global.flow"]
+
+    for plot_key in list(plot.keys()):
+        plot[plot_key] = {GRAPH: plot[plot_key]}
+        plot[plot_key][GLOBAL_TRANSITIONS] = global_flow.get(flow_key, {}).get(GLOBAL_TRANSITIONS, {})
+    plot["global.flow"] = {GLOBAL_TRANSITIONS: global_flow.get(GLOBAL, {}).get(GLOBAL_TRANSITIONS, {})}
+    return plot
+
+
 class Actor(BaseModel):
-    flows: Union[Flows, dict]
+    plot: Union[Plot, dict]
     start_node_label: tuple[str, str, float]
     fallback_node_label: Optional[tuple[str, str, float]] = None
     default_transition_priority: float = 1.0
@@ -31,7 +144,7 @@ class Actor(BaseModel):
     @validate_arguments
     def __init__(
         self,
-        flows: Union[Flows, dict],
+        plot: Union[Plot, dict],
         start_node_label: tuple[str, str],
         fallback_node_label: Optional[tuple[str, str]] = None,
         default_transition_priority: float = 1.0,
@@ -42,14 +155,14 @@ class Actor(BaseModel):
         *args,
         **kwargs,
     ):
-        # flows validation
-        flows = flows if isinstance(flows, Flows) else Flows(flows=flows)
+        # plot validation
+        plot = plot if isinstance(plot, Plot) else Plot(plot=downgrade_plot_version(plot))
 
         # node lables validation
         start_node_label = normalize_node_label(
             start_node_label, flow_label="", default_transition_priority=default_transition_priority
         )
-        if flows.get_node(start_node_label) is None:
+        if plot.get_node(start_node_label) is None:
             raise ValueError(f"Unkown {start_node_label=}")
         if fallback_node_label is None:
             fallback_node_label = start_node_label
@@ -59,14 +172,14 @@ class Actor(BaseModel):
                 flow_label="",
                 default_transition_priority=default_transition_priority,
             )
-            if flows.get_node(fallback_node_label) is None:
+            if plot.get_node(fallback_node_label) is None:
                 raise ValueError(f"Unkown {fallback_node_label}")
 
         # etc.
         default_transition_priority = default_transition_priority
 
         super(Actor, self).__init__(
-            flows=flows,
+            plot=plot,
             start_node_label=start_node_label,
             fallback_node_label=fallback_node_label,
             default_transition_priority=default_transition_priority,
@@ -75,7 +188,7 @@ class Actor(BaseModel):
             pre_handlers=pre_handlers,
             post_handlers=post_handlers,
         )
-        errors = self.validate_flows(response_validation_flag, validation_logging_flag)
+        errors = self.validate_plot(response_validation_flag, validation_logging_flag)
         if errors:
             raise ValueError(
                 f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
@@ -107,7 +220,7 @@ class Actor(BaseModel):
         flow_label, node = self._get_node(previous_node_label)
 
         # TODO: deepcopy for node_label
-        global_transitions = self.flows.get_transitions(self.default_transition_priority, True)
+        global_transitions = self.plot.get_transitions(self.default_transition_priority, True)
         global_true_node_label = self._get_true_node_label(
             global_transitions,
             ctx,
@@ -170,9 +283,9 @@ class Actor(BaseModel):
         self,
         node_label: tuple[str, str, float],
     ) -> tuple[str, Node]:
-        node = self.flows.get_node(node_label)
+        node = self.plot.get_node(node_label)
         if node is None:
-            node, node_label = self.flows.get_node(self.start_node_label), self.start_node_label
+            node, node_label = self.plot.get_node(self.start_node_label), self.start_node_label
         flow_label = node_label[0]
         return flow_label, node
 
@@ -195,12 +308,12 @@ class Actor(BaseModel):
         return true_node_label
 
     @validate_arguments
-    def validate_flows(
+    def validate_plot(
         self,
         response_validation_flag: Optional[bool] = None,
         logging_flag: bool = True,
     ):
-        transitions = self.flows.get_transitions(-1, False) | self.flows.get_transitions(-1, True)
+        transitions = self.plot.get_transitions(-1, False) | self.plot.get_transitions(-1, True)
         error_msgs = []
         for callable_node_label, condition in transitions.items():
             ctx = Context()
@@ -216,7 +329,7 @@ class Actor(BaseModel):
 
             # validate node_label
             try:
-                node = self.flows.get_node(node_label)
+                node = self.plot.get_node(node_label)
             except Exception as exc:
                 node = None
                 msg = f"Got exception '''{exc}''' for {callable_node_label=}"

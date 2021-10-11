@@ -54,53 +54,50 @@ def predetermined_condition(condition: bool):
     return internal_condition_function
 
 
-flows = {
+plot = {
     "greeting_flow": {
-        GRAPH: {
-            "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
-                RESPONSE: "",
-                TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
+        "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
+            RESPONSE: "",
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
+        },
+        "node1": {
+            RESPONSE: ["Hi, how are you?"],
+            TRANSITIONS: {"node2": cnd.regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
+        },
+        "node2": {
+            RESPONSE: "Good. What do you want to talk about?",
+            TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
+            # mix sequence of condtions by cond.all
+            # all is alias `aggregate` with `aggregate_func` == `all`
+        },
+        "node3": {
+            RESPONSE: "Sorry, I can not talk about music now.",
+            TRANSITIONS: {"node4": cnd.regexp(re.compile(r"Ok, goodbye."))},  # pattern matching by precompiled pattern
+        },
+        "node4": {
+            RESPONSE: "bye",
+            TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match("hello")])},
+            # mix sequence of condtions by cond.any
+            # any is alias `aggregate` with `aggregate_func` == `any`
+        },
+        "fallback_node": {  # We get to this node if an error occurred while the agent was running
+            RESPONSE: "Ooops",
+            TRANSITIONS: {
+                "node1": complex_user_answer_condition,  # the user request can be more than just a string
+                # first we will chech returned value of `complex_user_answer_condition`
+                # if the value is True then we will go to `node1`
+                # if the value is False then
+                # we will check a result of `predetermined_condition(True)` for `fallback_node`
+                "fallback_node": predetermined_condition(True),  # or you can use cnd.true
+                # last condition function will return true and will repeat fallback_node
+                # if complex_user_answer_condition return false
             },
-            "node1": {
-                RESPONSE: ["Hi, how are you?"],
-                TRANSITIONS: {"node2": cnd.regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
-            },
-            "node2": {
-                RESPONSE: "Good. What do you want to talk about?",
-                TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
-                # mix sequence of condtions by cond.all
-                # all is alias `aggregate` with `aggregate_func` == `all`
-            },
-            "node3": {
-                RESPONSE: "Sorry, I can not talk about music now.",
-                TRANSITIONS: {
-                    "node4": cnd.regexp(re.compile(r"Ok, goodbye."))
-                },  # pattern matching by precompiled pattern
-            },
-            "node4": {
-                RESPONSE: "bye",
-                TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match("hello")])},
-                # mix sequence of condtions by cond.any
-                # any is alias `aggregate` with `aggregate_func` == `any`
-            },
-            "fallback_node": {  # We get to this node if an error occurred while the agent was running
-                RESPONSE: "Ooops",
-                TRANSITIONS: {
-                    "node1": complex_user_answer_condition,  # the user request can be more than just a string
-                    # first we will chech returned value of `complex_user_answer_condition`
-                    # if the value is True then we will go to `node1`
-                    # if the value is False then
-                    # we will check a result of `predetermined_condition(True)` for `fallback_node`
-                    "fallback_node": predetermined_condition(True),  # or you can use cnd.true
-                    # last condition function will return true and will repeat fallback_node
-                    # if complex_user_answer_condition return false
-                },
-            },
-        }
+        },
     },
 }
+
 actor = Actor(
-    flows,
+    plot,
     start_node_label=("greeting_flow", "start_node"),
     fallback_node_label=("greeting_flow", "fallback_node"),
 )

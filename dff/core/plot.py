@@ -59,13 +59,13 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     logging_flag and logger.error(msg, exc_info=exception)
 
 
-class Flows(BaseModel, extra=Extra.forbid):
-    flows: dict[str, Flow]
+class Plot(BaseModel, extra=Extra.forbid):
+    plot: dict[str, Flow]
 
-    @validator("flows")
+    @validator("plot")
     def is_not_empty(cls, fields: dict) -> dict:
         if not any(fields.values()):
-            raise ValueError("expected not empty flows")
+            raise ValueError("expected not empty plot")
         return fields
 
     @validate_arguments
@@ -73,7 +73,7 @@ class Flows(BaseModel, extra=Extra.forbid):
         self, default_transition_priority: float, global_transition_flag=False
     ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
         transitions = {}
-        for flow_label, node in self.flows.items():
+        for flow_label, node in self.plot.items():
             transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)
         return transitions
 
@@ -82,25 +82,25 @@ class Flows(BaseModel, extra=Extra.forbid):
         normalized_node_label = normalize_node_label(node_label, flow_label, -1)
         flow_label = normalized_node_label[0]
         node_label = normalized_node_label[1]
-        node = self.flows.get(flow_label, Flow()).graph.get(node_label)
+        node = self.plot.get(flow_label, Flow()).graph.get(node_label)
         if node is None:
             logger.warn(f"Unknown pair(flow_label:node_label) = {flow_label}:{node_label}")
         return node
 
     def __getitem__(self, k):
-        return self.flows[k]
+        return self.plot[k]
 
     def get(self, k, item=None):
-        return self.flows.get(k, item)
+        return self.plot.get(k, item)
 
     def keys(self):
-        return self.flows.keys()
+        return self.plot.keys()
 
     def items(self):
-        return self.flows.items()
+        return self.plot.items()
 
     def values(self):
-        return self.flows.values()
+        return self.plot.values()
 
     def __iter__(self):
-        return self.flows
+        return self.plot

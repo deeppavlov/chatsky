@@ -42,9 +42,9 @@ def normalize_node_label(
             try:
                 res = node_label(ctx, actor, *args, **kwargs)
                 res = (str(res[0]), str(res[1]), float(res[2]))
-                node = actor.flows.get_node(res)
+                node = actor.plot.get_node(res)
                 if not node:
-                    raise Exception(f"Unknown transitions {res} {actor.flows}")
+                    raise Exception(f"Unknown transitions {res} {actor.plot}")
             except Exception as exc:
                 res = None
                 logger.error(f"Exception {exc} of function {node_label}", exc_info=exc)

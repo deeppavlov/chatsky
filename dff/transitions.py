@@ -49,8 +49,8 @@ def _get_node_label_by_index_shifting(
 ):
     turn_index = ctx.previous_index
     tgt_flow_label, node_label = ctx.node_labels.get(turn_index, actor.fallback_node_label[:2])
-    flows = actor.flows
-    flow = flows[tgt_flow_label]
+    plot = actor.plot
+    flow = plot[tgt_flow_label]
     node_labels = list(flow.graph)
     current_priority = actor.default_transition_priority if priority is None else priority
 

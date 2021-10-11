@@ -1,4 +1,4 @@
-from typing import Callable, Pattern, Tuple, Union, Any
+from typing import Callable, Pattern, Union, Any
 import logging
 import re
 
@@ -90,7 +90,7 @@ def negation(condition: Callable, *args, **kwargs):
 
 
 @validate_arguments
-def isin_flow(flows: list[str] = [], nodes: list[Tuple[str, str]] = [], *args, **kwargs):
+def isin_flow(flows: list[str] = [], nodes: list[tuple[str, str]] = [], *args, **kwargs):
     def isin_flow_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         node_label = list(ctx.node_labels.values())
         node_label = node_label[-1][:2] if node_label else (None, None)

@@ -58,38 +58,35 @@ def add_time_processing(
 
 
 # a dialog script
-flows = {
+plot = {
     "root": {
-        GRAPH: {
-            "start": {
-                RESPONSE: "",
-                TRANSITIONS: {("greeting", "step_0"): always_true},
-            },
-            "fallback": {RESPONSE: "the end"},
+        "start": {
+            RESPONSE: "",
+            TRANSITIONS: {("greeting", "step_0"): always_true},
         },
+        "fallback": {RESPONSE: "the end"},
     },
     "greeting": {
-        GRAPH: {
-            "step_0": {
-                PROCESSING: [add_node_label_processing, add_time_processing],
-                RESPONSE: "hi",
-                TRANSITIONS: {trn.forward(): always_true},
-            },
-            "step_1": {
-                PROCESSING: [add_node_label_processing, add_time_processing],
-                RESPONSE: "what's up",
-                TRANSITIONS: {trn.forward(): always_true},
-            },
-            "step_2": {
-                PROCESSING: [add_node_label_processing, add_time_processing],
-                RESPONSE: "ok",
-            },
+        "step_0": {
+            PROCESSING: {1: add_node_label_processing, 2: add_time_processing},
+            RESPONSE: "hi",
+            TRANSITIONS: {trn.forward(): always_true},
+        },
+        "step_1": {
+            PROCESSING: {1: add_node_label_processing, 2: add_time_processing},
+            RESPONSE: "what's up",
+            TRANSITIONS: {trn.forward(): always_true},
+        },
+        "step_2": {
+            PROCESSING: {1: add_node_label_processing, 2: add_time_processing},
+            RESPONSE: "ok",
         },
     },
 }
 
+
 ctx = Context()
-actor = Actor(flows, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
+actor = Actor(plot, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
 while True:
     in_text = input("you: ")
     ctx.add_request(in_text)

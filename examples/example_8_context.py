@@ -1,6 +1,6 @@
 import logging
 
-from dff.core.keywords import GLOBAL_TRANSITIONS, GRAPH, RESPONSE
+from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 import dff.transitions as trn
 
@@ -21,20 +21,18 @@ def response(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 
 
 # a dialog script
-flows = {
+plot = {
+    GLOBAL: {TRANSITIONS: {trn.repeat(): always_true}},
     "start": {
-        GLOBAL_TRANSITIONS: {trn.repeat(): always_true},
-        GRAPH: {
-            "start": {
-                RESPONSE: response,
-            },
+        "start": {
+            RESPONSE: response,
         },
     },
 }
 
 
 ctx = Context()
-actor = Actor(flows, start_node_label=("start", "start"))
+actor = Actor(plot, start_node_label=("start", "start"))
 ctx.misc["prompt"] = "Lenght of request "
 while True:
     in_text = input("you: ")
