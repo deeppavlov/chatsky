@@ -23,8 +23,6 @@ class Context(BaseModel):
     node_labels: dict[int, NodeLabel2Type] = {}
     requests: dict[int, Any] = {}
     responses: dict[int, Any] = {}
-    previous_index: int = -1
-    current_index: int = -1
     misc: dict[str, Any] = {}
     validation: bool = False
 
@@ -56,53 +54,42 @@ class Context(BaseModel):
     def add_request(
         self,
         request: Any,
-        current_index: Optional[int] = None,
     ):
-        if current_index is None:
-            self.current_index += 1
-        else:
-            self.current_index = current_index
-
-        self.requests[self.current_index] = request
+        self.requests[len(self.requests)] = request
 
     @validate_arguments
     def add_response(self, response: Any):
-        self.responses[self.current_index] = response
+        self.responses[len(self.responses)] = response
 
     @validate_arguments
     def add_node_label(self, node_label: tuple[str, str]):
-        self.previous_index = self.current_index
-        self.node_labels[self.current_index] = node_label
+        self.node_labels[len(self.node_labels)] = node_label
 
     @validate_arguments
     def clear(self, hold_last_n_indexes: int, field_names: list[str] = ["requests", "responses", "node_labels"]):
         if "requests" in field_names:
-            for index in list(self.requests.keys())[:-hold_last_n_indexes]:
+            for index in list(self.requests)[:-hold_last_n_indexes]:
                 del self.requests[index]
         if "responses" in field_names:
-            for index in list(self.responses.keys())[:-hold_last_n_indexes]:
+            for index in list(self.responses)[:-hold_last_n_indexes]:
                 del self.responses[index]
         if "mics" in field_names:
             self.misc.clear()
         if "node_labels" in field_names:
-            for index in list(self.node_labels.keys())[:-hold_last_n_indexes]:
+            for index in list(self.node_labels)[:-hold_last_n_indexes]:
                 del self.node_labels[index]
 
     @property
-    def previous_node_label(self) -> Optional[tuple[str, str]]:
-        return self.node_labels.get(self.previous_index)
+    def last_node_label(self) -> Optional[NodeLabel2Type]:
+        return self.node_labels.get(len(self.node_labels) - 1)
 
     @property
     def last_response(self) -> Optional[Any]:
-        vals = list(self.responses.values())[-1:]
-        if vals:
-            return vals[0]
+        return self.responses.get(len(self.responses) - 1)
 
     @property
     def last_request(self) -> Optional[Any]:
-        vals = list(self.requests.values())[-1:]
-        if vals:
-            return vals[0]
+        return self.requests.get(len(self.requests) - 1)
 
 
 Context.update_forward_refs()

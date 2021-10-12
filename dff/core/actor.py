@@ -99,12 +99,12 @@ class Actor(BaseModel):
             condition_handler = deep_copy_condition_handler
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
-        previous_node_label = (
-            normalize_node_label(ctx.previous_node_label, "", self.default_transition_priority)
-            if ctx.previous_node_label
+        last_node_label = (
+            normalize_node_label(ctx.last_node_label, "", self.default_transition_priority)
+            if ctx.last_node_label
             else self.start_node_label
         )
-        flow_label, node = self._get_node(previous_node_label)
+        flow_label, node = self._get_node(last_node_label)
 
         # TODO: deepcopy for node_label
         global_transitions = self.plot.get_transitions(self.default_transition_priority, True)
