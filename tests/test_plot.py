@@ -4,7 +4,7 @@ import itertools
 import re
 import random
 
-from dff.core import Plot, Flow, Node, Actor, Context
+from dff.core import Plot, Node, Actor, Context
 from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING
 from dff.response import choice
 

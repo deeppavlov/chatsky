@@ -1,88 +1,65 @@
+# %%
+
 import logging
 from typing import Union, Callable, Optional, Any
 
+from pydantic import BaseModel, validator, validate_arguments, Extra, root_validator
 
-from pydantic import BaseModel, conlist, validator, validate_arguments, Extra
-
+from .keywords import GLOBAL
 from .types import NodeLabelType, ConditionType, NodeLabel3Type
 from .normalization import normalize_node_label, normalize_conditions, normalize_response, normalize_processing
 
 logger = logging.getLogger(__name__)
-# TODO: add texts
+# TODO: add tests
 
 
-class Transition(BaseModel, extra=Extra.forbid):
+class Node(BaseModel, extra=Extra.forbid):
+    transitions: dict[NodeLabelType, ConditionType] = {}
+    response: Optional[Any] = None
+    processing: dict[Any, Callable] = {}
+    misc: dict = {}
+
     @validate_arguments
     def get_transitions(
-        self, flow_label: str, default_transition_priority: float, global_transition_flag=False
+        self,
+        default_flow_label: str,
+        default_transition_priority: float,
     ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
         transitions = {}
-        gtrs = self.global_transitions if hasattr(self, "global_transitions") else {}
-        trs = self.transitions if hasattr(self, "transitions") else {}
-        items = gtrs if global_transition_flag else trs
-        for node_label in items:
-            normalized_node_label = normalize_node_label(node_label, flow_label, default_transition_priority)
-            normalized_conditions = normalize_conditions(items[node_label])
+        for node_label, condition in self.transitions.items():
+            normalized_node_label = normalize_node_label(node_label, default_flow_label, default_transition_priority)
+            normalized_conditions = normalize_conditions(condition)
             transitions[normalized_node_label] = normalized_conditions
         return transitions
 
-
-class Node(Transition):
-    transitions: dict[NodeLabelType, ConditionType] = {}
-    response: Union[Any, Callable]
-    processing: Union[Callable, conlist(Callable, min_items=1)] = None
-    misc: Optional[Any] = None
-
-    def get_response(self):
+    def get_response(self) -> Any:
         return normalize_response(self.response)
 
     def get_processing(self):
         return normalize_processing(self.processing)
 
 
-class Flow(Transition):
-    global_transitions: dict[NodeLabelType, ConditionType] = {}
-    graph: dict[str, Node] = {}
-
-    @validate_arguments
-    def get_transitions(
-        self, flow_label: str, default_transition_priority: float, global_transition_flag=False
-    ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
-        transitions = super(Flow, self).get_transitions(flow_label, default_transition_priority, global_transition_flag)
-        for node in self.graph.values():
-            transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)
-        return transitions
-
-
-def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
-    error_msgs.append(msg)
-    logging_flag and logger.error(msg, exc_info=exception)
-
-
 class Plot(BaseModel, extra=Extra.forbid):
-    plot: dict[str, Flow]
+    plot: dict[str, dict[str, Node]]
+
+    @root_validator(pre=True)
+    def preproc_global(cls, values):
+        if "plot" in values and GLOBAL in values["plot"]:
+            values["plot"][GLOBAL] = {GLOBAL: values["plot"][GLOBAL]}
+        return values
 
     @validator("plot")
     def is_not_empty(cls, fields: dict) -> dict:
         if not any(fields.values()):
-            raise ValueError("expected not empty plot")
+            raise ValueError("Plot does not have nodes")
         return fields
-
-    @validate_arguments
-    def get_transitions(
-        self, default_transition_priority: float, global_transition_flag=False
-    ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
-        transitions = {}
-        for flow_label, node in self.plot.items():
-            transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)
-        return transitions
 
     @validate_arguments
     def get_node(self, node_label: NodeLabelType, flow_label: str = "") -> Optional[Node]:
         normalized_node_label = normalize_node_label(node_label, flow_label, -1)
         flow_label = normalized_node_label[0]
         node_label = normalized_node_label[1]
-        node = self.plot.get(flow_label, Flow()).graph.get(node_label)
+        node = self.plot.get(flow_label, {}).get(node_label)
         if node is None:
             logger.warn(f"Unknown pair(flow_label:node_label) = {flow_label}:{node_label}")
         return node

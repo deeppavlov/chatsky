@@ -1,13 +1,11 @@
 import logging
 from typing import Union, Callable, Optional
-import copy
 
 
 from pydantic import BaseModel, validate_arguments
 
 from .types import NodeLabel2Type, NodeLabel3Type
 
-from .keywords import GLOBAL, GRAPH, LOCAL, GLOBAL_TRANSITIONS, MISC, PROCESSING, RESPONSE, TRANSITIONS
 from .context import Context
 from .plot import Plot, Node
 from .normalization import normalize_node_label, normalize_response
@@ -20,117 +18,6 @@ logger = logging.getLogger(__name__)
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     error_msgs.append(msg)
     logging_flag and logger.error(msg, exc_info=exception)
-
-
-@validate_arguments
-def check_cond_seq(cond_seq):
-    for cond in cond_seq:
-        if not isinstance(cond, Callable):
-            raise Exception(f"{cond_seq=} has to consist of callable objects")
-
-
-def aggregate(cond_seq: list, *args, **kwargs):
-    check_cond_seq(cond_seq)
-
-    def aggregate_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        try:
-            return bool(all([cond(ctx, actor, *args, **kwargs) for cond in cond_seq]))
-        except Exception as exc:
-            logger.error(f"Exception {exc} for {cond_seq=}, {all=} and {ctx.last_request=}", exc_info=exc)
-
-    return aggregate_condition_handler
-
-
-@validate_arguments
-def isin_flow(flows: list[str] = [], nodes: list[NodeLabel2Type] = [], *args, **kwargs):
-    def isin_flow_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        node_label = list(ctx.node_labels.values())
-        node_label = node_label[-1][:2] if node_label else (None, None)
-        return node_label[0] in flows or node_label in nodes
-
-    return isin_flow_condition_handler
-
-
-@validate_arguments
-def downgrade_plot_version(plot: dict):
-    plot = copy.deepcopy(plot)
-    global_flow = {}
-    for plot_key in list(plot.keys()):
-        if GLOBAL == plot_key:
-            node = plot[plot_key]
-            del plot[plot_key]
-            node[GLOBAL_TRANSITIONS] = node[TRANSITIONS]
-            del node[TRANSITIONS]
-            global_flow[plot_key] = node
-        else:
-            for flow_key in plot[plot_key].keys():
-                if flow_key == LOCAL:
-                    node = plot[plot_key][flow_key]
-                    del plot[plot_key][flow_key]
-                    node[GLOBAL_TRANSITIONS] = node[TRANSITIONS]
-                    del node[TRANSITIONS]
-                    node[GLOBAL_TRANSITIONS] = {
-                        tr_key: aggregate([tr_val, isin_flow([flow_key])])
-                        for tr_key, tr_val in node[GLOBAL_TRANSITIONS].items()
-                    }
-                    global_flow[plot_key] = node
-
-    for plot_key in list(plot.keys()):
-        for flow_key in plot[plot_key].keys():
-            processing = global_flow.get(GLOBAL, {}).get(PROCESSING, {}).copy()
-            upd_processing = global_flow.get(plot_key, {}).get(PROCESSING, {})
-            if isinstance(processing, dict) and isinstance(upd_processing, dict):
-                processing.update(upd_processing)
-            else:
-                processing = upd_processing
-
-            upd_processing = plot[plot_key][flow_key].get(PROCESSING, {})
-            if isinstance(processing, dict) and isinstance(upd_processing, dict):
-                processing.update(upd_processing)
-            else:
-                processing = upd_processing
-            plot[plot_key][flow_key][PROCESSING] = processing
-
-    for plot_key in list(plot.keys()):
-        for flow_key in plot[plot_key].keys():
-            misc = global_flow.get(GLOBAL, {}).get(MISC, {}).copy()
-            upd_misc = global_flow.get(plot_key, {}).get(MISC, {})
-            if isinstance(misc, dict) and isinstance(upd_misc, dict):
-                misc.update(upd_misc)
-            else:
-                misc = upd_misc
-
-            upd_misc = plot[plot_key][flow_key].get(MISC, {})
-            if isinstance(misc, dict) and isinstance(upd_misc, dict):
-                misc.update(upd_misc)
-            else:
-                misc = upd_misc
-            plot[plot_key][flow_key][MISC] = misc
-
-    for plot_key in list(plot.keys()):
-        for flow_key in plot[plot_key].keys():
-            response = global_flow.get(GLOBAL, {}).get(RESPONSE, "")
-            response = global_flow.get(plot_key, {}).get(RESPONSE, response)
-            response = plot[plot_key][flow_key].get(RESPONSE, response)
-            plot[plot_key][flow_key][RESPONSE] = response
-
-    plot["global.flow"] = global_flow
-
-    for plot_key in list(plot.keys()):
-        for flow_key in plot[plot_key].keys():
-            processing = plot[plot_key][flow_key].get(PROCESSING, {})
-            if isinstance(processing, dict):
-                plot[plot_key][flow_key][PROCESSING] = list(processing.values())
-            if not plot[plot_key][flow_key][PROCESSING]:
-                del plot[plot_key][flow_key][PROCESSING]
-    global_flow = plot["global.flow"]
-    del plot["global.flow"]
-
-    for plot_key in list(plot.keys()):
-        plot[plot_key] = {GRAPH: plot[plot_key]}
-        plot[plot_key][GLOBAL_TRANSITIONS] = global_flow.get(flow_key, {}).get(GLOBAL_TRANSITIONS, {})
-    plot["global.flow"] = {GLOBAL_TRANSITIONS: global_flow.get(GLOBAL, {}).get(GLOBAL_TRANSITIONS, {})}
-    return plot
 
 
 class Actor(BaseModel):
@@ -158,7 +45,7 @@ class Actor(BaseModel):
         **kwargs,
     ):
         # plot validation
-        plot = plot if isinstance(plot, Plot) else Plot(plot=downgrade_plot_version(plot))
+        plot = plot if isinstance(plot, Plot) else Plot(plot=plot)
 
         # node lables validation
         start_node_label = normalize_node_label(
@@ -200,8 +87,6 @@ class Actor(BaseModel):
     def __call__(
         self,
         ctx: Union[Context, dict, str] = {},
-        return_dict=False,
-        return_json=False,
         condition_handler: Optional[Callable] = None,
         *args,
         **kwargs,
