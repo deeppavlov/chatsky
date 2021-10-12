@@ -5,6 +5,8 @@ import copy
 
 from pydantic import BaseModel, validate_arguments
 
+from .types import NodeLabel2Type, NodeLabel3Type
+
 from .keywords import GLOBAL, GRAPH, LOCAL, GLOBAL_TRANSITIONS, MISC, PROCESSING, RESPONSE, TRANSITIONS
 from .context import Context
 from .plot import Plot, Node
@@ -40,7 +42,7 @@ def aggregate(cond_seq: list, *args, **kwargs):
 
 
 @validate_arguments
-def isin_flow(flows: list[str] = [], nodes: list[tuple[str, str]] = [], *args, **kwargs):
+def isin_flow(flows: list[str] = [], nodes: list[NodeLabel2Type] = [], *args, **kwargs):
     def isin_flow_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         node_label = list(ctx.node_labels.values())
         node_label = node_label[-1][:2] if node_label else (None, None)
@@ -133,8 +135,8 @@ def downgrade_plot_version(plot: dict):
 
 class Actor(BaseModel):
     plot: Union[Plot, dict]
-    start_node_label: tuple[str, str, float]
-    fallback_node_label: Optional[tuple[str, str, float]] = None
+    start_node_label: NodeLabel3Type
+    fallback_node_label: Optional[NodeLabel3Type] = None
     default_transition_priority: float = 1.0
     response_validation_flag: Optional[bool] = None
     validation_logging_flag: bool = True
@@ -145,8 +147,8 @@ class Actor(BaseModel):
     def __init__(
         self,
         plot: Union[Plot, dict],
-        start_node_label: tuple[str, str],
-        fallback_node_label: Optional[tuple[str, str]] = None,
+        start_node_label: NodeLabel2Type,
+        fallback_node_label: Optional[NodeLabel2Type] = None,
         default_transition_priority: float = 1.0,
         response_validation_flag: Optional[bool] = None,
         validation_logging_flag: bool = True,
@@ -262,7 +264,7 @@ class Actor(BaseModel):
         transition_info: str = "",
         *args,
         **kwargs,
-    ) -> Optional[tuple[str, str, float]]:
+    ) -> Optional[NodeLabel3Type]:
         true_node_labels = []
         for node_label, condition in transitions.items():
             if condition_handler(condition, ctx, self, *args, **kwargs):
@@ -281,7 +283,7 @@ class Actor(BaseModel):
     @validate_arguments
     def _get_node(
         self,
-        node_label: tuple[str, str, float],
+        node_label: NodeLabel3Type,
     ) -> tuple[str, Node]:
         node = self.plot.get_node(node_label)
         if node is None:
@@ -292,9 +294,9 @@ class Actor(BaseModel):
     @validate_arguments
     def _choose_true_node_label(
         self,
-        local_true_node_label: Optional[tuple[str, str, float]],
-        global_true_node_label: Optional[tuple[str, str, float]],
-    ) -> tuple[str, str, float]:
+        local_true_node_label: Optional[NodeLabel3Type],
+        global_true_node_label: Optional[NodeLabel3Type],
+    ) -> NodeLabel3Type:
         if all([local_true_node_label, global_true_node_label]):
             true_node_label = (
                 local_true_node_label

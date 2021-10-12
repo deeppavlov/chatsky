@@ -4,7 +4,7 @@ from typing import Union, Callable, Optional, Any
 
 from pydantic import BaseModel, conlist, validator, validate_arguments, Extra
 
-from .normalization import NodeLabelType, ConditionType
+from .types import NodeLabelType, ConditionType, NodeLabel3Type
 from .normalization import normalize_node_label, normalize_conditions, normalize_response, normalize_processing
 
 logger = logging.getLogger(__name__)
@@ -15,7 +15,7 @@ class Transition(BaseModel, extra=Extra.forbid):
     @validate_arguments
     def get_transitions(
         self, flow_label: str, default_transition_priority: float, global_transition_flag=False
-    ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
+    ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
         transitions = {}
         gtrs = self.global_transitions if hasattr(self, "global_transitions") else {}
         trs = self.transitions if hasattr(self, "transitions") else {}
@@ -47,7 +47,7 @@ class Flow(Transition):
     @validate_arguments
     def get_transitions(
         self, flow_label: str, default_transition_priority: float, global_transition_flag=False
-    ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
+    ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
         transitions = super(Flow, self).get_transitions(flow_label, default_transition_priority, global_transition_flag)
         for node in self.graph.values():
             transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)
@@ -71,7 +71,7 @@ class Plot(BaseModel, extra=Extra.forbid):
     @validate_arguments
     def get_transitions(
         self, default_transition_priority: float, global_transition_flag=False
-    ) -> dict[Union[Callable, tuple[str, str, float]], Callable]:
+    ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
         transitions = {}
         for flow_label, node in self.plot.items():
             transitions |= node.get_transitions(flow_label, default_transition_priority, global_transition_flag)

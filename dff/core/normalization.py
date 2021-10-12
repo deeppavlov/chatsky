@@ -5,26 +5,12 @@ from typing import Union, Callable, Pattern, Optional, Any
 
 
 from .context import Context
+from .types import NodeLabel3Type, NodeLabelType, ConditionType, NodeLabelTupledType
 
 from pydantic import conlist, validate_arguments, BaseModel
 
 
 logger = logging.getLogger(__name__)
-# TODO: add texts
-
-CONDITION_DEPTH_TYPE_CHECKING = 20
-# Callable = str
-# Pattern = str
-
-NodeLabelTupledType = Union[
-    tuple[str, float],
-    tuple[str, str],
-    tuple[str, str, float],
-]
-NodeLabelType = Union[Callable, NodeLabelTupledType, str]
-ConditionType = Union[Callable, Pattern, str]
-for _ in range(CONDITION_DEPTH_TYPE_CHECKING):
-    ConditionType = Union[conlist(ConditionType, min_items=1), Callable, Pattern, str]
 
 
 Actor = BaseModel  # ForwardRef("Actor")
@@ -34,11 +20,11 @@ Node = BaseModel  # ForwardRef("Node")
 @validate_arguments
 def normalize_node_label(
     node_label: NodeLabelType, flow_label: str, default_transition_priority: float
-) -> Union[Callable, tuple[str, str, float]]:
+) -> Union[Callable, NodeLabel3Type]:
     if isinstance(node_label, Callable):
 
         @validate_arguments
-        def get_node_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
+        def get_node_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
             try:
                 res = node_label(ctx, actor, *args, **kwargs)
                 res = (str(res[0]), str(res[1]), float(res[2]))

@@ -5,6 +5,7 @@ from typing import ForwardRef
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, validate_arguments, Field, validator
+from .types import NodeLabel2Type
 
 
 logger = logging.getLogger(__name__)
@@ -19,7 +20,7 @@ def sort_dict_keys(dictionary: dict) -> dict:
 
 class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
-    node_labels: dict[int, tuple[str, str]] = {}
+    node_labels: dict[int, NodeLabel2Type] = {}
     requests: dict[int, Any] = {}
     responses: dict[int, Any] = {}
     previous_index: int = -1
