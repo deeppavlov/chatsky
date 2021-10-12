@@ -18,6 +18,12 @@ def sort_dict_keys(dictionary: dict) -> dict:
     return {key: dictionary[key] for key in sorted(dictionary)}
 
 
+@validate_arguments
+def get_last_index(dictionary: dict) -> int:
+    indexes = list(dictionary)
+    return indexes[-1] if indexes else 0
+
+
 class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     node_labels: dict[int, NodeLabel2Type] = {}
@@ -51,19 +57,19 @@ class Context(BaseModel):
         return ctx
 
     @validate_arguments
-    def add_request(
-        self,
-        request: Any,
-    ):
-        self.requests[len(self.requests)] = request
+    def add_request(self, request: Any):
+        last_index = get_last_index(self.requests)
+        self.requests[last_index + 1] = request
 
     @validate_arguments
     def add_response(self, response: Any):
-        self.responses[len(self.responses)] = response
+        last_index = get_last_index(self.responses)
+        self.responses[last_index + 1] = response
 
     @validate_arguments
-    def add_node_label(self, node_label: tuple[str, str]):
-        self.node_labels[len(self.node_labels)] = node_label
+    def add_node_label(self, node_label: NodeLabel2Type):
+        last_index = get_last_index(self.node_labels)
+        self.node_labels[last_index + 1] = node_label
 
     @validate_arguments
     def clear(self, hold_last_n_indexes: int, field_names: list[str] = ["requests", "responses", "node_labels"]):
@@ -81,15 +87,18 @@ class Context(BaseModel):
 
     @property
     def last_node_label(self) -> Optional[NodeLabel2Type]:
-        return self.node_labels.get(len(self.node_labels) - 1)
+        last_index = get_last_index(self.node_labels)
+        return self.node_labels.get(last_index)
 
     @property
     def last_response(self) -> Optional[Any]:
-        return self.responses.get(len(self.responses) - 1)
+        last_index = get_last_index(self.responses)
+        return self.responses.get(last_index)
 
     @property
     def last_request(self) -> Optional[Any]:
-        return self.requests.get(len(self.requests) - 1)
+        last_index = get_last_index(self.requests)
+        return self.requests.get(last_index)
 
 
 Context.update_forward_refs()
