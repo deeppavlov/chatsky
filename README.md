@@ -16,7 +16,8 @@ make venv
 ## Extentions 
 <!-- ### List of extentions -->
 <!-- ### Your own extention -->
-
+# TODO:
+- add description of live time for var of actor_state
 
 # Contributing to the Dialog Flow Framework
 

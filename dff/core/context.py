@@ -31,6 +31,7 @@ class Context(BaseModel):
     responses: dict[int, Any] = {}
     misc: dict[str, Any] = {}
     validation: bool = False
+    actor_state: dict[str, Any] = {}
 
     # validators
     _sort_node_labels = validator("node_labels", allow_reuse=True)(sort_dict_keys)

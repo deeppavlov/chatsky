@@ -48,24 +48,16 @@ class Actor(BaseModel):
         plot = plot if isinstance(plot, Plot) else Plot(plot=plot)
 
         # node lables validation
-        start_node_label = normalize_node_label(
-            start_node_label, flow_label="", default_transition_priority=default_transition_priority
-        )
+        start_node_label = normalize_node_label(start_node_label, flow_label="")
         if plot.get_node(start_node_label) is None:
             raise ValueError(f"Unkown {start_node_label=}")
         if fallback_node_label is None:
             fallback_node_label = start_node_label
         else:
-            fallback_node_label = normalize_node_label(
-                fallback_node_label,
-                flow_label="",
-                default_transition_priority=default_transition_priority,
-            )
+            fallback_node_label = normalize_node_label(fallback_node_label, flow_label="")
             if plot.get_node(fallback_node_label) is None:
                 raise ValueError(f"Unkown {fallback_node_label}")
 
-        # etc.
-        default_transition_priority = default_transition_priority
 
         super(Actor, self).__init__(
             plot=plot,
@@ -100,14 +92,12 @@ class Actor(BaseModel):
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         last_node_label = (
-            normalize_node_label(ctx.last_node_label, "", self.default_transition_priority)
-            if ctx.last_node_label
-            else self.start_node_label
+            normalize_node_label(ctx.last_node_label, "") if ctx.last_node_label else self.start_node_label
         )
         flow_label, node = self._get_node(last_node_label)
 
         # TODO: deepcopy for node_label
-        global_transitions = self.plot.get_transitions(self.default_transition_priority, True)
+        global_transitions = self.plot.get_transitions(True)
         global_true_node_label = self._get_true_node_label(
             global_transitions,
             ctx,
@@ -116,7 +106,7 @@ class Actor(BaseModel):
             "global",
         )
 
-        local_transitions = node.get_transitions(flow_label, self.default_transition_priority, False)
+        local_transitions = node.get_transitions(flow_label, False)
         local_true_node_label = self._get_true_node_label(
             local_transitions,
             ctx,
@@ -158,7 +148,7 @@ class Actor(BaseModel):
                     # TODO: explisit handling of errors
                     if node_label is None:
                         continue
-                node_label = normalize_node_label(node_label, flow_label, self.default_transition_priority)
+                node_label = normalize_node_label(node_label, flow_label)
                 true_node_labels += [node_label]
         true_node_labels.sort(key=lambda label: -label[2])
         true_node_label = true_node_labels[0] if true_node_labels else None
@@ -200,6 +190,7 @@ class Actor(BaseModel):
         response_validation_flag: Optional[bool] = None,
         logging_flag: bool = True,
     ):
+        # TODO: plot has to not contain priority == -inf, because it uses for miss values
         transitions = self.plot.get_transitions(-1, False) | self.plot.get_transitions(-1, True)
         error_msgs = []
         for callable_node_label, condition in transitions.items():

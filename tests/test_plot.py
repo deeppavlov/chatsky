@@ -1,15 +1,10 @@
 # %%
-from typing import Callable
 import itertools
-import re
-import random
-
-from dff.core import Plot, Node, Actor, Context
-from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING
-from dff.response import choice
+from typing import Callable
 
 
-# TODO: full, correct test for normalize_* , validate_plot
+from dff.core import Node
+from dff.core.keywords import TRANSITIONS, RESPONSE, PROCESSING, MISC
 
 
 def positive_test(samples, custom_class):
@@ -19,139 +14,70 @@ def positive_test(samples, custom_class):
             res = custom_class(**sample)
             results += [res]
         except Exception as exeption:
-            raise Exception(f"For {sample} got {exeption=}")
+            raise Exception(f"{sample=} gets {exeption=}")
     return results
 
 
 def negative_test(samples, custom_class):
     for sample in samples:
         try:
-            res = custom_class(**sample)
-            raise Exception(f"{sample} couldn't be passed but get {res.dict()}")
-        except Exception:
+            custom_class(**sample)
+        except Exception:  # TODO: spetial tyupe of exceptions
             continue
+        raise Exception(f"{sample=} can not be passed")
 
 
-def trasition_test(model, transition_name, additional_data):
-    true_graph_name = ["flow_name", "123"]
-    true_node_name = ["state_name", "123"]
-    true_node_name_with_lambda = true_node_name + [lambda c, f: "state"]
-    true_priorities = [123, 0, 0.1, -1, "123", "0", "0.1", "-1"]
-    node_label_samples = (
-        true_node_name_with_lambda
-        + list(itertools.product(true_graph_name, true_node_name))
-        + list(itertools.product(true_node_name, true_priorities))
-        + list(itertools.product(true_graph_name, true_node_name, true_priorities))
-    )
-    condition_samples = [
-        # "sample",
-        # "123",
-        # re.compile("123"),
-        lambda c, f: True,
-        # [any, ["123", all, [lambda c, f: True, "123"]]],
-        # [all, ["123", re.compile("123"), "sample"]],
-        # 123,
-    ]
-    samples = list(itertools.product(node_label_samples, condition_samples))
-    samples = [{transition_name: {sample[0]: sample[1]}, **additional_data} for sample in samples]
-    results = positive_test(samples, model)
-    results = [res.get_transitions("root", 1.0) for res in results] + [
-        res.get_transitions("root", 1.0, True) for res in results
-    ]
-    actor = Actor({"globals": {"globals": {RESPONSE: "123"}}}, ("globals", "globals"))
-    ctx = Context()
-    ctx.add_request("text")
-    for res in results:
-        for node_label, cond in res.items():
-            if not (
-                isinstance(node_label, Callable)
-                or (isinstance(node_label[0], str) and isinstance(node_label[1], str), isinstance(node_label[2], float))
-            ):
-                raise ValueError(f"unexpected {node_label=}")
-            if not (isinstance(cond, Callable) and isinstance(cond(ctx, actor), bool)):
-                raise ValueError(f"unexpected {cond=}")
+def std_func(ctx, actor, *args, **kwargs):
+    pass
 
-    # negative sampling
+
+def test_node_creation():
+
+    samples = {
+        "transition": [std_func, "node", ("flow", "node"), ("node", 2.0), ("flow", "node", 2.0)],
+        "condition": [std_func],
+        RESPONSE: ["text", std_func, 123, 1.0, None],
+        PROCESSING: [{}, {1: std_func}, None],
+        MISC: [{}, {1: "var"}, None],
+    }
     samples = [
-        {transition_name: {None: "asd"}, **additional_data},
-        {transition_name: {"asd": []}, **additional_data},
+        {TRANSITIONS: {transition: condition}, RESPONSE: response, PROCESSING: processing, MISC: misc}
+        for transition, condition, response, processing, misc in itertools.product(*list(samples.values()))
     ]
-    negative_test(samples, model)
-    # print(f"{trasition_test.__name__} passed")
+    samples = [{k: v for k, v in sample.items() if v is not None} for sample in samples]
+    positive_test(samples, Node)
 
-
-def test_node():
-    trasition_test(Node, TRANSITIONS, {RESPONSE: choice(["123", "123"]), PROCESSING: any})
+    samples = {
+        "transition": [None],
+        "condition": [None, 123, "asdasd", 2.0, [], {}],
+        PROCESSING: [123, "asdasd", 2.0, {1: None}, {1: 123}, {1: 2.0}, {1: []}, {1: {}}],
+        MISC: [123, "asdasd", 2.0],
+    }
     samples = [
-        {RESPONSE: choice(["123", "123"]), PROCESSING: any},
-        {RESPONSE: "asd", PROCESSING: any},
-        {RESPONSE: lambda c, f: "response", PROCESSING: any},
-        {RESPONSE: lambda c, f: "response"},
+        {
+            TRANSITIONS: {val if key == "transition" else "node": val if key == "condition" else std_func},
+            RESPONSE: val if key == RESPONSE else None,
+            PROCESSING: val if key == PROCESSING else None,
+            MISC: val if key == MISC else None,
+        }
+        for key, values in samples.items()
+        for val in values
     ]
-    results = positive_test(samples, Node)
-    actor = Actor({"globals": {"globals": {RESPONSE: "123"}}}, ("globals", "globals"))
-    ctx = Context()
-    for res in results:
-        response = res.get_response()
-        if not isinstance(response, Callable):
-            raise ValueError(f"unexpected {response=} for node {res}")
-        random.seed(31415)
-        response_res = response(ctx, actor)
-        if not isinstance(response_res, str):
-            raise ValueError(f"unexpected {response_res=} for node {res}")
-    # negative sampling
-    samples = [
-        {RESPONSE: [], PROCESSING: any},
-        {RESPONSE: None, PROCESSING: any},
-        {RESPONSE: "zxczxc", PROCESSING: any, "asdasdas": any},
-        {RESPONSE: "zxczxc", PROCESSING: "asd"},
-        {RESPONSE: "zxczxc", PROCESSING: []},
-        {RESPONSE: "zxczxc", PROCESSING: ["123"]},
-    ]
+    samples = [{k: v for k, v in sample.items() if v is not None} for sample in samples]
     negative_test(samples, Node)
-    # print(f"{test_node.__name__} passed")
-
-#  TODO: RETURN TESTS
-# def test_flow():
-#     #  TODO: TEST GLOBAL
-#     trasition_test(Flow, TRANSITIONS, {})
-#     samples = [
-#         {},
-#         {
-#             "node1": {RESPONSE: choice([123, "123"]), PROCESSING: any},
-#             "node2": {RESPONSE: any, PROCESSING: any},
-#             "node3": {RESPONSE: any},
-#             "node4": {RESPONSE: "123", PROCESSING: any},
-#         },
-#     ]
-#     positive_test(samples, Flow)
-#     # negative sampling
-#     samples = [
-#         {
-#             "node1": {RESPONSE: None, PROCESSING: any},
-#         },
-#         {
-#             "node1": {RESPONSE: "", PROCESSING: any, "asdasdas": any},
-#         },
-#     ]
-
-#     negative_test(samples, Flow)
-#     # print(f"{test_flow.__name__} passed")
 
 
-# def test_plot():
-#     samples = [
-#         {
-#             "plot": {
-#                 # GLOBAL: {TRANSITIONS: {"213": any}},
-#                 "globals": {
-#                     "node": {TRANSITIONS: {"213": any}, RESPONSE: ["qweqwdqwd", ".git/"], PROCESSING: any},
-#                 },
-#             }
-#         }
-#     ]
-#     positive_test(samples, Plot)
-#     # negative sampling
-#     samples = [{"plot": {}}]
-#     negative_test(samples, Plot)
-#     # print(f"{test_plot.__name__} passed")
+def test_node_exec():
+    node = Node(
+        **{
+            TRANSITIONS: {"node": std_func},
+            RESPONSE: "text",
+            PROCESSING: {1: std_func},
+            MISC: {"key": "val"},
+        }
+    )
+    assert list(node.transitions)[0] == ("", "node", float("-inf"))
+    assert isinstance(list(node.transitions.values())[0], Callable)
+    assert isinstance(node.response, Callable)
+    assert isinstance(node.processing, Callable)
+    assert node.misc == {"key": "val"}
