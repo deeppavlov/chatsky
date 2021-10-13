@@ -29,9 +29,11 @@ plot = {
             ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),
             trn.to_fallback(0.1): always_true_condition,
             trn.forward(): cnd.all(
-                [cnd.regexp(r"next\b"), cnd.has_last_labels(nodes=[("music_flow", i) for i in ["node2", "node3"]])]
+                [cnd.regexp(r"next\b"), cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]])]
             ),
-            trn.repeat(0.2): cnd.all([cnd.regexp(r"repeat", re.I), cnd.negation(cnd.has_last_labels(plot=["global_flow"]))]),
+            trn.repeat(0.2): cnd.all(
+                [cnd.regexp(r"repeat", re.I), cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"]))]
+            ),
         },
     },
     "global_flow": {
