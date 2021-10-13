@@ -18,6 +18,7 @@ make venv
 <!-- ### Your own extention -->
 # TODO:
 - add description of live time for var of actor_state
+- add examles of LOCAL
 
 # Contributing to the Dialog Flow Framework
 
