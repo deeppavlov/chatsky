@@ -29,7 +29,7 @@ plot = {
             TRANSITIONS: {
                 # ("flow_start", "node_start"): always_true,
                 # or
-                ("flow_start", "node_start"): cnd.true,
+                ("flow_start", "node_start"): cnd.true(),
             },
         }
     },

@@ -25,7 +25,7 @@ class Actor(BaseModel):
     plot: Union[Plot, dict]
     start_label: NodeLabel3Type
     fallback_label: Optional[NodeLabel3Type] = None
-    default_transition_priority: float = 1.0
+    transition_priority: float = 1.0
     response_validation_flag: Optional[bool] = None
     condition_handler: Optional[Callable] = None
     validation_logging_flag: bool = True
@@ -94,23 +94,21 @@ class Actor(BaseModel):
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
         previous_label = normalize_label(ctx.last_label) if ctx.last_label else self.start_label
-        previous_node = self.get(previous_label[0], {}).get(previous_label[1])
+        previous_node = self.plot.get(previous_label[0], {}).get(previous_label[1])
         ctx.actor_state["previous_label"] = previous_label
         ctx.actor_state["previous_node"] = previous_node
 
         global_transitions = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
         global_true_label = self._get_true_label(global_transitions, ctx, GLOBAL, "global")
 
-        local_transitions = self.plot.get(previous_node[0], {}).get(LOCAL, Node()).transitions
-        local_true_label = self._get_true_label(local_transitions, ctx, previous_node[0], "local")
+        local_transitions = self.plot.get(previous_label[0], {}).get(LOCAL, Node()).transitions
+        local_true_label = self._get_true_label(local_transitions, ctx, previous_label[0], "local")
 
-        node_transitions = self.plot.get(previous_node[0], {}).get(previous_node[1], Node()).transitions
-        node_true_label = self._get_true_label(node_transitions, ctx, previous_node[0], "node")
+        node_transitions = self.plot.get(previous_label[0], {}).get(previous_label[1], Node()).transitions
+        node_true_label = self._get_true_label(node_transitions, ctx, previous_label[0], "node")
 
         next_label = self._choose_label(node_true_label, local_true_label)
         next_label = self._choose_label(next_label, global_true_label)
-
-        ctx.add_label(next_label[:2])
 
         next_node = self.plot.get(next_label[0], {}).get(next_label[1])
         if next_node is None:
@@ -118,8 +116,9 @@ class Actor(BaseModel):
             next_node = self.plot.get(next_label[0], {}).get(next_label[1])
         ctx.actor_state["next_label"] = next_label
         ctx.actor_state["next_node"] = next_node
+        ctx.add_label(next_label[:2])
 
-        ctx = next_node.processing(ctx, self, *args, **kwargs)
+        ctx = next_node.processing(ctx, self, *args, **kwargs) if next_node.processing else ctx
 
         response = ctx.actor_state["next_node"].response(ctx, self, *args, **kwargs)
         ctx.add_response(response)
@@ -148,7 +147,7 @@ class Actor(BaseModel):
                 label = normalize_label(label, flow_label)
                 true_labels += [label]
         true_labels.sort(key=lambda label: -(self.transition_priority if label[2] == float("-inf") else label[2]))
-        true_label = true_labels[0] if true_labels else None
+        true_label = (flow_label,) + true_labels[0][1:] if true_labels else None
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
 
@@ -214,10 +213,7 @@ class Actor(BaseModel):
                         )
                         error_handler(error_msgs, msg, None, logging_flag)
                 except Exception as exc:
-                    msg = (
-                        f"Got exception '''{exc}''' during response execution "
-                        f"for {label=} and {node.response=}"
-                    )
+                    msg = f"Got exception '''{exc}''' during response execution " f"for {label=} and {node.response=}"
                     error_handler(error_msgs, msg, exc, logging_flag)
                 if n_errors != len(error_msgs) and response_validation_flag is None:
                     logger.info(
@@ -225,7 +221,7 @@ class Actor(BaseModel):
                         "It's service message can be switched off by manually setting response_validation_flag"
                     )
 
-        # validate conditions
+            # validate conditions
             try:
                 bool(condition(ctx, actor))
             except Exception as exc:

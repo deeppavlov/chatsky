@@ -1,42 +1,47 @@
-from typing import Optional
+from typing import Optional, Callable
 from .core.actor import Actor
 from .core.context import Context
+from .core.types import NodeLabel3Type
 
 
-def repeat(priority: Optional[float] = None, *args, **kwargs):
-    def repeat_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        turn_index = ctx.previous_index
-        flow_label, label = ctx.labels.get(turn_index, actor.fallback_label[:2])
-        current_priority = actor.default_transition_priority if priority is None else priority
+def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+    def repeat_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        current_priority = actor.transition_priority if priority is None else priority
+        if len(ctx.labels) >= 1:
+            flow_label, label = list(ctx.labels.values())[-1]
+        else:
+            flow_label, label = actor.fallback_label[:2]
         return (flow_label, label, current_priority)
 
-    return repeat_transition
+    return repeat_transition_handler
 
 
-def previous(priority: Optional[float] = None, *args, **kwargs):
-    def previous_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        turn_index = ctx.previous_index - 1
-        flow_label, label = ctx.labels.get(turn_index, actor.fallback_label[:2])
-        current_priority = actor.default_transition_priority if priority is None else priority
+def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+    def previous_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        current_priority = actor.transition_priority if priority is None else priority
+        if len(ctx.labels) >= 2:
+            flow_label, label = list(ctx.labels.values())[-2]
+        else:
+            flow_label, label = actor.fallback_label[:2]
         return (flow_label, label, current_priority)
 
-    return previous_transition
+    return previous_transition_handler
 
 
-def to_start(priority: Optional[float] = None, *args, **kwargs):
-    def to_start_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        current_priority = actor.default_transition_priority if priority is None else priority
+def to_start(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+    def to_start_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        current_priority = actor.transition_priority if priority is None else priority
         return (*actor.start_label[:2], current_priority)
 
-    return to_start_transition
+    return to_start_transition_handler
 
 
-def to_fallback(priority: Optional[float] = None, *args, **kwargs):
-    def to_fallback_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        current_priority = actor.default_transition_priority if priority is None else priority
+def to_fallback(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+    def to_fallback_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        current_priority = actor.transition_priority if priority is None else priority
         return (*actor.fallback_label[:2], current_priority)
 
-    return to_fallback_transition
+    return to_fallback_transition_handler
 
 
 def _get_label_by_index_shifting(
@@ -44,37 +49,46 @@ def _get_label_by_index_shifting(
     actor: Actor,
     priority: Optional[float] = None,
     increment_flag: bool = True,
+    cyclicality_flag: bool = True,
     *args,
     **kwargs,
-):
-    turn_index = ctx.previous_index
-    tgt_flow_label, label = ctx.labels.get(turn_index, actor.fallback_label[:2])
-    plot = actor.plot
-    flow = plot[tgt_flow_label]
-    labels = list(flow.graph)
-    current_priority = actor.default_transition_priority if priority is None else priority
+) -> NodeLabel3Type:
+    flow_label, node_label, current_priority = repeat(priority, *args, **kwargs)(ctx, actor, *args, **kwargs)
+    labels = list(actor.plot.get(flow_label, {}))
 
-    if label not in labels:
+    if node_label not in labels:
         return (*actor.fallback_label[:2], current_priority)
 
-    label_index = labels.index(label)
-    tgt_label_index = label_index + 1 if increment_flag else label_index - 1
-    if not (0 <= tgt_label_index < len(labels)):
+    label_index = labels.index(node_label)
+    label_index = label_index + 1 if increment_flag else label_index - 1
+    if not (cyclicality_flag or (0 <= label_index < len(labels))):
         return (*actor.fallback_label[:2], current_priority)
+    label_index %= len(labels)
 
-    tgt_label = labels[tgt_label_index]
-    return (tgt_flow_label, tgt_label, current_priority)
-
-
-def forward(priority: Optional[float] = None, *args, **kwargs):
-    def forward_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        return _get_label_by_index_shifting(ctx, actor, priority, increment_flag=True)
-
-    return forward_transition
+    return (flow_label, labels[label_index], current_priority)
 
 
-def backward(priority: Optional[float] = None, *args, **kwargs):
-    def back_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        return _get_label_by_index_shifting(ctx, actor, priority, increment_flag=False)
+def forward(priority: Optional[float] = None, cyclicality_flag: bool = True, *args, **kwargs) -> Callable:
+    def forward_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        return _get_label_by_index_shifting(
+            ctx,
+            actor,
+            priority,
+            increment_flag=True,
+            cyclicality_flag=cyclicality_flag,
+        )
 
-    return back_transition
+    return forward_transition_handler
+
+
+def backward(priority: Optional[float] = None, cyclicality_flag: bool = True, *args, **kwargs) -> Callable:
+    def back_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        return _get_label_by_index_shifting(
+            ctx,
+            actor,
+            priority,
+            increment_flag=False,
+            cyclicality_flag=cyclicality_flag,
+        )
+
+    return back_transition_handler

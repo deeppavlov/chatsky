@@ -4,6 +4,8 @@ import re
 
 from pydantic import validate_arguments
 
+from dff.core.types import NodeLabel2Type
+
 
 from .core.actor import Actor
 from .core.context import Context
@@ -13,7 +15,7 @@ logger = logging.getLogger(__name__)
 
 
 @validate_arguments
-def exact_match(match: Any, *args, **kwargs):
+def exact_match(match: Any, *args, **kwargs) -> Callable:
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
         try:
@@ -25,7 +27,7 @@ def exact_match(match: Any, *args, **kwargs):
 
 
 @validate_arguments
-def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs):
+def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs) -> Callable:
     pattern = re.compile(pattern, flags)
 
     def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -39,7 +41,7 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 
 
 @validate_arguments
-def check_cond_seq(cond_seq):
+def check_cond_seq(cond_seq: list):
     for cond in cond_seq:
         if not isinstance(cond, Callable):
             raise Exception(f"{cond_seq=} has to consist of callable objects")
@@ -49,7 +51,8 @@ _any = any
 _all = all
 
 
-def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs):
+@validate_arguments
+def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) -> Callable:
     check_cond_seq(cond_seq)
 
     def aggregate_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -62,7 +65,7 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs):
 
 
 @validate_arguments
-def any(cond_seq: list, *args, **kwargs):
+def any(cond_seq: list, *args, **kwargs) -> Callable:
     _agg = aggregate(cond_seq, _any)
 
     def any_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -72,7 +75,7 @@ def any(cond_seq: list, *args, **kwargs):
 
 
 @validate_arguments
-def all(cond_seq: list, *args, **kwargs):
+def all(cond_seq: list, *args, **kwargs) -> Callable:
     _agg = aggregate(cond_seq, _all)
 
     def all_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -82,7 +85,7 @@ def all(cond_seq: list, *args, **kwargs):
 
 
 @validate_arguments
-def negation(condition: Callable, *args, **kwargs):
+def negation(condition: Callable, *args, **kwargs) -> Callable:
     def negation_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return not condition(ctx, actor, *args, **kwargs)
 
@@ -90,21 +93,38 @@ def negation(condition: Callable, *args, **kwargs):
 
 
 @validate_arguments
-def isin_flow(flows: list[str] = [], nodes: list[tuple[str, str]] = [], *args, **kwargs):
-    def isin_flow_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        label = list(ctx.labels.values())
-        label = label[-1][:2] if label else (None, None)
-        return label[0] in flows or label in nodes
+def has_last_labels(
+    flow_labels: list[str] = [],
+    labels: list[NodeLabel2Type] = [],
+    last_n_indexes: int = 1,
+    *args,
+    **kwargs,
+) -> Callable:
+    def has_last_labels_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        label = list(ctx.labels.values())[-last_n_indexes:]
+        for label in list(ctx.labels.values())[-last_n_indexes:]:
+            label = label if label else (None, None)
+            if label[0] in flow_labels or label in labels:
+                return True
+        return False
 
-    return isin_flow_condition_handler
+    return has_last_labels_condition_handler
+
 
 @validate_arguments
-def true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return True
+def true(*args, **kwargs) -> Callable:
+    def true_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        return True
+
+    return true_handler
+
 
 @validate_arguments
-def false(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return False
+def false(*args, **kwargs) -> Callable:
+    def false_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        return False
+
+    return false_handler
 
 
 # aliases

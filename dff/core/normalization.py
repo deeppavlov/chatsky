@@ -24,8 +24,8 @@ def normalize_label(label: NodeLabelType, default_flow_label: str = "") -> Union
         def get_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
             try:
                 res = label(ctx, actor, *args, **kwargs)
-                res = (str(res[0]), str(res[1]), float(res[2]))
-                node = actor.plot.get_node(res)
+                flow_label, node_label, _ = (str(res[0]), str(res[1]), float(res[2]))
+                node = actor.plot.get(flow_label, {}).get(node_label)
                 if not node:
                     raise Exception(f"Unknown transitions {res} for {actor.plot}")
             except Exception as exc:

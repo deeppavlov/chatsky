@@ -5,6 +5,9 @@ from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 import dff.conditions as cnd
 
+logging.basicConfig(
+    format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
+)
 logger = logging.getLogger(__name__)
 
 # First of all, to create a dialog agent, we need to create a dialog script.

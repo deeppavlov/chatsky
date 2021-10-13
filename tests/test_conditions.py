@@ -1,0 +1,37 @@
+# %%
+from dff.core import Context, Actor
+import dff.conditions as cnd
+
+
+def test_conditions():
+    ctx = Context()
+    actor = Actor(plot={"flow": {"node": {}}}, start_label=("flow", "node"))
+    ctx.add_request("text")
+    ctx.add_label(["flow", "node"])
+    # ctx.add_response(str(index + 1))
+    assert cnd.exact_match("text")(ctx, actor)
+    assert not cnd.exact_match("text1")(ctx, actor)
+
+    assert cnd.regexp("t.*t")(ctx, actor)
+    assert not cnd.regexp("t.*t1")(ctx, actor)
+
+    assert cnd.agg([cnd.regexp("t.*t"), cnd.exact_match("text")], aggregate_func=all)(ctx, actor)
+    assert not cnd.agg([cnd.regexp("t.*t1"), cnd.exact_match("text")], aggregate_func=all)(ctx, actor)
+
+    assert cnd.any([cnd.regexp("t.*t1"), cnd.exact_match("text")])(ctx, actor)
+    assert not cnd.any([cnd.regexp("t.*t1"), cnd.exact_match("text1")])(ctx, actor)
+
+    assert cnd.all([cnd.regexp("t.*t"), cnd.exact_match("text")])(ctx, actor)
+    assert not cnd.all([cnd.regexp("t.*t1"), cnd.exact_match("text")])(ctx, actor)
+
+    assert cnd.neg(cnd.exact_match("text1"))(ctx, actor)
+    assert not cnd.neg(cnd.exact_match("text"))(ctx, actor)
+
+    assert cnd.has_last_labels(flow_labels=["flow"])(ctx, actor)
+    assert not cnd.has_last_labels(flow_labels=["flow1"])(ctx, actor)
+
+    assert cnd.has_last_labels(labels=[("flow", "node")])(ctx, actor)
+    assert not cnd.has_last_labels(labels=[("flow", "node1")])(ctx, actor)
+
+    assert cnd.true()(ctx, actor)
+    assert not cnd.false()(ctx, actor)

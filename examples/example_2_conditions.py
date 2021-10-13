@@ -1,7 +1,7 @@
 import logging
 import re
 
-from dff.core.keywords import TRANSITIONS, GRAPH, RESPONSE
+from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.core import Actor, Context
 import dff.conditions as cnd
 
@@ -29,7 +29,7 @@ logger = logging.getLogger(__name__)
 #           all(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=all)
 # - `negation` - return a negation of passed function
 #              `negation` has alias `neg`
-# - `isin_flow` - covered in the following examples.
+# - `has_last_labels` - covered in the following examples.
 # - `true` - returns true
 # - `false` - returns false
 
@@ -88,7 +88,7 @@ plot = {
                 # if the value is True then we will go to `node1`
                 # if the value is False then
                 # we will check a result of `predetermined_condition(True)` for `fallback_node`
-                "fallback_node": predetermined_condition(True),  # or you can use cnd.true
+                "fallback_node": predetermined_condition(True),  # or you can use cnd.true()
                 # last condition function will return true and will repeat fallback_node
                 # if complex_user_answer_condition return false
             },
