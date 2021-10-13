@@ -3,8 +3,8 @@ import itertools
 from typing import Callable
 
 
-from dff.core import Node
-from dff.core.keywords import TRANSITIONS, RESPONSE, PROCESSING, MISC
+from dff.core import Plot, Node
+from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
 
 
 def positive_test(samples, custom_class):
@@ -67,6 +67,14 @@ def test_node_creation():
     negative_test(samples, Node)
 
 
+def node_test(node):
+    assert list(node.transitions)[0] == ("", "node", float("-inf"))
+    assert isinstance(list(node.transitions.values())[0], Callable)
+    assert isinstance(node.response, Callable)
+    assert isinstance(node.processing, Callable)
+    assert node.misc == {"key": "val"}
+
+
 def test_node_exec():
     node = Node(
         **{
@@ -76,8 +84,21 @@ def test_node_exec():
             MISC: {"key": "val"},
         }
     )
-    assert list(node.transitions)[0] == ("", "node", float("-inf"))
-    assert isinstance(list(node.transitions.values())[0], Callable)
-    assert isinstance(node.response, Callable)
-    assert isinstance(node.processing, Callable)
-    assert node.misc == {"key": "val"}
+    node_test(node)
+
+
+def test_plot():
+    node_template = {
+        TRANSITIONS: {"node": std_func},
+        RESPONSE: "text",
+        PROCESSING: {1: std_func},
+        MISC: {"key": "val"},
+    }
+    plot = Plot(
+        plot={
+            GLOBAL: node_template.copy(),
+            "flow": {"node": node_template.copy()},
+        }
+    )
+    node_test(plot[GLOBAL][GLOBAL])
+    node_test(plot["flow"]["node"])

@@ -3,15 +3,12 @@
 import logging
 from typing import Callable, Optional, Any
 
-from pydantic import BaseModel, validator, validate_arguments, Extra, root_validator
+from pydantic import BaseModel, validator, Extra
 
-from .keywords import GLOBAL
 from .types import NodeLabelType, ConditionType
-from .normalization import normalize_node_label, normalize_response, normalize_processing, normalize_transitions
+from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_plot
 
 logger = logging.getLogger(__name__)
-# TODO: add tests
-
 
 class Node(BaseModel, extra=Extra.forbid):
     transitions: dict[NodeLabelType, ConditionType] = {}
@@ -27,33 +24,13 @@ class Node(BaseModel, extra=Extra.forbid):
 class Plot(BaseModel, extra=Extra.forbid):
     plot: dict[str, dict[str, Node]]
 
-    @root_validator(pre=True)
-    def preproc_global(cls, values):
-        if "plot" in values and GLOBAL in values["plot"]:
-            values["plot"][GLOBAL] = {GLOBAL: values["plot"][GLOBAL]}
-        return values
+    _normalize_plot = validator("plot", allow_reuse=True, pre=True)(normalize_plot)
 
-    @validator("plot")
-    def is_not_empty(cls, fields: dict) -> dict:
-        if not any(fields.values()):
-            raise ValueError("Plot does not have nodes")
-        return fields
+    def __getitem__(self, key):
+        return self.plot[key]
 
-    @validate_arguments
-    def get_node(self, node_label: NodeLabelType, flow_label: str = "") -> Optional[Node]:
-        normalized_node_label = normalize_node_label(node_label, flow_label)
-        flow_label = normalized_node_label[0]
-        node_label = normalized_node_label[1]
-        node = self.plot.get(flow_label, {}).get(node_label)
-        if node is None:
-            logger.warn(f"Unknown pair(flow_label:node_label) = {flow_label}:{node_label}")
-        return node
-
-    def __getitem__(self, k):
-        return self.plot[k]
-
-    def get(self, k, item=None):
-        return self.plot.get(k, item)
+    def get(self, key, item=None):
+        return self.plot.get(key, item)
 
     def keys(self):
         return self.plot.keys()

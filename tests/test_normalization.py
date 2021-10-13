@@ -1,9 +1,11 @@
 # %%
 from typing import Callable
 
+from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
 from dff.core.normalization import (
     normalize_condition,
     normalize_node_label,
+    normalize_plot,
     normalize_processing,
     normalize_response,
     normalize_transitions,
@@ -49,3 +51,21 @@ def test_normalize_processing():
     assert isinstance(normalize_processing({}), Callable)
     assert isinstance(normalize_processing({1: std_func}), Callable)
     assert isinstance(normalize_processing({1: std_func, 2: std_func}), Callable)
+
+
+def test_normalize_plot():
+    # TODO: Add full check for functions
+    node_template = {
+        TRANSITIONS: {"node": std_func},
+        RESPONSE: "text",
+        PROCESSING: {1: std_func},
+        MISC: {"key": "val"},
+    }
+    plot = {
+        GLOBAL: node_template.copy(),
+        "flow": {"node": node_template.copy()},
+    }
+    plot = normalize_plot(plot)
+    assert isinstance(plot, dict)
+    assert plot[GLOBAL][GLOBAL] == node_template
+    assert plot["flow"]["node"] == node_template

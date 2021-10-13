@@ -3,6 +3,7 @@ import logging
 from typing import Union, Callable, Optional, Any
 
 
+from .keywords import GLOBAL
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType
 
@@ -99,3 +100,14 @@ def normalize_processing(processing: Optional[dict[Any, Callable]]) -> Callable:
 
         return processing_handler
     raise NotImplementedError(f"Unexpected processing {processing}")
+
+
+@validate_arguments
+def normalize_plot(plot: dict[str, dict]) -> dict[str, dict]:
+    if isinstance(plot, dict):
+        if not any(plot.values()):
+            raise ValueError("Plot does not have nodes")
+        if GLOBAL in plot:
+            plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
+        return plot
+    raise NotImplementedError(f"Unexpected plot {plot}")
