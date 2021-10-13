@@ -9,6 +9,7 @@ from .types import NodeLabel2Type, NodeLabel3Type
 from .context import Context
 from .plot import Plot, Node
 from .normalization import normalize_node_label, normalize_response
+from .keywords import GLOBAL, LOCAL
 
 
 logger = logging.getLogger(__name__)
@@ -22,10 +23,11 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
 
 class Actor(BaseModel):
     plot: Union[Plot, dict]
-    start_node_label: NodeLabel3Type
-    fallback_node_label: Optional[NodeLabel3Type] = None
+    start_label: NodeLabel3Type
+    fallback_label: Optional[NodeLabel3Type] = None
     default_transition_priority: float = 1.0
     response_validation_flag: Optional[bool] = None
+    condition_handler: Optional[Callable] = None
     validation_logging_flag: bool = True
     pre_handlers: list[Callable] = []
     post_handlers: list[Callable] = []
@@ -34,10 +36,11 @@ class Actor(BaseModel):
     def __init__(
         self,
         plot: Union[Plot, dict],
-        start_node_label: NodeLabel2Type,
-        fallback_node_label: Optional[NodeLabel2Type] = None,
-        default_transition_priority: float = 1.0,
+        start_label: NodeLabel2Type,
+        fallback_label: Optional[NodeLabel2Type] = None,
+        transition_priority: float = 1.0,
         response_validation_flag: Optional[bool] = None,
+        condition_handler: Optional[Callable] = None,
         validation_logging_flag: bool = True,
         pre_handlers: list[Callable] = [],
         post_handlers: list[Callable] = [],
@@ -48,23 +51,25 @@ class Actor(BaseModel):
         plot = plot if isinstance(plot, Plot) else Plot(plot=plot)
 
         # node lables validation
-        start_node_label = normalize_node_label(start_node_label, flow_label="")
-        if plot.get_node(start_node_label) is None:
-            raise ValueError(f"Unkown {start_node_label=}")
-        if fallback_node_label is None:
-            fallback_node_label = start_node_label
+        start_label = normalize_node_label(start_label)
+        if plot.get(start_label[0], {}).get(start_label[1]) is None:
+            raise ValueError(f"Unkown {start_label=}")
+        if fallback_label is None:
+            fallback_label = start_label
         else:
-            fallback_node_label = normalize_node_label(fallback_node_label, flow_label="")
-            if plot.get_node(fallback_node_label) is None:
-                raise ValueError(f"Unkown {fallback_node_label}")
-
+            fallback_label = normalize_node_label(fallback_label)
+            if plot.get(fallback_label[0]).get(fallback_label[1]) is None:
+                raise ValueError(f"Unkown {fallback_label=}")
+        if condition_handler is None:
+            condition_handler = deep_copy_condition_handler
 
         super(Actor, self).__init__(
             plot=plot,
-            start_node_label=start_node_label,
-            fallback_node_label=fallback_node_label,
-            default_transition_priority=default_transition_priority,
+            start_label=start_label,
+            fallback_label=fallback_label,
+            transition_priority=transition_priority,
             response_validation_flag=response_validation_flag,
+            condition_handler=condition_handler,
             validation_logging_flag=validation_logging_flag,
             pre_handlers=pre_handlers,
             post_handlers=post_handlers,
@@ -79,62 +84,54 @@ class Actor(BaseModel):
     def __call__(
         self,
         ctx: Union[Context, dict, str] = {},
-        condition_handler: Optional[Callable] = None,
         *args,
         **kwargs,
     ) -> Union[Context, dict, str]:
         ctx = Context.cast(ctx)
         if not ctx.requests:
-            ctx.add_node_label(self.start_node_label[:2])
+            ctx.add_node_label(self.start_label[:2])
             ctx.add_request("")
-        if condition_handler is None:
-            condition_handler = deep_copy_condition_handler
 
         [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
-        last_node_label = (
-            normalize_node_label(ctx.last_node_label, "") if ctx.last_node_label else self.start_node_label
-        )
-        flow_label, node = self._get_node(last_node_label)
+        previous_label = normalize_node_label(ctx.last_node_label) if ctx.last_node_label else self.start_label
+        previous_node = self.get(previous_label[0], {}).get(previous_label[1])
+        ctx.actor_state["previous_label"] = previous_label
+        ctx.actor_state["previous_node"] = previous_node
 
-        # TODO: deepcopy for node_label
-        global_transitions = self.plot.get_transitions(True)
-        global_true_node_label = self._get_true_node_label(
-            global_transitions,
-            ctx,
-            condition_handler,
-            flow_label,
-            "global",
-        )
+        global_transitions = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
+        global_true_node_label = self._get_true_label(global_transitions, ctx, GLOBAL, "global")
 
-        local_transitions = node.get_transitions(flow_label, False)
-        local_true_node_label = self._get_true_node_label(
-            local_transitions,
-            ctx,
-            condition_handler,
-            flow_label,
-            "local",
-        )
+        local_transitions = self.plot.get(previous_node[0], {}).get(LOCAL, Node()).transitions
+        local_true_node_label = self._get_true_label(local_transitions, ctx, previous_node[0], "local")
 
-        true_node_label = self._choose_true_node_label(local_true_node_label, global_true_node_label)
+        node_transitions = self.plot.get(previous_node[0], {}).get(previous_node[1], Node()).transitions
+        node_true_node_label = self._get_true_label(node_transitions, ctx, previous_node[0], "node")
 
-        ctx.add_node_label(true_node_label[:2])
-        flow_label, next_node = self._get_node(true_node_label)
-        processing = next_node.get_processing()
-        _, tmp_node = processing(true_node_label, next_node, ctx, self, *args, **kwargs)
+        next_label = self._choose_label(node_true_node_label, local_true_node_label)
+        next_label = self._choose_label(next_label, global_true_node_label)
 
-        response = tmp_node.get_response()
-        text = response(ctx, self, *args, **kwargs)
-        ctx.add_response(text)
+        ctx.add_node_label(next_label[:2])
+
+        next_node = self.plot.get(next_label[0], {}).get(next_label[1])
+        if next_node is None:
+            next_label = self.start_label
+            next_node = self.plot.get(next_label[0], {}).get(next_label[1])
+        ctx.actor_state["next_label"] = next_label
+        ctx.actor_state["next_node"] = next_node
+
+        ctx = next_node.processing(ctx, self, *args, **kwargs)
+
+        response = ctx.actor_state["next_node"].response(ctx, self, *args, **kwargs)
+        ctx.add_response(response)
 
         [handler(ctx, self, *args, **kwargs) for handler in self.post_handlers]
         return ctx
 
     @validate_arguments
-    def _get_true_node_label(
+    def _get_true_label(
         self,
         transitions: dict,
         ctx: Context,
-        condition_handler: Callable,
         flow_label: str,
         transition_info: str = "",
         *args,
@@ -142,7 +139,7 @@ class Actor(BaseModel):
     ) -> Optional[NodeLabel3Type]:
         true_node_labels = []
         for node_label, condition in transitions.items():
-            if condition_handler(condition, ctx, self, *args, **kwargs):
+            if self.condition_handler(condition, ctx, self, *args, **kwargs):
                 if isinstance(node_label, Callable):
                     node_label = node_label(ctx, self, *args, **kwargs)
                     # TODO: explisit handling of errors
@@ -150,39 +147,24 @@ class Actor(BaseModel):
                         continue
                 node_label = normalize_node_label(node_label, flow_label)
                 true_node_labels += [node_label]
-        true_node_labels.sort(key=lambda label: -label[2])
+        true_node_labels.sort(key=lambda label: -(self.transition_priority if label[2] == float("-inf") else label[2]))
         true_node_label = true_node_labels[0] if true_node_labels else None
         logger.debug(f"{transition_info} transitions sorted by priority = {true_node_labels}")
         return true_node_label
 
     @validate_arguments
-    def _get_node(
+    def _choose_label(
         self,
-        node_label: NodeLabel3Type,
-    ) -> tuple[str, Node]:
-        node = self.plot.get_node(node_label)
-        if node is None:
-            node, node_label = self.plot.get_node(self.start_node_label), self.start_node_label
-        flow_label = node_label[0]
-        return flow_label, node
-
-    @validate_arguments
-    def _choose_true_node_label(
-        self,
-        local_true_node_label: Optional[NodeLabel3Type],
-        global_true_node_label: Optional[NodeLabel3Type],
+        specific_label: Optional[NodeLabel3Type],
+        general_label: Optional[NodeLabel3Type],
     ) -> NodeLabel3Type:
-        if all([local_true_node_label, global_true_node_label]):
-            true_node_label = (
-                local_true_node_label
-                if local_true_node_label[2] >= global_true_node_label[2]
-                else global_true_node_label
-            )
-        elif any([local_true_node_label, global_true_node_label]):
-            true_node_label = local_true_node_label if local_true_node_label else global_true_node_label
+        if all([specific_label, general_label]):
+            chosen_label = specific_label if specific_label[2] >= general_label[2] else general_label
+        elif any([specific_label, general_label]):
+            chosen_label = specific_label if specific_label else general_label
         else:
-            true_node_label = self.fallback_node_label
-        return true_node_label
+            chosen_label = self.fallback_label
+        return chosen_label
 
     @validate_arguments
     def validate_plot(
@@ -191,30 +173,31 @@ class Actor(BaseModel):
         logging_flag: bool = True,
     ):
         # TODO: plot has to not contain priority == -inf, because it uses for miss values
-        transitions = self.plot.get_transitions(-1, False) | self.plot.get_transitions(-1, True)
+        labels = []
+        conditions = []
+        for flow in self.plot.values():
+            for node in flow.values():
+                labels += list(node.transitions.keys())
+                conditions += list(node.transitions.values())
+
         error_msgs = []
-        for callable_node_label, condition in transitions.items():
+        for label, condition in zip(labels, conditions):
             ctx = Context()
             ctx.validation = True
             ctx.add_request("text")
             actor = self.copy(deep=True)
 
-            if hasattr(callable_node_label, "update_forward_refs"):
-                callable_node_label.update_forward_refs()
-            node_label = (
-                callable_node_label(ctx, actor) if isinstance(callable_node_label, Callable) else callable_node_label
-            )
+            label = label(ctx, actor) if isinstance(label, Callable) else label
 
-            # validate node_label
             try:
-                node = self.plot.get_node(node_label)
+                node = self.plot.get(label[0], {}).get(label[1], Node())
             except Exception as exc:
                 node = None
-                msg = f"Got exception '''{exc}''' for {callable_node_label=}"
+                msg = f"Got exception '''{exc}''' for {label=}"
                 error_handler(error_msgs, msg, exc, logging_flag)
 
             if not isinstance(node, Node):
-                msg = f"Could not find node with node_label={node_label[:2]}"
+                msg = f"Could not find node with {label=}"
                 error_handler(error_msgs, msg, None, logging_flag)
                 continue
 
@@ -227,13 +210,13 @@ class Actor(BaseModel):
                     if isinstance(response_result, Callable):
                         msg = (
                             f"Expected type of response_result needed not Callable but got {type(response_result)=}"
-                            f" for node_label={node_label[:2]}"
+                            f" for {label=}"
                         )
                         error_handler(error_msgs, msg, None, logging_flag)
                 except Exception as exc:
                     msg = (
                         f"Got exception '''{exc}''' during response execution "
-                        f"for {node_label=} and {node.response=}"
+                        f"for {label=} and {node.response=}"
                     )
                     error_handler(error_msgs, msg, exc, logging_flag)
                 if n_errors != len(error_msgs) and response_validation_flag is None:
@@ -242,11 +225,11 @@ class Actor(BaseModel):
                         "It's service message can be switched off by manually setting response_validation_flag"
                     )
 
-            # validate condition
+        # validate conditions
             try:
                 bool(condition(ctx, actor))
             except Exception as exc:
-                msg = f"Got exception '''{exc}''' during condition execution for {node_label=}"
+                msg = f"Got exception '''{exc}''' during condition execution for {label=}"
                 error_handler(error_msgs, msg, exc, logging_flag)
         return error_msgs
 
