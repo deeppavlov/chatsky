@@ -4,7 +4,7 @@ from typing import Callable
 from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
 from dff.core.normalization import (
     normalize_condition,
-    normalize_node_label,
+    normalize_label,
     normalize_plot,
     normalize_processing,
     normalize_response,
@@ -16,13 +16,13 @@ def std_func(ctx, actor, *args, **kwargs):
     pass
 
 
-def test_normalize_node_label():
+def test_normalize_label():
     # TODO: Add full check for functions
-    assert isinstance(normalize_node_label(std_func), Callable)
-    assert normalize_node_label("node", "flow") == ("flow", "node", float("-inf"))
-    assert normalize_node_label(("flow", "node"), "flow") == ("flow", "node", float("-inf"))
-    assert normalize_node_label(("flow", "node", 1.0), "flow") == ("flow", "node", 1.0)
-    assert normalize_node_label(("node", 1.0), "flow") == ("flow", "node", 1.0)
+    assert isinstance(normalize_label(std_func), Callable)
+    assert normalize_label("node", "flow") == ("flow", "node", float("-inf"))
+    assert normalize_label(("flow", "node"), "flow") == ("flow", "node", float("-inf"))
+    assert normalize_label(("flow", "node", 1.0), "flow") == ("flow", "node", 1.0)
+    assert normalize_label(("node", 1.0), "flow") == ("flow", "node", 1.0)
 
 
 def test_normalize_condition():

@@ -17,32 +17,32 @@ Actor = BaseModel
 
 
 @validate_arguments
-def normalize_node_label(node_label: NodeLabelType, default_flow_label: str = "") -> Union[Callable, NodeLabel3Type]:
-    if isinstance(node_label, Callable):
+def normalize_label(label: NodeLabelType, default_flow_label: str = "") -> Union[Callable, NodeLabel3Type]:
+    if isinstance(label, Callable):
 
         @validate_arguments
-        def get_node_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        def get_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
             try:
-                res = node_label(ctx, actor, *args, **kwargs)
+                res = label(ctx, actor, *args, **kwargs)
                 res = (str(res[0]), str(res[1]), float(res[2]))
                 node = actor.plot.get_node(res)
                 if not node:
                     raise Exception(f"Unknown transitions {res} for {actor.plot}")
             except Exception as exc:
                 res = None
-                logger.error(f"Exception {exc} of function {node_label}", exc_info=exc)
+                logger.error(f"Exception {exc} of function {label}", exc_info=exc)
             return res
 
-        return get_node_label_handler  # create wrap to get uniq key for dictionary
-    elif isinstance(node_label, str):
-        return (default_flow_label, node_label, float("-inf"))
-    elif isinstance(node_label, tuple) and len(node_label) == 2 and isinstance(node_label[-1], float):
-        return (default_flow_label, node_label[0], node_label[-1])
-    elif isinstance(node_label, tuple) and len(node_label) == 2 and isinstance(node_label[-1], str):
-        return (node_label[0], node_label[-1], float("-inf"))
-    elif isinstance(node_label, tuple) and len(node_label) == 3:
-        return (node_label[0], node_label[1], node_label[2])
-    raise NotImplementedError(f"Unexpected node label {node_label}")
+        return get_label_handler  # create wrap to get uniq key for dictionary
+    elif isinstance(label, str):
+        return (default_flow_label, label, float("-inf"))
+    elif isinstance(label, tuple) and len(label) == 2 and isinstance(label[-1], float):
+        return (default_flow_label, label[0], label[-1])
+    elif isinstance(label, tuple) and len(label) == 2 and isinstance(label[-1], str):
+        return (label[0], label[-1], float("-inf"))
+    elif isinstance(label, tuple) and len(label) == 3:
+        return (label[0], label[1], label[2])
+    raise NotImplementedError(f"Unexpected node label {label}")
 
 
 @validate_arguments
@@ -66,8 +66,8 @@ def normalize_transitions(
     transitions: dict[NodeLabelType, ConditionType]
 ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
     transitions = {
-        normalize_node_label(node_label): normalize_condition(condition)
-        for node_label, condition in transitions.items()
+        normalize_label(label): normalize_condition(condition)
+        for label, condition in transitions.items()
     }
     return transitions
 

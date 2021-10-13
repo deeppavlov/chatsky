@@ -50,7 +50,7 @@ def upper_case_response(response: str):
 
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     return {
-        "previous_node": list(ctx.node_labels.values())[-2],
+        "previous_node": list(ctx.labels.values())[-2],
         "last_request": ctx.last_request,
     }
 
@@ -87,8 +87,8 @@ plot = {
 
 actor = Actor(
     plot,
-    start_node_label=("greeting_flow", "start_node"),
-    fallback_node_label=("greeting_flow", "fallback_node"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 

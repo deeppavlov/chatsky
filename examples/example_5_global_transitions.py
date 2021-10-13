@@ -15,9 +15,9 @@ def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 
 
-def high_priority_node_transition(flow_label, node_label):
+def high_priority_node_transition(flow_label, label):
     def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        return (flow_label, node_label, 2.0)
+        return (flow_label, label, 2.0)
 
     return transition
 
@@ -85,8 +85,8 @@ plot = {
 
 actor = Actor(
     plot,
-    start_node_label=("global_flow", "start_node"),
-    fallback_node_label=("global_flow", "fallback_node"),
+    start_label=("global_flow", "start_node"),
+    fallback_label=("global_flow", "fallback_node"),
     default_transition_priority=1.0,  # default_transition_priority == 1 by dafault
 )
 

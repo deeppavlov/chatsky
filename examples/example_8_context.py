@@ -32,7 +32,7 @@ plot = {
 
 
 ctx = Context()
-actor = Actor(plot, start_node_label=("start", "start"))
+actor = Actor(plot, start_label=("start", "start"))
 ctx.misc["prompt"] = "Lenght of request "
 while True:
     in_text = input("you: ")

@@ -55,13 +55,13 @@ plot = {
 
 # An actor is an object that processes user input replicas and returns responses
 # To create the actor, you need to pass the script of the dialogue `plot`
-# And pass the initial node `start_node_label`
-# and the node to which the actor will go in case of an error `fallback_node_label`
-# If `fallback_node_label` is not set, then its value becomes equal to `start_node_label` by default
+# And pass the initial node `start_label`
+# and the node to which the actor will go in case of an error `fallback_label`
+# If `fallback_label` is not set, then its value becomes equal to `start_label` by default
 actor = Actor(
     plot,
-    start_node_label=("greeting_flow", "start_node"),
-    fallback_node_label=("greeting_flow", "fallback_node"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 

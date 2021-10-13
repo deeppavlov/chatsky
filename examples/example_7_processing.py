@@ -32,20 +32,20 @@ def create_transitions():
     }
 
 
-def add_node_label_processing(
-    node_label: str,
+def add_label_processing(
+    label: str,
     node: Node,
     ctx: Context,
     actor: Actor,
     *args,
     **kwargs,
 ) -> Optional[tuple[str, Node]]:
-    node.response = f"{node_label}: {node.response}"
-    return node_label, node
+    node.response = f"{label}: {node.response}"
+    return label, node
 
 
 def add_time_processing(
-    node_label: str,
+    label: str,
     node: Node,
     ctx: Context,
     actor: Actor,
@@ -54,7 +54,7 @@ def add_time_processing(
 ) -> Optional[tuple[str, Node]]:
     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
     node.response = f"{timestamp}: {node.response}"
-    return node_label, node
+    return label, node
 
 
 # a dialog script
@@ -68,17 +68,17 @@ plot = {
     },
     "greeting": {
         "step_0": {
-            PROCESSING: {1: add_node_label_processing, 2: add_time_processing},
+            PROCESSING: {1: add_label_processing, 2: add_time_processing},
             RESPONSE: "hi",
             TRANSITIONS: {trn.forward(): always_true},
         },
         "step_1": {
-            PROCESSING: {1: add_node_label_processing, 2: add_time_processing},
+            PROCESSING: {1: add_label_processing, 2: add_time_processing},
             RESPONSE: "what's up",
             TRANSITIONS: {trn.forward(): always_true},
         },
         "step_2": {
-            PROCESSING: {1: add_node_label_processing, 2: add_time_processing},
+            PROCESSING: {1: add_label_processing, 2: add_time_processing},
             RESPONSE: "ok",
         },
     },
@@ -86,7 +86,7 @@ plot = {
 
 
 ctx = Context()
-actor = Actor(plot, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
+actor = Actor(plot, start_label=("root", "start"), fallback_label=("root", "fallback"))
 while True:
     in_text = input("you: ")
     ctx.add_request(in_text)

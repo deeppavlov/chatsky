@@ -92,9 +92,9 @@ def negation(condition: Callable, *args, **kwargs):
 @validate_arguments
 def isin_flow(flows: list[str] = [], nodes: list[tuple[str, str]] = [], *args, **kwargs):
     def isin_flow_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        node_label = list(ctx.node_labels.values())
-        node_label = node_label[-1][:2] if node_label else (None, None)
-        return node_label[0] in flows or node_label in nodes
+        label = list(ctx.labels.values())
+        label = label[-1][:2] if label else (None, None)
+        return label[0] in flows or label in nodes
 
     return isin_flow_condition_handler
 

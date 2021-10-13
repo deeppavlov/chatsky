@@ -48,7 +48,7 @@ plot = {
 
 def test_transitions():
     ctx = Context()
-    actor = Actor(plot, start_node_label=("root", "start"), fallback_node_label=("root", "fallback"))
+    actor = Actor(plot, start_label=("root", "start"), fallback_label=("root", "fallback"))
     for in_text, out_text in [
         ("start", "s"),
         ("left", "l2"),

@@ -36,7 +36,7 @@ plot = {
 }
 
 
-actor = Actor(plot, start_node_label=("flow_start", "node_start"))
+actor = Actor(plot, start_label=("flow_start", "node_start"))
 
 
 testing_dialog = [

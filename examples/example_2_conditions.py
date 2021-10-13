@@ -98,8 +98,8 @@ plot = {
 
 actor = Actor(
     plot,
-    start_node_label=("greeting_flow", "start_node"),
-    fallback_node_label=("greeting_flow", "fallback_node"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 
