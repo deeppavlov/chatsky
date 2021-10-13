@@ -21,7 +21,7 @@ def sort_dict_keys(dictionary: dict) -> dict:
 @validate_arguments
 def get_last_index(dictionary: dict) -> int:
     indexes = list(dictionary)
-    return indexes[-1] if indexes else 0
+    return indexes[-1] if indexes else -1
 
 
 class Context(BaseModel):
