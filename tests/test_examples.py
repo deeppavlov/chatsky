@@ -16,10 +16,10 @@ def test_responses():
     run_test()
 
 
-# def test_transitions():
-#     from .examples.example_4_transitions import run_test
+def test_transitions():
+    from .examples.example_4_transitions import run_test
 
-#     run_test()
+    run_test()
 
 
 # def test_global_transitions():
