@@ -87,7 +87,7 @@ actor = Actor(
     plot,
     start_label=("global_flow", "start_node"),
     fallback_label=("global_flow", "fallback_node"),
-    default_transition_priority=1.0,  # default_transition_priority == 1 by dafault
+    transition_priority=1.0,
 )
 
 

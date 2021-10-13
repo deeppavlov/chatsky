@@ -117,6 +117,7 @@ class Actor(BaseModel):
         ctx.actor_state["next_label"] = next_label
         ctx.actor_state["next_node"] = next_node
         ctx.add_label(next_label[:2])
+        logger.error(f"{ctx=}")
 
         ctx = next_node.processing(ctx, self, *args, **kwargs) if next_node.processing else ctx
 
@@ -124,6 +125,7 @@ class Actor(BaseModel):
         ctx.add_response(response)
 
         [handler(ctx, self, *args, **kwargs) for handler in self.post_handlers]
+        ctx.actor_state.clear()
         return ctx
 
     @validate_arguments
@@ -146,8 +148,14 @@ class Actor(BaseModel):
                         continue
                 label = normalize_label(label, flow_label)
                 true_labels += [label]
-        true_labels.sort(key=lambda label: -(self.transition_priority if label[2] == float("-inf") else label[2]))
-        true_label = (flow_label,) + true_labels[0][1:] if true_labels else None
+        true_labels = [
+            ((label[0] if label[0] else flow_label),)
+            + label[1:2]
+            + ((self.transition_priority if label[2] == float("-inf") else label[2]),)
+            for label in true_labels
+        ]
+        true_labels.sort(key=lambda label: -label[2])
+        true_label = true_labels[0] if true_labels else None
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
 
