@@ -85,25 +85,25 @@ class Actor(BaseModel):
 
         # get previous node
         ctx = self._get_previous_node(ctx, *args, **kwargs)
-        # self._run_handlers(self, ctx, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
         ctx = self._get_true_labels(ctx, *args, **kwargs)
-        # self._run_handlers(self, ctx, ActorStage.GET_TRUE_LABEL, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.GET_TRUE_LABEL, *args, **kwargs)
 
         # get next node
         ctx = self._get_next_node(ctx, *args, **kwargs)
-        # self._run_handlers(self, ctx, ActorStage.GET_NEXT_NODE, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.GET_NEXT_NODE, *args, **kwargs)
 
         ctx.add_label(ctx.a_s["next_label"][:2])
 
         # run processing
         ctx = self._run_processing(ctx, *args, **kwargs)
-        # self._run_handlers(self, ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
 
         # create response
         ctx.a_s["response"] = ctx.a_s["processed_node"].response(ctx, self, *args, **kwargs)
-        # self._run_handlers(self, ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.a_s["response"])
 
         # exec post_handlers
