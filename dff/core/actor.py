@@ -119,9 +119,10 @@ class Actor(BaseModel):
         ctx.add_label(next_label[:2])
         logger.error(f"{ctx=}")
 
+        ctx.actor_state["processed_node"] = ctx.actor_state["next_node"]
         ctx = next_node.processing(ctx, self, *args, **kwargs) if next_node.processing else ctx
 
-        response = ctx.actor_state["next_node"].response(ctx, self, *args, **kwargs)
+        response = ctx.actor_state["processed_node"].response(ctx, self, *args, **kwargs)
         ctx.add_response(response)
 
         [handler(ctx, self, *args, **kwargs) for handler in self.post_handlers]
