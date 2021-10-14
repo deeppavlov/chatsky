@@ -29,7 +29,7 @@ class Actor(BaseModel):
     response_validation_flag: Optional[bool] = None
     condition_handler: Optional[Callable] = None
     validation_logging_flag: bool = True
-    # handlers: dict[ActorStage : list[Callable]] = {}
+    handlers: dict[ActorStage, list[Callable]] = {}
 
     @validate_arguments
     def __init__(
@@ -41,7 +41,7 @@ class Actor(BaseModel):
         response_validation_flag: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         validation_logging_flag: bool = True,
-        # handlers: dict[ActorStage : list[Callable]] = {},
+        handlers: dict[ActorStage, list[Callable]] = {},
         *args,
         **kwargs,
     ):
@@ -69,7 +69,7 @@ class Actor(BaseModel):
             response_validation_flag=response_validation_flag,
             condition_handler=condition_handler,
             validation_logging_flag=validation_logging_flag,
-            # handlers=handlers,
+            handlers=handlers,
         )
         errors = self.validate_plot(response_validation_flag, validation_logging_flag)
         if errors:
