@@ -11,6 +11,7 @@ NodeLabelType = Union[Callable, NodeLabelTupledType, str]
 ConditionType = Callable
 
 
+# TODO: add description for ActorStage
 class ActorStage(Enum):
     GET_PREVIOUS_NODE = auto()
     GET_TRUE_LABEL = auto()
