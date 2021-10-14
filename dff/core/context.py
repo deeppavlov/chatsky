@@ -101,5 +101,9 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
+    @property
+    def a_s(self) -> dict[str, Any]:
+        return self.actor_state
+
 
 Context.update_forward_refs()

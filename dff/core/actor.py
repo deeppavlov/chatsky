@@ -4,7 +4,7 @@ from typing import Union, Callable, Optional
 
 from pydantic import BaseModel, validate_arguments
 
-from .types import NodeLabel2Type, NodeLabel3Type
+from .types import ActorStage, NodeLabel2Type, NodeLabel3Type
 
 from .context import Context
 from .plot import Plot, Node
@@ -29,8 +29,7 @@ class Actor(BaseModel):
     response_validation_flag: Optional[bool] = None
     condition_handler: Optional[Callable] = None
     validation_logging_flag: bool = True
-    pre_handlers: list[Callable] = []
-    post_handlers: list[Callable] = []
+    # handlers: dict[ActorStage : list[Callable]] = {}
 
     @validate_arguments
     def __init__(
@@ -42,8 +41,7 @@ class Actor(BaseModel):
         response_validation_flag: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         validation_logging_flag: bool = True,
-        pre_handlers: list[Callable] = [],
-        post_handlers: list[Callable] = [],
+        # handlers: dict[ActorStage : list[Callable]] = {},
         *args,
         **kwargs,
     ):
@@ -71,8 +69,7 @@ class Actor(BaseModel):
             response_validation_flag=response_validation_flag,
             condition_handler=condition_handler,
             validation_logging_flag=validation_logging_flag,
-            pre_handlers=pre_handlers,
-            post_handlers=post_handlers,
+            # handlers=handlers,
         )
         errors = self.validate_plot(response_validation_flag, validation_logging_flag)
         if errors:
@@ -81,52 +78,95 @@ class Actor(BaseModel):
             )
 
     @validate_arguments
-    def __call__(
-        self,
-        ctx: Union[Context, dict, str] = {},
-        *args,
-        **kwargs,
-    ) -> Union[Context, dict, str]:
+    def __call__(self, ctx: Union[Context, dict, str] = {}, *args, **kwargs) -> Union[Context, dict, str]:
+
+        # context init
+        ctx = self._context_init(ctx, *args, **kwargs)
+
+        # get previous node
+        ctx = self._get_previous_node(ctx, *args, **kwargs)
+        # self._run_handlers(self, ctx, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
+
+        # get true labels for scopes (GLOBAL, LOCAL, NODE)
+        ctx = self._get_true_labels(ctx, *args, **kwargs)
+        # self._run_handlers(self, ctx, ActorStage.GET_TRUE_LABEL, *args, **kwargs)
+
+        # get next node
+        ctx = self._get_next_node(ctx, *args, **kwargs)
+        # self._run_handlers(self, ctx, ActorStage.GET_NEXT_NODE, *args, **kwargs)
+
+        ctx.add_label(ctx.a_s["next_label"][:2])
+
+        # run processing
+        ctx = self._run_processing(ctx, *args, **kwargs)
+        # self._run_handlers(self, ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
+
+        # create response
+        ctx.a_s["response"] = ctx.a_s["processed_node"].response(ctx, self, *args, **kwargs)
+        # self._run_handlers(self, ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
+        ctx.add_response(ctx.a_s["response"])
+
+        # exec post_handlers
+        ctx.a_s.clear()
+        return ctx
+
+    @validate_arguments
+    def _context_init(self, ctx: Context, *args, **kwargs) -> Context:
         ctx = Context.cast(ctx)
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
             ctx.add_request("")
+        return ctx
 
-        [handler(ctx, self, *args, **kwargs) for handler in self.pre_handlers]
-        previous_label = normalize_label(ctx.last_label) if ctx.last_label else self.start_label
-        previous_node = self.plot.get(previous_label[0], {}).get(previous_label[1])
-        ctx.actor_state["previous_label"] = previous_label
-        ctx.actor_state["previous_node"] = previous_node
+    @validate_arguments
+    def _get_previous_node(self, ctx: Context, *args, **kwargs) -> Context:
+        ctx.a_s["previous_label"] = normalize_label(ctx.last_label) if ctx.last_label else self.start_label
+        ctx.a_s["previous_node"] = self.plot.get(ctx.a_s["previous_label"][0], {}).get(ctx.a_s["previous_label"][1])
+        return ctx
 
-        global_transitions = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
-        global_true_label = self._get_true_label(global_transitions, ctx, GLOBAL, "global")
+    @validate_arguments
+    def _get_true_labels(self, ctx: Context, *args, **kwargs) -> Context:
+        # GLOBAL
+        ctx.a_s["global_transitions"] = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
+        ctx.a_s["global_true_label"] = self._get_true_label(ctx.a_s["global_transitions"], ctx, GLOBAL, "global")
 
-        local_transitions = self.plot.get(previous_label[0], {}).get(LOCAL, Node()).transitions
-        local_true_label = self._get_true_label(local_transitions, ctx, previous_label[0], "local")
+        # LOCAL
+        ctx.a_s["local_transitions"] = self.plot.get(ctx.a_s["previous_label"][0], {}).get(LOCAL, Node()).transitions
+        ctx.a_s["local_true_label"] = self._get_true_label(
+            ctx.a_s["local_transitions"],
+            ctx,
+            ctx.a_s["previous_label"][0],
+            "local",
+        )
 
-        node_transitions = self.plot.get(previous_label[0], {}).get(previous_label[1], Node()).transitions
-        node_true_label = self._get_true_label(node_transitions, ctx, previous_label[0], "node")
+        # NODE
+        ctx.a_s["node_transitions"] = (
+            self.plot.get(ctx.a_s["previous_label"][0], {}).get(ctx.a_s["previous_label"][1], Node()).transitions
+        )
+        ctx.a_s["node_true_label"] = self._get_true_label(
+            ctx.a_s["node_transitions"],
+            ctx,
+            ctx.a_s["previous_label"][0],
+            "node",
+        )
+        return ctx
 
-        next_label = self._choose_label(node_true_label, local_true_label)
-        next_label = self._choose_label(next_label, global_true_label)
+    @validate_arguments
+    def _get_next_node(self, ctx: Context, *args, **kwargs) -> Context:
+        # choose next label
+        ctx.a_s["next_label"] = self._choose_label(ctx.a_s["node_true_label"], ctx.a_s["local_true_label"])
+        ctx.a_s["next_label"] = self._choose_label(ctx.a_s["next_label"], ctx.a_s["global_true_label"])
+        # get next node
+        ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
+        if ctx.a_s["next_node"] is None:
+            ctx.a_s["next_label"] = self.start_label
+            ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
+        return ctx
 
-        next_node = self.plot.get(next_label[0], {}).get(next_label[1])
-        if next_node is None:
-            next_label = self.start_label
-            next_node = self.plot.get(next_label[0], {}).get(next_label[1])
-        ctx.actor_state["next_label"] = next_label
-        ctx.actor_state["next_node"] = next_node
-        ctx.add_label(next_label[:2])
-        logger.error(f"{ctx=}")
-
-        ctx.actor_state["processed_node"] = ctx.actor_state["next_node"]
-        ctx = next_node.processing(ctx, self, *args, **kwargs) if next_node.processing else ctx
-
-        response = ctx.actor_state["processed_node"].response(ctx, self, *args, **kwargs)
-        ctx.add_response(response)
-
-        [handler(ctx, self, *args, **kwargs) for handler in self.post_handlers]
-        ctx.actor_state.clear()
+    @validate_arguments
+    def _run_processing(self, ctx: Context, *args, **kwargs) -> Context:
+        ctx.a_s["processed_node"] = ctx.a_s["next_node"].copy()
+        ctx = ctx.a_s["next_node"].processing(ctx, self, *args, **kwargs) if ctx.a_s["next_node"].processing else ctx
         return ctx
 
     @validate_arguments
@@ -159,6 +199,11 @@ class Actor(BaseModel):
         true_label = true_labels[0] if true_labels else None
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
+
+    @validate_arguments
+    def _run_handlers(self, ctx, actor_stade: ActorStage, *args, **kwargs):
+        pass
+        # [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
 
     @validate_arguments
     def _choose_label(
