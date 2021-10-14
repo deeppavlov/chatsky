@@ -5,7 +5,7 @@ from typing import Any
 
 from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.core import Actor, Context
-import dff.response as rsp
+import dff.responses as rsp
 import dff.conditions as cnd
 
 from examples import example_1_basics
