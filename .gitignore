@@ -19,7 +19,6 @@ GlobalUserTableAccessor*
 memory_debugging*
 opening_database*
 dff/modules/emora
-/stupid.py
 _globals.py
 venv
 .vscode
