@@ -10,6 +10,7 @@ from .normalization import normalize_response, normalize_processing, normalize_t
 
 logger = logging.getLogger(__name__)
 
+
 class Node(BaseModel, extra=Extra.forbid):
     transitions: dict[NodeLabelType, ConditionType] = {}
     response: Optional[Any] = None

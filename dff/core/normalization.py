@@ -65,10 +65,7 @@ def normalize_condition(condition: ConditionType) -> Callable:
 def normalize_transitions(
     transitions: dict[NodeLabelType, ConditionType]
 ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
-    transitions = {
-        normalize_label(label): normalize_condition(condition)
-        for label, condition in transitions.items()
-    }
+    transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
     return transitions
 
 

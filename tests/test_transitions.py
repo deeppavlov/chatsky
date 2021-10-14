@@ -100,6 +100,7 @@
 from dff.core import Context, Actor
 from dff.transitions import forward, repeat, previous, to_fallback, to_start, backward
 
+
 def test_transitions():
     ctx = Context()
     ctx.add_label(["flow", "node1"])
@@ -107,7 +108,7 @@ def test_transitions():
     ctx.add_label(["flow", "node3"])
     ctx.add_label(["flow", "node2"])
     actor = Actor(
-        plot={"flow": {"node1": {}, "node2": {}, "node3": {}},"service": {"start": {}, "fallback": {}}},
+        plot={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),
     )
@@ -121,8 +122,8 @@ def test_transitions():
 
     ctx.add_label(["flow", "node3"])
     assert forward(99)(ctx, actor) == ("flow", "node1", 99)
-    assert forward(99,cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
+    assert forward(99, cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
 
     ctx.add_label(["flow", "node1"])
     assert backward(99)(ctx, actor) == ("flow", "node3", 99)
-    assert backward(99,cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
+    assert backward(99, cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
