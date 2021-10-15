@@ -8,7 +8,7 @@ def test_conditions():
     actor = Actor(plot={"flow": {"node": {}}}, start_label=("flow", "node"))
     ctx.add_request("text")
     ctx.add_label(["flow", "node"])
-    # ctx.add_response(str(index + 1))
+
     assert cnd.exact_match("text")(ctx, actor)
     assert not cnd.exact_match("text1")(ctx, actor)
 

@@ -13,8 +13,9 @@ ConditionType = Callable
 
 # TODO: add description for ActorStage
 class ActorStage(Enum):
+    CONTEXT_INIT = auto()
     GET_PREVIOUS_NODE = auto()
-    GET_TRUE_LABEL = auto()
+    GET_TRUE_LABELS = auto()
     GET_NEXT_NODE = auto()
     RUN_PROCESSING = auto()
     CREATE_RESPONSE = auto()

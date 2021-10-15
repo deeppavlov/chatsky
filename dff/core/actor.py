@@ -82,6 +82,7 @@ class Actor(BaseModel):
 
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.CONTEXT_INIT, *args, **kwargs)
 
         # get previous node
         ctx = self._get_previous_node(ctx, *args, **kwargs)
@@ -89,7 +90,7 @@ class Actor(BaseModel):
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
         ctx = self._get_true_labels(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.GET_TRUE_LABEL, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
 
         # get next node
         ctx = self._get_next_node(ctx, *args, **kwargs)
