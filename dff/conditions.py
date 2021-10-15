@@ -18,10 +18,7 @@ logger = logging.getLogger(__name__)
 def exact_match(match: Any, *args, **kwargs) -> Callable:
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        try:
-            return match == request
-        except Exception as exc:
-            logger.error(f"Exception {exc} for {match=} and {request=}", exc_info=exc)
+        return match == request
 
     return exact_match_condition_handler
 
@@ -32,10 +29,7 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 
     def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        try:
-            return bool(pattern.search(request))
-        except Exception as exc:
-            logger.error(f"Exception {exc} for {pattern=} and {request=}", exc_info=exc)
+        return bool(pattern.search(request))
 
     return regexp_condition_handler
 
@@ -44,7 +38,7 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 def check_cond_seq(cond_seq: list):
     for cond in cond_seq:
         if not isinstance(cond, Callable):
-            raise Exception(f"{cond_seq=} has to consist of callable objects")
+            raise TypeError(f"{cond_seq=} has to consist of callable objects")
 
 
 _any = any

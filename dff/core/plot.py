@@ -43,4 +43,4 @@ class Plot(BaseModel, extra=Extra.forbid):
         return self.plot.values()
 
     def __iter__(self):
-        return self.plot
+        return self.plot.__iter__()

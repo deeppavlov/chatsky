@@ -35,3 +35,13 @@ def test_conditions():
 
     assert cnd.true()(ctx, actor)
     assert not cnd.false()(ctx, actor)
+
+    try:
+        cnd.any([123])
+    except TypeError:
+        pass
+
+    def failed_cond_func(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        raise ValueError("Failed cnd")
+
+    assert not cnd.any([failed_cond_func])(ctx, actor)

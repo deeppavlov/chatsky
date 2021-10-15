@@ -102,3 +102,6 @@ def test_plot():
     )
     node_test(plot[GLOBAL][GLOBAL])
     node_test(plot["flow"]["node"])
+    assert list(plot.keys()) == [GLOBAL, "flow"]
+    assert list(plot) == [GLOBAL, "flow"]
+    assert len(list(plot.items())) == 2

@@ -56,7 +56,7 @@ class Actor(BaseModel):
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
-            if plot.get(fallback_label[0]).get(fallback_label[1]) is None:
+            if plot.get(fallback_label[0], {}).get(fallback_label[1]) is None:
                 raise ValueError(f"Unkown {fallback_label=}")
         if condition_handler is None:
             condition_handler = deep_copy_condition_handler

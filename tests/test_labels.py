@@ -28,3 +28,11 @@ def test_labels():
     ctx.add_label(["flow", "node1"])
     assert backward(99)(ctx, actor) == ("flow", "node3", 99)
     assert backward(99, cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
+    ctx = Context()
+    ctx.add_label(["flow", "node2"])
+    actor = Actor(
+        plot={"flow": {"node1": {}}, "service": {"start": {}, "fallback": {}}},
+        start_label=("service", "start"),
+        fallback_label=("service", "fallback"),
+    )
+    assert forward()(ctx, actor) == ('service', 'fallback', 1.0)
