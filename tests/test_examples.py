@@ -22,10 +22,10 @@ def test_transitions():
     run_test()
 
 
-# def test_global_transitions():
-#     from .examples.example_5_global_transitions import run_test
+def test_global_transitions():
+    from .examples.example_5_global_transitions import run_test
 
-#     run_test()
+    run_test()
 
 
 def test_context_serialization():

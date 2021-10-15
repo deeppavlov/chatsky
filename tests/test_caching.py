@@ -1,30 +1,55 @@
 from dff.core import Context, Actor
-from dff.transitions import forward, repeat, previous, to_fallback, to_start, backward
+from dff.transitions import repeat
+from dff.conditions import true
+from dff.core.keywords import RESPONSE, TRANSITIONS
+from dff.caching import OneTurnCache
 
 
-def test_transitions():
+def cache_test(cached_response, cache):
+
     ctx = Context()
     ctx.add_label(["flow", "node1"])
-    ctx.add_label(["flow", "node2"])
-    ctx.add_label(["flow", "node3"])
-    ctx.add_label(["flow", "node2"])
-    actor = Actor(
-        plot={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
-        start_label=("service", "start"),
-        fallback_label=("service", "fallback"),
-    )
 
-    assert repeat(99)(ctx, actor) == ("flow", "node2", 99)
-    assert previous(99)(ctx, actor) == ("flow", "node3", 99)
-    assert to_fallback(99)(ctx, actor) == ("service", "fallback", 99)
-    assert to_start(99)(ctx, actor) == ("service", "start", 99)
-    assert forward(99)(ctx, actor) == ("flow", "node3", 99)
-    assert backward(99)(ctx, actor) == ("flow", "node1", 99)
+    def response(ctx: Context, actor: Actor, *args, **kwargs):
+        if ctx.validation:
+            return ""
+        return f"{cached_response(1)}-{cached_response(1)}-{cached_response(1)}-{cached_response(2)}"
 
-    ctx.add_label(["flow", "node3"])
-    assert forward(99)(ctx, actor) == ("flow", "node1", 99)
-    assert forward(99, cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
+    plot = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
+    actor = Actor(plot=plot, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
+    ctx.add_request("text")
+    ctx = actor(ctx)
+    assert ctx.last_response == "1-1-1-2"
+    ctx.add_request("text")
+    ctx = actor(ctx)
+    assert ctx.last_response == "1-1-1-2"
+    actor = cache.update_actor_handlers(actor)
+    ctx.add_request("text")
+    ctx = actor(ctx)
+    assert ctx.last_response == "3-3-3-4"
+    ctx.add_request("text")
+    ctx = actor(ctx)
+    assert ctx.last_response == "5-5-5-6"
 
-    ctx.add_label(["flow", "node1"])
-    assert backward(99)(ctx, actor) == ("flow", "node3", 99)
-    assert backward(99, cyclicality_flag=False)(ctx, actor) == ("service", "fallback", 99)
+
+def test_caching():
+    cache = OneTurnCache()
+
+    external_data = {"counter": 0}
+
+    @cache.cache
+    def cached_response(arg):
+        external_data["counter"] += 1
+        return external_data["counter"]
+
+    cache_test(cached_response, cache)
+    cache = OneTurnCache()
+
+    external_data = {"counter": 0}
+
+    @cache.lru_cache(maxsize=32)
+    def cached_response(arg):
+        external_data["counter"] += 1
+        return external_data["counter"]
+
+    cache_test(cached_response, cache)

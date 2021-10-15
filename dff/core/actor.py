@@ -203,8 +203,7 @@ class Actor(BaseModel):
 
     @validate_arguments
     def _run_handlers(self, ctx, actor_stade: ActorStage, *args, **kwargs):
-        pass
-        # [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
+        [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
 
     @validate_arguments
     def _choose_label(
