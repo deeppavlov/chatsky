@@ -1,5 +1,5 @@
 from dff.core import Context, Actor
-from dff.transitions import repeat
+from dff.labels import repeat
 from dff.conditions import true
 from dff.core.keywords import RESPONSE, TRANSITIONS
 from dff.caching import OneTurnCache

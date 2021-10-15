@@ -2,6 +2,8 @@
 from typing import Callable
 
 from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
+
+# from dff.labels
 from dff.core.normalization import (
     normalize_condition,
     normalize_label,
@@ -14,6 +16,13 @@ from dff.core.normalization import (
 
 def std_func(ctx, actor, *args, **kwargs):
     pass
+
+
+# def create_env():
+#     plot = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: "response"}}}
+#     actor = Actor(plot=plot, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
+#     ctx.add_request("text")
+#     ctx = actor(ctx)
 
 
 def test_normalize_label():

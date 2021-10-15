@@ -4,7 +4,7 @@ import re
 from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 import dff.conditions as cnd
-import dff.transitions as trn
+import dff.labels as lbl
 
 from examples import example_1_basics
 
@@ -42,10 +42,10 @@ plot = {
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
                 ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
-                trn.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
-                # trn.previous() is equivalent to ("PREVIOUS_flow", "PREVIOUS_node")
-                trn.repeat(): always_true_condition,  # fourth check
-                # trn.repeat() is equivalent to ("global_flow", "fallback_node")
+                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
+                # lbl.previous() is equivalent to ("PREVIOUS_flow", "PREVIOUS_node")
+                lbl.repeat(): always_true_condition,  # fourth check
+                # lbl.repeat() is equivalent to ("global_flow", "fallback_node")
             },
         },
     },
@@ -61,24 +61,24 @@ plot = {
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: {
-                trn.to_fallback(0.1): always_true_condition,  # third check
-                # trn.to_fallback(0.1) is equivalent to ("global_flow", "fallback_node", 0.1)
-                trn.forward(0.5): cnd.regexp(r"talk about"),  # second check
-                # trn.forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
+                lbl.to_fallback(0.1): always_true_condition,  # third check
+                # lbl.to_fallback(0.1) is equivalent to ("global_flow", "fallback_node", 0.1)
+                lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
+                # lbl.forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
-                trn.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
+                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
                 # ("music_flow", "node1") is equivalent to ("music_flow", "node1", 1.0)
             },
         },
         "node3": {
             RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: {trn.forward(): cnd.regexp(r"bye")},
+            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
         },
         "node4": {
             RESPONSE: "bye",
             TRANSITIONS: {
                 "node1": cnd.regexp(r"hi|hello", re.IGNORECASE),  # first check
-                trn.to_fallback(): always_true_condition,  # second check
+                lbl.to_fallback(): always_true_condition,  # second check
             },
         },
     },
@@ -86,25 +86,25 @@ plot = {
         "node1": {
             RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
             TRANSITIONS: {
-                trn.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
-                trn.to_fallback(): always_true_condition,
+                lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
+                lbl.to_fallback(): always_true_condition,
             },
         },
         "node2": {
             RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
             TRANSITIONS: {
-                trn.forward(): cnd.regexp(r"next", re.IGNORECASE),
-                trn.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
-                trn.to_fallback(): always_true_condition,
+                lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
+                lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
+                lbl.to_fallback(): always_true_condition,
             },
         },
         "node3": {
             RESPONSE: "The band achieved commercial success with the release of five studio albums.",
             TRANSITIONS: {
-                trn.forward(): cnd.regexp(r"next", re.IGNORECASE),
-                trn.backward(): cnd.regexp(r"back", re.IGNORECASE),
-                trn.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
-                trn.to_fallback(): always_true_condition,
+                lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
+                lbl.backward(): cnd.regexp(r"back", re.IGNORECASE),
+                lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
+                lbl.to_fallback(): always_true_condition,
             },
         },
         "node4": {
@@ -112,7 +112,7 @@ plot = {
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp(r"next", re.IGNORECASE),  # second check
                 high_priority_node_transition("greeting_flow", "node4"): cnd.regexp(r"next time", re.IGNORECASE),
-                trn.to_fallback(): always_true_condition,  # third check
+                lbl.to_fallback(): always_true_condition,  # third check
             },
         },
     },

@@ -5,7 +5,7 @@ import datetime
 
 from dff.core.keywords import GRAPH, RESPONSE, TRANSITIONS, PROCESSING
 from dff.core import Context, Actor, Node
-import dff.transitions as trn
+import dff.labels as lbl
 
 logging.basicConfig(
     format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG

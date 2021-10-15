@@ -1,5 +1,5 @@
 from dff.core import Context, Actor
-from dff.transitions import forward, repeat, previous, to_fallback, to_start, backward
+from dff.labels import forward, repeat, previous, to_fallback, to_start, backward
 
 
 def test_transitions():

@@ -4,7 +4,7 @@ import re
 from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 import dff.conditions as cnd
-import dff.transitions as trn
+import dff.labels as lbl
 
 from examples import example_1_basics
 
@@ -27,11 +27,11 @@ plot = {
         TRANSITIONS: {
             ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),
             ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),
-            trn.to_fallback(0.1): always_true_condition,
-            trn.forward(): cnd.all(
+            lbl.to_fallback(0.1): always_true_condition,
+            lbl.forward(): cnd.all(
                 [cnd.regexp(r"next\b"), cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]])]
             ),
-            trn.repeat(0.2): cnd.all(
+            lbl.repeat(0.2): cnd.all(
                 [cnd.regexp(r"repeat", re.I), cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"]))]
             ),
         },
@@ -42,7 +42,7 @@ plot = {
         },
         "fallback_node": {  # We get to this node if an error occurred while the agent was running
             RESPONSE: "Ooops",
-            TRANSITIONS: {trn.previous(): cnd.regexp(r"previous", re.I)},
+            TRANSITIONS: {lbl.previous(): cnd.regexp(r"previous", re.I)},
         },
     },
     "greeting_flow": {
@@ -53,27 +53,27 @@ plot = {
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: {
-                trn.forward(0.5): cnd.regexp(r"talk about"),
-                trn.previous(): cnd.regexp(r"previous", re.I),
+                lbl.forward(0.5): cnd.regexp(r"talk about"),
+                lbl.previous(): cnd.regexp(r"previous", re.I),
             },
         },
         "node3": {
             RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: {trn.forward(): cnd.regexp(r"bye")},
+            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
         },
         "node4": {RESPONSE: "bye"},
     },
     "music_flow": {
         "node1": {
             RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
-            TRANSITIONS: {trn.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
+            TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
         "node2": {
             RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
         },
         "node3": {
             RESPONSE: "The band achieved commercial success with the release of five studio albums.",
-            TRANSITIONS: {trn.backward(): cnd.regexp(r"back", re.I)},
+            TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
         },
         "node4": {
             RESPONSE: "That's all what I know",

@@ -2,7 +2,7 @@ import logging
 
 from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
-import dff.transitions as trn
+import dff.labels as lbl
 
 logging.basicConfig(
     format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
