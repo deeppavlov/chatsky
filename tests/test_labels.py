@@ -2,7 +2,7 @@ from dff.core import Context, Actor
 from dff.labels import forward, repeat, previous, to_fallback, to_start, backward
 
 
-def test_transitions():
+def test_labels():
     ctx = Context()
     ctx.add_label(["flow", "node1"])
     ctx.add_label(["flow", "node2"])
