@@ -37,3 +37,8 @@ def test_context():
     assert ctx.responses == {10: "21", 11: "23", 12: "25", 13: "27", 14: "29", 15: "1001"}
     assert ctx.misc == {1001: "11111"}
     ctx.json()
+
+    try:
+        Context.cast(123)
+    except ValueError:
+        pass

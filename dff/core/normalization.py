@@ -1,6 +1,6 @@
 import logging
 
-from typing import Union, Callable, Optional, Any
+from typing import Union, Callable, Any
 
 
 from .keywords import GLOBAL
@@ -42,7 +42,6 @@ def normalize_label(label: NodeLabelType, default_flow_label: str = "") -> Union
         return (label[0], label[-1], float("-inf"))
     elif isinstance(label, tuple) and len(label) == 3:
         return (label[0], label[1], label[2])
-    raise NotImplementedError(f"Unexpected node label {label}")
 
 
 @validate_arguments
@@ -58,7 +57,6 @@ def normalize_condition(condition: ConditionType) -> Callable:
                 return False
 
         return callable_condition_handler
-    raise NotImplementedError(f"Unexpected condition {condition}")
 
 
 @validate_arguments
@@ -83,7 +81,7 @@ def normalize_response(response: Any) -> Callable:
 
 
 @validate_arguments
-def normalize_processing(processing: Optional[dict[Any, Callable]]) -> Callable:
+def normalize_processing(processing: dict[Any, Callable]) -> Callable:
     if isinstance(processing, dict):
 
         @validate_arguments
@@ -96,15 +94,11 @@ def normalize_processing(processing: Optional[dict[Any, Callable]]) -> Callable:
             return ctx
 
         return processing_handler
-    raise NotImplementedError(f"Unexpected processing {processing}")
 
 
 @validate_arguments
 def normalize_plot(plot: dict[str, dict]) -> dict[str, dict]:
     if isinstance(plot, dict):
-        if not any(plot.values()):
-            raise ValueError("Plot does not have nodes")
         if GLOBAL in plot:
             plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
         return plot
-    raise NotImplementedError(f"Unexpected plot {plot}")
