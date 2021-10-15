@@ -24,3 +24,4 @@ venv
 .vscode
 .coverage
 .pytest_cache
+htmlcov
