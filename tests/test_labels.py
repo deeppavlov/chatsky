@@ -35,4 +35,4 @@ def test_labels():
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),
     )
-    assert forward()(ctx, actor) == ('service', 'fallback', 1.0)
+    assert forward()(ctx, actor) == ("service", "fallback", 1.0)
