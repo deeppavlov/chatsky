@@ -5,6 +5,7 @@ import pathlib
 
 native_type_patterns = {re.compile(r"\b(" + t + r")\["): t.capitalize() + "[" for t in ["dict", "list", "tuple"]}
 cache_patterns = {re.compile(r"\bfunctools.cache\b"): "functools.lru_cache"}
+fstring_patterns = {re.compile(r"\=\}"): "}"}
 # %%
 
 rep_root = pathlib.Path(".")
