@@ -20,4 +20,6 @@ for py_file in py_files:
             text = pat.sub(replace, text)
     for pat, replace in cache_patterns.items():
         text = pat.sub(replace, text)
+    for pat, replace in fstring_patterns.items():
+        text = pat.sub(replace, text)
     py_file.write_text(text)
