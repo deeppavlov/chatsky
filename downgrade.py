@@ -11,6 +11,7 @@ forwardref_patterns = {
     re.compile(r'ForwardRef\("Context"\)'): "BaseModel",
 }
 
+
 def downgrade(root_dir: pathlib.Path):
     py_files = sum(
         [list(root_dir.glob(glob)) for glob in ["tests/*.py", "examples/*.py", "dff/*.py", "dff/core/*.py"]], []
@@ -31,5 +32,6 @@ def downgrade(root_dir: pathlib.Path):
             for pat, replace in forwardref_patterns.items():
                 text = pat.sub(replace, text)
         py_file.write_text(text)
+
 
 downgrade(pathlib.Path("."))
