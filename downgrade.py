@@ -28,7 +28,7 @@ def downgrade(root_dir: pathlib.Path):
         if sys.version_info < (3, 8):
             for pat, replace in fstring_patterns.items():
                 text = pat.sub(replace, text)
-        if sys.version_info < (3, 6):
+        if sys.version_info < (3, 7):
             for pat, replace in forwardref_patterns.items():
                 text = pat.sub(replace, text)
         py_file.write_text(text)
