@@ -20,7 +20,7 @@ memory_debugging*
 opening_database*
 dff/modules/emora
 _globals.py
-venv
+venv*
 .vscode
 .coverage
 .pytest_cache
