@@ -36,7 +36,7 @@ lint: venv
 .PHONY: lint
 
 test: venv
-	@$(VENV_PATH)/bin/python -m pytest --cov=dff tests/
+	@$(VENV_PATH)/bin/python -m pytest --cov-report html --cov-report term --cov=dff tests/
 .PHONY: test
 
 test-all: venv test lint
