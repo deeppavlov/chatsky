@@ -1,7 +1,8 @@
+from typing import Dict, List, Tuple
 import logging
 from uuid import UUID, uuid4
 
-from typing import ForwardRef
+
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, validate_arguments, Field, validator
@@ -10,7 +11,7 @@ from .types import NodeLabel2Type
 
 logger = logging.getLogger(__name__)
 
-Context = ForwardRef("Context")
+Context = BaseModel
 
 
 @validate_arguments
@@ -26,12 +27,12 @@ def get_last_index(dictionary: dict) -> int:
 
 class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
-    labels: dict[int, NodeLabel2Type] = {}
-    requests: dict[int, Any] = {}
-    responses: dict[int, Any] = {}
-    misc: dict[str, Any] = {}
+    labels: Dict[int, NodeLabel2Type] = {}
+    requests: Dict[int, Any] = {}
+    responses: Dict[int, Any] = {}
+    misc: Dict[str, Any] = {}
     validation: bool = False
-    actor_state: dict[str, Any] = {}
+    actor_state: Dict[str, Any] = {}
 
     # validators
     _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
@@ -73,7 +74,7 @@ class Context(BaseModel):
         self.labels[last_index + 1] = label
 
     @validate_arguments
-    def clear(self, hold_last_n_indexes: int, field_names: list[str] = ["requests", "responses", "labels"]):
+    def clear(self, hold_last_n_indexes: int, field_names: List[str] = ["requests", "responses", "labels"]):
         if "requests" in field_names:
             for index in list(self.requests)[:-hold_last_n_indexes]:
                 del self.requests[index]
@@ -102,7 +103,7 @@ class Context(BaseModel):
         return self.requests.get(last_index)
 
     @property
-    def a_s(self) -> dict[str, Any]:
+    def a_s(self) -> Dict[str, Any]:
         return self.actor_state
 
 

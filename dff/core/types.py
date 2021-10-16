@@ -1,10 +1,11 @@
+from typing import Dict, List, Tuple
 from typing import Union, Callable
 from enum import Enum, auto
 
 
-NodeLabel1Type = tuple[str, float]
-NodeLabel2Type = tuple[str, str]
-NodeLabel3Type = tuple[str, str, float]
+NodeLabel1Type = Tuple[str, float]
+NodeLabel2Type = Tuple[str, str]
+NodeLabel3Type = Tuple[str, str, float]
 
 NodeLabelTupledType = Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type]
 NodeLabelType = Union[Callable, NodeLabelTupledType, str]

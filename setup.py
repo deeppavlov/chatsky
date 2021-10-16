@@ -1,7 +1,9 @@
 from setuptools import setup, find_packages
 import pathlib
 import sys
+import sysconfig
 import re
+from setuptools.command.install import install
 
 native_type_patterns = {re.compile(r"\b(" + t + r")\["): t.capitalize() + "[" for t in ["dict", "list", "tuple"]}
 cache_patterns = {re.compile(r"\bfunctools.cache\b"): "functools.lru_cache(maxsize=None)"}
@@ -36,7 +38,13 @@ def downgrade(root_dir: pathlib.Path):
 
 LOCATION = pathlib.Path(__file__).parent.resolve()
 
-downgrade(LOCATION)
+
+class Downgrade(install):
+    def run(self):
+        install.run(self)
+        downgrade(pathlib.Path((sysconfig.get_paths()["purelib"]) / "dff"))
+
+
 # Get the long description from the README file
 readme_file = LOCATION / "README.md"
 
@@ -86,16 +94,8 @@ setup(
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="chatbots",  # Optional
-    # package_dir={"": "dff"},  # Optional
     packages=find_packages(where="."),  # Required
     python_requires=">=3.6, <4",
     install_requires=["pydantic==1.8.2"],  # Optional
-    # extras_require={"dev": ["check-manifest"], "test": ["coverage"]}, # Optional
-    # package_data={"sample": ["package_data.dat"]}, # Optional
-    # data_files=[("my_data", ["data/data_file"])],  # Optional
-    #
-    # For example, the following would provide a command called `sample` which
-    # executes the function `main` from this package when invoked:
-    # entry_points={"console_scripts": ["sample=sample:main"]},  # Optional
-    # project_urls={},  # Optional
+    cmdclass={"install": Downgrade},
 )

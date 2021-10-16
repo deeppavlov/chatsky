@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 # %%
 
 import logging
@@ -12,9 +13,9 @@ logger = logging.getLogger(__name__)
 
 
 class Node(BaseModel, extra=Extra.forbid):
-    transitions: dict[NodeLabelType, ConditionType] = {}
+    transitions: Dict[NodeLabelType, ConditionType] = {}
     response: Optional[Any] = None
-    processing: dict[Any, Callable] = {}
+    processing: Dict[Any, Callable] = {}
     misc: dict = {}
 
     _normalize_transitions = validator("transitions", allow_reuse=True)(normalize_transitions)
@@ -23,7 +24,7 @@ class Node(BaseModel, extra=Extra.forbid):
 
 
 class Plot(BaseModel, extra=Extra.forbid):
-    plot: dict[str, dict[str, Node]]
+    plot: Dict[str, Dict[str, Node]]
 
     _normalize_plot = validator("plot", allow_reuse=True, pre=True)(normalize_plot)
 

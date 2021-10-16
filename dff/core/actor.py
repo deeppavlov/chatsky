@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 import logging
 from typing import Union, Callable, Optional
 
@@ -29,7 +30,7 @@ class Actor(BaseModel):
     response_validation_flag: Optional[bool] = None
     condition_handler: Optional[Callable] = None
     validation_logging_flag: bool = True
-    handlers: dict[ActorStage, list[Callable]] = {}
+    handlers: Dict[ActorStage, List[Callable]] = {}
 
     @validate_arguments
     def __init__(
@@ -41,7 +42,7 @@ class Actor(BaseModel):
         response_validation_flag: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         validation_logging_flag: bool = True,
-        handlers: dict[ActorStage, list[Callable]] = {},
+        handlers: Dict[ActorStage, List[Callable]] = {},
         *args,
         **kwargs,
     ):
@@ -51,13 +52,13 @@ class Actor(BaseModel):
         # node lables validation
         start_label = normalize_label(start_label)
         if plot.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unkown {start_label=}")
+            raise ValueError(f"Unkown {start_label}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
             if plot.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unkown {fallback_label=}")
+                raise ValueError(f"Unkown {fallback_label}")
         if condition_handler is None:
             condition_handler = deep_copy_condition_handler
 
@@ -246,11 +247,11 @@ class Actor(BaseModel):
                 node = self.plot.get(label[0], {}).get(label[1], Node())
             except Exception as exc:
                 node = None
-                msg = f"Got exception '''{exc}''' for {label=}"
+                msg = f"Got exception '''{exc}''' for {label}"
                 error_handler(error_msgs, msg, exc, logging_flag)
 
             if not isinstance(node, Node):
-                msg = f"Could not find node with {label=}"
+                msg = f"Could not find node with {label}"
                 error_handler(error_msgs, msg, None, logging_flag)
                 continue
 
@@ -262,12 +263,12 @@ class Actor(BaseModel):
                     response_result = response_func(ctx, actor)
                     if isinstance(response_result, Callable):
                         msg = (
-                            f"Expected type of response_result needed not Callable but got {type(response_result)=}"
-                            f" for {label=}"
+                            f"Expected type of response_result needed not Callable but got {type(response_result)}"
+                            f" for {label}"
                         )
                         error_handler(error_msgs, msg, None, logging_flag)
                 except Exception as exc:
-                    msg = f"Got exception '''{exc}''' during response execution " f"for {label=} and {node.response=}"
+                    msg = f"Got exception '''{exc}''' during response execution " f"for {label} and {node.response}"
                     error_handler(error_msgs, msg, exc, logging_flag)
                 if n_errors != len(error_msgs) and response_validation_flag is None:
                     logger.info(
@@ -279,7 +280,7 @@ class Actor(BaseModel):
             try:
                 bool(condition(ctx, actor))
             except Exception as exc:
-                msg = f"Got exception '''{exc}''' during condition execution for {label=}"
+                msg = f"Got exception '''{exc}''' during condition execution for {label}"
                 error_handler(error_msgs, msg, exc, logging_flag)
         return error_msgs
 

@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 from typing import Callable, Pattern, Union, Any
 import logging
 import re
@@ -38,7 +39,7 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 def check_cond_seq(cond_seq: list):
     for cond in cond_seq:
         if not isinstance(cond, Callable):
-            raise TypeError(f"{cond_seq=} has to consist of callable objects")
+            raise TypeError(f"{cond_seq} has to consist of callable objects")
 
 
 _any = any
@@ -53,7 +54,7 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
         try:
             return bool(aggregate_func([cond(ctx, actor, *args, **kwargs) for cond in cond_seq]))
         except Exception as exc:
-            logger.error(f"Exception {exc} for {cond_seq=}, {aggregate_func=} and {ctx.last_request=}", exc_info=exc)
+            logger.error(f"Exception {exc} for {cond_seq}, {aggregate_func} and {ctx.last_request}", exc_info=exc)
 
     return aggregate_condition_handler
 
@@ -88,8 +89,8 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
 
 @validate_arguments
 def has_last_labels(
-    flow_labels: list[str] = [],
-    labels: list[NodeLabel2Type] = [],
+    flow_labels: List[str] = [],
+    labels: List[NodeLabel2Type] = [],
     last_n_indexes: int = 1,
     *args,
     **kwargs,

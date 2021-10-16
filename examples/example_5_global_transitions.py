@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 import logging
 import re
 
@@ -16,7 +17,7 @@ def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 
 
 def high_priority_node_transition(flow_label, label):
-    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
+    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> Tuple[str, str, float]:
         return (flow_label, label, 2.0)
 
     return transition

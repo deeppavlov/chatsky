@@ -1,3 +1,4 @@
+from typing import Dict, List, Tuple
 import logging
 from typing import Optional
 import datetime
@@ -39,7 +40,7 @@ def add_label_processing(
     actor: Actor,
     *args,
     **kwargs,
-) -> Optional[tuple[str, Node]]:
+) -> Optional[Tuple[str, Node]]:
     node.response = f"{label}: {node.response}"
     return label, node
 
@@ -51,7 +52,7 @@ def add_time_processing(
     actor: Actor,
     *args,
     **kwargs,
-) -> Optional[tuple[str, Node]]:
+) -> Optional[Tuple[str, Node]]:
     timestamp = datetime.datetime.now().strftime("%H:%M:%S")
     node.response = f"{timestamp}: {node.response}"
     return label, node
