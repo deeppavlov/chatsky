@@ -1,8 +1,11 @@
 from setuptools import setup, find_packages
 import pathlib
 
+from .downgrade import downgrade
+
 LOCATION = pathlib.Path(__file__).parent.resolve()
 
+downgrade(LOCATION)
 # Get the long description from the README file
 readme_file = LOCATION / "README.md"
 
