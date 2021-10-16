@@ -42,7 +42,7 @@ LOCATION = pathlib.Path(__file__).parent.resolve()
 class Downgrade(install):
     def run(self):
         install.run(self)
-        downgrade(pathlib.Path((sysconfig.get_paths()["purelib"]) / "dff"))
+        downgrade(pathlib.Path((sysconfig.get_paths()["purelib"])) / "dff")
 
 
 # Get the long description from the README file
