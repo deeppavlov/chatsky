@@ -4,7 +4,7 @@ import re
 import pathlib
 
 native_type_patterns = {re.compile(r"\b(" + t + r")\["): t.capitalize() + "[" for t in ["dict", "list", "tuple"]}
-cache_patterns = {re.compile(r"\bfunctools.cache\b"): "functools.lru_cache"}
+cache_patterns = {re.compile(r"\bfunctools.cache\b"): "functools.lru_cache(maxsize=None)"}
 fstring_patterns = {re.compile(r"\=\}"): "}"}
 # %%
 
