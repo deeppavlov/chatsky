@@ -97,7 +97,7 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
 
 
 @validate_arguments
-def normalize_plot(plot: dict[LabelType, dict]) -> dict[LabelType, dict]:
+def normalize_plot(plot: dict[LabelType, dict]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
     # def normalize_plot(plot: dict[LabelType, dict[LabelType, dict[Keywords,Any]]]) -> dict[LabelType, dict[LabelType, dict[str,Any]]]:
     if isinstance(plot, dict):
         if GLOBAL in plot:
