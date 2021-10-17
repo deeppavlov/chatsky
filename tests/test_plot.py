@@ -41,7 +41,12 @@ def test_node_creation():
         MISC.name.lower(): [{}, {1: "var"}, None],
     }
     samples = [
-        {TRANSITIONS.name.lower(): {transition: condition}, RESPONSE.name.lower(): response, PROCESSING.name.lower(): processing, MISC.name.lower(): misc}
+        {
+            TRANSITIONS.name.lower(): {transition: condition},
+            RESPONSE.name.lower(): response,
+            PROCESSING.name.lower(): processing,
+            MISC.name.lower(): misc,
+        }
         for transition, condition, response, processing, misc in itertools.product(*list(samples.values()))
     ]
     samples = [{k: v for k, v in sample.items() if v is not None} for sample in samples]
