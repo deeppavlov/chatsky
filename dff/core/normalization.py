@@ -98,7 +98,14 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
 
 @validate_arguments
 def normalize_plot(plot: dict[LabelType, dict]) -> dict[LabelType, dict]:
+    # def normalize_plot(plot: dict[LabelType, dict[LabelType, dict[Keywords,Any]]]) -> dict[LabelType, dict[LabelType, dict[str,Any]]]:
     if isinstance(plot, dict):
         if GLOBAL in plot:
             plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
-        return plot
+    plot = {
+        flow_label: {
+            node_label: {key.name.lower(): val for key, val in node.items()} for node_label, node in flow.items()
+        }
+        for flow_label, flow in plot.items()
+    }
+    return plot

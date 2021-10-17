@@ -36,12 +36,12 @@ def test_node_creation():
     samples = {
         "transition": [std_func, "node", ("flow", "node"), ("node", 2.0), ("flow", "node", 2.0)],
         "condition": [std_func],
-        RESPONSE: ["text", std_func, 123, 1.0, None],
-        PROCESSING: [{}, {1: std_func}, None],
-        MISC: [{}, {1: "var"}, None],
+        RESPONSE.name.lower(): ["text", std_func, 123, 1.0, None],
+        PROCESSING.name.lower(): [{}, {1: std_func}, None],
+        MISC.name.lower(): [{}, {1: "var"}, None],
     }
     samples = [
-        {TRANSITIONS: {transition: condition}, RESPONSE: response, PROCESSING: processing, MISC: misc}
+        {TRANSITIONS.name.lower(): {transition: condition}, RESPONSE.name.lower(): response, PROCESSING.name.lower(): processing, MISC.name.lower(): misc}
         for transition, condition, response, processing, misc in itertools.product(*list(samples.values()))
     ]
     samples = [{k: v for k, v in sample.items() if v is not None} for sample in samples]
@@ -50,15 +50,15 @@ def test_node_creation():
     samples = {
         "transition": [None],
         "condition": [None, 123, "asdasd", 2.0, [], {}],
-        PROCESSING: [123, "asdasd", 2.0, {1: None}, {1: 123}, {1: 2.0}, {1: []}, {1: {}}],
-        MISC: [123, "asdasd", 2.0],
+        PROCESSING.name.lower(): [123, "asdasd", 2.0, {1: None}, {1: 123}, {1: 2.0}, {1: []}, {1: {}}],
+        MISC.name.lower(): [123, "asdasd", 2.0],
     }
     samples = [
         {
-            TRANSITIONS: {val if key == "transition" else "node": val if key == "condition" else std_func},
-            RESPONSE: val if key == RESPONSE else None,
-            PROCESSING: val if key == PROCESSING else None,
-            MISC: val if key == MISC else None,
+            TRANSITIONS.name.lower(): {val if key == "transition" else "node": val if key == "condition" else std_func},
+            RESPONSE.name.lower(): val if key == RESPONSE.name.lower() else None,
+            PROCESSING.name.lower(): val if key == PROCESSING.name.lower() else None,
+            MISC.name.lower(): val if key == MISC.name.lower() else None,
         }
         for key, values in samples.items()
         for val in values
@@ -78,10 +78,10 @@ def node_test(node):
 def test_node_exec():
     node = Node(
         **{
-            TRANSITIONS: {"node": std_func},
-            RESPONSE: "text",
-            PROCESSING: {1: std_func},
-            MISC: {"key": "val"},
+            TRANSITIONS.name.lower(): {"node": std_func},
+            RESPONSE.name.lower(): "text",
+            PROCESSING.name.lower(): {1: std_func},
+            MISC.name.lower(): {"key": "val"},
         }
     )
     node_test(node)

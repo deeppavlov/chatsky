@@ -114,11 +114,17 @@ def test_normalize_plot():
         PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
+    node_template_gold = {
+        TRANSITIONS.name.lower(): {"node": std_func},
+        RESPONSE.name.lower(): "text",
+        PROCESSING.name.lower(): {1: std_func},
+        MISC.name.lower(): {"key": "val"},
+    }
     plot = {
         GLOBAL: node_template.copy(),
         "flow": {"node": node_template.copy()},
     }
     plot = normalize_plot(plot)
     assert isinstance(plot, dict)
-    assert plot[GLOBAL][GLOBAL] == node_template
-    assert plot["flow"]["node"] == node_template
+    assert plot[GLOBAL][GLOBAL] == node_template_gold
+    assert plot["flow"]["node"] == node_template_gold
