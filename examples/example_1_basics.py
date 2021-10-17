@@ -82,9 +82,9 @@ def turn_handler(
     out_response = ctx.last_response
     # the next condition branching needs for testing
     if true_out_response is not None and true_out_response != out_response:
-        raise Exception(f"{in_request} -> true_out_response != out_response: {true_out_response} != {out_response}")
+        raise Exception(f"{in_request=} -> true_out_response != out_response: {true_out_response} != {out_response}")
     else:
-        logging.info(f"{in_request} -> {out_response}")
+        logging.info(f"{in_request=} -> {out_response}")
     return out_response, ctx
 
 

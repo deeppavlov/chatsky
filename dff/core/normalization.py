@@ -1,4 +1,3 @@
-from typing import Dict, List, Tuple
 import logging
 
 from typing import Union, Callable, Any
@@ -62,8 +61,8 @@ def normalize_condition(condition: ConditionType) -> Callable:
 
 @validate_arguments
 def normalize_transitions(
-    transitions: Dict[NodeLabelType, ConditionType]
-) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
+    transitions: dict[NodeLabelType, ConditionType]
+) -> dict[Union[Callable, NodeLabel3Type], Callable]:
     transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
     return transitions
 
@@ -82,7 +81,7 @@ def normalize_response(response: Any) -> Callable:
 
 
 @validate_arguments
-def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
+def normalize_processing(processing: dict[Any, Callable]) -> Callable:
     if isinstance(processing, dict):
 
         @validate_arguments
@@ -91,14 +90,14 @@ def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
                 try:
                     ctx = processing_func(ctx, actor, *args, **kwargs)
                 except Exception as exc:
-                    logger.error(f"Exception {exc} for {processing_name} and {processing_func}", exc_info=exc)
+                    logger.error(f"Exception {exc} for {processing_name=} and {processing_func=}", exc_info=exc)
             return ctx
 
         return processing_handler
 
 
 @validate_arguments
-def normalize_plot(plot: Dict[str, dict]) -> Dict[str, dict]:
+def normalize_plot(plot: dict[str, dict]) -> dict[str, dict]:
     if isinstance(plot, dict):
         if GLOBAL in plot:
             plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}

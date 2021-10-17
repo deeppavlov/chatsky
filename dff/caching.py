@@ -19,7 +19,7 @@ class OneTurnCache:
         [wrapper.cache_clear() for wrapper in self.wrappers]
 
     def cache(self, func):
-        @functools.lru_cache(maxsize=None)
+        @functools.cache
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 

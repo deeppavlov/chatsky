@@ -1,7 +1,6 @@
 SHELL = /bin/bash
 
-# VENV_PATH = venv
-VENV_PATH = venv3.6
+VENV_PATH = venv
 
 help:
 	@echo "Thanks for your interest in the Dialog Flow Framework!"

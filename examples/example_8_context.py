@@ -38,5 +38,5 @@ while True:
     in_text = input("you: ")
     ctx.add_request(in_text)
     ctx = actor(ctx)
-    print(f"{ctx.misc}")
+    print(f"{ctx.misc=}")
     print(f"bot: {ctx.last_response}")
