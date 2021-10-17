@@ -23,15 +23,16 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
         @validate_arguments
         def get_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
             try:
-                res = label(ctx, actor, *args, **kwargs)
-                flow_label, node_label, _ = (str(res[0]), str(res[1]), float(res[2]))
+                new_label = label(ctx, actor, *args, **kwargs)
+                new_label = normalize_label(new_label, default_flow_label)
+                flow_label, node_label, _ = new_label
                 node = actor.plot.get(flow_label, {}).get(node_label)
                 if not node:
-                    raise Exception(f"Unknown transitions {res} for {actor.plot}")
+                    raise Exception(f"Unknown transitions {new_label} for {actor.plot}")
             except Exception as exc:
-                res = None
+                new_label = None
                 logger.error(f"Exception {exc} of function {label}", exc_info=exc)
-            return res
+            return new_label
 
         return get_label_handler  # create wrap to get uniq key for dictionary
     elif isinstance(label, str) or isinstance(label, Keywords):
@@ -101,7 +102,7 @@ def normalize_plot(
     plot: dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
 ) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
     if isinstance(plot, dict):
-        if GLOBAL in plot:
+        if GLOBAL in plot and all([isinstance(item, Keywords) for item in plot[GLOBAL].keys()]):
             plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
     plot = {
         flow_label: {
