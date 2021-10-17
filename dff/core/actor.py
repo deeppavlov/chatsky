@@ -98,6 +98,10 @@ class Actor(BaseModel):
 
         ctx.add_label(ctx.a_s["next_label"][:2])
 
+        # rewrite next node
+        ctx = self._rewrite_next_node(ctx, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
+
         # run processing
         ctx = self._run_processing(ctx, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
@@ -162,6 +166,17 @@ class Actor(BaseModel):
         if ctx.a_s["next_node"] is None:
             ctx.a_s["next_label"] = self.start_label
             ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
+        return ctx
+
+    @validate_arguments
+    def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
+        updated_next = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).copy()
+        local_node = self.plot.get(ctx.a_s["next_label"][0], {}).get(LOCAL, Node())
+        for node in [local_node, ctx.a_s["next_node"]]:
+            updated_next.response = node.response if node.response else updated_next.response
+            updated_next.processing.update(node.processing)
+            updated_next.misc.update(node.misc)
+        ctx.a_s["next_node"] = updated_next
         return ctx
 
     @validate_arguments

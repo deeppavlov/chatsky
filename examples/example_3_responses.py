@@ -49,6 +49,7 @@ def upper_case_response(response: str):
 
 
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
+    print(ctx)
     return {
         "previous_node": list(ctx.labels.values())[-2],
         "last_request": ctx.last_request,
