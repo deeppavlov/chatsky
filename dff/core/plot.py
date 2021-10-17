@@ -30,8 +30,8 @@ class Plot(BaseModel, extra=Extra.forbid):
     def __getitem__(self, key):
         return self.plot[key]
 
-    def get(self, key, item=None):
-        return self.plot.get(key, item)
+    def get(self, key, value=None):
+        return self.plot.get(key, value)
 
     def keys(self):
         return self.plot.keys()
