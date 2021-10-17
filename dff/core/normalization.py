@@ -3,9 +3,9 @@ import logging
 from typing import Union, Callable, Any
 
 
-from .keywords import GLOBAL
+from .keywords import GLOBAL, Keywords
 from .context import Context
-from .types import NodeLabel3Type, NodeLabelType, ConditionType
+from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 
 from pydantic import validate_arguments, BaseModel
 
@@ -17,7 +17,7 @@ Actor = BaseModel
 
 
 @validate_arguments
-def normalize_label(label: NodeLabelType, default_flow_label: str = "") -> Union[Callable, NodeLabel3Type]:
+def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") -> Union[Callable, NodeLabel3Type]:
     if isinstance(label, Callable):
 
         @validate_arguments
@@ -34,7 +34,7 @@ def normalize_label(label: NodeLabelType, default_flow_label: str = "") -> Union
             return res
 
         return get_label_handler  # create wrap to get uniq key for dictionary
-    elif isinstance(label, str):
+    elif isinstance(label, str) or isinstance(label, Keywords):
         return (default_flow_label, label, float("-inf"))
     elif isinstance(label, tuple) and len(label) == 2 and isinstance(label[-1], float):
         return (default_flow_label, label[0], label[-1])
@@ -97,7 +97,7 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
 
 
 @validate_arguments
-def normalize_plot(plot: dict[str, dict]) -> dict[str, dict]:
+def normalize_plot(plot: dict[LabelType, dict]) -> dict[LabelType, dict]:
     if isinstance(plot, dict):
         if GLOBAL in plot:
             plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}

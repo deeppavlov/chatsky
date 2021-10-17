@@ -5,7 +5,7 @@ from typing import Callable, Optional, Any
 
 from pydantic import BaseModel, validator, Extra
 
-from .types import NodeLabelType, ConditionType
+from .types import LabelType, NodeLabelType, ConditionType
 from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_plot
 
 logger = logging.getLogger(__name__)
@@ -23,7 +23,7 @@ class Node(BaseModel, extra=Extra.forbid):
 
 
 class Plot(BaseModel, extra=Extra.forbid):
-    plot: dict[str, dict[str, Node]]
+    plot: dict[LabelType, dict[LabelType, Node]]
 
     _normalize_plot = validator("plot", allow_reuse=True, pre=True)(normalize_plot)
 

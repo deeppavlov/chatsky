@@ -4,7 +4,7 @@ from typing import Union, Callable, Optional
 
 from pydantic import BaseModel, validate_arguments
 
-from .types import ActorStage, NodeLabel2Type, NodeLabel3Type
+from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 
 from .context import Context
 from .plot import Plot, Node
@@ -175,7 +175,7 @@ class Actor(BaseModel):
         self,
         transitions: dict,
         ctx: Context,
-        flow_label: str,
+        flow_label: LabelType,
         transition_info: str = "",
         *args,
         **kwargs,
