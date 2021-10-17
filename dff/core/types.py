@@ -5,9 +5,9 @@ from .keywords import Keywords
 
 LabelType = Union[str, Keywords]
 
-NodeLabel1Type = tuple[LabelType, float]
-NodeLabel2Type = tuple[LabelType, LabelType]
-NodeLabel3Type = tuple[LabelType, LabelType, float]
+NodeLabel1Type = tuple[str, float]
+NodeLabel2Type = tuple[str, str]
+NodeLabel3Type = tuple[str, str, float]
 
 NodeLabelTupledType = Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type]
 NodeLabelType = Union[Callable, NodeLabelTupledType, str]
