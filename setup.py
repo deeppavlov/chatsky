@@ -1,39 +1,8 @@
 from setuptools import setup, find_packages
 import pathlib
-import sys
-import sysconfig
-import re
 from setuptools.command.install import install
 
-native_type_patterns = {re.compile(r"\b(" + t + r")\["): t.capitalize() + "[" for t in ["dict", "list", "tuple"]}
-cache_patterns = {re.compile(r"\bfunctools.cache\b"): "functools.lru_cache(maxsize=None)"}
-fstring_patterns = {re.compile(r"\=\}"): "}"}
-forwardref_patterns = {
-    re.compile("from typing import ForwardRef"): "",
-    re.compile(r'ForwardRef\("Context"\)'): "BaseModel",
-}
-
-
-def downgrade(root_dir: pathlib.Path):
-    py_files = sum(
-        [list(root_dir.glob(glob)) for glob in ["tests/*.py", "examples/*.py", "dff/*.py", "dff/core/*.py"]], []
-    )
-    for py_file in py_files:
-        text = py_file.read_text()
-        if sys.version_info < (3, 9):
-            if any([i.search(text) for i in native_type_patterns.keys()]):
-                text = "from typing import Dict, List, Tuple\n{}".format(text)
-                for pat, replace in native_type_patterns.items():
-                    text = pat.sub(replace, text)
-            for pat, replace in cache_patterns.items():
-                text = pat.sub(replace, text)
-        if sys.version_info < (3, 8):
-            for pat, replace in fstring_patterns.items():
-                text = pat.sub(replace, text)
-        if sys.version_info < (3, 7):
-            for pat, replace in forwardref_patterns.items():
-                text = pat.sub(replace, text)
-        py_file.write_text(text)
+from utils.downgrade_patch import downgrade
 
 
 LOCATION = pathlib.Path(__file__).parent.resolve()
@@ -41,8 +10,8 @@ LOCATION = pathlib.Path(__file__).parent.resolve()
 
 class Downgrade(install):
     def run(self):
+        downgrade(pathlib.Path("."))
         install.run(self)
-        downgrade(pathlib.Path((sysconfig.get_paths()["purelib"])) / "dff")
 
 
 # Get the long description from the README file
@@ -70,7 +39,7 @@ def read_requirements():
 
 setup(
     name="dff",
-    version="0.1.a1",
+    version="0.1.a4",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
