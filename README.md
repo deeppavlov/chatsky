@@ -56,7 +56,7 @@ while True:
     print(out_response)
 
 ```
-When you run this code you get
+When you run this code, you get similar output:
 ```
 type your answer: hi
 Okey
@@ -68,6 +68,8 @@ type your answer: ok
 Okey
 
 ```
+
+To get more advanced examples, take a look at [examples](https://github.com/deepmipt/dialog_flow_framework/tree/dev/examples) on GitHub.
 
 ## Extentions 
 <!-- ### List of extentions -->
