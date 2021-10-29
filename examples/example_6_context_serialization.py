@@ -58,7 +58,7 @@ def run_test():
     if isinstance(ctx, str):
         logging.info("context serialized to json str")
     else:
-        raise Exception(f"{ctx=} has to be serialized to json string")
+        raise Exception(f"ctx={ctx} has to be serialized to json string")
     in_request, true_out_response = next(iterator)
     _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
     # serialize context to dict
@@ -66,12 +66,12 @@ def run_test():
     if isinstance(ctx, dict):
         logging.info("context serialized to dict")
     else:
-        raise Exception(f"{ctx=} has to be serialized to dict")
+        raise Exception(f"ctx={ctx} has to be serialized to dict")
     in_request, true_out_response = next(iterator)
     _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
     # context without serialization
     if not isinstance(ctx, Context):
-        raise Exception(f"{ctx=} has to have Context type")
+        raise Exception(f"ctx={ctx} has to have Context type")
     in_request, true_out_response = next(iterator)
     _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
 

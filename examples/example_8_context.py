@@ -22,7 +22,7 @@ def response(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 
 # a dialog script
 plot = {
-    GLOBAL: {TRANSITIONS: {trn.repeat(): always_true}},
+    GLOBAL: {TRANSITIONS: {lbl.repeat(): always_true}},
     "start": {
         "start": {
             RESPONSE: response,

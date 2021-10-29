@@ -3,7 +3,7 @@ from typing import Optional
 import datetime
 
 
-from dff.core.keywords import GRAPH, RESPONSE, TRANSITIONS, PROCESSING
+from dff.core.keywords import RESPONSE, TRANSITIONS, PROCESSING
 from dff.core import Context, Actor, Node
 import dff.labels as lbl
 
@@ -22,13 +22,13 @@ def create_transitions():
     return {
         ("left", "step_2"): "left",
         ("right", "step_2"): "right",
-        trn.previous(): "previous",
-        trn.to_start(): "start",
-        trn.forward(): "forward",
-        trn.backward(): "back",
-        trn.previous(): "previous",
-        trn.repeat(): "repeat",
-        trn.to_fallback(): always_true,
+        lbl.previous(): "previous",
+        lbl.to_start(): "start",
+        lbl.forward(): "forward",
+        lbl.backward(): "back",
+        lbl.previous(): "previous",
+        lbl.repeat(): "repeat",
+        lbl.to_fallback(): always_true,
     }
 
 
@@ -70,12 +70,12 @@ plot = {
         "step_0": {
             PROCESSING: {1: add_label_processing, 2: add_time_processing},
             RESPONSE: "hi",
-            TRANSITIONS: {trn.forward(): always_true},
+            TRANSITIONS: {lbl.forward(): always_true},
         },
         "step_1": {
             PROCESSING: {1: add_label_processing, 2: add_time_processing},
             RESPONSE: "what's up",
-            TRANSITIONS: {trn.forward(): always_true},
+            TRANSITIONS: {lbl.forward(): always_true},
         },
         "step_2": {
             PROCESSING: {1: add_label_processing, 2: add_time_processing},

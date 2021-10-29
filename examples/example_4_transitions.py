@@ -5,6 +5,7 @@ from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 import dff.conditions as cnd
 import dff.labels as lbl
+from dff.core.types import NodeLabel3Type
 
 from examples import example_1_basics
 
@@ -15,12 +16,13 @@ def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 
 
-def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
+# NodeLabel3Type == tuple[str, str, float]
+def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
     return ("greeting_flow", "node2", 1.0)
 
 
 def high_priority_node_transition(flow_label, label):
-    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
+    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
         return (flow_label, label, 2.0)
 
     return transition

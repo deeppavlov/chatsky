@@ -1,22 +1,3 @@
-[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deepmipt/dff/blob/master/LICENSE)
-![Python 3.6, 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-green.svg)
-[![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
-# Dialog Flow Framework
-
-The Dialog Flow Framework (DFF) is a dialogue systems development environment that supports both rapid prototyping and long-term team development workflow for dialogue systems. A simple structure allows easily building and visualizing a dialogue graph.
-
-# Links
-[Github](https://github.com/deepmipt/dialog_flow_framework)
-
-# Quick Start
-
-## Installation
-```bash
-pip install dff
-```
-
-## Basic example
-```python
 from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core import Context, Actor
 import dff.conditions as cnd
@@ -54,25 +35,3 @@ while True:
     in_request = input("type your answer: ")
     out_response, ctx = turn_handler(in_request, ctx, actor)
     print(out_response)
-
-```
-When you run this code you get
-```
-type your answer: hi
-Okey
-type your answer: Hi
-Hi!!!
-type your answer: ok
-Okey
-type your answer: ok
-Okey
-
-```
-
-## Extentions 
-<!-- ### List of extentions -->
-<!-- ### Your own extention -->
-
-# Contributing to the Dialog Flow Framework
-
-Please refer to [CONTRIBUTING.md](https://github.com/deepmipt/dialog_flow_framework/dev/CONTRIBUTING.md).
