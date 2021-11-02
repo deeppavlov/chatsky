@@ -23,3 +23,4 @@ class ActorStage(Enum):
     REWRITE_NEXT_NODE = auto()
     RUN_PROCESSING = auto()
     CREATE_RESPONSE = auto()
+    FINISH_TURN = auto()

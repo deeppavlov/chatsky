@@ -111,7 +111,7 @@ class Actor(BaseModel):
         self._run_handlers(ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.a_s["response"])
 
-        # exec post_handlers
+        self._run_handlers(ctx, ActorStage.FINISH_TURN, *args, **kwargs)
         ctx.a_s.clear()
         return ctx
 
