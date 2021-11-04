@@ -71,7 +71,7 @@ class Actor(BaseModel):
             verbose=verbose,
             handlers=handlers,
         )
-        errors = self.validate_plot(validation_stage, verbose) if validation_stage else []
+        errors = self.validate_plot(verbose) if validation_stage or validation_stage is None else []
         if errors:
             raise ValueError(
                 f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
