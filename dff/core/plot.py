@@ -15,6 +15,7 @@ logger = logging.getLogger(__name__)
 Actor = ForwardRef("Actor")
 Context = ForwardRef("Context")
 
+
 class Node(BaseModel, extra=Extra.forbid):
     transitions: dict[NodeLabelType, ConditionType] = {}
     response: Optional[Any] = None

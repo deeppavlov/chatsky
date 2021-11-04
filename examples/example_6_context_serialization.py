@@ -12,10 +12,6 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-# custom functions
-def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return True
-
 
 def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return f"answer {len(ctx.requests)}"
@@ -27,8 +23,6 @@ plot = {
         "node_start": {
             RESPONSE: response_handler,
             TRANSITIONS: {
-                # ("flow_start", "node_start"): always_true,
-                # or
                 ("flow_start", "node_start"): cnd.true(),
             },
         }

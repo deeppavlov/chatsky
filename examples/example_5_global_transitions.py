@@ -11,10 +11,6 @@ from examples import example_1_basics
 logger = logging.getLogger(__name__)
 
 
-def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return True
-
-
 def high_priority_node_transition(flow_label, label):
     def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         return (flow_label, label, 2.0)
@@ -27,7 +23,7 @@ plot = {
         TRANSITIONS: {
             ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),
             ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),
-            lbl.to_fallback(0.1): always_true_condition,
+            lbl.to_fallback(0.1): cnd.true(),
             lbl.forward(): cnd.all(
                 [cnd.regexp(r"next\b"), cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]])]
             ),

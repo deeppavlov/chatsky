@@ -2,7 +2,7 @@
 
 from dff.core import Actor
 from dff.core.context import Context
-from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
+from dff.core.keywords import TRANSITIONS, RESPONSE
 from dff.conditions import true
 from dff.labels import repeat
 

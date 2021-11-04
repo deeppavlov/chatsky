@@ -12,8 +12,10 @@ from examples import example_1_basics
 logger = logging.getLogger(__name__)
 
 
-def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return True
+# def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+#     return True
+
+# `always_true_condition` is same cnd.true()
 
 
 # NodeLabel3Type == tuple[str, str, float]
@@ -35,8 +37,8 @@ plot = {
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
                 ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
-                # ("global_flow", "fallback_node"): always_true_condition,  # third check
-                "fallback_node": always_true_condition,  # third check
+                # ("global_flow", "fallback_node"): cnd.true(),  # third check
+                "fallback_node": cnd.true(),  # third check
                 # "fallback_node" is equivalent to ("global_flow", "fallback_node")
             },
         },
@@ -47,7 +49,7 @@ plot = {
                 ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
                 lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
                 # lbl.previous() is equivalent to ("PREVIOUS_flow", "PREVIOUS_node")
-                lbl.repeat(): always_true_condition,  # fourth check
+                lbl.repeat(): cnd.true(),  # fourth check
                 # lbl.repeat() is equivalent to ("global_flow", "fallback_node")
             },
         },
@@ -56,7 +58,7 @@ plot = {
         "node1": {
             RESPONSE: "Hi, how are you?",  # When the agent goes to node1, we return "Hi, how are you?"
             TRANSITIONS: {
-                ("global_flow", "fallback_node", 0.1): always_true_condition,  # second check
+                ("global_flow", "fallback_node", 0.1): cnd.true(),  # second check
                 "node2": cnd.regexp(r"how are you"),  # first check
                 # "node2" is equivalent to ("greeting_flow", "node2", 1.0)
             },
@@ -64,7 +66,7 @@ plot = {
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: {
-                lbl.to_fallback(0.1): always_true_condition,  # third check
+                lbl.to_fallback(0.1): cnd.true(),  # third check
                 # lbl.to_fallback(0.1) is equivalent to ("global_flow", "fallback_node", 0.1)
                 lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
                 # lbl.forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
@@ -81,7 +83,7 @@ plot = {
             RESPONSE: "bye",
             TRANSITIONS: {
                 "node1": cnd.regexp(r"hi|hello", re.IGNORECASE),  # first check
-                lbl.to_fallback(): always_true_condition,  # second check
+                lbl.to_fallback(): cnd.true(),  # second check
             },
         },
     },
@@ -90,7 +92,7 @@ plot = {
             RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
-                lbl.to_fallback(): always_true_condition,
+                lbl.to_fallback(): cnd.true(),
             },
         },
         "node2": {
@@ -98,7 +100,7 @@ plot = {
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
-                lbl.to_fallback(): always_true_condition,
+                lbl.to_fallback(): cnd.true(),
             },
         },
         "node3": {
@@ -107,7 +109,7 @@ plot = {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.backward(): cnd.regexp(r"back", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
-                lbl.to_fallback(): always_true_condition,
+                lbl.to_fallback(): cnd.true(),
             },
         },
         "node4": {
@@ -115,7 +117,7 @@ plot = {
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp(r"next", re.IGNORECASE),  # second check
                 high_priority_node_transition("greeting_flow", "node4"): cnd.regexp(r"next time", re.IGNORECASE),
-                lbl.to_fallback(): always_true_condition,  # third check
+                lbl.to_fallback(): cnd.true(),  # third check
             },
         },
     },

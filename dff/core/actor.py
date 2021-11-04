@@ -282,8 +282,11 @@ class Actor(BaseModel):
                     error_handler(error_msgs, msg, None, verbose)
                     continue
             except Exception as exc:
-                msg = f"Got exception '''{exc}''' during response execution " f"for {label=} and {node.response=}" \
+                msg = (
+                    f"Got exception '''{exc}''' during response execution "
+                    f"for {label=} and {node.response=}"
                     f", error was found in {(flow_label, node_label)}"
+                )
                 error_handler(error_msgs, msg, exc, verbose)
                 continue
 

@@ -4,6 +4,7 @@ import logging
 from dff.core.keywords import RESPONSE, TRANSITIONS, PROCESSING
 from dff.core import Context, Actor
 import dff.labels as lbl
+import dff.conditions as cnd
 
 from examples import example_1_basics
 
@@ -11,11 +12,6 @@ logging.basicConfig(
     format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
 )
 logger = logging.getLogger(__name__)
-
-
-# custom functions
-def always_true(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-    return True
 
 
 def create_transitions():
@@ -28,7 +24,7 @@ def create_transitions():
         lbl.backward(): "back",
         lbl.previous(): "previous",
         lbl.repeat(): "repeat",
-        lbl.to_fallback(): always_true,
+        lbl.to_fallback(): cnd.true(),
     }
 
 
@@ -54,7 +50,7 @@ plot = {
     "root": {
         "start": {
             RESPONSE: "",
-            TRANSITIONS: {("greeting", "step_0"): always_true},
+            TRANSITIONS: {("greeting", "step_0"): cnd.true()},
         },
         "fallback": {RESPONSE: "the end"},
     },
@@ -62,12 +58,12 @@ plot = {
         "step_0": {
             PROCESSING: {1: add_label_processing, 2: add_prefix("prefix_1")},
             RESPONSE: "hi",
-            TRANSITIONS: {lbl.forward(): always_true},
+            TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_1": {
             PROCESSING: {1: add_label_processing, 2: add_prefix("prefix_2")},
             RESPONSE: "what's up",
-            TRANSITIONS: {lbl.forward(): always_true},
+            TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_2": {
             PROCESSING: {1: add_label_processing, 2: add_prefix("prefix_3")},
