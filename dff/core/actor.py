@@ -259,7 +259,6 @@ class Actor(BaseModel):
             ctx.add_request("text")
             actor = self.copy(deep=True)
 
-            logger.error(f"{(label, flow_label)=}")
             label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
 
             # validate labeling
