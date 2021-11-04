@@ -8,6 +8,7 @@ fstring_patterns = {re.compile(r"\=\}"): "}"}
 forwardref_patterns = {
     re.compile("from typing import ForwardRef"): "",
     re.compile(r'ForwardRef\("Context"\)'): "BaseModel",
+    re.compile(r'ForwardRef\("Actor"\)'): "BaseModel",
 }
 
 

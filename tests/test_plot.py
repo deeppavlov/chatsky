@@ -75,8 +75,7 @@ def test_node_creation():
 def node_test(node):
     assert list(node.transitions)[0] == ("", "node", float("-inf"))
     assert isinstance(list(node.transitions.values())[0], Callable)
-    assert isinstance(node.response, Callable)
-    assert isinstance(node.processing, Callable)
+    assert isinstance(node.processing, dict)
     assert node.misc == {"key": "val"}
 
 
@@ -108,5 +107,6 @@ def test_plot():
     node_test(plot[GLOBAL][GLOBAL])
     node_test(plot["flow"]["node"])
     assert list(plot.keys()) == [GLOBAL, "flow"]
+    assert len(plot.values()) == 2
     assert list(plot) == [GLOBAL, "flow"]
     assert len(list(plot.items())) == 2

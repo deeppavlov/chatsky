@@ -32,3 +32,9 @@ def test_context_serialization():
     from .examples.example_6_context_serialization import run_test
 
     run_test()
+
+
+def test_processing():
+    from .examples.example_7_processing import run_test
+
+    run_test()

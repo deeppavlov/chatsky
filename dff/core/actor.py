@@ -26,9 +26,9 @@ class Actor(BaseModel):
     start_label: NodeLabel3Type
     fallback_label: Optional[NodeLabel3Type] = None
     transition_priority: float = 1.0
-    response_validation_flag: Optional[bool] = None
+    validation_stage: Optional[bool] = None
     condition_handler: Optional[Callable] = None
-    validation_logging_flag: bool = True
+    validation: bool = True
     handlers: dict[ActorStage, list[Callable]] = {}
 
     @validate_arguments
@@ -38,9 +38,9 @@ class Actor(BaseModel):
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         transition_priority: float = 1.0,
-        response_validation_flag: Optional[bool] = None,
+        validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
-        validation_logging_flag: bool = True,
+        verbose: bool = True,
         handlers: dict[ActorStage, list[Callable]] = {},
         *args,
         **kwargs,
@@ -66,12 +66,12 @@ class Actor(BaseModel):
             start_label=start_label,
             fallback_label=fallback_label,
             transition_priority=transition_priority,
-            response_validation_flag=response_validation_flag,
+            validation_stage=validation_stage,
             condition_handler=condition_handler,
-            validation_logging_flag=validation_logging_flag,
+            verbose=verbose,
             handlers=handlers,
         )
-        errors = self.validate_plot(response_validation_flag, validation_logging_flag)
+        errors = self.validate_plot(validation_stage, verbose) if validation_stage else []
         if errors:
             raise ValueError(
                 f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
@@ -107,7 +107,7 @@ class Actor(BaseModel):
         self._run_handlers(ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
 
         # create response
-        ctx.a_s["response"] = ctx.a_s["processed_node"].response(ctx, self, *args, **kwargs)
+        ctx.a_s["response"] = ctx.a_s["processed_node"].run_response(ctx, self, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.a_s["response"])
 
@@ -163,9 +163,10 @@ class Actor(BaseModel):
         ctx.a_s["next_label"] = self._choose_label(ctx.a_s["next_label"], ctx.a_s["global_true_label"])
         # get next node
         ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
-        if ctx.a_s["next_node"] is None:
-            ctx.a_s["next_label"] = self.start_label
-            ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
+        # below is commented unreachable condition
+        # if ctx.a_s["next_node"] is None:
+        #     ctx.a_s["next_label"] = self.start_label
+        #     ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
         return ctx
 
     @validate_arguments
@@ -182,7 +183,7 @@ class Actor(BaseModel):
     @validate_arguments
     def _run_processing(self, ctx: Context, *args, **kwargs) -> Context:
         ctx.a_s["processed_node"] = ctx.a_s["next_node"].copy()
-        ctx = ctx.a_s["next_node"].processing(ctx, self, *args, **kwargs) if ctx.a_s["next_node"].processing else ctx
+        ctx = ctx.a_s["next_node"].run_processing(ctx, self, *args, **kwargs)
         return ctx
 
     @validate_arguments
@@ -237,65 +238,62 @@ class Actor(BaseModel):
     @validate_arguments
     def validate_plot(
         self,
-        response_validation_flag: Optional[bool] = None,
-        logging_flag: bool = True,
+        verbose: bool = True,
     ):
         # TODO: plot has to not contain priority == -inf, because it uses for miss values
+        flow_labels = []
+        node_labels = []
         labels = []
         conditions = []
-        for flow in self.plot.values():
-            for node in flow.values():
+        for flow_name, flow in self.plot.items():
+            for node_name, node in flow.items():
+                flow_labels += [flow_name] * len(node.transitions)
+                node_labels += [node_name] * len(node.transitions)
                 labels += list(node.transitions.keys())
                 conditions += list(node.transitions.values())
 
         error_msgs = []
-        for label, condition in zip(labels, conditions):
+        for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
             ctx.add_request("text")
             actor = self.copy(deep=True)
 
-            label = label(ctx, actor) if isinstance(label, Callable) else label
+            logger.error(f"{(label, flow_label)=}")
+            label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
 
+            # validate labeling
             try:
-                node = self.plot.get(label[0], {}).get(label[1], Node())
+                node = self.plot[label[0]][label[1]]
             except Exception as exc:
-                node = None
-                msg = f"Got exception '''{exc}''' for {label=}"
-                error_handler(error_msgs, msg, exc, logging_flag)
+                msg = f"Could not find node with {label=}, error was found in {(flow_label, node_label)}"
+                error_handler(error_msgs, msg, exc, verbose)
+                break
 
-            if not isinstance(node, Node):
-                msg = f"Could not find node with {label=}"
-                error_handler(error_msgs, msg, None, logging_flag)
+            # validate responsing
+            response_func = normalize_response(node.response)
+            try:
+                response_result = response_func(ctx, actor)
+                if isinstance(response_result, Callable):
+                    msg = (
+                        f"Expected type of response_result needed not Callable but got {type(response_result)=}"
+                        f" for {label=} , error was found in {(flow_label, node_label)}"
+                    )
+                    error_handler(error_msgs, msg, None, verbose)
+                    continue
+            except Exception as exc:
+                msg = f"Got exception '''{exc}''' during response execution " f"for {label=} and {node.response=}" \
+                    f", error was found in {(flow_label, node_label)}"
+                error_handler(error_msgs, msg, exc, verbose)
                 continue
 
-            # validate response
-            if response_validation_flag or response_validation_flag is None:
-                response_func = normalize_response(node.response)
-                n_errors = len(error_msgs)
-                try:
-                    response_result = response_func(ctx, actor)
-                    if isinstance(response_result, Callable):
-                        msg = (
-                            f"Expected type of response_result needed not Callable but got {type(response_result)=}"
-                            f" for {label=}"
-                        )
-                        error_handler(error_msgs, msg, None, logging_flag)
-                except Exception as exc:
-                    msg = f"Got exception '''{exc}''' during response execution " f"for {label=} and {node.response=}"
-                    error_handler(error_msgs, msg, exc, logging_flag)
-                if n_errors != len(error_msgs) and response_validation_flag is None:
-                    logger.info(
-                        "response_validation_flag was not setuped, by default responses validation is enabled. "
-                        "It's service message can be switched off by manually setting response_validation_flag"
-                    )
-
-            # validate conditions
+            # validate conditioning
             try:
-                bool(condition(ctx, actor))
+                assert isinstance(condition(ctx, actor), bool)
             except Exception as exc:
                 msg = f"Got exception '''{exc}''' during condition execution for {label=}"
-                error_handler(error_msgs, msg, exc, logging_flag)
+                error_handler(error_msgs, msg, exc, verbose)
+                continue
         return error_msgs
 
 

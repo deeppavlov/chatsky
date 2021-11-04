@@ -7,9 +7,13 @@ from pydantic import BaseModel, validator, Extra
 
 from .types import LabelType, NodeLabelType, ConditionType
 from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_plot
+from typing import ForwardRef
 
 logger = logging.getLogger(__name__)
 
+
+Actor = ForwardRef("Actor")
+Context = ForwardRef("Context")
 
 class Node(BaseModel, extra=Extra.forbid):
     transitions: dict[NodeLabelType, ConditionType] = {}
@@ -18,8 +22,14 @@ class Node(BaseModel, extra=Extra.forbid):
     misc: dict = {}
 
     _normalize_transitions = validator("transitions", allow_reuse=True)(normalize_transitions)
-    _normalize_response = validator("response", allow_reuse=True)(normalize_response)
-    _normalize_processing = validator("processing", allow_reuse=True)(normalize_processing)
+
+    def run_response(self, ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+        response = normalize_response(self.response)
+        return response(ctx, actor, *args, **kwargs)
+
+    def run_processing(self, ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+        processing = normalize_processing(self.processing)
+        return processing(ctx, actor, *args, **kwargs)
 
 
 class Plot(BaseModel, extra=Extra.forbid):

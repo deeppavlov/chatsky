@@ -35,6 +35,7 @@ plot = {
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
                 ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
+                # ("global_flow", "fallback_node"): always_true_condition,  # third check
                 "fallback_node": always_true_condition,  # third check
                 # "fallback_node" is equivalent to ("global_flow", "fallback_node")
             },

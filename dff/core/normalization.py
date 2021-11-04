@@ -40,9 +40,11 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
     elif isinstance(label, tuple) and len(label) == 2 and isinstance(label[-1], float):
         return (default_flow_label, label[0], label[-1])
     elif isinstance(label, tuple) and len(label) == 2 and isinstance(label[-1], str):
-        return (label[0], label[-1], float("-inf"))
+        flow_label = label[0] or default_flow_label
+        return (flow_label, label[-1], float("-inf"))
     elif isinstance(label, tuple) and len(label) == 3:
-        return (label[0], label[1], label[2])
+        flow_label = label[0] or default_flow_label
+        return (flow_label, label[1], label[2])
 
 
 @validate_arguments
