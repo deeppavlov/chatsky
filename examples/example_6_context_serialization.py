@@ -71,5 +71,5 @@ def run_test():
 
 
 if __name__ == "__main__":
-    run_test()
+    # run_test()
     example_1_basics.run_interactive_mode(actor)
