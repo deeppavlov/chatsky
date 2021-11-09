@@ -91,7 +91,8 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
         def processing_handler(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
             for processing_name, processing_func in processing.items():
                 try:
-                    ctx = processing_func(ctx, actor, *args, **kwargs)
+                    if processing_func is not None:
+                        ctx = processing_func(ctx, actor, *args, **kwargs)
                 except Exception as exc:
                     logger.error(f"Exception {exc} for {processing_name=} and {processing_func=}", exc_info=exc)
             return ctx
