@@ -291,7 +291,9 @@ class Actor(BaseModel):
 
             # validate conditioning
             try:
-                assert isinstance(condition(ctx, actor), bool)
+                condition_result = condition(ctx, actor)
+                if not isinstance(condition(ctx, actor), bool):
+                    raise Exception(f"Returned {condition_result=}, but expected bool type")
             except Exception as exc:
                 msg = f"Got exception '''{exc}''' during condition execution for {label=}"
                 error_handler(error_msgs, msg, exc, verbose)
