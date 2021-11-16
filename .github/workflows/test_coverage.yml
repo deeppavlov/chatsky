@@ -25,7 +25,7 @@ jobs:
           python -m pip install --upgrade pip
           python utils/downgrade_patch.py -d .
           pip install -e .
-          if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
+          pip install -r requirements_test.txt
 
       - name: build coverage file
         run: |
