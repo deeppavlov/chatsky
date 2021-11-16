@@ -1,11 +1,8 @@
-<!-- 
-<p align="center">
-<a href="https://github.com/deepmipt/dialog_flow_framework/actions"><img alt="Actions Status" src="https://github.com/deepmipt/dialog_flow_framework/workflows/codestyle/badge.svg"></a>
-<a href="https://github.com/deepmipt/dialog_flow_framework/actions"><img alt="Actions Status" src="https://github.com/deepmipt/dialog_flow_framework/workflows/test_coverage/badge.svg"></a>
-<a href="https://dff.readthedocs.io/en/stable/?badge=stable"><img alt="Documentation Status" src="https://readthedocs.org/projects/dff/badge/?version=stable"></a>
-<a href="https://coveralls.io/github/deepmipt/dialog_flow_framework?branch=main"><img alt="Coverage Status" src="https://coveralls.io/repos/github/deepmipt/dialog_flow_framework/badge.svg?branch=main"></a>
-</p> -->
 
+<!-- [![Documentation Status](https://dff.readthedocs.io/en/stable/?badge=stable)](https://readthedocs.org/projects/dff/badge/?version=stable) -->
+<!-- [![Coverage Status](https://coveralls.io/repos/github/deepmipt/dialog_flow_framework/badge.svg?branch=main)](https://coveralls.io/github/deepmipt/dialog_flow_framework?branch=main) -->
+[![Codestyle](https://github.com/deepmipt/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deepmipt/dialog_flow_framework/actions)
+[![Tests](https://github.com/deepmipt/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deepmipt/dialog_flow_framework/actions)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deepmipt/dff/blob/master/LICENSE)
 ![Python 3.6, 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
