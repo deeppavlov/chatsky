@@ -28,6 +28,6 @@ jobs:
 
       - name: build coverage file
         run: |
-          pytest --cache-clear --cov=dff tests/ > pytest-coverage.txt
+          pytest --cache-clear --cov-fail-under=100 --cov=dff tests/ > pytest-coverage.txt
       - name: comment coverage
         uses: coroo/pytest-coverage-commentator@v1.0.2
