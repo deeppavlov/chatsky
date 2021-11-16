@@ -9,9 +9,6 @@ on:
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      COVERAGE_SINGLE: 100
-      COVERAGE_TOTAL: 100
 
     steps:
       - uses: actions/checkout@v2

@@ -109,4 +109,4 @@ def test_plot():
     assert list(plot.keys()) == [GLOBAL, "flow"]
     assert len(plot.values()) == 2
     assert list(plot) == [GLOBAL, "flow"]
-    assert len(list(plot.items())) == 2
+    assert len(list(plot.items())) != 2
