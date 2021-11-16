@@ -278,7 +278,7 @@ class Actor(BaseModel):
                         f"Expected type of response_result needed not Callable but got {type(response_result)=}"
                         f" for {label=} , error was found in {(flow_label, node_label)}"
                     )
-                    error_handler(error_msgs, msg, None, verbose)
+                    error_handler(error_msgs,       msg, None, verbose)
                     continue
             except Exception as exc:
                 msg = (

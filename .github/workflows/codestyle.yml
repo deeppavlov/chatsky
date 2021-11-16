@@ -1,4 +1,4 @@
-name: run test coverage
+name: run codestyle
 
 on: [push]
 
