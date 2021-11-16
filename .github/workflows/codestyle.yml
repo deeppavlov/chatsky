@@ -1,4 +1,4 @@
-name: run codestyle
+name: codestyle
 
 on: [push]
 
