@@ -11,10 +11,12 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v2
+
       - name: Set up Python 3.6
         uses: actions/setup-python@v2
         with:
           python-version: 3.6
+
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
@@ -25,7 +27,3 @@ jobs:
       - name: build coverage file
         run: |
           pytest --cache-clear --cov-fail-under=100 --cov=dff tests/ > pytest-coverage.txt
-      - name: comment coverage
-        uses: coroo/pytest-coverage-commentator@v1.0.2
-        with:
-          pytest-coverage: pytest-coverage.txt
