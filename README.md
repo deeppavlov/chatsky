@@ -1,4 +1,5 @@
 
+# Dialog Flow Framework
 <!-- [![Documentation Status](https://dff.readthedocs.io/en/stable/?badge=stable)](https://readthedocs.org/projects/dff/badge/?version=stable) -->
 <!-- [![Coverage Status](https://coveralls.io/repos/github/deepmipt/dialog_flow_framework/badge.svg?branch=main)](https://coveralls.io/github/deepmipt/dialog_flow_framework?branch=main) -->
 [![Codestyle](https://github.com/deepmipt/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deepmipt/dialog_flow_framework/actions)
@@ -7,7 +8,6 @@
 ![Python 3.6, 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
 [![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
-# Dialog Flow Framework
 
 The Dialog Flow Framework (DFF) is a dialogue systems development environment that supports both rapid prototyping and long-term team development workflow for dialogue systems. A simple structure allows easily building and visualizing a dialogue graph.
 
