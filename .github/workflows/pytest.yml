@@ -26,6 +26,7 @@ jobs:
           if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
 
       - name: pytester-cov
+        id: pytester-cov
         uses: alexanderdamiani/pytester-cov@v1.2.1
         with:
           # cov-omit-list: 'tests/*, examples/*, utils/*'
