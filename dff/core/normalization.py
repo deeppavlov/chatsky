@@ -117,6 +117,5 @@ def normalize_keywords(
 def normalize_plot(plot: dict[LabelType, Any]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
     if isinstance(plot, dict):
         if GLOBAL in plot and all([isinstance(item, Keywords) for item in plot[GLOBAL].keys()]):
-            logger.info(f"{plot[GLOBAL]=}")
             plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
     return normalize_keywords(plot)

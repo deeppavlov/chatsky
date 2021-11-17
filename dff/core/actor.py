@@ -183,7 +183,6 @@ class Actor(BaseModel):
     @validate_arguments
     def _run_processing(self, ctx: Context, *args, **kwargs) -> Context:
         ctx.a_s["processed_node"] = copy.deepcopy(ctx.a_s["next_node"])
-        logger.info(f'{ctx.a_s["next_node"].processing=}')
         ctx = ctx.a_s["next_node"].run_processing(ctx, self, *args, **kwargs)
         return ctx
 
