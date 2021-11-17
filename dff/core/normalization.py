@@ -101,12 +101,9 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
 
 
 @validate_arguments
-def normalize_plot(
-    plot: dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
+def normalize_keywords(
+    plot: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
 ) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
-    if isinstance(plot, dict):
-        if GLOBAL in plot and all([isinstance(item, Keywords) for item in plot[GLOBAL].keys()]):
-            plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
     plot = {
         flow_label: {
             node_label: {key.name.lower(): val for key, val in node.items()} for node_label, node in flow.items()
@@ -114,3 +111,12 @@ def normalize_plot(
         for flow_label, flow in plot.items()
     }
     return plot
+
+
+@validate_arguments
+def normalize_plot(plot: dict[LabelType, Any]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
+    if isinstance(plot, dict):
+        if GLOBAL in plot and all([isinstance(item, Keywords) for item in plot[GLOBAL].keys()]):
+            logger.info(f"{plot[GLOBAL]=}")
+            plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
+    return normalize_keywords(plot)

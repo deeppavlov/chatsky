@@ -10,6 +10,7 @@ from dff.conditions import true
 # from dff.labels
 from dff.core.normalization import (
     normalize_condition,
+    normalize_keywords,
     normalize_label,
     normalize_plot,
     normalize_processing,
@@ -104,6 +105,28 @@ def test_normalize_processing():
     assert isinstance(normalize_processing({}), Callable)
     assert isinstance(normalize_processing({1: std_func}), Callable)
     assert isinstance(normalize_processing({1: std_func, 2: std_func}), Callable)
+
+
+def test_normalize_keywords():
+    # TODO: Add full check for functions
+    node_template = {
+        TRANSITIONS: {"node": std_func},
+        RESPONSE: "text",
+        PROCESSING: {1: std_func},
+        MISC: {"key": "val"},
+    }
+    node_template_gold = {
+        TRANSITIONS.name.lower(): {"node": std_func},
+        RESPONSE.name.lower(): "text",
+        PROCESSING.name.lower(): {1: std_func},
+        MISC.name.lower(): {"key": "val"},
+    }
+    plot = {
+        "flow": {"node": node_template.copy()},
+    }
+    plot = normalize_keywords(plot)
+    assert isinstance(plot, dict)
+    assert plot["flow"]["node"] == node_template_gold
 
 
 def test_normalize_plot():
