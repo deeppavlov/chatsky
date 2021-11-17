@@ -39,7 +39,7 @@ def read_requirements():
 
 setup(
     name="dff",
-    version="0.2.b1",
+    version="0.2b2",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
