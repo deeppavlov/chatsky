@@ -1,6 +1,6 @@
 import logging
 from typing import Union, Callable, Optional
-
+import copy
 
 from pydantic import BaseModel, validate_arguments
 
@@ -171,7 +171,7 @@ class Actor(BaseModel):
 
     @validate_arguments
     def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
-        updated_next = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).copy()
+        updated_next = copy.deepcopy(self.plot.get(GLOBAL, {}).get(GLOBAL, Node()))
         local_node = self.plot.get(ctx.a_s["next_label"][0], {}).get(LOCAL, Node())
         for node in [local_node, ctx.a_s["next_node"]]:
             updated_next.response = node.response if node.response else updated_next.response
@@ -182,7 +182,8 @@ class Actor(BaseModel):
 
     @validate_arguments
     def _run_processing(self, ctx: Context, *args, **kwargs) -> Context:
-        ctx.a_s["processed_node"] = ctx.a_s["next_node"].copy()
+        ctx.a_s["processed_node"] = copy.deepcopy(ctx.a_s["next_node"])
+        logger.info(f'{ctx.a_s["next_node"].processing=}')
         ctx = ctx.a_s["next_node"].run_processing(ctx, self, *args, **kwargs)
         return ctx
 
