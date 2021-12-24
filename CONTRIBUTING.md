@@ -8,6 +8,7 @@ Prepare the enviroment:
 
 ```bash
 pip install -r requirements_dev.txt
+pip install -r requirements_test.txt
 ```
 ### Documentation
 Build documentation:
