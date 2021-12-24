@@ -7,8 +7,9 @@ We will be glad if you contribute to Dialog Flow Engine.
 Prepare the enviroment:
 
 ```bash
-pip install -r requirements_dev.txt
+pip install -r requirements_doc.txt
 pip install -r requirements_test.txt
+pip install -e .
 ```
 ### Documentation
 Build documentation:
