@@ -42,6 +42,6 @@ test_all: venv test lint
 `.PHONY: test_all
 
 build_doc:
-	sphinx-build -M clean docs/source docs/build
-	sphinx-build -M html docs/source docs/build
+	sphinx-build -M clean docs docs/build
+	sphinx-build -M html docs docs/build
 `.PHONY: build_doc
