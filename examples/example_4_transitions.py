@@ -1,11 +1,11 @@
 import logging
 import re
 
-from dff.core.keywords import TRANSITIONS, RESPONSE
-from dff.core import Context, Actor
-import dff.conditions as cnd
-import dff.labels as lbl
-from dff.core.types import NodeLabel3Type
+from df_engine.core.keywords import TRANSITIONS, RESPONSE
+from df_engine.core import Context, Actor
+import df_engine.conditions as cnd
+import df_engine.labels as lbl
+from df_engine.core.types import NodeLabel3Type
 
 from examples import example_1_basics
 
@@ -75,10 +75,7 @@ plot = {
                 # ("music_flow", "node1") is equivalent to ("music_flow", "node1", 1.0)
             },
         },
-        "node3": {
-            RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
-        },
+        "node3": {RESPONSE: "Sorry, I can not talk about that now.", TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
         "node4": {
             RESPONSE: "bye",
             TRANSITIONS: {
@@ -90,10 +87,7 @@ plot = {
     "music_flow": {
         "node1": {
             RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
-            TRANSITIONS: {
-                lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
-                lbl.to_fallback(): cnd.true(),
-            },
+            TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE), lbl.to_fallback(): cnd.true()},
         },
         "node2": {
             RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
@@ -124,10 +118,7 @@ plot = {
 }
 
 actor = Actor(
-    plot,
-    start_label=("global_flow", "start_node"),
-    fallback_label=("global_flow", "fallback_node"),
-    transition_priority=1.0,
+    plot, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node"), label_priority=1.0
 )
 
 
@@ -166,8 +157,7 @@ def run_test():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.DEBUG,
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
     )
     # run_test()
     example_1_basics.run_interactive_mode(actor)

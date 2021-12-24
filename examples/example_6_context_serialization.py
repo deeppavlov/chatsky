@@ -1,14 +1,13 @@
 import logging
 
-from dff.core.keywords import TRANSITIONS, RESPONSE
-from dff.core import Context, Actor
+from df_engine.core.keywords import TRANSITIONS, RESPONSE
+from df_engine.core import Context, Actor
 
 from examples import example_1_basics
-import dff.conditions as cnd
+import df_engine.conditions as cnd
 
 logging.basicConfig(
-    format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-    level=logging.INFO,
+    format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
 )
 logger = logging.getLogger(__name__)
 
@@ -19,26 +18,14 @@ def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 
 # a dialog script
 plot = {
-    "flow_start": {
-        "node_start": {
-            RESPONSE: response_handler,
-            TRANSITIONS: {
-                ("flow_start", "node_start"): cnd.true(),
-            },
-        }
-    },
+    "flow_start": {"node_start": {RESPONSE: response_handler, TRANSITIONS: {("flow_start", "node_start"): cnd.true()}}}
 }
 
 
 actor = Actor(plot, start_label=("flow_start", "node_start"))
 
 
-testing_dialog = [
-    ("hi", "answer 1"),
-    ("how are you?", "answer 2"),
-    ("ok", "answer 3"),
-    ("good", "answer 4"),
-]
+testing_dialog = [("hi", "answer 1"), ("how are you?", "answer 2"), ("ok", "answer 3"), ("good", "answer 4")]
 
 
 def run_test():

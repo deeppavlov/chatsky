@@ -38,19 +38,19 @@ def read_requirements():
 
 
 setup(
-    name="dff",
+    name="df_engine",
     version="0.2.b3",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/deepmipt/dialog_flow_framework",
+    url="https://github.com/deepmipt/dialog_flow_engine",
     author="Denis Kuznetsov",
     author_email="kuznetsov.den.p@gmail.com",
     classifiers=[  # Optional
         #   3 - Alpha
         #   4 - Beta
         #   5 - Production/Stable
-        "Development Status :: 3 - Alpha",
+        "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
         "License :: OSI Approved :: Apache Software License",

@@ -3,10 +3,10 @@ import re
 import random
 from typing import Any
 
-from dff.core.keywords import TRANSITIONS, RESPONSE
-from dff.core import Actor, Context
-import dff.responses as rsp
-import dff.conditions as cnd
+from df_engine.core.keywords import TRANSITIONS, RESPONSE
+from df_engine.core import Actor, Context
+import df_engine.responses as rsp
+import df_engine.conditions as cnd
 
 from examples import example_1_basics
 
@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 #                          then the object will be returned by the agent as a response.
 
 
-# Out of the box, dff offers 1 additional response function:
+# Out of the box, df_engine offers 1 additional response function:
 # - `choice` - will return `true` if the user's request completely matches the value passed to the function.
 
 
@@ -50,10 +50,7 @@ def upper_case_response(response: str):
 
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     logger.warning(f"ctx={ctx}")
-    return {
-        "previous_node": list(ctx.labels.values())[-2],
-        "last_request": ctx.last_request,
-    }
+    return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
 
 plot = {
@@ -70,27 +67,17 @@ plot = {
             RESPONSE: "Good. What do you want to talk about?",
             TRANSITIONS: {"node3": cnd.exact_match("Let's talk about music.")},
         },
-        "node3": {
-            RESPONSE: cannot_talk_about_topic_response,
-            TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
-        },
-        "node4": {
-            RESPONSE: upper_case_response("bye"),
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
-        },
+        "node3": {RESPONSE: cannot_talk_about_topic_response, TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")}},
+        "node4": {RESPONSE: upper_case_response("bye"), TRANSITIONS: {"node1": cnd.exact_match("Hi")}},
         "fallback_node": {  # We get to this node if an error occurred while the agent was running
             RESPONSE: fallback_trace_response,
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
-    },
+    }
 }
 
 
-actor = Actor(
-    plot,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
+actor = Actor(plot, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
 # testing
@@ -122,8 +109,7 @@ def run_test():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
     )
     # run_test()
     example_1_basics.run_interactive_mode(actor)

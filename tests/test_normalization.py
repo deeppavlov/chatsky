@@ -1,14 +1,14 @@
 # %%
 from typing import Callable
 
-from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
-from dff.core import Actor, Context
-from dff.core.types import NodeLabel3Type
-from dff.labels import repeat
-from dff.conditions import true
+from df_engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
+from df_engine.core import Actor, Context
+from df_engine.core.types import NodeLabel3Type
+from df_engine.labels import repeat
+from df_engine.conditions import true
 
-# from dff.labels
-from dff.core.normalization import (
+# from df_engine.labels
+from df_engine.core.normalization import (
     normalize_condition,
     normalize_keywords,
     normalize_label,
@@ -109,21 +109,14 @@ def test_normalize_processing():
 
 def test_normalize_keywords():
     # TODO: Add full check for functions
-    node_template = {
-        TRANSITIONS: {"node": std_func},
-        RESPONSE: "text",
-        PROCESSING: {1: std_func},
-        MISC: {"key": "val"},
-    }
+    node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
         RESPONSE.name.lower(): "text",
         PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
     }
-    plot = {
-        "flow": {"node": node_template.copy()},
-    }
+    plot = {"flow": {"node": node_template.copy()}}
     plot = normalize_keywords(plot)
     assert isinstance(plot, dict)
     assert plot["flow"]["node"] == node_template_gold
@@ -131,22 +124,14 @@ def test_normalize_keywords():
 
 def test_normalize_plot():
     # TODO: Add full check for functions
-    node_template = {
-        TRANSITIONS: {"node": std_func},
-        RESPONSE: "text",
-        PROCESSING: {1: std_func},
-        MISC: {"key": "val"},
-    }
+    node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
         RESPONSE.name.lower(): "text",
         PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
     }
-    plot = {
-        GLOBAL: node_template.copy(),
-        "flow": {"node": node_template.copy()},
-    }
+    plot = {GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}}
     plot = normalize_plot(plot)
     assert isinstance(plot, dict)
     assert plot[GLOBAL][GLOBAL] == node_template_gold

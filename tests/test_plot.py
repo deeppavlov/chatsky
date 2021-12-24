@@ -3,8 +3,8 @@ import itertools
 from typing import Callable
 
 
-from dff.core import Plot, Node
-from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
+from df_engine.core import Plot, Node
+from df_engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
 
 
 def positive_test(samples, custom_class):
@@ -92,18 +92,8 @@ def test_node_exec():
 
 
 def test_plot():
-    node_template = {
-        TRANSITIONS: {"node": std_func},
-        RESPONSE: "text",
-        PROCESSING: {1: std_func},
-        MISC: {"key": "val"},
-    }
-    plot = Plot(
-        plot={
-            GLOBAL: node_template.copy(),
-            "flow": {"node": node_template.copy()},
-        }
-    )
+    node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
+    plot = Plot(plot={GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}})
     node_test(plot[GLOBAL][GLOBAL])
     node_test(plot["flow"]["node"])
     assert list(plot.keys()) == [GLOBAL, "flow"]

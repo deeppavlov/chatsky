@@ -1,3 +1,10 @@
+"""
+Actor
+---------------------------
+The Actor is described here.
+Actor is one of the main abstractions that processes incoming requests (:py:class:`~df_engine.core.context.Context`)
+from the user in accordance with the dialog graph (:py:class:`~df_engine.core.plot.Plot`).
+"""
 import logging
 from typing import Union, Callable, Optional
 import copy
@@ -11,24 +18,76 @@ from .plot import Plot, Node
 from .normalization import normalize_label, normalize_response
 from .keywords import GLOBAL, LOCAL
 
-
 logger = logging.getLogger(__name__)
-# TODO: add texts
 
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
+    """
+    This function processes errors in the process of :py:class:`~df_engine.core.plot.Plot` validation.
+
+    Parameters
+    ----------
+    error_msgs : list
+       List that contains error messages. :py:func:`~df_engine.core.actor.error_handler`
+       adds every next error message to that list.
+    msg: str
+        Error message which is to be added into `error_msgs`.
+    exception : Optional[Exception]
+        Invoked exception. If it was set, it is used to obtain logging traceback.
+    logging_flag : bool
+        The flag which defines whether logging is nesessary.
+    """
     error_msgs.append(msg)
     logging_flag and logger.error(msg, exc_info=exception)
 
 
 class Actor(BaseModel):
+    """
+    The class which is used to process :py:class:`~df_engine.core.context.Context`
+    according to the :py:class:`~df_engine.core.plot.Plot`.
+
+    Parameters
+    ----------
+
+    plot: Union[Plot, dict]
+       The dialog scenario: a graph described by the :py:class:`~df_engine.core.keywords.Keywords`.
+       While the graph is being initialized, it passes validation and after that it is used for the dialog.
+
+    start_label: :py:const:`~df_engine.core.types.NodeLabel3Type`
+       The start node of :py:class:`~df_engine.core.plot.Plot`. The execution starts from it.
+
+    fallback_label: Optional[:py:const:`~df_engine.core.types.NodeLabel3Type`] = None
+       The label of :py:class:`~df_engine.core.plot.Plot`.
+       Dialog comes into that label if all other transitions failed, or there was an error while executing the scenario.
+
+    label_priority: float = 1.0
+       Default priority value for all :py:const:`labels <df_engine.core.types.NodeLabel3Type>`
+       where there is no priority.
+
+    validation_stage: Optional[bool] = None
+       This flag sets whether the validation stage is executed. It is executed by default.
+
+    condition_handler: Optional[Callable] = None
+       Handler that processes a call of condition functions.
+
+    verbose: bool = True
+        If it is True, we use logging.
+
+    handlers: dict[ActorStage, list[Callable]] = {}
+        This variable is responsible for the usage of external handlers on
+        the certain stages of work of :py:class:`~df_engine.core.actor.Actor`.
+
+        * key: :py:class:`~df_engine.core.types.ActorStage` - stage when the handler is called
+        * value: list[Callable] - the list of called handlers for each stage
+    """
+
     plot: Union[Plot, dict]
     start_label: NodeLabel3Type
     fallback_label: Optional[NodeLabel3Type] = None
-    transition_priority: float = 1.0
+    label_priority: float = 1.0
     validation_stage: Optional[bool] = None
     condition_handler: Optional[Callable] = None
-    validation: bool = True
+    verbose: bool = True
     handlers: dict[ActorStage, list[Callable]] = {}
 
     @validate_arguments
@@ -37,7 +96,7 @@ class Actor(BaseModel):
         plot: Union[Plot, dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
-        transition_priority: float = 1.0,
+        label_priority: float = 1.0,
         validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
@@ -65,7 +124,7 @@ class Actor(BaseModel):
             plot=plot,
             start_label=start_label,
             fallback_label=fallback_label,
-            transition_priority=transition_priority,
+            label_priority=label_priority,
             validation_stage=validation_stage,
             condition_handler=condition_handler,
             verbose=verbose,
@@ -138,10 +197,7 @@ class Actor(BaseModel):
         # LOCAL
         ctx.a_s["local_transitions"] = self.plot.get(ctx.a_s["previous_label"][0], {}).get(LOCAL, Node()).transitions
         ctx.a_s["local_true_label"] = self._get_true_label(
-            ctx.a_s["local_transitions"],
-            ctx,
-            ctx.a_s["previous_label"][0],
-            "local",
+            ctx.a_s["local_transitions"], ctx, ctx.a_s["previous_label"][0], "local"
         )
 
         # NODE
@@ -149,10 +205,7 @@ class Actor(BaseModel):
             self.plot.get(ctx.a_s["previous_label"][0], {}).get(ctx.a_s["previous_label"][1], Node()).transitions
         )
         ctx.a_s["node_true_label"] = self._get_true_label(
-            ctx.a_s["node_transitions"],
-            ctx,
-            ctx.a_s["previous_label"][0],
-            "node",
+            ctx.a_s["node_transitions"], ctx, ctx.a_s["previous_label"][0], "node"
         )
         return ctx
 
@@ -188,13 +241,7 @@ class Actor(BaseModel):
 
     @validate_arguments
     def _get_true_label(
-        self,
-        transitions: dict,
-        ctx: Context,
-        flow_label: LabelType,
-        transition_info: str = "",
-        *args,
-        **kwargs,
+        self, transitions: dict, ctx: Context, flow_label: LabelType, transition_info: str = "", *args, **kwargs
     ) -> Optional[NodeLabel3Type]:
         true_labels = []
         for label, condition in transitions.items():
@@ -209,7 +256,7 @@ class Actor(BaseModel):
         true_labels = [
             ((label[0] if label[0] else flow_label),)
             + label[1:2]
-            + ((self.transition_priority if label[2] == float("-inf") else label[2]),)
+            + ((self.label_priority if label[2] == float("-inf") else label[2]),)
             for label in true_labels
         ]
         true_labels.sort(key=lambda label: -label[2])
@@ -223,9 +270,7 @@ class Actor(BaseModel):
 
     @validate_arguments
     def _choose_label(
-        self,
-        specific_label: Optional[NodeLabel3Type],
-        general_label: Optional[NodeLabel3Type],
+        self, specific_label: Optional[NodeLabel3Type], general_label: Optional[NodeLabel3Type]
     ) -> NodeLabel3Type:
         if all([specific_label, general_label]):
             chosen_label = specific_label if specific_label[2] >= general_label[2] else general_label
@@ -236,10 +281,7 @@ class Actor(BaseModel):
         return chosen_label
 
     @validate_arguments
-    def validate_plot(
-        self,
-        verbose: bool = True,
-    ):
+    def validate_plot(self, verbose: bool = True):
         # TODO: plot has to not contain priority == -inf, because it uses for miss values
         flow_labels = []
         node_labels = []
@@ -303,4 +345,17 @@ class Actor(BaseModel):
 
 @validate_arguments()
 def deep_copy_condition_handler(condition: Callable, ctx: Context, actor: Actor, *args, **kwargs):
+    """
+    This function returns deep copy of callable conditions:
+
+    Parameters
+    ----------
+
+    condition: Callable
+        condition to copy
+    ctx: Context
+        context of current condition
+    actor: Actor
+        :py:class:`~df_engine.core.actor.Actor` we use in this condition
+    """
     return condition(ctx.copy(deep=True), actor.copy(deep=True), *args, **kwargs)

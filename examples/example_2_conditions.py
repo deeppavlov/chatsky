@@ -1,9 +1,9 @@
 import logging
 import re
 
-from dff.core.keywords import TRANSITIONS, RESPONSE
-from dff.core import Actor, Context
-import dff.conditions as cnd
+from df_engine.core.keywords import TRANSITIONS, RESPONSE
+from df_engine.core import Actor, Context
+import df_engine.conditions as cnd
 
 from examples import example_1_basics
 
@@ -16,7 +16,7 @@ logger = logging.getLogger(__name__)
 # If the function returns the value `true`, then the actor performs the corresponding transition.
 # Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
 
-# Out of the box, dff offers 8 options for setting conditions:
+# Out of the box, df_engine offers 8 options for setting conditions:
 # - `exact_match` - will return `true` if the user's request completely matches the value passed to the function.
 # - `regexp` - will return `true` if the pattern matches the user's request, while the user's request must be a string.
 # -            `regexp` has same signature as `re.compile` function.
@@ -93,14 +93,10 @@ plot = {
                 # if complex_user_answer_condition return false
             },
         },
-    },
+    }
 }
 
-actor = Actor(
-    plot,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
+actor = Actor(plot, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
 # testing
@@ -129,8 +125,7 @@ def run_test():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
     )
     # run_test()
     example_1_basics.run_interactive_mode(actor)

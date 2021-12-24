@@ -1,9 +1,9 @@
 import logging
 from typing import Optional, Union
 
-from dff.core.keywords import TRANSITIONS, RESPONSE
-from dff.core import Context, Actor
-import dff.conditions as cnd
+from df_engine.core.keywords import TRANSITIONS, RESPONSE
+from df_engine.core import Context, Actor
+import df_engine.conditions as cnd
 
 logger = logging.getLogger(__name__)
 
@@ -42,15 +42,12 @@ plot = {
             RESPONSE: "Sorry, I can not talk about music now.",
             TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
         },
-        "node4": {
-            RESPONSE: "bye",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
-        },
+        "node4": {RESPONSE: "bye", TRANSITIONS: {"node1": cnd.exact_match("Hi")}},
         "fallback_node": {  # We get to this node if an error occurred while the agent was running
             RESPONSE: "Ooops",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
-    },
+    }
 }
 
 # An actor is an object that processes user input replicas and returns responses
@@ -58,19 +55,12 @@ plot = {
 # And pass the initial node `start_label`
 # and the node to which the actor will go in case of an error `fallback_label`
 # If `fallback_label` is not set, then its value becomes equal to `start_label` by default
-actor = Actor(
-    plot,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
+actor = Actor(plot, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
 # turn_handler - a function is made for the convenience of working with an actor
 def turn_handler(
-    in_request: str,
-    ctx: Union[Context, str, dict],
-    actor: Actor,
-    true_out_response: Optional[str] = None,
+    in_request: str, ctx: Union[Context, str, dict], actor: Actor, true_out_response: Optional[str] = None
 ):
     # Context.cast - gets an object type of [Context, str, dict] returns an object type of Context
     ctx = Context.cast(ctx)
@@ -121,8 +111,7 @@ def run_interactive_mode(actor):
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
     )
     # run_test()
     run_interactive_mode(actor)

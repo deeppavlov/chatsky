@@ -1,10 +1,10 @@
 import logging
 import re
 
-from dff.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
-from dff.core import Context, Actor
-import dff.conditions as cnd
-import dff.labels as lbl
+from df_engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
+from df_engine.core import Context, Actor
+import df_engine.conditions as cnd
+import df_engine.labels as lbl
 
 from examples import example_1_basics
 
@@ -30,12 +30,10 @@ plot = {
             lbl.repeat(0.2): cnd.all(
                 [cnd.regexp(r"repeat", re.I), cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"]))]
             ),
-        },
+        }
     },
     "global_flow": {
-        "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
-            RESPONSE: "",
-        },
+        "start_node": {RESPONSE: ""},  # This is an initial node, it doesn't need an `RESPONSE`
         "fallback_node": {  # We get to this node if an error occurred while the agent was running
             RESPONSE: "Ooops",
             TRANSITIONS: {lbl.previous(): cnd.regexp(r"previous", re.I)},
@@ -48,15 +46,9 @@ plot = {
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
-            TRANSITIONS: {
-                lbl.forward(0.5): cnd.regexp(r"talk about"),
-                lbl.previous(): cnd.regexp(r"previous", re.I),
-            },
+            TRANSITIONS: {lbl.forward(0.5): cnd.regexp(r"talk about"), lbl.previous(): cnd.regexp(r"previous", re.I)},
         },
-        "node3": {
-            RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
-        },
+        "node3": {RESPONSE: "Sorry, I can not talk about that now.", TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
         "node4": {RESPONSE: "bye"},
     },
     "music_flow": {
@@ -64,9 +56,7 @@ plot = {
             RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
-        "node2": {
-            RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
-        },
+        "node2": {RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994."},
         "node3": {
             RESPONSE: "The band achieved commercial success with the release of five studio albums.",
             TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
@@ -82,10 +72,7 @@ plot = {
 }
 
 actor = Actor(
-    plot,
-    start_label=("global_flow", "start_node"),
-    fallback_label=("global_flow", "fallback_node"),
-    transition_priority=1.0,
+    plot, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node"), label_priority=1.0
 )
 
 
@@ -124,8 +111,7 @@ def run_test():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
     )
     # run_test()
     example_1_basics.run_interactive_mode(actor)

@@ -1,6 +1,6 @@
 # %%
-from dff.core import Context, Actor
-import dff.conditions as cnd
+from df_engine.core import Context, Actor
+import df_engine.conditions as cnd
 
 
 def test_conditions():
