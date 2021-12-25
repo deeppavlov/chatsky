@@ -75,4 +75,4 @@ To get more advanced examples, take a look at [examples](https://github.com/deep
 
 # Contributing to the Dialog Flow Engine
 
-Please refer to [CONTRIBUTING.md](https://github.com/deepmipt/dialog_flow_engine/dev/CONTRIBUTING.md).
+Please refer to [CONTRIBUTING.md](https://github.com/deepmipt/dialog_flow_engine/blob/dev/CONTRIBUTING.md).
