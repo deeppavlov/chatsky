@@ -6,7 +6,7 @@ The Dialog Flow Engine (DFE) allows you to write conversational services. The se
 [![Documentation Status](https://readthedocs.org/projects/dialog-flow-engine/badge/?version=latest)](https://readthedocs.org/projects/dialog-flow-engine/badge/?version=latest)
 [![Codestyle](https://github.com/deepmipt/dialog_flow_engine/workflows/codestyle/badge.svg)](https://github.com/deepmipt/dialog_flow_engine/actions)
 [![Tests](https://github.com/deepmipt/dialog_flow_engine/workflows/test_coverage/badge.svg)](https://github.com/deepmipt/dialog_flow_engine/actions)
-[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deepmipt/df_engine/blob/master/LICENSE)
+[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deepmipt/dialog_flow_engine/blob/master/LICENSE)
 ![Python 3.6, 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/df_engine)](https://pypi.org/project/df_engine/)
 [![Downloads](https://pepy.tech/badge/df_engine)](https://pepy.tech/project/df_engine)
