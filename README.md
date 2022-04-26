@@ -24,8 +24,8 @@ from df_engine.core import Context, Actor
 import df_engine.conditions as cnd
 from typing import Union
 
-# create plot of dialog
-plot = {
+# create script of dialog
+script = {
     GLOBAL: {TRANSITIONS: {("flow", "node_hi"): cnd.exact_match("Hi"), ("flow", "node_ok"): cnd.true()}},
     "flow": {
         "node_hi": {RESPONSE: "Hi!!!"},
@@ -34,7 +34,7 @@ plot = {
 }
 
 # init actor
-actor = Actor(plot, start_label=("flow", "node_hi"))
+actor = Actor(script, start_label=("flow", "node_hi"))
 
 
 # handler requests

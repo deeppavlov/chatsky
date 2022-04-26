@@ -47,9 +47,9 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
                 new_label = label(ctx, actor, *args, **kwargs)
                 new_label = normalize_label(new_label, default_flow_label)
                 flow_label, node_label, _ = new_label
-                node = actor.plot.get(flow_label, {}).get(node_label)
+                node = actor.script.get(flow_label, {}).get(node_label)
                 if not node:
-                    raise Exception(f"Unknown transitions {new_label} for {actor.plot}")
+                    raise Exception(f"Unknown transitions {new_label} for {actor.script}")
             except Exception as exc:
                 new_label = None
                 logger.error(f"Exception {exc} of function {label}", exc_info=exc)
@@ -183,51 +183,51 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
 # TODO: doc string
 @validate_arguments
 def normalize_keywords(
-    plot: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
+    script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
 ) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
     """
-    This function is used to normalize keywords in the plot.
+    This function is used to normalize keywords in the script.
 
     Parameters
     ----------
 
-    plot: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
-    plot, containing all transitions between states based in the keywords.
+    script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
+    script, containing all transitions between states based in the keywords.
 
     Returns
     -------
     dict[LabelType, dict[LabelType, dict[str, Any]]]
-    Plot with the normalized keywords
+    Script with the normalized keywords
     """
 
-    plot = {
+    script = {
         flow_label: {
             node_label: {key.name.lower(): val for key, val in node.items()} for node_label, node in flow.items()
         }
-        for flow_label, flow in plot.items()
+        for flow_label, flow in script.items()
     }
-    return plot
+    return script
 
 
 @validate_arguments
-def normalize_plot(plot: dict[LabelType, Any]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
+def normalize_script(script: dict[LabelType, Any]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
     """
-    This function normalizes `Plot`: it returns `dict` where the `GLOBAL` node is moved
+    This function normalizes `Script`: it returns `dict` where the `GLOBAL` node is moved
     into the flow with the `GLOBAL` name. The function returns the structure
     `{GLOBAL:{...NODE...}, ...}` -> `{GLOBAL:{GLOBAL:{...NODE...}}, ...}`
 
 
     Parameters
     ----------
-    plot : dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
-        `Plot` that describes the dialog scenario.
+    script : dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
+        `Script` that describes the dialog scenario.
 
     Returns
     -------
     dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
-        Normalized`Plot`.
+        Normalized`Script`.
     """
-    if isinstance(plot, dict):
-        if GLOBAL in plot and all([isinstance(item, Keywords) for item in plot[GLOBAL].keys()]):
-            plot[GLOBAL] = {GLOBAL: plot[GLOBAL]}
-    return normalize_keywords(plot)
+    if isinstance(script, dict):
+        if GLOBAL in script and all([isinstance(item, Keywords) for item in script[GLOBAL].keys()]):
+            script[GLOBAL] = {GLOBAL: script[GLOBAL]}
+    return normalize_keywords(script)

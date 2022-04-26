@@ -8,9 +8,9 @@ import df_engine.conditions as cnd
 logger = logging.getLogger(__name__)
 
 # First of all, to create a dialog agent, we need to create a dialog script.
-# Below, `plot` is the dialog script.
-# A dialog script is a flow dictionary that can contain multiple plot .
-# Plot are needed in order to divide a dialog into sub-dialogs and process them separately.
+# Below, `script` is the dialog script.
+# A dialog script is a flow dictionary that can contain multiple script .
+# Script are needed in order to divide a dialog into sub-dialogs and process them separately.
 # For example, the separation can be tied to the topic of the dialog.
 # In our example, there is one flow called greeting_flow.
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 # `TRANSITIONS` are described in pairs:
 #      - the node to which the agent will perform the transition
 #      - the condition under which to make the transition
-plot = {
+script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -51,11 +51,11 @@ plot = {
 }
 
 # An actor is an object that processes user input replicas and returns responses
-# To create the actor, you need to pass the script of the dialogue `plot`
+# To create the actor, you need to pass the script of the dialogue `script`
 # And pass the initial node `start_label`
 # and the node to which the actor will go in case of an error `fallback_label`
 # If `fallback_label` is not set, then its value becomes equal to `start_label` by default
-actor = Actor(plot, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
+actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
 # turn_handler - a function is made for the convenience of working with an actor

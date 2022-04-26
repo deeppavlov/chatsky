@@ -9,7 +9,7 @@ def test_labels():
     ctx.add_label(["flow", "node3"])
     ctx.add_label(["flow", "node2"])
     actor = Actor(
-        plot={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
+        script={"flow": {"node1": {}, "node2": {}, "node3": {}}, "service": {"start": {}, "fallback": {}}},
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),
     )
@@ -31,7 +31,7 @@ def test_labels():
     ctx = Context()
     ctx.add_label(["flow", "node2"])
     actor = Actor(
-        plot={"flow": {"node1": {}}, "service": {"start": {}, "fallback": {}}},
+        script={"flow": {"node1": {}}, "service": {"start": {}, "fallback": {}}},
         start_label=("service", "start"),
         fallback_label=("service", "fallback"),
     )

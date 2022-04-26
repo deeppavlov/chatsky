@@ -54,7 +54,7 @@ def predetermined_condition(condition: bool):
     return internal_condition_function
 
 
-plot = {
+script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -96,7 +96,7 @@ plot = {
     }
 }
 
-actor = Actor(plot, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
+actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
 # testing

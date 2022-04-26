@@ -3,7 +3,7 @@ import itertools
 from typing import Callable
 
 
-from df_engine.core import Plot, Node
+from df_engine.core import Script, Node
 from df_engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
 
 
@@ -91,12 +91,12 @@ def test_node_exec():
     node_test(node)
 
 
-def test_plot():
+def test_script():
     node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
-    plot = Plot(plot={GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}})
-    node_test(plot[GLOBAL][GLOBAL])
-    node_test(plot["flow"]["node"])
-    assert list(plot.keys()) == [GLOBAL, "flow"]
-    assert len(plot.values()) == 2
-    assert list(plot) == [GLOBAL, "flow"]
-    assert len(list(plot.items())) == 2
+    script = Script(script={GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}})
+    node_test(script[GLOBAL][GLOBAL])
+    node_test(script["flow"]["node"])
+    assert list(script.keys()) == [GLOBAL, "flow"]
+    assert len(script.values()) == 2
+    assert list(script) == [GLOBAL, "flow"]
+    assert len(list(script.items())) == 2

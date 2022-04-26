@@ -18,7 +18,7 @@ def high_priority_node_transition(flow_label, label):
     return transition
 
 
-plot = {
+script = {
     GLOBAL: {
         TRANSITIONS: {
             ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),
@@ -72,7 +72,10 @@ plot = {
 }
 
 actor = Actor(
-    plot, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node"), label_priority=1.0
+    script,
+    start_label=("global_flow", "start_node"),
+    fallback_label=("global_flow", "fallback_node"),
+    label_priority=1.0,
 )
 
 

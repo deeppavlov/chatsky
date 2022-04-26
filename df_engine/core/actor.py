@@ -3,7 +3,7 @@ Actor
 ---------------------------
 The Actor is described here.
 Actor is one of the main abstractions that processes incoming requests (:py:class:`~df_engine.core.context.Context`)
-from the user in accordance with the dialog graph (:py:class:`~df_engine.core.plot.Plot`).
+from the user in accordance with the dialog graph (:py:class:`~df_engine.core.script.Script`).
 """
 import logging
 from typing import Union, Callable, Optional
@@ -14,7 +14,7 @@ from pydantic import BaseModel, validate_arguments
 from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 
 from .context import Context
-from .plot import Plot, Node
+from .script import Script, Node
 from .normalization import normalize_label, normalize_response
 from .keywords import GLOBAL, LOCAL
 
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """
-    This function processes errors in the process of :py:class:`~df_engine.core.plot.Plot` validation.
+    This function processes errors in the process of :py:class:`~df_engine.core.script.Script` validation.
 
     Parameters
     ----------
@@ -44,20 +44,20 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
 class Actor(BaseModel):
     """
     The class which is used to process :py:class:`~df_engine.core.context.Context`
-    according to the :py:class:`~df_engine.core.plot.Plot`.
+    according to the :py:class:`~df_engine.core.script.Script`.
 
     Parameters
     ----------
 
-    plot: Union[Plot, dict]
+    script: Union[Script, dict]
        The dialog scenario: a graph described by the :py:class:`~df_engine.core.keywords.Keywords`.
        While the graph is being initialized, it passes validation and after that it is used for the dialog.
 
     start_label: :py:const:`~df_engine.core.types.NodeLabel3Type`
-       The start node of :py:class:`~df_engine.core.plot.Plot`. The execution starts from it.
+       The start node of :py:class:`~df_engine.core.script.Script`. The execution starts from it.
 
     fallback_label: Optional[:py:const:`~df_engine.core.types.NodeLabel3Type`] = None
-       The label of :py:class:`~df_engine.core.plot.Plot`.
+       The label of :py:class:`~df_engine.core.script.Script`.
        Dialog comes into that label if all other transitions failed, or there was an error while executing the scenario.
 
     label_priority: float = 1.0
@@ -81,7 +81,7 @@ class Actor(BaseModel):
         * value: list[Callable] - the list of called handlers for each stage
     """
 
-    plot: Union[Plot, dict]
+    script: Union[Script, dict]
     start_label: NodeLabel3Type
     fallback_label: Optional[NodeLabel3Type] = None
     label_priority: float = 1.0
@@ -93,7 +93,7 @@ class Actor(BaseModel):
     @validate_arguments
     def __init__(
         self,
-        plot: Union[Plot, dict],
+        script: Union[Script, dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
@@ -104,24 +104,24 @@ class Actor(BaseModel):
         *args,
         **kwargs,
     ):
-        # plot validation
-        plot = plot if isinstance(plot, Plot) else Plot(plot=plot)
+        # script validation
+        script = script if isinstance(script, Script) else Script(script=script)
 
         # node lables validation
         start_label = normalize_label(start_label)
-        if plot.get(start_label[0], {}).get(start_label[1]) is None:
+        if script.get(start_label[0], {}).get(start_label[1]) is None:
             raise ValueError(f"Unkown {start_label=}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
-            if plot.get(fallback_label[0], {}).get(fallback_label[1]) is None:
+            if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
                 raise ValueError(f"Unkown {fallback_label=}")
         if condition_handler is None:
             condition_handler = deep_copy_condition_handler
 
         super(Actor, self).__init__(
-            plot=plot,
+            script=script,
             start_label=start_label,
             fallback_label=fallback_label,
             label_priority=label_priority,
@@ -130,7 +130,7 @@ class Actor(BaseModel):
             verbose=verbose,
             handlers=handlers,
         )
-        errors = self.validate_plot(verbose) if validation_stage or validation_stage is None else []
+        errors = self.validate_script(verbose) if validation_stage or validation_stage is None else []
         if errors:
             raise ValueError(
                 f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
@@ -190,7 +190,7 @@ class Actor(BaseModel):
         ctx.framework_states["actor"]["previous_label"] = (
             normalize_label(ctx.last_label) if ctx.last_label else self.start_label
         )
-        ctx.framework_states["actor"]["previous_node"] = self.plot.get(
+        ctx.framework_states["actor"]["previous_node"] = self.script.get(
             ctx.framework_states["actor"]["previous_label"][0], {}
         ).get(ctx.framework_states["actor"]["previous_label"][1])
         return ctx
@@ -198,14 +198,16 @@ class Actor(BaseModel):
     @validate_arguments
     def _get_true_labels(self, ctx: Context, *args, **kwargs) -> Context:
         # GLOBAL
-        ctx.framework_states["actor"]["global_transitions"] = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
+        ctx.framework_states["actor"]["global_transitions"] = (
+            self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
+        )
         ctx.framework_states["actor"]["global_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["global_transitions"], ctx, GLOBAL, "global"
         )
 
         # LOCAL
         ctx.framework_states["actor"]["local_transitions"] = (
-            self.plot.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
+            self.script.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
         )
         ctx.framework_states["actor"]["local_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["local_transitions"],
@@ -216,7 +218,7 @@ class Actor(BaseModel):
 
         # NODE
         ctx.framework_states["actor"]["node_transitions"] = (
-            self.plot.get(ctx.framework_states["actor"]["previous_label"][0], {})
+            self.script.get(ctx.framework_states["actor"]["previous_label"][0], {})
             .get(ctx.framework_states["actor"]["previous_label"][1], Node())
             .transitions
         )
@@ -238,15 +240,15 @@ class Actor(BaseModel):
             ctx.framework_states["actor"]["next_label"], ctx.framework_states["actor"]["global_true_label"]
         )
         # get next node
-        ctx.framework_states["actor"]["next_node"] = self.plot.get(
+        ctx.framework_states["actor"]["next_node"] = self.script.get(
             ctx.framework_states["actor"]["next_label"][0], {}
         ).get(ctx.framework_states["actor"]["next_label"][1])
         return ctx
 
     @validate_arguments
     def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
-        updated_next = copy.deepcopy(self.plot.get(GLOBAL, {}).get(GLOBAL, Node()))
-        local_node = self.plot.get(ctx.framework_states["actor"]["next_label"][0], {}).get(LOCAL, Node())
+        updated_next = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
+        local_node = self.script.get(ctx.framework_states["actor"]["next_label"][0], {}).get(LOCAL, Node())
         for node in [local_node, ctx.framework_states["actor"]["next_node"]]:
             updated_next.response = node.response if node.response else updated_next.response
             updated_next.processing.update(node.processing)
@@ -302,13 +304,13 @@ class Actor(BaseModel):
         return chosen_label
 
     @validate_arguments
-    def validate_plot(self, verbose: bool = True):
-        # TODO: plot has to not contain priority == -inf, because it uses for miss values
+    def validate_script(self, verbose: bool = True):
+        # TODO: script has to not contain priority == -inf, because it uses for miss values
         flow_labels = []
         node_labels = []
         labels = []
         conditions = []
-        for flow_name, flow in self.plot.items():
+        for flow_name, flow in self.script.items():
             for node_name, node in flow.items():
                 flow_labels += [flow_name] * len(node.transitions)
                 node_labels += [node_name] * len(node.transitions)
@@ -326,7 +328,7 @@ class Actor(BaseModel):
 
             # validate labeling
             try:
-                node = self.plot[label[0]][label[1]]
+                node = self.script[label[0]][label[1]]
             except Exception as exc:
                 msg = f"Could not find node with {label=}, error was found in {(flow_label, node_label)}"
                 error_handler(error_msgs, msg, exc, verbose)

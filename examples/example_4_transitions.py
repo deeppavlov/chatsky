@@ -30,7 +30,7 @@ def high_priority_node_transition(flow_label, label):
     return transition
 
 
-plot = {
+script = {
     "global_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -118,7 +118,10 @@ plot = {
 }
 
 actor = Actor(
-    plot, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node"), label_priority=1.0
+    script,
+    start_label=("global_flow", "start_node"),
+    fallback_label=("global_flow", "fallback_node"),
+    label_priority=1.0,
 )
 
 

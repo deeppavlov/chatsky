@@ -14,12 +14,12 @@ def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 
 
 # a dialog script
-plot = {
+script = {
     "flow_start": {"node_start": {RESPONSE: response_handler, TRANSITIONS: {("flow_start", "node_start"): cnd.true()}}}
 }
 
 
-actor = Actor(plot, start_label=("flow_start", "node_start"))
+actor = Actor(script, start_label=("flow_start", "node_start"))
 
 
 testing_dialog = [("hi", "answer 1"), ("how are you?", "answer 2"), ("ok", "answer 3"), ("good", "answer 4")]

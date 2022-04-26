@@ -141,7 +141,7 @@ def _get_label_by_index_shifting(
 
     """
     flow_label, node_label, current_priority = repeat(priority, *args, **kwargs)(ctx, actor, *args, **kwargs)
-    labels = list(actor.plot.get(flow_label, {}))
+    labels = list(actor.script.get(flow_label, {}))
 
     if node_label not in labels:
         return (*actor.fallback_label[:2], current_priority)

@@ -43,7 +43,7 @@ def add_prefix(prefix):
 
 
 # a dialog script
-plot = {
+script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
         "fallback": {RESPONSE: "the end"},
@@ -72,7 +72,7 @@ plot = {
 }
 
 
-actor = Actor(plot, start_label=("root", "start"), fallback_label=("root", "fallback"))
+actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 
 # testing

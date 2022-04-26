@@ -53,7 +53,7 @@ def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
 
-plot = {
+script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -77,7 +77,7 @@ plot = {
 }
 
 
-actor = Actor(plot, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
+actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
 # testing

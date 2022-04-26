@@ -12,7 +12,7 @@ from df_engine.core.normalization import (
     normalize_condition,
     normalize_keywords,
     normalize_label,
-    normalize_plot,
+    normalize_script,
     normalize_processing,
     normalize_response,
     normalize_transitions,
@@ -25,8 +25,8 @@ def std_func(ctx, actor, *args, **kwargs):
 
 def create_env():
     ctx = Context()
-    plot = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: "response"}}}
-    actor = Actor(plot=plot, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
+    script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: "response"}}}
+    actor = Actor(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
     ctx.add_request("text")
     return ctx, actor
 
@@ -116,13 +116,13 @@ def test_normalize_keywords():
         PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
     }
-    plot = {"flow": {"node": node_template.copy()}}
-    plot = normalize_keywords(plot)
-    assert isinstance(plot, dict)
-    assert plot["flow"]["node"] == node_template_gold
+    script = {"flow": {"node": node_template.copy()}}
+    script = normalize_keywords(script)
+    assert isinstance(script, dict)
+    assert script["flow"]["node"] == node_template_gold
 
 
-def test_normalize_plot():
+def test_normalize_script():
     # TODO: Add full check for functions
     node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
     node_template_gold = {
@@ -131,8 +131,8 @@ def test_normalize_plot():
         PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
     }
-    plot = {GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}}
-    plot = normalize_plot(plot)
-    assert isinstance(plot, dict)
-    assert plot[GLOBAL][GLOBAL] == node_template_gold
-    assert plot["flow"]["node"] == node_template_gold
+    script = {GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}}
+    script = normalize_script(script)
+    assert isinstance(script, dict)
+    assert script[GLOBAL][GLOBAL] == node_template_gold
+    assert script["flow"]["node"] == node_template_gold

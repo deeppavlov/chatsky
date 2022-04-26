@@ -1,5 +1,5 @@
 """
-Plot
+Script
 ---------------------------
 Here is a set of pydantic Models for the dialog graph.
 """
@@ -11,7 +11,7 @@ from typing import Callable, Optional, Any
 from pydantic import BaseModel, validator, Extra
 
 from .types import LabelType, NodeLabelType, ConditionType
-from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_plot
+from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_script
 from typing import ForwardRef
 
 logger = logging.getLogger(__name__)
@@ -48,29 +48,29 @@ class Node(BaseModel, extra=Extra.forbid):
         return processing(ctx, actor, *args, **kwargs)
 
 
-class Plot(BaseModel, extra=Extra.forbid):
+class Script(BaseModel, extra=Extra.forbid):
     """
-    The class for the Plot object
+    The class for the Script object
     """
 
-    plot: dict[LabelType, dict[LabelType, Node]]
+    script: dict[LabelType, dict[LabelType, Node]]
 
-    _normalize_plot = validator("plot", allow_reuse=True, pre=True)(normalize_plot)
+    _normalize_script = validator("script", allow_reuse=True, pre=True)(normalize_script)
 
     def __getitem__(self, key):
-        return self.plot[key]
+        return self.script[key]
 
     def get(self, key, value=None):
-        return self.plot.get(key, value)
+        return self.script.get(key, value)
 
     def keys(self):
-        return self.plot.keys()
+        return self.script.keys()
 
     def items(self):
-        return self.plot.items()
+        return self.script.items()
 
     def values(self):
-        return self.plot.values()
+        return self.script.values()
 
     def __iter__(self):
-        return self.plot.__iter__()
+        return self.script.__iter__()

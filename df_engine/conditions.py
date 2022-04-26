@@ -172,12 +172,12 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
 
 @validate_arguments
 def has_last_labels(
-    flow_labels: list[str] = [], labels: list[NodeLabel2Type] = [], last_n_indexes: int = 1, *args, **kwargs
+    flow_labels: list[str] = [], labels: list[NodeLabel2Type] = [], last_n_indices: int = 1, *args, **kwargs
 ) -> Callable:
     """
     Function returns condition handler.
     This handler returns True if any label from
-    last :py:const:`last_n_indexes <int>`context labels is in
+    last :py:const:`last_n_indices <int>`context labels is in
     the :py:const:`flow_labels <list[str]>` list or in
     the :py:const:`labels ~df_engine.core.types.NodeLabel2Type` list.
 
@@ -187,13 +187,13 @@ def has_last_labels(
         list of labels to check.Every label has type `str`. Is empty if not set.
     labels: list[:py:const:`~df_engine.core.types.NodeLabel2Type`]
         list of labels that correspond to the nodes. Is empty is not set.
-    last_n_indexes: int
+    last_n_indices: int
         number of last utterances to check.
     """
 
     def has_last_labels_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        label = list(ctx.labels.values())[-last_n_indexes:]
-        for label in list(ctx.labels.values())[-last_n_indexes:]:
+        label = list(ctx.labels.values())[-last_n_indices:]
+        for label in list(ctx.labels.values())[-last_n_indices:]:
             label = label if label else (None, None)
             if label[0] in flow_labels or label in labels:
                 return True

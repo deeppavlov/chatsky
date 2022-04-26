@@ -34,8 +34,8 @@ def get_last_index(dictionary: dict) -> int:
     """
     Obtaining of the last index from the `dictionary`, functions returns `-1` if the `dict` is empty.
     """
-    indexes = list(dictionary)
-    return indexes[-1] if indexes else -1
+    indices = list(dictionary)
+    return indices[-1] if indices else -1
 
 
 class Context(BaseModel):
@@ -78,7 +78,7 @@ class Context(BaseModel):
 
     validation : bool
         `validation` is a flag that signals that :py:class:`~df_engine.core.actor.Actor`,
-        while being initialized, checks the :py:class:`~df_engine.core.plot.Plot`.
+        while being initialized, checks the :py:class:`~df_engine.core.script.Script`.
         The functions that can give not validable data
         while being validated must use this flag to take the validation mode into account.
         Otherwise the validation will not be passed.
@@ -180,29 +180,29 @@ class Context(BaseModel):
         self.labels[last_index + 1] = label
 
     @validate_arguments
-    def clear(self, hold_last_n_indexes: int, field_names: list[str] = ["requests", "responses", "labels"]):
+    def clear(self, hold_last_n_indices: int, field_names: list[str] = ["requests", "responses", "labels"]):
         """
         Deletes all recordings from the `requests`/`responses`/`labels` except for
-        the last N turns according to the `hold_last_n_indexes`.
+        the last N turns according to the `hold_last_n_indices`.
         If`field_names` contains `misc` field, `misc` field is fully cleared,
 
         Parameters
         ----------
-        hold_last_n_indexes : int
+        hold_last_n_indices : int
             number of last turns that remein under clearing
         field_names : list[str]
              properties of :py:class:`~df_engine.core.context.Context` we need to clear
         """
         if "requests" in field_names:
-            for index in list(self.requests)[:-hold_last_n_indexes]:
+            for index in list(self.requests)[:-hold_last_n_indices]:
                 del self.requests[index]
         if "responses" in field_names:
-            for index in list(self.responses)[:-hold_last_n_indexes]:
+            for index in list(self.responses)[:-hold_last_n_indices]:
                 del self.responses[index]
         if "mics" in field_names:
             self.misc.clear()
         if "labels" in field_names:
-            for index in list(self.labels)[:-hold_last_n_indexes]:
+            for index in list(self.labels)[:-hold_last_n_indices]:
                 del self.labels[index]
         if "framework_states" in field_names:
             self.framework_states.clear()

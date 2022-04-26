@@ -5,7 +5,7 @@ import df_engine.conditions as cnd
 
 def test_conditions():
     ctx = Context()
-    actor = Actor(plot={"flow": {"node": {}}}, start_label=("flow", "node"))
+    actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
     ctx.add_request("text")
     ctx.add_label(["flow", "node"])
 
