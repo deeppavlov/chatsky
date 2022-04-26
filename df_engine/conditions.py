@@ -11,7 +11,7 @@ import re
 
 from pydantic import validate_arguments
 
-from df_engine.core.types import NodeLabel2Type
+from .core.types import NodeLabel2Type
 
 from .core.actor import Actor
 from .core.context import Context
