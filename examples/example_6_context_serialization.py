@@ -6,9 +6,6 @@ from df_engine.core import Context, Actor
 from examples import example_1_basics
 import df_engine.conditions as cnd
 
-logging.basicConfig(
-    format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
-)
 logger = logging.getLogger(__name__)
 
 
@@ -58,5 +55,9 @@ def run_test():
 
 
 if __name__ == "__main__":
+    logging.basicConfig(
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
+        level=logging.INFO,
+    )
     # run_test()
     example_1_basics.run_interactive_mode(actor)

@@ -8,9 +8,6 @@ import df_engine.conditions as cnd
 
 from examples import example_1_basics
 
-logging.basicConfig(
-    format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.DEBUG
-)
 logger = logging.getLogger(__name__)
 
 
@@ -97,7 +94,8 @@ def run_test():
 
 if __name__ == "__main__":
     logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
+        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
+        level=logging.INFO,
     )
     # run_test()
     example_1_basics.run_interactive_mode(actor)

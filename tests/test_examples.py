@@ -38,3 +38,9 @@ def test_processing():
     from .examples.example_7_processing import run_test
 
     run_test()
+
+
+def test_processing():
+    from .examples.example_8_misc import run_test
+
+    run_test()

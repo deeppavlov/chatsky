@@ -27,6 +27,9 @@ def downgrade(root_dir="."):
         ],
         [],
     )
+
+    py_files = [py_file for py_file in py_files if "venv" not in str(py_file)]
+
     for py_file in py_files:
         text = py_file.read_text()
         # if sys.version_info < (3, 9):

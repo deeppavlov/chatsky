@@ -12,10 +12,10 @@ help:
 	@echo
 
 venv:
-	virtualenv -p python3 $(VENV_PATH)
+	python3 -m venv $(VENV_PATH)
 	$(VENV_PATH)/bin/pip install -r requirements.txt
-	$(VENV_PATH)/bin/pip install -r requirements_dev.txt
 	$(VENV_PATH)/bin/pip install -r requirements_test.txt
+	$(VENV_PATH)/bin/pip install -r requirements_doc.txt
 
 
 format: venv
@@ -35,11 +35,16 @@ lint: venv
 .PHONY: lint
 
 test: venv
-	@$(VENV_PATH)/bin/python -m pytest --cov-report html --cov-report term --cov=df_engine tests/
+	@$(VENV_PATH)/bin/python -m pytest --cov-fail-under=100 --cov-report html --cov-report term --cov=df_engine tests/
 .PHONY: test
 
 test_all: venv test lint
 `.PHONY: test_all
+
+
+downgrade: venv format
+	@$(VENV_PATH)/bin/python utils/downgrade_patch.py -d .
+`.PHONY: downgrade
 
 build_doc:
 	sphinx-build -M clean docs/source docs/build
