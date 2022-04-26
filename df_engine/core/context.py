@@ -199,7 +199,7 @@ class Context(BaseModel):
         if "responses" in field_names:
             for index in list(self.responses)[:-hold_last_n_indices]:
                 del self.responses[index]
-        if "mics" in field_names:
+        if "misc" in field_names:
             self.misc.clear()
         if "labels" in field_names:
             for index in list(self.labels)[:-hold_last_n_indices]:
