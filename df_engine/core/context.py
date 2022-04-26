@@ -13,7 +13,7 @@ from typing import ForwardRef
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, validate_arguments, Field, validator
-from .types import NodeLabel2Type
+from .types import NodeLabel2Type, ModuleName
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +70,7 @@ class Context(BaseModel):
         * value - `response` on this turn
 
     misc : dict[str, Any]
-        `misc` stores the arbitrary data, the engine doesn't use this dictionary by default,
+        `misc` stores any custom data, the engine doesn't use this dictionary by default,
         so storage of any data won't reflect on the work on the internal Dialog Flow Engine functions.
 
         * key - arbitrary data name
@@ -83,11 +83,11 @@ class Context(BaseModel):
         while being validated must use this flag to take the validation mode into account.
         Otherwise the validation will not be passed.
 
-    actor_state : dict[str, Any]
-        `actor_state` or `a_s` is used every time while processing the :py:class:`~df_engine.core.context.Context`.
-        :py:class:`~df_engine.core.actor.Actor` records all its intermediate conditions into the `actor_state`.
+    framework_states : dict[:py:const:`~df_engine.core.types.ModuleName`, dict[str, Any]]
+        `framework_states` is used for addons states or for :py:class:`~df_engine.core.actor.Actor`'s states.
+        :py:class:`~df_engine.core.actor.Actor` records all its intermediate conditions into the `framework_states`.
         After :py:class:`~df_engine.core.context.Context` processing is finished,
-        :py:class:`~df_engine.core.actor.Actor` resets `actor_state`  and
+        :py:class:`~df_engine.core.actor.Actor` resets `framework_states` and
         returns :py:class:`~df_engine.core.context.Context`.
 
         * key - temporary variable name
@@ -101,7 +101,7 @@ class Context(BaseModel):
     responses: dict[int, Any] = {}
     misc: dict[str, Any] = {}
     validation: bool = False
-    actor_state: dict[str, Any] = {}
+    framework_states: dict[ModuleName, dict[str, Any]] = {}
 
     # validators
     _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
@@ -204,6 +204,8 @@ class Context(BaseModel):
         if "labels" in field_names:
             for index in list(self.labels)[:-hold_last_n_indexes]:
                 del self.labels[index]
+        if "framework_states" in field_names:
+            self.framework_states.clear()
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
@@ -232,13 +234,6 @@ class Context(BaseModel):
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
-
-    @property
-    def a_s(self) -> dict[str, Any]:
-        """
-        Alias of the `actor_state`
-        """
-        return self.actor_state
 
 
 Context.update_forward_refs()

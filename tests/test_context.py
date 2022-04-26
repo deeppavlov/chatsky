@@ -19,7 +19,7 @@ def test_context():
     ctx.responses = shuffle_dict_keys(ctx.responses)
     ctx = Context.cast(ctx.json())
     ctx.misc[123] = 312
-    ctx.clear(5, ["requests", "responses", "mics", "labels"])
+    ctx.clear(5, ["requests", "responses", "mics", "labels", "framework_states"])
     ctx.misc[1001] = "11111"
     ctx.add_request(str(1000))
     ctx.add_label([str(1000), str(1000 + 1)])

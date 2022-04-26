@@ -29,7 +29,7 @@ def create_transitions():
 def custom_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     if ctx.validation:
         return ""
-    processed_node = ctx.a_s["processed_node"]
+    processed_node = ctx.framework_states["actor"]["processed_node"]
     return f"ctx.last_label={ctx.last_label}: processed_node.misc={processed_node.misc}"
 
 

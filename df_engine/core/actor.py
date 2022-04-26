@@ -155,7 +155,7 @@ class Actor(BaseModel):
         ctx = self._get_next_node(ctx, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.GET_NEXT_NODE, *args, **kwargs)
 
-        ctx.add_label(ctx.a_s["next_label"][:2])
+        ctx.add_label(ctx.framework_states["actor"]["next_label"][:2])
 
         # rewrite next node
         ctx = self._rewrite_next_node(ctx, *args, **kwargs)
@@ -166,12 +166,14 @@ class Actor(BaseModel):
         self._run_handlers(ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
 
         # create response
-        ctx.a_s["response"] = ctx.a_s["processed_node"].run_response(ctx, self, *args, **kwargs)
+        ctx.framework_states["actor"]["response"] = ctx.framework_states["actor"]["processed_node"].run_response(
+            ctx, self, *args, **kwargs
+        )
         self._run_handlers(ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
-        ctx.add_response(ctx.a_s["response"])
+        ctx.add_response(ctx.framework_states["actor"]["response"])
 
         self._run_handlers(ctx, ActorStage.FINISH_TURN, *args, **kwargs)
-        ctx.a_s.clear()
+        del ctx.framework_states["actor"]
         return ctx
 
     @validate_arguments
@@ -180,63 +182,82 @@ class Actor(BaseModel):
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
             ctx.add_request("")
+        ctx.framework_states["actor"] = {}
         return ctx
 
     @validate_arguments
     def _get_previous_node(self, ctx: Context, *args, **kwargs) -> Context:
-        ctx.a_s["previous_label"] = normalize_label(ctx.last_label) if ctx.last_label else self.start_label
-        ctx.a_s["previous_node"] = self.plot.get(ctx.a_s["previous_label"][0], {}).get(ctx.a_s["previous_label"][1])
+        ctx.framework_states["actor"]["previous_label"] = (
+            normalize_label(ctx.last_label) if ctx.last_label else self.start_label
+        )
+        ctx.framework_states["actor"]["previous_node"] = self.plot.get(
+            ctx.framework_states["actor"]["previous_label"][0], {}
+        ).get(ctx.framework_states["actor"]["previous_label"][1])
         return ctx
 
     @validate_arguments
     def _get_true_labels(self, ctx: Context, *args, **kwargs) -> Context:
         # GLOBAL
-        ctx.a_s["global_transitions"] = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
-        ctx.a_s["global_true_label"] = self._get_true_label(ctx.a_s["global_transitions"], ctx, GLOBAL, "global")
+        ctx.framework_states["actor"]["global_transitions"] = self.plot.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
+        ctx.framework_states["actor"]["global_true_label"] = self._get_true_label(
+            ctx.framework_states["actor"]["global_transitions"], ctx, GLOBAL, "global"
+        )
 
         # LOCAL
-        ctx.a_s["local_transitions"] = self.plot.get(ctx.a_s["previous_label"][0], {}).get(LOCAL, Node()).transitions
-        ctx.a_s["local_true_label"] = self._get_true_label(
-            ctx.a_s["local_transitions"], ctx, ctx.a_s["previous_label"][0], "local"
+        ctx.framework_states["actor"]["local_transitions"] = (
+            self.plot.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
+        )
+        ctx.framework_states["actor"]["local_true_label"] = self._get_true_label(
+            ctx.framework_states["actor"]["local_transitions"],
+            ctx,
+            ctx.framework_states["actor"]["previous_label"][0],
+            "local",
         )
 
         # NODE
-        ctx.a_s["node_transitions"] = (
-            self.plot.get(ctx.a_s["previous_label"][0], {}).get(ctx.a_s["previous_label"][1], Node()).transitions
+        ctx.framework_states["actor"]["node_transitions"] = (
+            self.plot.get(ctx.framework_states["actor"]["previous_label"][0], {})
+            .get(ctx.framework_states["actor"]["previous_label"][1], Node())
+            .transitions
         )
-        ctx.a_s["node_true_label"] = self._get_true_label(
-            ctx.a_s["node_transitions"], ctx, ctx.a_s["previous_label"][0], "node"
+        ctx.framework_states["actor"]["node_true_label"] = self._get_true_label(
+            ctx.framework_states["actor"]["node_transitions"],
+            ctx,
+            ctx.framework_states["actor"]["previous_label"][0],
+            "node",
         )
         return ctx
 
     @validate_arguments
     def _get_next_node(self, ctx: Context, *args, **kwargs) -> Context:
         # choose next label
-        ctx.a_s["next_label"] = self._choose_label(ctx.a_s["node_true_label"], ctx.a_s["local_true_label"])
-        ctx.a_s["next_label"] = self._choose_label(ctx.a_s["next_label"], ctx.a_s["global_true_label"])
+        ctx.framework_states["actor"]["next_label"] = self._choose_label(
+            ctx.framework_states["actor"]["node_true_label"], ctx.framework_states["actor"]["local_true_label"]
+        )
+        ctx.framework_states["actor"]["next_label"] = self._choose_label(
+            ctx.framework_states["actor"]["next_label"], ctx.framework_states["actor"]["global_true_label"]
+        )
         # get next node
-        ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
-        # below is commented unreachable condition
-        # if ctx.a_s["next_node"] is None:
-        #     ctx.a_s["next_label"] = self.start_label
-        #     ctx.a_s["next_node"] = self.plot.get(ctx.a_s["next_label"][0], {}).get(ctx.a_s["next_label"][1])
+        ctx.framework_states["actor"]["next_node"] = self.plot.get(
+            ctx.framework_states["actor"]["next_label"][0], {}
+        ).get(ctx.framework_states["actor"]["next_label"][1])
         return ctx
 
     @validate_arguments
     def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
         updated_next = copy.deepcopy(self.plot.get(GLOBAL, {}).get(GLOBAL, Node()))
-        local_node = self.plot.get(ctx.a_s["next_label"][0], {}).get(LOCAL, Node())
-        for node in [local_node, ctx.a_s["next_node"]]:
+        local_node = self.plot.get(ctx.framework_states["actor"]["next_label"][0], {}).get(LOCAL, Node())
+        for node in [local_node, ctx.framework_states["actor"]["next_node"]]:
             updated_next.response = node.response if node.response else updated_next.response
             updated_next.processing.update(node.processing)
             updated_next.misc.update(node.misc)
-        ctx.a_s["next_node"] = updated_next
+        ctx.framework_states["actor"]["next_node"] = updated_next
         return ctx
 
     @validate_arguments
     def _run_processing(self, ctx: Context, *args, **kwargs) -> Context:
-        ctx.a_s["processed_node"] = copy.deepcopy(ctx.a_s["next_node"])
-        ctx = ctx.a_s["next_node"].run_processing(ctx, self, *args, **kwargs)
+        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
+        ctx = ctx.framework_states["actor"]["next_node"].run_processing(ctx, self, *args, **kwargs)
         return ctx
 
     @validate_arguments
