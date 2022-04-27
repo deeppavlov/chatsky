@@ -39,7 +39,7 @@ def read_requirements():
 
 setup(
     name="df_engine",
-    version="0.8.1",
+    version="0.9.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
