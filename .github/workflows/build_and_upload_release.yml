@@ -1,0 +1,42 @@
+name: build_and_upload_release
+
+on:
+  pull_request:
+  push: { branches: main}
+
+jobs:
+  build:
+    name: build and upload release
+    # permit release uploads only from the repository owner
+    if: github.repository == 'deepmipt/dialog_flow_generics'
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python
+        uses: actions/setup-python@v2
+
+      - name: install latest pip, setuptools, twine + wheel
+        run: |
+          python -m pip install --upgrade pip setuptools twine wheel
+
+      - name: build wheels
+        run: |
+          python setup.py bdist_wheel
+          python setup.py sdist
+
+      # - name: upload to pypi via twine
+      #   env:
+      #     TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+      #   run: |
+      #     twine upload --verbose -u '__token__' dist/*
+
+      # - name: upload binaries into release
+      #   uses: svenstaro/upload-release-action@v2
+      #   with:
+      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
+      #     file: dist/*
+      #     tag: ${{ github.ref }}
+      #     overwrite: true
+      #     file_glob: true
