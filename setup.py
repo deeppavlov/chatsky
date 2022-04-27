@@ -27,9 +27,9 @@ description = [line for line in readme_lines if line and not line.startswith("#"
 long_description = "\n".join(readme_lines)
 
 
-requirements = parse_requirements("requirements.txt")
+# requirements = parse_requirements("requirements.txt")
 
-test_requirements = parse_requirements("requirements_test.txt")
+# test_requirements = parse_requirements("requirements_test.txt")
 
 
 setup(
