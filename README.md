@@ -1,11 +1,13 @@
 
-# Dialog Flow DB Connector
+# DF DB Connector
 
-[There](https://github.com/deepmipt/dialog_flow_db_connector) is an addon for the [Dialog Flow Framework](https://github.com/deepmipt/dialog_flow_engine), a minimalistic open-source engine for conversational services.
+[DF DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) is an extension to the [Dialogflow Framework](https://github.com/deepmipt/dialog_flow_engine), a minimalistic open-source engine for conversational services.
 
-[Dialog Flow DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) allows you to to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
+[DF DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) allows you to to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
 
 Currently, the supported options are: 
+* [Redis](https://redis.io/)
+* [MongoDB](https://www.mongodb.com/)
 * [Postgresql](https://www.postgresql.org/)
 * [MySQL](https://www.mysql.com/)
 * [Sqlite](https://www.sqlite.org/index.html)
@@ -29,6 +31,8 @@ pip install df-db-connector
 
 Please, note that if you are going to use one of the database backends, you will have to specify an extra or install the corresponding requirements yourself.
 ```bash
+pip install df-db-connector[redis]
+pip install df-db-connector[mongodb]
 pip install df-db-connector[mysql]
 pip install df-db-connector[postgresql]
 pip install df-db-connector[sqlite]
@@ -60,6 +64,6 @@ def handle_request(request):
 
 To get more advanced examples, take a look at [examples](https://github.com/deepmipt/dialog_flow_db_connector/tree/main/examples) on GitHub.
 
-# Contributing to the Dialog Flow DB Connector
+# Contributing to the DF DB Connector
 
 Please refer to [CONTRIBUTING.md](https://github.com/deepmipt/dialog_flow_db_connector/blob/main/CONTRIBUTING.md).

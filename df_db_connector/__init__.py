@@ -22,8 +22,11 @@ def connector_factory(path: str, **kwargs):
 
     """
     mapping = {
+        "shelve": {"module": "shelve_connector", "class": "ShelveConnector"},
         "json": {"module": "json_connector", "class": "JSONConnector"},
         "pickle": {"module": "pickle_connector", "class": "PickleConnector"},
+        "redis": {"module": "redis_connector", "class": "RedisConnector"},
+        "mongodb": {"module": "mongo_connector", "class": "MongoConnector"},
         "mysql": {"module": "sql_connector", "class": "SQLConnector"},
         "postgresql": {"module": "sql_connector", "class": "SQLConnector"},
         "sqlite": {"module": "sql_connector", "class": "SQLConnector"},

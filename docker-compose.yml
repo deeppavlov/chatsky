@@ -17,3 +17,18 @@ services:
       POSTGRES_DB: test
     ports:
       - '5432:5432'
+  redis:
+    image: redis
+    restart: unless-stopped
+    command: --requirepass $REDIS_PASSWORD
+    ports:
+      - '6379:6379'
+  mongo:
+    image: mongo:latest
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: $MONGO_INITDB_ROOT_USERNAME
+      MONGO_INITDB_ROOT_PASSWORD: $MONGO_INITDB_ROOT_PASSWORD
+      MONGO_INITDB_DATABASE: $MONGO_INITDB_ROOT_USERNAME
+    ports:
+      - '27017:27017'

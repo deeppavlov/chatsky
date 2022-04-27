@@ -7,8 +7,11 @@ from df_engine.core.context import Context
 
 from df_db_connector.json_connector import JSONConnector
 from df_db_connector.pickle_connector import PickleConnector
+from df_db_connector.shelve_connector import ShelveConnector
 from df_db_connector.db_connector import DBConnector, DFAbstractConnector
 from df_db_connector.sql_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
+from df_db_connector.redis_connector import RedisConnector, redis_available
+from df_db_connector.mongo_connector import MongoConnector, mongo_available
 from df_db_connector import connector_factory
 
 
@@ -23,6 +26,10 @@ def ping_localhost(port: int, timeout=3):
         s.close()
         return True
 
+
+MONGO_ACTIVE = ping_localhost(27017)
+
+REDIS_ACTIVE = ping_localhost(6379)
 
 POSTGRES_ACTIVE = ping_localhost(5432)
 
@@ -58,6 +65,11 @@ def test_main(testing_file, testing_context, testing_telegram_id):
     generic_test(connector_instance, testing_context, testing_telegram_id)
 
 
+def test_shelve(testing_file, testing_context, testing_telegram_id):
+    connector_instance = ShelveConnector(f"shelve://{testing_file}")
+    generic_test(connector_instance, testing_context, testing_telegram_id)
+
+
 def test_json(testing_file, testing_context, testing_telegram_id):
     connector_instance = JSONConnector(f"json://{testing_file}")
     generic_test(connector_instance, testing_context, testing_telegram_id)
@@ -65,6 +77,29 @@ def test_json(testing_file, testing_context, testing_telegram_id):
 
 def test_pickle(testing_file, testing_context, testing_telegram_id):
     connector_instance = PickleConnector(f"pickle://{testing_file}")
+    generic_test(connector_instance, testing_context, testing_telegram_id)
+
+
+@pytest.mark.skipif(MONGO_ACTIVE == False, reason="Mongodb server not running")
+@pytest.mark.skipif(mongo_available == False, reason="Mongodb dependencies missing")
+def test_mongo(testing_context, testing_telegram_id):
+    if system() == "Windows":
+        pytest.skip()
+
+    connector_instance = MongoConnector(
+        "mongodb://{}:{}@localhost:27017/{}".format(
+            os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+            os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
+            os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+        )
+    )
+    generic_test(connector_instance, testing_context, testing_telegram_id)
+
+
+@pytest.mark.skipif(REDIS_ACTIVE == False, reason="Redis server not running")
+@pytest.mark.skipif(redis_available == False, reason="Redis dependencies missing")
+def test_redis(testing_context, testing_telegram_id):
+    connector_instance = RedisConnector("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
     generic_test(connector_instance, testing_context, testing_telegram_id)
 
 
