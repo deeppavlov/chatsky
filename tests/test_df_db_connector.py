@@ -68,7 +68,6 @@ def test_pickle(testing_file, testing_context, testing_telegram_id):
     generic_test(connector_instance, testing_context, testing_telegram_id)
 
 
-
 @pytest.mark.skipif(POSTGRES_ACTIVE == False, reason="Postgres server not running")
 @pytest.mark.skipif(postgres_available == False, reason="Postgres dependencies missing")
 def test_postgres(testing_context, testing_telegram_id):
