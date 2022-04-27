@@ -1,0 +1,60 @@
+name: test_coverage
+
+on: [push]
+
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    env:
+      COMPOSE_FILE: docker-compose.yml
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+      MYSQL_USERNAME: root
+      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
+      MYSQL_DATABASE: test
+      PG_USERNAME: pguser
+      PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build images
+        if: matrix.os == 'ubuntu-latest'
+        run: docker-compose -f $COMPOSE_FILE up -d
+
+      - name: Check running containers
+        if: matrix.os == 'ubuntu-latest'
+        run: docker ps -a
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          python -m pip install -r requirements_dev.txt
+          python -m pip install -e .
+          python -m pip install -r requirements_test.txt
+
+      - name: build coverage ubuntu
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          python -m pytest --cov-fail-under=80 --cache-clear --tb=long -vv --cov=df_db_connector tests/ 2>&1 | tee pytest-coverage.txt
+
+      - name: build coverage non-linux
+        if: matrix.os != 'ubuntu-latest'
+        run: |
+          python -m pytest --cache-clear --tb=long -vv --cov=df_db_connector tests/ 2>&1 | tee pytest-coverage.txt
+      
+      - name: stop containers
+        if: matrix.os == 'ubuntu-latest'
+        run: docker-compose stop
