@@ -1,9 +1,11 @@
 
 # Dialog Flow Generics
 
-[There](https://github.com/deepmipt/dialog_flow_generics) is an addon for the [Dialog Flow Engine](https://github.com/deepmipt/dialog_flow_engine), a minimalistic open-source engine for conversational services.
+[Dialog Flow Generics](https://github.com/deepmipt/dialog_flow_generics) is an extension to the [Dialogflow Engine](https://github.com/deepmipt/dialog_flow_engine), a minimalistic open-source engine for conversational services.
 
 [Dialog Flow Generics](https://github.com/deepmipt/dialog_flow_generics) introduces a GenericResponse class as well as generic classes for various media types. Using this API, you can create identical responses in DF adapters for Telegram, Yandex's Alice, or other services instead of learning service-specific classes. 
+
+Note that some of the options that are present in the generic response will be ignored, when the service API does not support them. For instance, since Yandex's Alice does not support sending videos or documents, fields like `video` or `attachment` will be skipped by `DF-alice-adapter`.  
 
 <!-- uncomment one of these to add badges to your project description -->
 <!-- [![Documentation Status](https://DF-generic-response.readthedocs.io/en/stable/?badge=stable)](https://readthedocs.org/projects/DF-generic-response/badge/?version=stable) -->
@@ -18,7 +20,7 @@
 # Quick Start
 ## Installation
 ```bash
-pip install DF-generic-response
+pip install df-generics
 ```
 
 To get more advanced examples, take a look at [examples](https://github.com/deepmipt/dialog_flow_generics/tree/main/examples) on GitHub.

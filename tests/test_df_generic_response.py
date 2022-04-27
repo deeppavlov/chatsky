@@ -10,7 +10,7 @@ sys.path.insert(0, "../")
 from examples.example_utils import run_test
 
 
-@pytest.mark.parametrize("module_name", ["examples.basics"])
+@pytest.mark.parametrize("module_name", ["examples.basics", "examples.buttons", "examples.media"])
 def test_examples(module_name):
     module = importlib.import_module(module_name)
     actor = getattr(module, "actor")
