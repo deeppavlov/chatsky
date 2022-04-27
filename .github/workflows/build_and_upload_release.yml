@@ -26,17 +26,17 @@ jobs:
           python setup.py bdist_wheel
           python setup.py sdist
 
-      # - name: upload to pypi via twine
-      #   env:
-      #     TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-      #   run: |
-      #     twine upload --verbose -u '__token__' dist/*
+      - name: upload to pypi via twine
+        env:
+          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+        run: |
+          twine upload --verbose -u '__token__' dist/*
 
-      # - name: upload binaries into release
-      #   uses: svenstaro/upload-release-action@v2
-      #   with:
-      #     repo_token: ${{ secrets.GITHUB_TOKEN }}
-      #     file: dist/*
-      #     tag: ${{ github.ref }}
-      #     overwrite: true
-      #     file_glob: true
+      - name: upload binaries into release
+        uses: svenstaro/upload-release-action@v2
+        with:
+          repo_token: ${{ secrets.GITHUB_TOKEN }}
+          file: dist/*
+          tag: ${{ github.ref }}
+          overwrite: true
+          file_glob: true
