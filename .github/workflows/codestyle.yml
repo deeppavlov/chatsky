@@ -15,17 +15,8 @@ jobs:
 
       - name: install dependencies
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-              python -m pip install --upgrade pip
-              if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
-          else
-              make venv
-          fi
+            make venv
 
       - name: run codestyle
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-              black --line-length=120 --exclude="setup\.py" --check .
-          else
-              make lint
-          fi
+            make lint
