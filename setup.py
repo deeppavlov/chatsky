@@ -27,14 +27,14 @@ description = [line for line in readme_lines if line and not line.startswith("#"
 long_description = "\n".join(readme_lines)
 
 
-# requirements = parse_requirements("requirements.txt")
+requirements = parse_requirements("requirements.txt")
 
-# test_requirements = parse_requirements("requirements_test.txt")
+test_requirements = parse_requirements("requirements_test.txt")
 
 
 setup(
     name="df_db_connector",
-    version="0.1",
+    version="0.1.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -61,17 +61,9 @@ setup(
     packages=find_packages(where="."),  # Required
     include_package_data=True,
     python_requires=">=3.5, <4",
-    install_requires=["df_engine>=0.9.0"],  # Optional
+    install_requires=requirements,  # Optional
     test_suite="tests",
-    tests_require=[
-        "pytest >=6.2.4,<7.0.0",
-        "pytest-cov >=2.12.0,<3.0.0",
-        "pytest-asyncio >=0.14.0,<0.15.0",
-        "flake8 >=3.8.3,<4.0.0",
-        "black ==20.8b1",
-        "click ==8.0.2",
-        "isort >=5.0.6,<6.0.0",
-    ],
+    tests_require=test_requirements,
     extras_require={
         "postgresql": ["sqlalchemy>=1.4.27", "psycopg2>=2.9.2"],
         "mysql": ["sqlalchemy>=1.4.27", "pymysql>=1.0.2", "cryptography-36.0.2"],
