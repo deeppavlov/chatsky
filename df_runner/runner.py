@@ -4,8 +4,6 @@ from typing import Any, Optional, Union, Callable
 from abc import ABC, abstractmethod
 
 
-from pydantic import validate_arguments, Field, validator
-
 from df_engine.core import Context, Actor, Script
 from df_engine.core.types import NodeLabel2Type
 from df_db_connector import DBAbstractConnector
@@ -78,14 +76,14 @@ class Runner:
 
         # pre_annotators
         for annotator in self._pre_annotators:
-            ctx = annotator(ctx, actor)
+            ctx = annotator(ctx, self._actor)
 
         ctx.add_request(request)
         ctx = self._actor(ctx)
 
         # post_annotators
         for annotator in self._post_annotators:
-            ctx = annotator(ctx, actor)
+            ctx = annotator(ctx, self._actor)
 
         self._db[ctx_id] = ctx
 
