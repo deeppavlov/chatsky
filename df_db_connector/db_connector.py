@@ -2,17 +2,13 @@
 db_connector
 ---------------------------
 | Base module. Provided classes:
-| Abstract connector interface :py:class:`~df_db.connector.db_connector.DBAbstractConnector`. 
+| Abstract connector interface :py:class:`~df_db.connector.db_connector.DBAbstractConnector`.
 | An intermediate class to inherit from: :py:class:`~df_db.connector.db_connector.DBConnector`
 
 """
 import threading
 from abc import ABC, abstractmethod
 from typing import Any, Callable
-
-from pydantic import validate_arguments
-from df_engine.core import Context, Actor
-from df_engine.core.types import ActorStage
 
 
 class DBAbstractConnector(ABC):

@@ -27,7 +27,7 @@ venv:
 	$(VENV_PATH)/bin/pip install -e . ;
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
 	$(VENV_PATH)/bin/pip install -r requirements_test.txt ;
-	
+	docker-compose up -d
 
 format: venv
 	$(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 .

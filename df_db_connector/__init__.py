@@ -1,4 +1,6 @@
 # -*- coding: utf-8 -*-
+# flake8: noqa: F401
+
 __author__ = "Denis Kuznetsov"
 __email__ = "kuznetosv.den.p@gmail.com"
 __version__ = "0.1.1"
@@ -8,8 +10,7 @@ import importlib
 from .db_connector import DBAbstractConnector, DBConnector, threadsafe_method
 from .json_connector import JSONConnector
 from .pickle_connector import PickleConnector
-from .sql_connector import SQLConnector
-
+from .sql_connector import SQLConnector, postgres_available, sqlite_available, mysql_available
 
 
 def connector_factory(path: str, **kwargs):
