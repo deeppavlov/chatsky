@@ -40,7 +40,6 @@ lint: venv
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
-	$(VENV_PATH)/bin/mypy df_db_connector/
 
 .PHONY: lint
 
