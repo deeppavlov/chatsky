@@ -1,5 +1,7 @@
-from df_runner import __version__
+from df_runner import Runner
+
+from examples import cli_runner
 
 
-def test_version():
-    assert __version__ == "0.1.0"
+def test_cli():
+    assert isinstance(cli_runner.runner, Runner)
