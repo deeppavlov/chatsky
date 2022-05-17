@@ -43,27 +43,27 @@ class Runner:
     def __init__(
         self,
         actor: Actor,
-        db: DBAbstractConnector = dict(),
-        request_provider: AbsRequestProvider = CLIRequestProvider(),
-        pre_annotators: list = [],
-        post_annotators: list = [],
+        db: Optional[DBAbstractConnector] = None,
+        request_provider: Optional[AbsRequestProvider] = None,
+        pre_annotators: Optional[list] = None,
+        post_annotators: Optional[list] = None,
         *args,
         **kwargs,
     ):
-        self._db: DBAbstractConnector = db
+        self._db: DBAbstractConnector = dict() if db is None else db
         self._actor: Actor = actor
-        self._request_provider: AbsRequestProvider = request_provider
-        self._pre_annotators: list = pre_annotators
-        self._post_annotators: list = post_annotators
+        self._request_provider: AbsRequestProvider = CLIRequestProvider() if request_provider is None else request_provider
+        self._pre_annotators: list = [] if pre_annotators is None else pre_annotators
+        self._post_annotators: list = [] if post_annotators is None else post_annotators
 
-    def start(self) -> None:
+    def start(self, *args, **kwargs) -> None:
         while self._request_provider.run(self):
             pass
 
     def request_handler(
         self,
         ctx_id: Any,
-        request: Any,
+        ctx_update: Optional[Union[Any, Callable]],
         init_ctx: Optional[Union[Context, Callable]] = None,
     ) -> Context:
         # db
@@ -74,11 +74,15 @@ class Runner:
             else:
                 ctx: Context = init_ctx() if callable(init_ctx) else init_ctx
 
+        if callable(ctx_update):
+            ctx = ctx_update(ctx)
+        else:
+            ctx.add_request(ctx_update)
+
         # pre_annotators
         for annotator in self._pre_annotators:
             ctx = annotator(ctx, self._actor)
 
-        ctx.add_request(request)
         ctx = self._actor(ctx)
 
         # post_annotators
