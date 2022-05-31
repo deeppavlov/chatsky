@@ -1,4 +1,4 @@
 df_engine >= 0.9.0
 pytelegrambotapi >= 4.5.1
 df-generics >= 0.1.0
-df-runner @ git+https://github.com/deepmipt/dialog_flow_runner.git@b21493c
+df-runner >= 0.1.1
