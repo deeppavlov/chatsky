@@ -5,4 +5,4 @@ from .runner import Runner, ScriptRunner, AbsRequestProvider, CLIRequestProvider
 
 __author__ = "Denis Kuznetsov"
 __email__ = "kuznetsov.den.p@gmail.com"
-__version__ = "0.1.0"
+__version__ = "0.1.1"

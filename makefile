@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_runner/__init__.py
-CURRENT_VERSION = 0.1.0 
+CURRENT_VERSION = 0.1.1 
 
 help:
 	@echo "Thanks for your interest in Dialog Flow My Addon!"
