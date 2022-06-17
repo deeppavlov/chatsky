@@ -9,7 +9,6 @@ adding data, data serialization, type checking etc.
 import logging
 from uuid import UUID, uuid4
 
-from typing import ForwardRef
 from typing import Any, Optional, Union
 
 from pydantic import BaseModel, validate_arguments, Field, validator

@@ -19,11 +19,8 @@ help:
 	@echo
 
 venv:
-	@if [ "`which python`" != "venv/bin/python" ] ; 	then \
-		echo "Start creating virtual environment";\
-		python3 -m venv $(VENV_PATH);\
-	fi
-
+	echo "Start creating virtual environment";\
+	python3 -m venv $(VENV_PATH);\
 	$(VENV_PATH)/bin/pip install -e . ;
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
 	$(VENV_PATH)/bin/pip install -r requirements_test.txt ;
@@ -34,7 +31,7 @@ format: venv
 .PHONY: format
 
 lint: venv
-	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_telegram_connector/
+	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_engine/
 	@set -e && $(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 --check . || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
@@ -51,7 +48,7 @@ test_all: venv test lint
 .PHONY: test_all
 
 doc: venv
-	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_telegram_connector
+	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_engine
 	$(VENV_PATH)/bin/sphinx-build -M clean docs/source docs/build
 	$(VENV_PATH)/bin/sphinx-build -M html docs/source docs/build
 .PHONY: doc
