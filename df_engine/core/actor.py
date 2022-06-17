@@ -147,6 +147,14 @@ class Actor(BaseModel):
         ctx = self._get_previous_node(ctx, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
 
+        # rewrite previous node
+        ctx = self._rewrite_previous_node(ctx, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
+
+        # run pre transitions processing
+        ctx = self._run_pre_transitions_processing(ctx, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
+
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
         ctx = self._get_true_labels(ctx, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
@@ -161,14 +169,14 @@ class Actor(BaseModel):
         ctx = self._rewrite_next_node(ctx, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
 
-        # run processing
-        ctx = self._run_processing(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.RUN_PROCESSING, *args, **kwargs)
+        # run pre response processing
+        ctx = self._run_pre_response_processing(ctx, *args, **kwargs)
+        self._run_handlers(ctx, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
 
         # create response
-        ctx.framework_states["actor"]["response"] = ctx.framework_states["actor"]["processed_node"].run_response(
-            ctx, self, *args, **kwargs
-        )
+        ctx.framework_states["actor"]["response"] = ctx.framework_states["actor"][
+            "pre_response_processed_node"
+        ].run_response(ctx, self, *args, **kwargs)
         self._run_handlers(ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.framework_states["actor"]["response"])
 
@@ -192,7 +200,7 @@ class Actor(BaseModel):
         )
         ctx.framework_states["actor"]["previous_node"] = self.script.get(
             ctx.framework_states["actor"]["previous_label"][0], {}
-        ).get(ctx.framework_states["actor"]["previous_label"][1])
+        ).get(ctx.framework_states["actor"]["previous_label"][1], Node())
         return ctx
 
     @validate_arguments
@@ -217,11 +225,9 @@ class Actor(BaseModel):
         )
 
         # NODE
-        ctx.framework_states["actor"]["node_transitions"] = (
-            self.script.get(ctx.framework_states["actor"]["previous_label"][0], {})
-            .get(ctx.framework_states["actor"]["previous_label"][1], Node())
-            .transitions
-        )
+        ctx.framework_states["actor"]["node_transitions"] = ctx.framework_states["actor"][
+            "pre_transitions_processed_node"
+        ].transitions
         ctx.framework_states["actor"]["node_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["node_transitions"],
             ctx,
@@ -246,20 +252,47 @@ class Actor(BaseModel):
         return ctx
 
     @validate_arguments
-    def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
-        updated_next = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
-        local_node = self.script.get(ctx.framework_states["actor"]["next_label"][0], {}).get(LOCAL, Node())
-        for node in [local_node, ctx.framework_states["actor"]["next_node"]]:
-            updated_next.response = node.response if node.response else updated_next.response
-            updated_next.processing.update(node.processing)
-            updated_next.misc.update(node.misc)
-        ctx.framework_states["actor"]["next_node"] = updated_next
+    def _rewrite_previous_node(self, ctx: Context, *args, **kwargs) -> Context:
+        node = ctx.framework_states["actor"]["previous_node"]
+        flow_label = ctx.framework_states["actor"]["previous_label"][0]
+        ctx.framework_states["actor"]["previous_node"] = self._overwrite_node(node, flow_label)
         return ctx
 
     @validate_arguments
-    def _run_processing(self, ctx: Context, *args, **kwargs) -> Context:
+    def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
+        node = ctx.framework_states["actor"]["next_node"]
+        flow_label = ctx.framework_states["actor"]["next_label"][0]
+        ctx.framework_states["actor"]["next_node"] = self._overwrite_node(node, flow_label)
+        return ctx
+
+    @validate_arguments
+    def _overwrite_node(self, current_node: Node, flow_label: LabelType, *args, **kwargs) -> Context:
+        overwritten_node = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
+        local_node = self.script.get(flow_label, {}).get(LOCAL, Node())
+        for node in [local_node, current_node]:
+            overwritten_node.pre_transitions_processing.update(node.pre_transitions_processing)
+            overwritten_node.transitions.update(node.transitions)
+            overwritten_node.pre_response_processing.update(node.pre_response_processing)
+            overwritten_node.response = overwritten_node.response if node.response is None else node.response
+            overwritten_node.misc.update(node.misc)
+        return overwritten_node
+
+    @validate_arguments
+    def _run_pre_transitions_processing(self, ctx: Context, *args, **kwargs) -> Context:
+        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
+        ctx = ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing(ctx, self, *args, **kwargs)
+        ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
+            "processed_node"
+        ]
+        del ctx.framework_states["actor"]["processed_node"]
+        return ctx
+
+    @validate_arguments
+    def _run_pre_response_processing(self, ctx: Context, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
-        ctx = ctx.framework_states["actor"]["next_node"].run_processing(ctx, self, *args, **kwargs)
+        ctx = ctx.framework_states["actor"]["next_node"].run_pre_response_processing(ctx, self, *args, **kwargs)
+        ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
+        del ctx.framework_states["actor"]["processed_node"]
         return ctx
 
     @validate_arguments

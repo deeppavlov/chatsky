@@ -17,7 +17,8 @@ from .types import NodeLabel2Type, ModuleName
 
 logger = logging.getLogger(__name__)
 
-Context = ForwardRef("Context")
+Context = BaseModel
+Node = BaseModel
 
 
 @validate_arguments
@@ -234,6 +235,46 @@ class Context(BaseModel):
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
+
+    @property
+    def current_node(self) -> Optional[Node]:
+        """
+        Returns current :py:class:`~df_engine.core.script.Node`.
+        """
+        actor = self.framework_states.get("actor", {})
+        node = (
+            actor.get("processed_node")
+            or actor.get("pre_response_processed_node")
+            or actor.get("next_node")
+            or actor.get("pre_transitions_processed_node")
+            or actor.get("previous_node")
+        )
+        if node is None:
+            logger.warning(
+                "The `current_node` exists when an actor is running between `ActorStage.GET_PREVIOUS_NODE`"
+                " and `ActorStage.FINISH_TURN`"
+            )
+
+        return node
+
+    @validate_arguments
+    def overwrite_current_node_in_processing(self, processed_node: Node):
+        """
+        Overwrites the current node with a processed node. This method only works in processing functions.
+
+        Parameters
+        ----------
+        processed_node : :py:class:`~df_engine.core.script.Node`.
+            `node` that we need to overwrite current node.
+        """
+        is_processing = self.framework_states.get("actor", {}).get("processed_node")
+        if is_processing:
+            self.framework_states["actor"]["processed_node"] = processed_node
+        else:
+            logger.warning(
+                f"The `{self.overwrite_current_node_in_processing.__name__}` "
+                "function can only be run during processing functions."
+            )
 
 
 Context.update_forward_refs()

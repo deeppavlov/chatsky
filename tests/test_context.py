@@ -1,7 +1,7 @@
 # %%
 import random
 
-from df_engine.core import Context
+from df_engine.core import Context, Node
 
 
 def shuffle_dict_keys(dictionary: dict) -> dict:
@@ -36,6 +36,8 @@ def test_context():
     assert ctx.requests == {10: "20", 11: "22", 12: "24", 13: "26", 14: "28", 15: "1000"}
     assert ctx.responses == {10: "21", 11: "23", 12: "25", 13: "27", 14: "29", 15: "1001"}
     assert ctx.misc == {1001: "11111"}
+    assert ctx.current_node is None
+    ctx.overwrite_current_node_in_processing(Node(**{"response": "text"}))
     ctx.json()
 
     try:

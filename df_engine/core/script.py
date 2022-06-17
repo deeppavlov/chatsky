@@ -28,7 +28,8 @@ class Node(BaseModel, extra=Extra.forbid):
 
     transitions: dict[NodeLabelType, ConditionType] = {}
     response: Optional[Any] = None
-    processing: dict[Any, Callable] = {}
+    pre_transitions_processing: dict[Any, Callable] = {}
+    pre_response_processing: dict[Any, Callable] = {}
     misc: dict = {}
 
     _normalize_transitions = validator("transitions", allow_reuse=True)(normalize_transitions)
@@ -40,11 +41,17 @@ class Node(BaseModel, extra=Extra.forbid):
         response = normalize_response(self.response)
         return response(ctx, actor, *args, **kwargs)
 
-    def run_processing(self, ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+    def run_pre_response_processing(self, ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+        return self.run_processing(self.pre_response_processing, ctx, actor, *args, **kwargs)
+
+    def run_pre_transitions_processing(self, ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+        return self.run_processing(self.pre_transitions_processing, ctx, actor, *args, **kwargs)
+
+    def run_processing(self, processing: dict[Any, Callable], ctx: Context, actor: Actor, *args, **kwargs) -> Context:
         """
         Executes the normalized processing. See details in the normalize_processing function of normalization.py
         """
-        processing = normalize_processing(self.processing)
+        processing = normalize_processing(processing)
         return processing(ctx, actor, *args, **kwargs)
 
 

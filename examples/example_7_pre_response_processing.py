@@ -1,7 +1,7 @@
 import logging
 
 
-from df_engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PROCESSING
+from df_engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PRE_RESPONSE_PROCESSING
 from df_engine.core import Context, Actor
 import df_engine.labels as lbl
 import df_engine.conditions as cnd
@@ -26,17 +26,17 @@ def create_transitions():
 
 
 def add_label_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
-    processed_node = ctx.framework_states["actor"].get("processed_node", ctx.framework_states["actor"]["next_node"])
+    processed_node = ctx.current_node
     processed_node.response = f"{ctx.last_label}: {processed_node.response}"
-    ctx.framework_states["actor"]["processed_node"] = processed_node
+    ctx.overwrite_current_node_in_processing(processed_node)
     return ctx
 
 
 def add_prefix(prefix):
     def add_prefix_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
-        processed_node = ctx.framework_states["actor"].get("processed_node", ctx.framework_states["actor"]["next_node"])
+        processed_node = ctx.current_node
         processed_node.response = f"{prefix}: {processed_node.response}"
-        ctx.framework_states["actor"]["processed_node"] = processed_node
+        ctx.overwrite_current_node_in_processing(processed_node)
         return ctx
 
     return add_prefix_processing
@@ -48,26 +48,37 @@ script = {
         "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
         "fallback": {RESPONSE: "the end"},
     },
-    GLOBAL: {PROCESSING: {1: add_prefix("l1_global"), 2: add_prefix("l2_global")}},
+    GLOBAL: {
+        PRE_RESPONSE_PROCESSING: {
+            "proc_name_1": add_prefix("l1_global"),
+            "proc_name_2": add_prefix("l2_global"),
+        }
+    },
     "flow": {
-        LOCAL: {PROCESSING: {2: add_prefix("l2_local"), 3: add_prefix("l3_local")}},
+        LOCAL: {
+            PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_local"), "proc_name_3": add_prefix("l3_local")}
+        },
         "step_0": {RESPONSE: "first", TRANSITIONS: {lbl.forward(): cnd.true()}},
         "step_1": {
-            PROCESSING: {1: add_prefix("l1_step_1")},
+            PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
             RESPONSE: "second",
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_2": {
-            PROCESSING: {2: add_prefix("l2_step_2")},
+            PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_step_2")},
             RESPONSE: "third",
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_3": {
-            PROCESSING: {3: add_prefix("l3_step_3")},
+            PRE_RESPONSE_PROCESSING: {"proc_name_3": add_prefix("l3_step_3")},
             RESPONSE: "fourth",
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
-        "step_4": {PROCESSING: {4: add_prefix("l4_step_4")}, RESPONSE: "fifth", TRANSITIONS: {"step_0": cnd.true()}},
+        "step_4": {
+            PRE_RESPONSE_PROCESSING: {"proc_name_4": add_prefix("l4_step_4")},
+            RESPONSE: "fifth",
+            TRANSITIONS: {"step_0": cnd.true()},
+        },
     },
 }
 

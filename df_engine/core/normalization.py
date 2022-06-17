@@ -180,7 +180,31 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
         return processing_handler
 
 
-# TODO: doc string
+@validate_arguments
+def map_deprecated_key(key: str) -> str:
+    """
+    This function is used to map deprecated keyword to new one.
+
+    Parameters
+    ----------
+
+    key: str
+    a keyword of a node.
+
+    Returns
+    -------
+    str
+    a mapped keyword of a node
+    """
+    if key == "processing":
+        logger.warning(
+            "Use the new key 'PRE_RESPONSE_PROCESSING instead of the deprecated key 'PROCESSING',"
+            " which will be removed in future versions."
+        )
+        return "pre_response_processing"
+    return key
+
+
 @validate_arguments
 def normalize_keywords(
     script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
@@ -202,7 +226,8 @@ def normalize_keywords(
 
     script = {
         flow_label: {
-            node_label: {key.name.lower(): val for key, val in node.items()} for node_label, node in flow.items()
+            node_label: {map_deprecated_key(key.name.lower()): val for key, val in node.items()}
+            for node_label, node in flow.items()
         }
         for flow_label, flow in script.items()
     }

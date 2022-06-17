@@ -1,7 +1,15 @@
 # %%
 from typing import Callable
 
-from df_engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE, PROCESSING, MISC
+from df_engine.core.keywords import (
+    GLOBAL,
+    TRANSITIONS,
+    RESPONSE,
+    PROCESSING,
+    MISC,
+    PRE_RESPONSE_PROCESSING,
+    PRE_TRANSITIONS_PROCESSING,
+)
 from df_engine.core import Actor, Context
 from df_engine.core.types import NodeLabel3Type
 from df_engine.labels import repeat
@@ -109,11 +117,24 @@ def test_normalize_processing():
 
 def test_normalize_keywords():
     # TODO: Add full check for functions
-    node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
+    subtest_normalize_keywords(PROCESSING)
+    subtest_normalize_keywords(PRE_RESPONSE_PROCESSING)
+
+
+def subtest_normalize_keywords(pre_response_processing):
+    # TODO: Add full check for functions
+    node_template = {
+        TRANSITIONS: {"node": std_func},
+        RESPONSE: "text",
+        pre_response_processing: {1: std_func},
+        PRE_TRANSITIONS_PROCESSING: {1: std_func},
+        MISC: {"key": "val"},
+    }
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
         RESPONSE.name.lower(): "text",
-        PROCESSING.name.lower(): {1: std_func},
+        PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
+        PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
     }
     script = {"flow": {"node": node_template.copy()}}
@@ -124,11 +145,18 @@ def test_normalize_keywords():
 
 def test_normalize_script():
     # TODO: Add full check for functions
-    node_template = {TRANSITIONS: {"node": std_func}, RESPONSE: "text", PROCESSING: {1: std_func}, MISC: {"key": "val"}}
+    node_template = {
+        TRANSITIONS: {"node": std_func},
+        RESPONSE: "text",
+        PROCESSING: {1: std_func},
+        PRE_TRANSITIONS_PROCESSING: {1: std_func},
+        MISC: {"key": "val"},
+    }
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
         RESPONSE.name.lower(): "text",
-        PROCESSING.name.lower(): {1: std_func},
+        PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
+        PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
     }
     script = {GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}}

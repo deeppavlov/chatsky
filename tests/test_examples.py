@@ -34,13 +34,19 @@ def test_context_serialization():
     run_test()
 
 
-def test_processing():
-    from .examples.example_7_processing import run_test
+def test_pre_response_processing():
+    from .examples.example_7_pre_response_processing import run_test
 
     run_test()
 
 
-def test_processing():
+def test_misc():
     from .examples.example_8_misc import run_test
+
+    run_test()
+
+
+def test_pre_transitions_processing():
+    from .examples.example_9_pre_transitions_processing import run_test
 
     run_test()
