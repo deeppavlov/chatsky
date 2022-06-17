@@ -1,8 +1,17 @@
-from setuptools import setup, find_packages
-import pathlib
-from setuptools.command.install import install
+#!/usr/bin/env python
+# -*- coding: utf-8 -*-
 
+import pip
+import pathlib
+
+from setuptools.command.install import install
 from utils.downgrade_patch import downgrade
+
+try:
+    from setuptools import setup
+except ImportError:
+    from distutils.core import setup
+from setuptools import find_packages
 
 
 LOCATION = pathlib.Path(__file__).parent.resolve()
@@ -14,6 +23,12 @@ class Downgrade(install):
         install.run(self)
 
 
+def parse_requirements(filename):
+    """load requirements from a pip requirements file"""
+    lines = (line.strip() for line in (LOCATION / filename).open())
+    return [line for line in lines if line and not line.startswith("#")]
+
+
 # Get the long description from the README file
 readme_file = LOCATION / "README.md"
 
@@ -22,20 +37,9 @@ description = [line for line in readme_lines if line and not line.startswith("#"
 long_description = "\n".join(readme_lines)
 
 
-def read_requirements():
-    """parses requirements from requirements.txt"""
-    reqs_file = LOCATION / "requirements.txt"
-    reqs = [line.strip() for line in reqs_file.open(encoding="utf8").readlines() if not line.strip().startswith("#")]
+requirements = parse_requirements("requirements.txt")
 
-    names = []
-    links = []
-    for req in reqs:
-        if "://" in req:
-            links.append(req)
-        else:
-            names.append(req)
-    return {"install_requires": names, "dependency_links": links}
-
+test_requirements = parse_requirements("requirements_test.txt")
 
 setup(
     name="df_engine",
@@ -65,6 +69,8 @@ setup(
     keywords="chatbots",  # Optional
     packages=find_packages(where="."),  # Required
     python_requires=">=3.6, <4",
-    install_requires=["pydantic>=1.8.2"],  # Optional
+    install_requires=requirements,  # Optional
     cmdclass={"install": Downgrade},
+    test_suite="tests",
+    tests_require=test_requirements,
 )
