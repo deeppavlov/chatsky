@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_engine/__init__.py
-CURRENT_VERSION = 0.9.0 
+CURRENT_VERSION = 0.10.0 
 
 help:
 	@echo "Thanks for your interest in the Dialog Flow Engine!"
