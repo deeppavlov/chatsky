@@ -5,7 +5,7 @@ VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_telegram_connector/
 CURRENT_VERSION = 0.1.0 
 
 help:
-	@echo "Thanks for your interest in Dialog Flow Telegram Connector!"
+	@echo "Thanks for your interest in Dialog Flow Framework!"
 	@echo
 	@echo "make lint: Run linters"
 	@echo "make test: Run basic tests (not testing most integrations)"
