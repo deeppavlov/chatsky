@@ -19,11 +19,8 @@ help:
 	@echo
 
 venv:
-	@if [ "`which python`" != "venv/bin/python" ] ; 	then \
-		echo "Start creating virtual environment";\
-		python3 -m venv $(VENV_PATH);\
-	fi
-
+	echo "Start creating virtual environment";\
+	python3 -m venv $(VENV_PATH);\
 	$(VENV_PATH)/bin/pip install -e . ;
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
 	$(VENV_PATH)/bin/pip install -r requirements_test.txt ;
