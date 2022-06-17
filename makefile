@@ -5,7 +5,7 @@ VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_db_connector/__init
 CURRENT_VERSION = 0.1.1 
 
 help:
-	@echo "Thanks for your interest in Dialog Flow My Addon!"
+	@echo "Thanks for your interest in Dialog Flow Framework!"
 	@echo
 	@echo "make lint: Run linters"
 	@echo "make test: Run basic tests (not testing most integrations)"
@@ -19,10 +19,8 @@ help:
 	@echo
 
 venv:
-	@if [ "`which python`" != "venv/bin/python" ] ; 	then \
-		echo "Start creating virtual environment";\
-		python3 -m venv $(VENV_PATH);\
-	fi
+	echo "Start creating virtual environment";\
+	python3 -m venv $(VENV_PATH);\
 
 	$(VENV_PATH)/bin/pip install -e . ;
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
