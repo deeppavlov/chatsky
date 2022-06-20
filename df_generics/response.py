@@ -95,3 +95,6 @@ class Response(BaseModel):
     # that use an intermediate backend server, like Yandex's Alice
     commands: Optional[List[Command]] = None
     state: Optional[Session] = Session.ACTIVE
+    
+    def __init__(self, text: str, *, **data) -> None:
+        super().__init__(text=text, **data)
