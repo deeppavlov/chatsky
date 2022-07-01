@@ -2,7 +2,14 @@
 
 from df_engine.core import Actor
 from df_engine.core.context import Context
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+from df_engine.core.keywords import (
+    TRANSITIONS,
+    RESPONSE,
+    GLOBAL,
+    LOCAL,
+    PRE_TRANSITIONS_PROCESSING,
+    PRE_RESPONSE_PROCESSING,
+)
 from df_engine.conditions import true
 from df_engine.labels import repeat
 
@@ -96,3 +103,117 @@ def test_actor():
     actor = Actor({"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1"))
     ctx = Context()
     actor(ctx)
+
+
+limit_errors = {}
+
+
+def check_call_limit(limit: int = 1, default_value=None, label=""):
+    counter = 0
+
+    def call_limit_handler(ctx: Context, actor, *args, **kwargs):
+        nonlocal counter
+        counter += 1
+        if counter > limit:
+            msg = f"calls are out of limits counterlimit={counter}/{limit} for {default_value=} and {label=}"
+            limit_errors[call_limit_handler] = msg
+        if default_value == "ctx":
+            return ctx
+        return default_value
+
+    return call_limit_handler
+
+
+def test_call_limit():
+    script = {
+        GLOBAL: {
+            TRANSITIONS: {
+                check_call_limit(4, ("flow1", "node1", 0.0), "global label"): check_call_limit(4, True, "global cond")
+            },
+            PRE_TRANSITIONS_PROCESSING: {"tpg": check_call_limit(4, "ctx", "tpg")},
+            PRE_RESPONSE_PROCESSING: {"rpg": check_call_limit(4, "ctx", "rpg")},
+        },
+        "flow1": {
+            LOCAL: {
+                TRANSITIONS: {
+                    check_call_limit(2, ("flow1", "node1", 0.0), "local label for flow1"): check_call_limit(
+                        2, True, "local cond for flow1"
+                    )
+                },
+                PRE_TRANSITIONS_PROCESSING: {"tpl": check_call_limit(2, "ctx", "tpl")},
+                PRE_RESPONSE_PROCESSING: {"rpl": check_call_limit(3, "ctx", "rpl")},
+            },
+            "node1": {
+                RESPONSE: check_call_limit(1, "r1", "flow1_node1"),
+                PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow1_node1_tp1")},
+                TRANSITIONS: {
+                    check_call_limit(1, ("flow1", "node2"), "cond flow1_node2"): check_call_limit(
+                        1,
+                        True,
+                        "cond flow1_node2",
+                    )
+                },
+                PRE_RESPONSE_PROCESSING: {"rp1": check_call_limit(1, "ctx", "flow1_node1_rp1")},
+            },
+            "node2": {
+                RESPONSE: check_call_limit(1, "r1", "flow1_node2"),
+                PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow1_node2_tp1")},
+                TRANSITIONS: {
+                    check_call_limit(1, ("flow2", "node1"), "cond flow2_node1"): check_call_limit(
+                        1,
+                        True,
+                        "cond flow2_node1",
+                    )
+                },
+                PRE_RESPONSE_PROCESSING: {"rp1": check_call_limit(1, "ctx", "flow1_node2_rp1")},
+            },
+        },
+        "flow2": {
+            LOCAL: {
+                TRANSITIONS: {
+                    check_call_limit(2, ("flow1", "node1", 0.0), "local label for flow2"): check_call_limit(
+                        2, True, "local cond for flow2"
+                    )
+                },
+                PRE_TRANSITIONS_PROCESSING: {"tpl": check_call_limit(2, "ctx", "tpl")},
+                PRE_RESPONSE_PROCESSING: {"rpl": check_call_limit(2, "ctx", "rpl")},
+            },
+            "node1": {
+                RESPONSE: check_call_limit(1, "r1", "flow2_node1"),
+                PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow2_node1_tp1")},
+                TRANSITIONS: {
+                    check_call_limit(1, ("flow2", "node2"), "label flow2_node2"): check_call_limit(
+                        1,
+                        True,
+                        "cond flow2_node2",
+                    )
+                },
+                PRE_RESPONSE_PROCESSING: {"rp1": check_call_limit(1, "ctx", "flow2_node1_rp1")},
+            },
+            "node2": {
+                RESPONSE: check_call_limit(1, "r1", "flow2_node2"),
+                PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow2_node2_tp1")},
+                TRANSITIONS: {
+                    check_call_limit(1, ("flow1", "node1"), "label flow2_node2"): check_call_limit(
+                        1,
+                        True,
+                        "cond flow2_node2",
+                    )
+                },
+                PRE_RESPONSE_PROCESSING: {"rp1": check_call_limit(1, "ctx", "flow2_node2_rp1")},
+            },
+        },
+    }
+    # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
+    ctx = Context()
+    actor = Actor(script=script, start_label=("flow1", "node1"), validation_stage=False)
+    for i in range(4):
+        ctx.add_request("req1")
+        ctx = actor(ctx)
+    if limit_errors:
+        error_msg = repr(limit_errors)
+        raise Exception(error_msg)
+
+
+if __name__ == "__main__":
+    test_call_limit()

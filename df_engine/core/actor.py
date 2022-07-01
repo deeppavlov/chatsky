@@ -255,7 +255,11 @@ class Actor(BaseModel):
     def _rewrite_previous_node(self, ctx: Context, *args, **kwargs) -> Context:
         node = ctx.framework_states["actor"]["previous_node"]
         flow_label = ctx.framework_states["actor"]["previous_label"][0]
-        ctx.framework_states["actor"]["previous_node"] = self._overwrite_node(node, flow_label)
+        ctx.framework_states["actor"]["previous_node"] = self._overwrite_node(
+            node,
+            flow_label,
+            only_current_node_transitions=True,
+        )
         return ctx
 
     @validate_arguments
@@ -266,15 +270,25 @@ class Actor(BaseModel):
         return ctx
 
     @validate_arguments
-    def _overwrite_node(self, current_node: Node, flow_label: LabelType, *args, **kwargs) -> Context:
+    def _overwrite_node(
+        self,
+        current_node: Node,
+        flow_label: LabelType,
+        *args,
+        only_current_node_transitions: bool = False,
+        **kwargs,
+    ) -> Context:
         overwritten_node = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
         local_node = self.script.get(flow_label, {}).get(LOCAL, Node())
         for node in [local_node, current_node]:
             overwritten_node.pre_transitions_processing.update(node.pre_transitions_processing)
-            overwritten_node.transitions.update(node.transitions)
             overwritten_node.pre_response_processing.update(node.pre_response_processing)
             overwritten_node.response = overwritten_node.response if node.response is None else node.response
             overwritten_node.misc.update(node.misc)
+            if not only_current_node_transitions:
+                overwritten_node.transitions.update(node.transitions)
+        if only_current_node_transitions:
+            overwritten_node.transitions = current_node.transitions
         return overwritten_node
 
     @validate_arguments
