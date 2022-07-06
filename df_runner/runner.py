@@ -30,7 +30,7 @@ class CLIRequestProvider(AbsRequestProvider):
         self.prompt_response: str = prompt_response
 
     def run(self, runner: Runner) -> bool:
-        ctx_id = uuid.uuid4()
+        ctx_id = str(uuid.uuid4())
         if self.intro is not None:
             print(self.intro)
         while True:
