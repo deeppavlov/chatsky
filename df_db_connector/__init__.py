@@ -3,7 +3,7 @@
 
 __author__ = "Denis Kuznetsov"
 __email__ = "kuznetosv.den.p@gmail.com"
-__version__ = "0.1.1"
+__version__ = "0.1.2"
 
 import importlib
 
