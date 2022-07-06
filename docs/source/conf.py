@@ -23,7 +23,7 @@ copyright = "Denis Kuznetsov"
 author = "Denis Kuznetsov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.1"
+release = "0.1.2"
 
 
 # -- General configuration ---------------------------------------------------
