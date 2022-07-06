@@ -53,6 +53,7 @@ class PickleConnector(DBConnector):
     @threadsafe_method
     def clear(self) -> None:
         self.dict.clear()
+        self._save()
 
     def _save(self) -> None:
         with open(self.path, "wb+") as file:
