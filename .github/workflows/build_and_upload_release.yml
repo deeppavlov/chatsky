@@ -2,9 +2,6 @@ name: build_and_upload_release
 
 on:
   push:
-    branches:
-      - main
-      - dev
     tags:
       - '*'
 
