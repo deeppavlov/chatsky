@@ -3,7 +3,6 @@ json_connector
 ---------------------------
 Provides the json-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
 """
-import json
 import os
 
 from pydantic import BaseModel, Extra, root_validator
@@ -30,6 +29,7 @@ class JSONConnector(DBConnector):
     path: str
         Target file URI. Example: 'json://file.json'
     """
+
     def __init__(self, path: str):
         DBConnector.__init__(self, path)
 
