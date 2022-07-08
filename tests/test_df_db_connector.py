@@ -5,20 +5,13 @@ from platform import system
 
 from df_engine.core.context import Context
 
-<<<<<<< HEAD
 from df_db_connector.json_connector import JSONConnector
 from df_db_connector.pickle_connector import PickleConnector
 from df_db_connector.shelve_connector import ShelveConnector
-from df_db_connector.db_connector import DBConnector, DFAbstractConnector
+from df_db_connector.db_connector import DBConnector, DBAbstractConnector
 from df_db_connector.sql_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
 from df_db_connector.redis_connector import RedisConnector, redis_available
 from df_db_connector.mongo_connector import MongoConnector, mongo_available
-=======
-from df_db_connector import JSONConnector
-from df_db_connector import PickleConnector
-from df_db_connector import DBConnector, DBAbstractConnector
-from df_db_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
->>>>>>> dev
 from df_db_connector import connector_factory
 
 

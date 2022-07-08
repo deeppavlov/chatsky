@@ -1,9 +1,9 @@
 
-# DF DB Connector
+# Dialog Flow DB Connector
 
-[DF DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) is an extension to the [Dialogflow Framework](https://github.com/deepmipt/dialog_flow_engine), a minimalistic open-source engine for conversational services.
+[There](https://github.com/deepmipt/dialog_flow_db_connector) is an addon for the [Dialog Flow Framework](https://github.com/deepmipt/dialog_flow_engine), a minimalistic open-source engine for conversational services.
 
-[DF DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) allows you to to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
+[Dialog Flow DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) allows you to to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
 
 Currently, the supported options are: 
 * [Redis](https://redis.io/)
@@ -64,6 +64,6 @@ def handle_request(request):
 
 To get more advanced examples, take a look at [examples](https://github.com/deepmipt/dialog_flow_db_connector/tree/main/examples) on GitHub.
 
-# Contributing to the DF DB Connector
+# Contributing to the Dialog Flow DB Connector
 
 Please refer to [CONTRIBUTING.md](https://github.com/deepmipt/dialog_flow_db_connector/blob/main/CONTRIBUTING.md).
