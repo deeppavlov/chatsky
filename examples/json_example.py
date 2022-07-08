@@ -42,10 +42,7 @@ actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_labe
 connector = connector_factory("json://file.json")
 # You can import any other connector using this factory:
 # connector = connector_factory("pickle://file.pkl")
-<<<<<<< HEAD
-=======
 # connector = connector_factory("shelve://file")
->>>>>>> fa838af22a5fcee40f402e5499aebe03f7b7b980
 
 USER_ID = str(random.randint(0, 100))
 
