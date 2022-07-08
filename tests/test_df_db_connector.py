@@ -8,7 +8,7 @@ from df_engine.core.context import Context
 from df_db_connector.json_connector import JSONConnector
 from df_db_connector.pickle_connector import PickleConnector
 from df_db_connector.shelve_connector import ShelveConnector
-from df_db_connector.db_connector import DBConnector, DFAbstractConnector
+from df_db_connector.db_connector import DBConnector, DBAbstractConnector
 from df_db_connector.sql_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
 from df_db_connector.redis_connector import RedisConnector, redis_available
 from df_db_connector.mongo_connector import MongoConnector, mongo_available
@@ -38,7 +38,7 @@ MYSQL_ACTIVE = ping_localhost(3307)
 
 def generic_test(connector_instance, testing_context, testing_telegram_id):
     assert isinstance(connector_instance, DBConnector)
-    assert isinstance(connector_instance, DFAbstractConnector)
+    assert isinstance(connector_instance, DBAbstractConnector)
     # perform cleanup
     connector_instance.clear()
     assert len(connector_instance) == 0
@@ -60,7 +60,7 @@ def generic_test(connector_instance, testing_context, testing_telegram_id):
 
 
 def test_main(testing_file, testing_context, testing_telegram_id):
-    assert issubclass(DBConnector, DFAbstractConnector)
+    assert issubclass(DBConnector, DBAbstractConnector)
     connector_instance = connector_factory(f"json://{testing_file}")
     generic_test(connector_instance, testing_context, testing_telegram_id)
 
