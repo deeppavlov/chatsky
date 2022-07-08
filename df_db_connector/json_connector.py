@@ -3,14 +3,23 @@ json_connector
 ---------------------------
 Provides the json-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
 """
-import json
 import os
+
+from pydantic import BaseModel, Extra, root_validator
 
 from .db_connector import DBConnector, threadsafe_method
 from df_engine.core.context import Context
 
 
-class JSONConnector(dict, DBConnector):
+class SerializeableStorage(BaseModel, extra=Extra.allow):
+    @root_validator
+    def validate_any(cls, vals):
+        for key, value in vals.items():
+            vals[key] = Context.cast(value)
+        return vals
+
+
+class JSONConnector(DBConnector):
     """
     Implements :py:class:`~df_db.connector.db_connector.DBConnector` with `json` as the storage format.
 
@@ -21,15 +30,10 @@ class JSONConnector(dict, DBConnector):
         Target file URI. Example: 'json://file.json'
     """
 
-    def __new__(cls, path: str):
-        obj = dict.__new__(cls)
-        return obj
-
     def __init__(self, path: str):
         DBConnector.__init__(self, path)
 
-        if not os.path.isfile(self.path):
-            open(self.path, "a").close()
+        self._load()
 
     def get(self, key: str, default=None):
         try:
@@ -38,40 +42,43 @@ class JSONConnector(dict, DBConnector):
             return default
 
     @threadsafe_method
+    def __len__(self):
+        return len(self.storage.__dict__)
+
+    @threadsafe_method
+    def __setitem__(self, key: str, item: Context) -> None:
+        self.storage.__dict__.__setitem__(key, item)
+        self._save()
+
+    @threadsafe_method
     def __getitem__(self, key: str) -> Context:
         self._load()
-        value = dict.__getitem__(self, key)
+        value = self.storage.__dict__.__getitem__(key)
         return Context.cast(value)
 
     @threadsafe_method
-    def __setitem__(self, key: str, value: Context) -> None:
-
-        value_dict = value.dict() if isinstance(value, Context) else value
-
-        if not isinstance(value_dict, dict):
-            raise TypeError(f"The saved value should be a dict or a dict-serializeable item, not {type(value_dict)}")
-
-        dict.__setitem__(self, key, value_dict)
+    def __delitem__(self, key: str) -> None:
+        self.storage.__dict__.__delitem__(key)
         self._save()
 
     @threadsafe_method
-    def __delitem__(self, key: str):
-        dict.__delitem__(self, key)
-        self._save()
+    def __contains__(self, key: str) -> bool:
+        self._load()
+        return self.storage.__dict__.__contains__(key)
 
     @threadsafe_method
-    def clear(self):
-        dict.clear(self)
+    def clear(self) -> None:
+        self.storage.__dict__.clear()
+        self._save()
 
     def _save(self) -> None:
         with open(self.path, "w+", encoding="utf-8") as file_stream:
-            json.dump(self, file_stream, ensure_ascii=False)
+            file_stream.write(self.storage.json())
 
     def _load(self) -> None:
-        if os.stat(self.path).st_size == 0:
-            return
-        with open(self.path, "r", encoding="utf-8") as file_stream:
-            saved_values = json.load(file_stream)
-        for key, value in saved_values.items():
-            if key not in self:
-                self[key] = value
+        if not os.path.isfile(self.path) or os.stat(self.path).st_size == 0:
+            self.storage = SerializeableStorage()
+            self._save()
+        else:
+            with open(self.path, "r", encoding="utf-8") as file_stream:
+                self.storage = SerializeableStorage.parse_raw(file_stream.read())

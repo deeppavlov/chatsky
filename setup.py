@@ -34,7 +34,7 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 setup(
     name="df_db_connector",
-    version="0.1",
+    version="0.1.2",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -67,7 +67,7 @@ setup(
     extras_require={
         "redis": ["redis>=4.1.2"],
         "mongodb": ["pymongo>=4.0.2", "bson>=0.5.10"],
-        "postgresql": ["sqlalchemy>=1.4.27", "psycopg2>=2.9.2"],
+        "postgresql": ["sqlalchemy>=1.4.27", "psycopg2-binary>=2.9.2"],
         "mysql": ["sqlalchemy>=1.4.27", "pymysql>=1.0.2", "cryptography-36.0.2"],
         "sqlite": ["sqlalchemy>=1.4.27"]
     },

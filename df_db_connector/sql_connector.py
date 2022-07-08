@@ -23,6 +23,8 @@ postgres_available = sqlite_available = mysql_available = False
 try:
     import psycopg2
 
+    _ = psycopg2
+
     postgres_available = True
 except (ImportError, ModuleNotFoundError):
     pass
@@ -30,12 +32,16 @@ except (ImportError, ModuleNotFoundError):
 try:
     import pymysql
 
+    _ = pymysql
+
     mysql_available = True
 except (ImportError, ModuleNotFoundError):
     pass
 
 try:
     import sqlite3
+
+    _ = sqlite3
 
     sqlite_available = True
 except (ImportError, ModuleNotFoundError):

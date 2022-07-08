@@ -8,8 +8,8 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.6", "3.7", "3.8", "3.9"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        python-version: ["3.6", "3.7", "3.8", "3.9", "3.10"]
+        os: [ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
     env:
@@ -29,11 +29,9 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build images
-        if: matrix.os == 'ubuntu-latest'
         run: docker-compose -f $COMPOSE_FILE up -d
 
       - name: Check running containers
-        if: matrix.os == 'ubuntu-latest'
         run: docker ps -a
 
       - name: set up python ${{ matrix.python-version }}
@@ -43,21 +41,11 @@ jobs:
 
       - name: install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -r requirements_dev.txt
-          python -m pip install -e .
-          python -m pip install -r requirements_test.txt
+          make venv
 
       - name: build coverage ubuntu
-        if: matrix.os == 'ubuntu-latest'
         run: |
-          python -m pytest --cov-fail-under=80 --cache-clear --tb=long -vv --cov=df_db_connector tests/ 2>&1 | tee pytest-coverage.txt
+          make test
 
-      - name: build coverage non-linux
-        if: matrix.os != 'ubuntu-latest'
-        run: |
-          python -m pytest --cache-clear --tb=long -vv --cov=df_db_connector tests/ 2>&1 | tee pytest-coverage.txt
-      
       - name: stop containers
-        if: matrix.os == 'ubuntu-latest'
         run: docker-compose stop

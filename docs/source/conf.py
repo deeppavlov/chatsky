@@ -28,7 +28,7 @@ author = "Denis Kuznetsov, Daniil Ignatiev"
 >>>>>>> fa838af22a5fcee40f402e5499aebe03f7b7b980
 
 # The full version, including alpha/beta/rc tags
-release = "0.1"
+release = "0.1.2"
 
 
 # -- General configuration ---------------------------------------------------
