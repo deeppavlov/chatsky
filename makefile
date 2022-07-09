@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 VENV_PATH = venv
-VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_parser/__init__.py tests/test_df_parser.py
+VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_script_parser/__init__.py tests/test_df_script_parser.py
 CURRENT_VERSION = 0.1.0 
 
 help:
@@ -34,25 +34,25 @@ format: venv
 .PHONY: format
 
 lint: venv
-	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_parser/
+	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_script_parser/
 	@set -e && $(VENV_PATH)/bin/black --exclude="setup\.py|/examples/" --line-length=120 --check . || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
-	$(VENV_PATH)/bin/mypy df_parser/
+	$(VENV_PATH)/bin/mypy df_script_parser/
 
 .PHONY: lint
 
 test: venv
-	$(VENV_PATH)/bin/pytest --log-level=DEBUG --cov-report html --cov-report term --cov=df_parser tests/
+	$(VENV_PATH)/bin/pytest --log-level=DEBUG --cov-report html --cov-report term --cov=df_script_parser tests/
 .PHONY: test
 
 test_all: venv test lint
 .PHONY: test_all
 
 doc: venv
-	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_parser
+	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_script_parser
 	$(VENV_PATH)/bin/sphinx-build -M clean docs/source docs/build
 	$(VENV_PATH)/bin/sphinx-build -M html docs/source docs/build
 .PHONY: doc

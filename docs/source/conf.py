@@ -18,7 +18,7 @@ sys.path.insert(0, os.path.abspath("../.."))
 
 # -- Project information -----------------------------------------------------
 
-project = "Dialog Flow Parser"
+project = "Dialog Flow Script Parser"
 copyright = "Denis Kuznetsov"
 author = "Denis Kuznetsov"
 

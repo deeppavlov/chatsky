@@ -1,6 +1,6 @@
 ## Introduction
 We will be glad to receive your pull requests and issues for adding new features if you are missing something.
-We always look forward to your contributions to the Dialog Flow Parser. 
+We always look forward to your contributions to the Dialog Flow Script Parser. 
 
 ## Managing your workflow
 We use `make` as handy automation tool, which reads `makefile` to get specification for commands. `make` is a quite popular tool for building software. Usage signature of the make is `make COMMAND` if your environment supports make autocompletions you can use tab for example:

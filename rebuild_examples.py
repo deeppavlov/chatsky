@@ -1,6 +1,6 @@
 from pathlib import Path
 import shutil
-from df_parser.cli import py2yaml, yaml2py
+from df_script_parser.cli import py2yaml, yaml2py
 import logging
 
 logging.basicConfig(

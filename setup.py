@@ -34,7 +34,7 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 
 setup(
-    name="df_parser",
+    name="df_script_parser",
     version="0.1.0",
     description=description,
     long_description=long_description,
@@ -58,7 +58,7 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3 :: Only",
     ],
-    keywords=["chatbots", "Dialog Flow Parser"],  # Optional
+    keywords=["chatbots", "Dialog Flow Script Parser"],  # Optional
     packages=find_packages(where="."),  # Required
     include_package_data=True,
     python_requires=">=3.6, <4",
@@ -67,7 +67,7 @@ setup(
     tests_require=test_requirements,
     entry_points="""
     [console_scripts]
-    df_parser.py2yaml=df_parser:py2yaml_cli
-    df_parser.yaml2py=df_parser:yaml2py_cli
+    df_script_parser.py2yaml=df_script_parser:py2yaml_cli
+    df_script_parser.yaml2py=df_script_parser:yaml2py_cli
     """,
 )

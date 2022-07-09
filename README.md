@@ -1,35 +1,35 @@
 
-# Dialog Flow Parser
+# Dialog Flow Script Parser
 
-**Dialog Flow Parser** is python module add-on for [Dialog Flow Framework](https://github.com/deepmipt/dialog_flow_framework), a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0.
+**Dialog Flow Script Parser** is python module add-on for [Dialog Flow Framework](https://github.com/deepmipt/dialog_flow_framework), a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0.
 
 
-[Dialog Flow Parser](../..) allows you to parse python files in order to extract inputs and dictionaries.
+[Dialog Flow Script Parser](../..) allows you to parse python files in order to extract inputs and dictionaries.
 [![Codestyle](https://github.com/deepmipt/dialog_flow_parser/actions/workflows/codestyle.yml/badge.svg)](https://github.com/deepmipt/dialog_flow_parser/actions)
 [![Tests](https://github.com/deepmipt/dialog_flow_parser/actions/workflows/test_coverage.yml/badge.svg)](https://github.com/deepmipt/dialog_flow_parser/actions)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](LICENSE)
 ![Python 3.6, 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.6%20%7C%203.7%20%7C%203.8%20%7C%203.9-green.svg)
 
 <!-- TODO: uncomment one of these to add badges to your project description -->
-<!-- [![Documentation Status](https://df_parser.readthedocs.io/en/stable/?badge=stable)]() See readthedocs.io -->
+<!-- [![Documentation Status](https://df_script_parser.readthedocs.io/en/stable/?badge=stable)]() See readthedocs.io -->
 <!-- [![Coverage Status]()]() See coveralls.io -->
-<!-- [![PyPI](https://img.shields.io/pypi/v/df_parser)](https://pypi.org/project/df_parser/) -->
-<!-- [![Downloads](https://pepy.tech/badge/df_parser)](https://pepy.tech/project/df_parser) -->
+<!-- [![PyPI](https://img.shields.io/pypi/v/df_script_parser)](https://pypi.org/project/df_script_parser/) -->
+<!-- [![Downloads](https://pepy.tech/badge/df_script_parser)](https://pepy.tech/project/df_script_parser) -->
 
 # Quick Start
 ## Installation
 ```bash
-pip install df_parser
+pip install df_script_parser
 ```
 
 ## py2yaml
 
 ```bash
-df_parser.py2yaml --help
+df_script_parser.py2yaml --help
 ```
 
 ```
-usage: df_parser.py2yaml [-h] INPUT_FILE OUTPUT_DIR
+usage: df_script_parser.py2yaml [-h] INPUT_FILE OUTPUT_DIR
 
 Parse python script INPUT_FILE into import.yaml containing information about imports used in the script,
 script.yaml containing a dictionary found inside the file.
@@ -67,11 +67,11 @@ The `OUTPUT_DIR` will contain:
 ## yaml2py
 
 ```bash
-df_parser.yaml2py --help
+df_script_parser.yaml2py --help
 ```
 
 ```
-usage: df_parser.yaml2py [-h] INPUT_DIR OUTPUT_FILE
+usage: df_script_parser.yaml2py [-h] INPUT_DIR OUTPUT_FILE
 
 Generate a python script OUTPUT_FILE from import.yaml and script.yaml inside the INPUT_DIR.
 
@@ -109,6 +109,6 @@ If a script has a tag `!fallback` or `!fallback:str` or `!fallback:py` the path 
 To get more advanced examples, take a look at [examples](examples) on GitHub.
 
 
-# Contributing to the Dialog Flow Parser
+# Contributing to the Dialog Flow Script Parser
 
 Please refer to [CONTRIBUTING.md](CONTRIBUTING.md).

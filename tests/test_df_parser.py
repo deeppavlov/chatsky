@@ -1,9 +1,9 @@
-from df_parser import __version__
+from df_script_parser import __version__
 import pytest
 from pathlib import Path
-from df_parser import py2yaml, yaml2py
-from df_parser.dumpers_loaders import pp
-from df_parser.processors import devnull
+from df_script_parser import py2yaml, yaml2py
+from df_script_parser.dumpers_loaders import pp
+from df_script_parser.processors import devnull
 
 
 def test_version():
