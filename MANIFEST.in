@@ -1,0 +1,14 @@
+include CONTRIBUTING.md
+include LICENSE
+include README.md
+include requirements.txt
+include requirements_test.txt
+
+exclude makefile
+
+recursive-exclude tests *
+recursive-exclude examples *
+recursive-exclude * __pycache__
+recursive-exclude * *.py[co]
+
+recursive-exclude docs *.rst makefile

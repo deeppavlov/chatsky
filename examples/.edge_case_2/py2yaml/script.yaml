@@ -1,0 +1,9 @@
+global_flow:
+  !fallback start_label:
+    '1':
+    - '1'
+    - '2'
+!start:str global_flow:
+  '2':
+  - '1'
+  - !str 2
