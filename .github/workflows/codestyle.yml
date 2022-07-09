@@ -1,0 +1,31 @@
+name: codestyle
+
+on: [push]
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: install dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              python -m pip install --upgrade pip
+              if [ -f requirements_test.txt ]; then pip install -r requirements_test.txt; fi
+          else
+              make venv
+          fi
+
+      - name: run codestyle
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              black --line-length=120 --exclude="setup\.py" --check .
+          else
+              make lint
+          fi
