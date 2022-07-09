@@ -33,7 +33,7 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 
 setup(
-    name="Dialog Flow Slots",
+    name="df_slots",
     version="0.1.0",
     description=description,
     long_description=long_description,
