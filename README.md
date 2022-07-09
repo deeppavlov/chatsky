@@ -19,7 +19,7 @@
 # Quick Start
 ## Installation
 ```bash
-pip install Dialog Flow Slots
+pip install df_slots
 ```
 
 ## Basic example
