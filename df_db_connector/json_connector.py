@@ -29,6 +29,7 @@ class JSONConnector(DBConnector):
     path: str
         Target file URI. Example: 'json://file.json'
     """
+
     def __init__(self, path: str):
         DBConnector.__init__(self, path)
 
