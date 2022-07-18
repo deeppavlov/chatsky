@@ -3,13 +3,10 @@ shelve_connector
 ---------------------------
 Provides the shelve-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
 """
-import os
 import pickle
 from shelve import DbfilenameShelf
 
-from df_engine.core import Context
-
-from .db_connector import DBConnector, threadsafe_method
+from .db_connector import DBConnector
 
 
 class ShelveConnector(DbfilenameShelf, DBConnector):

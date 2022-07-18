@@ -25,7 +25,11 @@ venv:
 	$(VENV_PATH)/bin/pip install -e . ;
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
 	$(VENV_PATH)/bin/pip install -r requirements_test.txt ;
+	
+	
+docker_up:
 	docker-compose up -d
+.PHONY: docker_up
 
 format: venv
 	$(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 .
@@ -41,11 +45,11 @@ lint: venv
 
 .PHONY: lint
 
-test: venv
-	$(VENV_PATH)/bin/pytest --cov-report html --cov-report term --cov=df_db_connector tests/
+test: docker_up venv
+	source .env && $(VENV_PATH)/bin/pytest --log-level=DEBUG --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
 .PHONY: test
 
-test_all: venv test lint
+test_all: venv test lint 
 .PHONY: test_all
 
 doc: venv

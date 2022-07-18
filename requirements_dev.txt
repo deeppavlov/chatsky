@@ -10,3 +10,4 @@ redis>=4.1.2
 pymongo>=4.0.2
 bson>=0.5.10
 cryptography>=36.0.2
+sqlalchemy>=1.4.27
