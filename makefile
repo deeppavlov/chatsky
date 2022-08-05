@@ -46,7 +46,7 @@ lint: venv
 .PHONY: lint
 
 test: docker_up venv
-	source .env && $(VENV_PATH)/bin/pytest --log-level=DEBUG --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
+	for i in `cat .env_file` ;do export $i ; done && $(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
 .PHONY: test
 
 test_all: venv test lint 

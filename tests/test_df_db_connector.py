@@ -15,7 +15,7 @@ from df_db_connector.mongo_connector import MongoConnector, mongo_available
 from df_db_connector import connector_factory
 
 
-def ping_localhost(port: int, timeout=3):
+def ping_localhost(port: int, timeout=60):
     try:
         socket.setdefaulttimeout(timeout)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
@@ -107,7 +107,11 @@ def test_redis(testing_context, testing_telegram_id):
 @pytest.mark.skipif(postgres_available == False, reason="Postgres dependencies missing")
 def test_postgres(testing_context, testing_telegram_id):
     connector_instance = SQLConnector(
-        "postgresql://{}:{}@localhost:5432/{}".format(os.getenv("PG_USERNAME"), os.getenv("PG_PASSWORD"), "test")
+        "postgresql://{}:{}@localhost:5432/{}".format(
+            os.getenv("POSTGRES_USERNAME"), 
+            os.getenv("POSTGRES_PASSWORD"), 
+            "test",
+            )
     )
     generic_test(connector_instance, testing_context, testing_telegram_id)
 
