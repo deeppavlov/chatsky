@@ -4,16 +4,12 @@ services:
     env_file: [.env_file]
     image: mysql:latest
     restart: unless-stopped
-    environment:
-      MYSQL_DATABASE: test
     ports:
       - '3307:3306'
   psql:
     env_file: [.env_file]
     image: postgres:latest
     restart: unless-stopped
-    environment:
-      POSTGRES_DB: test
     ports:
       - '5432:5432'
   redis:

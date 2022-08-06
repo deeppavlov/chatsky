@@ -1,7 +1,7 @@
 SHELL = /bin/bash
 
 VENV_PATH = venv
-VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_db_connector/__init__.py
+VERSIONING_FILES = setup.py makefile docs/source/conf.py df_db_connector/__init__.py
 CURRENT_VERSION = 0.1.2 
 
 help:
@@ -46,7 +46,7 @@ lint: venv
 .PHONY: lint
 
 test: docker_up venv
-	for i in `cat .env_file` ;do export $i ; done && $(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
+	$(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
 .PHONY: test
 
 test_all: venv test lint 
