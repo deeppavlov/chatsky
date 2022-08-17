@@ -5,23 +5,23 @@ services:
     image: mysql:latest
     restart: unless-stopped
     ports:
-      - '3307:3306'
+      - 3307:3306
   psql:
     env_file: [.env_file]
     image: postgres:latest
     restart: unless-stopped
     ports:
-      - '5432:5432'
+      - 5432:5432
   redis:
     env_file: [.env_file]
-    image: redis
+    image: redis:latest
     restart: unless-stopped
     command: --requirepass pass
     ports:
-      - '6379:6379'
+      - 6379:6379
   mongo:
     env_file: [.env_file]
     image: mongo:latest
     restart: unless-stopped
     ports:
-      - '27017:27017'
+      - 27017:27017
