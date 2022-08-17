@@ -29,9 +29,12 @@ venv:
 	
 docker_up:
 	docker-compose up -d
-	# while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	# while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
-.PHONY: docker_up
+.PHONY: docker_up	
+	
+wait_db: docker_up
+	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
+	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
+.PHONY: wait_db
 
 format: venv
 	$(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 .
@@ -47,11 +50,11 @@ lint: venv
 
 .PHONY: lint
 
-test: docker_up venv
+test: venv
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
 .PHONY: test
 
-test_all: venv test lint 
+test_all: venv wait_db test lint 
 .PHONY: test_all
 
 doc: venv
