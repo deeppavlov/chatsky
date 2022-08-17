@@ -39,7 +39,7 @@ setup(
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/deepmipt/dialog_flow_db_connector",
-    author="Denis Kuznetsov",
+    author="Denis Kuznetsov, Daniil Ignatiev",
     author_email="kuznetsov.den.p@gmail.com",
     classifiers=[  # Optional
         #   3 - Alpha
@@ -61,12 +61,14 @@ setup(
     packages=find_packages(where="."),  # Required
     include_package_data=True,
     python_requires=">=3.5, <4",
-    install_requires=requirements,  # Optional
+    install_requires=requirements,
     test_suite="tests",
     tests_require=test_requirements,
     extras_require={
+        "redis": ["redis>=4.1.2"],
+        "mongodb": ["pymongo>=4.0.2", "bson>=0.5.10"],
         "postgresql": ["sqlalchemy>=1.4.27", "psycopg2-binary>=2.9.2"],
         "mysql": ["sqlalchemy>=1.4.27", "pymysql>=1.0.2", "cryptography-36.0.2"],
-        "sqlite": ["sqlalchemy>=1.4.27"],
+        "sqlite": ["sqlalchemy>=1.4.27"]
     },
 )

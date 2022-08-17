@@ -6,6 +6,8 @@
 [Dialog Flow DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) allows you to to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
 
 Currently, the supported options are: 
+* [Redis](https://redis.io/)
+* [MongoDB](https://www.mongodb.com/)
 * [Postgresql](https://www.postgresql.org/)
 * [MySQL](https://www.mysql.com/)
 * [Sqlite](https://www.sqlite.org/index.html)
@@ -29,6 +31,8 @@ pip install df-db-connector
 
 Please, note that if you are going to use one of the database backends, you will have to specify an extra or install the corresponding requirements yourself.
 ```bash
+pip install df-db-connector[redis]
+pip install df-db-connector[mongodb]
 pip install df-db-connector[mysql]
 pip install df-db-connector[postgresql]
 pip install df-db-connector[sqlite]
