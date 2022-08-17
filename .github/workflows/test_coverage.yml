@@ -29,7 +29,7 @@ jobs:
       - uses: actions/checkout@v2
 
       - name: Build images
-        run: docker-compose -f $COMPOSE_FILE up -d
+        run: make docker_up
 
       - name: Check running containers
         run: docker ps -a
