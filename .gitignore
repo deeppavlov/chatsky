@@ -20,4 +20,3 @@ venv*
 .coverage
 .pytest_cache
 htmlcov
-.env_make

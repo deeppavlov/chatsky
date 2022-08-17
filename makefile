@@ -46,7 +46,7 @@ lint: venv
 .PHONY: lint
 
 test: docker_up venv
-	bash -c "cat .env_file | sed 's/=/=/' | sed 's/^/export /' > .env_make" && source .env_make && rm .env_make && $(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
 .PHONY: test
 
 test_all: venv test lint 
