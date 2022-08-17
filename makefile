@@ -29,8 +29,8 @@ venv:
 	
 docker_up:
 	docker-compose up -d
-	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
+	while ! docker-compose exec psql pg_isready; do sleep 1; done
+	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done
 .PHONY: docker_up
 
 format: venv
