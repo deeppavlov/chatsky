@@ -13,23 +13,14 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     env:
-      COMPOSE_FILE: docker-compose.yml
       DOCKER_USER: ${{ secrets.DOCKER_USER }}
       DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
-      MYSQL_USERNAME: root
-      MYSQL_PASSWORD: ${{ secrets.MYSQL_PASSWORD }}
-      MYSQL_DATABASE: test
-      PG_USERNAME: pguser
-      PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
-      REDIS_PASSWORD: ${{ secrets.REDIS_PASSWORD }}
-      MONGO_INITDB_ROOT_USERNAME: admin
-      MONGO_INITDB_ROOT_PASSWORD: ${{ secrets.MONGO_PASSWORD }}
 
     steps:
       - uses: actions/checkout@v2
 
       - name: Build images
-        run: docker-compose -f $COMPOSE_FILE up -d
+        run: make docker_up
 
       - name: Check running containers
         run: docker ps -a
@@ -47,5 +38,5 @@ jobs:
         run: |
           make test
 
-      - name: stop containers
-        run: docker-compose stop
+      - name: down containers
+        run: docker-compose down

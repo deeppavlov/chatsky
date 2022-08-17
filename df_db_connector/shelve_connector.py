@@ -3,7 +3,6 @@ shelve_connector
 ---------------------------
 Provides the shelve-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
 """
-import os
 import pickle
 from shelve import DbfilenameShelf
 
