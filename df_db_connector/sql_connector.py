@@ -7,6 +7,7 @@ sql_connector
 
 """
 import importlib
+import json
 
 from .db_connector import DBConnector, threadsafe_method
 from df_engine.core.context import Context
@@ -107,11 +108,8 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
-        if isinstance(value, Context):
-            value = value.dict()
-
-        if not isinstance(value, dict):
-            raise TypeError(f"The saved value should be a dict or a dict-serializeable item, not {type(value)}")
+        value = value if isinstance(value, Context) else Context(value)
+        value = json.loads(value.json())
 
         insert_stmt = insert(self.table).values(id=str(key), context=value)
         update_stmt = self._get_update_stmt(insert_stmt)

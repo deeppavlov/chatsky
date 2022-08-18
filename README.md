@@ -36,6 +36,7 @@ pip install df-db-connector[mongodb]
 pip install df-db-connector[mysql]
 pip install df-db-connector[postgresql]
 pip install df-db-connector[sqlite]
+pip install df-db-connector[ydb]
 ```
 
 ## Basic example

@@ -39,13 +39,8 @@ class RedisConnector(DBConnector):
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
-        if isinstance(value, Context):
-            value = value.dict()
-
-        if not isinstance(value, dict):
-            raise TypeError(f"The saved value should be a dict or a dict-serializeable item, not {type(value)}")
-
-        self._redis.set(key, json.dumps(value, ensure_ascii=False))
+        value = value if isinstance(value, Context) else Context(value)
+        self._redis.set(key, value.json())
 
     @threadsafe_method
     def __getitem__(self, key: str) -> Context:

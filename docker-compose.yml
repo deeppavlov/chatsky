@@ -25,3 +25,12 @@ services:
     restart: unless-stopped
     ports:
       - 27017:27017
+  ydb:
+    env_file: [.env_file]
+    image: cr.yandex/yc/yandex-docker-local-ydb:latest
+    restart: unless-stopped
+    ports:
+      - 8765:8765
+      # - 2135:2135
+      - 2136:2136
+    hostname: localhost

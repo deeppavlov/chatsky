@@ -12,6 +12,9 @@ try:
 except ImportError:
     mongo_available = False
 
+import uuid
+import json
+
 from .db_connector import DBConnector, threadsafe_method
 from df_engine.core.context import Context
 
@@ -39,21 +42,20 @@ class MongoConnector(DBConnector):
 
     @staticmethod
     def _adjust_key(key: str):
-        """Convert a 9-digit telegram user id to a 24-digit mongo id"""
-        new_key = key + "0" * (24 - len(key))
+        """Convert a n-digit context id to a 24-digit mongo id"""
+        new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
+        new_key = (new_key * (24 // len(new_key) + 1))[:24]
         assert len(new_key) == 24
         return {"_id": ObjectId(new_key)}
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
         new_key = self._adjust_key(key)
-        value_dict = value.dict() if isinstance(value, Context) else value
+        value = value if isinstance(value, Context) else Context(value)
+        value = json.loads(value.json())
 
-        if not isinstance(value_dict, dict):
-            raise TypeError(f"The saved value should be a dict or a dict-serializeable item, not {type(value_dict)}")
-
-        value_dict.update(new_key)
-        self.collection.replace_one(new_key, value_dict, upsert=True)
+        value.update(new_key)
+        self.collection.replace_one(new_key, value, upsert=True)
 
     @threadsafe_method
     def __getitem__(self, key: str) -> Context:
@@ -61,7 +63,8 @@ class MongoConnector(DBConnector):
         value = self.collection.find_one(key)
         if value:
             value.pop("_id")
-            return Context.cast(value)
+            value = Context.cast(value)
+            return value
         raise KeyError
 
     @threadsafe_method

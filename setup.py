@@ -69,6 +69,7 @@ setup(
         "mongodb": ["pymongo>=4.0.2", "bson>=0.5.10"],
         "postgresql": ["sqlalchemy>=1.4.27", "psycopg2-binary>=2.9.2"],
         "mysql": ["sqlalchemy>=1.4.27", "pymysql>=1.0.2", "cryptography-36.0.2"],
-        "sqlite": ["sqlalchemy>=1.4.27"]
+        "sqlite": ["sqlalchemy>=1.4.27"],
+        "ydb": ["ydb>=2.5.0"],
     },
 )
