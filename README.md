@@ -6,11 +6,15 @@
 [Dialog Flow DB Connector](https://github.com/deepmipt/dialog_flow_db_connector) allows you to to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
 
 Currently, the supported options are: 
-* [Redis](https://redis.io/)
-* [MongoDB](https://www.mongodb.com/)
+* [json](https://www.json.org/json-en.html)
+* [pickle](https://docs.python.org/3/library/pickle.html)
+* [shelve](https://docs.python.org/3/library/shelve.html)
+* [Sqlite](https://www.sqlite.org/index.html)
 * [Postgresql](https://www.postgresql.org/)
 * [MySQL](https://www.mysql.com/)
-* [Sqlite](https://www.sqlite.org/index.html)
+* [MongoDB](https://www.mongodb.com/)
+* [Redis](https://redis.io/)
+* [YDB](https://ydb.tech/)
 
 Aside from this, we offer some interfaces for saving data to your local file system. These are not meant to be used in production, but can be helpful for prototyping your application.
 
