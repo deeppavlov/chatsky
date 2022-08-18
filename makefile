@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py df_db_connector/__init__.py
-CURRENT_VERSION = 0.1.2
+CURRENT_VERSION = 0.2.0
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
