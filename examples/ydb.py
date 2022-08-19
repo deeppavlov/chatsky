@@ -19,7 +19,10 @@ actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_labe
 ###### or use local-ydb with variables from .env_file
 
 # db_uri="grpc://localhost:2136/local"
-db_uri = f'{os.getenv("YDB_ENDPOINT")}{os.getenv("YDB_DATABASE")}'
+db_uri = "{}{}".format(
+    os.getenv("YDB_ENDPOINT"),
+    os.getenv("YDB_DATABASE"),
+)
 db = connector_factory(db_uri)
 
 

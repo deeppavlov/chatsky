@@ -1,7 +1,7 @@
 """
 mongo_connector
 ---------------------------
-Provides the mongo-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
+Provides the mongo-based version of the :py:class:`~df_db_connector.db_connector.DBConnector`.
 """
 
 try:
@@ -12,16 +12,17 @@ try:
 except ImportError:
     mongo_available = False
 
-import uuid
 import json
 
-from .db_connector import DBConnector, threadsafe_method
 from df_engine.core.context import Context
+
+from .db_connector import DBConnector, threadsafe_method
+from .protocol import get_protocol_install_suggestion
 
 
 class MongoConnector(DBConnector):
     """
-    Implements :py:class:`~df_db.connector.db_connector.DBConnector` with `mongodb` as the database backend.
+    Implements :py:class:`~df_db_connector.db_connector.DBConnector` with `mongodb` as the database backend.
 
     Parameters
     -----------
@@ -35,7 +36,8 @@ class MongoConnector(DBConnector):
     def __init__(self, path: str, collection: str = "context_collection"):
         super(MongoConnector, self).__init__(path)
         if not mongo_available:
-            raise ImportError("`pymongo` package is missing.")
+            install_suggestion = get_protocol_install_suggestion("pymongo")
+            raise ImportError("`pymongo` package is missing.\n" + install_suggestion)
         self._mongo = MongoClient(self.full_path)
         db = self._mongo.get_default_database()
         self.collection = db[collection]

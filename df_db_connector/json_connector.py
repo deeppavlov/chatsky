@@ -1,7 +1,7 @@
 """
 json_connector
 ---------------------------
-Provides the json-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
+Provides the json-based version of the :py:class:`~df_db_connector.db_connector.DBConnector`.
 """
 import os
 
@@ -21,7 +21,7 @@ class SerializeableStorage(BaseModel, extra=Extra.allow):
 
 class JSONConnector(DBConnector):
     """
-    Implements :py:class:`~df_db.connector.db_connector.DBConnector` with `json` as the storage format.
+    Implements :py:class:`~df_db_connector.db_connector.DBConnector` with `json` as the storage format.
 
     Parameters
     -----------
@@ -36,6 +36,7 @@ class JSONConnector(DBConnector):
         self._load()
 
     def get(self, key: str, default=None):
+        key = str(key)
         try:
             return self.__getitem__(key)
         except KeyError:
@@ -47,22 +48,26 @@ class JSONConnector(DBConnector):
 
     @threadsafe_method
     def __setitem__(self, key: str, item: Context) -> None:
+        key = str(key)
         self.storage.__dict__.__setitem__(key, item)
         self._save()
 
     @threadsafe_method
     def __getitem__(self, key: str) -> Context:
+        key = str(key)
         self._load()
         value = self.storage.__dict__.__getitem__(key)
         return Context.cast(value)
 
     @threadsafe_method
     def __delitem__(self, key: str) -> None:
+        key = str(key)
         self.storage.__dict__.__delitem__(key)
         self._save()
 
     @threadsafe_method
     def __contains__(self, key: str) -> bool:
+        key = str(key)
         self._load()
         return self.storage.__dict__.__contains__(key)
 

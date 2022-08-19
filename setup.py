@@ -10,6 +10,12 @@ except ImportError:
     from distutils.core import setup
 from setuptools import find_packages
 
+import json
+
+
+PROTOCOLS = json.load(pathlib.Path("df_db_connector/protocols.json").open())
+extras_require = {proc["slug"]: proc["extras_require"] for proc in PROTOCOLS.values() if proc["extras_require"]}
+
 
 def parse_requirements(filename):
     """load requirements from a pip requirements file"""
@@ -34,7 +40,7 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 setup(
     name="df_db_connector",
-    version="0.2.1",
+    version="0.3.0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -64,12 +70,5 @@ setup(
     install_requires=requirements,
     test_suite="tests",
     tests_require=test_requirements,
-    extras_require={
-        "redis": ["redis>=4.1.2"],
-        "mongodb": ["pymongo>=4.0.2", "bson>=0.5.10"],
-        "postgresql": ["sqlalchemy>=1.4.27", "psycopg2-binary>=2.9.2"],
-        "mysql": ["sqlalchemy>=1.4.27", "pymysql>=1.0.2", "cryptography-36.0.2"],
-        "sqlite": ["sqlalchemy>=1.4.27"],
-        "ydb": ["ydb>=2.5.0"],
-    },
+    extras_require=extras_require,
 )

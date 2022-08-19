@@ -1,7 +1,6 @@
 import logging
 import random
 
-from df_engine import responses as rsp
 from df_engine import conditions as cnd
 from df_engine.core import Context, Actor
 from df_engine.core.keywords import RESPONSE, TRANSITIONS
@@ -17,7 +16,7 @@ script = {
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
+            RESPONSE: "Hi, what is up?",
             TRANSITIONS: {"node2": cnd.exact_match("alright")},
         },
         "node2": {
@@ -45,5 +44,5 @@ def run_actor(in_request: str, actor: Actor, db: DBConnector, user_id=str(random
     ctx = actor(ctx)
     out_response = ctx.last_response
     db[user_id] = ctx
-    logging.info(f"in_request={in_request} -> {out_response}")
+    logger.info(f"in_request={in_request} -> {out_response}")
     return out_response, ctx

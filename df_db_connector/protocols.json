@@ -1,0 +1,90 @@
+{
+    "shelve": {
+        "module": "shelve_connector",
+        "class": "ShelveConnector",
+        "slug": "shelve",
+        "extras_require": [],
+        "uri_example": "shelve://path_to_the_file/file_name"
+    },
+    "json": {
+        "module": "json_connector",
+        "class": "JSONConnector",
+        "slug": "json",
+        "extras_require": [],
+        "uri_example": "json://path_to_the_file/file_name"
+    },
+    "pickle": {
+        "module": "pickle_connector",
+        "class": "PickleConnector",
+        "slug": "pickle",
+        "extras_require": [],
+        "uri_example": "pickle://path_to_the_file/file_name"
+    },
+    "sqlite": {
+        "module": "sql_connector",
+        "class": "SQLConnector",
+        "slug": "sqlite",
+        "extras_require": [
+            "sqlalchemy>=1.4.27"
+        ],
+        "uri_example": "sqlite://path_to_the_file/file_name"
+    },
+    "redis": {
+        "module": "redis_connector",
+        "class": "RedisConnector",
+        "slug": "redis",
+        "extras_require": [
+            "redis>=4.1.2"
+        ],
+        "uri_example": "redis://:pass@localhost:6379/0"
+    },
+    "mongodb": {
+        "module": "mongo_connector",
+        "class": "MongoConnector",
+        "slug": "mongodb",
+        "extras_require": [
+            "pymongo>=4.0.2",
+            "bson>=0.5.10"
+        ],
+        "uri_example": "mongodb://admin:pass@localhost:27017/admin"
+    },
+    "mysql": {
+        "module": "sql_connector",
+        "class": "SQLConnector",
+        "slug": "mysql",
+        "extras_require": [
+            "sqlalchemy>=1.4.27",
+            "pymysql>=1.0.2",
+            "cryptography-36.0.2"
+        ],
+        "uri_example": "mysql+pymysql://root:pass@localhost:3307/test"
+    },
+    "postgresql": {
+        "module": "sql_connector",
+        "class": "SQLConnector",
+        "slug": "postgresql",
+        "extras_require": [
+            "sqlalchemy>=1.4.27",
+            "psycopg2-binary>=2.9.2"
+        ],
+        "uri_example": "postgresql://postgres:pass@localhost:5432/test"
+    },
+    "grpc": {
+        "module": "ydb_connector",
+        "class": "YDBConnector",
+        "slug": "ydb",
+        "extras_require": [
+            "ydb>=2.5.0"
+        ],
+        "uri_example": "grpc://localhost:2136/local"
+    },
+    "grpcs": {
+        "module": "ydb_connector",
+        "class": "YDBConnector",
+        "slug": "ydb",
+        "extras_require": [
+            "ydb>=2.5.0"
+        ],
+        "uri_example": "grpcs://localhost:2135/local"
+    }
+}

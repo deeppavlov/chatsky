@@ -3,6 +3,7 @@ include LICENSE
 include README.md
 include requirements.txt
 include requirements_test.txt
+include df_db_connector/protocols.json
 
 recursive-include tests *
 recursive-exclude * __pycache__

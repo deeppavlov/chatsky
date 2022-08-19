@@ -2,15 +2,17 @@
 sql_connector
 ---------------------------
 
-| Provides the sql-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
+| Provides the sql-based version of the :py:class:`~df_db_connector.db_connector.DBConnector`.
 | You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 
 """
 import importlib
 import json
 
-from .db_connector import DBConnector, threadsafe_method
 from df_engine.core.context import Context
+
+from .db_connector import DBConnector, threadsafe_method
+from .protocol import get_protocol_install_suggestion
 
 try:
     from sqlalchemy import create_engine, Table, MetaData, Column, JSON, String, inspect, select, delete, func
@@ -65,7 +67,7 @@ def import_insert_for_dialect(dialect: str):
 
 class SQLConnector(DBConnector):
     """
-    | Sql-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
+    | Sql-based version of the :py:class:`~df_db_connector.db_connector.DBConnector`.
     | Compatible with MySQL, Postgresql, Sqlite.
 
     Parameters
@@ -108,6 +110,7 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
+        key = str(key)
         value = value if isinstance(value, Context) else Context(value)
         value = json.loads(value.json())
 
@@ -119,6 +122,7 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def __getitem__(self, key: str) -> Context:
+        key = str(key)
         stmt = select(self.table.c.context).where(self.table.c.id == key)
         with self.engine.connect() as conn:
             result = conn.execute(stmt)
@@ -129,12 +133,14 @@ class SQLConnector(DBConnector):
 
     @threadsafe_method
     def __delitem__(self, key: str) -> None:
+        key = str(key)
         stmt = delete(self.table).where(self.table.c.id == key)
         with self.engine.connect() as conn:
             conn.execute(stmt)
 
     @threadsafe_method
     def __contains__(self, key: str) -> bool:
+        key = str(key)
         stmt = select(self.table.c.context).where(self.table.c.id == key)
         with self.engine.connect() as conn:
             result = conn.execute(stmt)
@@ -167,8 +173,11 @@ class SQLConnector(DBConnector):
     def _check_availability(self, custom_driver: bool) -> None:
         if not custom_driver:
             if self.full_path.startswith("postgresql") and not postgres_available:
-                raise ImportError("Packages `sqlalchemy` and/or `psycopg2-binary` are missing.")
+                install_suggestion = get_protocol_install_suggestion("postgresql")
+                raise ImportError("Packages `sqlalchemy` and/or `psycopg2-binary` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("mysql") and not mysql_available:
-                raise ImportError("Packages `sqlalchemy` and/or `pymysql` are missing.")
+                install_suggestion = get_protocol_install_suggestion("mysql")
+                raise ImportError("Packages `sqlalchemy` and/or `pymysql` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("sqlite") and not sqlite_available:
-                raise ImportError("Package `sqlite3` is missing")
+                install_suggestion = get_protocol_install_suggestion("sqlite")
+                raise ImportError("Package `sqlalchemy` and/or `sqlite3` is missing.\n" + install_suggestion)

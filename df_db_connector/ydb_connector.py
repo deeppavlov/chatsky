@@ -2,16 +2,18 @@
 ydb_connector
 ---------------------------
 
-| Provides the version of the :py:class:`~df_db.connector.db_connector.DBConnector` for YDB.
+| Provides the version of the :py:class:`~df_db_connector.db_connector.DBConnector` for YDB.
 
 """
-from .db_connector import DBConnector, threadsafe_method
-from df_engine.core.context import Context
 
 import os
-import json
 from urllib.parse import urlsplit
-from uuid import UUID
+
+
+from df_engine.core.context import Context
+
+from .db_connector import DBConnector, threadsafe_method
+from .protocol import get_protocol_install_suggestion
 
 try:
     import ydb
@@ -21,16 +23,9 @@ except ImportError:
     ydb_available = False
 
 
-class UUIDEncoder(json.JSONEncoder):
-    def default(self, obj):
-        if isinstance(obj, UUID):
-            return str(obj)
-        return json.JSONEncoder.default(self, obj)
-
-
 class YDBConnector(DBConnector):
     """
-    | Version of the :py:class:`~df_db.connector.db_connector.DBConnector` for YDB.
+    | Version of the :py:class:`~df_db_connector.db_connector.DBConnector` for YDB.
 
     Parameters
     -----------
@@ -46,10 +41,11 @@ class YDBConnector(DBConnector):
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):
         super(YDBConnector, self).__init__(path)
         protocol, netloc, self.database, _, _ = urlsplit(path)
-        self.endpoint = f"{protocol}://{netloc}"
+        self.endpoint = "{}://{}".format(protocol, netloc)
         self.table_name = table_name
         if not ydb_available:
-            raise ImportError("`ydb` package is missing.")
+            install_suggestion = get_protocol_install_suggestion("grpc")
+            raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
         self.driver = ydb.Driver(endpoint=self.endpoint, database=self.database)
         self.driver.wait(timeout=timeout, fail_fast=True)

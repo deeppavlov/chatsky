@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py df_db_connector/__init__.py
-CURRENT_VERSION = 0.2.1
+CURRENT_VERSION = 0.3.0
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -50,7 +50,7 @@ lint: venv
 .PHONY: lint
 
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-report html --cov-report  term --cov=df_db_connector --log-cli-level=DEBUG tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-report html --cov-report term --cov=df_db_connector --log-cli-level=WARNING tests/
 .PHONY: test
 
 test_all: venv wait_db test lint 

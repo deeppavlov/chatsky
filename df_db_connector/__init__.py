@@ -3,7 +3,7 @@
 
 __author__ = "Denis Kuznetsov"
 __email__ = "kuznetosv.den.p@gmail.com"
-__version__ = "0.2.1"
+__version__ = "0.3.0"
 
 import importlib
 
@@ -14,59 +14,7 @@ from .sql_connector import SQLConnector
 from .ydb_connector import YDBConnector
 from .redis_connector import RedisConnector
 from .mongo_connector import MongoConnector
-
-SUPPORTED_PROTOCOLS = {
-    "shelve": {
-        "module": "shelve_connector",
-        "class": "ShelveConnector",
-        "uri_example": "shelve://path_to_the_file/file_name",
-    },
-    "json": {
-        "module": "json_connector",
-        "class": "JSONConnector",
-        "uri_example": "json://path_to_the_file/file_name",
-    },
-    "pickle": {
-        "module": "pickle_connector",
-        "class": "PickleConnector",
-        "uri_example": "pickle://path_to_the_file/file_name",
-    },
-    "sqlite": {
-        "module": "sql_connector",
-        "class": "SQLConnector",
-        "uri_example": "sqlite://path_to_the_file/file_name",
-    },
-    "redis": {
-        "module": "redis_connector",
-        "class": "RedisConnector",
-        "uri_example": "redis://:pass@localhost:6379/0",
-    },
-    "mongodb": {
-        "module": "mongo_connector",
-        "class": "MongoConnector",
-        "uri_example": "mongodb://admin:pass@localhost:27017/admin",
-    },
-    "mysql": {
-        "module": "sql_connector",
-        "class": "SQLConnector",
-        "uri_example": "mysql+pymysql://root:pass@localhost:3307/test",
-    },
-    "postgresql": {
-        "module": "sql_connector",
-        "class": "SQLConnector",
-        "uri_example": "postgresql://postgres:pass@localhost:5432/test",
-    },
-    "grpc": {
-        "module": "ydb_connector",
-        "class": "YDBConnector",
-        "uri_example": "grpc://localhost:2136/local",
-    },
-    "grpcs": {
-        "module": "ydb_connector",
-        "class": "YDBConnector",
-        "uri_example": "grpcs://localhost:2135/local",
-    },
-}
+from .protocol import PROTOCOLS
 
 
 def connector_factory(path: str, **kwargs):
@@ -98,12 +46,12 @@ def connector_factory(path: str, **kwargs):
     if "sql" in prefix:
         prefix = prefix.split("+")[0]  # this takes care of alternative sql drivers
     assert (
-        prefix in SUPPORTED_PROTOCOLS
+        prefix in PROTOCOLS
     ), f"""
     URI path should be prefixed with one of the following:\n
-    {", ".join(SUPPORTED_PROTOCOLS.keys())}.\n
+    {", ".join(PROTOCOLS.keys())}.\n
     For more information, see the function doc:\n{connector_factory.__doc__}
     """
-    _class, module = SUPPORTED_PROTOCOLS[prefix]["class"], SUPPORTED_PROTOCOLS[prefix]["module"]
+    _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
     target_class = getattr(importlib.import_module(f".{module}", package="df_db_connector"), _class)
     return target_class(path, **kwargs)

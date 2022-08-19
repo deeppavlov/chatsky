@@ -1,7 +1,7 @@
 """
 pickle_connector
 ---------------------------
-Provides the pickle-based version of the :py:class:`~df_db.connector.db_connector.DBConnector`.
+Provides the pickle-based version of the :py:class:`~df_db_connector.db_connector.DBConnector`.
 """
 import pickle
 import os
@@ -12,7 +12,7 @@ from df_engine.core.context import Context
 
 class PickleConnector(DBConnector):
     """
-    Implements :py:class:`~df_db.connector.db_connector.DBConnector` with `pickle` as driver.
+    Implements :py:class:`~df_db_connector.db_connector.DBConnector` with `pickle` as driver.
 
     Parameters
     -----------

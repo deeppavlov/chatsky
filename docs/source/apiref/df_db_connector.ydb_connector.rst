@@ -1,7 +1,7 @@
-df\_db\_connector.sql\_connector module
+df\_db\_connector.ydb\_connector module
 =======================================
 
-.. automodule:: df_db_connector.sql_connector
+.. automodule:: df_db_connector.ydb_connector
    :members:
    :undoc-members:
    :show-inheritance:
