@@ -68,6 +68,7 @@ SUPPORTED_PROTOCOLS = {
     },
 }
 
+
 def connector_factory(path: str, **kwargs):
     """
     Use connector_factory to lazy import connector types and instantiate them.
