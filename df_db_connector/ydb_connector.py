@@ -255,7 +255,7 @@ class YDBConnector(DBConnector):
     def _create_table(self, pool, path, table_name):
         def callee(session):
             session.create_table(
-                os.path.join(path, table_name),
+                "/".join([path, table_name]),
                 ydb.TableDescription()
                 .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
                 .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
