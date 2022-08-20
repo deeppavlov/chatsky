@@ -40,7 +40,7 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 setup(
     name="df_db_connector",
-    version="0.3.0",
+    version="0.3.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
