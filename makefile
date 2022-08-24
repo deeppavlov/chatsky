@@ -41,6 +41,7 @@ format: venv
 .PHONY: format
 
 lint: venv
+	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_db_connector/
 	@set -e && $(VENV_PATH)/bin/black --exclude="setup\.py|venv\/" --line-length=120 --check . || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \

@@ -3,7 +3,7 @@ protocol
 ---------------------------
 | Base protocol code.
 | Protocols :py:data:`~df_db_connector.protocol.PROTOCOLS`.
-| A function is used for suggestion of installation: :py:func:`~df_db_connector.protocol.get_protocol_install_suggestion`
+| A func is used for suggestion of installation: :py:func:`~df_db_connector.protocol.get_protocol_install_suggestion`
 
 """
 import json
