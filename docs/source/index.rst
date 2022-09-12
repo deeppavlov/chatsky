@@ -17,7 +17,7 @@ Welcome to Dialog Flow Script Parser documentation!
    :maxdepth: 3
    :caption: Package Reference
 
-   apiref/*
+   apiref/df_script_parser
 
 Indices and tables
 ==================

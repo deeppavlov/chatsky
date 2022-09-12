@@ -1,0 +1,7 @@
+requirements: []
+namespaces:
+  main:
+    abc: !import abc
+    d: {}
+    c:
+      '1': d

@@ -1,7 +1,6 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pip
 import pathlib
 
 try:
@@ -35,11 +34,11 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 setup(
     name="df_script_parser",
-    version="0.1.0",
+    version="0.2.0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
-    url="https://github.com/deepmipt/dialog_flow_parser",
+    url="https://github.com/deeppavlovteam/dialog_flow_parser",
     author="Denis Kuznetsov",
     author_email="kuznetsov.den.p@gmail.com",
     classifiers=[  # Optional

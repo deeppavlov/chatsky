@@ -1,8 +1,9 @@
 SHELL = /bin/bash
 
+PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_script_parser/__init__.py tests/test_df_script_parser.py
-CURRENT_VERSION = 0.1.0 
+CURRENT_VERSION = 0.2.0 
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -20,8 +21,8 @@ help:
 
 venv:
 	echo "Start creating virtual environment";\
-	which python3;\
-	python3 -m venv $(VENV_PATH);\
+	which $(PYTHON);\
+	$(PYTHON) -m venv $(VENV_PATH);\
 	$(VENV_PATH)/bin/pip install --upgrade pip;
 	$(VENV_PATH)/bin/pip install -e . ;
 	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
