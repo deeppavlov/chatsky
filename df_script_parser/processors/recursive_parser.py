@@ -44,7 +44,26 @@ class RecursiveParser:
         self.start_label: tp.Optional[tp.Tuple[tp.Union[Python, String]]] = None
         self.fallback_label: tp.Optional[tp.Tuple[tp.Union[Python, String]]] = None
 
-    def get_object(self, request: Request) -> tp.Union[dict, Call]:
+    def resolve_name(
+        self,
+        name: tp.Union[Request, String, Python],
+    ) -> tp.Union[String, Python, dict, Call]:
+        """Try to resolve ``name``. Return ``name`` if not possible
+
+        :param name: Name to resolve
+        :type name: :py:class:`.String` | :py:class:`.Python`
+        :return:
+        """
+        if isinstance(name, Request):
+            return self.get_object(name)
+        try:
+            if isinstance(name, Python):
+                return self.get_object(Request.from_str(name.absolute_value))
+        except ResolutionError:
+            pass
+        return name
+
+    def get_object(self, request: Request) -> tp.Union[dict, Call, Python, String]:
         """Return an object requested in ``request``
 
         :param request: Request of an object
@@ -64,13 +83,22 @@ class RecursiveParser:
                 namespace = self.namespaces.get(potential_namespace)
                 if namespace is None:
                     raise NamespaceNotParsedError(f"Not found namespace {repr(potential_namespace)}, request={request}")
-                name = namespace.names.get(middle)
+                name: tp.Union[dict, Call, Python, String, None] = namespace.names.get(middle)
+                if isinstance(name, Python):
+                    name = self.get_object(Request.from_str(".".join([name.absolute_value, *map(repr, right)])))
+
+                # process indices
+                for index in request.indices:
+                    if isinstance(name, dict):
+                        resolved_names = {self.resolve_name(k): k for k in name.keys()}
+                        key = resolved_names.get(self.resolve_name(index))
+                        if key is None:
+                            raise ResolutionError(f"Key not found: '{key}', existing keys: {resolved_names}")
+                        name = name[key]
                 if name is None:
                     raise ObjectNotFoundError(
                         f"Not found {request.attributes[-1]} in {potential_namespace}, request={request}"
                     )
-                if isinstance(name, Python):
-                    name = self.get_object(Request.from_str(".".join([name.absolute_value, *map(repr, right)])))
                 return name
             except ResolutionError as error:
                 logging.debug("Name not found reason: %s", error)
@@ -130,11 +158,13 @@ class RecursiveParser:
             if not isinstance(value, dict):
                 raise ResolutionError(f"Object {value} is not a dict.")
 
-            if isinstance(key, Request):
-                key = Python("", repr(key))
-            if key not in value:
-                raise KeyNotFoundError(f"Not found {key} in {value}")
-            value = value[key]
+            resolved_names = {self.resolve_name(k): k for k in value.keys()}
+            resolved_key = self.resolve_name(key)
+            dict_key = resolved_names.get(resolved_key)
+
+            if dict_key is None:
+                raise KeyNotFoundError(f"Not found '{resolved_key}' in '{resolved_names.keys()}'")
+            value = value[dict_key]
         return value
 
     def check_actor_args(self, actor_args: dict):

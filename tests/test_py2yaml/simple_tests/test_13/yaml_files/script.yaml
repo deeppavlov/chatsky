@@ -1,0 +1,22 @@
+requirements:
+- df-engine==0.9.0
+namespaces:
+  main:
+    Actor: !from df_engine.core.actor Actor
+    kw: !from df_engine.core keywords
+    strs:
+      node: node
+    strings: strs
+    dicts:
+      '1':
+        strs["node"]:
+          kw.RESPONSE: hi
+    script:
+      flow: dicts[1]
+    actor: !call
+      name: Actor
+      args:
+        script: script
+        start_label:
+        - flow
+        - strings["node"]

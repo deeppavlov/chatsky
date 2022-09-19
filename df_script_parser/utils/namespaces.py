@@ -196,6 +196,7 @@ class Request:
         :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
             If a node cannot be represented as a request
         """
+        # raise RuntimeError(f"{evaluate(node)}")
         if len(node.slice) != 1:
             raise RequestParsingError(f"Subscript {evaluate(node)} has multiple slices.")
         index = node.slice[0].slice
