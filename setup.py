@@ -35,7 +35,7 @@ test_requirements = parse_requirements("requirements_test.txt")
 
 setup(
     name="df_runner",
-    version="0.1.2",
+    version="0.2.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",

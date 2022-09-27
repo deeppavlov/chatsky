@@ -1,8 +1,8 @@
 SHELL = /bin/bash
 
 VENV_PATH = venv
-VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_runner/__init__.py
-CURRENT_VERSION = 0.1.2 
+VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_pipeline/__init__.py
+CURRENT_VERSION = 0.2.1 
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -31,7 +31,7 @@ format: venv
 .PHONY: format
 
 lint: venv
-	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_runner/
+	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_pipeline/
 	@set -e && $(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 --check . || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
@@ -41,17 +41,18 @@ lint: venv
 .PHONY: lint
 
 test: venv
-	$(VENV_PATH)/bin/pytest --cov-report html --cov-report term --cov=df_runner tests/
+	$(VENV_PATH)/bin/pytest --cov-report html --cov-report term --cov=df_pipeline --log-cli-level=WARNING tests/
 .PHONY: test
 
 test_all: venv test lint
 .PHONY: test_all
 
-doc: venv
-	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_runner
-	$(VENV_PATH)/bin/sphinx-build -M clean docs/source docs/build
-	$(VENV_PATH)/bin/sphinx-build -M html docs/source docs/build
-.PHONY: doc
+build_doc: venv
+	# $(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_pipeline
+	# $(VENV_PATH)/bin/sphinx-build -M clean docs build
+	# $(VENV_PATH)/bin/sphinx-build -M html docs build
+	$(VENV_PATH)/bin/sphinx-build docs build
+.PHONY: build_doc
 
 pre_commit: venv
 	echo -e "#!/bin/sh\n\nmake test_all" > .git/hooks/pre-commit && chmod +x .git/hooks/pre-commit

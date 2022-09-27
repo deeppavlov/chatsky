@@ -20,3 +20,4 @@ venv*
 .coverage
 .pytest_cache
 htmlcov
+docs/examples/
