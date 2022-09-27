@@ -1,3 +1,11 @@
+"""
+Example for future documenting!
+===============================
+
+TODO: update documentation to match this file
+TODO: fix function definition types, rn they are faaar too long
+"""
+
 import logging
 import abc
 import asyncio
