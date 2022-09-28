@@ -62,7 +62,7 @@ class RecursiveParser:
         :return:
         """
         if isinstance(name, Request):
-            return self.get_object(name)[0]
+            return self.get_object(name)[0] # TODO: please use an explicit manner `name, _ = self.get_object(name)`
         try:
             if isinstance(name, Python):
                 return self.get_object(Request.from_str(name.absolute_value))[0]
@@ -70,7 +70,7 @@ class RecursiveParser:
             pass
         return name
 
-    def get_object(self, request: Request) -> tp.Tuple[tp.Union[dict, Call, StringTag], tp.List[str]]:
+    def get_object(self, request: Request) -> tp.Tuple[tp.Union[dict, Call, StringTag], tp.List[str]]: # TODO: abstract naming
         """Return an object requested in ``request``
 
         :param request: Request of an object
@@ -90,7 +90,7 @@ class RecursiveParser:
 
                 potential_namespace = NamespaceTag(".".join(map(repr, left)))
                 namespace = self.namespaces.get(potential_namespace)
-                if namespace is None:
+                if namespace is None: # TODO: maybe just `break`
                     raise NamespaceNotParsedError(f"Not found namespace {repr(potential_namespace)}, request={request}")
 
                 name: tp.Union[dict, Call, StringTag, None] = namespace.names.get(middle)
@@ -109,6 +109,7 @@ class RecursiveParser:
                     except ResolutionError as error:
                         logging.debug(error)
 
+                # TODO: so hard, can be this func split into 2-3 small functions?
                 # process indices
                 for index in request.indices:
                     if not isinstance(name, dict):
@@ -138,10 +139,10 @@ class RecursiveParser:
         self,
         script: ScriptDict,
         paths: tp.List[tp.List[str]],
-        func: tp.Callable[..., None],
-        func_kwargs: tp.Optional[dict] = None,
+        func: tp.Callable[..., None], # TODO: naming, it seems hard
+        func_kwargs: tp.Optional[dict] = None,  # TODO: why not `{}` by default?
         stop_condition: tp.Callable[[tp.List[StringTag]], bool] = lambda x: False,
-        traversed_path: tp.Optional[tp.List[StringTag]] = None,
+        traversed_path: tp.Optional[tp.List[StringTag]] = None, # TODO: why not `[]` by default?
     ):
         """Traverse a dictionary as a tree call ``func`` at leaf nodes of a tree
 
@@ -168,10 +169,9 @@ class RecursiveParser:
             func_kwargs = {}
 
         for key in script:  # add enumerate
+            # TODO: do it if `not isinstance(value, Python)`
             value = script[key]
-
             path = copy(paths[-1])
-            current_traversed_path = copy(traversed_path)
 
             path.append(key.display_value)
 
@@ -186,9 +186,11 @@ class RecursiveParser:
             resolved_key = self.resolve_name(key)
             if isinstance(resolved_key, (dict, Call)):
                 raise ScriptValidationError(f"Dictionary key '{key}' is not a ``StringTag``: {resolved_key}")
-            key = copy(key)
+            key = copy(key) # TODO: maybe deepcopy? because of `key.metadata["resolved_value"] = resolved_key`
             key.absolute_value = resolved_key.absolute_value
             key.metadata["resolved_value"] = resolved_key
+
+            current_traversed_path = copy(traversed_path)
             current_traversed_path.append(key)
 
             if isinstance(value, dict):

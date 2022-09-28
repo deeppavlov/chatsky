@@ -9,6 +9,7 @@ from collections import OrderedDict
 from os import devnull
 
 import libcst as cst
+# TODO: Why do we use this directives `# type: ignore` in this imports
 from pyflakes.api import check  # type: ignore
 from pyflakes.reporter import Reporter  # type: ignore
 
@@ -41,7 +42,7 @@ class NodeProcessor:
         self.parse_calls = parse_calls
 
     def _process_dict(self, node: cst.Dict) -> dict:
-        result = OrderedDict()
+        result = OrderedDict() # TODO: why do we use OrderedDict ?
         for element in node.elements:
             if not isinstance(element, cst.DictElement):
                 raise StarredError("Starred dict elements are not supported")
@@ -86,7 +87,7 @@ class NodeProcessor:
             value = node.evaluated_value
             return String(value, show_yaml_tag=is_correct(list(self.namespace), value))
 
-        value = re.sub(r"\n[ \t]*", "", evaluate(node))
+        value = re.sub(r"\n[ \t]*", "", evaluate(node)) # TODO: pls, describe an idea of this regexp, also it can be compiled outside of runtime of the function 
 
         show_yaml_tag = False
         if not is_correct(list(self.namespace), value):
@@ -140,7 +141,7 @@ class Disambiguator:
         self.names.append(name)
 
     def _process_dict(self, obj: dict) -> dict:
-        result = OrderedDict()
+        result = OrderedDict() # TODO: why do we use OrderedDict ?
         for key in obj:
             result[self._process(key)] = self._process(obj[key])
         return dict(result)
@@ -165,7 +166,7 @@ class Disambiguator:
     def __call__(self, node: tp.Any):
         return self._process(node)
 
-
+# TODO: `is_correct` is bad naming for description of a function purpose
 def is_correct(names: tp.List[str], code: str) -> bool:
     """Check code for correctness if names are available in the namespace.
 
@@ -177,5 +178,7 @@ def is_correct(names: tp.List[str], code: str) -> bool:
     :rtype: bool
     """
     code_string = "\n".join([*(f"import {name}\n{name}" for name in names), code])
+    # TODO: pls, describe it, something like `to quite checking proc we route reporting output intu /dev/null`
+    # TODO: how does it work for windows? it's correct?
     with open(devnull, "w", encoding="utf-8") as null:
         return check(code_string, "", Reporter(null, null)) == 0

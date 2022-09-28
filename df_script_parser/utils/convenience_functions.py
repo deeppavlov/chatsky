@@ -7,6 +7,7 @@ import typing as tp
 import libcst as cst
 
 
+# TODO: can `evaluate` be named more explicitly?
 def evaluate(node: tp.Union[cst.CSTNode, str]) -> str:
     """Get string representation of :py:class:`libcst.CSTNode`
 

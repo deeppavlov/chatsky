@@ -42,6 +42,7 @@ class Parser(m.MatcherDecoratableTransformer):
         :param args: Arguments to pass to the function
         :return: None
         """
+        # TODO: Can add_function be renamed as add_callback ? or something like that ? 
         if isinstance(node, cst.AnnAssign):
             add_function(evaluate(node.target), *args)
         elif isinstance(node, cst.Assign):
