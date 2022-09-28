@@ -2,7 +2,7 @@
 """
 from pathlib import Path
 import argparse
-from df_script_parser.tools import py2yaml, yaml2py
+from df_script_parser.tools import py2yaml, yaml2py, py2graph
 
 
 def is_dir(arg: str) -> Path:
@@ -62,6 +62,39 @@ def py2yaml_cli():
     )
     args = parser.parse_args()
     py2yaml(**vars(args))
+
+
+def py2graph_cli():
+    """:py:func:`.py2graph` cli wrapper"""
+    parser = argparse.ArgumentParser(description=py2graph.__doc__.split("\n\n", maxsplit=1)[0])
+    parser.add_argument(
+        "root_file",
+        metavar="ROOT_FILE",
+        help="Python file to start parsing with",
+        type=is_file,
+    )
+    parser.add_argument(
+        "project_root_dir",
+        metavar="PROJECT_ROOT_DIR",
+        help="Directory that contains all the local files required to run ROOT_FILE",
+        type=is_dir,
+    )
+    parser.add_argument(
+        "output_file",
+        metavar="OUTPUT_FILE",
+        help="Yaml file to store parser output in",
+        type=str,
+    )
+    parser.add_argument(
+        "--requirements",
+        metavar="REQUIREMENTS",
+        help="File with project requirements to override those collected by parser",
+        type=is_file,
+        required=False,
+        default=None,
+    )
+    args = parser.parse_args()
+    py2graph(**vars(args))
 
 
 def yaml2py_cli():

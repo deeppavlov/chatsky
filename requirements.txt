@@ -3,3 +3,4 @@ ruamel.yaml>=0.17.21
 pyflakes>=2.3.1
 black>=20.8b1
 df-engine
+networkx>=2.5.1

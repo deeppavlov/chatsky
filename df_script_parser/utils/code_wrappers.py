@@ -34,11 +34,13 @@ class StringTag(ABC):
         show_yaml_tag: bool = True,
         absolute_value: tp.Union[str, None] = None,
         display_absolute_value: bool = False,
+        metadata: tp.Optional[dict] = None
     ):
         self.display_value: str = display_value
         self.absolute_value: str = absolute_value if absolute_value else display_value
         self.show_yaml_tag: bool = show_yaml_tag
         self.display_absolute_value: bool = display_absolute_value
+        self.metadata = {} if metadata is None else metadata
 
     def __str__(self):
         return self.display_value
@@ -134,8 +136,9 @@ class Python(StringTag):
         absolute_value: tp.Union[str, None] = None,
         show_yaml_tag: bool = False,
         display_absolute_value: bool = False,
+        metadata: tp.Optional[dict] = None
     ):
-        super().__init__(display_value, show_yaml_tag, absolute_value, display_absolute_value)
+        super().__init__(display_value, show_yaml_tag, absolute_value, display_absolute_value, metadata)
 
     def __hash__(self):
         return hash(self.absolute_value)

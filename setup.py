@@ -68,5 +68,6 @@ setup(
     [console_scripts]
     df_script_parser.py2yaml=df_script_parser:py2yaml_cli
     df_script_parser.yaml2py=df_script_parser:yaml2py_cli
+    df_script_parser.py2graph=df_script_parser:py2graph_cli
     """,
 )

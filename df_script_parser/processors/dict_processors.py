@@ -17,8 +17,8 @@ from df_script_parser.utils.code_wrappers import (
     Python,
 )
 from df_script_parser.utils.convenience_functions import evaluate
-from df_script_parser.utils.exceptions import StarredError
-from df_script_parser.utils.namespaces import Namespace
+from df_script_parser.utils.exceptions import StarredError, ParserError
+from df_script_parser.utils.namespaces import Namespace, Call
 
 
 class NodeProcessor:
@@ -34,9 +34,11 @@ class NodeProcessor:
         self,
         namespace: Namespace,
         parse_tuples: bool = False,
+        parse_calls: bool = False,
     ):
         self.namespace: Namespace = namespace
         self.parse_tuples = parse_tuples
+        self.parse_calls = parse_calls
 
     def _process_dict(self, node: cst.Dict) -> dict:
         result = OrderedDict()
@@ -55,6 +57,18 @@ class NodeProcessor:
             result.append(self._process_node(element.value))
         return result
 
+    def _process_call(self, node: cst.Call) -> Call:
+        func_name = evaluate(node.func)
+
+        args = {}
+        for idx, arg in enumerate(node.args):
+            if arg.keyword is not None:
+                key: tp.Union[str, int] = evaluate(arg.keyword)
+            else:
+                key = idx
+            args[key] = self._process_node(arg.value)
+        return Call(func_name, args)
+
     def _process_node(self, node: cst.CSTNode) -> object:
         if isinstance(node, cst.Dict):
             return self._process_dict(node)
@@ -65,17 +79,29 @@ class NodeProcessor:
         if self.parse_tuples and isinstance(node, cst.Tuple):
             return tuple(self._process_list(node))
 
+        if self.parse_calls and isinstance(node, cst.Call):
+            return self._process_call(node)
+
         if isinstance(node, cst.SimpleString):
             value = node.evaluated_value
             return String(value, show_yaml_tag=is_correct(list(self.namespace), value))
 
         value = re.sub(r"\n[ \t]*", "", evaluate(node))
 
+        show_yaml_tag = False
         if not is_correct(list(self.namespace), value):
             logging.warning("Value %s is not a correct line of python code", value)
-            return Python(value, self.namespace.get_absolute_name(value), show_yaml_tag=True)
+            show_yaml_tag = True
 
-        return Python(value, self.namespace.get_absolute_name(value))
+        metadata = {}
+
+        if not (self.parse_tuples and self.parse_calls):
+            try:
+                metadata["parsed_value"] = NodeProcessor(self.namespace, True, True)(node)
+            except ParserError:
+                pass
+
+        return Python(value, self.namespace.get_absolute_name(value), show_yaml_tag=show_yaml_tag, metadata=metadata)
 
     def process(self, node: cst.CSTNode) -> object:
         """Process a node

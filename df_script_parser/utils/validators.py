@@ -6,7 +6,7 @@ import typing as tp
 import libcst as cst
 from df_engine.core.keywords import Keywords  # type: ignore
 
-from df_script_parser.utils.code_wrappers import Python, String
+from df_script_parser.utils.code_wrappers import StringTag, Python
 from df_script_parser.utils.convenience_functions import evaluate
 from df_script_parser.utils.exceptions import WrongFileStructureError, ScriptValidationError
 from df_script_parser.utils.namespaces import Call
@@ -46,8 +46,9 @@ def check_file_structure(
 
 
 def validate_path(
-    traversed_path: tp.List[tp.Union[Python, String]],
-    final_value: tp.Optional[tp.Union[Python, String, Call]] = None,
+    traversed_path: tp.List[StringTag],
+    final_value: tp.Union[StringTag, Call],
+    paths: tp.List[tp.List[str]],
 ) -> None:
     """Validate a sequence of keys in a script.
 
@@ -67,6 +68,8 @@ def validate_path(
         |
         :py:class:`df_script_parser.utils.code_wrappers.String`,
         optional
+    :param paths: Path to the ``value``
+    :type paths: list[str]
 
     :raises :py:exc:`df_script_parser.utils.exceptions.ScriptValidationError`:
 

@@ -3,8 +3,10 @@
 from pathlib import Path
 import typing as tp
 import logging
+import json
 
 from black import format_file_in_place, FileMode, WriteBack
+import networkx as nx
 
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
 from df_script_parser.processors.dict_processors import Disambiguator
@@ -41,6 +43,35 @@ def py2yaml(
                 dictionary["requirements"] = [x for x in reqs.read().split("\n") if x]
 
         yaml_dumper_loader.dump(dictionary, outfile)
+
+
+def py2graph(
+    root_file: Path,
+    project_root_dir: Path,
+    output_file: Path,
+    requirements: tp.Optional[Path] = None,
+):
+    """Export dff project dir as a :py:mod:`networkx` graph.
+
+    :param root_file: Python file to start parsing with
+    :type root_file: :py:class:`.Path`
+    :param project_root_dir: Directory that contains all the local files required to run ``root_file``
+    :type project_root_dir: :py:class:`.Path`
+    :param output_file: Yaml file to store parser output in
+    :type output_file: :py:class:`.Path`
+    :param requirements: Path to a file containing project requirements, defaults to None
+    :type requirements: :pu:class:`.Path`, optional
+    :return:
+    """
+    with open(Path(output_file).absolute(), "w", encoding="utf-8") as outfile:
+        project = RecursiveParser(Path(project_root_dir).absolute())
+        project.parse_project_dir(Path(root_file).absolute())
+
+        if requirements:
+            with open(requirements, "r", encoding="utf-8") as reqs:
+                project.requirements = [x for x in reqs.read().split("\n") if x]
+
+        json.dump(nx.readwrite.node_link_data(project.to_graph()), outfile, indent=4)
 
 
 def yaml2py(

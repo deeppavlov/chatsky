@@ -196,7 +196,6 @@ class Request:
         :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
             If a node cannot be represented as a request
         """
-        # raise RuntimeError(f"{evaluate(node)}")
         if len(node.slice) != 1:
             raise RequestParsingError(f"Subscript {evaluate(node)} has multiple slices.")
         index = node.slice[0].slice
@@ -283,7 +282,7 @@ class Namespace:
         path: Path,
         project_root_dir: Path,
         import_module_hook: tp.Optional[tp.Callable[[ModuleType, str], tp.Optional["Namespace"]]] = None,
-        actor_args_check: tp.Optional[tp.Callable[[dict], None]] = None,
+        actor_args_check: tp.Optional[tp.Callable[[dict, tp.List[str]], None]] = None,
     ):
         self.path = Path(path)
         self.project_root_dir = Path(project_root_dir)
@@ -413,7 +412,7 @@ class Namespace:
         :return:
         """
         if check_args and self.actor_args_check:
-            self.actor_args_check(args)
+            self.actor_args_check(args, [self.name, name, "script"])
         self.names[ActorTag(name)] = Call(func_name, args)
 
     def get_absolute_name(self, name: str) -> tp.Optional[str]:
