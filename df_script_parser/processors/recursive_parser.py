@@ -7,7 +7,7 @@ from copy import copy
 import io
 
 import libcst as cst
-import networkx as nx
+import networkx as nx  # type: ignore
 
 from df_script_parser.processors.parse import Parser
 from df_script_parser.utils.code_wrappers import StringTag, Python, String
@@ -53,8 +53,8 @@ class RecursiveParser:
 
     def resolve_name(
         self,
-        name: tp.Union[Request, String, Python],
-    ) -> tp.Union[String, Python, dict, Call]:
+        name: tp.Union[Request, StringTag],
+    ) -> tp.Union[StringTag, dict, Call]:
         """Try to resolve ``name``. Return ``name`` if not possible
 
         :param name: Name to resolve
@@ -93,13 +93,13 @@ class RecursiveParser:
                 if namespace is None: # TODO: maybe just `break`
                     raise NamespaceNotParsedError(f"Not found namespace {repr(potential_namespace)}, request={request}")
 
-                name: tp.Union[dict, Call, StringTag, None] = namespace.names.get(middle)
+                namespace_object = namespace.names.get(middle)
 
-                if name is None:
-                    raise ObjectNotFoundError(
-                        f"Not found {middle} in {namespace.name}, request={request}"
-                    )
+                if namespace_object is None:
+                    raise ObjectNotFoundError(f"Not found {middle} in {namespace.name}, request={request}")
                 path = [namespace.name, repr(middle)]
+
+                name: tp.Union[ScriptDict, Call, StringTag] = namespace_object
 
                 if isinstance(name, Python):
                     try:
@@ -124,9 +124,7 @@ class RecursiveParser:
 
                     if isinstance(name, Python):
                         try:
-                            name, path = self.get_object(
-                                Request.from_str(name.absolute_value)
-                            )
+                            name, path = self.get_object(Request.from_str(name.absolute_value))
                         except ResolutionError as error:
                             logging.debug(error)
 
@@ -225,6 +223,7 @@ class RecursiveParser:
         :rtype: :py:class:`.Import` | dict | :py:class:`.Python` | :py:class:`.Call` | :py:class:`.String`
         """
         value: tp.Union[ScriptDict, Import, Call, StringTag] = script
+
         for key in path:
             if isinstance(value, Python):
                 value, _ = self.get_object(Request.from_str(value.absolute_value))
@@ -261,7 +260,7 @@ class RecursiveParser:
             if not isinstance(script, Python):
                 raise RuntimeError(f"Script argument in actor is not a Python instance: {script}")
             script_request = Request.from_str(script.absolute_value)
-            script, path = self.get_object(script_request)  # todo: check that this does not produce bugs
+            script, path = self.get_object(script_request)
             if not isinstance(script, dict):
                 raise RuntimeError(f"Script is not a dict: {script}")
 
@@ -277,7 +276,21 @@ class RecursiveParser:
             if label:
                 if not isinstance(label, tuple):
                     raise RuntimeError(f"Label is not a tuple: {label}")
-                self.check_node_existence(script, list(label))
+
+                resolved_label = []
+                for item in label:
+                    resolved_item = self.resolve_name(item)
+                    if isinstance(resolved_item, (dict, Call)):
+                        raise ScriptValidationError(f"Label item '{item}' is not a ``StringTag``: {resolved_item}")
+                    resolved_label.append(resolved_item.absolute_value)
+
+                node = self.graph.nodes.get(tuple(resolved_label))
+                if node is None:
+                    raise ScriptValidationError(f"Node not found: {label}")
+                if label == start_label:
+                    node["start_label"] = True
+                if label == fallback_label:
+                    node["fallback_label"] = True
 
     def process_import(self, module_type: ModuleType, module_metadata: str) -> tp.Optional[Namespace]:
         """Import module hook for :py:class:`.Namespace`
@@ -365,9 +378,7 @@ class RecursiveParser:
         """
         return {
             "requirements": self.requirements,
-            "namespaces": {
-                k: v.names if v else {} for k, v in self.namespaces.items() if k not in self.unprocessed
-            },
+            "namespaces": {k: v.names if v else {} for k, v in self.namespaces.items() if k not in self.unprocessed},
         }
 
     def to_graph(self) -> nx.MultiDiGraph:

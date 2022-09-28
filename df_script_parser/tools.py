@@ -6,7 +6,7 @@ import logging
 import json
 
 from black import format_file_in_place, FileMode, WriteBack
-import networkx as nx
+import networkx as nx  # type: ignore
 
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
 from df_script_parser.processors.dict_processors import Disambiguator
