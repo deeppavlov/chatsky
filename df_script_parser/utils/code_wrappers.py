@@ -34,7 +34,7 @@ class StringTag(ABC):
         show_yaml_tag: bool = True,
         absolute_value: tp.Union[str, None] = None,
         display_absolute_value: bool = False,
-        metadata: tp.Optional[dict] = None
+        metadata: tp.Optional[dict] = None,
     ):
         self.display_value: str = display_value
         self.absolute_value: str = absolute_value if absolute_value else display_value
@@ -136,7 +136,7 @@ class Python(StringTag):
         absolute_value: tp.Union[str, None] = None,
         show_yaml_tag: bool = False,
         display_absolute_value: bool = False,
-        metadata: tp.Optional[dict] = None
+        metadata: tp.Optional[dict] = None,
     ):
         super().__init__(display_value, show_yaml_tag, absolute_value, display_absolute_value, metadata)
 
