@@ -68,7 +68,9 @@ def py2graph(
         project.parse_project_dir(Path(root_file).absolute())
 
         if requirements:
-            with open(requirements, "r", encoding="utf-8") as reqs: # TODO: need use yaml structure !!!! or I do not understand what happens
+            with open(
+                requirements, "r", encoding="utf-8"
+            ) as reqs:  # TODO: need use yaml structure !!!! or I do not understand what happens
                 project.requirements = [x for x in reqs.read().split("\n") if x]
         # TODO: we need other formats, not only json?
         json.dump(nx.readwrite.node_link_data(project.to_graph()), outfile, indent=4)

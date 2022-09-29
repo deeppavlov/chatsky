@@ -17,7 +17,7 @@ def script2graph(
     paths: tp.List[tp.List[str]],
     graph: nx.MultiDiGraph,
 ):
-    def get_destination(label: StringTag): # TODO: move outside of script2graph
+    def get_destination(label: StringTag):  # TODO: move outside of script2graph
         if isinstance(label, Python):
             resolved_value = label.metadata.get("resolved_value")
             if resolved_value is None:
@@ -36,7 +36,7 @@ def script2graph(
 
     # TODO: use one function twice instead reusing `graph.add_node` `get_destination`, `graph.add_edge` twice
     if traversed_path[0] in keywords_dict["GLOBAL"]:
-        graph.add_node("GLOBAL", ref=copy(paths[1])) # TODO: need more other flags like a fallback, global, etc.
+        graph.add_node("GLOBAL", ref=copy(paths[1]))  # TODO: need more other flags like a fallback, global, etc.
         if traversed_path[1] in keywords_dict["TRANSITIONS"]:
             dst = get_destination(traversed_path[2])
             graph.add_edge(
@@ -55,6 +55,6 @@ def script2graph(
                 dst,
                 label_ref=copy(paths[3]),
                 label=traversed_path[3].display_value,
-                cnd_ref=copy(paths[4]) # TODO: use full name`condition_ref`
+                cnd_ref=copy(paths[4])  # TODO: use full name`condition_ref`
                 # TODO: add `condition`
             )

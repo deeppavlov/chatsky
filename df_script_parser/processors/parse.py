@@ -31,7 +31,9 @@ class Parser(m.MatcherDecoratableTransformer):
         self.namespace: Namespace = namespace
         self.node_processor: NodeProcessor = NodeProcessor(namespace)
 
-    def add_assignment(self, namespace_insertion_callback: tp.Callable[..., None], node: tp.Union[cst.Assign, cst.AnnAssign], *args):
+    def add_assignment(
+        self, namespace_insertion_callback: tp.Callable[..., None], node: tp.Union[cst.Assign, cst.AnnAssign], *args
+    ):
         """Process :py:class:`libcst.Assign` and :py:class:`libcst.AnnAssign`
 
         :param namespace_insertion_callback: Function to call to add the assigned object to the namespace

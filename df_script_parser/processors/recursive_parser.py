@@ -13,7 +13,6 @@ from df_script_parser.processors.parse import Parser
 from df_script_parser.utils.code_wrappers import StringTag, Python, String
 from df_script_parser.utils.convenience_functions import get_module_name, remove_suffix
 from df_script_parser.utils.exceptions import (
-    KeyNotFoundError,
     NamespaceNotParsedError,
     ObjectNotFoundError,
     ResolutionError,
@@ -22,7 +21,7 @@ from df_script_parser.utils.exceptions import (
     WrongFileStructureError,
 )
 from df_script_parser.utils.module_metadata import ModuleType
-from df_script_parser.utils.namespaces import Namespace, NamespaceTag, Request, Import, Call
+from df_script_parser.utils.namespaces import Namespace, NamespaceTag, Request, Call
 from df_script_parser.utils.validators import check_file_structure, validate_path
 from df_script_parser.processors.script2graph import script2graph
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
@@ -62,7 +61,9 @@ class RecursiveParser:
         :return:
         """
         if isinstance(name, Request):
-            return self.get_requested_object(name)[0] # TODO: please use an explicit manner `name, _ = self.get_requested_object(name)`
+            return self.get_requested_object(name)[
+                0
+            ]  # TODO: please use an explicit manner `name, _ = self.get_requested_object(name)`
         try:
             if isinstance(name, Python):
                 return self.get_requested_object(Request.from_str(name.absolute_value))[0]
@@ -90,7 +91,7 @@ class RecursiveParser:
 
                 potential_namespace = NamespaceTag(".".join(map(repr, left)))
                 namespace = self.namespaces.get(potential_namespace)
-                if namespace is None: # TODO: maybe just `break`
+                if namespace is None:  # TODO: maybe just `break`
                     raise NamespaceNotParsedError(f"Not found namespace {repr(potential_namespace)}, request={request}")
 
                 namespace_object = namespace.names.get(middle)
@@ -192,7 +193,9 @@ class RecursiveParser:
                 if stop_condition(current_traversed_path):
                     traversal_stop_callback(current_traversed_path, value, paths + [path], **func_kwargs)
                     return None
-                self.traverse_dict(value, paths + [path], traversal_stop_callback, func_kwargs, stop_condition, current_traversed_path)
+                self.traverse_dict(
+                    value, paths + [path], traversal_stop_callback, func_kwargs, stop_condition, current_traversed_path
+                )
             else:
                 if not isinstance(value, Call):
                     resolved_value = self.resolve_name(value)
