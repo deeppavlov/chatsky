@@ -62,15 +62,15 @@ class RecursiveParser:
         :return:
         """
         if isinstance(name, Request):
-            return self.get_object(name)[0] # TODO: please use an explicit manner `name, _ = self.get_object(name)`
+            return self.get_requested_object(name)[0] # TODO: please use an explicit manner `name, _ = self.get_requested_object(name)`
         try:
             if isinstance(name, Python):
-                return self.get_object(Request.from_str(name.absolute_value))[0]
+                return self.get_requested_object(Request.from_str(name.absolute_value))[0]
         except ResolutionError:
             pass
         return name
 
-    def get_object(self, request: Request) -> tp.Tuple[tp.Union[dict, Call, StringTag], tp.List[str]]: # TODO: abstract naming
+    def get_requested_object(self, request: Request) -> tp.Tuple[tp.Union[dict, Call, StringTag], tp.List[str]]:
         """Return an object requested in ``request``
 
         :param request: Request of an object
@@ -103,7 +103,7 @@ class RecursiveParser:
 
                 if isinstance(name, Python):
                     try:
-                        name, path = self.get_object(
+                        name, path = self.get_requested_object(
                             Request.from_str(".".join([name.absolute_value, *map(repr, right)]))
                         )
                     except ResolutionError as error:
@@ -124,7 +124,7 @@ class RecursiveParser:
 
                     if isinstance(name, Python):
                         try:
-                            name, path = self.get_object(Request.from_str(name.absolute_value))
+                            name, path = self.get_requested_object(Request.from_str(name.absolute_value))
                         except ResolutionError as error:
                             logging.debug(error)
 
@@ -137,17 +137,17 @@ class RecursiveParser:
         self,
         script: ScriptDict,
         paths: tp.List[tp.List[str]],
-        func: tp.Callable[..., None], # TODO: naming, it seems hard
-        func_kwargs: tp.Optional[dict] = None,  # TODO: why not `{}` by default?
+        traversal_stop_callback: tp.Callable[..., None],
+        func_kwargs: tp.Optional[dict] = None,
         stop_condition: tp.Callable[[tp.List[StringTag]], bool] = lambda x: False,
-        traversed_path: tp.Optional[tp.List[StringTag]] = None, # TODO: why not `[]` by default?
+        traversed_path: tp.Optional[tp.List[StringTag]] = None,
     ):
-        """Traverse a dictionary as a tree call ``func`` at leaf nodes of a tree
+        """Traverse a dictionary as a tree call ``traversal_stop_callback`` at leaf nodes of a tree
 
         :param script: Dictionary to traverse
         :type script: :py:class:`.ScriptDict`
-        :param func: Function to be called
-        :type func:
+        :param traversal_stop_callback: Function to be called
+        :type traversal_stop_callback:
             Callable[Concatenate[list[:py:class:`.StringTag], :py:class:`.StringTag` | None, ...], None]
         :param func_kwargs: Additional arguments to pass to the function, defaults to None
         :type func_kwargs: dict, optional
@@ -166,8 +166,7 @@ class RecursiveParser:
         if func_kwargs is None:
             func_kwargs = {}
 
-        for key in script:  # add enumerate
-            # TODO: do it if `not isinstance(value, Python)`
+        for key in script:
             value = script[key]
             path = copy(paths[-1])
 
@@ -176,11 +175,9 @@ class RecursiveParser:
             if isinstance(value, Python):
                 absolute_value = value.absolute_value
                 try:
-                    value, path = self.get_object(Request.from_str(absolute_value))
+                    value, path = self.get_requested_object(Request.from_str(absolute_value))
                 except ResolutionError:
                     logging.debug("Cannot resolve request: %s", absolute_value)
-            # if isinstance(value, Call):
-            #     raise ScriptValidationError(f"Dictionary value '{value}' is not a ``StringTag``: {value}")
             resolved_key = self.resolve_name(key)
             if isinstance(resolved_key, (dict, Call)):
                 raise ScriptValidationError(f"Dictionary key '{key}' is not a ``StringTag``: {resolved_key}")
@@ -193,9 +190,9 @@ class RecursiveParser:
 
             if isinstance(value, dict):
                 if stop_condition(current_traversed_path):
-                    func(current_traversed_path, value, paths + [path], **func_kwargs)
+                    traversal_stop_callback(current_traversed_path, value, paths + [path], **func_kwargs)
                     return None
-                self.traverse_dict(value, paths + [path], func, func_kwargs, stop_condition, current_traversed_path)
+                self.traverse_dict(value, paths + [path], traversal_stop_callback, func_kwargs, stop_condition, current_traversed_path)
             else:
                 if not isinstance(value, Call):
                     resolved_value = self.resolve_name(value)
@@ -206,38 +203,7 @@ class RecursiveParser:
                     value = copy(value)
                     value.absolute_value = resolved_value.absolute_value
                     value.metadata["resolved_value"] = resolved_value
-                func(current_traversed_path, value, paths + [path], **func_kwargs)
-
-    def check_node_existence(
-        self,
-        script: ScriptDict,
-        path: tp.List[StringTag],
-    ) -> tp.Union[Import, dict, Call, StringTag]:
-        """Check that the path is valid in the script
-
-        :param script: Dict to check
-        :type script: :py:class:`.ScriptDict`
-        :param path: Path to check
-        :type path: list[:py:class:`.Python` | :py:class:`.String`]
-        :return: Value that the ``path`` points at
-        :rtype: :py:class:`.Import` | dict | :py:class:`.Python` | :py:class:`.Call` | :py:class:`.String`
-        """
-        value: tp.Union[ScriptDict, Import, Call, StringTag] = script
-
-        for key in path:
-            if isinstance(value, Python):
-                value, _ = self.get_object(Request.from_str(value.absolute_value))
-            if not isinstance(value, dict):
-                raise ResolutionError(f"Object {value} is not a dict.")
-
-            resolved_names = {self.resolve_name(k): k for k in value.keys()}
-            resolved_key = self.resolve_name(key)
-            dict_key = resolved_names.get(resolved_key)
-
-            if dict_key is None:
-                raise KeyNotFoundError(f"Not found '{resolved_key}' in '{resolved_names.keys()}'")
-            value = value[dict_key]
-        return value
+                traversal_stop_callback(current_traversed_path, value, paths + [path], **func_kwargs)
 
     def check_actor_args(self, actor_args: dict, path: tp.List[str]):
         """Checks :py:class:`~df_engine.core.actor.Actor` args for correctness
@@ -260,7 +226,7 @@ class RecursiveParser:
             if not isinstance(script, Python):
                 raise RuntimeError(f"Script argument in actor is not a Python instance: {script}")
             script_request = Request.from_str(script.absolute_value)
-            script, path = self.get_object(script_request)
+            script, path = self.get_requested_object(script_request)
             if not isinstance(script, dict):
                 raise RuntimeError(f"Script is not a dict: {script}")
 
@@ -270,7 +236,7 @@ class RecursiveParser:
         self.graph = nx.MultiDiGraph()
 
         self.traverse_dict(script, [path], validate_path)
-        self.traverse_dict(script, [path], script2graph, {"graph": self.graph, "resolve_name": self.resolve_name})
+        self.traverse_dict(script, [path], script2graph, {"graph": self.graph})
 
         for label in [start_label, fallback_label]:
             if label:

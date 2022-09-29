@@ -16,7 +16,6 @@ def script2graph(
     final_value: tp.Union[StringTag, Call],
     paths: tp.List[tp.List[str]],
     graph: nx.MultiDiGraph,
-    resolve_name: tp.Callable, # TODO: unused
 ):
     def get_destination(label: StringTag): # TODO: move outside of script2graph
         if isinstance(label, Python):
@@ -30,19 +29,19 @@ def script2graph(
                 if isinstance(parsed_value, tuple):
                     if isinstance(parsed_value[0], String) and isinstance(parsed_value[1], String):
                         return parsed_value[0].display_value, parsed_value[1].display_value
-        return None # TODO: useless
+        return "NONE"
 
     if len(traversed_path) == 0:
         raise ScriptValidationError(f"traversed_path is empty: {traversed_path, final_value, paths}")
 
     # TODO: use one function twice instead reusing `graph.add_node` `get_destination`, `graph.add_edge` twice
-    if traversed_path[0] in keywords_dict["GLOBAL"]: # TODO: will "GLOBAL" key be always into keywords_dict?
+    if traversed_path[0] in keywords_dict["GLOBAL"]:
         graph.add_node("GLOBAL", ref=copy(paths[1])) # TODO: need more other flags like a fallback, global, etc.
         if traversed_path[1] in keywords_dict["TRANSITIONS"]:
             dst = get_destination(traversed_path[2])
             graph.add_edge(
                 "GLOBAL",
-                dst or "NONE", # TODO: Xmm, I think id of node can be nill/None , can we check it?
+                dst,
                 label_ref=copy(paths[2]),
                 label=traversed_path[2].display_value,
                 cnd_ref=copy(paths[3]),
@@ -53,7 +52,7 @@ def script2graph(
             dst = get_destination(traversed_path[3])
             graph.add_edge(
                 (traversed_path[0].absolute_value, traversed_path[1].absolute_value),
-                dst or "NONE",
+                dst,
                 label_ref=copy(paths[3]),
                 label=traversed_path[3].display_value,
                 cnd_ref=copy(paths[4]) # TODO: use full name`condition_ref`

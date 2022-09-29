@@ -11,7 +11,7 @@ from ruamel.yaml.constructor import Constructor
 from ruamel.yaml.representer import Representer
 
 from df_script_parser.utils.code_wrappers import Python, String
-from df_script_parser.utils.convenience_functions import evaluate, remove_suffix, get_module_name
+from df_script_parser.utils.convenience_functions import repr_libcst_node, remove_suffix, get_module_name
 from df_script_parser.utils.exceptions import ObjectNotFoundError, ResolutionError, RequestParsingError
 from df_script_parser.utils.module_metadata import ModuleType, get_module_info
 
@@ -184,8 +184,8 @@ class Request:
         elif isinstance(node, cst.Name):
             self._process_name(node)
         else:
-            # Note: If there are a lot of calls to evaluate and they hinder performance it's probably here.
-            raise RequestParsingError(f"Node {evaluate(node)} is not a subscript, attribute or name.")
+            # Note: If there are a lot of calls to repr_libcst_node and they hinder performance it's probably here.
+            raise RequestParsingError(f"Node {repr_libcst_node(node)} is not a subscript, attribute or name.")
 
     def _process_subscript(self, node: cst.Subscript):
         """Recursively parse a node that is a Subscript
@@ -197,17 +197,17 @@ class Request:
             If a node cannot be represented as a request
         """
         if len(node.slice) != 1:
-            raise RequestParsingError(f"Subscript {evaluate(node)} has multiple slices.")
+            raise RequestParsingError(f"Subscript {repr_libcst_node(node)} has multiple slices.")
         index = node.slice[0].slice
         if not isinstance(index, cst.Index):
-            raise RequestParsingError(f"Slice {evaluate(index)} is not an index.")
+            raise RequestParsingError(f"Slice {repr_libcst_node(index)} is not an index.")
         try:
             self.indices.insert(0, Request(index.value, self.get_absolute_attributes))
         except RequestParsingError:
             if isinstance(index.value, cst.SimpleString):
                 self.indices.insert(0, String(index.value.evaluated_value))
             else:
-                self.indices.insert(0, Python(evaluate(index.value)))
+                self.indices.insert(0, Python(repr_libcst_node(index.value)))
         self._process_node(node.value)
 
     def _process_attribute(self, node: cst.Attribute):

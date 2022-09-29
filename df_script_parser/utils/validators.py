@@ -7,7 +7,7 @@ import libcst as cst
 from df_engine.core.keywords import Keywords  # type: ignore
 
 from df_script_parser.utils.code_wrappers import StringTag, Python
-from df_script_parser.utils.convenience_functions import evaluate
+from df_script_parser.utils.convenience_functions import repr_libcst_node
 from df_script_parser.utils.exceptions import WrongFileStructureError, ScriptValidationError
 from df_script_parser.utils.namespaces import Call
 
@@ -35,7 +35,7 @@ def check_file_structure(
     :raise :py:exc:`df_script_parser.utils.exceptions.WrongFileStructureError`:
         If the node is not empty. Message includes the first unsupported line of code.
     """
-    remaining_file = evaluate(node)
+    remaining_file = repr_libcst_node(node)
 
     if re.fullmatch(r"[ \t\n\r]*", remaining_file) is None:
         first_non_empty_line = next(line for line in remaining_file.split("\n") if line)

@@ -5,11 +5,9 @@ and replace all the keys and values that are not dicts, lists or tuples with Str
 import logging
 import re
 import typing as tp
-from collections import OrderedDict
 from os import devnull
 
 import libcst as cst
-# TODO: Why do we use this directives `# type: ignore` in this imports
 from pyflakes.api import check  # type: ignore
 from pyflakes.reporter import Reporter  # type: ignore
 
@@ -17,9 +15,12 @@ from df_script_parser.utils.code_wrappers import (
     String,
     Python,
 )
-from df_script_parser.utils.convenience_functions import evaluate
+from df_script_parser.utils.convenience_functions import repr_libcst_node
 from df_script_parser.utils.exceptions import StarredError, ParserError
 from df_script_parser.utils.namespaces import Namespace, Call
+
+
+WHITESPACES_REGEXP = r"\n[ \t]*"
 
 
 class NodeProcessor:
@@ -42,7 +43,7 @@ class NodeProcessor:
         self.parse_calls = parse_calls
 
     def _process_dict(self, node: cst.Dict) -> dict:
-        result = OrderedDict() # TODO: why do we use OrderedDict ?
+        result = {}
         for element in node.elements:
             if not isinstance(element, cst.DictElement):
                 raise StarredError("Starred dict elements are not supported")
@@ -59,12 +60,12 @@ class NodeProcessor:
         return result
 
     def _process_call(self, node: cst.Call) -> Call:
-        func_name = evaluate(node.func)
+        func_name = repr_libcst_node(node.func)
 
         args = {}
         for idx, arg in enumerate(node.args):
             if arg.keyword is not None:
-                key: tp.Union[str, int] = evaluate(arg.keyword)
+                key: tp.Union[str, int] = repr_libcst_node(arg.keyword)
             else:
                 key = idx
             args[key] = self._process_node(arg.value)
@@ -85,12 +86,12 @@ class NodeProcessor:
 
         if isinstance(node, cst.SimpleString):
             value = node.evaluated_value
-            return String(value, show_yaml_tag=is_correct(list(self.namespace), value))
+            return String(value, show_yaml_tag=pyflakes_check_with_imports(list(self.namespace), value))
 
-        value = re.sub(r"\n[ \t]*", "", evaluate(node)) # TODO: pls, describe an idea of this regexp, also it can be compiled outside of runtime of the function 
+        value = re.sub(WHITESPACES_REGEXP, "", repr_libcst_node(node))
 
         show_yaml_tag = False
-        if not is_correct(list(self.namespace), value):
+        if not pyflakes_check_with_imports(list(self.namespace), value):
             logging.warning("Value %s is not a correct line of python code", value)
             show_yaml_tag = True
 
@@ -141,7 +142,7 @@ class Disambiguator:
         self.names.append(name)
 
     def _process_dict(self, obj: dict) -> dict:
-        result = OrderedDict() # TODO: why do we use OrderedDict ?
+        result = {}
         for key in obj:
             result[self._process(key)] = self._process(obj[key])
         return dict(result)
@@ -160,14 +161,14 @@ class Disambiguator:
         if isinstance(obj, list):
             return self._process_list(obj)
         if isinstance(obj, str):
-            return Python(obj) if is_correct(self.names, obj) else String(obj)
+            return Python(obj) if pyflakes_check_with_imports(self.names, obj) else String(obj)
         return obj
 
     def __call__(self, node: tp.Any):
         return self._process(node)
 
-# TODO: `is_correct` is bad naming for description of a function purpose
-def is_correct(names: tp.List[str], code: str) -> bool:
+
+def pyflakes_check_with_imports(names: tp.List[str], code: str) -> bool:
     """Check code for correctness if names are available in the namespace.
 
     :param names: Namespace in which the correctness is asserted
@@ -178,7 +179,6 @@ def is_correct(names: tp.List[str], code: str) -> bool:
     :rtype: bool
     """
     code_string = "\n".join([*(f"import {name}\n{name}" for name in names), code])
-    # TODO: pls, describe it, something like `to quite checking proc we route reporting output intu /dev/null`
-    # TODO: how does it work for windows? it's correct?
     with open(devnull, "w", encoding="utf-8") as null:
+        # suppress errors since check already returns the number of errors
         return check(code_string, "", Reporter(null, null)) == 0

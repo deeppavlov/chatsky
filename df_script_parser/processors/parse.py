@@ -9,7 +9,7 @@ import libcst.matchers as m
 from df_engine.core.actor import Actor  # type: ignore
 
 from df_script_parser.processors.dict_processors import NodeProcessor
-from df_script_parser.utils.convenience_functions import evaluate
+from df_script_parser.utils.convenience_functions import repr_libcst_node
 from df_script_parser.utils.exceptions import StarredError
 from df_script_parser.utils.namespaces import Namespace
 
@@ -31,25 +31,24 @@ class Parser(m.MatcherDecoratableTransformer):
         self.namespace: Namespace = namespace
         self.node_processor: NodeProcessor = NodeProcessor(namespace)
 
-    def add_assignment(self, add_function: tp.Callable[..., None], node: tp.Union[cst.Assign, cst.AnnAssign], *args):
+    def add_assignment(self, namespace_insertion_callback: tp.Callable[..., None], node: tp.Union[cst.Assign, cst.AnnAssign], *args):
         """Process :py:class:`libcst.Assign` and :py:class:`libcst.AnnAssign`
 
-        :param add_function: Function to call to add the assigned object to the namespace
-        :type add_function:
+        :param namespace_insertion_callback: Function to call to add the assigned object to the namespace
+        :type namespace_insertion_callback:
             Callable[Concatenate[str, ...], None]
         :param node: Node from which assignment targets are extracted
         :type node: :py:class:`libcst.Assign` | :py:class:`libcst.AnnAssign`
         :param args: Arguments to pass to the function
         :return: None
         """
-        # TODO: Can add_function be renamed as add_callback ? or something like that ? 
         if isinstance(node, cst.AnnAssign):
-            add_function(evaluate(node.target), *args)
+            namespace_insertion_callback(repr_libcst_node(node.target), *args)
         elif isinstance(node, cst.Assign):
-            first_target = evaluate(node.targets[0].target)
-            add_function(first_target, *args)
+            first_target = repr_libcst_node(node.targets[0].target)
+            namespace_insertion_callback(first_target, *args)
             for target in node.targets[1:]:
-                self.namespace.add_alt_name(first_target, evaluate(target.target))
+                self.namespace.add_alt_name(first_target, repr_libcst_node(target.target))
         else:
             raise ValueError(
                 f"Parameter node should be of type libcst.Assign or libcst.AnnAssign, type of the node: {type(node)}."
@@ -88,7 +87,7 @@ class Parser(m.MatcherDecoratableTransformer):
         :param updated_node:
         :return:
         """
-        func_name = evaluate(cst.ensure_type(original_node.value, cst.Call).func)
+        func_name = repr_libcst_node(cst.ensure_type(original_node.value, cst.Call).func)
         self.node_processor.parse_tuples = True
 
         if self.namespace.get_absolute_name(func_name) in ["df_engine.core.actor.Actor", "df_engine.core.Actor"]:
@@ -96,7 +95,7 @@ class Parser(m.MatcherDecoratableTransformer):
             actor_arg_order = Actor.__init__.__wrapped__.__code__.co_varnames[1:]  # pylint: disable=no-member
             for arg, keyword in zip(cst.ensure_type(original_node.value, cst.Call).args, actor_arg_order):
                 if arg.keyword is not None:
-                    keyword = evaluate(arg.keyword)
+                    keyword = repr_libcst_node(arg.keyword)
                 args[keyword] = self.node_processor(arg.value)
                 logging.info("Found actor call arg %s = %s", keyword, args[keyword])
             self.add_assignment(self.namespace.add_function_call, original_node, func_name, args, True)
@@ -104,7 +103,7 @@ class Parser(m.MatcherDecoratableTransformer):
             args = {}
             for idx, arg in enumerate(cst.ensure_type(original_node.value, cst.Call).args):
                 if arg.keyword is not None:
-                    key: tp.Union[str, int] = evaluate(arg.keyword)
+                    key: tp.Union[str, int] = repr_libcst_node(arg.keyword)
                 else:
                     key = idx
                 args[key] = self.node_processor(arg.value)
@@ -129,8 +128,8 @@ class Parser(m.MatcherDecoratableTransformer):
                 self.namespace.add_import(name.evaluated_name, name.evaluated_alias)
         elif isinstance(original_node, cst.ImportFrom):
             if isinstance(original_node.names, cst.ImportStar):
-                raise StarredError(f"ImportStar is not allowed: {evaluate(original_node)}")
-            module_name = len(original_node.relative) * "." + evaluate(original_node.module or "")
+                raise StarredError(f"ImportStar is not allowed: {repr_libcst_node(original_node)}")
+            module_name = len(original_node.relative) * "." + repr_libcst_node(original_node.module or "")
             for name in original_node.names:
                 self.namespace.add_from_import(module_name, name.evaluated_name, name.evaluated_alias)
         return cst.RemoveFromParent()
