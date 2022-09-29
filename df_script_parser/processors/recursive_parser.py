@@ -3,7 +3,7 @@
 import logging
 import typing as tp
 from pathlib import Path
-from copy import copy
+from copy import copy, deepcopy
 import io
 
 import libcst as cst
@@ -181,7 +181,7 @@ class RecursiveParser:
             resolved_key = self.resolve_name(key)
             if isinstance(resolved_key, (dict, Call)):
                 raise ScriptValidationError(f"Dictionary key '{key}' is not a ``StringTag``: {resolved_key}")
-            key = copy(key) # TODO: maybe deepcopy? because of `key.metadata["resolved_value"] = resolved_key`
+            key = deepcopy(key)
             key.absolute_value = resolved_key.absolute_value
             key.metadata["resolved_value"] = resolved_key
 
@@ -200,7 +200,7 @@ class RecursiveParser:
                         raise ScriptValidationError(
                             f"Dictionary value '{value}' is not a ``StringTag``: {resolved_value}"
                         )
-                    value = copy(value)
+                    value = deepcopy(value)
                     value.absolute_value = resolved_value.absolute_value
                     value.metadata["resolved_value"] = resolved_value
                 traversal_stop_callback(current_traversed_path, value, paths + [path], **func_kwargs)

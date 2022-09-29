@@ -49,7 +49,7 @@ class NodeProcessor:
                 raise StarredError("Starred dict elements are not supported")
             key = self._process_node(element.key)
             result[key] = self._process_node(element.value)
-        return dict(result)
+        return result
 
     def _process_list(self, node: tp.Union[cst.List, cst.Tuple]) -> list:
         result = []
@@ -145,7 +145,7 @@ class Disambiguator:
         result = {}
         for key in obj:
             result[self._process(key)] = self._process(obj[key])
-        return dict(result)
+        return result
 
     def _process_list(self, obj: list) -> tp.Union[list, tuple]:
         result = []
