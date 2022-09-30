@@ -50,5 +50,5 @@ class KeyNotFoundError(ScriptValidationError):
     """
 
 
-class YamlStructureError(ParserError):
-    """Raised when a yaml file does not have a correct structure"""
+class DictStructureError(ParserError):
+    """Raised when a dictionary does not have a correct structure"""

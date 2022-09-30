@@ -133,6 +133,11 @@ class DictProcessor:
         self.replace_lists_with_tuples: bool = False
         self.process_element = self.disambiguate
 
+    def from_yaml(self, obj: tp.Any) -> tp.Any:
+        if isinstance(obj, str):
+            obj = yaml_dumper_loader.load(obj)
+        return obj
+
     @staticmethod
     def to_yaml(obj: tp.Any) -> tp.Any:
         if isinstance(obj, (StringTag, Import, Call)):

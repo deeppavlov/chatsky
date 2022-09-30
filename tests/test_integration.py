@@ -8,7 +8,7 @@ import pytest
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
 from df_script_parser.processors.recursive_parser import RecursiveParser
 from df_script_parser.utils.exceptions import ScriptValidationError
-from df_script_parser.tools import yaml2py, py2graph
+from df_script_parser.tools import yaml2py, py2graph, graph2py
 
 
 py2yaml_params = [
@@ -225,3 +225,70 @@ def test_py2graph(project_root_dir, main_file, output, exception, tmp_path):
             _test_yaml2py()
     else:
         _test_yaml2py()
+
+
+graph2py_params = [
+    # *[
+    #     (
+    #         Path(f"tests/test_yaml2py/simple_tests/test_{test_number}/yaml_files/script.yaml"),
+    #         Path(f"tests/test_yaml2py/simple_tests/test_{test_number}/python_files"),
+    #         exception,
+    #     )
+    #     for test_number, exception in zip(
+    #         range(1, 6),
+    #         [
+    #             None,
+    #             None,
+    #             None,
+    #             None,
+    #             None,
+    #         ],
+    #     )
+    # ],
+    # *[
+    #     (
+    #         Path(f"tests/test_yaml2py/complex_tests/test_{test_number}/yaml_files/script.yaml"),
+    #         Path(f"tests/test_yaml2py/complex_tests/test_{test_number}/python_files"),
+    #         exception,
+    #     )
+    #     for test_number, exception in zip(range(1, 3), [None, None])
+    # ],
+    (Path("examples/example_graph2py/graph_files/graph.json"), Path("examples/example_graph2py/python_files"), None),
+]
+
+
+@pytest.mark.parametrize(
+    "input_file,output_dir,exception",
+    graph2py_params,
+)
+def test_graph2py(input_file, output_dir, exception, tmp_path):
+    """Test graph2py
+
+    :param input_file: Graph file to convert
+    :param output_dir: Directory with a correct answer
+    :param exception: Exception raised during converting
+    :param tmp_path: Temporary path to convert to
+    :return:
+    """
+
+    def _test_graph2py():
+        def _assert_dir_eq(dir_cmp: dircmp):
+            """Assert two dirs are equal
+
+            :param dir_cmp:
+            :return:
+            """
+            assert dir_cmp.left_only == []
+            assert dir_cmp.right_only == []
+            assert dir_cmp.diff_files == []
+            for subdir in dir_cmp.subdirs.values():
+                _assert_dir_eq(subdir)
+
+        graph2py(Path(input_file), tmp_path)
+        _assert_dir_eq(dircmp(output_dir, tmp_path))
+
+    if exception:
+        with pytest.raises(exception):
+            _test_graph2py()
+    else:
+        _test_graph2py()
