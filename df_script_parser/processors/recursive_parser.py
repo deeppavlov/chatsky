@@ -4,7 +4,6 @@ import logging
 import typing as tp
 from pathlib import Path
 from copy import copy, deepcopy
-import io
 
 import libcst as cst
 import networkx as nx  # type: ignore
@@ -22,7 +21,7 @@ from df_script_parser.utils.module_metadata import ModuleType
 from df_script_parser.utils.namespaces import Namespace, NamespaceTag, Request, Call, Import
 from df_script_parser.utils.validators import check_file_structure, validate_path
 from df_script_parser.processors.script2graph import script2graph
-from df_script_parser.dumpers_loaders import yaml_dumper_loader
+from df_script_parser.processors.dict_processors import DictProcessor
 
 
 ScriptDict = tp.Dict[tp.Union[Python, String], tp.Union["ScriptDict", Python, String]]  # type: ignore
@@ -377,9 +376,7 @@ class RecursiveParser:
     def to_graph(self) -> nx.MultiDiGraph:
         if self.graph is None:
             raise RuntimeError("Not found an actor call")
-        buffer = io.StringIO()
-        yaml_dumper_loader.dump(self.to_dict(), buffer)
-        buffer.seek(0)
-        self.graph.graph["requirements"] = self.requirements
-        self.graph.graph["script"] = buffer.read()
+        processor = DictProcessor()
+        processor.process_element = processor.to_yaml
+        self.graph.graph["script"] = processor(self.to_dict())
         return self.graph

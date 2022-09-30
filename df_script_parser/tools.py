@@ -9,7 +9,7 @@ from black import format_file_in_place, FileMode, WriteBack
 import networkx as nx  # type: ignore
 
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
-from df_script_parser.processors.dict_processors import Disambiguator
+from df_script_parser.processors.dict_processors import DictProcessor
 from df_script_parser.processors.recursive_parser import RecursiveParser
 from df_script_parser.utils.namespaces import Import, From, Call
 from df_script_parser.utils.exceptions import YamlStructureError
@@ -105,7 +105,7 @@ def yaml2py(
             logging.warning("File %s already exists", path_to_file)
 
         with open(path_to_file, "w", encoding="utf-8") as outfile:
-            disambiguator = Disambiguator()
+            disambiguator = DictProcessor()
             for name, value in namespaces[namespace].items():
                 if isinstance(value, (Import, From)):
                     outfile.write(repr(value) + f" as {name}\n")

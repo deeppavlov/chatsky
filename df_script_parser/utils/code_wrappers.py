@@ -52,7 +52,7 @@ class StringTag(ABC):
     def to_yaml(cls, representer: Representer, node: "StringTag"):
         """Represent object in yaml
 
-        :param representer: Yaml node representer that provide functions for displaying values
+        :param representer: Yaml node representer that provides functions for displaying values
         :type representer: :py:class:`ruamel.yaml.representer.Representer`
         :param node: Node that is represented
         :type node: :py:class:`StringTag`

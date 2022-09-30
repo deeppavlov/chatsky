@@ -6,6 +6,7 @@ import logging
 import re
 import typing as tp
 from os import devnull
+from io import StringIO
 
 import libcst as cst
 from pyflakes.api import check  # type: ignore
@@ -14,10 +15,12 @@ from pyflakes.reporter import Reporter  # type: ignore
 from df_script_parser.utils.code_wrappers import (
     String,
     Python,
+    StringTag,
 )
-from df_script_parser.utils.convenience_functions import repr_libcst_node
+from df_script_parser.utils.convenience_functions import repr_libcst_node, remove_suffix
 from df_script_parser.utils.exceptions import StarredError, ParserError
-from df_script_parser.utils.namespaces import Namespace, Call
+from df_script_parser.utils.namespaces import Namespace, Call, Import
+from df_script_parser.dumpers_loaders import yaml_dumper_loader
 
 
 WHITESPACES_REGEXP = r"\n[ \t]*"
@@ -119,18 +122,30 @@ class NodeProcessor:
         return self.process(node)
 
 
-class Disambiguator:
-    """Class that processes an object by replacing :py:class:`str` with a subclass of :py:class:`.StringTag`
+class DictProcessor:
+    """Class that processes dicts and lists by replacing their keys and values
 
-    To determine whether the string should be a :py:class:`.Python` or a :py:class:`.String` object uses a list of
-    names in the namespace
-
-    If :py:property:`replace_lists_with_tuples` is set to True Disambiguator replaces lists with tuples
+    If :py:property:`replace_lists_with_tuples` is set to True DictProcessor replaces lists with tuples
     """
 
     def __init__(self):
         self.names: tp.List[str] = []
         self.replace_lists_with_tuples: bool = False
+        self.process_element = self.disambiguate
+
+    @staticmethod
+    def to_yaml(obj: tp.Any) -> tp.Any:
+        if isinstance(obj, (StringTag, Import, Call)):
+            buffer = StringIO()
+            yaml_dumper_loader.dump(obj, buffer)
+            buffer.seek(0)
+            return remove_suffix(buffer.read(), "\n...\n")
+        return obj
+
+    def disambiguate(self, obj: tp.Any) -> tp.Any:
+        if isinstance(obj, str):
+            return Python(obj) if pyflakes_check_with_imports(self.names, obj) else String(obj)
+        return obj
 
     def add_name(self, name: str):
         """Add a name to the list of names in a namespace
@@ -160,9 +175,7 @@ class Disambiguator:
             return self._process_dict(obj)
         if isinstance(obj, list):
             return self._process_list(obj)
-        if isinstance(obj, str):
-            return Python(obj) if pyflakes_check_with_imports(self.names, obj) else String(obj)
-        return obj
+        return self.process_element(obj)
 
     def __call__(self, node: tp.Any):
         return self._process(node)
