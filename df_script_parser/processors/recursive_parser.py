@@ -13,15 +13,13 @@ from df_script_parser.processors.parse import Parser
 from df_script_parser.utils.code_wrappers import StringTag, Python, String
 from df_script_parser.utils.convenience_functions import get_module_name, remove_suffix
 from df_script_parser.utils.exceptions import (
-    NamespaceNotParsedError,
-    ObjectNotFoundError,
     ResolutionError,
     ParserError,
     ScriptValidationError,
     WrongFileStructureError,
 )
 from df_script_parser.utils.module_metadata import ModuleType
-from df_script_parser.utils.namespaces import Namespace, NamespaceTag, Request, Call
+from df_script_parser.utils.namespaces import Namespace, NamespaceTag, Request, Call, Import
 from df_script_parser.utils.validators import check_file_structure, validate_path
 from df_script_parser.processors.script2graph import script2graph
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
@@ -61,17 +59,54 @@ class RecursiveParser:
         :return:
         """
         if isinstance(name, Request):
-            return self.get_requested_object(name)[
-                0
-            ]  # TODO: please use an explicit manner `name, _ = self.get_requested_object(name)`
-        try:
-            if isinstance(name, Python):
-                return self.get_requested_object(Request.from_str(name.absolute_value))[0]
-        except ResolutionError:
-            pass
-        return name
+            result, _ = self.get_requested_object(name)
+        else:
+            result = name
+            try:
+                if isinstance(name, Python):
+                    result, _ = self.get_requested_object(Request.from_str(name.absolute_value))
+            except ResolutionError:
+                pass
+        return result
 
-    def get_requested_object(self, request: Request) -> tp.Tuple[tp.Union[dict, Call, StringTag], tp.List[str]]:
+    def resolve_dict_key_path(
+        self, dictionary: ScriptDict, key_path: tp.Sequence[tp.Union[Request, StringTag]], path: tp.List[str]
+    ) -> tp.Optional[tp.Tuple[tp.Union[StringTag, Call, Import, dict], tp.List[str]]]:
+        """Given a dictionary get its items key by key. Take keys from ``key_path``
+
+        :param dictionary: Dictionary to get items from
+        :param key_path: A sequence of keys
+        :param path: Path to the dictionary
+        :return:
+            value of ``dictionary[key_path[0]][key_path[1]]...`` and path to that value or None if an error occurred
+        """
+        if len(key_path) == 0:
+            raise RuntimeError(f"key_path is empty. path={path}")
+        for key in key_path:
+            if not isinstance(dictionary, dict):
+                logging.debug("Object '%s' is not a dict. Key '%s' not found", dictionary, key)
+                return None
+
+            resolved_keys_to_keys = {self.resolve_name(k): k for k in dictionary.keys()}
+            dict_key = resolved_keys_to_keys.get(self.resolve_name(key))
+            if dict_key is None:
+                logging.debug("Key not found: '%s', existing keys: %s", key, resolved_keys_to_keys)
+                return None
+
+            path = copy(path)
+            path.append(dict_key.display_value)
+
+            value = dictionary[dict_key]
+
+            if isinstance(value, Python):
+                try:
+                    value, path = self.get_requested_object(Request.from_str(value.absolute_value))
+                except ResolutionError as error:
+                    logging.debug(error)
+            dictionary = value  # type: ignore
+        return value, path
+
+    def get_requested_object(self, request: Request) -> tp.Tuple[tp.Union[dict, Call, StringTag, Import], tp.List[str]]:
         """Return an object requested in ``request``
 
         :param request: Request of an object
@@ -83,55 +118,44 @@ class RecursiveParser:
             If a requested object is not found
         """
         for i in reversed(range(1, len(request.attributes))):
-            try:
-                # split the name into (namespace, module, object) or into (namespace, object
-                left = request.attributes[:i]
-                middle = request.attributes[i]
-                right = request.attributes[i + 1 :]  # noqa: E203
+            # split the name into (namespace, module, object) or into (namespace, object)
+            left = request.attributes[:i]
+            middle = request.attributes[i]
+            right = request.attributes[i + 1 :]  # noqa: E203
 
-                potential_namespace = NamespaceTag(".".join(map(repr, left)))
-                namespace = self.namespaces.get(potential_namespace)
-                if namespace is None:  # TODO: maybe just `break`
-                    raise NamespaceNotParsedError(f"Not found namespace {repr(potential_namespace)}, request={request}")
+            # find a namespace
+            potential_namespace = NamespaceTag(".".join(map(repr, left)))
+            namespace = self.namespaces.get(potential_namespace)
+            if namespace is None:
+                logging.debug("Not found namespace '%s', request=%s", potential_namespace, request)
+                continue
 
-                namespace_object = namespace.names.get(middle)
+            # find an object
+            namespace_object = namespace.names.get(middle)
+            if namespace_object is None:
+                logging.debug("Not found '%s' in '%s', request=%s", middle, namespace.name, request)
+                continue
+            path = [namespace.name, repr(middle)]
+            name: tp.Union[ScriptDict, Call, StringTag] = namespace_object
 
-                if namespace_object is None:
-                    raise ObjectNotFoundError(f"Not found {middle} in {namespace.name}, request={request}")
-                path = [namespace.name, repr(middle)]
+            if isinstance(name, Python):
+                try:
+                    name, path = self.get_requested_object(
+                        Request.from_str(".".join([name.absolute_value, *map(repr, right)]))
+                    )
+                except ResolutionError as error:
+                    logging.debug(error)
 
-                name: tp.Union[ScriptDict, Call, StringTag] = namespace_object
-
-                if isinstance(name, Python):
-                    try:
-                        name, path = self.get_requested_object(
-                            Request.from_str(".".join([name.absolute_value, *map(repr, right)]))
-                        )
-                    except ResolutionError as error:
-                        logging.debug(error)
-
-                # TODO: so hard, can be this func split into 2-3 small functions?
-                # process indices
-                for index in request.indices:
-                    if not isinstance(name, dict):
-                        raise ResolutionError(f"Object '{name}' is not a dict. Key '{index}' not found")
-
-                    resolved_names = {self.resolve_name(k): k for k in name.keys()}
-                    key = resolved_names.get(self.resolve_name(index))
-                    if key is None:
-                        raise ResolutionError(f"Key not found: '{key}', existing keys: {resolved_names}")
-                    name = name[key]
-                    path.append(repr(index))
-
-                    if isinstance(name, Python):
-                        try:
-                            name, path = self.get_requested_object(Request.from_str(name.absolute_value))
-                        except ResolutionError as error:
-                            logging.debug(error)
-
-                return name, path
-            except ResolutionError as error:
-                logging.debug("Name not found reason: %s", error)
+            # process indices
+            if len(request.indices) > 0:
+                if not isinstance(name, dict):
+                    logging.debug("Object '%s' is not a dict. Indices: %s", name, request.indices)
+                    continue
+                result = self.resolve_dict_key_path(name, request.indices, path)
+                if result is None:
+                    continue
+                name, path = result
+            return name, path
         raise ResolutionError(f"Cannot find object {request}")
 
     def traverse_dict(
@@ -167,7 +191,7 @@ class RecursiveParser:
         if func_kwargs is None:
             func_kwargs = {}
 
-        for key in script:
+        for key in script:  # todo: check if there are bugs
             value = script[key]
             path = copy(paths[-1])
 
@@ -197,7 +221,7 @@ class RecursiveParser:
                     value, paths + [path], traversal_stop_callback, func_kwargs, stop_condition, current_traversed_path
                 )
             else:
-                if not isinstance(value, Call):
+                if isinstance(value, StringTag):
                     resolved_value = self.resolve_name(value)
                     if isinstance(resolved_value, (dict, Call)):
                         raise ScriptValidationError(

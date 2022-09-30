@@ -7,8 +7,8 @@ import pytest
 
 from df_script_parser.dumpers_loaders import yaml_dumper_loader
 from df_script_parser.processors.recursive_parser import RecursiveParser
-from df_script_parser.utils.exceptions import ScriptValidationError, KeyNotFoundError
-from df_script_parser.tools import yaml2py
+from df_script_parser.utils.exceptions import ScriptValidationError
+from df_script_parser.tools import yaml2py, py2graph
 
 
 py2yaml_params = [
@@ -20,7 +20,7 @@ py2yaml_params = [
             exception,
         )
         for test_number, exception in zip(
-            range(1, 16),
+            range(1, 18),
             [
                 None,
                 ScriptValidationError,
@@ -37,6 +37,8 @@ py2yaml_params = [
                 None,
                 None,
                 ScriptValidationError,
+                None,
+                None,
             ],
         )
     ],
@@ -140,6 +142,83 @@ def test_yaml2py(script, output_dir, exception, tmp_path):
 
         yaml2py(Path(script), tmp_path)
         _assert_dir_eq(dircmp(output_dir, tmp_path))
+
+    if exception:
+        with pytest.raises(exception):
+            _test_yaml2py()
+    else:
+        _test_yaml2py()
+
+
+py2graph_params = [
+    # *[
+    #     (
+    #         Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/python_files"),
+    #         Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/python_files/main.py"),
+    #         Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/yaml_files/script.yaml"),
+    #         exception,
+    #     )
+    #     for test_number, exception in zip(
+    #         range(1, 18),
+    #         [
+    #             None,
+    #             ScriptValidationError,
+    #             ScriptValidationError,
+    #             ScriptValidationError,
+    #             ScriptValidationError,
+    #             ScriptValidationError,
+    #             ScriptValidationError,
+    #             None,
+    #             None,
+    #             None,
+    #             None,
+    #             ScriptValidationError,
+    #             None,
+    #             None,
+    #             ScriptValidationError,
+    #             None,
+    #             None,
+    #         ],
+    #     )
+    # ],
+    # *[
+    #     (
+    #         Path(f"tests/test_py2yaml/complex_tests/test_{test_number}/python_files"),
+    #         Path(f"tests/test_py2yaml/complex_tests/test_{test_number}/python_files/main.py"),
+    #         Path(f"tests/test_py2yaml/complex_tests/test_{test_number}/yaml_files/script.yaml"),
+    #         exception,
+    #     )
+    #     for test_number, exception in zip(range(1, 3), [None, None])
+    # ],
+    (
+        Path("examples/example_py2graph/python_files"),
+        Path("examples/example_py2graph/python_files/main.py"),
+        Path("examples/example_py2graph/graph_files"),
+        None,
+    ),
+]
+
+
+@pytest.mark.parametrize(
+    "project_root_dir,main_file,output,exception",
+    py2graph_params,
+)
+def test_py2graph(project_root_dir, main_file, output, exception, tmp_path):
+    def _test_yaml2py():
+        def _assert_dir_eq(dir_cmp: dircmp):
+            """Assert two dirs are equal
+
+            :param dir_cmp:
+            :return:
+            """
+            assert dir_cmp.left_only == []
+            assert dir_cmp.right_only == []
+            assert dir_cmp.diff_files == []
+            for subdir in dir_cmp.subdirs.values():
+                _assert_dir_eq(subdir)
+
+        py2graph(main_file, project_root_dir, tmp_path / "graph.json")
+        _assert_dir_eq(dircmp(output, tmp_path))
 
     if exception:
         with pytest.raises(exception):

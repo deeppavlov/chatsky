@@ -10,7 +10,7 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import Constructor
 from ruamel.yaml.representer import Representer
 
-from df_script_parser.utils.code_wrappers import Python, String
+from df_script_parser.utils.code_wrappers import Python, String, StringTag
 from df_script_parser.utils.convenience_functions import repr_libcst_node, remove_suffix, get_module_name
 from df_script_parser.utils.exceptions import ObjectNotFoundError, ResolutionError, RequestParsingError
 from df_script_parser.utils.module_metadata import ModuleType, get_module_info
@@ -162,7 +162,7 @@ class Request:
         get_absolute_attributes: tp.Optional[tp.Callable[[tp.List[Python]], tp.List[Python]]] = None,
     ):
         self.attributes: tp.List[Python] = []
-        self.indices: tp.List[tp.Union["Request", Python, String]] = []
+        self.indices: tp.List[tp.Union["Request", StringTag]] = []
         self.get_absolute_attributes = get_absolute_attributes
         self._process_node(node)
         if get_absolute_attributes:
