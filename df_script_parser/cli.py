@@ -2,7 +2,7 @@
 """
 from pathlib import Path
 import argparse
-from df_script_parser.tools import py2yaml, yaml2py, py2graph
+from df_script_parser.tools import py2yaml, yaml2py, py2graph, graph2py
 
 
 def is_dir(arg: str) -> Path:
@@ -114,3 +114,22 @@ def yaml2py_cli():
     )
     args = parser.parse_args()
     yaml2py(**vars(args))
+
+
+def graph2py_cli():
+    """:py:func:`.graph2py` cli wrapper"""
+    parser = argparse.ArgumentParser(description=graph2py.__doc__.split("\n\n", maxsplit=1)[0])
+    parser.add_argument(
+        "graph_file",
+        metavar="GRAPH_FILE",
+        help="Graph file to load",
+        type=is_file,
+    )
+    parser.add_argument(
+        "extract_to_directory",
+        metavar="EXTRACT_TO_DIRECTORY",
+        help="Path to the directory to extract project to",
+        type=is_dir,
+    )
+    args = parser.parse_args()
+    graph2py(**vars(args))
