@@ -10,9 +10,9 @@ from typing_extensions import NotRequired
 _ForwardPipelineComponent = NewType("PipelineComponent", None)
 _ForwardService = NewType("Service", _ForwardPipelineComponent)
 _ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
-_ForwardServiceWrapper = NewType("Wrapper", None)
+_ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", None)
 _ForwardProvider = NewType("ABCProvider", ABC)
-_ForwardWrapperFunction = NewType("WrapperFunction", None)
+_ForwardExtraHandlerFunction = NewType("ExtraHandlerFunction", None)
 
 
 @unique
@@ -35,7 +35,7 @@ class ComponentExecutionState(Enum):
 
 
 @unique
-class GlobalWrapperType(Enum):
+class GlobalExtraHandlerType(Enum):
     """
     Enum, representing types of global wrappers, that can be set applied for a pipeline.
     The following types are supported:
@@ -52,7 +52,7 @@ class GlobalWrapperType(Enum):
 
 
 @unique
-class WrapperStage(Enum):
+class ExtraHandlerType(Enum):
     """
     Enum, representing wrapper type, pre- or postprocessing.
     The following types are supported:
@@ -99,7 +99,7 @@ A function type used during global wrappers initialization to determine
 Checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
 Accepts str (component path), returns boolean (whether wrapper should be applied).
 """
-WrapperConditionFunction = Callable[[str], bool]
+ExtraHandlerConditionFunction = Callable[[str], bool]
 
 
 """
@@ -132,11 +132,11 @@ Type of dictionary, that is passed to wrappers in runtime.
 Contains current wrapper info (`name`, `stage`).
 Also contains `component` - runtime info dictionary of the component this wrapper is attached to.
 """
-WrapperRuntimeInfo = TypedDict(
-    "WrapperRuntimeInfo",
+ExtraHandlerRuntimeInfo = TypedDict(
+    "ExtraHandlerRuntimeInfo",
     {
-        "function": _ForwardWrapperFunction,
-        "stage": WrapperStage,
+        "function": _ForwardExtraHandlerFunction,
+        "stage": ExtraHandlerType,
         "component": ServiceRuntimeInfo,
     },
 )
@@ -146,10 +146,10 @@ WrapperRuntimeInfo = TypedDict(
 A function type for creating wrappers (before and after functions).
 Can accept current dialog context, actor, attached to the pipeline, and current wrapper info dictionary.
 """
-WrapperFunction = Union[
+ExtraHandlerFunction = Union[
     Callable[[Context], None],
     Callable[[Context, Actor], None],
-    Callable[[Context, Actor, WrapperRuntimeInfo], None],
+    Callable[[Context, Actor, ExtraHandlerRuntimeInfo], None],
 ]
 
 
@@ -168,17 +168,17 @@ ServiceFunction = Union[
 ]
 
 
-WrapperBuilder = Union[
-    _ForwardServiceWrapper,
+ExtraHandlerBuilder = Union[
+    _ForwardComponentExtraHandler,
     TypedDict(
         "WrapperDict",
         {
             "timeout": NotRequired[Optional[int]],
             "asynchronous": NotRequired[bool],
-            "functions": List[WrapperFunction],
+            "functions": List[ExtraHandlerFunction],
         },
     ),
-    List[WrapperFunction],
+    List[ExtraHandlerFunction],
 ]
 
 
@@ -198,8 +198,8 @@ ServiceBuilder = Union[
         "ServiceDict",
         {
             "handler": "ServiceBuilder",
-            "before_wrapper": NotRequired[Optional[WrapperBuilder]],
-            "after_wrapper": NotRequired[Optional[WrapperBuilder]],
+            "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
+            "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "timeout": NotRequired[Optional[int]],
             "asynchronous": NotRequired[bool],
             "start_condition": NotRequired[StartConditionCheckerFunction],
@@ -231,8 +231,8 @@ PipelineBuilder = TypedDict(
         "messenger_interface": NotRequired[Optional[_ForwardProvider]],
         "context_storage": NotRequired[Optional[Union[DBAbstractConnector, Dict]]],
         "components": ServiceGroupBuilder,
-        "before_wrapper": NotRequired[Optional[WrapperBuilder]],
-        "after_wrapper": NotRequired[Optional[WrapperBuilder]],
+        "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
+        "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
     },
 )

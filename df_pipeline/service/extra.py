@@ -6,33 +6,38 @@ from typing import Optional, List
 from df_engine.core import Context, Actor
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates, wrap_sync_function_in_async
-from ..types import ServiceRuntimeInfo, WrapperStage, WrapperBuilder, WrapperFunction
+from ..types import ServiceRuntimeInfo, ExtraHandlerType, ExtraHandlerBuilder, ExtraHandlerFunction
 
 logger = logging.getLogger(__name__)
 
 
-class Wrapper:
-    """TODO: update docs
-    Class, representing a wrapper.
-    A wrapper is a set of two functions, one run before and one after pipeline component.
-    Wrappers should execute supportive tasks (like time or resources measurement, minor data transformations).
-    Wrappers should NOT edit context or actor, use services for that purpose instead.
+class _ComponentExtraHandler:
+    """
+    Class, representing an extra pipeline component handler.
+    A component extra handler is a set of functions, attached to pipeline component (before or after it).
+    Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
+    Extra handlers should NOT edit context or actor, use services for that purpose instead.
     It accepts constructor parameters:
-        `before` - function to be executed before component
-        `after` - function to be executed after component
-        `name` - wrapper name
+        `functions` - an ExtraHandlerBuilder object, an _ComponentExtraHandler instance,
+        a dict or a list of ExtraHandlerFunctions
+        `stage` - an ExtraHandlerType,
+        specifying whether this handler will be executed before or after pipeline component
+        `timeout` - (for asynchronous only!) maximum component execution time (in seconds),
+        if it exceeds this time, it is interrupted
+        `asynchronous` - requested asynchronous property
     """
 
     def __init__(
         self,
-        functions: WrapperBuilder,
+        functions: ExtraHandlerBuilder,
+        stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED,
         timeout: Optional[int] = None,
         asynchronous: Optional[bool] = None,
     ):
         overridden_parameters = collect_defined_constructor_parameters_to_dict(
             timeout=timeout, asynchronous=asynchronous
         )
-        if isinstance(functions, Wrapper):
+        if isinstance(functions, _ComponentExtraHandler):
             self.__init__(
                 **_get_attrs_with_updates(
                     functions,
@@ -49,14 +54,14 @@ class Wrapper:
             self.timeout = timeout
             self.requested_async_flag = asynchronous
             self.calculated_async_flag = all([asyncio.iscoroutinefunction(function) for function in self.functions])
-            self.stage: WrapperStage = WrapperStage.UNDEFINED
+            self.stage = stage
         else:
-            raise Exception(f"Unknown type for ServiceGroup {functions}")
+            raise Exception(f"Unknown type for {type(self).__name__} {functions}")
 
     @property
     def asynchronous(self) -> bool:
         """
-        Property, that indicates, whether this component is synchronous or asynchronous.
+        Property, that indicates, whether this component extra handler is synchronous or asynchronous.
         It is calculated according to following rule:
             1. If component can be asynchronous and `requested_async_flag` is set, it returns `requested_async_flag`
             2. If component can be asynchronous and `requested_async_flag` isn't set, it returns True
@@ -68,7 +73,7 @@ class Wrapper:
         return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
     async def _run_function(
-        self, function: WrapperFunction, ctx: Context, actor: Actor, component_info: ServiceRuntimeInfo
+        self, function: ExtraHandlerFunction, ctx: Context, actor: Actor, component_info: ServiceRuntimeInfo
     ):
         handler_params = len(inspect.signature(function).parameters)
         if handler_params == 1:
@@ -151,3 +156,23 @@ class Wrapper:
             "asynchronous": self.asynchronous,
             "functions": [function.__name__ for function in self.functions],
         }
+
+
+class BeforeHandler(_ComponentExtraHandler):
+    def __init__(
+        self,
+        functions: ExtraHandlerBuilder,
+        timeout: Optional[int] = None,
+        asynchronous: Optional[bool] = None,
+    ):
+        super().__init__(functions, ExtraHandlerType.BEFORE, timeout, asynchronous)
+
+
+class AfterHandler(_ComponentExtraHandler):
+    def __init__(
+        self,
+        functions: ExtraHandlerBuilder,
+        timeout: Optional[int] = None,
+        asynchronous: Optional[bool] = None,
+    ):
+        super().__init__(functions, ExtraHandlerType.AFTER, timeout, asynchronous)

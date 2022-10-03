@@ -1,8 +1,8 @@
 """
-Wrappers (basic)
+Extra Handlers (basic)
 ================
 
-The following example shows wrappers possibilities and use cases
+The following example shows extra handlers possibilities and use cases
 """
 
 import asyncio
@@ -13,31 +13,29 @@ from datetime import datetime
 
 from df_engine.core import Context, Actor
 
-from df_pipeline import Pipeline, ServiceGroup, WrapperRuntimeInfo
+from df_pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 from _utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-""" TODO: update docs
-Wrappers are additional function pairs (before-function and after-function) that can be added to any pipeline components (service and service groups).
-Wrappers main purpose should be service and service groups statistics collection.
-Wrappers can be attached to pipeline component using `wrappers` constructor parameter.
-
-Wrappers can have `before` and `after` functions - that will be executed before and after pipeline component respectively.
+"""
+Extra handlers are additional function lists (before-functions and/or after-functions) that can be added to any pipeline components (service and service groups).
+Extra handlers main purpose should be service and service groups statistics collection.
+Extra handlers can be attached to pipeline component using `before_handler` and `after_handler` constructor parameter.
 
 Here 5 `heavy_service`s are run in single asynchronous service group.
 Each of them sleeps for random amount of seconds (between 0 and 5).
-To each of them (as well as to group) time measurement wrapper is attached, that writes execution time to `ctx.misc`.
+To each of them (as well as to group) time measurement extra handler is attached, that writes execution time to `ctx.misc`.
 In the end `ctx.misc` is logged to info channel.
 """
 
 
-def collect_timestamp_before(ctx: Context, _, info: WrapperRuntimeInfo):
+def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now()})
 
 
-def collect_timestamp_after(ctx: Context, _, info: WrapperRuntimeInfo):
+def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]})
 
 
@@ -59,33 +57,33 @@ def logging_service(ctx: Context):
 pipeline_dict = {
     "components": [
         ServiceGroup(
-            before_wrapper=[collect_timestamp_before],
-            after_wrapper=[collect_timestamp_after],
+            before_handler=[collect_timestamp_before],
+            after_handler=[collect_timestamp_after],
             components=[
                 {
                     "handler": heavy_service,
-                    "before_wrapper": [collect_timestamp_before],
-                    "after_wrapper": [collect_timestamp_after],
+                    "before_handler": [collect_timestamp_before],
+                    "after_handler": [collect_timestamp_after],
                 },
                 {
                     "handler": heavy_service,
-                    "before_wrapper": [collect_timestamp_before],
-                    "after_wrapper": [collect_timestamp_after],
+                    "before_handler": [collect_timestamp_before],
+                    "after_handler": [collect_timestamp_after],
                 },
                 {
                     "handler": heavy_service,
-                    "before_wrapper": [collect_timestamp_before],
-                    "after_wrapper": [collect_timestamp_after],
+                    "before_handler": [collect_timestamp_before],
+                    "after_handler": [collect_timestamp_after],
                 },
                 {
                     "handler": heavy_service,
-                    "before_wrapper": [collect_timestamp_before],
-                    "after_wrapper": [collect_timestamp_after],
+                    "before_handler": [collect_timestamp_before],
+                    "after_handler": [collect_timestamp_after],
                 },
                 {
                     "handler": heavy_service,
-                    "before_wrapper": [collect_timestamp_before],
-                    "after_wrapper": [collect_timestamp_after],
+                    "before_handler": [collect_timestamp_before],
+                    "after_handler": [collect_timestamp_after],
                 },
             ],
         ),

@@ -10,10 +10,11 @@ from ..types import (
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ServiceGroupBuilder,
-    GlobalWrapperType,
-    WrapperConditionFunction,
-    WrapperFunction,
-    WrapperBuilder,
+    GlobalExtraHandlerType,
+    ExtraHandlerConditionFunction,
+    ExtraHandlerFunction,
+    ExtraHandlerBuilder,
+    ExtraHandlerType,
 )
 from .service import Service
 
@@ -42,16 +43,16 @@ class ServiceGroup(PipelineComponent):
     def __init__(
         self,
         components: ServiceGroupBuilder,
-        before_wrapper: Optional[WrapperBuilder] = None,
-        after_wrapper: Optional[WrapperBuilder] = None,
+        before_handler: Optional[ExtraHandlerBuilder] = None,
+        after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[int] = None,
         asynchronous: Optional[bool] = None,
         start_condition: Optional[StartConditionCheckerFunction] = None,
         name: Optional[str] = None,
     ):
         overridden_parameters = collect_defined_constructor_parameters_to_dict(
-            before_wrapper=before_wrapper,
-            after_wrapper=after_wrapper,
+            before_handler=before_handler,
+            after_handler=after_handler,
             timeout=timeout,
             asynchronous=asynchronous,
             start_condition=start_condition,
@@ -76,7 +77,7 @@ class ServiceGroup(PipelineComponent):
             self.components = self._create_components(components)
             calc_async = all([service.asynchronous for service in self.components])
             super(ServiceGroup, self).__init__(
-                before_wrapper, after_wrapper, timeout, asynchronous, calc_async, start_condition, name
+                before_handler, after_handler, timeout, asynchronous, calc_async, start_condition, name
             )
         else:
             raise Exception(f"Unknown type for ServiceGroup {components}")
@@ -128,7 +129,7 @@ class ServiceGroup(PipelineComponent):
         :actor: - actor, associated with the pipeline.
         Returns current dialog context if synchronous, else None.
         """
-        await self.run_wrapper(self.before_wrapper, ctx, actor)
+        await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, actor)
 
         try:
             if self.start_condition(ctx, actor):
@@ -140,7 +141,7 @@ class ServiceGroup(PipelineComponent):
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"ServiceGroup '{self.name}' execution failed!\n{e}")
 
-        await self.run_wrapper(self.after_wrapper, ctx, actor)
+        await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, actor)
         return ctx if not self.asynchronous else None
 
     def log_optimization_warnings(self):
@@ -176,11 +177,11 @@ class ServiceGroup(PipelineComponent):
                         )
                 service.log_optimization_warnings()
 
-    def add_wrapper(
+    def add_extra_handler(
         self,
-        global_wrapper_type: GlobalWrapperType,
-        wrapper: WrapperFunction,
-        condition: WrapperConditionFunction = lambda _: True,
+        global_extra_handler_type: GlobalExtraHandlerType,
+        extra_handler: ExtraHandlerFunction,
+        condition: ExtraHandlerConditionFunction = lambda _: True,
     ):
         """
         Method for adding a global wrapper to this group.
@@ -192,14 +193,14 @@ class ServiceGroup(PipelineComponent):
         :condition: - a condition function.
         Returns None.
         """
-        super().add_wrapper(global_wrapper_type, wrapper)
+        super().add_extra_handler(global_extra_handler_type, extra_handler)
         for service in self.components:
             if not condition(service.path):
                 continue
             if isinstance(service, Service):
-                service.add_wrapper(global_wrapper_type, wrapper)
+                service.add_extra_handler(global_extra_handler_type, extra_handler)
             else:
-                service.add_wrapper(global_wrapper_type, wrapper, condition)
+                service.add_extra_handler(global_extra_handler_type, extra_handler, condition)
 
     @property
     def info_dict(self) -> dict:

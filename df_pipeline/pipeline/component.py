@@ -1,11 +1,3 @@
-"""
-Example for future documenting!
-===============================
-
-TODO: update documentation to match this file
-TODO: fix function definition types, rn they are faaar too long
-"""
-
 import logging
 import abc
 import asyncio
@@ -14,17 +6,17 @@ from typing import Optional, Union, Awaitable
 
 from df_engine.core import Context, Actor
 
-from ..service.wrapper import Wrapper
+from ..service.extra import BeforeHandler, AfterHandler
 from ..conditions import always_start_condition
 from ..types import (
     PIPELINE_STATE_KEY,
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ServiceRuntimeInfo,
-    GlobalWrapperType,
-    WrapperFunction,
-    WrapperStage,
-    WrapperBuilder,
+    GlobalExtraHandlerType,
+    ExtraHandlerFunction,
+    ExtraHandlerType,
+    ExtraHandlerBuilder,
 )
 
 logger = logging.getLogger(__name__)
@@ -35,20 +27,23 @@ class PipelineComponent(abc.ABC):
     This class represents a pipeline component - a service or a service group.
     It contains some fields that they have in common.
 
-    :param list wrappers: list of Wrappers, associated with this component
+    :param before_handler: before handler, associated with this component
+    :type before_handler: :py:class:`~df_runner.BeforeHandler`
+    :param after_handler: after handler, associated with this component
+    :type before_handler: :py:class:`~df_runner.AfterHandler`
     :param int timeout: (for asynchronous only!) maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted
     :param bool requested_async_flag: requested asynchronous property;
     if not defined, calculated_async_flag is used instead
     :param bool calculated_async_flag: whether the component can be asynchronous or not
 
-        - for :py:class:`~df_pipeline.service.service.Service`: whether its ``handler`` is asynchronous or not
-        - for :py:class:`~df_pipeline.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
+        - for :py:class:`~df_runner.service.service.Service`: whether its ``handler`` is asynchronous or not
+        - for :py:class:`~df_runner.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
 
     :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
     component is executed only if it returns True
-    :type start_condition: :py:class:`~df_pipeline.types.StartConditionCheckerFunction`
-    :param name: component name (should be unique in single :py:class:`~df_pipeline.service.group.ServiceGroup`),
+    :type start_condition: :py:class:`~df_runner.types.StartConditionCheckerFunction`
+    :param name: component name (should be unique in single :py:class:`~df_runner.service.group.ServiceGroup`),
     should not be blank or contain '.' symbol
     :param path: dot-separated path to component, is universally unique
     :type path: str or None
@@ -56,8 +51,8 @@ class PipelineComponent(abc.ABC):
 
     def __init__(
         self,
-        before_wrapper: Optional[WrapperBuilder] = None,
-        after_wrapper: Optional[WrapperBuilder] = None,
+        before_handler: Optional[ExtraHandlerBuilder] = None,
+        after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[int] = None,
         requested_async_flag: Optional[bool] = None,
         calculated_async_flag: bool = False,
@@ -75,17 +70,14 @@ class PipelineComponent(abc.ABC):
         #: Component start condition that is invoked before each component execution;
         #: component is executed only if it returns True
         self.start_condition = always_start_condition if start_condition is None else start_condition
-        #: Component name (should be unique in single :py:class:`~df_pipeline.service.group.ServiceGroup`),
+        #: Component name (should be unique in single :py:class:`~df_runner.service.group.ServiceGroup`),
         #: should not be blank or contain '.' symbol
         self.name = name
         #: Вot-separated path to component (should be is universally unique)
         self.path = path
 
-        self.before_wrapper = Wrapper([] if before_wrapper is None else before_wrapper)
-        self.before_wrapper.stage = WrapperStage.BEFORE
-
-        self.after_wrapper = Wrapper([] if after_wrapper is None else after_wrapper)
-        self.after_wrapper.stage = WrapperStage.AFTER
+        self.before_handler = BeforeHandler([] if before_handler is None else before_handler)
+        self.after_handler = AfterHandler([] if after_handler is None else after_handler)
 
         if name is not None and (name == "" or "." in name):
             raise Exception(f"User defined service name shouldn't be blank or contain '.' (service: {name})!")
@@ -101,7 +93,7 @@ class PipelineComponent(abc.ABC):
         :param ctx: context to keep state in
         :type ctx: :py:class:`df_engine.core.Context`
         :param value: state to set
-        :type value: :py:class:`~df_pipeline.types.ComponentExecutionState`
+        :type value: :py:class:`~df_runner.types.ComponentExecutionState`
         :return: None
         """
         if PIPELINE_STATE_KEY not in ctx.framework_states:
@@ -116,9 +108,9 @@ class PipelineComponent(abc.ABC):
         :param ctx: context to get state from
         :type ctx: :py:class:`df_engine.core.Context`
         :param default: default to return if no record found
-        (usually it's :py:attr:`~df_pipeline.types.ComponentExecutionState.NOT_RUN`)
-        :type default: :py:class:`~df_pipeline.types.ComponentExecutionState` or None
-        :return: :py:class:`~df_pipeline.types.ComponentExecutionState` of this service or default if not found
+        (usually it's :py:attr:`~df_runner.types.ComponentExecutionState.NOT_RUN`)
+        :type default: :py:class:`~df_runner.types.ComponentExecutionState` or None
+        :return: :py:class:`~df_runner.types.ComponentExecutionState` of this service or default if not found
         """
         return ComponentExecutionState[
             ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
@@ -132,7 +124,8 @@ class PipelineComponent(abc.ABC):
 
            1. If component **can** be asynchronous and :py:attr:`~requested_async_flag` is set,
            it returns :py:attr:`~requested_async_flag`
-           2. If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set, it returns True
+           2. If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set,
+           it returns True
            3. If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is False or not set,
            it returns False
            4. If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is True,
@@ -142,13 +135,20 @@ class PipelineComponent(abc.ABC):
         """
         return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
-    async def run_wrapper(self, wrapper: Wrapper, ctx: Context, actor: Actor):
+    async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context, actor: Actor):
+        extra_handler = None
+        if stage == ExtraHandlerType.BEFORE:
+            extra_handler = self.before_handler
+        if stage == ExtraHandlerType.AFTER:
+            extra_handler = self.after_handler
+        if extra_handler is None:
+            return
         try:
-            wrapper_result = await wrapper(ctx, actor, self._get_runtime_info(ctx))
-            if wrapper.asynchronous and isinstance(wrapper_result, Awaitable):
-                await wrapper_result
+            extra_handler_result = await extra_handler(ctx, actor, self._get_runtime_info(ctx))
+            if extra_handler.asynchronous and isinstance(extra_handler_result, Awaitable):
+                await extra_handler_result
         except asyncio.TimeoutError:
-            logger.warning(f"{type(self).__name__} '{self.name}' {wrapper.stage.name} wrapper timed out!")
+            logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage.name} extra handler timed out!")
 
     @abc.abstractmethod
     async def _run(self, ctx: Context, actor: Optional[Actor] = None) -> Optional[Context]:
@@ -182,20 +182,20 @@ class PipelineComponent(abc.ABC):
         else:
             return await self._run(ctx, actor)
 
-    def add_wrapper(self, global_wrapper_type: GlobalWrapperType, wrapper: WrapperFunction):
+    def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """
-        Method for adding a global wrapper to this particular component.
-        Wrapper is automatically named using :py:meth:`uuid.uuid4`
-        and depending on wrapper type for debugging/logging purposes.
+        Method for adding a global extra handler to this particular component.
 
-        :param global_wrapper_type: a type of wrapper to add
-        :type global_wrapper_type: :py:class:`~df_engine.typing.GlobalWrapperType`
-        :param wrapper: a WrapperFunction to add to the component as a wrapper
-        :type wrapper: :py:class:`~df_engine.typing.WrapperFunction`
+        :param global_extra_handler_type: a type of extra handler to add
+        :type global_extra_handler_type: :py:class:`~df_engine.typing.GlobalExtraHandlerType`
+        :param extra_handler: a GlobalExtraHandlerType to add to the component as an extra handler
+        :type extra_handler: :py:class:`~df_engine.typing.ExtraHandlerFunction`
         :return: None
         """
-        target = self.before_wrapper if global_wrapper_type is GlobalWrapperType.BEFORE else self.after_wrapper
-        target.functions.append(wrapper)
+        target = (
+            self.before_handler if global_extra_handler_type is GlobalExtraHandlerType.BEFORE else self.after_handler
+        )
+        target.functions.append(extra_handler)
 
     def _get_runtime_info(self, ctx: Context) -> ServiceRuntimeInfo:
         """
@@ -228,8 +228,8 @@ class PipelineComponent(abc.ABC):
             "path": self.path if self.path is not None else "[None]",
             "asynchronous": self.asynchronous,
             "start_condition": self.start_condition.__name__,
-            "wrappers": {
-                "before": self.before_wrapper.info_dict,
-                "after": self.after_wrapper.info_dict,
+            "extra_handlers": {
+                "before": self.before_handler.info_dict,
+                "after": self.after_handler.info_dict,
             },
         }

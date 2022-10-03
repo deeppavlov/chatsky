@@ -77,7 +77,7 @@ def auto_run_pipeline(
 
     for turn_id, (request, true_response) in enumerate(wrapped_turns):
         if logger is not None:
-            logger.debug(f"USER: {request}")
+            logger.debug(f"> {request}")
         ctx = pipeline(request, ctx.id)
         if true_response != ctx.last_response:
             msg = f" pipeline={pipeline}"
@@ -87,4 +87,4 @@ def auto_run_pipeline(
             msg += f"\n{true_response} != {ctx.last_response}"
             raise Exception(msg)
         if logger is not None:
-            logger.debug(f"BOT: {ctx.last_response}")
+            logger.debug(f"< {ctx.last_response}")

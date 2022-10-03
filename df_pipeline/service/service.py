@@ -10,7 +10,8 @@ from ..types import (
     ServiceBuilder,
     StartConditionCheckerFunction,
     ComponentExecutionState,
-    WrapperBuilder,
+    ExtraHandlerBuilder,
+    ExtraHandlerType,
 )
 from ..pipeline.component import PipelineComponent
 
@@ -37,16 +38,16 @@ class Service(PipelineComponent):
     def __init__(
         self,
         handler: ServiceBuilder,
-        before_wrapper: Optional[WrapperBuilder] = None,
-        after_wrapper: Optional[WrapperBuilder] = None,
+        before_handler: Optional[ExtraHandlerBuilder] = None,
+        after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[int] = None,
         asynchronous: Optional[bool] = None,
         start_condition: Optional[StartConditionCheckerFunction] = None,
         name: Optional[str] = None,
     ):
         overridden_parameters = collect_defined_constructor_parameters_to_dict(
-            before_wrapper=before_wrapper,
-            after_wrapper=after_wrapper,
+            before_handler=before_handler,
+            after_handler=after_handler,
             timeout=timeout,
             asynchronous=asynchronous,
             start_condition=start_condition,
@@ -70,8 +71,8 @@ class Service(PipelineComponent):
         elif isinstance(handler, Callable):
             self.handler = handler
             super(Service, self).__init__(
-                before_wrapper,
-                after_wrapper,
+                before_handler,
+                after_handler,
                 timeout,
                 asynchronous,
                 asyncio.iscoroutinefunction(handler),
@@ -146,14 +147,14 @@ class Service(PipelineComponent):
         :actor: - actor, associated with the pipeline.
         Returns context if this service's handler is an Actor else None.
         """
-        await self.run_wrapper(self.before_wrapper, ctx, actor)
+        await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, actor)
 
         if isinstance(self.handler, Actor):
             ctx = self._run_as_actor(ctx)
         else:
             await self._run_as_service(ctx, actor)
 
-        await self.run_wrapper(self.after_wrapper, ctx, actor)
+        await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, actor)
 
         if isinstance(self.handler, Actor):
             return ctx
@@ -176,8 +177,8 @@ class Service(PipelineComponent):
 
 
 def to_service(
-    before_wrapper: Optional[WrapperBuilder] = None,
-    after_wrapper: Optional[WrapperBuilder] = None,
+    before_handler: Optional[ExtraHandlerBuilder] = None,
+    after_handler: Optional[ExtraHandlerBuilder] = None,
     timeout: Optional[int] = None,
     asynchronous: Optional[bool] = None,
     start_condition: Optional[StartConditionCheckerFunction] = None,
@@ -192,8 +193,8 @@ def to_service(
     def inner(handler: ServiceBuilder) -> Service:
         return Service(
             handler=handler,
-            before_wrapper=before_wrapper,
-            after_wrapper=after_wrapper,
+            before_handler=before_handler,
+            after_handler=after_handler,
             timeout=timeout,
             asynchronous=asynchronous,
             start_condition=start_condition,

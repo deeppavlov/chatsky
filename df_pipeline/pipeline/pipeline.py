@@ -12,9 +12,9 @@ from ..types import (
     ServiceBuilder,
     ServiceGroupBuilder,
     PipelineBuilder,
-    GlobalWrapperType,
-    WrapperFunction,
-    WrapperBuilder,
+    GlobalExtraHandlerType,
+    ExtraHandlerFunction,
+    ExtraHandlerBuilder,
 )
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
@@ -44,8 +44,8 @@ class Pipeline:
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
         components: ServiceGroupBuilder = None,
-        before_wrapper: Optional[WrapperBuilder] = None,
-        after_wrapper: Optional[WrapperBuilder] = None,
+        before_handler: Optional[ExtraHandlerBuilder] = None,
+        after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[int] = None,
         optimization_warnings: bool = False,
     ):
@@ -53,8 +53,8 @@ class Pipeline:
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
             components,
-            before_wrapper=before_wrapper,
-            after_wrapper=after_wrapper,
+            before_handler=before_handler,
+            after_handler=after_handler,
             timeout=timeout,
         )
 
@@ -67,10 +67,10 @@ class Pipeline:
         if optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
 
-    def add_global_wrapper(
+    def add_global_handler(
         self,
-        global_wrapper_type: GlobalWrapperType,
-        wrapper: WrapperFunction,
+        global_handler_type: GlobalExtraHandlerType,
+        extra_handler: ExtraHandlerFunction,
         whitelist: Optional[List[str]] = None,
         blacklist: Optional[List[str]] = None,
     ):
@@ -91,15 +91,18 @@ class Pipeline:
         def condition(name: str) -> bool:
             return (whitelist is None or name in whitelist) and (blacklist is None or name not in blacklist)
 
-        if global_wrapper_type is GlobalWrapperType.BEFORE_ALL or global_wrapper_type is GlobalWrapperType.AFTER_ALL:
+        if (
+            global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
+            or global_handler_type is GlobalExtraHandlerType.AFTER_ALL
+        ):
             whitelist = ["pipeline"]
-            global_wrapper_type = (
-                GlobalWrapperType.BEFORE
-                if global_wrapper_type is GlobalWrapperType.BEFORE_ALL
-                else GlobalWrapperType.AFTER
+            global_handler_type = (
+                GlobalExtraHandlerType.BEFORE
+                if global_handler_type is GlobalExtraHandlerType.BEFORE_ALL
+                else GlobalExtraHandlerType.AFTER
             )
 
-        self._services_pipeline.add_wrapper(global_wrapper_type, wrapper, condition)
+        self._services_pipeline.add_extra_handler(global_handler_type, extra_handler, condition)
 
     @property
     def info_dict(self) -> dict:
@@ -115,7 +118,7 @@ class Pipeline:
             "services": [self._services_pipeline.info_dict],
         }
 
-    def pretty_format(self, show_wrappers: bool = False, indent: int = 4) -> str:
+    def pretty_format(self, show_extra_handlers: bool = False, indent: int = 4) -> str:
         """
         Method for receiving pretty-formatted string description of the pipeline.
         Resulting string structure is somewhat similar to YAML string.
@@ -123,7 +126,7 @@ class Pipeline:
         :show_wrappers: - whether to include Wrappers or not (could be many and/or generated).
         :indent: - offset from new line to add before component children.
         """
-        return pretty_format_component_info_dict(self.info_dict, show_wrappers, indent=indent)
+        return pretty_format_component_info_dict(self.info_dict, show_extra_handlers, indent=indent)
 
     @classmethod
     def from_script(

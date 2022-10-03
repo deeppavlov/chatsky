@@ -10,9 +10,9 @@ from ..service.group import ServiceGroup
 
 def pretty_format_component_info_dict(
     service: dict,
-    show_wrappers: bool,
+    show_extra_handlers: bool,
     offset: str = "",
-    wrappers_key: str = "wrappers",
+    extra_handlers_key: str = "extra_handlers",
     type_key: str = "type",
     name_key: str = "name",
     indent: int = 4,
@@ -35,11 +35,11 @@ def pretty_format_component_info_dict(
         f" '{service.get(name_key, '[None]')}'" if name_key in service else ""
     )
     for key, value in service.items():
-        if key not in (type_key, name_key, wrappers_key) or (key == wrappers_key and show_wrappers):
+        if key not in (type_key, name_key, extra_handlers_key) or (key == extra_handlers_key and show_extra_handlers):
             if isinstance(value, List):
                 if len(value) > 0:
                     values = [
-                        pretty_format_component_info_dict(instance, show_wrappers, f"{indent * 2}{offset}")
+                        pretty_format_component_info_dict(instance, show_extra_handlers, f"{indent * 2}{offset}")
                         for instance in value
                     ]
                     value_str = "\n%s" % "\n".join(values)
