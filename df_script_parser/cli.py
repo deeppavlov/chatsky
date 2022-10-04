@@ -82,7 +82,7 @@ def py2graph_cli():
     parser.add_argument(
         "output_file",
         metavar="OUTPUT_FILE",
-        help="Yaml file to store parser output in",
+        help="Graph file to store parser output in",
         type=str,
     )
     parser.add_argument(

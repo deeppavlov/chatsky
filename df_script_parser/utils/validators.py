@@ -11,6 +11,9 @@ from df_script_parser.utils.convenience_functions import repr_libcst_node
 from df_script_parser.utils.exceptions import WrongFileStructureError, ScriptValidationError
 from df_script_parser.utils.namespaces import Call
 
+if tp.TYPE_CHECKING:
+    from df_script_parser.processors.recursive_parser import RecursiveParser
+
 keywords_dict = {
     k: [Python(k, "df_engine.core.keywords." + k), Python(k, "df_engine.core.keywords.Keywords." + k)]
     for k in Keywords.__members__
@@ -49,6 +52,7 @@ def validate_path(
     traversed_path: tp.List[StringTag],
     final_value: tp.Union[StringTag, Call],
     paths: tp.List[tp.List[str]],
+    project: "RecursiveParser",
 ) -> None:
     """Validate a sequence of keys in a script.
 
@@ -81,17 +85,17 @@ def validate_path(
     """
     if len(traversed_path) < 1:
         raise ScriptValidationError(f"No keys in a traversed path.\n" f"Keys point to: {final_value}")
-    if traversed_path[0] in keywords_dict["GLOBAL"]:
+    if project.resolve_name(traversed_path[0]) in keywords_dict["GLOBAL"]:
         if len(traversed_path) < 2:
             raise ScriptValidationError(
                 f"Less than 2 consecutive keys in a script: {traversed_path}.\n" f"Keys point to: {final_value}"
             )
-        if traversed_path[1] not in keywords_list:
+        if project.resolve_name(traversed_path[1]) not in keywords_list:
             raise ScriptValidationError(f"GLOBAL keys should be keywords: {traversed_path}")
     else:
         if len(traversed_path) < 3:
             raise ScriptValidationError(
                 f"Less than 3 consecutive keys in a script: {traversed_path}.\n" f"Keys point to: {final_value}"
             )
-        if traversed_path[2] not in keywords_list:
+        if project.resolve_name(traversed_path[2]) not in keywords_list:
             raise ScriptValidationError(f"Node keys should be keywords: {traversed_path}")

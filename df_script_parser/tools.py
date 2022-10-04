@@ -57,7 +57,7 @@ def py2graph(
     :type root_file: :py:class:`.Path`
     :param project_root_dir: Directory that contains all the local files required to run ``root_file``
     :type project_root_dir: :py:class:`.Path`
-    :param output_file: Yaml file to store parser output in
+    :param output_file: Graph file to store parser output in
     :type output_file: :py:class:`.Path`
     :param requirements: Path to a file containing project requirements, defaults to None
     :type requirements: :pu:class:`.Path`, optional
@@ -70,20 +70,17 @@ def py2graph(
         if requirements:
             with open(requirements, "r", encoding="utf-8") as reqs:
                 project.requirements = [x for x in reqs.read().split("\n") if x]
-        # TODO: we need other formats, not only json?
         json.dump(nx.readwrite.node_link_data(project.to_graph()), outfile, indent=4)
 
 
 def dict2py(
     dictionary: dict,
     extract_to_directory: Path,
-    process_element: str = "disambiguate",
 ):
     """Extract a project from a dictionary to a directory
 
     :param dictionary: Dictionary as one returned by :py:meth:`.RecursiveParser.to_dict`
     :param extract_to_directory: Path to a directory to extract files to
-    :param process_element: Name of the function used to process dictionary elements
     :return: None
     """
     namespaces = dictionary.get("namespaces")
@@ -104,7 +101,6 @@ def dict2py(
 
         with open(path_to_file, "w", encoding="utf-8") as outfile:
             dict_processor = DictProcessor()
-            dict_processor.process_element = dict_processor.__getattribute__(process_element)
             for name, value in namespaces[namespace].items():
                 if isinstance(value, (Import, From)):
                     outfile.write(repr(value) + f" as {name}\n")

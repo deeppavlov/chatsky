@@ -3,7 +3,7 @@
 import logging
 import typing as tp
 from pathlib import Path
-from copy import copy, deepcopy
+from copy import copy
 
 import libcst as cst
 import networkx as nx  # type: ignore
@@ -47,14 +47,12 @@ class RecursiveParser:
         self.fallback_label: tp.Optional[tp.Tuple[tp.Union[Python, String]]] = None
         self.graph: tp.Optional[nx.MultiDiGraph] = None
 
-    def resolve_name(
-        self,
-        name: tp.Union[Request, StringTag],
-    ) -> tp.Union[StringTag, dict, Call]:
-        """Try to resolve ``name``. Return ``name`` if not possible
+    def resolve_name(self, name: tp.Union[StringTag, Request]) -> StringTag:
+        """Try to resolve ``name`` into a :py:class:`.StringTag`. Return ``name`` if not possible
 
         :param name: Name to resolve
         :type name: :py:class:`.String` | :py:class:`.Python`
+        :param return_path: Whether to return path to the resolved name
         :return:
         """
         if isinstance(name, Request):
@@ -66,6 +64,8 @@ class RecursiveParser:
                     result, _ = self.get_requested_object(Request.from_str(name.absolute_value))
             except ResolutionError:
                 pass
+        if isinstance(result, (dict, Call)):
+            raise ResolutionError(f"Method ``resolve_name`` did not return a ``StringTag``: {result}")
         return result
 
     def resolve_dict_key_path(
@@ -202,12 +202,6 @@ class RecursiveParser:
                     value, path = self.get_requested_object(Request.from_str(absolute_value))
                 except ResolutionError:
                     logging.debug("Cannot resolve request: %s", absolute_value)
-            resolved_key = self.resolve_name(key)
-            if isinstance(resolved_key, (dict, Call)):
-                raise ScriptValidationError(f"Dictionary key '{key}' is not a ``StringTag``: {resolved_key}")
-            key = deepcopy(key)
-            key.absolute_value = resolved_key.absolute_value
-            key.metadata["resolved_value"] = resolved_key
 
             current_traversed_path = copy(traversed_path)
             current_traversed_path.append(key)
@@ -220,15 +214,6 @@ class RecursiveParser:
                     value, paths + [path], traversal_stop_callback, func_kwargs, stop_condition, current_traversed_path
                 )
             else:
-                if isinstance(value, StringTag):
-                    resolved_value = self.resolve_name(value)
-                    if isinstance(resolved_value, (dict, Call)):
-                        raise ScriptValidationError(
-                            f"Dictionary value '{value}' is not a ``StringTag``: {resolved_value}"
-                        )
-                    value = deepcopy(value)
-                    value.absolute_value = resolved_value.absolute_value
-                    value.metadata["resolved_value"] = resolved_value
                 traversal_stop_callback(current_traversed_path, value, paths + [path], **func_kwargs)
 
     def check_actor_args(self, actor_args: dict, path: tp.List[str]):
@@ -251,8 +236,7 @@ class RecursiveParser:
         if not isinstance(script, dict):
             if not isinstance(script, Python):
                 raise RuntimeError(f"Script argument in actor is not a Python instance: {script}")
-            script_request = Request.from_str(script.absolute_value)
-            script, path = self.get_requested_object(script_request)
+            script, path = self.get_requested_object(Request.from_str(script.absolute_value))
             if not isinstance(script, dict):
                 raise RuntimeError(f"Script is not a dict: {script}")
 
@@ -261,8 +245,8 @@ class RecursiveParser:
 
         self.graph = nx.MultiDiGraph()
 
-        self.traverse_dict(script, [path], validate_path)
-        self.traverse_dict(script, [path], script2graph, {"graph": self.graph})
+        self.traverse_dict(script, [path], validate_path, {"project": self})
+        self.traverse_dict(script, [path], script2graph, {"project": self})
 
         for label in [start_label, fallback_label]:
             if label:
@@ -272,8 +256,6 @@ class RecursiveParser:
                 resolved_label = []
                 for item in label:
                     resolved_item = self.resolve_name(item)
-                    if isinstance(resolved_item, (dict, Call)):
-                        raise ScriptValidationError(f"Label item '{item}' is not a ``StringTag``: {resolved_item}")
                     resolved_label.append(resolved_item.absolute_value)
 
                 node = self.graph.nodes.get(tuple(resolved_label))
