@@ -42,6 +42,9 @@ def script2graph(
     if len(traversed_path) == 0:
         raise ScriptValidationError(f"traversed_path is empty: {traversed_path, final_value, paths}")
 
+    if project.graph is None:
+        raise RuntimeError("Graph is not found")
+
     if project.resolve_name(traversed_path[0]) in keywords_dict["GLOBAL"]:
         node_name: tp.Union[tp.Tuple[str], tp.Tuple[str, str]] = ("GLOBAL",)
     else:
@@ -57,7 +60,7 @@ def script2graph(
     )
 
     if project.resolve_name(traversed_path[len(node_name)]) in keywords_dict["TRANSITIONS"]:
-        if not isinstance(project.resolve_name(final_value), StringTag):
+        if not isinstance(final_value, StringTag) or not isinstance(project.resolve_name(final_value), StringTag):
             raise ScriptValidationError(
                 f"Condition is not a ``StringTag: {final_value}. traversed_path={traversed_path}"
             )
@@ -67,6 +70,8 @@ def script2graph(
             )
         except ResolutionError:
             label, label_ref = traversed_path[len(node_name) + 1], copy(paths[len(node_name) + 1])
+        if isinstance(label, (dict, Call)):
+            raise RuntimeError(f"Label is not a ``StringTag``: {label}")
         destination = get_destination(traversed_path[len(node_name) + 1], project.resolve_name)
         project.graph.add_edge(
             node_name,
