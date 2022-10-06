@@ -1,1 +1,5 @@
 df_engine>=0.9.0
+df_script_parser @ git+https://github.com/deeppavlov/dialog_flow_script_parser.git@feature/graph_export
+graphviz==0.17
+dash==2.6.2
+plotly<=5.10.0

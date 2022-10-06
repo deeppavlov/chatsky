@@ -65,4 +65,9 @@ setup(
     install_requires=requirements,
     test_suite="tests",
     tests_require=test_requirements,
+    entry_points="""
+    [console_scripts]
+    df_script_viewer.server=df_script_viewer:make_server
+    df_script_viewer.image=df_script_viewer:make_image
+    """,
 )
