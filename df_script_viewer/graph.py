@@ -5,7 +5,7 @@ import networkx as nx
 from df_script_parser.processors.recursive_parser import RecursiveParser
 
 
-def get_graph(root_file, project_root_dir, requirements = None) -> nx.Graph:
+def get_graph(root_file, project_root_dir, requirements=None) -> nx.Graph:
     project = RecursiveParser(Path(project_root_dir).absolute())
     project.parse_project_dir(Path(root_file).absolute())
 

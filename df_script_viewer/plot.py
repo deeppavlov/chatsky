@@ -1,12 +1,12 @@
 import random
-from io import BytesIO
-from base64 import b64encode
-from collections import Iterable
+from typing import TypedDict, Dict
 
 import networkx as nx
 import graphviz
-import plotly.graph_objects as go
 from plotly.colors import qualitative
+
+
+NodeDict = TypedDict("NodeDict", {"name": str, "label": list, "transitions": dict})
 
 
 NODE_ATTRS = {
@@ -26,45 +26,59 @@ def get_random_colors():
             yield element
 
 
-def get_html_label(name: str, **kwargs) -> str:
-    rows = [f"<tr><td><b>{name}</b></td></tr>"]
-    for key, value in kwargs.items():
-        rows.append(f"<tr><td><b>{key}</b></td></tr>")
-        if isinstance(value, str):
-            line = f"<tr><td>{value}</td></tr>"
-        elif isinstance(value, Iterable):
-            line_sep = "<br/>".join(value)
-            line = f"<tr><td>{line_sep}</td></tr>"
-        rows.append(line)
+def format_name(name: str):
+    return f"<tr><td><b>{name}</b></td></tr>"
 
+
+def format_lines(lines: list):
+    return f"<tr><td>{'<br/>'.join(lines)}</td></tr>"
+
+
+def format_port(name: str, port: str) -> str:
+    return f'<tr><td port="{port}">{name}</td></tr>'
+
+
+def format_as_table(rows: list) -> str:
     return "".join(['<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">', *rows, "</table>>"])
 
 
 def get_plot(nx_graph: nx.Graph) -> bytes:
-    graph = graphviz.Digraph(engine="fdp")
+    graph = graphviz.Graph(engine="fdp")
     graph.attr(compound="true", splines="true", overlap="prism")
     graph.node_attr.update(**NODE_ATTRS)
-    flows = dict()
-    for node, node_data in nx_graph.nodes.items():
-        if not flows.get(node[0]):
-            flows[node[0]] = dict()
-        flows[node[0]][node] = node_data
 
-    for color, flow in zip(get_random_colors(), flows.keys()):
-        color = color.lower()
-        with graph.subgraph(name=flow) as flow_graph:
-            flow_graph.attr(label=flow)
-            for node, node_data in flows[flow].items():
-                name = str(node)
-                label = get_html_label(name, **node_data)
-                flow_graph.node(name, label=label, style="filled", fillcolor=color, fontcolor="white")
-
+    nodes: Dict[str, NodeDict] = {}
     for edge, edge_data in nx_graph.edges.items():
-        name = str(edge)
-        label = get_html_label(name, **edge_data)
-        graph.node(name, label=label, style="filled", fillcolor="gray95")
-        graph.edge(name, str(edge[1]))
-        graph.edge(str(edge[0]), name)
+        if edge[0] not in nodes:
+            nodes[edge[0]] = {"name": str(edge[0]), "label": [], "transitions": {}}
+        nodes[edge[0]]["label"] += [
+            format_port(edge_data["condition"], str(hash(edge)))
+        ]  # port id is named after the edge
+        nodes[edge[0]]["transitions"][hash(edge)] = str(edge[1])  # port id mapped to the target node
+
+    flows: dict = {}
+
+    for key in nodes.keys():
+        if key[0] not in flows:
+            flows[key[0]] = graphviz.Graph(name=key[0])
+            flows[key[0]].attr(label=key[0], style="filled")
+
+        nodes[key]["label"] = format_as_table(
+            [
+                format_name(key),
+                format_name("ref"),
+                format_lines(nx_graph.nodes[key]["ref"]),
+                format_name("Transitions"),
+                *nodes[key]["label"],
+            ]
+        )
+        flows[key[0]].node(name=nodes[key]["name"], label="".join(nodes[key]["label"]))
+        for transition, dest in nodes[key]["transitions"].items():
+            graph.edge(f"{key}:{transition}", dest)
+
+    for color, subgraph in zip(get_random_colors(), flows.values()):
+        subgraph.node_attr.update(fillcolor=color.lower(), fontcolor="white")
+        graph.subgraph(subgraph)
 
     graph = graph.unflatten(stagger=5, fanout=True)
     _bytes = graph.pipe(format="png")
