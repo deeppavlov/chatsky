@@ -13,6 +13,8 @@ NODE_ATTRS = {
     "fontname": "Helvetica,Arial,sans-serif",
     "shape": "plain",
     "style": "filled",
+    "fillcolor": "white",
+    "color": "gray95"
 }
 
 
@@ -43,7 +45,7 @@ def format_as_table(rows: list) -> str:
 
 
 def get_plot(nx_graph: nx.Graph) -> bytes:
-    graph = graphviz.Graph(engine="fdp")
+    graph = graphviz.Digraph()
     graph.attr(compound="true", splines="true", overlap="prism")
     graph.node_attr.update(**NODE_ATTRS)
 
@@ -60,7 +62,7 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
 
     for key in nodes.keys():
         if key[0] not in flows:
-            flows[key[0]] = graphviz.Graph(name=key[0])
+            flows[key[0]] = graphviz.Digraph(name=f"cluster_{key[0]}")
             flows[key[0]].attr(label=key[0], style="filled")
 
         nodes[key]["label"] = format_as_table(
@@ -77,7 +79,7 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
             graph.edge(f"{key}:{transition}", dest)
 
     for color, subgraph in zip(get_random_colors(), flows.values()):
-        subgraph.node_attr.update(fillcolor=color.lower(), fontcolor="white")
+        subgraph.attr(color=color.lower())
         graph.subgraph(subgraph)
 
     graph = graph.unflatten(stagger=5, fanout=True)
