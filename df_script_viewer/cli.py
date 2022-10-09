@@ -33,7 +33,7 @@ def is_file(arg: str) -> Path:
     raise argparse.ArgumentTypeError(f"Not a file: {path}")
 
 
-py2file_parser = argparse.ArgumentParser()
+py2file_parser = argparse.ArgumentParser(add_help=False)
 py2file_parser.add_argument(
     "root_file",
     metavar="ROOT_FILE",
@@ -57,7 +57,8 @@ py2file_parser.add_argument(
 
 
 def make_server():
-    args: argparse.Namespace = py2file_parser.parse_args()
+    server_praser = argparse.ArgumentParser(parents=[py2file_parser], add_help=True)
+    args: argparse.Namespace = server_praser.parse_args()
     graph = get_graph(**vars(args))
     plot = get_plot(graph)
     app = create_app(plot)
@@ -65,7 +66,7 @@ def make_server():
 
 
 def make_image():
-    image_parser = argparse.ArgumentParser(parents=[py2file_parser])
+    image_parser = argparse.ArgumentParser(parents=[py2file_parser], add_help=True)
     image_parser.add_argument(
         "output_file",
         metavar="OUTPUT_FILE",

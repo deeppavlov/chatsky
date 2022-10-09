@@ -14,7 +14,7 @@ NODE_ATTRS = {
     "shape": "plain",
     "style": "filled",
     "fillcolor": "white",
-    "color": "gray95"
+    "color": "gray95",
 }
 
 

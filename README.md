@@ -3,6 +3,8 @@
 
 **df_script_viewer** is python module add-on for [Dialog Flow Framework](https://github.com/deepmipt/dialog_flow_framework), a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0.
 
+Using DF Script Viewer, you can get a visual representation of the plot that you are working on at any time. This feature gives you more control over the development process.
+
 
 [df_script_viewer](../..) allows you to ...
 [![Codestyle](../../../workflows/codestyle/badge.svg)](../../../actions)
@@ -23,11 +25,18 @@ pip install df_script_viewer
 ```
 
 ## Basic example
-```python
 
+Get a DFF project project plot as a static image:
+
+```bash
+df_script_viewer.image ./examples/python_files/main.py ./examples/python_files/ ./plot.png
 ```
 
-To get more advanced examples, take a look at [examples](examples) on GitHub.
+View the project plot on a local Dash server:
+
+```bash
+df_script_viewer.server ./examples/python_files/main.py ./examples/python_files/
+```
 
 # Contributing to the df_script_viewer
 
