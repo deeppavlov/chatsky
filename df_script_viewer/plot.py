@@ -11,10 +11,10 @@ NodeDict = TypedDict("NodeDict", {"name": str, "label": list, "transitions": dic
 
 NODE_ATTRS = {
     "fontname": "Helvetica,Arial,sans-serif",
-    "shape": "plain",
-    "style": "filled",
+    "shape": "box",
+    "style": "rounded, filled",
     "fillcolor": "white",
-    "color": "gray95",
+    "color": "white",
 }
 
 
@@ -63,14 +63,11 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
     for key in nodes.keys():
         if key[0] not in flows:
             flows[key[0]] = graphviz.Digraph(name=f"cluster_{key[0]}")
-            flows[key[0]].attr(label=key[0], style="filled")
+            flows[key[0]].attr(label=key[0], style="rounded, filled")
 
         nodes[key]["label"] = format_as_table(
             [
                 format_name(key),
-                format_name("ref"),
-                format_lines(nx_graph.nodes[key]["ref"]),
-                format_name("Transitions"),
                 *nodes[key]["label"],
             ]
         )
