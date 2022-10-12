@@ -20,22 +20,17 @@ Actor = BaseModel
 
 @validate_arguments
 def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") -> Union[Callable, NodeLabel3Type]:
-    """
-    The function which is used for the normalization of
+    """The function which is used for the normalization of
     :py:const:`default_flow_label <dff.core.engine.core.types.NodeLabelType>`.
 
-    Parameters
-    ----------
-
-    label : :py:const:`label <dff.core.engine.core.types.NodeLabelType>`, we need to normalize.
-        If `label` is Callable then function is wrapped into try/except
+    :param label: If `label` is Callable then function is wrapped into try/except
         and normalization is used on the result of the call of function called `label`.
-    default_flow_label : :py:const:`default_flow_label <dff.core.engine.core.types.LabelType>`
-        `flow_label` is used if `label` does not contain `flow_label`.
+    :type label: :py:const:`label <dff.core.engine.core.types.NodeLabelType>`, we need to normalize.
+    :param default_flow_label: `flow_label` is used if `label` does not contain `flow_label`.
+    :type default_flow_label: :py:const:`default_flow_label <dff.core.engine.core.types.LabelType>`
 
-    Returns
-    -------
-    Union[Callable, NodeLabel3Type]
+    :rtype: Union[Callable, NodeLabel3Type]
+    :return:
         Result of the `label` normalization,
         if Callable is returned then the normalized result is returned after the call of this function
     """
@@ -70,19 +65,13 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
 
 @validate_arguments
 def normalize_condition(condition: ConditionType) -> Callable:
-    """
-    The functon that is used to normalize `condition`
+    """The functon that is used to normalize `condition`
 
-    Parameters
-    ----------
+    :param condition: `condition` to normalize
+    :type condition: ConditionType
 
-    condition : ConditionType
-        `condition` to normalize
-
-
-    Returns
-    -------
-    Callable
+    :rtype: Callable
+    :return:
         The function `condition` wrapped into the try/except.
     """
     if isinstance(condition, Callable):
@@ -102,19 +91,13 @@ def normalize_condition(condition: ConditionType) -> Callable:
 def normalize_transitions(
     transitions: dict[NodeLabelType, ConditionType]
 ) -> dict[Union[Callable, NodeLabel3Type], Callable]:
-    """
-    The function which is used to normalize `transitions` and returns normalized `dict`.
+    """The function which is used to normalize `transitions` and returns normalized `dict`.
 
-    Parameters
-    ----------
+    :param transitions: `transitions` to normalize
+    :type transitions: dict[NodeLabelType, ConditionType]
 
-    transitions : dict[NodeLabelType, ConditionType]
-        `transitions` to normalize
-
-    Returns
-    -------
-    dict[Union[Callable, NodeLabel3Type], Callable]
-        `transitions` with normalized `label` и `condition`
+    :rtype: dict[Union[Callable, NodeLabel3Type], Callable]
+    :return: `transitions` with normalized `label` и `condition`
     """
     transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
     return transitions
@@ -122,20 +105,14 @@ def normalize_transitions(
 
 @validate_arguments
 def normalize_response(response: Any) -> Callable:
-    """
-    This function is used to normalize `response`, if `response` Callable, it is returned, otherwise
+    """This function is used to normalize `response`, if `response` Callable, it is returned, otherwise
     `response` is wrapped to the function and this function is returned.
 
-    Parameters
-    ----------
+    :param response: `response` to normalize
+    :type response: Any
 
-    response : Any
-        `response` to normalize
-
-    Returns
-    -------
-    Callable
-        Function that returns callable response
+    :rtype: Callable
+    :return: Function that returns callable response
     """
     if isinstance(response, Callable):
         return response
@@ -150,20 +127,14 @@ def normalize_response(response: Any) -> Callable:
 
 @validate_arguments
 def normalize_processing(processing: dict[Any, Callable]) -> Callable:
-    """
-    This function is used to normalize `processing`.
+    """This function is used to normalize `processing`.
     It returns function that consecutively applies all preprocessing stages from `dict`.
 
-    Parameters
-    ----------
+    :param processing: `processing`, it contains all preprocessing stages in a format "PROC_i"->proc_func_i
+    :type processing: dict[Any, Callable]
 
-    processing : dict[Any, Callable]
-        `processing`, it contains all preprocessing stages in a format "PROC_i"->proc_func_i
-
-    Returns
-    -------
-    Callable
-        Function that consequentially applies all preprocessing stages from `dict`.
+    :rtype: Callable
+    :return: Function that consequentially applies all preprocessing stages from `dict`.
     """
     if isinstance(processing, dict):
 
@@ -182,19 +153,15 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
 
 @validate_arguments
 def map_deprecated_key(key: str) -> str:
-    """
-    This function is used to map deprecated keyword to new one.
+    """This function is used to map deprecated keyword to new one.
 
-    Parameters
-    ----------
+    :param key:
+        a keyword of a node.
+    :type key: str
 
-    key: str
-    a keyword of a node.
-
-    Returns
-    -------
-    str
-    a mapped keyword of a node
+    :rtype: str
+    :return:
+        a mapped keyword of a node
     """
     if key == "processing":
         logger.warning(
@@ -209,19 +176,13 @@ def map_deprecated_key(key: str) -> str:
 def normalize_keywords(
     script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
 ) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
-    """
-    This function is used to normalize keywords in the script.
+    """This function is used to normalize keywords in the script.
 
-    Parameters
-    ----------
+    :param script: script, containing all transitions between states based in the keywords.
+    :type script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
 
-    script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
-    script, containing all transitions between states based in the keywords.
-
-    Returns
-    -------
-    dict[LabelType, dict[LabelType, dict[str, Any]]]
-    Script with the normalized keywords
+    :rtype: dict[LabelType, dict[LabelType, dict[str, Any]]]
+    :return: Script with the normalized keywords
     """
 
     script = {
@@ -236,21 +197,15 @@ def normalize_keywords(
 
 @validate_arguments
 def normalize_script(script: dict[LabelType, Any]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
-    """
-    This function normalizes `Script`: it returns `dict` where the `GLOBAL` node is moved
+    """This function normalizes `Script`: it returns `dict` where the `GLOBAL` node is moved
     into the flow with the `GLOBAL` name. The function returns the structure
     `{GLOBAL:{...NODE...}, ...}` -> `{GLOBAL:{GLOBAL:{...NODE...}}, ...}`
 
+    :param script: `Script` that describes the dialog scenario.
+    :type script: dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
 
-    Parameters
-    ----------
-    script : dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
-        `Script` that describes the dialog scenario.
-
-    Returns
-    -------
-    dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
-        Normalized`Script`.
+    :rtype: dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
+    :return: Normalized `Script`.
     """
     if isinstance(script, dict):
         if GLOBAL in script and all([isinstance(item, Keywords) for item in script[GLOBAL].keys()]):

@@ -13,15 +13,12 @@ from .core.actor import Actor
 
 
 def choice(responses: list):
-    """
-    Function wrapper that takes the list of responses as an input,
+    """Function wrapper that takes the list of responses as an input,
     and returns handler which outputs a response randomly chosen from that list.
 
-    Parameters
-    ----------
-
-    responses: list
+    :param responses:
         a list of responses for random sampling
+    :type responses: list
     """
 
     def choice_response_handler(ctx: Context, actor: Actor, *args, **kwargs):

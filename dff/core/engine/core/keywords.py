@@ -7,8 +7,7 @@ from enum import Enum, auto
 
 
 class Keywords(Enum):
-    """
-    Keywords used to define the dialog script (:py:class:`~dff.core.engine.core.script.Script`).
+    """Keywords used to define the dialog script (:py:class:`~dff.core.engine.core.script.Script`).
     The data type `dict` is used while describing the scenario.
     `Enums` of this class are used as keys in this `dict`.
     Different keys correspond to the different value types aimed at different purposes.
@@ -56,6 +55,7 @@ class Keywords(Enum):
         Value corresponding to the `MISC` key must have `dict` type:
         `{"VAR_KEY_0": VAR_VALUE_0, ..., "VAR_KEY_N": VAR_VALUE_N}`
         `"VAR_KEY_0"` - is an arbitrary name of the value which is saved into the `MISC`.
+
 
     """
 

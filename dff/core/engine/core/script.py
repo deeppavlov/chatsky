@@ -22,9 +22,7 @@ Context = ForwardRef("Context")
 
 
 class Node(BaseModel, extra=Extra.forbid):
-    """
-    The class for the Node object.
-    """
+    """The class for the Node object."""
 
     transitions: dict[NodeLabelType, ConditionType] = {}
     response: Optional[Any] = None
@@ -35,9 +33,7 @@ class Node(BaseModel, extra=Extra.forbid):
     _normalize_transitions = validator("transitions", allow_reuse=True)(normalize_transitions)
 
     def run_response(self, ctx: Context, actor: Actor, *args, **kwargs) -> Context:
-        """
-        Executes the normalized response. See details in the normalize_response function of normalization.py
-        """
+        """Executes the normalized response. See details in the normalize_response function of normalization.py"""
         response = normalize_response(self.response)
         return response(ctx, actor, *args, **kwargs)
 
@@ -48,17 +44,13 @@ class Node(BaseModel, extra=Extra.forbid):
         return self.run_processing(self.pre_transitions_processing, ctx, actor, *args, **kwargs)
 
     def run_processing(self, processing: dict[Any, Callable], ctx: Context, actor: Actor, *args, **kwargs) -> Context:
-        """
-        Executes the normalized processing. See details in the normalize_processing function of normalization.py
-        """
+        """Executes the normalized processing. See details in the normalize_processing function of normalization.py"""
         processing = normalize_processing(processing)
         return processing(ctx, actor, *args, **kwargs)
 
 
 class Script(BaseModel, extra=Extra.forbid):
-    """
-    The class for the Script object
-    """
+    """The class for the Script object"""
 
     script: dict[LabelType, dict[LabelType, Node]]
 

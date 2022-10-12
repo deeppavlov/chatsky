@@ -21,16 +21,13 @@ logger = logging.getLogger(__name__)
 
 @validate_arguments
 def exact_match(match: Any, *args, **kwargs) -> Callable:
-    """
-    Returns function handler.
+    """Returns function handler.
     This handler returns True only if the last user phrase is exactly
     the same as the :py:const:`match <any>.`
 
-    Parameters
-    ----------
-
-    match: Any
+    :param match:
         the variable of the same type as  :py:class:`~dff.core.engine.core.context.last_request`
+    :type match: Any
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -42,20 +39,18 @@ def exact_match(match: Any, *args, **kwargs) -> Callable:
 
 @validate_arguments
 def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs) -> Callable:
-    """
-    Returns function handler.
+    """Returns function handler.
     This handler returns True only if the last user phrase contains
     :py:const:`pattern <Union[str, Pattern]>` with
     :py:const:`flags <Union[int, re.RegexFlag]>`.
 
-    Parameters
-    ----------
-
-    pattern: Union[str, Pattern]
+    :param pattern:
         the RegExp pattern
-
-    flags: Union[int, re.RegexFlag] = 0
-         flags for this pattern
+    :type pattern: Union[str, Pattern]
+    :param flags:
+        flags for this pattern
+        Defaults to 0
+    :type flags: Union[int, re.RegexFlag]
     """
     pattern = re.compile(pattern, flags)
 
@@ -68,14 +63,11 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 
 @validate_arguments
 def check_cond_seq(cond_seq: list):
-    """
-    Checks if the list consists only of Callables.
+    """Checks if the list consists only of Callables.
 
-    Parameters
-    ----------
-
-    cond_seq: list
+    :param cond_seq:
         list of conditions to check
+    :type cond_seq: list
     """
     for cond in cond_seq:
         if not isinstance(cond, Callable):
@@ -90,17 +82,16 @@ _all = all
 
 @validate_arguments
 def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) -> Callable:
-    """
-    Aggregates multiple functions into one by using agregating function.
+    """Aggregates multiple functions into one by using agregating function.
     Returns function handler.
 
-    Parameters
-    ----------
-
-    cond_seq: list
+    :param cond_seq:
         list of conditions to check
-    aggregate_func: Callable = _any
+    :type cond_seq: list
+    :param aggregate_func:
         function to aggregate conditions
+        Defaults to :py:func:`._any`
+    :type aggregate_func: Callable
     """
     check_cond_seq(cond_seq)
 
@@ -116,14 +107,12 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
 # todo: shadows built-in any
 @validate_arguments
 def any(cond_seq: list, *args, **kwargs) -> Callable:
-    """
-    Function that returns function handler. This handler returns True
+    """Function that returns function handler. This handler returns True
     if any function from the list is True.
 
-    Parameters
-    ----------
-    cond_seq: list
+    :param cond_seq:
         list of conditions to check
+    :type cond_seq: list
     """
     _agg = aggregate(cond_seq, _any)
 
@@ -136,14 +125,12 @@ def any(cond_seq: list, *args, **kwargs) -> Callable:
 # todo: shadows built-in all
 @validate_arguments
 def all(cond_seq: list, *args, **kwargs) -> Callable:
-    """
-    Function that returns function handler. This handler returns True only
+    """Function that returns function handler. This handler returns True only
     if all functions from the list are True.
 
-    Parameters
-    ----------
-    cond_seq: list
+    :param cond_seq:
         list of conditions to check
+    :type cond_seq: list
     """
     _agg = aggregate(cond_seq, _all)
 
@@ -155,15 +142,13 @@ def all(cond_seq: list, *args, **kwargs) -> Callable:
 
 @validate_arguments
 def negation(condition: Callable, *args, **kwargs) -> Callable:
-    """
-    Returns function handler.
+    """Returns function handler.
     This handler returns negation of the :py:func:`~condition`: False
     if :py:func:`~condition` holds True and True otherwise
 
-    Parameters
-    ----------
-    condition: Callable
+    :param condition:
         any :py:func:`~condition`
+    :type condition: Callable
     """
 
     def negation_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -206,9 +191,7 @@ def has_last_labels(
 
 @validate_arguments
 def true(*args, **kwargs) -> Callable:
-    """
-    Returns function handler. This handler always returns True.
-    """
+    """Returns function handler. This handler always returns True."""
 
     def true_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return True
@@ -218,9 +201,7 @@ def true(*args, **kwargs) -> Callable:
 
 @validate_arguments
 def false(*args, **kwargs) -> Callable:
-    """
-    Returns function handler. This handler always returns False.
-    """
+    """Returns function handler. This handler always returns False."""
 
     def false_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return False
