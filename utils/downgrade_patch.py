@@ -32,7 +32,7 @@ def downgrade(root_dir="."):
 
     for py_file in py_files:
         text = py_file.read_text()
-        # if sys.version_info < (3, 9):
+        # if sys.version_info < (3, 9):  # todo: maybe uncomment the version check lines?
         if any([i.search(text) for i in native_type_patterns.keys()]):
             text = "from typing import Dict, List, Tuple\n{}".format(text)
             for pat, replace in native_type_patterns.items():

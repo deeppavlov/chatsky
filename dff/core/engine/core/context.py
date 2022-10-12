@@ -111,6 +111,7 @@ class Context(BaseModel):
 
     @classmethod
     def cast(cls, ctx: Union[Context, dict, str] = {}, *args, **kwargs) -> Context:
+        # todo: might be a problem here with default {}
         """
         Transforms different data types to the objects of :py:class:`~dff.core.engine.core.context.Context` class.
 
@@ -181,7 +182,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    @validate_arguments
+    @validate_arguments  # todo: use set instead of a list
     def clear(self, hold_last_n_indices: int, field_names: list[str] = ["requests", "responses", "labels"]):
         """
         Deletes all recordings from the `requests`/`responses`/`labels` except for

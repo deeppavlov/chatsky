@@ -113,6 +113,7 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
     return aggregate_condition_handler
 
 
+# todo: shadows built-in any
 @validate_arguments
 def any(cond_seq: list, *args, **kwargs) -> Callable:
     """
@@ -132,6 +133,7 @@ def any(cond_seq: list, *args, **kwargs) -> Callable:
     return any_condition_handler
 
 
+# todo: shadows built-in all
 @validate_arguments
 def all(cond_seq: list, *args, **kwargs) -> Callable:
     """
@@ -173,7 +175,7 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
 @validate_arguments
 def has_last_labels(
     flow_labels: list[str] = [], labels: list[NodeLabel2Type] = [], last_n_indices: int = 1, *args, **kwargs
-) -> Callable:
+) -> Callable:  # todo: might be a problem here with default []
     """
     Function returns condition handler.
     This handler returns True if any label from

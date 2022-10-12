@@ -102,6 +102,7 @@ class Actor(BaseModel):
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: dict[ActorStage, list[Callable]] = {},
+        # todo: might be a problem here with default {}
         *args,
         **kwargs,
     ):
@@ -139,6 +140,7 @@ class Actor(BaseModel):
 
     @validate_arguments
     def __call__(self, ctx: Union[Context, dict, str] = {}, *args, **kwargs) -> Union[Context, dict, str]:
+        # todo: might be a problem here with default {}
 
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
