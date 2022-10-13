@@ -8,12 +8,22 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
+    env:
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+
     steps:
       - uses: actions/checkout@v2
+
+      - name: Build images
+        run: make docker_up
+
+      - name: Check running containers
+        run: docker ps -a
 
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -38,3 +48,6 @@ jobs:
             make test
           fi
         shell: bash
+
+      - name: down containers
+        run: docker-compose down

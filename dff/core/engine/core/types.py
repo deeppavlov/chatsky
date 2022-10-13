@@ -31,7 +31,7 @@ ConditionType = Callable
 
 ModuleName = str
 """Module name names addon state, or your own module state. For example module name can be: ` "df_db_connector"`"""
-
+# todo: change example
 
 # TODO: add description for each stage of ActorStage
 class ActorStage(Enum):

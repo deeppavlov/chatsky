@@ -40,6 +40,34 @@ mypy_dependencies = [
     "mypy",
 ]
 
+sqlite_dependencies = [
+    "sqlalchemy>=1.4.27",
+]
+
+redis_dependencies = [
+    "redis>=4.1.2",
+]
+
+mongodb_dependencies = [
+    "pymongo>=4.0.2",
+    "bson>=0.5.10",
+]
+
+mysql_dependencies = [
+    "sqlalchemy>=1.4.27",
+    "pymysql>=1.0.2",
+    "cryptography>=36.0.2",
+]
+
+postgresql_dependencies = [
+    "sqlalchemy>=1.4.27",
+    "psycopg2-binary>=2.9.2",
+]
+
+ydb_dependencies = [
+    "ydb>=2.5.0",
+]
+
 devel = [
     "bump2version>=1.0.1",
     "build==0.7.0",
@@ -54,7 +82,13 @@ devel = [
 ]
 
 full = merge_req_lists([
-    core
+    core,
+    sqlite_dependencies,
+    redis_dependencies,
+    mongodb_dependencies,
+    mysql_dependencies,
+    postgresql_dependencies,
+    ydb_dependencies,
 ])
 
 devel_full = merge_req_lists([
@@ -69,6 +103,12 @@ EXTRA_DEPENDENCIES = {
     "devel": devel,
     "full": full,
     "devel_full": devel_full,
+    "sqlite": sqlite_dependencies,
+    "redis": redis_dependencies,
+    "mongodb": mongodb_dependencies,
+    "mysql": mysql_dependencies,
+    "postgresql": postgresql_dependencies,
+    "ydb": ydb_dependencies,
 }
 
 setup(
@@ -97,6 +137,7 @@ setup(
     ],
     keywords="chatbots",  # Optional
     packages=find_packages(where="."),  # Required
+    include_package_data=True,
     python_requires=">=3.7, <4",
     install_requires=core,  # Optional
     test_suite="tests",
