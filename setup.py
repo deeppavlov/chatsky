@@ -4,11 +4,7 @@
 import pathlib
 from typing import Iterable, List
 
-try:
-    from setuptools import setup
-except ImportError:
-    from distutils.core import setup
-from setuptools import find_packages
+from setuptools import setup, find_packages
 
 
 LOCATION = pathlib.Path(__file__).parent.resolve()
@@ -94,7 +90,6 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.6",
         "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
@@ -102,7 +97,7 @@ setup(
     ],
     keywords="chatbots",  # Optional
     packages=find_packages(where="."),  # Required
-    python_requires=">=3.6, <4",
+    python_requires=">=3.7, <4",
     install_requires=core,  # Optional
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
