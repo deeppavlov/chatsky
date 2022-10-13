@@ -3,7 +3,7 @@ Types
 ---------------------------
 Basic types are defined here.
 """
-from typing import Union, Callable
+from typing import Union, Callable, Tuple
 from enum import Enum, auto
 
 from .keywords import Keywords
@@ -11,13 +11,13 @@ from .keywords import Keywords
 LabelType = Union[str, Keywords]
 """label can be a casual string or :py:class:`~dff.core.engine.core.keywords.Keywords`"""
 
-NodeLabel1Type = tuple[str, float]
+NodeLabel1Type = Tuple[str, float]
 """label type for transitions can be [node_name, transition_priority]"""
 
-NodeLabel2Type = tuple[str, str]
+NodeLabel2Type = Tuple[str, str]
 """label type for transitions can be [flow_name, node_name]"""
 
-NodeLabel3Type = tuple[str, str, float]
+NodeLabel3Type = Tuple[str, str, float]
 """label type for transitions can be [flow_name, node_name, transition_priority]"""
 
 NodeLabelTupledType = Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type]

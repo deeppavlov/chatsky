@@ -9,7 +9,7 @@ adding data, data serialization, type checking etc.
 import logging
 from uuid import UUID, uuid4
 
-from typing import Any, Optional, Union
+from typing import Any, Optional, Union, Dict, List
 
 from pydantic import BaseModel, validate_arguments, Field, validator
 from .types import NodeLabel2Type, ModuleName
@@ -50,20 +50,20 @@ class Context(BaseModel):
         * key - `id` of the turn
         * value - `label` on this turn
 
-    :type labels: dict[int, :py:const:`~dff.core.engine.core.types.NodeLabel2Type`]
+    :type labels: Dict[int, :py:const:`~dff.core.engine.core.types.NodeLabel2Type`]
     :param requests:
         `requests` stores the history of all `requests` received by the agent
 
         * key - `id` of the turn
         * value - `request` on this turn
-    :type requests: dict[int, Any]
+    :type requests: Dict[int, Any]
     :param responses:
         `responses` stores the history of all agent `responses`
 
         * key - `id` of the turn
         * value - `response` on this turn
 
-    :type responses: dict[int, Any]
+    :type responses: Dict[int, Any]
     :param misc:
         `misc` stores any custom data, the engine doesn't use this dictionary by default,
         so storage of any data won't reflect on the work on the internal Dialog Flow Engine functions.
@@ -71,7 +71,7 @@ class Context(BaseModel):
         * key - arbitrary data name
         * value - arbitrary data
 
-    :type misc: dict[str, Any]
+    :type misc: Dict[str, Any]
     :param validation:
         `validation` is a flag that signals that :py:class:`~dff.core.engine.core.actor.Actor`,
         while being initialized, checks the :py:class:`~dff.core.engine.core.script.Script`.
@@ -91,16 +91,16 @@ class Context(BaseModel):
         * key - temporary variable name
         * value - temporary variable data
 
-    :type framework_states: dict[:py:const:`~dff.core.engine.core.types.ModuleName`, dict[str, Any]]
+    :type framework_states: Dict[:py:const:`~dff.core.engine.core.types.ModuleName`, Dict[str, Any]]
     """
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
-    labels: dict[int, NodeLabel2Type] = {}
-    requests: dict[int, Any] = {}
-    responses: dict[int, Any] = {}
-    misc: dict[str, Any] = {}
+    labels: Dict[int, NodeLabel2Type] = {}
+    requests: Dict[int, Any] = {}
+    responses: Dict[int, Any] = {}
+    misc: Dict[str, Any] = {}
     validation: bool = False
-    framework_states: dict[ModuleName, dict[str, Any]] = {}
+    framework_states: Dict[ModuleName, Dict[str, Any]] = {}
 
     # validators
     _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
@@ -175,7 +175,7 @@ class Context(BaseModel):
         self.labels[last_index + 1] = label
 
     @validate_arguments  # todo: use set instead of a list
-    def clear(self, hold_last_n_indices: int, field_names: list[str] = ["requests", "responses", "labels"]):
+    def clear(self, hold_last_n_indices: int, field_names: List[str] = ["requests", "responses", "labels"]):
         """Deletes all recordings from the `requests`/`responses`/`labels` except for
         the last N turns according to the `hold_last_n_indices`.
         If`field_names` contains `misc` field, `misc` field is fully cleared,
@@ -186,7 +186,7 @@ class Context(BaseModel):
         :param field_names:
             properties of :py:class:`~dff.core.engine.core.context.Context` we need to clear
             Defaults to ["requests", "responses", "labels"]
-        :type field_names: list[str]
+        :type field_names: List[str]
         """
         if "requests" in field_names:
             for index in list(self.requests)[:-hold_last_n_indices]:

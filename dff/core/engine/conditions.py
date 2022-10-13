@@ -5,7 +5,7 @@ Conditions are one of the most important components of the dialog graph,
 which determine the possibility of transition from one node of the graph to another node.
 This is a standard set of engine conditions.
 """
-from typing import Callable, Pattern, Union, Any
+from typing import Callable, Pattern, Union, Any, List
 import logging
 import re
 
@@ -71,7 +71,7 @@ def check_cond_seq(cond_seq: list):
     """
     for cond in cond_seq:
         if not isinstance(cond, Callable):
-            raise TypeError(f"{cond_seq=} has to consist of callable objects")
+            raise TypeError(f"{cond_seq} has to consist of callable objects")
 
 
 _any = any
@@ -82,7 +82,7 @@ _all = all
 
 @validate_arguments
 def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) -> Callable:
-    """Aggregates multiple functions into one by using agregating function.
+    """Aggregates multiple functions into one by using aggregating function.
     Returns function handler.
 
     :param cond_seq:
@@ -99,7 +99,7 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
         try:
             return bool(aggregate_func([cond(ctx, actor, *args, **kwargs) for cond in cond_seq]))
         except Exception as exc:
-            logger.error(f"Exception {exc} for {cond_seq=}, {aggregate_func=} and {ctx.last_request=}", exc_info=exc)
+            logger.error(f"Exception {exc} for {cond_seq}, {aggregate_func} and {ctx.last_request}", exc_info=exc)
 
     return aggregate_condition_handler
 
@@ -159,20 +159,20 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
 
 @validate_arguments
 def has_last_labels(
-    flow_labels: list[str] = [], labels: list[NodeLabel2Type] = [], last_n_indices: int = 1, *args, **kwargs
+    flow_labels: List[str] = [], labels: List[NodeLabel2Type] = [], last_n_indices: int = 1, *args, **kwargs
 ) -> Callable:  # todo: might be a problem here with default []
     """
     Function returns condition handler.
     This handler returns True if any label from
     last :py:const:`last_n_indices <int>`context labels is in
-    the :py:const:`flow_labels <list[str]>` list or in
+    the :py:const:`flow_labels <List[str]>` list or in
     the :py:const:`labels ~dff.core.engine.core.types.NodeLabel2Type` list.
 
     Parameters
     ----------
     flow_labels: list
         list of labels to check.Every label has type `str`. Is empty if not set.
-    labels: list[:py:const:`~dff.core.engine.core.types.NodeLabel2Type`]
+    labels: List[:py:const:`~dff.core.engine.core.types.NodeLabel2Type`]
         list of labels that correspond to the nodes. Is empty is not set.
     last_n_indices: int
         number of last utterances to check.

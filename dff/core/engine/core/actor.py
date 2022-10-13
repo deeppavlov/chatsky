@@ -7,7 +7,7 @@ Actor is one of the main abstractions that processes incoming requests
 from the user in accordance with the dialog graph (:py:class:`~dff.core.engine.core.script.Script`).
 """
 import logging
-from typing import Union, Callable, Optional
+from typing import Union, Callable, Optional, Dict, List
 import copy
 
 from pydantic import BaseModel, validate_arguments
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
-    """This function processes errors in the process of :py:class:`~dff.core.engine.core.script.Script` validation.
+    """This function handles errors during :py:class:`~dff.core.engine.core.script.Script` validation.
 
     :param error_msgs:
         List that contains error messages. :py:func:`~dff.core.engine.core.actor.error_handler`
@@ -38,11 +38,12 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     :type exception: Optional[Exception]
     :param logging_flag:
         The flag which defines whether logging is necessary.
-        Defaults to None
+        Defaults to True
     :type logging_flag: bool
     """
     error_msgs.append(msg)
     logging_flag and logger.error(msg, exc_info=exception)
+    # todo: why not ``if logging_flag: logger.error``
 
 
 class Actor(BaseModel):
@@ -92,10 +93,10 @@ class Actor(BaseModel):
         the certain stages of work of :py:class:`~dff.core.engine.core.actor.Actor`.
 
         * key: :py:class:`~dff.core.engine.core.types.ActorStage` - stage when the handler is called
-        * value: list[Callable] - the list of called handlers for each stage
+        * value: List[Callable] - the list of called handlers for each stage
 
         Defaults to an empty dict
-    :type handlers: dict[ActorStage, list[Callable]]
+    :type handlers: Dict[ActorStage, List[Callable]]
     """
 
     script: Union[Script, dict]
@@ -105,7 +106,7 @@ class Actor(BaseModel):
     validation_stage: Optional[bool] = None
     condition_handler: Optional[Callable] = None
     verbose: bool = True
-    handlers: dict[ActorStage, list[Callable]] = {}
+    handlers: Dict[ActorStage, List[Callable]] = {}
 
     @validate_arguments
     def __init__(
@@ -117,7 +118,7 @@ class Actor(BaseModel):
         validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
-        handlers: dict[ActorStage, list[Callable]] = {},
+        handlers: Dict[ActorStage, List[Callable]] = {},
         # todo: might be a problem here with default {}
         *args,
         **kwargs,
@@ -128,13 +129,13 @@ class Actor(BaseModel):
         # node labels validation
         start_label = normalize_label(start_label)
         if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unkown {start_label=}")
+            raise ValueError(f"Unkown {start_label}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unkown {fallback_label=}")
+                raise ValueError(f"Unkown {fallback_label}")
         if condition_handler is None:
             condition_handler = deep_copy_condition_handler
 
@@ -396,7 +397,7 @@ class Actor(BaseModel):
             try:
                 node = self.script[label[0]][label[1]]
             except Exception as exc:
-                msg = f"Could not find node with {label=}, error was found in {(flow_label, node_label)}"
+                msg = f"Could not find node with {label}, error was found in {(flow_label, node_label)}"
                 error_handler(error_msgs, msg, exc, verbose)
                 break
 
@@ -406,15 +407,15 @@ class Actor(BaseModel):
                 response_result = response_func(ctx, actor)
                 if isinstance(response_result, Callable):
                     msg = (
-                        f"Expected type of response_result needed not Callable but got {type(response_result)=}"
-                        f" for {label=} , error was found in {(flow_label, node_label)}"
+                        f"Expected type of response_result needed not Callable but got {type(response_result)}"
+                        f" for {label} , error was found in {(flow_label, node_label)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
                     continue
             except Exception as exc:
                 msg = (
                     f"Got exception '''{exc}''' during response execution "
-                    f"for {label=} and {node.response=}"
+                    f"for {label} and {node.response}"
                     f", error was found in {(flow_label, node_label)}"
                 )
                 error_handler(error_msgs, msg, exc, verbose)
@@ -424,9 +425,9 @@ class Actor(BaseModel):
             try:
                 condition_result = condition(ctx, actor)
                 if not isinstance(condition(ctx, actor), bool):
-                    raise Exception(f"Returned {condition_result=}, but expected bool type")
+                    raise Exception(f"Returned {condition_result}, but expected bool type")
             except Exception as exc:
-                msg = f"Got exception '''{exc}''' during condition execution for {label=}"
+                msg = f"Got exception '''{exc}''' during condition execution for {label}"
                 error_handler(error_msgs, msg, exc, verbose)
                 continue
         return error_msgs

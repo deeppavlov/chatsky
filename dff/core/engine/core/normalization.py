@@ -5,7 +5,7 @@ This is placed basic set of functions to normalize data in the dialog scenario.
 """
 import logging
 
-from typing import Union, Callable, Any
+from typing import Union, Callable, Any, Dict
 
 from .keywords import GLOBAL, Keywords
 from .context import Context
@@ -89,14 +89,14 @@ def normalize_condition(condition: ConditionType) -> Callable:
 
 @validate_arguments
 def normalize_transitions(
-    transitions: dict[NodeLabelType, ConditionType]
-) -> dict[Union[Callable, NodeLabel3Type], Callable]:
+    transitions: Dict[NodeLabelType, ConditionType]
+) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
     """The function which is used to normalize `transitions` and returns normalized `dict`.
 
     :param transitions: `transitions` to normalize
-    :type transitions: dict[NodeLabelType, ConditionType]
+    :type transitions: Dict[NodeLabelType, ConditionType]
 
-    :rtype: dict[Union[Callable, NodeLabel3Type], Callable]
+    :rtype: Dict[Union[Callable, NodeLabel3Type], Callable]
     :return: `transitions` with normalized `label` и `condition`
     """
     transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
@@ -126,12 +126,12 @@ def normalize_response(response: Any) -> Callable:
 
 
 @validate_arguments
-def normalize_processing(processing: dict[Any, Callable]) -> Callable:
+def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
     """This function is used to normalize `processing`.
     It returns function that consecutively applies all preprocessing stages from `dict`.
 
     :param processing: `processing`, it contains all preprocessing stages in a format "PROC_i"->proc_func_i
-    :type processing: dict[Any, Callable]
+    :type processing: Dict[Any, Callable]
 
     :rtype: Callable
     :return: Function that consequentially applies all preprocessing stages from `dict`.
@@ -145,7 +145,7 @@ def normalize_processing(processing: dict[Any, Callable]) -> Callable:
                     if processing_func is not None:
                         ctx = processing_func(ctx, actor, *args, **kwargs)
                 except Exception as exc:
-                    logger.error(f"Exception {exc} for {processing_name=} and {processing_func=}", exc_info=exc)
+                    logger.error(f"Exception {exc} for {processing_name} and {processing_func}", exc_info=exc)
             return ctx
 
         return processing_handler
@@ -174,14 +174,14 @@ def map_deprecated_key(key: str) -> str:
 
 @validate_arguments
 def normalize_keywords(
-    script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
-) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
+    script: Dict[LabelType, Dict[LabelType, Dict[Keywords, Any]]]
+) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
     """This function is used to normalize keywords in the script.
 
     :param script: script, containing all transitions between states based in the keywords.
-    :type script: dict[LabelType, dict[LabelType, dict[Keywords, Any]]]
+    :type script: Dict[LabelType, Dict[LabelType, Dict[Keywords, Any]]]
 
-    :rtype: dict[LabelType, dict[LabelType, dict[str, Any]]]
+    :rtype: Dict[LabelType, Dict[LabelType, Dict[str, Any]]]
     :return: Script with the normalized keywords
     """
 
@@ -196,15 +196,15 @@ def normalize_keywords(
 
 
 @validate_arguments
-def normalize_script(script: dict[LabelType, Any]) -> dict[LabelType, dict[LabelType, dict[str, Any]]]:
+def normalize_script(script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
     """This function normalizes `Script`: it returns `dict` where the `GLOBAL` node is moved
     into the flow with the `GLOBAL` name. The function returns the structure
     `{GLOBAL:{...NODE...}, ...}` -> `{GLOBAL:{GLOBAL:{...NODE...}}, ...}`
 
     :param script: `Script` that describes the dialog scenario.
-    :type script: dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
+    :type script: Dict[LabelType, Union[Dict[LabelType, Dict[Keywords, Any]], Dict[Keywords, Any]]]
 
-    :rtype: dict[LabelType, Union[dict[LabelType, dict[Keywords, Any]], dict[Keywords, Any]]]
+    :rtype: Dict[LabelType, Union[Dict[LabelType, Dict[Keywords, Any]], Dict[Keywords, Any]]]
     :return: Normalized `Script`.
     """
     if isinstance(script, dict):

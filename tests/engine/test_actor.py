@@ -21,7 +21,7 @@ def positive_test(samples, custom_class):
             res = custom_class(**sample)
             results += [res]
         except Exception as exeption:
-            raise Exception(f"{sample=} gets {exeption=}")
+            raise Exception(f"sample={sample} gets exception={exeption}")
     return results
 
 
@@ -29,9 +29,9 @@ def negative_test(samples, custom_class):
     for sample in samples:
         try:
             custom_class(**sample)
-        except Exception:  # TODO: spetial tyupe of exceptions
+        except Exception:  # TODO: special type of exceptions
             continue
-        raise Exception(f"{sample=} can not be passed")
+        raise Exception(f"sample={sample} can not be passed")
 
 
 def std_func(ctx, actor, *args, **kwargs):
@@ -115,7 +115,7 @@ def check_call_limit(limit: int = 1, default_value=None, label=""):
         nonlocal counter
         counter += 1
         if counter > limit:
-            msg = f"calls are out of limits counterlimit={counter}/{limit} for {default_value=} and {label=}"
+            msg = f"calls are out of limits counterlimit={counter}/{limit} for {default_value} and {label}"
             limit_errors[call_limit_handler] = msg
         if default_value == "ctx":
             return ctx

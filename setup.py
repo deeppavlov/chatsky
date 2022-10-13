@@ -1,12 +1,8 @@
 #!/usr/bin/env python
 # -*- coding: utf-8 -*-
 
-import pip
 import pathlib
 from typing import Iterable, List
-
-from setuptools.command.install import install
-from utils.downgrade_patch import downgrade
 
 try:
     from setuptools import setup
@@ -16,18 +12,6 @@ from setuptools import find_packages
 
 
 LOCATION = pathlib.Path(__file__).parent.resolve()
-
-
-class Downgrade(install):
-    def run(self):
-        downgrade(pathlib.Path("."))
-        install.run(self)
-
-
-def parse_requirements(filename):
-    """load requirements from a pip requirements file"""
-    lines = (line.strip() for line in (LOCATION / filename).open())
-    return [line for line in lines if line and not line.startswith("#")]
 
 
 # Get the long description from the README file
@@ -120,7 +104,6 @@ setup(
     packages=find_packages(where="."),  # Required
     python_requires=">=3.6, <4",
     install_requires=core,  # Optional
-    cmdclass={"install": Downgrade},
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
 )
