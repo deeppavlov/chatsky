@@ -5,6 +5,7 @@ on: [push]
 
 jobs:
   docker-compose:
+    runs-on: ubuntu-latest
     services:
       mysql:
         env_file: [ .env_file ]
