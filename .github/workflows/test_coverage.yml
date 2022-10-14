@@ -4,7 +4,42 @@ on: [push]
 
 
 jobs:
-  build:
+  docker-compose:
+    services:
+      mysql:
+        env_file: [ .env_file ]
+        image: mysql:latest
+        restart: unless-stopped
+        ports:
+          - 3307:3306
+      psql:
+        env_file: [ .env_file ]
+        image: postgres:latest
+        restart: unless-stopped
+        ports:
+          - 5432:5432
+      redis:
+        env_file: [ .env_file ]
+        image: redis:latest
+        restart: unless-stopped
+        command: --requirepass pass
+        ports:
+          - 6379:6379
+      mongo:
+        env_file: [ .env_file ]
+        image: mongo:latest
+        restart: unless-stopped
+        ports:
+          - 27017:27017
+      ydb:
+        env_file: [ .env_file ]
+        image: cr.yandex/yc/yandex-docker-local-ydb:latest
+        restart: unless-stopped
+        ports:
+          - 8765:8765
+          - 2136:2136
+        hostname: localhost
+  test:
     strategy:
       fail-fast: false
       matrix:
@@ -12,18 +47,8 @@ jobs:
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
-    env:
-      DOCKER_USER: ${{ secrets.DOCKER_USER }}
-      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
-
     steps:
       - uses: actions/checkout@v2
-
-      - name: Build images
-        run: make docker_up
-
-      - name: Check running containers
-        run: docker ps -a
 
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
@@ -48,6 +73,3 @@ jobs:
             make test
           fi
         shell: bash
-
-      - name: down containers
-        run: docker-compose down
