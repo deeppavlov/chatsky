@@ -42,13 +42,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Install docker-compose
-        run: brew install docker docker-machine docker-compose
-
-      - name: Build images
-        run: |
-          docker-compose up -d
-
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
         with:
