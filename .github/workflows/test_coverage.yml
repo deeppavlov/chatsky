@@ -62,7 +62,7 @@ jobs:
       - name: build coverage file
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            pytest --cache-clear --cov-fail-under=90 --cov=dff tests/ > pytest-coverage.txt
+            pytest --cache-clear --cov=dff tests/ > pytest-coverage.txt
           else
             make test
           fi
