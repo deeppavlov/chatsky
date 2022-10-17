@@ -13,14 +13,14 @@ NODE_ATTRS = {
     "fontname": "Helvetica,Arial,sans-serif",
     "shape": "box",
     "style": "rounded, filled",
-    "fillcolor": "white",
-    "color": "white",
+    "fillcolor": "#ffffff",
+    "color": "#ffffff",
 }
 
 
 def get_random_colors():
     reserve = []
-    for element in qualitative.Plotly:
+    for element in ["#96B0AF", "#C6AE82", "#F78378", "#FF7B9C", "#D289AB", "#86ACD5", "#86ACD5", "#F8D525", "#F6AE2D"]:
         yield element
         reserve.append("#{:06x}".format(random.randint(0, 0xFFFFFF)).upper())
     while reserve:
@@ -56,6 +56,7 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
         nodes[edge[0]]["label"] += [
             format_port(edge_data["condition"], str(hash(edge)))
         ]  # port id is named after the edge
+
         nodes[edge[0]]["transitions"][hash(edge)] = str(edge[1])  # port id mapped to the target node
 
     flows: dict = {}
