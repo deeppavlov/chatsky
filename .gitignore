@@ -3,6 +3,7 @@
 dist/
 venv/
 build/
+docs/source/apiref
 *__pycache__*
 *.idea/*
 .idea/*
