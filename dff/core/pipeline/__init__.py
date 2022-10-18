@@ -37,8 +37,3 @@ from .service.extra import BeforeHandler, AfterHandler
 from .service.service import Service, to_service
 from .service.group import ServiceGroup
 from .pipeline.pipeline import Pipeline
-
-
-__author__ = "Denis Kuznetsov"
-__email__ = "kuznetsov.den.p@gmail.com"
-__version__ = "0.2.1"
