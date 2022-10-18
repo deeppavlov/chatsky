@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """This function handles errors during :py:class:`~dff.core.engine.core.script.Script` validation.
 
-    :param error_msgs:
+    :param error_msg:
         List that contains error messages. :py:func:`~dff.core.engine.core.actor.error_handler`
         adds every next error message to that list.
     :type error_msgs: list
@@ -395,7 +395,10 @@ class Actor(BaseModel):
             try:
                 node = self.script[label[0]][label[1]]
             except Exception as exc:
-                msg = f"Could not find node with label={label}, error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                msg = (
+                    f"Could not find node with label={label}, "
+                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                )
                 error_handler(error_msgs, msg, exc, verbose)
                 break
 
@@ -405,7 +408,7 @@ class Actor(BaseModel):
                 response_result = response_func(ctx, actor)
                 if isinstance(response_result, Callable):
                     msg = (
-                        f"Expected type of response_result needed not Callable but got type(response_result)={type(response_result)}"
+                        "Expected type of response_result needed not Callable "+ f"but got type(response_result)={type(response_result)}"
                         f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)

@@ -145,7 +145,10 @@ def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
                     if processing_func is not None:
                         ctx = processing_func(ctx, actor, *args, **kwargs)
                 except Exception as exc:
-                    logger.error(f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}", exc_info=exc)
+                    logger.error(
+                        f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
+                        exc_info=exc,
+                    )
             return ctx
 
         return processing_handler
