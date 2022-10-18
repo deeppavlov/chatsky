@@ -42,7 +42,8 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     :type logging_flag: bool
     """
     error_msgs.append(msg)
-    if logging_flag: logger.error(msg, exc_info=exception)
+    if logging_flag:
+        logger.error(msg, exc_info=exception)
 
 
 class Actor(BaseModel):
@@ -117,8 +118,7 @@ class Actor(BaseModel):
         validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
-        handlers: Dict[ActorStage, List[Callable]] = {},
-        # todo: might be a problem here with default {}
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         *args,
         **kwargs,
     ):
@@ -146,7 +146,7 @@ class Actor(BaseModel):
             validation_stage=validation_stage,
             condition_handler=condition_handler,
             verbose=verbose,
-            handlers=handlers,
+            handlers={} if handlers is None else handlers,
         )
         errors = self.validate_script(verbose) if validation_stage or validation_stage is None else []
         if errors:
@@ -155,8 +155,7 @@ class Actor(BaseModel):
             )
 
     @validate_arguments
-    def __call__(self, ctx: Union[Context, dict, str] = {}, *args, **kwargs) -> Union[Context, dict, str]:
-        # todo: might be a problem here with default {}
+    def __call__(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Union[Context, dict, str]:
 
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
@@ -204,7 +203,8 @@ class Actor(BaseModel):
         return ctx
 
     @validate_arguments
-    def _context_init(self, ctx: Context, *args, **kwargs) -> Context:
+    def _context_init(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
+        ctx = {} if ctx is None else ctx
         ctx = Context.cast(ctx)
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
@@ -296,7 +296,7 @@ class Actor(BaseModel):
         *args,
         only_current_node_transitions: bool = False,
         **kwargs,
-    ) -> Context:
+    ) -> Node:
         overwritten_node = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
         local_node = self.script.get(flow_label, {}).get(LOCAL, Node())
         for node in [local_node, current_node]:
