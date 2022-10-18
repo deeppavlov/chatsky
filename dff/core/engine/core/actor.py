@@ -25,7 +25,7 @@ logger = logging.getLogger(__name__)
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """This function handles errors during :py:class:`~dff.core.engine.core.script.Script` validation.
 
-    :param error_msg:
+    :param error_msgs:
         List that contains error messages. :py:func:`~dff.core.engine.core.actor.error_handler`
         adds every next error message to that list.
     :type error_msgs: list
