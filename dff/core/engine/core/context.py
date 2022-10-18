@@ -188,8 +188,8 @@ class Context(BaseModel):
         :type hold_last_n_indices: int
         :param field_names:
             properties of :py:class:`~dff.core.engine.core.context.Context` we need to clear
-            Defaults to ["requests", "responses", "labels"]
-        :type field_names: List[str]
+            Defaults to {"requests", "responses", "labels"}
+        :type field_names: Union[Set[str], List[str]]
         """
         field_names = field_names if isinstance(field_names, set) else set(field_names)
         if "requests" in field_names:

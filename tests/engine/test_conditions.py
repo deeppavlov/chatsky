@@ -4,9 +4,9 @@ import dff.core.engine.conditions as cnd
 
 
 def test_conditions():
+    label = ["flow", "node"]
     ctx = Context()
     ctx.add_request("text")
-    label = ["flow", "node"]
     ctx.add_label(label)
     failed_ctx = Context()
     failed_ctx.add_request({})
