@@ -44,7 +44,7 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
                 flow_label, node_label, _ = new_label
                 node = actor.script.get(flow_label, {}).get(node_label)
                 if not node:
-                    raise Exception(f"Unknown transitions {new_label} for {actor.script}")
+                    raise Exception(f"Unknown transitions {new_label} for actor.script={actor.script}")
             except Exception as exc:
                 new_label = None
                 logger.error(f"Exception {exc} of function {label}", exc_info=exc)
@@ -145,7 +145,7 @@ def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
                     if processing_func is not None:
                         ctx = processing_func(ctx, actor, *args, **kwargs)
                 except Exception as exc:
-                    logger.error(f"Exception {exc} for {processing_name} and {processing_func}", exc_info=exc)
+                    logger.error(f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}", exc_info=exc)
             return ctx
 
         return processing_handler
