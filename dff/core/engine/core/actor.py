@@ -42,8 +42,7 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     :type logging_flag: bool
     """
     error_msgs.append(msg)
-    logging_flag and logger.error(msg, exc_info=exception)
-    # todo: why not ``if logging_flag: logger.error``
+    if logging_flag: logger.error(msg, exc_info=exception)
 
 
 class Actor(BaseModel):
