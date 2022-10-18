@@ -7,6 +7,7 @@ db_connector
 
 """
 import threading
+from functools import wraps
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
@@ -85,7 +86,7 @@ def threadsafe_method(func: Callable):
     """
     A decorator that makes sure methods of an object instance are threadsafe.
     """
-
+    @wraps(func)
     def _synchronized(self, *args, **kwargs):
         with self._lock:
             return func(self, *args, **kwargs)
