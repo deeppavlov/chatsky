@@ -204,7 +204,6 @@ class Actor(BaseModel):
 
     @validate_arguments
     def _context_init(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
-        ctx = {} if ctx is None else ctx
         ctx = Context.cast(ctx)
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
