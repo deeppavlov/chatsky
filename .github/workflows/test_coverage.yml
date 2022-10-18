@@ -25,7 +25,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: install dependencies
-        run: make venv
+        run: make venv_test
         shell: bash
 
       - name: build coverage file
@@ -48,7 +48,7 @@ jobs:
           python-version: ${{ matrix.python-version }}
 
       - name: install dependencies
-        run: make venv
+        run: make venv_test
         shell: bash
 
       - name: build coverage file
@@ -73,7 +73,7 @@ jobs:
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
-          pip install -e .[devel_full]
+          pip install -e .[test_full]
         shell: bash
 
       - name: build coverage file
