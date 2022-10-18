@@ -408,7 +408,8 @@ class Actor(BaseModel):
                 response_result = response_func(ctx, actor)
                 if isinstance(response_result, Callable):
                     msg = (
-                        "Expected type of response_result needed not Callable "+ f"but got type(response_result)={type(response_result)}"
+                        "Expected type of response_result needed not Callable "
+                        + f"but got type(response_result)={type(response_result)}"
                         f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
