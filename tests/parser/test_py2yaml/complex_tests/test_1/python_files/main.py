@@ -1,5 +1,5 @@
-from df_engine.core.actor import Actor as act
-from df_engine.core.keywords import GLOBAL as glb, RESPONSE as rsp
+from dff.core.engine.core.actor import Actor as act
+from dff.core.engine.core.keywords import GLOBAL as glb, RESPONSE as rsp
 
 import flows
 

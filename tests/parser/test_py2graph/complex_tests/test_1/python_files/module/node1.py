@@ -1,4 +1,4 @@
-from df_engine.core.keywords import TRANSITIONS as tr
+from dff.core.engine.core.keywords import TRANSITIONS as tr
 import consts
 
 d = {

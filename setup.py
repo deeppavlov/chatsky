@@ -41,8 +41,20 @@ doc = [
     "nbsphinx>=0.8.9",
 ]
 
-mypy_dependencies = [
+codestyle_dependencies = [
     "mypy",
+    "pylint",
+]
+
+parser_dependencies = [
+    "libcst>=0.4.1",
+    "ruamel.yaml>=0.17.21",
+    "pyflakes>=2.3.1",
+    "black ==20.8b1",
+]
+
+graph_dependencies = [
+    "networkx>=2.5.1",
 ]
 
 sqlite_dependencies = [
@@ -82,7 +94,7 @@ test_requirements = [
     "black ==20.8b1",
     "isort >=5.0.6,<6.0.0",
     "flask[async]>=2.1.2",
-    "psutil>=5.9.1"
+    "psutil>=5.9.1",
 ]
 
 devel = [
@@ -93,6 +105,8 @@ devel = [
 
 full = merge_req_lists([
     core,
+    parser_dependencies,
+    graph_dependencies,
     sqlite_dependencies,
     redis_dependencies,
     mongodb_dependencies,
@@ -110,7 +124,7 @@ devel_full = merge_req_lists([
     tests_full,
     doc,
     devel,
-    mypy_dependencies,
+    codestyle_dependencies,
 ])
 
 EXTRA_DEPENDENCIES = {
@@ -120,6 +134,8 @@ EXTRA_DEPENDENCIES = {
     "full": full,
     "test_full": tests_full,
     "devel_full": devel_full,
+    "parser": parser_dependencies,
+    "graph": graph_dependencies,
     "sqlite": sqlite_dependencies,
     "redis": redis_dependencies,
     "mongodb": mongodb_dependencies,
@@ -159,4 +175,12 @@ setup(
     install_requires=core,  # Optional
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
+    entry_points={
+        "console_scripts": [
+            "dff.py2yaml = dff.script.import_export.parser.cli:py2yaml_cli",
+            "dff.yaml2py = dff.script.import_export.parser.cli:yaml2py_cli",
+            "dff.py2graph = dff.script.import_export.parser.cli:py2graph_cli",
+            "dff.graph2py = dff.script.import_export.parser.cli:graph2py_cli",
+        ]
+    }
 )

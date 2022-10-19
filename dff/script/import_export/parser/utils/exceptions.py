@@ -19,33 +19,33 @@ class ModuleNotFoundParserError(ParserError):
 
 
 class ResolutionError(ParserError):
-    """Raised when a string cannot be cast to :py:class:`df_script_parser.utils.namespaces.Request`."""
+    """Raised when a string cannot be cast to :py:class:`dff.script.import_export.parser.utils.namespaces.Request`."""
 
 
 class ObjectNotFoundError(ResolutionError):
-    """Raised when a string cannot be cast to :py:class:`df_script_parser.utils.namespaces.Request`
+    """Raised when a string cannot be cast to :py:class:`dff.script.import_export.parser.utils.namespaces.Request`
     due to the string referencing an object that does not exist.
     """
 
 
 class NamespaceNotParsedError(ResolutionError):
-    """Raised when a string cannot be cast to :py:class:`df_script_parser.utils.namespaces.Request`
+    """Raised when a string cannot be cast to :py:class:`dff.script.import_export.parser.utils.namespaces.Request`
     due to the string referencing an object in one of the namespaces that have not been parsed.
     """
 
 
 class RequestParsingError(ResolutionError):
-    """Raised when a string cannot be cast to :py:class:`df_script_parser.utils.namespaces.Request`
+    """Raised when a string cannot be cast to :py:class:`dff.script.import_export.parser.utils.namespaces.Request`
     due to the string not being of the required format.
     """
 
 
 class ScriptValidationError(ParserError):
-    """Raised when :py:class:`df_engine.core.actor.Actor` is initialized incorrectly."""
+    """Raised when :py:class:`dff.core.engine.core.actor.Actor` is initialized incorrectly."""
 
 
 class KeyNotFoundError(ScriptValidationError):
-    """Raised when :py:class:`df_engine.core.actor.Actor` is initialized incorrectly:
+    """Raised when :py:class:`dff.core.engine.core.actor.Actor` is initialized incorrectly:
     ``start_label`` or ``fallback_label`` refers to a key that does not exist in a dictionary.
     """
 

@@ -4,23 +4,23 @@ import re
 import typing as tp
 
 import libcst as cst
-from df_engine.core.keywords import Keywords  # type: ignore
+from dff.core.engine.core.keywords import Keywords  # type: ignore
 
-from df_script_parser.utils.code_wrappers import StringTag, Python
-from df_script_parser.utils.convenience_functions import repr_libcst_node
-from df_script_parser.utils.exceptions import WrongFileStructureError, ScriptValidationError
-from df_script_parser.utils.namespaces import Call
+from dff.script.import_export.parser.utils.code_wrappers import StringTag, Python
+from dff.script.import_export.parser.utils.convenience_functions import repr_libcst_node
+from dff.script.import_export.parser.utils.exceptions import WrongFileStructureError, ScriptValidationError
+from dff.script.import_export.parser.utils.namespaces import Call
 
 if tp.TYPE_CHECKING:
-    from df_script_parser.processors.recursive_parser import RecursiveParser
+    from dff.script.import_export.parser.processors.recursive_parser import RecursiveParser
 
 keywords_dict = {
-    k: [Python(k, "df_engine.core.keywords." + k), Python(k, "df_engine.core.keywords.Keywords." + k)]
+    k: [Python(k, "dff.core.engine.core.keywords." + k), Python(k, "dff.core.engine.core.keywords.Keywords." + k)]
     for k in Keywords.__members__
 }
 
-keywords_list = list(map(lambda x: Python(x, "df_engine.core.keywords." + x), Keywords.__members__)) + list(
-    map(lambda x: Python(x, "df_engine.core.keywords.Keywords." + x), Keywords.__members__)
+keywords_list = list(map(lambda x: Python(x, "dff.core.engine.core.keywords." + x), Keywords.__members__)) + list(
+    map(lambda x: Python(x, "dff.core.engine.core.keywords.Keywords." + x), Keywords.__members__)
 )
 
 
@@ -29,13 +29,13 @@ def check_file_structure(
 ) -> None:
     """Check that node is empty.
 
-    The `df_script_parser.processors.parse.Parse` removes supported nodes.
+    The `dff.script.import_export.parser.processors.parse.Parse` removes supported nodes.
     This function makes sure that there are no unsupported nodes in a file by checking that the resulting node is empty
 
     :param node: Node to check
     :type node: :py:class:`libcst.CSTNode`
 
-    :raise :py:exc:`df_script_parser.utils.exceptions.WrongFileStructureError`:
+    :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.WrongFileStructureError`:
         If the node is not empty. Message includes the first unsupported line of code.
     """
     remaining_file = repr_libcst_node(node)
@@ -57,31 +57,31 @@ def validate_path(
     """Validate a sequence of keys in a script.
 
     When a script tree is traversed during checking in
-    :py:meth:`df_script_parser.processors.recursive_parser.RecursiveParser.traverse_dict`
+    :py:meth:`dff.script.import_export.parser.processors.recursive_parser.RecursiveParser.traverse_dict`
     this function is called at the leaf nodes
 
     :param traversed_path: Sequence of tree nodes visited before the leaf node
     :type traversed_path:
         tuple[
-        :py:class:`df_script_parser.utils.code_wrappers.Python`,
-        :py:class:`df_script_parser.utils.code_wrappers.String`
+        :py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`,
+        :py:class:`dff.script.import_export.parser.utils.code_wrappers.String`
         ]
     :param final_value: Value of the leaf node, defaults to None
     :type final_value:
-        :py:class:`df_script_parser.utils.code_wrappers.Python`
+        :py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`
         |
-        :py:class:`df_script_parser.utils.code_wrappers.String`,
+        :py:class:`dff.script.import_export.parser.utils.code_wrappers.String`,
         optional
     :param paths: Path to the ``value``
     :type paths: list[str]
 
-    :raises :py:exc:`df_script_parser.utils.exceptions.ScriptValidationError`:
+    :raises :py:exc:`dff.script.import_export.parser.utils.exceptions.ScriptValidationError`:
 
         - If ``traversed_path`` is empty
-        - If the first element of ``traversed_path`` is :py:obj:`df_engine.core.keywords.GLOBAL` but the second
-          element does not exist or is not in :py:mod:`df_engine.core.keywords`
-        - If the first element of ``traversed_path`` is not :py:obj:`df_engine.core.keywords.GLOBAL` but the third
-          element does not exist or is not in :py:mod:`df_engine.core.keywords`
+        - If the first element of ``traversed_path`` is :py:obj:`dff.core.engine.core.keywords.GLOBAL` but the second
+          element does not exist or is not in :py:mod:`dff.core.engine.core.keywords`
+        - If the first element of ``traversed_path`` is not :py:obj:`dff.core.engine.core.keywords.GLOBAL` but the third
+          element does not exist or is not in :py:mod:`dff.core.engine.core.keywords`
     """
     if len(traversed_path) < 1:
         raise ScriptValidationError(f"No keys in a traversed path.\n" f"Keys point to: {final_value}")

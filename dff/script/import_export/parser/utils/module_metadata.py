@@ -10,7 +10,7 @@ from pathlib import Path
 import pkg_resources
 from isort import place_module
 
-from df_script_parser.utils.exceptions import ModuleNotFoundParserError
+from dff.script.import_export.parser.utils.exceptions import ModuleNotFoundParserError
 
 
 class ModuleType(Enum):
@@ -19,7 +19,7 @@ class ModuleType(Enum):
     Enums:
 
     PIP: "pip"
-        used for modules that are available via pip such as :py:mod:`df_engine`
+        used for modules that are available via pip such as :py:mod:`dff.core.engine`
 
     SYSTEM: "system"
         used for modules listed in :py:data:`sys.stdlib_module_names` such as :py:mod:`sys`
@@ -164,7 +164,7 @@ def get_module_info(
     :param inside_dir: Parent directory of the script that imports the module
     :type inside_dir: str | :py:class:`pathlib.Path`
 
-    :raises :py:exc:`df_script_parser.utils.exceptions.ModuleNotFoundParserError`:
+    :raises :py:exc:`dff.script.import_export.parser.utils.exceptions.ModuleNotFoundParserError`:
         If the module is not found with the specified params
 
     :return: A tuple of two elements. The first one is a :py:class:`ModuleType` instance. The second one is:

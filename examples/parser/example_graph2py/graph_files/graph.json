@@ -3,29 +3,24 @@
     "multigraph": true,
     "graph": {
         "script": {
-            "requirements": [
-                "df-engine==0.9.0",
-                "git+https://github.com/navdeep-G/setup.py.git@3a03ee20c0d2b795c8d5cb1aa1d7c3c6468d2ffc"
-            ],
             "namespaces": {
                 "main": {
-                    "TRANSITIONS": "!from df_engine.core.keywords TRANSITIONS",
-                    "RESPONSE": "!from df_engine.core.keywords RESPONSE",
-                    "PROCESSING": "!from df_engine.core.keywords PROCESSING",
-                    "GLOBAL": "!from df_engine.core.keywords GLOBAL",
-                    "MISC": "!from df_engine.core.keywords MISC",
-                    "LOCAL": "!from df_engine.core.keywords LOCAL",
-                    "cnd": "!import df_engine.conditions",
-                    "lbl": "!import df_engine.labels",
-                    "Act": "!from df_engine.core Actor",
-                    "Context": "!from df_engine.core Context",
-                    "rsp": "!import df_engine.responses",
+                    "TRANSITIONS": "!from dff.core.engine.core.keywords TRANSITIONS",
+                    "RESPONSE": "!from dff.core.engine.core.keywords RESPONSE",
+                    "PROCESSING": "!from dff.core.engine.core.keywords PROCESSING",
+                    "GLOBAL": "!from dff.core.engine.core.keywords GLOBAL",
+                    "MISC": "!from dff.core.engine.core.keywords MISC",
+                    "LOCAL": "!from dff.core.engine.core.keywords LOCAL",
+                    "cnd": "!import dff.core.engine.conditions",
+                    "lbl": "!import dff.core.engine.labels",
+                    "Act": "!from dff.core.engine.core Actor",
+                    "Context": "!from dff.core.engine.core Context",
+                    "rsp": "!import dff.core.engine.responses",
                     "add_prefix": "!from functions add_prefix",
                     "tp": "!import typing",
                     "re": "!import re",
                     "transitions": "!import transitions",
                     "global_flow": "!from flow global_flow",
-                    "mypackage": "!import mypackage",
                     "script": {
                         "GLOBAL": {
                             "TRANSITIONS": {
@@ -143,12 +138,12 @@
                     "actor": "!call\nname: Act\nargs:\n  fallback_label:\n  - !str global_flow\n  - fallback_node\n  script: script\n  start_label:\n  - !str global_flow\n  - start_node\n"
                 },
                 "flow": {
-                    "TRANSITIONS": "!from df_engine.core.keywords TRANSITIONS",
-                    "RESPONSE": "!from df_engine.core.keywords RESPONSE",
-                    "PROCESSING": "!from df_engine.core.keywords PROCESSING",
-                    "LOCAL": "!from df_engine.core.keywords LOCAL",
-                    "cnd": "!import df_engine.conditions",
-                    "lbl": "!import df_engine.labels",
+                    "TRANSITIONS": "!from dff.core.engine.core.keywords TRANSITIONS",
+                    "RESPONSE": "!from dff.core.engine.core.keywords RESPONSE",
+                    "PROCESSING": "!from dff.core.engine.core.keywords PROCESSING",
+                    "LOCAL": "!from dff.core.engine.core.keywords LOCAL",
+                    "cnd": "!import dff.core.engine.conditions",
+                    "lbl": "!import dff.core.engine.labels",
                     "re": "!import re",
                     "add_prefix": "!from functions add_prefix",
                     "global_flow": {
@@ -233,7 +228,7 @@
             "local": true,
             "id": [
                 "global_flow",
-                "df_engine.core.keywords.LOCAL"
+                "dff.core.engine.core.keywords.LOCAL"
             ]
         },
         {

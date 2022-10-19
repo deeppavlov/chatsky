@@ -2,7 +2,7 @@
 """
 from pathlib import Path
 import argparse
-from df_script_parser.tools import py2yaml, yaml2py, py2graph, graph2py
+from dff.script.import_export.parser.tools import py2yaml, yaml2py, py2graph, graph2py
 
 
 def is_dir(arg: str) -> Path:
@@ -52,14 +52,6 @@ def py2yaml_cli():
         help="Yaml file to store parser output in",
         type=str,
     )
-    parser.add_argument(
-        "--requirements",
-        metavar="REQUIREMENTS",
-        help="File with project requirements to override those collected by parser",
-        type=is_file,
-        required=False,
-        default=None,
-    )
     args = parser.parse_args()
     py2yaml(**vars(args))
 
@@ -84,14 +76,6 @@ def py2graph_cli():
         metavar="OUTPUT_FILE",
         help="Graph file to store parser output in",
         type=str,
-    )
-    parser.add_argument(
-        "--requirements",
-        metavar="REQUIREMENTS",
-        help="File with project requirements to override those collected by parser",
-        type=is_file,
-        required=False,
-        default=None,
     )
     args = parser.parse_args()
     py2graph(**vars(args))

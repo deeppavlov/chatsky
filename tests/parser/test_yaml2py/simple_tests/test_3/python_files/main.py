@@ -1,5 +1,5 @@
-from df_engine.core.actor import Actor as Actor
-from df_engine.core import keywords as keywords
+from dff.core.engine.core.actor import Actor as Actor
+from dff.core.engine.core import keywords as keywords
 
 ints = {1: 2}
 strings = {1: {2: "flow"}}

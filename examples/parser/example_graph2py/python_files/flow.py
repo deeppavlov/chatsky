@@ -1,9 +1,9 @@
-from df_engine.core.keywords import TRANSITIONS as TRANSITIONS
-from df_engine.core.keywords import RESPONSE as RESPONSE
-from df_engine.core.keywords import PROCESSING as PROCESSING
-from df_engine.core.keywords import LOCAL as LOCAL
-import df_engine.conditions as cnd
-import df_engine.labels as lbl
+from dff.core.engine.core.keywords import TRANSITIONS as TRANSITIONS
+from dff.core.engine.core.keywords import RESPONSE as RESPONSE
+from dff.core.engine.core.keywords import PROCESSING as PROCESSING
+from dff.core.engine.core.keywords import LOCAL as LOCAL
+import dff.core.engine.conditions as cnd
+import dff.core.engine.labels as lbl
 import re as re
 from functions import add_prefix as add_prefix
 

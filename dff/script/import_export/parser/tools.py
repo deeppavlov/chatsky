@@ -1,29 +1,27 @@
 """This module contains implementations of :py:func:`.py2yaml` and :py:func:`.yaml2py` parsers
 """
 from pathlib import Path
-import typing as tp
 import logging
 import json
 
 from black import format_file_in_place, FileMode, WriteBack
 import networkx as nx  # type: ignore
 
-from df_script_parser.dumpers_loaders import yaml_dumper_loader
-from df_script_parser.processors.dict_processors import DictProcessor
-from df_script_parser.processors.recursive_parser import RecursiveParser
-from df_script_parser.utils.namespaces import Import, From, Call
-from df_script_parser.utils.exceptions import DictStructureError
+from dff.script.import_export.parser.dumpers_loaders import yaml_dumper_loader
+from dff.script.import_export.parser.processors.dict_processors import DictProcessor
+from dff.script.import_export.parser.processors.recursive_parser import RecursiveParser
+from dff.script.import_export.parser.utils.namespaces import Import, From, Call
+from dff.script.import_export.parser.utils.exceptions import DictStructureError
 
 
 def py2yaml(
     root_file: Path,
     project_root_dir: Path,
     output_file: Path,
-    requirements: tp.Optional[Path] = None,
 ):
     """Compress a dff project into a yaml file by parsing files inside PROJECT_ROOT_DIR starting with ROOT_FILE.
     Extract imports, assignments of dictionaries and function calls from each file.
-    Recursively parse imported local modules. Collect non-local modules as project requirements
+    Recursively parse imported local modules
 
     :param root_file: Python file to start parsing with
     :type root_file: :py:class:`.Path`
@@ -31,16 +29,10 @@ def py2yaml(
     :type project_root_dir: :py:class:`.Path`
     :param output_file: Yaml file to store parser output in
     :type output_file: :py:class:`.Path`
-    :param requirements: Path to a file containing project requirements, defaults to None
-    :type requirements: :pu:class:`.Path`, optional
     :return:
     """
     with open(Path(output_file).absolute(), "w", encoding="utf-8") as outfile:
         dictionary = RecursiveParser(Path(project_root_dir).absolute()).parse_project_dir(Path(root_file).absolute())
-
-        if requirements:
-            with open(requirements, "r", encoding="utf-8") as reqs:
-                dictionary["requirements"] = [x for x in reqs.read().split("\n") if x]
 
         yaml_dumper_loader.dump(dictionary, outfile)
 
@@ -49,7 +41,6 @@ def py2graph(
     root_file: Path,
     project_root_dir: Path,
     output_file: Path,
-    requirements: tp.Optional[Path] = None,
 ):
     """Export dff project dir as a :py:mod:`networkx` graph.
 
@@ -59,17 +50,12 @@ def py2graph(
     :type project_root_dir: :py:class:`.Path`
     :param output_file: Graph file to store parser output in
     :type output_file: :py:class:`.Path`
-    :param requirements: Path to a file containing project requirements, defaults to None
-    :type requirements: :pu:class:`.Path`, optional
     :return:
     """
     with open(Path(output_file).absolute(), "w", encoding="utf-8") as outfile:
         project = RecursiveParser(Path(project_root_dir).absolute())
         project.parse_project_dir(Path(root_file).absolute())
 
-        if requirements:
-            with open(requirements, "r", encoding="utf-8") as reqs:
-                project.requirements = [x for x in reqs.read().split("\n") if x]
         json.dump(nx.readwrite.node_link_data(project.to_graph()), outfile, indent=4)
 
 
@@ -84,11 +70,8 @@ def dict2py(
     :return: None
     """
     namespaces = dictionary.get("namespaces")
-    requirements = dictionary.get("requirements")
     if not namespaces:
         raise DictStructureError("No namespaces found")
-    if requirements is None:
-        raise DictStructureError("No requirements found")
 
     for namespace in namespaces:
         path = namespace.split(".")
@@ -116,8 +99,6 @@ def dict2py(
 
                 dict_processor.add_name(name)
         format_file_in_place(path_to_file, fast=False, mode=FileMode(), write_back=WriteBack.YES)
-    with open(extract_to_directory / "requirements.txt", "w", encoding="utf-8") as reqs:
-        reqs.write("\n".join(requirements))
 
 
 def yaml2py(

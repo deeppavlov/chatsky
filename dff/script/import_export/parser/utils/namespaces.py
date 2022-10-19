@@ -10,17 +10,17 @@ from ruamel.yaml.comments import CommentedMap
 from ruamel.yaml.constructor import Constructor
 from ruamel.yaml.representer import Representer
 
-from df_script_parser.utils.code_wrappers import Python, String, StringTag
-from df_script_parser.utils.convenience_functions import repr_libcst_node, remove_suffix, get_module_name
-from df_script_parser.utils.exceptions import ObjectNotFoundError, ResolutionError, RequestParsingError
-from df_script_parser.utils.module_metadata import ModuleType, get_module_info
+from dff.script.import_export.parser.utils.code_wrappers import Python, String, StringTag
+from dff.script.import_export.parser.utils.convenience_functions import repr_libcst_node, remove_suffix, get_module_name
+from dff.script.import_export.parser.utils.exceptions import ObjectNotFoundError, ResolutionError, RequestParsingError
+from dff.script.import_export.parser.utils.module_metadata import ModuleType, get_module_info
 
 
 class Import(Python):
     """This class is used to represent an object that is an imported module.
 
-    - :py:attr:`df_script_parser.utils.code_wrappers.StringTag.show_yaml_tag` is set to True
-    - :py:attr:`df_script_parser.utils.code_wrappers.StringTag.display_absolute_value` is set to False
+    - :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.show_yaml_tag` is set to True
+    - :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.display_absolute_value` is set to False
 
     :param module: Name of the module being imported
     :type module: str
@@ -39,11 +39,11 @@ class From(Python):
     """This class is used to represent an object that refers to an object from another module.
 
     - Concatenation of ``module_name`` and ``obj`` using a whitespace is treated as
-      :py:attr:`df_script_parser.utils.code_wrappers.StringTag.display_value`
+      :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.display_value`
     - Concatenation of ``module_name`` and ``obj`` using a dot is treated as
-      :py:attr:`df_script_parser.utils.code_wrappers.StringTag.absolute_value`
-    - :py:attr:`df_script_parser.utils.code_wrappers.StringTag.show_yaml_tag` is set to True
-    - :py:attr:`df_script_parser.utils.code_wrappers.StringTag.display_absolute_value` is set to False
+      :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.absolute_value`
+    - :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.show_yaml_tag` is set to True
+    - :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.display_absolute_value` is set to False
 
     :param module_name: Name of the module from which the object is imported
     :type module_name: str
@@ -125,7 +125,7 @@ class Call:
 class NamespaceTag(Python):
     """This class is used to store a name of a namespace.
 
-    - :py:attr:`df_script_parser.utils.code_wrappers.StringTag.show_yaml_tag` is set to False by default
+    - :py:attr:`dff.script.import_export.parser.utils.code_wrappers.StringTag.show_yaml_tag` is set to False by default
     """
 
     yaml_tag = "!namespace"
@@ -149,10 +149,10 @@ class Request:
     :type node: :py:class:`libcst.CSTNode`
     :param get_absolute_attributes: :py:meth:`Namespace.get_absolute_name_list`
         that is used to get an absolute location of an object
-    :type get_absolute_attributes: Callable[[list[:py:class:`df_script_parser.utils.code_wrappers.Python`]],
-        list[:py:class:`df_script_parser.utils.code_wrappers.Python`]], optional
+    :type get_absolute_attributes: Callable[[list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]],
+        list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]], optional
 
-    :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
+    :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
         If a node cannot be represented as a request
     """
 
@@ -174,7 +174,7 @@ class Request:
         :param node: Node to parse
         :type node: :py:class:`libcst.CSTNode`
 
-        :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
+        :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
             If a node cannot be represented as a request
         """
         if isinstance(node, cst.Subscript):
@@ -193,7 +193,7 @@ class Request:
         :param node: Node to parse
         :type node: :py:class:`libcst.Subscript`
 
-        :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
+        :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
             If a node cannot be represented as a request
         """
         if len(node.slice) != 1:
@@ -216,7 +216,7 @@ class Request:
         :param node: Node to parse
         :type node: :py:class:`libcst.Attribute`
 
-        :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
+        :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
             If a node cannot be represented as a request
         """
         self._process_node(node.value)
@@ -240,10 +240,10 @@ class Request:
         :type request: str
         :param get_absolute_attributes: :py:meth:`Namespace.get_absolute_name_list`
             that is used to get an absolute location of an object
-        :type get_absolute_attributes: Callable[[list[:py:class:`df_script_parser.utils.code_wrappers.Python`]],
-            list[:py:class:`df_script_parser.utils.code_wrappers.Python`]], optional
+        :type get_absolute_attributes: Callable[[list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]],
+            list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]], optional
 
-        :raise :py:exc:`df_script_parser.utils.exceptions.RequestParsingError`:
+        :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
             If a string cannot be represented as a request
 
         :return: Instance of :py:class:`Request` class
@@ -271,7 +271,7 @@ class Namespace:
     :param import_module_hook: Function that is being called when an import is added to the namespace, defaults to None
     :type import_module_hook:
         Callable[[:py:class:`.ModuleType`, str], None] | None, optional
-    :param actor_args_check: Function that is being called when an instance of :py:class:`df_engine.core.actor.Actor` is
+    :param actor_args_check: Function that is being called when an instance of :py:class:`dff.core.engine.core.actor.Actor` is
         created, defaults to None
     :type actor_args_check:
         Callable[[dict], None] | None, optional
@@ -300,15 +300,15 @@ class Namespace:
         module_name: str,
     ) -> tp.Tuple[str, tp.Optional["Namespace"]]:
         """Call ``import_module_hook``, return absolute import name for
-        :py:attr:`df_script_parser.utils.module_metadata.ModuleType.LOCAL` modules
+        :py:attr:`dff.script.import_export.parser.utils.module_metadata.ModuleType.LOCAL` modules
 
         :param module_name: Module name
         :type module_name: str
         :return: Newly created namespace and its module name
 
-            - ``module_name`` for :py:attr:`df_script_parser.utils.module_metadata.ModuleType.PIP` and
-              :py:attr:`df_script_parser.utils.module_metadata.ModuleType.SYSTEM`
-            - Absolute name for :py:attr:`df_script_parser.utils.module_metadata.ModuleType.LOCAL`
+            - ``module_name`` for :py:attr:`dff.script.import_export.parser.utils.module_metadata.ModuleType.PIP` and
+              :py:attr:`dff.script.import_export.parser.utils.module_metadata.ModuleType.SYSTEM`
+            - Absolute name for :py:attr:`dff.script.import_export.parser.utils.module_metadata.ModuleType.LOCAL`
         :rtype: tuple[str, :py:class:`.Namespace`]
         """
         module_type, module_metadata = get_module_info(module_name, self.path.parent)
@@ -397,7 +397,7 @@ class Namespace:
         args: dict,
         check_args: bool = False,
     ):
-        """Add a call to :py:class:`df_engine.core.actor.Actor`
+        """Add a call to :py:class:`dff.core.engine.core.actor.Actor`
 
         :param name: Name of the actor
         :type name: str
@@ -406,7 +406,7 @@ class Namespace:
         :param args: Dictionary of arguments of the call
         :type args: dict
         :param check_args:
-            Whether to check args for correctness if the function being called is :py:class:`df_engine.core.Actor`,
+            Whether to check args for correctness if the function being called is :py:class:`dff.core.engine.core.Actor`,
             defaults to False
         :type check_args: bool
         :return:
@@ -431,8 +431,8 @@ class Namespace:
     def get_absolute_name_list(self, names: tp.List[Python]) -> tp.List[Python]:
         """Make an object name absolute
 
-        For example, namespace with added ``import df_engine.core.keywords as kw`` will return
-        ``[df_engine, core, keywords, GLOBAL]`` if this method is called with ``[kw, GLOBAL]``
+        For example, namespace with added ``import dff.core.engine.core.keywords as kw`` will return
+        ``[dff.core.engine, core, keywords, GLOBAL]`` if this method is called with ``[kw, GLOBAL]``
 
         :param names: List of module and object names
         :type names: list[:py:class:`.Python`]

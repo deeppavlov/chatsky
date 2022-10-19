@@ -2,21 +2,29 @@
 from io import StringIO
 from pathlib import Path
 from filecmp import dircmp
+from copy import copy
+from itertools import product
 
 import pytest
 
-from df_script_parser.dumpers_loaders import yaml_dumper_loader
-from df_script_parser.processors.recursive_parser import RecursiveParser
-from df_script_parser.utils.exceptions import ScriptValidationError
-from df_script_parser.tools import yaml2py, py2graph, graph2py
+from dff.script.import_export.parser.dumpers_loaders import yaml_dumper_loader
+from dff.script.import_export.parser.processors.recursive_parser import RecursiveParser
+from dff.script.import_export.parser.utils.exceptions import ScriptValidationError
+from dff.script.import_export.parser import dependencies, py2yaml, yaml2py, py2graph, graph2py
+import dff
+
+true_dependencies = copy(dependencies)
+
+
+current_dir = Path(__file__).parent
 
 
 py2yaml_params = [
     *[
         (
-            Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/python_files"),
-            Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/python_files/main.py"),
-            Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/yaml_files/script.yaml"),
+            current_dir / "test_py2yaml" / "simple_tests" / f"test_{test_number}" / "python_files",
+            current_dir / "test_py2yaml" / "simple_tests" / f"test_{test_number}" / "python_files" / "main.py",
+            current_dir / "test_py2yaml" / "simple_tests" / f"test_{test_number}" / "yaml_files" / "script.yaml",
             exception,
         )
         for test_number, exception in zip(
@@ -44,29 +52,30 @@ py2yaml_params = [
     ],
     *[
         (
-            Path(f"tests/test_py2yaml/complex_tests/test_{test_number}/python_files"),
-            Path(f"tests/test_py2yaml/complex_tests/test_{test_number}/python_files/main.py"),
-            Path(f"tests/test_py2yaml/complex_tests/test_{test_number}/yaml_files/script.yaml"),
+            current_dir / "test_py2yaml" / "complex_tests" / f"test_{test_number}" / "python_files",
+            current_dir / "test_py2yaml" / "complex_tests" / f"test_{test_number}" / "python_files" / "main.py",
+            current_dir / "test_py2yaml" / "complex_tests" / f"test_{test_number}" / "yaml_files" / "script.yaml",
             exception,
         )
         for test_number, exception in zip(range(1, 3), [None, None])
     ],
     (
-        Path("examples/example_py2yaml/python_files"),
-        Path("examples/example_py2yaml/python_files/main.py"),
-        Path("examples/example_py2yaml/yaml_files/script.yaml"),
+        current_dir / "examples" / "example_py2yaml" / "python_files",
+        current_dir / "examples" / "example_py2yaml" / "python_files" / "main.py",
+        current_dir / "examples" / "example_py2yaml" / "yaml_files" / "script.yaml",
         None,
     ),
 ]
 
 
 @pytest.mark.parametrize(
-    "project_root_dir,main_file,script,exception",
-    py2yaml_params,
+    "project_root_dir,main_file,script,exception,nx_available",
+    list((*x[0], x[1]) for x in product(py2yaml_params, [True, False]))  # add True or False to each param set
 )
-def test_py2yaml(project_root_dir, main_file, script, exception):
+def test_py2yaml(project_root_dir, main_file, script, exception, nx_available):
     """Test the py2yaml part of the parser."""
-
+    if not true_dependencies["graph"] and nx_available:
+        pytest.skip("`networkx` is not installed")
     def _test_py2yaml():
         buffer = StringIO()
         recursive_parser = RecursiveParser(Path(project_root_dir))
@@ -76,18 +85,20 @@ def test_py2yaml(project_root_dir, main_file, script, exception):
         with open(script, "r", encoding="utf-8") as correct_result:
             assert buffer.read() == correct_result.read()
 
+    dff.script.import_export.parser.dependencies["graph"] = nx_available
     if exception:
         with pytest.raises(exception):
             _test_py2yaml()
     else:
         _test_py2yaml()
+    dff.script.import_export.parser.dependencies["graph"] = true_dependencies["graph"]
 
 
 yaml2py_params = [
     *[
         (
-            Path(f"tests/test_yaml2py/simple_tests/test_{test_number}/yaml_files/script.yaml"),
-            Path(f"tests/test_yaml2py/simple_tests/test_{test_number}/python_files"),
+            current_dir / "test_yaml2py" / "simple_tests" / f"test_{test_number}" / "yaml_files" / "script.yaml",
+            current_dir / "test_yaml2py" / "simple_tests" / f"test_{test_number}" / "python_files",
             exception,
         )
         for test_number, exception in zip(
@@ -103,13 +114,17 @@ yaml2py_params = [
     ],
     *[
         (
-            Path(f"tests/test_yaml2py/complex_tests/test_{test_number}/yaml_files/script.yaml"),
-            Path(f"tests/test_yaml2py/complex_tests/test_{test_number}/python_files"),
+            current_dir / "test_yaml2py" / "complex_tests" / f"test_{test_number}" / "yaml_files" / "script.yaml",
+            current_dir / "test_yaml2py" / "complex_tests" / f"test_{test_number}" / "python_files",
             exception,
         )
         for test_number, exception in zip(range(1, 3), [None, None])
     ],
-    (Path("examples/example_yaml2py/yaml_files/script.yaml"), Path("examples/example_yaml2py/python_files"), None),
+    (
+        current_dir / "examples" / "example_yaml2py" / "yaml_files" / "script.yaml",
+        current_dir / "examples" / "example_yaml2py" / "python_files",
+        None
+    ),
 ]
 
 
@@ -183,17 +198,17 @@ py2graph_params = [
     # ],
     *[
         (
-            Path(f"tests/test_py2graph/complex_tests/test_{test_number}/python_files"),
-            Path(f"tests/test_py2graph/complex_tests/test_{test_number}/python_files/main.py"),
-            Path(f"tests/test_py2graph/complex_tests/test_{test_number}/graph_files"),
+            current_dir / "test_py2graph" / "complex_tests" / f"test_{test_number}" / "python_files",
+            current_dir / "test_py2graph" / "complex_tests" / f"test_{test_number}" / "python_files" / "main.py",
+            current_dir / "test_py2graph" / "complex_tests" / f"test_{test_number}" / "graph_files",
             exception,
         )
         for test_number, exception in zip(range(1, 2), [None])
     ],
     (
-        Path("examples/example_py2graph/python_files"),
-        Path("examples/example_py2graph/python_files/main.py"),
-        Path("examples/example_py2graph/graph_files"),
+        current_dir / "examples" / "example_py2graph" / "python_files",
+        current_dir / "examples" / "example_py2graph" / "python_files" / "main.py",
+        current_dir / "examples" / "example_py2graph" / "graph_files",
         None,
     ),
 ]
@@ -203,6 +218,7 @@ py2graph_params = [
     "project_root_dir,main_file,output,exception",
     py2graph_params,
 )
+@pytest.mark.skipif(not true_dependencies["graph"], reason="`networkx` is not installed")
 def test_py2graph(project_root_dir, main_file, output, exception, tmp_path):
     def _test_yaml2py():
         def _assert_dir_eq(dir_cmp: dircmp):
@@ -253,7 +269,11 @@ graph2py_params = [
     #     )
     #     for test_number, exception in zip(range(1, 3), [None, None])
     # ],
-    (Path("examples/example_graph2py/graph_files/graph.json"), Path("examples/example_graph2py/python_files"), None),
+    (
+        current_dir / "examples" / "example_graph2py" / "graph_files" / "graph.json",
+        current_dir / "examples" / "example_graph2py" / "python_files",
+        None
+    ),
 ]
 
 
@@ -261,6 +281,7 @@ graph2py_params = [
     "input_file,output_dir,exception",
     graph2py_params,
 )
+@pytest.mark.skipif(not true_dependencies["graph"], reason="`networkx` is not installed")
 def test_graph2py(input_file, output_dir, exception, tmp_path):
     """Test graph2py
 

@@ -7,7 +7,7 @@ import typing as tp
 from ruamel.yaml.constructor import Constructor
 from ruamel.yaml.representer import Representer
 
-from df_script_parser.utils.convenience_functions import enquote_string
+from dff.script.import_export.parser.utils.convenience_functions import enquote_string
 
 
 class StringTag(ABC):

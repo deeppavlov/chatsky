@@ -4,8 +4,8 @@ from math import inf
 
 from ruamel.yaml import YAML
 
-from df_script_parser.utils.code_wrappers import String, Python
-from df_script_parser.utils.namespaces import NamespaceTag, From, Import, AltName, ActorTag, Call
+from dff.script.import_export.parser.utils.code_wrappers import String, Python
+from dff.script.import_export.parser.utils.namespaces import NamespaceTag, From, Import, AltName, ActorTag, Call
 
 yaml_dumper_loader = YAML()
 

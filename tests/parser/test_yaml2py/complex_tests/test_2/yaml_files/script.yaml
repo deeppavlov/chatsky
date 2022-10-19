@@ -1,9 +1,7 @@
-requirements:
-- df-engine==0.9.0
 namespaces:
   main:
     act: !from script act
-    function_does_not_exist: !from df_engine function_does_not_exist
+    function_does_not_exist: !from dff.core.engine function_does_not_exist
     result: !call
       name: function_does_not_exist
       args:
@@ -13,7 +11,7 @@ namespaces:
         value: '2'
   script:
     flow: !from flows.start flow
-    Actor: !from df_engine.core.actor Actor
+    Actor: !from dff.core.engine.core.actor Actor
     act: !call
       name: Actor
       args:
@@ -28,7 +26,7 @@ namespaces:
       start_node: node
   flows.__init__: {}
   nodes.node_1:
-    kw: !import df_engine.core.keywords
+    kw: !import dff.core.engine.core.keywords
     node:
       kw.RESPONSE: hey
   nodes.__init__: {}

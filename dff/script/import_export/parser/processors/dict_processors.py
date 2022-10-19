@@ -12,15 +12,15 @@ import libcst as cst
 from pyflakes.api import check  # type: ignore
 from pyflakes.reporter import Reporter  # type: ignore
 
-from df_script_parser.utils.code_wrappers import (
+from dff.script.import_export.parser.utils.code_wrappers import (
     String,
     Python,
     StringTag,
 )
-from df_script_parser.utils.convenience_functions import repr_libcst_node, remove_suffix
-from df_script_parser.utils.exceptions import StarredError, ParserError
-from df_script_parser.utils.namespaces import Namespace, Call, Import
-from df_script_parser.dumpers_loaders import yaml_dumper_loader
+from dff.script.import_export.parser.utils.convenience_functions import repr_libcst_node, remove_suffix
+from dff.script.import_export.parser.utils.exceptions import StarredError, ParserError
+from dff.script.import_export.parser.utils.namespaces import Namespace, Call, Import
+from dff.script.import_export.parser.dumpers_loaders import yaml_dumper_loader
 
 
 WHITESPACES_REGEXP = r"\n[ \t]*"

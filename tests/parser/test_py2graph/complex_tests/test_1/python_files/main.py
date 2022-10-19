@@ -1,6 +1,6 @@
 import module
-from df_engine.core.keywords import TRANSITIONS, GLOBAL
-from df_engine.core.actor import Actor
+from dff.core.engine.core.keywords import TRANSITIONS, GLOBAL
+from dff.core.engine.core.actor import Actor
 
 glob = {"glob": GLOBAL}
 

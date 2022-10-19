@@ -6,12 +6,12 @@ from pathlib import Path
 
 import libcst as cst
 import libcst.matchers as m
-from df_engine.core.actor import Actor  # type: ignore
+from dff.core.engine.core.actor import Actor  # type: ignore
 
-from df_script_parser.processors.dict_processors import NodeProcessor
-from df_script_parser.utils.convenience_functions import repr_libcst_node
-from df_script_parser.utils.exceptions import StarredError
-from df_script_parser.utils.namespaces import Namespace
+from dff.script.import_export.parser.processors.dict_processors import NodeProcessor
+from dff.script.import_export.parser.utils.convenience_functions import repr_libcst_node
+from dff.script.import_export.parser.utils.exceptions import StarredError
+from dff.script.import_export.parser.utils.namespaces import Namespace
 
 call_matcher = m.OneOf(m.Assign(value=m.Call()), m.AnnAssign(value=m.Call()))
 
@@ -22,7 +22,7 @@ class Parser(m.MatcherDecoratableTransformer):
     :param project_root_dir: Root directory of the project
     :type project_root_dir: :py:class:`pathlib.Path`
     :param namespace: Namespace to store all the extracted objects in
-    :type namespace: :py:class:`df_script_parser.utils.namespaces.Namespace`
+    :type namespace: :py:class:`dff.script.import_export.parser.utils.namespaces.Namespace`
     """
 
     def __init__(self, project_root_dir: Path, namespace: Namespace):
@@ -83,7 +83,7 @@ class Parser(m.MatcherDecoratableTransformer):
         original_node: tp.Union[cst.Assign, cst.AnnAssign],
         updated_node: tp.Union[cst.Assign, cst.AnnAssign],  # pylint: disable=unused-argument
     ) -> tp.Union[cst.RemovalSentinel, cst.Assign, cst.AnnAssign]:
-        """Parse arguments of a call. If the call is :py:class:`df_engine.core.Actor` validate its arguments
+        """Parse arguments of a call. If the call is :py:class:`dff.core.engine.core.Actor` validate its arguments
 
         :param original_node:
         :param updated_node:
@@ -92,7 +92,7 @@ class Parser(m.MatcherDecoratableTransformer):
         func_name = repr_libcst_node(cst.ensure_type(original_node.value, cst.Call).func)
         self.node_processor.parse_tuples = True
 
-        if self.namespace.get_absolute_name(func_name) in ["df_engine.core.actor.Actor", "df_engine.core.Actor"]:
+        if self.namespace.get_absolute_name(func_name) in ["dff.core.engine.core.actor.Actor", "dff.core.engine.core.Actor"]:
             args = {}
             actor_arg_order = Actor.__init__.__wrapped__.__code__.co_varnames[1:]  # pylint: disable=no-member
             for arg, keyword in zip(cst.ensure_type(original_node.value, cst.Call).args, actor_arg_order):

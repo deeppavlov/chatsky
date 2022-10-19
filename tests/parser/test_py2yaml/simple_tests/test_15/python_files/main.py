@@ -1,5 +1,5 @@
-from df_engine.core.actor import Actor
-from df_engine.core import keywords as kw
+from dff.core.engine.core.actor import Actor
+from dff.core.engine.core import keywords as kw
 
 node = {3: "node"}
 

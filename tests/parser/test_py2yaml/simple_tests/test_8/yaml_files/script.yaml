@@ -1,9 +1,7 @@
-requirements:
-- df-engine==0.9.0
 namespaces:
   main:
-    Actor: !from df_engine.core.actor Actor
-    keywords: !from df_engine.core keywords
+    Actor: !from dff.core.engine.core.actor Actor
+    keywords: !from dff.core.engine.core keywords
     ints:
       '1': '2'
     strings:

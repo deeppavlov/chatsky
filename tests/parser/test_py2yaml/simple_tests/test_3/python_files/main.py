@@ -1,4 +1,4 @@
-from df_engine.core.actor import Actor
+from dff.core.engine.core.actor import Actor
 
 script = {1: 1}
 

@@ -1,10 +1,8 @@
-requirements:
-- df-engine==0.9.0
 namespaces:
   python_files.main:
-    act: !from df_engine.core.actor Actor
-    glb: !from df_engine.core.keywords GLOBAL
-    rsp: !from df_engine.core.keywords RESPONSE
+    act: !from dff.core.engine.core.actor Actor
+    glb: !from dff.core.engine.core.keywords GLOBAL
+    rsp: !from dff.core.engine.core.keywords RESPONSE
     flows: !import python_files.flows
     script:
       glb:
@@ -32,14 +30,14 @@ namespaces:
       !str fallback_node: fallback_node
       other_node: sn.start_node
   python_files.nodes.fallback_node:
-    rp: !from df_engine.core.keywords RESPONSE
+    rp: !from dff.core.engine.core.keywords RESPONSE
     fallback_node:
       rp: bye
   python_files.nodes.__init__:
     sn: !from python_files.nodes.start_node start_node
     fn: !from python_files.nodes.fallback_node fallback_node
   python_files.nodes.start_node:
-    rsp: !from df_engine.core.keywords RESPONSE
+    rsp: !from dff.core.engine.core.keywords RESPONSE
     start_node:
       rsp: hi
   python_files.flows.start_flow:

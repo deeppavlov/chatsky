@@ -1,5 +1,5 @@
-from df_engine.core.actor import Actor as Actor
-from df_engine.core import keywords as kw
+from dff.core.engine.core.actor import Actor as Actor
+from dff.core.engine.core import keywords as kw
 
 another_script = {"flow": {"node": {kw.RESPONSE: "hi"}}}
 script = another_script

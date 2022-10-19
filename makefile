@@ -12,7 +12,7 @@ help:
 	@echo "make test: Run basic tests (not testing most integrations)"
 	@echo "make test-all: Run ALL tests (slow, closest to CI)"
 	@echo "make format: Run code formatters (destructive)"
-	@echo "make build_doc: Build Sphinx docs; activate your virtual environment before execution"
+	@echo "make doc: Build Sphinx docs; activate your virtual environment before execution"
 	@echo "make pre_commit: Register a git hook to lint the code on each commit"
 	@echo "make version_major: increment version major in metadata files 8.8.1 -> 9.0.0"
 	@echo "make version_minor: increment version minor in metadata files 9.1.1 -> 9.2.0"

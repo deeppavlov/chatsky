@@ -6,25 +6,28 @@ from pathlib import Path
 from copy import copy
 
 import libcst as cst
-import networkx as nx  # type: ignore
 
-from df_script_parser.processors.parse import Parser
-from df_script_parser.utils.code_wrappers import StringTag, Python, String
-from df_script_parser.utils.convenience_functions import get_module_name, remove_suffix
-from df_script_parser.utils.exceptions import (
+from dff.script.import_export.parser.processors.parse import Parser
+from dff.script.import_export.parser.utils.code_wrappers import StringTag, Python
+from dff.script.import_export.parser.utils.convenience_functions import get_module_name, remove_suffix
+from dff.script.import_export.parser.utils.exceptions import (
     ResolutionError,
     ParserError,
     ScriptValidationError,
     WrongFileStructureError,
 )
-from df_script_parser.utils.module_metadata import ModuleType
-from df_script_parser.utils.namespaces import Namespace, NamespaceTag, Request, Call, Import
-from df_script_parser.utils.validators import check_file_structure, validate_path
-from df_script_parser.processors.script2graph import script2graph
-from df_script_parser.processors.dict_processors import DictProcessor
+from dff.script.import_export.parser.utils.module_metadata import ModuleType
+from dff.script.import_export.parser.utils.namespaces import Namespace, NamespaceTag, Request, Call, Import
+from dff.script.import_export.parser.utils.validators import check_file_structure, validate_path, keywords_dict
+from dff.script.import_export.parser.processors.script2graph import script2graph
+from dff.script.import_export.parser.processors.dict_processors import DictProcessor
+from dff.script.import_export.parser import dependencies
+
+if dependencies["graph"]:
+    import networkx as nx  # type: ignore
 
 
-ScriptDict = tp.Dict[tp.Union[Python, String], tp.Union["ScriptDict", Python, String]]  # type: ignore
+ScriptDict = tp.Dict[StringTag, tp.Union["ScriptDict", StringTag]]  # type: ignore
 
 
 class RecursiveParser:
@@ -43,9 +46,10 @@ class RecursiveParser:
         self.namespaces: tp.Dict[NamespaceTag, tp.Union[Namespace, None]] = {}
         self.unprocessed: tp.List[NamespaceTag] = []
         self.script: tp.Optional[Python] = None
-        self.start_label: tp.Optional[tp.Tuple[tp.Union[Python, String]]] = None
-        self.fallback_label: tp.Optional[tp.Tuple[tp.Union[Python, String]]] = None
-        self.graph: tp.Optional[nx.MultiDiGraph] = None
+        self.start_label: tp.Optional[tp.Tuple[StringTag]] = None
+        self.fallback_label: tp.Optional[tp.Tuple[StringTag]] = None
+        if dependencies["graph"]:
+            self.graph: tp.Optional[nx.MultiDiGraph] = None
 
     def resolve_name(self, name: tp.Union[StringTag, Request]) -> StringTag:
         """Try to resolve ``name`` into a :py:class:`.StringTag`. Return ``name`` if not possible
@@ -109,11 +113,11 @@ class RecursiveParser:
         """Return an object requested in ``request``
 
         :param request: Request of an object
-        :type request: :py:class:`df_script_parser.utils.namespaces.Request`
+        :type request: :py:class:`dff.script.import_export.parser.utils.namespaces.Request`
         :return: Object requested in a ``request`` and a namespace where the object is declared
         :rtype: tuple[dict | :py:class:`.Call` | :py:class:`.StringTag`, :py:class:`.Namespace`]
 
-        :raise :py:exc:`df_script_parser.exceptions.ObjectNotFoundError`:
+        :raise :py:exc:`dff.script.import_export.parser.exceptions.ObjectNotFoundError`:
             If a requested object is not found
         """
         for i in reversed(range(1, len(request.attributes))):
@@ -217,9 +221,9 @@ class RecursiveParser:
                 traversal_stop_callback(current_traversed_path, value, paths + [path], **func_kwargs)
 
     def check_actor_args(self, actor_args: dict, path: tp.List[str]):
-        """Checks :py:class:`~df_engine.core.actor.Actor` args for correctness
+        """Checks :py:class:`~dff.core.engine.core.actor.Actor` args for correctness
 
-        :param actor_args: Arguments of the :py:class:`~df_engine.core.actor.Actor` call
+        :param actor_args: Arguments of the :py:class:`~dff.core.engine.core.actor.Actor` call
         :type actor_args: dict
         :param path: Path to the actor call
         :type path: list[str]
@@ -240,13 +244,16 @@ class RecursiveParser:
             if not isinstance(script, dict):
                 raise RuntimeError(f"Script is not a dict: {script}")
 
-        if self.graph is not None:
-            raise WrongFileStructureError("Found two ``df_engine.core.Actor`` calls")
-
-        self.graph = nx.MultiDiGraph()
-
+        # validate script
         self.traverse_dict(script, [path], validate_path, {"project": self})
-        self.traverse_dict(script, [path], script2graph, {"project": self})
+
+        if dependencies["graph"]:
+            if self.graph is not None:
+                raise WrongFileStructureError("Found two ``dff.core.engine.core.Actor`` calls")
+
+            self.graph = nx.MultiDiGraph()
+
+            self.traverse_dict(script, [path], script2graph, {"project": self})
 
         for label in [start_label, fallback_label]:
             if label:
@@ -256,15 +263,28 @@ class RecursiveParser:
                 resolved_label = []
                 for item in label:
                     resolved_item = self.resolve_name(item)
-                    resolved_label.append(resolved_item.absolute_value)
+                    resolved_label.append(resolved_item)
 
-                node = self.graph.nodes.get(tuple(resolved_label))
-                if node is None:
-                    raise ScriptValidationError(f"Node not found: {label}")
-                if label == start_label:
-                    node["start_label"] = True
-                if label == fallback_label:
-                    node["fallback_label"] = True
+                # check label size
+                if not (
+                    (len(resolved_label) == 2 and resolved_label[0] not in keywords_dict["GLOBAL"])
+                    or
+                    (len(resolved_label) == 1 and resolved_label[0] in keywords_dict["GLOBAL"])
+                ):
+                    raise ScriptValidationError(f"Wrong label size: {resolved_label}")
+
+                if dependencies["graph"]:
+                    node = self.graph.nodes.get(tuple(item.absolute_value for item in resolved_label))
+                    if node is None:
+                        raise ScriptValidationError(f"Node not found: {label}")
+                    if label == start_label:
+                        node["start_label"] = True
+                    if label == fallback_label:
+                        node["fallback_label"] = True
+                else:
+                    result = self.resolve_dict_key_path(script, label, path)
+                    if result is None:
+                        raise ScriptValidationError(f"Node not found: {label}")
 
     def process_import(self, module_type: ModuleType, module_metadata: str) -> tp.Optional[Namespace]:
         """Import module hook for :py:class:`.Namespace`
@@ -351,11 +371,13 @@ class RecursiveParser:
         :rtype: dict
         """
         return {
-            "requirements": self.requirements,
+            # "requirements": self.requirements,
             "namespaces": {k: v.names if v else {} for k, v in self.namespaces.items() if k not in self.unprocessed},
         }
 
-    def to_graph(self) -> nx.MultiDiGraph:
+    def to_graph(self) -> 'nx.MultiDiGraph':
+        if not dependencies["graph"]:
+            raise ImportError("Module `networkx` is missing. Install it with `pip install dff[graph]`")
         if self.graph is None:
             raise RuntimeError("Not found an actor call")
         processor = DictProcessor()

@@ -3,13 +3,13 @@
 import typing as tp
 from copy import copy
 
-from df_script_parser.utils.code_wrappers import StringTag, Python, String
-from df_script_parser.utils.namespaces import Call, Request
-from df_script_parser.utils.validators import keywords_dict
-from df_script_parser.utils.exceptions import ScriptValidationError, ResolutionError
+from dff.script.import_export.parser.utils.code_wrappers import StringTag, Python, String
+from dff.script.import_export.parser.utils.namespaces import Call, Request
+from dff.script.import_export.parser.utils.validators import keywords_dict
+from dff.script.import_export.parser.utils.exceptions import ScriptValidationError, ResolutionError
 
 if tp.TYPE_CHECKING:
-    from df_script_parser.processors.recursive_parser import RecursiveParser
+    from dff.script.import_export.parser.processors.recursive_parser import RecursiveParser
 
 
 def get_destination(label: StringTag, resolve_name: tp.Callable):

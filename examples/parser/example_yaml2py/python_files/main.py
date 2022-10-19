@@ -1,20 +1,19 @@
-from df_engine.core.keywords import TRANSITIONS as TRANSITIONS
-from df_engine.core.keywords import RESPONSE as RESPONSE
-from df_engine.core.keywords import PROCESSING as PROCESSING
-from df_engine.core.keywords import GLOBAL as GLOBAL
-from df_engine.core.keywords import MISC as MISC
-from df_engine.core.keywords import LOCAL as LOCAL
-import df_engine.conditions as cnd
-import df_engine.labels as lbl
-from df_engine.core import Actor as Act
-from df_engine.core import Context as Context
-import df_engine.responses as rsp
+from dff.core.engine.core.keywords import TRANSITIONS as TRANSITIONS
+from dff.core.engine.core.keywords import RESPONSE as RESPONSE
+from dff.core.engine.core.keywords import PROCESSING as PROCESSING
+from dff.core.engine.core.keywords import GLOBAL as GLOBAL
+from dff.core.engine.core.keywords import MISC as MISC
+from dff.core.engine.core.keywords import LOCAL as LOCAL
+import dff.core.engine.conditions as cnd
+import dff.core.engine.labels as lbl
+from dff.core.engine.core import Actor as Act
+from dff.core.engine.core import Context as Context
+import dff.core.engine.responses as rsp
 from functions import add_prefix as add_prefix
 import typing as tp
 import re as re
 import transitions as transitions
 from flow import global_flow as global_flow
-import mypackage as mypackage
 
 script = {
     GLOBAL: {

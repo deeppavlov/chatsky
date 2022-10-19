@@ -1,5 +1,5 @@
-from df_engine.core.actor import Actor as Act1
-from df_engine.core import Actor as Act2
+from dff.core.engine.core.actor import Actor as Act1
+from dff.core.engine.core import Actor as Act2
 
 script = {
     1: "hey",

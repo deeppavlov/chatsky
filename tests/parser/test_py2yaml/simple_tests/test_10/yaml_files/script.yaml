@@ -1,8 +1,6 @@
-requirements:
-- df-engine==0.9.0
 namespaces:
   main:
-    Actor: !from df_engine.core.actor Actor
+    Actor: !from dff.core.engine.core.actor Actor
     script: !from scripts script
     actor: !call
       name: Actor
@@ -12,7 +10,7 @@ namespaces:
         - flow
         - node
   scripts:
-    kw: !from df_engine.core keywords
+    kw: !from dff.core.engine.core keywords
     another_script:
       flow:
         node:
