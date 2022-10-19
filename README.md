@@ -76,3 +76,5 @@ To get more advanced examples, take a look at [examples](https://github.com/deep
 # Contributing to the Dialog Flow Framework
 
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md).
+
+TODO: split README.md to addons/README.rst & split examples and docs
