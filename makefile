@@ -4,6 +4,7 @@ PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
+TEST_COVERAGE_THRESHOLD=94.49
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -49,7 +50,7 @@ wait_db: docker_up
 .PHONY: wait_db
 
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-fail-under=90 --cov-report html --cov-report term --cov=dff tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff tests/
 .PHONY: test
 
 test_all: venv wait_db test lint
