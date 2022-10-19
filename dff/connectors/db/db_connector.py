@@ -69,7 +69,7 @@ class DBConnector(DBAbstractConnector):
     """
 
     def __init__(self, path: str):
-        prefix, _, file_path = path.partition("://")
+        _, _, file_path = path.partition("://")
         self.full_path = path
         self.path = file_path
         self._lock = threading.Lock()
