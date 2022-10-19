@@ -9,7 +9,7 @@ adding data, data serialization, type checking etc.
 import logging
 from uuid import UUID, uuid4
 
-from typing import Any, Optional, Union, Dict, List
+from typing import Any, Optional, Union, Dict, List, Set
 
 from pydantic import BaseModel, validate_arguments, Field, validator
 from .types import NodeLabel2Type, ModuleName
@@ -108,8 +108,7 @@ class Context(BaseModel):
     _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
 
     @classmethod
-    def cast(cls, ctx: Union[Context, dict, str] = {}, *args, **kwargs) -> Context:
-        # todo: might be a problem here with default {}
+    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         """
         Transforms different data types to the objects of :py:class:`~dff.core.engine.core.context.Context` class.
 
@@ -174,8 +173,12 @@ class Context(BaseModel):
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    @validate_arguments  # todo: use set instead of a list
-    def clear(self, hold_last_n_indices: int, field_names: List[str] = ["requests", "responses", "labels"]):
+    @validate_arguments
+    def clear(
+        self,
+        hold_last_n_indices: int,
+        field_names: Union[Set[str], List[str]] = {"requests", "responses", "labels"},
+    ):
         """Deletes all recordings from the `requests`/`responses`/`labels` except for
         the last N turns according to the `hold_last_n_indices`.
         If`field_names` contains `misc` field, `misc` field is fully cleared,
@@ -185,9 +188,10 @@ class Context(BaseModel):
         :type hold_last_n_indices: int
         :param field_names:
             properties of :py:class:`~dff.core.engine.core.context.Context` we need to clear
-            Defaults to ["requests", "responses", "labels"]
-        :type field_names: List[str]
+            Defaults to {"requests", "responses", "labels"}
+        :type field_names: Union[Set[str], List[str]]
         """
+        field_names = field_names if isinstance(field_names, set) else set(field_names)
         if "requests" in field_names:
             for index in list(self.requests)[:-hold_last_n_indices]:
                 del self.requests[index]

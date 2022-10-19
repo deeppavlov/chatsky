@@ -4,16 +4,21 @@ import dff.core.engine.conditions as cnd
 
 
 def test_conditions():
+    label = ["flow", "node"]
     ctx = Context()
-    actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
     ctx.add_request("text")
-    ctx.add_label(["flow", "node"])
+    ctx.add_label(label)
+    failed_ctx = Context()
+    failed_ctx.add_request({})
+    failed_ctx.add_label(label)
+    actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 
     assert cnd.exact_match("text")(ctx, actor)
     assert not cnd.exact_match("text1")(ctx, actor)
 
     assert cnd.regexp("t.*t")(ctx, actor)
     assert not cnd.regexp("t.*t1")(ctx, actor)
+    assert not cnd.regexp("t.*t1")(failed_ctx, actor)
 
     assert cnd.agg([cnd.regexp("t.*t"), cnd.exact_match("text")], aggregate_func=all)(ctx, actor)
     assert not cnd.agg([cnd.regexp("t.*t1"), cnd.exact_match("text")], aggregate_func=all)(ctx, actor)
@@ -45,3 +50,4 @@ def test_conditions():
         raise ValueError("Failed cnd")
 
     assert not cnd.any([failed_cond_func])(ctx, actor)
+

@@ -42,8 +42,8 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     :type logging_flag: bool
     """
     error_msgs.append(msg)
-    logging_flag and logger.error(msg, exc_info=exception)
-    # todo: why not ``if logging_flag: logger.error``
+    if logging_flag:
+        logger.error(msg, exc_info=exception)
 
 
 class Actor(BaseModel):
@@ -118,8 +118,7 @@ class Actor(BaseModel):
         validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
-        handlers: Dict[ActorStage, List[Callable]] = {},
-        # todo: might be a problem here with default {}
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         *args,
         **kwargs,
     ):
@@ -129,13 +128,13 @@ class Actor(BaseModel):
         # node labels validation
         start_label = normalize_label(start_label)
         if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unkown {start_label}")
+            raise ValueError(f"Unkown start_label={start_label}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unkown {fallback_label}")
+                raise ValueError(f"Unkown fallback_label={fallback_label}")
         if condition_handler is None:
             condition_handler = deep_copy_condition_handler
 
@@ -147,17 +146,16 @@ class Actor(BaseModel):
             validation_stage=validation_stage,
             condition_handler=condition_handler,
             verbose=verbose,
-            handlers=handlers,
+            handlers={} if handlers is None else handlers,
         )
         errors = self.validate_script(verbose) if validation_stage or validation_stage is None else []
         if errors:
             raise ValueError(
-                f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
+                f"Found len(errors)={len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
             )
 
     @validate_arguments
-    def __call__(self, ctx: Union[Context, dict, str] = {}, *args, **kwargs) -> Union[Context, dict, str]:
-        # todo: might be a problem here with default {}
+    def __call__(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Union[Context, dict, str]:
 
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
@@ -205,7 +203,7 @@ class Actor(BaseModel):
         return ctx
 
     @validate_arguments
-    def _context_init(self, ctx: Context, *args, **kwargs) -> Context:
+    def _context_init(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         ctx = Context.cast(ctx)
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
@@ -297,7 +295,7 @@ class Actor(BaseModel):
         *args,
         only_current_node_transitions: bool = False,
         **kwargs,
-    ) -> Context:
+    ) -> Node:
         overwritten_node = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
         local_node = self.script.get(flow_label, {}).get(LOCAL, Node())
         for node in [local_node, current_node]:
@@ -397,7 +395,10 @@ class Actor(BaseModel):
             try:
                 node = self.script[label[0]][label[1]]
             except Exception as exc:
-                msg = f"Could not find node with {label}, error was found in {(flow_label, node_label)}"
+                msg = (
+                    f"Could not find node with label={label}, "
+                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                )
                 error_handler(error_msgs, msg, exc, verbose)
                 break
 
@@ -407,16 +408,17 @@ class Actor(BaseModel):
                 response_result = response_func(ctx, actor)
                 if isinstance(response_result, Callable):
                     msg = (
-                        f"Expected type of response_result needed not Callable but got {type(response_result)}"
-                        f" for {label} , error was found in {(flow_label, node_label)}"
+                        "Expected type of response_result needed not Callable "
+                        + f"but got type(response_result)={type(response_result)}"
+                        f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
                     continue
             except Exception as exc:
                 msg = (
                     f"Got exception '''{exc}''' during response execution "
-                    f"for {label} and {node.response}"
-                    f", error was found in {(flow_label, node_label)}"
+                    f"for label={label} and node.response={node.response}"
+                    f", error was found in (flow_label, node_label)={(flow_label, node_label)}"
                 )
                 error_handler(error_msgs, msg, exc, verbose)
                 continue
@@ -425,9 +427,9 @@ class Actor(BaseModel):
             try:
                 condition_result = condition(ctx, actor)
                 if not isinstance(condition(ctx, actor), bool):
-                    raise Exception(f"Returned {condition_result}, but expected bool type")
+                    raise Exception(f"Returned condition_result={condition_result}, but expected bool type")
             except Exception as exc:
-                msg = f"Got exception '''{exc}''' during condition execution for {label}"
+                msg = f"Got exception '''{exc}''' during condition execution for label={label}"
                 error_handler(error_msgs, msg, exc, verbose)
                 continue
         return error_msgs
