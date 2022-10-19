@@ -58,7 +58,7 @@ class YDBConnector(DBConnector):
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
 
-        value = value if isinstance(value, Context) else Context(value)
+        value = value if isinstance(value, Context) else Context.cast(value)
 
         def callee(session):
             query = """

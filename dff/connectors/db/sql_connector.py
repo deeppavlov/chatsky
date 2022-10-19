@@ -111,7 +111,7 @@ class SQLConnector(DBConnector):
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
         key = str(key)
-        value = value if isinstance(value, Context) else Context(value)
+        value = value if isinstance(value, Context) else Context.cast(value)
         value = json.loads(value.json())
 
         insert_stmt = insert(self.table).values(id=str(key), context=value)
