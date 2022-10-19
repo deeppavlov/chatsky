@@ -1,0 +1,34 @@
+requirements:
+- df-engine==0.9.0
+namespaces:
+  main:
+    act: !from script act
+    function_does_not_exist: !from df_engine function_does_not_exist
+    result: !call
+      name: function_does_not_exist
+      args:
+        0: act
+        script:
+          '1': '1'
+        value: '2'
+  script:
+    flow: !from flows.start flow
+    Actor: !from df_engine.core.actor Actor
+    act: !call
+      name: Actor
+      args:
+        script:
+          start_flow: flow
+        start_label:
+        - start_flow
+        - start_node
+  flows.start:
+    node: !from nodes.node_1 node
+    flow:
+      start_node: node
+  flows.__init__: {}
+  nodes.node_1:
+    kw: !import df_engine.core.keywords
+    node:
+      kw.RESPONSE: hey
+  nodes.__init__: {}

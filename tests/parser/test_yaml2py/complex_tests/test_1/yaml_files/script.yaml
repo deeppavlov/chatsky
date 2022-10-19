@@ -1,0 +1,50 @@
+requirements:
+- df-engine==0.9.0
+namespaces:
+  python_files.main:
+    act: !from df_engine.core.actor Actor
+    glb: !from df_engine.core.keywords GLOBAL
+    rsp: !from df_engine.core.keywords RESPONSE
+    flows: !import python_files.flows
+    script:
+      glb:
+        rsp: !str glb
+      start_flow: flows.sf
+      fallback_flow: flows.ff
+    actor: !call
+      name: act
+      args:
+        fallback_label:
+        - fallback_flow
+        - fallback_node
+        start_label:
+        - start_flow
+        - start_node
+        script: script
+  python_files.__init__: {}
+  python_files.flows.__init__:
+    ff: !from python_files.flows.fallback_flow fallback_flow
+    sf: !from python_files.flows.start_flow start_flow
+  python_files.flows.fallback_flow:
+    fallback_node: !from python_files.nodes.fallback_node fallback_node
+    sn: !from python_files.nodes start_node
+    fallback_flow:
+      !str fallback_node: fallback_node
+      other_node: sn.start_node
+  python_files.nodes.fallback_node:
+    rp: !from df_engine.core.keywords RESPONSE
+    fallback_node:
+      rp: bye
+  python_files.nodes.__init__:
+    sn: !from python_files.nodes.start_node start_node
+    fn: !from python_files.nodes.fallback_node fallback_node
+  python_files.nodes.start_node:
+    rsp: !from df_engine.core.keywords RESPONSE
+    start_node:
+      rsp: hi
+  python_files.flows.start_flow:
+    sn: !from python_files.nodes sn
+    fallback_node: !from python_files.nodes.fallback_node fallback_node
+    start_flow:
+      start_node: sn
+      other_node: fallback_node

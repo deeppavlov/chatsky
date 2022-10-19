@@ -1,0 +1,37 @@
+requirements:
+- df-engine==0.9.0
+namespaces:
+  main:
+    Actor: !from df_engine.core.actor Actor
+    kw: !from df_engine.core keywords
+    proxy: !import proxy
+    keywords_2:
+      '2': kw.RESPONSE
+    keywords:
+      rsp: keywords_2[2]
+    strs:
+      '1':
+        node:
+          '1': node
+      '2':
+        node:
+          '2': node
+    strings: strs
+    dicts:
+      '1':
+        strs[1][proxy.node.node[3]][1]:
+          keywords["rsp"]: hi
+    script:
+      flow: dicts[1]
+    actor: !call
+      name: Actor
+      args:
+        script: script
+        start_label:
+        - flow
+        - strings[2][proxy.node.node[3]][2]
+  proxy:
+    node: !import node
+  node:
+    node:
+      '3': node

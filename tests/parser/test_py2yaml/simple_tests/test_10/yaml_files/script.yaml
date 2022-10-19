@@ -1,0 +1,20 @@
+requirements:
+- df-engine==0.9.0
+namespaces:
+  main:
+    Actor: !from df_engine.core.actor Actor
+    script: !from scripts script
+    actor: !call
+      name: Actor
+      args:
+        script: script
+        start_label:
+        - flow
+        - node
+  scripts:
+    kw: !from df_engine.core keywords
+    another_script:
+      flow:
+        node:
+          kw.RESPONSE: hi
+    script: another_script

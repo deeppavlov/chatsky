@@ -1,0 +1,1232 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "script": {
+            "requirements": [
+                "df-engine==0.9.0",
+                "git+https://github.com/navdeep-G/setup.py.git@3a03ee20c0d2b795c8d5cb1aa1d7c3c6468d2ffc"
+            ],
+            "namespaces": {
+                "main": {
+                    "TRANSITIONS": "!from df_engine.core.keywords TRANSITIONS",
+                    "RESPONSE": "!from df_engine.core.keywords RESPONSE",
+                    "PROCESSING": "!from df_engine.core.keywords PROCESSING",
+                    "GLOBAL": "!from df_engine.core.keywords GLOBAL",
+                    "MISC": "!from df_engine.core.keywords MISC",
+                    "LOCAL": "!from df_engine.core.keywords LOCAL",
+                    "cnd": "!import df_engine.conditions",
+                    "lbl": "!import df_engine.labels",
+                    "Act": "!from df_engine.core Actor",
+                    "Context": "!from df_engine.core Context",
+                    "rsp": "!import df_engine.responses",
+                    "add_prefix": "!from functions add_prefix",
+                    "tp": "!import typing",
+                    "re": "!import re",
+                    "transitions": "!import transitions",
+                    "global_flow": "!from flow global_flow",
+                    "mypackage": "!import mypackage",
+                    "script": {
+                        "GLOBAL": {
+                            "TRANSITIONS": {
+                                "(\"greeting_flow\", \"node1\", 1.1)": "cnd.regexp(r\"\\b(hi|hello)\\b\", re.I)",
+                                "(\"music_flow\", \"node1\", 1.1)": "cnd.regexp(r\"talk about music\")",
+                                "lbl.to_fallback(0.1)": "cnd.true()",
+                                "lbl.forward()": "cnd.all([cnd.regexp(r\"next\\b\"),cnd.has_last_labels(labels=[(\"music_flow\", i) for i in [\"node2\", \"node3\"]]),])",
+                                "lbl.repeat(0.2)": "cnd.all([cnd.regexp(r\"repeat\", re.I),cnd.negation(cnd.has_last_labels(flow_labels=[\"global_flow\"])),])"
+                            },
+                            "PROCESSING": {
+                                "'1'\n": "add_prefix(\"l1_global\")",
+                                "'2'\n": "add_prefix(\"l2_global\")"
+                            },
+                            "MISC": {
+                                "var1": "global_data",
+                                "var2": "global_data",
+                                "var3": "global_data"
+                            },
+                            "RESPONSE": "!str"
+                        },
+                        "!str global_flow": {
+                            "LOCAL": {
+                                "PROCESSING": {
+                                    "'2'\n": "add_prefix(\"l2_local\")",
+                                    "'3'\n": "add_prefix(\"l3_local\")"
+                                }
+                            },
+                            "start_node": {
+                                "RESPONSE": "!str",
+                                "TRANSITIONS": {
+                                    "(\"music_flow\", \"node1\")": "cnd.regexp(r\"talk about music\")",
+                                    "(\"greeting_flow\", \"node1\")": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+                                    "fallback_node": "cnd.true()"
+                                }
+                            },
+                            "fallback_node": {
+                                "RESPONSE": "Ooops",
+                                "TRANSITIONS": {
+                                    "(\"music_flow\", \"node1\")": "cnd.regexp(r\"talk about music\")",
+                                    "(\"greeting_flow\", \"node1\")": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+                                    "lbl.previous()": "cnd.regexp(r\"previous\", re.IGNORECASE)",
+                                    "lbl.repeat()": "cnd.true()"
+                                }
+                            }
+                        },
+                        "greeting_flow": {
+                            "node1": {
+                                "RESPONSE": "rsp.choice([\"Hi, what is up?\", \"Hello, how are you?\"])",
+                                "TRANSITIONS": {
+                                    "(\"global_flow\", \"fallback_node\", 0.1)": "cnd.true()",
+                                    "node2": "cnd.regexp(r\"how are you\")"
+                                },
+                                "MISC": {
+                                    "var3": "info_of_step_1"
+                                }
+                            },
+                            "node2": {
+                                "RESPONSE": "Good. What do you want to talk about?",
+                                "TRANSITIONS": {
+                                    "lbl.to_fallback(0.1)": "cnd.true()",
+                                    "lbl.forward(0.5)": "cnd.regexp(r\"talk about\")",
+                                    "(\"music_flow\", \"node1\")": "cnd.regexp(r\"talk about music\")",
+                                    "lbl.previous()": "cnd.regexp(r\"previous\", re.IGNORECASE)"
+                                }
+                            },
+                            "node3": {
+                                "RESPONSE": "!py foo",
+                                "TRANSITIONS": {
+                                    "lbl.forward()": "cnd.regexp(r\"bye\")"
+                                }
+                            },
+                            "node4": {
+                                "RESPONSE": "!py bar(\"bye\")",
+                                "TRANSITIONS": {
+                                    "node1": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+                                    "lbl.to_fallback()": "cnd.true()"
+                                }
+                            }
+                        },
+                        "music_flow": {
+                            "node1": {
+                                "RESPONSE": "'I love `System of a Down` group, would you like to tell about it? '\n",
+                                "TRANSITIONS": {
+                                    "lbl.forward()": "cnd.regexp(r\"yes|yep|ok\", re.IGNORECASE)",
+                                    "lbl.to_fallback()": "cnd.true()"
+                                }
+                            },
+                            "node2": {
+                                "RESPONSE": "System of a Down is an Armenian-American heavy metal band formed in in 1994.",
+                                "TRANSITIONS": {
+                                    "lbl.forward()": "cnd.regexp(r\"next\", re.IGNORECASE)",
+                                    "lbl.repeat()": "cnd.regexp(r\"repeat\", re.IGNORECASE)",
+                                    "lbl.to_fallback()": "cnd.true()"
+                                }
+                            },
+                            "node3": {
+                                "RESPONSE": "The band achieved commercial success with the release of five studio albums.",
+                                "TRANSITIONS": {
+                                    "lbl.forward()": "cnd.regexp(r\"next\", re.IGNORECASE)",
+                                    "lbl.backward()": "cnd.regexp(r\"back\", re.IGNORECASE)",
+                                    "lbl.repeat()": "cnd.regexp(r\"repeat\", re.IGNORECASE)",
+                                    "lbl.to_fallback()": "cnd.true()"
+                                }
+                            },
+                            "node4": {
+                                "RESPONSE": "That's all what I know",
+                                "TRANSITIONS": {
+                                    "transitions.greeting_flow_n2_transition": "cnd.regexp(r\"next\", re.IGNORECASE)",
+                                    "transitions.high_priority_node_transition(\"greeting_flow\", \"node4\")": "cnd.regexp(r\"next time\", re.IGNORECASE)",
+                                    "lbl.to_fallback()": "cnd.true()"
+                                }
+                            }
+                        }
+                    },
+                    "actor": "!call\nname: Act\nargs:\n  fallback_label:\n  - !str global_flow\n  - fallback_node\n  script: script\n  start_label:\n  - !str global_flow\n  - start_node\n"
+                },
+                "flow": {
+                    "TRANSITIONS": "!from df_engine.core.keywords TRANSITIONS",
+                    "RESPONSE": "!from df_engine.core.keywords RESPONSE",
+                    "PROCESSING": "!from df_engine.core.keywords PROCESSING",
+                    "LOCAL": "!from df_engine.core.keywords LOCAL",
+                    "cnd": "!import df_engine.conditions",
+                    "lbl": "!import df_engine.labels",
+                    "re": "!import re",
+                    "add_prefix": "!from functions add_prefix",
+                    "global_flow": {
+                        "LOCAL": {
+                            "PROCESSING": {
+                                "'2'\n": "add_prefix(\"l2_local\")",
+                                "'3'\n": "add_prefix(\"l3_local\")"
+                            }
+                        },
+                        "start_node": {
+                            "RESPONSE": "!str",
+                            "TRANSITIONS": {
+                                "(\"music_flow\", \"node1\")": "cnd.regexp(r\"talk about music\")",
+                                "(\"greeting_flow\", \"node1\")": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+                                "fallback_node": "cnd.true()"
+                            }
+                        },
+                        "fallback_node": {
+                            "RESPONSE": "Ooops",
+                            "TRANSITIONS": {
+                                "(\"music_flow\", \"node1\")": "cnd.regexp(r\"talk about music\")",
+                                "(\"greeting_flow\", \"node1\")": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+                                "lbl.previous()": "cnd.regexp(r\"previous\", re.IGNORECASE)",
+                                "lbl.repeat()": "cnd.true()"
+                            }
+                        }
+                    }
+                }
+            }
+        }
+    },
+    "nodes": [
+        {
+            "ref": [
+                "main",
+                "script",
+                "GLOBAL"
+            ],
+            "local": false,
+            "id": [
+                "GLOBAL"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node1"
+            ],
+            "local": false,
+            "id": [
+                "greeting_flow",
+                "node1"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node1"
+            ],
+            "local": false,
+            "id": [
+                "music_flow",
+                "node1"
+            ]
+        },
+        {
+            "id": [
+                "NONE"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "global_flow",
+                "LOCAL"
+            ],
+            "local": true,
+            "id": [
+                "global_flow",
+                "df_engine.core.keywords.LOCAL"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node"
+            ],
+            "local": false,
+            "start_label": true,
+            "id": [
+                "global_flow",
+                "start_node"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node"
+            ],
+            "local": false,
+            "fallback_label": true,
+            "id": [
+                "global_flow",
+                "fallback_node"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2"
+            ],
+            "local": false,
+            "id": [
+                "greeting_flow",
+                "node2"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node3"
+            ],
+            "local": false,
+            "id": [
+                "greeting_flow",
+                "node3"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node4"
+            ],
+            "local": false,
+            "id": [
+                "greeting_flow",
+                "node4"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2"
+            ],
+            "local": false,
+            "id": [
+                "music_flow",
+                "node2"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3"
+            ],
+            "local": false,
+            "id": [
+                "music_flow",
+                "node3"
+            ]
+        },
+        {
+            "ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4"
+            ],
+            "local": false,
+            "id": [
+                "music_flow",
+                "node4"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS"
+            ],
+            "label": "(\"greeting_flow\", \"node1\", 1.1)",
+            "condition_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS",
+                "(\"greeting_flow\", \"node1\", 1.1)"
+            ],
+            "condition": "cnd.regexp(r\"\\b(hi|hello)\\b\", re.I)",
+            "source": [
+                "GLOBAL"
+            ],
+            "target": [
+                "greeting_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS"
+            ],
+            "label": "(\"music_flow\", \"node1\", 1.1)",
+            "condition_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS",
+                "(\"music_flow\", \"node1\", 1.1)"
+            ],
+            "condition": "cnd.regexp(r\"talk about music\")",
+            "source": [
+                "GLOBAL"
+            ],
+            "target": [
+                "music_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback(0.1)",
+            "condition_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS",
+                "lbl.to_fallback(0.1)"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "GLOBAL"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS",
+                "lbl.forward()"
+            ],
+            "condition": "cnd.all([cnd.regexp(r\"next\\b\"),cnd.has_last_labels(labels=[(\"music_flow\", i) for i in [\"node2\", \"node3\"]]),])",
+            "source": [
+                "GLOBAL"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.repeat(0.2)",
+            "condition_ref": [
+                "main",
+                "script",
+                "GLOBAL",
+                "TRANSITIONS",
+                "lbl.repeat(0.2)"
+            ],
+            "condition": "cnd.all([cnd.regexp(r\"repeat\", re.I),cnd.negation(cnd.has_last_labels(flow_labels=[\"global_flow\"])),])",
+            "source": [
+                "GLOBAL"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 2
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node1",
+                "TRANSITIONS"
+            ],
+            "label": "(\"global_flow\", \"fallback_node\", 0.1)",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node1",
+                "TRANSITIONS",
+                "(\"global_flow\", \"fallback_node\", 0.1)"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "greeting_flow",
+                "node1"
+            ],
+            "target": [
+                "global_flow",
+                "fallback_node"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node1",
+                "TRANSITIONS"
+            ],
+            "label": "node2",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node1",
+                "TRANSITIONS",
+                "node2"
+            ],
+            "condition": "cnd.regexp(r\"how are you\")",
+            "source": [
+                "greeting_flow",
+                "node1"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node1",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node1",
+                "TRANSITIONS",
+                "lbl.forward()"
+            ],
+            "condition": "cnd.regexp(r\"yes|yep|ok\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node1"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node1",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node1",
+                "TRANSITIONS",
+                "lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "music_flow",
+                "node1"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node",
+                "TRANSITIONS"
+            ],
+            "label": "(\"music_flow\", \"node1\")",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node",
+                "TRANSITIONS",
+                "(\"music_flow\", \"node1\")"
+            ],
+            "condition": "cnd.regexp(r\"talk about music\")",
+            "source": [
+                "global_flow",
+                "start_node"
+            ],
+            "target": [
+                "music_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node",
+                "TRANSITIONS"
+            ],
+            "label": "(\"greeting_flow\", \"node1\")",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node",
+                "TRANSITIONS",
+                "(\"greeting_flow\", \"node1\")"
+            ],
+            "condition": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+            "source": [
+                "global_flow",
+                "start_node"
+            ],
+            "target": [
+                "greeting_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node",
+                "TRANSITIONS"
+            ],
+            "label": "fallback_node",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "start_node",
+                "TRANSITIONS",
+                "fallback_node"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "global_flow",
+                "start_node"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS"
+            ],
+            "label": "(\"music_flow\", \"node1\")",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS",
+                "(\"music_flow\", \"node1\")"
+            ],
+            "condition": "cnd.regexp(r\"talk about music\")",
+            "source": [
+                "global_flow",
+                "fallback_node"
+            ],
+            "target": [
+                "music_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS"
+            ],
+            "label": "(\"greeting_flow\", \"node1\")",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS",
+                "(\"greeting_flow\", \"node1\")"
+            ],
+            "condition": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+            "source": [
+                "global_flow",
+                "fallback_node"
+            ],
+            "target": [
+                "greeting_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.previous()",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS",
+                "lbl.previous()"
+            ],
+            "condition": "cnd.regexp(r\"previous\", re.IGNORECASE)",
+            "source": [
+                "global_flow",
+                "fallback_node"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.repeat()",
+            "condition_ref": [
+                "main",
+                "script",
+                "global_flow",
+                "fallback_node",
+                "TRANSITIONS",
+                "lbl.repeat()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "global_flow",
+                "fallback_node"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback(0.1)",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS",
+                "lbl.to_fallback(0.1)"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "greeting_flow",
+                "node2"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.forward(0.5)",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS",
+                "lbl.forward(0.5)"
+            ],
+            "condition": "cnd.regexp(r\"talk about\")",
+            "source": [
+                "greeting_flow",
+                "node2"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.previous()",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS",
+                "lbl.previous()"
+            ],
+            "condition": "cnd.regexp(r\"previous\", re.IGNORECASE)",
+            "source": [
+                "greeting_flow",
+                "node2"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 2
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "(\"music_flow\", \"node1\")",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node2",
+                "TRANSITIONS",
+                "(\"music_flow\", \"node1\")"
+            ],
+            "condition": "cnd.regexp(r\"talk about music\")",
+            "source": [
+                "greeting_flow",
+                "node2"
+            ],
+            "target": [
+                "music_flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node3",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node3",
+                "TRANSITIONS",
+                "lbl.forward()"
+            ],
+            "condition": "cnd.regexp(r\"bye\")",
+            "source": [
+                "greeting_flow",
+                "node3"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node4",
+                "TRANSITIONS"
+            ],
+            "label": "node1",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node4",
+                "TRANSITIONS",
+                "node1"
+            ],
+            "condition": "cnd.regexp(r\"hi|hello\", re.IGNORECASE)",
+            "source": [
+                "greeting_flow",
+                "node4"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node4",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "main",
+                "script",
+                "greeting_flow",
+                "node4",
+                "TRANSITIONS",
+                "lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "greeting_flow",
+                "node4"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2",
+                "TRANSITIONS",
+                "lbl.forward()"
+            ],
+            "condition": "cnd.regexp(r\"next\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node2"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.repeat()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2",
+                "TRANSITIONS",
+                "lbl.repeat()"
+            ],
+            "condition": "cnd.regexp(r\"repeat\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node2"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node2",
+                "TRANSITIONS",
+                "lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "music_flow",
+                "node2"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 2
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS",
+                "lbl.forward()"
+            ],
+            "condition": "cnd.regexp(r\"next\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node3"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.backward()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS",
+                "lbl.backward()"
+            ],
+            "condition": "cnd.regexp(r\"back\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node3"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.repeat()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS",
+                "lbl.repeat()"
+            ],
+            "condition": "cnd.regexp(r\"repeat\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node3"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 2
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node3",
+                "TRANSITIONS",
+                "lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "music_flow",
+                "node3"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 3
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4",
+                "TRANSITIONS"
+            ],
+            "label": "transitions.greeting_flow_n2_transition",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4",
+                "TRANSITIONS",
+                "transitions.greeting_flow_n2_transition"
+            ],
+            "condition": "cnd.regexp(r\"next\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node4"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4",
+                "TRANSITIONS"
+            ],
+            "label": "transitions.high_priority_node_transition(\"greeting_flow\", \"node4\")",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4",
+                "TRANSITIONS",
+                "transitions.high_priority_node_transition(\"greeting_flow\", \"node4\")"
+            ],
+            "condition": "cnd.regexp(r\"next time\", re.IGNORECASE)",
+            "source": [
+                "music_flow",
+                "node4"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4",
+                "TRANSITIONS"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "main",
+                "script",
+                "music_flow",
+                "node4",
+                "TRANSITIONS",
+                "lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "music_flow",
+                "node4"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 2
+        }
+    ]
+}
