@@ -91,7 +91,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../../examples')
+examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../../examples', './examples')
 
 sphinx_gallery_conf = {
     'examples_dirs': examples,
@@ -117,12 +117,3 @@ html_theme_options = {
     'tab_ecosystem': '#',
     'tab_about_us': '#'
 }
-
-
-def setup(app):
-    # Custom directives
-    app.add_directive('includenodoc', IncludeDirective)
-    app.add_directive('galleryitem', GalleryItemDirective)
-    app.add_directive('customgalleryitem', CustomGalleryItemDirective)
-    app.add_directive('customcarditem', CustomCardItemDirective)
-    app.add_directive('customcalloutitem', CustomCalloutItemDirective)
