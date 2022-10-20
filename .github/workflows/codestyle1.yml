@@ -15,8 +15,13 @@ jobs:
 
       - name: install dependencies
         run: |
-            make venv
+          make venv
 
-      - name: run codestyle
-        run: |
-            make lint
+      - name: run flake8
+        run: venv/bin/flake8 --max-line-length 120 dff/
+
+      - name: run black
+        run: venv/bin/black --line-length=120 --check dff/
+
+      - name: run mypy
+        run: venv/bin/mypy dff/
