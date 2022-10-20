@@ -39,12 +39,12 @@ class RedisConnector(DBConnector):
     @threadsafe_method
     def __contains__(self, key: str) -> bool:
         key = str(key)
-        return self._redis.exists(key)
+        return bool(self._redis.exists(key))
 
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
         key = str(key)
-        value = value if isinstance(value, Context) else Context(value)
+        value = value if isinstance(value, Context) else Context.cast(value)
         self._redis.set(key, value.json())
 
     @threadsafe_method

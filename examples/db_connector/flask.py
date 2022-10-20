@@ -5,7 +5,7 @@ from flask import Flask, request
 from dff.core.engine.core import Context, Actor
 
 from dff.connectors.db import connector_factory
-from .utils import run_actor, script
+from .utils import script
 
 app = Flask(__name__)
 
