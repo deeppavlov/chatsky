@@ -49,13 +49,15 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
     for edge, edge_data in nx_graph.edges.items():
         if edge[0] not in nodes:
             nodes[edge[0]] = {"name": str(edge[0]), "label": [], "transitions": {}}
-        if edge[1] not in nodes:
-            nodes[edge[1]] = {"name": str(edge[1]), "label": [], "transitions": {}}
         nodes[edge[0]]["label"] += [
             format_port(edge_data["condition"], str(hash(edge)))
         ]  # port id is named after the edge
 
         nodes[edge[0]]["transitions"][hash(edge)] = str(edge[1])  # port id mapped to the target node
+
+    for node, node_data in nx_graph.nodes.items():
+        if node not in nodes:
+            nodes[node] = {"name": str(node), "label": [], "transitions": {}}
 
     flows: dict = {}
 
