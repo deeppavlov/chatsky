@@ -11,7 +11,7 @@ The Dialog Flow Framework (DFF) allows you to write conversational services. The
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
 [![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
-# Quick Start
+# Quick Start -- df_engine
 ## Installation
 ```bash
 pip install dff
@@ -68,6 +68,65 @@ type your answer: ok
 Okey
 type your answer: ok
 Okey
+
+```
+
+To get more advanced examples, take a look at [examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
+
+# Quick Start -- db_connector
+## Description
+
+Dialog Flow DB Connector allows you to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
+
+Currently, the supported options are: 
+* [json](https://www.json.org/json-en.html)
+* [pickle](https://docs.python.org/3/library/pickle.html)
+* [shelve](https://docs.python.org/3/library/shelve.html)
+* [Sqlite](https://www.sqlite.org/index.html)
+* [Postgresql](https://www.postgresql.org/)
+* [MySQL](https://www.mysql.com/)
+* [MongoDB](https://www.mongodb.com/)
+* [Redis](https://redis.io/)
+* [YDB](https://ydb.tech/)
+
+Aside from this, we offer some interfaces for saving data to your local file system. These are not meant to be used in production, but can be helpful for prototyping your application.
+
+## Installation
+```bash
+pip install dff
+```
+
+Please, note that if you are going to use one of the database backends, you will have to specify an extra or install the corresponding requirements yourself.
+```bash
+pip install dff[redis]
+pip install dff[mongodb]
+pip install dff[mysql]
+pip install dff[postgresql]
+pip install dff[sqlite]
+pip install dff[ydb]
+```
+
+## Basic example
+```python
+from dff.core.engine.core import Context, Actor
+from dff.connectors.db_connectors import SQLConnector
+from .script import some_df_script
+
+db = SQLConnector("postgresql://user:password@host:port/dbname")
+
+actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+
+
+def handle_request(request):
+    user_id = request.args["user_id"]
+    if user_id not in db:
+        context = Context(id=user_id)
+    else:
+        context = db[user_id]
+    new_context = actor(context)
+    db[user_id] = new_context
+    assert user_id in db
+    return new_context.last_response
 
 ```
 
