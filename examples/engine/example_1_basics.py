@@ -4,11 +4,12 @@
 """
 
 import logging
-from typing import Optional, Union
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Actor
 import dff.core.engine.conditions as cnd
+from examples.engine._utils import run_auto_mode, run_interactive_mode
+from examples.utils import get_auto_arg
 
 logger = logging.getLogger(__name__)
 
@@ -62,28 +63,6 @@ script = {
 # If `fallback_label` is not set, then its value becomes equal to `start_label` by default
 actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
-
-# turn_handler - a function is made for the convenience of working with an actor
-def turn_handler(
-    in_request: str, ctx: Union[Context, str, dict], actor: Actor, true_out_response: Optional[str] = None
-):
-    # Context.cast - gets an object type of [Context, str, dict] returns an object type of Context
-    ctx = Context.cast(ctx)
-    # Add in current context a next request of user
-    ctx.add_request(in_request)
-    # pass the context into actor and it returns updated context with actor response
-    ctx = actor(ctx)
-    # get last actor response from the context
-    out_response = ctx.last_response
-    # the next condition branching needs for testing
-    if true_out_response is not None and true_out_response != out_response:
-        msg = f"in_request={in_request} -> true_out_response != out_response: {true_out_response} != {out_response}"
-        raise Exception(msg)
-    else:
-        logging.info(f"in_request={in_request} -> {out_response}")
-    return out_response, ctx
-
-
 # testing
 testing_dialog = [
     ("Hi", "Hi, how are you?"),  # start_node -> node1
@@ -99,25 +78,8 @@ testing_dialog = [
     ("Ok, goodbye.", "bye"),  # node3 -> node4
 ]
 
-
-def run_test():
-    ctx = {}
-    for in_request, true_out_response in testing_dialog:
-        _, ctx = turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
-
-
-# interactive mode
-def run_interactive_mode(actor):
-    ctx = {}
-    while True:
-        in_request = input("type your answer: ")
-        _, ctx = turn_handler(in_request, ctx, actor)
-
-
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    # run_test()
-    run_interactive_mode(actor)
+    if get_auto_arg():
+        run_auto_mode(actor, testing_dialog, logger)
+    else:
+        run_interactive_mode(actor, logger)
