@@ -21,7 +21,7 @@ from ..types import (
 
 logger = logging.getLogger(__name__)
 
-
+# TODO: outdate naming `df_runner`, in doc-strings and comments
 class PipelineComponent(abc.ABC):
     """
     This class represents a pipeline component - a service or a service group.
