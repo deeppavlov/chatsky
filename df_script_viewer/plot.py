@@ -1,12 +1,8 @@
 import random
-from typing import TypedDict, Dict
+from typing import Dict
 
 import networkx as nx
 import graphviz
-from plotly.colors import qualitative
-
-
-NodeDict = TypedDict("NodeDict", {"name": str, "label": list, "transitions": dict})
 
 
 NODE_ATTRS = {
@@ -49,10 +45,12 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
     graph.attr(compound="true", splines="true", overlap="prism")
     graph.node_attr.update(**NODE_ATTRS)
 
-    nodes: Dict[str, NodeDict] = {}
+    nodes: Dict[str, Dict] = {}
     for edge, edge_data in nx_graph.edges.items():
         if edge[0] not in nodes:
             nodes[edge[0]] = {"name": str(edge[0]), "label": [], "transitions": {}}
+        if edge[1] not in nodes:
+            nodes[edge[1]] = {"name": str(edge[1]), "label": [], "transitions": {}}
         nodes[edge[0]]["label"] += [
             format_port(edge_data["condition"], str(hash(edge)))
         ]  # port id is named after the edge
@@ -64,7 +62,7 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
     for key in nodes.keys():
         if key[0] not in flows:
             flows[key[0]] = graphviz.Digraph(name=f"cluster_{key[0]}")
-            flows[key[0]].attr(label=key[0], style="rounded, filled")
+            flows[key[0]].attr(label=str(key[0]), style="rounded, filled")
 
         nodes[key]["label"] = format_as_table(
             [

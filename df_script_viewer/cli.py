@@ -35,18 +35,23 @@ def is_file(arg: str) -> Path:
 
 py2file_parser = argparse.ArgumentParser(add_help=False)
 py2file_parser.add_argument(
-    "root_file",
+    "-rf",
+    "--root_file",
+    required=True,
     metavar="ROOT_FILE",
     help="Python file to start parsing with",
     type=is_file,
 )
 py2file_parser.add_argument(
-    "project_root_dir",
+    "-d",
+    "--project_root_dir",
+    required=True,
     metavar="PROJECT_ROOT_DIR",
     help="Directory that contains all the local files required to run ROOT_FILE",
     type=is_dir,
 )
 py2file_parser.add_argument(
+    "-rq",
     "--requirements",
     metavar="REQUIREMENTS",
     help="File with project requirements to override those collected by parser",
@@ -68,7 +73,8 @@ def make_server():
 def make_image():
     image_parser = argparse.ArgumentParser(parents=[py2file_parser], add_help=True)
     image_parser.add_argument(
-        "output_file",
+        "-o",
+        "--output_file",
         metavar="OUTPUT_FILE",
         help="File to store parser output in",
         type=str,
