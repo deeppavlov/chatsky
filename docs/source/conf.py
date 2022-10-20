@@ -19,10 +19,10 @@ import re
 
 from sphinx_gallery.sorting import FileNameSortKey
 
-from dff_sphinx_theme.extras import IncludeDirective, GalleryItemDirective, CustomGalleryItemDirective, CustomCardItemDirective, CustomCalloutItemDirective, sphinx_gallery_find_example_and_build_dirs, sphinx_gallery_add_source_dirs_to_path
+from dff_sphinx_theme.extras import sphinx_gallery_find_example_and_build_dirs, sphinx_gallery_add_source_dirs_to_path
 
 
-sphinx_gallery_add_source_dirs_to_path('..')
+sphinx_gallery_add_source_dirs_to_path('../../dff/core')
 
 
 # -- Project information -----------------------------------------------------
@@ -91,7 +91,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../../examples', './examples')
+examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../../examples', '../examples')
 
 sphinx_gallery_conf = {
     'examples_dirs': examples,

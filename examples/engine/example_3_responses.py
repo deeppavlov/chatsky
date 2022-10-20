@@ -1,3 +1,8 @@
+"""
+3. Responses
+============
+"""
+
 import logging
 import re
 import random

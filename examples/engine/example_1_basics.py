@@ -1,3 +1,8 @@
+"""
+1. Basics
+=========
+"""
+
 import logging
 from typing import Optional, Union
 

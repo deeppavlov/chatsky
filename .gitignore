@@ -4,6 +4,7 @@ dist/
 venv/
 build/
 docs/source/apiref
+docs/examples
 *__pycache__*
 *.idea/*
 .idea/*
@@ -15,4 +16,3 @@ venv*
 .coverage
 .pytest_cache
 htmlcov
-docs/source/apiref

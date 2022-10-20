@@ -1,3 +1,8 @@
+"""
+9. Pre-transitions processing
+=============================
+"""
+
 import logging
 
 

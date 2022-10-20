@@ -1,3 +1,8 @@
+"""
+5. Global transitions
+=====================
+"""
+
 import logging
 import re
 

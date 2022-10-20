@@ -1,3 +1,8 @@
+"""
+6. Context serialization
+========================
+"""
+
 import logging
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE

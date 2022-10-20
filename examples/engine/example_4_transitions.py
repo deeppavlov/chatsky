@@ -1,3 +1,8 @@
+"""
+4. Transitions
+==============
+"""
+
 import logging
 import re
 

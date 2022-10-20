@@ -33,9 +33,12 @@ core = [
 doc = [
     "sphinx>=1.7.9",
     "dff_sphinx_theme>=0.1.3",
+    "sphinxcontrib-apidoc==0.3.0",
+    "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
-    "sphinxcontrib-apidoc==0.3.0",
+    "sphinx_gallery>=0.11.1",
+    "matplotlib>=3.6.0",
 ]
 
 mypy_dependencies = [
