@@ -86,6 +86,7 @@ def threadsafe_method(func: Callable):
     """
     A decorator that makes sure methods of an object instance are threadsafe.
     """
+
     @wraps(func)
     def _synchronized(self, *args, **kwargs):
         with self._lock:

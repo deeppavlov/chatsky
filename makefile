@@ -37,7 +37,8 @@ lint: venv
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
-	$(VENV_PATH)/bin/mypy dff/
+	# TODO: Add mypy testing
+	@# $(VENV_PATH)/bin/mypy dff/
 .PHONY: lint
 
 docker_up:
