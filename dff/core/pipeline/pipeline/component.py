@@ -177,7 +177,7 @@ class PipelineComponent(abc.ABC):
         asynchronous services shouldn't modify Context
         """
         if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, actor), name=self.name)
+            task = asyncio.create_task(self._run(ctx, actor))
             return asyncio.wait_for(task, timeout=self.timeout)
         else:
             return await self._run(ctx, actor)
