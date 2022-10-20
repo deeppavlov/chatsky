@@ -1,8 +1,8 @@
-.. Dialog Flow Engine documentation master file, created by
+.. Dialog Flow Framework documentation master file, created by
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Dialog Flow Engine's documentation!
+Welcome to Dialog Flow Framework's documentation!
 =================================================
 
 .. toctree::

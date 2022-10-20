@@ -1,8 +1,0 @@
-sphinx>=1.7.9
-dff_sphinx_theme>=0.1.3
-sphinxcontrib-katex==0.9.0
-sphinx_copybutton>=0.5
-sphinxcontrib-apidoc==0.3.0
-bump2version>=1.0.1
-build==0.7.0
-twine==4.0.0

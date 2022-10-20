@@ -9,8 +9,10 @@ docs/source/apiref
 .idea/*
 *.pyc
 .pytest_cache/*
+.mypy_cache
 venv*
 .vscode
 .coverage
 .pytest_cache
 htmlcov
+docs/source/apiref

@@ -1,7 +1,8 @@
 SHELL = /bin/bash
 
+PYTHON = python3
 VENV_PATH = venv
-VERSIONING_FILES =  setup.py makefile docs/source/conf.py df_engine/__init__.py
+VERSIONING_FILES =  setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1 
 
 help:
@@ -20,35 +21,35 @@ help:
 
 venv:
 	echo "Start creating virtual environment";\
-	python3 -m venv $(VENV_PATH);\
-	$(VENV_PATH)/bin/pip install -e . ;
-	$(VENV_PATH)/bin/pip install -r requirements_dev.txt ;
-	$(VENV_PATH)/bin/pip install -r requirements_test.txt ;
+	$(PYTHON) -m venv $(VENV_PATH);\
+	$(VENV_PATH)/bin/pip install --upgrade pip;
+	$(VENV_PATH)/bin/pip install -e .[devel_full];
 	
 
 format: venv
-	$(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 .
+	$(VENV_PATH)/bin/black --line-length=120 dff/
 .PHONY: format
 
 lint: venv
-	$(VENV_PATH)/bin/flake8 --max-line-length 120 df_engine/
-	@set -e && $(VENV_PATH)/bin/black --exclude="setup\.py" --line-length=120 --check . || ( \
+	$(VENV_PATH)/bin/flake8 --max-line-length 120 dff/
+	@set -e && $(VENV_PATH)/bin/black --line-length=120 --check dff/ || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
+	$(VENV_PATH)/bin/mypy dff/
 
 .PHONY: lint
 
 test: venv
-	$(VENV_PATH)/bin/pytest --cov-fail-under=100 --cov-report html --cov-report term --cov=df_engine tests/
+	$(VENV_PATH)/bin/pytest --cov-fail-under=100 --cov-report html --cov-report term --cov=dff tests/
 .PHONY: test
 
 test_all: venv test lint
 .PHONY: test_all
 
 doc: venv
-	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref df_engine
+	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref dff
 	$(VENV_PATH)/bin/sphinx-build -M clean docs/source docs/build
 	$(VENV_PATH)/bin/sphinx-build -M html docs/source docs/build
 .PHONY: doc

@@ -8,7 +8,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.9"]
+        python-version: ["3.7", "3.8", "3.9"]
         os: [ubuntu-latest, macOS-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
@@ -24,8 +24,7 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
               python -m pip install --upgrade pip
-              pip install -e .
-              pip install -r requirements_test.txt
+              pip install -e .[devel_full]
           else
               make venv
           fi
@@ -34,7 +33,7 @@ jobs:
       - name: build coverage file
         run: |
           if [ "$RUNNER_OS" == "Windows" ]; then
-            pytest --cache-clear --cov=df_runner tests/ > pytest-coverage.txt
+            pytest --cache-clear --cov=dff tests/ > pytest-coverage.txt
           else
             make test
           fi
