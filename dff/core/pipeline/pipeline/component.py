@@ -21,29 +21,29 @@ from ..types import (
 
 logger = logging.getLogger(__name__)
 
-# TODO: outdate naming `df_runner`, in doc-strings and comments
+
 class PipelineComponent(abc.ABC):
     """
     This class represents a pipeline component - a service or a service group.
     It contains some fields that they have in common.
 
     :param before_handler: before handler, associated with this component
-    :type before_handler: :py:class:`~df_runner.BeforeHandler`
+    :type before_handler: :py:class:`~pipeline.BeforeHandler`
     :param after_handler: after handler, associated with this component
-    :type before_handler: :py:class:`~df_runner.AfterHandler`
+    :type before_handler: :py:class:`~pipeline.AfterHandler`
     :param int timeout: (for asynchronous only!) maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted
     :param bool requested_async_flag: requested asynchronous property;
     if not defined, calculated_async_flag is used instead
     :param bool calculated_async_flag: whether the component can be asynchronous or not
 
-        - for :py:class:`~df_runner.service.service.Service`: whether its ``handler`` is asynchronous or not
-        - for :py:class:`~df_runner.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
+        - for :py:class:`~pipeline.service.service.Service`: whether its ``handler`` is asynchronous or not
+        - for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
 
     :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
     component is executed only if it returns True
-    :type start_condition: :py:class:`~df_runner.types.StartConditionCheckerFunction`
-    :param name: component name (should be unique in single :py:class:`~df_runner.service.group.ServiceGroup`),
+    :type start_condition: :py:class:`~pipeline.types.StartConditionCheckerFunction`
+    :param name: component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
     should not be blank or contain '.' symbol
     :param path: dot-separated path to component, is universally unique
     :type path: str or None
@@ -70,7 +70,7 @@ class PipelineComponent(abc.ABC):
         #: Component start condition that is invoked before each component execution;
         #: component is executed only if it returns True
         self.start_condition = always_start_condition if start_condition is None else start_condition
-        #: Component name (should be unique in single :py:class:`~df_runner.service.group.ServiceGroup`),
+        #: Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
         #: should not be blank or contain '.' symbol
         self.name = name
         #: Вot-separated path to component (should be is universally unique)
@@ -93,7 +93,7 @@ class PipelineComponent(abc.ABC):
         :param ctx: context to keep state in
         :type ctx: :py:class:`dff.core.engine.core.Context`
         :param value: state to set
-        :type value: :py:class:`~df_runner.types.ComponentExecutionState`
+        :type value: :py:class:`~pipeline.types.ComponentExecutionState`
         :return: None
         """
         if PIPELINE_STATE_KEY not in ctx.framework_states:
@@ -108,9 +108,9 @@ class PipelineComponent(abc.ABC):
         :param ctx: context to get state from
         :type ctx: :py:class:`dff.core.engine.core.Context`
         :param default: default to return if no record found
-        (usually it's :py:attr:`~df_runner.types.ComponentExecutionState.NOT_RUN`)
-        :type default: :py:class:`~df_runner.types.ComponentExecutionState` or None
-        :return: :py:class:`~df_runner.types.ComponentExecutionState` of this service or default if not found
+        (usually it's :py:attr:`~pipeline.types.ComponentExecutionState.NOT_RUN`)
+        :type default: :py:class:`~pipeline.types.ComponentExecutionState` or None
+        :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found
         """
         return ComponentExecutionState[
             ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)

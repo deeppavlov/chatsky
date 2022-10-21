@@ -61,7 +61,6 @@ class PollingMessengerInterface(MessengerInterface):
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
 
-    # TODO: test this func by pytest
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
@@ -96,11 +95,9 @@ class CallbackMessengerInterface(MessengerInterface):
     def __init__(self):
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
 
-    # TODO: test this func by pytest
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         self._pipeline_runner = pipeline_runner
 
-    # TODO: test this func by pytest
     def on_request(self, request: Any, ctx_id: Hashable) -> Context:
         """
         Method invoked on user input.
@@ -134,15 +131,12 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._prompt_response: str = prompt_response
         self._descriptor: Optional[TextIO] = out_descriptor
 
-    # TODO: test this func by pytest
     def _request(self) -> List[Tuple[Any, Any]]:
         return [(input(self._prompt_request), self._ctx_id)]
 
-    # TODO: test this func by pytest
     def _respond(self, response: List[Context]):
         print(f"{self._prompt_response}{response[0].last_response}", file=self._descriptor)
 
-    # TODO: test this func by pytest
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.

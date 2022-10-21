@@ -2,7 +2,7 @@
 Basic example
 =============
 
-The following example shows basic usage of `df_runner` module, as an extension to `dff.core.engine`
+The following example shows basic usage of `pipeline` module, as an extension to `dff.core.engine`
 """
 
 import logging
@@ -40,7 +40,7 @@ if __name__ == "__main__":
     if get_auto_arg():
         auto_run_pipeline(pipeline, logger=logger)
     else:
-        ctx_id = 0 # 0 will be current dialog (context) identification.
+        ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)
             print(ctx.last_response)
