@@ -1,4 +1,3 @@
-import os
 import sys
 import importlib
 import pathlib
@@ -29,8 +28,8 @@ from .examples._utils import auto_run_pipeline
     ]
 )
 def test_examples(module_name: str):
-    sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
-    module = importlib.import_module(f"examples.{module_name}")
+    sys.path.append(str((pathlib.Path(__file__).parent / 'examples').absolute()))
+    module = importlib.import_module(f"{module_name}", package="examples")
     if module_name.startswith("6"):
         auto_run_pipeline(module.pipeline, wrapper=module.construct_webpage_by_response)
     else:

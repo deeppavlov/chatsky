@@ -1,3 +1,8 @@
+"""
+1. Flask
+========
+"""
+
 import pathlib
 
 from flask import Flask, request
@@ -5,7 +10,7 @@ from flask import Flask, request
 from dff.core.engine.core import Context, Actor
 
 from dff.connectors.db import connector_factory
-from .utils import script
+from utils import script
 
 app = Flask(__name__)
 

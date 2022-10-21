@@ -23,6 +23,7 @@ from dff_sphinx_theme.extras import sphinx_gallery_find_example_and_build_dirs, 
 
 
 sphinx_gallery_add_source_dirs_to_path('../../dff/core')
+sphinx_gallery_add_source_dirs_to_path('../../dff/connectors')
 
 
 # -- Project information -----------------------------------------------------
@@ -56,7 +57,6 @@ extensions = [
 ]
 
 suppress_warnings = ['image.nonlocal_uri']
-templates_path = ['_templates']
 source_suffix = '.rst'
 master_doc = 'index'
 

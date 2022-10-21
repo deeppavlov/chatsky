@@ -11,7 +11,7 @@ import logging
 from dff.core.engine.core import Actor
 
 from dff.core.pipeline import Pipeline
-from ._utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from _utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
