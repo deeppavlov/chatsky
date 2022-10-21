@@ -4,7 +4,7 @@ PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
-TEST_COVERAGE_THRESHOLD=94.49
+TEST_COVERAGE_THRESHOLD=93
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -25,6 +25,12 @@ venv:
 	$(PYTHON) -m venv $(VENV_PATH);\
 	$(VENV_PATH)/bin/pip install --upgrade pip;
 	$(VENV_PATH)/bin/pip install -e .[devel_full];
+
+venv_test:
+	echo "Start creating virtual environment";\
+	$(PYTHON) -m venv $(VENV_PATH);\
+	$(VENV_PATH)/bin/pip install --upgrade pip;
+	$(VENV_PATH)/bin/pip install -e .[test_full];
 
 format: venv
 	$(VENV_PATH)/bin/black --line-length=120 dff/
