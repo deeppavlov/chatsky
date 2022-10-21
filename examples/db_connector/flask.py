@@ -10,7 +10,7 @@ from flask import Flask, request
 from dff.core.engine.core import Context, Actor
 
 from dff.connectors.db import connector_factory
-from utils import script
+from utils import script, run_actor
 
 app = Flask(__name__)
 
@@ -24,14 +24,15 @@ actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_labe
 def respond():
     user_id = str(request.values.get("id"))
     user_message = str(request.values.get("message"))
-    context = db.get(user_id, Context(id=user_id))
-
-    context.add_request(user_message)
-    updated_context = actor(context)
-    response = updated_context.last_response
-
-    updated_context.clear(hold_last_n_indexes=3)
-    db[user_id] = updated_context
+    # # you can use this user message handling 
+    # context = db.get(user_id, Context(id=user_id))
+    # context.add_request(user_message)
+    # updated_context = actor(context)
+    # updated_context.clear(hold_last_n_indexes=3)
+    # db[user_id] = updated_context
+    # response = updated_context.last_response
+    # # or you can use user message handling by run_actor from utils
+    response, _ = run_actor(user_message, actor, db, user_id)
     return {"response": str(response)}
 
 
