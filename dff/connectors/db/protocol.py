@@ -14,6 +14,7 @@ _prtocol_keys = {"module", "class", "slug", "uri_example"}
 assert all(set(proc.keys()) == _prtocol_keys for proc in PROTOCOLS.values()), "Protocols are incomplete"
 
 
+# TODO: test this func by pytest
 def get_protocol_install_suggestion(protocol_name: str) -> str:
     protocol = PROTOCOLS.get(protocol_name, {})
     slug = protocol.get("slug")

@@ -189,6 +189,7 @@ class Pipeline:
         self.context_storage[ctx_id] = ctx
         return ctx
 
+    # TODO: test this func by pytest
     def run(self):
         """
         Method that starts a pipeline and connects to `messenger_interface`.

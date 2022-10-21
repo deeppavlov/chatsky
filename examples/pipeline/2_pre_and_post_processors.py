@@ -55,8 +55,9 @@ if __name__ == "__main__":
     if get_auto_arg():
         auto_run_pipeline(pipeline, logger=logger)
     else:
+        ctx_id = 0 # 0 will be current dialog (context) identification.
         while True:
-            ctx: Context = pipeline(input("Send request: "), 0)
+            ctx: Context = pipeline(input("Send request: "), ctx_id)
             print(f"Response: {ctx.last_response}")
             ping_pong = ctx.misc.get("ping", False) and ctx.misc.get("pong", False)
             print(f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}.")

@@ -7,6 +7,7 @@ db_connector
 
 """
 import threading
+from functools import wraps
 from abc import ABC, abstractmethod
 from typing import Any, Callable
 
@@ -68,7 +69,7 @@ class DBConnector(DBAbstractConnector):
     """
 
     def __init__(self, path: str):
-        prefix, _, file_path = path.partition("://")
+        _, _, file_path = path.partition("://")
         self.full_path = path
         self.path = file_path
         self._lock = threading.Lock()
@@ -86,6 +87,7 @@ def threadsafe_method(func: Callable):
     A decorator that makes sure methods of an object instance are threadsafe.
     """
 
+    @wraps(func)
     def _synchronized(self, *args, **kwargs):
         with self._lock:
             return func(self, *args, **kwargs)

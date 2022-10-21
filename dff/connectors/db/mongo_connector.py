@@ -53,31 +53,31 @@ class MongoConnector(DBConnector):
     @threadsafe_method
     def __setitem__(self, key: str, value: Context) -> None:
         new_key = self._adjust_key(key)
-        value = value if isinstance(value, Context) else Context(value)
-        value = json.loads(value.json())
+        value = value if isinstance(value, Context) else Context.cast(value)
+        document = json.loads(value.json())
 
-        value.update(new_key)
-        self.collection.replace_one(new_key, value, upsert=True)
+        document.update(new_key)
+        self.collection.replace_one(new_key, document, upsert=True)
 
     @threadsafe_method
     def __getitem__(self, key: str) -> Context:
-        key = self._adjust_key(key)
-        value = self.collection.find_one(key)
-        if value:
-            value.pop("_id")
-            value = Context.cast(value)
-            return value
+        adjust_key = self._adjust_key(key)
+        document = self.collection.find_one(adjust_key)
+        if document:
+            document.pop("_id")
+            ctx = Context.cast(document)
+            return ctx
         raise KeyError
 
     @threadsafe_method
     def __delitem__(self, key: str) -> None:
-        key = self._adjust_key(key)
-        self.collection.delete_one(key)
+        adjust_key = self._adjust_key(key)
+        self.collection.delete_one(adjust_key)
 
     @threadsafe_method
     def __contains__(self, key: str) -> bool:
-        key = self._adjust_key(key)
-        return bool(self.collection.find_one(key))
+        adjust_key = self._adjust_key(key)
+        return bool(self.collection.find_one(adjust_key))
 
     @threadsafe_method
     def __len__(self) -> int:
