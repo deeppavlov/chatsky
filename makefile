@@ -4,7 +4,7 @@ PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
-TEST_COVERAGE_THRESHOLD=94.49
+TEST_COVERAGE_THRESHOLD=93
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"

@@ -36,7 +36,7 @@ def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr('builtins.input', lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
-    pipeline.messenger_interface = CLIMessengerInterface()
+    pipeline.messenger_interface = CLIMessengerInterface(intro="your_request:")
 
     def loop() -> bool:
         loop.runs_left -= 1
