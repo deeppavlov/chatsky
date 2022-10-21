@@ -41,10 +41,10 @@ def not_condition(function: StartConditionCheckerFunction) -> StartConditionChec
     Returns StartConditionCheckerFunction.
     """
 
-    def not_fun(ctx: Context, actor: Actor):
+    def not_function(ctx: Context, actor: Actor):
         return not function(ctx, actor)
 
-    return not_fun
+    return not_function
 
 
 def aggregate_condition(
@@ -57,10 +57,10 @@ def aggregate_condition(
     Returns StartConditionCheckerFunction.
     """
 
-    def aggregation_fun(ctx: Context, actor: Actor):
+    def aggregation_function(ctx: Context, actor: Actor):
         return aggregator([function(ctx, actor) for function in functions])
 
-    return aggregation_fun
+    return aggregation_function
 
 
 def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:

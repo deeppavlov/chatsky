@@ -41,9 +41,9 @@ class Pipeline:
 
     def __init__(
         self,
+        components: ServiceGroupBuilder,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
-        components: ServiceGroupBuilder = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[int] = None,
@@ -135,7 +135,7 @@ class Pipeline:
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
-        messenger_interface: MessengerInterface = CLIMessengerInterface(),
+        messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
     ):
@@ -159,7 +159,7 @@ class Pipeline:
         post_services = [] if post_services is None else post_services
         return cls(
             messenger_interface=messenger_interface,
-            context_storage=context_storage if context_storage is None else context_storage,
+            context_storage=context_storage,
             components=[*pre_services, actor, *post_services],
         )
 
