@@ -1,11 +1,11 @@
 include CONTRIBUTING.md
 include LICENSE
 include README.md
+include df_db_connector/protocols.json
 
 exclude makefile
 
 recursive-exclude tests *
-recursive-exclude utils *
 recursive-exclude examples *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

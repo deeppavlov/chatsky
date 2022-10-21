@@ -4,12 +4,40 @@ on: [push]
 
 
 jobs:
-  build:
+  linux_test:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9"]
-        os: [ubuntu-latest, macOS-latest, windows-latest]
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build images
+        run: |
+          docker-compose up -d
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: make venv_test
+        shell: bash
+
+      - name: build coverage file
+        run: make test
+        shell: bash
+
+  non_linux_test:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        os: [macOS-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
     steps:
@@ -22,19 +50,10 @@ jobs:
 
       - name: install dependencies
         run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-              python -m pip install --upgrade pip
-              pip install -e .[devel_full]
-          else
-              make venv
-          fi
+          python -m pip install --upgrade pip
+          pip install -e .[test_full]
         shell: bash
 
       - name: build coverage file
-        run: |
-          if [ "$RUNNER_OS" == "Windows" ]; then
-            pytest --cache-clear --cov=dff tests/ > pytest-coverage.txt
-          else
-            make test
-          fi
+        run: pytest --cache-clear --cov=dff tests/ > pytest-coverage.txt
         shell: bash

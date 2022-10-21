@@ -3,7 +3,8 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES =  setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.10.1 
+CURRENT_VERSION = 0.10.1
+TEST_COVERAGE_THRESHOLD=93
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -24,7 +25,12 @@ venv:
 	$(PYTHON) -m venv $(VENV_PATH);\
 	$(VENV_PATH)/bin/pip install --upgrade pip;
 	$(VENV_PATH)/bin/pip install -e .[devel_full];
-	
+
+venv_test:
+	echo "Start creating virtual environment";\
+	$(PYTHON) -m venv $(VENV_PATH);\
+	$(VENV_PATH)/bin/pip install --upgrade pip;
+	$(VENV_PATH)/bin/pip install -e .[test_full];
 
 format: venv
 	$(VENV_PATH)/bin/black --line-length=120 dff/
@@ -37,15 +43,24 @@ lint: venv
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
-	$(VENV_PATH)/bin/mypy dff/
-
+	# TODO: Add mypy testing
+	@# $(VENV_PATH)/bin/mypy dff/
 .PHONY: lint
 
+docker_up:
+	docker-compose up -d
+.PHONY: docker_up
+
+wait_db: docker_up
+	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
+	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
+.PHONY: wait_db
+
 test: venv
-	$(VENV_PATH)/bin/pytest --cov-fail-under=100 --cov-report html --cov-report term --cov=dff tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff tests/
 .PHONY: test
 
-test_all: venv test lint
+test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv
@@ -69,7 +84,3 @@ version_minor: venv
 version_major: venv
 	$(VENV_PATH)/bin/bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
-
-downgrade: venv format
-	@$(VENV_PATH)/bin/python utils/downgrade_patch.py -d .
-`.PHONY: downgrade

@@ -28,6 +28,8 @@ def merge_req_lists(req_lists: Iterable[List[str]]) -> List[str]:
 
 core = [
     "pydantic>=1.8.2",
+    "nest_asyncio>=1.5.5",
+    "typing_extensions>=4.0.0",
 ]
 
 doc = [
@@ -45,10 +47,35 @@ mypy_dependencies = [
     "mypy",
 ]
 
-devel = [
-    "bump2version>=1.0.1",
-    "build==0.7.0",
-    "twine==4.0.0",
+sqlite_dependencies = [
+    "sqlalchemy>=1.4.27",
+]
+
+redis_dependencies = [
+    "redis>=4.1.2",
+]
+
+mongodb_dependencies = [
+    "pymongo>=4.0.2",
+    "bson>=0.5.10",
+]
+
+mysql_dependencies = [
+    "sqlalchemy>=1.4.27",
+    "pymysql>=1.0.2",
+    "cryptography>=36.0.2",
+]
+
+postgresql_dependencies = [
+    "sqlalchemy>=1.4.27",
+    "psycopg2-binary>=2.9.2",
+]
+
+ydb_dependencies = [
+    "ydb>=2.5.0",
+]
+
+test_requirements = [
     "pytest >=6.2.4,<7.0.0",
     "pytest-cov >=2.12.0,<3.0.0",
     "pytest-asyncio >=0.14.0,<0.15.0",
@@ -56,14 +83,33 @@ devel = [
     "click<=8.0.4",
     "black ==20.8b1",
     "isort >=5.0.6,<6.0.0",
+    "flask[async]>=2.1.2",
+    "psutil>=5.9.1"
+]
+
+devel = [
+    "bump2version>=1.0.1",
+    "build==0.7.0",
+    "twine==4.0.0",
 ]
 
 full = merge_req_lists([
-    core
+    core,
+    sqlite_dependencies,
+    redis_dependencies,
+    mongodb_dependencies,
+    mysql_dependencies,
+    postgresql_dependencies,
+    ydb_dependencies,
+])
+
+tests_full = merge_req_lists([
+    full,
+    test_requirements,
 ])
 
 devel_full = merge_req_lists([
-    full,
+    tests_full,
     doc,
     devel,
     mypy_dependencies,
@@ -71,9 +117,17 @@ devel_full = merge_req_lists([
 
 EXTRA_DEPENDENCIES = {
     "doc": doc,
+    "tests": test_requirements,
     "devel": devel,
     "full": full,
+    "test_full": tests_full,
     "devel_full": devel_full,
+    "sqlite": sqlite_dependencies,
+    "redis": redis_dependencies,
+    "mongodb": mongodb_dependencies,
+    "mysql": mysql_dependencies,
+    "postgresql": postgresql_dependencies,
+    "ydb": ydb_dependencies,
 }
 
 setup(
@@ -102,6 +156,7 @@ setup(
     ],
     keywords="chatbots",  # Optional
     packages=find_packages(where="."),  # Required
+    include_package_data=True,
     python_requires=">=3.7, <4",
     install_requires=core,  # Optional
     test_suite="tests",
