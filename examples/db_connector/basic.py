@@ -9,7 +9,8 @@ import pathlib
 from dff.core.engine.core import Actor
 
 from dff.connectors.db import connector_factory
-from utils import run_actor, script
+from _db_connector_utils import script, run_auto_mode, run_interactive_mode
+from examples.utils import get_auto_arg
 
 logger = logging.getLogger(__name__)
 
@@ -22,14 +23,8 @@ db = connector_factory("json://dbs/file.json")
 # db = connector_factory("shelve://dbs/file")
 
 
-def main(actor):
-    while True:
-        in_request = input("type your answer: ")
-        run_actor(in_request, actor, db)
-
-
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s", level=logging.INFO
-    )
-    main(actor)
+    if get_auto_arg():
+        run_auto_mode(actor, db, logger)
+    else:
+        run_interactive_mode(actor, db, logger)

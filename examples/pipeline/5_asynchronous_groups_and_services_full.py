@@ -13,7 +13,7 @@ import urllib.request
 from dff.core.engine.core import Actor, Context
 
 from dff.core.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
-from _utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

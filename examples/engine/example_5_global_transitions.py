@@ -10,7 +10,7 @@ from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
-from examples.engine._utils import run_auto_mode, run_interactive_mode
+from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
 from examples.utils import get_auto_arg
 
 logger = logging.getLogger(__name__)

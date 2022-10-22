@@ -8,7 +8,7 @@ import logging
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
-from examples.engine._utils import run_interactive_mode, turn_handler
+from examples.engine._engine_utils import run_interactive_mode, turn_handler
 from examples.utils import get_auto_arg
 
 logger = logging.getLogger(__name__)

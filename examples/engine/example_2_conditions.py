@@ -9,7 +9,7 @@ import re
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
 import dff.core.engine.conditions as cnd
-from examples.engine._utils import run_auto_mode, run_interactive_mode
+from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
 from examples.utils import get_auto_arg
 
 logger = logging.getLogger(__name__)

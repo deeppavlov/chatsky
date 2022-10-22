@@ -51,7 +51,7 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.extlinks",
-    "sphinxcontrib.katex",
+#    "sphinxcontrib.katex",  # TODO: throws an exception for some reason
     "sphinx_copybutton",
     "sphinx_gallery.gen_gallery"
 ]
