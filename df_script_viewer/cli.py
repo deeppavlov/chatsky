@@ -1,3 +1,4 @@
+import logging
 from pathlib import Path
 import argparse
 
@@ -59,11 +60,11 @@ py2file_parser.add_argument(
     required=False,
     default=None,
 )
-py2file_parser.add_argument("-r", "--response", required=False, action="store_true", help="Show node response values.")
-py2file_parser.add_argument("-m", "--misc", required=False, action="store_true", help="Show node misc values.")
-py2file_parser.add_argument("-l", "--show_local", required=False, action="store_true", help="Show local transitions.")
-py2file_parser.add_argument("-g", "--show_global", required=False, action="store_true", help="Show global transitions.")
-py2file_parser.add_argument("-i", "--show_isolates", required=False, action="store_true", help="Show isolated nodes.")
+py2file_parser.add_argument("-r", "--show_response", action="store_true", help="Show node response values.")
+py2file_parser.add_argument("-m", "--show_misc", action="store_true", help="Show node misc values.")
+py2file_parser.add_argument("-l", "--show_local", action="store_true", help="Show local transitions.")
+py2file_parser.add_argument("-g", "--show_global", action="store_true", help="Show global transitions.")
+py2file_parser.add_argument("-i", "--show_isolates", action="store_true", help="Show isolated nodes.")
 
 server_parser = argparse.ArgumentParser(add_help=False)
 server_parser.add_argument(
@@ -92,7 +93,7 @@ def make_image():
         help="Graphviz output format",
         default="png",
         choices=["png", "jpeg", "svg", "gif", "bmp"],
-        type=str
+        type=str,
     )
     image_parser.add_argument(
         "-o",

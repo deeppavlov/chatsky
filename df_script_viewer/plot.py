@@ -123,7 +123,7 @@ def get_plot(
 
         if show_misc and "misc" in node_data:
             nodes[node]["label"].append(format_title("Misc"))
-            nodes[node]["label"].extend(format_lines([node_data["misc"].display_value]))
+            nodes[node]["label"].extend(format_lines([str(node_data["misc"])]))
 
     flows: dict = {}
 
