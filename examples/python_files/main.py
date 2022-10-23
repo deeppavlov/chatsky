@@ -43,7 +43,12 @@ script = {
         RESPONSE: "",
     },
     "global_flow": {
-        LOCAL: {PROCESSING: {2: add_prefix("l2_local"), 3: add_prefix("l3_local")}},
+        LOCAL: {
+            PROCESSING: {2: add_prefix("l2_local"), 3: add_prefix("l3_local")},
+            TRANSITIONS: {
+                ("greeting_flow", "node1"): cnd.regexp(r"greetings"),
+            },
+        },
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
             TRANSITIONS: {

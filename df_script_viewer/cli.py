@@ -59,27 +59,49 @@ py2file_parser.add_argument(
     required=False,
     default=None,
 )
+py2file_parser.add_argument("-r", "--response", required=False, action="store_true", help="Show node response values.")
+py2file_parser.add_argument("-m", "--misc", required=False, action="store_true", help="Show node misc values.")
+py2file_parser.add_argument("-l", "--show_local", required=False, action="store_true", help="Show local transitions.")
+py2file_parser.add_argument("-g", "--show_global", required=False, action="store_true", help="Show global transitions.")
+py2file_parser.add_argument("-i", "--show_isolates", required=False, action="store_true", help="Show isolated nodes.")
+
+server_parser = argparse.ArgumentParser(add_help=False)
+server_parser.add_argument(
+    "-H", "--host", required=False, metavar="HOST", type=str, default="127.0.0.1", help="Dash application host."
+)
+server_parser.add_argument(
+    "-p", "--port", required=False, metavar="PORT", type=int, default=5000, help="Dash application port."
+)
 
 
 def make_server():
-    server_praser = argparse.ArgumentParser(parents=[py2file_parser], add_help=True)
+    server_praser = argparse.ArgumentParser(parents=[py2file_parser, server_parser], add_help=True)
     args: argparse.Namespace = server_praser.parse_args()
     graph = get_graph(**vars(args))
-    plot = get_plot(graph)
+    plot = get_plot(graph, **vars(args))
     app = create_app(plot)
-    app.run(debug=True, dev_tools_hot_reload=True)
+    app.run(host=args.host, port=args.port, debug=True, dev_tools_hot_reload=True)
 
 
 def make_image():
     image_parser = argparse.ArgumentParser(parents=[py2file_parser], add_help=True)
     image_parser.add_argument(
+        "-f",
+        "--format",
+        metavar="FORMAT",
+        help="Graphviz output format",
+        default="png",
+        choices=["png", "jpeg", "svg", "gif", "bmp"],
+        type=str
+    )
+    image_parser.add_argument(
         "-o",
         "--output_file",
         metavar="OUTPUT_FILE",
-        help="File to store parser output in",
+        help="Image file",
         type=str,
     )
     args: argparse.Namespace = image_parser.parse_args()
     graph = get_graph(**vars(args))
-    plot = get_plot(graph)
-    create_image(plot, args.output_file)
+    plot = get_plot(graph, **vars(args))
+    create_image(plot, args.output_file, format=args.format)

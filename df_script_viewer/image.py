@@ -1,3 +1,7 @@
-def create_image(plot: bytes, output_file: str):
+from graphviz import Digraph
+
+
+def create_image(plot: Digraph, output_file: str, format: str = "png") -> None:
+    _bytes = plot.pipe(format=format)
     with open(output_file, "wb") as file:
-        file.write(plot)
+        file.write(_bytes)

@@ -1,10 +1,15 @@
+import logging
 import random
 from typing import Dict
 
+from df_script_parser.utils.validators import keywords_dict
 import networkx as nx
 import graphviz
 
 
+VIRTUAL_FLOW_KEY = "virtual"
+UNRESOLVED_KEY = "UNRESOLVED"
+LOCAL = keywords_dict["LOCAL"][0].absolute_value
 NODE_ATTRS = {
     "fontname": "Helvetica,Arial,sans-serif",
     "shape": "box",
@@ -24,8 +29,15 @@ def get_random_colors():
             yield element
 
 
-def format_name(name: str):
-    return f"<tr><td><b>{name}</b></td></tr>"
+def format_name(name: tuple):
+    name_value = str(name[1]).upper()
+    if name_value == "NONE":
+        name_value = UNRESOLVED_KEY
+    return f"<tr><td><b>{name_value}</b></td></tr>"
+
+
+def format_title(title: str):
+    return f"<tr><td><b>{title}</b></td></tr>"
 
 
 def format_lines(lines: list):
@@ -40,39 +52,96 @@ def format_as_table(rows: list) -> str:
     return "".join(['<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">', *rows, "</table>>"])
 
 
-def get_plot(nx_graph: nx.Graph) -> bytes:
+def transform_virtual(node: tuple):
+    """
+    Put nodes with no flow to a virtual flow, leave the rest unchanged.
+    """
+    if len(node) == 2:
+        return node
+    return (VIRTUAL_FLOW_KEY, node[0])
+
+
+def get_plot(
+    nx_graph: nx.Graph,
+    show_misc: bool = False,
+    show_response: bool = False,
+    show_global: bool = False,
+    show_local: bool = False,
+    show_isolates: bool = True,
+    **kwargs,
+) -> graphviz.Digraph:
     graph = graphviz.Digraph()
-    graph.attr(compound="true", splines="true", overlap="prism")
+    graph.attr(compound="true", splines="true", overlap="prism", fontname="Helvetica,Arial,sans-serif")
     graph.node_attr.update(**NODE_ATTRS)
+
+    if not show_isolates:
+        nx_graph.remove_nodes_from(list(nx.isolates(nx_graph)))
 
     nodes: Dict[str, Dict] = {}
     for edge, edge_data in nx_graph.edges.items():
-        if edge[0] not in nodes:
-            nodes[edge[0]] = {"name": str(edge[0]), "label": [], "transitions": {}}
-        nodes[edge[0]]["label"] += [
-            format_port(edge_data["condition"], str(hash(edge)))
-        ]  # port id is named after the edge
+        cur_node, next_node, _ = edge
+        cur_node, next_node = transform_virtual(cur_node), transform_virtual(next_node)
 
-        nodes[edge[0]]["transitions"][hash(edge)] = str(edge[1])  # port id mapped to the target node
+        if not show_local and cur_node[1] == LOCAL:  # ignore local unless flag is set
+            continue
+        if not show_global and cur_node[1] == "GLOBAL":  # ignore local unless flag is set
+            continue
 
-    for node, node_data in nx_graph.nodes.items():
+        if cur_node not in nodes:
+            nodes[cur_node] = {
+                "name": str(cur_node),
+                "label": [format_name(cur_node)],
+                "transitions": {},
+                "ports": [],
+                "full_label": None,
+            }
+
+        port_id = str(hash(edge))  # port id is named after the edge
+        nodes[cur_node]["ports"] += [format_port(edge_data["condition"], port_id)]
+        nodes[cur_node]["transitions"][port_id] = str(next_node)  # port id mapped to the target node
+
+    for node, node_data in nx_graph.nodes.items():  # add isolated nodes
+        node = transform_virtual(node)
         if node not in nodes:
-            nodes[node] = {"name": str(node), "label": [], "transitions": {}}
+
+            if not show_local and node[1] == LOCAL:  # ignore local unless flag is set
+                continue
+            if not show_global and node[1] == "GLOBAL":  # ignore local unless flag is set
+                continue
+
+            nodes[node] = {
+                "name": str(node),
+                "label": [format_name(node)],
+                "transitions": {},
+                "ports": [],
+                "full_label": None,
+            }
+
+        if show_response and "response" in node_data:
+            nodes[node]["label"].append(format_title("Response"))
+            nodes[node]["label"].extend(format_lines([node_data["response"].display_value]))
+
+        if show_misc and "misc" in node_data:
+            nodes[node]["label"].append(format_title("Misc"))
+            nodes[node]["label"].extend(format_lines([node_data["misc"].display_value]))
 
     flows: dict = {}
 
     for key in nodes.keys():
-        if key[0] not in flows:
-            flows[key[0]] = graphviz.Digraph(name=f"cluster_{key[0]}")
-            flows[key[0]].attr(label=str(key[0]), style="rounded, filled")
+        flow, _ = key
+        if flow not in flows:
+            flows[flow] = graphviz.Digraph(name=f"cluster_{flow}")
+            flows[flow].attr(label=str(flow).upper(), style="rounded, filled")
+            if flow == VIRTUAL_FLOW_KEY:
+                pass  # flows[flow].node_attr.update(bgcolor="transparent")
 
-        nodes[key]["label"] = format_as_table(
-            [
-                format_name(key),
-                *nodes[key]["label"],
-            ]
-        )
-        flows[key[0]].node(name=nodes[key]["name"], label="".join(nodes[key]["label"]))
+        if len(nodes[key]["ports"]) > 0:
+            nodes[key]["label"].append(format_title("Transitions"))
+            nodes[key]["label"].extend([*nodes[key]["ports"]])
+
+        nodes[key]["full_label"] = format_as_table(nodes[key]["label"])
+        flows[flow].node(name=nodes[key]["name"], label=nodes[key]["full_label"])
+
         for transition, dest in nodes[key]["transitions"].items():
             graph.edge(f"{key}:{transition}", dest)
 
@@ -81,5 +150,4 @@ def get_plot(nx_graph: nx.Graph) -> bytes:
         graph.subgraph(subgraph)
 
     graph = graph.unflatten(stagger=5, fanout=True)
-    _bytes = graph.pipe(format="png")
-    return _bytes
+    return graph

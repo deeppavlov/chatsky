@@ -16,11 +16,23 @@ def testing_graph():
     yield G
 
 
-def test_plotting(testing_graph):
+@pytest.mark.parametrize(["params"], [{}, {}])
+def test_plotting(params, testing_graph):
     testing_plot = plot.get_plot(testing_graph)
-    assert isinstance(testing_plot, bytes) and len(testing_plot) > 0
+    _bytes = testing_plot.pipe("png")
+    assert isinstance(_bytes, bytes) and len(_bytes) > 0
     prefix = "data:image/png;base64,"
-    with BytesIO(testing_plot) as stream:
+    with BytesIO(_bytes) as stream:
         base64 = prefix + b64encode(stream.getvalue()).decode("utf-8")
     fig = go.Figure(go.Image(source=base64))
     assert fig
+
+
+@pytest.mark.parametrize(["params"], [{}, {}])
+def test_plotting_2(testing_graph, tmp_path):
+    testing_plot = plot.get_plot(testing_graph)
+    plot_file = str(tmp_path / "plot")
+    testing_plot.render(filename=plot_file)
+    with open(plot_file, "r", encoding="utf-8") as file:
+        text = file.read()
+    lines = text.splitlines()

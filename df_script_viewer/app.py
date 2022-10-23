@@ -2,15 +2,17 @@ from base64 import b64encode
 from io import BytesIO
 
 import plotly.graph_objects as go
+from graphviz import Digraph
 
 import dash
 from dash import dcc
 from dash import html
 
 
-def create_app(plot: bytes):
+def create_app(plot: Digraph):
+    _bytes = plot.pipe(format="png")
     prefix = "data:image/png;base64,"
-    with BytesIO(plot) as stream:
+    with BytesIO(_bytes) as stream:
         base64 = prefix + b64encode(stream.getvalue()).decode("utf-8")
     fig = go.Figure(go.Image(source=base64))
     fig.update_layout(title="Script Graph View")
