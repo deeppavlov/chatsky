@@ -31,6 +31,7 @@ venv_test:
 	$(PYTHON) -m venv $(VENV_PATH);\
 	$(VENV_PATH)/bin/pip install --upgrade pip;
 	$(VENV_PATH)/bin/pip install -e .[test_full];
+.PHONY venv_test
 
 format: venv
 	$(VENV_PATH)/bin/black --line-length=120 dff/
