@@ -1,0 +1,32 @@
+name: build_and_publish_docs
+
+on: [push]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: install dependencies
+        run: |
+            make venv
+
+      - name: run codestyle
+        run: |
+            make doc
+
+      - name: remove jekyll theming
+        run: touch docs/build/.nojekyll
+
+      - name: deploy website
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs/build/
+          single-commit: True

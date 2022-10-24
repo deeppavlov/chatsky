@@ -53,7 +53,8 @@ extensions = [
     "sphinx.ext.extlinks",
 #    "sphinxcontrib.katex",  # TODO: throws an exception for some reason
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery"
+    "sphinx_gallery.gen_gallery",
+    "sphinx-autodoc-typehints"
 ]
 
 suppress_warnings = ['image.nonlocal_uri']

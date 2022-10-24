@@ -5,6 +5,7 @@ VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
 TEST_COVERAGE_THRESHOLD=93
+SPHINXOPTS="-W --keep-going -n"
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
@@ -26,7 +27,7 @@ venv:
 	@echo "Start creating virtual environment"
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
-	$(VENV_PATH)/bin/pip install -e .[devel_full]
+	pip install -e .[devel_full]
 
 venv_test:
 	@echo "Start creating virtual environment (test)"
