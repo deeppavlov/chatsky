@@ -1,5 +1,6 @@
 #!/usr/bin/env python3
 import logging
+import pathlib
 
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.engine.core import Context, Actor
@@ -35,7 +36,7 @@ script = {
         "send_many": {
             RESPONSE: Response(
                 text="Look at my pictures",
-                attachments=Attachments(files=[Image(source="examples/kitten.jpg")] * 10),
+                attachments=Attachments(files=[Image(source=pathlib.Path(__file__).parent / "kitten.jpg")] * 10),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
