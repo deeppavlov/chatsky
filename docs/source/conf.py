@@ -78,7 +78,7 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['**/README.rst']
 
-html_short_title = None
+html_short_title = 'None'
 
 # -- Options for HTML output -------------------------------------------------
 

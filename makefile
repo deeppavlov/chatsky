@@ -5,7 +5,6 @@ VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
 TEST_COVERAGE_THRESHOLD=93
-SPHINXOPTS="-W --keep-going -n"
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
@@ -67,9 +66,9 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv
-	sphinx-apidoc -e -f -o docs/source/apiref dff
+	# sphinx-apidoc -e -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -M html docs/source docs/build
+	sphinx-build -b html  -W --keep-going docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -77,7 +76,7 @@ pre_commit: venv
 .PHONY: pre_commit
 
 version_patch: venv
-	$(VENV_PATH)/bin/bump2version --current-version $(CURRENT_VERSION) patch $(VERSIONING_FILES)
+	bump2version --current-version $(CURRENT_VERSION) patch $(VERSIONING_FILES)
 .PHONY: version_patch
 
 version_minor: venv
