@@ -104,7 +104,8 @@ pipeline_dict = {
 
 @app.route("/pipeline_web_interface")
 async def route():
-    return messenger_interface.on_request(request, 0).last_response
+    ctx_id = 0  # 0 will be current dialog (context) identification.
+    return messenger_interface.on_request(request, ctx_id).last_response
 
 
 pipeline = Pipeline(**pipeline_dict)

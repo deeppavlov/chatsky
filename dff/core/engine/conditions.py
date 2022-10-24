@@ -5,7 +5,7 @@ Conditions are one of the most important components of the dialog graph,
 which determine the possibility of transition from one node of the graph to another node.
 This is a standard set of engine conditions.
 """
-from typing import Callable, Pattern, Union, Any, List
+from typing import Callable, Pattern, Union, Any, List, Optional
 import logging
 import re
 
@@ -56,7 +56,11 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 
     def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        return bool(pattern.search(request))
+        if isinstance(request, str):
+            return bool(pattern.search(request))
+        else:
+            logger.error(f"request has to be str type, but got request={request}")
+            return False
 
     return regexp_condition_handler
 
@@ -100,11 +104,11 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
             return bool(aggregate_func([cond(ctx, actor, *args, **kwargs) for cond in cond_seq]))
         except Exception as exc:
             logger.error(f"Exception {exc} for {cond_seq}, {aggregate_func} and {ctx.last_request}", exc_info=exc)
+            return False
 
     return aggregate_condition_handler
 
 
-# todo: shadows built-in any
 @validate_arguments
 def any(cond_seq: list, *args, **kwargs) -> Callable:
     """Function that returns function handler. This handler returns True
@@ -122,7 +126,6 @@ def any(cond_seq: list, *args, **kwargs) -> Callable:
     return any_condition_handler
 
 
-# todo: shadows built-in all
 @validate_arguments
 def all(cond_seq: list, *args, **kwargs) -> Callable:
     """Function that returns function handler. This handler returns True only
@@ -159,8 +162,12 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
 
 @validate_arguments
 def has_last_labels(
-    flow_labels: List[str] = [], labels: List[NodeLabel2Type] = [], last_n_indices: int = 1, *args, **kwargs
-) -> Callable:  # todo: might be a problem here with default []
+    flow_labels: Optional[List[str]] = None,
+    labels: Optional[List[NodeLabel2Type]] = None,
+    last_n_indices: int = 1,
+    *args,
+    **kwargs,
+) -> Callable:
     """
     Function returns condition handler.
     This handler returns True if any label from
@@ -170,13 +177,15 @@ def has_last_labels(
 
     Parameters
     ----------
-    flow_labels: list
+    flow_labels: Optional[List]
         list of labels to check.Every label has type `str`. Is empty if not set.
-    labels: List[:py:const:`~dff.core.engine.core.types.NodeLabel2Type`]
+    labels: Optional[List[:py:const:`~dff.core.engine.core.types.NodeLabel2Type`]]
         list of labels that correspond to the nodes. Is empty is not set.
     last_n_indices: int
         number of last utterances to check.
     """
+    flow_labels = [] if flow_labels is None else flow_labels
+    labels = [] if labels is None else labels
 
     def has_last_labels_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         label = list(ctx.labels.values())[-last_n_indices:]

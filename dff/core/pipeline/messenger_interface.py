@@ -122,14 +122,14 @@ class CLIMessengerInterface(PollingMessengerInterface):
         intro: Optional[str] = None,
         prompt_request: str = "request: ",
         prompt_response: str = "response: ",
-        out_descriptor: TextIO = None,
+        out_descriptor: Optional[TextIO] = None,
     ):
         super().__init__()
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request
         self._prompt_response: str = prompt_response
-        self._descriptor: TextIO = out_descriptor
+        self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Any, Any]]:
         return [(input(self._prompt_request), self._ctx_id)]

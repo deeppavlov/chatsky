@@ -29,7 +29,7 @@ def ping_localhost(port: int, timeout=60):
         socket.setdefaulttimeout(timeout)
         s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         s.connect(("localhost", port))
-    except OSError as error:
+    except OSError:
         return False
     else:
         s.close()
