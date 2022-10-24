@@ -13,7 +13,7 @@ help:
 	@echo
 	@echo "make lint: Run linters"
 	@echo "make test: Run basic tests (not testing most integrations)"
-	@echo "make test-all: Run ALL tests (slow, closest to CI)"
+	@echo "make test_all: Run ALL tests (slow, closest to CI)"
 	@echo "make format: Run code formatters (destructive)"
 	@echo "make build_doc: Build Sphinx docs; activate your virtual environment before execution"
 	@echo "make pre_commit: Register a git hook to lint the code on each commit"
