@@ -1,0 +1,57 @@
+name: test_coverage
+
+on: [push]
+
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.6", "3.7", "3.8", "3.9"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    env:
+      HF_API_KEY: ${{ secrets.HF_API_KEY }}
+      GDF_ACCOUNT_JSON: ${{ secrets.GDF_ACCOUNT_JSON }}
+      RASA_URL: ${{ secrets.RASA_URL }}
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: build_images
+        run: docker build -t myrasa . && docker run -d -p 5005:5005 --name rasa myrasa
+
+      - name: check running containers
+        run: docker ps -a
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              python -m pip install --upgrade pip
+              pip install -e .[all]
+              pip install -r requirements_test.txt
+          else
+              make venv
+          fi
+        shell: bash
+
+      - name: build coverage file
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            pytest --cache-clear --cov=df_extended_conditions tests/ > pytest-coverage.txt
+          else
+            make test
+          fi
+        shell: bash
+      
+      - name: stop containers
+        run: docker stop rasa
