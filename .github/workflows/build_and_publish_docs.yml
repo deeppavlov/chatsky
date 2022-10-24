@@ -17,7 +17,7 @@ jobs:
         run: |
             make venv
 
-      - name: run codestyle
+      - name: build documentation
         run: |
             make doc
 
