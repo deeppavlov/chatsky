@@ -1,0 +1,11 @@
+df_engine>=0.8.1
+requests>=2.26.0
+asyncpg>=0.26.0
+aiochclient>=2.2.0
+httpx<=0.23.0
+SQLAlchemy==1.4.27
+sphinx>=1.7.9
+sphinx_rtd_theme>=0.4.0
+click<=8.0.4
+black ==20.8b1
+isort >=5.0.6,<6.0.0

@@ -1,0 +1,7 @@
+venv/
+htmlcov/
+.pytest-cache/
+__pycache__/
+env.sh
+.github/
+init_superset.sh

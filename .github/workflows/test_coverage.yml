@@ -1,0 +1,50 @@
+name: test_coverage
+
+on: [push]
+
+
+jobs:
+  build:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9"]
+        os: [ubuntu-latest, macOS-latest, windows-latest]
+
+    runs-on: ${{ matrix.os }}
+    env:
+      COMPOSE_FILE: docker-compose.yml
+      DOCKER_USER: ${{ secrets.DOCKER_USER }}
+      DOCKER_PASS: ${{ secrets.DOCKER_PASSWORD }}
+      PG_USERNAME: pguser
+      PG_PASSWORD: ${{ secrets.PG_PASSWORD }}
+      CH_USENAME: chuser
+      CH_PASSWORD: ${{ secrets.CH_PASSWORD }}
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+              python -m pip install --upgrade pip
+              pip install -e .
+              pip install -r requirements_test.txt
+          else
+              make venv
+          fi
+        shell: bash
+
+      - name: build coverage file
+        run: |
+          if [ "$RUNNER_OS" == "Windows" ]; then
+            pytest --cache-clear -v --cov=df_stats tests/ > pytest-coverage.txt
+          else
+            make test
+          fi
+        shell: bash

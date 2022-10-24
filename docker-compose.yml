@@ -1,0 +1,42 @@
+version: "3.9"
+services:
+  dashboard:
+    build:
+      context: .
+      dockerfile: ./dockerfile
+    image: superset_df_dashboard
+    ports:
+      - "8088:8088"
+  psql:
+    image: postgres:latest
+    restart: unless-stopped
+    environment: [.env_file]
+    ports:
+      - '5432:5432'
+    volumes:
+      - pg-data:/var/lib/postgresql/data/
+  clickhouse:
+    image: yandex/clickhouse-server:latest
+    restart: unless-stopped
+    ports:
+      - '8123:8123'
+    volumes:
+      - ch-data:/var/lib/clickhouse/
+  mysql:
+    image: mysql:latest
+    restart: unless-stopped
+    env_file: [.env_file]
+    ports:
+      - '3307:3306'
+    volumes:
+      - mysql-data:/var/lib/mysql/
+volumes:
+  mysql-data: &volume-spec
+    driver: default
+    name: "mysql-data"
+  ch-data:
+    <<: *volume-spec
+    name: "ch-data"
+  pg-data:
+    <<: *volume-spec
+    name: "pg-data"
