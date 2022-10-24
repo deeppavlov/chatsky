@@ -4,7 +4,7 @@ import pathlib
 
 import pytest
 
-from .examples._utils import auto_run_pipeline
+from .examples._pipeline_utils import auto_run_pipeline
 
 
 # Uncomment the following line, if you want to run your examples during the test suite or import from them

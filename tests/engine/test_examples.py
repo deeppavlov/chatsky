@@ -1,4 +1,4 @@
-from .examples._utils import run_auto_mode
+from .examples._engine_utils import run_auto_mode
 
 
 def test_basics():

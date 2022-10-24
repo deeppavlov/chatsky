@@ -16,7 +16,7 @@ from dff.connectors.db.redis_connector import RedisConnector, redis_available
 from dff.connectors.db.mongo_connector import MongoConnector, mongo_available
 from dff.connectors.db.ydb_connector import YDBConnector, ydb_available
 from dff.connectors.db import connector_factory
-from .examples._utils import script, testing_dialog
+from .examples._db_connector_utils import script, testing_dialog
 
 
 from dff.core.engine.core import Context
