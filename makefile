@@ -77,7 +77,7 @@ pre_commit: venv
 .PHONY: pre_commit
 
 version_patch: venv
-	bump2version --current-version $(CURRENT_VERSION) patch $(VERSIONING_FILES)
+	$(VENV_PATH)/bin/bump2version --current-version $(CURRENT_VERSION) patch $(VERSIONING_FILES)
 .PHONY: version_patch
 
 version_minor: venv
