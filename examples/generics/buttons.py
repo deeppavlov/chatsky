@@ -3,12 +3,12 @@ import re
 from typing import Optional
 import logging
 
-import df_engine.conditions as cnd
-import df_engine.labels as lbl
-from df_engine.core import Context, Actor
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+import dff.core.engine.conditions as cnd
+import dff.core.engine.labels as lbl
+from dff.core.engine.core import Context, Actor
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
-from df_generics.response import Button, Keyboard, Response
+from dff.connectors.messenger.generics.response import Button, Keyboard, Response
 from .example_utils import run_test, run_interactive_mode
 
 

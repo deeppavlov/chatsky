@@ -1,11 +1,11 @@
 #!/usr/bin/env python3
 import logging
 
-from df_engine.core.keywords import RESPONSE, TRANSITIONS
-from df_engine.core import Context, Actor
-from df_engine import conditions as cnd
+from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
+from dff.core.engine.core import Context, Actor
+from dff.core.engine import conditions as cnd
 
-from df_generics.response import Attachments, Image, Response
+from dff.connectors.messenger.generics.response import Attachments, Image, Response
 from .example_utils import run_test, run_interactive_mode
 
 script = {

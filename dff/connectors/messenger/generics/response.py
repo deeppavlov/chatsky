@@ -6,8 +6,7 @@ This module contains a universal response model that should be supported in all 
 It only contains types and properties that are compatible with most messaging services.
 On the other hand, it can support service-specific ui models.
 """
-import os
-from typing import Any, Dict, Optional, List, Union
+from typing import Any, Optional, List, Union
 from enum import Enum, auto
 
 from pydantic import Extra, Field, ValidationError, root_validator, FilePath, HttpUrl, BaseModel as PydanticBaseModel
@@ -96,5 +95,5 @@ class Response(BaseModel):
     commands: Optional[List[Command]] = None
     state: Optional[Session] = Session.ACTIVE
     
-    def __init__(self, text: str, *, **data) -> None:
+    def __init__(self, text: str, *args, **data) -> None:
         super().__init__(text=text, **data)

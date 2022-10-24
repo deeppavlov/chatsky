@@ -10,8 +10,8 @@ This module aims to emulate user interaction with text-based interface and butto
 import logging
 from typing import Union, Optional, NamedTuple
 
-from df_engine.core import Context, Actor
-from df_generics import Response, Keyboard
+from dff.core.engine.core import Context, Actor
+from dff.connectors.messenger.generics import Response, Keyboard
 
 
 class CallbackRequest(NamedTuple):
