@@ -35,7 +35,7 @@ script = {
         },
         "node4": {RESPONSE: "bye", TRANSITIONS: {"node1": cnd.exact_match("Hi")}},
         "fallback_node": {  # We get to this node if an error occurred while the agent was running
-            RESPONSE: "Oops",
+            RESPONSE: "Ooops",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
     }
