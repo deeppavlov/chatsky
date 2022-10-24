@@ -1,0 +1,84 @@
+digraph {
+	graph [compound=true,
+		fontname="Helvetica,Arial,sans-serif",
+		overlap=prism,
+		splines=true
+	];
+	node [color="#ffffff",
+		fillcolor="#ffffff",
+		fontname="Helvetica,Arial,sans-serif",
+		shape=box,
+		style="rounded, filled"
+	];
+	subgraph cluster_virtual {
+		graph [color="#96b0af",
+			label=VIRTUAL,
+			style="rounded, filled"
+		];
+		"('virtual', 'GLOBAL')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>GLOBAL</b></td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('GLOBAL',), ('greeting_flow', 'node1'), 0)">cnd.regexp(r"\b(hi|hello)\b", re.I)</td></tr><tr><td port="(('GLOBAL',), ('music_flow', 'node1'), 0)">cnd.regexp(r"talk about music")</td></tr><tr><td port="(('GLOBAL',), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr><tr><td port="(('GLOBAL',), ('global_flow', 'fallback_node'), 1)">cnd.all([cnd.regexp(r"next\b"),cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]]),])</td></tr><tr><td port="(('GLOBAL',), ('NONE',), 0)">cnd.all([cnd.regexp(r"repeat", re.I),cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"])),])</td></tr></table>>];
+		"('virtual', 'NONE')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>UNRESOLVED</b></td></tr></table>>];
+	}
+	subgraph cluster_greeting_flow {
+		graph [color="#c6ae82",
+			label=GREETING_FLOW,
+			style="rounded, filled"
+		];
+		"('greeting_flow', 'node1')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE1</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>rsp.choice(["Hi, what is up?", "Hello, how are you?"])</td></tr><tr><td><b>Misc</b></td></tr><tr><td>{'var3': 'info_of_step_1'}</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('greeting_flow', 'node1'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr><tr><td port="(('greeting_flow', 'node1'), ('greeting_flow', 'node2'), 0)">cnd.regexp(r"how are you")</td></tr></table>>];
+		"('greeting_flow', 'node2')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE2</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>Good. What do you want to talk about?</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('greeting_flow', 'node2'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr><tr><td port="(('greeting_flow', 'node2'), ('greeting_flow', 'node3'), 0)">cnd.regexp(r"talk about")</td></tr><tr><td port="(('greeting_flow', 'node2'), ('music_flow', 'node1'), 0)">cnd.regexp(r"talk about music")</td></tr><tr><td port="(('greeting_flow', 'node2'), ('NONE',), 0)">cnd.regexp(r"previous", re.IGNORECASE)</td></tr></table>>];
+		"('greeting_flow', 'node3')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE3</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>foo</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('greeting_flow', 'node3'), ('greeting_flow', 'node4'), 0)">cnd.regexp(r"bye")</td></tr></table>>];
+		"('greeting_flow', 'node4')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE4</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>bar("bye")</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('greeting_flow', 'node4'), ('greeting_flow', 'node1'), 0)">cnd.regexp(r"hi|hello", re.IGNORECASE)</td></tr><tr><td port="(('greeting_flow', 'node4'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr></table>>];
+	}
+	subgraph cluster_music_flow {
+		graph [color="#f78378",
+			label=MUSIC_FLOW,
+			style="rounded, filled"
+		];
+		"('music_flow', 'node1')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE1</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>I love `System of a Down` group, would you like to tell about it? </td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('music_flow', 'node1'), ('music_flow', 'node2'), 0)">cnd.regexp(r"yes|yep|ok", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node1'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr></table>>];
+		"('music_flow', 'node2')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE2</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>System of a Down is an Armenian-American heavy metal band formed in in 1994.</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('music_flow', 'node2'), ('music_flow', 'node3'), 0)">cnd.regexp(r"next", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node2'), ('music_flow', 'node2'), 0)">cnd.regexp(r"repeat", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node2'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr></table>>];
+		"('music_flow', 'node3')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE3</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>The band achieved commercial success with the release of five studio albums.</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('music_flow', 'node3'), ('music_flow', 'node4'), 0)">cnd.regexp(r"next", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node3'), ('music_flow', 'node2'), 0)">cnd.regexp(r"back", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node3'), ('music_flow', 'node3'), 0)">cnd.regexp(r"repeat", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node3'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr></table>>];
+		"('music_flow', 'node4')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>NODE4</b></td></tr><tr><td><b>Response</b></td></tr><tr><td>That's all what I know</td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('music_flow', 'node4'), ('NONE',), 0)">cnd.regexp(r"next", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node4'), ('NONE',), 1)">cnd.regexp(r"next time", re.IGNORECASE)</td></tr><tr><td port="(('music_flow', 'node4'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr></table>>];
+	}
+	subgraph cluster_global_flow {
+		graph [color="#d289ab",
+			label=GLOBAL_FLOW,
+			style="rounded, filled"
+		];
+		"('global_flow', 'fallback_node')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>FALLBACK_NODE</b></td></tr></table>>];
+		"('global_flow', 'df_engine.core.keywords.LOCAL')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>DF_ENGINE.CORE.KEYWORDS.LOCAL</b></td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('global_flow', 'df_engine.core.keywords.LOCAL'), ('greeting_flow', 'node1'), 0)">cnd.regexp(r"greetings")</td></tr></table>>];
+		"('global_flow', 'start_node')"	[label=<<table border="0" cellborder="1" cellspacing="0" cellpadding="4"><tr><td><b>START_NODE</b></td></tr><tr><td><b>Response</b></td></tr><tr><td></td></tr><tr><td><b>Transitions</b></td></tr><tr><td port="(('global_flow', 'start_node'), ('music_flow', 'node1'), 0)">cnd.regexp(r"talk about music")</td></tr><tr><td port="(('global_flow', 'start_node'), ('greeting_flow', 'node1'), 0)">cnd.regexp(r"hi|hello", re.IGNORECASE)</td></tr><tr><td port="(('global_flow', 'start_node'), ('global_flow', 'fallback_node'), 0)">cnd.true()</td></tr></table>>];
+	}
+	"('virtual', 'GLOBAL')":"(('GLOBAL',), ('greeting_flow', 'node1'), 0)" -> "('greeting_flow', 'node1')";
+	"('virtual', 'GLOBAL')":"(('GLOBAL',), ('music_flow', 'node1'), 0)" -> "('music_flow', 'node1')";
+	"('virtual', 'GLOBAL')":"(('GLOBAL',), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('virtual', 'GLOBAL')":"(('GLOBAL',), ('global_flow', 'fallback_node'), 1)" -> "('global_flow', 'fallback_node')";
+	"('virtual', 'GLOBAL')":"(('GLOBAL',), ('NONE',), 0)" -> "('virtual', 'NONE')";
+	"('greeting_flow', 'node1')":"(('greeting_flow', 'node1'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('greeting_flow', 'node1')":"(('greeting_flow', 'node1'), ('greeting_flow', 'node2'), 0)" -> "('greeting_flow', 'node2')";
+	"('music_flow', 'node1')":"(('music_flow', 'node1'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('music_flow', 'node1')":"(('music_flow', 'node1'), ('music_flow', 'node2'), 0)" -> "('music_flow', 'node2')";
+	"('global_flow', 'fallback_node')":"(('global_flow', 'fallback_node'), ('greeting_flow', 'node1'), 0)" -> "('greeting_flow', 'node1')";
+	"('global_flow', 'fallback_node')":"(('global_flow', 'fallback_node'), ('music_flow', 'node1'), 0)" -> "('music_flow', 'node1')";
+	"('global_flow', 'fallback_node')":"(('global_flow', 'fallback_node'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('global_flow', 'fallback_node')":"(('global_flow', 'fallback_node'), ('NONE',), 0)" -> "('virtual', 'NONE')";
+	"('greeting_flow', 'node2')":"(('greeting_flow', 'node2'), ('music_flow', 'node1'), 0)" -> "('music_flow', 'node1')";
+	"('greeting_flow', 'node2')":"(('greeting_flow', 'node2'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('greeting_flow', 'node2')":"(('greeting_flow', 'node2'), ('NONE',), 0)" -> "('virtual', 'NONE')";
+	"('greeting_flow', 'node2')":"(('greeting_flow', 'node2'), ('greeting_flow', 'node3'), 0)" -> "('greeting_flow', 'node3')"	[minlen=1];
+	"('music_flow', 'node2')":"(('music_flow', 'node2'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('music_flow', 'node2')":"(('music_flow', 'node2'), ('music_flow', 'node2'), 0)" -> "('music_flow', 'node2')";
+	"('music_flow', 'node2')":"(('music_flow', 'node2'), ('music_flow', 'node3'), 0)" -> "('music_flow', 'node3')";
+	"('global_flow', 'df_engine.core.keywords.LOCAL')":"(('global_flow', 'df_engine.core.keywords.LOCAL'), ('greeting_flow', 'node1'), 0)" -> "('greeting_flow', 'node1')"	[minlen=1];
+	"('global_flow', 'start_node')":"(('global_flow', 'start_node'), ('greeting_flow', 'node1'), 0)" -> "('greeting_flow', 'node1')";
+	"('global_flow', 'start_node')":"(('global_flow', 'start_node'), ('music_flow', 'node1'), 0)" -> "('music_flow', 'node1')";
+	"('global_flow', 'start_node')":"(('global_flow', 'start_node'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('greeting_flow', 'node3')":"(('greeting_flow', 'node3'), ('greeting_flow', 'node4'), 0)" -> "('greeting_flow', 'node4')";
+	"('greeting_flow', 'node4')":"(('greeting_flow', 'node4'), ('greeting_flow', 'node1'), 0)" -> "('greeting_flow', 'node1')";
+	"('greeting_flow', 'node4')":"(('greeting_flow', 'node4'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('music_flow', 'node3')":"(('music_flow', 'node3'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('music_flow', 'node3')":"(('music_flow', 'node3'), ('music_flow', 'node2'), 0)" -> "('music_flow', 'node2')";
+	"('music_flow', 'node3')":"(('music_flow', 'node3'), ('music_flow', 'node3'), 0)" -> "('music_flow', 'node3')";
+	"('music_flow', 'node3')":"(('music_flow', 'node3'), ('music_flow', 'node4'), 0)" -> "('music_flow', 'node4')";
+	"('music_flow', 'node4')":"(('music_flow', 'node4'), ('global_flow', 'fallback_node'), 0)" -> "('global_flow', 'fallback_node')";
+	"('music_flow', 'node4')":"(('music_flow', 'node4'), ('NONE',), 0)" -> "('virtual', 'NONE')";
+	"('music_flow', 'node4')":"(('music_flow', 'node4'), ('NONE',), 1)" -> "('virtual', 'NONE')";
+}

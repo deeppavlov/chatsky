@@ -65,6 +65,9 @@ py2file_parser.add_argument("-m", "--show_misc", action="store_true", help="Show
 py2file_parser.add_argument("-l", "--show_local", action="store_true", help="Show local transitions.")
 py2file_parser.add_argument("-g", "--show_global", action="store_true", help="Show global transitions.")
 py2file_parser.add_argument("-i", "--show_isolates", action="store_true", help="Show isolated nodes.")
+py2file_parser.add_argument(
+    "-rs", "--random_seed", required=False, type=int, default=1, help="Random seed to control color generation."
+)
 
 server_parser = argparse.ArgumentParser(add_help=False)
 server_parser.add_argument(

@@ -2,6 +2,7 @@ import logging
 import random
 from typing import Dict
 
+from df_script_parser.utils.code_wrappers import Python
 from df_script_parser.utils.validators import keywords_dict
 import networkx as nx
 import graphviz
@@ -20,10 +21,11 @@ NODE_ATTRS = {
 
 
 def get_random_colors():
+    target_colors = ["#96B0AF", "#C6AE82", "#F78378", "#FF7B9C", "#D289AB", "#86ACD5", "#86ACD5", "#F8D525", "#F6AE2D"]
     reserve = []
-    for element in ["#96B0AF", "#C6AE82", "#F78378", "#FF7B9C", "#D289AB", "#86ACD5", "#86ACD5", "#F8D525", "#F6AE2D"]:
+    for element in target_colors:
         yield element
-        reserve.append("#{:06x}".format(random.randint(0, 0xFFFFFF)).upper())
+        reserve.append(random.choice(target_colors))
     while reserve:
         for element in reserve:
             yield element
@@ -68,8 +70,11 @@ def get_plot(
     show_global: bool = False,
     show_local: bool = False,
     show_isolates: bool = True,
+    random_seed: int = 1,
     **kwargs,
 ) -> graphviz.Digraph:
+    random.seed(random_seed)
+
     graph = graphviz.Digraph()
     graph.attr(compound="true", splines="true", overlap="prism", fontname="Helvetica,Arial,sans-serif")
     graph.node_attr.update(**NODE_ATTRS)
@@ -96,7 +101,7 @@ def get_plot(
                 "full_label": None,
             }
 
-        port_id = str(hash(edge))  # port id is named after the edge
+        port_id = str(edge)  # port id is named after the edge
         nodes[cur_node]["ports"] += [format_port(edge_data["condition"], port_id)]
         nodes[cur_node]["transitions"][port_id] = str(next_node)  # port id mapped to the target node
 
@@ -118,8 +123,12 @@ def get_plot(
             }
 
         if show_response and "response" in node_data:
+            if isinstance(node_data["response"], Python):
+                response_val = node_data["response"].display_value
+            else:
+                response_val = str(node_data["response"])
             nodes[node]["label"].append(format_title("Response"))
-            nodes[node]["label"].extend(format_lines([node_data["response"].display_value]))
+            nodes[node]["label"].extend(format_lines([response_val]))
 
         if show_misc and "misc" in node_data:
             nodes[node]["label"].append(format_title("Misc"))
