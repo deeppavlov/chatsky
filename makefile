@@ -2,16 +2,18 @@ SHELL = /bin/bash
 
 PYTHON = python3
 VENV_PATH = venv
-VERSIONING_FILES =  setup.py makefile docs/source/conf.py dff/__init__.py
+VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
 TEST_COVERAGE_THRESHOLD=93
+
+PATH := $(VENV_PATH)/bin:$(PATH)
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
 	@echo
 	@echo "make lint: Run linters"
 	@echo "make test: Run basic tests (not testing most integrations)"
-	@echo "make test-all: Run ALL tests (slow, closest to CI)"
+	@echo "make test_all: Run ALL tests (slow, closest to CI)"
 	@echo "make format: Run code formatters (destructive)"
 	@echo "make build_doc: Build Sphinx docs; activate your virtual environment before execution"
 	@echo "make pre_commit: Register a git hook to lint the code on each commit"
@@ -21,30 +23,30 @@ help:
 	@echo
 
 venv:
-	echo "Start creating virtual environment";\
-	$(PYTHON) -m venv $(VENV_PATH);\
-	$(VENV_PATH)/bin/pip install --upgrade pip;
-	$(VENV_PATH)/bin/pip install -e .[devel_full];
+	@echo "Start creating virtual environment"
+	$(PYTHON) -m venv $(VENV_PATH)
+	pip install --upgrade pip
+	$(VENV_PATH)/bin/pip install -e .[devel_full]
 
 venv_test:
-	echo "Start creating virtual environment";\
-	$(PYTHON) -m venv $(VENV_PATH);\
-	$(VENV_PATH)/bin/pip install --upgrade pip;
-	$(VENV_PATH)/bin/pip install -e .[test_full];
+	@echo "Start creating virtual environment (test)"
+	$(PYTHON) -m venv $(VENV_PATH)
+	pip install --upgrade pip
+	pip install -e .[test_full]
 
 format: venv
-	$(VENV_PATH)/bin/black --line-length=120 dff/
+	black --line-length=120 dff/
 .PHONY: format
 
 lint: venv
-	$(VENV_PATH)/bin/flake8 --max-line-length 120 dff/
-	@set -e && $(VENV_PATH)/bin/black --line-length=120 --check dff/ || ( \
+	flake8 --max-line-length 120 dff/
+	@set -e && black --line-length=120 --check dff/ || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	@# $(VENV_PATH)/bin/mypy dff/
+	# @mypy dff/
 .PHONY: lint
 
 docker_up:
@@ -57,16 +59,16 @@ wait_db: docker_up
 .PHONY: wait_db
 
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && $(VENV_PATH)/bin/pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff tests/
 .PHONY: test
 
 test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv
-	$(VENV_PATH)/bin/sphinx-apidoc -e -f -o docs/source/apiref dff
-	$(VENV_PATH)/bin/sphinx-build -M clean docs/source docs/build
-	$(VENV_PATH)/bin/sphinx-build -M html docs/source docs/build
+	sphinx-apidoc -e -f -o docs/source/apiref dff
+	sphinx-build -M clean docs/source docs/build
+	sphinx-build -M html docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -74,13 +76,26 @@ pre_commit: venv
 .PHONY: pre_commit
 
 version_patch: venv
-	$(VENV_PATH)/bin/bump2version --current-version $(CURRENT_VERSION) patch $(VERSIONING_FILES)
+	bump2version --current-version $(CURRENT_VERSION) patch $(VERSIONING_FILES)
 .PHONY: version_patch
 
 version_minor: venv
-	$(VENV_PATH)/bin/bump2version --current-version $(CURRENT_VERSION) minor $(VERSIONING_FILES)
+	bump2version --current-version $(CURRENT_VERSION) minor $(VERSIONING_FILES)
 .PHONY: version_minor
 
 version_major: venv
-	$(VENV_PATH)/bin/bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
+	bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
+
+
+
+clear:
+	rm -rf $(VENV_PATH)
+	rm -rf .pytest_cache
+	rm -rf *.egg-info
+	rm -rf htmlcov
+	rm -f .coverage
+	rm -rf docs/build
+	rm -rf docs/examples
+	rm -rf docs/source/apiref
+.PHONY: clear

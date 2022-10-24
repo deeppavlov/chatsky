@@ -1,16 +1,17 @@
-import os
 import sys
 import importlib
 import pathlib
 
 import pytest
 
-from .examples._utils import auto_run_pipeline
+from .examples._pipeline_utils import auto_run_pipeline
 
 
 # Uncomment the following line, if you want to run your examples during the test suite or import from them
 # pytest.skip(allow_module_level=True)
 
+
+sys.path.append(str((pathlib.Path(__file__).parent / 'examples').absolute()))
 
 @pytest.mark.parametrize(
     "module_name", [
@@ -29,7 +30,7 @@ from .examples._utils import auto_run_pipeline
     ]
 )
 def test_examples(module_name: str):
-    module = importlib.import_module(f"tests.pipeline.examples.{module_name}")
+    module = importlib.import_module(f"{module_name}", package="examples")
     if module_name.startswith("6"):
         auto_run_pipeline(module.pipeline, wrapper=module.construct_webpage_by_response)
     else:
