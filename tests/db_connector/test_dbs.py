@@ -5,18 +5,18 @@ import random
 import uuid
 from platform import system
 
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Actor
 
 from dff.connectors.db.json_connector import JSONConnector
 from dff.connectors.db.pickle_connector import PickleConnector
 from dff.connectors.db.shelve_connector import ShelveConnector
-from dff.connectors.db.db_connector import DBConnector, DBAbstractConnector
+from dff.connectors.db.db_connector import DBAbstractConnector
 from dff.connectors.db.sql_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
 from dff.connectors.db.redis_connector import RedisConnector, redis_available
 from dff.connectors.db.mongo_connector import MongoConnector, mongo_available
 from dff.connectors.db.ydb_connector import YDBConnector, ydb_available
 from dff.connectors.db import connector_factory
-from .examples.utils import script
+from .examples._db_connector_utils import script, testing_dialog
 
 
 from dff.core.engine.core import Context
@@ -47,25 +47,9 @@ MYSQL_ACTIVE = ping_localhost(3307)
 YDB_ACTIVE = ping_localhost(2136)
 
 
-TEST_TURNS = [
-    ("Hi", "Hi, what is up?"),
-    ("alright", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about that now."),
-    ("Ok, goodbye.", "bye"),
-    ("Hi", "Hi, what is up?"),
-    ("alright", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about that now."),
-    ("Ok, goodbye.", "bye"),
-    ("Hi", "Hi, what is up?"),
-    ("alright", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about that now."),
-    ("Ok, goodbye.", "bye"),
-]
-
-
 def run_turns_test(actor: Actor, db: DBConnector):
     for user_id in [str(random.randint(0, 10000000)), random.randint(0, 10000000), uuid.uuid4()]:
-        for turn_id, (request, true_response) in enumerate(TEST_TURNS):
+        for turn_id, (request, true_response) in enumerate(testing_dialog):
             try:
                 ctx = db.get(user_id, Context(id=user_id))
                 ctx.add_request(request)

@@ -34,11 +34,13 @@ core = [
 
 doc = [
     "sphinx>=1.7.9",
-    "sphinx_rtd_theme>=0.4.0",
+    "dff_sphinx_theme>=0.1.4",
     "sphinxcontrib-apidoc==0.3.0",
+    "sphinxcontrib-httpdomain>=1.8.0",
+    "sphinxcontrib-katex==0.9.0",
+    "sphinx_copybutton>=0.5",
     "sphinx_gallery>=0.11.1",
-    "sphinxcontrib-httpdomain>=1.7.9",
-    "nbsphinx>=0.8.9",
+    "matplotlib<=3.5.3",
 ]
 
 codestyle_dependencies = [
