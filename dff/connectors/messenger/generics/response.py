@@ -38,7 +38,7 @@ class Attachment(BaseModel):
 
     @root_validator
     def validate_source_or_id(cls, values):
-        if bool(values["source"]) == bool(values["id"]):
+        if bool(values.get("source")) == bool(values.get("id")):
             raise ValidationError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
         return values
 
