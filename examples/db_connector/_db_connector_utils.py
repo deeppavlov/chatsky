@@ -47,8 +47,8 @@ testing_dialog = [
     ("Let's talk about music.", "Sorry, I can not talk about that now."),  # node2 -> node3
     ("Ok, goodbye.", "bye"),  # node3 -> node4
     ("Hi", "Hi, what is up?"),  # node4 -> node1
-    ("stop", "Ooops"),  # node1 -> fallback_node
-    ("stop", "Ooops"),  # fallback_node -> fallback_node
+    ("stop", "Oops"),  # node1 -> fallback_node
+    ("stop", "Oops"),  # fallback_node -> fallback_node
     ("Hi", "Hi, what is up?"),  # fallback_node -> node1
     ("alright", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about that now."),  # node2 -> node3
