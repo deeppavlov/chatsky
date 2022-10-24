@@ -95,7 +95,7 @@ def make_image():
         metavar="FORMAT",
         help="Graphviz output format",
         default="png",
-        choices=["png", "jpeg", "svg", "gif", "bmp"],
+        choices=["png", "jpeg", "svg", "gif", "bmp", "dot"],
         type=str,
     )
     image_parser.add_argument(
