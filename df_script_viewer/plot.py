@@ -15,8 +15,7 @@ NODE_ATTRS = {
     "fontname": "Helvetica,Arial,sans-serif",
     "shape": "box",
     "style": "rounded, filled",
-    "fillcolor": "#ffffff",
-    "color": "#ffffff",
+    "fillcolor": "#ffffffbf",
 }
 
 
@@ -35,23 +34,23 @@ def format_name(name: tuple):
     name_value = str(name[1]).upper()
     if name_value == "NONE":
         name_value = UNRESOLVED_KEY
-    return f"<tr><td><b>{name_value}</b></td></tr>"
+    return f'<tr><td> <br align="left" /></td><td><b>{name_value}</b></td><td> <br align="right" /></td></tr>'
 
 
-def format_title(title: str):
-    return f"<tr><td><b>{title}</b></td></tr>"
+def format_title(title: str):  # second <br> to the left for spacing
+    return f'<tr><td><br align="left" /> <br align="left" /></td><td><b>{title}</b></td><td> <br align="right" /></td></tr>'
 
 
 def format_lines(lines: list):
-    return f"<tr><td>{'<br/>'.join(lines)}</td></tr>"
+    return f'<tr><td> <br align="left" /></td><td>{"<br/>".join(lines)}</td><td> <br align="right" /></td></tr>'
 
 
 def format_port(name: str, port: str) -> str:
-    return f'<tr><td port="{port}">{name}</td></tr>'
+    return f'<tr><td>(<br align="left" /></td><td>{name}</td><td port="{port}">)<br align="right" /></td></tr>'
 
 
 def format_as_table(rows: list) -> str:
-    return "".join(['<<table border="0" cellborder="1" cellspacing="0" cellpadding="4">', *rows, "</table>>"])
+    return "".join(['<<table border="0" cellborder="0" cellspacing="6" cellpadding="0">', *rows, "</table>>"])
 
 
 def transform_virtual(node: tuple):
@@ -87,8 +86,11 @@ def get_plot(
         cur_node, next_node, _ = edge
         cur_node, next_node = transform_virtual(cur_node), transform_virtual(next_node)
 
-        if not show_local and cur_node[1] == LOCAL:  # ignore local unless flag is set
-            continue
+        if cur_node[1] == LOCAL:  # ignore local unless flag is set
+            if not show_local:
+                continue
+            cur_node = (cur_node[0], "***LOCAL***")
+
         if not show_global and cur_node[1] == "GLOBAL":  # ignore local unless flag is set
             continue
 
@@ -109,8 +111,11 @@ def get_plot(
         node = transform_virtual(node)
         if node not in nodes:
 
-            if not show_local and node[1] == LOCAL:  # ignore local unless flag is set
-                continue
+            if node[1] == LOCAL:  # ignore local unless flag is set
+                if not show_local:
+                    continue
+                node = (node[0], "***LOCAL***")
+
             if not show_global and node[1] == "GLOBAL":  # ignore local unless flag is set
                 continue
 
@@ -127,24 +132,25 @@ def get_plot(
                 response_val = node_data["response"].display_value
             else:
                 response_val = str(node_data["response"])
+            nodes[node]["label"].append("<hr/>")
             nodes[node]["label"].append(format_title("Response"))
             nodes[node]["label"].extend(format_lines([response_val]))
 
         if show_misc and "misc" in node_data:
+            nodes[node]["label"].append("<hr/>")
             nodes[node]["label"].append(format_title("Misc"))
             nodes[node]["label"].extend(format_lines([str(node_data["misc"])]))
 
     flows: dict = {}
 
     for key in nodes.keys():
-        flow, _ = key
+        flow, f_node = key
         if flow not in flows:
             flows[flow] = graphviz.Digraph(name=f"cluster_{flow}")
             flows[flow].attr(label=str(flow).upper(), style="rounded, filled")
-            if flow == VIRTUAL_FLOW_KEY:
-                pass  # flows[flow].node_attr.update(bgcolor="transparent")
 
         if len(nodes[key]["ports"]) > 0:
+            nodes[key]["label"].append("<hr/>")
             nodes[key]["label"].append(format_title("Transitions"))
             nodes[key]["label"].extend([*nodes[key]["ports"]])
 
