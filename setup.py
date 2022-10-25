@@ -34,12 +34,13 @@ core = [
 
 doc = [
     "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.4",
+    "dff_sphinx_theme>=0.1.5",
     "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
     "sphinx_gallery>=0.11.1",
+    "sphinx-autodoc-typehints>=1.19.4",
     "matplotlib<=3.5.3",
 ]
 
@@ -68,7 +69,7 @@ mysql_dependencies = [
 
 postgresql_dependencies = [
     "sqlalchemy>=1.4.27",
-    "psycopg2-binary>=2.9.2",
+    "psycopg2-binary==2.9.4", # TODO: change to >= when psycopg2 will be stabe for windows
 ]
 
 ydb_dependencies = [
