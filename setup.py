@@ -28,12 +28,20 @@ def merge_req_lists(req_lists: Iterable[List[str]]) -> List[str]:
 
 core = [
     "pydantic>=1.8.2",
+    "nest_asyncio>=1.5.5",
+    "typing_extensions>=4.0.0",
 ]
 
 doc = [
     "sphinx>=1.7.9",
-    "sphinx_rtd_theme>=0.4.0",
+    "dff_sphinx_theme>=0.1.5",
     "sphinxcontrib-apidoc==0.3.0",
+    "sphinxcontrib-httpdomain>=1.8.0",
+    "sphinxcontrib-katex==0.9.0",
+    "sphinx_copybutton>=0.5",
+    "sphinx_gallery>=0.11.1",
+    "sphinx-autodoc-typehints>=1.19.4",
+    "matplotlib<=3.5.3",
 ]
 
 mypy_dependencies = [
@@ -61,17 +69,14 @@ mysql_dependencies = [
 
 postgresql_dependencies = [
     "sqlalchemy>=1.4.27",
-    "psycopg2-binary>=2.9.2",
+    "psycopg2-binary==2.9.4", # TODO: change to >= when psycopg2 will be stabe for windows
 ]
 
 ydb_dependencies = [
     "ydb>=2.5.0",
 ]
 
-devel = [
-    "bump2version>=1.0.1",
-    "build==0.7.0",
-    "twine==4.0.0",
+test_requirements = [
     "pytest >=6.2.4,<7.0.0",
     "pytest-cov >=2.12.0,<3.0.0",
     "pytest-asyncio >=0.14.0,<0.15.0",
@@ -79,6 +84,14 @@ devel = [
     "click<=8.0.4",
     "black ==20.8b1",
     "isort >=5.0.6,<6.0.0",
+    "flask[async]>=2.1.2",
+    "psutil>=5.9.1"
+]
+
+devel = [
+    "bump2version>=1.0.1",
+    "build==0.7.0",
+    "twine==4.0.0",
 ]
 
 full = merge_req_lists([
@@ -91,8 +104,13 @@ full = merge_req_lists([
     ydb_dependencies,
 ])
 
-devel_full = merge_req_lists([
+tests_full = merge_req_lists([
     full,
+    test_requirements,
+])
+
+devel_full = merge_req_lists([
+    tests_full,
     doc,
     devel,
     mypy_dependencies,
@@ -100,8 +118,10 @@ devel_full = merge_req_lists([
 
 EXTRA_DEPENDENCIES = {
     "doc": doc,
+    "tests": test_requirements,
     "devel": devel,
     "full": full,
+    "test_full": tests_full,
     "devel_full": devel_full,
     "sqlite": sqlite_dependencies,
     "redis": redis_dependencies,

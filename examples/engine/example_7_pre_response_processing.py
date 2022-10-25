@@ -1,11 +1,16 @@
+"""
+7. Pre-response processing
+==========================
+"""
+
 import logging
 
 from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PRE_RESPONSE_PROCESSING
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.labels as lbl
 import dff.core.engine.conditions as cnd
-
-from . import example_1_basics
+from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
+from examples.utils import get_auto_arg
 
 logger = logging.getLogger(__name__)
 
@@ -96,16 +101,8 @@ testing_dialog = [
 ]
 
 
-def run_test():
-    ctx = {}
-    for in_request, true_out_response in testing_dialog:
-        _, ctx = example_1_basics.turn_handler(in_request, ctx, actor, true_out_response=true_out_response)
-
-
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    # run_test()
-    example_1_basics.run_interactive_mode(actor)
+    if get_auto_arg():
+        run_auto_mode(actor, testing_dialog, logger)
+    else:
+        run_interactive_mode(actor, logger)
