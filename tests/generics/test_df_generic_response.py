@@ -8,10 +8,10 @@ from pydantic import BaseModel
 
 sys.path.insert(0, str(pathlib.Path(__file__).parent.parent.parent / "examples"))
 
-from generics.example_utils import run_test
-from generics import media
-from generics import basics
-from generics import buttons
+from .examples.example_utils import run_test
+from .examples import media
+from .examples import basics
+from .examples import buttons
 
 
 @pytest.mark.parametrize(["module"], [(basics, ), (buttons, ), (media, )])
