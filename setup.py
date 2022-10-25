@@ -70,6 +70,7 @@ mysql_dependencies = [
 postgresql_dependencies = [
     "sqlalchemy>=1.4.27",
     "psycopg2-binary>=2.9.2",
+    "wheel>=0.37.1"
 ]
 
 ydb_dependencies = [
