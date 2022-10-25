@@ -7,6 +7,7 @@ from platform import system
 
 from dff.core.engine.core import Context, Actor
 
+from dff.connectors.db.protocol import get_protocol_install_suggestion
 from dff.connectors.db.json_connector import JSONConnector
 from dff.connectors.db.pickle_connector import PickleConnector
 from dff.connectors.db.shelve_connector import ShelveConnector
@@ -113,6 +114,17 @@ def generic_test(db, testing_context, context_id):
         fallback_label=("greeting_flow", "fallback_node"),
     )
     run_turns_test(actor, db)
+
+
+@pytest.mark.parametrize(["protocol", "expected"], [
+    ("pickle", "Try to run `pip install dff[pickle]`"),
+    ("postgresql", "Try to run `pip install dff[postgresql]`"),
+    ("false", "")
+])
+def test_protocol_suggestion(protocol, expected):
+    result = get_protocol_install_suggestion(protocol)
+    assert result == expected
+
 
 
 def test_main(testing_file, testing_context, context_id):
