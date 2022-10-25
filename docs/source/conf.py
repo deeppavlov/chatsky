@@ -22,8 +22,10 @@ from sphinx_gallery.sorting import FileNameSortKey
 from dff_sphinx_theme.extras import sphinx_gallery_find_example_and_build_dirs, sphinx_gallery_add_source_dirs_to_path
 
 
-sphinx_gallery_add_source_dirs_to_path('../../dff/core')
-sphinx_gallery_add_source_dirs_to_path('../../dff/connectors')
+# TODO: Use this to add all source code dirs:
+# sphinx_gallery_add_source_dirs_to_path('../../dff/*/*/')
+# But for now it will be:
+sphinx_gallery_add_source_dirs_to_path()
 
 
 # -- Project information -----------------------------------------------------
@@ -53,14 +55,15 @@ extensions = [
     "sphinx.ext.extlinks",
 #    "sphinxcontrib.katex",  # TODO: throws an exception for some reason
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery"
+    "sphinx_gallery.gen_gallery",
+    "sphinx_autodoc_typehints"
 ]
 
 suppress_warnings = ['image.nonlocal_uri']
 source_suffix = '.rst'
 master_doc = 'index'
 
-version = "0.1"
+version = "0.10.1"
 language = 'en'
 
 pygments_style = 'default'
@@ -74,7 +77,7 @@ templates_path = ["_templates"]
 # This pattern also affects html_static_path and html_extra_path.
 exclude_patterns = ['**/README.rst']
 
-html_short_title = None
+html_short_title = 'None'
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -92,7 +95,10 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../../examples', '../examples')
+# TODO: After all examples will be fixed it shall look like:
+# examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../examples', *glob.glob('../../examples/*/'))
+# But for now:
+examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../examples', '../../examples/engine/', '../../examples/pipeline/')
 
 sphinx_gallery_conf = {
     'examples_dirs': examples,
