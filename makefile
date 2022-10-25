@@ -26,13 +26,13 @@ venv:
 	@echo "Start creating virtual environment"
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
-	pip install -e .[devel_full]
+	pip install -e .[devel_full] --use-pep517
 
 venv_test:
 	@echo "Start creating virtual environment (test)"
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
-	pip install -e .[test_full]
+	pip install -e .[test_full] --use-pep517
 
 format: venv
 	black --line-length=120 dff/
