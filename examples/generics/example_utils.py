@@ -11,7 +11,7 @@ import logging
 from typing import Union, Optional, NamedTuple
 
 from dff.core.engine.core import Context, Actor
-from dff.connectors.messenger.generics import Response, Keyboard
+from dff.connectors.messenger.generics import Response
 
 
 class CallbackRequest(NamedTuple):
