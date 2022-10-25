@@ -9,7 +9,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.generics.response import Button, Keyboard, Response
-from .example_utils import run_test, run_interactive_mode
+from example_utils import run_test, run_interactive_mode
 
 
 def check_button_payload(value: str):
