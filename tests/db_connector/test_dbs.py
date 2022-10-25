@@ -126,7 +126,6 @@ def test_protocol_suggestion(protocol, expected):
     assert result == expected
 
 
-
 def test_main(testing_file, testing_context, context_id):
     assert issubclass(DBConnector, DBAbstractConnector)
     db = connector_factory(f"json://{testing_file}")
