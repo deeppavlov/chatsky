@@ -26,7 +26,7 @@ venv:
 	@echo "Start creating virtual environment"
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
-	$(VENV_PATH)/bin/pip install -e .[devel_full]
+	pip install -e .[devel_full]
 
 venv_test:
 	@echo "Start creating virtual environment (test)"
@@ -66,9 +66,9 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv
-	sphinx-apidoc -e -f -o docs/source/apiref dff
+	# sphinx-apidoc -e -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -M html docs/source docs/build
+	sphinx-build -b html  -W --keep-going docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -89,7 +89,7 @@ version_major: venv
 
 
 
-clear:
+clean:
 	rm -rf $(VENV_PATH)
 	rm -rf .pytest_cache
 	rm -rf *.egg-info
@@ -98,4 +98,4 @@ clear:
 	rm -rf docs/build
 	rm -rf docs/examples
 	rm -rf docs/source/apiref
-.PHONY: clear
+.PHONY: clean
