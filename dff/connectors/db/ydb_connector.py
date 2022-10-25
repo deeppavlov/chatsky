@@ -221,28 +221,6 @@ class YDBConnector(DBConnector):
 
         return self.pool.retry_operation_sync(callee)
 
-    # TODO: test this func by pytest
-    def _is_directory_exists(self, driver, path):
-        try:
-            return driver.scheme_client.describe_path(path).is_directory()
-        except ydb.SchemeError:
-            return False
-
-    # TODO: test this func by pytest
-    def _ensure_path_exists(self, driver, database, path):
-        paths_to_create = list()
-        path = path.rstrip("/")
-        while path not in ("", database):
-            full_path = os.path.join(database, path)
-            if self._is_directory_exists(driver, full_path):
-                break
-            paths_to_create.append(full_path)
-            path = os.path.dirname(path).rstrip("/")
-
-        while len(paths_to_create) > 0:
-            full_path = paths_to_create.pop(-1)
-            driver.scheme_client.make_directory(full_path)
-
     def _is_table_exists(self, pool, path, table_name):
         try:
 
@@ -254,7 +232,6 @@ class YDBConnector(DBConnector):
         except ydb.SchemeError:
             return False
 
-    # TODO: test this func by pytest
     def _create_table(self, pool, path, table_name):
         def callee(session):
             session.create_table(
