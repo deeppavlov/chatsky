@@ -8,8 +8,10 @@ On the other hand, it can support service-specific ui models.
 """
 from typing import Any, Optional, List, Union
 from enum import Enum, auto
+from pathlib import Path
 
 from pydantic import Extra, Field, ValidationError, root_validator, FilePath, HttpUrl, BaseModel as PydanticBaseModel
+from pydantic import validator
 
 
 class Session(Enum):
@@ -41,6 +43,12 @@ class Attachment(BaseModel):
         if bool(values.get("source")) == bool(values.get("id")):
             raise ValidationError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
         return values
+
+    @validator("source")
+    def validate_source(cls, value):
+        if isinstance(value, Path):
+            return Path(value)
+        return value
 
 
 class Audio(Attachment):
