@@ -89,7 +89,7 @@ version_major: venv
 
 
 
-clear:
+clean:
 	rm -rf $(VENV_PATH)
 	rm -rf .pytest_cache
 	rm -rf *.egg-info
@@ -98,4 +98,4 @@ clear:
 	rm -rf docs/build
 	rm -rf docs/examples
 	rm -rf docs/source/apiref
-.PHONY: clear
+.PHONY: clean

@@ -3,7 +3,6 @@
 # This file only contains a selection of the most common options. For a full
 # list see the documentation:
 # https://www.sphinx-doc.org/en/master/usage/configuration.html
-import glob
 import os
 import re
 
@@ -64,7 +63,7 @@ suppress_warnings = ['image.nonlocal_uri']
 source_suffix = '.rst'
 master_doc = 'index'
 
-version = "0.1"
+version = "0.10.1"
 language = 'en'
 
 pygments_style = 'default'
