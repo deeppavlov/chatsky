@@ -3,7 +3,7 @@ import importlib
 import tests.utils as utils
 
 
-dot_path_to_addon = utils.get_dot_path_to_example_directory(__file__)
+dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
 
 
 def test_pretty_format():
