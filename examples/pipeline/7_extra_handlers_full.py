@@ -14,7 +14,7 @@ import psutil
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import Pipeline, ServiceGroup, to_service, ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
-from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
