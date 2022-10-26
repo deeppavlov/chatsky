@@ -6,9 +6,8 @@ from telebot import types
 
 sys.path.insert(0, "../dff-generics")
 
-from df_telegram_connector.types import TelegramResponse, TelegramAttachments, TelegramAttachment
-
-from df_generics import Attachments, Response, Keyboard, Button, Image
+from dff.connectors.messenger.telegram.types import TelegramResponse, TelegramAttachments, TelegramAttachment
+from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image
 
 
 def test_adapt_buttons():

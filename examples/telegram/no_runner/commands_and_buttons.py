@@ -1,22 +1,22 @@
 #!/usr/bin/env python3
 """
-This module demonstrates how to use the TelegramConnector without the df_runner add-on. 
+This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on. 
 This approach remains much closer to the usual workflow of pytelegrambotapi developers, so go for it
-if you need a quick prototype or have no interest in using the df_runner. 
+if you need a quick prototype or have no interest in using the dff.core.runner. 
 """
 import os
 import sys
 from typing import Optional
 
-import df_engine.conditions as cnd
-from df_engine.core import Context, Actor
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+import dff.core.engine.conditions as cnd
+from dff.core.engine.core import Context, Actor
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 from telebot.util import content_type_media
 
-from df_telegram_connector.connector import TelegramConnector
-from df_telegram_connector.utils import set_state, get_user_id, get_initial_context
+from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.utils import set_state, get_user_id, get_initial_context
 
 
 db = dict()

@@ -6,18 +6,18 @@ Using generic responses, you can use send local files as well as links to extern
 import os
 import sys
 
-import df_engine.conditions as cnd
-from df_engine.core import Context, Actor
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+import dff.core.engine.conditions as cnd
+from dff.core.engine.core import Context, Actor
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 
-from df_telegram_connector.connector import TelegramConnector
-from df_telegram_connector.request_provider import PollingRequestProvider
+from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.request_provider import PollingRequestProvider
 
-from df_runner import ScriptRunner
+from dff.core.runner import ScriptRunner
 
-from df_generics import Response, Image, Attachments
+from dff.connectors.messenger.generics import Response, Image, Attachments
 
 
 def doc_is_photo(message: types.Message):

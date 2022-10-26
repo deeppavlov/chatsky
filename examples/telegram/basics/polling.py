@@ -1,12 +1,12 @@
 import os
 
-import df_engine.conditions as cnd
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+import dff.core.engine.conditions as cnd
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
-from df_telegram_connector.connector import TelegramConnector
-from df_telegram_connector.request_provider import PollingRequestProvider
+from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.request_provider import PollingRequestProvider
 
-from df_runner import ScriptRunner
+from dff.core.runner import ScriptRunner
 
 script = {
     "greeting_flow": {

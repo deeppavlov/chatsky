@@ -5,7 +5,7 @@ from io import IOBase
 from copy import copy
 
 from telebot import types
-from df_engine.core import Context
+from dff.core.engine.core import Context
 
 
 def set_state(ctx: Context, update: types.JsonDeserializable):

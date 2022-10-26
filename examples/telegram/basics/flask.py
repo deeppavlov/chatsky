@@ -1,12 +1,12 @@
 import os
 
-import df_engine.conditions as cnd
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+import dff.core.engine.conditions as cnd
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
-from df_runner import ScriptRunner
+from dff.core.runner import ScriptRunner
 
-from df_telegram_connector.request_provider import FlaskRequestProvider
-from df_telegram_connector.connector import TelegramConnector
+from dff.connectors.messenger.telegram.request_provider import FlaskRequestProvider
+from dff.connectors.messenger.telegram.connector import TelegramConnector
 
 from flask import Flask
 

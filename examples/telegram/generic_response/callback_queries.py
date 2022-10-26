@@ -9,18 +9,18 @@ to the TelegramUI class.
 import os
 import sys
 
-import df_engine.conditions as cnd
-from df_engine.core.keywords import TRANSITIONS, RESPONSE
+import dff.core.engine.conditions as cnd
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 
-from df_telegram_connector.connector import TelegramConnector
-from df_telegram_connector.types import TelegramUI, TelegramButton
-from df_telegram_connector.request_provider import PollingRequestProvider
+from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.types import TelegramUI, TelegramButton
+from dff.connectors.messenger.telegram.request_provider import PollingRequestProvider
 
-from df_runner import ScriptRunner
+from dff.core.runner import ScriptRunner
 
-from df_generics import Response, Keyboard, Button
+from dff.connectors.messenger.generics import Response, Keyboard, Button
 
 bot = TelegramConnector(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
 

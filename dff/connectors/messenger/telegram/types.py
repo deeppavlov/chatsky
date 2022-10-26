@@ -13,7 +13,7 @@ from pathlib import Path
 from telebot import types
 from pydantic import BaseModel, ValidationError, validator, root_validator, Field, Extra, FilePath, HttpUrl, Required
 
-import df_generics
+import dff.connectors.messenger.generics
 
 
 class AdapterModel(BaseModel):
@@ -83,13 +83,13 @@ class TelegramAttachments(AdapterModel):
     def cast_to_input_media(cls, file: Any):
         tg_cls = None
 
-        if isinstance(file, df_generics.Image):
+        if isinstance(file, dff.connectors.messenger.generics.Image):
             tg_cls = types.InputMediaPhoto
-        elif isinstance(file, df_generics.Audio):
+        elif isinstance(file, dff.connectors.messenger.generics.Audio):
             tg_cls = types.InputMediaAudio
-        elif isinstance(file, df_generics.Document):
+        elif isinstance(file, dff.connectors.messenger.generics.Document):
             tg_cls = types.InputMediaDocument
-        elif isinstance(file, df_generics.Video):
+        elif isinstance(file, dff.connectors.messenger.generics.Video):
             tg_cls = types.InputMediaVideo
 
         if tg_cls:
@@ -100,7 +100,7 @@ class TelegramAttachments(AdapterModel):
         else:
             raise TypeError(
                 """`files` field can only be set with InputMedia objects (pytelegrambotapi lib), 
-                or Image, Video, Audio or Document objects (df_generics lib).
+                or Image, Video, Audio or Document objects (dff.connectors.messenger.generics lib).
                 """
             )
 

@@ -12,12 +12,12 @@ from typing import Union
 
 from telebot import types, TeleBot
 
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from .utils import partialmethod, open_io, close_io
 from .types import TelegramResponse
 
-import df_generics
+import dff.connectors.messenger.generics
 
 
 class TelegramConnector(TeleBot):
@@ -31,7 +31,7 @@ class TelegramConnector(TeleBot):
     token: str
         A Telegram API bot token.
     threaded: bool
-        This parameter is currently deprecated for the sake of compatibility with `df_runner`.
+        This parameter is currently deprecated for the sake of compatibility with `dff.core.runner`.
         We plan to add support for the threaded polling mode in the future.
     args:
         The rest of the parameters exactly matches those of the `Telebot` class. See the pytelegrambotapi docs
@@ -44,7 +44,7 @@ class TelegramConnector(TeleBot):
         self.cnd = ConditionNamespace(self)
 
     def send_response(
-        self, chat_id: Union[str, int], response: Union[str, dict, df_generics.Response, TelegramResponse]
+        self, chat_id: Union[str, int], response: Union[str, dict, dff.connectors.messenger.generics.Response, TelegramResponse]
     ):
         """
         Cast the `response` argument to the :py:class:`~df_telegram_connector.types.TelegramResponse` type and send it.
@@ -54,9 +54,9 @@ class TelegramConnector(TeleBot):
         -----------
         chat_id: Union[str, int]
             ID of the chat to send the response to
-        response: Union[str, dict, df_generics.Response, TelegramResponse]
+        response: Union[str, dict, dff.connectors.messenger.generics.Response, TelegramResponse]
             Response data. Can be passed as a :py:class:`~str`, a :py:class:`~dict`,
-            or a :py:class:`~df_generics.Response`.
+            or a :py:class:`~dff.connectors.messenger.generics.Response`.
             which will then be used to instantiate a :py:class:`~TelegramResponse` object.
             A :py:class:`~TelegramResponse` can also be passed directly.
             Note, that the dict should implement the :py:class:`~TelegramResponse` schema.
@@ -67,13 +67,13 @@ class TelegramConnector(TeleBot):
             ready_response = response
         elif isinstance(response, str):
             ready_response = TelegramResponse(text=response)
-        elif isinstance(response, dict) or isinstance(response, df_generics.Response):
+        elif isinstance(response, dict) or isinstance(response, dff.connectors.messenger.generics.Response):
             ready_response = TelegramResponse.parse_obj(response)
         else:
             raise TypeError(
                 """
                 Type of the response argument should be one of the following: 
-                str, dict, TelegramResponse, or df_generics.Response
+                str, dict, TelegramResponse, or dff.connectors.messenger.generics.Response
                 """
             )
 
@@ -110,7 +110,7 @@ class TelegramConnector(TeleBot):
 
 class ConditionNamespace:
     """
-    This class includes methods that produce df_engine conditions based on pytelegrambotapi updates.
+    This class includes methods that produce dff.core.engine conditions based on pytelegrambotapi updates.
 
     It is included to the :py:class:`~df_telegram_connector.connector.TelegramConnector` as :py:attr:`cnd` attribute.
     This helps us avoid overriding the original methods.
@@ -122,7 +122,7 @@ class ConditionNamespace:
 
         bot.cnd.message_handler(func=lambda msg: True)
 
-    in your :py:class:`~df_engine.core.Script` will always be `True`, unless the new update is not a message.
+    in your :py:class:`~dff.core.engine.core.Script` will always be `True`, unless the new update is not a message.
 
     """
 
@@ -133,7 +133,7 @@ class ConditionNamespace:
         self, target_type: type, commands=None, regexp=None, func=None, content_types=None, chat_types=None, **kwargs
     ):
         """
-        Creates a df_engine condition, triggered by update type {target_type}.
+        Creates a dff.core.engine condition, triggered by update type {target_type}.
         The signature is equal with the :py:class:`~telebot.Telebot` method of the same name.
         """
 

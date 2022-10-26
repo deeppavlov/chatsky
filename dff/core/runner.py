@@ -5,9 +5,9 @@ from typing import Any, Optional, Union, Callable
 from abc import ABC, abstractmethod
 
 
-from df_engine.core import Context, Actor, Script
-from df_engine.core.types import NodeLabel2Type
-from df_db_connector import DBAbstractConnector
+from dff.core.engine.core import Context, Actor, Script
+from dff.core.engine.core.types import NodeLabel2Type
+from dff.connectors.db import DBAbstractConnector
 
 
 Runner = ForwardRef("Runner")

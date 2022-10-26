@@ -4,15 +4,15 @@ Request Provider
 
 This module contains several variations of the `RequestProvider` class that can be used 
 to combine :py:class:`~df_telegram_connector.connector.TelegramConnector` 
-together with the `df_runner` add-on.
+together with the `dff.core.runner` add-on.
 """
 from functools import partial
 from typing import Any, Optional
 
 from telebot import types, logger
 
-from df_engine.core import Context, Actor
-from df_runner import AbsRequestProvider, Runner
+from dff.core.engine.core import Context, Actor
+from dff.core.runner import AbsRequestProvider, Runner
 
 from .connector import TelegramConnector
 from .utils import get_user_id, set_state, get_initial_context
@@ -65,7 +65,7 @@ class BaseRequestProvider(AbsRequestProvider):
 
 class PollingRequestProvider(BaseRequestProvider):
     """
-    | Class for compatibility with df_runner. Retrieves updates by polling.
+    | Class for compatibility with dff.core.runner. Retrieves updates by polling.
     | Multi-threaded polling is currently not supported, but will be implemented in the future.
 
     Parameters
@@ -111,7 +111,7 @@ class PollingRequestProvider(BaseRequestProvider):
 
 class FlaskRequestProvider(BaseRequestProvider):
     """
-    Class for compatibility with df_runner. Retrieves updates from post json requests.
+    Class for compatibility with dff.core.runner. Retrieves updates from post json requests.
 
     Parameters
     ----------

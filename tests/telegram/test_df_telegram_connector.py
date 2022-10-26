@@ -3,7 +3,7 @@ import sys
 import pytest
 
 from telebot import types
-from df_engine.core.context import Context
+from dff.core.engine.core.context import Context
 
 
 def create_text_message(text: str):
