@@ -44,7 +44,11 @@ doc = [
 ]
 
 mypy_dependencies = [
-    "mypy",
+    "mypy==0.950",
+]
+
+telegram_dependencies = [
+    "pytelegrambotapi==4.5.1",
 ]
 
 sqlite_dependencies = [
@@ -83,7 +87,7 @@ test_requirements = [
     "click<=8.0.4",
     "black ==20.8b1",
     "isort >=5.0.6,<6.0.0",
-    "flask[async]>=2.1.2",
+    "flask[async]==2.1.2",
     "psutil>=5.9.1"
 ]
 
@@ -101,6 +105,7 @@ full = merge_req_lists([
     mysql_dependencies,
     postgresql_dependencies,
     ydb_dependencies,
+    telegram_dependencies,
 ])
 
 tests_full = merge_req_lists([
@@ -128,6 +133,7 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,
     "postgresql": postgresql_dependencies,
     "ydb": ydb_dependencies,
+    "telegram": telegram_dependencies,
 }
 
 setup(
