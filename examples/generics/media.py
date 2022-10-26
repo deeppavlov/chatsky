@@ -7,7 +7,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine import conditions as cnd
 
 from dff.connectors.messenger.generics.response import Attachments, Image, Response
-from example_utils import run_test, run_interactive_mode
+from .example_utils import run_test, run_interactive_mode
 
 script = {
     "root": {
