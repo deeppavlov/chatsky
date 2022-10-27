@@ -65,7 +65,7 @@ class PollingMessengerInterface(MessengerInterface):
         self,
         pipeline_runner: PipelineRunnerFunction,
         loop: PollingProviderLoopFunction = lambda: True,
-        timeout: int = 0,
+        timeout: float = 0,
     ):
         """
         Method, running a request - response cycle in a loop.

@@ -49,7 +49,7 @@ Pipeline `add_global_extra_handler` function is used to register global extra ha
 Here basic functionality of `df-node-stats` library is emulated.
 Information about pipeline component execution time and
     result is collected and printed to info log after pipeline execution.
-Pipeline consists of actor and 25 `long_service`s that run random amount of time between 0 and 5 seconds.
+Pipeline consists of actor and 25 `long_service`s that run random amount of time between 0 and 0.05 seconds.
 """
 
 
@@ -92,7 +92,7 @@ def after_all(_, __, info: ExtraHandlerRuntimeInfo):
 
 
 async def long_service(_, __, info: ServiceRuntimeInfo):
-    timeout = random.randint(0, 5)
+    timeout = random.randint(0, 5) / 100
     logger.info(f"Service {info['name']} is going to sleep for {timeout} seconds.")
     await asyncio.sleep(timeout)
 
