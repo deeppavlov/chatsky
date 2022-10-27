@@ -106,16 +106,16 @@ actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_labe
 
 # testing
 testing_dialog = [
-    ("Hi", ["Hi, how are you?"]),  # start_node -> node1
+    ("Hi", "Hi, how are you?"),  # start_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "bye"),  # node3 -> node4
-    ("Hi", ["Hi, how are you?"]),  # node4 -> node1
+    ("Hi", "Hi, how are you?"),  # node4 -> node1
     ("stop", "Ooops"),  # node1 -> fallback_node
     ("one", "Ooops"),  # fallback_node -> fallback_node
     ("help", "Ooops"),  # fallback_node -> fallback_node
     ("nope", "Ooops"),  # fallback_node -> fallback_node
-    ({"some_key": "some_value"}, ["Hi, how are you?"]),  # fallback_node -> node1
+    ({"some_key": "some_value"}, "Hi, how are you?"),  # fallback_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "bye"),  # node3 -> node4
