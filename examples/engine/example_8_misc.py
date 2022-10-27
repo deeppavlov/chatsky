@@ -3,6 +3,10 @@
 =======
 """
 
+# TODO:
+# 1. Explain that MISC == miscellaneous and why we need it
+# 2. Remove `create_transitions`
+
 import logging
 from typing import Any
 
