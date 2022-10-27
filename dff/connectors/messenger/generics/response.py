@@ -14,7 +14,6 @@ from pydantic import Extra, Field, ValidationError, FilePath, HttpUrl, BaseModel
 from pydantic import validator, root_validator
 
 
-
 class Session(Enum):
     ACTIVE = auto()
     FINISHED = auto()
