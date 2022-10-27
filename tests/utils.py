@@ -1,5 +1,6 @@
 import pathlib
 
+
 def get_dot_path_from_tests_to_current_dir(file):
     parents = []
     for parent in pathlib.Path(file).parents:
@@ -8,5 +9,4 @@ def get_dot_path_from_tests_to_current_dir(file):
         parents += [parent.name]
 
     dot_path_to_addon = ".".join(reversed(parents))
-    return dot_path_to_addon     
-    
+    return dot_path_to_addon

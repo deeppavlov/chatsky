@@ -20,13 +20,15 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 """
-Extra handlers are additional function lists (before-functions and/or after-functions) that can be added to any pipeline components (service and service groups).
+Extra handlers are additional function lists (before-functions and/or after-functions)
+    that can be added to any pipeline components (service and service groups).
 Extra handlers main purpose should be service and service groups statistics collection.
 Extra handlers can be attached to pipeline component using `before_handler` and `after_handler` constructor parameter.
 
 Here 5 `heavy_service`s are run in single asynchronous service group.
 Each of them sleeps for random amount of seconds (between 0 and 5).
-To each of them (as well as to group) time measurement extra handler is attached, that writes execution time to `ctx.misc`.
+To each of them (as well as to group) time measurement extra handler is attached,
+    that writes execution time to `ctx.misc`.
 In the end `ctx.misc` is logged to info channel.
 """
 
