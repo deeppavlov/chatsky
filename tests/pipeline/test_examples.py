@@ -1,18 +1,14 @@
-import sys
 import importlib
-import pathlib
 
 import pytest
 
-from .examples._pipeline_utils import auto_run_pipeline
+import tests.utils as utils
 
-
-# Uncomment the following line, if you want to run your examples during the test suite or import from them
-# pytest.skip(allow_module_level=True)
-
+dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
+pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipeline_utils")
 
 @pytest.mark.parametrize(
-    "module_name", [
+    "example_module_name", [
         "1_basic_example",
         "2_pre_and_post_processors",
         "3_pipeline_dict_with_services_basic",
@@ -27,10 +23,9 @@ from .examples._pipeline_utils import auto_run_pipeline
         "8_extra_handlers_and_extensions",
     ]
 )
-def test_examples(module_name: str):
-    sys.path.append(str((pathlib.Path(__file__).parent / 'examples').absolute()))
-    module = importlib.import_module(f"{module_name}", package="examples")
-    if module_name.startswith("6"):
-        auto_run_pipeline(module.pipeline, wrapper=module.construct_webpage_by_response)
+def test_examples(example_module_name: str):
+    example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
+    if example_module_name.startswith("6"):
+        pipeline_utils.auto_run_pipeline(example_module.pipeline, wrapper=example_module.construct_webpage_by_response)
     else:
-        auto_run_pipeline(module.pipeline)
+        pipeline_utils.auto_run_pipeline(example_module.pipeline)

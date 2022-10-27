@@ -3,6 +3,7 @@ import socket
 import os
 import random
 import uuid
+import importlib
 from platform import system
 
 from dff.core.engine.core import Actor
@@ -17,12 +18,15 @@ from dff.connectors.db.redis_connector import RedisConnector, redis_available
 from dff.connectors.db.mongo_connector import MongoConnector, mongo_available
 from dff.connectors.db.ydb_connector import YDBConnector, ydb_available
 from dff.connectors.db import connector_factory
-from .examples._db_connector_utils import script, testing_dialog
 
 
 from dff.core.engine.core import Context
 
 from dff.connectors.db import DBConnector
+import tests.utils as utils
+
+dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
+db_connector_utils = importlib.import_module(f"examples.{dot_path_to_addon}._db_connector_utils")
 
 
 def ping_localhost(port: int, timeout=60):
@@ -50,7 +54,7 @@ YDB_ACTIVE = ping_localhost(2136)
 
 def run_turns_test(actor: Actor, db: DBConnector):
     for user_id in [str(random.randint(0, 10000000)), random.randint(0, 10000000), uuid.uuid4()]:
-        for turn_id, (request, true_response) in enumerate(testing_dialog):
+        for turn_id, (request, true_response) in enumerate(db_connector_utils.testing_dialog):
             try:
                 ctx = db.get(user_id, Context(id=user_id))
                 ctx.add_request(request)
@@ -93,7 +97,7 @@ def generic_test(db, testing_context, context_id):
     # test `get` method
     assert db.get(context_id) is None
     actor = Actor(
-        script,
+        db_connector_utils.script,
         start_label=("greeting_flow", "start_node"),
         fallback_label=("greeting_flow", "fallback_node"),
     )
