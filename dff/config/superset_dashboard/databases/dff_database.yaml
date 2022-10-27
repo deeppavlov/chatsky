@@ -1,0 +1,15 @@
+database_name: dff_database
+sqlalchemy_uri: postgresql://root:XXXXXXXXXX@172.17.0.1:5432/test
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_file_upload: false
+extra:
+  allows_virtual_table_explore: true
+  metadata_params: {}
+  engine_params: {}
+  schemas_allowed_for_file_upload: []
+uuid: 355926fc-e7d6-439e-b506-393ac7410e63
+version: 1.0.0

@@ -1,0 +1,94 @@
+table_name: dff_acyclic_nodes
+main_dttm_col: start_time
+description: null
+default_endpoint: null
+offset: 0
+cache_timeout: null
+schema: public
+sql: "WITH main as (\n  SELECT DISTINCT test.context_id, request_id, time, cast(data\
+  \ -> 'label' as text) as label\n  FROM test INNER JOIN \n  (\n    WITH helper as\
+  \ (\n         SELECT DISTINCT context_id, request_id, cast(data -> 'label' as text)\
+  \ as label from test\n         ) \n    SELECT context_id FROM helper GROUP BY context_id\n\
+  \    HAVING count(context_id) = COUNT(DISTINCT label)\n  ) as plain_ctx ON test.context_id\
+  \ = plain_ctx.context_id\n     ORDER BY context_id, request_id\n     ) SELECT context_id,\
+  \ request_id, time, label,\n    LAG(label,1) OVER (ORDER BY context_id, request_id)\
+  \ as prev_label\nFROM main;"
+params: null
+template_params: null
+filter_select_enabled: false
+fetch_values_predicate: null
+extra: null
+uuid: 2ec02aa6-e414-4103-9dc3-cba7fc7b4777
+metrics:
+- metric_name: count
+  verbose_name: COUNT(*)
+  metric_type: count
+  expression: COUNT(*)
+  description: null
+  d3format: null
+  extra:
+    warning_markdown: ''
+  warning_text: null
+columns:
+- column_name: time
+  verbose_name: null
+  is_dttm: true
+  is_active: true
+  type: DATETIME
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: request_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: INTEGER
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: prev_label
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: context_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: label
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: STRING
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+version: 1.0.0
+database_uuid: 355926fc-e7d6-439e-b506-393ac7410e63
