@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 PYTHON = python3
 VENV_PATH = venv
-VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
+VERSIONING_FILES = setup.py makefile docs/source/conf.py .__init__.py
 CURRENT_VERSION = 0.10.1
 TEST_COVERAGE_THRESHOLD=93
 
@@ -35,18 +35,18 @@ venv_test:
 	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 dff/
+	black --line-length=120 . --exclude venv,build
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 dff/
-	@set -e && black --line-length=120 --check dff/ || ( \
+	flake8 --max-line-length 120 . --exclude venv,build
+	@set -e && black --line-length=120 --check . --exclude venv,build|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	# @mypy dff/
+	# @mypy . --exclude venv,build
 .PHONY: lint
 
 docker_up:

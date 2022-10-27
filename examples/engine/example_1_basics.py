@@ -3,6 +3,12 @@
 =========
 """
 
+# TODO:
+# 1. The illustration should express only what is shown in the example, not all at once.
+#    Complicate illustrations from one example to another.
+# 2. Fix PRE_RESPONSE_PROCESSING to PRE_TRANSITIONS_PROCESSING
+# 3. Specify that the nodes form an ordered set
+
 import logging
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE

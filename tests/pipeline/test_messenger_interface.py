@@ -2,8 +2,6 @@ import asyncio
 import sys
 import pathlib
 
-import pytest
-
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.pipeline import CLIMessengerInterface, Pipeline, CallbackMessengerInterface
 import dff.core.engine.conditions as cnd
@@ -33,7 +31,7 @@ pipeline = Pipeline.from_script(
 
 
 def test_cli_messenger_interface(monkeypatch):
-    monkeypatch.setattr('builtins.input', lambda _: "Ping")
+    monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
     pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
@@ -49,7 +47,7 @@ def test_cli_messenger_interface(monkeypatch):
 
 
 def test_callback_messenger_interface(monkeypatch):
-    monkeypatch.setattr('builtins.input', lambda _: "Ping")
+    monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
     interface = CallbackMessengerInterface()

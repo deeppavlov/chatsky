@@ -81,7 +81,7 @@ mysql_dependencies = [
 
 postgresql_dependencies = [
     "sqlalchemy>=1.4.27",
-    "psycopg2-binary==2.9.4", # TODO: change to >= when psycopg2 will be stabe for windows
+    "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stabe for windows
 ]
 
 ydb_dependencies = [
@@ -106,29 +106,33 @@ devel = [
     "twine==4.0.0",
 ]
 
-full = merge_req_lists([
-    core,
-    parser_dependencies,
-    graph_dependencies,
-    sqlite_dependencies,
-    redis_dependencies,
-    mongodb_dependencies,
-    mysql_dependencies,
-    postgresql_dependencies,
-    ydb_dependencies,
-])
+full = merge_req_lists(
+    [
+        core,
+        sqlite_dependencies,
+        redis_dependencies,
+        mongodb_dependencies,
+        mysql_dependencies,
+        postgresql_dependencies,
+        ydb_dependencies,
+    ]
+)
 
-tests_full = merge_req_lists([
-    full,
-    test_requirements,
-])
+tests_full = merge_req_lists(
+    [
+        full,
+        test_requirements,
+    ]
+)
 
-devel_full = merge_req_lists([
-    tests_full,
-    doc,
-    devel,
-    codestyle_dependencies,
-])
+devel_full = merge_req_lists(
+    [
+        tests_full,
+        doc,
+        devel,
+        mypy_dependencies,
+    ]
+)
 
 EXTRA_DEPENDENCIES = {
     "doc": doc,
