@@ -3,11 +3,11 @@ import logging
 import pathlib
 
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.connectors.messenger.generics.response import Attachments, Image, Response
-from .example_utils import run_test, run_interactive_mode
+from ._example_utils import run_interactive_mode
 
 script = {
     "root": {

@@ -1,6 +1,4 @@
 #!/usr/bin/env python3
-import re
-from typing import Optional
 import logging
 
 import dff.core.engine.conditions as cnd
@@ -9,7 +7,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.generics.response import Button, Keyboard, Response
-from .example_utils import run_test, run_interactive_mode
+from ._example_utils import run_interactive_mode
 
 
 def check_button_payload(value: str):
