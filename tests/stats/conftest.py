@@ -3,7 +3,7 @@ from uuid import uuid4
 from random import choice
 
 import pytest
-from df_stats import make_saver, StatsRecord
+from dff.stats import make_saver, StatsRecord
 
 
 @pytest.fixture(scope="session")  # test saving configs to zip

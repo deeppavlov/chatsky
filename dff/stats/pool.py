@@ -2,8 +2,8 @@ import functools
 import asyncio
 from typing import List, Callable, Optional
 
-from df_engine.core import Context
-from df_runner import WrapperRuntimeInfo
+from dff.core.engine.core import Context
+from dff.core.pipeline import ExtraHandlerRuntimeInfo
 from .subscriber import PoolSubscriber
 
 
@@ -44,7 +44,7 @@ class ExtractorPool:
 
     def _wrap_extractor(self, extractor: Callable) -> Callable:
         @functools.wraps(extractor)
-        async def extractor_wrapper(ctx: Context, _, info: WrapperRuntimeInfo):
+        async def extractor_wrapper(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
             if asyncio.iscoroutinefunction(extractor):
                 result = await extractor(ctx, _, info)
             else:

@@ -3,8 +3,8 @@ import pathlib
 import importlib
 
 import pytest
-from df_engine.core import Context
-from df_runner import Pipeline
+from dff.core.engine.core import Context
+from dff.core.pipeline import Pipeline
 
 TURNS = [
     ("hi", "how are you"),

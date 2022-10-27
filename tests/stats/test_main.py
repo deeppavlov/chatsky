@@ -2,7 +2,7 @@ import pytest
 import os
 from argparse import Namespace
 
-from df_stats.__main__ import main
+from dff.stats.__main__ import main
 
 
 @pytest.mark.parametrize(

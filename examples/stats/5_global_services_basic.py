@@ -5,9 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
 
-from df_engine.core import Context, Actor
-from df_runner import Pipeline, WrapperRuntimeInfo, GlobalWrapperType, to_service
-from df_stats import StatsStorage, StatsRecord, ExtractorPool
+from dff.core.engine.core import Context, Actor
+from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalWrapperType, to_service
+from dff.stats import StatsStorage, StatsRecord, ExtractorPool
 
 from _utils import parse_args, script
 
@@ -19,7 +19,7 @@ async def heavy_service(_):
 
 
 @extractor_pool.new_extractor
-async def get_pipeline_state(ctx: Context, _, info: WrapperRuntimeInfo):
+async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     data = {"runtime_state": info["component"]["execution_state"]}
     group_stats = StatsRecord.from_context(ctx, info, data)
     return group_stats

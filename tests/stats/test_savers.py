@@ -1,9 +1,9 @@
 import pytest
 from sqlalchemy import text
 
-from df_stats import make_saver
-from df_stats.savers.clickhouse import ClickHouseSaver
-from df_stats.savers.postgresql import PostgresSaver
+from dff.stats import make_saver
+from dff.stats.savers.clickhouse import ClickHouseSaver
+from dff.stats.savers.postgresql import PostgresSaver
 
 
 @pytest.mark.asyncio

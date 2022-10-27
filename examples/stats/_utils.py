@@ -1,8 +1,8 @@
 import argparse
 import sys
 
-from df_engine.core.keywords import RESPONSE, TRANSITIONS
-import df_engine.conditions as cnd
+from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
+import dff.core.engine.conditions as cnd
 from omegaconf import OmegaConf
 
 common_opts = argparse.ArgumentParser(add_help=False)

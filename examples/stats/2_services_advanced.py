@@ -5,9 +5,9 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
 
-from df_engine.core import Context, Actor
-from df_runner import Pipeline, Service, WrapperRuntimeInfo, to_service
-from df_stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool # import default pool from addon
+from dff.core.engine.core import Context, Actor
+from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool # import default pool from addon
 from _utils import parse_args, script
 
 """
@@ -26,7 +26,7 @@ extractor_pool = ExtractorPool()
 
 
 @extractor_pool.new_extractor
-async def get_service_state(ctx: Context, _, info: WrapperRuntimeInfo):
+async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
         "execution_state": info["component"]["execution_state"],

@@ -5,16 +5,16 @@ from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
 
-from df_engine.core import Context, Actor
-from df_runner import Pipeline, Service, WrapperRuntimeInfo, to_service
-from df_stats import StatsStorage, ExtractorPool, StatsRecord
+from dff.core.engine.core import Context, Actor
+from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.stats import StatsStorage, ExtractorPool, StatsRecord
 
 from _utils import parse_args, script
 
 """
 The statistics are collected from services by wrapping them in special 'extractor' functions.
 These functions have a specific signature: their arguments are always a `Context`, an `Actor`, 
-and a `WrapperRuntimeInfo`. Their return value is always a `StatsRecord` instance. 
+and a `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance. 
 It is a preferred practice to define them as asynchronous.
 
 Before you use the said functions, you should create an `ExtractorPool` 
@@ -41,7 +41,7 @@ extractor_pool = ExtractorPool()
 
 # Create an extractor and add it to the pool.
 @extractor_pool.new_extractor
-async def get_service_state(ctx: Context, _, info: WrapperRuntimeInfo):
+async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
         "execution_state": info["component"]["execution_state"],

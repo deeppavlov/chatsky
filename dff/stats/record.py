@@ -3,8 +3,8 @@ import json
 from typing import Any
 
 from pydantic import BaseModel, Field, validator
-from df_engine.core.context import Context, get_last_index
-from df_runner import WrapperRuntimeInfo
+from dff.core.engine.core.context import Context, get_last_index
+from dff.core.pipeline import ExtraHandlerRuntimeInfo
 
 from .utils import get_wrapper_field
 
@@ -23,7 +23,7 @@ class StatsRecord(BaseModel):
         return val
 
     @classmethod
-    def from_context(cls, ctx: Context, info: WrapperRuntimeInfo, data: Any):
+    def from_context(cls, ctx: Context, info: ExtraHandlerRuntimeInfo, data: Any):
         context_id = str(ctx.id)
         request_id = get_last_index(ctx.requests)
         data_key = get_wrapper_field(info)
