@@ -66,7 +66,7 @@ script = {
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: ["Hi, how are you?"],
+            RESPONSE: "Hi, how are you?",
             TRANSITIONS: {"node2": cnd.regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
         },
         "node2": {

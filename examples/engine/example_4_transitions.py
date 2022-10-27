@@ -3,6 +3,9 @@
 ==============
 """
 
+# TODO:
+# 1. Maybe remove `lbl.to_fallback(): cnd.true(),` from script as a trivial condition?
+
 import logging
 import re
 
@@ -95,7 +98,7 @@ script = {
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE), lbl.to_fallback(): cnd.true()},
         },
         "node2": {
-            RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
+            RESPONSE: "System of a Down is an Armenian-American heavy metal band formed in 1994.",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
