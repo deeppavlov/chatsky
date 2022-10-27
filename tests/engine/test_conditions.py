@@ -50,4 +50,3 @@ def test_conditions():
         raise ValueError("Failed cnd")
 
     assert not cnd.any([failed_cond_func])(ctx, actor)
-

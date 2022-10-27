@@ -51,7 +51,9 @@ testing_dialog = [
 ]
 
 actor = Actor(
-    script=script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"),
+    script=script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":

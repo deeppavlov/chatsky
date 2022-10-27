@@ -6,11 +6,7 @@ from dff.core.engine.core import Context, Actor
 from examples.utils import ConsoleFormatter
 
 
-def run_auto_mode(
-    actor: Actor,
-    testing_dialog: List[Tuple[Any, Any]],
-    logger: Optional[logging.Logger] = None
-):
+def run_auto_mode(actor: Actor, testing_dialog: List[Tuple[Any, Any]], logger: Optional[logging.Logger] = None):
     ctx = {}
     for in_request, true_out_response in testing_dialog:
         _, ctx = turn_handler(in_request, ctx, actor, true_out_response, logger)

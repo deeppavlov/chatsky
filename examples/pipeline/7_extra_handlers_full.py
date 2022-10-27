@@ -20,10 +20,13 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 """ TODO: update docs
-Extra handlers are additional function lists (before-functions and/or after-functions) that can be added to any pipeline components (service and service groups).
-Despite extra handlers can be used to prepare data for certain services, that require some very special input type, in most cases services should be preferred for that purpose.
+Extra handlers are additional function lists (before-functions and/or after-functions)
+    that can be added to any pipeline components (service and service groups).
+Despite extra handlers can be used to prepare data for certain services, that require some very special input type,
+    in most cases services should be preferred for that purpose.
 Extra handlers can be asynchronous, however there's no statistics that can be collected about them.
-So their main purpose should be _really_ lightweight data conversion (etc.) operations or service and service groups statistics collection.
+So their main purpose should be _really_ lightweight data conversion (etc.)
+    operations or service and service groups statistics collection.
 
 Extra handlers have the following constructor arguments / parameters:
     `functions` - functions that will be run
@@ -34,16 +37,20 @@ NB! Extra handlers don't have execution state, so their names shouldn't appear i
 Extra handlers callable signature can be one of the following: [ctx], [ctx, actor] or [ctx, actor, info], where:
     `ctx` - Context of the current dialog
     `actor` - Actor of the pipeline
-    `info` - dictionary, containing information about current extra handler and pipeline execution state (see example №4)
+    `info` - dictionary, containing information about current extra handler
+             and pipeline execution state (see example №4)
 
 Extra handlers can be attached to pipeline component in few different ways:
     1. Directly in constructor - by adding extra handlers to `before_handler` or `after_handler` constructor parameter
-    2. (Services only) `to_service` decorator - transforms function to service with extra handlers from `before_handler` and `after_handler` arguments
+    2. (Services only) `to_service` decorator - transforms function to service with extra handlers
+                                                from `before_handler` and `after_handler` arguments
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
-Their runtime stats are captured and displayed by extra services, `time_measure_handler` measures time and `ram_measure_handler` - allocated memory.
+Their runtime stats are captured and displayed by extra services,
+    `time_measure_handler` measures time and `ram_measure_handler` - allocated memory.
 Another `time_measure_handler` measures total amount of time taken by all of them (combined in service group).
-`logging_service` logs stats, however it can use string arguments only, so `json_encoder_handler` is applied to encode stats to JSON.
+`logging_service` logs stats, however it can use string arguments only,
+    so `json_encoder_handler` is applied to encode stats to JSON.
 """
 
 

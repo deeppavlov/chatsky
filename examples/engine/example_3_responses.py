@@ -111,4 +111,3 @@ if __name__ == "__main__":
         run_auto_mode(actor, testing_dialog, logger)
     else:
         run_interactive_mode(actor, logger)
-

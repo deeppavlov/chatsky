@@ -90,27 +90,33 @@ actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fa
 testing_dialog = [
     (
         "",
-        "ctx.last_label=('flow', 'step_0'): current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_0'}",
+        "ctx.last_label=('flow', 'step_0'): "
+        "current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_0'}",
     ),
     (
         "",
-        "ctx.last_label=('flow', 'step_1'): current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_1'}",
+        "ctx.last_label=('flow', 'step_1'): "
+        "current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_1'}",
     ),
     (
         "",
-        "ctx.last_label=('flow', 'step_2'): current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_2'}",
+        "ctx.last_label=('flow', 'step_2'): "
+        "current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_2'}",
     ),
     (
         "",
-        "ctx.last_label=('flow', 'step_3'): current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_3'}",
+        "ctx.last_label=('flow', 'step_3'): "
+        "current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_3'}",
     ),
     (
         "",
-        "ctx.last_label=('flow', 'step_4'): current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_4'}",
+        "ctx.last_label=('flow', 'step_4'): "
+        "current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_4'}",
     ),
     (
         "",
-        "ctx.last_label=('flow', 'step_0'): current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_0'}",
+        "ctx.last_label=('flow', 'step_0'): "
+        "current_node.misc={'var1': 'global_data', 'var2': 'rewrite_by_local', 'var3': 'info_of_step_0'}",
     ),
 ]
 

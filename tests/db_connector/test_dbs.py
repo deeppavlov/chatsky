@@ -70,7 +70,7 @@ def run_turns_test(actor: Actor, db: DBConnector):
                 msg = f"user_id={user_id}"
                 msg += f" turn_id={turn_id}"
                 msg += f" request={request} "
-                msg += f"\ntrue_response != out_response: "
+                msg += "\ntrue_response != out_response: "
                 msg += f"\n{true_response} != {out_response}"
                 raise Exception(msg)
 
@@ -104,11 +104,14 @@ def generic_test(db, testing_context, context_id):
     run_turns_test(actor, db)
 
 
-@pytest.mark.parametrize(["protocol", "expected"], [
-    ("pickle", "Try to run `pip install dff[pickle]`"),
-    ("postgresql", "Try to run `pip install dff[postgresql]`"),
-    ("false", "")
-])
+@pytest.mark.parametrize(
+    ["protocol", "expected"],
+    [
+        ("pickle", "Try to run `pip install dff[pickle]`"),
+        ("postgresql", "Try to run `pip install dff[postgresql]`"),
+        ("false", ""),
+    ],
+)
 def test_protocol_suggestion(protocol, expected):
     result = get_protocol_install_suggestion(protocol)
     assert result == expected
@@ -135,8 +138,8 @@ def test_pickle(testing_file, testing_context, context_id):
     generic_test(db, testing_context, context_id)
 
 
-@pytest.mark.skipif(MONGO_ACTIVE == False, reason="Mongodb server is not running")
-@pytest.mark.skipif(mongo_available == False, reason="Mongodb dependencies missing")
+@pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running")
+@pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing")
 def test_mongo(testing_context, context_id):
     if system() == "Windows":
         pytest.skip()
@@ -151,15 +154,15 @@ def test_mongo(testing_context, context_id):
     generic_test(db, testing_context, context_id)
 
 
-@pytest.mark.skipif(REDIS_ACTIVE == False, reason="Redis server is not running")
-@pytest.mark.skipif(redis_available == False, reason="Redis dependencies missing")
+@pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
+@pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 def test_redis(testing_context, context_id):
     db = RedisConnector("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
     generic_test(db, testing_context, context_id)
 
 
-@pytest.mark.skipif(POSTGRES_ACTIVE == False, reason="Postgres server is not running")
-@pytest.mark.skipif(postgres_available == False, reason="Postgres dependencies missing")
+@pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
+@pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
 def test_postgres(testing_context, context_id):
     db = SQLConnector(
         "postgresql://{}:{}@localhost:5432/{}".format(
@@ -171,7 +174,7 @@ def test_postgres(testing_context, context_id):
     generic_test(db, testing_context, context_id)
 
 
-@pytest.mark.skipif(sqlite_available == False, reason="Sqlite dependencies missing")
+@pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
     db = SQLConnector(f"sqlite:{separator}{testing_file}")
@@ -179,8 +182,8 @@ def test_sqlite(testing_file, testing_context, context_id):
     generic_test(db, testing_context, context_id)
 
 
-@pytest.mark.skipif(MYSQL_ACTIVE == False, reason="Mysql server is not running")
-@pytest.mark.skipif(mysql_available == False, reason="Mysql dependencies missing")
+@pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
+@pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
 def test_mysql(testing_context, context_id):
     db = SQLConnector(
         "mysql+pymysql://{}:{}@localhost:3307/{}".format(
@@ -192,8 +195,8 @@ def test_mysql(testing_context, context_id):
     generic_test(db, testing_context, context_id)
 
 
-@pytest.mark.skipif(YDB_ACTIVE == False, reason="YQL server not running")
-@pytest.mark.skipif(ydb_available == False, reason="YDB dependencies missing")
+@pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
+@pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
 def test_ydb(testing_context, context_id):
     db = YDBConnector(
         "{}{}".format(

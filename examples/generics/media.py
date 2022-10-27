@@ -30,7 +30,9 @@ script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(text="here's my picture!", image=Image(source=pathlib.Path(__file__).parent / "kitten.jpg")),
+            RESPONSE: Response(
+                text="here's my picture!", image=Image(source=pathlib.Path(__file__).parent / "kitten.jpg")
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
