@@ -65,10 +65,11 @@ test: venv
 test_all: venv wait_db test lint
 .PHONY: test_all
 
-doc: venv
+doc: venv clean_docs
 	# sphinx-apidoc -e -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -b html  -W --keep-going docs/source docs/build
+	# sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
+	sphinx-build -b html -j 4 docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -89,13 +90,17 @@ version_major: venv
 
 
 
-clean:
+clean_docs:
+	rm -rf docs/build
+	rm -rf docs/examples
+	rm -rf docs/source/apiref
+	rm -rf docs/source/examples
+.PHONY: clean
+
+clean: clean_docs
 	rm -rf $(VENV_PATH)
 	rm -rf .pytest_cache
 	rm -rf *.egg-info
 	rm -rf htmlcov
 	rm -f .coverage
-	rm -rf docs/build
-	rm -rf docs/examples
-	rm -rf docs/source/apiref
 .PHONY: clean

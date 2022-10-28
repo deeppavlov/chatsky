@@ -41,7 +41,9 @@ doc = [
     "sphinx_copybutton>=0.5",
     "sphinx_gallery>=0.11.1",
     "sphinx-autodoc-typehints>=1.19.4",
-    "matplotlib<=3.5.3",
+    "nbsphinx",
+    "nbsphinx_link",
+    "jupytext"
 ]
 
 mypy_dependencies = [

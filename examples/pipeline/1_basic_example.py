@@ -1,10 +1,10 @@
+# %% [markdown]
 """
-Basic example
-=============
-
+# Basic Example
 The following example shows basic usage of `pipeline` module, as an extension to `dff.core.engine`
 """
 
+# %%
 import logging
 
 from dff.core.engine.core import Context
@@ -15,6 +15,7 @@ from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+# %% [markdown]
 """
 Pipeline is an object, that automates Actor execution and context management.
 `from_script` method can be used to create a pipeline of the most basic structure:
@@ -29,6 +30,7 @@ This call will return Context, its `last_response` property will be actors respo
 """
 
 
+# %%
 pipeline = Pipeline.from_script(
     SCRIPT,  # Actor script object, defined in `.utils` module.
     start_label=("greeting_flow", "start_node"),
@@ -36,6 +38,7 @@ pipeline = Pipeline.from_script(
 )
 
 
+# %%
 if __name__ == "__main__":
     if get_auto_arg():
         auto_run_pipeline(pipeline, logger=logger)
