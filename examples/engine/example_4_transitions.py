@@ -3,6 +3,9 @@
 ==============
 """
 
+# TODO:
+# 1. Maybe remove `lbl.to_fallback(): cnd.true(),` from script as a trivial condition?
+
 import logging
 import re
 
@@ -95,7 +98,7 @@ script = {
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE), lbl.to_fallback(): cnd.true()},
         },
         "node2": {
-            RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
+            RESPONSE: "System of a Down is an Armenian-American heavy metal band formed in 1994.",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
@@ -135,10 +138,10 @@ testing_dialog = [
     ("hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("talk about music.", "I love `System of a Down` group, would you like to tell about it? "),
-    ("yes", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("yes", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
-    ("back", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
-    ("repeat", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("back", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
+    ("repeat", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
     ("next", "That's all what I know"),
     ("next", "Good. What do you want to talk about?"),

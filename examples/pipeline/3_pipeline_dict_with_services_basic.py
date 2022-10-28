@@ -10,14 +10,15 @@ import logging
 from dff.core.engine.core import Actor
 
 from dff.core.pipeline import Service, Pipeline
-from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 """
 When Pipeline is created using `from_dict` method, pipeline should be defined as dictionary.
-It should contain `services` - a ServiceGroupBuilder object, basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4.
+It should contain `services` - a ServiceGroupBuilder object,
+basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4.
 
 On pipeline execution services from `services` list are run without difference between pre- and postprocessors.
 Actor instance should also be present among services.
@@ -39,15 +40,15 @@ actor = Actor(
 
 
 def prepreprocess(_):
-    logger.info(f"preprocession intent-detection Service running (defined as a dict)")
+    logger.info("preprocession intent-detection Service running (defined as a dict)")
 
 
 def preprocess(_):
-    logger.info(f"another preprocession web-based annotator Service (defined as a callable)")
+    logger.info("another preprocession web-based annotator Service (defined as a callable)")
 
 
 def postprocess(_):
-    logger.info(f"postprocession Service (defined as an object)")
+    logger.info("postprocession Service (defined as an object)")
 
 
 pipeline_dict = {
