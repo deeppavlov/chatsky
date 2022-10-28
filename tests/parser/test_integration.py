@@ -57,14 +57,8 @@ py2yaml_params = [
             current_dir / "test_py2yaml" / "complex_tests" / f"test_{test_number}" / "yaml_files" / "script.yaml",
             exception,
         )
-        for test_number, exception in zip(range(1, 3), [None, None])
+        for test_number, exception in zip(range(1, 4), [None, None, None])
     ],
-    (
-        current_dir / "examples" / "example_py2yaml" / "python_files",
-        current_dir / "examples" / "example_py2yaml" / "python_files" / "main.py",
-        current_dir / "examples" / "example_py2yaml" / "yaml_files" / "script.yaml",
-        None,
-    ),
 ]
 
 
@@ -118,13 +112,8 @@ yaml2py_params = [
             current_dir / "test_yaml2py" / "complex_tests" / f"test_{test_number}" / "python_files",
             exception,
         )
-        for test_number, exception in zip(range(1, 3), [None, None])
+        for test_number, exception in zip(range(1, 4), [None, None, None])
     ],
-    (
-        current_dir / "examples" / "example_yaml2py" / "yaml_files" / "script.yaml",
-        current_dir / "examples" / "example_yaml2py" / "python_files",
-        None
-    ),
 ]
 
 
@@ -166,36 +155,6 @@ def test_yaml2py(script, output_dir, exception, tmp_path):
 
 
 py2graph_params = [
-    # *[
-    #     (
-    #         Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/python_files"),
-    #         Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/python_files/main.py"),
-    #         Path(f"tests/test_py2yaml/simple_tests/test_{test_number}/yaml_files/script.yaml"),
-    #         exception,
-    #     )
-    #     for test_number, exception in zip(
-    #         range(1, 18),
-    #         [
-    #             None,
-    #             ScriptValidationError,
-    #             ScriptValidationError,
-    #             ScriptValidationError,
-    #             ScriptValidationError,
-    #             ScriptValidationError,
-    #             ScriptValidationError,
-    #             None,
-    #             None,
-    #             None,
-    #             None,
-    #             ScriptValidationError,
-    #             None,
-    #             None,
-    #             ScriptValidationError,
-    #             None,
-    #             None,
-    #         ],
-    #     )
-    # ],
     *[
         (
             current_dir / "test_py2graph" / "complex_tests" / f"test_{test_number}" / "python_files",
@@ -203,14 +162,8 @@ py2graph_params = [
             current_dir / "test_py2graph" / "complex_tests" / f"test_{test_number}" / "graph_files",
             exception,
         )
-        for test_number, exception in zip(range(1, 2), [None])
+        for test_number, exception in zip(range(1, 3), [None, None])
     ],
-    (
-        current_dir / "examples" / "example_py2graph" / "python_files",
-        current_dir / "examples" / "example_py2graph" / "python_files" / "main.py",
-        current_dir / "examples" / "example_py2graph" / "graph_files",
-        None,
-    ),
 ]
 
 
@@ -244,36 +197,14 @@ def test_py2graph(project_root_dir, main_file, output, exception, tmp_path):
 
 
 graph2py_params = [
-    # *[
-    #     (
-    #         Path(f"tests/test_yaml2py/simple_tests/test_{test_number}/yaml_files/script.yaml"),
-    #         Path(f"tests/test_yaml2py/simple_tests/test_{test_number}/python_files"),
-    #         exception,
-    #     )
-    #     for test_number, exception in zip(
-    #         range(1, 6),
-    #         [
-    #             None,
-    #             None,
-    #             None,
-    #             None,
-    #             None,
-    #         ],
-    #     )
-    # ],
-    # *[
-    #     (
-    #         Path(f"tests/test_yaml2py/complex_tests/test_{test_number}/yaml_files/script.yaml"),
-    #         Path(f"tests/test_yaml2py/complex_tests/test_{test_number}/python_files"),
-    #         exception,
-    #     )
-    #     for test_number, exception in zip(range(1, 3), [None, None])
-    # ],
-    (
-        current_dir / "examples" / "example_graph2py" / "graph_files" / "graph.json",
-        current_dir / "examples" / "example_graph2py" / "python_files",
-        None
-    ),
+    *[
+        (
+            current_dir / "test_graph2py" / "complex_tests" / f"test_{test_number}" / "graph_files" / "graph.json",
+            current_dir / "test_graph2py" / "complex_tests" / f"test_{test_number}" / "python_files",
+            exception,
+        )
+        for test_number, exception in zip(range(1, 2), [None])
+    ],
 ]
 
 
