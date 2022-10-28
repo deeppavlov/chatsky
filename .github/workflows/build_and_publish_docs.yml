@@ -16,7 +16,7 @@ jobs:
 
       - name: install dependencies
         run: |
-            apt install pandoc
+            sudo apt install pandoc
             make venv
 
       - name: build documentation
