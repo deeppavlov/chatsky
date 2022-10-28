@@ -48,8 +48,7 @@ def should_auto_execute() -> bool:
     try:
         from IPython import get_ipython
         shell = get_ipython().__class__.__name__
-        if shell == 'ZMQInteractiveShell':
-            return True
+        return shell == 'ZMQInteractiveShell'
     finally:
         return "-a" in sys.argv[1:]
 
