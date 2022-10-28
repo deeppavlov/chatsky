@@ -20,7 +20,7 @@ from dff.core.pipeline import (
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
 )
-from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -109,7 +109,7 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER, after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, after_all)
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if should_auto_execute():
         auto_run_pipeline(pipeline, logger=logger)
     else:
         pipeline.run()

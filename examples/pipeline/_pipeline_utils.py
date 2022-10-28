@@ -44,14 +44,12 @@ TURNS = (
 )
 
 
-def get_auto_arg() -> bool:
+def should_auto_execute() -> bool:
     try:
         shell = get_ipython().__class__.__name__
         if shell == 'ZMQInteractiveShell':
             return True
-        else:
-            return False
-    except NameError:
+    finally:
         return "-a" in sys.argv[1:]
 
 

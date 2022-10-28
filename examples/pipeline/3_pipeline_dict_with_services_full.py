@@ -11,7 +11,7 @@ import urllib.request
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import CLIMessengerInterface, Service, Pipeline, ServiceRuntimeInfo
-from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -106,7 +106,7 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if should_auto_execute():
         auto_run_pipeline(pipeline, logger=logger)
     else:
         pipeline.run()
