@@ -115,6 +115,8 @@ full = merge_req_lists(
         mysql_dependencies,
         postgresql_dependencies,
         ydb_dependencies,
+        parser_dependencies,
+        graph_dependencies,
     ]
 )
 
@@ -130,7 +132,7 @@ devel_full = merge_req_lists(
         tests_full,
         doc,
         devel,
-        mypy_dependencies,
+        codestyle_dependencies,
     ]
 )
 
