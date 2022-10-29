@@ -45,12 +45,12 @@ TURNS = (
 
 
 def should_auto_execute() -> bool:
+    shell = None
     try:
         from IPython import get_ipython
         shell = get_ipython().__class__.__name__
-        return shell == 'ZMQInteractiveShell'
     finally:
-        return "-a" in sys.argv[1:]
+        return shell == "ZMQInteractiveShell" or "-a" in sys.argv[1:]
 
 
 class ConsoleFormatter(logging.Formatter):
