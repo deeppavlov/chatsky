@@ -8,4 +8,4 @@ Gallery of examples
     :glob:
     :reversed:
 
-    examples/pipeline/1_basic_example
+    examples/index
