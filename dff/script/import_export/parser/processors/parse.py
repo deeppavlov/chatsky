@@ -90,7 +90,7 @@ class Parser(m.MatcherDecoratableTransformer):
         :return:
         """
         func_name = repr_libcst_node(cst.ensure_type(original_node.value, cst.Call).func)
-        self.node_processor.parse_tuples = True
+        self.node_processor.parse_tuples = False
 
         if self.namespace.get_absolute_name(func_name) in ["dff.core.engine.core.actor.Actor", "dff.core.engine.core.Actor"]:
             args = {}
@@ -98,6 +98,7 @@ class Parser(m.MatcherDecoratableTransformer):
             for arg, keyword in zip(cst.ensure_type(original_node.value, cst.Call).args, actor_arg_order):
                 if arg.keyword is not None:
                     keyword = repr_libcst_node(arg.keyword)
+                self.node_processor.parse_tuples = keyword.endswith("label")
                 args[keyword] = self.node_processor(arg.value)
                 logging.info("Found actor call arg %s = %s", keyword, args[keyword])
             self.add_assignment(self.namespace.add_function_call, original_node, func_name, args, True)

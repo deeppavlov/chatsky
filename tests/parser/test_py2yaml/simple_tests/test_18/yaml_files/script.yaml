@@ -1,0 +1,22 @@
+namespaces:
+  main:
+    act: !from dff.core.engine.core Actor
+    kw: !import dff.core.engine.core.keywords
+    cnd: !import dff.core.engine.conditions
+    actor: !call
+      name: act
+      args:
+        script:
+          flow1:
+            node:
+              kw.RESPONSE: hey
+              kw.TRANSITIONS:
+                ("flow2", "node"): cnd.true()
+          flow2:
+            node:
+              kw.RESPONSE: hi
+              kw.TRANSITIONS:
+                ("flow1", "node"): cnd.true()
+        start_label:
+        - flow1
+        - node

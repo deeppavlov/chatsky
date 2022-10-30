@@ -28,7 +28,7 @@ py2yaml_params = [
             exception,
         )
         for test_number, exception in zip(
-            range(1, 18),
+            range(1, 19),
             [
                 None,
                 ScriptValidationError,
@@ -45,6 +45,7 @@ py2yaml_params = [
                 None,
                 None,
                 ScriptValidationError,
+                None,
                 None,
                 None,
             ],
