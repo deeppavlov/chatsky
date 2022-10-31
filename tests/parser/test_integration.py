@@ -4,6 +4,7 @@ from pathlib import Path
 from filecmp import dircmp
 from copy import copy
 from itertools import product
+from typing import List
 
 import pytest
 
@@ -19,12 +20,19 @@ current_dir = Path(__file__).parent
 
 
 def assert_dirs_equal(dir1: Path, dir2: Path):
+    subdir_stack: List[str] = []
+
     def _assert_dir_eq(dir_cmp: dircmp):
         assert len(dir_cmp.left_only) == 0
         assert len(dir_cmp.right_only) == 0
-        assert len(dir_cmp.diff_files) == 0
-        for subdir in dir_cmp.subdirs.values():
+        for diff_file in dir_cmp.diff_files:
+            with open(dir1.joinpath(*subdir_stack, diff_file), "r") as first,\
+                    open(dir2.joinpath(*subdir_stack, diff_file), "r") as second:
+                assert list(first.readlines()) == list(second.readlines())
+        for name, subdir in dir_cmp.subdirs.items():
+            subdir_stack.append(name)
             _assert_dir_eq(subdir)
+            subdir_stack.pop()
 
     _assert_dir_eq(dircmp(dir1, dir2))
 
@@ -92,7 +100,7 @@ def test_py2yaml(project_root_dir, main_file, output_dir, exception, nx_availabl
 
     def _test_py2yaml():
         py2yaml_cli()
-        assert_dirs_equal(tmp_path, output_dir)
+        assert_dirs_equal(output_dir, tmp_path)
 
     monkeypatch.setitem(dff.script.import_export.parser.dependencies, "graph", nx_available)
     if exception:
