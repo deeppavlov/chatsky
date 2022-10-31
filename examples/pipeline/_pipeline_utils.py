@@ -88,7 +88,7 @@ def auto_run_pipeline(
             msg = f" pipeline={pipeline}"
             msg += f" turn_id={turn_id}"
             msg += f" request={request} "
-            msg += f"\ntrue_response != out_response: "
+            msg += "\ntrue_response != out_response: "
             msg += f"\n{true_response} != {ctx.last_response}"
             raise Exception(msg)
         if logger is not None:

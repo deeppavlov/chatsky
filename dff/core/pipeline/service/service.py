@@ -40,7 +40,7 @@ class Service(PipelineComponent):
         handler: ServiceBuilder,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[int] = None,
+        timeout: Optional[float] = None,
         asynchronous: Optional[bool] = None,
         start_condition: Optional[StartConditionCheckerFunction] = None,
         name: Optional[str] = None,
