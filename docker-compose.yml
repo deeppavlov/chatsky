@@ -21,7 +21,7 @@ services:
       - 6379:6379
   mongo:
     env_file: [.env_file]
-    image: mongo:6.0.1
+    image: mongo:latest
     restart: unless-stopped
     ports:
       - 27017:27017

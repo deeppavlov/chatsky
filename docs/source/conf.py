@@ -51,7 +51,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
     "nbsphinx",
-    "sphinx_gallery.load_style"
+    "sphinx_gallery.load_style",
 ]
 
 suppress_warnings = ["image.nonlocal_uri"]
@@ -90,9 +90,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {
-    '.py': lambda s: jupytext.reads(s, 'py:percent')
-}
+nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
 
 
 # Theme options

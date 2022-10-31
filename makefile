@@ -26,27 +26,27 @@ venv:
 	@echo "Start creating virtual environment"
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
-	pip install -e .[devel_full] --use-pep517
+	pip install -e .[devel_full]
 
 venv_test:
 	@echo "Start creating virtual environment (test)"
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
-	pip install -e .[test_full] --use-pep517
+	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 dff/
+	black --line-length=120 . --exclude venv,build
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 dff/
-	@set -e && black --line-length=120 --check dff/ || ( \
+	flake8 --max-line-length 120 . --exclude venv,build
+	@set -e && black --line-length=120 --check . --exclude venv,build|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	# @mypy dff/
+	# @mypy . --exclude venv,build
 .PHONY: lint
 
 docker_up:
@@ -86,8 +86,6 @@ version_minor: venv
 version_major: venv
 	bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
-
-
 
 clean_docs:
 	rm -rf docs/build

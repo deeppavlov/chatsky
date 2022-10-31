@@ -34,7 +34,11 @@ def process_dir(path: Path, exclude: List[str]) -> List[str]:
     for entity in path.glob("./*"):
         doc_path = Path(f"docs/source/examples") / entity.relative_to("examples/")
         if not entity.name.startswith("__"):
-            if entity.is_file() and entity.suffix in (".py", ".ipynb") and any(fnmatch(str(entity.relative_to(".")), ex) for ex in exclude):
+            if (
+                entity.is_file()
+                and entity.suffix in (".py", ".ipynb")
+                and any(fnmatch(str(entity.relative_to(".")), ex) for ex in exclude)
+            ):
                 if not entity.name.startswith("_"):
                     includes.append(doc_path.name)
                 create_nblink(doc_path, entity)
