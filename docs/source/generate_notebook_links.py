@@ -32,7 +32,7 @@ def process_dir(path: Path, exclude: List[str]) -> List[str]:
         raise Exception(f"Entity {path} appeared to be a file during processing!")
     includes = list()
     for entity in path.glob("./*"):
-        doc_path = Path(f"docs/source/examples") / entity.relative_to("examples/")
+        doc_path = Path("docs/source/examples") / entity.relative_to("examples/")
         if not entity.name.startswith("__"):
             if (
                 entity.is_file()
@@ -46,7 +46,7 @@ def process_dir(path: Path, exclude: List[str]) -> List[str]:
                 if len(process_dir(entity, exclude)) > 0:
                     includes.append(f"{doc_path.name}/index")
     if len(includes) > 0:
-        create_index(Path(f"docs/source/examples") / path.relative_to("examples/") / Path("index.rst"), includes)
+        create_index(Path("docs/source/examples") / path.relative_to("examples/") / Path("index.rst"), includes)
     return includes
 
 

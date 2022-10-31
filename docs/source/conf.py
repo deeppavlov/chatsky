@@ -19,7 +19,7 @@ from jupytext import jupytext
 # sys.path.insert(0, os.path.abspath('.'))
 
 sys.path.append(os.path.abspath("."))
-from generate_notebook_links import generate_links
+from generate_notebook_links import generate_links  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
