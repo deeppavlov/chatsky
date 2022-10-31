@@ -51,7 +51,6 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
     "nbsphinx",
-    "nbsphinx_link",
     "sphinx_gallery.load_style"
 ]
 
