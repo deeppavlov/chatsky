@@ -25,7 +25,7 @@ from dff.core.engine.core import Context
 from dff.connectors.db import DBConnector
 import tests.utils as utils
 
-dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 db_connector_utils = importlib.import_module(f"examples.{dot_path_to_addon}._db_connector_utils")
 
 

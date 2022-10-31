@@ -1,10 +1,14 @@
 import importlib
+import os
+import sys
 
 import pytest
 
 import tests.utils as utils
 
-dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
+sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
+
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipeline_utils")
 
 
