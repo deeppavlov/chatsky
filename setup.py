@@ -42,7 +42,6 @@ doc = [
     "sphinx_gallery>=0.11.1",
     "sphinx-autodoc-typehints>=1.19.4",
     "nbsphinx>=0.8.9",
-    "nbsphinx_link>=1.3.0",
     "jupytext>=1.14.1",
     "jupyter>=1.0.0"
 ]

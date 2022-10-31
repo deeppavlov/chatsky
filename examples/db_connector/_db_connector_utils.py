@@ -62,7 +62,7 @@ def run_actor(
     db: DBConnector,
     logger: logging.Logger,
     user_id: str,
-    true_out_response: Optional[str] = None
+    true_out_response: Optional[str] = None,
 ):
     if logger is not None:
         handler = logging.StreamHandler(sys.stdout)
@@ -93,7 +93,7 @@ def run_auto_mode(
     actor: Actor,
     db_connector: DBConnector,
     logger: Optional[logging.Logger] = None,
-    user_id=str(random.randint(0, 100))
+    user_id=str(random.randint(0, 100)),
 ):
     for in_request, true_out_response in testing_dialog:
         _, ctx = run_actor(in_request, actor, db_connector, logger, user_id, true_out_response)
@@ -103,9 +103,8 @@ def run_interactive_mode(
     actor: Actor,
     db_connector: DBConnector,
     logger: Optional[logging.Logger] = None,
-    user_id=str(random.randint(0, 100))
+    user_id=str(random.randint(0, 100)),
 ):
     while True:
         in_request = input(">>> ")
         _, ctx = run_actor(in_request, actor, db_connector, logger, user_id, None)
-
