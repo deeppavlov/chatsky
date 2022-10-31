@@ -66,7 +66,7 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv
-	# sphinx-apidoc -e -f -o docs/source/apiref dff
+	sphinx-apidoc -e -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
 	sphinx-build -b html  -W --keep-going docs/source docs/build
 .PHONY: doc
