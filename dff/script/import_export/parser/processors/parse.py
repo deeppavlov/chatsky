@@ -92,7 +92,10 @@ class Parser(m.MatcherDecoratableTransformer):
         func_name = repr_libcst_node(cst.ensure_type(original_node.value, cst.Call).func)
         self.node_processor.parse_tuples = False
 
-        if self.namespace.get_absolute_name(func_name) in ["dff.core.engine.core.actor.Actor", "dff.core.engine.core.Actor"]:
+        if self.namespace.get_absolute_name(func_name) in [
+            "dff.core.engine.core.actor.Actor",
+            "dff.core.engine.core.Actor",
+        ]:
             args = {}
             actor_arg_order = Actor.__init__.__wrapped__.__code__.co_varnames[1:]  # pylint: disable=no-member
             for arg, keyword in zip(cst.ensure_type(original_node.value, cst.Call).args, actor_arg_order):

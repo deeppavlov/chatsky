@@ -268,8 +268,7 @@ class RecursiveParser:
                 # check label size
                 if not (
                     (len(resolved_label) == 2 and resolved_label[0] not in keywords_dict["GLOBAL"])
-                    or
-                    (len(resolved_label) == 1 and resolved_label[0] in keywords_dict["GLOBAL"])
+                    or (len(resolved_label) == 1 and resolved_label[0] in keywords_dict["GLOBAL"])
                 ):
                     raise ScriptValidationError(f"Wrong label size: {resolved_label}")
 
@@ -375,7 +374,7 @@ class RecursiveParser:
             "namespaces": {k: v.names if v else {} for k, v in self.namespaces.items() if k not in self.unprocessed},
         }
 
-    def to_graph(self) -> 'nx.MultiDiGraph':
+    def to_graph(self) -> "nx.MultiDiGraph":
         if not dependencies["graph"]:
             raise ImportError("Module `networkx` is missing. Install it with `pip install dff[graph]`")
         if self.graph is None:

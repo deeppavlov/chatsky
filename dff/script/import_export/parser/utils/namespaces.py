@@ -149,10 +149,9 @@ class Request:
     :type node: :py:class:`libcst.CSTNode`
     :param get_absolute_attributes: :py:meth:`Namespace.get_absolute_name_list`
         that is used to get an absolute location of an object
-    :type get_absolute_attributes: Callable[[list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]],
-        list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]], optional
+    :type get_absolute_attributes: Callable[[list[:py:class:`.Python`]], list[:py:class:`.Python`]], optional
 
-    :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
+    :raise :py:exc:`.RequestParsingError`:
         If a node cannot be represented as a request
     """
 
@@ -240,10 +239,9 @@ class Request:
         :type request: str
         :param get_absolute_attributes: :py:meth:`Namespace.get_absolute_name_list`
             that is used to get an absolute location of an object
-        :type get_absolute_attributes: Callable[[list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]],
-            list[:py:class:`dff.script.import_export.parser.utils.code_wrappers.Python`]], optional
+        :type get_absolute_attributes: Callable[[list[:py:class:`.Python`]], list[:py:class:`.Python`]], optional
 
-        :raise :py:exc:`dff.script.import_export.parser.utils.exceptions.RequestParsingError`:
+        :raise :py:exc:`.RequestParsingError`:
             If a string cannot be represented as a request
 
         :return: Instance of :py:class:`Request` class
@@ -271,8 +269,9 @@ class Namespace:
     :param import_module_hook: Function that is being called when an import is added to the namespace, defaults to None
     :type import_module_hook:
         Callable[[:py:class:`.ModuleType`, str], None] | None, optional
-    :param actor_args_check: Function that is being called when an instance of :py:class:`dff.core.engine.core.actor.Actor` is
-        created, defaults to None
+    :param actor_args_check:
+        Function that is being called when an instance of :py:class:`dff.core.engine.core.actor.Actor` is created,
+        defaults to None
     :type actor_args_check:
         Callable[[dict], None] | None, optional
     """
@@ -406,7 +405,8 @@ class Namespace:
         :param args: Dictionary of arguments of the call
         :type args: dict
         :param check_args:
-            Whether to check args for correctness if the function being called is :py:class:`dff.core.engine.core.Actor`,
+            Whether to check args for correctness
+            if the function being called is :py:class:`dff.core.engine.core.Actor`,
             defaults to False
         :type check_args: bool
         :return:

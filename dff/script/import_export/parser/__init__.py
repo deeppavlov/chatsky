@@ -7,15 +7,16 @@ try:
     import pyflakes  # type: ignore  # noqa: F401
     import black  # noqa: F401
 except ImportError:
-    raise ImportError("Some packages required for `dff.script.import_export.parser` are not found.\n"
-                      "Install them with `pip install dff[parser]`")
+    raise ImportError(
+        "Some packages required for `dff.script.import_export.parser` are not found.\n"
+        "Install them with `pip install dff[parser]`"
+    )
 
-dependencies = {
-    "graph": False
-}
+dependencies = {"graph": False}
 
 try:
     import networkx  # type: ignore  # noqa: F401
+
     dependencies["graph"] = True
 except ImportError:
     pass
