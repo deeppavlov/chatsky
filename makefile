@@ -35,18 +35,18 @@ venv_test:
 	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 . --exclude venv,build
+	black --line-length=120 dff
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 . --exclude venv,build
-	@set -e && black --line-length=120 --check . --exclude venv,build|| ( \
+	flake8 --max-line-length 120 dff
+	@set -e && black --line-length=120 --check dff|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	# @mypy . --exclude venv,build
+	# @mypy dff
 .PHONY: lint
 
 docker_up:
