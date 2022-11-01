@@ -20,7 +20,7 @@ It is a preferred practice to define them as asynchronous.
 Before you use the said functions, you should create an `ExtractorPool` 
 or import a ready one as a first step.
 
-Then, you should define the wrappers and add them to some pool, using the `new_extractor` method.
+Then, you should define the handlers and add them to some pool, using the `new_extractor` method.
 The latter can be called by decorating the function (see below).
 
 Finally, one should also create a `StatsStorage`, which compresses data into batches
@@ -50,7 +50,7 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return StatsRecord.from_context(ctx, info, data)
 
 
-@to_service(after_wrapper=[get_service_state]) # set get_service_state to rubn it after the `heavy_service`
+@to_service(after_handler=[get_service_state]) # set get_service_state to rubn it after the `heavy_service`
 async def heavy_service(ctx: Context, actor: Actor):
     _ = ctx # get something from ctx if it needs
     _ = actor # get something from actor if it needs
@@ -63,7 +63,7 @@ pipeline = Pipeline.from_dict(
     {
         "components": [
             Service(handler=heavy_service),
-            Service(handler=to_service(after_wrapper=[get_service_state])(actor)),
+            Service(handler=to_service(after_handler=[get_service_state])(actor)),
         ]
     }
 )

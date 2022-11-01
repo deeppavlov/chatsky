@@ -6,7 +6,7 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalWrapperType, to_service
+from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType, to_service
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool
 
 from _utils import parse_args, script
@@ -34,7 +34,7 @@ pipeline_dict = {
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
-pipeline.add_global_wrapper(GlobalWrapperType.AFTER_ALL, get_pipeline_state)
+pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
     args = parse_args()

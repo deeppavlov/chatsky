@@ -81,7 +81,7 @@ class Pipeline:
         They can be used for pipeline statistics collection or other functionality extensions.
         NB! Global wrappers are still wrappers,
             they shouldn't be used for much time-consuming tasks (see ../service/wrapper.py).
-        :global_wrapper_type: (required) - GlobalWrapperType indication where the wrapper function should be executed.
+        :global_wrapper_type: (required) - GlobalExtraHandlerType indication where the wrapper function should be executed.
         :wrapper: (required) - wrapper function itself.
         :whitelist: - a list of services to only add this wrapper to.
         :blacklist: - a list of services to not add this wrapper to.

@@ -32,8 +32,8 @@ pipeline = Pipeline.from_dict(
     {
         "components": [
             ServiceGroup(
-                before_wrapper=[default_extractor_pool["extract_timing_before"]],
-                after_wrapper=[default_extractor_pool["extract_timing_after"], get_group_stats],
+                before_handler=[default_extractor_pool["extract_timing_before"]],
+                after_handler=[default_extractor_pool["extract_timing_after"], get_group_stats],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
             actor,

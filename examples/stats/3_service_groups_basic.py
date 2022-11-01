@@ -11,9 +11,9 @@ from dff.stats import StatsStorage, StatsRecord, ExtractorPool
 from _utils import parse_args, script
 
 """
-Wrappers can be applied to any pipeline parameter, including service groups.
-The `ServiceGroup` constructor has `before_wrapper` and `after_wrapper` parameters, 
-to which wrapper functions can be passed.
+handlers can be applied to any pipeline parameter, including service groups.
+The `ServiceGroup` constructor has `before_handler` and `after_handler` parameters, 
+to which handler functions can be passed.
 
 """
 
@@ -37,7 +37,7 @@ pipeline = Pipeline.from_dict(
     {
         "components": [
             ServiceGroup(
-                after_wrapper=[get_group_stats],
+                after_handler=[get_group_stats],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
             actor,

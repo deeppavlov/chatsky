@@ -11,12 +11,12 @@ from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extracto
 from _utils import parse_args, script
 
 """
-As is the case with the regular wrappers, you can add extractors both before and after the
-target service. You can use a wrapper that runs before the service to compare the pre-service and post-service
+As is the case with the regular handlers, you can add extractors both before and after the
+target service. You can use a handler that runs before the service to compare the pre-service and post-service
 states of the context, measure the running time, etc. 
-An example of such wrapper can be found in the default extractor pool.
+An example of such handler can be found in the default extractor pool.
 
-Pass before- and after-wrappers to the respective parameters of the `to_service` decorator.
+Pass before- and after-handlers to the respective parameters of the `to_service` decorator.
 
 As for using multiple pools, you can subscribe your storage to any number of pools.
 
@@ -38,8 +38,8 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 # run extract_timing_before before `heavy_service`
 # run get_service_state and extract_timing_after after `heavy_service`
 @to_service(
-    before_wrapper=[default_extractor_pool["extract_timing_before"]],
-    after_wrapper=[get_service_state, default_extractor_pool["extract_timing_after"]],
+    before_handler=[default_extractor_pool["extract_timing_before"]],
+    after_handler=[get_service_state, default_extractor_pool["extract_timing_after"]],
 ) 
 async def heavy_service(ctx: Context, actor: Actor):
     _ = ctx # get something from ctx if it needs
@@ -55,8 +55,8 @@ pipeline = Pipeline.from_dict(
             Service(handler=heavy_service), # add `heavy_service` before the actor
             Service(
                 handler=to_service(
-                    before_wrapper=[default_extractor_pool["extract_timing_before"]],
-                    after_wrapper=[get_service_state, default_extractor_pool["extract_timing_after"]],
+                    before_handler=[default_extractor_pool["extract_timing_before"]],
+                    after_handler=[get_service_state, default_extractor_pool["extract_timing_after"]],
                 )(actor) # wrap and add the actor
             ),
         ]

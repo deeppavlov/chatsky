@@ -6,16 +6,16 @@ from pathlib import Path
 sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalWrapperType
+from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
 
 from _utils import parse_args, script
 
 """
-Like with regular wrappers, you can define global statistic wrappers, 
+Like with regular handlers, you can define global statistic handlers, 
 which will be applied to every element inside the pipeline.
 
-Use the `add_global_wrapper` method.
+Use the `add_global_handler` method.
 """
 
 
@@ -42,9 +42,9 @@ pipeline_dict = {
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
-pipeline.add_global_wrapper(GlobalWrapperType.BEFORE_ALL, default_extractor_pool["extract_timing_before"])
-pipeline.add_global_wrapper(GlobalWrapperType.AFTER_ALL, default_extractor_pool["extract_timing_after"])
-pipeline.add_global_wrapper(GlobalWrapperType.AFTER_ALL, get_pipeline_state)
+pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, default_extractor_pool["extract_timing_before"])
+pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, default_extractor_pool["extract_timing_after"])
+pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
     args = parse_args()
