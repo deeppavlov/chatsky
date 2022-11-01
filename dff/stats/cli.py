@@ -13,8 +13,8 @@ from omegaconf import OmegaConf
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-MODULE_DIR = Path(__file__).absolute().parent.parent
-DASHBOARD_DIR = str(MODULE_DIR / "superset_dashboard")
+DFF_DIR = Path(__file__).absolute().parent.parent
+DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 
 TYPE_MAPPING_CH = {
     "FLOAT": "Nullable(Float64)",
