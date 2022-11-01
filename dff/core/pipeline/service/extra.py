@@ -31,7 +31,7 @@ class _ComponentExtraHandler:
         self,
         functions: ExtraHandlerBuilder,
         stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED,
-        timeout: Optional[int] = None,
+        timeout: Optional[float] = None,
         asynchronous: Optional[bool] = None,
     ):
         overridden_parameters = collect_defined_constructor_parameters_to_dict(

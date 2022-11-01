@@ -44,8 +44,8 @@ Synchronous services should be expelled from (mostly) asynchronous groups.
 
 Here service group `balanced_group` can be asynchronous, however it is requested to be synchronous,
     so its services are executed consequently.
-Service group `service_group_0` is asynchronous, it doesn't run out of timeout of 2 seconds,
-    however contains 6 time consuming services, each of them sleeps for a second.
+Service group `service_group_0` is asynchronous, it doesn't run out of timeout of 0.02 seconds,
+    however contains 6 time consuming services, each of them sleeps for 0.01 of a second.
 Service group `service_group_1` is also asynchronous, it logs HTTPS requests (from 1 to 15),
     running simultaneously, in random order.
 Service group `pipeline` can't be asynchronous because `balanced_group` and actor are synchronous.
@@ -64,7 +64,7 @@ async def simple_asynchronous_service(_, __, info: ServiceRuntimeInfo):
 
 
 async def time_consuming_service(_):
-    await asyncio.sleep(1)
+    await asyncio.sleep(0.01)
 
 
 def meta_web_querying_service(photo_number: int):  # This function returns services, a service factory
@@ -93,7 +93,7 @@ pipeline_dict = {
             asynchronous=False,
             components=[
                 simple_asynchronous_service,
-                ServiceGroup(timeout=2, components=[time_consuming_service for _ in range(0, 6)]),
+                ServiceGroup(timeout=0.02, components=[time_consuming_service for _ in range(0, 6)]),
                 simple_asynchronous_service,
             ],
         ),

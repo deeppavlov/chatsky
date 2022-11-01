@@ -46,7 +46,7 @@ class Pipeline:
         context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[int] = None,
+        timeout: Optional[float] = None,
         optimization_warnings: bool = False,
     ):
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
