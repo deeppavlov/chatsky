@@ -1,6 +1,7 @@
 import os # TODO: unused
 from uuid import uuid4
 from random import choice
+import os
 
 import pytest
 from dff.stats import make_saver, StatsRecord
@@ -47,9 +48,17 @@ def table():
 
 @pytest.fixture(scope="session")
 def PG_uri_string():
-    return "postgresql://{}:{}@localhost:5432/{}".format("root", "qwerty", "test")
+    return "postgresql://{}:{}@localhost:5432/{}".format(
+        os.getenv("POSTGRES_USERNAME"),
+        os.getenv("POSTGRES_PASSWORD"),
+        os.getenv("POSTGRES_DB"),
+    )
 
 
 @pytest.fixture(scope="session")
 def CH_uri_string():
-    return "clickhouse://{}:{}@localhost:8123/{}".format("root", "qwerty", "test")
+    return "clickhouse://{}:{}@localhost:8123/{}".format(
+        os.getenv("CLICKHOUSE_USER"),
+        os.getenv("CLICKHOUSE_PASSWORD"),
+        os.getenv("CLICKHOUSE_DB"),
+    )
