@@ -12,7 +12,7 @@ from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg
+from _pipeline_utils import SCRIPT, should_auto_execute
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -22,22 +22,22 @@ Messenger interfaces are used for providing a way for communication between user
 They manage message channel initialization and termination as well as pipeline execution on every user request.
 There are two built-in messenger interface types (that may be overridden):
     `PollingMessengerInterface` - starts polling for user request in a loop upon initialization,
-                                  it has following methods:
+                it has following methods:
         `_request()` - method that is executed in a loop, should return list of tuples: (user request, unique dialog id)
         `_respond(responses)` - method that is executed in a loop after all user requests processing,
-                                accepts list of dialog Contexts
+                    accepts list of dialog Contexts
         `_on_exception(e)` - method that is called on exception that happens in the loop,
-                             should catch the exception (it is also called on pipeline termination)
+                    should catch the exception (it is also called on pipeline termination)
         `connect(pipeline_runner, loop, timeout)` - method that is called on connection to message channel,
-                                                    accepts pipeline_runner (a callback, running pipeline)
+                    accepts pipeline_runner (a callback, running pipeline)
             loop - a function to be called on each loop execution (should return True to continue polling)
             timeout - time in seconds to wait between loop executions
     `CallbackMessengerInterface` - creates message channel and provides a callback for pipeline execution,
-                                   it has following methods:
+                it has following methods:
         `on_request(request, ctx_id)` - method that should be called each time user provides new input to pipeline,
-                                        returns dialog Context
-`CLIMessengerInterface` is also a messenger interface that overrides `PollingMessengerInterface` and
-    provides default message channel between pipeline and console/file IO
+                    returns dialog Context
+`CLIMessengerInterface` is also a messenger interface that overrides `PollingMessengerInterface`
+            and provides default message channel between pipeline and console/file IO
 
 Here a default `CallbackMessengerInterface` is used to setup communication between pipeline and Flask server.
 Two services are used to process request:
@@ -70,8 +70,9 @@ def construct_webpage_by_response(response: str) -> str:
             </style>
         </head>
         <body>
-        <p><b>{response}</b></p>
-        <img src="https://source.unsplash.com/random?{response}" alt="Response picture" style="width:50%;height:50%;">
+            <p><b>{response}</b></p>
+            <img src="https://source.unsplash.com/random?{response}"
+                        alt="Response picture" style="width:50%;height:50%;">
         </body>
     </html>
     """
@@ -117,7 +118,7 @@ async def route():
 
 pipeline = Pipeline(**pipeline_dict)
 
-if __name__ == "__main__" and not get_auto_arg():
+if __name__ == "__main__" and not should_auto_execute():
     pipeline.run()
     app.run()
     # Navigate to http://127.0.0.1:5000/pipeline_web_interface?request={REQUEST} to receive response

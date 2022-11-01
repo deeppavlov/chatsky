@@ -1,9 +1,13 @@
 import importlib
+import os
+import sys
 
 import tests.utils as utils
 
 
-dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
+sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
+
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 def test_pretty_format():
