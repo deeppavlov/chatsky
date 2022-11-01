@@ -55,5 +55,5 @@ jobs:
         shell: bash
 
       - name: build coverage file
-        run: pytest --tb=long -vv --cache-clear --cov=dff tests/ > pytest-coverage.txt
+        run: pytest --tb=long -vv --cache-clear --cov=dff tests/
         shell: bash
