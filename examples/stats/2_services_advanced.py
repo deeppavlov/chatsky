@@ -8,7 +8,7 @@ sys.path.insert(0, str(Path(__file__).absolute().parent))
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool # import default pool from addon
-from _utils import parse_args, script
+from _stats_utils import parse_args, script
 
 """
 As is the case with the regular handlers, you can add extractors both before and after the

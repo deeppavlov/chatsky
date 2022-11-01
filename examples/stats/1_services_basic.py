@@ -9,7 +9,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord
 
-from _utils import parse_args, script
+from _stats_utils import parse_args, script
 
 """
 The statistics are collected from services by wrapping them in special 'extractor' functions.

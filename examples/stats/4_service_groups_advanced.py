@@ -9,7 +9,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool, default_extractor_pool
 
-from _utils import parse_args, script
+from _stats_utils import parse_args, script
 
 
 extractor_pool = ExtractorPool()

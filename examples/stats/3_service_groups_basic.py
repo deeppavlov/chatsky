@@ -8,7 +8,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool
 
-from _utils import parse_args, script
+from _stats_utils import parse_args, script
 
 """
 handlers can be applied to any pipeline parameter, including service groups.

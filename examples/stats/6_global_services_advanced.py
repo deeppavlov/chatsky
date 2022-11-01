@@ -9,7 +9,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
 
-from _utils import parse_args, script
+from _stats_utils import parse_args, script
 
 """
 Like with regular handlers, you can define global statistic handlers, 
