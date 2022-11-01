@@ -1,10 +1,12 @@
 from typing import List, Tuple
-import pathlib
 import importlib
 
 import pytest
 from dff.core.engine.core import Context
 from dff.core.pipeline import Pipeline
+import tests.utils as utils
+
+dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
 
 TURNS = [
     ("hi", "how are you"),
@@ -28,15 +30,18 @@ def run_pipeline_test(pipeline: Pipeline, turns: List[Tuple[str, str]]):
 
 
 @pytest.mark.parametrize(
-    "module_path",
+    "example_module_name",
     [
-        file
-        for file in pathlib.Path(__file__).absolute().parent.parent.joinpath("examples").glob("*.py")
-        if not file.stem.startswith("_")
+        "1_services_basic",
+        "2_services_advanced",
+        "3_service_groups_basic",
+        "4_service_groups_advanced",
+        "5_global_services_basic",
+        "6_global_services_advanced",
     ],
 )
-def test_examples(module_path: pathlib.Path, testing_file: str):
-    module = importlib.import_module(f"examples.{module_path.stem}")
+def test_examples(example_module_name: str, testing_file: str):
+    module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     try:
         pipeline = module.pipeline
         stats = module.StatsStorage.from_uri(f"csv://{testing_file}", "")
@@ -46,4 +51,4 @@ def test_examples(module_path: pathlib.Path, testing_file: str):
             lines = file.read().splitlines()
             assert len(lines) > 1
     except Exception as exc:
-        raise Exception(f"model_name={module_path.stem}") from exc
+        raise Exception(f"model_name=examples.{dot_path_to_addon}.{example_module_name}") from exc
