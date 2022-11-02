@@ -171,18 +171,19 @@ def has_last_labels(
     """
     Function returns condition handler.
     This handler returns True if any label from
-    last :py:const:`last_n_indices <int>`context labels is in
+    last :py:const:`last_n_indices <int>` context labels is in
     the :py:const:`flow_labels <List[str]>` list or in
     the :py:const:`labels ~dff.core.engine.core.types.NodeLabel2Type` list.
 
-    Parameters
-    ----------
-    flow_labels: Optional[List]
+    :param flow_labels:
         list of labels to check.Every label has type `str`. Is empty if not set.
-    labels: Optional[List[:py:const:`~dff.core.engine.core.types.NodeLabel2Type`]]
+    :type flow_labels: Optional[List[str]]
+    :param labels:
         list of labels that correspond to the nodes. Is empty is not set.
-    last_n_indices: int
+    :type labels: Optional[List[NodeLabel2Type]]
+    :param last_n_indices:
         number of last utterances to check.
+    :type last_n_indices: int
     """
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
