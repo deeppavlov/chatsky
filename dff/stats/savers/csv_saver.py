@@ -1,9 +1,9 @@
 """
 CSV
 ---------------------------
-Provides the CSV version of the :py:class:`~df_stats.savers.saver.Saver`. 
+Provides the CSV version of the :py:class:`~dff.stats.savers.saver.Saver`. 
 You don't need to interact with this class manually, as it will be automatically 
-initialized when you construct a :py:class:`~df_stats.savers.saver.Saver` with specific parameters.
+initialized when you construct a :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
 
 Statistical data collected to csv cannot be directly displayed in Superset.
 Use this class, if you want to permute or analyze your data manually.
@@ -25,7 +25,7 @@ class CsvSaver(Saver):
     """
     Saves and reads the stats dataframe from a csv file.
     You don't need to interact with this class manually, as it will be automatically
-    initialized when you construct :py:class:`~df_stats.savers.saver.Saver` with specific parameters.
+    initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
 
     Statistical data collected to csv cannot be directly displayed in Superset.
     Use this class, if you want to permute or analyze your data manually.

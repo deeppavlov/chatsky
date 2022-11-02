@@ -10,11 +10,11 @@ Examples
 
 .. code:: bash
 
-    df_stats cfg_from_file file.yaml --outfile=/tmp/superset_dashboard.zip
+    dff.stats cfg_from_file file.yaml --outfile=/tmp/superset_dashboard.zip
 
 .. code:: bash
 
-    df_stats cfg_from_opts \\
+    dff.stats cfg_from_opts \\
         --db.type=postgresql \\
         --db.user=root \\
         --db.host=localhost \\
@@ -25,7 +25,7 @@ Examples
 
 .. code:: bash
 
-    df_stats import_dashboard \\
+    dff.stats import_dashboard \\
         -U admin \\
         -P admin \\
         -i /tmp/superset_dashboard.zip \\

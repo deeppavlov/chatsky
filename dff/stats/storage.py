@@ -23,7 +23,7 @@ class StatsStorage(PoolSubscriber):
     Parameters
     ----------
 
-    saver: :py:class:`~df_stats.savers.Saver`
+    saver: :py:class:`~dff.stats.savers.Saver`
         An instance of the Saver class that is used to save the collected data.
     batch_size: int = 1
         The number of records that should be accumulated before they get persisted to the db.
