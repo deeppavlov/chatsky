@@ -54,11 +54,11 @@ def iterate_dir_generating_notebook_links(path: Path, dest: str, include: List[s
 def generate_example_links_for_notebook_creation(
     include: Optional[List[str]] = None,
     destination: str = "examples",
-    exclude: Optional[List[str]] = None
+    exclude: Optional[List[str]] = None,
 ):
     iterate_dir_generating_notebook_links(
-        Path(f"examples/"),
+        Path("examples/"),
         f"docs/source/{destination}",
         ["**"] if include is None else include,
-        [] if exclude is None else exclude
+        [] if exclude is None else exclude,
     )
