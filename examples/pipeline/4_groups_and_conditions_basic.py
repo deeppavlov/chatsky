@@ -10,7 +10,7 @@ import logging
 from dff.core.engine.core import Actor
 
 from dff.core.pipeline import Service, Pipeline, not_condition, service_successful_condition, ServiceRuntimeInfo
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 """
 Pipeline can contain not only single services, but also service groups.
 Service groups can be defined as ServiceGroupBuilder objects:
-      lists of ServiceBuilders and ServiceGroupBuilders orobjects.
+      lists of ServiceBuilders and ServiceGroupBuilders or objects.
 The objects should contain `services` - a ServiceBuilder and ServiceGroupBuilder object list.
 
 To receive serialized information about service, service group or pipeline a property `info_dict` can be used,
@@ -84,7 +84,7 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if should_auto_execute():
         auto_run_pipeline(pipeline, logger=logger)
     else:
         pipeline.run()
