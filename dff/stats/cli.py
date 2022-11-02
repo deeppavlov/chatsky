@@ -7,8 +7,11 @@ import logging
 from pathlib import Path
 from zipfile import ZipFile, ZIP_DEFLATED
 
-import requests
-from omegaconf import OmegaConf
+try:
+    import requests
+    from omegaconf import OmegaConf
+except ImportError:
+    raise ImportError("Some packages are not found. Run `pip install dff[stats]`")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
