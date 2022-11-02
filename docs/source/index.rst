@@ -16,7 +16,6 @@ Welcome to Dialog Flow Framework's documentation!
    :maxdepth: 3
    :caption: Package Reference
 
-..
    apiref/*
 
 Indices and tables
