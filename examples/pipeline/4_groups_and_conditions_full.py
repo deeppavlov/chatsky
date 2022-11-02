@@ -32,7 +32,7 @@ Alternatively, the groups can be defined as objects with following constructor a
     `wrappers` - a list of pipeline wrappers, see example №7
     `timeout` - pipeline timeout, see example №5
     `asynchronous` - whether or not this service group _should_ be asynchronous
-            (keep in mind that not all service groups _can_ be asynchronous), see example №5
+                     (keep in mind that not all service groups _can_ be asynchronous), see example №5
     `start_condition` - service group start condition
     `name` - custom defined name for the service group (keep in mind that names in one ServiceGroup should be unique)
 Service (and service group) object fields are mostly the same as constructor parameters,

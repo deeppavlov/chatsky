@@ -18,11 +18,11 @@ logger.setLevel(logging.DEBUG)
 """
 Pipeline can contain not only single services, but also service groups.
 Service groups can be defined as ServiceGroupBuilder objects:
-        lists of ServiceBuilders and ServiceGroupBuilders or objects.
+      lists of ServiceBuilders and ServiceGroupBuilders or objects.
 The objects should contain `services` - a ServiceBuilder and ServiceGroupBuilder object list.
 
 To receive serialized information about service, service group or pipeline a property `info_dict` can be used,
-        it returns important object properties as a dict.
+      it returns important object properties as a dict.
 
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.

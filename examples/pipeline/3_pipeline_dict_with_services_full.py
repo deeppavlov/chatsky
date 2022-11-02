@@ -23,7 +23,7 @@ These objects are dictionaries of particular structure:
     `messenger_interface` - `MessengerInterface` instance, used to connect to channel and transfer IO to user
     `context_storage` - place to store dialog contexts (dictionary or a `DBAbstractConnector` instance)
     `services` (required) - a ServiceGroupBuilder object,
-                basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4
+                            basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4
     `wrappers` - a list of pipeline wrappers, see example №7
     `timeout` - pipeline timeout, see example №5
     `optimization_warnings` - whether pipeline asynchronous structure should be checked during initialization,
@@ -32,14 +32,14 @@ These objects are dictionaries of particular structure:
 On pipeline execution services from `services` list are run without difference between pre- and postprocessors.
 If Actor instance is not found among `services` pipeline creation fails. There can be only one actor in the pipeline.
 ServiceBuilder object can be defined either with callable (see example №2) or
-            with dict of following structure / object with following constructor arguments:
+    with dict of following structure / object with following constructor arguments:
     `handler` (required) - ServiceBuilder, if handler is an object or a dict itself,
                            it will be used instead of base ServiceBuilder
-        NB! Fields of nested ServiceBuilder will be overridden by defined fields of the base ServiceBuilder
+    NB! Fields of nested ServiceBuilder will be overridden by defined fields of the base ServiceBuilder
     `wrappers` - a list of service wrappers, see example №7
     `timeout` - service timeout, see example №5
     `asynchronous` - whether or not this service _should_ be asynchronous
-            (keep in mind that not all services _can_ be asynchronous), see example №5
+                     (keep in mind that not all services _can_ be asynchronous), see example №5
     `start_condition` - service start condition, see example №4
     `name` - custom defined name for the service (keep in mind that names in one ServiceGroup should be unique),
              see example №4
