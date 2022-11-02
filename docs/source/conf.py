@@ -6,7 +6,7 @@ from jupytext import jupytext
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from generate_notebook_links import generate_links  # noqa: E402
+from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -96,4 +96,4 @@ html_theme_options = {
 
 
 def setup(_):
-    generate_links(include=["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
+    generate_example_links_for_notebook_creation(["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
