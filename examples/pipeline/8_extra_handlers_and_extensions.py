@@ -35,21 +35,21 @@ There are 4 types of global extra handlers:
     `AFTER_ALL` - is called after pipeline execution
 Global extra handlers have the same signature as regular extra handlers.
 Actually `BEFORE_ALL` and `AFTER_ALL` are attached to root service group named 'pipeline',
-            so they return its runtime info
+    so they return its runtime info
 
 All extra handlers warnings (see example №7) are applicable to global extra handlers.
 Pipeline `add_global_extra_handler` function is used to register global extra handlers. It accepts following arguments:
     `global_extra_handler_type` (required) - a GlobalExtraHandlerType instance, indicates extra handler type to add
     `extra_handler` (required) - the extra handler function itself
-    `whitelist` - an optional list of paths, if it's not None the extra handlers
-                will be applied to specified pipeline components only
-    `blacklist` - an optional list of paths, if it's not None the extra handlers
-                will be applied to all pipeline components except specified
+    `whitelist` - an optional list of paths, if it's not None
+                  the extra handlers will be applied to specified pipeline components only
+    `blacklist` - an optional list of paths, if it's not None
+                  the extra handlers will be applied to all pipeline components except specified
 
 Here basic functionality of `df-node-stats` library is emulated.
-Information about pipeline component execution time and result
-            is collected and printed to info log after pipeline execution.
-Pipeline consists of actor and 25 `long_service`s that run random amount of time between 0 and 5 seconds.
+Information about pipeline component execution time and
+    result is collected and printed to info log after pipeline execution.
+Pipeline consists of actor and 25 `long_service`s that run random amount of time between 0 and 0.05 seconds.
 """
 
 
@@ -92,7 +92,7 @@ def after_all(_, __, info: ExtraHandlerRuntimeInfo):
 
 
 async def long_service(_, __, info: ServiceRuntimeInfo):
-    timeout = random.randint(0, 5)
+    timeout = random.randint(0, 5) / 100
     logger.info(f"Service {info['name']} is going to sleep for {timeout} seconds.")
     await asyncio.sleep(timeout)
 
