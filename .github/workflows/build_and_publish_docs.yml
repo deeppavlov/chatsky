@@ -16,6 +16,7 @@ jobs:
 
       - name: install dependencies
         run: |
+            sudo apt install pandoc
             make venv
 
       - name: build documentation
@@ -26,6 +27,7 @@ jobs:
         run: touch docs/build/.nojekyll
 
       - name: deploy website
+        if: ${{ github.ref == 'refs/heads/dev' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
