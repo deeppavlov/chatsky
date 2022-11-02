@@ -92,7 +92,7 @@ clean_docs:
 	rm -rf docs/examples
 	rm -rf docs/source/apiref
 	rm -rf docs/source/examples
-.PHONY: clean
+.PHONY: clean_docs
 
 clean: clean_docs
 	rm -rf $(VENV_PATH)
