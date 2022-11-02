@@ -12,7 +12,7 @@ from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from _pipeline_utils import SCRIPT, should_auto_execute
+from examples.pipeline._pipeline_utils import SCRIPT, should_auto_execute
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

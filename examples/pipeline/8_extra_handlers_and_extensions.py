@@ -20,7 +20,7 @@ from dff.core.pipeline import (
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
 )
-from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
+from examples.pipeline._pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)

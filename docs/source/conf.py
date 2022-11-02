@@ -8,6 +8,7 @@ from jupytext import jupytext
 sys.path.append(os.path.abspath("."))
 from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
 
+sys.path.append(os.path.abspath("../../"))
 
 # -- Project information -----------------------------------------------------
 

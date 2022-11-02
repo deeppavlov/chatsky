@@ -10,7 +10,7 @@ import logging
 from dff.core.engine.core import Actor
 
 from dff.core.pipeline import Service, Pipeline
-from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
+from examples.pipeline._pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
