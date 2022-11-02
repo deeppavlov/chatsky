@@ -35,18 +35,18 @@ venv_test:
 	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 . --exclude venv,build
+	black --line-length=120 . --exclude venv*,build
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 . --exclude venv,build
-	@set -e && black --line-length=120 --check . --exclude venv,build|| ( \
+	flake8 --max-line-length 120 . --exclude venv*,build
+	@set -e && black --line-length=120 --check . --exclude venv*,build|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	# @mypy . --exclude venv,build
+	# @mypy . --exclude venv*,build
 .PHONY: lint
 
 docker_up:
@@ -87,12 +87,6 @@ version_major: venv
 	bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
 
-clean_docs:
-	rm -rf docs/build
-	rm -rf docs/examples
-	rm -rf docs/source/apiref
-	rm -rf docs/source/examples
-.PHONY: clean
 
 clean: clean_docs
 	rm -rf $(VENV_PATH)

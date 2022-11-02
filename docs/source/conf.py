@@ -1,8 +1,3 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
 import sys
 
@@ -10,16 +5,8 @@ from jupytext import jupytext
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
 sys.path.append(os.path.abspath("."))
-from generate_notebook_links import generate_links  # noqa: E402
+from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -70,7 +57,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["*.py", "**/_*"]
+exclude_patterns = ["**/README.rst"]
 
 html_short_title = "None"
 
@@ -109,4 +96,4 @@ html_theme_options = {
 
 
 def setup(_):
-    generate_links(include=["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
+    generate_example_links_for_notebook_creation(["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
