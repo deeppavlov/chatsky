@@ -1,5 +1,4 @@
 import pytest
-import socket
 import os
 import random
 import uuid
@@ -24,32 +23,16 @@ from dff.core.engine.core import Context
 
 from dff.connectors.db import DBConnector
 import tests.utils as utils
+from tests.db_list import (
+    MONGO_ACTIVE,
+    REDIS_ACTIVE,
+    POSTGRES_ACTIVE,
+    MYSQL_ACTIVE,
+    YDB_ACTIVE,
+)
 
 dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
 db_connector_utils = importlib.import_module(f"examples.{dot_path_to_addon}._db_connector_utils")
-
-
-def ping_localhost(port: int, timeout=60):
-    try:
-        socket.setdefaulttimeout(timeout)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("localhost", port))
-    except OSError:
-        return False
-    else:
-        s.close()
-        return True
-
-
-MONGO_ACTIVE = ping_localhost(27017)
-
-REDIS_ACTIVE = ping_localhost(6379)
-
-POSTGRES_ACTIVE = ping_localhost(5432)
-
-MYSQL_ACTIVE = ping_localhost(3307)
-
-YDB_ACTIVE = ping_localhost(2136)
 
 
 def run_turns_test(actor: Actor, db: DBConnector):
