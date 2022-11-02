@@ -1,6 +1,6 @@
 name: build_and_publish_docs
 
-on: [push]
+on: [push, pull_request]
 
 jobs:
   publish:
