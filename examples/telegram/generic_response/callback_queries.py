@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 The replies below use generic classes.
 When creating a UI, you can use the generic Keyboard class.
@@ -6,8 +5,8 @@ It does not include all the options that are available in Telegram, so an Inline
 If you want to remove the reply keyboard, pass an instance of telebot's ReplyKeyboardRemove
 to the TelegramUI class.
 """
+import logging
 import os
-import sys
 
 import dff.core.engine.conditions as cnd
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -16,11 +15,15 @@ from telebot import types
 
 from dff.connectors.messenger.telegram.connector import TelegramConnector
 from dff.connectors.messenger.telegram.types import TelegramUI, TelegramButton
-from dff.connectors.messenger.telegram.request_provider import PollingRequestProvider
-
-from dff.core.runner import ScriptRunner
+from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
+from dff.core.pipeline import Pipeline
 
 from dff.connectors.messenger.generics import Response, Keyboard, Button
+from examples.pipeline._pipeline_utils import get_auto_arg, auto_run_pipeline
+from examples.telegram._telegram_utils import check_env_bot_tokens
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 bot = TelegramConnector(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
@@ -88,19 +91,19 @@ script = {
     },
 }
 
-provider = PollingRequestProvider(bot=bot)
+interface = PollingTelegramInterface(bot=bot)
 
-runner = ScriptRunner(
+pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    db=dict(),
-    request_provider=provider,
+    context_storage=dict(),
+    messenger_interface=interface,
 )
 
 if __name__ == "__main__":
-    if "BOT_TOKEN" not in os.environ:
-        print("BOT_TOKEN variable needs to be set to continue")
-        sys.exit(1)
-
-    runner.start()
+    check_env_bot_tokens()
+    if get_auto_arg():
+        auto_run_pipeline(pipeline, logger=logger)
+    else:
+        pipeline.run()
