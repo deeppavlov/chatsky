@@ -1,7 +1,7 @@
 import pytest
 
-from df_extended_conditions.models.local.cosine_matchers.gensim import GensimMatcher
-from df_extended_conditions.dataset import Dataset
+from dff.script.logic.extended_conditions.models.local.cosine_matchers.gensim import GensimMatcher
+from dff.script.logic.extended_conditions.dataset import Dataset
 
 try:
     import numpy as np

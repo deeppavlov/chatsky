@@ -3,7 +3,7 @@ import os
 import requests
 import pytest
 
-from df_extended_conditions.models import RasaModel, AsyncRasaModel
+from dff.script.logic.extended_conditions.models import RasaModel, AsyncRasaModel
 
 RASA_URL = os.getenv("RASA_URL", "http://localhost:5005")
 if RASA_URL is None or isinstance(RASA_URL, str) and requests.get(RASA_URL).status_code != 200:

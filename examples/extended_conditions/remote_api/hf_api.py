@@ -1,19 +1,19 @@
 import os
 import logging
 
-from df_engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
-from df_engine.core import Actor
-from df_engine import conditions as cnd
+from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
+from dff.core.engine.core import Actor
+from dff.core.engine import conditions as cnd
 
-from df_extended_conditions.models.remote_api.hf_api_model import HFAPIModel
-from df_extended_conditions import conditions as i_cnd
+from dff.script.logic.extended_conditions.models.remote_api.hf_api_model import HFAPIModel
+from dff.script.logic.extended_conditions import conditions as i_cnd
 
 from examples import example_utils
 
 logger = logging.getLogger(__name__)
 
 # We are using this open source model by Obsei-AI
-# to demonstrate, how custom classifiers can be easily adapted for use in df_extended_conditions
+# to demonstrate, how custom classifiers can be easily adapted for use in dff.script.logic.extended_conditions
 api_model = HFAPIModel(
     model="obsei-ai/sell-buy-intent-classifier-bert-mini",
     api_key=os.getenv("HF_API_KEY"),

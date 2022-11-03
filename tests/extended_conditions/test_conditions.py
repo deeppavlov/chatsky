@@ -2,10 +2,10 @@ from typing import List
 
 import pytest
 from pydantic import parse_obj_as
-from df_engine.core import Context
-from df_extended_conditions.utils import LABEL_KEY
-from df_extended_conditions.dataset import DatasetItem, Dataset
-from df_extended_conditions.conditions import has_cls_label, has_match
+from dff.core.engine.core import Context
+from dff.script.logic.extended_conditions.utils import LABEL_KEY
+from dff.script.logic.extended_conditions.dataset import DatasetItem, Dataset
+from dff.script.logic.extended_conditions.conditions import has_cls_label, has_match
 
 
 @pytest.mark.parametrize(

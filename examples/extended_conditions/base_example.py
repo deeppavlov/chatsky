@@ -1,13 +1,13 @@
 import logging
 from pathlib import Path
 
-from df_engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
-from df_engine.core import Actor
-from df_engine import conditions as cnd
+from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
+from dff.core.engine.core import Actor
+from dff.core.engine import conditions as cnd
 
-from df_extended_conditions.models.local.classifiers.regex import RegexClassifier, RegexModel
-from df_extended_conditions.dataset import Dataset
-from df_extended_conditions import conditions as i_cnd
+from dff.script.logic.extended_conditions.models.local.classifiers.regex import RegexClassifier, RegexModel
+from dff.script.logic.extended_conditions.dataset import Dataset
+from dff.script.logic.extended_conditions import conditions as i_cnd
 
 from examples import example_utils
 

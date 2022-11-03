@@ -6,7 +6,7 @@ try:
 except ImportError:
     pytest.skip(allow_module_level=True)
 
-from df_extended_conditions.models import GoogleDialogFlowModel, AsyncGoogleDialogFlowModel
+from dff.script.logic.extended_conditions.models import GoogleDialogFlowModel, AsyncGoogleDialogFlowModel
 
 
 @pytest.fixture(scope="session")

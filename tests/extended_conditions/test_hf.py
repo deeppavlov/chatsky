@@ -8,8 +8,8 @@ try:
 except ImportError:
     pytest.skip(allow_module_level=True)
 
-from df_extended_conditions.models.local.classifiers.huggingface import HFClassifier
-from df_extended_conditions.models.local.cosine_matchers.huggingface import HFMatcher
+from dff.script.logic.extended_conditions.models.local.classifiers.huggingface import HFClassifier
+from dff.script.logic.extended_conditions.models.local.cosine_matchers.huggingface import HFMatcher
 
 
 @pytest.fixture(scope="session")

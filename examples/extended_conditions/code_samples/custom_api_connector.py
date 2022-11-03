@@ -3,9 +3,9 @@ import json
 import requests
 import httpx
 
-from df_extended_conditions.models.remote_api.async_mixin import AsyncMixin
-from df_extended_conditions.models.base_model import BaseModel
-from df_extended_conditions.utils import STATUS_SUCCESS
+from dff.script.logic.extended_conditions.models.remote_api.async_mixin import AsyncMixin
+from dff.script.logic.extended_conditions.models.base_model import BaseModel
+from dff.script.logic.extended_conditions.utils import STATUS_SUCCESS
 
 """
 To create a synchronous connector to an API, we recommend you to inherit your class from `BaseModel`.

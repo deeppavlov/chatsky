@@ -8,7 +8,7 @@ When defining custom label-scoring models, always inherit from this class.
 from copy import copy
 from abc import ABC, abstractmethod
 
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from ..dataset import Dataset
 from ..utils import LABEL_KEY

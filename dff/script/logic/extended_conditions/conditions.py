@@ -8,7 +8,7 @@ from typing import Callable, Optional, List
 from functools import singledispatch
 
 from sklearn.metrics.pairwise import cosine_similarity
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from .dataset import DatasetItem
 from .utils import LABEL_KEY

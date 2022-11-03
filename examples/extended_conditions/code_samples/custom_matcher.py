@@ -1,5 +1,5 @@
-from df_extended_conditions.models.base_model import BaseModel
-from df_extended_conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
+from dff.script.logic.extended_conditions.models.base_model import BaseModel
+from dff.script.logic.extended_conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
 """
 To build  your own cosine matcher, you should inherit from the `CosineMatcherMixin` and from the `BaseModel`, 

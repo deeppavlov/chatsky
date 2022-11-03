@@ -1,6 +1,6 @@
 import pytest
 
-from df_extended_conditions.models import HFAPIModel, AsyncHFAPIModel
+from dff.script.logic.extended_conditions.models import HFAPIModel, AsyncHFAPIModel
 
 
 @pytest.fixture(scope="session")

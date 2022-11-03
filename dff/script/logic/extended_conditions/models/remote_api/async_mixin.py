@@ -1,4 +1,4 @@
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from ..base_model import BaseModel
 from ...utils import LABEL_KEY

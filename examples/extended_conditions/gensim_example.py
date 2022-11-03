@@ -4,13 +4,13 @@ from pathlib import Path
 from gensim.models import Word2Vec, KeyedVectors
 import gensim.downloader as api
 
-from df_engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
-from df_engine.core import Actor
-from df_engine import conditions as cnd
+from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
+from dff.core.engine.core import Actor
+from dff.core.engine import conditions as cnd
 
-from df_extended_conditions.models import GensimMatcher
-from df_extended_conditions.dataset import Dataset
-from df_extended_conditions import conditions as i_cnd
+from dff.script.logic.extended_conditions.models import GensimMatcher
+from dff.script.logic.extended_conditions.dataset import Dataset
+from dff.script.logic.extended_conditions import conditions as i_cnd
 from examples import example_utils
 
 logger = logging.getLogger(__name__)

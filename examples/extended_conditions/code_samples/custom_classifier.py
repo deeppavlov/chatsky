@@ -1,6 +1,6 @@
 import pickle
 
-from df_extended_conditions.models.base_model import BaseModel
+from dff.script.logic.extended_conditions.models.base_model import BaseModel
 
 """
 In order to create your own classifier, create a child class of the `BaseModel` abstract type. 

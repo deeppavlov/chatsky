@@ -1,6 +1,6 @@
 import sys
 from pathlib import Path
-from df_runner import Pipeline, CLIMessengerInterface
+from dff.core.pipeline import Pipeline, CLIMessengerInterface
 
 
 sys.path.insert(0, str(Path(__file__).absolute().parent.parent))
