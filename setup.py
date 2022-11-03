@@ -41,7 +41,9 @@ doc = [
     "sphinx_copybutton>=0.5",
     "sphinx_gallery>=0.11.1",
     "sphinx-autodoc-typehints>=1.19.4",
-    "matplotlib<=3.5.3",
+    "nbsphinx>=0.8.9",
+    "jupytext>=1.14.1",
+    "jupyter>=1.0.0",
 ]
 
 codestyle_dependencies = [

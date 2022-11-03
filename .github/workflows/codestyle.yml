@@ -1,6 +1,13 @@
 name: codestyle
 
-on: [push]
+on:
+  push:
+    branches:
+    - dev
+    - test/**
+  pull_request:
+    branches:
+    - dev
 
 jobs:
   lint:

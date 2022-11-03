@@ -12,7 +12,7 @@ from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg
+from _pipeline_utils import SCRIPT, should_auto_execute
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -117,7 +117,7 @@ async def route():
 
 pipeline = Pipeline(**pipeline_dict)
 
-if __name__ == "__main__" and not get_auto_arg():
+if __name__ == "__main__" and not should_auto_execute():
     pipeline.run()
     app.run()
     # Navigate to http://127.0.0.1:5000/pipeline_web_interface?request={REQUEST} to receive response

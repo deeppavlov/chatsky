@@ -35,18 +35,18 @@ venv_test:
 	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 dff
+	black --line-length=120 . --exclude venv*,build
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 dff
-	@set -e && black --line-length=120 --check dff|| ( \
+	flake8 --max-line-length 120 . --exclude venv*,build
+	@set -e && black --line-length=120 --check . --exclude venv*,build|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	# @mypy dff
+	# @mypy . --exclude venv*,build
 .PHONY: lint
 
 docker_up:
@@ -65,10 +65,10 @@ test: venv
 test_all: venv wait_db test lint
 .PHONY: test_all
 
-doc: venv
+doc: venv clean_docs
 	# sphinx-apidoc -e -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -b html  -W --keep-going docs/source docs/build
+	sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -87,15 +87,17 @@ version_major: venv
 	bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
 
+clean_docs:
+	rm -rf docs/build
+	rm -rf docs/examples
+	rm -rf docs/source/apiref
+	rm -rf docs/source/examples
+.PHONY: clean_docs
 
-
-clean:
+clean: clean_docs
 	rm -rf $(VENV_PATH)
 	rm -rf .pytest_cache
 	rm -rf *.egg-info
 	rm -rf htmlcov
 	rm -f .coverage
-	rm -rf docs/build
-	rm -rf docs/examples
-	rm -rf docs/source/apiref
 .PHONY: clean
