@@ -1,21 +1,18 @@
 """
 Request Provider
 *****************
-
-This module contains several variations of the `RequestProvider` class that can be used 
-to combine :py:class:`~df_telegram_connector.connector.TelegramConnector` 
-together with the `dff.core.runner` add-on.
+This module contains several variations of the `RequestProvider` class that can be used
+to combine :py:class:`~df_telegram_connector.connector.TelegramConnector`
+together with the `df_runner` add-on.
 """
-from functools import partial
-from typing import Any, Optional
+from typing import Any, Optional, List, Tuple, Hashable
 
 from telebot import types, logger
 
-from dff.core.engine.core import Context, Actor
-from dff.core.runner import AbsRequestProvider, Runner
-
+from dff.core.engine.core import Context
+from dff.core.pipeline import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
 from .connector import TelegramConnector
-from .utils import get_user_id, set_state, get_initial_context
+from .utils import get_user_id
 
 flask_imported: bool
 try:
@@ -28,14 +25,14 @@ except ImportError:
     request, abort = None, None
 
 
-class BaseRequestProvider(AbsRequestProvider):
+class TelegramInterfaceMixin:
+    bot: TelegramConnector
+
     """
     Abstract class for Telegram request providers.
     Subclass it, or use one of the child classes below.
-
     Parameters
     ----------
-
     bot: :py:class:`~df_telegram_connector.connector.TelegramConnector`
         An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
         Note that passing a regular `Telebot` instance will result in an error.
@@ -44,7 +41,7 @@ class BaseRequestProvider(AbsRequestProvider):
     def __init__(self, bot: TelegramConnector):
         self.bot = bot
 
-    def handle_update(self, update: types.Update, runner: Runner):
+    def _extract_telegram_request_and_id(self, update: types.Update) -> Tuple[Any, Hashable]:
         if update.update_id > self.bot.last_update_id:
             self.bot.last_update_id = update.update_id
 
@@ -53,21 +50,13 @@ class BaseRequestProvider(AbsRequestProvider):
         inner_update = next(filter(lambda val: val is not None, list(update_fields.values())))
 
         ctx_id = get_user_id(inner_update)
-        ctx_update_callable = partial(set_state, update=inner_update)
-        ctx: Context = runner.request_handler(
-            ctx_id=ctx_id, ctx_update=ctx_update_callable, init_ctx=get_initial_context(ctx_id)
-        )
-        self.bot.send_response(ctx_id, ctx.last_response)
-
-    def run(self, runner: Runner):
-        raise NotImplementedError
+        return inner_update, ctx_id
 
 
-class PollingRequestProvider(BaseRequestProvider):
+class PollingTelegramInterface(PollingMessengerInterface, TelegramInterfaceMixin):
     """
-    | Class for compatibility with dff.core.runner. Retrieves updates by polling.
+    | Class for compatibility with df_runner. Retrieves updates by polling.
     | Multi-threaded polling is currently not supported, but will be implemented in the future.
-
     Parameters
     ----------
     bot: :py:class:`~df_telegram_connector.connector.TelegramConnector`
@@ -77,42 +66,43 @@ class PollingRequestProvider(BaseRequestProvider):
         The rest of the parameters are equal to those of the `polling` method of a regular `Telebot`.
         See the pytelegrambotapi docs for more info:
         `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
-
     """
 
     def __init__(self, bot: TelegramConnector, interval=3, allowed_updates=None, timeout=20, long_polling_timeout=20):
-        super().__init__(bot=bot)
+        TelegramInterfaceMixin.__init__(self, bot)
         self.interval = interval
         self.allowed_updates = allowed_updates
         self.timeout = timeout
         self.long_polling_timeout = long_polling_timeout
 
-    def run(self, runner: Runner):
+    def _request(self) -> List[Tuple[Any, Hashable]]:
+        updates = self.bot.get_updates(
+            offset=(self.bot.last_update_id + 1),
+            allowed_updates=self.allowed_updates,
+            timeout=self.timeout,
+            long_polling_timeout=self.long_polling_timeout,
+        )
+        lst = [self._extract_telegram_request_and_id(update) for update in updates]
+        return lst
+
+    def _respond(self, response: List[Context]):
+        for resp in response:
+            self.bot.send_response(resp.id, resp.last_response)
+
+    def _except(self, e: Exception):
+        logger.error(e)
+        self.bot._TeleBot__stop_polling.set()
+
+    async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
         self.bot._TeleBot__stop_polling.clear()
-        logger.info("started polling")
         self.bot.get_updates(offset=-1)
 
-        while not self.bot._TeleBot__stop_polling.wait(self.interval):
-            try:
-                updates = self.bot.get_updates(
-                    offset=(self.bot.last_update_id + 1),
-                    allowed_updates=self.allowed_updates,
-                    timeout=self.timeout,
-                    long_polling_timeout=self.long_polling_timeout,
-                )
-                for update in updates:
-                    self.handle_update(update, runner=runner)
-
-            except Exception as e:
-                print(e)
-                self.bot._TeleBot__stop_polling.set()
-                break
+        await super().connect(callback, loop=lambda: not self.bot._TeleBot__stop_polling.wait(self.interval))
 
 
-class FlaskRequestProvider(BaseRequestProvider):
+class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin):
     """
-    Class for compatibility with dff.core.runner. Retrieves updates from post json requests.
-
+    Class for compatibility with df_runner. Retrieves updates from post json requests.
     Parameters
     ----------
     bot: :py:class:`~df_telegram_connector.connector.TelegramConnector`
@@ -131,7 +121,6 @@ class FlaskRequestProvider(BaseRequestProvider):
     full_uri: Optional[str] = None
         Setting up a webhook requires a public IP that is accessible by https. If you are hosting
         your application, this is where you pass the full public URL of your webhook.
-
     """
 
     def __init__(
@@ -146,24 +135,25 @@ class FlaskRequestProvider(BaseRequestProvider):
         if not flask_imported:
             raise ModuleNotFoundError("Flask is not installed")
 
-        super().__init__(bot=bot)
+        TelegramInterfaceMixin.__init__(self, bot=bot)
         self.app: Flask = app
         self.host: str = host
         self.port: int = port
         self.endpoint: str = endpoint
         self.full_uri: str = full_uri or "".join([f"https://{host}:{port}", endpoint])
 
-    def run(self, runner: Runner):
-        def handle_updates():
+    async def connect(self, callback: PipelineRunnerFunction):
+        async def endpoint():
             if not request.headers.get("content-type") == "application/json":
                 abort(403)
 
             json_string = request.get_data().decode("utf-8")
             update = types.Update.de_json(json_string)
-            self.handle_update(update, runner=runner)
-            return ""
+            return self.on_request(*self._extract_telegram_request_and_id(update))
 
-        self.app.route(self.endpoint, methods=["POST"])(handle_updates)
+        await super().connect(callback)
+
+        self.app.route(self.endpoint, methods=["POST"])(endpoint)
         self.bot.remove_webhook()
         self.bot.set_webhook(self.full_uri)
 
