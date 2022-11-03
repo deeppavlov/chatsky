@@ -11,31 +11,38 @@ import urllib.request
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import CLIMessengerInterface, Service, Pipeline, ServiceRuntimeInfo
-from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
 """
-When Pipeline is created using `from_dict` method, pipeline should be defined as PipelineBuilder objects (defined in `types` module).
+When Pipeline is created using `from_dict` method,
+pipeline should be defined as PipelineBuilder objects (defined in `types` module).
 These objects are dictionaries of particular structure:
     `messenger_interface` - `MessengerInterface` instance, used to connect to channel and transfer IO to user
     `context_storage` - place to store dialog contexts (dictionary or a `DBAbstractConnector` instance)
-    `services` (required) - a ServiceGroupBuilder object, basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4
+    `services` (required) - a ServiceGroupBuilder object,
+                            basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4
     `wrappers` - a list of pipeline wrappers, see example №7
     `timeout` - pipeline timeout, see example №5
-    `optimization_warnings` - whether pipeline asynchronous structure should be checked during initialization, see example №5
+    `optimization_warnings` - whether pipeline asynchronous structure should be checked during initialization,
+    see example №5
 
 On pipeline execution services from `services` list are run without difference between pre- and postprocessors.
 If Actor instance is not found among `services` pipeline creation fails. There can be only one actor in the pipeline.
-ServiceBuilder object can be defined either with callable (see example №2) or with dict of following structure / object with following constructor arguments:
-    `handler` (required) - ServiceBuilder, if handler is an object or a dict itself, it will be used instead of base ServiceBuilder
-        NB! Fields of nested ServiceBuilder will be overridden by defined fields of the base ServiceBuilder
+ServiceBuilder object can be defined either with callable (see example №2) or
+    with dict of following structure / object with following constructor arguments:
+    `handler` (required) - ServiceBuilder, if handler is an object or a dict itself,
+                           it will be used instead of base ServiceBuilder
+    NB! Fields of nested ServiceBuilder will be overridden by defined fields of the base ServiceBuilder
     `wrappers` - a list of service wrappers, see example №7
     `timeout` - service timeout, see example №5
-    `asynchronous` - whether or not this service _should_ be asynchronous (keep in mind that not all services _can_ be asynchronous), see example №5
+    `asynchronous` - whether or not this service _should_ be asynchronous
+                     (keep in mind that not all services _can_ be asynchronous), see example №5
     `start_condition` - service start condition, see example №4
-    `name` - custom defined name for the service (keep in mind that names in one ServiceGroup should be unique), see example №4
+    `name` - custom defined name for the service (keep in mind that names in one ServiceGroup should be unique),
+             see example №4
 
 Not only Pipeline can be run using `__call__` method, for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.
@@ -55,7 +62,7 @@ actor = Actor(
 
 
 def prepreprocess(ctx: Context):
-    logger.info(f"preprocession intent-detection Service running (defined as a dict)")
+    logger.info("preprocession intent-detection Service running (defined as a dict)")
     ctx.misc["preprocess_detection"] = {
         ctx.last_request: "some_intent"
     }  # Similar syntax can be used to access service output dedicated to current pipeline rum
@@ -69,11 +76,12 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
 
 
 def postprocess(ctx: Context, actor: Actor):
-    logger.info(f"postprocession Service (defined as an object)")
+    logger.info("postprocession Service (defined as an object)")
     logger.info(f"resulting misc looks like: {json.dumps(ctx.misc, indent=4, default=str)}")
     fallback_flow, fallback_node, _ = actor.fallback_label
     logger.info(
-        f"actor is{'' if actor.script[fallback_flow][fallback_node].response == ctx.last_response else ' not'} in fallback node"
+        f"actor is{'' if actor.script[fallback_flow][fallback_node].response == ctx.last_response else ' not'} "
+        "in fallback node"
     )
 
 
@@ -106,7 +114,7 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if should_auto_execute():
         auto_run_pipeline(pipeline, logger=logger)
     else:
         pipeline.run()

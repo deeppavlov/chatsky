@@ -3,11 +3,11 @@ import logging
 import pathlib
 
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.connectors.messenger.generics.response import Attachments, Image, Response
-from .example_utils import run_test, run_interactive_mode
+from ._example_utils import run_interactive_mode
 
 script = {
     "root": {
@@ -30,7 +30,9 @@ script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(text="here's my picture!", image=Image(source=pathlib.Path(__file__).parent / "kitten.jpg")),
+            RESPONSE: Response(
+                text="here's my picture!", image=Image(source=pathlib.Path(__file__).parent / "kitten.jpg"),
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {

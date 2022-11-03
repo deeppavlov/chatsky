@@ -6,17 +6,17 @@ Welcome to Dialog Flow Framework's documentation!
 =================================================
 
 .. toctree::
-   :maxdepth: 2
    :caption: Contents:
 
 
 
 .. toctree::
    :glob:
-   :maxdepth: 3
    :caption: Package Reference
 
-   apiref/*
+   gallery
+
+.. apiref/*
 
 Indices and tables
 ==================

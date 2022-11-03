@@ -10,8 +10,8 @@ from typing import Any, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 
-from pydantic import Extra, Field, ValidationError, root_validator, FilePath, HttpUrl, BaseModel as PydanticBaseModel
-from pydantic import validator
+from pydantic import Extra, Field, ValidationError, FilePath, HttpUrl, BaseModel
+from pydantic import validator, root_validator
 
 
 class Session(Enum):
@@ -19,21 +19,21 @@ class Session(Enum):
     FINISHED = auto()
 
 
-class BaseModel(PydanticBaseModel):
+class DataModel(BaseModel):
     class Config:
         extra = Extra.allow
 
 
-class Command(BaseModel):
-    command: str = ...
+class Command(DataModel):
+    command: str
 
 
-class Location(BaseModel):
-    longitude: float = ...
-    latitude: float = ...
+class Location(DataModel):
+    longitude: float
+    latitude: float
 
 
-class Attachment(BaseModel):
+class Attachment(DataModel):
     source: Optional[Union[HttpUrl, FilePath]] = None
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
@@ -67,12 +67,12 @@ class Document(Attachment):
     pass
 
 
-class Attachments(BaseModel):
+class Attachments(DataModel):
     files: List[Attachment] = Field(default_factory=list, min_items=2, max_items=10)
 
 
-class Link(BaseModel):
-    source: HttpUrl = ...
+class Link(DataModel):
+    source: HttpUrl
     title: Optional[str] = None
 
     @property
@@ -80,19 +80,19 @@ class Link(BaseModel):
         return f'<a href="{self.source}">{self.title if self.title else self.source}</a>'
 
 
-class Button(BaseModel):
+class Button(DataModel):
     source: Optional[HttpUrl] = None
-    text: str = ...
+    text: str
     payload: Optional[Any] = None
 
 
-class Keyboard(BaseModel):
+class Keyboard(DataModel):
     buttons: List[Button] = Field(default_factory=list, min_items=1)
 
 
-class Response(BaseModel):
-    text: str = ...
-    ui: Optional[Union[Keyboard, BaseModel]] = None
+class Response(DataModel):
+    text: str
+    ui: Optional[Union[Keyboard, DataModel]] = None
     document: Optional[Document] = None
     image: Optional[Image] = None
     attachments: Optional[Attachments] = None
@@ -102,6 +102,6 @@ class Response(BaseModel):
     # that use an intermediate backend server, like Yandex's Alice
     commands: Optional[List[Command]] = None
     state: Optional[Session] = Session.ACTIVE
-    
-    def __init__(self, text: str, *args, **data) -> None:
-        super().__init__(text=text, **data)
+
+    def __init__(self, text: str, *args, **kwargs) -> None:
+        super().__init__(text=text, **kwargs)
