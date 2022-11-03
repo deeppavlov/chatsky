@@ -100,8 +100,8 @@ class ServiceGroup(PipelineComponent):
             for service, future in zip(self.components, asyncio.as_completed(service_futures)):
                 try:
                     service_result = await future
-                    while service.asynchronous and isinstance(service_result, Awaitable):
-                        service_result = await service_result
+                    if service.asynchronous and isinstance(service_result, Awaitable):
+                        await service_result
                 except asyncio.TimeoutError:
                     logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
 
@@ -110,8 +110,8 @@ class ServiceGroup(PipelineComponent):
                 service_result = await service(ctx, actor)
                 if not service.asynchronous and isinstance(service_result, Context):
                     ctx = service_result
-                while service.asynchronous and isinstance(service_result, Awaitable):
-                    service_result = await service_result
+                elif service.asynchronous and isinstance(service_result, Awaitable):
+                    await service_result
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
