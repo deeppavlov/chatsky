@@ -120,7 +120,7 @@ ServiceRuntimeInfo = TypedDict(
     {
         "name": str,
         "path": str,
-        "timeout": Optional[int],
+        "timeout": Optional[float],
         "asynchronous": bool,
         "execution_state": Dict[str, ComponentExecutionState],
     },
@@ -173,7 +173,7 @@ ExtraHandlerBuilder = Union[
     TypedDict(
         "WrapperDict",
         {
-            "timeout": NotRequired[Optional[int]],
+            "timeout": NotRequired[Optional[float]],
             "asynchronous": NotRequired[bool],
             "functions": List[ExtraHandlerFunction],
         },
@@ -200,7 +200,7 @@ ServiceBuilder = Union[
             "handler": "ServiceBuilder",
             "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
-            "timeout": NotRequired[Optional[int]],
+            "timeout": NotRequired[Optional[float]],
             "asynchronous": NotRequired[bool],
             "start_condition": NotRequired[StartConditionCheckerFunction],
             "name": Optional[str],

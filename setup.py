@@ -34,13 +34,16 @@ core = [
 
 doc = [
     "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.4",
+    "dff_sphinx_theme>=0.1.5",
     "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
     "sphinx_gallery>=0.11.1",
-    "matplotlib<=3.5.3",
+    "sphinx-autodoc-typehints>=1.19.4",
+    "nbsphinx>=0.8.9",
+    "jupytext>=1.14.1",
+    "jupyter>=1.0.0",
 ]
 
 mypy_dependencies = [
@@ -72,7 +75,7 @@ mysql_dependencies = [
 
 postgresql_dependencies = [
     "sqlalchemy>=1.4.27",
-    "psycopg2-binary>=2.9.2",
+    "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stabe for windows
 ]
 
 ydb_dependencies = [
@@ -87,8 +90,8 @@ test_requirements = [
     "click<=8.0.4",
     "black ==20.8b1",
     "isort >=5.0.6,<6.0.0",
-    "flask[async]==2.1.2",
-    "psutil>=5.9.1"
+    "flask[async]>=2.1.2",
+    "psutil>=5.9.1",
 ]
 
 devel = [
@@ -108,17 +111,21 @@ full = merge_req_lists([
     telegram_dependencies,
 ])
 
-tests_full = merge_req_lists([
-    full,
-    test_requirements,
-])
+tests_full = merge_req_lists(
+    [
+        full,
+        test_requirements,
+    ]
+)
 
-devel_full = merge_req_lists([
-    tests_full,
-    doc,
-    devel,
-    mypy_dependencies,
-])
+devel_full = merge_req_lists(
+    [
+        tests_full,
+        doc,
+        devel,
+        mypy_dependencies,
+    ]
+)
 
 EXTRA_DEPENDENCIES = {
     "doc": doc,

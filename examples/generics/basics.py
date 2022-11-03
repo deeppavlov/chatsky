@@ -1,11 +1,11 @@
 import logging
 
 import dff.core.engine.conditions as cnd
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.generics import Response
-from .example_utils import run_test, run_interactive_mode
+from ._example_utils import run_interactive_mode
 
 script = {
     "greeting_flow": {
@@ -51,7 +51,9 @@ testing_dialog = [
 ]
 
 actor = Actor(
-    script=script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
+    script=script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":

@@ -3,6 +3,10 @@
 ============
 """
 
+# TODO:
+# 1. make `choice_with_exclusion` as Out of the box method
+# 2. Make function `cannot_talk_about_topic_response` simpler
+
 import logging
 import re
 import random
@@ -111,4 +115,3 @@ if __name__ == "__main__":
         run_auto_mode(actor, testing_dialog, logger)
     else:
         run_interactive_mode(actor, logger)
-

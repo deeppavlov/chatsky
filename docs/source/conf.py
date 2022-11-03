@@ -1,29 +1,12 @@
-# Configuration file for the Sphinx documentation builder.
-#
-# This file only contains a selection of the most common options. For a full
-# list see the documentation:
-# https://www.sphinx-doc.org/en/master/usage/configuration.html
 import os
-import re
+import sys
+
+from jupytext import jupytext
 
 # -- Path setup --------------------------------------------------------------
 
-# If extensions (or modules to document with autodoc) are in another directory,
-# add these directories to sys.path here. If the directory is relative to the
-# documentation root, use os.path.abspath to make it absolute, like shown here.
-#
-# import os
-# import sys
-# sys.path.insert(0, os.path.abspath('.'))
-
-
-from sphinx_gallery.sorting import FileNameSortKey
-
-from dff_sphinx_theme.extras import sphinx_gallery_find_example_and_build_dirs, sphinx_gallery_add_source_dirs_to_path
-
-
-sphinx_gallery_add_source_dirs_to_path('../../dff/core')
-sphinx_gallery_add_source_dirs_to_path('../../dff/connectors')
+sys.path.append(os.path.abspath("."))
+from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -51,19 +34,21 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.extlinks",
-#    "sphinxcontrib.katex",  # TODO: throws an exception for some reason
+    "sphinxcontrib.katex",
     "sphinx_copybutton",
-    "sphinx_gallery.gen_gallery"
+    "sphinx_autodoc_typehints",
+    "nbsphinx",
+    "sphinx_gallery.load_style",
 ]
 
-suppress_warnings = ['image.nonlocal_uri']
-source_suffix = '.rst'
-master_doc = 'index'
+suppress_warnings = ["image.nonlocal_uri"]
+source_suffix = ".rst"
+master_doc = "index"
 
-version = "0.1"
-language = 'en'
+version = "0.10.1"
+language = "en"
 
-pygments_style = 'default'
+pygments_style = "default"
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -72,9 +57,9 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ['**/README.rst']
+exclude_patterns = ["*.py", "**/_*.py"]
 
-html_short_title = None
+html_short_title = "None"
 
 # -- Options for HTML output -------------------------------------------------
 
@@ -92,29 +77,23 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-examples, auto_examples = sphinx_gallery_find_example_and_build_dirs('../../examples', '../examples')
-
-sphinx_gallery_conf = {
-    'examples_dirs': examples,
-    'gallery_dirs': auto_examples,
-    'filename_pattern': '.py',
-    'reset_argv': lambda _, __: ["-a"],
-    'within_subsection_order': FileNameSortKey,
-    'ignore_pattern': f'{re.escape(os.sep)}_',
-    'line_numbers': True,
-}
+nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
 
 
 # Theme options
 html_theme_options = {
-    'logo_only': True,
-
-    'tab_intro_dff': '#',
-    'tab_intro_addons': '#',
-    'tab_intro_designer': '#',
-    'tab_get_started': '#',
-    'tab_tutorials': '#',
-    'tab_documentation': './',  # Matches ROOT tag, should be ONE PER MODULE, other tabs = other modules (may be relative paths)
-    'tab_ecosystem': '#',
-    'tab_about_us': '#'
+    "logo_only": True,
+    "tab_intro_dff": "#",
+    "tab_intro_addons": "#",
+    "tab_intro_designer": "#",
+    "tab_get_started": "#",
+    "tab_tutorials": "#",
+    # Matches ROOT tag, should be ONE PER MODULE, other tabs = other modules (may be relative paths)
+    "tab_documentation": "./",
+    "tab_ecosystem": "#",
+    "tab_about_us": "#",
 }
+
+
+def setup(_):
+    generate_example_links_for_notebook_creation(["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
