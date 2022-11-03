@@ -1,7 +1,7 @@
 import logging
 import os
 import sys
-from typing import List, Tuple, Callable, Optional, Any
+from typing import List, Tuple, Callable, Optional
 
 from dff.core.engine.core import Context
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -37,22 +37,6 @@ SCRIPT = {
 
 
 TURNS = (
-    ("Hi", "Hi, how are you?"),
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about music now."),
-    ("Ok, goodbye.", "bye"),
-    ("Hi", "Hi, how are you?"),
-)
-
-TURNS_CALLBACK_QUERIES = (
-    ("Hi", "Hi, how are you?"),
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about music now."),
-    ("Ok, goodbye.", "bye"),
-    ("Hi", "Hi, how are you?"),
-)
-
-TURNS_PICTURES = (
     ("Hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("Let's talk about music.", "Sorry, I can not talk about music now."),

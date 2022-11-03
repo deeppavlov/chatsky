@@ -19,8 +19,7 @@ from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
 from dff.core.pipeline import Pipeline
 
 from dff.connectors.messenger.generics import Response, Keyboard, Button
-from examples.pipeline._pipeline_utils import get_auto_arg, auto_run_pipeline
-from examples.telegram._telegram_utils import check_env_bot_tokens
+from examples.telegram._telegram_utils import check_env_bot_tokens, get_auto_arg, auto_run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
