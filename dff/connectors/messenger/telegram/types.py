@@ -35,7 +35,6 @@ class TelegramUI(AdapterModel):
     keyboard: Optional[Union[types.ReplyKeyboardRemove, types.ReplyKeyboardMarkup, types.InlineKeyboardMarkup]] = None
     row_width: int = 3
 
-    @classmethod
     @root_validator
     def init_validator(cls, values: dict):
         if values["keyboard"] is not None:  # no changes if buttons are not required
@@ -62,14 +61,12 @@ class TelegramAttachment(AdapterModel):
     id: Optional[str] = None  # id field is made separate to simplify validation.
     title: Optional[str] = None
 
-    @classmethod
     @root_validator
     def validate_id_or_source(cls, values):
         if bool(values["source"]) == bool(values["id"]):
             raise ArgumentError(values, "Attachment type requires exactly one parameter, `source` or `id`.")
         return values
 
-    @classmethod
     @validator("source", pre=False)
     def validate_source(cls, source: Optional[Union[HttpUrl, FilePath]]):
         if not isinstance(source, Path):
@@ -82,7 +79,6 @@ class TelegramAttachment(AdapterModel):
 class TelegramAttachments(AdapterModel):
     files: List[types.InputMedia] = Field(default_factory=list, min_items=2, max_items=10)
 
-    @classmethod
     @validator("files", pre=True, each_item=True, always=True)
     def cast_to_input_media(cls, file: Any):
         tg_cls = None
