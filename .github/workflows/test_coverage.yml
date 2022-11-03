@@ -1,6 +1,13 @@
 name: test_coverage
 
-on: [push, pull_request]
+on:
+  push:
+    branches:
+    - dev
+    - test/**
+  pull_request:
+    branches:
+    - dev
 
 
 jobs:
