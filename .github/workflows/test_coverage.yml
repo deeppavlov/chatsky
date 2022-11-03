@@ -62,9 +62,5 @@ jobs:
         shell: bash
 
       - name: build coverage file
-<<<<<<< HEAD
-        run: pytest --tb=long -vv --cache-clear --cov=dff tests/ > pytest-coverage.txt
-=======
         run: pytest --tb=long -vv --cache-clear --cov=dff tests/
->>>>>>> origin/dev
         shell: bash
