@@ -1,10 +1,9 @@
-#!/usr/bin/env python3
 """
 The replies below use generic classes.
 Using generic responses, you can use send local files as well as links to external ones.
 """
+import logging
 import os
-import sys
 
 import dff.core.engine.conditions as cnd
 from dff.core.engine.core import Context, Actor
@@ -13,11 +12,14 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from telebot import types
 
 from dff.connectors.messenger.telegram.connector import TelegramConnector
-from dff.connectors.messenger.telegram.request_provider import PollingRequestProvider
-
-from dff.core.runner import ScriptRunner
+from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
+from dff.core.pipeline import Pipeline
 
 from dff.connectors.messenger.generics import Response, Image, Attachments
+from examples.telegram._telegram_utils import check_env_bot_tokens, get_auto_arg, auto_run_pipeline
+
+logger = logging.getLogger(__name__)
+logger.setLevel(logging.DEBUG)
 
 
 def doc_is_photo(message: types.Message):
@@ -91,20 +93,20 @@ def extract_data(ctx: Context, actor: Actor):
     return ctx
 
 
-provider = PollingRequestProvider(bot=bot)
+interface = PollingTelegramInterface(bot=bot)
 
-runner = ScriptRunner(
+pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    db=dict(),
-    request_provider=provider,
-    pre_annotators=[extract_data],
+    context_storage=dict(),
+    messenger_interface=interface,
+    pre_services=[extract_data],
 )
 
 if __name__ == "__main__":
-    if "BOT_TOKEN" not in os.environ:
-        print("BOT_TOKEN variable needs to be set to continue")
-        sys.exit(1)
-
-    runner.start()
+    check_env_bot_tokens()
+    if get_auto_arg():
+        auto_run_pipeline(pipeline, logger=logger)
+    else:
+        pipeline.run()

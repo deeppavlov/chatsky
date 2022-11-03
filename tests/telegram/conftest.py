@@ -1,13 +1,12 @@
-from re import L
-import os
-
 import pytest
 
-from .examples.no_runner.basic_bot import bot, actor
+from examples.telegram._telegram_utils import check_env_bot_tokens
+from examples.telegram.no_pipeline.basic_bot import bot, actor
 
-# for variable in ["BOT_TOKEN"]:
-#     if variable not in os.environ:
-#         raise AssertionError(f"{variable} variable needs to be set to continue")
+
+@pytest.fixture(scope="session")
+def env_var_presence():
+    yield check_env_bot_tokens()
 
 
 @pytest.fixture(scope="session")

@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 """
 This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on. 
 This approach remains much closer to the usual workflow of pytelegrambotapi developers, so go for it
@@ -15,7 +14,7 @@ from telebot.util import content_type_media
 
 from dff.connectors.messenger.telegram.connector import TelegramConnector
 from dff.connectors.messenger.telegram.utils import set_state, get_user_id, get_initial_context
-
+from examples.telegram._telegram_utils import check_env_bot_tokens
 
 db = dict()
 # Optionally, you can use database connection implementations from the dff ecosystem.
@@ -92,10 +91,7 @@ def dialog_handler(update):
 
 
 if __name__ == "__main__":
-    if "BOT_TOKEN" not in os.environ:
-        print("BOT_TOKEN variable needs to be set to continue")
-        sys.exit(1)
-
+    check_env_bot_tokens()
     try:
         bot.infinity_polling()
     except KeyboardInterrupt:
