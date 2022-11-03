@@ -16,8 +16,6 @@ example_utils = importlib.import_module(f"examples.{dot_path_to_addon}._telegram
     [
         "basics.flask",
         "basics.polling",
-        "generic_response.callback_queries",
-        "generic_response.pictures",
     ],
 )
 def test_examples(example_module_name: str):

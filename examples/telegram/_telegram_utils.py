@@ -83,13 +83,6 @@ class ConsoleFormatter(logging.Formatter):
         return formatter.format(record)
 
 
-def compare_responses(true_response: Any, actual_response: Any) -> bool:
-    if isinstance(true_response, str) and isinstance(actual_response, str):
-        return true_response == actual_response
-    else:
-        return true_response == actual_response
-
-
 def auto_run_pipeline(
     pipeline: Pipeline,
     turns: List[Tuple[str, str]] = TURNS,
