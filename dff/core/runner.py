@@ -53,7 +53,9 @@ class Runner:
     ):
         self._db: DBAbstractConnector = dict() if db is None else db
         self._actor: Actor = actor
-        self._request_provider: AbsRequestProvider = CLIRequestProvider() if request_provider is None else request_provider
+        self._request_provider: AbsRequestProvider = (
+            CLIRequestProvider() if request_provider is None else request_provider
+        )
         self._pre_annotators: list = [] if pre_annotators is None else pre_annotators
         self._post_annotators: list = [] if post_annotators is None else post_annotators
 

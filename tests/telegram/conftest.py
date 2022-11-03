@@ -1,6 +1,3 @@
-from re import L
-import os
-
 import pytest
 
 from .examples.no_runner.basic_bot import bot, actor

@@ -100,16 +100,18 @@ devel = [
     "twine==4.0.0",
 ]
 
-full = merge_req_lists([
-    core,
-    sqlite_dependencies,
-    redis_dependencies,
-    mongodb_dependencies,
-    mysql_dependencies,
-    postgresql_dependencies,
-    ydb_dependencies,
-    telegram_dependencies,
-])
+full = merge_req_lists(
+    [
+        core,
+        sqlite_dependencies,
+        redis_dependencies,
+        mongodb_dependencies,
+        mysql_dependencies,
+        postgresql_dependencies,
+        ydb_dependencies,
+        telegram_dependencies,
+    ]
+)
 
 tests_full = merge_req_lists(
     [

@@ -58,7 +58,8 @@ script = {
                 **{
                     "text": "Question: What's 2 + 2?",
                     # In this case, we use telegram-specific classes.
-                    # They derive from the generic ones and include more options, e.g. simple keyboard or inline keyboard.
+                    # They derive from the generic ones and include more options,
+                    # e.g. simple keyboard or inline keyboard.
                     "ui": TelegramUI(
                         buttons=[TelegramButton(text="5", payload="5"), TelegramButton(text="4", payload="4")],
                         is_inline=False,

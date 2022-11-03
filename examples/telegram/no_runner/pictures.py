@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on. 
+This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on.
 This approach remains much closer to the usual workflow of pytelegrambotapi developers, so go for it
-if you need a quick prototype or have no interest in using the dff.core.runner. 
+if you need a quick prototype or have no interest in using the dff.core.runner.
 """
 import os
 import sys
@@ -77,6 +77,8 @@ actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fa
 
 # While most of the time you will be using only one handler to iterate over your script,
 # you can always create a separate function that will take care of additional tasks.
+
+
 def extract_data(message):
     """A function to extract data with"""
     if not message.photo and not message.document:

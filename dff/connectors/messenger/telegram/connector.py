@@ -43,9 +43,7 @@ class TelegramConnector(TeleBot):
         super().__init__(token, threaded=threaded, parse_mode=parse_mode, skip_pending=skip_pending, *args, **kwargs)
         self.cnd = ConditionNamespace(self)
 
-    def send_response(
-        self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]
-    ):
+    def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]):
         """
         Cast the `response` argument to the :py:class:`~df_telegram_connector.types.TelegramResponse` type and send it.
         The order is that the media are sent first, after which the marked-up text message is sent.
@@ -71,10 +69,8 @@ class TelegramConnector(TeleBot):
             ready_response = TelegramResponse.parse_obj(response)
         else:
             raise TypeError(
-                """
-                Type of the response argument should be one of the following: 
-                str, dict, TelegramResponse, or df_generics.Response
-                """
+                "Type of the response argument should be one of the following:"
+                " str, dict, TelegramResponse, or df_generics.Response"
             )
 
         for attachment_prop, method in [

@@ -1,8 +1,8 @@
 #!/usr/bin/env python3
 """
-This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on. 
+This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on.
 This approach remains much closer to the usual workflow of pytelegrambotapi developers, so go for it
-if you need a quick prototype or have no interest in using the dff.core.runner. 
+if you need a quick prototype or have no interest in using the dff.core.runner.
 """
 import os
 import sys
@@ -53,13 +53,15 @@ script = {
 actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 
-# The content_type parameter is set to the `content_type_media` constant, so that the bot can reply to images, stickers, etc.
+# The content_type parameter is set to the `content_type_media` constant,
+# so that the bot can reply to images, stickers, etc.
 @bot.message_handler(func=lambda message: True, content_types=content_type_media)
 def dialog_handler(update):
     """
     | Standard handler that replies with dff.core.engine's :py:class:`~dff.core.engine.core.Actor` responses.
 
-    | Since the logic of processing Telegram updates will be wholly handled by the :py:class:`~dff.core.engine.core.Actor`,
+    | Since the logic of processing Telegram updates
+    | will be wholly handled by the :py:class:`~dff.core.engine.core.Actor`,
     | only one handler is sufficient to run the bot.
     | If you need to need to process other updates in addition to messages,
     | just stack the corresponding handler decorators on top of the function.

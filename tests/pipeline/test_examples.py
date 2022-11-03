@@ -13,8 +13,6 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipeline_utils")
 
 
-sys.path.append(str((pathlib.Path(__file__).parent / 'examples').absolute()))
-
 @pytest.mark.parametrize(
     "example_module_name",
     [

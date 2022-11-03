@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 from telebot import types
@@ -27,7 +25,7 @@ def test_message_handling(message, expected, actor_instance, basic_bot):
     assert condition(context, actor_instance) == expected
     wrong_type = create_query("some data")
     context.framework_states["TELEGRAM_CONNECTOR"]["data"] = wrong_type
-    assert condition(context, actor_instance) == False
+    assert not condition(context, actor_instance)
 
 
 @pytest.mark.parametrize("query,expected", [(create_query("4"), True), (create_query("5"), False)])
@@ -38,4 +36,4 @@ def test_query_handling(query, expected, actor_instance, basic_bot):
     assert condition(context, actor_instance) == expected
     wrong_type = create_text_message("some text")
     context.framework_states["TELEGRAM_CONNECTOR"]["data"] = wrong_type
-    assert condition(context, actor_instance) == False
+    assert not condition(context, actor_instance)

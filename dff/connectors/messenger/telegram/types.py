@@ -103,9 +103,8 @@ class TelegramAttachments(AdapterModel):
             return file
         else:
             raise TypeError(
-                """`files` field can only be set with InputMedia objects (pytelegrambotapi lib), 
-                or Image, Video, Audio or Document objects (dff.connectors.messenger.generics lib).
-                """
+                "`files` field can only be set with InputMedia objects (pytelegrambotapi lib),"
+                " or Image, Video, Audio or Document objects (dff.connectors.messenger.generics lib)."
             )
 
 

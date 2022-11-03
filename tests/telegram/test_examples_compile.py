@@ -1,5 +1,6 @@
 "This script ensures that example scripts can successfully compile and are ready to run"
 
+
 def test_basics():
     from .examples.no_runner.basic_bot import bot, actor
 
