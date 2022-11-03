@@ -32,6 +32,18 @@ def get_user_id(update: types.JsonDeserializable) -> str:
     return str(update.from_user.id)
 
 
+def get_content_type(update: types.JsonDeserializable) -> str:
+    """Extracts content type from an update instance and casts it to a string"""
+    assert hasattr(update, "content_type"), f"Received an invalid update object: {str(type(update))}."
+    return str(update.content_type)
+
+
+def get_text(update: types.JsonDeserializable) -> str:
+    """Extracts text from a text update instance and casts it to a string"""
+    assert hasattr(update, "text"), f"Received an invalid update object: {str(type(update))}."
+    return str(update.text)
+
+
 def get_initial_context(user_id: str):
     """
     Initialize a context with module-specific parameters.

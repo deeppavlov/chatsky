@@ -17,7 +17,7 @@ from dff.core.engine.core import Context, Actor
 from .utils import partialmethod, open_io, close_io
 from .types import TelegramResponse
 
-import dff.connectors.messenger.generics
+from dff.connectors.messenger.generics import Response
 
 
 class TelegramConnector(TeleBot):
@@ -40,11 +40,11 @@ class TelegramConnector(TeleBot):
     """
 
     def __init__(self, token, threaded=False, parse_mode=None, skip_pending=False, *args, **kwargs):
-        super().__init__(token, threaded=False, parse_mode=parse_mode, skip_pending=skip_pending, *args, **kwargs)
+        super().__init__(token, threaded=threaded, parse_mode=parse_mode, skip_pending=skip_pending, *args, **kwargs)
         self.cnd = ConditionNamespace(self)
 
     def send_response(
-        self, chat_id: Union[str, int], response: Union[str, dict, dff.connectors.messenger.generics.Response, TelegramResponse]
+        self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]
     ):
         """
         Cast the `response` argument to the :py:class:`~df_telegram_connector.types.TelegramResponse` type and send it.
@@ -67,13 +67,13 @@ class TelegramConnector(TeleBot):
             ready_response = response
         elif isinstance(response, str):
             ready_response = TelegramResponse(text=response)
-        elif isinstance(response, dict) or isinstance(response, dff.connectors.messenger.generics.Response):
+        elif isinstance(response, dict) or isinstance(response, Response):
             ready_response = TelegramResponse.parse_obj(response)
         else:
             raise TypeError(
                 """
                 Type of the response argument should be one of the following: 
-                str, dict, TelegramResponse, or dff.connectors.messenger.generics.Response
+                str, dict, TelegramResponse, or df_generics.Response
                 """
             )
 
