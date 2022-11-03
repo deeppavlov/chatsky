@@ -1,9 +1,6 @@
-import sys
 import json
 
 from telebot import types
-
-sys.path.insert(0, "../dff-generics")
 
 from dff.connectors.messenger.telegram.types import TelegramResponse, TelegramAttachments, TelegramAttachment
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image

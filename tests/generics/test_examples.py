@@ -13,6 +13,7 @@ example_utils = importlib.import_module(f"examples.{dot_path_to_addon}._example_
     [
         "basics",
         "buttons",
+        "media",
     ],
 )
 def test_examples(example_module_name: str):
