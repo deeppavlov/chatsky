@@ -18,7 +18,7 @@ logger.setLevel(logging.DEBUG)
 """
 When Pipeline is created using `from_dict` method, pipeline should be defined as dictionary.
 It should contain `services` - a ServiceGroupBuilder object,
-            basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4.
+basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4.
 
 On pipeline execution services from `services` list are run without difference between pre- and postprocessors.
 Actor instance should also be present among services.
