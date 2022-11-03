@@ -193,5 +193,5 @@ setup(
             "dff.py2graph = dff.script.import_export.parser.cli:py2graph_cli",
             "dff.graph2py = dff.script.import_export.parser.cli:graph2py_cli",
         ]
-    }
+    },
 )
