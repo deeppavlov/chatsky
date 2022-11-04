@@ -25,10 +25,7 @@ SCRIPT = {
             RESPONSE: "Sorry, I can not talk about music now.",
             TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
         },
-        "node4": {
-            RESPONSE: "bye",
-            TRANSITIONS: {"node1": exact_match("Hi")}
-        },
+        "node4": {RESPONSE: "bye", TRANSITIONS: {"node1": exact_match("Hi")}},
         "fallback_node": {
             RESPONSE: "Ooops",
             TRANSITIONS: {"node1": exact_match("Hi")},
@@ -135,21 +132,14 @@ def run_actor(
     return actual_response, ctx
 
 
-def run_auto_mode(
-    actor: Actor,
-    testing_dialog: List[Tuple[Any, Any]] = TURNS,
-    logger: Optional[Logger] = None
-):
+def run_auto_mode(actor: Actor, testing_dialog: List[Tuple[Any, Any]] = TURNS, logger: Optional[Logger] = None):
     ctx = {}
     ConsoleFormatter.set_logger(logger)
     for in_request, true_response in testing_dialog:
         _, ctx = run_actor(in_request, ctx, actor, true_response, logger=logger)
 
 
-def run_interactive_mode(
-    actor: Actor,
-    logger: Optional[Logger] = None
-):
+def run_interactive_mode(actor: Actor, logger: Optional[Logger] = None):
     ctx = {}
     ConsoleFormatter.set_logger(logger)
     while True:

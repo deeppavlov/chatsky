@@ -46,11 +46,7 @@ def process_response(response: Response, _: Context) -> str:
     return response.text
 
 
-def run_auto_mode(
-    actor: Actor,
-    testing_dialog: List[Tuple[Any, Any]] = TURNS,
-    logger: Optional[Logger] = None
-):
+def run_auto_mode(actor: Actor, testing_dialog: List[Tuple[Any, Any]] = TURNS, logger: Optional[Logger] = None):
     ctx = {}
     ConsoleFormatter.set_logger(logger)
     for in_request, true_response in testing_dialog:
@@ -61,23 +57,15 @@ def run_auto_mode(
             true_response,
             request_wrapper=process_request,
             response_wrapper=process_response,
-            logger=logger
+            logger=logger,
         )
 
 
-def run_interactive_mode(
-    actor: Actor,
-    logger: Optional[Logger] = None
-):
+def run_interactive_mode(actor: Actor, logger: Optional[Logger] = None):
     ctx = {}
     ConsoleFormatter.set_logger(logger)
     while True:
         in_request = input(">>> ")
         _, ctx = run_actor(
-            in_request,
-            ctx,
-            actor,
-            request_wrapper=process_request,
-            response_wrapper=process_response,
-            logger=logger
+            in_request, ctx, actor, request_wrapper=process_request, response_wrapper=process_response, logger=logger
         )
