@@ -8,8 +8,7 @@ import logging
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
-from examples.engine._engine_utils import run_interactive_mode, turn_handler
-from examples.utils import get_auto_arg
+from dff._example_utils.index import run_interactive_mode, run_actor, is_in_notebook
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +34,7 @@ def run_auto_mode():
     iterator = iter(testing_dialog)
     in_request, true_out_response = next(iterator)
     # pass as empty context
-    _, ctx = turn_handler(in_request, ctx, actor, true_out_response, logger)
+    _, ctx = run_actor(in_request, ctx, actor, true_out_response, logger=logger)
     # serialize context to json str
     ctx = ctx.json()
     if isinstance(ctx, str):
@@ -43,7 +42,7 @@ def run_auto_mode():
     else:
         raise Exception(f"ctx={ctx} has to be serialized to json string")
     in_request, true_out_response = next(iterator)
-    _, ctx = turn_handler(in_request, ctx, actor, true_out_response, logger)
+    _, ctx = run_actor(in_request, ctx, actor, true_out_response, logger=logger)
     # serialize context to dict
     ctx = ctx.dict()
     if isinstance(ctx, dict):
@@ -51,16 +50,16 @@ def run_auto_mode():
     else:
         raise Exception(f"ctx={ctx} has to be serialized to dict")
     in_request, true_out_response = next(iterator)
-    _, ctx = turn_handler(in_request, ctx, actor, true_out_response, logger)
+    _, ctx = run_actor(in_request, ctx, actor, true_out_response, logger=logger)
     # context without serialization
     if not isinstance(ctx, Context):
         raise Exception(f"ctx={ctx} has to have Context type")
     in_request, true_out_response = next(iterator)
-    _, ctx = turn_handler(in_request, ctx, actor, true_out_response, logger)
+    _, ctx = run_actor(in_request, ctx, actor, true_out_response, logger=logger)
 
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if is_in_notebook():
         run_auto_mode()
     else:
         run_interactive_mode(actor, logger)

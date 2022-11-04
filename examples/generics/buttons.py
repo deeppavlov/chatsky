@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import logging
 
 import dff.core.engine.conditions as cnd
@@ -7,7 +6,10 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.generics.response import Button, Keyboard, Response
-from ._example_utils import run_interactive_mode
+from dff._example_utils.index import is_in_notebook
+from dff._example_utils.generics import run_interactive_mode, run_auto_mode
+
+logger = logging.getLogger(__name__)
 
 
 def check_button_payload(value: str):
@@ -101,9 +103,7 @@ testing_dialog = [
 actor = Actor(script=script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    # run_test()
-    run_interactive_mode(actor)
+    if is_in_notebook():
+        run_auto_mode(actor, testing_dialog, logger)
+    else:
+        run_interactive_mode(actor, logger)

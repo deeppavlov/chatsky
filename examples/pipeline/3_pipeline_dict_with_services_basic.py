@@ -10,7 +10,7 @@ import logging
 from dff.core.engine.core import Actor
 
 from dff.core.pipeline import Service, Pipeline
-from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
+from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -68,7 +68,7 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if should_auto_execute():
-        auto_run_pipeline(pipeline, logger=logger)
+    if is_in_notebook():
+        run_pipeline(pipeline, logger=logger)
     else:
         pipeline.run()

@@ -12,7 +12,7 @@ from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from _pipeline_utils import SCRIPT, should_auto_execute
+from dff._example_utils.index import SCRIPT, is_in_notebook
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -54,7 +54,7 @@ messenger_interface = (
 )  # For this simple case of Flask, CallbackMessengerInterface may not be overridden
 
 
-def construct_webpage_by_response(response: str) -> str:
+def construct_webpage_by_response(response: str, _: Context) -> str:
     return f"""
     <!DOCTYPE html>
     <html>
@@ -93,7 +93,7 @@ def purify_request(ctx: Context):
 def markdown_request(ctx: Context):
     last_response = ctx.last_response
     last_index = get_last_index(ctx.responses)
-    ctx.responses[last_index] = construct_webpage_by_response(last_response)
+    ctx.responses[last_index] = construct_webpage_by_response(last_response, ctx)
 
 
 pipeline_dict = {
@@ -117,7 +117,7 @@ async def route():
 
 pipeline = Pipeline(**pipeline_dict)
 
-if __name__ == "__main__" and not should_auto_execute():
+if __name__ == "__main__" and not is_in_notebook():
     pipeline.run()
     app.run()
     # Navigate to http://127.0.0.1:5000/pipeline_web_interface?request={REQUEST} to receive response

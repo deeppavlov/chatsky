@@ -1,16 +1,10 @@
 import importlib
-import os
-import sys
-
 import pytest
 
 import tests.utils as utils
-
-# TODO: remove this and refactor examples as soon as utils will be moved to PYPI
-sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
+from dff._example_utils.index import run_pipeline
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
-pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipeline_utils")
 
 
 @pytest.mark.parametrize(
@@ -33,6 +27,6 @@ pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipelin
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     if example_module_name.startswith("6"):
-        pipeline_utils.auto_run_pipeline(example_module.pipeline, wrapper=example_module.construct_webpage_by_response)
+        run_pipeline(example_module.pipeline, response_wrapper=example_module.construct_webpage_by_response)
     else:
-        pipeline_utils.auto_run_pipeline(example_module.pipeline)
+        run_pipeline(example_module.pipeline)

@@ -3,9 +3,9 @@ import importlib
 import pytest
 
 import tests.utils as utils
+from dff._example_utils.index import run_auto_mode
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
-engine_utils = importlib.import_module(f"examples.{dot_path_to_addon}._engine_utils")
 
 
 @pytest.mark.parametrize(
@@ -24,4 +24,7 @@ engine_utils = importlib.import_module(f"examples.{dot_path_to_addon}._engine_ut
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    engine_utils.run_auto_mode(example_module.actor, example_module.testing_dialog, example_module.logger)
+    if example_module_name.startswith("example_6"):
+        example_module.run_auto_mode()
+    else:
+        run_auto_mode(example_module.actor, example_module.testing_dialog, example_module.logger)

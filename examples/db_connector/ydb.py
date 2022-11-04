@@ -9,13 +9,13 @@ import os
 from dff.core.engine.core import Actor
 
 from dff.connectors.db import connector_factory
-from _db_connector_utils import script, run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
+from dff._example_utils.db_connector import run_auto_mode, run_interactive_mode
+from dff._example_utils.index import is_in_notebook, SCRIPT
 
 logger = logging.getLogger(__name__)
 
 
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
+actor = Actor(SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 # ##### Connecting to yandex cloud
 # https://github.com/zinal/ydb-python-sdk/blob/ex_basic-example_p1/examples/basic_example_v1/README.md
@@ -33,7 +33,7 @@ db = connector_factory(db_uri)
 
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if is_in_notebook():
         run_auto_mode(actor, db, logger)
     else:
         run_interactive_mode(actor, db, logger)

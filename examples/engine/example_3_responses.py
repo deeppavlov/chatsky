@@ -16,8 +16,7 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
 import dff.core.engine.responses as rsp
 import dff.core.engine.conditions as cnd
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
+from dff._example_utils.index import run_auto_mode, run_interactive_mode, is_in_notebook
 
 logger = logging.getLogger(__name__)
 
@@ -111,7 +110,7 @@ random.seed(31415)  # predestination of choice
 
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if is_in_notebook():
         run_auto_mode(actor, testing_dialog, logger)
     else:
         run_interactive_mode(actor, logger)

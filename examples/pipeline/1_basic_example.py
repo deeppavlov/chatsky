@@ -10,7 +10,7 @@ import logging
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline
-from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
+from dff._example_utils.index import SCRIPT, run_pipeline, is_in_notebook
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -40,8 +40,8 @@ pipeline = Pipeline.from_script(
 
 # %%
 if __name__ == "__main__":
-    if should_auto_execute():
-        auto_run_pipeline(pipeline, logger=logger)
+    if is_in_notebook():
+        run_pipeline(pipeline, logger=logger)
     else:
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:

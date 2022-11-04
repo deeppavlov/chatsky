@@ -1,4 +1,3 @@
-#!/usr/bin/env python3
 import logging
 import pathlib
 
@@ -7,7 +6,10 @@ from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.connectors.messenger.generics.response import Attachments, Image, Response
-from ._example_utils import run_interactive_mode
+from dff._example_utils.index import is_in_notebook
+from dff._example_utils.generics import run_interactive_mode, run_auto_mode
+
+logger = logging.getLogger(__name__)
 
 script = {
     "root": {
@@ -66,9 +68,7 @@ testing_dialog = [
 ]
 
 if __name__ == "__main__":
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    # run_test()
-    run_interactive_mode(actor)
+    if is_in_notebook():
+        run_auto_mode(actor, testing_dialog, logger)
+    else:
+        run_interactive_mode(actor, logger)

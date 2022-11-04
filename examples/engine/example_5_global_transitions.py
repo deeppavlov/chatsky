@@ -10,8 +10,7 @@ from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
+from dff._example_utils.index import run_auto_mode, run_interactive_mode, is_in_notebook
 
 logger = logging.getLogger(__name__)
 
@@ -112,7 +111,7 @@ testing_dialog = [
 
 
 if __name__ == "__main__":
-    if get_auto_arg():
+    if is_in_notebook():
         run_auto_mode(actor, testing_dialog, logger)
     else:
         run_interactive_mode(actor, logger)

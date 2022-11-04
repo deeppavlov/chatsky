@@ -3,9 +3,9 @@ import socket
 import os
 import random
 import uuid
-import importlib
 from platform import system
 
+from dff._example_utils.index import SCRIPT, TURNS
 from dff.core.engine.core import Actor
 
 from dff.connectors.db.protocol import get_protocol_install_suggestion
@@ -26,7 +26,6 @@ from dff.connectors.db import DBConnector
 import tests.utils as utils
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
-db_connector_utils = importlib.import_module(f"examples.{dot_path_to_addon}._db_connector_utils")
 
 
 def ping_localhost(port: int, timeout=60):
@@ -54,7 +53,7 @@ YDB_ACTIVE = ping_localhost(2136)
 
 def run_turns_test(actor: Actor, db: DBConnector):
     for user_id in [str(random.randint(0, 10000000)), random.randint(0, 10000000), uuid.uuid4()]:
-        for turn_id, (request, true_response) in enumerate(db_connector_utils.testing_dialog):
+        for turn_id, (request, true_response) in enumerate(TURNS):
             try:
                 ctx = db.get(user_id, Context(id=user_id))
                 ctx.add_request(request)
@@ -97,7 +96,7 @@ def generic_test(db, testing_context, context_id):
     # test `get` method
     assert db.get(context_id) is None
     actor = Actor(
-        db_connector_utils.script,
+        SCRIPT,
         start_label=("greeting_flow", "start_node"),
         fallback_label=("greeting_flow", "fallback_node"),
     )
