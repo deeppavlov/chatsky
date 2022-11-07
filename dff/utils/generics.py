@@ -61,6 +61,6 @@ def run_generics_example(
     logger: Optional[Logger] = None,
     request_wrapper: Optional[ServiceBuilder] = process_request,
     response_wrapper: Optional[ServiceBuilder] = process_response,
-    **kwargs
+    **kwargs,
 ):
     run_example(logger, request_wrapper=request_wrapper, response_wrapper=response_wrapper, **kwargs)

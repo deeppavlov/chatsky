@@ -5,7 +5,6 @@ import pytest
 
 import tests.utils as utils
 from dff.utils.common import run_example
-from dff.utils.toy_script import HAPPY_PATH
 
 logger = logging.Logger(__name__)
 
@@ -37,5 +36,5 @@ def test_examples(example_module_name: str):
         example_module.logger,
         actor=example_module.actor,
         response_wrapper=response_wrapper,
-        happy_path=example_module.testing_dialog
+        happy_path=example_module.testing_dialog,
     )

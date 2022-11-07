@@ -40,7 +40,7 @@ def create_example_pipeline(
     context_id: Optional[Hashable] = None,
     context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
     request_wrapper: Optional[ServiceBuilder] = None,
-    response_wrapper: Optional[ServiceBuilder] = None
+    response_wrapper: Optional[ServiceBuilder] = None,
 ) -> Pipeline:
     if happy_path is None and is_in_notebook():
         happy_path = HAPPY_PATH
@@ -63,7 +63,7 @@ def create_example_pipeline(
             context_storage,
             messenger_interface,
             pre_services,
-            post_services
+            post_services,
         )
     else:
         pipeline.actor = actor
