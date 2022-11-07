@@ -3,6 +3,7 @@ import pytest
 
 import tests.utils as utils
 from dff.utils.common import run_example
+from dff.utils.toy_script import HAPPY_PATH
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -26,4 +27,4 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    run_example(example_module.logger, pipeline=example_module.pipeline, happy_path=(("error?", "error!"),))
+    run_example(example_module.logger, pipeline=example_module.pipeline, happy_path=HAPPY_PATH)

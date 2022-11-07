@@ -94,12 +94,12 @@ testing_dialog = [
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
-    ("Hi", "Hello, how are you?"),  # node4 -> node1
+    ("Hi", "Hi, what is up?"),  # node4 -> node1
     ("stop", {"previous_node": ("greeting_flow", "node1"), "last_request": "stop"}),  # node1 -> fallback_node
     ("one", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "one"}),  # f_n->f_n
     ("help", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "help"}),  # f_n->f_n
     ("nope", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "nope"}),  # f_n->f_n
-    ("Hi", "Hi, what is up?"),  # fallback_node -> node1
+    ("Hi", "Hello, how are you?"),  # fallback_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4

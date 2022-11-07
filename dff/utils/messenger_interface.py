@@ -49,6 +49,7 @@ class LoggerMessengerInterface(PollingMessengerInterface):
         handler.setLevel(DEBUG)
         handler.setFormatter(ConsoleFormatter())
         logger.addHandler(handler)
+        logger.setLevel(DEBUG)
 
     def _happy_path_iterator(self, happy_path: Tuple[Tuple[str, str], ...]):
         for entry in happy_path:
@@ -56,7 +57,10 @@ class LoggerMessengerInterface(PollingMessengerInterface):
             yield entry[0]
 
     def _on_exception(self, e: BaseException):
-        raise e
+        if isinstance(e, StopIteration):
+            pass
+        else:
+            raise e
 
     def _request(self) -> List[Tuple[Any, Any]]:
         request = self._request_function()

@@ -23,6 +23,7 @@ def process_request(ctx: Context):
         except (IndexError, ValueError):
             raise ValueError("Type in the index of the correct option to choose from the buttons.")
         ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+        return
     ctx.requests[last_index] = last_request
 
 
@@ -34,12 +35,14 @@ def process_response(ctx: Context):
     if ui and ui.buttons:
         options = [f"{str(idx)}): {item.text}" for idx, item in enumerate(ui.buttons)]
         ctx.responses[last_index] = "\n".join(["", last_response.text] + options)
+        return
 
     attachment = last_response.image or last_response.document or last_response.audio or last_response.video
     if attachment and attachment.source:
         with open(attachment.source, "rb") as file:
             bytestr = file.read()
             ctx.responses[last_index] = "\n".join(["", last_response.text, f"Attachment size: {len(bytestr)} bytes."])
+            return
 
     attachments = last_response.attachments
     if attachments:
@@ -49,14 +52,15 @@ def process_response(ctx: Context):
                 bytestr = file.read()
                 size += len(bytestr)
         ctx.responses[last_index] = "\n".join(["", last_response.text, f"Grouped attachment size: {str(size)} bytes."])
+        return
 
     ctx.responses[last_index] = last_response.text
 
 
 def run_generics_example(
     logger: Optional[Logger] = None,
-    request_wrapper: Optional[ServiceBuilder] = None,
-    response_wrapper: Optional[ServiceBuilder] = None,
+    request_wrapper: Optional[ServiceBuilder] = process_request,
+    response_wrapper: Optional[ServiceBuilder] = process_response,
     **kwargs
 ):
     run_example(logger, request_wrapper=request_wrapper, response_wrapper=response_wrapper, **kwargs)

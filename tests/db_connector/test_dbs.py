@@ -22,6 +22,7 @@ from dff.core.engine.core import Context
 
 from dff.connectors.db import DBConnector
 import tests.utils as utils
+from dff.utils.toy_script import HAPPY_PATH
 
 logger = logging.Logger(__name__)
 
@@ -72,7 +73,7 @@ def generic_test(db, testing_context, context_id):
     assert context_id not in db
     # test `get` method
     assert db.get(context_id) is None
-    run_example(logger, context_storage=db)
+    run_example(logger, context_storage=db, happy_path=HAPPY_PATH)
 
 
 @pytest.mark.parametrize(

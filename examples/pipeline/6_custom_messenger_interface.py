@@ -71,7 +71,7 @@ def construct_webpage_by_response(response: str, _: Context) -> str:
         <img src="https://source.unsplash.com/random?{response}" alt="Response picture" style="width:50%;height:50%;">
         </body>
     </html>
-    """
+    """ if is_in_notebook() else response
 
 
 def purify_request(ctx: Context):
