@@ -6,8 +6,7 @@ from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.connectors.messenger.generics.response import Attachments, Image, Response
-from dff._example_utils.index import is_in_notebook
-from dff._example_utils.generics import run_interactive_mode, run_auto_mode
+from dff.utils.generics import run_generics_example
 
 logger = logging.getLogger(__name__)
 
@@ -68,7 +67,4 @@ testing_dialog = [
 ]
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    run_generics_example(logger, actor=actor, happy_path=testing_dialog)

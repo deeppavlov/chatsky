@@ -1,9 +1,12 @@
 import importlib
+import logging
 
 import pytest
 
 import tests.utils as utils
-from dff._example_utils.index import run_auto_mode
+from dff.utils.common import run_example
+
+logger = logging.Logger(__name__)
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -24,7 +27,9 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
+
     if example_module_name.startswith("example_6"):
-        example_module.run_auto_mode()
+        response_wrapper = example_module.process_response
     else:
-        run_auto_mode(example_module.actor, example_module.testing_dialog, example_module.logger)
+        response_wrapper = None
+    run_example(example_module.logger, actor=example_module.actor, response_wrapper=response_wrapper)

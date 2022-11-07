@@ -7,15 +7,14 @@ The following example shows messenger interfaces usage
 
 import logging
 
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Context
 from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from dff._example_utils.index import SCRIPT, is_in_notebook
+from dff.utils.common import create_example_actor, is_in_notebook
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Messenger interfaces are used for providing a way for communication between user and pipeline.
@@ -46,8 +45,6 @@ Two services are used to process request:
 """
 
 app = Flask("examples.6_custom_messenger_interface")
-
-actor = Actor(SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 messenger_interface = (
     CallbackMessengerInterface()
@@ -101,7 +98,7 @@ pipeline_dict = {
     "components": [
         purify_request,
         {
-            "handler": actor,
+            "handler": create_example_actor(),
             "name": "encapsulated-actor",
         },  # Actor here is encapsulated in another service with specific name
         markdown_request,

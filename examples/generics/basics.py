@@ -1,43 +1,10 @@
 import logging
 
-import dff.core.engine.conditions as cnd
-from dff.core.engine.core import Actor
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-
-from dff.connectors.messenger.generics import Response
-from dff._example_utils.index import is_in_notebook
-from dff._example_utils.generics import run_interactive_mode, run_auto_mode
+from dff.utils.generics import run_generics_example
+from dff.utils.common import create_example_actor
 
 logger = logging.getLogger(__name__)
 
-script = {
-    "greeting_flow": {
-        "start_node": {
-            RESPONSE: Response(text=""),
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
-        },
-        "node1": {
-            RESPONSE: Response(text="Hi, how are you?"),
-            TRANSITIONS: {"node2": cnd.exact_match("i'm fine, how are you?")},
-        },
-        "node2": {
-            RESPONSE: Response(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.exact_match("Let's talk about music.")},
-        },
-        "node3": {
-            RESPONSE: Response(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
-        },
-        "node4": {
-            RESPONSE: Response(text="bye"),
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
-        },
-        "fallback_node": {
-            RESPONSE: Response(text="Ooops"),
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
-        },
-    }
-}
 
 testing_dialog = [
     ("Hi", "Hi, how are you?"),
@@ -53,14 +20,7 @@ testing_dialog = [
     ("Ok, goodbye.", "bye"),
 ]
 
-actor = Actor(
-    script=script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
+actor = create_example_actor()
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    run_generics_example(logger, actor=actor)

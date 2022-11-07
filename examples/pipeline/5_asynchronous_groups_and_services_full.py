@@ -10,13 +10,12 @@ import json
 import logging
 import urllib.request
 
-from dff.core.engine.core import Actor, Context
+from dff.core.engine.core import Context
 
 from dff.core.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Services and service groups can be synchronous and asynchronous.
@@ -50,13 +49,6 @@ Service group `service_group_1` is also asynchronous, it logs HTTPS requests (fr
     running simultaneously, in random order.
 Service group `pipeline` can't be asynchronous because `balanced_group` and actor are synchronous.
 """
-
-
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
 
 
 async def simple_asynchronous_service(_, __, info: ServiceRuntimeInfo):
@@ -97,7 +89,7 @@ pipeline_dict = {
                 simple_asynchronous_service,
             ],
         ),
-        actor,
+        create_example_actor(),
         [meta_web_querying_service(photo) for photo in range(1, 16)],
         context_printing_service,
     ],
@@ -107,7 +99,4 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

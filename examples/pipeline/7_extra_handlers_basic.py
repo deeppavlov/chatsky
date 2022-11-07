@@ -11,13 +11,12 @@ import logging
 import random
 from datetime import datetime
 
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Extra handlers are additional function lists (before-functions and/or after-functions)
@@ -39,13 +38,6 @@ def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]})
-
-
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
 
 
 async def heavy_service(_):
@@ -89,7 +81,7 @@ pipeline_dict = {
                 },
             ],
         ),
-        actor,
+        create_example_actor(),
         logging_service,
     ],
 }
@@ -98,7 +90,4 @@ pipeline_dict = {
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

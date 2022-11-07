@@ -11,8 +11,6 @@ import logging
 import random
 from datetime import datetime
 
-from dff.core.engine.core import Actor
-
 from dff.core.pipeline import (
     Pipeline,
     ComponentExecutionState,
@@ -20,10 +18,9 @@ from dff.core.pipeline import (
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
 )
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """ TODO: update docs
 Pipeline functionality can be extended by global extra handlers.
@@ -51,13 +48,6 @@ Information about pipeline component execution time and
     result is collected and printed to info log after pipeline execution.
 Pipeline consists of actor and 25 `long_service`s that run random amount of time between 0 and 0.05 seconds.
 """
-
-
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
 
 start_times = dict()  # Place to temporarily store service start times
 pipeline_info = dict()  # Pipeline information storage
@@ -100,7 +90,7 @@ async def long_service(_, __, info: ServiceRuntimeInfo):
 pipeline_dict = {
     "components": [
         [long_service for _ in range(0, 25)],
-        actor,
+        create_example_actor(),
     ],
 }
 
@@ -113,7 +103,4 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER, after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, after_all)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

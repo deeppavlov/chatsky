@@ -7,7 +7,6 @@ The following example shows pipeline service group usage and start conditions
 
 import json
 import logging
-from dff.core.engine.core import Actor
 
 from dff.core.pipeline import (
     Service,
@@ -18,10 +17,9 @@ from dff.core.pipeline import (
     all_condition,
     ServiceRuntimeInfo,
 )
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Pipeline can contain not only single services, but also service groups.
@@ -91,13 +89,6 @@ Here there are two conditionally executed services: a service named `running_ser
 """
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 def simple_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running...")
 
@@ -116,7 +107,7 @@ pipeline_dict = {
             simple_service,  # This simple service will be named `simple_service_0`
             simple_service,  # This simple service will be named `simple_service_1`
         ],  # Despite this is the unnamed service group in the root service group, it will be named `service_group_0`
-        actor,
+        create_example_actor(),
         ServiceGroup(
             name="named_group",
             components=[
@@ -144,8 +135,5 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        logger.info(f"Pipeline structure:\n{pipeline.pretty_format()}")
-        pipeline.run()
+    logger.info(f"Pipeline structure:\n{pipeline.pretty_format()}")
+    run_example(logger, pipeline=pipeline)

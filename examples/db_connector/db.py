@@ -6,15 +6,10 @@
 import logging
 import os
 
-from dff.core.engine.core import Actor
-
 from dff.connectors.db import connector_factory
-from dff._example_utils.db_connector import run_auto_mode, run_interactive_mode
-from dff._example_utils.index import is_in_notebook, SCRIPT
+from dff.utils.common import run_example
 
 logger = logging.getLogger(__name__)
-
-actor = Actor(SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 # ######## mongodb #########
 # db_uri = "mongodb://{}:{}@localhost:27017/{}".format(
@@ -49,7 +44,4 @@ db = connector_factory(db_uri)
 
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_auto_mode(actor, db, logger)
-    else:
-        run_interactive_mode(actor, db, logger)
+    run_example(logger, context_storage=db)

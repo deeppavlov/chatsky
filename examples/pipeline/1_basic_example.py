@@ -10,10 +10,10 @@ import logging
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline
-from dff._example_utils.index import SCRIPT, run_pipeline, is_in_notebook
+from dff.utils.common import run_example, is_in_notebook
+from dff.utils.toy_script import TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 # %% [markdown]
 """
@@ -32,7 +32,7 @@ This call will return Context, its `last_response` property will be actors respo
 
 # %%
 pipeline = Pipeline.from_script(
-    SCRIPT,  # Actor script object, defined in `.utils` module.
+    TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
@@ -41,7 +41,7 @@ pipeline = Pipeline.from_script(
 # %%
 if __name__ == "__main__":
     if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
+        run_example(logger, pipeline=pipeline)
     else:
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:

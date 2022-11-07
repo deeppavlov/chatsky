@@ -11,10 +11,9 @@ import urllib.request
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import CLIMessengerInterface, Service, Pipeline, ServiceRuntimeInfo
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import run_example, create_example_actor
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 When Pipeline is created using `from_dict` method,
@@ -52,13 +51,6 @@ First two of them write sample feature detection data to `ctx.misc`.
 The first uses a constant expression and the second fetches from `example.com`.
 Third one is Actor (it acts like a _special_ service here). Final service logs `ctx.misc` dict.
 """
-
-
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
 
 
 def prepreprocess(ctx: Context):
@@ -102,7 +94,7 @@ pipeline_dict = {
             "name": "preprocessor",
         },  # This service will be named `preprocessor`, handler name will be overridden
         preprocess,
-        actor,
+        create_example_actor(),
         Service(
             handler=postprocess,
             name="postprocessor",
@@ -114,7 +106,4 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

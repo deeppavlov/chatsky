@@ -7,13 +7,11 @@ The following example shows pipeline service group usage and start conditions
 
 import json
 import logging
-from dff.core.engine.core import Actor
 
 from dff.core.pipeline import Service, Pipeline, not_condition, service_successful_condition, ServiceRuntimeInfo
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Pipeline can contain not only single services, but also service groups.
@@ -43,13 +41,6 @@ that contains execution state of all previously run services.
 """
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 def always_running_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running...")
 
@@ -68,7 +59,7 @@ pipeline_dict = {
             handler=always_running_service,
             name="always_running_service",
         ),
-        actor,
+        create_example_actor(),
         Service(
             handler=never_running_service,
             start_condition=not_condition(service_successful_condition(".pipeline.always_running_service")),
@@ -84,7 +75,4 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

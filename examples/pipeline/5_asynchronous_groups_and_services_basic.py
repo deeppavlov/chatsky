@@ -8,13 +8,10 @@ The following example shows pipeline asynchronous service and service group usag
 import asyncio
 import logging
 
-from dff.core.engine.core import Actor
-
 from dff.core.pipeline import Pipeline
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Services and service groups can be synchronous and asynchronous.
@@ -30,13 +27,6 @@ Service group `pipeline` can't be asynchronous because actor is synchronous.
 """
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 async def time_consuming_service(_):
     await asyncio.sleep(0.01)
 
@@ -44,7 +34,7 @@ async def time_consuming_service(_):
 pipeline_dict = {
     "components": [
         [time_consuming_service for _ in range(0, 10)],
-        actor,
+        create_example_actor(),
     ],
 }
 
@@ -52,7 +42,4 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

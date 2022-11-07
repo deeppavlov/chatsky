@@ -6,8 +6,7 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.generics.response import Button, Keyboard, Response
-from dff._example_utils.index import is_in_notebook
-from dff._example_utils.generics import run_interactive_mode, run_auto_mode
+from dff.utils.generics import run_generics_example
 
 logger = logging.getLogger(__name__)
 
@@ -103,7 +102,4 @@ testing_dialog = [
 actor = Actor(script=script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    run_generics_example(logger, actor=actor, happy_path=testing_dialog)

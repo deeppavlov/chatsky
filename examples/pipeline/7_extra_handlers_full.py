@@ -11,13 +11,12 @@ import random
 from datetime import datetime
 
 import psutil
-from dff.core.engine.core import Context, Actor
+from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline, ServiceGroup, to_service, ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import create_example_actor, run_example
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """ TODO: update docs
 Extra handlers are additional function lists (before-functions and/or after-functions)
@@ -94,12 +93,6 @@ def json_converter_after_handler(ctx, _, info):
     ctx.misc.pop(get_extra_handler_misc_field(info, "str"))
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 memory_heap = dict()  # This object plays part of some memory heap
 
 
@@ -125,7 +118,7 @@ pipeline_dict = {
             after_handler=[time_measure_after_handler],
             components=[heavy_service for _ in range(0, 5)],
         ),
-        actor,
+        create_example_actor(),
         logging_service,
     ],
 }
@@ -134,7 +127,4 @@ pipeline_dict = {
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    run_example(logger, pipeline=pipeline)

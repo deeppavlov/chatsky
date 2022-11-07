@@ -10,10 +10,10 @@ import logging
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline, CLIMessengerInterface
-from dff._example_utils.index import SCRIPT, is_in_notebook, run_pipeline
+from dff.utils.common import is_in_notebook, run_example
+from dff.utils.toy_script import TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 When Pipeline is created with `from_script` method, additional pre- and postprocessors can be defined.
@@ -43,7 +43,7 @@ def pong_processor(ctx: Context):
 
 
 pipeline = Pipeline.from_script(
-    SCRIPT,
+    TOY_SCRIPT,
     ("greeting_flow", "start_node"),
     ("greeting_flow", "fallback_node"),
     {},  # `context_storage` - a dictionary or a `DBAbstractConnector` instance, a place to store dialog contexts
@@ -55,7 +55,7 @@ pipeline = Pipeline.from_script(
 
 if __name__ == "__main__":
     if is_in_notebook():
-        run_pipeline(pipeline, logger=logger)
+        run_example(logger, pipeline=pipeline)
     else:
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:

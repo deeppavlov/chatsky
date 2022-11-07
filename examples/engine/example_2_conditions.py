@@ -9,7 +9,7 @@ import re
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
 import dff.core.engine.conditions as cnd
-from dff._example_utils.index import run_auto_mode, run_interactive_mode, is_in_notebook
+from dff.utils.common import run_example
 
 logger = logging.getLogger(__name__)
 
@@ -121,7 +121,4 @@ testing_dialog = [
 ]
 
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    run_example(logger, actor=actor, happy_path=testing_dialog)

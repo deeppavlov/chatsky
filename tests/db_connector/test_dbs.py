@@ -1,12 +1,11 @@
+import logging
+
 import pytest
 import socket
 import os
-import random
-import uuid
 from platform import system
 
-from dff._example_utils.index import SCRIPT, TURNS
-from dff.core.engine.core import Actor
+from dff.utils.common import run_example
 
 from dff.connectors.db.protocol import get_protocol_install_suggestion
 from dff.connectors.db.json_connector import JSONConnector
@@ -19,11 +18,12 @@ from dff.connectors.db.mongo_connector import MongoConnector, mongo_available
 from dff.connectors.db.ydb_connector import YDBConnector, ydb_available
 from dff.connectors.db import connector_factory
 
-
 from dff.core.engine.core import Context
 
 from dff.connectors.db import DBConnector
 import tests.utils as utils
+
+logger = logging.Logger(__name__)
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -51,29 +51,6 @@ MYSQL_ACTIVE = ping_localhost(3307)
 YDB_ACTIVE = ping_localhost(2136)
 
 
-def run_turns_test(actor: Actor, db: DBConnector):
-    for user_id in [str(random.randint(0, 10000000)), random.randint(0, 10000000), uuid.uuid4()]:
-        for turn_id, (request, true_response) in enumerate(TURNS):
-            try:
-                ctx = db.get(user_id, Context(id=user_id))
-                ctx.add_request(request)
-                ctx = actor(ctx)
-                out_response = ctx.last_response
-                db[user_id] = ctx
-            except Exception as exc:
-                msg = f"user_id={user_id}"
-                msg += f" turn_id={turn_id}"
-                msg += f" request={request} "
-                raise Exception(msg) from exc
-            if true_response != out_response:
-                msg = f"user_id={user_id}"
-                msg += f" turn_id={turn_id}"
-                msg += f" request={request} "
-                msg += "\ntrue_response != out_response: "
-                msg += f"\n{true_response} != {out_response}"
-                raise Exception(msg)
-
-
 def generic_test(db, testing_context, context_id):
     assert isinstance(db, DBConnector)
     assert isinstance(db, DBAbstractConnector)
@@ -95,12 +72,7 @@ def generic_test(db, testing_context, context_id):
     assert context_id not in db
     # test `get` method
     assert db.get(context_id) is None
-    actor = Actor(
-        SCRIPT,
-        start_label=("greeting_flow", "start_node"),
-        fallback_label=("greeting_flow", "fallback_node"),
-    )
-    run_turns_test(actor, db)
+    run_example(logger, context_storage=db)
 
 
 @pytest.mark.parametrize(

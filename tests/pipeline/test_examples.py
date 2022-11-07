@@ -2,7 +2,7 @@ import importlib
 import pytest
 
 import tests.utils as utils
-from dff._example_utils.index import run_pipeline
+from dff.utils.common import run_example
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -26,7 +26,4 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    if example_module_name.startswith("6"):
-        run_pipeline(example_module.pipeline, response_wrapper=example_module.construct_webpage_by_response)
-    else:
-        run_pipeline(example_module.pipeline)
+    run_example(example_module.logger, pipeline=example_module.pipeline, happy_path=(("error?", "error!"),))
