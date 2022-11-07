@@ -221,6 +221,6 @@ def false(*args, **kwargs) -> Callable:
 
 # aliases
 agg = aggregate
-""" :py:func:`~agg` is an alias for :py:func:`~aggregate`. """
+""":py:func:`~agg` is an alias for :py:func:`~aggregate`."""
 neg = negation
-""" :py:func:`~neg` is an alias for :py:func:`~negation`. """
+""":py:func:`~neg` is an alias for :py:func:`~negation`."""
