@@ -46,9 +46,8 @@ doc = [
     "jupyter>=1.0.0",
 ]
 
-codestyle_dependencies = [
+mypy_dependencies = [
     "mypy",
-    "pylint",
 ]
 
 parser_dependencies = [
@@ -134,7 +133,7 @@ devel_full = merge_req_lists(
         tests_full,
         doc,
         devel,
-        codestyle_dependencies,
+        mypy_dependencies,
     ]
 )
 
