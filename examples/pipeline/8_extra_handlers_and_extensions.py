@@ -11,6 +11,7 @@ import logging
 import random
 from datetime import datetime
 
+from dff.core.engine.core import Actor
 from dff.core.pipeline import (
     Pipeline,
     ComponentExecutionState,
@@ -18,7 +19,9 @@ from dff.core.pipeline import (
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
 )
-from dff.utils.common import create_example_actor, run_example
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -87,10 +90,17 @@ async def long_service(_, __, info: ServiceRuntimeInfo):
     await asyncio.sleep(timeout)
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "components": [
         [long_service for _ in range(0, 25)],
-        create_example_actor(),
+        actor,
     ],
 }
 
@@ -103,4 +113,6 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER, after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, after_all)
 
 if __name__ == "__main__":
-    run_example(logger, pipeline=pipeline)
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

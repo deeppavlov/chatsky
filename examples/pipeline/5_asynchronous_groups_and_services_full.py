@@ -10,10 +10,12 @@ import json
 import logging
 import urllib.request
 
-from dff.core.engine.core import Context
+from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
-from dff.utils.common import create_example_actor, run_example
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +79,13 @@ def context_printing_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "optimization_warnings": True,  # There are no warnings - pipeline is well-optimized
     "components": [
@@ -89,7 +98,7 @@ pipeline_dict = {
                 simple_asynchronous_service,
             ],
         ),
-        create_example_actor(),
+        actor,
         [meta_web_querying_service(photo) for photo in range(1, 16)],
         context_printing_service,
     ],
@@ -99,4 +108,6 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    run_example(logger, pipeline=pipeline)
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

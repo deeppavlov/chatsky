@@ -11,10 +11,12 @@ import random
 from datetime import datetime
 
 import psutil
-from dff.core.engine.core import Context
+from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import Pipeline, ServiceGroup, to_service, ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
-from dff.utils.common import create_example_actor, run_example
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -111,6 +113,13 @@ def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
     logger.info(f"Stringified misc: {str_misc}")
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "components": [
         ServiceGroup(
@@ -118,7 +127,7 @@ pipeline_dict = {
             after_handler=[time_measure_after_handler],
             components=[heavy_service for _ in range(0, 5)],
         ),
-        create_example_actor(),
+        actor,
         logging_service,
     ],
 }
@@ -127,4 +136,6 @@ pipeline_dict = {
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    run_example(logger, pipeline=pipeline)
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

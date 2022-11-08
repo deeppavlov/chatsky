@@ -6,15 +6,13 @@
 # TODO:
 # 1. Remove `create_transitions` - doesn't use
 
-import logging
-
 from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PRE_RESPONSE_PROCESSING
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.labels as lbl
 import dff.core.engine.conditions as cnd
-from dff.utils.common import run_example
 
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def create_transitions():
@@ -49,7 +47,7 @@ def add_prefix(prefix):
 
 
 # a dialog script
-script = {
+toy_script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
         "fallback": {RESPONSE: "the end"},
@@ -89,19 +87,20 @@ script = {
 }
 
 
-actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
-
-
 # testing
-testing_dialog = [
+happy_path = (
     ("", "l3_local: l2_local: l1_global: first"),
     ("", "l3_local: l2_local: l1_step_1: second"),
     ("", "l3_local: l2_step_2: l1_global: third"),
     ("", "l3_step_3: l2_local: l1_global: fourth"),
     ("", "l4_step_4: l3_local: l2_local: l1_global: fifth"),
     ("", "l3_local: l2_local: l1_global: first"),
-]
+)
 
+
+pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":
-    run_example(logger, actor=actor, happy_path=testing_dialog)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

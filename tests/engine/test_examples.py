@@ -4,7 +4,7 @@ import logging
 import pytest
 
 import tests.utils as utils
-from dff.utils.common import run_example
+from dff.utils.testing.common import check_happy_path
 
 logger = logging.Logger(__name__)
 
@@ -27,14 +27,4 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-
-    if example_module_name.startswith("example_6"):
-        response_wrapper = example_module.process_response
-    else:
-        response_wrapper = None
-    run_example(
-        example_module.logger,
-        actor=example_module.actor,
-        response_wrapper=response_wrapper,
-        happy_path=example_module.testing_dialog,
-    )
+    check_happy_path(example_module.pipeline, example_module.happy_path)

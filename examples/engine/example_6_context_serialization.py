@@ -8,9 +8,9 @@ import logging
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
-from dff.utils.common import run_example
 
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:
@@ -18,15 +18,12 @@ def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 
 
 # a dialog script
-script = {
+toy_script = {
     "flow_start": {"node_start": {RESPONSE: response_handler, TRANSITIONS: {("flow_start", "node_start"): cnd.true()}}}
 }
 
 
-actor = Actor(script, start_label=("flow_start", "node_start"))
-
-
-testing_dialog = [("hi", "answer 1"), ("how are you?", "answer 2"), ("ok", "answer 3"), ("good", "answer 4")]
+happy_path = (("hi", "answer 1"), ("how are you?", "answer 2"), ("ok", "answer 3"), ("good", "answer 4"))
 
 
 def process_response(ctx: Context):
@@ -46,5 +43,9 @@ def process_response(ctx: Context):
         raise Exception(f"ctx={ctx} has to have Context type")
 
 
+pipeline = Pipeline.from_script(toy_script, start_label=("flow_start", "node_start"), post_services=[process_response])
+
 if __name__ == "__main__":
-    run_example(logger, actor=actor, response_wrapper=process_response)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

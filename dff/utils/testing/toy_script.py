@@ -27,7 +27,6 @@ TOY_SCRIPT = {
     }
 }
 
-
 HAPPY_PATH = (
     ("Hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),

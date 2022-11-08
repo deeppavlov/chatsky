@@ -1,11 +1,7 @@
-import logging
-
 import pytest
 import socket
 import os
 from platform import system
-
-from dff.utils.common import run_example
 
 from dff.connectors.db.protocol import get_protocol_install_suggestion
 from dff.connectors.db.json_connector import JSONConnector
@@ -22,9 +18,9 @@ from dff.core.engine.core import Context
 
 from dff.connectors.db import DBConnector
 import tests.utils as utils
-from dff.utils.toy_script import HAPPY_PATH
-
-logger = logging.Logger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -73,7 +69,13 @@ def generic_test(db, testing_context, context_id):
     assert context_id not in db
     # test `get` method
     assert db.get(context_id) is None
-    run_example(logger, context_storage=db, happy_path=HAPPY_PATH)
+    pipeline = Pipeline.from_script(
+        TOY_SCRIPT,
+        context_storage=db,
+        start_label=("greeting_flow", "start_node"),
+        fallback_label=("greeting_flow", "fallback_node"),
+    )
+    check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
 
 @pytest.mark.parametrize(

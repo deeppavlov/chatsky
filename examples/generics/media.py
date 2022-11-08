@@ -1,16 +1,18 @@
-import logging
 import pathlib
+from typing import NamedTuple
 
+from dff.core.engine.core import Context
+from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.connectors.messenger.generics.response import Attachments, Image, Response
-from dff.utils.generics import run_generics_example
 
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.response_comparers import generics_comparer
 
-script = {
+toy_script = {
     "root": {
         "start": {
             RESPONSE: Response(text=""),
@@ -54,9 +56,7 @@ script = {
     },
 }
 
-actor = Actor(script=script, start_label=("root", "start"), fallback_label=("root", "fallback"))
-
-testing_dialog = [
+happy_path = (
     ("Hi", "Please, send me a picture url"),
     ("no", "I cannot find the picture. Please, try again."),
     ("https://sun9-49.userapi.com/s/v1/if2/gpquN.png", "\nhere's my picture!\nAttachment size: 36643 bytes."),
@@ -64,7 +64,33 @@ testing_dialog = [
     ("ok", "Please, send me a picture url"),
     ("https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg", "\nLook at my pictures\nGrouped attachment size: 366430 bytes."),
     ("ok", "Final node reached, send any message to restart."),
-]
+)
+
+
+class CallbackRequest(NamedTuple):
+    payload: str
+
+
+def process_request(ctx: Context):
+    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
+    last_index = get_last_index(ctx.requests)
+
+    ui = ctx.last_response and ctx.last_response.ui
+    if ui and ctx.last_response.ui.buttons:
+        try:
+            chosen_button = ui.buttons[int(last_request)]
+        except (IndexError, ValueError):
+            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+        return
+    ctx.requests[last_index] = last_request
+
+
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"), pre_services=[process_request]
+)
 
 if __name__ == "__main__":
-    run_generics_example(logger, actor=actor, happy_path=testing_dialog)
+    check_happy_path(pipeline, happy_path, generics_comparer)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

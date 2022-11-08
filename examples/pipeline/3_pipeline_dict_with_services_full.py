@@ -11,7 +11,9 @@ import urllib.request
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import CLIMessengerInterface, Service, Pipeline, ServiceRuntimeInfo
-from dff.utils.common import run_example, create_example_actor
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 
@@ -77,6 +79,13 @@ def postprocess(ctx: Context, actor: Actor):
     )
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "messenger_interface": CLIMessengerInterface(
         intro="Hi, this is a brand new Pipeline running!", prompt_request="Request: ", prompt_response="Response: "
@@ -94,7 +103,7 @@ pipeline_dict = {
             "name": "preprocessor",
         },  # This service will be named `preprocessor`, handler name will be overridden
         preprocess,
-        create_example_actor(),
+        actor,
         Service(
             handler=postprocess,
             name="postprocessor",
@@ -106,4 +115,6 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    run_example(logger, pipeline=pipeline)
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

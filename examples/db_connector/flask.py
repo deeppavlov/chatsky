@@ -2,22 +2,20 @@
 1. Flask
 ========
 """
-import logging
 import pathlib
+
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 from flask import Flask, request
 
 from dff.connectors.db import connector_factory
-from dff.utils.common import create_example_pipeline, is_in_notebook
-
-logger = logging.getLogger(__name__)
 
 app = Flask(__name__)
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
 db = connector_factory("json://dbs/file.json")
-
-pipeline = create_example_pipeline(logger, context_storage=db)
 
 
 @app.route("/chat", methods=["GET", "POST"])
@@ -28,8 +26,14 @@ def respond():
     return {"response": str(context.last_response)}
 
 
+pipeline = Pipeline.from_script(
+    TOY_SCRIPT,
+    context_storage=db,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
 if __name__ == "__main__":
-    if is_in_notebook():
-        pipeline.run()
-    else:
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
         app.run(host="0.0.0.0", port=5000, debug=True)

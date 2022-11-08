@@ -7,12 +7,13 @@ The following example shows messenger interfaces usage
 
 import logging
 
-from dff.core.engine.core import Context
+from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from dff.utils.common import create_example_actor, is_in_notebook
+from dff.utils.testing.common import is_interactive_mode
+from dff.utils.testing.toy_script import TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -73,7 +74,7 @@ def construct_webpage_by_response(response: str, _: Context) -> str:
         </body>
     </html>
     """
-        if is_in_notebook()
+        if is_interactive_mode()
         else response
     )
 
@@ -97,12 +98,19 @@ def markdown_request(ctx: Context):
     ctx.responses[last_index] = construct_webpage_by_response(last_response, ctx)
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "messenger_interface": messenger_interface,
     "components": [
         purify_request,
         {
-            "handler": create_example_actor(),
+            "handler": actor,
             "name": "encapsulated-actor",
         },  # Actor here is encapsulated in another service with specific name
         markdown_request,
@@ -118,7 +126,7 @@ async def route():
 
 pipeline = Pipeline(**pipeline_dict)
 
-if __name__ == "__main__" and not is_in_notebook():
+if __name__ == "__main__" and not is_interactive_mode():
     pipeline.run()
     app.run()
     # Navigate to http://127.0.0.1:5000/pipeline_web_interface?request={REQUEST} to receive response

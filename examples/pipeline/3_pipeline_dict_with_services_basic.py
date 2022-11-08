@@ -7,9 +7,11 @@ The following example shows pipeline creation from dict and most important pipel
 
 import logging
 
+from dff.core.engine.core import Actor
 from dff.core.pipeline import Service, Pipeline
 
-from dff.utils.common import create_example_actor, run_example
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -42,13 +44,20 @@ def postprocess(_):
     logger.info("postprocession Service (defined as an object)")
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "components": [
         {
             "handler": prepreprocess,
         },
         preprocess,
-        create_example_actor(),
+        actor,
         Service(
             handler=postprocess,
         ),
@@ -59,4 +68,6 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    run_example(logger, pipeline=pipeline)
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

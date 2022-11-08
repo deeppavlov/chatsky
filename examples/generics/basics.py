@@ -1,12 +1,12 @@
-import logging
+from typing import NamedTuple
 
-from dff.utils.generics import run_generics_example
-from dff.utils.common import create_example_actor
+from dff.core.engine.core import Context
+from dff.core.engine.core.context import get_last_index
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import TOY_SCRIPT
 
-logger = logging.getLogger(__name__)
-
-
-testing_dialog = [
+happy_path = (
     ("Hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("Let's talk about music.", "Sorry, I can not talk about music now."),
@@ -18,9 +18,36 @@ testing_dialog = [
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("Let's talk about music.", "Sorry, I can not talk about music now."),
     ("Ok, goodbye.", "bye"),
-]
+)
 
-actor = create_example_actor()
 
-if __name__ == "__main__":
-    run_generics_example(logger, actor=actor)
+class CallbackRequest(NamedTuple):
+    payload: str
+
+
+def process_request(ctx: Context):
+    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
+    last_index = get_last_index(ctx.requests)
+
+    ui = ctx.last_response and ctx.last_response.ui
+    if ui and ctx.last_response.ui.buttons:
+        try:
+            chosen_button = ui.buttons[int(last_request)]
+        except (IndexError, ValueError):
+            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+        return
+    ctx.requests[last_index] = last_request
+
+
+pipeline = Pipeline.from_script(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+    pre_services=[process_request],
+)
+
+if __name__ == "__main__":  # TODO: FIXME: WHAT IS GOING ON HERE??👀
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

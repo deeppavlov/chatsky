@@ -5,15 +5,12 @@ The following example shows basic usage of `pipeline` module, as an extension to
 """
 
 # %%
-import logging
-
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline
-from dff.utils.common import run_example, is_in_notebook
-from dff.utils.toy_script import TOY_SCRIPT
 
-logger = logging.getLogger(__name__)
+from dff.utils.testing.common import check_happy_path, is_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
 """
@@ -40,9 +37,8 @@ pipeline = Pipeline.from_script(
 
 # %%
 if __name__ == "__main__":
-    if is_in_notebook():
-        run_example(logger, pipeline=pipeline)
-    else:
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)

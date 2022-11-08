@@ -3,7 +3,8 @@ import importlib
 import pytest
 
 import tests.utils as utils
-from dff.utils.generics import run_generics_example
+from dff.utils.testing.common import check_happy_path
+from dff.utils.testing.response_comparers import generics_comparer, default_comparer
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -14,4 +15,8 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    run_generics_example(example_module.logger, actor=example_module.actor, happy_path=example_module.testing_dialog)
+    if example_module_name == "basics":
+        comparer = default_comparer  # TODO: why are we testing it BTW?
+    else:
+        comparer = generics_comparer
+    check_happy_path(example_module.pipeline, example_module.happy_path, comparer)

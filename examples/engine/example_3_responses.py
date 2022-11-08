@@ -16,7 +16,9 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
 import dff.core.engine.responses as rsp
 import dff.core.engine.conditions as cnd
-from dff.utils.common import run_example
+
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +63,7 @@ def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
 
-script = {
+toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -85,11 +87,8 @@ script = {
 }
 
 
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
-
-
 # testing
-testing_dialog = [
+happy_path = (
     ("Hi", "Hello, how are you?"),  # start_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
@@ -103,11 +102,17 @@ testing_dialog = [
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
-]
+)
 
 
 random.seed(31415)  # predestination of choice
 
 
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
+)
+
 if __name__ == "__main__":
-    run_example(logger, actor=actor, happy_path=testing_dialog)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)

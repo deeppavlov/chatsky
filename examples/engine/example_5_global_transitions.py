@@ -3,16 +3,14 @@
 =====================
 """
 
-import logging
 import re
 
 from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
-from dff.utils.common import run_example
-
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def high_priority_node_transition(flow_label, label):
@@ -22,7 +20,7 @@ def high_priority_node_transition(flow_label, label):
     return transition
 
 
-script = {
+toy_script = {
     GLOBAL: {
         TRANSITIONS: {
             ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),
@@ -75,16 +73,9 @@ script = {
     },
 }
 
-actor = Actor(
-    script,
-    start_label=("global_flow", "start_node"),
-    fallback_label=("global_flow", "fallback_node"),
-    label_priority=1.0,
-)
-
 
 # testing
-testing_dialog = [
+happy_path = (
     ("hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("talk about music.", "I love `System of a Down` group, would you like to tell about it? "),
@@ -107,8 +98,14 @@ testing_dialog = [
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("let's talk about something.", "Sorry, I can not talk about that now."),
     ("Ok, goodbye.", "bye"),
-]
+)
 
+
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node")
+)
 
 if __name__ == "__main__":
-    run_example(logger, actor=actor, happy_path=testing_dialog)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+        run_interactive_mode(pipeline)
