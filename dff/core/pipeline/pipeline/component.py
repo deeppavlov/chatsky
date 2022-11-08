@@ -24,28 +24,31 @@ logger = logging.getLogger(__name__)
 
 class PipelineComponent(abc.ABC):
     """
-    This class represents a pipeline component - a service or a service group.
+    This class represents a pipeline component, which is a service or a service group.
     It contains some fields that they have in common.
 
     :param before_handler: before handler, associated with this component
     :type before_handler: :py:class:`~pipeline.BeforeHandler`
     :param after_handler: after handler, associated with this component
-    :type before_handler: :py:class:`~pipeline.AfterHandler`
-    :param float timeout: (for asynchronous only!) maximum component execution time (in seconds),
-    if it exceeds this time, it is interrupted
-    :param bool requested_async_flag: requested asynchronous property;
-    if not defined, calculated_async_flag is used instead
-    :param bool calculated_async_flag: whether the component can be asynchronous or not
+    :type after_handler: :py:class:`~pipeline.AfterHandler`
+    :param timeout: (for asynchronous only!) maximum component execution time (in seconds), 
+        if it exceeds this time, it is interrupted
+    :type timeout: float
+    :param requested_async_flag: requested asynchronous property;
+        if not defined, calculated_async_flag is used instead
+    :type requested_async_flag: bool
+    :param calculated_async_flag: whether the component can be asynchronous or not
 
         - for :py:class:`~pipeline.service.service.Service`: whether its ``handler`` is asynchronous or not
         - for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
-
+    
+    :type calculated_async_flag: bool
     :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
-    component is executed only if it returns True
+        component is executed only if it returns True
     :type start_condition: :py:class:`~pipeline.types.StartConditionCheckerFunction`
     :param name: component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
-    should not be blank or contain '.' symbol
-    :param path: dot-separated path to component, is universally unique
+        should not be blank or contain `.` symbol
+    :param path: separated by dots path to component, is universally unique
     :type path: str or None
     """
 
@@ -108,7 +111,7 @@ class PipelineComponent(abc.ABC):
         :param ctx: context to get state from
         :type ctx: :py:class:`dff.core.engine.core.Context`
         :param default: default to return if no record found
-        (usually it's :py:attr:`~pipeline.types.ComponentExecutionState.NOT_RUN`)
+            (usually it's :py:attr:`~pipeline.types.ComponentExecutionState.NOT_RUN`)
         :type default: :py:class:`~pipeline.types.ComponentExecutionState` or None
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found
         """
@@ -124,10 +127,13 @@ class PipelineComponent(abc.ABC):
 
            1. If component **can** be asynchronous and :py:attr:`~requested_async_flag` is set,
            it returns :py:attr:`~requested_async_flag`
+
            2. If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set,
            it returns True
+           
            3. If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is False or not set,
            it returns False
+           
            4. If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is True,
            an Exception is thrown in constructor
 
@@ -174,7 +180,7 @@ class PipelineComponent(abc.ABC):
         :param actor: this Pipeline Actor or None if this is a service, that wraps Actor
         :type actor: :py:class:`dff.core.engine.core.Actor` or None
         :return: Context if this is a synchronous service or :py:class:`~typing.const.Awaitable`,
-        asynchronous services shouldn't modify Context
+            asynchronous services shouldn't modify Context
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, actor))
@@ -204,7 +210,7 @@ class PipelineComponent(abc.ABC):
         :param ctx: current dialog Context
         :type ctx: :py:class:`dff.core.engine.core.Context`
         :return: :py:class:`~dff.core.engine.typing.ServiceRuntimeInfo`
-        dict where all not set fields are replaced with ``[None]``.
+            dict where all not set fields are replaced with ``[None]``.
         """
         return {
             "name": self.name if self.name is not None else "[None]",
