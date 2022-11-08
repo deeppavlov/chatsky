@@ -12,6 +12,8 @@
 #     name: python3
 # ---
 
+# flake8: noqa
+
 # %% [markdown]
 # **_Note:_** examples here use the python interface of the parser but it's identical to parser's cli
 
@@ -38,7 +40,8 @@ yaml_file = working_dir / "script.yaml"
 
 # %%
 with open(main_file, "w") as main:
-    main.write("""
+    main.write(
+        """
 from pathlib import Path
 import dff.core.engine as dfe
 import mypackage
@@ -51,22 +54,16 @@ dictionary = {
 }
 
 result = this_function_does_not_exist(dictionary)
-    """)
+    """
+    )
 
-dff.script.import_export.parser.py2yaml(
-    root_file=main_file,
-    project_root_dir=working_dir,
-    output_file=yaml_file
-)
+dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
 
 with open(yaml_file, "r") as out:
     print(out.read())
 
 # %%
-dff.script.import_export.parser.yaml2py(
-    yaml_file=yaml_file,
-    extract_to_directory=working_dir
-)
+dff.script.import_export.parser.yaml2py(yaml_file=yaml_file, extract_to_directory=working_dir)
 
 with open(main_file, "r") as out:
     print(out.read())
@@ -88,7 +85,8 @@ yaml_file = working_dir / "script.yaml"
 
 # %%
 with open(main_file, "w") as main:
-    main.write("""
+    main.write(
+        """
 from pathlib import Path
 
 dictionary = {
@@ -100,22 +98,16 @@ dictionary = {
     6: "printd"
 }
 
-    """)
+    """
+    )
 
-dff.script.import_export.parser.py2yaml(
-    root_file=main_file,
-    project_root_dir=working_dir,
-    output_file=yaml_file
-)
+dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
 
 with open(yaml_file, "r") as out:
     print(out.read())
 
 # %%
-dff.script.import_export.parser.yaml2py(
-    yaml_file=yaml_file,
-    extract_to_directory=working_dir
-)
+dff.script.import_export.parser.yaml2py(yaml_file=yaml_file, extract_to_directory=working_dir)
 
 with open(main_file, "r") as out:
     print(out.read())
@@ -167,7 +159,8 @@ yaml_file = working_dir / "script.yaml"
 
 # %%
 with open(main_file, "w") as main:
-    main.write("""
+    main.write(
+        """
 from some_package import another_file
 from some_package.another_file import something, something_else
 import unparsed
@@ -178,27 +171,28 @@ dictionary = {
     3: unparsed.path
 }
 
-    """)
-    
+    """
+    )
+
 with open(another_file, "w") as file:
-    file.write("""
+    file.write(
+        """
 import abc as something
 
-    """)
-    
+    """
+    )
+
 with open(unparsed, "w") as file:
-    file.write("""
+    file.write(
+        """
 from pathlib import Path as path
 
 print(path)
 
-    """)
+    """
+    )
 
-dff.script.import_export.parser.py2yaml(
-    root_file=main_file,
-    project_root_dir=python_files,
-    output_file=yaml_file
-)
+dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=python_files, output_file=yaml_file)
 
 with open(yaml_file, "r") as out:
     print(out.read())
@@ -240,7 +234,8 @@ yaml_file = working_dir / "script.yaml"
 
 # %%
 with open(main_file, "w") as main:
-    main.write("""
+    main.write(
+        """
 from dff.core.engine.core import Actor as act
 import dff.core.engine.core.keywords as kw
 
@@ -249,13 +244,10 @@ actor = act(
     ("flow", "node")
 )
 
-    """)
+    """
+    )
 
-dff.script.import_export.parser.py2yaml(
-    root_file=main_file,
-    project_root_dir=working_dir,
-    output_file=yaml_file
-)
+dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
 
 with open(yaml_file, "r") as out:
     print(out.read())
@@ -266,7 +258,8 @@ with open(yaml_file, "r") as out:
 # %%
 try:
     with open(main_file, "w") as main:
-        main.write("""
+        main.write(
+            """
 from dff.core.engine.core import Actor as act
 import dff.core.engine.core.keywords as kw
 
@@ -277,13 +270,10 @@ actor = act(
     script=script
 )
 
-        """)
+        """
+        )
 
-    dff.script.import_export.parser.py2yaml(
-        root_file=main_file,
-        project_root_dir=working_dir,
-        output_file=yaml_file
-    )
+    dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
 
     with open(yaml_file, "r") as out:
         print(out.read())
@@ -305,7 +295,8 @@ output_file = working_dir / "graph.json"
 
 # %%
 with open(main_file, "w") as main:
-    main.write("""
+    main.write(
+        """
 from dff.core.engine.core import Actor as act
 import dff.core.engine.core.keywords as kw
 import dff.core.engine.conditions as cnd
@@ -332,14 +323,11 @@ actor = act(
     ("flow1", "node")
 )
 
-    """)
+    """
+    )
 
 # %%
-dff.script.import_export.parser.py2graph(
-    root_file=main_file,
-    project_root_dir=working_dir,
-    output_file=output_file
-)
+dff.script.import_export.parser.py2graph(root_file=main_file, project_root_dir=working_dir, output_file=output_file)
 
 # %%
 import networkx as nx
