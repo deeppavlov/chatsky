@@ -111,18 +111,12 @@ class Context(BaseModel):
     def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         """
         Transforms different data types to the objects of :py:class:`~dff.core.engine.core.context.Context` class.
+        Return Context object of :py:class:`~dff.core.engine.core.context.Context` type that is initialized by the input data.
 
-        Parameters
-        ----------
-        ctx : Union[Context, dict, str]
-            Different data types, that are used to initialize object of
-            :py:class:`~dff.core.engine.core.context.Context` type.
-            The empty object of :py:class:`~dff.core.engine.core.context.Context` type is created if no data are given.
-
-        Returns
-        -------
-        Context
-            Object of :py:class:`~dff.core.engine.core.context.Context` type that is initialized by the input data
+        :param ctx: different data types, that are used to initialize object of
+                    :py:class:`~dff.core.engine.core.context.Context` type.
+                    The empty object of :py:class:`~dff.core.engine.core.context.Context` type is created if no data are given.
+        :type ctx: Union[Context, dict, str]
         """
         if not ctx:
             ctx = Context(*args, **kwargs)
@@ -218,7 +212,7 @@ class Context(BaseModel):
     @property
     def last_response(self) -> Optional[Any]:
         """Returns the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
-        Returns `None if `responses` is empty
+        Returns `None` if `responses` is empty
         """
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)

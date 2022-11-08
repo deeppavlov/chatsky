@@ -22,7 +22,8 @@ class MessengerInterface(abc.ABC):
         """
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
-        :pipeline_runner: - a function that should return pipeline response to user request;
+        
+        :pipeline_runner: a function that should return pipeline response to user request;
             usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
         """
         raise NotImplementedError
@@ -37,7 +38,9 @@ class PollingMessengerInterface(MessengerInterface):
     def _request(self) -> List[Tuple[Any, Hashable]]:
         """
         Method used for sending users request for their input.
-        Returns a list of tuples: user inputs and context ids (any user ids) associated with inputs.
+        
+        :return: Returns a list of tuples: user inputs and context ids (any user ids) associated with inputs.
+        :rtype: List
         """
         raise NotImplementedError
 
@@ -45,6 +48,7 @@ class PollingMessengerInterface(MessengerInterface):
     def _respond(self, responses: List[Context]):
         """
         Method used for sending users responses for their last input.
+        
         :responses: - a list of contexts, representing dialogs with the users;
             `last_response`, `id` and some dialog info can be extracted from there.
         """
@@ -69,11 +73,14 @@ class PollingMessengerInterface(MessengerInterface):
     ):
         """
         Method, running a request - response cycle in a loop.
-        The looping behaviour is determined by :loop: and :timeout:,
-            for most cases the loop itself shouldn't be overridden.
-        :loop: - a function that determines whether polling should be continued;
+        The looping behaviour is determined by `loop` and `timeout`,
+        for most cases the loop itself shouldn't be overridden.
+        
+        :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return True to continue polling or False to stop.
-        :timeout: - a time interval between polls (in seconds).
+        :type loop: PollingProviderLoopFunction
+        :param timeout: a time interval between polls (in seconds).
+        :type timeout: float
         """
         while loop():
             try:
@@ -102,18 +109,22 @@ class CallbackMessengerInterface(MessengerInterface):
         """
         Method invoked on user input.
         This method works just like `Pipeline.__call__(request, ctx_id)`,
-            however callback message interface may contain additional functionality (e.g. for external API accessing).
-        :request: - user input.
-        :ctx_id: - any unique id that will be associated with dialog between this user and pipeline.
+        however callback message interface may contain additional functionality (e.g. for external API accessing).
         Returns context that represents dialog with the user;
-            `last_response`, `id` and some dialog info can be extracted from there.
+        `last_response`, `id` and some dialog info can be extracted from there.
+        
+        :param request: user input.
+        :type request: Any
+        :param ctx_id: any unique id that will be associated with dialog between this user and pipeline.
+        :type ctx_id: Hashable
+        :return:
         """
         return asyncio.run(self._pipeline_runner(request, ctx_id))
 
 
 class CLIMessengerInterface(PollingMessengerInterface):
     """
-    Command line message interface - the default message interface, communicating with user via STDIN/STDOUT.
+    Command line message interface is the default message interface, communicating with user via STDIN/STDOUT.
     This message interface can maintain dialog with one user at a time only.
     """
 
@@ -140,7 +151,8 @@ class CLIMessengerInterface(PollingMessengerInterface):
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
-        :kwargs: - argument, added for compatibility with super class, it shouldn't be used normally.
+
+        :param kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()
         if self._intro is not None:
