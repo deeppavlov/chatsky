@@ -14,7 +14,7 @@ import dff.script.logic.slots
 from dff.script.logic.slots import conditions as slot_cnd
 from dff.script.logic.slots import processing as slot_procs
 
-from examples import example_utils
+import examples.slots._slots_example_utils as example_utils
 
 logger = logging.getLogger(__name__)
 

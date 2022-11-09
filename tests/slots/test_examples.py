@@ -1,14 +1,19 @@
 import sys
 import importlib
+import os
 
 import pytest
 
 import dff.script.logic.slots
 
-# uncomment the following line, if you want to run your examples during the test suite or import from them
-sys.path.insert(0, "../")
+from tests import utils
 
-from examples.example_utils import run_test
+# uncomment the following line, if you want to run your examples during the test suite or import from them
+sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
+
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
+
+from _slots_example_utils import run_test
 
 # pytest.skip(allow_module_level=True)
 
@@ -16,10 +21,10 @@ from examples.example_utils import run_test
 @pytest.mark.parametrize(
     "module_name",
     [
-        "examples.generics_example",
-        # "examples.basic_example",
-        "examples.handlers_example",
-        "examples.form_example",
+        "generics_example",
+        # "basic_example",
+        "handlers_example",
+        "form_example",
     ],
 )
 def test_examples(module_name, root):
