@@ -22,7 +22,7 @@ class MessengerInterface(abc.ABC):
         """
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
-        
+
         :pipeline_runner: a function that should return pipeline response to user request;
             usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
         """
@@ -38,7 +38,7 @@ class PollingMessengerInterface(MessengerInterface):
     def _request(self) -> List[Tuple[Any, Hashable]]:
         """
         Method used for sending users request for their input.
-        
+
         :return: Returns a list of tuples: user inputs and context ids (any user ids) associated with inputs.
         :rtype: List
         """
@@ -48,7 +48,7 @@ class PollingMessengerInterface(MessengerInterface):
     def _respond(self, responses: List[Context]):
         """
         Method used for sending users responses for their last input.
-        
+
         :responses: - a list of contexts, representing dialogs with the users;
             `last_response`, `id` and some dialog info can be extracted from there.
         """
@@ -75,7 +75,7 @@ class PollingMessengerInterface(MessengerInterface):
         Method, running a request - response cycle in a loop.
         The looping behaviour is determined by `loop` and `timeout`,
         for most cases the loop itself shouldn't be overridden.
-        
+
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return True to continue polling or False to stop.
         :type loop: PollingProviderLoopFunction
@@ -112,7 +112,7 @@ class CallbackMessengerInterface(MessengerInterface):
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Returns context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
-        
+
         :param request: user input.
         :type request: Any
         :param ctx_id: any unique id that will be associated with dialog between this user and pipeline.

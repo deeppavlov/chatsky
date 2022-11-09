@@ -31,7 +31,7 @@ class PipelineComponent(abc.ABC):
     :type before_handler: :py:class:`~pipeline.BeforeHandler`
     :param after_handler: after handler, associated with this component
     :type after_handler: :py:class:`~pipeline.AfterHandler`
-    :param timeout: (for asynchronous only!) maximum component execution time (in seconds), 
+    :param timeout: (for asynchronous only!) maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted
     :type timeout: float
     :param requested_async_flag: requested asynchronous property;
@@ -41,7 +41,7 @@ class PipelineComponent(abc.ABC):
 
         - for :py:class:`~pipeline.service.service.Service`: whether its ``handler`` is asynchronous or not
         - for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
-    
+
     :type calculated_async_flag: bool
     :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
         component is executed only if it returns True
@@ -130,10 +130,10 @@ class PipelineComponent(abc.ABC):
 
            2. If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set,
            it returns True
-           
+
            3. If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is False or not set,
            it returns False
-           
+
            4. If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is True,
            an Exception is thrown in constructor
 

@@ -110,12 +110,15 @@ class Context(BaseModel):
     @classmethod
     def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         """
-        Transforms different data types to the objects of :py:class:`~dff.core.engine.core.context.Context` class.
-        Return Context object of :py:class:`~dff.core.engine.core.context.Context` type that is initialized by the input data.
+        Transforms different data types to the objects of
+        :py:class:`~dff.core.engine.core.context.Context` class.
+        Return Context object of :py:class:`~dff.core.engine.core.context.Context`
+        type that is initialized by the input data.
 
         :param ctx: different data types, that are used to initialize object of
-                    :py:class:`~dff.core.engine.core.context.Context` type.
-                    The empty object of :py:class:`~dff.core.engine.core.context.Context` type is created if no data are given.
+            :py:class:`~dff.core.engine.core.context.Context` type.
+            The empty object of :py:class:`~dff.core.engine.core.context.Context`
+            type is created if no data are given.
         :type ctx: Union[Context, dict, str]
         """
         if not ctx:
