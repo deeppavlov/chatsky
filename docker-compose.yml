@@ -34,3 +34,10 @@ services:
       # - 2135:2135
       - 2136:2136
     hostname: localhost
+  rasa:
+    env_file: [.env_file]
+    build:
+      context: .
+      dockerfile: ./dockerfile_extended_conditions
+    ports:
+      - "5005:5005"
