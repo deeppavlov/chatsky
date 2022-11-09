@@ -78,6 +78,46 @@ ydb_dependencies = [
     "ydb>=2.5.0",
 ]
 
+sklearn_dependencies = [
+    "scikit-learn<=1.1.1",
+]
+
+extended_conditions_dependencies = merge_req_lists(
+    [
+        sklearn_dependencies,
+        [
+            "requests<=2.28.1",
+        ]
+    ]
+)
+
+httpx_dependencies = [
+    "httpx>=0.23.0",
+]
+
+huggingface_dependencies = merge_req_lists(
+    [
+        sklearn_dependencies,
+        [
+            "transformers>=4.16.2",
+            "torch>=1.7.0",
+        ]
+    ]
+)
+
+gensim_dependencies = merge_req_lists(
+    [
+        sklearn_dependencies,
+        [
+            "gensim>=4.0.0",
+        ]
+    ]
+)
+
+dialogflow_dependencies = [
+    "google-cloud-dialogflow==2.15.0",
+]
+
 test_requirements = [
     "pytest >=6.2.4,<7.0.0",
     "pytest-cov >=2.12.0,<3.0.0",
@@ -105,6 +145,12 @@ full = merge_req_lists(
         mysql_dependencies,
         postgresql_dependencies,
         ydb_dependencies,
+        sklearn_dependencies,
+        extended_conditions_dependencies,
+        httpx_dependencies,
+        huggingface_dependencies,
+        gensim_dependencies,
+        dialogflow_dependencies,
     ]
 )
 
@@ -137,6 +183,12 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,
     "postgresql": postgresql_dependencies,
     "ydb": ydb_dependencies,
+    "extended_conditions": extended_conditions_dependencies,  # todo: maybe shorten the name
+    "sklearn": sklearn_dependencies,
+    "async": httpx_dependencies,
+    "huggingface": huggingface_dependencies,
+    "gensim": gensim_dependencies,
+    "dialogflow": dialogflow_dependencies,
 }
 
 setup(
