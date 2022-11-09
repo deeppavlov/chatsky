@@ -18,7 +18,7 @@ def is_interactive_mode() -> bool:
 
         shell = get_ipython().__class__.__name__
     finally:
-        return shell == "ZMQInteractiveShell" or getenv("DISABLE_INTERACTIVE_MODE", "False") == "True"
+        return shell != "ZMQInteractiveShell" and getenv("DISABLE_INTERACTIVE_MODE", "False") == "True"
 
 
 def check_happy_path(
