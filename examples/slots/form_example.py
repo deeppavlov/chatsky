@@ -1,16 +1,16 @@
 import logging
 
-from df_engine import labels as lbl
-from df_engine.core import Actor
-from df_engine.core.keywords import LOCAL, PRE_TRANSITIONS_PROCESSING, TRANSITIONS, GLOBAL, RESPONSE
-from df_engine import conditions as cnd
+from dff.core.engine import labels as lbl
+from dff.core.engine.core import Actor
+from dff.core.engine.core.keywords import LOCAL, PRE_TRANSITIONS_PROCESSING, TRANSITIONS, GLOBAL, RESPONSE
+from dff.core.engine import conditions as cnd
 
-import df_slots
-from df_slots.forms import FormState
-from df_slots.utils import FORM_STORAGE_KEY, SLOT_STORAGE_KEY
-from df_slots import processing as slot_procs
-from df_slots import response as slot_rsp
-from df_slots import conditions as slot_cnd
+import dff.script.logic.slots
+from dff.script.logic.slots.forms import FormState
+from dff.script.logic.slots.utils import FORM_STORAGE_KEY, SLOT_STORAGE_KEY
+from dff.script.logic.slots import processing as slot_procs
+from dff.script.logic.slots import response as slot_rsp
+from dff.script.logic.slots import conditions as slot_cnd
 
 from examples import example_utils
 
@@ -21,10 +21,10 @@ def is_unrelated_intent(ctx, actor):
     return False
 
 
-RestaurantCuisine = df_slots.RegexpSlot(name="cuisine", regexp=r"([A-Za-z]+) cuisine", match_group_idx=1)
-RestaurantAddress = df_slots.RegexpSlot(name="restaurantaddress", regexp=r"(at|in) (.+)", match_group_idx=2)
-NumberOfPeople = df_slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
-RestaurantForm = df_slots.FormPolicy(
+RestaurantCuisine = dff.script.logic.slots.RegexpSlot(name="cuisine", regexp=r"([A-Za-z]+) cuisine", match_group_idx=1)
+RestaurantAddress = dff.script.logic.slots.RegexpSlot(name="restaurantaddress", regexp=r"(at|in) (.+)", match_group_idx=2)
+NumberOfPeople = dff.script.logic.slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
+RestaurantForm = dff.script.logic.slots.FormPolicy(
     "restaurant",
     {
         RestaurantCuisine.name: [("restaurant", "cuisine")],
@@ -32,7 +32,7 @@ RestaurantForm = df_slots.FormPolicy(
         NumberOfPeople.name: [("restaurant", "number")],
     },
 )
-df_slots.add_slots([RestaurantCuisine, RestaurantAddress, NumberOfPeople])
+dff.script.logic.slots.add_slots([RestaurantCuisine, RestaurantAddress, NumberOfPeople])
 
 script = {
     GLOBAL: {
@@ -66,7 +66,7 @@ script = {
         "offer_accepted": {
             RESPONSE: "Very well then, processing your request.",
             PRE_TRANSITIONS_PROCESSING: {
-                "activate_form": RestaurantForm.update_state(df_slots.FormState.ACTIVE),
+                "activate_form": RestaurantForm.update_state(dff.script.logic.slots.FormState.ACTIVE),
             },
         },
         "form_filled": {
@@ -109,8 +109,8 @@ script = {
 
 
 actor = Actor(script=script, start_label=("root", "start"), fallback_label=("root", "fallback"))
-df_slots.register_storage(actor, SLOT_STORAGE_KEY)
-df_slots.register_storage(actor, FORM_STORAGE_KEY)
+dff.script.logic.slots.register_storage(actor, SLOT_STORAGE_KEY)
+dff.script.logic.slots.register_storage(actor, FORM_STORAGE_KEY)
 
 testing_dialog = [
     ("hi", "How's life?"),

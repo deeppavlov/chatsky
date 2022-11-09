@@ -1,12 +1,12 @@
 import sys
 
 import pytest
-import df_slots
+import dff.script.logic.slots
 
-from df_slots.handlers import get_values, get_filled_template, extract, unset
-from df_slots import FunctionSlot, RootSlot, add_slots
-from df_slots.types import BaseSlot
-from df_slots.conditions import is_set_any
+from dff.script.logic.slots.handlers import get_values, get_filled_template, extract, unset
+from dff.script.logic.slots import FunctionSlot, RootSlot, add_slots
+from dff.script.logic.slots.types import BaseSlot
+from dff.script.logic.slots.conditions import is_set_any
 
 
 @pytest.mark.parametrize(
@@ -47,10 +47,10 @@ def test_error(testing_context, testing_actor):
 @pytest.mark.parametrize(
     ["slot", "noparams"],
     [
-        (df_slots.RegexpSlot(name="test", regexp=".+"), False),
-        (df_slots.RegexpSlot(name="test", regexp=".+"), True),
-        (df_slots.GroupSlot(name="test", children=[df_slots.RegexpSlot(name="test", regexp=".+")]), False),
-        (df_slots.GroupSlot(name="test", children=[df_slots.RegexpSlot(name="test", regexp=".+")]), True),
+        (dff.script.logic.slots.RegexpSlot(name="test", regexp=".+"), False),
+        (dff.script.logic.slots.RegexpSlot(name="test", regexp=".+"), True),
+        (dff.script.logic.slots.GroupSlot(name="test", children=[dff.script.logic.slots.RegexpSlot(name="test", regexp=".+")]), False),
+        (dff.script.logic.slots.GroupSlot(name="test", children=[dff.script.logic.slots.RegexpSlot(name="test", regexp=".+")]), True),
     ],
 )
 def test_unset(testing_context, testing_actor, slot: BaseSlot, noparams: bool, root: RootSlot):

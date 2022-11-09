@@ -1,7 +1,7 @@
 import logging
 
-from df_engine import conditions as cnd
-from df_engine.core.keywords import (
+from dff.core.engine import conditions as cnd
+from dff.core.engine.core.keywords import (
     RESPONSE,
     TRANSITIONS,
     PRE_TRANSITIONS_PROCESSING,
@@ -9,39 +9,39 @@ from df_engine.core.keywords import (
     GLOBAL,
     LOCAL,
 )
-from df_engine.core import Actor
+from dff.core.engine.core import Actor
 
-import df_slots
-from df_slots import processing as slot_procs
-from df_slots import response as slot_rps
-from df_slots import conditions as slot_cnd
+import dff.script.logic.slots
+from dff.script.logic.slots import processing as slot_procs
+from dff.script.logic.slots import response as slot_rps
+from dff.script.logic.slots import conditions as slot_cnd
 
 from examples import example_utils
 
 logger = logging.getLogger(__name__)
 
 # Group 1: person/username, person/email
-person_slot = df_slots.GroupSlot(
+person_slot = dff.script.logic.slots.GroupSlot(
     name="person",
     children=[
-        df_slots.RegexpSlot(name="username", regexp=r"username is ([a-zA-Z]+)", match_group_idx=1),
-        df_slots.RegexpSlot(name="email", regexp=r"email is ([a-z@\.A-Z]+)", match_group_idx=1),
+        dff.script.logic.slots.RegexpSlot(name="username", regexp=r"username is ([a-zA-Z]+)", match_group_idx=1),
+        dff.script.logic.slots.RegexpSlot(name="email", regexp=r"email is ([a-z@\.A-Z]+)", match_group_idx=1),
     ],
 )
 # Group 2: friend/first_name, friend/last_name
-friend_slot = df_slots.GroupSlot(
+friend_slot = dff.script.logic.slots.GroupSlot(
     name="friend",
     children=[
-        df_slots.RegexpSlot(name="first_name", regexp=r"^[A-Z][a-z]+?(?= )"),
-        df_slots.RegexpSlot(name="last_name", regexp=r"(?<= )[A-Z][a-z]+"),
+        dff.script.logic.slots.RegexpSlot(name="first_name", regexp=r"^[A-Z][a-z]+?(?= )"),
+        dff.script.logic.slots.RegexpSlot(name="last_name", regexp=r"(?<= )[A-Z][a-z]+"),
     ],
 )
-df_slots.add_slots([person_slot, friend_slot])
+dff.script.logic.slots.add_slots([person_slot, friend_slot])
 # ALTERNATE SYNTAX: you can register slots manually.
-# from df_slots import slot_types
+# from dff.script.logic.slots import slot_types
 # username_slot = slot_types.RegexpSlot(name="username", regexp=r"(?<=username is )[a-zA-Z]+")
 # person_slot = slot_types.GroupSlot(name="person", children=[username_slot])
-# df_slots.root.register_slots([person_slot])
+# dff.script.logic.slots.root.register_slots([person_slot])
 
 
 script = {
@@ -112,7 +112,7 @@ actor = Actor(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )
-df_slots.register_storage(actor, storage=dict())
+dff.script.logic.slots.register_storage(actor, storage=dict())
 
 if __name__ == "__main__":
     logging.basicConfig(

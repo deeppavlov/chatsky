@@ -7,8 +7,8 @@ from typing import Dict, Callable, Any
 from logging import getLogger
 from functools import wraps
 
-from df_engine.core import Context, Actor
-from df_engine.core.actor import ActorStage
+from dff.core.engine.core import Context, Actor
+from dff.core.engine.core.actor import ActorStage
 
 logger = getLogger(__name__)
 

@@ -8,8 +8,8 @@ from typing import Optional, Union, List, Callable
 
 from pydantic import validate_arguments
 
-from df_engine.core import Context, Actor
-from df_generics import Response
+from dff.core.engine.core import Context, Actor
+from dff.connectors.messenger.generics import Response
 
 from .handlers import get_filled_template, extract as extract_handler, unset as unset_handler
 
@@ -49,7 +49,7 @@ def unset(slots: Optional[List[str]] = None):
 def fill_template(slots: Optional[List[str]] = None):
     """
     Fill the response template in the current node.
-    Response should be an instance of :py:class:`~str` or of the :py:class:`~Response` class from df_generics add-on.
+    Response should be an instance of :py:class:`~str` or of the :py:class:`~Response` class from dff.connectors.messenger.generics add-on.
     Names of slots to be used should be placed in curly braces: 'Username is {profile/username}'.
 
     Parameters

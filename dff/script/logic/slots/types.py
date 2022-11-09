@@ -12,7 +12,7 @@ from copy import copy
 from collections.abc import Iterable
 from typing import Callable, Any, Dict, Union
 
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from pydantic import Field, BaseModel, validator
 from pydantic.typing import ForwardRef

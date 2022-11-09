@@ -1,8 +1,8 @@
 import logging
 from typing import Union, Optional
 
-from df_engine.core import Context, Actor
-from df_generics import Response
+from dff.core.engine.core import Context, Actor
+from dff.connectors.messenger.generics import Response
 
 
 def process_response(response):

@@ -2,14 +2,14 @@ import sys
 
 import pytest
 
-from df_engine.core import Context
+from dff.core.engine.core import Context
 
 sys.path.insert(0, "../")
 
 from examples.basic_example import actor
 
-from df_slots.utils import register_storage, FORM_STORAGE_KEY, SLOT_STORAGE_KEY
-from df_slots.root import root_slot
+from dff.script.logic.slots.utils import register_storage, FORM_STORAGE_KEY, SLOT_STORAGE_KEY
+from dff.script.logic.slots.root import root_slot
 
 
 @pytest.fixture

@@ -6,7 +6,7 @@ This module is for general functions that can be used in processing, conditions,
 import logging
 from typing import Dict, Optional, List
 
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from .types import BaseSlot, GroupSlot
 from .root import root_slot as root

@@ -2,8 +2,8 @@ import sys
 
 import pytest
 
-from df_slots.types import RegexpSlot, GroupSlot, FunctionSlot
-from df_slots.root import flatten_slot_tree, RootSlot, add_slots
+from dff.script.logic.slots.types import RegexpSlot, GroupSlot, FunctionSlot
+from dff.script.logic.slots.root import flatten_slot_tree, RootSlot, add_slots
 
 # pytest.skip(allow_module_level=True)
 

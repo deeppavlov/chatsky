@@ -1,40 +1,40 @@
 import logging
 
-from df_engine import conditions as cnd
-from df_engine.core.keywords import (
+from dff.core.engine import conditions as cnd
+from dff.core.engine.core.keywords import (
     RESPONSE,
     TRANSITIONS,
     PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
     LOCAL,
 )
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
-import df_slots
-from df_slots import conditions as slot_cnd
-from df_slots import processing as slot_procs
+import dff.script.logic.slots
+from dff.script.logic.slots import conditions as slot_cnd
+from dff.script.logic.slots import processing as slot_procs
 
 from examples import example_utils
 
 logger = logging.getLogger(__name__)
 
 
-pet = df_slots.GroupSlot(
+pet = dff.script.logic.slots.GroupSlot(
     name="pet",
     children=[
-        df_slots.GroupSlot(
+        dff.script.logic.slots.GroupSlot(
             name="pet_info",
             children=[
-                df_slots.RegexpSlot(name="sort", regexp=r"(dog|cat)", match_group_idx=1),
-                df_slots.RegexpSlot(name="gender", regexp=r"(she|(?<=[^s])he|^he)", match_group_idx=1),
-                df_slots.RegexpSlot(name="behaviour", regexp=r"(good|bad)", match_group_idx=1),
+                dff.script.logic.slots.RegexpSlot(name="sort", regexp=r"(dog|cat)", match_group_idx=1),
+                dff.script.logic.slots.RegexpSlot(name="gender", regexp=r"(she|(?<=[^s])he|^he)", match_group_idx=1),
+                dff.script.logic.slots.RegexpSlot(name="behaviour", regexp=r"(good|bad)", match_group_idx=1),
             ],
         )
     ],
 )
-df_slots.add_slots(pet)
+dff.script.logic.slots.add_slots(pet)
 
-# You can use df_slots handlers to define custom functions.
+# You can use dff.script.logic.slots handlers to define custom functions.
 # These include conditions, responses, and processing routines.
 # The following function can yield 4 responses depending on slot values:
 # - Is he a good boy or a bad boy?
@@ -44,10 +44,10 @@ df_slots.add_slots(pet)
 def custom_behaviour_question(ctx: Context, actor: Actor):
     template = "Is {pet/pet_info/gender} a good "
     middle = " or a bad "
-    new_template = df_slots.get_filled_template(template, ctx, actor, slots=["pet/pet_info/gender"])
-    gender = df_slots.get_values(ctx, actor, slots=["pet/pet_info/gender"])[0]
+    new_template = dff.script.logic.slots.get_filled_template(template, ctx, actor, slots=["pet/pet_info/gender"])
+    gender = dff.script.logic.slots.get_values(ctx, actor, slots=["pet/pet_info/gender"])[0]
     if gender is None:
-        new_template = df_slots.get_filled_template("Is your {pet/pet_info/sort} good or is it bad?", ctx, actor)
+        new_template = dff.script.logic.slots.get_filled_template("Is your {pet/pet_info/sort} good or is it bad?", ctx, actor)
     elif gender == "he":
         new_template = new_template + "boy" + middle + "boy?"
     else:
@@ -56,7 +56,7 @@ def custom_behaviour_question(ctx: Context, actor: Actor):
 
 
 def custom_esteem(ctx: Context, actor: Actor):
-    value = df_slots.get_values(ctx, actor, slots=["pet/pet_info/behaviour"])[0]
+    value = dff.script.logic.slots.get_values(ctx, actor, slots=["pet/pet_info/behaviour"])[0]
     if value == "bad":
         return "Sorry to hear that."
     else:
@@ -134,7 +134,7 @@ actor = Actor(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )
-df_slots.register_storage(actor, storage=dict())
+dff.script.logic.slots.register_storage(actor, storage=dict())
 
 if __name__ == "__main__":
     logging.basicConfig(

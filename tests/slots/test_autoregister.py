@@ -2,8 +2,8 @@ import sys
 
 import pytest
 
-from df_slots import GroupSlot, RegexpSlot, RootSlot
-from df_slots.root import add_slots
+from dff.script.logic.slots import GroupSlot, RegexpSlot, RootSlot
+from dff.script.logic.slots.root import add_slots
 
 
 def test_nesting(root: RootSlot):

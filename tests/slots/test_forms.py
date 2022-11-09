@@ -1,8 +1,8 @@
 import pytest
 
 
-from df_slots import RegexpSlot
-from df_slots import FormPolicy, FormState
+from dff.script.logic.slots import RegexpSlot
+from dff.script.logic.slots import FormPolicy, FormState
 
 
 pytest.skip(allow_module_level=True)

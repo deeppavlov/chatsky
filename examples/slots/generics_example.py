@@ -1,7 +1,7 @@
 import logging
 
-from df_engine import conditions as cnd
-from df_engine.core.keywords import (
+from dff.core.engine import conditions as cnd
+from dff.core.engine.core.keywords import (
     RESPONSE,
     TRANSITIONS,
     PRE_TRANSITIONS_PROCESSING,
@@ -9,14 +9,14 @@ from df_engine.core.keywords import (
     GLOBAL,
     LOCAL,
 )
-from df_engine.core import Actor
+from dff.core.engine.core import Actor
 
-from df_generics import Response
+from dff.connectors.messenger.generics import Response
 
-import df_slots
-from df_slots import processing as slot_procs
-from df_slots import response as slot_rps
-from df_slots import conditions as slot_cnd
+import dff.script.logic.slots
+from dff.script.logic.slots import processing as slot_procs
+from dff.script.logic.slots import response as slot_rps
+from dff.script.logic.slots import conditions as slot_cnd
 
 from examples import example_utils
 
@@ -24,10 +24,10 @@ logger = logging.getLogger(__name__)
 
 
 # In regexp slot you can define a group that will be extracted. Default is 0: full match.
-username_slot = df_slots.RegexpSlot(name="username", regexp=r"username is ([a-zA-Z]+)", match_group_idx=1)
-email_slot = df_slots.RegexpSlot(name="email", regexp=r"(?<=email is )[a-z@\.A-Z]+", match_group_idx=0)
-person_slot = df_slots.GroupSlot(name="person", children=[username_slot, email_slot])
-df_slots.add_slots(person_slot)
+username_slot = dff.script.logic.slots.RegexpSlot(name="username", regexp=r"username is ([a-zA-Z]+)", match_group_idx=1)
+email_slot = dff.script.logic.slots.RegexpSlot(name="email", regexp=r"(?<=email is )[a-z@\.A-Z]+", match_group_idx=0)
+person_slot = dff.script.logic.slots.GroupSlot(name="person", children=[username_slot, email_slot])
+dff.script.logic.slots.add_slots(person_slot)
 
 script = {
     GLOBAL: {TRANSITIONS: {("username_flow", "ask"): cnd.regexp(r"^[sS]tart")}},
@@ -86,7 +86,7 @@ actor = Actor(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )
-df_slots.register_storage(actor, storage=dict())
+dff.script.logic.slots.register_storage(actor, storage=dict())
 
 if __name__ == "__main__":
     logging.basicConfig(

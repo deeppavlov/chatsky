@@ -9,11 +9,11 @@ from random import choice
 from math import inf
 from collections import Counter
 
-import df_engine.labels as lbl
+import dff.core.engine.labels as lbl
 from pydantic import BaseModel, Field, PrivateAttr, validate_arguments
 
-from df_engine.core import Context, Actor
-from df_engine.core.types import NodeLabel3Type, NodeLabel2Type
+from dff.core.engine.core import Context, Actor
+from dff.core.engine.core.types import NodeLabel3Type, NodeLabel2Type
 
 from .root import root_slot
 from .handlers import get_values
@@ -100,7 +100,7 @@ class FormPolicy(BaseModel):
 
         priority: Optional[float] = None
             The weight that will be assigned to the transition.
-            Defaults to 1 (default priority in df_engine :py:class:`~Actor`).
+            Defaults to 1 (default priority in dff.core.engine :py:class:`~Actor`).
 
         """
 
@@ -135,7 +135,7 @@ class FormPolicy(BaseModel):
     @validate_arguments
     def has_state(self, state: FormState):
         """
-        This method produces a df_engine condition that yields `True` if the state of the form
+        This method produces a dff.core.engine condition that yields `True` if the state of the form
         equals the passed :class:`~FormState` or `False` otherwise.
 
         Parameters

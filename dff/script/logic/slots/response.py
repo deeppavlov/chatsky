@@ -8,8 +8,8 @@ from typing import Union, Optional, List
 
 from pydantic import validate_arguments
 
-from df_generics import Response
-from df_engine.core import Context, Actor
+from dff.connectors.messenger.generics import Response
+from dff.core.engine.core import Context, Actor
 
 from .handlers import get_filled_template
 
@@ -18,7 +18,7 @@ from .handlers import get_filled_template
 def fill_template(template: Union[str, Response], slots: Optional[List[str]] = None):
     """
     Fill a template with slot values.
-    Response should be an instance of :py:class:`~str` or of the :py:class:`~Response` class from df_generics add-on.
+    Response should be an instance of :py:class:`~str` or of the :py:class:`~Response` class from dff.connectors.messenger.generics add-on.
 
     Parameters
     ----------

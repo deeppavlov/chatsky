@@ -8,7 +8,7 @@ from functools import partial
 
 from pydantic import validate_arguments
 
-from df_engine.core import Context, Actor
+from dff.core.engine.core import Context, Actor
 
 from .root import root_slot
 from .utils import requires_storage
