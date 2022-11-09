@@ -10,14 +10,17 @@ except ImportError as e:
 
 
 from dff.script.logic.extended_conditions.dataset import Dataset
+from tests import utils
+
+path = utils.get_path_from_tests_to_current_dir(__file__)
 
 
 @pytest.mark.parametrize(
     ["file", "method_name"],
     [
-        ("./examples/data/example.json", "parse_json"),
-        ("./examples/data/example.jsonl", "parse_jsonl"),
-        ("./examples/data/example.yaml", "parse_yaml"),
+        (f"examples/{path}/data/example.json", "parse_json"),
+        (f"examples/{path}/data/example.jsonl", "parse_jsonl"),
+        (f"examples/{path}/data/example.yaml", "parse_yaml"),
     ],
 )
 def test_file_parsing(file, method_name):

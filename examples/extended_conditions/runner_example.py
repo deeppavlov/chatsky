@@ -5,7 +5,7 @@ from dff.core.pipeline import Pipeline, CLIMessengerInterface
 
 sys.path.insert(0, str(Path(__file__).absolute().parent.parent))
 
-from examples.base_example import regex_model, script
+from base_example import regex_model, script
 
 pipeline = Pipeline.from_script(
     script,

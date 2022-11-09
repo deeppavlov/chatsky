@@ -1,25 +1,30 @@
 import sys
+import os
 from pathlib import Path
 import importlib
 
 import pytest
 
-# uncomment the following line, if you want to run your examples during the test suite or import from them
-sys.path.insert(0, str(Path(__file__).absolute().parent.parent))
+import tests.utils as utils
 
 
-from examples.example_utils import run_test
+# TODO: remove this as soon as utils will be moved to PYPI
+sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
+
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
+
+from _extended_conditions_utils import run_test
 
 
 @pytest.mark.parametrize(
     ["module_name"],
     [
-        ("examples.base_example",),
-        ("examples.remote_api.rasa",),
-        ("examples.remote_api.dialogflow",),
-        ("examples.remote_api.hf_api",),
-        ("examples.gensim_example",),
-        ("examples.sklearn_example",),
+        ("base_example",),
+        ("remote_api.rasa",),
+        ("remote_api.dialogflow",),
+        ("remote_api.hf_api",),
+        ("gensim_example",),
+        ("sklearn_example",),
     ],
 )
 def test_examples(module_name):

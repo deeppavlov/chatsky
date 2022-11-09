@@ -9,7 +9,7 @@ from dff.script.logic.extended_conditions.models.local.classifiers.regex import 
 from dff.script.logic.extended_conditions.dataset import Dataset
 from dff.script.logic.extended_conditions import conditions as i_cnd
 
-from examples import example_utils
+import _extended_conditions_utils as example_utils
 
 logger = logging.getLogger(__name__)
 

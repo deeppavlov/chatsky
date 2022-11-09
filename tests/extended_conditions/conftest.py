@@ -1,24 +1,26 @@
 import os
-import sys
+import importlib
+from pathlib import Path
 
 import pytest
 from sklearn.feature_extraction.text import TfidfVectorizer
 from dff.script.logic.extended_conditions.models.local.cosine_matchers.sklearn import SklearnMatcher
 from dff.script.logic.extended_conditions.dataset import Dataset
 
-sys.path.insert(0, os.path.pardir)
-
+import tests.utils as utils
 
 @pytest.fixture(scope="session")
 def testing_actor():
-    from examples.base_example import actor
+    actor = importlib.import_module(
+        f"examples.{utils.get_path_from_tests_to_current_dir(__file__, separator='.')}.base_example"
+    ).actor
 
     yield actor
 
 
 @pytest.fixture(scope="session")
 def testing_dataset():
-    yield Dataset.parse_yaml("./examples/data/example.yaml")
+    yield Dataset.parse_yaml(Path(__file__).parent.parent.parent / f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}/data/example.yaml")
 
 
 @pytest.fixture(scope="session")

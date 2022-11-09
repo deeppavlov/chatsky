@@ -11,7 +11,7 @@ from dff.script.logic.extended_conditions.models import HFClassifier
 from dff.script.logic.extended_conditions.models import HFMatcher
 from dff.script.logic.extended_conditions.dataset import Dataset
 from dff.script.logic.extended_conditions import conditions as i_cnd
-from examples import example_utils
+import _extended_conditions_utils as example_utils
 
 logger = logging.getLogger(__name__)
 

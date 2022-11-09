@@ -8,7 +8,7 @@ from dff.core.engine import conditions as cnd
 from dff.script.logic.extended_conditions.models.remote_api.hf_api_model import HFAPIModel
 from dff.script.logic.extended_conditions import conditions as i_cnd
 
-from examples import example_utils
+import examples.extended_conditions._extended_conditions_utils as example_utils
 
 logger = logging.getLogger(__name__)
 
