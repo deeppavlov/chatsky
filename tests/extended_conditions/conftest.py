@@ -34,11 +34,8 @@ def hf_api_key():
 
 
 @pytest.fixture(scope="session")
-def gdf_json(tmpdir_factory):
-    json_file = tmpdir_factory.mktemp("gdf").join("service_account.json")
-    contents = os.getenv("GDF_ACCOUNT_JSON")
-    json_file.write(contents)
-    yield str(json_file)
+def gdf_json():
+    yield os.getenv("GDF_ACCOUNT_JSON")
 
 
 @pytest.fixture(scope="session")

@@ -19,8 +19,17 @@ jobs:
 
     runs-on: ubuntu-latest
 
+    env:
+      HF_API_KEY: ${{ secrets.HF_API_KEY }}
+
     steps:
       - uses: actions/checkout@v2
+
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
       - name: Build images
         run: |
@@ -47,8 +56,19 @@ jobs:
         os: [macOS-latest, windows-latest]
 
     runs-on: ${{ matrix.os }}
+
+    env:
+      HF_API_KEY: ${{ secrets.HF_API_KEY }}
+      GDF_ACCOUNT_JSON: ./gdf_account.json
+
     steps:
       - uses: actions/checkout@v2
+
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v2
