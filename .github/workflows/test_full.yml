@@ -42,8 +42,7 @@ jobs:
       - name: build coverage file
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
-              make test
-          else
-              pytest --tb=long -vv --cache-clear --cov=dff tests/
+              source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           fi
+          pytest --tb=long -vv --cache-clear --cov=dff tests/
         shell: bash
