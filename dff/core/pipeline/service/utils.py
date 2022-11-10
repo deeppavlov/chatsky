@@ -6,10 +6,11 @@ async def wrap_sync_function_in_async(function: Callable, *args, **kwargs) -> An
     """
     Utility function, that wraps both functions and coroutines in coroutines.
     Invokes function if it is just a callable and awaits - if this is a coroutine.
-    :function: - callable to wrap.
-    :*args: - function args.
-    :**kwargs: - function kwargs.
-    Returns what function returns.
+
+    :param function: callable to wrap.
+    :param \\*args: function args.
+    :param \\**kwargs: function kwargs.
+    :return: what function returns.
     """
     if asyncio.iscoroutinefunction(function):
         return await function(*args, **kwargs)
@@ -26,14 +27,15 @@ def _get_attrs_with_updates(
     """
     Advanced customizable version of built-in `__dict__` property.
     Sometimes during Pipeline construction Services (or ServiceGroups) should be rebuilt,
-        e.g. in case of some fields overriding.
+    e.g. in case of some fields overriding.
     This method can be customized to return a dict,
-        that can be spread (** operator) and passed to Service or ServiceGroup constructor.
+    that can be spread (** operator) and passed to Service or ServiceGroup constructor.
     Base dict is formed via `vars` built-in function. All "private" or "dunder" fields are omitted.
-    :drop_attrs: - a tuple of key names that should be removed from the resulting dict.
-    :replace_attrs: - a mapping, that should be replaced in the resulting dict.
-    :add_attrs: - a mapping, that should be added to the resulting dict.
-    Returns resulting dict.
+
+    :param drop_attrs: a tuple of key names that should be removed from the resulting dict.
+    :param replace_attrs: a mapping, that should be replaced in the resulting dict.
+    :param add_attrs: a mapping, that should be added to the resulting dict.
+    :return: resulting dict.
     """
     drop_attrs = () if drop_attrs is None else drop_attrs
     replace_attrs = {} if replace_attrs is None else dict(replace_attrs)
@@ -53,7 +55,7 @@ def collect_defined_constructor_parameters_to_dict(**kwargs: Any):
     """
     Function, that creates dict from non-None constructor parameters of pipeline component.
     It is used in overriding component parameters,
-        when service handler or service group service is instance of Service or ServiceGroup (or dict).
+    when service handler or service group service is instance of Service or ServiceGroup (or dict).
     It accepts same named parameters as component constructor.
     Returns dict, containing key-value pairs of these parameters, that are not None.
     """

@@ -129,7 +129,7 @@ class Pipeline:
         Method for receiving pretty-formatted string description of the pipeline.
         Resulting string structure is somewhat similar to YAML string.
         Should be used in debugging/logging purposes and should not be parsed.
-        
+
         :param show_wrappers: whether to include Wrappers or not (could be many and/or generated).
         :param indent: offset from new line to add before component children.
         """
@@ -213,7 +213,7 @@ class Pipeline:
         Method that executes pipeline once.
         Basically, it is a shortcut for `_run_pipeline`.
         NB! When pipeline is executed this way, `messenger_interface` won't be initiated nor connected.
-        
+
         :param request: any user request.
         :param ctx_id: current dialog id.
         :return: dialog Context.
