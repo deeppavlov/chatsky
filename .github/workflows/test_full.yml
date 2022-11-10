@@ -40,5 +40,10 @@ jobs:
         shell: bash
 
       - name: build coverage file
-        run: pytest --tb=long -vv --cache-clear --cov=dff tests/
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              make test
+          else
+              pytest --tb=long -vv --cache-clear --cov=dff tests/
+          fi
         shell: bash
