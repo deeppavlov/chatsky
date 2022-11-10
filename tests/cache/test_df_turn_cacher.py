@@ -1,8 +1,8 @@
-from df_engine.core import Context, Actor
-from df_engine.labels import repeat
-from df_engine.conditions import true
-from df_engine.core.keywords import RESPONSE, TRANSITIONS
-from df_turn_cacher.caching import OneTurnCache
+from dff.core.engine.core import Context, Actor
+from dff.core.engine.labels import repeat
+from dff.core.engine.conditions import true
+from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
+from dff.script.utils.cache.caching import OneTurnCache
 
 
 def cache_test(cached_response, cache):

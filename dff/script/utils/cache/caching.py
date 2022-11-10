@@ -4,8 +4,8 @@ Caching
 """
 import functools
 
-from df_engine.core import Actor, Context
-from df_engine.core.types import ActorStage
+from dff.core.engine.core import Actor, Context
+from dff.core.engine.core.types import ActorStage
 
 
 class OneTurnCache:
