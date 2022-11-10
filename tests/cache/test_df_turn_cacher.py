@@ -15,8 +15,8 @@ def cache_test(cached_response, cache):
             return ""
         return f"{cached_response(1)}-{cached_response(1)}-{cached_response(1)}-{cached_response(2)}"
 
-    plot = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
-    actor = Actor(plot=plot, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
+    script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
+    actor = Actor(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
     ctx.add_request("text")
     ctx = actor(ctx)
     assert ctx.last_response == "1-1-1-2"
