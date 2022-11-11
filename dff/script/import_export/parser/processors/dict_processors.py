@@ -23,7 +23,7 @@ from dff.script.import_export.parser.utils.namespaces import Namespace, Call, Im
 from dff.script.import_export.parser.dumpers_loaders import yaml_dumper_loader
 
 
-WHITESPACES_REGEXP = r"\n[ \t]*"
+WHITESPACES_REGEXP = re.compile(r"\n[ \t]*")
 
 
 class NodeProcessor:
@@ -91,7 +91,7 @@ class NodeProcessor:
             value = node.evaluated_value
             return String(value, show_yaml_tag=pyflakes_check_with_imports(list(self.namespace), value))
 
-        value = re.sub(WHITESPACES_REGEXP, "", repr_libcst_node(node))
+        value = WHITESPACES_REGEXP.sub("", repr_libcst_node(node))
 
         show_yaml_tag = False
         if not pyflakes_check_with_imports(list(self.namespace), value):
