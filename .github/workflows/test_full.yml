@@ -39,10 +39,12 @@ jobs:
           pip install -e .[test_full]
         shell: bash
 
-      - name: build coverage file
+      - name: add env variables
+        if: matrix.os == 'ubuntu-latest'
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-              source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-          fi
+          source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
+
+      - name: run pytest
+        run: |
           pytest --tb=long -vv --cache-clear --cov=dff tests/
         shell: bash
