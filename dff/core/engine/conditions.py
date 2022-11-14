@@ -28,7 +28,7 @@ def exact_match(match: Any, *args, **kwargs) -> Callable:
     :param match: the variable of the same type as
         :py:class:`~dff.core.engine.core.context.last_request`
     :type match: Any
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -48,7 +48,7 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
     :type pattern: Union[str, Pattern]
     :param flags: flags for this pattern. Defaults to 0.
     :type flags: Union[int, re.RegexFlag]
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     pattern = re.compile(pattern, flags)
 
@@ -95,7 +95,7 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
     :type cond_seq: list
     :param aggregate_func: function to aggregate conditions. Defaults to :py:func:`_any`.
     :type aggregate_func: Callable
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     check_cond_seq(cond_seq)
 
@@ -117,7 +117,7 @@ def any(cond_seq: list, *args, **kwargs) -> Callable:
 
     :param cond_seq: list of conditions to check
     :type cond_seq: list
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     _agg = aggregate(cond_seq, _any)
 
@@ -135,7 +135,7 @@ def all(cond_seq: list, *args, **kwargs) -> Callable:
 
     :param cond_seq: list of conditions to check
     :type cond_seq: list
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     _agg = aggregate(cond_seq, _all)
 
@@ -153,7 +153,7 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
 
     :param condition: any :py:func:`~condition`
     :type condition: Callable
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
 
     def negation_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -182,7 +182,7 @@ def has_last_labels(
     :type labels: Optional[List[NodeLabel2Type]]
     :param last_n_indices: number of last utterances to check.
     :type last_n_indices: int
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
@@ -203,7 +203,7 @@ def true(*args, **kwargs) -> Callable:
     """
     Returns function handler. This handler always returns `True`.
 
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
 
     def true_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -217,7 +217,7 @@ def false(*args, **kwargs) -> Callable:
     """
     Returns function handler. This handler always returns `False`.
 
-    :rtype: Callable
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
 
     def false_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
