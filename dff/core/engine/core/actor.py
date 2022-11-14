@@ -23,22 +23,19 @@ logger = logging.getLogger(__name__)
 
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
-    """This function handles errors during :py:class:`~dff.core.engine.core.script.Script` validation.
+    """
+    This function handles errors during :py:class:`~dff.core.engine.core.script.Script` validation.
 
-    :param error_msgs:
-        List that contains error messages. :py:func:`~dff.core.engine.core.actor.error_handler`
+    :param error_msgs: List that contains error messages.
+        :py:func:`~dff.core.engine.core.actor.error_handler`
         adds every next error message to that list.
     :type error_msgs: list
-    :param msg:
-        Error message which is to be added into `error_msgs`.
+    :param msg: Error message which is to be added into `error_msgs`.
     :type msg: str
-    :param exception:
-        Invoked exception. If it was set, it is used to obtain logging traceback.
-        Defaults to None
+    :param exception: Invoked exception. If it was set, it is used to obtain logging traceback.
+        Defaults to `None`.
     :type exception: Optional[Exception]
-    :param logging_flag:
-        The flag which defines whether logging is necessary.
-        Defaults to True
+    :param logging_flag: The flag which defines whether logging is necessary. Defaults to `True`.
     :type logging_flag: bool
     """
     error_msgs.append(msg)
@@ -47,55 +44,38 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
 
 
 class Actor(BaseModel):
-    """The class which is used to process :py:class:`~dff.core.engine.core.context.Context`
+    """
+    The class which is used to process :py:class:`~dff.core.engine.core.context.Context`
     according to the :py:class:`~dff.core.engine.core.script.Script`.
 
-    :param script:
-        The dialog scenario: a graph described by the :py:class:`~dff.core.engine.core.keywords.Keywords`.
+    :param script: The dialog scenario: a graph described by the :py:class:`~dff.core.engine.core.keywords.Keywords`.
         While the graph is being initialized, it passes validation and after that it is used for the dialog.
-    :type script:  Union[Script, dict]
-
-    :param start_label:
-        The start node of :py:class:`~dff.core.engine.core.script.Script`. The execution starts from it.
-    :type start_label:
-        :py:const:`~dff.core.engine.core.types.NodeLabel3Type`
-
-    :param fallback_label:
-        The label of :py:class:`~dff.core.engine.core.script.Script`.
+    :type script: Union[Script, dict]
+    :param start_label: The start node of :py:class:`~dff.core.engine.core.script.Script`.
+        The execution starts from it.
+    :type start_label: :py:const:`~dff.core.engine.core.types.NodeLabel3Type`
+    :param fallback_label: The label of :py:class:`~dff.core.engine.core.script.Script`.
         Dialog comes into that label if all other transitions failed,
-        or there was an error while executing the scenario.
-        Defaults to None
+        or there was an error while executing the scenario. Defaults to `None`.
     :type fallback_label: Optional[:py:const:`~dff.core.engine.core.types.NodeLabel3Type`]
-
-    :param label_priority:
-        Default priority value for all :py:const:`labels <dff.core.engine.core.types.NodeLabel3Type>`
-        where there is no priority.
-        Defaults to 1.0
+    :param label_priority: Default priority value for all
+        :py:const:`labels <dff.core.engine.core.types.NodeLabel3Type>` where there is no priority.
+        Defaults to 1.0.
     :type label_priority: float
-
-    :param validation_stage:
-        This flag sets whether the validation stage is executed. It is executed by default.
-        Defaults to None
+    :param validation_stage: This flag sets whether the validation stage is executed.
+        It is executed by default. Defaults to `None`.
     :type validation_stage: Optional[bool]
-
-    :param condition_handler:
-        Handler that processes a call of condition functions.
-        Defaults to None
+    :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
     :type condition_handler: Optional[Callable]
-
-    :param verbose:
-        If it is True, we use logging.
-        Defaults to True
+    :param verbose: If it is `True`, we use logging. Defaults to `True`.
     :type verbose: bool
-
-    :param handlers:
-        This variable is responsible for the usage of external handlers on
+    :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.core.engine.core.actor.Actor`.
 
-        * key: :py:class:`~dff.core.engine.core.types.ActorStage` - stage when the handler is called
-        * value: List[Callable] - the list of called handlers for each stage
+        - key: :py:class:`~dff.core.engine.core.types.ActorStage` - stage when the handler is called
+        - value: List[Callable] - the list of called handlers for each stage
 
-        Defaults to an empty dict
+        Defaults to an empty `dict`.
     :type handlers: Dict[ActorStage, List[Callable]]
     """
 
@@ -437,16 +417,15 @@ class Actor(BaseModel):
 
 @validate_arguments()
 def deep_copy_condition_handler(condition: Callable, ctx: Context, actor: Actor, *args, **kwargs):
-    """This function returns deep copy of callable conditions:
+    """
+    This function returns deep copy of callable conditions:
 
-    :param condition:
-        condition to copy
+    :param condition: Condition to copy.
     :type condition: Callable
-    :param ctx:
-        context of current condition
+    :param ctx: Context of current condition.
     :type ctx: :py:class:`.Context`
-    :param actor:
-        Actor we use in this condition
+    :param actor: Actor we use in this condition.
     :type actor: :py:class:`.Actor`
+    :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     return condition(ctx.copy(deep=True), actor.copy(deep=True), *args, **kwargs)
