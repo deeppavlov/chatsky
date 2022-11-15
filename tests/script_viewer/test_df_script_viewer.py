@@ -5,16 +5,17 @@ from pathlib import Path
 import re
 
 import plotly.graph_objects as go
-from df_script_viewer import graph
-from df_script_viewer import plot
+from dff.script.utils.script_viewer import graph
+from dff.script.utils.script_viewer import plot
+from tests.utils import get_path_from_tests_to_current_dir
 
 import pytest
 
 
 @pytest.fixture(scope="session")
 def testing_graph():
-    dir = Path(__file__).parent.parent / "examples" / "python_files"
-    G = graph.get_graph(dir / "main.py", dir)
+    example_dir = Path(f"examples/{get_path_from_tests_to_current_dir(__file__)}") / "python_files"
+    G = graph.get_graph(example_dir / "main.py", example_dir)
     yield G
 
 

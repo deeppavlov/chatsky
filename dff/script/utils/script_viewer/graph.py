@@ -2,7 +2,7 @@ from pathlib import Path
 
 import networkx as nx
 
-from df_script_parser.processors.recursive_parser import RecursiveParser
+from dff.script.import_export.parser.processors.recursive_parser import RecursiveParser
 
 
 def get_graph(root_file, project_root_dir, requirements=None, **kwargs) -> nx.Graph:

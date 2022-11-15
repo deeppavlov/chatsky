@@ -1,5 +1,5 @@
-from df_engine.core.types import NodeLabel3Type
-from df_engine.core import Actor, Context
+from dff.core.engine.core.types import NodeLabel3Type
+from dff.core.engine.core import Actor, Context
 import typing as tp
 
 

@@ -1,6 +1,6 @@
-from df_engine.core.keywords import TRANSITIONS, RESPONSE, PROCESSING, LOCAL
-import df_engine.conditions as cnd
-import df_engine.labels as lbl
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE, PROCESSING, LOCAL
+import dff.core.engine.conditions as cnd
+import dff.core.engine.labels as lbl
 import re
 
 from functions import add_prefix

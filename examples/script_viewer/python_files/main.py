@@ -1,4 +1,4 @@
-from df_engine.core.keywords import (
+from dff.core.engine.core.keywords import (
     TRANSITIONS,
     RESPONSE,
     PROCESSING,
@@ -6,10 +6,10 @@ from df_engine.core.keywords import (
     MISC,
     LOCAL,
 )
-import df_engine.conditions as cnd
-import df_engine.labels as lbl
-from df_engine.core import Actor as Act, Context
-import df_engine.responses as rsp
+import dff.core.engine.conditions as cnd
+import dff.core.engine.labels as lbl
+from dff.core.engine.core import Actor as Act, Context
+import dff.core.engine.responses as rsp
 from functions import add_prefix
 import typing as tp, re, transitions
 from flow import global_flow

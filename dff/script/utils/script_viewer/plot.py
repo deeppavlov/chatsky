@@ -2,8 +2,8 @@ import logging
 import random
 from typing import Dict
 
-from df_script_parser.utils.code_wrappers import Python
-from df_script_parser.utils.validators import keywords_dict
+from dff.script.import_export.parser.utils.code_wrappers import Python
+from dff.script.import_export.parser.utils.validators import keywords_dict
 import networkx as nx
 import graphviz
 
