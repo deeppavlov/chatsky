@@ -61,6 +61,18 @@ graph_dependencies = [
     "networkx>=2.5.1",
 ]
 
+script_viewer_dependencies = merge_req_lists(
+    [
+        parser_dependencies,
+        graph_dependencies,
+        [
+            "graphviz==0.17",
+            "dash==2.6.2",
+            "plotly<=5.10.0",
+        ]
+    ]
+)
+
 sqlite_dependencies = [
     "sqlalchemy>=1.4.27",
 ]
@@ -118,6 +130,7 @@ full = merge_req_lists(
         ydb_dependencies,
         parser_dependencies,
         graph_dependencies,
+        script_viewer_dependencies,
     ]
 )
 
@@ -146,6 +159,7 @@ EXTRA_DEPENDENCIES = {
     "devel_full": devel_full,
     "parser": parser_dependencies,
     "graph": graph_dependencies,
+    "script_viewer": script_viewer_dependencies,
     "sqlite": sqlite_dependencies,
     "redis": redis_dependencies,
     "mongodb": mongodb_dependencies,
@@ -191,6 +205,8 @@ setup(
             "dff.yaml2py = dff.script.import_export.parser.cli:yaml2py_cli",
             "dff.py2graph = dff.script.import_export.parser.cli:py2graph_cli",
             "dff.graph2py = dff.script.import_export.parser.cli:graph2py_cli",
+            "dff.script_viewer.server=dff.script.utils.script_viewer:make_server",
+            "dff.script_viewer.image=dff.script.utils.script_viewer:make_image",
         ]
     },
 )
