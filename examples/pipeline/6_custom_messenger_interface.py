@@ -53,8 +53,7 @@ messenger_interface = (
 
 
 def construct_webpage_by_response(response: str, _: Context) -> str:
-    return (
-        f"""
+    return f"""
     <!DOCTYPE html>
     <html>
         <head>
@@ -74,9 +73,6 @@ def construct_webpage_by_response(response: str, _: Context) -> str:
         </body>
     </html>
     """
-        if is_interactive_mode()
-        else response
-    )
 
 
 def purify_request(ctx: Context):
@@ -92,7 +88,7 @@ def purify_request(ctx: Context):
         raise Exception(f"Request of type {type(last_request)} can not be purified!")
 
 
-def markdown_request(ctx: Context):
+def cat_response2webpage(ctx: Context):
     last_response = ctx.last_response
     last_index = get_last_index(ctx.responses)
     ctx.responses[last_index] = construct_webpage_by_response(last_response, ctx)
@@ -113,7 +109,7 @@ pipeline_dict = {
             "handler": actor,
             "name": "encapsulated-actor",
         },  # Actor here is encapsulated in another service with specific name
-        markdown_request,
+        cat_response2webpage,
     ],
 }
 
