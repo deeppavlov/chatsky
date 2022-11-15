@@ -25,9 +25,7 @@ def exact_match(match: Any, *args, **kwargs) -> Callable:
     Returns function handler. This handler returns `True` only if the last user phrase is exactly
     the same as the :py:const:`match`.
 
-    :param match: the variable of the same type as
-        :py:class:`~dff.core.engine.core.context.last_request`
-    :type match: Any
+    :param match: The variable of the same type as :py:class:`~dff.core.engine.core.context.last_request`.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
 
@@ -44,10 +42,8 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
     Returns function handler. This handler returns `True` only if the last user phrase contains
     :py:const:`pattern <Union[str, Pattern]>` with :py:const:`flags <Union[int, re.RegexFlag]>`.
 
-    :param pattern: the `RegExp` pattern.
-    :type pattern: Union[str, Pattern]
-    :param flags: flags for this pattern. Defaults to 0.
-    :type flags: Union[int, re.RegexFlag]
+    :param pattern: The `RegExp` pattern.
+    :param flags: Flags for this pattern. Defaults to 0.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     pattern = re.compile(pattern, flags)
@@ -68,8 +64,7 @@ def check_cond_seq(cond_seq: list):
     """
     Checks if the list consists only of Callables.
 
-    :param cond_seq: list of conditions to check.
-    :type cond_seq: list
+    :param cond_seq: List of conditions to check.
     """
     for cond in cond_seq:
         if not isinstance(cond, Callable):
@@ -91,10 +86,8 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
     """
     Aggregates multiple functions into one by using aggregating function.
 
-    :param cond_seq: list of conditions to check.
-    :type cond_seq: list
-    :param aggregate_func: function to aggregate conditions. Defaults to :py:func:`_any`.
-    :type aggregate_func: Callable
+    :param cond_seq: List of conditions to check.
+    :param aggregate_func: Function to aggregate conditions. Defaults to :py:func:`_any`.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     check_cond_seq(cond_seq)
@@ -115,8 +108,7 @@ def any(cond_seq: list, *args, **kwargs) -> Callable:
     Returns function handler. This handler returns `True`
     if any function from the list is `True`.
 
-    :param cond_seq: list of conditions to check
-    :type cond_seq: list
+    :param cond_seq: List of conditions to check.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     _agg = aggregate(cond_seq, _any)
@@ -133,8 +125,7 @@ def all(cond_seq: list, *args, **kwargs) -> Callable:
     Returns function handler. This handler returns `True` only
     if all functions from the list are `True`.
 
-    :param cond_seq: list of conditions to check
-    :type cond_seq: list
+    :param cond_seq: List of conditions to check.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     _agg = aggregate(cond_seq, _all)
@@ -151,8 +142,7 @@ def negation(condition: Callable, *args, **kwargs) -> Callable:
     Returns function handler. This handler returns negation of the :py:func:`~condition`: `False`
     if :py:func:`~condition` holds `True` and returns `True` otherwise.
 
-    :param condition: any :py:func:`~condition`
-    :type condition: Callable
+    :param condition: Any :py:func:`~condition`.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
 
@@ -176,12 +166,9 @@ def has_last_labels(
     the :py:const:`flow_labels` list or in
     the :py:const:`~dff.core.engine.core.types.NodeLabel2Type` list.
 
-    :param flow_labels: list of labels to check. Every label has type `str`. Is empty if not set.
-    :type flow_labels: Optional[List[str]]
-    :param labels: list of labels that correspond to the nodes. Is empty is not set.
-    :type labels: Optional[List[NodeLabel2Type]]
-    :param last_n_indices: number of last utterances to check.
-    :type last_n_indices: int
+    :param flow_labels: List of labels to check. Every label has type `str`. Empty if not set.
+    :param labels: List of labels corresponding to the nodes. Empty if not set.
+    :param last_n_indices: Number of last utterances to check.
     :rtype: Callable[[Context, Actor, Any, Any], bool]
     """
     flow_labels = [] if flow_labels is None else flow_labels

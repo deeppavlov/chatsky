@@ -4,7 +4,6 @@ Context
 Data structure which is used for the context storage.
 It provides a convenient interface for working with data:
 adding data, data serialization, type checking etc.
-
 """
 import logging
 from uuid import UUID, uuid4
@@ -22,74 +21,81 @@ Node = BaseModel
 
 @validate_arguments
 def sort_dict_keys(dictionary: dict) -> dict:
-    """Sorting of keys in the `dictionary`.
-    It is necessary to do it after the deserialization: keys deserialize in a random order.
+    """
+    Sorting of keys in the `dictionary`. It is necessary to do it after the deserialization:
+    keys deserialize in a random order.
+
+    :param dictionary: Dictionary with unsorted keys.
+    :type dictionary: dict
+    :return: Dictionary with sorted keys.
+    :rtype: dict
     """
     return {key: dictionary[key] for key in sorted(dictionary)}
 
 
 @validate_arguments
 def get_last_index(dictionary: dict) -> int:
-    """Obtaining of the last index from the `dictionary`, functions returns `-1` if the `dict` is empty."""
+    """
+    Obtaining the last index from the `dictionary`. Functions returns `-1` if the `dict` is empty.
+
+    :param dictionary: Dictionary with unsorted keys.
+    :type dictionary: dict
+    :return: Last index from the `dictionary`.
+    :rtype: int
+    """
     indices = list(dictionary)
     return indices[-1] if indices else -1
 
 
 class Context(BaseModel):
-    """The structure which is used for the storage of data about the dialog context.
+    """
+    The structure which is used for the storage of data about the dialog context.
 
-    :param id:
-        `id` is the unique context identifier.
-        By default, the `id` which is randomly generated using `uuid4` is used.
-        `id` can be used to trace the user behaviour,
-        e.g while collecting the statistical data.
+    :param id: `id` is the unique context identifier.
+        By default, randomly generated using `uuid4` `id` is used.
+        `id` can be used to trace the user behaviour, e.g while collecting the statistical data.
     :type id: Union[UUID, int, str]
-    :param labels:
-        `labels` stores the history of all passed `labels`:
+    :param labels: `labels` stores the history of all passed `labels`
 
-        * key - `id` of the turn
-        * value - `label` on this turn
+        - key - `id` of the turn,
+        - value - `label` on this turn.
 
     :type labels: Dict[int, :py:const:`~dff.core.engine.core.types.NodeLabel2Type`]
-    :param requests:
-        `requests` stores the history of all `requests` received by the agent
+    :param requests: `requests` stores the history of all `requests` received by the agent
 
-        * key - `id` of the turn
-        * value - `request` on this turn
+        - key - `id` of the turn,
+        - value - `request` on this turn.
+
     :type requests: Dict[int, Any]
-    :param responses:
-        `responses` stores the history of all agent `responses`
+    :param responses: `responses` stores the history of all agent `responses`
 
-        * key - `id` of the turn
-        * value - `response` on this turn
+        - key - `id` of the turn,
+        - value - `response` on this turn.
 
     :type responses: Dict[int, Any]
-    :param misc:
-        `misc` stores any custom data, the engine doesn't use this dictionary by default,
+    :param misc: `misc` stores any custom data, the engine doesn't use this dictionary by default,
         so storage of any data won't reflect on the work on the internal Dialog Flow Engine functions.
 
-        * key - arbitrary data name
-        * value - arbitrary data
+        - key - arbitrary data name,
+        - value - arbitrary data.
 
     :type misc: Dict[str, Any]
-    :param validation:
-        `validation` is a flag that signals that :py:class:`~dff.core.engine.core.actor.Actor`,
+    :param validation: `validation` is a flag that signals that :py:class:`~dff.core.engine.core.actor.Actor`,
         while being initialized, checks the :py:class:`~dff.core.engine.core.script.Script`.
         The functions that can give not validable data
         while being validated must use this flag to take the validation mode into account.
         Otherwise the validation will not be passed.
 
     :type validation: bool
-    :param framework_states:
-        `framework_states` is used for addons states or for :py:class:`~dff.core.engine.core.actor.Actor`'s states.
-        :py:class:`~dff.core.engine.core.actor.Actor`
+    :param framework_states: `framework_states` is used for addons states or for
+        :py:class:`~dff.core.engine.core.actor.Actor`'s states. :py:class:`~dff.core.engine.core.actor.Actor`
         records all its intermediate conditions into the `framework_states`.
         After :py:class:`~dff.core.engine.core.context.Context` processing is finished,
         :py:class:`~dff.core.engine.core.actor.Actor` resets `framework_states` and
         returns :py:class:`~dff.core.engine.core.context.Context`.
 
-        * key - temporary variable name
-        * value - temporary variable data
+        - key - temporary variable name,
+        - value - temporary variable data.
 
     :type framework_states: Dict[:py:const:`~dff.core.engine.core.types.ModuleName`, Dict[str, Any]]
     """
@@ -115,11 +121,14 @@ class Context(BaseModel):
         Return Context object of :py:class:`~dff.core.engine.core.context.Context`
         type that is initialized by the input data.
 
-        :param ctx: different data types, that are used to initialize object of
+        :param ctx: Different data types, that are used to initialize object of
             :py:class:`~dff.core.engine.core.context.Context` type.
             The empty object of :py:class:`~dff.core.engine.core.context.Context`
             type is created if no data are given.
         :type ctx: Union[Context, dict, str]
+        :return: Context object of :py:class:`~dff.core.engine.core.context.Context`
+            type that is initialized by the input data.
+        :rtype: Context
         """
         if not ctx:
             ctx = Context(*args, **kwargs)
@@ -135,11 +144,11 @@ class Context(BaseModel):
 
     @validate_arguments
     def add_request(self, request: Any):
-        """Adds to the context the next `request`, that is correspondent to the next turn.
+        """
+        Adds to the context the next `request`, that is correspondent to the next turn.
         The addition is happening in the `requests`, and `new_index = last_index + 1`
 
-        :param request:
-            `request` that we need to add to the context
+        :param request: `request` that we need to add to the context.
         :type request: Any
         """
         last_index = get_last_index(self.requests)
@@ -147,11 +156,11 @@ class Context(BaseModel):
 
     @validate_arguments
     def add_response(self, response: Any):
-        """Adds to the context the next `response`, that is correspondent to the next turn.
+        """
+        Adds to the context the next `response`, that is correspondent to the next turn.
         The addition is happening in the `responses`, and `new_index = last_index + 1`
 
-        :param response:
-            `response` that we need to add to the context
+        :param response: `response` that we need to add to the context.
         :type response: Any
         """
         last_index = get_last_index(self.responses)
@@ -159,12 +168,12 @@ class Context(BaseModel):
 
     @validate_arguments
     def add_label(self, label: NodeLabel2Type):
-        """Adds to the context the next :py:const:`label <dff.core.engine.core.types.NodeLabel2Type>`,
+        """
+        Adds to the context the next :py:const:`label <dff.core.engine.core.types.NodeLabel2Type>`,
         that is correspondent to the next turn.
         The addition is happening in the `labels`, and `new_index = last_index + 1`
 
-        :param label:
-            `label` that we need to add to the context
+        :param label: `label` that we need to add to the context.
         :type label: :py:const:`~dff.core.engine.core.types.NodeLabel2Type`
         """
         last_index = get_last_index(self.labels)
@@ -176,15 +185,14 @@ class Context(BaseModel):
         hold_last_n_indices: int,
         field_names: Union[Set[str], List[str]] = {"requests", "responses", "labels"},
     ):
-        """Deletes all recordings from the `requests`/`responses`/`labels` except for
+        """
+        Deletes all recordings from the `requests`/`responses`/`labels` except for
         the last N turns according to the `hold_last_n_indices`.
         If`field_names` contains `misc` field, `misc` field is fully cleared,
 
-        :param hold_last_n_indices:
-            number of last turns that remain under clearing
+        :param hold_last_n_indices: Number of last turns that remain under clearing.
         :type hold_last_n_indices: int
-        :param field_names:
-            properties of :py:class:`~dff.core.engine.core.context.Context` we need to clear
+        :param field_names: Properties of :py:class:`~dff.core.engine.core.context.Context` we need to clear.
             Defaults to {"requests", "responses", "labels"}
         :type field_names: Union[Set[str], List[str]]
         """
@@ -205,32 +213,40 @@ class Context(BaseModel):
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
-        """Returns the last :py:const:`~dff.core.engine.core.types.NodeLabel2Type` of
+        """
+        Returns the last :py:const:`~dff.core.engine.core.types.NodeLabel2Type` of
         the :py:class:`~dff.core.engine.core.context.Context`.
-        Returns `None` if `labels` is empty
+        Returns `None` if `labels` is empty.
+        :return: The last :py:const:`~dff.core.engine.core.types.NodeLabel2Type` of
+        the :py:class:`~dff.core.engine.core.context.Context`.
+        :rtype: :py:const:`~dff.core.engine.core.types.NodeLabel2Type`
         """
         last_index = get_last_index(self.labels)
         return self.labels.get(last_index)
 
     @property
     def last_response(self) -> Optional[Any]:
-        """Returns the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
-        Returns `None` if `responses` is empty
+        """
+        Returns the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Returns `None` if `responses` is empty.
         """
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
     @property
     def last_request(self) -> Optional[Any]:
-        """Returns the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
-        Returns `None if `requests` is empty
+        """
+        Returns the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Returns `None if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
     @property
     def current_node(self) -> Optional[Node]:
-        """Returns current :py:class:`~dff.core.engine.core.script.Node`."""
+        """
+        Returns current :py:class:`~dff.core.engine.core.script.Node`.
+        """
         actor = self.framework_states.get("actor", {})
         node = (
             actor.get("processed_node")
@@ -249,10 +265,10 @@ class Context(BaseModel):
 
     @validate_arguments
     def overwrite_current_node_in_processing(self, processed_node: Node):
-        """Overwrites the current node with a processed node. This method only works in processing functions.
+        """
+        Overwrites the current node with a processed node. This method only works in processing functions.
 
-        :param processed_node:
-            `node` that we need to overwrite current node.
+        :param processed_node: `node` that we need to overwrite current node.
         :type processed_node: :py:class:`~dff.core.engine.core.script.Node`
         """
         is_processing = self.framework_states.get("actor", {}).get("processed_node")
