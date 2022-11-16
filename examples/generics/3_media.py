@@ -9,7 +9,7 @@ from dff.connectors.messenger.generics.response import Attachments, Image, Respo
 
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-from dff.utils.testing.response_comparers import generics_diff
+from dff.utils.testing.response_comparers import generics_comparer
 
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
@@ -93,6 +93,6 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path, generics_diff)
+    check_happy_path(pipeline, happy_path, generics_comparer)
     if is_interactive_mode():
         run_interactive_mode(pipeline)

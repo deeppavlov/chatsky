@@ -6,15 +6,15 @@ from dff.connectors.messenger.generics import Response
 from dff.core.engine.core.script import Context
 
 
-def default_diff(candidate: Any, reference: Any, _: Context) -> Optional[str]:
+def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[str]:
     return None if candidate == reference else candidate
 
 
-def ref_in_cand_diff(candidate: Any, reference: Any, _: Context) -> Optional[str]:
+def ref_in_cand_comparer(candidate: Any, reference: Any, _: Context) -> Optional[str]:
     return None if reference in candidate else candidate
 
 
-def generics_diff(candidate: Response, reference: str, _: Context) -> Optional[str]:
+def generics_comparer(candidate: Response, reference: str, _: Context) -> Optional[str]:
     ui = candidate.ui
     if ui and ui.buttons:
         options = [f"{str(idx)}): {item.text}" for idx, item in enumerate(ui.buttons)]
