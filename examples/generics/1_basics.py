@@ -1,23 +1,53 @@
 from typing import NamedTuple
 
+from dff.connectors.messenger.generics import Response
+from dff.core.engine.conditions import exact_match
 from dff.core.engine.core import Context
 from dff.core.engine.core.context import get_last_index
+from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-from dff.utils.testing.toy_script import TOY_SCRIPT
+
+toy_script = {
+    "greeting_flow": {
+        "start_node": {
+            RESPONSE: Response(text=""),
+            TRANSITIONS: {"node1": exact_match("Hi")},
+        },
+        "node1": {
+            RESPONSE: Response(text="Hi, how are you?"),
+            TRANSITIONS: {"node2": exact_match("i'm fine, how are you?")},
+        },
+        "node2": {
+            RESPONSE: Response(text="Good. What do you want to talk about?"),
+            TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
+        },
+        "node3": {
+            RESPONSE: Response(text="Sorry, I can not talk about music now."),
+            TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
+        },
+        "node4": {
+            RESPONSE: Response(text="bye"),
+            TRANSITIONS: {"node1": exact_match("Hi")}},
+        "fallback_node": {
+            RESPONSE: Response(text="Ooops"),
+            TRANSITIONS: {"node1": exact_match("Hi")},
+        },
+    }
+}
 
 happy_path = (
-    ("Hi", "Hi, how are you?"),
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about music now."),
-    ("Ok, goodbye.", "bye"),
-    ("Hi", "Hi, how are you?"),
-    ("stop", "Ooops"),
-    ("stop", "Ooops"),
-    ("Hi", "Hi, how are you?"),
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("Let's talk about music.", "Sorry, I can not talk about music now."),
-    ("Ok, goodbye.", "bye"),
+    ("Hi", Response(text="Hi, how are you?")),
+    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
+    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
+    ("Ok, goodbye.", Response(text="bye")),
+    ("Hi", Response(text="Hi, how are you?")),
+    ("stop", Response(text="Ooops")),
+    ("stop", Response(text="Ooops")),
+    ("Hi", Response(text="Hi, how are you?")),
+    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
+    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
+    ("Ok, goodbye.", Response(text="bye")),
 )
 
 
@@ -41,13 +71,13 @@ def process_request(ctx: Context):
 
 
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
+    toy_script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
     pre_services=[process_request],
 )
 
-if __name__ == "__main__":  # TODO: FIXME: WHAT IS GOING ON HERE??👀
+if __name__ == "__main__":
     check_happy_path(
         pipeline,
         happy_path,
