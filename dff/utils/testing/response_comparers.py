@@ -23,7 +23,7 @@ def generics_diff(candidate: Response, reference: str, _: Context) -> Optional[s
 
     attachment = candidate.image or candidate.document or candidate.audio or candidate.video
     if attachment and attachment.source:
-        attachment_size = int(get(attachment.source, stream=True).headers['Content-length'])
+        attachment_size = int(get(attachment.source, stream=True).headers["Content-length"])
         transformed = "\n".join(["", candidate.text, f"Attachment size: {attachment_size} bytes."])
         return None if transformed == reference else transformed
 
@@ -31,7 +31,7 @@ def generics_diff(candidate: Response, reference: str, _: Context) -> Optional[s
     if attachments:
         attachment_size = 0
         for attach in attachments.files:
-            attachment_size += int(get(attach.source, stream=True).headers['Content-length'])
+            attachment_size += int(get(attach.source, stream=True).headers["Content-length"])
         transformed = "\n".join(["", candidate.text, f"Grouped attachment size: {attachment_size} bytes."])
         return None if transformed == reference else transformed
 

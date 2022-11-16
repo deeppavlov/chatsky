@@ -1,4 +1,3 @@
-import pathlib
 from typing import NamedTuple
 
 from dff.core.engine.core import Context
@@ -12,7 +11,10 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.utils.testing.response_comparers import generics_diff
 
-kitten_url = "https://unsplash.com/photos/Y0WXj3xqJz0/download?ixid=MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0&force=true&w=640"
+kitten_id = "Y0WXj3xqJz0"
+kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
+kitten_width = 640
+kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
 
 toy_script = {
     "root": {
@@ -35,9 +37,7 @@ toy_script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(
-                text="here's my picture!", image=Image(source=kitten_url)
-            ),
+            RESPONSE: Response(text="here's my picture!", image=Image(source=kitten_url)),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
