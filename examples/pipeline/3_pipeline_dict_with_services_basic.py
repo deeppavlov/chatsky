@@ -8,12 +8,12 @@ The following example shows pipeline creation from dict and most important pipel
 import logging
 
 from dff.core.engine.core import Actor
-
 from dff.core.pipeline import Service, Pipeline
-from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 When Pipeline is created using `from_dict` method, pipeline should be defined as dictionary.
@@ -32,13 +32,6 @@ Here pipeline contains 4 services, defined in 4 different ways with different si
 """
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 def prepreprocess(_):
     logger.info("preprocession intent-detection Service running (defined as a dict)")
 
@@ -49,6 +42,13 @@ def preprocess(_):
 
 def postprocess(_):
     logger.info("postprocession Service (defined as an object)")
+
+
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 
 pipeline_dict = {
@@ -68,7 +68,6 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if should_auto_execute():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)  # This runs example in interactive mode

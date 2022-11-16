@@ -12,10 +12,10 @@ from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from _pipeline_utils import SCRIPT, should_auto_execute
+from dff.utils.testing.common import is_interactive_mode
+from dff.utils.testing.toy_script import TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Messenger interfaces are used for providing a way for communication between user and pipeline.
@@ -46,8 +46,6 @@ Two services are used to process request:
 """
 
 app = Flask("examples.6_custom_messenger_interface")
-
-actor = Actor(SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
 
 messenger_interface = (
     CallbackMessengerInterface()
@@ -87,10 +85,17 @@ def purify_request(ctx: Context):
         raise Exception(f"Request of type {type(ctx.last_request)} can not be purified!")
 
 
-def markdown_request(ctx: Context):
+def cat_response2webpage(ctx: Context):
     last_response = ctx.last_response
     last_index = get_last_index(ctx.responses)
     ctx.responses[last_index] = construct_webpage_by_response(last_response)
+
+
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 
 pipeline_dict = {
@@ -101,7 +106,7 @@ pipeline_dict = {
             "handler": actor,
             "name": "encapsulated-actor",
         },  # Actor here is encapsulated in another service with specific name
-        markdown_request,
+        cat_response2webpage,
     ],
 }
 
@@ -114,7 +119,7 @@ async def route():
 
 pipeline = Pipeline(**pipeline_dict)
 
-if __name__ == "__main__" and not should_auto_execute():
+if __name__ == "__main__" and not is_interactive_mode():  # This example will be run in interactive mode only
     pipeline.run()
     app.run()
     # Navigate to http://127.0.0.1:5000/pipeline_web_interface?request={REQUEST} to receive response
