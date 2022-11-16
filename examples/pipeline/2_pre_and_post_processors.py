@@ -56,7 +56,7 @@ pipeline = Pipeline.from_script(
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
-    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+    if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)

@@ -100,5 +100,5 @@ pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
-    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+    if is_interactive_mode():
         run_interactive_mode(pipeline)

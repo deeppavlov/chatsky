@@ -92,5 +92,5 @@ pipeline = Pipeline.from_script(
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path, generics_diff)
-    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+    if is_interactive_mode():
         run_interactive_mode(pipeline)

@@ -47,5 +47,5 @@ pipeline = Pipeline.from_script(toy_script, start_label=("flow_start", "node_sta
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)
-    if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
+    if is_interactive_mode():
         run_interactive_mode(pipeline)
