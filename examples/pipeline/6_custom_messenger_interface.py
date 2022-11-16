@@ -52,7 +52,7 @@ messenger_interface = (
 )  # For this simple case of Flask, CallbackMessengerInterface may not be overridden
 
 
-def construct_webpage_by_response(response: str, _: Context) -> str:
+def construct_webpage_by_response(response: str) -> str:
     return f"""
     <!DOCTYPE html>
     <html>
@@ -88,7 +88,7 @@ def purify_request(ctx: Context):
 def cat_response2webpage(ctx: Context):
     last_response = ctx.last_response
     last_index = get_last_index(ctx.responses)
-    ctx.responses[last_index] = construct_webpage_by_response(last_response, ctx)
+    ctx.responses[last_index] = construct_webpage_by_response(last_response)
 
 
 actor = Actor(

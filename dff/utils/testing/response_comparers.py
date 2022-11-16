@@ -10,10 +10,6 @@ def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[str
     return None if candidate == reference else candidate
 
 
-def ref_in_cand_comparer(candidate: Any, reference: Any, _: Context) -> Optional[str]:
-    return None if reference in candidate else candidate
-
-
 def generics_comparer(candidate: Response, reference: str, _: Context) -> Optional[str]:
     ui = candidate.ui
     if ui and ui.buttons:
