@@ -1,5 +1,5 @@
 from os import getenv
-from typing import Callable, Tuple, Any
+from typing import Callable, Tuple, Any, Optional
 from uuid import uuid4
 
 from dff.core.engine.core import Context
@@ -21,7 +21,7 @@ def check_happy_path(
     pipeline: Pipeline,
     happy_path: Tuple[Tuple[Any, Any], ...],
     # This optional argument is used for additional processing of candidate responses and reference responses
-    candidate_response_diff: Callable[[Any, Any, Context], bool] = default_diff,
+    candidate_response_diff: Callable[[Any, Any, Context], Optional[str]] = default_diff,
     printout_enable: bool = True,
 ):
     ctx_id = uuid4()  # get random ID for current context

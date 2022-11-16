@@ -14,15 +14,15 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 @pytest.mark.parametrize(
     "example_module_name",
     [
-        "example_1_basics",
-        "example_2_conditions",
-        "example_3_responses",
-        "example_4_transitions",
-        "example_5_global_transitions",
-        "example_6_context_serialization",
-        "example_7_pre_response_processing",
-        "example_8_misc",
-        "example_9_pre_transitions_processing",
+        "1_basics",
+        "2_conditions",
+        "3_responses",
+        "4_transitions",
+        "5_global_transitions",
+        "6_context_serialization",
+        "7_pre_response_processing",
+        "8_misc",
+        "9_pre_transitions_processing",
     ],
 )
 def test_examples(example_module_name: str):
