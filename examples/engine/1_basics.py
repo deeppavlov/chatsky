@@ -84,15 +84,20 @@ happy_path = (
     ("Ok, goodbye.", "bye"),  # node3 -> node4
 )
 
+# You can use `Actor`, we already described it above, but `Actor` is a low-level API
+# We recommend using `Pipeline` with the same functionality and as a high-level API opposite `Actor`.
 pipeline = Pipeline.from_script(
-    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
+    toy_script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":
     check_happy_path(
-        pipeline, happy_path
+        pipeline,
+        happy_path,
     )  # This is a function for automatic example running (testing) with `happy_path`
-    if (
-        is_interactive_mode()
-    ):  # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+
+    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    if is_interactive_mode():
         run_interactive_mode(pipeline)  # This runs example in interactive mode

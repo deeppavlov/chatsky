@@ -121,12 +121,17 @@ def process_request(ctx: Context):
 
 
 pipeline = Pipeline.from_script(
-    toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"), pre_services=[process_request]
+    toy_script,
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
+    pre_services=[process_request],
 )
 
 if __name__ == "__main__":
     check_happy_path(
-        pipeline, happy_path, generics_comparer
+        pipeline,
+        happy_path,
+        generics_comparer,
     )  # For response object with `happy_path` string comparing, a special `generics_comparer` comparator is used
     if is_interactive_mode():
         run_interactive_mode(pipeline)
