@@ -3,7 +3,7 @@ import pytest
 
 import tests.utils as utils
 from dff.utils.testing.common import check_happy_path
-from dff.utils.testing.response_comparers import ref_in_cand_comparer
+from dff.utils.testing.response_comparers import ref_in_cand_diff
 from dff.utils.testing.toy_script import HAPPY_PATH
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
@@ -29,6 +29,6 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     if example_module_name == "6_custom_messenger_interface":
-        check_happy_path(example_module.pipeline, HAPPY_PATH, ref_in_cand_comparer)
+        check_happy_path(example_module.pipeline, HAPPY_PATH, ref_in_cand_diff)
     else:
         check_happy_path(example_module.pipeline, HAPPY_PATH)

@@ -4,7 +4,7 @@ from uuid import uuid4
 
 from dff.core.engine.core import Context
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.response_comparers import default_comparer
+from dff.utils.testing.response_comparers import default_diff
 
 
 def is_interactive_mode() -> bool:
@@ -21,8 +21,8 @@ def check_happy_path(
     pipeline: Pipeline,
     happy_path: Tuple[Tuple[Any, Any], ...],
     # This optional argument is used for additional processing of candidate responses and reference responses
-    is_equal_comparer: Callable[[Any, Any, Context], bool] = default_comparer,
-    printout_enable=True,
+    candidate_response_diff: Callable[[Any, Any, Context], bool] = default_diff,
+    printout_enable: bool = True,
 ):
     ctx_id = uuid4()  # get random ID for current context
     for step_id, (request, reference_response) in enumerate(happy_path):
@@ -31,12 +31,13 @@ def check_happy_path(
         if printout_enable:
             print(f"(user) >>> {request}")
             print(f" (bot) <<< {candidate_response}")
-        if not is_equal_comparer(candidate_response, reference_response, ctx):
+        transformed_candidate_response = candidate_response_diff(candidate_response, reference_response, ctx)
+        if transformed_candidate_response is not None:
             error_msg = f"\n\npipeline = {pipeline.info_dict}\n\n"
             error_msg += f"ctx = {ctx}\n\n"
             error_msg += f"step_id = {step_id}\n"
             error_msg += f"request = {request}\n"
-            error_msg += f"candidate_response = {candidate_response}\n"
+            error_msg += f"candidate_response = {transformed_candidate_response}\n"
             error_msg += f"reference_response = {reference_response}\n"
             error_msg += "candidate_response != reference_response"
             raise Exception(error_msg)

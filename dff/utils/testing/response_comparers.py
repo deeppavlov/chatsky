@@ -1,28 +1,30 @@
-from typing import Any
+from typing import Any, Optional
 
 from dff.connectors.messenger.generics import Response
 from dff.core.engine.core.script import Context
 
 
-def default_comparer(candidate: Any, reference: Any, _: Context) -> bool:
-    return candidate == reference
+def default_diff(candidate: Any, reference: Any, _: Context) -> Optional[str]:
+    return None if candidate == reference else candidate
 
 
-def ref_in_cand_comparer(candidate: Any, reference: Any, _: Context) -> bool:
-    return reference in candidate
+def ref_in_cand_diff(candidate: Any, reference: Any, _: Context) -> Optional[str]:
+    return None if reference in candidate else candidate
 
 
-def generics_comparer(candidate: Response, reference: str, _: Context) -> bool:
+def generics_diff(candidate: Response, reference: str, _: Context) -> Optional[str]:
     ui = candidate.ui
     if ui and ui.buttons:
         options = [f"{str(idx)}): {item.text}" for idx, item in enumerate(ui.buttons)]
-        return "\n".join(["", candidate.text] + options) == reference
+        transformed = "\n".join(["", candidate.text] + options)
+        return None if transformed == reference else transformed
 
     attachment = candidate.image or candidate.document or candidate.audio or candidate.video
     if attachment and attachment.source:
         with open(attachment.source, "rb") as file:
             bytestr = file.read()
-            return "\n".join(["", candidate.text, f"Attachment size: {len(bytestr)} bytes."]) == reference
+            transformed = "\n".join(["", candidate.text, f"Attachment size: {len(bytestr)} bytes."])
+            return None if transformed == reference else transformed
 
     attachments = candidate.attachments
     if attachments:
@@ -31,6 +33,7 @@ def generics_comparer(candidate: Response, reference: str, _: Context) -> bool:
             with open(attach.source, "rb") as file:
                 bytestr = file.read()
                 size += len(bytestr)
-        return "\n".join(["", candidate.text, f"Grouped attachment size: {str(size)} bytes."]) == reference
+        transformed = "\n".join(["", candidate.text, f"Grouped attachment size: {str(size)} bytes."])
+        return None if transformed == reference else transformed
 
-    return candidate.text == reference
+    return None if candidate.text == reference else candidate.text

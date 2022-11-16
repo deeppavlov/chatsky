@@ -10,7 +10,7 @@ from dff.connectors.messenger.generics.response import Attachments, Image, Respo
 
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-from dff.utils.testing.response_comparers import generics_comparer
+from dff.utils.testing.response_comparers import generics_diff
 
 toy_script = {
     "root": {
@@ -91,6 +91,6 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path, generics_comparer)
+    check_happy_path(pipeline, happy_path, generics_diff)
     if is_interactive_mode():  # TODO: Add comments about DISABLE_INTERACTIVE_MODE variable
         run_interactive_mode(pipeline)
