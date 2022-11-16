@@ -26,9 +26,7 @@ toy_script = {
             RESPONSE: Response(text="Sorry, I can not talk about music now."),
             TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
         },
-        "node4": {
-            RESPONSE: Response(text="bye"),
-            TRANSITIONS: {"node1": exact_match("Hi")}},
+        "node4": {RESPONSE: Response(text="bye"), TRANSITIONS: {"node1": exact_match("Hi")}},
         "fallback_node": {
             RESPONSE: Response(text="Ooops"),
             TRANSITIONS: {"node1": exact_match("Hi")},
