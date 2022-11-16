@@ -12,6 +12,8 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.utils.testing.response_comparers import generics_diff
 
+kitten_url = "https://unsplash.com/photos/Y0WXj3xqJz0/download?ixid=MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0&force=true&w=640"
+
 toy_script = {
     "root": {
         "start": {
@@ -34,14 +36,14 @@ toy_script = {
         },
         "send_one": {
             RESPONSE: Response(
-                text="here's my picture!", image=Image(source=pathlib.Path(__file__).parent / "kitten.jpg")
+                text="here's my picture!", image=Image(source=kitten_url)
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
             RESPONSE: Response(
                 text="Look at my pictures",
-                attachments=Attachments(files=[Image(source=pathlib.Path(__file__).parent / "kitten.jpg")] * 10),
+                attachments=Attachments(files=[Image(source=kitten_url)] * 10),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -59,10 +61,10 @@ toy_script = {
 happy_path = (
     ("Hi", "Please, send me a picture url"),
     ("no", "I cannot find the picture. Please, try again."),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.png", "\nhere's my picture!\nAttachment size: 36643 bytes."),
+    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.png", "\nhere's my picture!\nAttachment size: 51706 bytes."),
     ("ok", "Final node reached, send any message to restart."),
     ("ok", "Please, send me a picture url"),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg", "\nLook at my pictures\nGrouped attachment size: 366430 bytes."),
+    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg", "\nLook at my pictures\nGrouped attachment size: 517060 bytes."),
     ("ok", "Final node reached, send any message to restart."),
 )
 
