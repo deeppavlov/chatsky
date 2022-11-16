@@ -76,16 +76,13 @@ def construct_webpage_by_response(response: str, _: Context) -> str:
 
 
 def purify_request(ctx: Context):
-    last_request = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
-    last_index = get_last_index(ctx.requests)
-    if isinstance(last_request, Request):
-        logger.info(f"Capturing request from: {last_request.base_url}")
-        ctx.requests[last_index] = last_request.args.get("request")
-    elif isinstance(last_request, str):
+    if isinstance(ctx.last_request, Request):
+        logger.info(f"Capturing request from: {ctx.last_request.base_url}")
+        ctx.last_request = ctx.last_request.args.get("request")
+    elif isinstance(ctx.last_request, str):
         logger.info("Capturing request from CLI")
-        ctx.requests[last_index] = last_request
     else:
-        raise Exception(f"Request of type {type(last_request)} can not be purified!")
+        raise Exception(f"Request of type {type(ctx.last_request)} can not be purified!")
 
 
 def cat_response2webpage(ctx: Context):
