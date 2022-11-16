@@ -178,7 +178,7 @@ class PipelineComponent(abc.ABC):
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, actor))
-            return asyncio.wait_for(task, timeout=self.timeout)
+            return await asyncio.wait_for(task, timeout=self.timeout)
         else:
             return await self._run(ctx, actor)
 
