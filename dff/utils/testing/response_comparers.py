@@ -1,3 +1,4 @@
+import os
 from typing import Any, Optional
 
 from dff.connectors.messenger.generics import Response
@@ -21,19 +22,16 @@ def generics_diff(candidate: Response, reference: str, _: Context) -> Optional[s
 
     attachment = candidate.image or candidate.document or candidate.audio or candidate.video
     if attachment and attachment.source:
-        with open(attachment.source, "rb") as file:
-            bytestr = file.read()
-            transformed = "\n".join(["", candidate.text, f"Attachment size: {len(bytestr)} bytes."])
-            return None if transformed == reference else transformed
+        attachment_size = os.path.getsize(attachment.source)
+        transformed = "\n".join(["", candidate.text, f"Attachment size: {attachment_size} bytes."])
+        return None if transformed == reference else transformed
 
     attachments = candidate.attachments
     if attachments:
-        size = 0
+        attachment_size = 0
         for attach in attachments.files:
-            with open(attach.source, "rb") as file:
-                bytestr = file.read()
-                size += len(bytestr)
-        transformed = "\n".join(["", candidate.text, f"Grouped attachment size: {str(size)} bytes."])
+            attachment_size += os.path.getsize(attach.source)
+        transformed = "\n".join(["", candidate.text, f"Grouped attachment size: {attachment_size} bytes."])
         return None if transformed == reference else transformed
 
     return None if candidate.text == reference else candidate.text
