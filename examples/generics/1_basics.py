@@ -48,6 +48,10 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":  # TODO: FIXME: WHAT IS GOING ON HERE??👀
-    check_happy_path(pipeline, happy_path)  # This is a function for automatic example running (testing) with `happy_path`
-    if is_interactive_mode():  # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    check_happy_path(
+        pipeline, happy_path
+    )  # This is a function for automatic example running (testing) with `happy_path`
+    if (
+        is_interactive_mode()
+    ):  # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
         run_interactive_mode(pipeline)  # This runs example in interactive mode

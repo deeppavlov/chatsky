@@ -36,4 +36,6 @@ pipeline = Pipeline.from_script(
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
-        app.run(host="0.0.0.0", port=5000, debug=True)  # This runs example in interactive mode (via flask, as a web server)
+        app.run(
+            host="0.0.0.0", port=5000, debug=True
+        )  # This runs example in interactive mode (via flask, as a web server)
