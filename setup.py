@@ -47,7 +47,7 @@ doc = [
 ]
 
 mypy_dependencies = [
-    "mypy",
+    "mypy==0.991",
 ]
 
 sqlite_dependencies = [
