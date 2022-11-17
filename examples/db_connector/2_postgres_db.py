@@ -3,43 +3,38 @@
 =====
 """
 
-import logging
 import os
 
-from dff.core.engine.core import Actor
-
 from dff.connectors.db import connector_factory
-from _db_connector_utils import script, run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
 
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
-
-######### mongodb #########
+# ######## mongodb #########
 # db_uri = "mongodb://{}:{}@localhost:27017/{}".format(
 #     os.getenv("MONGO_INITDB_ROOT_USERNAME"),
 #     os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
 #     os.getenv("MONGO_INITDB_ROOT_USERNAME"),
 # )
 
-######### redis #########
+# ######## redis #########
 # db_uri = "redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0")
 
-######### sqlite #########
+# ######## sqlite #########
 # from platform import system
 # pathlib.Path("dbs").mkdir(exist_ok=True)
 # separator = "///" if system() == "Windows" else "////"
 # db_uri = f"sqlite:{separator}dbs/sqlite.db"
 
-######### mysql #########
+# ######## mysql #########
 # db_uri = "mysql+pymysql://{}:{}@localhost:3307/{}".format(
 #     os.getenv("MYSQL_USERNAME"),
 #     os.getenv("MYSQL_PASSWORD"),
 #     os.getenv("MYSQL_DATABASE"),
 # )
 
-######### postgresql #########
+# ######## postgresql #########
 db_uri = "postgresql://{}:{}@localhost:5432/{}".format(
     os.getenv("POSTGRES_USERNAME"),
     os.getenv("POSTGRES_PASSWORD"),
@@ -48,8 +43,14 @@ db_uri = "postgresql://{}:{}@localhost:5432/{}".format(
 db = connector_factory(db_uri)
 
 
+pipeline = Pipeline.from_script(
+    TOY_SCRIPT,
+    context_storage=db,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
 if __name__ == "__main__":
-    if get_auto_arg():
-        run_auto_mode(actor, db, logger)
-    else:
-        run_interactive_mode(actor, db, logger)
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

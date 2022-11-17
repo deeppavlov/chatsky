@@ -31,7 +31,7 @@ class PipelineComponent(abc.ABC):
     :type before_handler: :py:class:`~pipeline.BeforeHandler`
     :param after_handler: after handler, associated with this component
     :type before_handler: :py:class:`~pipeline.AfterHandler`
-    :param int timeout: (for asynchronous only!) maximum component execution time (in seconds),
+    :param float timeout: (for asynchronous only!) maximum component execution time (in seconds),
     if it exceeds this time, it is interrupted
     :param bool requested_async_flag: requested asynchronous property;
     if not defined, calculated_async_flag is used instead
@@ -53,7 +53,7 @@ class PipelineComponent(abc.ABC):
         self,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[int] = None,
+        timeout: Optional[float] = None,
         requested_async_flag: Optional[bool] = None,
         calculated_async_flag: bool = False,
         start_condition: Optional[StartConditionCheckerFunction] = None,

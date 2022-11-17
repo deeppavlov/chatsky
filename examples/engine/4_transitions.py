@@ -3,7 +3,9 @@
 ==============
 """
 
-import logging
+# TODO:
+# 1. Maybe remove `lbl.to_fallback(): cnd.true(),` from script as a trivial condition?
+
 import re
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -11,10 +13,8 @@ from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
 from dff.core.engine.core.types import NodeLabel3Type
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
-
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 # def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -35,7 +35,7 @@ def high_priority_node_transition(flow_label, label):
     return transition
 
 
-script = {
+toy_script = {
     "global_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -95,7 +95,7 @@ script = {
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE), lbl.to_fallback(): cnd.true()},
         },
         "node2": {
-            RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994.",
+            RESPONSE: "System of a Down is an Armenian-American heavy metal band formed in 1994.",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
@@ -122,23 +122,16 @@ script = {
     },
 }
 
-actor = Actor(
-    script,
-    start_label=("global_flow", "start_node"),
-    fallback_label=("global_flow", "fallback_node"),
-    label_priority=1.0,
-)
-
 
 # testing
-testing_dialog = [
+happy_path = (
     ("hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("talk about music.", "I love `System of a Down` group, would you like to tell about it? "),
-    ("yes", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("yes", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
-    ("back", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
-    ("repeat", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("back", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
+    ("repeat", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
     ("next", "That's all what I know"),
     ("next", "Good. What do you want to talk about?"),
@@ -154,11 +147,14 @@ testing_dialog = [
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     ("let's talk about something.", "Sorry, I can not talk about that now."),
     ("Ok, goodbye.", "bye"),
-]
+)
 
+
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node")
+)
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

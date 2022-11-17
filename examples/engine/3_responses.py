@@ -3,6 +3,10 @@
 ============
 """
 
+# TODO:
+# 1. make `choice_with_exclusion` as Out of the box method
+# 2. Make function `cannot_talk_about_topic_response` simpler
+
 import logging
 import re
 import random
@@ -12,8 +16,9 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
 import dff.core.engine.responses as rsp
 import dff.core.engine.conditions as cnd
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
+
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 
@@ -58,7 +63,7 @@ def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
 
-script = {
+toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -82,33 +87,32 @@ script = {
 }
 
 
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
-
-
 # testing
-testing_dialog = [
+happy_path = (
     ("Hi", "Hello, how are you?"),  # start_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
-    ("Hi", "Hello, how are you?"),  # node4 -> node1
+    ("Hi", "Hi, what is up?"),  # node4 -> node1
     ("stop", {"previous_node": ("greeting_flow", "node1"), "last_request": "stop"}),  # node1 -> fallback_node
     ("one", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "one"}),  # f_n->f_n
     ("help", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "help"}),  # f_n->f_n
     ("nope", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "nope"}),  # f_n->f_n
-    ("Hi", "Hi, what is up?"),  # fallback_node -> node1
+    ("Hi", "Hello, how are you?"),  # fallback_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
-]
+)
 
 
 random.seed(31415)  # predestination of choice
 
 
-if __name__ == "__main__":
-    if get_auto_arg():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
+)
 
+if __name__ == "__main__":
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

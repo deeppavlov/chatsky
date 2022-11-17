@@ -6,18 +6,25 @@ Welcome to Dialog Flow Framework's documentation!
 =================================================
 
 .. toctree::
-   :maxdepth: 2
    :caption: Contents:
 
 
+.. toctree::
+   :maxdepth: 1
+   :glob:
+   :caption: DFF Core Addons
+
+.. apiref/dff.core.pipeline
+
 
 .. toctree::
-   :glob:
+   :caption: This is a thumbnail gallery
+   :name: rst-gallery
    :maxdepth: 3
-   :caption: Package Reference
+   :glob:
+   :reversed:
 
-..
-   apiref/*
+   examples/index
 
 Indices and tables
 ==================

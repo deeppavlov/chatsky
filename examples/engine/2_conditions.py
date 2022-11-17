@@ -9,8 +9,9 @@ import re
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
 import dff.core.engine.conditions as cnd
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
+
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 
@@ -59,14 +60,14 @@ def predetermined_condition(condition: bool):
     return internal_condition_function
 
 
-script = {
+toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: ["Hi, how are you?"],
+            RESPONSE: "Hi, how are you?",
             TRANSITIONS: {"node2": cnd.regexp(r".*how are you", re.IGNORECASE)},  # pattern matching (precompiled)
         },
         "node2": {
@@ -101,28 +102,28 @@ script = {
     }
 }
 
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
-
-
 # testing
-testing_dialog = [
-    ("Hi", ["Hi, how are you?"]),  # start_node -> node1
+happy_path = (
+    ("Hi", "Hi, how are you?"),  # start_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "bye"),  # node3 -> node4
-    ("Hi", ["Hi, how are you?"]),  # node4 -> node1
+    ("Hi", "Hi, how are you?"),  # node4 -> node1
     ("stop", "Ooops"),  # node1 -> fallback_node
     ("one", "Ooops"),  # fallback_node -> fallback_node
     ("help", "Ooops"),  # fallback_node -> fallback_node
     ("nope", "Ooops"),  # fallback_node -> fallback_node
-    ({"some_key": "some_value"}, ["Hi, how are you?"]),  # fallback_node -> node1
+    ({"some_key": "some_value"}, "Hi, how are you?"),  # fallback_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "bye"),  # node3 -> node4
-]
+)
+
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
+)
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

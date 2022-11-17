@@ -9,7 +9,8 @@ protocol
 import json
 import pathlib
 
-PROTOCOLS = json.load((pathlib.Path(__file__).parent / "protocols.json").open())
+with open(pathlib.Path(__file__).parent / "protocols.json", "r", encoding="utf-8") as protocols:
+    PROTOCOLS = json.load(protocols)
 _prtocol_keys = {"module", "class", "slug", "uri_example"}
 assert all(set(proc.keys()) == _prtocol_keys for proc in PROTOCOLS.values()), "Protocols are incomplete"
 

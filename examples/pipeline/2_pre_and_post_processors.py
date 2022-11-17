@@ -10,18 +10,21 @@ import logging
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline, CLIMessengerInterface
-from _pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 When Pipeline is created with `from_script` method, additional pre- and postprocessors can be defined.
 These can be any ServiceBuilder objects (defined in `types` module) - callables, objects or dicts.
-They are being turned into special Service objects (see example №3), that will be run before or after Actor respectively.
+They are being turned into special Service objects (see example №3),
+that will be run before or after Actor respectively.
 These services can be used to access external APIs, annotate user input, etc.
 
-Service callable signature can be one of the following: [ctx], [ctx, actor] or [ctx, actor, info] (see example №3), where:
+Service callable signature can be one of the following: [ctx], [ctx, actor] or [ctx, actor, info] (see example №3),
+where:
     `ctx` - Context of the current dialog
     `actor` - Actor of the pipeline
     `info` - dictionary, containing information about current service and pipeline execution state (see example №4)
@@ -41,7 +44,7 @@ def pong_processor(ctx: Context):
 
 
 pipeline = Pipeline.from_script(
-    SCRIPT,
+    TOY_SCRIPT,
     ("greeting_flow", "start_node"),
     ("greeting_flow", "fallback_node"),
     {},  # `context_storage` - a dictionary or a `DBAbstractConnector` instance, a place to store dialog contexts
@@ -52,9 +55,8 @@ pipeline = Pipeline.from_script(
 
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)

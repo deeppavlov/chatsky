@@ -1,18 +1,16 @@
-import sys
 import importlib
-import pathlib
-
 import pytest
 
-from .examples._pipeline_utils import auto_run_pipeline
+import tests.utils as utils
+from dff.utils.testing.common import check_happy_path
+from dff.utils.testing.toy_script import HAPPY_PATH
 
-
-# Uncomment the following line, if you want to run your examples during the test suite or import from them
-# pytest.skip(allow_module_level=True)
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 @pytest.mark.parametrize(
-    "module_name", [
+    "example_module_name",
+    [
         "1_basic_example",
         "2_pre_and_post_processors",
         "3_pipeline_dict_with_services_basic",
@@ -25,12 +23,12 @@ from .examples._pipeline_utils import auto_run_pipeline
         "7_extra_handlers_basic",
         "7_extra_handlers_full",
         "8_extra_handlers_and_extensions",
-    ]
+    ],
 )
-def test_examples(module_name: str):
-    sys.path.append(str((pathlib.Path(__file__).parent / 'examples').absolute()))
-    module = importlib.import_module(f"{module_name}", package="examples")
-    if module_name.startswith("6"):
-        auto_run_pipeline(module.pipeline, wrapper=module.construct_webpage_by_response)
+def test_examples(example_module_name: str):
+    example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
+    if example_module_name == "6_custom_messenger_interface":
+        happy_path = ((req, example_module.construct_webpage_by_response(res)) for req, res in HAPPY_PATH)
+        check_happy_path(example_module.pipeline, happy_path)
     else:
-        auto_run_pipeline(module.pipeline)
+        check_happy_path(example_module.pipeline, HAPPY_PATH)
