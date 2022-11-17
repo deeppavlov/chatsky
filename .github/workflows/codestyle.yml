@@ -26,7 +26,7 @@ jobs:
         run: make venv
 
       - name: run flake8
-        run: venv/bin/flake8 --max-line-length 120 dff/
+        run: make flake8
 
   black:
     runs-on: ubuntu-latest
@@ -42,7 +42,7 @@ jobs:
         run: make venv
 
       - name: run black
-        run: venv/bin/black --line-length=120 --check dff/
+        run: make black
 
   mypy:
     runs-on: ubuntu-latest
@@ -58,4 +58,4 @@ jobs:
         run: make venv
 
       - name: run mypy
-        run: venv/bin/mypy dff/
+        run: make mypy

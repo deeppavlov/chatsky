@@ -38,15 +38,23 @@ format: venv
 	black --line-length=120 . --exclude venv*,build
 .PHONY: format
 
-lint: venv
+flake8: venv
 	flake8 --max-line-length 120 . --exclude venv*,build
+.PHONY: flake8
+
+black: venv
 	@set -e && black --line-length=120 --check . --exclude venv*,build|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
-	# TODO: Add mypy testing
-	# @mypy . --exclude venv*,build
+.PHONY: black
+
+mypy: venv
+	mypy . --exclude venv*,build
+.PHONY: mypy
+
+lint: flake8 black mypy
 .PHONY: lint
 
 docker_up:
