@@ -22,11 +22,11 @@ class OneTurnCache:
         actor.handlers[ActorStage.CONTEXT_INIT] = handlers
         return actor
 
-    def clear_cache_handler(self, ctx: Context, actor: Actor, *args, **kwargs):
+    def clear_cache_handler(self, _: Context, __: Actor, *___, **____):
         [wrapper.cache_clear() for wrapper in self.wrappers]
 
     def cache(self, func):
-        @functools.cache
+        @functools.lru_cache(maxsize=None)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
 

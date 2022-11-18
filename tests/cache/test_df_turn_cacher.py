@@ -8,9 +8,9 @@ from dff.script.utils.cache.caching import OneTurnCache
 def cache_test(cached_response, cache):
 
     ctx = Context()
-    ctx.add_label(["flow", "node1"])
+    ctx.add_label(("flow", "node1"))
 
-    def response(ctx: Context, actor: Actor, *args, **kwargs):
+    def response(ctx: Context, _: Actor, *__, **___):
         if ctx.validation:
             return ""
         return f"{cached_response(1)}-{cached_response(1)}-{cached_response(1)}-{cached_response(2)}"
@@ -38,7 +38,7 @@ def test_caching():
     external_data = {"counter": 0}
 
     @cache.cache
-    def cached_response(arg):
+    def cached_response(_):
         external_data["counter"] += 1
         return external_data["counter"]
 
@@ -48,7 +48,7 @@ def test_caching():
     external_data = {"counter": 0}
 
     @cache.lru_cache(maxsize=32)
-    def cached_response(arg):
+    def cached_response(_):
         external_data["counter"] += 1
         return external_data["counter"]
 
