@@ -10,8 +10,9 @@ import logging
 from typing import Union, Callable, Optional, Dict, List
 import copy
 
-from pydantic import BaseModel, validate_arguments
+from pydantic import BaseModel, validate_arguments, Extra
 
+from dff.script.utils.singleton import clean_cache_singleton
 from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 
 from .context import Context
@@ -99,6 +100,9 @@ class Actor(BaseModel):
     :type handlers: Dict[ActorStage, List[Callable]]
     """
 
+    class Config:
+        extra = Extra.allow
+
     script: Union[Script, dict]
     start_label: NodeLabel3Type
     fallback_label: Optional[NodeLabel3Type] = None
@@ -148,6 +152,11 @@ class Actor(BaseModel):
             verbose=verbose,
             handlers={} if handlers is None else handlers,
         )
+
+        self._clean_turn_cache = bool(
+            kwargs.get("clean_turn_cache", False)
+        )  # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+
         errors = self.validate_script(verbose) if validation_stage or validation_stage is None else []
         if errors:
             raise ValueError(
@@ -199,6 +208,9 @@ class Actor(BaseModel):
         ctx.add_response(ctx.framework_states["actor"]["response"])
 
         self._run_handlers(ctx, ActorStage.FINISH_TURN, *args, **kwargs)
+        if self._clean_turn_cache:
+            clean_cache_singleton()
+
         del ctx.framework_states["actor"]
         return ctx
 
