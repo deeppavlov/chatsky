@@ -22,6 +22,7 @@ def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
     Works like the standard `functools.lru_cache` function.
     Caches are kept in a library-wide singleton and cleared in the end of each turn.
     """
+
     def decorator(func):
         global USED_CACHES
 
