@@ -3,14 +3,14 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.labels import repeat
 from dff.core.pipeline import Pipeline
-from dff.script.utils.singleton_turn_caching import cache
+from dff.script.utils.singleton_turn_caching import lru_cache
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 external_data = {"counter": 0}
 
 
-@cache
+@lru_cache(maxsize=2)
 def cached_response(_):
     external_data["counter"] += 1
     return external_data["counter"]
@@ -19,7 +19,7 @@ def cached_response(_):
 def response(ctx: Context, _: Actor, *__, **___):
     if ctx.validation:
         return ""
-    return f"{cached_response(1)}-{cached_response(2)}-{cached_response(1)}-{cached_response(2)}"
+    return f"{cached_response(1)}-{cached_response(2)}-{cached_response(3)}-{cached_response(2)}-{cached_response(1)}"
 
 
 toy_script = {
@@ -34,9 +34,9 @@ toy_script = {
 }
 
 happy_path = (
-    ("", "1-2-1-2"),
-    ("", "3-4-3-4"),
-    ("", "5-6-5-6"),
+    ("", "1-2-3-2-4"),
+    ("", "5-6-7-6-8"),
+    ("", "9-10-11-10-12"),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
