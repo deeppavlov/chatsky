@@ -9,15 +9,11 @@
 # 2. Fix PRE_RESPONSE_PROCESSING to PRE_TRANSITIONS_PROCESSING
 # 3. Specify that the nodes form an ordered set
 
-import logging
-
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-from dff.core.engine.core import Actor
 import dff.core.engine.conditions as cnd
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
 
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 # First of all, to create a dialog agent, we need to create a dialog script.
 # Below, `script` is the dialog script.
@@ -36,7 +32,7 @@ logger = logging.getLogger(__name__)
 # `TRANSITIONS` are described in pairs:
 #      - the node to which the agent will perform the transition
 #      - the condition under which to make the transition
-script = {
+toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
             RESPONSE: "",
@@ -67,10 +63,14 @@ script = {
 # And pass the initial node `start_label`
 # and the node to which the actor will go in case of an error `fallback_label`
 # If `fallback_label` is not set, then its value becomes equal to `start_label` by default
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
+# actor = Actor(
+#     toy_script,
+#     start_label=("greeting_flow", "start_node"),
+#     fallback_label=("greeting_flow", "fallback_node")
+# )
 
 # testing
-testing_dialog = [
+happy_path = (
     ("Hi", "Hi, how are you?"),  # start_node -> node1
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
@@ -82,10 +82,22 @@ testing_dialog = [
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "bye"),  # node3 -> node4
-]
+)
+
+# You can use `Actor`, we already described it above, but `Actor` is a low-level API
+# We recommend using `Pipeline` with the same functionality and as a high-level API opposite `Actor`.
+pipeline = Pipeline.from_script(
+    toy_script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    check_happy_path(
+        pipeline,
+        happy_path,
+    )  # This is a function for automatic example running (testing) with `happy_path`
+
+    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)  # This runs example in interactive mode

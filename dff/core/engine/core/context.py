@@ -219,6 +219,14 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
+    @last_response.setter
+    def last_response(self, response: Optional[Any]):
+        """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Required for use with various response wrappers.
+        """
+        last_index = get_last_index(self.responses)
+        self.responses[last_index] = response
+
     @property
     def last_request(self) -> Optional[Any]:
         """
@@ -227,6 +235,14 @@ class Context(BaseModel):
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
+
+    @last_request.setter
+    def last_request(self, request: Optional[Any]):
+        """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Required for use with various request wrappers.
+        """
+        last_index = get_last_index(self.requests)
+        self.requests[last_index] = request
 
     @property
     def current_node(self) -> Optional[Node]:
