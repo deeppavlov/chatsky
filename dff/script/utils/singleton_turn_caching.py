@@ -11,8 +11,6 @@ def cache_clear():
 
 
 def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
-    global USED_CACHES
-
     def decorator(func):
         global USED_CACHES
 
@@ -26,5 +24,5 @@ def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
     return decorator
 
 
-def cache(func, /):
+def cache(func):
     return lru_cache(maxsize=None)(func)

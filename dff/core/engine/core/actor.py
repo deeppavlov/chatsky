@@ -123,6 +123,7 @@ class Actor(BaseModel):
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
+        *args,
     ):
         # script validation
         script = script if isinstance(script, Script) else Script(script=script)

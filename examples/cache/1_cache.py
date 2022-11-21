@@ -12,6 +12,11 @@ external_data = {"counter": 0}
 
 @cache
 def cached_response(_):
+    """
+    This function execution result will be saved for any set of given argument(s).
+    If the function will be called again with the same arguments it will prevent it from execution.
+    The cached values will be used instead.
+    """
     external_data["counter"] += 1
     return external_data["counter"]
 
@@ -22,16 +27,7 @@ def response(ctx: Context, _: Actor, *__, **___):
     return f"{cached_response(1)}-{cached_response(2)}-{cached_response(1)}-{cached_response(2)}"
 
 
-toy_script = {
-    "flow": {
-        "node1": {
-            TRANSITIONS: {
-                repeat(): true()
-            },
-            RESPONSE: response
-        }
-    }
-}
+toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
     ("", "1-2-1-2"),

@@ -12,6 +12,11 @@ external_data = {"counter": 0}
 
 @lru_cache(maxsize=2)
 def cached_response(_):
+    """
+    This function will work exactly the same as the one from previous example with only one exception.
+    Only 2 results will be stored;
+    when the function will be executed with third arguments set, the least recent result will be deleted.
+    """
     external_data["counter"] += 1
     return external_data["counter"]
 
@@ -22,16 +27,7 @@ def response(ctx: Context, _: Actor, *__, **___):
     return f"{cached_response(1)}-{cached_response(2)}-{cached_response(3)}-{cached_response(2)}-{cached_response(1)}"
 
 
-toy_script = {
-    "flow": {
-        "node1": {
-            TRANSITIONS: {
-                repeat(): true()
-            },
-            RESPONSE: response
-        }
-    }
-}
+toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
     ("", "1-2-3-2-4"),
