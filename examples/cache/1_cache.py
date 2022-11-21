@@ -16,6 +16,7 @@ def cached_response(_):
     This function execution result will be saved for any set of given argument(s).
     If the function will be called again with the same arguments it will prevent it from execution.
     The cached values will be used instead.
+    The cache is stored in a library-wide singleton, that is cleared in the end of execution of actor and/or pipeline.
     """
     external_data["counter"] += 1
     return external_data["counter"]
