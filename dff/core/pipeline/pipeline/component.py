@@ -28,28 +28,21 @@ class PipelineComponent(abc.ABC):
     It contains some fields that they have in common.
 
     :param before_handler: before handler, associated with this component
-    :type before_handler: :py:class:`~pipeline.BeforeHandler`
     :param after_handler: after handler, associated with this component
-    :type after_handler: :py:class:`~pipeline.AfterHandler`
     :param timeout: (for asynchronous only!) maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted
-    :type timeout: float
     :param requested_async_flag: requested asynchronous property;
         if not defined, calculated_async_flag is used instead
-    :type requested_async_flag: bool
     :param calculated_async_flag: whether the component can be asynchronous or not
 
         - for :py:class:`~pipeline.service.service.Service`: whether its ``handler`` is asynchronous or not
         - for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not
 
-    :type calculated_async_flag: bool
     :param start_condition: StartConditionCheckerFunction that is invoked before each component execution;
         component is executed only if it returns True
-    :type start_condition: :py:class:`~pipeline.types.StartConditionCheckerFunction`
     :param name: component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
         should not be blank or contain `.` symbol
-    :param path: separated by dots path to component, is universally unique
-    :type path: str or None
+    :param path: separated by dots path to component, is universally unique.
     """
 
     def __init__(
@@ -94,9 +87,7 @@ class PipelineComponent(abc.ABC):
         in subdict, dedicated to this library.
 
         :param ctx: context to keep state in
-        :type ctx: :py:class:`dff.core.engine.core.Context`
         :param value: state to set
-        :type value: :py:class:`~pipeline.types.ComponentExecutionState`
         :return: None
         """
         if PIPELINE_STATE_KEY not in ctx.framework_states:
@@ -109,10 +100,8 @@ class PipelineComponent(abc.ABC):
         in subdict, dedicated to this library.
 
         :param ctx: context to get state from
-        :type ctx: :py:class:`dff.core.engine.core.Context`
         :param default: default to return if no record found
             (usually it's :py:attr:`~pipeline.types.ComponentExecutionState.NOT_RUN`)
-        :type default: :py:class:`~pipeline.types.ComponentExecutionState` or None
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found
         """
         return ComponentExecutionState[
@@ -163,9 +152,7 @@ class PipelineComponent(abc.ABC):
         This method is run after the component's timeout is set (if needed).
 
         :param ctx: current dialog Context
-        :type ctx: :py:class:`dff.core.engine.core.Context`
         :param actor: this Pipeline Actor or None if this is a service, that wraps Actor
-        :type actor: :py:class:`dff.core.engine.core.Actor` or None
         :return: Context if this is a synchronous service or None, asynchronous services shouldn't modify Context
         """
         raise NotImplementedError
@@ -176,9 +163,7 @@ class PipelineComponent(abc.ABC):
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`~_run` method.
 
         :param ctx: current dialog Context
-        :type ctx: :py:class:`dff.core.engine.core.Context`
         :param actor: this Pipeline Actor or None if this is a service, that wraps Actor
-        :type actor: :py:class:`dff.core.engine.core.Actor` or None
         :return: Context if this is a synchronous service or :py:class:`~typing.const.Awaitable`,
             asynchronous services shouldn't modify Context
         """
@@ -193,9 +178,7 @@ class PipelineComponent(abc.ABC):
         Method for adding a global extra handler to this particular component.
 
         :param global_extra_handler_type: a type of extra handler to add
-        :type global_extra_handler_type: :py:class:`~dff.core.engine.typing.GlobalExtraHandlerType`
         :param extra_handler: a GlobalExtraHandlerType to add to the component as an extra handler
-        :type extra_handler: :py:class:`~dff.core.engine.typing.ExtraHandlerFunction`
         :return: None
         """
         target = (
@@ -208,7 +191,6 @@ class PipelineComponent(abc.ABC):
         Method for retrieving runtime info about this component.
 
         :param ctx: current dialog Context
-        :type ctx: :py:class:`dff.core.engine.core.Context`
         :return: :py:class:`~dff.core.engine.typing.ServiceRuntimeInfo`
             dict where all not set fields are replaced with ``[None]``.
         """

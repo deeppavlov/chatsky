@@ -40,7 +40,6 @@ class PollingMessengerInterface(MessengerInterface):
         Method used for sending users request for their input.
 
         :return: Returns a list of tuples: user inputs and context ids (any user ids) associated with inputs.
-        :rtype: List
         """
         raise NotImplementedError
 
@@ -49,7 +48,7 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method used for sending users responses for their last input.
 
-        :responses: - a list of contexts, representing dialogs with the users;
+        :param responses: A list of contexts, representing dialogs with the users;
             `last_response`, `id` and some dialog info can be extracted from there.
         """
         raise NotImplementedError
@@ -78,9 +77,7 @@ class PollingMessengerInterface(MessengerInterface):
 
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return True to continue polling or False to stop.
-        :type loop: PollingProviderLoopFunction
         :param timeout: a time interval between polls (in seconds).
-        :type timeout: float
         """
         while loop():
             try:
@@ -114,10 +111,8 @@ class CallbackMessengerInterface(MessengerInterface):
         `last_response`, `id` and some dialog info can be extracted from there.
 
         :param request: user input.
-        :type request: Any
-        :param ctx_id: any unique id that will be associated with dialog between this user and pipeline.
-        :type ctx_id: Hashable
-        :return:
+        :param ctx_id: Any unique id that will be associated with dialog between this user and pipeline.
+        :return: Context that represents dialog with the user.
         """
         return asyncio.run(self._pipeline_runner(request, ctx_id))
 

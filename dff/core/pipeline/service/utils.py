@@ -57,6 +57,7 @@ def collect_defined_constructor_parameters_to_dict(**kwargs: Any):
     It is used in overriding component parameters,
     when service handler or service group service is instance of Service or ServiceGroup (or dict).
     It accepts same named parameters as component constructor.
-    Returns dict, containing key-value pairs of these parameters, that are not None.
+
+    :return: Dict, containing key-value pairs of these parameters, that are not None.
     """
     return dict([(key, value) for key, value in kwargs.items() if value is not None])
