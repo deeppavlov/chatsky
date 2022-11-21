@@ -5,12 +5,12 @@ from typing import Callable, Optional
 USED_CACHES = list()
 
 
-def clean_cache_singleton():
-    for cache in USED_CACHES:
-        cache.cache_clear()
+def cache_clear():
+    for used_cache in USED_CACHES:
+        used_cache.cache_clear()
 
 
-def singleton_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
+def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
     global USED_CACHES
 
     def decorator(func):
@@ -24,3 +24,7 @@ def singleton_cache(maxsize: Optional[int] = None, typed: bool = False) -> Calla
         return wrapper
 
     return decorator
+
+
+def cache(func, /):
+    return lru_cache(maxsize=None)(func)

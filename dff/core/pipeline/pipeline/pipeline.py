@@ -5,7 +5,7 @@ from typing import Any, Union, List, Dict, Optional, Hashable
 from dff.connectors.db import DBAbstractConnector
 from dff.core.engine.core import Actor, Script, Context
 from dff.core.engine.core.types import NodeLabel2Type
-from dff.script.utils.singleton import clean_cache_singleton
+from dff.script.utils.singleton_turn_caching import cache_clear
 
 from ..messenger_interface import MessengerInterface, CLIMessengerInterface
 from ..service.group import ServiceGroup
@@ -49,7 +49,6 @@ class Pipeline:
         after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[float] = None,
         optimization_warnings: bool = False,
-        **kwargs,
     ):
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
@@ -69,9 +68,8 @@ class Pipeline:
         if optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
 
-        self._clean_turn_cache = bool(
-            kwargs.get("clean_turn_cache", False)
-        )  # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+        self._clean_turn_cache = True
         if self._clean_turn_cache:
             self.actor._clean_turn_cache = False
 
@@ -196,7 +194,7 @@ class Pipeline:
 
         self.context_storage[ctx_id] = ctx
         if self._clean_turn_cache:
-            clean_cache_singleton()
+            cache_clear()
 
         return ctx
 

@@ -2,7 +2,6 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.labels import repeat
 from dff.core.engine.conditions import true
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.script.utils.caching import OneTurnCache
 
 
 def cache_test(cached_response, cache):
