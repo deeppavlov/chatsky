@@ -14,10 +14,11 @@ from datetime import datetime
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
-from _pipeline_utils import SCRIPT, should_auto_execute, auto_run_pipeline
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 Extra handlers are additional function lists (before-functions and/or after-functions)
@@ -41,19 +42,19 @@ def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]})
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 async def heavy_service(_):
     await asyncio.sleep(random.randint(0, 5) / 100)
 
 
 def logging_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
+
+
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 
 pipeline_dict = {
@@ -98,7 +99,6 @@ pipeline_dict = {
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    if should_auto_execute():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

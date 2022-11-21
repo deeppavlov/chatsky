@@ -15,7 +15,7 @@ help:
 	@echo "make test: Run basic tests (not testing most integrations)"
 	@echo "make test_all: Run ALL tests (slow, closest to CI)"
 	@echo "make format: Run code formatters (destructive)"
-	@echo "make build_doc: Build Sphinx docs; activate your virtual environment before execution"
+	@echo "make doc: Build Sphinx docs; activate your virtual environment before execution"
 	@echo "make pre_commit: Register a git hook to lint the code on each commit"
 	@echo "make version_major: increment version major in metadata files 8.8.1 -> 9.0.0"
 	@echo "make version_minor: increment version minor in metadata files 9.1.1 -> 9.2.0"
@@ -66,9 +66,9 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv clean_docs
-	sphinx-apidoc -e -f -o docs/source/apiref dff
+	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
+	export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -86,6 +86,7 @@ version_minor: venv
 version_major: venv
 	bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
+
 
 clean_docs:
 	rm -rf docs/build

@@ -7,9 +7,6 @@
 # 1. Remove `create_transitions`
 # 2. Rename start to start_node, fallback to fallback_node, step to node?
 
-import logging
-
-
 from dff.core.engine.core.keywords import (
     GLOBAL,
     RESPONSE,
@@ -20,10 +17,8 @@ from dff.core.engine.core.keywords import (
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.labels as lbl
 import dff.core.engine.conditions as cnd
-from examples.engine._engine_utils import run_auto_mode, run_interactive_mode
-from examples.utils import get_auto_arg
-
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def create_transitions():
@@ -54,7 +49,7 @@ def get_previous_node_response_for_response_processing(ctx: Context, actor: Acto
 
 
 # a dialog script
-script = {
+toy_script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
         "fallback": {RESPONSE: "the end"},
@@ -74,21 +69,19 @@ script = {
 }
 
 
-actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
-
-
 # testing
-testing_dialog = [
+happy_path = (
     ("1", "previous=: current=first"),
     ("2", "previous=first: current=second"),
     ("3", "previous=second: current=third"),
     ("4", "previous=third: current=fourth"),
     ("5", "previous=fourth: current=fifth"),
-]
+)
 
+
+pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        run_auto_mode(actor, testing_dialog, logger)
-    else:
-        run_interactive_mode(actor, logger)
+    check_happy_path(pipeline, happy_path)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)
