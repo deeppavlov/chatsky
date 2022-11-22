@@ -90,7 +90,9 @@ class TelegramConnector(TeleBot):
 
         if ready_response.location:
             self.send_location(
-                chat_id=chat_id, latitude=ready_response.location.latitude, longitude=ready_response.location.longitude
+                chat_id=chat_id,
+                latitude=ready_response.location.latitude,
+                longitude=ready_response.location.longitude,
             )
 
         if ready_response.attachments:
@@ -100,7 +102,9 @@ class TelegramConnector(TeleBot):
                 close_io(item)
 
         self.send_message(
-            chat_id=chat_id, text=ready_response.text, reply_markup=ready_response.ui and ready_response.ui.keyboard
+            chat_id=chat_id,
+            text=ready_response.text,
+            reply_markup=ready_response.ui and ready_response.ui.keyboard,
         )
 
 
