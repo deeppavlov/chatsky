@@ -24,6 +24,7 @@ Welcome to Dialog Flow Framework's documentation!
    :glob:
    :reversed:
 
+   apiref/*
    examples/index
 
 Indices and tables
