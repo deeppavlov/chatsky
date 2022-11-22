@@ -2,7 +2,7 @@
 Conditions
 ---------------------------
 Conditions are one of the most important components of the dialog graph,
-which determine the possibility of transition from one node of the graph to another node.
+which determine the possibility of transition from one node of the graph to another.
 This is a standard set of engine conditions.
 """
 from typing import Callable, Pattern, Union, Any, List, Optional
@@ -20,14 +20,12 @@ logger = logging.getLogger(__name__)
 
 
 @validate_arguments
-def exact_match(match: Any, *args, **kwargs) -> Callable:
-    """Returns function handler.
-    This handler returns True only if the last user phrase is exactly
-    the same as the :py:const:`match <any>.`
+def exact_match(match: Any, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler returns `True` only if the last user phrase is exactly
+    the same as the :py:const:`match`.
 
-    :param match:
-        the variable of the same type as  :py:class:`~dff.core.engine.core.context.last_request`
-    :type match: Any
+    :param match: The variable of the same type as :py:class:`~dff.core.engine.core.context.last_request`.
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -38,19 +36,15 @@ def exact_match(match: Any, *args, **kwargs) -> Callable:
 
 
 @validate_arguments
-def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs) -> Callable:
-    """Returns function handler.
-    This handler returns True only if the last user phrase contains
-    :py:const:`pattern <Union[str, Pattern]>` with
-    :py:const:`flags <Union[int, re.RegexFlag]>`.
+def regexp(
+    pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs
+) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler returns `True` only if the last user phrase contains
+    :py:const:`pattern <Union[str, Pattern]>` with :py:const:`flags <Union[int, re.RegexFlag]>`.
 
-    :param pattern:
-        the RegExp pattern
-    :type pattern: Union[str, Pattern]
-    :param flags:
-        flags for this pattern
-        Defaults to 0
-    :type flags: Union[int, re.RegexFlag]
+    :param pattern: The `RegExp` pattern.
+    :param flags: Flags for this pattern. Defaults to 0.
     """
     pattern = re.compile(pattern, flags)
 
@@ -67,11 +61,10 @@ def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *a
 
 @validate_arguments
 def check_cond_seq(cond_seq: list):
-    """Checks if the list consists only of Callables.
+    """
+    Checks if the list consists only of Callables.
 
-    :param cond_seq:
-        list of conditions to check
-    :type cond_seq: list
+    :param cond_seq: List of conditions to check.
     """
     for cond in cond_seq:
         if not isinstance(cond, Callable):
@@ -79,23 +72,24 @@ def check_cond_seq(cond_seq: list):
 
 
 _any = any
-""" _any is an alias for any. """
+"""
+_any is an alias for any.
+"""
 _all = all
-""" _all is an alias for all. """
+"""
+_all is an alias for all.
+"""
 
 
 @validate_arguments
-def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) -> Callable:
-    """Aggregates multiple functions into one by using aggregating function.
-    Returns function handler.
+def aggregate(
+    cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs
+) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Aggregates multiple functions into one by using aggregating function.
 
-    :param cond_seq:
-        list of conditions to check
-    :type cond_seq: list
-    :param aggregate_func:
-        function to aggregate conditions
-        Defaults to :py:func:`._any`
-    :type aggregate_func: Callable
+    :param cond_seq: List of conditions to check.
+    :param aggregate_func: Function to aggregate conditions. Defaults to :py:func:`_any`.
     """
     check_cond_seq(cond_seq)
 
@@ -110,13 +104,12 @@ def aggregate(cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs) 
 
 
 @validate_arguments
-def any(cond_seq: list, *args, **kwargs) -> Callable:
-    """Function that returns function handler. This handler returns True
-    if any function from the list is True.
+def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler returns `True`
+    if any function from the list is `True`.
 
-    :param cond_seq:
-        list of conditions to check
-    :type cond_seq: list
+    :param cond_seq: List of conditions to check.
     """
     _agg = aggregate(cond_seq, _any)
 
@@ -127,13 +120,12 @@ def any(cond_seq: list, *args, **kwargs) -> Callable:
 
 
 @validate_arguments
-def all(cond_seq: list, *args, **kwargs) -> Callable:
-    """Function that returns function handler. This handler returns True only
-    if all functions from the list are True.
+def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler returns `True` only
+    if all functions from the list are `True`.
 
-    :param cond_seq:
-        list of conditions to check
-    :type cond_seq: list
+    :param cond_seq: List of conditions to check.
     """
     _agg = aggregate(cond_seq, _all)
 
@@ -144,14 +136,12 @@ def all(cond_seq: list, *args, **kwargs) -> Callable:
 
 
 @validate_arguments
-def negation(condition: Callable, *args, **kwargs) -> Callable:
-    """Returns function handler.
-    This handler returns negation of the :py:func:`~condition`: False
-    if :py:func:`~condition` holds True and True otherwise
+def negation(condition: Callable, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler returns negation of the :py:func:`~condition`: `False`
+    if :py:func:`~condition` holds `True` and returns `True` otherwise.
 
-    :param condition:
-        any :py:func:`~condition`
-    :type condition: Callable
+    :param condition: Any :py:func:`~condition`.
     """
 
     def negation_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -167,22 +157,16 @@ def has_last_labels(
     last_n_indices: int = 1,
     *args,
     **kwargs,
-) -> Callable:
+) -> Callable[[Context, Actor, Any, Any], bool]:
     """
-    Function returns condition handler.
-    This handler returns True if any label from
-    last :py:const:`last_n_indices <int>`context labels is in
-    the :py:const:`flow_labels <List[str]>` list or in
-    the :py:const:`labels ~dff.core.engine.core.types.NodeLabel2Type` list.
+    Returns condition handler. This handler returns `True` if any label from
+    last :py:const:`last_n_indices` context labels is in
+    the :py:const:`flow_labels` list or in
+    the :py:const:`~dff.core.engine.core.types.NodeLabel2Type` list.
 
-    Parameters
-    ----------
-    flow_labels: Optional[List]
-        list of labels to check.Every label has type `str`. Is empty if not set.
-    labels: Optional[List[:py:const:`~dff.core.engine.core.types.NodeLabel2Type`]]
-        list of labels that correspond to the nodes. Is empty is not set.
-    last_n_indices: int
-        number of last utterances to check.
+    :param flow_labels: List of labels to check. Every label has type `str`. Empty if not set.
+    :param labels: List of labels corresponding to the nodes. Empty if not set.
+    :param last_n_indices: Number of last utterances to check.
     """
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
@@ -199,8 +183,10 @@ def has_last_labels(
 
 
 @validate_arguments
-def true(*args, **kwargs) -> Callable:
-    """Returns function handler. This handler always returns True."""
+def true(*args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler always returns `True`.
+    """
 
     def true_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return True
@@ -209,8 +195,10 @@ def true(*args, **kwargs) -> Callable:
 
 
 @validate_arguments
-def false(*args, **kwargs) -> Callable:
-    """Returns function handler. This handler always returns False."""
+def false(*args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+    """
+    Returns function handler. This handler always returns `False`.
+    """
 
     def false_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         return False
@@ -220,6 +208,6 @@ def false(*args, **kwargs) -> Callable:
 
 # aliases
 agg = aggregate
-""" :py:func:`~agg` is an alias for :py:func:`~aggregate`. """
+""":py:func:`~agg` is an alias for :py:func:`~aggregate`."""
 neg = negation
-""" :py:func:`~neg` is an alias for :py:func:`~negation`. """
+""":py:func:`~neg` is an alias for :py:func:`~negation`."""

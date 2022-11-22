@@ -26,13 +26,14 @@ class Service(PipelineComponent):
     Service can be asynchronous only if its handler is a coroutine.
     Actor wrapping service can be synchronous only.
     It accepts constructor parameters:
-        `handler` - a service function or an actor
-        `wrappers` - list of Wrappers to add to the service
-        `timeout` - timeout to add to the group
-        `asynchronous` - requested asynchronous property
-        `start_condition` - StartConditionCheckerFunction that is invoked before each service execution;
-            service is executed only if it returns True
-        `name` - requested service name
+
+    :param handler: a service function or an actor
+    :param wrappers: list of Wrappers to add to the service
+    :param timeout: timeout to add to the group
+    :param asynchronous: requested asynchronous property
+    :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
+        service is executed only if it returns True
+    :param name: requested service name
     """
 
     def __init__(
@@ -87,13 +88,15 @@ class Service(PipelineComponent):
         Method for service `handler` execution.
         Handler has three possible signatures, so this method picks the right one to invoke.
         These possible signatures are:
-            1. (ctx: Context) - accepts current dialog context only
-            2. (ctx: Context, actor: Actor) - accepts context and actor, associated with the pipeline
-            3. (ctx: Context, actor: Actor, info: ServiceRuntimeInfo) - accepts context,
-                actor and service runtime info dictionary.
-        :ctx: - current dialog context only.
-        :actor: - actor, associated with the pipeline.
-        Returns None.
+
+            - (ctx: Context) - accepts current dialog context only
+            - (ctx: Context, actor: Actor) - accepts context and actor, associated with the pipeline
+            - (ctx: Context, actor: Actor, info: ServiceRuntimeInfo) - accepts context,
+              actor and service runtime info dictionary.
+
+        :param ctx: - current dialog context only.
+        :param actor: - actor, associated with the pipeline.
+        :return: None
         """
         handler_params = len(inspect.signature(self.handler).parameters)
         if handler_params == 1:
@@ -109,8 +112,9 @@ class Service(PipelineComponent):
         """
         Method for running this service if its handler is an Actor.
         Catches runtime exceptions.
-        :ctx: - current dialog context.
-        Returns context, mutated by actor.
+
+        :param ctx: current dialog context.
+        :return: context, mutated by actor.
         """
         try:
             ctx = self.handler(ctx)
@@ -124,9 +128,10 @@ class Service(PipelineComponent):
         """
         Method for running this service if its handler is not an Actor.
         Checks start condition and catches runtime exceptions.
-        :ctx: - current dialog context.
-        :actor: - current pipeline's actor.
-        Returns None.
+
+        :param ctx: current dialog context.
+        :param actor: current pipeline's actor.
+        :return: None
         """
         try:
             if self.start_condition(ctx, actor):
@@ -143,9 +148,10 @@ class Service(PipelineComponent):
         """
         Method for handling this service execution.
         Executes before and after execution wrappers, launches `_run_as_actor` or `_run_as_service` method.
-        :ctx: (required) - current dialog context.
-        :actor: - actor, associated with the pipeline.
-        Returns context if this service's handler is an Actor else None.
+
+        :param ctx: (required) current dialog context.
+        :param actor: actor, associated with the pipeline.
+        :return: context if this service's handler is an Actor else None.
         """
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, actor)
 

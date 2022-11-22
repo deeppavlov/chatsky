@@ -21,14 +21,15 @@ def pretty_format_component_info_dict(
     Function for dumping any pipeline components info dictionary (received from `info_dict` property) as a string.
     Resulting string is formatted with YAML-like format, however it's not strict and shouldn't be parsed.
     However, most preferable usage is via `pipeline.pretty_format`.
-    :service: (required) - pipeline components info dictionary.
-    :show_wrappers: (required) - whether to include Wrappers or not (could be many and/or generated).
-    :offset: - current level new line offset.
-    :wrappers_key: - key that is mapped to Wrappers lists.
-    :type_key: - key that is mapped to components type name.
-    :name_key: - key that is mapped to components name.
-    :indent: - current level new line offset (whitespace number).
-    Returns formatted string.
+
+    :param service: (required) pipeline components info dictionary.
+    :param show_wrappers: (required) whether to include Wrappers or not (could be many and/or generated).
+    :param offset: current level new line offset.
+    :param wrappers_key: key that is mapped to Wrappers lists.
+    :param type_key: key that is mapped to components type name.
+    :param name_key: key that is mapped to components name.
+    :param indent: current level new line offset (whitespace number).
+    :return: formatted string.
     """
     indent = " " * indent
     representation = f"{offset}{service.get(type_key, '[None]')}%s:\n" % (
@@ -56,17 +57,19 @@ def rename_component_incrementing(
 ):
     """
     Function for generating new name for a pipeline component,
-        that has similar name with other components in the same group.
+    that has similar name with other components in the same group.
     The name is generated according to these rules:
-        1. If service's handler is Actor, it is named 'actor'
-        2. If service's handler is Callable, it is named after this callable
-        3. If it's a service group, it is named 'service_group'
-        4. Otherwise, it is names 'noname_service'
-        5. After that, '_[NUMBER]' is added to the resulting name,
-            where number is number of components with the same name in current service group.
-    :service: - service to be renamed.
-    :collisions: - services in the same service group as service.
-    Returns string - generated name.
+
+        - If service's handler is Actor, it is named 'actor'
+        - If service's handler is Callable, it is named after this callable
+        - If it's a service group, it is named 'service_group'
+        - Otherwise, it is names 'noname_service'
+        - After that, '_[NUMBER]' is added to the resulting name,
+          where number is number of components with the same name in current service group.
+
+    :param service: service to be renamed.
+    :param collisions: services in the same service group as service.
+    :return: string - generated name.
     """
     if isinstance(service, Service) and isinstance(service.handler, Actor):
         base_name = "actor"
@@ -89,11 +92,12 @@ def rename_component_incrementing(
 def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Actor:
     """
     Function that iterates through a service group (and all its subgroups),
-        finalizing component's names and paths in it.
+    finalizing component's names and paths in it.
     Components are renamed only if user didn't set a name for them. Their paths are also generated here.
-    It also searches for Actor in th group, throwing exception if  no actor or multiple actors found.
-    :service_group: - service group to resolve name collisions in.
-    Returns Actor.
+    It also searches for Actor in th group, throwing exception if no actor or multiple actors found.
+
+    :param service_group: service group to resolve name collisions in.
+    :return: Actor.
     """
     actor = None
     names_counter = collections.Counter([component.name for component in service_group.components])

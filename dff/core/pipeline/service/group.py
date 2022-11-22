@@ -31,13 +31,14 @@ class ServiceGroup(PipelineComponent):
     Group can be asynchronous only if all components in it are asynchronous.
     Group containing actor can be synchronous only.
     It accepts constructor parameters:
-        `components` (required) - a ServiceGroupBuilder object, that will be added to the group
-        `wrappers` - list of Wrappers to add to the group
-        `timeout` - timeout to add to the group
-        `asynchronous` - requested asynchronous property
-        `start_condition` - StartConditionCheckerFunction that is invoked before each group execution;
-            group is executed only if it returns True
-        `name` - requested group name
+
+    :param components: a ServiceGroupBuilder object, that will be added to the group
+    :param wrappers: list of Wrappers to add to the group
+    :param timeout: timeout to add to the group
+    :param asynchronous: requested asynchronous property
+    :param start_condition: StartConditionCheckerFunction that is invoked before each group execution;
+        group is executed only if it returns True
+    :param name: requested group name
     """
 
     def __init__(
@@ -88,10 +89,11 @@ class ServiceGroup(PipelineComponent):
         It doesn't include wrappers execution, start condition checking or error handling - pure execution only.
         Executes components inside the group based on its `asynchronous` property.
         Collects information about their execution state - group is finished successfully
-            only if all components in it finished successfully.
-        :ctx: - current dialog context.
-        :actor: - actor, associated with the pipeline.
-        Returns current dialog context.
+        only if all components in it finished successfully.
+
+        :param ctx: current dialog context.
+        :param actor: actor, associated with the pipeline.
+        :return: current dialog context.
         """
         self._set_state(ctx, ComponentExecutionState.RUNNING)
 
@@ -125,9 +127,10 @@ class ServiceGroup(PipelineComponent):
         """
         Method for handling this group execution.
         Executes before and after execution wrappers, checks start condition and catches runtime exceptions.
-        :ctx: - current dialog context.
-        :actor: - actor, associated with the pipeline.
-        Returns current dialog context if synchronous, else None.
+
+        :param ctx: current dialog context.
+        :param actor: actor, associated with the pipeline.
+        :return: current dialog context if synchronous, else None.
         """
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, actor)
 
@@ -147,14 +150,16 @@ class ServiceGroup(PipelineComponent):
     def log_optimization_warnings(self):
         """
         Method for logging service group optimization warnings for all this groups inner components
-            (NOT this group itself!).
+        (NOT this group itself!).
         Warnings are basically messages,
-            that indicate service group inefficiency or explicitly defined parameters mismatch.
+        that indicate service group inefficiency or explicitly defined parameters mismatch.
         These are cases for warnings issuing:
-            1. Service can be asynchronous, however is marked synchronous explicitly
-            2. Service is not asynchronous, however has a timeout defined
-            3. Group is not marked synchronous explicitly and contains both synchronous and asynchronous components
-        Returns None.
+
+            - Service can be asynchronous, however is marked synchronous explicitly
+            - Service is not asynchronous, however has a timeout defined
+            - Group is not marked synchronous explicitly and contains both synchronous and asynchronous components
+
+        :return: None
         """
         for service in self.components:
             if isinstance(service, Service):
@@ -188,10 +193,11 @@ class ServiceGroup(PipelineComponent):
         Adds wrapper to itself and propagates it to all inner components.
         Uses a special condition function to determine whether to add wrapper to any particular inner component or not.
         Condition checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
-        :global_wrapper_type: - a type of wrapper to add.
-        :wrapper: - a WrapperFunction to add as a wrapper.
-        :condition: - a condition function.
-        Returns None.
+
+        :param global_wrapper_type: a type of wrapper to add.
+        :param wrapper: a WrapperFunction to add as a wrapper.
+        :param condition: a condition function.
+        :return: None
         """
         super().add_extra_handler(global_extra_handler_type, extra_handler)
         for service in self.components:
@@ -218,8 +224,9 @@ class ServiceGroup(PipelineComponent):
         Utility method, used to create inner components, judging by their nature.
         Services are created from services and dictionaries.
         ServiceGroups are created from service groups and lists.
-        :services: - ServiceGroupBuilder object (a ServiceGroup instance or a list).
-        Returns list of services and service groups.
+
+        :param services: ServiceGroupBuilder object (a ServiceGroup instance or a list).
+        :return: list of services and service groups.
         """
         handled_services = []
         for service in services:
