@@ -1,15 +1,17 @@
 import functools
-from typing import Callable, Optional
+from typing import Callable, List, Optional
 
 
-USED_CACHES = list()
+USED_CACHES: List[Callable] = list()
 """Cache singleton, it is common for all actors and pipelines in current environment."""
 
 
 def cache_clear():
     """
     Function for cache singleton clearing, it is called in the end of:
+
     1. Actor execution turn (except for actor inside pipeline)
+
     2. Pipeline execution turn
     """
     for used_cache in USED_CACHES:
@@ -26,6 +28,7 @@ def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
     def decorator(func):
         global USED_CACHES
 
+        @functools.wraps(func)
         @functools.lru_cache(maxsize=maxsize, typed=typed)
         def wrapper(*args, **kwargs):
             return func(*args, **kwargs)
