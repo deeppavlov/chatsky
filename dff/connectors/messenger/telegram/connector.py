@@ -130,7 +130,14 @@ class ConditionNamespace:
         self.bot = bot
 
     def handler(
-        self, target_type: type, commands=None, regexp=None, func=None, content_types=None, chat_types=None, **kwargs
+        self,
+        target_type: type,
+        commands=None,
+        regexp=None,
+        func=None,
+        content_types=None,
+        chat_types=None,
+        **kwargs,
     ):
         """
         Creates a dff.core.engine condition, triggered by update type {target_type}.
@@ -145,7 +152,7 @@ class ConditionNamespace:
             func=func,
             content_types=content_types,
             chat_types=chat_types,
-            **kwargs
+            **kwargs,
         )
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
