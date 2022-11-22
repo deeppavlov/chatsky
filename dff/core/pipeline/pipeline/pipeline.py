@@ -5,6 +5,7 @@ from typing import Any, Union, List, Dict, Optional, Hashable
 from dff.connectors.db import DBAbstractConnector
 from dff.core.engine.core import Actor, Script, Context
 from dff.core.engine.core.types import NodeLabel2Type
+from dff.script.utils.singleton_turn_caching import cache_clear
 
 from ..messenger_interface import MessengerInterface, CLIMessengerInterface
 from ..service.group import ServiceGroup
@@ -70,6 +71,11 @@ class Pipeline:
 
         if optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
+
+        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+        self._clean_turn_cache = True
+        if self._clean_turn_cache:
+            self.actor._clean_turn_cache = False
 
     def add_global_handler(
         self,
@@ -196,6 +202,9 @@ class Pipeline:
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
         self.context_storage[ctx_id] = ctx
+        if self._clean_turn_cache:
+            cache_clear()
+
         return ctx
 
     def run(self):
