@@ -21,12 +21,15 @@ from examples.telegram._telegram_utils import check_env_bot_tokens, get_auto_arg
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
+kitten_id = "Y0WXj3xqJz0"
+kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
+kitten_width = 640
+kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
+
 
 def doc_is_photo(message: types.Message):
     return message.document and message.document.mime_type == "image/jpeg"
 
-
-my_image_path = os.path.join(os.path.dirname(os.path.realpath(__file__)), "kitten.jpg")
 
 bot = TelegramConnector(os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
@@ -53,13 +56,15 @@ script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(text="Here's my picture!", image=Image(source=my_image_path)),
+            # An HTTP path or a path to a local file can be used here
+            RESPONSE: Response(text="Here's my picture!", image=Image(source=kitten_url)),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
             RESPONSE: Response(
                 text="Look at my pictures",
-                attachments=Attachments(files=[Image(source=my_image_path)] * 2),
+                # An HTTP path or a path to a local file can be used here
+                attachments=Attachments(files=[Image(source=kitten_url)] * 2),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },

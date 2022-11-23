@@ -6,6 +6,7 @@ if you need a quick prototype or have no interest in using the dff.core.runner.
 import os
 import sys
 
+from dff.connectors.messenger.telegram.types import TelegramResponse
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.engine.core import Context, Actor
 from dff.core.engine import conditions as cnd
@@ -22,8 +23,13 @@ db = dict()
 # from df_db_connector import SqlConnector
 # db = SqlConnector("SOME_URI")
 
+kitten_id = "Y0WXj3xqJz0"
+kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
+kitten_width = 640
+kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
 
-def doc_is_photo(message):
+
+def doc_is_photo(message: TelegramResponse):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
@@ -53,7 +59,8 @@ script = {
         "thank": {
             RESPONSE: dict(
                 text="Nice! Here is my picture:",
-                picture=os.path.join(os.path.dirname(os.path.realpath(__file__)), "kitten.jpg"),
+                # An HTTP path or a path to a local file can be used here
+                picture=kitten_url,
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },

@@ -13,7 +13,7 @@ from pathlib import Path
 from telebot import types
 from pydantic import BaseModel, validator, root_validator, Field, Extra, FilePath, HttpUrl, Required
 
-from dff.connectors.messenger.generics import Image, Audio, Document, Video
+from dff.connectors.messenger.generics import Image, Audio, Document, Video, Response
 
 
 class AdapterModel(BaseModel):
@@ -60,6 +60,7 @@ class TelegramAttachment(AdapterModel):
     source: Optional[Union[HttpUrl, FilePath]] = None
     id: Optional[str] = None  # id field is made separate to simplify validation.
     title: Optional[str] = None
+    mime_type: Optional[str] = None  # TODO: please, approve if this is valid
 
     @root_validator
     def validate_id_or_source(cls, values):
@@ -104,7 +105,7 @@ class TelegramAttachments(AdapterModel):
             )
 
 
-class TelegramResponse(AdapterModel):
+class TelegramResponse(Response, AdapterModel):
     text: str = Required
     ui: Optional[TelegramUI] = None
     location: Optional[types.Location] = None

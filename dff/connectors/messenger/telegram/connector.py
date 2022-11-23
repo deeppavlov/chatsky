@@ -70,7 +70,8 @@ class TelegramConnector(TeleBot):
         else:
             raise TypeError(
                 "Type of the response argument should be one of the following:"
-                " str, dict, TelegramResponse, or df_generics.Response"
+                " :py:class:`~str`, :py:class:`~dict`, :py:class:`~TelegramResponse`,"
+                " or :py:class:`~dff.connectors.messenger.generics.Response`"
             )
 
         for attachment_prop, method in [
@@ -165,29 +166,61 @@ class ConditionNamespace:
         return condition
 
     message_handler = partialmethod(handler, target_type=types.Message)
+    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     edited_message_handler = partialmethod(handler, target_type=types.Message)
+    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     channel_post_handler = partialmethod(handler, target_type=types.Message)
+    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     edited_channel_post_handler = partialmethod(handler, target_type=types.Message)
+    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     inline_handler = partialmethod(handler, target_type=types.InlineQuery)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.InlineQuery`"
+    )
 
     chosen_inline_handler = partialmethod(handler, target_type=types.ChosenInlineResult)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChosenInlineResult`"
+    )
 
     callback_query_handler = partialmethod(handler, target_type=types.CallbackQuery)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.CallbackQuery`"
+    )
 
     shipping_query_handler = partialmethod(handler, target_type=types.ShippingQuery)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ShippingQuery`"
+    )
 
     pre_checkout_query_handler = partialmethod(handler, target_type=types.PreCheckoutQuery)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.PreCheckoutQuery`"
+    )
 
     poll_handler = partialmethod(handler, target_type=types.Poll)
+    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Poll`"
 
     poll_answer_handler = partialmethod(handler, target_type=types.PollAnswer)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.PollAnswer`"
+    )
 
     chat_member_handler = partialmethod(handler, target_type=types.ChatMemberUpdated)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChatMemberUpdated`"
+    )
 
     my_chat_member_handler = partialmethod(handler, target_type=types.ChatMemberUpdated)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChatMemberUpdated`"
+    )
 
     chat_join_request_handler = partialmethod(handler, target_type=types.ChatJoinRequest)
+    message_handler.__doc__ = (
+        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChatJoinRequest`"
+    )
