@@ -15,7 +15,7 @@ help:
 	@echo "make test: Run basic tests (not testing most integrations)"
 	@echo "make test_all: Run ALL tests (slow, closest to CI)"
 	@echo "make format: Run code formatters (destructive)"
-	@echo "make build_doc: Build Sphinx docs; activate your virtual environment before execution"
+	@echo "make doc: Build Sphinx docs; activate your virtual environment before execution"
 	@echo "make pre_commit: Register a git hook to lint the code on each commit"
 	@echo "make version_major: increment version major in metadata files 8.8.1 -> 9.0.0"
 	@echo "make version_minor: increment version minor in metadata files 9.1.1 -> 9.2.0"
@@ -35,18 +35,18 @@ venv_test:
 	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 . --exclude venv,build
+	black --line-length=120 . --exclude venv*,build
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 . --exclude venv,build
-	@set -e && black --line-length=120 --check . --exclude venv,build|| ( \
+	flake8 --max-line-length 120 . --exclude venv*,build
+	@set -e && black --line-length=120 --check . --exclude venv*,build|| ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
 		false)
 	# TODO: Add mypy testing
-	# @mypy . --exclude venv,build
+	# @mypy . --exclude venv*,build
 .PHONY: lint
 
 docker_up:
@@ -65,10 +65,10 @@ test: venv
 test_all: venv wait_db test lint
 .PHONY: test_all
 
-doc: venv
-	# sphinx-apidoc -e -f -o docs/source/apiref dff
+doc: venv clean_docs
+	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -b html  -W --keep-going docs/source docs/build
+	export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -88,14 +88,17 @@ version_major: venv
 .PHONY: version_major
 
 
+clean_docs:
+	rm -rf docs/build
+	rm -rf docs/examples
+	rm -rf docs/source/apiref
+	rm -rf docs/source/examples
+.PHONY: clean_docs
 
-clean:
+clean: clean_docs
 	rm -rf $(VENV_PATH)
 	rm -rf .pytest_cache
 	rm -rf *.egg-info
 	rm -rf htmlcov
 	rm -f .coverage
-	rm -rf docs/build
-	rm -rf docs/examples
-	rm -rf docs/source/apiref
 .PHONY: clean

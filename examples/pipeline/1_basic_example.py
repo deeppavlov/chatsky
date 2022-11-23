@@ -1,20 +1,18 @@
+# %% [markdown]
 """
-Basic example
-=============
-
+# Basic Example
 The following example shows basic usage of `pipeline` module, as an extension to `dff.core.engine`
 """
 
-import logging
-
+# %%
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from dff.utils.testing.common import check_happy_path, is_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
+# %% [markdown]
 """
 Pipeline is an object, that automates Actor execution and context management.
 `from_script` method can be used to create a pipeline of the most basic structure:
@@ -29,17 +27,20 @@ This call will return Context, its `last_response` property will be actors respo
 """
 
 
+# %%
 pipeline = Pipeline.from_script(
-    SCRIPT,  # Actor script object, defined in `.utils` module.
+    TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
 
 
+# %%
 if __name__ == "__main__":
-    if get_auto_arg():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
+    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic example running (testing) with HAPPY_PATH
+
+    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)

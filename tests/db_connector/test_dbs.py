@@ -1,11 +1,6 @@
 import pytest
 import os
-import random
-import uuid
-import importlib
 from platform import system
-
-from dff.core.engine.core import Actor
 
 from dff.connectors.db.protocol import get_protocol_install_suggestion
 from dff.connectors.db.json_connector import JSONConnector
@@ -18,44 +13,38 @@ from dff.connectors.db.mongo_connector import MongoConnector, mongo_available
 from dff.connectors.db.ydb_connector import YDBConnector, ydb_available
 from dff.connectors.db import connector_factory
 
-
 from dff.core.engine.core import Context
 
 from dff.connectors.db import DBConnector
 import tests.utils as utils
-from tests.db_list import (
-    MONGO_ACTIVE,
-    REDIS_ACTIVE,
-    POSTGRES_ACTIVE,
-    MYSQL_ACTIVE,
-    YDB_ACTIVE,
-)
+from dff.core.pipeline import Pipeline
+from dff.utils.testing.common import check_happy_path
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
-dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
-db_connector_utils = importlib.import_module(f"examples.{dot_path_to_addon}._db_connector_utils")
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
-def run_turns_test(actor: Actor, db: DBConnector):
-    for user_id in [str(random.randint(0, 10000000)), random.randint(0, 10000000), uuid.uuid4()]:
-        for turn_id, (request, true_response) in enumerate(db_connector_utils.testing_dialog):
-            try:
-                ctx = db.get(user_id, Context(id=user_id))
-                ctx.add_request(request)
-                ctx = actor(ctx)
-                out_response = ctx.last_response
-                db[user_id] = ctx
-            except Exception as exc:
-                msg = f"user_id={user_id}"
-                msg += f" turn_id={turn_id}"
-                msg += f" request={request} "
-                raise Exception(msg) from exc
-            if true_response != out_response:
-                msg = f"user_id={user_id}"
-                msg += f" turn_id={turn_id}"
-                msg += f" request={request} "
-                msg += "\ntrue_response != out_response: "
-                msg += f"\n{true_response} != {out_response}"
-                raise Exception(msg)
+def ping_localhost(port: int, timeout=60):
+    try:
+        socket.setdefaulttimeout(timeout)
+        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        s.connect(("localhost", port))
+    except OSError:
+        return False
+    else:
+        s.close()
+        return True
+
+
+MONGO_ACTIVE = ping_localhost(27017)
+
+REDIS_ACTIVE = ping_localhost(6379)
+
+POSTGRES_ACTIVE = ping_localhost(5432)
+
+MYSQL_ACTIVE = ping_localhost(3307)
+
+YDB_ACTIVE = ping_localhost(2136)
 
 
 def generic_test(db, testing_context, context_id):
@@ -79,12 +68,13 @@ def generic_test(db, testing_context, context_id):
     assert context_id not in db
     # test `get` method
     assert db.get(context_id) is None
-    actor = Actor(
-        db_connector_utils.script,
+    pipeline = Pipeline.from_script(
+        TOY_SCRIPT,
+        context_storage=db,
         start_label=("greeting_flow", "start_node"),
         fallback_label=("greeting_flow", "fallback_node"),
     )
-    run_turns_test(actor, db)
+    check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
 
 @pytest.mark.parametrize(

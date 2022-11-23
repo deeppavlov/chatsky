@@ -101,19 +101,19 @@ class _ComponentExtraHandler:
         """
         Method for executing one of the wrapper functions (before or after).
         If the function is not set, nothing happens.
-        :stage: - current WrapperStage (before or after).
-        :ctx: - current dialog context.
-        :actor: - actor, associated with current pipeline.
-        :component_info: - associated component's info dictionary.
-        Returns None.
+        :param stage: current WrapperStage (before or after).
+        :param ctx: current dialog context.
+        :param actor: actor, associated with current pipeline.
+        :component_info: associated component's info dictionary.
+        :return: None.
         """
 
         """
         Method for retrieving runtime info about this wrapper.
         It embeds runtime info of the component it wraps under `component` key.
-        :stage: - current WrapperStage (before or after).
-        :component_info: - associated component's info dictionary.
-        Returns a WrapperRuntimeInfo dict where all not set fields are replaced with '[None]'.
+        :param stage: - current WrapperStage (before or after).
+        :param component_info: - associated component's info dictionary.
+        :return: A WrapperRuntimeInfo dict where all not set fields are replaced with '[None]'.
         """
         if self.asynchronous:
             futures = [self._run_function(function, ctx, actor, component_info) for function in self.functions]
@@ -133,9 +133,9 @@ class _ComponentExtraHandler:
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using `_run` method.
-        :ctx: (required) - current dialog Context.
-        :actor: - this Pipeline Actor or None if this is a service, that wraps Actor.
-        Returns Context if this is a synchronous service or Awaitable if this is an asynchronous component or None.
+        :param ctx: (required) Current dialog Context.
+        :param actor: This Pipeline Actor or None if this is a service, that wraps Actor.
+        :return: Context if this is a synchronous service or Awaitable if this is an asynchronous component or None.
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, actor, component_info))

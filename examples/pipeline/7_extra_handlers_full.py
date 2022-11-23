@@ -14,10 +14,11 @@ import psutil
 from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import Pipeline, ServiceGroup, to_service, ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """ TODO: update docs
 Extra handlers are additional function lists (before-functions and/or after-functions)
@@ -94,12 +95,6 @@ def json_converter_after_handler(ctx, _, info):
     ctx.misc.pop(get_extra_handler_misc_field(info, "str"))
 
 
-actor = Actor(
-    SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 memory_heap = dict()  # This object plays part of some memory heap
 
 
@@ -118,6 +113,13 @@ def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
     logger.info(f"Stringified misc: {str_misc}")
 
 
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
 pipeline_dict = {
     "components": [
         ServiceGroup(
@@ -134,7 +136,6 @@ pipeline_dict = {
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

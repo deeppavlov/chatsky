@@ -1,11 +1,11 @@
 import importlib
-
 import pytest
 
 import tests.utils as utils
+from dff.utils.testing.common import check_happy_path
+from dff.utils.testing.toy_script import HAPPY_PATH
 
-dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
-pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipeline_utils")
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 @pytest.mark.parametrize(
@@ -27,7 +27,8 @@ pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipelin
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    if example_module_name.startswith("6"):
-        pipeline_utils.auto_run_pipeline(example_module.pipeline, wrapper=example_module.construct_webpage_by_response)
+    if example_module_name == "6_custom_messenger_interface":
+        happy_path = ((req, example_module.construct_webpage_by_response(res)) for req, res in HAPPY_PATH)
+        check_happy_path(example_module.pipeline, happy_path)
     else:
-        pipeline_utils.auto_run_pipeline(example_module.pipeline)
+        check_happy_path(example_module.pipeline, HAPPY_PATH)

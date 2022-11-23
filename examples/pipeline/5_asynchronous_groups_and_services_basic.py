@@ -6,15 +6,12 @@ The following example shows pipeline asynchronous service and service group usag
 """
 
 import asyncio
-import logging
 
 from dff.core.engine.core import Actor
-
 from dff.core.pipeline import Pipeline
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
+from dff.utils.testing.common import is_interactive_mode, check_happy_path, run_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 """
 Services and service groups can be synchronous and asynchronous.
@@ -30,15 +27,15 @@ Service group `pipeline` can't be asynchronous because actor is synchronous.
 """
 
 
+async def time_consuming_service(_):
+    await asyncio.sleep(0.01)
+
+
 actor = Actor(
-    SCRIPT,
+    TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
-
-
-async def time_consuming_service(_):
-    await asyncio.sleep(0.01)
 
 
 pipeline_dict = {
@@ -52,7 +49,6 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
-        pipeline.run()
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)

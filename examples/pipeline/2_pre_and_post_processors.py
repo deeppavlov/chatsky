@@ -10,10 +10,11 @@ import logging
 from dff.core.engine.core import Context
 
 from dff.core.pipeline import Pipeline, CLIMessengerInterface
-from examples.pipeline._pipeline_utils import SCRIPT, get_auto_arg, auto_run_pipeline
+
+from dff.utils.testing.common import check_happy_path, is_interactive_mode
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
 
 """
 When Pipeline is created with `from_script` method, additional pre- and postprocessors can be defined.
@@ -43,7 +44,7 @@ def pong_processor(ctx: Context):
 
 
 pipeline = Pipeline.from_script(
-    SCRIPT,
+    TOY_SCRIPT,
     ("greeting_flow", "start_node"),
     ("greeting_flow", "fallback_node"),
     {},  # `context_storage` - a dictionary or a `DBAbstractConnector` instance, a place to store dialog contexts
@@ -54,9 +55,8 @@ pipeline = Pipeline.from_script(
 
 
 if __name__ == "__main__":
-    if get_auto_arg():
-        auto_run_pipeline(pipeline, logger=logger)
-    else:
+    check_happy_path(pipeline, HAPPY_PATH)
+    if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)

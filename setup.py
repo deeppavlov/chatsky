@@ -34,14 +34,16 @@ core = [
 
 doc = [
     "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.5",
+    "dff_sphinx_theme>=0.1.7",
     "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
     "sphinx_gallery>=0.11.1",
     "sphinx-autodoc-typehints>=1.19.4",
-    "matplotlib<=3.5.3",
+    "nbsphinx>=0.8.9",
+    "jupytext>=1.14.1",
+    "jupyter>=1.0.0",
 ]
 
 mypy_dependencies = [
@@ -107,6 +109,7 @@ test_requirements = [
     "isort >=5.0.6,<6.0.0",
     "flask[async]>=2.1.2",
     "psutil>=5.9.1",
+    "requests>=2.28.1",
 ]
 
 devel = [
