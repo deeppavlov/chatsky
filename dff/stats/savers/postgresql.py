@@ -75,7 +75,7 @@ class PostgresSaver(Saver):
         async with self.engine.connect() as conn:
             result = await conn.execute(select(self.sql_table))
 
-        async for item in result.all():
+        for item in result.all():
             stats.append(StatsRecord.from_orm(item))
 
         return stats

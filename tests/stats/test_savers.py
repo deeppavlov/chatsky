@@ -30,6 +30,9 @@ async def test_PG_saving(table, testing_items):
     async with saver.engine.connect() as conn:
         result = await conn.execute(text(f"SELECT COUNT(*) FROM {table}"))
         first = result.first()
+
+    result_2 = await saver.load()
+    assert len(result_2) == (len(testing_items) * 2)
     assert int(first[0]) == (len(testing_items) * 2)
 
 
@@ -50,4 +53,6 @@ async def test_CH_saving(table, testing_items):
     await saver.save(testing_items)
 
     result = await saver.ch_client.fetchval(f"SELECT COUNT (*) FROM {table}")
+    result_2 = await saver.load()
+    assert len(result_2) == (len(testing_items) * 2)
     assert int(result) == (len(testing_items) * 2)
