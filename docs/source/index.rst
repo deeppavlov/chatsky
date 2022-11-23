@@ -5,42 +5,62 @@
 dialog flow framework's documentation
 =====================================
 
-*Date: 29.11.2022* *Version: 1.0.0*
+*Date*: 29.11.2022 *Version*: 1.0.0
 
-Dialog flow framework's (dff) is an open-source Apache 2.0-licensed library developed for creating dialog systems.
+The Dialog Flow Framework's (DFF) is an open-source Apache 2.0-licensed library developed for creating dialog systems.
 
 Getting started
 ---------------
 
+Installation
+~~~~~~~~~~~~
+
+`DFF` can be installed via `pip`:
+
+.. code-block:: bash
+
+   pip install dff
+
 Key concepts
-------------
+~~~~~~~~~~~~
 
-Examples
---------
+DFF allows you to write conversational services. The service is written by defining a special dialog graph
+that describes the behavior of the dialog service. The dialog graph contains the dialog script.
+DFF offers a specialized language (DSL) for quickly writing dialog graphs.
+You can use it to write chatbots for social networks, call centers, websites, writing skills for Amazon Alexa, etc.
 
-Github
-------
+DFF has the following important concepts:
+
+**Context**:
+
+**Actor**:
+
+**Pipeline**:
+
+`Examples <file:///home/sakharov/deeppavlov/dialog_flow_framework/docs/build/examples/index.html>`_
+
+`Github <https://github.com/deeppavlov/dialog_flow_framework>`_
+
 
 .. toctree::
    :caption: Contents:
 
 
 .. toctree::
-   :maxdepth: 1
+   :maxdepth: 2
    :glob:
-   :caption: DFF Core Addons
+   :caption: Documentation
 
-   apiref/dff.core.pipeline
+   apiref/modules
 
 
 .. toctree::
-   :caption: This is a thumbnail gallery
+   :caption: Examples
    :name: rst-gallery
    :maxdepth: 3
    :glob:
    :reversed:
 
-   apiref/*
    examples/index
 
 Indices and tables
