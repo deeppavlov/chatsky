@@ -57,9 +57,7 @@ def test_main(testing_cfg_dir, args):
     assert os.path.getsize(args.outfile) > 2200
 
 
-@pytest.mark.parametrize(
-    ["cmd"], [("dff.stats -h", ), ("dff.stats --help", )]
-)
+@pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])
 def test_help(cmd):
     res = os.system(cmd)
     assert res == 0
