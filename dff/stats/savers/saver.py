@@ -7,7 +7,7 @@ On the other hand, it is also used to automatically construct the child classes
 depending on the input parameters. See the class documentation for more info.
 
 """
-from typing import List, Optional # TODO: Optional is not used
+from typing import List, Optional  # TODO: Optional is not used
 from abc import ABC, abstractmethod
 
 from ..record import StatsRecord

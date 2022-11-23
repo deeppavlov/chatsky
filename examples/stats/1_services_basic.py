@@ -49,10 +49,10 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return StatsRecord.from_context(ctx, info, data)
 
 
-@to_service(after_handler=[get_service_state]) # set get_service_state to rubn it after the `heavy_service`
+@to_service(after_handler=[get_service_state])  # set get_service_state to rubn it after the `heavy_service`
 async def heavy_service(ctx: Context, actor: Actor):
-    _ = ctx # get something from ctx if it needs
-    _ = actor # get something from actor if it needs
+    _ = ctx  # get something from ctx if it needs
+    _ = actor  # get something from actor if it needs
     await asyncio.sleep(0.02)
 
 

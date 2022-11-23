@@ -6,7 +6,7 @@ sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
-from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool # import default pool from addon
+from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool  # import default pool from addon
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
@@ -34,16 +34,17 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # return a record to save into connected database
     return StatsRecord.from_context(ctx, info, data)
 
-# use together extractor_pool and default_extractor_pool 
+
+# use together extractor_pool and default_extractor_pool
 # run extract_timing_before before `heavy_service`
 # run get_service_state and extract_timing_after after `heavy_service`
 @to_service(
     before_handler=[default_extractor_pool["extract_timing_before"]],
     after_handler=[get_service_state, default_extractor_pool["extract_timing_after"]],
-) 
+)
 async def heavy_service(ctx: Context, actor: Actor):
-    _ = ctx # get something from ctx if it needs
-    _ = actor # get something from actor if it needs
+    _ = ctx  # get something from ctx if it needs
+    _ = actor  # get something from actor if it needs
     await asyncio.sleep(0.02)
 
 
@@ -56,12 +57,14 @@ actor = Actor(
 pipeline = Pipeline.from_dict(
     {
         "components": [
-            Service(handler=heavy_service), # add `heavy_service` before the actor
+            Service(handler=heavy_service),  # add `heavy_service` before the actor
             Service(
                 handler=to_service(
                     before_handler=[default_extractor_pool["extract_timing_before"]],
                     after_handler=[get_service_state, default_extractor_pool["extract_timing_after"]],
-                )(actor) # wrap and add the actor
+                )(
+                    actor
+                )  # wrap and add the actor
             ),
         ]
     }

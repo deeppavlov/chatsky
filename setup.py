@@ -65,21 +65,25 @@ mongodb_dependencies = [
     "bson>=0.5.10",
 ]
 
-mysql_dependencies = merge_req_lists([
-    sql_dependencies,
+mysql_dependencies = merge_req_lists(
     [
-        "pymysql>=1.0.2",
-        "cryptography>=36.0.2",
+        sql_dependencies,
+        [
+            "pymysql>=1.0.2",
+            "cryptography>=36.0.2",
+        ],
     ]
-])
+)
 
-postgresql_dependencies = merge_req_lists([
-    sql_dependencies,
+postgresql_dependencies = merge_req_lists(
     [
-        "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stable for windows
-        "asyncpg>=0.26.0",
+        sql_dependencies,
+        [
+            "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stable for windows
+            "asyncpg>=0.26.0",
+        ],
     ]
-])
+)
 
 ydb_dependencies = [
     "ydb>=2.5.0",
@@ -90,14 +94,16 @@ clickhouse_dependencies = [
     "httpx<=0.23.0",
 ]
 
-stats_dependencies = merge_req_lists([
-    sql_dependencies,
+stats_dependencies = merge_req_lists(
     [
-        "tqdm==4.62.3",
-        "omegaconf>=2.2.2",
-        "requests>=2.28.1",
+        sql_dependencies,
+        [
+            "tqdm==4.62.3",
+            "omegaconf>=2.2.2",
+            "requests>=2.28.1",
+        ],
     ]
-])
+)
 
 test_requirements = [
     "pytest >=6.2.4,<7.0.0",
@@ -196,9 +202,5 @@ setup(
     install_requires=core,  # Optional
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
-    entry_points={
-        "console_scripts": [
-            "dff.stats=dff.stats.__main__:main"
-        ]
-    }
+    entry_points={"console_scripts": ["dff.stats=dff.stats.__main__:main"]},
 )
