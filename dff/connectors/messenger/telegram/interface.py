@@ -11,7 +11,7 @@ from telebot import types, logger
 
 from dff.core.engine.core import Context
 from dff.core.pipeline import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
-from .connector import TelegramConnector
+from .connector import DFFTeleBot
 from .utils import get_user_id
 
 flask_imported: bool
@@ -26,7 +26,7 @@ except ImportError:
 
 
 class TelegramInterfaceMixin:
-    bot: TelegramConnector
+    bot: DFFTeleBot
 
     """
     Abstract class for Telegram request providers.
@@ -38,7 +38,7 @@ class TelegramInterfaceMixin:
         Note that passing a regular `Telebot` instance will result in an error.
     """
 
-    def __init__(self, bot: TelegramConnector):
+    def __init__(self, bot: DFFTeleBot):
         self.bot = bot
 
     def _extract_telegram_request_and_id(self, update: types.Update) -> Tuple[Any, Hashable]:
@@ -68,7 +68,7 @@ class PollingTelegramInterface(PollingMessengerInterface, TelegramInterfaceMixin
         `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
     """
 
-    def __init__(self, bot: TelegramConnector, interval=3, allowed_updates=None, timeout=20, long_polling_timeout=20):
+    def __init__(self, bot: DFFTeleBot, interval=3, allowed_updates=None, timeout=20, long_polling_timeout=20):
         TelegramInterfaceMixin.__init__(self, bot)
         self.interval = interval
         self.allowed_updates = allowed_updates
@@ -125,7 +125,7 @@ class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin)
 
     def __init__(
         self,
-        bot: TelegramConnector,
+        bot: DFFTeleBot,
         app: Flask,
         host: str = "localhost",
         port: int = 8443,

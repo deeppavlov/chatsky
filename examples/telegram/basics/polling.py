@@ -4,7 +4,7 @@ import os
 import dff.core.engine.conditions as cnd
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
-from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.connector import DFFTeleBot
 from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
 from dff.core.pipeline import Pipeline
 
@@ -39,7 +39,7 @@ script = {
     }
 }
 
-bot = TelegramConnector(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = DFFTeleBot(os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
 interface = PollingTelegramInterface(bot=bot)
 

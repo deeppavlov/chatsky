@@ -11,7 +11,7 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 
-from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.connector import DFFTeleBot
 from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
 from dff.core.pipeline import Pipeline
 
@@ -31,7 +31,7 @@ def doc_is_photo(message: types.Message):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
-bot = TelegramConnector(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = DFFTeleBot(os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
 script = {
     "root": {

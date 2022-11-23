@@ -14,7 +14,7 @@ from dff.core.engine import conditions as cnd
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.connector import DFFTeleBot
 from dff.connectors.messenger.telegram.utils import set_state, get_user_id, get_initial_context
 from examples.telegram._telegram_utils import check_env_bot_tokens
 
@@ -33,7 +33,7 @@ def doc_is_photo(message: TelegramResponse):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
-bot = TelegramConnector(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = DFFTeleBot(os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
 script = {
     "root": {

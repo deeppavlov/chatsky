@@ -13,7 +13,7 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 
-from dff.connectors.messenger.telegram.connector import TelegramConnector
+from dff.connectors.messenger.telegram.connector import DFFTeleBot
 from dff.connectors.messenger.telegram.types import TelegramUI, TelegramButton
 from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
 from dff.core.pipeline import Pipeline
@@ -24,7 +24,7 @@ from examples.telegram._telegram_utils import check_env_bot_tokens, get_auto_arg
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-bot = TelegramConnector(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = DFFTeleBot(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
 
 script = {

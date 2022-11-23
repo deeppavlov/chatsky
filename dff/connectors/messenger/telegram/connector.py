@@ -20,7 +20,7 @@ from .types import TelegramResponse
 from dff.connectors.messenger.generics import Response
 
 
-class TelegramConnector(TeleBot):
+class DFFTeleBot(TeleBot):
     """
     This class inherits from `Telebot` and implements dff-specific functionality, including script conditions
     and sending generic responses.
@@ -127,7 +127,7 @@ class ConditionNamespace:
 
     """
 
-    def __init__(self, bot: TelegramConnector):
+    def __init__(self, bot: DFFTeleBot):
         self.bot = bot
 
     def handler(
