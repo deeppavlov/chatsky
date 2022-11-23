@@ -1,7 +1,10 @@
 # %% [markdown]
 """
 # Basic Example
-The following example shows basic usage of `pipeline` module, as an extension to `dff.core.engine`
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](
+    https://colab.research.google.com/github/deeppavlov/dialog_flow_framework/blob/gh-pages/examples/pipeline/1_basic_example.ipynb)
+    
+The following example shows basic usage of `pipeline` module as an extension to `dff.core.engine`.
 """
 
 # %%

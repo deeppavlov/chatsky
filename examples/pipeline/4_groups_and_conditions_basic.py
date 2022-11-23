@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Groups and conditions (basic)
-=============================
+# Groups and conditions (basic)
 
-The following example shows pipeline service group usage and start conditions
+The following example shows pipeline service group usage and start conditions.
 """
 
+# %%
 import json
 import logging
 
@@ -16,6 +17,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 Pipeline can contain not only single services, but also service groups.
 Service groups can be defined as ServiceGroupBuilder objects:
@@ -43,7 +45,7 @@ The service, named `context_printing_service` prints pipeline runtime informatio
 that contains execution state of all previously run services.
 """
 
-
+# %%
 def always_running_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running...")
 
@@ -55,7 +57,7 @@ def never_running_service(_, __, info: ServiceRuntimeInfo):
 def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' runtime execution info: {json.dumps(info, indent=4, default=str)}")
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -81,7 +83,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":

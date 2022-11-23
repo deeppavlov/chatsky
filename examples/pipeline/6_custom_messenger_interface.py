@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Custom messenger interface
-==========================
+# Custom messenger interface
 
-The following example shows messenger interfaces usage
+The following example shows messenger interfaces usage.
 """
 
+# %%
 import logging
 
 from dff.core.engine.core import Context, Actor
@@ -17,6 +18,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 Messenger interfaces are used for providing a way for communication between user and pipeline.
 They manage message channel initialization and termination as well as pipeline execution on every user request.
@@ -45,6 +47,7 @@ Two services are used to process request:
     `construct_webpage_by_response` wraps actor response in webpage and adds response-based image to it
 """
 
+# %%
 app = Flask("examples.6_custom_messenger_interface")
 
 messenger_interface = (
@@ -90,7 +93,7 @@ def cat_response2webpage(ctx: Context):
     last_index = get_last_index(ctx.responses)
     ctx.responses[last_index] = construct_webpage_by_response(last_response)
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -116,7 +119,7 @@ async def route():
     ctx_id = 0  # 0 will be current dialog (context) identification.
     return messenger_interface.on_request(request, ctx_id).last_response
 
-
+# %%
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__" and not is_interactive_mode():  # This example will be run in interactive mode only

@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Extra Handlers and Extensions
-=======================
+# Extra Handlers and Extensions
 
-The following example shows how pipeline can be extended by global extra handlers and custom functions
+The following example shows how pipeline can be extended by global extra handlers and custom functions.
 """
 
+# %%
 import asyncio
 import json
 import logging
@@ -25,7 +26,10 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
-""" TODO: update docs
+# %% [markdown]
+"""
+TODO: update docs
+
 Pipeline functionality can be extended by global extra handlers.
 Global extra handlers are special extra handlers that are called on some stages of pipeline execution.
 There are 4 types of global extra handlers:
@@ -52,6 +56,7 @@ Information about pipeline component execution time and
 Pipeline consists of actor and 25 `long_service`s that run random amount of time between 0 and 0.05 seconds.
 """
 
+# %%
 start_times = dict()  # Place to temporarily store service start times
 pipeline_info = dict()  # Pipeline information storage
 
@@ -89,7 +94,7 @@ async def long_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service {info['name']} is going to sleep for {timeout} seconds.")
     await asyncio.sleep(timeout)
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -104,7 +109,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline(**pipeline_dict)
 
 pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, before_all)

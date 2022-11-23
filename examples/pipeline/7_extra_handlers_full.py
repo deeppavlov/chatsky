@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Extra Handlers (basic)
-================
+# Extra Handlers (basic)
 
-The following example shows extra handlers possibilities and use cases
+The following example shows extra handlers possibilities and use cases.
 """
 
+# %%
 import json
 import logging
 import random
@@ -20,7 +21,10 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
-""" TODO: update docs
+# %% [markdown]
+"""
+TODO: update docs
+
 Extra handlers are additional function lists (before-functions and/or after-functions)
     that can be added to any pipeline components (service and service groups).
 Despite extra handlers can be used to prepare data for certain services, that require some very special input type,
@@ -54,7 +58,7 @@ Another `time_measure_handler` measures total amount of time taken by all of the
     so `json_encoder_handler` is applied to encode stats to JSON.
 """
 
-
+# %%
 def get_extra_handler_misc_field(
     info: ExtraHandlerRuntimeInfo, postfix: str
 ) -> str:  # This method calculates `misc` field name dedicated to extra handler based on its and its service name
@@ -97,7 +101,7 @@ def json_converter_after_handler(ctx, _, info):
 
 memory_heap = dict()  # This object plays part of some memory heap
 
-
+# %%
 @to_service(
     before_handler=[time_measure_before_handler, ram_measure_before_handler],
     after_handler=[time_measure_after_handler, ram_measure_after_handler],
@@ -132,7 +136,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":

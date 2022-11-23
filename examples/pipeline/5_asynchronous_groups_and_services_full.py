@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Asynchronous groups and services (full)
-=======================================
+# Asynchronous groups and services (full)
 
-The following example shows pipeline asynchronous service and service group usage
+The following example shows pipeline asynchronous service and service group usage.
 """
 
+# %%
 import asyncio
 import json
 import logging
@@ -19,6 +20,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 Services and service groups can be synchronous and asynchronous.
 In synchronous service groups services are executed consequently, some of them (actor) can even return Context object,
@@ -52,7 +54,7 @@ Service group `service_group_1` is also asynchronous, it logs HTTPS requests (fr
 Service group `pipeline` can't be asynchronous because `balanced_group` and actor are synchronous.
 """
 
-
+# %%
 async def simple_asynchronous_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running")
 
@@ -78,7 +80,7 @@ def meta_web_querying_service(photo_number: int):  # This function returns servi
 def context_printing_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -104,7 +106,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":

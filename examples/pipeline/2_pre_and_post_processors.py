@@ -1,10 +1,10 @@
+# %% [markdown]
 """
-Pre- and postprocessors
-=======================
-
-The following example shows more advanced usage of `pipeline` module, as an extension to `dff.core.engine`
+# Pre- and postprocessors
+The following example shows more advanced usage of `pipeline` module as an extension to `dff.core.engine`.
 """
 
+# %%
 import logging
 
 from dff.core.engine.core import Context
@@ -16,6 +16,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 When Pipeline is created with `from_script` method, additional pre- and postprocessors can be defined.
 These can be any ServiceBuilder objects (defined in `types` module) - callables, objects or dicts.
@@ -33,7 +34,7 @@ Here a preprocessor ("ping") and a postprocessor ("pong") are added to pipeline.
 They share data in `context.misc` - a common place for sharing data between services and actor.
 """
 
-
+# %%
 def ping_processor(ctx: Context):
     ctx.misc["ping"] = True
 
@@ -42,7 +43,7 @@ def pong_processor(ctx: Context):
     ping = ctx.misc.get("ping", False)
     ctx.misc["pong"] = ping
 
-
+# %%
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,
     ("greeting_flow", "start_node"),

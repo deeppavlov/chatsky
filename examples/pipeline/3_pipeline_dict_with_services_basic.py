@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Pipeline dict with services (basic)
-===================================
+# Pipeline dict with services (basic)
 
-The following example shows pipeline creation from dict and most important pipeline components
+The following example shows pipeline creation from dict and most important pipeline components.
 """
 
+# %%
 import logging
 
 from dff.core.engine.core import Actor
@@ -15,6 +16,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 When Pipeline is created using `from_dict` method, pipeline should be defined as dictionary.
 It should contain `services` - a ServiceGroupBuilder object,
@@ -31,7 +33,7 @@ It starts pipeline asynchronously and connects to provided messenger interface.
 Here pipeline contains 4 services, defined in 4 different ways with different signatures.
 """
 
-
+# %%
 def prepreprocess(_):
     logger.info("preprocession intent-detection Service running (defined as a dict)")
 
@@ -43,14 +45,14 @@ def preprocess(_):
 def postprocess(_):
     logger.info("postprocession Service (defined as an object)")
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
 
-
+# %%
 pipeline_dict = {
     "components": [
         {
@@ -64,7 +66,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":

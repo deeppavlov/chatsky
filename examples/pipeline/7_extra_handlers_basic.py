@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Extra Handlers (basic)
-================
+# Extra Handlers (basic)
 
-The following example shows extra handlers possibilities and use cases
+The following example shows extra handlers possibilities and use cases.
 """
 
+# %%
 import asyncio
 import json
 import logging
@@ -20,6 +21,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 Extra handlers are additional function lists (before-functions and/or after-functions)
     that can be added to any pipeline components (service and service groups).
@@ -33,7 +35,7 @@ To each of them (as well as to group) time measurement extra handler is attached
 In the end `ctx.misc` is logged to info channel.
 """
 
-
+# %%
 def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now()})
 
@@ -49,7 +51,7 @@ async def heavy_service(_):
 def logging_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -95,7 +97,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":

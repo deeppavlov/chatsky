@@ -1,9 +1,11 @@
+# %% [markdown]
 """
-Pipeline dict with services (full)
-==================================
+# Pipeline dict with services (full)
 
-The following example shows pipeline creation from dict and most important pipeline components
+The following example shows pipeline creation from dict and most important pipeline components.
 """
+
+# %%
 import json
 import logging
 import urllib.request
@@ -17,6 +19,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
 When Pipeline is created using `from_dict` method,
 pipeline should be defined as PipelineBuilder objects (defined in `types` module).
@@ -54,7 +57,7 @@ The first uses a constant expression and the second fetches from `example.com`.
 Third one is Actor (it acts like a _special_ service here). Final service logs `ctx.misc` dict.
 """
 
-
+# %%
 def prepreprocess(ctx: Context):
     logger.info("preprocession intent-detection Service running (defined as a dict)")
     ctx.misc["preprocess_detection"] = {
@@ -78,14 +81,14 @@ def postprocess(ctx: Context, actor: Actor):
         "in fallback node"
     )
 
-
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
 
-
+# %%
 pipeline_dict = {
     "messenger_interface": CLIMessengerInterface(
         intro="Hi, this is a brand new Pipeline running!", prompt_request="Request: ", prompt_response="Response: "
@@ -111,7 +114,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":

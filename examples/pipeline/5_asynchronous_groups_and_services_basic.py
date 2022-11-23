@@ -1,10 +1,11 @@
+# %% [markdown]
 """
-Asynchronous groups and services (basic)
-========================================
+# Asynchronous groups and services (basic)
 
-The following example shows pipeline asynchronous service and service group usage
+The following example shows pipeline asynchronous service and service group usage.
 """
 
+# %%
 import asyncio
 
 from dff.core.engine.core import Actor
@@ -13,6 +14,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode, check_happy_path, run_interactive_mode
 from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
+# %% [markdown]
 """
 Services and service groups can be synchronous and asynchronous.
 In synchronous service groups services are executed consequently.
@@ -26,7 +28,7 @@ However, as the group is asynchronous, it is being executed for 0.01 of a second
 Service group `pipeline` can't be asynchronous because actor is synchronous.
 """
 
-
+# %%
 async def time_consuming_service(_):
     await asyncio.sleep(0.01)
 
@@ -45,7 +47,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":

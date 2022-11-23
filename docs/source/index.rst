@@ -2,8 +2,24 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Welcome to Dialog Flow Framework's documentation!
-=================================================
+dialog flow framework's documentation
+=====================================
+
+*Date: 29.11.2022* *Version: 1.0.0*
+
+Dialog flow framework's (dff) is an open-source Apache 2.0-licensed library developed for creating dialog systems.
+
+Getting started
+---------------
+
+Key concepts
+------------
+
+Examples
+--------
+
+Github
+------
 
 .. toctree::
    :caption: Contents:
@@ -14,7 +30,7 @@ Welcome to Dialog Flow Framework's documentation!
    :glob:
    :caption: DFF Core Addons
 
-.. apiref/dff.core.pipeline
+   apiref/dff.core.pipeline
 
 
 .. toctree::
