@@ -1,8 +1,8 @@
 """
 CSV
 ---------------------------
-Provides the CSV version of the :py:class:`~dff.stats.savers.saver.Saver`. 
-You don't need to interact with this class manually, as it will be automatically 
+Provides the CSV version of the :py:class:`~dff.stats.savers.saver.Saver`.
+You don't need to interact with this class manually, as it will be automatically
 initialized when you construct a :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
 
 Statistical data collected to csv cannot be directly displayed in Superset.

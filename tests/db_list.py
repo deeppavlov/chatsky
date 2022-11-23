@@ -1,6 +1,5 @@
 """List of running databases"""
 import socket
-import os
 
 
 def ping_localhost(port: int, timeout=60):

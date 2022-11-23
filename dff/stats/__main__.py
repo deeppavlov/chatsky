@@ -1,7 +1,7 @@
 """
 Main
 *********
-This module is a script designed to adapt the standard Superset dashboard to 
+This module is a script designed to adapt the standard Superset dashboard to
 user-specific settings. Settings can be passed to the script with a config file
 or as command line arguments.
 

@@ -1,8 +1,4 @@
-import sys
 import asyncio
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
@@ -11,7 +7,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
 """
-Like with regular handlers, you can define global statistic handlers, 
+Like with regular handlers, you can define global statistic handlers,
 which will be applied to every element inside the pipeline.
 
 Use the `add_global_handler` method.

@@ -1,8 +1,4 @@
-import sys
 import asyncio
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
@@ -12,11 +8,11 @@ from dff.utils.testing.stats_cli import parse_args
 
 """
 The statistics are collected from services by wrapping them in special 'extractor' functions.
-These functions have a specific signature: their arguments are always a `Context`, an `Actor`, 
-and a `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance. 
+These functions have a specific signature: their arguments are always a `Context`, an `Actor`,
+and a `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance.
 It is a preferred practice to define them as asynchronous.
 
-Before you use the said functions, you should create an `ExtractorPool` 
+Before you use the said functions, you should create an `ExtractorPool`
 or import a ready one as a first step.
 
 Then, you should define the handlers and add them to some pool, using the `new_extractor` method.
@@ -27,7 +23,7 @@ and saves it to a database. The database credentials can be configured by either
 instantiating a `Saver` class and passing it on construction, or by
 passing the database credentials to the `from_uri` class method.
 
-When this is done, subscribe the storage to one or more pools that you have created 
+When this is done, subscribe the storage to one or more pools that you have created
 by calling the `add_extractor_pool` method.
 
 The whole process is illustrated in the example below.

@@ -28,7 +28,8 @@ TYPE_MAPPING_CH = {
 }
 
 SQL_STMT_MAPPING = {
-    "dff_acyclic_nodes.yaml": "WITH main AS (\n  SELECT DISTINCT {table}.context_id, request_id, timestamp, CAST({lblfield} AS {texttype}) AS label\n  \
+    "dff_acyclic_nodes.yaml": "WITH main AS (\n  SELECT DISTINCT {table}.context_id, request_id, timestamp, \
+    CAST({lblfield} AS {texttype}) AS label\n  \
     FROM {table} INNER JOIN \n  (\n    WITH helper AS \
     (\n         SELECT DISTINCT context_id, request_id, CAST({lblfield} AS {texttype}) \
     AS label from {table}\n         ) \n    SELECT context_id FROM helper GROUP BY context_id\n\
@@ -87,7 +88,11 @@ def import_dashboard(
 
     payload = {}
     headers = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;"
+            + "q=0.9,image/avif,image/webp,image/apng,*/*;"
+            + "q=0.8,application/signed-exchange;v=b3;q=0.9"
+        ),
         "Accept-Language": "en-US,en;q=0.9",
     }
 
@@ -96,7 +101,11 @@ def import_dashboard(
 
     payload = f"csrf_token={csrf_token}&username={username}&password={password}"
     headers = {
-        "Accept": "text/html,application/xhtml+xml,application/xml;q=0.9,image/avif,image/webp,image/apng,*/*;q=0.8,application/signed-exchange;v=b3;q=0.9",
+        "Accept": (
+            "text/html,application/xhtml+xml,application/xml;"
+            + "q=0.9,image/avif,image/webp,image/apng,*/*;"
+            + "q=0.8,application/signed-exchange;v=b3;q=0.9"
+        ),
         "Content-Type": "application/x-www-form-urlencoded",
     }
 
@@ -176,7 +185,7 @@ def make_zip_config(parsed_args: argparse.Namespace):
         database_dir = Path(os.path.join(nested_temp_dir, "databases"))
         dataset_dir = Path(os.path.join(nested_temp_dir, "datasets/dff_database"))
 
-        logger.info(f"Overriding the initial configuration.")
+        logger.info("Overriding the initial configuration.")
         # overwrite sqlalchemy uri
         for filepath in database_dir.iterdir():
             file_config = OmegaConf.load(filepath)

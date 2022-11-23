@@ -1,8 +1,4 @@
-import sys
 import asyncio
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
@@ -12,7 +8,7 @@ from dff.utils.testing.stats_cli import parse_args
 
 """
 handlers can be applied to any pipeline parameter, including service groups.
-The `ServiceGroup` constructor has `before_handler` and `after_handler` parameters, 
+The `ServiceGroup` constructor has `before_handler` and `after_handler` parameters,
 to which handler functions can be passed.
 
 """

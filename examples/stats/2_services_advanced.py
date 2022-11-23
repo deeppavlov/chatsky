@@ -1,8 +1,4 @@
-import sys
 import asyncio
-from pathlib import Path
-
-sys.path.insert(0, str(Path(__file__).absolute().parent))
 
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
@@ -13,7 +9,7 @@ from dff.utils.testing.stats_cli import parse_args
 """
 As is the case with the regular handlers, you can add extractors both before and after the
 target service. You can use a handler that runs before the service to compare the pre-service and post-service
-states of the context, measure the running time, etc. 
+states of the context, measure the running time, etc.
 An example of such handler can be found in the default extractor pool.
 
 Pass before- and after-handlers to the respective parameters of the `to_service` decorator.

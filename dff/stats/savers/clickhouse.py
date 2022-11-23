@@ -1,8 +1,8 @@
 """
 Clickhouse
 ---------------------------
-Provides the Clickhouse version of the :py:class:`~dff.stats.savers.saver.Saver`. 
-You don't need to interact with this class manually, as it will be automatically 
+Provides the Clickhouse version of the :py:class:`~dff.stats.savers.saver.Saver`.
+You don't need to interact with this class manually, as it will be automatically
 imported and initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
 
 """

@@ -1,13 +1,13 @@
 """
 Saver
 ******
-Provides the base class :py:class:`~dff.stats.savers.saver.Saver`. 
+Provides the base class :py:class:`~dff.stats.savers.saver.Saver`.
 It is an interface class that defines methods for saving and loading dataframes.
-On the other hand, it is also used to automatically construct the child classes 
+On the other hand, it is also used to automatically construct the child classes
 depending on the input parameters. See the class documentation for more info.
 
 """
-from typing import List, Optional  # TODO: Optional is not used
+from typing import List
 from abc import ABC, abstractmethod
 
 from ..record import StatsRecord
@@ -45,7 +45,8 @@ class Saver(ABC):
         A string that contains a prefix and a url of the target data storage, separated by ://.
         The prefix is used to automatically import a child class from one of the submodules
         and instantiate it.
-        For instance, a call to `Saver("csv://...")` will eventually produce a :py:class:`~dff.stats.savers.csv_saver.CsvSaver`,
+        For instance, a call to `Saver("csv://...")` will eventually produce
+        a :py:class:`~dff.stats.savers.csv_saver.CsvSaver`,
         while a call to `Saver("clickhouse://...")` produces a :py:class:`~dff.stats.savers.clickhouse.ClickHouseSaver`
 
     table: str
