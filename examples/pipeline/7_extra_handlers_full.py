@@ -107,14 +107,14 @@ memory_heap = dict()  # This object plays part of some memory heap
     after_handler=[time_measure_after_handler, ram_measure_after_handler],
 )
 def heavy_service(ctx: Context):
-    memory_heap[ctx.last_request] = [random.randint(0, num) for num in range(0, 100000)]
+    memory_heap[ctx.last_request] = [random.randint(0, num) for num in range(0, 1000)]
 
 
 @to_service(before_handler=[json_converter_before_handler], after_handler=[json_converter_after_handler])
 def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
     str_misc = ctx.misc[f"{info['name']}-str"]
     assert isinstance(str_misc, str)
-    logger.info(f"Stringified misc: {str_misc}")
+    print(f"Stringified misc: {str_misc}")
 
 
 actor = Actor(

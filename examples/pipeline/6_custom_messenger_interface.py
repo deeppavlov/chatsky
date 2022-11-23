@@ -122,7 +122,7 @@ async def route():
 # %%
 pipeline = Pipeline(**pipeline_dict)
 
-if __name__ == "__main__" and not is_interactive_mode():  # This example will be run in interactive mode only
+if __name__ == "__main__" and is_interactive_mode():  # This example will be run in interactive mode only
     pipeline.run()
     app.run()
     # Navigate to http://127.0.0.1:5000/pipeline_web_interface?request={REQUEST} to receive response
