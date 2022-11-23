@@ -5,6 +5,7 @@ import argparse
 import os
 import logging
 from pathlib import Path
+from typing import Optional
 from zipfile import ZipFile, ZIP_DEFLATED
 
 try:
@@ -63,8 +64,8 @@ def add_to_zip(zip_file, path, zippath):
 
 
 def import_dashboard(
-    parsed_args: argparse.Namespace = None,
-):  # TODO: Add Optioal type because `Type "None" cannot be assigned to type "Namespace"`
+    parsed_args: Optional[argparse.Namespace] = None,
+):
     """
     Import an Apache Superset dashboard to a local instance with specified arguments.
     """
