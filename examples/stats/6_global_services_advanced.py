@@ -1,6 +1,5 @@
 import sys
 import asyncio
-import random
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
@@ -8,8 +7,8 @@ sys.path.insert(0, str(Path(__file__).absolute().parent))
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
-
-from _stats_utils import parse_args, script
+from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.stats_cli import parse_args
 
 """
 Like with regular handlers, you can define global statistic handlers, 
@@ -23,7 +22,7 @@ extractor_pool = ExtractorPool()
 
 
 async def heavy_service(_):
-    await asyncio.sleep(random.randint(0, 2))
+    await asyncio.sleep(0.02)
 
 
 @extractor_pool.new_extractor
@@ -33,7 +32,11 @@ async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return group_stats
 
 
-actor = Actor(script, ("root", "start"), ("root", "fallback"))
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 pipeline_dict = {
     "components": [

@@ -132,6 +132,101 @@ def handle_request(request):
 
 To get more advanced examples, take a look at [examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
 
+# Quick Start -- df_stats
+
+## Description
+
+Dialog Flow Stats collects usage statistics for your conversational service and allows you to visualize those using a pre-configured dashboard for [Apache Superset](https://superset.apache.org/) or [Preset](https://preset.io/).
+
+There are multiple ways to deploy an Apache Superset instance: you can install it locally or use a [Docker image](https://hub.docker.com/r/apache/superset) with docker or docker-compose. 
+See the [Superset documentation](https://superset.apache.org/docs/databases/installing-database-drivers/) for more info.
+
+Currently, support is offered for multiple database types that can be used as a backend storage for your data:
+
+* [Postgresql](https://www.postgresql.org/)
+* [Clickhouse](https://clickhouse.com/)
+
+As an addition, you can use the library without any dependencies
+to save your service logs to `csv`-formatted files.
+
+## Installation
+
+```bash
+pip install dff[stats] # csv-only, no connection to Superset
+pip install dff[stats,clickhouse]
+pip install dff[stats,postgresql]
+```
+
+## Setting up a pipeline
+
+```python
+# import dependencies
+from dff.stats import StatsStorage
+from dff.stats import default_extractor_pool
+
+# Extractor pools are namespaces that contain handler functions
+# Like all functions of this kind, they can be used in a pipeline
+# In the following example, the handlers measure the running time of the actor
+actor = Actor(...)
+actor_service = to_service(
+    before_handler=[default_extractor_pool["extract_timing_before"]],
+    after_handler=[default_extractor_pool["extract_timing_after"]]
+)(actor)
+
+pipeline = Pipeline.from_dict(
+    {
+        "components": [
+            Service(handler=actor_service),
+        ]
+    }
+)
+
+# Define a destination for stats saving
+db_uri = "postgresql://user:password@host:5432/default"
+# for clickhouse:
+# db_uri = "clickhouse://user:password@host:8123/default"
+# for csv:
+# db_uri = "csv://file.csv"
+stats = StatsStorage.from_uri(db_uri)
+# update the stats object
+stats.add_extractor_pool(default_extractor_pool)
+pipeline.run()
+```
+
+## Display your data
+
+### Adjust Dashboard Configuration
+
+In order to run the dashboard in Apache Superset, you should update the default configuration with the credentials of your database. The output will be saved to a zip archive.
+
+It can be done through the  CLI:
+
+```bash
+dff.stats --help
+```
+
+An alternative way is to save the settings in a YAML file. 
+
+```yaml
+db:
+  type: clickhousedb+connect
+  name: test
+  user: user
+  host: localhost
+  port: 5432
+  table: dff_stats
+```
+
+You can forward the file to the script like this:
+
+```bash
+dff.stats cfg_from_file config.yaml --outfile=./superset_dashboard.zip
+```
+
+### Import the Dashboard Config
+
+Log in to Superset, open the `Dashboards` tab and press the **import** button on the right of the screen. You will be prompted for the database password. If all of the database credentials match, the dashboard will appear in the dashboard list.
+
 # Contributing to the Dialog Flow Framework
 
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md).

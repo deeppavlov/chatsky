@@ -1,6 +1,5 @@
 import sys
 import asyncio
-import random
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
@@ -8,7 +7,8 @@ sys.path.insert(0, str(Path(__file__).absolute().parent))
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool # import default pool from addon
-from _stats_utils import parse_args, script
+from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.stats_cli import parse_args
 
 """
 As is the case with the regular handlers, you can add extractors both before and after the
@@ -44,10 +44,14 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 async def heavy_service(ctx: Context, actor: Actor):
     _ = ctx # get something from ctx if it needs
     _ = actor # get something from actor if it needs
-    await asyncio.sleep(random.randint(0, 2))
+    await asyncio.sleep(0.02)
 
 
-actor = Actor(script, ("root", "start"), ("root", "fallback"))
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 pipeline = Pipeline.from_dict(
     {

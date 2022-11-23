@@ -1,4 +1,5 @@
 import pytest
+import socket
 import os
 from platform import system
 

@@ -1,32 +1,11 @@
-from typing import List, Tuple
 import importlib
-
 import pytest
-from dff.core.engine.core import Context
-from dff.core.pipeline import Pipeline
+
 import tests.utils as utils
+from dff.utils.testing.common import check_happy_path
+from dff.utils.testing.toy_script import HAPPY_PATH
 
-dot_path_to_addon = utils.get_dot_path_from_tests_to_current_dir(__file__)
-
-TURNS = [
-    ("hi", "how are you"),
-    ("fine", "what would you like to talk about?"),
-    ("dog", "do you like it?"),
-    ("yes", "what animals do you have?"),
-]
-
-
-def run_pipeline_test(pipeline: Pipeline, turns: List[Tuple[str, str]]):
-    ctx = Context()
-    for turn_id, (request, true_response) in enumerate(turns):
-        ctx = pipeline(request, ctx.id)
-        if true_response != ctx.last_response:
-            msg = f" pipeline={pipeline}"
-            msg += f" turn_id={turn_id}"
-            msg += f" request={request} "
-            msg += f"\ntrue_response != out_response: "
-            msg += f"\n{true_response} != {ctx.last_response}"
-            raise Exception(msg)
+dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__)
 
 
 @pytest.mark.parametrize(
@@ -46,7 +25,7 @@ def test_examples(example_module_name: str, testing_file: str):
         pipeline = module.pipeline
         stats = module.StatsStorage.from_uri(f"csv://{testing_file}", "")
         stats.add_extractor_pool(module.extractor_pool)
-        run_pipeline_test(pipeline, TURNS)
+        check_happy_path(pipeline, HAPPY_PATH)
         with open(testing_file, "r", encoding="utf-8") as file:
             lines = file.read().splitlines()
             assert len(lines) > 1

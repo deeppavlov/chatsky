@@ -1,3 +1,4 @@
+import os
 import pytest
 from sqlalchemy import text
 
@@ -10,7 +11,12 @@ from tests.db_list import POSTGRES_ACTIVE, CLICKHOUSE_ACTIVE
 
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.asyncio
-async def test_PG_saving(PG_uri_string, table, testing_items):
+async def test_PG_saving(table, testing_items):
+    PG_uri_string = "postgresql://{}:{}@localhost:5432/{}".format(
+        os.getenv("POSTGRES_USERNAME"),
+        os.getenv("POSTGRES_PASSWORD"),
+        os.getenv("POSTGRES_DB"),
+    )
     saver: PostgresSaver = make_saver(PG_uri_string, table=table)
     await saver._create_table()
 
@@ -29,7 +35,12 @@ async def test_PG_saving(PG_uri_string, table, testing_items):
 
 @pytest.mark.skipif(not CLICKHOUSE_ACTIVE, reason="Clickhouse server is not running")
 @pytest.mark.asyncio
-async def test_CH_saving(CH_uri_string, table, testing_items):
+async def test_CH_saving(table, testing_items):
+    CH_uri_string = "clickhouse://{}:{}@localhost:8123/{}".format(
+        os.getenv("CLICKHOUSE_USER"),
+        os.getenv("CLICKHOUSE_PASSWORD"),
+        os.getenv("CLICKHOUSE_DB"),
+    )
     saver: ClickHouseSaver = make_saver(CH_uri_string, table=table)
     await saver._create_table()
 

@@ -44,21 +44,3 @@ def testing_items():
 @pytest.fixture(scope="session")
 def table():
     yield "test"
-
-
-@pytest.fixture(scope="session")
-def PG_uri_string():
-    return "postgresql://{}:{}@localhost:5432/{}".format(
-        os.getenv("POSTGRES_USERNAME"),
-        os.getenv("POSTGRES_PASSWORD"),
-        os.getenv("POSTGRES_DB"),
-    )
-
-
-@pytest.fixture(scope="session")
-def CH_uri_string():
-    return "clickhouse://{}:{}@localhost:8123/{}".format(
-        os.getenv("CLICKHOUSE_USER"),
-        os.getenv("CLICKHOUSE_PASSWORD"),
-        os.getenv("CLICKHOUSE_DB"),
-    )

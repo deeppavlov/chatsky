@@ -1,5 +1,5 @@
 import sys
-import asyncio, random
+import asyncio
 from pathlib import Path
 
 sys.path.insert(0, str(Path(__file__).absolute().parent))
@@ -7,8 +7,8 @@ sys.path.insert(0, str(Path(__file__).absolute().parent))
 from dff.core.engine.core import Context, Actor
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool
-
-from _stats_utils import parse_args, script
+from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.stats_cli import parse_args
 
 """
 handlers can be applied to any pipeline parameter, including service groups.
@@ -21,7 +21,7 @@ extractor_pool = ExtractorPool()
 
 
 async def heavy_service(_):
-    await asyncio.sleep(random.randint(0, 2))
+    await asyncio.sleep(0.02)
 
 
 @extractor_pool.new_extractor
@@ -31,7 +31,11 @@ async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return group_stats
 
 
-actor = Actor(script, ("root", "start"), ("root", "fallback"))
+actor = Actor(
+    TOY_SCRIPT,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 pipeline = Pipeline.from_dict(
     {
