@@ -1,2 +1,4 @@
 [run]
-omit = dff/utils/testing/*
+omit = 
+    dff/utils/testing/*
+    */dff/stats/cli.py
