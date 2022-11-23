@@ -3,10 +3,36 @@ import pytest
 from sqlalchemy import text
 
 from dff.stats import make_saver
+from dff.stats.savers.saver import Saver
 from dff.stats.savers.clickhouse import ClickHouseSaver
 from dff.stats.savers.postgresql import PostgresSaver
+from dff.stats.subscriber import PoolSubscriber
 
 from tests.db_list import POSTGRES_ACTIVE, CLICKHOUSE_ACTIVE
+
+
+def test_subscriber():
+    with pytest.raises(TypeError) as e:
+        PoolSubscriber()
+    assert "Can't instantiate abstract class PoolSubscriber with abstract method on_record_event" in str(e.value)
+
+    with pytest.raises(TypeError) as e:
+        PoolSubscriber.on_record_event()
+    assert "on_record_event() missing 2 required positional arguments: 'self' and 'record'" in str(e.value)
+
+
+def test_saver():
+    with pytest.raises(TypeError) as e:
+        Saver()
+    assert "Can't instantiate abstract class Saver with abstract methods load, save" in str(e.value)
+
+    with pytest.raises(TypeError) as e:
+        Saver.load()
+    assert "load() missing 1 required positional argument: 'self'" in str(e.value)
+
+    with pytest.raises(TypeError) as e:
+        Saver.save()
+    assert "save() missing 2 required positional arguments: 'self' and 'data'" in str(e.value)
 
 
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
