@@ -41,7 +41,7 @@ class StatsStorage(PoolSubscriber):
 
     async def flush(self):
         async with asyncio.Lock():
-            await self.saver.save(self.data)  # TODO: "None" is not awaitable
+            await self.saver.save(self.data)
         self.data.clear()
 
     async def on_record_event(self, record: StatsRecord):
