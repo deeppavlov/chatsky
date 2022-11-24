@@ -41,8 +41,8 @@ services:
   dashboard:
     env_file: [.env_file]
     build:
-      context: .
-      dockerfile: ./dockerfile_stats
+      context: ./dff/utils/docker
+      dockerfile: dockerfile_stats
     image: superset_df_dashboard
     ports:
       - "8088:8088"

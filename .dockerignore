@@ -4,4 +4,3 @@ htmlcov/
 __pycache__/
 env.sh
 .github/
-init_superset.sh
