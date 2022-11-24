@@ -61,10 +61,10 @@ toy_script = {
 happy_path = (
     ("Hi", "Please, send me a picture url"),
     ("no", "I cannot find the picture. Please, try again."),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.png", "\nhere's my picture!\nAttachment size: 51706 bytes."),
+    ("https://example.com/some_image_url.jpg", "\nhere's my picture!\nAttachment size: 51706 bytes."),
     ("ok", "Final node reached, send any message to restart."),
     ("ok", "Please, send me a picture url"),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg", "\nLook at my pictures\nGrouped attachment size: 517060 bytes."),
+    ("https://example.com/another_image_url.jpg", "\nLook at my pictures\nGrouped attachment size: 517060 bytes."),
     ("ok", "Final node reached, send any message to restart."),
 )
 
