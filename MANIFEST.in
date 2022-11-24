@@ -1,7 +1,7 @@
 include CONTRIBUTING.md
 include LICENSE
 include README.md
-include df_db_connector/protocols.json
+include dff/connectors/db/protocols.json
 graft dff/config/superset_dashboard
 
 exclude makefile
