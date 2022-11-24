@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Asynchronous groups and services (basic)
+# 5. Asynchronous groups and services (basic)
 
 The following example shows pipeline asynchronous service and service group usage.
 """

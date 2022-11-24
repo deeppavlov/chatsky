@@ -1,12 +1,13 @@
+# %% [markdown]
 """
-3. Responses
-============
+# 3. Responses
+
+#TODO:
+#1. make `choice_with_exclusion` as Out of the box method
+#2. Make function `cannot_talk_about_topic_response` simplerS
 """
 
-# TODO:
-# 1. make `choice_with_exclusion` as Out of the box method
-# 2. Make function `cannot_talk_about_topic_response` simpler
-
+# %%
 import logging
 import re
 import random
@@ -22,23 +23,24 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
+"""
+Here we will consider different options for setting responses.
 
-# Here we will consider different options for setting responses.
+The response is set by any object of python:
 
-# The response is set by any object of python:
-#
-# - collable objects - If the object is callable, then it must have a special signature:
-#                      func`(ctx: Context, actor: Actor, *args, **kwargs) -> Any`
-#                      Then this object will be called with the appropriate arguments.
-#
-# - non-callable objects - If the object is not callable,
-#                          then the object will be returned by the agent as a response.
+- collable objects - If the object is callable, then it must have a special signature:
+                    func`(ctx: Context, actor: Actor, *args, **kwargs) -> Any`
+                     Then this object will be called with the appropriate arguments.
+- non-callable objects - If the object is not callable,
+                       then the object will be returned by the agent as a response.
 
+Out of the box, dff.core.engine offers 1 additional response function:
 
-# Out of the box, dff.core.engine offers 1 additional response function:
-# - `choice` - will return `true` if the user's request completely matches the value passed to the function.
+- `choice` - will return `true` if the user's request completely matches the value passed to the function.
+"""
 
-
+# %%
 def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     request = ctx.last_request
     topic_pattern = re.compile(r"(.*talk about )(.*)\.")
@@ -62,7 +64,7 @@ def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     logger.warning(f"ctx={ctx}")
     return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
-
+# %%
 toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
@@ -86,7 +88,7 @@ toy_script = {
     }
 }
 
-
+# %%
 # testing
 happy_path = (
     ("Hi", "Hello, how are you?"),  # start_node -> node1

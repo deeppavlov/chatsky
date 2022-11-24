@@ -1,37 +1,44 @@
+# %% [markdown]
 """
-1. Basics
-=========
+# 1. Basics
+
+TODO:
+1. The illustration should express only what is shown in the example, not all at once.
+Complicate illustrations from one example to another.
+2. Fix PRE_RESPONSE_PROCESSING to PRE_TRANSITIONS_PROCESSING
+3. Specify that the nodes form an ordered set
 """
 
-# TODO:
-# 1. The illustration should express only what is shown in the example, not all at once.
-#    Complicate illustrations from one example to another.
-# 2. Fix PRE_RESPONSE_PROCESSING to PRE_TRANSITIONS_PROCESSING
-# 3. Specify that the nodes form an ordered set
-
+# %%
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
+from dff.core.engine.core import Actor
 import dff.core.engine.conditions as cnd
 
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
-# First of all, to create a dialog agent, we need to create a dialog script.
-# Below, `script` is the dialog script.
-# A dialog script is a flow dictionary that can contain multiple script .
-# Script are needed in order to divide a dialog into sub-dialogs and process them separately.
-# For example, the separation can be tied to the topic of the dialog.
-# In our example, there is one flow called greeting_flow.
+# %% [markdown]
+"""
+First of all, to create a dialog agent, we need to create a dialog script.
+Below, `script` is the dialog script.
+A dialog script is a flow dictionary that can contain multiple script .
+Script are needed in order to divide a dialog into sub-dialogs and process them separately.
+For example, the separation can be tied to the topic of the dialog.
+In our example, there is one flow called greeting_flow.
 
-# Inside each flow, we can describe a sub-dialog.
-# Here we can also use keyword `LOCAL`, which we have considered in other examples.
+Inside each flow, we can describe a sub-dialog.
+Here we can also use keyword `LOCAL`, which we have considered in other examples.
 
-# Flow describes a sub-dialog using linked nodes, each node has the keywords `RESPONSE` and `TRANSITIONS`.
+Flow describes a sub-dialog using linked nodes, each node has the keywords `RESPONSE` and `TRANSITIONS`.
 
-# `RESPONSE` - contains the response that the dialog agent will return when transitioning to this node.
-# `TRANSITIONS` - describes transitions from the current node to other nodes.
-# `TRANSITIONS` are described in pairs:
-#      - the node to which the agent will perform the transition
-#      - the condition under which to make the transition
+`RESPONSE` - contains the response that the dialog agent will return when transitioning to this node.
+`TRANSITIONS` - describes transitions from the current node to other nodes.
+`TRANSITIONS` are described in pairs:
+     - the node to which the agent will perform the transition
+     - the condition under which to make the transition
+"""
+
+# %%
 toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
@@ -58,17 +65,23 @@ toy_script = {
     }
 }
 
-# An actor is an object that processes user input replicas and returns responses
-# To create the actor, you need to pass the script of the dialogue `script`
-# And pass the initial node `start_label`
-# and the node to which the actor will go in case of an error `fallback_label`
-# If `fallback_label` is not set, then its value becomes equal to `start_label` by default
-# actor = Actor(
-#     toy_script,
-#     start_label=("greeting_flow", "start_node"),
-#     fallback_label=("greeting_flow", "fallback_node")
-# )
+# %% [markdown]
+"""
+An actor is an object that processes user input replicas and returns responses
+To create the actor, you need to pass the script of the dialogue `script`
+And pass the initial node `start_label`
+and the node to which the actor will go in case of an error `fallback_label`
+If `fallback_label` is not set, then its value becomes equal to `start_label` by default
+"""
 
+# %%
+actor = Actor(
+    toy_script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node")
+)
+
+# %%
 # testing
 happy_path = (
     ("Hi", "Hi, how are you?"),  # start_node -> node1
@@ -84,8 +97,13 @@ happy_path = (
     ("Ok, goodbye.", "bye"),  # node3 -> node4
 )
 
-# You can use `Actor`, we already described it above, but `Actor` is a low-level API
-# We recommend using `Pipeline` with the same functionality and as a high-level API opposite `Actor`.
+# %% [markdown]
+"""
+You can use `Actor`, we already described it above, but `Actor` is a low-level API
+We recommend using `Pipeline` with the same functionality and as a high-level API opposite `Actor`.
+"""
+
+# %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("greeting_flow", "start_node"),

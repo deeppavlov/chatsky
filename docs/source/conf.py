@@ -98,4 +98,4 @@ html_theme_options = {
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(["examples/pipeline/[1,2]*.py", "examples/pipeline/_*.py"])
+    generate_example_links_for_notebook_creation(["examples/engine/[3]*.py", "examples/pipeline/_*.py"])

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Groups and conditions (full)
+# 4. Groups and conditions (full)
 
 The following example shows pipeline service group usage and start conditions.
 """

@@ -1,8 +1,10 @@
+# %% [markdown]
 """
-2. Conditions
-=============
+# 2. Conditions
+
 """
 
+# %%
 import logging
 import re
 
@@ -15,31 +17,34 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
+"""
+Here we will consider different options for setting transition conditions.
 
-# Here we will consider different options for setting transition conditions.
+The transition condition is set by the function.
+If the function returns the value `true`, then the actor performs the corresponding transition.
+Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
 
-# The transition condition is set by the function.
-# If the function returns the value `true`, then the actor performs the corresponding transition.
-# Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
+Out of the box, dff.core.engine offers 8 options for setting conditions:
 
-# Out of the box, dff.core.engine offers 8 options for setting conditions:
-# - `exact_match` - will return `true` if the user's request completely matches the value passed to the function.
-# - `regexp` - will return `true` if the pattern matches the user's request, while the user's request must be a string.
-# -            `regexp` has same signature as `re.compile` function.
-# - `aggregate` - returns bool value as result after aggregate by `aggregate_func` for input sequence of condtions.
-#              `aggregate_func` == any by default
-#              `aggregate` has alias `agg`
-# - `any` - will return `true` if an one element of  input sequence of condtions is `true`
-#           any(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=any)
-# - `all` - will return `true` if all elements of  input sequence of condtions are `true`
-#           all(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=all)
-# - `negation` - return a negation of passed function
-#              `negation` has alias `neg`
-# - `has_last_labels` - covered in the following examples.
-# - `true` - returns true
-# - `false` - returns false
+- `exact_match` - will return `true` if the user's request completely matches the value passed to the function.
+- `regexp` - will return `true` if the pattern matches the user's request, while the user's request must be a string.
+-            `regexp` has same signature as `re.compile` function.
+- `aggregate` - returns bool value as result after aggregate by `aggregate_func` for input sequence of condtions.
+             `aggregate_func` == any by default
+             `aggregate` has alias `agg`
+- `any` - will return `true` if an one element of  input sequence of condtions is `true`
+          any(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=any)
+- `all` - will return `true` if all elements of  input sequence of condtions are `true`
+          all(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=all)
+- `negation` - return a negation of passed function
+             `negation` has alias `neg`
+- `has_last_labels` - covered in the following examples.
+- `true` - returns true
+- `false` - returns false
+"""
 
-
+# %%
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     request = ctx.last_request
     return "hi" in request.lower()
@@ -59,7 +64,7 @@ def predetermined_condition(condition: bool):
 
     return internal_condition_function
 
-
+# %%
 toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
@@ -119,6 +124,7 @@ happy_path = (
     ("Ok, goodbye.", "bye"),  # node3 -> node4
 )
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
 )

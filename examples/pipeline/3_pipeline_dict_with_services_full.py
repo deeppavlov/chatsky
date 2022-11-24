@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Pipeline dict with services (full)
+# 3. Pipeline dict with services (full)
 
 The following example shows pipeline creation from dict and most important pipeline components.
 """

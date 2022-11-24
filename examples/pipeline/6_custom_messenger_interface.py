@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Custom messenger interface
+# 6. Custom messenger interface
 
 The following example shows messenger interfaces usage.
 """

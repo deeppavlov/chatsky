@@ -21,6 +21,16 @@ Installation
 
    pip install dff
 
+or download from `Github <https://github.com/deeppavlov/dialog_flow_framework>`_:
+
+.. code-block:: bash
+
+   git clone https://github.com/deeppavlov/dialog_flow_framework.git
+   make clean
+   make venv
+
+The last command will set up all requirements.
+
 Key concepts
 ~~~~~~~~~~~~
 
@@ -31,15 +41,16 @@ You can use it to write chatbots for social networks, call centers, websites, wr
 
 DFF has the following important concepts:
 
-**Context**:
+**Script**: First of all, to create a dialog agent it is necessary to create a dialog (:py:class:`~dff.core.engine.core.script.Script`).
+A dialog script is a dictionary, where keys correspond to different `flows`.
+Script is needed to separate a dialog into sub-dialogs. Processes in sub-dialogs are separately.
 
-**Actor**:
+**Flow**: As mentioned above, the dialogue is divided into `flows`.
+Each `flow` represent a sub-dialogue corresponding to the discussion of a particular topic.
+Each `flow` is also a dictionary, where the keys are the `nodes`.
 
-**Pipeline**:
-
-`Examples <file:///home/sakharov/deeppavlov/dialog_flow_framework/docs/build/examples/index.html>`_
-
-`Github <https://github.com/deeppavlov/dialog_flow_framework>`_
+**Node**: Each `node` necessarily contains a `RESPONSE` of the bot and the `CONDITIONS` of `TRANSITION` to another `node`
+in this or another `flow`.
 
 
 .. toctree::
@@ -47,9 +58,10 @@ DFF has the following important concepts:
 
 
 .. toctree::
-   :maxdepth: 2
-   :glob:
    :caption: Documentation
+   :name: documentation
+   :maxdepth: 4
+   :glob:
 
    apiref/modules
 
@@ -64,7 +76,7 @@ DFF has the following important concepts:
    examples/index
 
 Indices and tables
-==================
+------------------
 
 * :ref:`genindex`
 * :ref:`modindex`

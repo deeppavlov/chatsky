@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Extra Handlers (basic)
+# 7. Extra Handlers (basic)
 
 The following example shows extra handlers possibilities and use cases.
 """

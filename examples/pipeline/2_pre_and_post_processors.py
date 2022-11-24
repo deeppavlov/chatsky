@@ -1,6 +1,8 @@
 # %% [markdown]
 """
-# Pre- and postprocessors
+# 2. Pre- and postprocessors
+[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deeppavlov/dialog_flow_framework/blob/gh-pages/examples/pipeline/2_pre_and_post_processors.ipynb)
+
 The following example shows more advanced usage of `pipeline` module as an extension to `dff.core.engine`.
 """
 
