@@ -25,3 +25,5 @@ MYSQL_ACTIVE = ping_localhost(3307)
 YDB_ACTIVE = ping_localhost(2136)
 
 CLICKHOUSE_ACTIVE = ping_localhost(8123)
+
+SUPERSET_ACTIVE = ping_localhost(8088)

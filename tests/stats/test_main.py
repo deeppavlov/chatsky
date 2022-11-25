@@ -3,6 +3,7 @@ from argparse import Namespace
 import pytest
 
 from dff.stats.__main__ import main
+from tests.db_list import SUPERSET_ACTIVE
 
 
 @pytest.mark.parametrize(
@@ -57,6 +58,7 @@ def test_main(testing_cfg_dir, args):
     assert os.path.getsize(args.outfile) > 2200
 
 
+@pytest.mark.skipif(not SUPERSET_ACTIVE, reason="Superset server not active")
 @pytest.mark.parametrize(
     ["zip_args", "upload_args"],
     [

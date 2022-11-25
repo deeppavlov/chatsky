@@ -76,10 +76,12 @@ def import_dashboard(
 
     base_url = "http://localhost:8088"
 
-    while True:
+    tries = 0
+    while tries < 10:
         try:
             response = requests.get(base_url, timeout=10)
             response.raise_for_status()
+            tries += 1
             break
         except Exception:
             pass
