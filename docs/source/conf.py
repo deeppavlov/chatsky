@@ -80,6 +80,11 @@ html_show_sourcelink = False
 
 # Finding examples directories
 nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
+nbsphinx_prolog = """
+:tutorial_name: {{ env.docname }}
+:tutorial_path: \\.
+:github_url: deeppavlov/dialog_flow_framework
+"""
 
 
 # Theme options
