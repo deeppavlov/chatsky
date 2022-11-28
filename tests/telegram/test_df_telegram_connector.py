@@ -19,16 +19,16 @@ def create_query(data: str):
 
 
 def create_update(**kwargs):
-    none_dict = {
-        key: None for key in list(inspect.signature(types.Update).parameters.keys())
-    }
+    none_dict = {key: None for key in list(inspect.signature(types.Update).parameters.keys())}
     return types.Update(**{**none_dict, **kwargs})
 
 
-@pytest.mark.parametrize(["update",], [
-    (create_text_message("hello"),),
-    (create_text_message("hi"),)
-])
+@pytest.mark.parametrize(
+    [
+        "update",
+    ],
+    [(create_text_message("hello"),), (create_text_message("hi"),)],
+)
 def test_set_update(update):
     ctx = Context()
     set_state(ctx, update)
@@ -43,17 +43,22 @@ def test_initial():
     assert ctx.id == _id
 
 
-@pytest.mark.parametrize(["param",], [
-    (create_update(update_id=1, message=create_text_message("hello")), ),
-    (create_update(update_id=1, callback_query=create_query("hello")), )
-])
+@pytest.mark.parametrize(
+    [
+        "param",
+    ],
+    [
+        (create_update(update_id=1, message=create_text_message("hello")),),
+        (create_update(update_id=1, callback_query=create_query("hello")),),
+    ],
+)
 def test_update_handling(param, basic_bot, user_id):
     interface = PollingTelegramInterface(bot=basic_bot)
     inner_update, _id = interface._extract_telegram_request_and_id(param)
     assert isinstance(inner_update, types.JsonDeserializable)
     assert _id == "1"
     except_result = interface._except(Exception())
-    assert except_result == None
+    assert except_result is None
     interface.bot.remove_webhook()
     request_result = interface._request()
     assert isinstance(request_result, list)

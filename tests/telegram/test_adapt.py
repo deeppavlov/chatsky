@@ -4,34 +4,47 @@ import pytest
 from pydantic import ValidationError
 from telebot import types
 
-from dff.connectors.messenger.telegram.types import TelegramResponse, TelegramAttachments, TelegramAttachment, TelegramUI
+from dff.connectors.messenger.telegram.types import (
+    TelegramResponse,
+    TelegramAttachments,
+    TelegramAttachment,
+    TelegramUI,
+)
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location
 
 
-@pytest.mark.parametrize(["ui", "markup_type", "button_type"], [
-    (Keyboard(
-        buttons=[
-            Button(text="button 1", payload=json.dumps({"text": "1", "other_prop": "4"})),
-            Button(text="button 2", payload=json.dumps({"text": "2", "other_prop": "3"})),
-            Button(text="button 3", payload=json.dumps({"text": "3", "other_prop": "2"})),
-            Button(text="button 4", payload=json.dumps({"text": "4", "other_prop": "1"})),
-        ]
-    ), types.InlineKeyboardMarkup, types.InlineKeyboardButton),
-    (Keyboard(
-        is_inline=False,
-        buttons=[
-            Button(text="button 1", payload=json.dumps({"text": "1", "other_prop": "4"})),
-            Button(text="button 2", payload=json.dumps({"text": "2", "other_prop": "3"})),
-            Button(text="button 3", payload=json.dumps({"text": "3", "other_prop": "2"})),
-            Button(text="button 4", payload=json.dumps({"text": "4", "other_prop": "1"})),
-        ]
-    ), types.ReplyKeyboardMarkup, types.KeyboardButton)
-])
-def test_adapt_buttons(ui, button_type, markup_type,  basic_bot, user_id):
-    generic_response = Response(
-        text="test",
-        ui=ui
-    )
+@pytest.mark.parametrize(
+    ["ui", "markup_type", "button_type"],
+    [
+        (
+            Keyboard(
+                buttons=[
+                    Button(text="button 1", payload=json.dumps({"text": "1", "other_prop": "4"})),
+                    Button(text="button 2", payload=json.dumps({"text": "2", "other_prop": "3"})),
+                    Button(text="button 3", payload=json.dumps({"text": "3", "other_prop": "2"})),
+                    Button(text="button 4", payload=json.dumps({"text": "4", "other_prop": "1"})),
+                ]
+            ),
+            types.InlineKeyboardMarkup,
+            types.InlineKeyboardButton,
+        ),
+        (
+            Keyboard(
+                is_inline=False,
+                buttons=[
+                    Button(text="button 1", payload=json.dumps({"text": "1", "other_prop": "4"})),
+                    Button(text="button 2", payload=json.dumps({"text": "2", "other_prop": "3"})),
+                    Button(text="button 3", payload=json.dumps({"text": "3", "other_prop": "2"})),
+                    Button(text="button 4", payload=json.dumps({"text": "4", "other_prop": "1"})),
+                ],
+            ),
+            types.ReplyKeyboardMarkup,
+            types.KeyboardButton,
+        ),
+    ],
+)
+def test_adapt_buttons(ui, button_type, markup_type, basic_bot, user_id):
+    generic_response = Response(text="test", ui=ui)
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui and isinstance(telegram_response.ui.keyboard, markup_type)
@@ -84,21 +97,21 @@ def test_adapt_error(basic_bot, user_id):
 
 def test_missing_error():
     with pytest.raises(ValidationError) as e:
-        attachment = TelegramAttachment(source="http://google.com", id="123")
+        _ = TelegramAttachment(source="http://google.com", id="123")
     assert e
 
     with pytest.raises(ValidationError) as e:
-        attachment = TelegramAttachment(source="/etc/missing_file")
+        _ = TelegramAttachment(source="/etc/missing_file")
     assert e
 
 
 def test_attachment_error():
     with pytest.raises(ValidationError) as e:
-        attachments = TelegramAttachments(files=["a", "b"])
+        _ = TelegramAttachments(files=["a", "b"])
     assert e
 
 
 def test_empty_keyboard():
     with pytest.raises(ValidationError) as e:
-        keyboard = TelegramUI(buttons=[])
+        _ = TelegramUI(buttons=[])
     assert e

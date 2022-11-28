@@ -100,8 +100,5 @@ class TelegramResponse(Response, AdapterModel):
     @validator("location", pre=True, always=True)
     def validate_location(cls, val: Any):
         if isinstance(val, Location):
-            return types.Location(
-                longitude=val.longitude,
-                latitude=val.latitude
-            )
+            return types.Location(longitude=val.longitude, latitude=val.latitude)
         return val

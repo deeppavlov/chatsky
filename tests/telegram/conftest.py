@@ -1,4 +1,3 @@
-import os
 import pytest
 
 from examples.telegram.no_pipeline.basic_bot import bot, actor
