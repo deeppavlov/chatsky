@@ -22,6 +22,8 @@ def set_state(ctx: Context, update: types.JsonDeserializable):
 
     """
     ctx.add_request(update.text if (hasattr(update, "text") and update.text) else "data")
+    if "TELEGRAM_CONNECTOR" not in ctx.framework_states:
+        ctx.framework_states["TELEGRAM_CONNECTOR"] = dict()
     ctx.framework_states["TELEGRAM_CONNECTOR"]["data"] = update
     return ctx
 
@@ -30,18 +32,6 @@ def get_user_id(update: types.JsonDeserializable) -> str:
     """Extracts user ID from an update instance and casts it to a string"""
     assert hasattr(update, "from_user"), f"Received an invalid update object: {str(type(update))}."
     return str(update.from_user.id)
-
-
-def get_content_type(update: types.JsonDeserializable) -> str:
-    """Extracts content type from an update instance and casts it to a string"""
-    assert hasattr(update, "content_type"), f"Received an invalid update object: {str(type(update))}."
-    return str(update.content_type)
-
-
-def get_text(update: types.JsonDeserializable) -> str:
-    """Extracts text from a text update instance and casts it to a string"""
-    assert hasattr(update, "text"), f"Received an invalid update object: {str(type(update))}."
-    return str(update.text)
 
 
 def get_initial_context(user_id: str):

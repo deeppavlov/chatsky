@@ -25,35 +25,33 @@ class DFFTeleBot(TeleBot):
     This class inherits from `Telebot` and implements dff-specific functionality, including script conditions
     and sending generic responses.
 
-    Parameters
-    ----------
-
-    token: str
-        A Telegram API bot token.
-    threaded: bool
-        This parameter is currently deprecated for the sake of compatibility with `dff.core.runner`.
+    :param token: A Telegram API bot token.
+    :param threaded: This parameter is currently deprecated for the sake of compatibility with `dff.core.runner`.
         We plan to add support for the threaded polling mode in the future.
-    args:
-        The rest of the parameters exactly matches those of the `Telebot` class. See the pytelegrambotapi docs
+    :param args: The other parameters match those of the `Telebot` class. See the pytelegrambotapi docs
         for more info: `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
 
     """
 
-    def __init__(self, token, threaded=False, parse_mode=None, skip_pending=False, *args, **kwargs):
+    def __init__(
+        self,
+        token: str,
+        threaded: bool = False,
+        parse_mode: Union[str, None] = None,
+        skip_pending: bool = False,
+        *args,
+        **kwargs,
+    ):
         super().__init__(token, threaded=threaded, parse_mode=parse_mode, skip_pending=skip_pending, *args, **kwargs)
-        self.cnd = ConditionNamespace(self)
+        self.cnd = TelegramConditions(self)
 
-    def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]):
+    def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]) -> None:
         """
         Cast the `response` argument to the :py:class:`~df_telegram_connector.types.TelegramResponse` type and send it.
         The order is that the media are sent first, after which the marked-up text message is sent.
 
-        Parameters
-        -----------
-        chat_id: Union[str, int]
-            ID of the chat to send the response to
-        response: Union[str, dict, dff.connectors.messenger.generics.Response, TelegramResponse]
-            Response data. Can be passed as a :py:class:`~str`, a :py:class:`~dict`,
+        :param chat_id: ID of the chat to send the response to
+        :param response: Response data. Can be passed as a :py:class:`~str`, a :py:class:`~dict`,
             or a :py:class:`~dff.connectors.messenger.generics.Response`.
             which will then be used to instantiate a :py:class:`~TelegramResponse` object.
             A :py:class:`~TelegramResponse` can also be passed directly.
@@ -109,7 +107,7 @@ class DFFTeleBot(TeleBot):
         )
 
 
-class ConditionNamespace:
+class TelegramConditions:
     """
     This class includes methods that produce dff.core.engine conditions based on pytelegrambotapi updates.
 
@@ -124,6 +122,8 @@ class ConditionNamespace:
         bot.cnd.message_handler(func=lambda msg: True)
 
     in your :py:class:`~dff.core.engine.core.Script` will always be `True`, unless the new update is not a message.
+
+    :param bot: Bot instance.
 
     """
 
@@ -166,61 +166,29 @@ class ConditionNamespace:
         return condition
 
     message_handler = partialmethod(handler, target_type=types.Message)
-    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     edited_message_handler = partialmethod(handler, target_type=types.Message)
-    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     channel_post_handler = partialmethod(handler, target_type=types.Message)
-    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     edited_channel_post_handler = partialmethod(handler, target_type=types.Message)
-    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Message`"
 
     inline_handler = partialmethod(handler, target_type=types.InlineQuery)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.InlineQuery`"
-    )
 
     chosen_inline_handler = partialmethod(handler, target_type=types.ChosenInlineResult)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChosenInlineResult`"
-    )
 
     callback_query_handler = partialmethod(handler, target_type=types.CallbackQuery)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.CallbackQuery`"
-    )
 
     shipping_query_handler = partialmethod(handler, target_type=types.ShippingQuery)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ShippingQuery`"
-    )
 
     pre_checkout_query_handler = partialmethod(handler, target_type=types.PreCheckoutQuery)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.PreCheckoutQuery`"
-    )
 
     poll_handler = partialmethod(handler, target_type=types.Poll)
-    message_handler.__doc__ = "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.Poll`"
 
     poll_answer_handler = partialmethod(handler, target_type=types.PollAnswer)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.PollAnswer`"
-    )
 
     chat_member_handler = partialmethod(handler, target_type=types.ChatMemberUpdated)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChatMemberUpdated`"
-    )
 
     my_chat_member_handler = partialmethod(handler, target_type=types.ChatMemberUpdated)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChatMemberUpdated`"
-    )
 
     chat_join_request_handler = partialmethod(handler, target_type=types.ChatJoinRequest)
-    message_handler.__doc__ = (
-        "Creates a dff.core.engine condition, triggered by update type :py:class:`~types.ChatJoinRequest`"
-    )

@@ -14,7 +14,7 @@ from telebot.util import content_type_media
 
 from dff.connectors.messenger.telegram.connector import DFFTeleBot
 from dff.connectors.messenger.telegram.utils import set_state, get_user_id, get_initial_context
-from examples.telegram._telegram_utils import check_env_bot_tokens
+from dff.utils.testing.common import check_env_var
 
 db = dict()
 # Optionally, you can use database connection implementations from the dff ecosystem.
@@ -93,7 +93,7 @@ def dialog_handler(update):
 
 
 if __name__ == "__main__":
-    check_env_bot_tokens()
+    check_env_var("BOT_TOKEN")
     try:
         bot.infinity_polling()
     except KeyboardInterrupt:

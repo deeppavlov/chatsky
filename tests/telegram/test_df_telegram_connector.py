@@ -1,7 +1,10 @@
 import pytest
+import inspect
 
 from telebot import types
 from dff.core.engine.core.context import Context
+from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
+from dff.connectors.messenger.telegram.utils import set_state, get_initial_context
 
 
 def create_text_message(text: str):
@@ -13,6 +16,49 @@ def create_text_message(text: str):
 def create_query(data: str):
     chat = types.User("1", False, "test")
     return types.CallbackQuery(1, chat, data, chat)
+
+
+def create_update(**kwargs):
+    none_dict = {
+        key: None for key in list(inspect.signature(types.Update).parameters.keys())
+    }
+    return types.Update(**{**none_dict, **kwargs})
+
+
+@pytest.mark.parametrize(["update",], [
+    (create_text_message("hello"),),
+    (create_text_message("hi"),)
+])
+def test_set_update(update):
+    ctx = Context()
+    set_state(ctx, update)
+    assert ctx.framework_states["TELEGRAM_CONNECTOR"]["data"]
+    assert ctx.last_request
+
+
+def test_initial():
+    _id = 123
+    ctx = get_initial_context(_id)
+    assert "TELEGRAM_CONNECTOR" in ctx.framework_states
+    assert ctx.id == _id
+
+
+@pytest.mark.parametrize(["param",], [
+    (create_update(update_id=1, message=create_text_message("hello")), ),
+    (create_update(update_id=1, callback_query=create_query("hello")), )
+])
+def test_update_handling(param, basic_bot, user_id):
+    interface = PollingTelegramInterface(bot=basic_bot)
+    inner_update, _id = interface._extract_telegram_request_and_id(param)
+    assert isinstance(inner_update, types.JsonDeserializable)
+    assert _id == "1"
+    except_result = interface._except(Exception())
+    assert except_result == None
+    interface.bot.remove_webhook()
+    request_result = interface._request()
+    assert isinstance(request_result, list)
+    response_result = interface._respond([Context(id=user_id, responses={0: "hi"})])
+    assert response_result is None
 
 
 @pytest.mark.parametrize(

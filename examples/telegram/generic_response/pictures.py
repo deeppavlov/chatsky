@@ -16,7 +16,7 @@ from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
 from dff.core.pipeline import Pipeline
 
 from dff.connectors.messenger.generics import Response, Image, Attachments
-from examples.telegram._telegram_utils import check_env_bot_tokens, get_auto_arg, auto_run_pipeline
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -110,8 +110,8 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_env_bot_tokens()
-    if get_auto_arg():
-        auto_run_pipeline(pipeline, logger=logger)
+    check_env_var("BOT_TOKEN")
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)
     else:
         pipeline.run()

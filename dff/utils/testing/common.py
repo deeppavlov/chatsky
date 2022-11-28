@@ -1,3 +1,4 @@
+import sys
 from os import getenv
 from typing import Callable, Tuple, Any, Optional
 from uuid import uuid4
@@ -5,6 +6,12 @@ from uuid import uuid4
 from dff.core.engine.core import Context
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
+
+
+def check_env_var(env_var: str = "BOT_TOKEN"):
+    if not getenv(env_var):
+        print(f"{env_var} variable needs to be set to continue")
+        sys.exit(1)
 
 
 def is_interactive_mode() -> bool:

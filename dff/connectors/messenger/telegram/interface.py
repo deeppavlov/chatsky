@@ -31,10 +31,8 @@ class TelegramInterfaceMixin:
     """
     Abstract class for Telegram request providers.
     Subclass it, or use one of the child classes below.
-    Parameters
-    ----------
-    bot: :py:class:`~df_telegram_connector.connector.TelegramConnector`
-        An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
+
+    :param bot: An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
         Note that passing a regular `Telebot` instance will result in an error.
     """
 
@@ -45,7 +43,7 @@ class TelegramInterfaceMixin:
         if update.update_id > self.bot.last_update_id:
             self.bot.last_update_id = update.update_id
 
-        update_fields = update.__dict__.copy()
+        update_fields = vars(update).copy()
         update_fields.pop("update_id")
         inner_update = next(filter(lambda val: val is not None, list(update_fields.values())))
 
@@ -55,15 +53,12 @@ class TelegramInterfaceMixin:
 
 class PollingTelegramInterface(PollingMessengerInterface, TelegramInterfaceMixin):
     """
-    | Class for compatibility with df_runner. Retrieves updates by polling.
-    | Multi-threaded polling is currently not supported, but will be implemented in the future.
-    Parameters
-    ----------
-    bot: :py:class:`~df_telegram_connector.connector.TelegramConnector`
-        An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
+    Class for compatibility with df_runner. Retrieves updates by polling.
+    Multi-threaded polling is currently not supported, but will be implemented in the future.
+
+    :param bot: An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
         Note that passing a regular `Telebot` instance will result in an error.
-    args:
-        The rest of the parameters are equal to those of the `polling` method of a regular `Telebot`.
+    :param args: The rest of the parameters are equal to those of the `polling` method of a regular `Telebot`.
         See the pytelegrambotapi docs for more info:
         `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
     """
@@ -103,23 +98,16 @@ class PollingTelegramInterface(PollingMessengerInterface, TelegramInterfaceMixin
 class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin):
     """
     Class for compatibility with df_runner. Retrieves updates from post json requests.
-    Parameters
-    ----------
-    bot: :py:class:`~df_telegram_connector.connector.TelegramConnector`
-        An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
+
+    :param bot: An instance of :py:class:`~df_telegram_connector.connector.TelegramConnector`.
         Note that passing a regular `Telebot` instance will result in an error.
-    app: :py:class:`~flask.Flask`
-        An instance of a `Flask` application. It may have any number of endpoints,
+    :param app: An instance of a `Flask` application. It may have any number of endpoints,
         but the endpoint you pass to this constructor should be reserved.
-    endpoint: str
-        The endpoint to which the webhook is bound. Like any flask endpoint,
+    :param endpoint: The endpoint to which the webhook is bound. Like any flask endpoint,
         it should always be prefixed with a forward slash ("/").
-    host: str = 'localhost'
-        The host IP.
-    port: int = 8443
-        The port of the app.
-    full_uri: Optional[str] = None
-        Setting up a webhook requires a public IP that is accessible by https. If you are hosting
+    :param host: The host IP.
+    :param port: The port of the app.
+    :param full_uri: Setting up a webhook requires a public IP that is accessible by https. If you are hosting
         your application, this is where you pass the full public URL of your webhook.
     """
 

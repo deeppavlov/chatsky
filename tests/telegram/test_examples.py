@@ -6,10 +6,10 @@ import importlib
 import pytest
 
 from tests import utils
+from dff.utils.testing.toy_script import HAPPY_PATH
+from dff.utils.testing.common import check_happy_path
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
-example_utils = importlib.import_module(f"examples.{dot_path_to_addon}._telegram_utils")
-
 
 @pytest.mark.parametrize(
     "example_module_name",
@@ -20,4 +20,4 @@ example_utils = importlib.import_module(f"examples.{dot_path_to_addon}._telegram
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    example_utils.auto_run_pipeline(pipeline=example_module.pipeline)
+    check_happy_path(example_module.pipeline, HAPPY_PATH)

@@ -6,14 +6,12 @@ This module implements local classes for compatibility with `df-generics` librar
 You can use :py:class:`~TelegramResponse` class directly with the `send_response` method
 that belongs to the :py:class:`connector.TelegramConnector` class.
 """
-from argparse import ArgumentError
 from typing import Any, List, Optional, Union
-from pathlib import Path
 
 from telebot import types
 from pydantic import BaseModel, validator, root_validator, Field, Extra, FilePath, HttpUrl, Required
 
-from dff.connectors.messenger.generics import Image, Audio, Document, Video, Response
+from dff.connectors.messenger.generics import Image, Audio, Document, Video, Response, Location
 
 
 class AdapterModel(BaseModel):
@@ -60,21 +58,12 @@ class TelegramAttachment(AdapterModel):
     source: Optional[Union[HttpUrl, FilePath]] = None
     id: Optional[str] = None  # id field is made separate to simplify validation.
     title: Optional[str] = None
-    mime_type: Optional[str] = None  # TODO: please, approve if this is valid
 
-    @root_validator
+    @root_validator(pre=True)
     def validate_id_or_source(cls, values):
-        if bool(values["source"]) == bool(values["id"]):
-            raise ArgumentError(values, "Attachment type requires exactly one parameter, `source` or `id`.")
+        if bool(values.get("source")) == bool(values.get("id")):
+            raise TypeError("Attachment type requires exactly one parameter, `source` or `id`.")
         return values
-
-    @validator("source", pre=False)
-    def validate_source(cls, source: Optional[Union[HttpUrl, FilePath]]):
-        if not isinstance(source, Path):
-            return source
-        if not source.exists():
-            raise OSError(f"Provided filepath {str(source)} does not exist")
-        return source
 
 
 class TelegramAttachments(AdapterModel):
@@ -95,14 +84,7 @@ class TelegramAttachments(AdapterModel):
 
         if tg_cls:
             file = tg_cls(media=file.source or file.id, caption=file.title)
-
-        if isinstance(file, types.InputMedia):
-            return file
-        else:
-            raise TypeError(
-                "`files` field can only be set with InputMedia objects (pytelegrambotapi lib),"
-                " or Image, Video, Audio or Document objects (dff.connectors.messenger.generics lib)."
-            )
+        return file
 
 
 class TelegramResponse(Response, AdapterModel):
@@ -114,3 +96,12 @@ class TelegramResponse(Response, AdapterModel):
     video: Optional[TelegramAttachment] = None
     audio: Optional[TelegramAttachment] = None
     attachments: Optional[TelegramAttachments] = None
+
+    @validator("location", pre=True, always=True)
+    def validate_location(cls, val: Any):
+        if isinstance(val, Location):
+            return types.Location(
+                longitude=val.longitude,
+                latitude=val.latitude
+            )
+        return val
