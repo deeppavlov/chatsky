@@ -19,7 +19,7 @@ try:
     remove_suffix = str.removesuffix
     remove_prefix = str.removeprefix
 except AttributeError:
-    from .utils import remove_prefix, remove_suffix
+    from .utils import remove_prefix, remove_suffix  # todo: remove this when python3.8 support is dropped
 
 
 if tp.TYPE_CHECKING:
@@ -92,7 +92,27 @@ class BaseParserObject(ABC):
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node) -> 'BaseParserObject':
+    def from_ast(cls, node):
+        ...
+
+
+class Statement(BaseParserObject, ABC):
+    """
+    This class is for nodes that represent [statements](https://docs.python.org/3.10/library/ast.html#statements)
+    """
+    @classmethod
+    @abstractmethod
+    def from_ast(cls, node) -> tp.List['Statement']:
+        ...
+
+
+class Expression(BaseParserObject, ABC):
+    """
+    This class is for nodes that represent [expressions](https://docs.python.org/3.10/library/ast.html#expressions)
+    """
+    @classmethod
+    @abstractmethod
+    def from_ast(cls, node) -> 'Expression':
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
         if isinstance(node, ast.Constant):
@@ -116,7 +136,7 @@ class ReferenceObject(BaseParserObject, ABC):
         return self.resolve_self == other
 
 
-class String(BaseParserObject):
+class String(Expression):
     def __init__(self, string: str):
         super().__init__()
         self.string = string
@@ -128,13 +148,13 @@ class String(BaseParserObject):
         return f"String({self.string})"
 
     @classmethod
-    def from_ast(cls, node: ast.Constant) -> 'BaseParserObject':
+    def from_ast(cls, node: ast.Constant) -> 'String':
         if not isinstance(node.value, str):
             raise RuntimeError(f"Node {node} is not str")
         return cls(node.value)
 
 
-class Python(BaseParserObject):
+class Python(Expression):
     def __init__(self, string: str):
         super().__init__()
         self.string = string
@@ -146,14 +166,14 @@ class Python(BaseParserObject):
         return f"Python({self.string})"
 
     @classmethod
-    def from_ast(cls, node: ast.AST) -> 'BaseParserObject':
+    def from_ast(cls, node: ast.AST) -> 'Python':
         return cls(remove_suffix(unparse(node), "\n"))
 
 
-class Dict(BaseParserObject):
-    def __init__(self, dictionary: tp.Dict[BaseParserObject, BaseParserObject]):
+class Dict(Expression):
+    def __init__(self, dictionary: tp.Dict[Expression, Expression]):
         super().__init__()
-        self.keys: tp.Dict[BaseParserObject, str] = {}
+        self.keys: tp.Dict[Expression, str] = {}
         for key, value in dictionary.items():
             key.parent = self
             value.parent = self
@@ -174,8 +194,8 @@ class Dict(BaseParserObject):
             [f"{repr(value['key'])}: {repr(value['value'])}" for value in self.children.values()]
         ) + ")"
 
-    def __getitem__(self, item: tp.Union[BaseParserObject, str]):
-        if isinstance(item, BaseParserObject):
+    def __getitem__(self, item: tp.Union[Expression, str]):
+        if isinstance(item, Expression):
             key = self.keys[item]
             return self.children[key]["value"]
         elif isinstance(item, str):
@@ -185,12 +205,12 @@ class Dict(BaseParserObject):
             raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
 
     @classmethod
-    def from_ast(cls, node: ast.Dict) -> BaseParserObject:
+    def from_ast(cls, node: ast.Dict) -> 'Dict':
         result = {}
         for key, value in zip(node.keys, node.values):
             if key is None:
                 raise StarError(f"Dict comprehensions are not supported: {unparse(node)}")
-            result[BaseParserObject.from_ast(key)] = BaseParserObject.from_ast(value)
+            result[Expression.from_ast(key)] = Expression.from_ast(value)
         return cls(result)
 
 
