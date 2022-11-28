@@ -42,11 +42,8 @@ class BaseParserObject(ABC):
     """
     def __init__(self):
         self.parent: tp.Optional[BaseParserObject] = None
-        self.child_paths: tp.Dict[int, tp.List[str]] = {}
+        self.append_path: tp.List[str] = []
         self.children: KeywordDict = {}
-
-    def get_child_path(self, child: 'BaseParserObject') -> tp.List[str]:
-        return self.path + self.child_paths[id(child)]
 
     def resolve_path(self, path: tp.List[str]) -> 'BaseParserObject':
         if len(path) == 0:
@@ -66,7 +63,7 @@ class BaseParserObject(ABC):
     def path(self) -> tp.List[str]:
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {repr(self)}")
-        return self.parent.get_child_path(self)
+        return self.parent.path + self.append_path
 
     @cached_property
     def namespace(self) -> 'Namespace':
@@ -98,8 +95,9 @@ class BaseParserObject(ABC):
     def from_ast(cls, node) -> 'BaseParserObject':
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
-        if isinstance(node, ast.Constant) and isinstance(node.value, str):
-            return String.from_ast(node)
+        if isinstance(node, ast.Constant):
+            if isinstance(node.value, str):
+                return String.from_ast(node)
         return Python.from_ast(node)
 
 
@@ -155,14 +153,16 @@ class Python(BaseParserObject):
 class Dict(BaseParserObject):
     def __init__(self, dictionary: tp.Dict[BaseParserObject, BaseParserObject]):
         super().__init__()
+        self.keys: tp.Dict[BaseParserObject, str] = {}
         for key, value in dictionary.items():
             key.parent = self
             value.parent = self
+            key.append_path = [repr(key), "key"]
+            value.append_path = [repr(key), "value"]
+            self.keys[key] = repr(key)
             self.children[repr(key)] = {}
             self.children[repr(key)]["key"] = key
             self.children[repr(key)]["value"] = value
-            self.child_paths[id(key)] = [repr(key), "key"]
-            self.child_paths[id(value)] = [repr(key), "value"]
 
     def __str__(self):
         return "{" + ", ".join(
@@ -174,8 +174,15 @@ class Dict(BaseParserObject):
             [f"{repr(value['key'])}: {repr(value['value'])}" for value in self.children.values()]
         ) + ")"
 
-    def __getitem__(self, item):
-        raise NotImplementedError
+    def __getitem__(self, item: tp.Union[BaseParserObject, str]):
+        if isinstance(item, BaseParserObject):
+            key = self.keys[item]
+            return self.children[key]["value"]
+        elif isinstance(item, str):
+            dict_item = self.children[item]
+            return dict_item["value"]
+        else:
+            raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
 
     @classmethod
     def from_ast(cls, node: ast.Dict) -> BaseParserObject:
