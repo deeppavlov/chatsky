@@ -2,9 +2,7 @@
 """
 # 3. Responses
 
-#TODO:
-#1. make `choice_with_exclusion` as Out of the box method
-#2. Make function `cannot_talk_about_topic_response` simplerS
+This example shows different options for setting responses.
 """
 
 # %%
@@ -24,21 +22,17 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 logger = logging.getLogger(__name__)
 
 # %% [markdown]
-"""
-Here we will consider different options for setting responses.
+The response can be set by any object of `python`:
 
-The response is set by any object of python:
+* `callable` objects - If the object is `callable` it must have a special signature:  
+`func(ctx: Context, actor: Actor, *args, **kwargs) -> Any`  
+In this form, this object is called with the corresponding arguments.
 
-- collable objects - If the object is callable, then it must have a special signature:
-                    func`(ctx: Context, actor: Actor, *args, **kwargs) -> Any`
-                     Then this object will be called with the appropriate arguments.
-- non-callable objects - If the object is not callable,
-                       then the object will be returned by the agent as a response.
+* `non-callable` objects - If the object is not `callable`, it will be returned by the agent as a response.
 
-Out of the box, dff.core.engine offers 1 additional response function:
+Out of the box `DSL` has a single response function:
 
-- `choice` - will return `true` if the user's request completely matches the value passed to the function.
-"""
+* `choice` - gives one random response from the list of responses.
 
 # %%
 def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
@@ -53,7 +47,7 @@ def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs
 
 
 def upper_case_response(response: str):
-    # wrapper for internal response function
+    # Wrapper for internal response function
     def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
         return response.upper()
 
@@ -67,13 +61,13 @@ def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
 # %%
 toy_script = {
     "greeting_flow": {
-        "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
+        "start_node": {  # This is the initial node, it doesn't contain an `RESPONSE`
             RESPONSE: "",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
-            TRANSITIONS: {"node2": cnd.exact_match("i'm fine, how are you?")},
+            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # Random choice from the list
+            TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
@@ -88,11 +82,10 @@ toy_script = {
     }
 }
 
-# %%
 # testing
 happy_path = (
     ("Hi", "Hello, how are you?"),  # start_node -> node1
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
+    ("I'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
     ("Hi", "Hi, what is up?"),  # node4 -> node1
@@ -101,14 +94,13 @@ happy_path = (
     ("help", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "help"}),  # f_n->f_n
     ("nope", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "nope"}),  # f_n->f_n
     ("Hi", "Hello, how are you?"),  # fallback_node -> node1
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
+    ("I'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
 )
 
-
+# %%
 random.seed(31415)  # predestination of choice
-
 
 pipeline = Pipeline.from_script(
     toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")

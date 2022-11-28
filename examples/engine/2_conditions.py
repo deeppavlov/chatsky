@@ -2,47 +2,43 @@
 """
 # 2. Conditions
 
+This example shows different options for setting transition conditions from one node to another.
 """
 
 # %%
-import logging
-import re
+import re # Regular expression library
 
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Actor, Context
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 import dff.core.engine.conditions as cnd
-
 from dff.core.pipeline import Pipeline
+
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
-logger = logging.getLogger(__name__)
-
 # %% [markdown]
-"""
-Here we will consider different options for setting transition conditions.
-
 The transition condition is set by the function.
-If the function returns the value `true`, then the actor performs the corresponding transition.
-Condition functions have signature ```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
+If this function returns the value `true`, then the actor performs the corresponding transition.
+Condition functions have signature  
 
-Out of the box, dff.core.engine offers 8 options for setting conditions:
+```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
 
-- `exact_match` - will return `true` if the user's request completely matches the value passed to the function.
-- `regexp` - will return `true` if the pattern matches the user's request, while the user's request must be a string.
--            `regexp` has same signature as `re.compile` function.
-- `aggregate` - returns bool value as result after aggregate by `aggregate_func` for input sequence of condtions.
-             `aggregate_func` == any by default
-             `aggregate` has alias `agg`
-- `any` - will return `true` if an one element of  input sequence of condtions is `true`
-          any(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=any)
-- `all` - will return `true` if all elements of  input sequence of condtions are `true`
-          all(input_sequence) is equivalent to aggregate(input sequence, aggregate_func=all)
-- `negation` - return a negation of passed function
-             `negation` has alias `neg`
-- `has_last_labels` - covered in the following examples.
-- `true` - returns true
-- `false` - returns false
-"""
+Out of the box `dff.core.engine` offers 8 options for setting conditions:
+
+* `exact_match` - Will return `true` if the user's request completely matches the value passed to the function.
+
+* `regexp` - Will return `true` if the pattern matches the user's request, while the user's request must be a string.
+`regexp` has same signature as `re.compile` function.
+
+* `aggregate` - Returns `bool` value as a result after aggregate by `aggregate_func` for input sequence of condtions.
+`aggregate_func` == any by default, `aggregate` has alias `agg`.
+* `any` - Will return `true` if one element of input sequence of condtions is `true`.
+`any(input_sequence)` is equivalent to `aggregate(input sequence, aggregate_func=any)`.
+* `all` - Will return `true` if all elements of  input sequence of condtions are `true`.
+`all(input_sequence)` is equivalent to `aggregate(input sequence, aggregate_func=all)`.
+* `negation` - Return a negation of passed function. `negation` has alias `neg`.
+* `has_last_labels` - Covered in the following examples.
+* `true` - Returns `true`.
+* `false` - Returns `false`.
 
 # %%
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -52,12 +48,12 @@ def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool
 
 def complex_user_answer_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     request = ctx.last_request
-    # the user request can be anything
+    # The user request can be anything.
     return {"some_key": "some_value"} == request
 
 
 def predetermined_condition(condition: bool):
-    # wrapper for internal condition function
+    # Wrapper for internal condition function.
     def internal_condition_function(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         # It always returns `condition`.
         return condition
@@ -67,7 +63,7 @@ def predetermined_condition(condition: bool):
 # %%
 toy_script = {
     "greeting_flow": {
-        "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
+        "start_node": {  # This is the initial node, it doesn't contain an `RESPONSE`
             RESPONSE: "",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
         },
