@@ -4,6 +4,7 @@ This module defines parser objects -- nodes that form a tree.
 import typing as tp
 from abc import ABC, abstractmethod
 import ast
+import logging
 
 try:
     from functools import cached_property
@@ -24,8 +25,11 @@ except AttributeError:
 
 if tp.TYPE_CHECKING:
     from .namespace import Namespace
+    from .dff_project import DFFProject
 from .exceptions import KeyNotFound, StarError
 
+
+logger = logging.getLogger(__name__)
 
 KeywordDict = tp.Dict[str, tp.Union['BaseParserObject', 'KeywordDict']]
 
@@ -69,17 +73,18 @@ class BaseParserObject(ABC):
     def namespace(self) -> 'Namespace':
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {repr(self)}")
-        if isinstance(self.parent, Namespace):
-            return self.parent
-        else:
-            return self.parent.namespace
+        return self.parent.namespace
 
-    @abstractmethod
-    def __repr__(self):
+    @cached_property
+    def dff_project(self) -> 'DFFProject':
+        return self.namespace.dff_project
+
+    @abstractmethod  # todo: add dump function, repr calls it with certain params
+    def __repr__(self) -> str:
         ...
 
     @abstractmethod
-    def __str__(self):
+    def __str__(self) -> str:
         ...
 
     def __hash__(self):
@@ -92,7 +97,7 @@ class BaseParserObject(ABC):
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node):
+    def from_ast(cls, node, **kwargs):
         ...
 
 
@@ -102,7 +107,7 @@ class Statement(BaseParserObject, ABC):
     """
     @classmethod
     @abstractmethod
-    def from_ast(cls, node) -> tp.List['Statement']:
+    def from_ast(cls, node, **kwargs) -> tp.List['Statement']:
         ...
 
 
@@ -112,7 +117,7 @@ class Expression(BaseParserObject, ABC):
     """
     @classmethod
     @abstractmethod
-    def from_ast(cls, node) -> 'Expression':
+    def from_ast(cls, node, **kwargs) -> 'Expression':
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
         if isinstance(node, ast.Constant):
@@ -125,6 +130,10 @@ class ReferenceObject(BaseParserObject, ABC):
     @cached_property
     @abstractmethod
     def resolve_self(self) -> BaseParserObject:
+        """
+
+        :return: Self, if can't resolve
+        """
         ...
 
     def __hash__(self):
@@ -134,6 +143,35 @@ class ReferenceObject(BaseParserObject, ABC):
         if isinstance(other, ReferenceObject):
             return self.resolve_self == other.resolve_self
         return self.resolve_self == other
+
+
+class Import(Statement, ReferenceObject):
+    def __init__(self, module: str, alias: tp.Optional[str] = None):
+        Statement.__init__(self)
+        ReferenceObject.__init__(self)
+        self.module = module
+        self.alias = alias
+
+    def __str__(self):
+        return f"import {self.module}" + f" as {self.alias}" if self.alias else ""
+
+    def __repr__(self):
+        return f"Import(module={self.module}, alias={self.alias})"
+
+    @cached_property
+    def resolve_self(self) -> BaseParserObject:
+        try:
+            return self.dff_project.resolve_path([self.namespace.name.rpartition(".")[0] + self.module])
+        except KeyNotFound as error:
+            logger.debug(f"Import did not resolve: {repr(self)}.\nReason: {error}")
+            return self
+
+    @classmethod
+    def from_ast(cls, node: ast.Import, **kwargs) -> tp.List['Import']:
+        result = []
+        for name in node.names:
+            result.append(cls(name.name, name.asname))
+        return result
 
 
 class String(Expression):
@@ -148,7 +186,7 @@ class String(Expression):
         return f"String({self.string})"
 
     @classmethod
-    def from_ast(cls, node: ast.Constant) -> 'String':
+    def from_ast(cls, node: ast.Constant, **kwargs) -> 'String':
         if not isinstance(node.value, str):
             raise RuntimeError(f"Node {node} is not str")
         return cls(node.value)
@@ -166,7 +204,7 @@ class Python(Expression):
         return f"Python({self.string})"
 
     @classmethod
-    def from_ast(cls, node: ast.AST) -> 'Python':
+    def from_ast(cls, node: ast.AST, **kwargs) -> 'Python':
         return cls(remove_suffix(unparse(node), "\n"))
 
 
@@ -205,7 +243,7 @@ class Dict(Expression):
             raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
 
     @classmethod
-    def from_ast(cls, node: ast.Dict) -> 'Dict':
+    def from_ast(cls, node: ast.Dict, **kwargs) -> 'Dict':
         result = {}
         for key, value in zip(node.keys, node.values):
             if key is None:

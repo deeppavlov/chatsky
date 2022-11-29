@@ -1,6 +1,8 @@
 import ast
 
-from dff.script.parser.base_parser_object import Dict, Expression, Python, String
+from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import
+from dff.script.parser.namespace import Namespace
+from dff.script.parser.dff_project import DFFProject
 
 
 def test_just_works():
@@ -30,3 +32,28 @@ def test_get_item():
     assert obj["Python(1)"] == Python("1")
     assert obj[String("1")] == String("1")
     assert obj["String(1)"] == String("1")
+
+
+def test_import_resolution():
+    namespace1 = Namespace.from_ast(ast.parse("import namespace2"), location=["namespace1"], parent=None)
+    namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["namespace2"], parent=None)
+    dff_project = DFFProject([namespace1, namespace2])
+    import_stmt = dff_project.resolve_path(["namespace1", "namespace2"])
+
+    assert isinstance(import_stmt, Import)
+    assert import_stmt.resolve_self == namespace2
+    assert import_stmt == namespace1.resolve_path(["namespace2"])
+    assert import_stmt.path == ["namespace1", "namespace2"]
+
+
+def test_multilevel_import_resolution():
+    namespace1 = Namespace.from_ast(ast.parse("import module.namespace2 as n2"), location=["namespace1"], parent=None)
+    namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["module", "namespace2"], parent=None)
+    dff_project = DFFProject([namespace1, namespace2])
+    import_stmt1 = dff_project.resolve_path(["namespace1", "n2"])
+
+    assert isinstance(import_stmt1, Import)
+    assert import_stmt1.resolve_self == namespace2
+    assert import_stmt1 == namespace1.resolve_path(["n2"])
+    assert import_stmt1.path == ["namespace1", "n2"]
+
