@@ -46,6 +46,25 @@ def test_import_resolution():
     assert import_stmt.path == ["namespace1", "namespace2"]
 
 
+def test_multiple_imports():
+    namespace1 = Namespace.from_ast(ast.parse("import namespace2, namespace3"), location=["namespace1"])
+    namespace2 = Namespace.from_ast(ast.parse(""), location=["namespace2"])
+    namespace3 = Namespace.from_ast(ast.parse(""), location=["namespace3"])
+    dff_project = DFFProject([namespace1, namespace2, namespace3])
+
+    import_2 = dff_project.resolve_path(["namespace1", "namespace2"])
+    import_3 = dff_project.resolve_path(["namespace1", "namespace3"])
+
+    assert isinstance(import_2, Import)
+    assert isinstance(import_3, Import)
+
+    assert import_2.resolve_self == namespace2
+    assert import_3.resolve_self == namespace3
+
+    assert str(import_2) == "import namespace2"
+    assert str(import_3) == "import namespace3"
+
+
 def test_multilevel_import_resolution():
     namespace1 = Namespace.from_ast(ast.parse("import module.namespace2 as n2"), location=["namespace1"])
     namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["module", "namespace2"])

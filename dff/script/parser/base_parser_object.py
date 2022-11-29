@@ -157,7 +157,7 @@ class Import(Statement, ReferenceObject):
         self.alias = alias
 
     def __str__(self):
-        return f"import {self.module}" + f" as {self.alias}" if self.alias else ""
+        return f"import {self.module}" + (f" as {self.alias}" if self.alias else "")
 
     def __repr__(self):
         return f"Import(module={self.module}, alias={self.alias})"
