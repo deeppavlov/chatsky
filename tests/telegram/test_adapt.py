@@ -1,6 +1,8 @@
 import json
 import pytest
 
+from io import IOBase
+from pathlib import Path
 from pydantic import ValidationError
 from telebot import types
 
@@ -11,6 +13,7 @@ from dff.connectors.messenger.telegram.types import (
     TelegramUI,
 )
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
+from dff.connectors.messenger.telegram.utils import open_io, close_io
 
 
 @pytest.mark.parametrize(
@@ -144,3 +147,12 @@ def test_empty_keyboard():
     with pytest.raises(ValidationError) as e:
         _ = TelegramUI(buttons=[])
     assert e
+
+
+def test_io(document):
+    tele_doc = types.InputMediaDocument(media=Path(document))
+    opened_doc = open_io(tele_doc)
+    print(type(opened_doc.media))
+    assert isinstance(opened_doc.media, IOBase)
+    close_io(opened_doc)
+    assert opened_doc.media.closed

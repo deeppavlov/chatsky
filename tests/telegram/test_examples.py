@@ -12,6 +12,12 @@ from dff.utils.testing.common import check_happy_path
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
+def test_unhappy_path(pipeline_instance):
+    with pytest.raises(Exception) as e:
+        check_happy_path(pipeline_instance, (("Hi", "false_response"),))
+    assert e
+
+
 @pytest.mark.parametrize(
     "example_module_name",
     [
