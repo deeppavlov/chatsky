@@ -10,7 +10,7 @@ from dff.connectors.messenger.telegram.types import (
     TelegramAttachment,
     TelegramUI,
 )
-from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location
+from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
 
 
 @pytest.mark.parametrize(
@@ -53,11 +53,40 @@ def test_adapt_buttons(ui, button_type, markup_type, basic_bot, user_id):
     basic_bot.send_response(user_id, telegram_response)
 
 
-def test_telegram_attachment(basic_bot, user_id):
-    generic_response = Response(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG"))
+@pytest.mark.parametrize(
+    ["ui"],
+    [
+        (TelegramUI(keyboard=types.ReplyKeyboardRemove()),),
+    ],
+)
+def test_keyboard_remove(ui, basic_bot, user_id):
+    generic_response = Response(text="test", ui=ui)
     telegram_response = TelegramResponse.parse_obj(generic_response)
-    assert telegram_response.image and isinstance(telegram_response.image, TelegramAttachment)
-    assert telegram_response.image.source == generic_response.image.source
+    assert telegram_response.text == generic_response.text
+    assert telegram_response.ui
+    basic_bot.send_response(user_id, telegram_response)
+
+
+@pytest.mark.parametrize(
+    ["generic_response", "prop"],
+    [
+        (Response(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")), "image"),
+        (Response(text="test", audio=Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")), "audio"),
+        (
+            Response(
+                text="test",
+                video=Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"),
+            ),
+            "video",
+        ),
+    ],
+)
+def test_telegram_attachment(generic_response, prop, basic_bot, user_id):
+    telegram_response = TelegramResponse.parse_obj(generic_response)
+    telegram_prop = vars(telegram_response).get(prop)
+    generic_prop = vars(generic_response).get(prop)
+    assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
+    assert telegram_prop.source == generic_prop.source
     basic_bot.send_response(user_id, telegram_response)
 
 
