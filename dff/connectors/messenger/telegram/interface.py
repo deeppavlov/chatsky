@@ -89,12 +89,10 @@ class PollingTelegramInterface(PollingMessengerInterface, TelegramInterfaceMixin
         self.bot._TeleBot__stop_polling.set()
 
     async def connect(self, callback: PipelineRunnerFunction, loop: Optional[Callable] = None, *args, **kwargs):
-        if loop is None:
-            loop = lambda: not self.bot._TeleBot__stop_polling.wait(self.interval)
         self.bot._TeleBot__stop_polling.clear()
         self.bot.get_updates(offset=-1)
 
-        await super().connect(callback, loop=loop)
+        await super().connect(callback, loop=loop or (lambda: not self.bot._TeleBot__stop_polling.wait(self.interval)))
 
 
 class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin):

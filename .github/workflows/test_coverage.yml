@@ -35,5 +35,7 @@ jobs:
         shell: bash
 
       - name: build coverage file
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: make test
         shell: bash

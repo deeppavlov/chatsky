@@ -40,6 +40,8 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
