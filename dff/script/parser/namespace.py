@@ -8,9 +8,8 @@ if tp.TYPE_CHECKING:
 
 
 class Namespace(BaseParserObject):
-    def __init__(self, parent: 'DFFProject', location: tp.List[str], names: tp.Dict[str, BaseParserObject]):
+    def __init__(self, location: tp.List[str], names: tp.Dict[str, BaseParserObject]):
         super().__init__()
-        self.parent = parent
         self.location = location
         self.name = ".".join(location)
         for key, value in names.items():
@@ -24,7 +23,7 @@ class Namespace(BaseParserObject):
 
     @cached_property
     def dff_project(self) -> 'DFFProject':
-        return self.parent
+        return self.parent.dff_project
 
     def __getitem__(self, item: str):
         return self.children[item]

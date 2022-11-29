@@ -35,8 +35,8 @@ def test_get_item():
 
 
 def test_import_resolution():
-    namespace1 = Namespace.from_ast(ast.parse("import namespace2"), location=["namespace1"], parent=None)
-    namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["namespace2"], parent=None)
+    namespace1 = Namespace.from_ast(ast.parse("import namespace2"), location=["namespace1"])
+    namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["namespace2"])
     dff_project = DFFProject([namespace1, namespace2])
     import_stmt = dff_project.resolve_path(["namespace1", "namespace2"])
 
@@ -47,8 +47,8 @@ def test_import_resolution():
 
 
 def test_multilevel_import_resolution():
-    namespace1 = Namespace.from_ast(ast.parse("import module.namespace2 as n2"), location=["namespace1"], parent=None)
-    namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["module", "namespace2"], parent=None)
+    namespace1 = Namespace.from_ast(ast.parse("import module.namespace2 as n2"), location=["namespace1"])
+    namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["module", "namespace2"])
     dff_project = DFFProject([namespace1, namespace2])
     import_stmt1 = dff_project.resolve_path(["namespace1", "n2"])
 
