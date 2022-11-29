@@ -1,13 +1,10 @@
 name: test_full
 
 on:
-  push:
-    branches:
-    - dev
-    - test/**
-  pull_request:
-    branches:
-    - dev
+  workflow_run:
+    workflows: [test_coverage]
+    types:
+      - completed
   workflow_dispatch:
 
 
@@ -15,6 +12,7 @@ jobs:
   test_full:
     strategy:
       fail-fast: false
+      max-parallel: 1
       matrix:
         python-version: ["3.7", "3.8", "3.9", "3.10"]
         os: [macOS-latest, windows-latest, ubuntu-latest]
