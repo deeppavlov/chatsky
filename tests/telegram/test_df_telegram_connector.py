@@ -49,17 +49,19 @@ def test_initial():
     ],
     [
         (create_update(update_id=1, message=create_text_message("hello")),),
-        (create_update(update_id=1, callback_query=create_query("hello")),),
+        (create_update(update_id=1, message=create_text_message("hi")),),
     ],
 )
-def test_update_handling(param, basic_bot, user_id):
+@pytest.mark.asyncio
+async def test_update_handling(pipeline_instance, param, basic_bot, user_id):
     interface = PollingTelegramInterface(bot=basic_bot)
     inner_update, _id = interface._extract_telegram_request_and_id(param)
     assert isinstance(inner_update, types.JsonDeserializable)
     assert _id == "1"
+    interface.bot.remove_webhook()
+    await interface.connect(pipeline_instance._run_pipeline, loop=lambda: None)
     except_result = interface._except(Exception())
     assert except_result is None
-    interface.bot.remove_webhook()
     request_result = interface._request()
     assert isinstance(request_result, list)
     response_result = interface._respond([Context(id=user_id, responses={0: "hi"})])

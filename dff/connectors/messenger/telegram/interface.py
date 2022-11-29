@@ -5,7 +5,7 @@ This module contains several variations of the `RequestProvider` class that can 
 to combine :py:class:`~df_telegram_connector.connector.TelegramConnector`
 together with the `df_runner` add-on.
 """
-from typing import Any, Optional, List, Tuple, Hashable
+from typing import Any, Optional, List, Tuple, Hashable, Callable
 
 from telebot import types, logger
 
@@ -88,11 +88,13 @@ class PollingTelegramInterface(PollingMessengerInterface, TelegramInterfaceMixin
         logger.error(e)
         self.bot._TeleBot__stop_polling.set()
 
-    async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
+    async def connect(self, callback: PipelineRunnerFunction, loop: Optional[Callable] = None, *args, **kwargs):
+        if loop is None:
+            loop = lambda: not self.bot._TeleBot__stop_polling.wait(self.interval)
         self.bot._TeleBot__stop_polling.clear()
         self.bot.get_updates(offset=-1)
 
-        await super().connect(callback, loop=lambda: not self.bot._TeleBot__stop_polling.wait(self.interval))
+        await super().connect(callback, loop=loop)
 
 
 class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin):
