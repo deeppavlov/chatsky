@@ -27,6 +27,7 @@ if tp.TYPE_CHECKING:
     from .namespace import Namespace
     from .dff_project import DFFProject
 from .exceptions import KeyNotFound, StarError
+from .utils import is_instance
 
 
 logger = logging.getLogger(__name__)
@@ -120,9 +121,12 @@ class Expression(BaseParserObject, ABC):
     def from_ast(cls, node, **kwargs) -> 'Expression':
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
-        if isinstance(node, ast.Constant):
+        # todo: replace this with isinstance when python3.7 support is dropped
+        if is_instance(node, ("_ast.Constant", "ast.Constant")):
             if isinstance(node.value, str):
                 return String.from_ast(node)
+        if is_instance(node, "_ast.Str"):  # todo: remove this when python3.7 support is dropped
+            return String.from_ast(node)
         return Python.from_ast(node)
 
 
@@ -186,10 +190,13 @@ class String(Expression):
         return f"String({self.string})"
 
     @classmethod
-    def from_ast(cls, node: ast.Constant, **kwargs) -> 'String':
-        if not isinstance(node.value, str):
-            raise RuntimeError(f"Node {node} is not str")
-        return cls(node.value)
+    def from_ast(cls, node: tp.Union['ast.Str', 'ast.Constant'], **kwargs) -> 'String':
+        if is_instance(node, "_ast.Str"):  # todo: remove this when python3.7 support is dropped
+            return cls(node.s)
+        # todo: replace this with isinstance when python3.7 support is dropped
+        elif is_instance(node, ("_ast.Constant", "ast.Constant")):
+            return cls(node.value)
+        raise RuntimeError(f"Node {node} is not str")
 
 
 class Python(Expression):
