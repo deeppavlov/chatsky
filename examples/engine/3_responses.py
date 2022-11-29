@@ -25,7 +25,10 @@ logger = logging.getLogger(__name__)
 The response can be set by any object of `python`:
 
 * `callable` objects - If the object is `callable` it must have a special signature:  
-`func(ctx: Context, actor: Actor, *args, **kwargs) -> Any`  
+```
+func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
+```
+
 In this form, this object is called with the corresponding arguments.
 
 * `non-callable` objects - If the object is not `callable`, it will be returned by the agent as a response.

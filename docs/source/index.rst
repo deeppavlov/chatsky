@@ -2,12 +2,12 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Dialog flow framework's documentation
+Dialog Flow Framework Documentation
 =====================================
 
 *Date*: ??.11.2022 *Version*: 1.0.0
 
-The Dialog Flow Framework's (`DFF`) is an open-source `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
+The Dialog Flow Framework (`DFF`) is an open-source `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
 developed for creating dialog systems.
 
 Getting started
@@ -16,7 +16,7 @@ Getting started
 Installation
 ~~~~~~~~~~~~
 
-DFF can be installed via ``pip``:
+`DFF` can be installed via ``pip``:
 
 .. code-block:: bash
    
@@ -39,14 +39,14 @@ Key concepts
 that describes the behavior of the dialog service. `DFF` offers a Specialized Language (`DSL`) for quickly writing dialog graphs.
 You can use it to write chatbots for social networks, call centers, websites, writing skills for Amazon Alexa, etc.
 
-DFF has the following important concepts:
+`DFF` has the following important concepts:
 
 **Script**: First of all, to create a dialog agent it is necessary to create a dialog (:py:class:`~dff.core.engine.core.script.Script`).
 A dialog `script` is a dictionary, where keys correspond to different `flows`. A script can contain multiple `scripts`, what is needed in order to divide
 a dialog into sub-dialogs and process them separately.
 
-**Flow**: As mentioned above, the dialogue is divided into `flows`.
-Each `flow` represent a sub-dialogue corresponding to the discussion of a particular topic.
+**Flow**: As mentioned above, the dialog is divided into `flows`.
+Each `flow` represent a sub-dialog corresponding to the discussion of a particular topic.
 Each `flow` is also a dictionary, where the keys are the `nodes`.
 
 **Node**: Each `node` necessarily contains a `response` of the bot and
@@ -55,14 +55,16 @@ in this or another `flow`.
 
 .. toctree::
    :caption: Documentation
-   :maxdepth: 3
+   :name: documentation
+   :maxdepth: 4
 
    apiref/dff.core
    apiref/dff.connectors
 
 .. toctree::
    :caption: Examples
-   :maxdepth: 3
+   :name: examples
+   :glob:
    :reversed:
 
    examples/pipeline/index

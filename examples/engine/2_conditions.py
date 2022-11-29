@@ -1,9 +1,8 @@
 # %% [markdown]
-"""
-# 2. Conditions
+2. Conditions
+===============
 
 This example shows different options for setting transition conditions from one node to another.
-"""
 
 # %%
 import re # Regular expression library
@@ -20,25 +19,30 @@ The transition condition is set by the function.
 If this function returns the value `true`, then the actor performs the corresponding transition.
 Condition functions have signature  
 
-```def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool```
+    def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool
 
 Out of the box `dff.core.engine` offers 8 options for setting conditions:
 
-* `exact_match` - Will return `true` if the user's request completely matches the value passed to the function.
-
-* `regexp` - Will return `true` if the pattern matches the user's request, while the user's request must be a string.
+* `exact_match` returns `true` if the user's request completely matches the value passed to the function.
+* `regexp` returns `true` if the pattern matches the user's request, while the user's request must be a string.
 `regexp` has same signature as `re.compile` function.
-
-* `aggregate` - Returns `bool` value as a result after aggregate by `aggregate_func` for input sequence of condtions.
-`aggregate_func` == any by default, `aggregate` has alias `agg`.
-* `any` - Will return `true` if one element of input sequence of condtions is `true`.
+* `aggregate` returns `bool` value as a result after aggregate by `aggregate_func` for input sequence of condtions.  
+`aggregate_func == any` by default. `aggregate` has alias `agg`.
+* `any` returns `true` if one element of input sequence of condtions is `true`.
 `any(input_sequence)` is equivalent to `aggregate(input sequence, aggregate_func=any)`.
-* `all` - Will return `true` if all elements of  input sequence of condtions are `true`.
+* `all` returns `true` if all elements of input sequence of condtions are `true`.
 `all(input_sequence)` is equivalent to `aggregate(input sequence, aggregate_func=all)`.
-* `negation` - Return a negation of passed function. `negation` has alias `neg`.
-* `has_last_labels` - Covered in the following examples.
-* `true` - Returns `true`.
-* `false` - Returns `false`.
+* `negation` returns negation of passed function. `negation` has alias `neg`.
+* `has_last_labels` covered in the following examples.
+* `true` returns `true`.
+* `false` returns `false`.
+
+For example function
+```
+def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    return True
+```
+always returns `true` and `always_true_condition` function is same as `dff.core.engine.conditions.true()`.
 
 # %%
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:

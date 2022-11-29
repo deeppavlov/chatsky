@@ -1,11 +1,11 @@
-"""
+# %% [markdown]
 4. Transitions
 ==============
-"""
 
 # TODO:
 # 1. Maybe remove `lbl.to_fallback(): cnd.true(),` from script as a trivial condition?
 
+# %%
 import re
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -16,13 +16,13 @@ from dff.core.engine.core.types import NodeLabel3Type
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
-
+# %%
 # def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
 #     return True
 
 # `always_true_condition` is same cnd.true()
 
-
+# %%
 # NodeLabel3Type == tuple[str, str, float]
 def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
     return ("greeting_flow", "node2", 1.0)
@@ -34,7 +34,7 @@ def high_priority_node_transition(flow_label, label):
 
     return transition
 
-
+# %%
 toy_script = {
     "global_flow": {
         "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
@@ -149,7 +149,7 @@ happy_path = (
     ("Ok, goodbye.", "bye"),
 )
 
-
+# %%
 pipeline = Pipeline.from_script(
     toy_script, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node")
 )
