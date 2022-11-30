@@ -128,6 +128,8 @@ class Expression(BaseParserObject, ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> 'Expression':
+        if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
+            return Iterable.from_ast(node)
         if isinstance(node, ast.Subscript):
             # todo: remove the right part when python3.8 support is dropped
             if not (isinstance(node.slice, ast.Slice) or is_instance(node.slice, "_ast.ExtSlice")):
@@ -172,12 +174,12 @@ class ReferenceObject(BaseParserObject, ABC):
         return resolved
 
     def __hash__(self):
-        return BaseParserObject.__hash__(self.resolve_self or self)
+        return BaseParserObject.__hash__(self.absolute or self)
 
     def __eq__(self, other):
         if isinstance(other, ReferenceObject):
-            return BaseParserObject.__eq__(self.resolve_self or self, other.resolve_self or other)
-        return BaseParserObject.__eq__(self.resolve_self or self, other)
+            return BaseParserObject.__eq__(self.absolute or self, other.absolute or other)
+        return BaseParserObject.__eq__(self.absolute or self, other)
 
 
 class Import(Statement, ReferenceObject):
@@ -261,7 +263,7 @@ class Assignment(Statement):
             target = Expression.from_ast(node.targets[-1])
             result[str(target)] = cls(target=target, value=Expression.from_ast(node.value))
             for target in node.targets[:-1]:
-                target = Expression.from_ast(target)
+                target = Expression.from_ast(target)  # todo: add support for tuple targets
                 result[str(target)] = cls(target=target, value=Expression.from_ast(node.targets[-1]))
         if isinstance(node, ast.AnnAssign):
             if node.value is None:
@@ -452,3 +454,43 @@ class Subscript(Expression, ReferenceObject):
         return cls(value, Expression.from_ast(index))
 
 
+class Iterable(Expression, ABC):
+    def __init__(self, iterable: tp.Iterable[Expression], iterable_type: str):
+        Expression.__init__(self)
+        self.type = iterable_type
+        for index, value in enumerate(iterable):
+            value.parent = self
+            value.append_path = [repr(Python(str(index)))]
+            self.children[repr(Python(str(index)))] = value
+
+    def __getitem__(self, item: Python):
+        return self.children[repr(item)]
+
+    def __str__(self):
+        if self.type == "list":
+            lbr, rbr = "[", "]"
+        elif self.type == "tuple":
+            lbr, rbr = "(", ")"
+        elif self.type == "set":
+            lbr, rbr = "{", "}"
+        else:
+            raise RuntimeError(f"{self.type}")
+        return lbr + ", ".join(map(str, self.children.values())) + rbr
+
+    def __repr__(self):
+        return f"Iterable:{self.type}(" + "; ".join(f"{k}: {repr(v)}" for k, v in self.children.items()) + ")"
+
+    @classmethod
+    def from_ast(cls, node: tp.Union[ast.Tuple, ast.List, ast.Set], **kwargs) -> 'Expression':
+        result = []
+        for item in node.elts:
+            result.append(Expression.from_ast(item))
+        if isinstance(node, ast.Tuple):
+            iterable_type = "tuple"
+        elif isinstance(node, ast.List):
+            iterable_type = "list"
+        elif isinstance(node, ast.Set):
+            iterable_type = "set"
+        else:
+            raise TypeError(type(node))
+        return cls(result, iterable_type)

@@ -97,8 +97,8 @@ def test_import_from():
 def test_name():
     namespace1 = Namespace.from_ast(ast.parse("a=b=1\nc=a\nd=b"), location=["namespace1"])
 
-    assert namespace1["c"].absolute == Python("1")
-    assert namespace1["d"].absolute == Python("1")
+    assert namespace1["c"] == Python("1")
+    assert namespace1["d"] == Python("1")
 
 
 def test_attribute():
@@ -114,4 +114,10 @@ def test_subscript():
     namespace = Namespace.from_ast(ast.parse("a = {1: {2: 3}}\nb = a[1][2]"), location=["namespace"])
 
     assert isinstance(namespace["b"], Subscript)
-    assert namespace["b"].absolute == Python("3")
+    assert namespace["b"] == Python("3")
+
+
+def test_iterable():
+    namespace = Namespace.from_ast(ast.parse("a = [1, 2, 3]\nb = a[2]"), location=["namespace"])
+
+    assert namespace["b"] == Python("3")
