@@ -32,8 +32,6 @@ from .utils import is_instance
 
 logger = logging.getLogger(__name__)
 
-KeywordDict = tp.Dict[str, tp.Union['BaseParserObject', 'KeywordDict']]
-
 
 class BaseParserObject(ABC):
     """
@@ -48,7 +46,7 @@ class BaseParserObject(ABC):
     def __init__(self):
         self.parent: tp.Optional[BaseParserObject] = None
         self.append_path: tp.List[str] = []
-        self.children: KeywordDict = {}
+        self.children: tp.Dict[str, BaseParserObject] = {}
 
     def resolve_path(self, path: tp.List[str]) -> 'BaseParserObject':
         if len(path) == 0:
@@ -58,10 +56,7 @@ class BaseParserObject(ABC):
             item = current_dict.get(key)
             if item is None:
                 raise KeyError(f"Not found key {key} in {current_dict}\nObject: {repr(self)}")
-            if isinstance(item, BaseParserObject):
-                return item.resolve_path(path[index:])
-            else:
-                current_dict = item
+            return item.resolve_path(path[index:])
         raise KeyError(f"Not found {path} in {self.children}\nObject: {repr(self)}")
 
     @cached_property
@@ -316,30 +311,31 @@ class Dict(Expression):
         for key, value in dictionary.items():
             key.parent = self
             value.parent = self
-            key.append_path = [repr(key), "key"]
-            value.append_path = [repr(key), "value"]
+            key.append_path = [repr(key) + "key"]
+            value.append_path = [repr(key) + "value"]
             self.keys[key] = repr(key)
-            self.children[repr(key)] = {}
-            self.children[repr(key)]["key"] = key
-            self.children[repr(key)]["value"] = value
+            self.children[repr(key) + "key"] = key
+            self.children[repr(key) + "value"] = value
 
     def __str__(self):
         return "{" + ", ".join(
-            [f"{str(value['key'])}: {str(value['value'])}" for value in self.children.values()]
+            [f"{str(self.children[key + 'key'])}: {str(self.children[key + 'value'])}" for key in self.keys.values()]
         ) + "}"
 
     def __repr__(self):
         return "Dict(" + ", ".join(
-            [f"{repr(value['key'])}: {repr(value['value'])}" for value in self.children.values()]
+            [
+                f"{repr(self.children[key + 'value'])}: "
+                f"{repr(self.children[key + 'value'])}" for key in self.keys.values()
+            ]
         ) + ")"
 
     def __getitem__(self, item: tp.Union[Expression, str]):
         if isinstance(item, Expression):
             key = self.keys[item]
-            return self.children[key]["value"]
+            return self.children[key + "value"]
         elif isinstance(item, str):
-            dict_item = self.children[item]
-            return dict_item["value"]
+            return self.children[item + "value"]
         else:
             raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
 
