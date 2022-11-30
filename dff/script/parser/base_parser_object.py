@@ -130,6 +130,8 @@ class Expression(BaseParserObject, ABC):
     def from_ast(cls, node, **kwargs) -> 'Expression':
         if isinstance(node, ast.Name):
             return Name.from_ast(node)
+        if isinstance(node, ast.Attribute):
+            return Attribute.from_ast(node)
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
         # todo: replace this with isinstance when python3.7 support is dropped
@@ -369,3 +371,36 @@ class Name(Expression, ReferenceObject):
     @classmethod
     def from_ast(cls, node: ast.Name, **kwargs) -> 'Expression':
         return cls(node.id)
+
+
+class Attribute(Expression, ReferenceObject):
+    def __init__(self, value: Expression, attr: str):
+        Expression.__init__(self)
+        ReferenceObject.__init__(self)
+        value.parent = self
+        value.append_path = ["value"]
+        self.children["value"] = value
+        self.attr = attr
+
+    @cached_property
+    def resolve_self(self) -> tp.Optional[BaseParserObject]:
+        try:
+            value = self.children["value"]
+            if isinstance(value, ReferenceObject):
+                value = value.absolute
+            if is_instance(value, "dff.script.parser.namespace.Namespace"):
+                return value[self.attr]
+            return None
+        except KeyError as error:
+            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            return None
+
+    def __str__(self):
+        return str(self.children["value"]) + "." + self.attr
+
+    def __repr__(self):
+        return f"Attribute(value={repr(self.children['value'])}; attr={self.attr})"
+
+    @classmethod
+    def from_ast(cls, node: ast.Attribute, **kwargs) -> 'Expression':
+        return cls(Expression.from_ast(node.value), node.attr)
