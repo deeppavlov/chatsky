@@ -1,6 +1,6 @@
 import ast
 
-from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute
+from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute, Subscript
 from dff.script.parser.namespace import Namespace
 from dff.script.parser.dff_project import DFFProject
 
@@ -108,3 +108,10 @@ def test_attribute():
 
     assert isinstance(namespace1["a"], Attribute)
     assert namespace1["a"] == namespace2["a"] == Python("1")
+
+
+def test_subscript():
+    namespace = Namespace.from_ast(ast.parse("a = {1: {2: 3}}\nb = a[1][2]"), location=["namespace"])
+
+    assert isinstance(namespace["b"], Subscript)
+    assert namespace["b"].absolute == Python("3")

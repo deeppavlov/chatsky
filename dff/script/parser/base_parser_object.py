@@ -128,6 +128,10 @@ class Expression(BaseParserObject, ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> 'Expression':
+        if isinstance(node, ast.Subscript):
+            # todo: remove the right part when python3.8 support is dropped
+            if not (isinstance(node.slice, ast.Slice) or is_instance(node.slice, "_ast.ExtSlice")):
+                return Subscript.from_ast(node)
         if isinstance(node, ast.Name):
             return Name.from_ast(node)
         if isinstance(node, ast.Attribute):
@@ -135,7 +139,7 @@ class Expression(BaseParserObject, ABC):
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
         # todo: replace this with isinstance when python3.7 support is dropped
-        if is_instance(node, ("_ast.Constant", "ast.Constant")):
+        if isinstance(node, ast.Constant):
             if isinstance(node.value, str):
                 return String.from_ast(node)
         if is_instance(node, "_ast.Str"):  # todo: remove this when python3.7 support is dropped
@@ -279,11 +283,10 @@ class String(Expression):
         return f"String({self.string})"
 
     @classmethod
-    def from_ast(cls, node: tp.Union['ast.Str', 'ast.Constant'], **kwargs) -> 'String':
+    def from_ast(cls, node: tp.Union['ast.Str', ast.Constant], **kwargs) -> 'String':
         if is_instance(node, "_ast.Str"):  # todo: remove this when python3.7 support is dropped
             return cls(node.s)
-        # todo: replace this with isinstance when python3.7 support is dropped
-        elif is_instance(node, ("_ast.Constant", "ast.Constant")):
+        elif isinstance(node, ast.Constant):
             return cls(node.value)
         raise RuntimeError(f"Node {node} is not str")
 
@@ -384,16 +387,15 @@ class Attribute(Expression, ReferenceObject):
 
     @cached_property
     def resolve_self(self) -> tp.Optional[BaseParserObject]:
+        value = self.children["value"]
+        if isinstance(value, ReferenceObject):
+            value = value.absolute
         try:
-            value = self.children["value"]
-            if isinstance(value, ReferenceObject):
-                value = value.absolute
             if is_instance(value, "dff.script.parser.namespace.Namespace"):
                 return value[self.attr]
-            return None
         except KeyError as error:
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
-            return None
+        return None
 
     def __str__(self):
         return str(self.children["value"]) + "." + self.attr
@@ -404,3 +406,49 @@ class Attribute(Expression, ReferenceObject):
     @classmethod
     def from_ast(cls, node: ast.Attribute, **kwargs) -> 'Expression':
         return cls(Expression.from_ast(node.value), node.attr)
+
+
+class Subscript(Expression, ReferenceObject):
+    def __init__(self, value: Expression, index: Expression):
+        Expression.__init__(self)
+        ReferenceObject.__init__(self)
+        value.parent = self
+        value.append_path = ["value"]
+        index.parent = self
+        index.append_path = ["index"]
+        self.children["value"] = value
+        self.children["index"] = index
+
+    @cached_property
+    def resolve_self(self) -> tp.Optional[BaseParserObject]:
+        value = self.children["value"]
+        if isinstance(value, ReferenceObject):
+            value = value.absolute
+        index = self.children["index"]
+        if isinstance(index, ReferenceObject):
+            index = index.absolute
+        try:
+            return value[index]
+        except KeyError as error:
+            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+        return None
+
+    def __str__(self):
+        return str(self.children["value"]) + "[" + self.children["index"] + "]"
+
+    def __repr__(self):
+        return f"Subscript(value={repr(self.children['value'])}; index={self.children['index']})"
+
+    @classmethod
+    def from_ast(cls, node: ast.Subscript, **kwargs) -> 'Expression':
+        value = Expression.from_ast(node.value)
+        # todo: remove the right part when python3.8 support is dropped
+        if isinstance(node.slice, ast.Slice) or is_instance(node.slice, "_ast.ExtSlice"):
+            raise RuntimeError(f"Slices are not supported: {unparse(node)}")
+        index = node.slice
+        # todo: remove this when python3.8 support is dropped
+        if is_instance(index, "_ast.Index"):
+            index = index.value
+        return cls(value, Expression.from_ast(index))
+
+
