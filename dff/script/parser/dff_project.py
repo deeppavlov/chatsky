@@ -14,6 +14,18 @@ class DFFProject(BaseParserObject):
             namespace.append_path = [namespace.name]
             self.children[namespace.name] = namespace
 
+    def __getitem__(self, item: tp.Union[tp.List[str], str]):
+        if isinstance(item, str):
+            return self.children[item]
+        elif isinstance(item, list):
+            if item[-1] == "__init__":
+                return self.children[".".join(item)]
+            namespace = self.children.get(".".join(item))
+            if namespace is None:
+                return self.children[".".join(item) + ".__init__"]
+            return namespace
+        raise TypeError(f"{type(item)}")
+
     @cached_property
     def path(self) -> tp.List[str]:
         return []

@@ -26,7 +26,7 @@ except AttributeError:
 if tp.TYPE_CHECKING:
     from .namespace import Namespace
     from .dff_project import DFFProject
-from .exceptions import KeyNotFound, StarError
+from .exceptions import StarError
 from .utils import is_instance
 
 
@@ -57,12 +57,12 @@ class BaseParserObject(ABC):
         for index, key in enumerate(path, start=1):
             item = current_dict.get(key)
             if item is None:
-                raise KeyNotFound(f"Not found key {key} in {current_dict}\nObject: {repr(self)}")
+                raise KeyError(f"Not found key {key} in {current_dict}\nObject: {repr(self)}")
             if isinstance(item, BaseParserObject):
                 return item.resolve_path(path[index:])
             else:
                 current_dict = item
-        raise KeyNotFound(f"Not found {path} in {self.children}\nObject: {repr(self)}")
+        raise KeyError(f"Not found {path} in {self.children}\nObject: {repr(self)}")
 
     @cached_property
     def path(self) -> tp.List[str]:
@@ -108,8 +108,17 @@ class Statement(BaseParserObject, ABC):
     """
     @classmethod
     @abstractmethod
-    def from_ast(cls, node, **kwargs) -> tp.List['Statement']:
-        ...
+    def from_ast(cls, node, **kwargs) -> tp.Dict[str, 'Statement']:
+        if isinstance(node, ast.Import):
+            return Import.from_ast(node)
+        if isinstance(node, ast.ImportFrom):
+            return ImportFrom.from_ast(node)
+        if isinstance(node, ast.Assign):
+            return Assignment.from_ast(node)
+        if isinstance(node, ast.AnnAssign):
+            if node.value is not None:
+                return Assignment.from_ast(node)
+        return {}
 
 
 class Expression(BaseParserObject, ABC):
@@ -131,6 +140,9 @@ class Expression(BaseParserObject, ABC):
 
 
 class ReferenceObject(BaseParserObject, ABC):
+    def __init__(self):
+        BaseParserObject.__init__(self)
+
     @cached_property
     @abstractmethod
     def resolve_self(self) -> BaseParserObject:
@@ -141,12 +153,12 @@ class ReferenceObject(BaseParserObject, ABC):
         ...
 
     def __hash__(self):
-        return hash(self.resolve_self)
+        return BaseParserObject.__hash__(self.resolve_self)
 
     def __eq__(self, other):
         if isinstance(other, ReferenceObject):
-            return self.resolve_self == other.resolve_self
-        return self.resolve_self == other
+            return BaseParserObject.__eq__(self.resolve_self, other.resolve_self)
+        return BaseParserObject.__eq__(self.resolve_self, other)
 
 
 class Import(Statement, ReferenceObject):
@@ -165,16 +177,78 @@ class Import(Statement, ReferenceObject):
     @cached_property
     def resolve_self(self) -> BaseParserObject:
         try:
-            return self.dff_project.resolve_path([self.namespace.name.rpartition(".")[0] + self.module])
-        except KeyNotFound as error:
+            return self.dff_project[".".join(self.namespace.resolve_relative_import(self.module))]
+        except KeyError as error:
             logger.debug(f"Import did not resolve: {repr(self)}.\nReason: {error}")
             return self
 
     @classmethod
-    def from_ast(cls, node: ast.Import, **kwargs) -> tp.List['Import']:
-        result = []
+    def from_ast(cls, node: ast.Import, **kwargs) -> tp.Dict[str, 'Import']:
+        result = {}
         for name in node.names:
-            result.append(cls(name.name, name.asname))
+            result[name.asname or name.name] = cls(name.name, name.asname)
+        return result
+
+
+class ImportFrom(Statement, ReferenceObject):
+    def __init__(self, module: str, level: int, obj: str, alias: tp.Optional[str] = None):
+        Statement.__init__(self)
+        ReferenceObject.__init__(self)
+        self.module = module
+        self.level = level
+        self.obj = obj
+        self.alias = alias
+
+    def __str__(self):
+        return f"from {self.level * '.' + self.module} import {self.obj}" + (f" as {self.alias}" if self.alias else "")
+
+    def __repr__(self):
+        return f"ImportFrom(module={self.module}, level={self.level}, obj={self.obj}, alias={self.alias})"
+
+    @cached_property
+    def resolve_self(self) -> BaseParserObject:
+        try:
+            return self.dff_project[self.namespace.resolve_relative_import(self.module, self.level)][self.obj]
+        except KeyError as error:
+            logger.warning(f"Import did not resolve: {repr(self)}.\nReason: {error}")
+            return self
+
+    @classmethod
+    def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:
+        result = {}
+        for name in node.names:
+            result[name.asname or name.name] = cls(node.module or "", node.level, name.name, name.asname)
+        return result
+
+
+class Assignment(Statement):
+    def __init__(self, target: Expression, value: Expression):
+        super().__init__()
+        target.parent = self
+        self.children["target"] = target
+        value.parent = self
+        self.children["value"] = value
+
+    def __str__(self):
+        return f"{str(self.children['target'])} = {str(self.children['value'])}"
+
+    def __repr__(self):
+        return f"Assignment(target={repr(self.children['target'])}; value={repr(self.children['value'])}"
+
+    @classmethod
+    def from_ast(cls, node, **kwargs) -> tp.Dict[str, 'Assignment']:
+        result = {}
+        if isinstance(node, ast.Assign):
+            target = Expression.from_ast(node.targets[-1])
+            result[str(target)] = cls(target=target, value=Expression.from_ast(node.value))
+            for target in node.targets[:-1]:
+                target = Expression.from_ast(target)
+                result[str(target)] = cls(target=target, value=Expression.from_ast(node.targets[-1]))
+        if isinstance(node, ast.AnnAssign):
+            if node.value is None:
+                raise RuntimeError(f"Assignment has no value: {node}")
+            target = Expression.from_ast(node.target)
+            result[str(target)] = cls(target=target, value=Expression.from_ast(node.value))
         return result
 
 

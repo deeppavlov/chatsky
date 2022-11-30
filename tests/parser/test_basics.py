@@ -76,3 +76,18 @@ def test_multilevel_import_resolution():
     assert import_stmt1 == namespace1.resolve_path(["n2"])
     assert import_stmt1.path == ["namespace1", "n2"]
 
+
+def test_assignment():
+    namespace = Namespace.from_ast(ast.parse("a = 1"), location=["namespace"])
+
+    assert namespace["a"] == Python("1")
+    assert namespace.resolve_path(["a", "value"]) == Python("1")
+
+
+def test_import_from():
+    namespace1 = Namespace.from_ast(ast.parse("import module.namespace2 as n2"), location=["namespace1"])
+    namespace2 = Namespace.from_ast(ast.parse("from . import a"), location=["module", "namespace2"])
+    namespace3 = Namespace.from_ast(ast.parse("a = 1"), location=["module", "__init__"])
+    dff_project = DFFProject([namespace1, namespace2, namespace3])
+
+    assert dff_project["namespace1"]["n2"].resolve_self["a"].resolve_self == Python("1")
