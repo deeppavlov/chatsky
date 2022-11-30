@@ -90,4 +90,11 @@ def test_import_from():
     namespace3 = Namespace.from_ast(ast.parse("a = 1"), location=["module", "__init__"])
     dff_project = DFFProject([namespace1, namespace2, namespace3])
 
-    assert dff_project["namespace1"]["n2"].resolve_self["a"].resolve_self == Python("1")
+    assert dff_project["namespace1"]["n2"].resolve_self["a"] == Python("1")
+    assert namespace2["a"] == Python("1")
+
+def test_name():
+    namespace1 = Namespace.from_ast(ast.parse("a=b=1\nc=a\nd=b"), location=["namespace1"])
+
+    assert namespace1["c"].absolute == Python("1")
+    assert namespace1["d"].absolute == Python("1")

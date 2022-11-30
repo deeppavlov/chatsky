@@ -128,6 +128,8 @@ class Expression(BaseParserObject, ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> 'Expression':
+        if isinstance(node, ast.Name):
+            return Name.from_ast(node)
         if isinstance(node, ast.Dict):
             return Dict.from_ast(node)
         # todo: replace this with isinstance when python3.7 support is dropped
@@ -145,20 +147,31 @@ class ReferenceObject(BaseParserObject, ABC):
 
     @cached_property
     @abstractmethod
-    def resolve_self(self) -> BaseParserObject:
+    def resolve_self(self) -> tp.Optional[BaseParserObject]:
         """
 
-        :return: Self, if can't resolve
+        :return: None, if can't resolve
         """
         ...
 
+    @cached_property
+    def absolute(self) -> tp.Optional[BaseParserObject]:  # todo: handle recursion
+        """
+        Returns an absolute object --  if the current object is a reference to another reference that reference will
+        be resolved as well.
+        """
+        resolved = self.resolve_self
+        if isinstance(resolved, ReferenceObject):
+            return resolved.absolute
+        return resolved
+
     def __hash__(self):
-        return BaseParserObject.__hash__(self.resolve_self)
+        return BaseParserObject.__hash__(self.resolve_self or self)
 
     def __eq__(self, other):
         if isinstance(other, ReferenceObject):
-            return BaseParserObject.__eq__(self.resolve_self, other.resolve_self)
-        return BaseParserObject.__eq__(self.resolve_self, other)
+            return BaseParserObject.__eq__(self.resolve_self or self, other.resolve_self or other)
+        return BaseParserObject.__eq__(self.resolve_self or self, other)
 
 
 class Import(Statement, ReferenceObject):
@@ -175,12 +188,12 @@ class Import(Statement, ReferenceObject):
         return f"Import(module={self.module}, alias={self.alias})"
 
     @cached_property
-    def resolve_self(self) -> BaseParserObject:
+    def resolve_self(self) -> tp.Optional[BaseParserObject]:
         try:
             return self.dff_project[".".join(self.namespace.resolve_relative_import(self.module))]
         except KeyError as error:
-            logger.debug(f"Import did not resolve: {repr(self)}.\nReason: {error}")
-            return self
+            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            return None
 
     @classmethod
     def from_ast(cls, node: ast.Import, **kwargs) -> tp.Dict[str, 'Import']:
@@ -206,12 +219,12 @@ class ImportFrom(Statement, ReferenceObject):
         return f"ImportFrom(module={self.module}, level={self.level}, obj={self.obj}, alias={self.alias})"
 
     @cached_property
-    def resolve_self(self) -> BaseParserObject:
+    def resolve_self(self) -> tp.Optional[BaseParserObject]:
         try:
             return self.dff_project[self.namespace.resolve_relative_import(self.module, self.level)][self.obj]
         except KeyError as error:
-            logger.warning(f"Import did not resolve: {repr(self)}.\nReason: {error}")
-            return self
+            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            return None
 
     @classmethod
     def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:
@@ -333,15 +346,26 @@ class Dict(Expression):
         return cls(result)
 
 
+class Name(Expression, ReferenceObject):
+    def __init__(self, name: str):
+        Expression.__init__(self)
+        ReferenceObject.__init__(self)
+        self.name = name
 
-# class Call(BaseParserObject):
-#     def __init__(
-#         self,
-#         name: BaseParserObject,
-#         args: tp.List[BaseParserObject],
-#         keywords: tp.Dict[str, BaseParserObject]
-#     ):
-#         super(Call, self).__init__()
-#         name.parent = self
-#         self.child_paths[id(name)] =
-#         self.name = name
+    @cached_property
+    def resolve_self(self) -> tp.Optional[BaseParserObject]:
+        try:
+            return self.namespace[self.name]
+        except KeyError as error:
+            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            return None
+
+    def __str__(self):
+        return self.name
+
+    def __repr__(self):
+        return f"Name({self.name})"
+
+    @classmethod
+    def from_ast(cls, node: ast.Name, **kwargs) -> 'Expression':
+        return cls(node.id)
