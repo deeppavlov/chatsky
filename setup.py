@@ -128,6 +128,7 @@ test_requirements = [
     "isort >=5.0.6,<6.0.0",
     "flask[async]>=2.1.2",
     "psutil>=5.9.1",
+    "requests>=2.28.1",
 ]
 
 devel = [
