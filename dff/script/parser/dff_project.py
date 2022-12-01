@@ -24,8 +24,8 @@ class DFFProject(BaseParserObject):
             self.add_child(namespace, namespace.name)
 
     @cached_property
-    def script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
-        args = {}
+    def actor_call(self) -> Call:
+        call = None
         for namespace in self.children.values():
             for statement in namespace.children.values():
                 if isinstance(statement, Assignment):
@@ -34,16 +34,27 @@ class DFFProject(BaseParserObject):
                         func = value.resolve_path(["func"])
                         func_name = str(func.resolve_name)
                         if func_name in ScriptInitializers.keys():
-                            if len(args) != 0:
-                                raise ScriptValidationError(f"Found two Scripts\nFirst args: {args}\nSecond call: {str(value)}")
-                            for index, arg in enumerate(ScriptInitializers[func_name]):
-                                args[arg] = value.children.get("arg_" + str(index)) or value.children.get("keyword_" + arg)
-                            if args["script"] is None:
-                                raise ScriptValidationError(f"Actor argument `script` is not set: {str(value)}")
-                            if args["start_label"] is None:
-                                raise ScriptValidationError(f"Actor argument `start_label` is not set: {str(value)}")
-                            return args["script"], args["start_label"], args["fallback_label"]
-        raise ScriptValidationError("Script is not found")
+                            if call is None:
+                                call = value
+                            else:
+                                raise ScriptValidationError(f"Found two Actor calls\nFirst: {str(call)}\nSecond:{str(value)}")
+        if call is not None:
+            return call
+        raise ScriptValidationError("Actor call is not found")
+
+    @cached_property
+    def script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
+        call = self.actor_call
+        args = {}
+        func = call.resolve_path(["func"])
+        func_name = str(func.resolve_name)
+        for index, arg in enumerate(ScriptInitializers[func_name]):
+            args[arg] = call.children.get("arg_" + str(index)) or call.children.get("keyword_" + arg)
+        if args["script"] is None:
+            raise ScriptValidationError(f"Actor argument `script` is not found: {str(call)}")
+        if args["start_label"] is None:
+            raise ScriptValidationError(f"Actor argument `start_label` is not found: {str(call)}")
+        return args["script"], args["start_label"], args["fallback_label"]
 
 
 
