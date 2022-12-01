@@ -490,7 +490,7 @@ class Subscript(Expression, ReferenceObject):
         return cls(value, Expression.from_ast(index))
 
 
-class Iterable(Expression, ABC):
+class Iterable(Expression):
     def __init__(self, iterable: tp.Iterable[Expression], iterable_type: str):
         Expression.__init__(self)
         self.type = iterable_type
