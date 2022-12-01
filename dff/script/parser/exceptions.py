@@ -2,6 +2,12 @@ class BaseParserException(BaseException):
     ...
 
 
+class ScriptValidationError(BaseParserException):
+    """
+    Raised during script validation
+    """
+
+
 class ResolutionError(BaseParserException):
     """
     Raised during name resolution

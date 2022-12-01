@@ -2,11 +2,19 @@ import typing as tp
 from pathlib import Path
 import logging
 
-from .base_parser_object import BaseParserObject, cached_property
+from .base_parser_object import BaseParserObject, cached_property, Expression, Assignment, Call
 from .namespace import Namespace
+from .exceptions import ScriptValidationError
+from dff.core.engine.core.actor import Actor
 
 
 logger = logging.getLogger(__name__)
+
+
+ScriptInitializers = {
+    "dff.core.engine.core.Actor": Actor.__init__.__wrapped__.__code__.co_varnames[1:],
+    "dff.core.engine.core.actor.Actor": Actor.__init__.__wrapped__.__code__.co_varnames[1:],
+}
 
 
 class DFFProject(BaseParserObject):
@@ -14,6 +22,29 @@ class DFFProject(BaseParserObject):
         super().__init__()
         for namespace in namespaces:
             self.add_child(namespace, namespace.name)
+
+    @cached_property
+    def get_script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
+        args = {}
+        for namespace in self.children.values():
+            for statement in namespace.children.values():
+                if isinstance(statement, Assignment):
+                    value = statement.children["value"]
+                    if isinstance(value, Call):
+                        func = value.resolve_path(["func"])
+                        func_name = str(func.resolve_name)
+                        if func_name in ScriptInitializers.keys():
+                            if len(args) != 0:
+                                raise ScriptValidationError(f"Found two Scripts\nFirst args: {args}\nSecond call: {str(value)}")
+                            for index, arg in enumerate(ScriptInitializers[func_name]):
+                                args[arg] = value.children.get("arg_" + str(index)) or value.children.get("keyword_" + arg)
+                            if args["script"] is None:
+                                raise ScriptValidationError(f"Actor argument `script` is not set: {str(value)}")
+                            if args["start_label"] is None:
+                                raise ScriptValidationError(f"Actor argument `start_label` is not set: {str(value)}")
+                            return args["script"], args["start_label"], args["fallback_label"]
+
+
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]):
         if isinstance(item, str):
