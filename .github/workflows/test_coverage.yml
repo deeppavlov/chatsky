@@ -36,6 +36,8 @@ jobs:
 
       - name: build coverage file
         env:
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
           BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: make test
         shell: bash

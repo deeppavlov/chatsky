@@ -5,6 +5,12 @@ from io import IOBase
 from pathlib import Path
 from pydantic import ValidationError
 from telebot import types
+from telethon.tl.types import (
+    InputMessagesFilterPhotos,
+    InputMessagesFilterGeo,
+    InputMessagesFilterMusic,
+    InputMessagesFilterVideo,
+)
 
 from dff.connectors.messenger.telegram.types import (
     TelegramResponse,
@@ -46,7 +52,7 @@ from dff.connectors.messenger.telegram.utils import open_io, close_io
         ),
     ],
 )
-def test_adapt_buttons(ui, button_type, markup_type, basic_bot, user_id):
+def test_adapt_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_id):
     generic_response = Response(text="test", ui=ui)
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
@@ -54,6 +60,8 @@ def test_adapt_buttons(ui, button_type, markup_type, basic_bot, user_id):
     print(telegram_response.ui.keyboard.keyboard)
     assert len(telegram_response.ui.keyboard.keyboard) == 2
     basic_bot.send_response(user_id, telegram_response)
+    messages = tg_client.get_messages("Dff_Test_Bot", None)
+    assert messages
 
 
 @pytest.mark.parametrize(
@@ -62,38 +70,52 @@ def test_adapt_buttons(ui, button_type, markup_type, basic_bot, user_id):
         (TelegramUI(keyboard=types.ReplyKeyboardRemove()),),
     ],
 )
-def test_keyboard_remove(ui, basic_bot, user_id):
+def test_keyboard_remove(ui, basic_bot, user_id, tg_client):
     generic_response = Response(text="test", ui=ui)
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui
     basic_bot.send_response(user_id, telegram_response)
+    messages = tg_client.get_messages("Dff_Test_Bot", None)
+    assert messages
 
 
 @pytest.mark.parametrize(
-    ["generic_response", "prop"],
+    ["generic_response", "prop", "filter_type"],
     [
-        (Response(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")), "image"),
-        (Response(text="test", audio=Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")), "audio"),
+        (
+            Response(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")),
+            "image",
+            InputMessagesFilterPhotos,
+        ),
+        (
+            Response(text="test", audio=Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")),
+            "audio",
+            InputMessagesFilterMusic,
+        ),
         (
             Response(
                 text="test",
                 video=Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"),
             ),
             "video",
+            InputMessagesFilterVideo,
         ),
     ],
 )
-def test_telegram_attachment(generic_response, prop, basic_bot, user_id):
+def test_telegram_attachment(generic_response, prop, filter_type, basic_bot, user_id, tg_client):
     telegram_response = TelegramResponse.parse_obj(generic_response)
     telegram_prop = vars(telegram_response).get(prop)
     generic_prop = vars(generic_response).get(prop)
     assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
     assert telegram_prop.source == generic_prop.source
     basic_bot.send_response(user_id, telegram_response)
+    messages = tg_client.get_messages("Dff_Test_Bot", None, filter_type)
+    assert messages
+    assert len(messages) > 0
 
 
-def test_adapt_attachments(basic_bot, user_id):
+def test_adapt_attachments(basic_bot, user_id, tg_client):
     generic_response = Response(
         text="test",
         attachments=Attachments(
@@ -111,14 +133,20 @@ def test_adapt_attachments(basic_bot, user_id):
     assert telegram_response.attachments.files[0].media == generic_response.attachments.files[0].source
     assert telegram_response.attachments.files[0].caption == generic_response.attachments.files[0].title
     basic_bot.send_response(user_id, telegram_response)
+    messages = tg_client.get_messages("Dff_Test_Bot", None, filter=InputMessagesFilterPhotos)
+    assert messages
+    assert len(messages) > 0
 
 
-def test_location(basic_bot, user_id):
+def test_location(basic_bot, user_id, tg_client):
     generic_response = Response(text="location", location=Location(longitude=39.0, latitude=43.0))
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.location
     basic_bot.send_response(user_id, telegram_response)
+    messages = tg_client.get_messages("Dff_Test_Bot", None, filter=InputMessagesFilterGeo)
+    assert messages
+    assert len(messages) > 0
 
 
 def test_adapt_error(basic_bot, user_id):

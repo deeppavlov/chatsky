@@ -109,6 +109,7 @@ class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin)
     :param port: The port of the app.
     :param full_uri: Setting up a webhook requires a public IP that is accessible by https. If you are hosting
         your application, this is where you pass the full public URL of your webhook.
+    :param test: whether to set up a webhook (not required for tests)
     """
 
     def __init__(
@@ -119,6 +120,7 @@ class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin)
         port: int = 8443,
         endpoint: str = "/dff-bot",
         full_uri: Optional[str] = None,
+        test: bool = False,
     ):
         if not flask_imported:
             raise ModuleNotFoundError("Flask is not installed")
@@ -129,8 +131,8 @@ class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin)
         self.port: int = port
         self.endpoint: str = endpoint
         self.full_uri: str = full_uri or "".join([f"https://{host}:{port}", endpoint])
+        self._test: bool = test
 
-    async def connect(self, callback: PipelineRunnerFunction):
         async def endpoint():
             if not request.headers.get("content-type") == "application/json":
                 abort(403)
@@ -139,10 +141,13 @@ class FlaskTelegramInterface(CallbackMessengerInterface, TelegramInterfaceMixin)
             update = types.Update.de_json(json_string)
             return self.on_request(*self._extract_telegram_request_and_id(update))
 
+        self.app.route(self.endpoint, methods=["POST"])(endpoint)
+
+    async def connect(self, callback: PipelineRunnerFunction):
         await super().connect(callback)
 
-        self.app.route(self.endpoint, methods=["POST"])(endpoint)
         self.bot.remove_webhook()
-        self.bot.set_webhook(self.full_uri)
+        if not self._test:
+            self.bot.set_webhook(self.full_uri)
 
         self.app.run(host=self.host, port=self.port)
