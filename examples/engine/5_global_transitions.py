@@ -1,8 +1,11 @@
+# %% [markdown]
 """
-5. Global transitions
-=====================
+# 5. Global transitions
+
 """
 
+
+# %%
 import re
 
 from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
@@ -13,6 +16,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
+# %%
 def high_priority_node_transition(flow_label, label):
     def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
         return (flow_label, label, 2.0)
@@ -20,6 +24,7 @@ def high_priority_node_transition(flow_label, label):
     return transition
 
 
+# %%
 toy_script = {
     GLOBAL: {
         TRANSITIONS: {
@@ -101,6 +106,7 @@ happy_path = (
 )
 
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script, start_label=("global_flow", "start_node"), fallback_label=("global_flow", "fallback_node")
 )

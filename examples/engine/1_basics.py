@@ -1,9 +1,11 @@
 # %% [markdown]
-1. Basics
-=========
+"""
+# 1. Basics
 
 This notebook shows basic example of creating a simple dialog bot (agent).
 Let's do all the necessary imports from `dff`:
+"""
+
 
 # %%
 from dff.core.engine.core import Actor
@@ -13,7 +15,9 @@ import dff.core.engine.conditions as cnd
 
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
+
 # %% [markdown]
+"""
 First of all, to create a dialog agent, we need to create a dialog script.
 Below script means a dialog script.
 A script is a dictionary, where the keys are the names of the flows.
@@ -27,6 +31,8 @@ Flow describes a sub-dialog using linked nodes. Each node has the keywords `RESP
 * `RESPONSE` contains the response that the agent will return from the current node.
 * `TRANSITIONS` describes transitions from the current node to another nodes. This is a dictionary,
 where keys are names of the nodes and values are conditions of transition to them.
+"""
+
 
 # %%
 toy_script = {
@@ -58,11 +64,15 @@ toy_script = {
     }
 }
 
+
 # %% [markdown]
+"""
 An `actor` is an object that processes user input replicas and returns responses.
 To create the actor you need to pass the script (`toy_script`), initial node (`start_label`) and
 the node to which the actor will move if none of the current conditions are performed (`fallback_label`).
 By default, if `fallback_label` is not set, then its value becomes equal to `start_label`.
+"""
+
 
 # %%
 actor = Actor(

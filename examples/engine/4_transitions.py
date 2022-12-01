@@ -1,9 +1,10 @@
 # %% [markdown]
-4. Transitions
-==============
+"""
+# 4. Transitions
 
-# TODO:
-# 1. Maybe remove `lbl.to_fallback(): cnd.true(),` from script as a trivial condition?
+This example shows transitions between flows.
+"""
+
 
 # %%
 import re
@@ -16,11 +17,6 @@ from dff.core.engine.core.types import NodeLabel3Type
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
-# %%
-# def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-#     return True
-
-# `always_true_condition` is same cnd.true()
 
 # %%
 # NodeLabel3Type == tuple[str, str, float]
@@ -33,6 +29,19 @@ def high_priority_node_transition(flow_label, label):
         return (flow_label, label, 2.0)
 
     return transition
+
+
+# %%
+"""
+There are three flows here: `global_flow`, `greeting_flow`, `music_flow`.
+Transition returns a `tuple` (`flow`, `node`, priority).
+Priority is needed to select a condition.
+
+All conditions in TRANSITIONS are being checked.
+Of the set of true conditions, the one that has the highest priority will be executed.
+Of the set of true conditions with largest priority the first met condition will be executed.
+"""
+
 
 # %%
 toy_script = {

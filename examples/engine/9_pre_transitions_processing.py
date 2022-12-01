@@ -1,12 +1,14 @@
+# %% [markdown]
 """
-9. Pre-transitions processing
-=============================
+# 9. Pre-transitions processing
+
+TODO:
+1. Remove `create_transitions`
+2. Rename start to start_node, fallback to fallback_node, step to node?
 """
 
-# TODO:
-# 1. Remove `create_transitions`
-# 2. Rename start to start_node, fallback to fallback_node, step to node?
 
+# %%
 from dff.core.engine.core.keywords import (
     GLOBAL,
     RESPONSE,
@@ -21,6 +23,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
+# %%
 def create_transitions():
     return {
         ("left", "step_2"): "left",
@@ -48,6 +51,7 @@ def get_previous_node_response_for_response_processing(ctx: Context, actor: Acto
     return ctx
 
 
+# %%
 # a dialog script
 toy_script = {
     "root": {
@@ -79,6 +83,7 @@ happy_path = (
 )
 
 
+# %%
 pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":

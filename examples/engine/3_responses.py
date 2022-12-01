@@ -1,6 +1,7 @@
 # %% [markdown]
 """
-# 3. Responses
+3. Responses
+============
 
 This example shows different options for setting responses.
 """
@@ -21,7 +22,9 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 
 logger = logging.getLogger(__name__)
 
+
 # %% [markdown]
+"""
 The response can be set by any object of `python`:
 
 * `callable` objects - If the object is `callable` it must have a special signature:  
@@ -36,6 +39,8 @@ In this form, this object is called with the corresponding arguments.
 Out of the box `DSL` has a single response function:
 
 * `choice` - gives one random response from the list of responses.
+"""
+
 
 # %%
 def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:

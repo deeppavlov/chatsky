@@ -1,12 +1,14 @@
+# %% [markdown]
 """
-8. Misc
-=======
+# 8. Misc
+
+TODO:
+1. Explain that MISC == miscellaneous and why we need it
+2. Remove `create_transitions`
 """
 
-# TODO:
-# 1. Explain that MISC == miscellaneous and why we need it
-# 2. Remove `create_transitions`
 
+# %%
 from typing import Any
 
 from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, MISC
@@ -17,6 +19,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
+# %%
 def create_transitions():
     return {
         ("left", "step_2"): "left",
@@ -38,7 +41,7 @@ def custom_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     return f"ctx.last_label={ctx.last_label}: current_node.misc={current_node.misc}"
 
 
-# a dialog script
+# %%
 toy_script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
@@ -118,6 +121,7 @@ happy_path = (
 )
 
 
+# %%
 pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":

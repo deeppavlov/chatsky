@@ -1,8 +1,10 @@
 # %% [markdown]
-2. Conditions
-===============
+"""
+# 2. Conditions
 
 This example shows different options for setting transition conditions from one node to another.
+"""
+
 
 # %%
 import re # Regular expression library
@@ -15,6 +17,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 # %% [markdown]
+"""
 The transition condition is set by the function.
 If this function returns the value `true`, then the actor performs the corresponding transition.
 Condition functions have signature  
@@ -43,6 +46,8 @@ def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 ```
 always returns `true` and `always_true_condition` function is same as `dff.core.engine.conditions.true()`.
+"""
+
 
 # %%
 def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:

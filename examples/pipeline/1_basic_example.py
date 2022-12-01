@@ -1,7 +1,6 @@
 # %% [markdown]
 """
 # 1. Basic Example
-[![Open In Colab](https://colab.research.google.com/assets/colab-badge.svg)](https://colab.research.google.com/github/deeppavlov/dialog_flow_framework/blob/gh-pages/examples/pipeline/1_basic_example.ipynb)
 
 The following example shows basic usage of `pipeline` module as an extension to `dff.core.engine`.
 """
@@ -13,6 +12,7 @@ from dff.core.pipeline import Pipeline
 
 from dff.utils.testing.common import check_happy_path, is_interactive_mode
 from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+
 
 # %% [markdown]
 """
@@ -27,7 +27,6 @@ pre- and postprocessors lists are empty.
 Pipeline object can be called with user input as first argument and dialog id (any immutable object).
 This call will return Context, its `last_response` property will be actors response.
 """
-
 
 # %%
 pipeline = Pipeline.from_script(

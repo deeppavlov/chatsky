@@ -1,11 +1,13 @@
+# %% [markdown]
 """
-7. Pre-response processing
-==========================
+# 7. Pre-response processing
+
+TODO:
+1. Remove `create_transitions` - doesn't use
 """
 
-# TODO:
-# 1. Remove `create_transitions` - doesn't use
 
+# %%
 from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PRE_RESPONSE_PROCESSING
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.labels as lbl
@@ -15,6 +17,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
+# %%
 def create_transitions():
     return {
         ("left", "step_2"): "left",
@@ -46,7 +49,7 @@ def add_prefix(prefix):
     return add_prefix_processing
 
 
-# a dialog script
+# %%
 toy_script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
@@ -98,6 +101,7 @@ happy_path = (
 )
 
 
+# %%
 pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":

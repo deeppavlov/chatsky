@@ -6,8 +6,6 @@ The following example shows messenger interfaces usage.
 """
 
 # %%
-import logging
-
 from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
@@ -16,7 +14,6 @@ from dff.core.pipeline import Pipeline, CallbackMessengerInterface
 from dff.utils.testing.common import is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
-logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """

@@ -80,6 +80,11 @@ html_show_sourcelink = False
 
 # Finding examples directories
 nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
+nbsphinx_prolog = """
+:tutorial_name: {{ env.docname }}
+:tutorial_path: \\.
+:github_url: deeppavlov/dialog_flow_framework
+"""
 
 
 # Theme options
@@ -98,4 +103,6 @@ html_theme_options = {
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(["examples/engine/[1-4]*.py", "examples/pipeline/[1-4]*.py", "examples/pipeline/_*.py"])
+    generate_example_links_for_notebook_creation(
+        ["examples/engine/[1]*.py", "examples/pipeline/[1]*.py", "examples/pipeline/_*.py"]
+    )
