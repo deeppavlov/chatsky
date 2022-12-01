@@ -48,6 +48,11 @@ class BaseParserObject(ABC):
         self.append_path: tp.Optional[str] = None
         self.children: tp.Dict[str, BaseParserObject] = {}
 
+    def add_child(self, child: 'BaseParserObject', asname: str):
+        child.parent = self
+        child.append_path = asname
+        self.children[asname] = child
+
     def resolve_path(self, path: tp.List[str]) -> 'BaseParserObject':
         if len(path) == 0:
             return self
@@ -242,12 +247,8 @@ class ImportFrom(Statement, ReferenceObject):
 class Assignment(Statement):
     def __init__(self, target: Expression, value: Expression):
         super().__init__()
-        target.parent = self
-        target.append_path = "target"
-        self.children["target"] = target
-        value.append_path = "value"
-        value.parent = self
-        self.children["value"] = value
+        self.add_child(target, "target")
+        self.add_child(value, "value")
 
     def __str__(self):
         return f"{str(self.children['target'])} = {str(self.children['value'])}"
@@ -313,13 +314,9 @@ class Dict(Expression):
         super().__init__()
         self.keys: tp.Dict[Expression, str] = {}
         for key, value in dictionary.items():
-            key.parent = self
-            value.parent = self
-            key.append_path = repr(key) + "key"
-            value.append_path = repr(key) + "value"
             self.keys[key] = repr(key)
-            self.children[repr(key) + "key"] = key
-            self.children[repr(key) + "value"] = value
+            self.add_child(key, repr(key) + "key")
+            self.add_child(value, repr(key) + "value")
 
     def __str__(self):
         return "{" + ", ".join(
@@ -382,9 +379,7 @@ class Attribute(Expression, ReferenceObject):
     def __init__(self, value: Expression, attr: str):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
-        value.parent = self
-        value.append_path = "value"
-        self.children["value"] = value
+        self.add_child(value, "value")
         self.attr = attr
 
     @cached_property
@@ -414,12 +409,8 @@ class Subscript(Expression, ReferenceObject):
     def __init__(self, value: Expression, index: Expression):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
-        value.parent = self
-        value.append_path = "value"
-        index.parent = self
-        index.append_path = "index"
-        self.children["value"] = value
-        self.children["index"] = index
+        self.add_child(value, "value")
+        self.add_child(index, "index")
 
     @cached_property
     def resolve_self(self) -> tp.Optional[BaseParserObject]:
@@ -436,10 +427,10 @@ class Subscript(Expression, ReferenceObject):
         return None
 
     def __str__(self):
-        return str(self.children["value"]) + "[" + self.children["index"] + "]"
+        return str(self.children["value"]) + "[" + str(self.children["index"]) + "]"
 
     def __repr__(self):
-        return f"Subscript(value={repr(self.children['value'])}; index={self.children['index']})"
+        return f"Subscript(value={repr(self.children['value'])}; index={repr(self.children['index'])})"
 
     @classmethod
     def from_ast(cls, node: ast.Subscript, **kwargs) -> 'Expression':
@@ -459,9 +450,7 @@ class Iterable(Expression, ABC):
         Expression.__init__(self)
         self.type = iterable_type
         for index, value in enumerate(iterable):
-            value.parent = self
-            value.append_path = repr(Python(str(index)))
-            self.children[repr(Python(str(index)))] = value
+            self.add_child(value, repr(Python(str(index))))
 
     def __getitem__(self, item: Python):
         return self.children[repr(item)]

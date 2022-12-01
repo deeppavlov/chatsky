@@ -10,9 +10,7 @@ class DFFProject(BaseParserObject):
     def __init__(self, namespaces: tp.List['Namespace']):
         super().__init__()
         for namespace in namespaces:
-            namespace.parent = self
-            namespace.append_path = namespace.name
-            self.children[namespace.name] = namespace
+            self.add_child(namespace, namespace.name)
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]):
         if isinstance(item, str):

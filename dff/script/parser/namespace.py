@@ -13,9 +13,7 @@ class Namespace(BaseParserObject):
         self.location = location
         self.name = ".".join(location)
         for key, value in names.items():
-            value.parent = self
-            value.append_path = key
-        self.children = names
+            self.add_child(value, key)
 
     def resolve_relative_import(self, module: str, level: int = 0) -> tp.List[str]:
         stripped_module = module.lstrip(".")
