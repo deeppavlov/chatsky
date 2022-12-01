@@ -128,6 +128,8 @@ class Expression(BaseParserObject, ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> 'Expression':
+        if isinstance(node, ast.Call):
+            return Call.from_ast(node)
         if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
             return Iterable.from_ast(node)
         if isinstance(node, ast.Subscript):
@@ -344,7 +346,7 @@ class Dict(Expression):
     def from_ast(cls, node: ast.Dict, **kwargs) -> 'Dict':
         result = {}
         for key, value in zip(node.keys, node.values):
-            if key is None:  # todo: add support for dict comprehensions
+            if key is None:
                 raise StarError(f"Dict comprehensions are not supported: {unparse(node)}")
             result[Expression.from_ast(key)] = Expression.from_ast(value)
         return cls(result)
@@ -483,3 +485,41 @@ class Iterable(Expression, ABC):
         else:
             raise TypeError(type(node))
         return cls(result, iterable_type)
+
+
+class Call(Expression):
+    def __init__(self, func: Expression, args: tp.List[Expression], keywords: tp.Dict[str, Expression]):
+        Expression.__init__(self)
+        self.add_child(func, "func")
+        for index, arg in enumerate(args):
+            self.add_child(arg, "arg_" + str(index))
+        for key, value in keywords.items():
+            self.add_child(value, "keyword_" + key)
+
+    def __str__(self):
+        return str(self.children["func"]) + "(" + \
+               ", ".join(
+                   [
+                       str(self.children[arg]) for arg in self.children.keys() if arg.startswith("arg_")
+                   ] + [
+                       f"{remove_prefix(keyword, 'keyword_')}={str(self.children[keyword])}" for keyword in self.children.keys() if keyword.startswith("keyword_")
+                   ]
+               ) + ")"
+
+    def __repr__(self):
+        return f"Call({'; '.join([k + ' = ' + repr(v) for k, v in self.children.items()])})"
+
+    @classmethod
+    def from_ast(cls, node: ast.Call, **kwargs) -> 'Call':
+        func = Expression.from_ast(node.func)
+        args = []
+        keywords = {}
+        for arg in node.args:
+            if isinstance(arg, ast.Starred):
+                raise StarError(f"Starred calls are not supported: {unparse(node)}")
+            args.append(Expression.from_ast(arg))
+        for keyword in node.keywords:
+            if keyword.arg is None:
+                raise StarError(f"Starred calls are not supported: {unparse(node)}")
+            keywords[str(keyword.arg)] = Expression.from_ast(keyword.value)
+        return cls(func, args, keywords)

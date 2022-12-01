@@ -1,6 +1,6 @@
 import ast
 
-from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute, Subscript
+from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute, Subscript, Call
 from dff.script.parser.namespace import Namespace
 from dff.script.parser.dff_project import DFFProject
 
@@ -121,3 +121,12 @@ def test_iterable():
     namespace = Namespace.from_ast(ast.parse("a = [1, 2, 3]\nb = a[2]"), location=["namespace"])
 
     assert namespace["b"] == Python("3")
+
+
+def test_call():
+    namespace = Namespace.from_ast(ast.parse("import Actor\na = Actor(1, 2, c=3)"), location=["namespace"])
+
+    assert isinstance(namespace["a"], Call)
+    assert repr(namespace["a"].resolve_path(["func"])) == "Name(Actor)"
+    assert namespace["a"].resolve_path(["arg_1"]) == Python("2")
+    assert namespace["a"].resolve_path(["keyword_c"]) == Python("3")

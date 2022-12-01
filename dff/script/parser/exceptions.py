@@ -9,6 +9,7 @@ class ResolutionError(BaseParserException):
     ...
 
 
+# todo: add support for star notation
 class StarError(BaseParserException):
     """
     Raised when star notation is used
