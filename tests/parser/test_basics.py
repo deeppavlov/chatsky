@@ -1,6 +1,6 @@
 import ast
 
-from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute, Subscript, Call
+from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute, Subscript, Call, ReferenceObject
 from dff.script.parser.namespace import Namespace
 from dff.script.parser.dff_project import DFFProject
 
@@ -131,3 +131,18 @@ def test_call():
     assert repr(namespace["a"].resolve_path(["func"])) == "Name(Actor)"
     assert namespace["a"].resolve_path(["arg_1"]) == Python("2")
     assert namespace["a"].resolve_path(["keyword_c"]) == Python("3")
+
+
+def test_name_resolution():
+    namespace1 = Namespace.from_ast(ast.parse("import namespace2\na = namespace2.a"), location=["namespace1"])
+    namespace2 = Namespace.from_ast(ast.parse("import dff\na = dff.actor"), location=["namespace2"])
+    namespace3 = Namespace.from_ast(ast.parse("import dff\na = dff.actor()"), location=["namespace3"])
+    namespace4 = Namespace.from_ast(ast.parse("from namespace2 import a as b\na = b()"), location=["namespace4"])
+
+    dff_project = DFFProject([namespace1, namespace2, namespace3, namespace4])
+
+    assert str(namespace1["a"].resolve_name) == "dff.actor"
+
+    assert str(namespace3["a"].resolve_path(["func"]).resolve_name) == "dff.actor"
+
+    assert str(namespace4["a"].resolve_path(["func"]).resolve_name) == "dff.actor"

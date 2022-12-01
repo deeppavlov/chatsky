@@ -167,13 +167,21 @@ class ReferenceObject(BaseParserObject, ABC):
     @cached_property
     def absolute(self) -> tp.Optional[BaseParserObject]:  # todo: handle recursion
         """
-        Returns an absolute object --  if the current object is a reference to another reference that reference will
+        Return an absolute object --  if the current object is a reference to another reference that reference will
         be resolved as well.
         """
         resolved = self.resolve_self
         if isinstance(resolved, ReferenceObject):
             return resolved.absolute
         return resolved
+
+    @cached_property
+    @abstractmethod
+    def resolve_name(self) -> BaseParserObject:
+        """
+        Replace absolute name of the object
+        """
+        ...
 
     def __hash__(self):
         return BaseParserObject.__hash__(self.absolute or self)
@@ -205,6 +213,10 @@ class Import(Statement, ReferenceObject):
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
 
+    @cached_property
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+        return self.absolute or Expression.from_ast(ast.parse(self.module).body[0].value)
+
     @classmethod
     def from_ast(cls, node: ast.Import, **kwargs) -> tp.Dict[str, 'Import']:
         result = {}
@@ -235,6 +247,13 @@ class ImportFrom(Statement, ReferenceObject):
         except KeyError as error:
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
+
+    @cached_property
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+        resolved = self.resolve_self
+        if isinstance(resolved, ReferenceObject):
+            resolved = resolved.resolve_name
+        return resolved or Expression.from_ast(ast.parse(self.module + "." + self.obj).body[0].value)
 
     @classmethod
     def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:
@@ -366,6 +385,13 @@ class Name(Expression, ReferenceObject):
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
 
+    @cached_property
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+        resolved = self.resolve_self
+        if isinstance(resolved, ReferenceObject):
+            return resolved.resolve_name
+        return resolved or self
+
     def __str__(self):
         return self.name
 
@@ -395,6 +421,13 @@ class Attribute(Expression, ReferenceObject):
         except KeyError as error:
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
         return None
+
+    @cached_property
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+        value = self.children["value"]
+        if isinstance(value, ReferenceObject):
+            value = value.resolve_name
+        return self.resolve_self or Attribute(value, self.attr)
 
     def __str__(self):
         return str(self.children["value"]) + "." + self.attr
@@ -427,6 +460,16 @@ class Subscript(Expression, ReferenceObject):
         except KeyError as error:
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
         return None
+
+    @cached_property
+    def resolve_name(self) -> BaseParserObject:
+        value = self.children["value"]
+        if isinstance(value, ReferenceObject):
+            value = value.resolve_name
+        index = self.children["index"]
+        if isinstance(index, ReferenceObject):
+            index = index.resolve_name
+        return self.resolve_self or Subscript(value, index)
 
     def __str__(self):
         return str(self.children["value"]) + "[" + str(self.children["index"]) + "]"
