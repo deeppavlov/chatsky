@@ -14,7 +14,7 @@ class Namespace(BaseParserObject):
         self.name = ".".join(location)
         for key, value in names.items():
             value.parent = self
-            value.append_path = [key]
+            value.append_path = key
         self.children = names
 
     def resolve_relative_import(self, module: str, level: int = 0) -> tp.List[str]:

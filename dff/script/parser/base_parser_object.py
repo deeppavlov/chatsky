@@ -45,7 +45,7 @@ class BaseParserObject(ABC):
     """
     def __init__(self):
         self.parent: tp.Optional[BaseParserObject] = None
-        self.append_path: tp.List[str] = []
+        self.append_path: tp.Optional[str] = None
         self.children: tp.Dict[str, BaseParserObject] = {}
 
     def resolve_path(self, path: tp.List[str]) -> 'BaseParserObject':
@@ -63,7 +63,7 @@ class BaseParserObject(ABC):
     def path(self) -> tp.List[str]:
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {repr(self)}")
-        return self.parent.path + self.append_path
+        return self.parent.path + ([self.append_path] if self.append_path else [])
 
     @cached_property
     def namespace(self) -> 'Namespace':
@@ -233,6 +233,8 @@ class ImportFrom(Statement, ReferenceObject):
     def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:
         result = {}
         for name in node.names:
+            if name.name == '*':
+                raise StarError(f"Starred import is not supported: {unparse(node)}")
             result[name.asname or name.name] = cls(node.module or "", node.level, name.name, name.asname)
         return result
 
@@ -241,7 +243,9 @@ class Assignment(Statement):
     def __init__(self, target: Expression, value: Expression):
         super().__init__()
         target.parent = self
+        target.append_path = "target"
         self.children["target"] = target
+        value.append_path = "value"
         value.parent = self
         self.children["value"] = value
 
@@ -311,8 +315,8 @@ class Dict(Expression):
         for key, value in dictionary.items():
             key.parent = self
             value.parent = self
-            key.append_path = [repr(key) + "key"]
-            value.append_path = [repr(key) + "value"]
+            key.append_path = repr(key) + "key"
+            value.append_path = repr(key) + "value"
             self.keys[key] = repr(key)
             self.children[repr(key) + "key"] = key
             self.children[repr(key) + "value"] = value
@@ -343,7 +347,7 @@ class Dict(Expression):
     def from_ast(cls, node: ast.Dict, **kwargs) -> 'Dict':
         result = {}
         for key, value in zip(node.keys, node.values):
-            if key is None:
+            if key is None:  # todo: add support for dict comprehensions
                 raise StarError(f"Dict comprehensions are not supported: {unparse(node)}")
             result[Expression.from_ast(key)] = Expression.from_ast(value)
         return cls(result)
@@ -379,7 +383,7 @@ class Attribute(Expression, ReferenceObject):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
         value.parent = self
-        value.append_path = ["value"]
+        value.append_path = "value"
         self.children["value"] = value
         self.attr = attr
 
@@ -411,9 +415,9 @@ class Subscript(Expression, ReferenceObject):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
         value.parent = self
-        value.append_path = ["value"]
+        value.append_path = "value"
         index.parent = self
-        index.append_path = ["index"]
+        index.append_path = "index"
         self.children["value"] = value
         self.children["index"] = index
 
@@ -456,7 +460,7 @@ class Iterable(Expression, ABC):
         self.type = iterable_type
         for index, value in enumerate(iterable):
             value.parent = self
-            value.append_path = [repr(Python(str(index)))]
+            value.append_path = repr(Python(str(index)))
             self.children[repr(Python(str(index)))] = value
 
     def __getitem__(self, item: Python):

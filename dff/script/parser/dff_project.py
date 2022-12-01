@@ -11,7 +11,7 @@ class DFFProject(BaseParserObject):
         super().__init__()
         for namespace in namespaces:
             namespace.parent = self
-            namespace.append_path = [namespace.name]
+            namespace.append_path = namespace.name
             self.children[namespace.name] = namespace
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]):
