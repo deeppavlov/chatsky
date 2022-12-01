@@ -50,7 +50,5 @@ def user_id():
 @pytest.fixture(scope="module")
 def tg_client(session_file, env_var_presence):
     _, _, _ = env_var_presence
-    client = TelegramClient(session_file, os.getenv("TG_API_ID"), os.getenv("TG_API_HASH"))
-    client.run_until_disconnected()
-    yield client
-    client.disconnect()
+    with TelegramClient(str(session_file), os.getenv("TG_API_ID"), os.getenv("TG_API_HASH")) as client:
+        yield client
