@@ -24,7 +24,7 @@ class DFFProject(BaseParserObject):
             self.add_child(namespace, namespace.name)
 
     @cached_property
-    def get_script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
+    def script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
         args = {}
         for namespace in self.children.values():
             for statement in namespace.children.values():
@@ -43,6 +43,7 @@ class DFFProject(BaseParserObject):
                             if args["start_label"] is None:
                                 raise ScriptValidationError(f"Actor argument `start_label` is not set: {str(value)}")
                             return args["script"], args["start_label"], args["fallback_label"]
+        raise ScriptValidationError("Script is not found")
 
 
 
