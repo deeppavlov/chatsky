@@ -39,7 +39,7 @@ doc = [
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
-    "sphinx_gallery>=0.11.1",
+    "sphinx_gallery==0.7.0",
     "sphinx-autodoc-typehints>=1.19.4",
     "nbsphinx>=0.8.9",
     "jupytext>=1.14.1",

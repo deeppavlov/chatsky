@@ -39,6 +39,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
+    "IPython.sphinxext.ipython_console_highlighting"
 ]
 
 suppress_warnings = ["image.nonlocal_uri"]
@@ -104,5 +105,5 @@ html_theme_options = {
 
 def setup(_):
     generate_example_links_for_notebook_creation(
-        ["examples/engine/[1]*.py", "examples/pipeline/[1]*.py", "examples/pipeline/_*.py"]
+        ["examples/engine/*.py", "examples/pipeline/*.py"]
     )

@@ -8,6 +8,10 @@ Let's do all the necessary imports from `dff`:
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 from dff.core.engine.core import Actor
 from dff.core.pipeline import Pipeline
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -81,8 +85,6 @@ actor = Actor(
     fallback_label=("greeting_flow", "fallback_node")
 )
 
-# %%
-# testing example
 happy_path = (
     ("Hi", "Hi, how are you?"),  # start_node -> node1
     ("I'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2

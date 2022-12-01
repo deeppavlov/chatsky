@@ -6,6 +6,10 @@ The following example shows pipeline creation from dict and most important pipel
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 import logging
 
 from dff.core.engine.core import Actor

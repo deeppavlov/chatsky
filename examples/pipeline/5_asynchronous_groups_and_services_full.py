@@ -5,6 +5,11 @@
 The following example shows pipeline asynchronous service and service group usage.
 """
 
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
+
 # %%
 import asyncio
 import json

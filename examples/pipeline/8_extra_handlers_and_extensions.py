@@ -5,6 +5,11 @@
 The following example shows how pipeline can be extended by global extra handlers and custom functions.
 """
 
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
+
 # %%
 import asyncio
 import json

@@ -6,6 +6,10 @@
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 import logging
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE

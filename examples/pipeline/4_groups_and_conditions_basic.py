@@ -5,6 +5,10 @@
 The following example shows pipeline service group usage and start conditions.
 """
 
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
 # %%
 import json
 import logging

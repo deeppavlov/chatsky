@@ -5,6 +5,11 @@
 The following example shows basic usage of `pipeline` module as an extension to `dff.core.engine`.
 """
 
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
+
 # %%
 from dff.core.engine.core import Context
 

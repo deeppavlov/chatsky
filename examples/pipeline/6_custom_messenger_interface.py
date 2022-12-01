@@ -5,6 +5,11 @@
 The following example shows messenger interfaces usage.
 """
 
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
+
 # %%
 from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.context import get_last_index

@@ -9,6 +9,10 @@ TODO:
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 from typing import Any
 
 from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, MISC

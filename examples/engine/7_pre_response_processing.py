@@ -8,6 +8,10 @@ TODO:
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PRE_RESPONSE_PROCESSING
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.labels as lbl

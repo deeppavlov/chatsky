@@ -6,6 +6,11 @@
 This example shows different options for setting responses.
 """
 
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
+
 # %%
 import logging
 import re

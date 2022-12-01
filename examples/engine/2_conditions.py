@@ -1,9 +1,14 @@
 # %% [markdown]
 """
-# 2. Conditions
+2. Conditions
+=============
 
 This example shows different options for setting transition conditions from one node to another.
 """
+
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
 
 
 # %%

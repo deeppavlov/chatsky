@@ -7,6 +7,10 @@ This example shows transitions between flows.
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 import re
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE

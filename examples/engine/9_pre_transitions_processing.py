@@ -9,6 +9,10 @@ TODO:
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 from dff.core.engine.core.keywords import (
     GLOBAL,
     RESPONSE,
