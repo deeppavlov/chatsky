@@ -1,7 +1,8 @@
 import typing as tp
 import ast
+from pathlib import Path
 
-from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment
+from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, remove_suffix, Import, ImportFrom
 
 if tp.TYPE_CHECKING:
     from .dff_project import DFFProject
@@ -25,6 +26,8 @@ class Namespace(BaseParserObject):
                 raise RuntimeError(f"Level is set but module contains leading dots: module={module}, level={level}")
         if level == 0:
             level = 1
+        if level > len(self.location):
+            raise ImportError(f"Cannot import file outside the project_root_dir\nCurrent file location={self.location}\nAttempted import of {module} at level {level}")
         return self.location[:-level] + (stripped_module.split('.') if stripped_module != "" else [])
 
     @cached_property
@@ -49,9 +52,25 @@ class Namespace(BaseParserObject):
     def __repr__(self) -> str:
         return f"Namespace(name={self.name}; {'; '.join(map(repr, self.children.values()))})"
 
+    def get_imports(self) -> tp.List[tp.List[str]]:
+        imports = []
+        for statement in self.children.values():
+            if isinstance(statement, Import):
+                imports.append(self.resolve_relative_import(statement.module))
+            if isinstance(statement, ImportFrom):
+                imports.append(self.resolve_relative_import(statement.module, statement.level))
+        return imports
+
     @classmethod
     def from_ast(cls, node: ast.Module, **kwargs) -> 'Namespace':
         children = {}
         for statement in node.body:
             children.update(Statement.from_ast(statement))
         return cls(names=children, **kwargs)
+
+    @classmethod
+    def from_file(cls, project_root_dir: Path, file: Path):
+        location = list(file.with_suffix("").relative_to(project_root_dir).parts)
+        with open(file, "r", encoding="utf-8") as fd:
+            return Namespace.from_ast(ast.parse(fd.read()), location=location)
+

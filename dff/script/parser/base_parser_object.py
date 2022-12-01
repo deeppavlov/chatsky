@@ -331,13 +331,20 @@ class Python(Expression):
 
 
 class Dict(Expression):
-    def __init__(self, dictionary: tp.Dict[Expression, Expression]):
+    def __init__(self, keys: tp.List[Expression], values: tp.List[Expression]):
         super().__init__()
-        self.keys: tp.Dict[Expression, str] = {}
-        for key, value in dictionary.items():
-            self.keys[key] = repr(key)
+        self._keys = []
+        for key, value in zip(keys, values):
+            self._keys.append((key, repr(key)))
             self.add_child(key, repr(key) + "key")
             self.add_child(value, repr(key) + "value")
+
+    @cached_property
+    def keys(self) -> tp.Dict[Expression, str]:
+        result = {}
+        for key, value in self._keys:
+            result[key] = value
+        return result
 
     def __str__(self):
         return "{" + ", ".join(
@@ -363,12 +370,13 @@ class Dict(Expression):
 
     @classmethod
     def from_ast(cls, node: ast.Dict, **kwargs) -> 'Dict':
-        result = {}
+        keys, values = [], []
         for key, value in zip(node.keys, node.values):
             if key is None:
                 raise StarError(f"Dict comprehensions are not supported: {unparse(node)}")
-            result[Expression.from_ast(key)] = Expression.from_ast(value)
-        return cls(result)
+            keys.append(Expression.from_ast(key))
+            values.append(Expression.from_ast(value))
+        return cls(keys,values)
 
 
 class Name(Expression, ReferenceObject):
