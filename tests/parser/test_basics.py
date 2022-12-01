@@ -121,6 +121,7 @@ def test_iterable():
     namespace = Namespace.from_ast(ast.parse("a = [1, 2, 3]\nb = a[2]"), location=["namespace"])
 
     assert namespace["b"] == Python("3")
+    assert namespace["a"][Python("0")] == Python("1")
 
 
 def test_call():
