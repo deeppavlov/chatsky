@@ -31,7 +31,7 @@ def iterate_dir_generating_notebook_links(path: Path, dest: str, include: List[s
     if not path.is_dir():
         raise Exception(f"Entity {path} appeared to be a file during processing!")
     includes = list()
-    for entity in path.glob("./*"):
+    for entity in sorted(path.glob("./*")):
         doc_path = Path(dest) / entity.relative_to("examples/")
         if not entity.name.startswith("__"):
             if (
