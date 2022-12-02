@@ -207,12 +207,12 @@ class ReferenceObject(BaseParserObject, ABC):
         ...
 
     def __hash__(self):
-        return BaseParserObject.__hash__(self.absolute or self)
+        return BaseParserObject.__hash__(self.resolve_name)
 
     def __eq__(self, other):
         if isinstance(other, ReferenceObject):
-            return BaseParserObject.__eq__(self.absolute or self, other.absolute or other)
-        return BaseParserObject.__eq__(self.absolute or self, other)
+            return BaseParserObject.__eq__(self.resolve_name, other.resolve_name)
+        return BaseParserObject.__eq__(self.resolve_name or self, other)
 
 
 class Import(Statement, ReferenceObject):
