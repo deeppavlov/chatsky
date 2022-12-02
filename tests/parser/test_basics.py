@@ -14,15 +14,15 @@ def test_just_works():
 def test_path():
     obj = Expression.from_ast(ast.parse("{1: {2: '3'}}").body[0].value)
     assert obj.children["Python(1)value"].children["Python(2)key"] == \
-           obj.resolve_path(["Python(1)value", "Python(2)key"])
+           obj.resolve_path(("Python(1)value", "Python(2)key"))
 
 
 def test_multiple_keys():
     obj = Expression.from_ast(ast.parse("{1: 1, '1': '1'}").body[0].value)
-    assert repr(obj.resolve_path(["Python(1)value"])) == "Python(1)"
-    assert repr(obj.resolve_path(["Python(1)key"])) == "Python(1)"
-    assert repr(obj.resolve_path(["String(1)value"])) == "String(1)"
-    assert repr(obj.resolve_path(["String(1)key"])) == "String(1)"
+    assert repr(obj.resolve_path(("Python(1)value",))) == "Python(1)"
+    assert repr(obj.resolve_path(("Python(1)key",))) == "Python(1)"
+    assert repr(obj.resolve_path(("String(1)value",))) == "String(1)"
+    assert repr(obj.resolve_path(("String(1)key",))) == "String(1)"
 
 
 def test_get_item():
@@ -38,12 +38,12 @@ def test_import_resolution():
     namespace1 = Namespace.from_ast(ast.parse("import namespace2"), location=["namespace1"])
     namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["namespace2"])
     dff_project = DFFProject([namespace1, namespace2])
-    import_stmt = dff_project.resolve_path(["namespace1", "namespace2"])
+    import_stmt = dff_project.resolve_path(("namespace1", "namespace2"))
 
     assert isinstance(import_stmt, Import)
     assert import_stmt.resolve_self == namespace2
-    assert import_stmt == namespace1.resolve_path(["namespace2"])
-    assert import_stmt.path == ["namespace1", "namespace2"]
+    assert import_stmt == namespace1.resolve_path(("namespace2",))
+    assert import_stmt.path == ("namespace1", "namespace2")
 
 
 def test_multiple_imports():
@@ -52,8 +52,8 @@ def test_multiple_imports():
     namespace3 = Namespace.from_ast(ast.parse(""), location=["namespace3"])
     dff_project = DFFProject([namespace1, namespace2, namespace3])
 
-    import_2 = dff_project.resolve_path(["namespace1", "namespace2"])
-    import_3 = dff_project.resolve_path(["namespace1", "namespace3"])
+    import_2 = dff_project.resolve_path(("namespace1", "namespace2"))
+    import_3 = dff_project.resolve_path(("namespace1", "namespace3"))
 
     assert isinstance(import_2, Import)
     assert isinstance(import_3, Import)
@@ -69,19 +69,19 @@ def test_multilevel_import_resolution():
     namespace1 = Namespace.from_ast(ast.parse("import module.namespace2 as n2"), location=["namespace1"])
     namespace2 = Namespace.from_ast(ast.parse("import namespace1"), location=["module", "namespace2"])
     dff_project = DFFProject([namespace1, namespace2])
-    import_stmt1 = dff_project.resolve_path(["namespace1", "n2"])
+    import_stmt1 = dff_project.resolve_path(("namespace1", "n2"))
 
     assert isinstance(import_stmt1, Import)
     assert import_stmt1.resolve_self == namespace2
-    assert import_stmt1 == namespace1.resolve_path(["n2"])
-    assert import_stmt1.path == ["namespace1", "n2"]
+    assert import_stmt1 == namespace1.resolve_path(("n2",))
+    assert import_stmt1.path == ("namespace1", "n2")
 
 
 def test_assignment():
     namespace = Namespace.from_ast(ast.parse("a = 1"), location=["namespace"])
 
     assert namespace["a"] == Python("1")
-    assert namespace.resolve_path(["a", "value"]) == Python("1")
+    assert namespace.resolve_path(("a", "value")) == Python("1")
 
 
 def test_import_from():
@@ -128,9 +128,9 @@ def test_call():
     namespace = Namespace.from_ast(ast.parse("import Actor\na = Actor(1, 2, c=3)"), location=["namespace"])
 
     assert isinstance(namespace["a"], Call)
-    assert repr(namespace["a"].resolve_path(["func"])) == "Name(Actor)"
-    assert namespace["a"].resolve_path(["arg_1"]) == Python("2")
-    assert namespace["a"].resolve_path(["keyword_c"]) == Python("3")
+    assert repr(namespace["a"].resolve_path(("func",))) == "Name(Actor)"
+    assert namespace["a"].resolve_path(("arg_1",)) == Python("2")
+    assert namespace["a"].resolve_path(("keyword_c",)) == Python("3")
 
 
 def test_name_resolution():
@@ -143,6 +143,26 @@ def test_name_resolution():
 
     assert str(namespace1["a"].resolve_name) == "dff.actor"
 
-    assert str(namespace3["a"].resolve_path(["func"]).resolve_name) == "dff.actor"
+    assert str(namespace3["a"].resolve_path(("func",)).resolve_name) == "dff.actor"
 
-    assert str(namespace4["a"].resolve_path(["func"]).resolve_name) == "dff.actor"
+    assert str(namespace4["a"].resolve_path(("func",)).resolve_name) == "dff.actor"
+
+
+def test_dependency_extraction():
+    namespace1 = Namespace.from_ast(ast.parse("import namespace2\na = namespace2.a"), location=["namespace1"])
+    namespace2 = Namespace.from_ast(ast.parse("from namespace3 import c\nfrom namespace4 import d\na = c[d]"), location=["namespace2"])
+    namespace3 = Namespace.from_ast(ast.parse("c=e\ne={1: 2}\nf=1"), location=["namespace3"])
+    namespace4 = Namespace.from_ast(ast.parse("d=1\nq=4"), location=["namespace4"])
+
+    dff_project = DFFProject([namespace1, namespace2, namespace3, namespace4])
+
+    assert namespace1["a"].dependencies == {
+        ("namespace1", "a"),
+        ("namespace1", "namespace2"),
+        ("namespace2", "c"),
+        ("namespace2", "d"),
+        ("namespace2", "a"),
+        ("namespace3", "c"),
+        ("namespace3", "e"),
+        ("namespace4", "d"),
+    }

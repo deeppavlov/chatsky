@@ -53,7 +53,7 @@ class BaseParserObject(ABC):
         child.append_path = asname
         self.children[asname] = child
 
-    def resolve_path(self, path: tp.List[str]) -> 'BaseParserObject':
+    def resolve_path(self, path: tp.Tuple[str, ...]) -> 'BaseParserObject':
         if len(path) == 0:
             return self
         current_dict = self.children
@@ -65,10 +65,10 @@ class BaseParserObject(ABC):
         raise KeyError(f"Not found {path} in {self.children}\nObject: {repr(self)}")
 
     @cached_property
-    def path(self) -> tp.List[str]:
+    def path(self) -> tp.Tuple[str, ...]:
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {repr(self)}")
-        return self.parent.path + ([self.append_path] if self.append_path else [])
+        return self.parent.path + ((self.append_path, ) if self.append_path else ())
 
     @cached_property
     def namespace(self) -> 'Namespace':
@@ -156,6 +156,30 @@ class ReferenceObject(BaseParserObject, ABC):
         BaseParserObject.__init__(self)
 
     @cached_property
+    def dependencies(self) -> tp.Set[tp.Tuple[str, ...]]:
+        """
+        :return: A set of objects in namespaces that are required to resolve it
+        """
+        result = set()
+
+        def add(x):
+            if len(x) >= 2:
+                result.add(x)
+
+        add(self.path[:2])
+        resolved = self.resolve_self
+        if isinstance(resolved, ReferenceObject):
+            result.update(resolved.dependencies)
+        elif isinstance(resolved, BaseParserObject):
+            add(resolved.path[:2])
+        for child in self.children.values():
+            if isinstance(child, ReferenceObject):
+                result.update(child.dependencies)
+            else:
+                add(child.path[:2])
+        return result
+
+    @cached_property
     @abstractmethod
     def resolve_self(self) -> tp.Optional[BaseParserObject]:
         """
@@ -179,7 +203,6 @@ class ReferenceObject(BaseParserObject, ABC):
     @abstractmethod
     def resolve_name(self) -> BaseParserObject:
         """
-        Replace absolute name of the object
         """
         ...
 

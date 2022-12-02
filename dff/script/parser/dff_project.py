@@ -31,7 +31,7 @@ class DFFProject(BaseParserObject):
                 if isinstance(statement, Assignment):
                     value = statement.children["value"]
                     if isinstance(value, Call):
-                        func = value.resolve_path(["func"])
+                        func = value.resolve_path(("func", ))
                         func_name = str(func.resolve_name)
                         if func_name in ScriptInitializers.keys():
                             if call is None:
@@ -46,7 +46,7 @@ class DFFProject(BaseParserObject):
     def script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
         call = self.actor_call
         args = {}
-        func = call.resolve_path(["func"])
+        func = call.resolve_path(("func", ))
         func_name = str(func.resolve_name)
         for index, arg in enumerate(ScriptInitializers[func_name]):
             args[arg] = call.children.get("arg_" + str(index)) or call.children.get("keyword_" + arg)
@@ -56,7 +56,13 @@ class DFFProject(BaseParserObject):
             raise ScriptValidationError(f"Actor argument `start_label` is not found: {str(call)}")
         return args["script"], args["start_label"], args["fallback_label"]
 
-
+    # @cached_property
+    # def resolve_script -> tp.Tuple[dict, tp.List[BaseParserObject]]:
+    #     """
+    #
+    #     :return: Resolved script and a list of all the objects necessary to resolve the script
+    #     """
+    #     for
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]):
         if isinstance(item, str):
@@ -71,8 +77,8 @@ class DFFProject(BaseParserObject):
         raise TypeError(f"{type(item)}")
 
     @cached_property
-    def path(self) -> tp.List[str]:
-        return []
+    def path(self) -> tp.Tuple[str, ...]:
+        return ()
 
     @cached_property
     def namespace(self) -> 'Namespace':
