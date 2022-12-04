@@ -89,12 +89,14 @@ class BaseParserObject(ABC):
         ...
 
     def __hash__(self):
-        return hash(repr(self))
+        return hash(str(self))
 
     def __eq__(self, other):
         if isinstance(other, BaseParserObject):
-            return repr(self) == repr(other)
-        return False
+            return str(self) == str(other)
+        if isinstance(other, str):
+            return str(self) == other
+        return NotImplemented
 
     @classmethod
     @abstractmethod
@@ -106,6 +108,10 @@ class Statement(BaseParserObject, ABC):
     """
     This class is for nodes that represent [statements](https://docs.python.org/3.10/library/ast.html#statements)
     """
+    def __init__(self):
+        BaseParserObject.__init__(self)
+        self.children: tp.Dict[str, Expression]
+
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> tp.Dict[str, 'Statement']:
@@ -125,6 +131,10 @@ class Expression(BaseParserObject, ABC):
     """
     This class is for nodes that represent [expressions](https://docs.python.org/3.10/library/ast.html#expressions)
     """
+    def __init__(self):
+        BaseParserObject.__init__(self)
+        self.children: tp.Dict[str, 'Expression']
+
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> 'Expression':
@@ -162,21 +172,21 @@ class ReferenceObject(BaseParserObject, ABC):
         """
         result = set()
 
-        def add(x):
-            if len(x) >= 2:
-                result.add(x)
+        def add(x: BaseParserObject):
+            if len(x.path) >= 2:
+                result.add(x.path[:2])
 
-        add(self.path[:2])
+        add(self)
         resolved = self.resolve_self
         if isinstance(resolved, ReferenceObject):
             result.update(resolved.dependencies)
         elif isinstance(resolved, BaseParserObject):
-            add(resolved.path[:2])
+            add(resolved)
         for child in self.children.values():
             if isinstance(child, ReferenceObject):
                 result.update(child.dependencies)
             else:
-                add(child.path[:2])
+                add(child)
         return result
 
     @cached_property
@@ -203,6 +213,7 @@ class ReferenceObject(BaseParserObject, ABC):
     @abstractmethod
     def resolve_name(self) -> BaseParserObject:
         """
+        Same as `absolute` but instead of returning None at failed resolution returns the name of the absolute object
         """
         ...
 
@@ -212,7 +223,7 @@ class ReferenceObject(BaseParserObject, ABC):
     def __eq__(self, other):
         if isinstance(other, ReferenceObject):
             return BaseParserObject.__eq__(self.resolve_name, other.resolve_name)
-        return BaseParserObject.__eq__(self.resolve_name or self, other)
+        return BaseParserObject.__eq__(self.resolve_name, other)
 
 
 class Import(Statement, ReferenceObject):
@@ -356,35 +367,50 @@ class Python(Expression):
 class Dict(Expression):
     def __init__(self, keys: tp.List[Expression], values: tp.List[Expression]):
         super().__init__()
-        self._keys = []
+        self.__keys: tp.List[tp.Tuple[Expression, str]] = []
         for key, value in zip(keys, values):
-            self._keys.append((key, repr(key)))
+            self.__keys.append((key, repr(key)))
             self.add_child(key, repr(key) + "key")
             self.add_child(value, repr(key) + "value")
 
+    def key_by_value(self, value: Expression) -> Expression:
+        return self.children[remove_suffix(value.append_path, "value") + "key"]
+
+    def keys(self) -> tp.Iterator[Expression]:
+        for _, key_str in self.__keys:
+            yield self.children[key_str + "key"]
+
+    def values(self) -> tp.Iterator[Expression]:
+        for _, key_str in self.__keys:
+            yield self.children[key_str + "value"]
+
+    def items(self) -> tp.Iterator[tp.Tuple[Expression, Expression]]:
+        for _, key_str in self.__keys:
+            yield self.children[key_str + "key"], self.children[key_str + "value"]
+
     @cached_property
-    def keys(self) -> tp.Dict[Expression, str]:
+    def _keys(self) -> tp.Dict[Expression, str]:
         result = {}
-        for key, value in self._keys:
+        for key, value in self.__keys:
             result[key] = value
         return result
 
     def __str__(self):
         return "{" + ", ".join(
-            [f"{str(self.children[key + 'key'])}: {str(self.children[key + 'value'])}" for key in self.keys.values()]
+            [f"{str(self.children[key + 'key'])}: {str(self.children[key + 'value'])}" for key in self._keys.values()]
         ) + "}"
 
     def __repr__(self):
         return "Dict(" + ", ".join(
             [
-                f"{repr(self.children[key + 'value'])}: "
-                f"{repr(self.children[key + 'value'])}" for key in self.keys.values()
+                f"{repr(self.children[key + 'key'])}: "
+                f"{repr(self.children[key + 'value'])}" for key in self._keys.values()
             ]
         ) + ")"
 
     def __getitem__(self, item: tp.Union[Expression, str]):
         if isinstance(item, Expression):
-            key = self.keys[item]
+            key = self._keys[item]
             return self.children[key + "value"]
         elif isinstance(item, str):
             return self.children[item + "value"]

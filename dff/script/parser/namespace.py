@@ -2,15 +2,16 @@ import typing as tp
 import ast
 from pathlib import Path
 
-from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, remove_suffix, Import, ImportFrom
+from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom
 
 if tp.TYPE_CHECKING:
     from .dff_project import DFFProject
 
 
 class Namespace(BaseParserObject):
-    def __init__(self, location: tp.List[str], names: tp.Dict[str, BaseParserObject]):
+    def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
         super().__init__()
+        self.children: tp.Dict[str, Statement]
         self.location = location
         self.name = ".".join(location)
         for key, value in names.items():

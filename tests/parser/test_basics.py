@@ -166,3 +166,11 @@ def test_dependency_extraction():
         ("namespace3", "e"),
         ("namespace4", "d"),
     }
+
+
+def test_eq_operator():
+    namespace = Namespace.from_ast(ast.parse("import dff.keywords as kw\na = kw.RESPONSE\nb=a"), location=["namespace"])
+    dff_project = DFFProject([namespace])
+
+    assert "dff.keywords.RESPONSE" == namespace["a"]
+    assert "dff.keywords.RESPONSE" == namespace["b"]
