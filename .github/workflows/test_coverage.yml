@@ -33,6 +33,10 @@ jobs:
       - name: install dependencies
         run: make venv_test
         shell: bash
+      
+      - name: create session file
+        run: echo ${{ secrets.TG_SESSION }} | base64 --decode > anon.session
+        shell: bash
 
       - name: build coverage file
         env:
