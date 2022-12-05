@@ -1,5 +1,6 @@
 import os
 import pytest
+import asyncio
 from pathlib import Path
 from telethon import TelegramClient
 
@@ -33,8 +34,7 @@ def document(tmpdir_factory):
 
 @pytest.fixture(scope="session")
 def session_file(tmpdir_factory):
-    filename = tmpdir_factory.mktemp("session").join("session.session")
-    yield Path(filename).absolute()
+    yield "anon"
 
 
 @pytest.fixture(scope="session")
@@ -44,11 +44,30 @@ def basic_bot():
 
 @pytest.fixture(scope="session")
 def user_id():
-    yield "5947503209"
+    yield "5889282756"
 
 
 @pytest.fixture(scope="module")
-def tg_client(session_file, env_var_presence):
+def event_loop():
+    yield asyncio.get_event_loop()
+
+
+@pytest.fixture(scope="module")
+def tg_client(session_file, env_var_presence, event_loop):
     _, _, _ = env_var_presence
-    with TelegramClient(str(session_file), os.getenv("TG_API_ID"), os.getenv("TG_API_HASH")) as client:
+    with TelegramClient(
+        str(session_file), int(os.getenv("TG_API_ID")), os.getenv("TG_API_HASH"), loop=event_loop
+    ) as client:
         yield client
+    client: TelegramClient
+    client.loop.close()
+
+
+@pytest.fixture(scope="module")
+async def bot_id(tg_client):
+    user = await tg_client.get_entity("https://t.me/test_dff_bot")
+    yield user
+
+
+def pytest_sessionfinish(session, exitstatus):
+    asyncio.get_event_loop().close()
