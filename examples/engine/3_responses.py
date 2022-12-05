@@ -12,7 +12,6 @@ This example shows different options for setting responses. Let's do all the nec
 
 
 # %%
-import logging
 import re
 import random
 from typing import Any
@@ -24,8 +23,6 @@ import dff.core.engine.conditions as cnd
 
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-
-logger = logging.getLogger(__name__)
 
 
 # %% [markdown]
@@ -66,7 +63,6 @@ def upper_case_response(response: str):
 
 
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
-    logger.warning(f"ctx={ctx}")
     return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
 # %%
@@ -78,7 +74,7 @@ toy_script = {
         },
         "node1": {
             RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
-            TRANSITIONS: {"node2": cnd.exact_match("i'm fine, how are you?")},
+            TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
@@ -102,7 +98,7 @@ toy_script = {
 # testing
 happy_path = (
     ("Hi", "Hello, how are you?"),  # start_node -> node1
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
+    ("I'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
     ("Hi", "Hi, what is up?"),  # node4 -> node1
@@ -111,7 +107,7 @@ happy_path = (
     ("help", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "help"}),  # f_n->f_n
     ("nope", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "nope"}),  # f_n->f_n
     ("Hi", "Hello, how are you?"),  # fallback_node -> node1
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
+    ("I'm fine, how are you?", "Good. What do you want to talk about?"),  # node1 -> node2
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
 )
