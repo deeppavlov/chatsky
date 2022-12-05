@@ -1,5 +1,6 @@
 import json
 import pytest
+import time
 import datetime
 
 from io import IOBase
@@ -21,6 +22,20 @@ from dff.connectors.messenger.telegram.types import (
 )
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
 from dff.connectors.messenger.telegram.utils import open_io, close_io
+
+
+def reiterate_response(bot, user, message):
+    counter = 0
+    while True:
+        counter += 1
+        try:
+            bot.send_response(user, message)
+            break
+        except Exception:
+            time.sleep(2)
+        finally:
+            if counter >= 4:
+                break
 
 
 @pytest.mark.asyncio
@@ -61,7 +76,8 @@ async def test_adapt_buttons(ui, button_type, markup_type, tg_client, basic_bot,
     assert telegram_response.ui and isinstance(telegram_response.ui.keyboard, markup_type)
     print(telegram_response.ui.keyboard.keyboard)
     assert len(telegram_response.ui.keyboard.keyboard) == 2
-    basic_bot.send_response(user_id, telegram_response)
+    reiterate_response(basic_bot, user_id, telegram_response)
+    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, offset_date=minute_ago)
     assert messages
@@ -79,7 +95,8 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui
-    basic_bot.send_response(user_id, telegram_response)
+    reiterate_response(basic_bot, user_id, telegram_response)
+    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, offset_date=minute_ago)
     assert messages
@@ -115,7 +132,8 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
     generic_prop = vars(generic_response).get(prop)
     assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
     assert telegram_prop.source == generic_prop.source
-    basic_bot.send_response(user_id, telegram_response)
+    reiterate_response(basic_bot, user_id, telegram_response)
+    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, filter=filter_type, offset_date=minute_ago)
     assert messages
@@ -140,7 +158,8 @@ async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
     assert isinstance(telegram_response.attachments.files[0], types.InputMediaPhoto)
     assert telegram_response.attachments.files[0].media == generic_response.attachments.files[0].source
     assert telegram_response.attachments.files[0].caption == generic_response.attachments.files[0].title
-    basic_bot.send_response(user_id, telegram_response)
+    # basic_bot.send_response(user_id, telegram_response)
+    reiterate_response(basic_bot, user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, filter=InputMessagesFilterPhotos, offset_date=minute_ago)
     assert messages
@@ -153,7 +172,8 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.location
-    basic_bot.send_response(user_id, telegram_response)
+    reiterate_response(basic_bot, user_id, telegram_response)
+    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, filter=InputMessagesFilterGeo, offset_date=minute_ago)
     assert messages
