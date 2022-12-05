@@ -3,6 +3,7 @@ This module defines parser objects -- nodes that form a tree.
 """
 import typing as tp
 from abc import ABC, abstractmethod
+from collections.abc import Iterable
 import ast
 import logging
 
@@ -47,6 +48,23 @@ class BaseParserObject(ABC):
         self.parent: tp.Optional[BaseParserObject] = None
         self.append_path: tp.Optional[str] = None
         self.children: tp.Dict[str, BaseParserObject] = {}
+
+    @cached_property
+    def dependencies(self) -> tp.Set[tp.Tuple[str, ...]]:
+        result = set()
+        if len(self.path) >= 2:
+            result.add(self.path[:2])
+        else:  # self is a Namespace
+            return result
+
+        if isinstance(self, ReferenceObject):
+            resolved = self.resolve_self
+            if resolved is not None:
+                result.update(resolved.dependencies)
+
+        for child in self.children.values():
+            result.update(child.dependencies)
+        return result
 
     def add_child(self, child: 'BaseParserObject', asname: str):
         child.parent = self
@@ -164,30 +182,6 @@ class Expression(BaseParserObject, ABC):
 class ReferenceObject(BaseParserObject, ABC):
     def __init__(self):
         BaseParserObject.__init__(self)
-
-    @cached_property
-    def dependencies(self) -> tp.Set[tp.Tuple[str, ...]]:
-        """
-        :return: A set of objects in namespaces that are required to resolve it
-        """
-        result = set()
-
-        def add(x: BaseParserObject):
-            if len(x.path) >= 2:
-                result.add(x.path[:2])
-
-        add(self)
-        resolved = self.resolve_self
-        if isinstance(resolved, ReferenceObject):
-            result.update(resolved.dependencies)
-        elif isinstance(resolved, BaseParserObject):
-            add(resolved)
-        for child in self.children.values():
-            if isinstance(child, ReferenceObject):
-                result.update(child.dependencies)
-            else:
-                add(child)
-        return result
 
     @cached_property
     @abstractmethod
@@ -349,9 +343,12 @@ class String(Expression):
 
 
 class Python(Expression):
-    def __init__(self, string: str):
+    def __init__(self, node: ast.AST):
         super().__init__()
-        self.string = string
+        for key, value in node.__dict__.items():
+            if isinstance(value, ast.expr):
+                self.add_child(Expression.from_ast(value), key)
+        self.string = remove_suffix(unparse(node), "\n")
 
     def __str__(self):
         return self.string
@@ -360,8 +357,12 @@ class Python(Expression):
         return f"Python({self.string})"
 
     @classmethod
+    def from_str(cls, string: str) -> 'Python':
+        return cls(ast.parse(string).body[0].value)
+
+    @classmethod
     def from_ast(cls, node: ast.AST, **kwargs) -> 'Python':
-        return cls(remove_suffix(unparse(node), "\n"))
+        return cls(node)
 
 
 class Dict(Expression):
@@ -552,7 +553,7 @@ class Iterable(Expression):
         Expression.__init__(self)
         self.type = iterable_type
         for index, value in enumerate(iterable):
-            self.add_child(value, repr(Python(str(index))))
+            self.add_child(value, repr(Python.from_str(str(index))))
 
     def __getitem__(self, item: Python):
         return self.children[repr(item)]
