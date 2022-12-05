@@ -87,6 +87,13 @@ nbsphinx_prolog = """
 :github_url: deeppavlov/dialog_flow_framework
 """
 
+# Add pictures on the preview buttons
+html_static_path = ["static"]
+
+nbsphinx_thumbnails = {
+    'examples/*/1_*': '_static/hippo.jpg',
+}
+
 
 # Theme options
 html_theme_options = {

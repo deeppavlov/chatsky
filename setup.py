@@ -34,7 +34,7 @@ core = [
 
 doc = [
     "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.11",
+    "dff_sphinx_theme>=0.1.14",
     "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
