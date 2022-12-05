@@ -4,6 +4,7 @@ This module defines parser objects -- nodes that form a tree.
 import typing as tp
 from abc import ABC, abstractmethod
 from collections.abc import Iterable
+from collections import defaultdict
 import ast
 import logging
 
@@ -50,20 +51,22 @@ class BaseParserObject(ABC):
         self.children: tp.Dict[str, BaseParserObject] = {}
 
     @cached_property
-    def dependencies(self) -> tp.Set[tp.Tuple[str, ...]]:
-        result = set()
+    def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
+        result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
-            result.add(self.path[:2])
+            result[self.path[0]].add(self.path[1])
         else:  # self is a Namespace
             return result
 
         if isinstance(self, ReferenceObject):
             resolved = self.resolve_self
             if resolved is not None:
-                result.update(resolved.dependencies)
+                for namespace, objects in resolved.dependencies.items():
+                    result[namespace].update(objects)
 
         for child in self.children.values():
-            result.update(child.dependencies)
+            for namespace, objects in child.dependencies.items():
+                result[namespace].update(objects)
         return result
 
     def add_child(self, child: 'BaseParserObject', asname: str):

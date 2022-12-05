@@ -157,16 +157,10 @@ def test_dependency_extraction():
     dff_project = DFFProject([namespace1, namespace2, namespace3, namespace4])
 
     assert namespace1["a"].dependencies == {
-        ("namespace1", "a"),
-        ("namespace1", "namespace2"),
-        ("namespace2", "c"),
-        ("namespace2", "d"),
-        ("namespace2", "a"),
-        ("namespace2", "namespace3"),
-        ("namespace3", "c"),
-        ("namespace3", "e"),
-        ("namespace3", "j"),
-        ("namespace4", "d"),
+        "namespace1": {"a", "namespace2"},
+        "namespace2": {"c", "d", "a", "namespace3"},
+        "namespace3": {"c", "e", "j"},
+        "namespace4": {"d"},
     }
 
 
