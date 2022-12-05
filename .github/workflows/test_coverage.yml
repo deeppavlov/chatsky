@@ -35,7 +35,7 @@ jobs:
         shell: bash
       
       - name: create session file
-        run: echo ${{ secrets.TG_SESSION }} | base64 --decode > anon.session
+        run: echo "${{ secrets.TG_SESSION }}" | base64 --decode > anon.session
         shell: bash
 
       - name: build coverage file
