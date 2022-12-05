@@ -1,3 +1,11 @@
+# %% [markdown]
+'''
+2. Buttons
+=========
+
+'''
+
+# %%
 from typing import NamedTuple
 
 import dff.core.engine.conditions as cnd
@@ -12,6 +20,7 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 from dff.utils.testing.response_comparers import generics_comparer
 
 
+# %%
 def check_button_payload(value: str):
     def payload_check_inner(ctx: Context, actor: Actor):
         return hasattr(ctx.last_request, "payload") and ctx.last_request.payload == value
@@ -19,6 +28,7 @@ def check_button_payload(value: str):
     return payload_check_inner
 
 
+# %%
 toy_script = {
     "root": {
         "start": {
@@ -101,6 +111,7 @@ happy_path = (
 )
 
 
+# %%
 class CallbackRequest(NamedTuple):
     payload: str
 
@@ -120,6 +131,7 @@ def process_request(ctx: Context):
     ctx.requests[last_index] = last_request
 
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("root", "start"),

@@ -1,3 +1,11 @@
+# %% [markdown]
+'''
+3. Media
+=========
+
+'''
+
+# %%
 from typing import NamedTuple
 
 from dff.core.engine.core import Context
@@ -11,6 +19,7 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.utils.testing.response_comparers import generics_comparer
 
+# %%
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
@@ -69,6 +78,7 @@ happy_path = (
 )
 
 
+# %%
 class CallbackRequest(NamedTuple):
     payload: str
 
@@ -88,6 +98,7 @@ def process_request(ctx: Context):
     ctx.requests[last_index] = last_request
 
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"), pre_services=[process_request]
 )

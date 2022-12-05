@@ -36,9 +36,7 @@ func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
 
 * Non-callable objects. If the object is not callable, it will be returned by the agent as a response.
 
-Out of the box `DSL` has a single response function:
-
-* `choice` - gives one random response from the list of responses.
+Out of the box `DSL` has a single response function `choice` that gives one random response from the list of responses.
 """
 
 
