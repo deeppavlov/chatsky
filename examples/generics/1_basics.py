@@ -1,3 +1,11 @@
+# %% [markdown]
+'''
+1. Basics
+=========
+
+'''
+
+# %%
 from typing import NamedTuple
 
 from dff.connectors.messenger.generics import Response

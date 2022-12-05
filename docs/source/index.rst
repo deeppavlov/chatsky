@@ -5,7 +5,7 @@
 Dialog Flow Framework Documentation
 =====================================
 
-*Date*: ??.11.2022 *Version*: 1.0.0
+*Date*: ??.12.2022 *Version*: 1.0.0
 
 The Dialog Flow Framework (`DFF`) is an open-source `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
 developed for creating dialog systems.
@@ -18,13 +18,13 @@ Installation
 
 `DFF` can be installed via ``pip``:
 
-.. code-block:: bash
+.. code-block:: console
    
    pip install dff
 
 You can also download the library from `Github <https://github.com/deeppavlov/dialog_flow_framework>`_:
 
-.. code-block:: bash
+.. code-block:: console
 
    git clone https://github.com/deeppavlov/dialog_flow_framework.git
    cd dialog_flow_framework
@@ -53,22 +53,29 @@ Each `flow` is also a dictionary, where the keys are the `nodes`.
 the `condition` (:py:class:`~dff.core.engine.conditions`) of `transition` to another `node`
 in this or another `flow`.
 
+Documentation and Examples
+--------------------------
+
 .. toctree::
+   :glob:
    :caption: Documentation
    :name: documentation
-   :maxdepth: 4
+   :maxdepth: 2
 
-   apiref/dff.core
-   apiref/dff.connectors
+   apiref/dff.core.engine
+   apiref/dff.core.pipeline
+   apiref/dff.connectors.db
+   apiref/dff.connectors.messenger
 
 .. toctree::
    :caption: Examples
    :name: examples
    :glob:
-   :reversed:
 
-   examples/pipeline/index
    examples/engine/index
+   examples/pipeline/index
+   examples/db_connector/index
+   examples/generics/index
 
 Indices and tables
 ------------------

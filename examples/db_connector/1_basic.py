@@ -1,8 +1,11 @@
+# %% [markdown]
 """
 1. Basics
 =========
+
 """
 
+# %%
 import pathlib
 
 from dff.connectors.db import connector_factory

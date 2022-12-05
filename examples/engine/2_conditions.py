@@ -1,9 +1,8 @@
 # %% [markdown]
 """
-2. Conditions
-=============
+# 2. Conditions
 
-This example shows different options for setting transition conditions from one node to another.
+This example shows different options for setting transition conditions from one node to another. First of all, let's do all the necessary imports from `dff`.
 """
 
 
