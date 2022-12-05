@@ -30,6 +30,7 @@ core = [
     "pydantic>=1.8.2",
     "nest_asyncio>=1.5.5",
     "typing_extensions>=4.0.0",
+    "requests==2.28.1",
 ]
 
 doc = [
@@ -82,17 +83,8 @@ sklearn_dependencies = [
     "scikit-learn<=1.1.1",
 ]
 
-extended_conditions_dependencies = merge_req_lists(
-    [
-        sklearn_dependencies,
-        [
-            "requests<=2.28.1",
-        ]
-    ]
-)
-
 httpx_dependencies = [
-    "httpx>=0.23.0",
+    "httpx==0.23.0",
 ]
 
 huggingface_dependencies = merge_req_lists(
@@ -101,7 +93,7 @@ huggingface_dependencies = merge_req_lists(
         [
             "transformers>=4.16.2",
             "torch>=1.7.0",
-        ]
+        ],
     ]
 )
 
@@ -110,7 +102,7 @@ gensim_dependencies = merge_req_lists(
         sklearn_dependencies,
         [
             "gensim>=4.0.0",
-        ]
+        ],
     ]
 )
 
@@ -128,7 +120,7 @@ test_requirements = [
     "isort >=5.0.6,<6.0.0",
     "flask[async]>=2.1.2",
     "psutil>=5.9.1",
-    "requests>=2.28.1",
+    "requests==2.28.1",
 ]
 
 devel = [
@@ -147,7 +139,6 @@ full = merge_req_lists(
         postgresql_dependencies,
         ydb_dependencies,
         sklearn_dependencies,
-        extended_conditions_dependencies,
         httpx_dependencies,
         huggingface_dependencies,
         gensim_dependencies,
@@ -184,7 +175,6 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,
     "postgresql": postgresql_dependencies,
     "ydb": ydb_dependencies,
-    "extended_conditions": extended_conditions_dependencies,  # todo: maybe shorten the name
     "sklearn": sklearn_dependencies,
     "async": httpx_dependencies,
     "huggingface": huggingface_dependencies,

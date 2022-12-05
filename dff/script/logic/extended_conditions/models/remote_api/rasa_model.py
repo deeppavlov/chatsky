@@ -15,10 +15,10 @@ import requests
 try:
     import httpx
 
-    IMPORT_ERROR_MESSAGE = None
+    rasa_available = True
 except ImportError as e:
     htppx = object()
-    IMPORT_ERROR_MESSAGE = e.msg
+    rasa_available = False
 
 from ...utils import RasaResponse
 from ..base_model import BaseModel
@@ -109,9 +109,8 @@ class AsyncRasaModel(AsyncMixin, AbstractRasaModel):
         retries: int = 10,
         headers: Optional[dict] = None,
     ):
-        IMPORT_ERROR_MESSAGE = globals().get("IMPORT_ERROR_MESSAGE")
-        if IMPORT_ERROR_MESSAGE is not None:
-            raise ImportError(IMPORT_ERROR_MESSAGE)
+        if not rasa_available:
+            raise ImportError("`httpx` package missing. Try `pip install dff[httpx]`")
         super().__init__(model, api_key, jwt_token, namespace_key, retries=retries, headers=headers)
 
     async def predict(self, request: str) -> dict:

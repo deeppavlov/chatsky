@@ -1,15 +1,10 @@
-import logging
-
 from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
-from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.script.logic.extended_conditions.models.remote_api.rasa_model import RasaModel
 from dff.script.logic.extended_conditions import conditions as i_cnd
-
-import examples.extended_conditions._extended_conditions_utils as example_utils
-
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline, CLIMessengerInterface
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 rasa_model = RasaModel(model="http://localhost:5005", namespace_key="rasa")
 
@@ -51,9 +46,14 @@ script = {
     },
 }
 
-actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(
+    script,
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
+    messenger_interface=CLIMessengerInterface(intro="Starting Dff bot..."),
+)
 
-testing_dialogue = [
+happy_path = [
     ("hi", "How do you feel today?"),
     ("i'm rather unhappy", "I feel you, fellow human. Watch a good movie, it might help."),
     ("ok", "Ok, see you soon!"),
@@ -67,11 +67,10 @@ testing_dialogue = [
 
 
 def main():
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    example_utils.run_interactive_mode(actor)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)
+    else:
+        pipeline.run()
 
 
 if __name__ == "__main__":

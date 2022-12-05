@@ -17,13 +17,13 @@ try:
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
     import torch
 
-    IMPORT_ERROR_MESSAGE = None
+    hf_available = True
 except ImportError as e:
     np = Namespace(ndarray=None)
     torch = Namespace(device=None)
     Tokenizer = None
     PreTrainedModel = None
-    IMPORT_ERROR_MESSAGE = e.msg
+    hf_available = False
 
 from .base_model import BaseModel
 from ..dataset import Dataset
@@ -58,9 +58,8 @@ class BaseHFModel(BaseModel):
         tokenizer_kwargs: Optional[dict] = None,
         model_kwargs: Optional[dict] = None,
     ) -> None:
-        IMPORT_ERROR_MESSAGE = globals().get("IMPORT_ERROR_MESSAGE")
-        if IMPORT_ERROR_MESSAGE is not None:
-            raise ImportError(IMPORT_ERROR_MESSAGE)
+        if not hf_available:
+            raise ImportError("`transformers` package missing. Try `pip install dff[huggingface]`.")
         super().__init__(namespace_key=namespace_key)
         self.model = model
         self.tokenizer = tokenizer

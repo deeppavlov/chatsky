@@ -29,9 +29,13 @@ def testing_classifier(testing_model, testing_tokenizer):
 
 
 @pytest.fixture(scope="session")
-def hf_matcher(testing_model, testing_tokenizer):
+def hf_matcher(testing_model, testing_tokenizer, testing_dataset):
     yield HFMatcher(
-        model=testing_model, tokenizer=testing_tokenizer, device=torch.device("cpu"), namespace_key="HFmodel"
+        model=testing_model,
+        tokenizer=testing_tokenizer,
+        dataset=testing_dataset,
+        device=torch.device("cpu"),
+        namespace_key="HFmodel",
     )
 
 

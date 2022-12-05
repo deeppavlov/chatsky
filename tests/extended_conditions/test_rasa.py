@@ -1,25 +1,32 @@
 import os
-
-import requests
 import pytest
 
-from dff.script.logic.extended_conditions.models import RasaModel, AsyncRasaModel
+from dff.script.logic.extended_conditions.models.remote_api.rasa_model import RasaModel, AsyncRasaModel, rasa_available
+from tests.db_connector.test_dbs import ping_localhost
 
-RASA_URL = os.getenv("RASA_URL", "http://localhost:5005")
-if RASA_URL is None or isinstance(RASA_URL, str) and requests.get(RASA_URL).status_code != 200:
-    pytest.skip(allow_module_level=True)
-
-
-@pytest.fixture(scope="session")
-def testing_model(rasa_url, rasa_api_key):
-    yield RasaModel(model=RASA_URL, api_key=rasa_api_key, namespace_key="rasa")
+RASA_ACTIVE = ping_localhost(5005)
 
 
 @pytest.fixture(scope="session")
-def testing_async_model(rasa_url):
-    yield AsyncRasaModel(model=RASA_URL, namespace_key="rasa_async")
+def testing_model():
+    rasa_url, api_key = os.getenv("RASA_URL"), os.getenv("RASA_API_KEY")
+    if rasa_url and api_key:
+        yield RasaModel(model=rasa_url, api_key=api_key, namespace_key="rasa")
+    else:
+        yield None
 
 
+@pytest.fixture(scope="session")
+def testing_async_model():
+    rasa_url, api_key = os.getenv("RASA_URL"), os.getenv("RASA_API_KEY")
+    if rasa_url and api_key:
+        yield AsyncRasaModel(model=rasa_url, api_key=api_key, namespace_key="rasa_async")
+    else:
+        yield None
+
+
+@pytest.mark.skipif(not RASA_ACTIVE, reason="RASA inactive.")
+@pytest.mark.skipif(not os.getenv("RASA_URL") or not os.getenv("RASA_API_KEY"), reason="No RASA API key.")
 def test_predict(testing_model: RasaModel):
     request = "Hello there"
     result = testing_model.predict(request=request)
@@ -28,6 +35,9 @@ def test_predict(testing_model: RasaModel):
     assert result["greet"] > 0.9  # testing on default intents that include 'greet'
 
 
+@pytest.mark.skipif(not rasa_available, reason="Async deps missing.")
+@pytest.mark.skipif(not RASA_ACTIVE, reason="RASA inactive.")
+@pytest.mark.skipif(not os.getenv("RASA_URL") or not os.getenv("RASA_API_KEY"), reason="No RASA API key.")
 @pytest.mark.asyncio
 async def test_async_predict(testing_async_model: AsyncRasaModel):
     request = "Hello there"

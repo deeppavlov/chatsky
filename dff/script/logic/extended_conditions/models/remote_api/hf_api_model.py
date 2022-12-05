@@ -16,10 +16,10 @@ import requests
 try:
     import httpx
 
-    IMPORT_ERROR_MESSAGE = None
+    hf_api_available = True
 except ImportError as e:
     htppx = object()
-    IMPORT_ERROR_MESSAGE = e.msg
+    hf_api_available = False
 
 from ...utils import STATUS_SUCCESS, STATUS_UNAVAILABLE
 from ..base_model import BaseModel
@@ -103,9 +103,8 @@ class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
         retries: int = 60,
         headers: Optional[dict] = None,
     ) -> None:
-        IMPORT_ERROR_MESSAGE = globals().get("IMPORT_ERROR_MESSAGE")
-        if IMPORT_ERROR_MESSAGE is not None:
-            raise ImportError(IMPORT_ERROR_MESSAGE)
+        if not hf_api_available:
+            raise ImportError("`httpx` package missing. Try `pip install dff[httpx]`")
         super().__init__(model, api_key, namespace_key, retries=retries, headers=headers)
 
     async def predict(self, request: str) -> dict:

@@ -14,12 +14,13 @@ try:
     from sklearn.base import BaseEstimator
     from sklearn.pipeline import make_pipeline, Pipeline
     from scipy.sparse import csr_matrix
+    sklearn_availabe = True
 except ImportError as e:
     BaseEstimator = object
     Pipeline = object
     make_pipeline = object
     csr_matrix = object
-    IMPORT_ERROR_MESSAGE = e.msg
+    sklearn_availabe = False
 
 from .base_model import BaseModel
 
@@ -47,9 +48,8 @@ class BaseSklearnModel(BaseModel):
         tokenizer: Optional[Union[BaseEstimator, Pipeline]] = None,
         namespace_key: Optional[str] = None,
     ) -> None:
-        IMPORT_ERROR_MESSAGE = globals().get("IMPORT_ERROR_MESSAGE")
-        if IMPORT_ERROR_MESSAGE is not None:
-            raise ImportError(IMPORT_ERROR_MESSAGE)
+        if not sklearn_availabe:
+            raise ImportError("`sklearn` package missing. Try `pip install dff[sklearn].`.")
         assert tokenizer is not None, "tokenizer parameter is required."
         super().__init__(namespace_key=namespace_key)
         self.model = model

@@ -1,19 +1,16 @@
-import logging
 from pathlib import Path
 
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
-from dff.core.engine.core import Actor
 from dff.core.engine import conditions as cnd
 
 from dff.script.logic.extended_conditions.models import HFClassifier
 from dff.script.logic.extended_conditions.models import HFMatcher
 from dff.script.logic.extended_conditions.dataset import Dataset
 from dff.script.logic.extended_conditions import conditions as i_cnd
-import _extended_conditions_utils as example_utils
-
-logger = logging.getLogger(__name__)
+from dff.core.pipeline import Pipeline, CLIMessengerInterface
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 # We are using this open source model by Obsei-AI
 # to demonstrate, how custom classifiers can be easily adapted for use in dff.script.logic.extended_conditions
@@ -58,9 +55,14 @@ script = {
     },
 }
 
-actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(
+    script,
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
+    messenger_interface=CLIMessengerInterface(intro="Starting Dff bot..."),
+)
 
-testing_dialogue = [
+happy_path = [
     ("hi", "Welcome to the e-marketplace. Tell us, what you would like to buy or sell."),
     (
         "I would like to buy a car",
@@ -74,11 +76,10 @@ testing_dialogue = [
 
 
 def main():
-    logging.basicConfig(
-        format="%(asctime)s-%(name)15s:%(lineno)3s:%(funcName)20s():%(levelname)s - %(message)s",
-        level=logging.INFO,
-    )
-    example_utils.run_interactive_mode(actor)
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)
+    else:
+        pipeline.run()
 
 
 if __name__ == "__main__":

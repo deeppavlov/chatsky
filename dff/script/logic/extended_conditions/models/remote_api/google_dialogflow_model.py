@@ -16,11 +16,11 @@ try:
     from google.cloud import dialogflow_v2
     from google.oauth2 import service_account
 
-    IMPORT_ERROR_MESSAGE = None
+    dialogflow_available = True
 except ImportError as e:
     dialogflow_v2 = None
     service_account = None
-    IMPORT_ERROR_MESSAGE = e.msg
+    dialogflow_available = False
 
 
 class AbstractGDFModel(BaseModel):
@@ -56,9 +56,8 @@ class AbstractGDFModel(BaseModel):
         *,
         language: str = "en",
     ) -> None:
-        IMPORT_ERROR_MESSAGE = globals().get("IMPORT_ERROR_MESSAGE")
-        if IMPORT_ERROR_MESSAGE is not None:
-            raise ImportError(IMPORT_ERROR_MESSAGE)
+        if not dialogflow_available:
+            raise ImportError("`google-cloud-dialogflow` package missing. Try `pip install dff[dialogflow]`.")
         super().__init__(namespace_key=namespace_key)
         self._language = language
         if isinstance(model, dict):
