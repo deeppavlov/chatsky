@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 4. Flask
+# 8. Flask
 
 """
 
@@ -44,6 +44,8 @@ pipeline = Pipeline.from_script(
     fallback_label=("greeting_flow", "fallback_node"),
 )
 
+
+# %%
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():

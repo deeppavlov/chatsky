@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 3. YDB
+# 7. Yandex Cloud
 
 """
 
@@ -26,16 +26,14 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 # export YDB_ENDPOINT=grpcs://ydb.serverless.yandexcloud.net:2135
 # export YDB_DATABASE=/ru-central1/qwertyuiopasdfgh/123456789qwertyui
 # ##### or use local-ydb with variables from .env_file
-
 # db_uri="grpc://localhost:2136/local"
+
 db_uri = "{}{}".format(
     os.getenv("YDB_ENDPOINT"),
     os.getenv("YDB_DATABASE"),
 )
 db = connector_factory(db_uri)
 
-
-# %%
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,
     context_storage=db,
@@ -43,6 +41,8 @@ pipeline = Pipeline.from_script(
     fallback_label=("greeting_flow", "fallback_node"),
 )
 
+
+# %%
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
