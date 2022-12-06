@@ -5,7 +5,7 @@
 Dialog Flow Framework Documentation
 =====================================
 
-*Date*: ??.12.2022 *Version*: 1.0.0
+*Date*: ??.12.2022 *Version*: 0.10.1
 
 The Dialog Flow Framework (`DFF`) is an open-source `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
 developed for creating dialog systems.
