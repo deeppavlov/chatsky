@@ -43,5 +43,6 @@ format_checkers = [regexp_format_checker, notebook_start_checker]
 
 @pytest.mark.parametrize("dff_example_py_file", dff_example_py_files)
 def test_format(dff_example_py_file: pathlib.Path):
+    current_path = dff_example_py_file.relative_to(dff_examples_dir.parent)
     for checker in format_checkers:
-        assert checker(dff_example_py_file) == True, f"Example {dff_example_py_file.relative_to(dff_examples_dir.parent)} didn't pass example checks!"
+        assert checker(dff_example_py_file), f"Example {current_path} didn't pass example checks!"

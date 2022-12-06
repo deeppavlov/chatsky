@@ -22,7 +22,7 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 external_data = {"counter": 0}
 
 
-#%%
+# %%
 @cache
 def cached_response(_):
     """
@@ -41,7 +41,7 @@ def response(ctx: Context, _: Actor, *__, **___):
     return f"{cached_response(1)}-{cached_response(2)}-{cached_response(1)}-{cached_response(2)}"
 
 
-#%%
+# %%
 toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
@@ -53,7 +53,7 @@ happy_path = (
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
 
 
-#%%
+# %%
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)
     if is_interactive_mode():
