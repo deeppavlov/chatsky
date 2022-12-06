@@ -9,27 +9,39 @@ dff_example_py_files = dff_examples_dir.glob("./**/*.py")
 
 
 patterns = [
-    re.compile("# pip install dff.* # Uncomment this line"),  # check dff installation
-    re.compile("# %% \[markdown\]\n"),  # check comment block
-    re.compile("# %%\n"),  # check python block
+    re.compile(r"# pip install dff.* # Uncomment this line"),  # check dff installation
+    re.compile(r"# %% \[markdown\]\n"),  # check comment block
+    re.compile(r"# %%\n"),  # check python block
 ]
+
+start_pattern = re.compile(r'# %% \[markdown\]\n"""\n# \d\. .*\n\n(?:[\S\s]*\n)?"""\n')
 
 
 def regexp_format_checker(dff_example_py_file: pathlib.Path):
     file_lines = dff_example_py_file.open("rt").readlines()
-    text = "\n".join(file_lines)
     for pattern in patterns:
-        if not pattern.search(text):
+        if not pattern.search("".join(file_lines)):
             raise Exception(
                 f"Pattern `{pattern}` is not found in `{dff_example_py_file.relative_to(dff_examples_dir.parent)}`."
             )
     return True
 
 
-format_checkers = [regexp_format_checker]
+def notebook_start_checker(dff_example_py_file: pathlib.Path):
+    file_lines = dff_example_py_file.open("rt").readlines()
+    result = start_pattern.search("".join(file_lines))
+    if result is None:
+        raise Exception(
+            f"Example `{dff_example_py_file.relative_to(dff_examples_dir.parent)}` doesn't start as a notebook."
+        )
+    else:
+        return result.pos == 0
+
+
+format_checkers = [regexp_format_checker, notebook_start_checker]
 
 
 @pytest.mark.parametrize("dff_example_py_file", dff_example_py_files)
 def test_format(dff_example_py_file: pathlib.Path):
     for checker in format_checkers:
-        checker(dff_example_py_file)
+        assert checker(dff_example_py_file) == True, f"Example {dff_example_py_file.relative_to(dff_examples_dir.parent)} didn't pass example checks!"

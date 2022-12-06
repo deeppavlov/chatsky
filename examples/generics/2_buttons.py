@@ -1,7 +1,6 @@
 # %% [markdown]
 """
-2. Buttons
-=========
+# 2. Buttons
 
 """
 

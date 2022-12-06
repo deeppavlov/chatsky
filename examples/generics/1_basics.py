@@ -1,7 +1,6 @@
 # %% [markdown]
 """
-1. Basics
-=========
+# 1. Basics
 
 """
 

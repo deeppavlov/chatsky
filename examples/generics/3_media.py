@@ -1,7 +1,6 @@
 # %% [markdown]
 """
-3. Media
-=========
+# 3. Media
 
 """
 

@@ -1,7 +1,6 @@
 # %% [markdown]
 """
-3. Responses
-============
+# 3. Responses
 
 This example shows different options for setting responses. Let's do all the necessary imports from `dff`.
 """
