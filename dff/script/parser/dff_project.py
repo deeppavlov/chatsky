@@ -1,11 +1,13 @@
 import typing as tp
 from pathlib import Path
 import logging
+from collections import defaultdict
 
-from .base_parser_object import BaseParserObject, cached_property, Expression, Assignment, Call
+from .base_parser_object import BaseParserObject, cached_property, Expression, Assignment, Call, ReferenceObject, Dict, Iterable
 from .namespace import Namespace
 from .exceptions import ScriptValidationError
 from dff.core.engine.core.actor import Actor
+from dff.core.engine.core.keywords import Keywords
 
 
 logger = logging.getLogger(__name__)
@@ -16,10 +18,20 @@ ScriptInitializers = {
     "dff.core.engine.core.actor.Actor": Actor.__init__.__wrapped__.__code__.co_varnames[1:],
 }
 
+keywords_dict = {
+    k: ["dff.core.engine.core.keywords." + k, "dff.core.engine.core.keywords.Keywords." + k]
+    for k in Keywords.__members__
+}
+
+keywords_list = list(map(lambda x: "dff.core.engine.core.keywords." + x, Keywords.__members__)) + list(
+    map(lambda x: "dff.core.engine.core.keywords.Keywords." + x, Keywords.__members__)
+)
+
 
 class DFFProject(BaseParserObject):
     def __init__(self, namespaces: tp.List['Namespace']):
         super().__init__()
+        self.children: tp.Dict[str, Namespace]
         for namespace in namespaces:
             self.add_child(namespace, namespace.name)
 
@@ -56,13 +68,52 @@ class DFFProject(BaseParserObject):
             raise ScriptValidationError(f"Actor argument `start_label` is not found: {str(call)}")
         return args["script"], args["start_label"], args["fallback_label"]
 
-    # @cached_property
-    # def resolve_script -> tp.Tuple[dict, tp.List[BaseParserObject]]:
-    #     """
-    #
-    #     :return: Resolved script and a list of all the objects necessary to resolve the script
-    #     """
-    #     for
+    @cached_property
+    def resolved_script(self) -> dict:
+        """
+
+        :return: Resolved script
+        """
+        script = defaultdict(dict)
+
+        def resolve(obj: BaseParserObject) -> BaseParserObject:
+            if isinstance(obj, ReferenceObject):
+               if obj.absolute is not None:
+                   return obj.absolute
+            return obj
+
+        def resolve_node(node_info: Expression) -> dict:
+            result = {}
+            node_info = resolve(node_info)
+            if not isinstance(node_info, Dict):
+                raise ScriptValidationError(f"Node {str(node_info)} is not a Dict")
+            for key, value in node_info.items():
+                str_key = str(key)
+                if isinstance(key, ReferenceObject):
+                    str_key = str(key.resolve_name)
+                if str_key not in keywords_list:
+                    raise ScriptValidationError(f"Node key {str_key} is not a keyword")
+                if str_key in keywords_dict["GLOBAL"]:
+                    raise ScriptValidationError(f"Node key is a GLOBAL keyword: {str_key}")
+                if str_key in keywords_dict["LOCAL"]:
+                    raise ScriptValidationError(f"Node key is a LOCAL keyword: {str_key}")
+                result[resolve(key)] = resolve(value)
+            return result
+
+        flows = resolve(self.script[0])
+        if not isinstance(flows, Dict):
+            raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
+        for flow, nodes in flows.items():
+            if flow in keywords_dict["GLOBAL"]:
+                script[resolve(flow)] = resolve_node(nodes)
+            else:
+                nodes = resolve(nodes)
+                if not isinstance(nodes, Dict):
+                    raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
+                for node, info in nodes.items():
+                    script[resolve(flow)][resolve(node)] = resolve_node(info)
+        return script
+
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]):
         if isinstance(item, str):
