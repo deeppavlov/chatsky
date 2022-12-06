@@ -21,6 +21,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %%
 from platform import system
+
 pathlib.Path("dbs").mkdir(exist_ok=True)
 separator = "///" if system() == "Windows" else "////"
 db_uri = f"sqlite:{separator}dbs/sqlite.db"
