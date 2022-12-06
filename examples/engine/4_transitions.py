@@ -2,7 +2,8 @@
 """
 # 4. Transitions
 
-This example shows settings for transitions between flows and nodes. First of all, let's do all the necessary imports from `dff`.
+This example shows settings for transitions between flows and nodes.
+First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -11,7 +12,7 @@ This example shows settings for transitions between flows and nodes. First of al
 
 
 # %%
-import re # Regular expression library
+import re
 
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.engine.core import Context, Actor
@@ -114,11 +115,7 @@ toy_script = {
                 lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
             },
         },
-        "node3": {
-            RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")
-            }
-        },
+        "node3": {RESPONSE: "Sorry, I can not talk about that now.", TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
         "node4": {
             RESPONSE: "Bye",
             TRANSITIONS: {
@@ -130,10 +127,7 @@ toy_script = {
     "music_flow": {
         "node1": {
             RESPONSE: "I love `System of a Down` group, would you like to talk about it?",
-            TRANSITIONS: {
-                lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
-                lbl.to_fallback(): cnd.true()
-            },
+            TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE), lbl.to_fallback(): cnd.true()},
         },
         "node2": {
             RESPONSE: "System of a Down is an Armenian-American heavy metal band formed in 1994.",
@@ -156,8 +150,9 @@ toy_script = {
             RESPONSE: "That's all what I know.",
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp(r"next", re.IGNORECASE),  # second check
-                high_priority_node_transition("greeting_flow", "node4"):
-                cnd.regexp(r"next time", re.IGNORECASE),  # first check
+                high_priority_node_transition("greeting_flow", "node4"): cnd.regexp(
+                    r"next time", re.IGNORECASE
+                ),  # first check
                 lbl.to_fallback(): cnd.true(),  # third check
             },
         },

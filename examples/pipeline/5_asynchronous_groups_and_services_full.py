@@ -59,6 +59,7 @@ Service group `service_group_1` is also asynchronous, it logs HTTPS requests (fr
 Service group `pipeline` can't be asynchronous because `balanced_group` and actor are synchronous.
 """
 
+
 # %%
 async def simple_asynchronous_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running")
@@ -84,6 +85,7 @@ def meta_web_querying_service(photo_number: int):  # This function returns servi
 
 def context_printing_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
+
 
 # %%
 actor = Actor(

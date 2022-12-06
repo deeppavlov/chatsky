@@ -1,9 +1,9 @@
 # %% [markdown]
-'''
+"""
 1. Basics
 =========
 
-'''
+"""
 
 # %%
 from typing import NamedTuple

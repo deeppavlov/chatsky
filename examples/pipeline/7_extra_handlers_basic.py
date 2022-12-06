@@ -40,6 +40,7 @@ To each of them (as well as to group) time measurement extra handler is attached
 In the end `ctx.misc` is logged to info channel.
 """
 
+
 # %%
 def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now()})
@@ -55,6 +56,7 @@ async def heavy_service(_):
 
 def logging_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
+
 
 # %%
 actor = Actor(

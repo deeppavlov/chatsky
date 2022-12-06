@@ -58,10 +58,7 @@ toy_script = {
             RESPONSE: "Sorry, I can not talk about music now.",
             TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
         },
-        "node4": {
-            RESPONSE: "Bye",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")}
-        },
+        "node4": {RESPONSE: "Bye", TRANSITIONS: {"node1": cnd.exact_match("Hi")}},
         "fallback_node": {
             # We get to this node if the conditions for switching to other nodes are not performed.
             RESPONSE: "Ooops",
@@ -82,9 +79,7 @@ By default, if `fallback_label` is not set, then its value becomes equal to `sta
 
 # %%
 actor = Actor(
-    toy_script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node")
+    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
 )
 
 happy_path = (
@@ -101,9 +96,13 @@ happy_path = (
     ("Ok, goodbye.", "Bye"),  # node3 -> node4
 )
 
+
 # %% [markdown]
+"""
 `Actor` is a low-level API way of working with `dff`.
 We recommend going the other way and using `Pipeline`, which has the same functionality but a high-level API.
+"""
+
 
 # %%
 pipeline = Pipeline.from_script(

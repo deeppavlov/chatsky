@@ -32,6 +32,7 @@ However, as the group is asynchronous, it is being executed for 0.01 of a second
 Service group `pipeline` can't be asynchronous because actor is synchronous.
 """
 
+
 # %%
 async def time_consuming_service(_):
     await asyncio.sleep(0.01)

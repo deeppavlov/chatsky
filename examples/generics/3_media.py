@@ -1,9 +1,9 @@
 # %% [markdown]
-'''
+"""
 3. Media
 =========
 
-'''
+"""
 
 # %%
 from typing import NamedTuple

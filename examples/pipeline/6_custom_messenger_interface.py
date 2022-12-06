@@ -11,6 +11,8 @@ The following example shows messenger interfaces usage.
 
 
 # %%
+import logging
+
 from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
@@ -18,6 +20,8 @@ from flask import Flask, request, Request
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
 from dff.utils.testing.common import is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT
+
+logger = logging.getLogger(__name__)
 
 
 # %% [markdown]
@@ -95,6 +99,7 @@ def cat_response2webpage(ctx: Context):
     last_index = get_last_index(ctx.responses)
     ctx.responses[last_index] = construct_webpage_by_response(last_response)
 
+
 # %%
 actor = Actor(
     TOY_SCRIPT,
@@ -120,6 +125,7 @@ pipeline_dict = {
 async def route():
     ctx_id = 0  # 0 will be current dialog (context) identification.
     return messenger_interface.on_request(request, ctx_id).last_response
+
 
 # %%
 pipeline = Pipeline(**pipeline_dict)

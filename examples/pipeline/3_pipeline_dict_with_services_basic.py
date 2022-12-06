@@ -1,8 +1,10 @@
 # %% [markdown]
+"""
 3.  Pipeline dict with services (basic)
 =======================================
 
 The following example shows pipeline creation from dict and most important pipeline components.
+"""
 
 
 # %%
@@ -22,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 # %% [markdown]
+"""
 When Pipeline is created using `from_dict` method, pipeline should be defined as dictionary.
 It should contain `services` - a ServiceGroupBuilder object,
 basically a list of ServiceBuilder or ServiceGroupBuilder objects, see example №4.
@@ -35,6 +38,7 @@ Not only Pipeline can be run using `__call__` method, for most cases `run` metho
 It starts pipeline asynchronously and connects to provided messenger interface.
 
 Here pipeline contains 4 services, defined in 4 different ways with different signatures.
+"""
 
 
 # %%

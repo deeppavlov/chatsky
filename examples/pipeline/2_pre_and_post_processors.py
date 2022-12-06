@@ -1,8 +1,10 @@
 # %% [markdown]
+"""
 2. Pre- and postprocessors
 ==========================
-The following example shows more advanced usage of `pipeline` module as an extension to `dff.core.engine`.
 
+The following example shows more advanced usage of `pipeline` module as an extension to `dff.core.engine`.
+"""
 
 # %%
 # pip install dff  # Uncomment this line to install the framework
@@ -22,6 +24,7 @@ logger = logging.getLogger(__name__)
 
 
 # %% [markdown]
+"""
 When Pipeline is created with `from_script` method, additional pre- and postprocessors can be defined.
 These can be any ServiceBuilder objects (defined in `types` module) - callables, objects or dicts.
 They are being turned into special Service objects (see example №3),
@@ -36,6 +39,7 @@ where:
 
 Here a preprocessor ("ping") and a postprocessor ("pong") are added to pipeline.
 They share data in `context.misc` - a common place for sharing data between services and actor.
+"""
 
 
 # %%

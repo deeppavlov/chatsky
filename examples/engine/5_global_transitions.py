@@ -14,7 +14,6 @@ This example shows the global setting of transitions. First of all, let's do all
 import re
 
 from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
-from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
 from dff.core.pipeline import Pipeline
@@ -38,14 +37,18 @@ toy_script = {
         TRANSITIONS: {
             ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),  # first check
             ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),  # second check
-            lbl.to_fallback(0.1): cnd.true(),   # fifth check
+            lbl.to_fallback(0.1): cnd.true(),  # fifth check
             lbl.forward(): cnd.all(
-                [cnd.regexp(r"next\b"),
-                cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]])]  # third ckheck
+                [
+                    cnd.regexp(r"next\b"),
+                    cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]]),
+                ]  # third ckheck
             ),
             lbl.repeat(0.2): cnd.all(
-                [cnd.regexp(r"repeat", re.I),
-                cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"]))]  # fourh check
+                [
+                    cnd.regexp(r"repeat", re.I),
+                    cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"])),
+                ]  # fourh check
             ),
         }
     },
@@ -68,11 +71,10 @@ toy_script = {
             TRANSITIONS: {
                 lbl.forward(0.5): cnd.regexp(r"talk about"),
                 # lbl.forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
-                lbl.previous(): cnd.regexp(r"previous", re.I)},
+                lbl.previous(): cnd.regexp(r"previous", re.I),
+            },
         },
-        "node3": {
-            RESPONSE: "Sorry, I can not talk about that now.",
-            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
+        "node3": {RESPONSE: "Sorry, I can not talk about that now.", TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
         "node4": {RESPONSE: "bye"},
         # Only the global transitions setting are used in this node.
     },

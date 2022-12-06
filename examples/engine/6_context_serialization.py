@@ -25,6 +25,8 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 """
 This function returns the user request number.
 """
+
+
 # %%
 def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:
     return f"answer {len(ctx.requests)}"
@@ -33,12 +35,7 @@ def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 # %%
 # a dialog script
 toy_script = {
-    "flow_start": {
-        "node_start": {
-            RESPONSE: response_handler,
-            TRANSITIONS: {("flow_start", "node_start"): cnd.true()}
-        }
-    }
+    "flow_start": {"node_start": {RESPONSE: response_handler, TRANSITIONS: {("flow_start", "node_start"): cnd.true()}}}
 }
 
 # testing
@@ -74,9 +71,7 @@ def process_response(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script, start_label=("flow_start", "node_start"), post_services=[process_response]
-)
+pipeline = Pipeline.from_script(toy_script, start_label=("flow_start", "node_start"), post_services=[process_response])
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)

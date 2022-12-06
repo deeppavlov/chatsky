@@ -99,6 +99,7 @@ async def long_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service {info['name']} is going to sleep for {timeout} seconds.")
     await asyncio.sleep(timeout)
 
+
 # %%
 actor = Actor(
     TOY_SCRIPT,

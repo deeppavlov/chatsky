@@ -58,14 +58,9 @@ toy_script = {
     },
     "flow": {
         LOCAL: {
-            PRE_RESPONSE_PROCESSING: {
-                "proc_name_2": add_prefix("l2_local"),
-                "proc_name_3": add_prefix("l3_local")
-            }
+            PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_local"), "proc_name_3": add_prefix("l3_local")}
         },
-        "step_0": {
-            RESPONSE: "first",
-            TRANSITIONS: {lbl.forward(): cnd.true()}},
+        "step_0": {RESPONSE: "first", TRANSITIONS: {lbl.forward(): cnd.true()}},
         "step_1": {
             PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
             RESPONSE: "second",
@@ -102,9 +97,7 @@ happy_path = (
 
 
 # %%
-pipeline = Pipeline.from_script(
-    toy_script, start_label=("root", "start"), fallback_label=("root", "fallback")
-)
+pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)

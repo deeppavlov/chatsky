@@ -2,7 +2,8 @@
 """
 # 2. Conditions
 
-This example shows different options for setting transition conditions from one node to another. First of all, let's do all the necessary imports from `dff`.
+This example shows different options for setting transition conditions from one node to another.
+First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -11,7 +12,7 @@ This example shows different options for setting transition conditions from one 
 
 
 # %%
-import re # Regular expression library
+import re
 
 from dff.core.engine.core import Actor, Context
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -35,7 +36,7 @@ Out of the box `dff.core.engine` offers the following options for setting condit
 `regexp` has same signature as `re.compile` function.
 * `aggregate` returns `bool` value as a result after aggregate by `aggregate_func` for input sequence of condtions.
 `aggregate_func == any` by default. `aggregate` has alias `agg`.
-* `any` returns `True` if one element of input sequence of condtions is `True`. `any(input_sequence)` is equivalent to  
+* `any` returns `True` if one element of input sequence of condtions is `True`. `any(input_sequence)` is equivalent to
 `aggregate(input sequence, aggregate_func=any)`.
 * `all` returns `True` if all elements of input sequence of condtions are `True`. `all(input_sequence)` is equivalent to
 `aggregate(input sequence, aggregate_func=all)`.
@@ -75,6 +76,7 @@ def predetermined_condition(condition: bool):
         return condition
 
     return internal_condition_function
+
 
 # %%
 toy_script = {
@@ -142,9 +144,7 @@ happy_path = (
 
 # %%
 pipeline = Pipeline.from_script(
-    toy_script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node")
+    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
 )
 
 if __name__ == "__main__":

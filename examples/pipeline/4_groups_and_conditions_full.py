@@ -30,6 +30,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+
 # %% [markdown]
 """
 Pipeline can contain not only single services, but also service groups.
@@ -98,6 +99,7 @@ Here there are two conditionally executed services: a service named `running_ser
     that contains execution state of all previously run services.
 """
 
+
 # %%
 def simple_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running...")
@@ -109,6 +111,7 @@ def never_running_service(_, __, info: ServiceRuntimeInfo):
 
 def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' runtime execution info: {json.dumps(info, indent=4, default=str)}")
+
 
 # %%
 actor = Actor(

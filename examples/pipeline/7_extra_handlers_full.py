@@ -63,6 +63,7 @@ Another `time_measure_handler` measures total amount of time taken by all of the
     so `json_encoder_handler` is applied to encode stats to JSON.
 """
 
+
 # %%
 def get_extra_handler_misc_field(
     info: ExtraHandlerRuntimeInfo, postfix: str
@@ -105,6 +106,7 @@ def json_converter_after_handler(ctx, _, info):
 
 
 memory_heap = dict()  # This object plays part of some memory heap
+
 
 # %%
 @to_service(

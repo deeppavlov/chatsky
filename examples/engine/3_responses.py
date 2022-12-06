@@ -29,7 +29,7 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 """
 The response can be set by any object of python:
 
-* Callable objects. If the object is callable it must have a special signature:  
+* Callable objects. If the object is callable it must have a special signature:
 
         func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
 
@@ -64,12 +64,13 @@ def upper_case_response(response: str):
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     return {"previous_node": list(ctx.labels.values())[-2], "last_request": ctx.last_request}
 
+
 # %%
 toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node, it doesn't need a `RESPONSE`.
             RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")}, 
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -119,9 +120,7 @@ random.seed(31415)  # predestination of choice
 
 
 pipeline = Pipeline.from_script(
-    toy_script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node")
+    toy_script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
 )
 
 if __name__ == "__main__":

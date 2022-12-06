@@ -9,6 +9,7 @@ The following example shows pipeline service group usage and start conditions.
 # %%
 # pip install dff  # Uncomment this line to install the framework
 
+
 # %%
 import json
 import logging
@@ -20,6 +21,7 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
+
 
 # %% [markdown]
 """
@@ -49,6 +51,7 @@ The service, named `context_printing_service` prints pipeline runtime informatio
 that contains execution state of all previously run services.
 """
 
+
 # %%
 def always_running_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' is running...")
@@ -60,6 +63,7 @@ def never_running_service(_, __, info: ServiceRuntimeInfo):
 
 def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
     logger.info(f"Service '{info['name']}' runtime execution info: {json.dumps(info, indent=4, default=str)}")
+
 
 # %%
 actor = Actor(
@@ -86,6 +90,7 @@ pipeline_dict = {
         ),
     ],
 }
+
 
 # %%
 pipeline = Pipeline.from_dict(pipeline_dict)

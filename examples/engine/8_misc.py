@@ -69,11 +69,7 @@ toy_script = {
             RESPONSE: custom_response,
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
-        "step_4": {
-            MISC: {"var3": "info_of_step_4"},
-            RESPONSE: custom_response,
-            TRANSITIONS: {"step_0": cnd.true()}
-        },
+        "step_4": {MISC: {"var3": "info_of_step_4"}, RESPONSE: custom_response, TRANSITIONS: {"step_0": cnd.true()}},
     },
 }
 
