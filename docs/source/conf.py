@@ -60,12 +60,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = [
-    "examples/index.rst",
-    "apiref/modules.rst",
-    "*.py",
-    "**/_*.py"
-]
+exclude_patterns = ["*.py", "**/_*.py"]
 
 html_short_title = "None"
 
