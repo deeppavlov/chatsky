@@ -9,8 +9,9 @@ import logging
 from typing import Union, Callable, Optional, Dict, List, Any
 import copy
 
-from pydantic import BaseModel, validate_arguments
+from pydantic import BaseModel, validate_arguments, Extra
 
+from dff.script.utils.singleton_turn_caching import cache_clear
 from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 
 from .context import Context
@@ -42,6 +43,9 @@ class Actor(BaseModel):
     The class which is used to process :py:class:`~dff.core.engine.core.context.Context`
     according to the :py:class:`~dff.core.engine.core.script.Script`.
     """
+
+    class Config:
+        extra = Extra.allow
 
     script: Union[Script, dict]
     """
@@ -126,6 +130,10 @@ class Actor(BaseModel):
             verbose=verbose,
             handlers={} if handlers is None else handlers,
         )
+
+        # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
+        self._clean_turn_cache = True
+
         errors = self.validate_script(verbose) if validation_stage or validation_stage is None else []
         if errors:
             raise ValueError(
@@ -177,6 +185,9 @@ class Actor(BaseModel):
         ctx.add_response(ctx.framework_states["actor"]["response"])
 
         self._run_handlers(ctx, ActorStage.FINISH_TURN, *args, **kwargs)
+        if self._clean_turn_cache:
+            cache_clear()
+
         del ctx.framework_states["actor"]
         return ctx
 

@@ -39,7 +39,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
-    "IPython.sphinxext.ipython_console_highlighting"
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
 suppress_warnings = ["image.nonlocal_uri"]
@@ -91,9 +91,8 @@ nbsphinx_prolog = """
 html_static_path = ["static"]
 
 nbsphinx_thumbnails = {
-    'examples/*/1_*': '_static/hippo.jpg',
+    "examples/*/1_*": "_static/hippo.jpg",
 }
-
 
 # Theme options
 html_theme_options = {
@@ -112,5 +111,10 @@ html_theme_options = {
 
 def setup(_):
     generate_example_links_for_notebook_creation(
-        ["examples/engine/[1-9]*.py", "examples/pipeline/[1-9]*.py", "examples/db_connector/*.py", "examples/generics/*.py"]
+        [
+            "examples/engine/[1-9]*.py",
+            "examples/pipeline/[1-9]*.py",
+            "examples/db_connector/*.py",
+            "examples/generics/*.py",
+        ]
     )
