@@ -2,9 +2,7 @@
 """
 # 9. Pre-transitions processing
 
-TODO:
-1. Remove `create_transitions`
-2. Rename start to start_node, fallback to fallback_node, step to node?
+This example shows pre-transitions processing feature. First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -28,20 +26,6 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 
 
 # %%
-def create_transitions():
-    return {
-        ("left", "step_2"): "left",
-        ("right", "step_2"): "right",
-        lbl.previous(): "previous",
-        lbl.to_start(): "start",
-        lbl.forward(): "forward",
-        lbl.backward(): "back",
-        lbl.previous(): "previous",
-        lbl.repeat(): "repeat",
-        lbl.to_fallback(): cnd.true(),
-    }
-
-
 def save_previous_node_response_to_ctx_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
     processed_node = ctx.current_node
     ctx.misc["previous_node_response"] = processed_node.response

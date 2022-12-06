@@ -30,13 +30,14 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 The response can be set by any object of python:
 
 * Callable objects. If the object is callable it must have a special signature:  
-```
-func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
-```
+
+        func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
 
 * Non-callable objects. If the object is not callable, it will be returned by the agent as a response.
 
 Out of the box `DSL` has a single response function `choice` that gives one random response from the list of responses.
+
+The functions to be used in the `toy_script` are declared here.
 """
 
 
@@ -66,12 +67,14 @@ def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
 # %%
 toy_script = {
     "greeting_flow": {
-        "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
+        "start_node": {  # This is an initial node, it doesn't need a `RESPONSE`.
             RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")}, 
+            # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
+            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),
+            # Random choice from candicate list.
             TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
         "node2": {
@@ -86,7 +89,7 @@ toy_script = {
             RESPONSE: upper_case_response("bye"),
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
-        "fallback_node": {  # We get to this node if an error occurred while the agent was running
+        "fallback_node": {  # We get to this node if an error occurred while the agent was running.
             RESPONSE: fallback_trace_response,
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
@@ -100,7 +103,8 @@ happy_path = (
     ("Let's talk about music.", "Sorry, I can not talk about music now."),  # node2 -> node3
     ("Ok, goodbye.", "BYE"),  # node3 -> node4
     ("Hi", "Hi, what is up?"),  # node4 -> node1
-    ("stop", {"previous_node": ("greeting_flow", "node1"), "last_request": "stop"}),  # node1 -> fallback_node
+    ("stop", {"previous_node": ("greeting_flow", "node1"), "last_request": "stop"}),
+    # node1 -> fallback_node
     ("one", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "one"}),  # f_n->f_n
     ("help", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "help"}),  # f_n->f_n
     ("nope", {"previous_node": ("greeting_flow", "fallback_node"), "last_request": "nope"}),  # f_n->f_n

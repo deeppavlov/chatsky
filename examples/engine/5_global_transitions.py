@@ -2,6 +2,7 @@
 """
 # 5. Global transitions
 
+This example shows the global setting of transitions. First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -20,60 +21,76 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
-# %%
-def high_priority_node_transition(flow_label, label):
-    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> tuple[str, str, float]:
-        return (flow_label, label, 2.0)
+# %% [markdown]
+"""
+The keyword `GLOBAL` is used to define a global node. There can be only one global node in a script.
+The value that corresponds to this key has the `dict` type with the same keywords as regular nodes.
+The global node is defined above the flow level as opposed to regular nodes.
+This node allows to define default global values for all nodes.
 
-    return transition
+There are `GLOBAL` node and three flows: `global_flow`, `greeting_flow`, `music_flow`.
+"""
 
 
 # %%
 toy_script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),
-            ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),
-            lbl.to_fallback(0.1): cnd.true(),
+            ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),  # first check
+            ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),  # second check
+            lbl.to_fallback(0.1): cnd.true(),   # fifth check
             lbl.forward(): cnd.all(
-                [cnd.regexp(r"next\b"), cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]])]
+                [cnd.regexp(r"next\b"),
+                cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]])]  # third ckheck
             ),
             lbl.repeat(0.2): cnd.all(
-                [cnd.regexp(r"repeat", re.I), cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"]))]
+                [cnd.regexp(r"repeat", re.I),
+                cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"]))]  # fourh check
             ),
         }
     },
     "global_flow": {
-        "start_node": {RESPONSE: ""},  # This is an initial node, it doesn't need an `RESPONSE`
-        "fallback_node": {  # We get to this node if an error occurred while the agent was running
+        "start_node": {RESPONSE: ""},  # This is an initial node, it doesn't need a `RESPONSE`.
+        "fallback_node": {  # We get to this node if an error occurred while the agent was running.
             RESPONSE: "Ooops",
             TRANSITIONS: {lbl.previous(): cnd.regexp(r"previous", re.I)},
+            # lbl.previous() is equivalent to ("previous_flow", "previous_node", 1.0)
         },
     },
     "greeting_flow": {
         "node1": {
-            RESPONSE: "Hi, how are you?",  # When the agent goes to node1, we return "Hi, how are you?"
+            RESPONSE: "Hi, how are you?",
             TRANSITIONS: {"node2": cnd.regexp(r"how are you")},
+            # "node2" is equivalent to ("greeting_flow", "node2", 1.0)
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
-            TRANSITIONS: {lbl.forward(0.5): cnd.regexp(r"talk about"), lbl.previous(): cnd.regexp(r"previous", re.I)},
+            TRANSITIONS: {
+                lbl.forward(0.5): cnd.regexp(r"talk about"),
+                # lbl.forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
+                lbl.previous(): cnd.regexp(r"previous", re.I)},
         },
-        "node3": {RESPONSE: "Sorry, I can not talk about that now.", TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
+        "node3": {
+            RESPONSE: "Sorry, I can not talk about that now.",
+            TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
         "node4": {RESPONSE: "bye"},
+        # Only the global transitions setting are used in this node.
     },
     "music_flow": {
         "node1": {
-            RESPONSE: "I love `System of a Down` group, would you like to tell about it? ",
+            RESPONSE: "I love `System of a Down` group, would you like to talk about it?",
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
-        "node2": {RESPONSE: "System of a Downis an Armenian-American heavy metal band formed in in 1994."},
+        "node2": {
+            RESPONSE: "System of a Down is an Armenian-American heavy metal band formed in 1994."
+            # Only the global transitions setting are used in this node.
+        },
         "node3": {
             RESPONSE: "The band achieved commercial success with the release of five studio albums.",
             TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
         },
         "node4": {
-            RESPONSE: "That's all what I know",
+            RESPONSE: "That's all what I know.",
             TRANSITIONS: {
                 ("greeting_flow", "node4"): cnd.regexp(r"next time", re.I),
                 ("greeting_flow", "node2"): cnd.regexp(r"next", re.I),
@@ -87,15 +104,15 @@ toy_script = {
 happy_path = (
     ("hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("talk about music.", "I love `System of a Down` group, would you like to tell about it? "),
-    ("yes", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("talk about music.", "I love `System of a Down` group, would you like to talk about it?"),
+    ("yes", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
-    ("back", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
-    ("repeat", "System of a Downis an Armenian-American heavy metal band formed in in 1994."),
+    ("back", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
+    ("repeat", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
-    ("next", "That's all what I know"),
+    ("next", "That's all what I know."),
     ("next", "Good. What do you want to talk about?"),
-    ("previous", "That's all what I know"),
+    ("previous", "That's all what I know."),
     ("next time", "bye"),
     ("stop", "Ooops"),
     ("previous", "bye"),

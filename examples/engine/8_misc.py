@@ -2,9 +2,7 @@
 """
 # 8. Misc
 
-TODO:
-1. Explain that MISC == miscellaneous and why we need it
-2. Remove `create_transitions`
+This example shows `MISC` (miscellaneous) keyword usage. First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -24,20 +22,6 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 
 
 # %%
-def create_transitions():
-    return {
-        ("left", "step_2"): "left",
-        ("right", "step_2"): "right",
-        lbl.previous(): "previous",
-        lbl.to_start(): "start",
-        lbl.forward(): "forward",
-        lbl.backward(): "back",
-        lbl.previous(): "previous",
-        lbl.repeat(): "repeat",
-        lbl.to_fallback(): cnd.true(),
-    }
-
-
 def custom_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     if ctx.validation:
         return ""
@@ -85,7 +69,11 @@ toy_script = {
             RESPONSE: custom_response,
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
-        "step_4": {MISC: {"var3": "info_of_step_4"}, RESPONSE: custom_response, TRANSITIONS: {"step_0": cnd.true()}},
+        "step_4": {
+            MISC: {"var3": "info_of_step_4"},
+            RESPONSE: custom_response,
+            TRANSITIONS: {"step_0": cnd.true()}
+        },
     },
 }
 

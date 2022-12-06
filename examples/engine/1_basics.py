@@ -41,12 +41,13 @@ where keys are names of the nodes and values are conditions of transition to the
 # %%
 toy_script = {
     "greeting_flow": {
-        "start_node": {  # This is the initial node, it doesn't contain an `RESPONSE`
+        "start_node": {  # This is the initial node, it doesn't contain a `RESPONSE`.
             RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of the user then we make the transition.
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            # If "Hi" == request of the user then we make the transition.
         },
         "node1": {
-            RESPONSE: "Hi, how are you?",  # When the agent goes to node1 we return "Hi, how are you?"
+            RESPONSE: "Hi, how are you?",  # When the agent goes to node1 we return "Hi, how are you?".
             TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
         "node2": {
@@ -61,7 +62,8 @@ toy_script = {
             RESPONSE: "Bye",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")}
         },
-        "fallback_node": {  # We get to this node if the conditions for switching to other nodes are not performed.
+        "fallback_node": {
+            # We get to this node if the conditions for switching to other nodes are not performed.
             RESPONSE: "Ooops",
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
@@ -116,6 +118,6 @@ if __name__ == "__main__":
         happy_path,
     )  # This is a function for automatic example running (testing example) with `happy_path`.
 
-    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set.
+    # Run example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set.
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # This runs example in interactive mode.

@@ -2,7 +2,7 @@
 """
 # 4. Transitions
 
-This is an example of transitions between flows. First of all, let's do all the necessary imports from `dff`.
+This example shows settings for transitions between flows and nodes. First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -22,6 +22,15 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
+# %% [markdown]
+"""
+Let's define the functions with a special type of return value:
+
+    NodeLabel3Type == tuple[str, str, float]
+
+which means that transition returns a `tuple` with flow name, node name and priority.
+"""
+
 
 # %%
 def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
@@ -37,17 +46,12 @@ def high_priority_node_transition(flow_label, label):
 
 # %% [markdown]
 """
-The functions here return a special data type:
+Priority is needed to select a condition in the situation where more than one condition is `True`.
+All conditions in `TRANSITIONS` are being checked.
+Of the set of `True` conditions, the one that has the highest priority will be executed.
+Of the set of `True` conditions with largest priority the first met condition will be executed.
 
-    NodeLabel3Type == tuple[str, str, float]
-
-which means that transition returns a `tuple` (`flow`, `node`, `priority`).
-Priority is needed to select a condition in the situation where more than one condition is `true`.
-All conditions in TRANSITIONS are being checked.
-Of the set of `true` conditions, the one that has the highest priority will be executed.
-Of the set of `true` conditions with largest priority the first met condition will be executed.
-
-Out of the box `dff.core.engine` offers 6 `labels` methods:
+Out of the box `dff.core.engine` offers the following `dff.core.engine.labels` methods:
 
 * `lbl.repeat()` returns transition handler which returns `NodeLabelType` to the last node,
 
@@ -68,23 +72,22 @@ There are three flows here: `global_flow`, `greeting_flow`, `music_flow`.
 # %%
 toy_script = {
     "global_flow": {
-        "start_node": {  # This is an initial node, it doesn't need an `RESPONSE`
+        "start_node": {  # This is an initial node, it doesn't need a `RESPONSE`.
             RESPONSE: "",
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
                 ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
-                # ("global_flow", "fallback_node"): cnd.true(),  # third check
                 "fallback_node": cnd.true(),  # third check
-                # "fallback_node" is equivalent to ("global_flow", "fallback_node")
+                # "fallback_node" is equivalent to ("global_flow", "fallback_node").
             },
         },
-        "fallback_node": {  # We get to this node if an error occurred while the agent was running
+        "fallback_node": {  # We get to this node if an error occurred while the agent was running.
             RESPONSE: "Ooops",
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
                 ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
                 lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
-                # lbl.previous() is equivalent to ("PREVIOUS_flow", "PREVIOUS_node")
+                # lbl.previous() is equivalent to ("previous_flow", "previous_node")
                 lbl.repeat(): cnd.true(),  # fourth check
                 # lbl.repeat() is equivalent to ("global_flow", "fallback_node")
             },
@@ -107,8 +110,8 @@ toy_script = {
                 lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
                 # lbl.forward(0.5) is equivalent to ("greeting_flow", "node3", 0.5)
                 ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
-                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
                 # ("music_flow", "node1") is equivalent to ("music_flow", "node1", 1.0)
+                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
             },
         },
         "node3": {
@@ -126,7 +129,7 @@ toy_script = {
     },
     "music_flow": {
         "node1": {
-            RESPONSE: "I love `System of a Down` group, would you like to tell about it?",
+            RESPONSE: "I love `System of a Down` group, would you like to talk about it?",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
                 lbl.to_fallback(): cnd.true()
@@ -154,7 +157,7 @@ toy_script = {
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp(r"next", re.IGNORECASE),  # second check
                 high_priority_node_transition("greeting_flow", "node4"):
-                cnd.regexp(r"next time", re.IGNORECASE),
+                cnd.regexp(r"next time", re.IGNORECASE),  # first check
                 lbl.to_fallback(): cnd.true(),  # third check
             },
         },
@@ -166,7 +169,7 @@ toy_script = {
 happy_path = (
     ("hi", "Hi, how are you?"),
     ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("talk about music.", "I love `System of a Down` group, would you like to tell about it?"),
+    ("talk about music.", "I love `System of a Down` group, would you like to talk about it?"),
     ("yes", "System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ("next", "The band achieved commercial success with the release of five studio albums."),
     ("back", "System of a Down is an Armenian-American heavy metal band formed in 1994."),

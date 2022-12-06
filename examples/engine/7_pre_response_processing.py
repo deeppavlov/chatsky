@@ -2,8 +2,7 @@
 """
 # 7. Pre-response processing
 
-TODO:
-1. Remove `create_transitions` - doesn't use
+This example shows pre-response processing feature. First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -22,20 +21,6 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 
 
 # %%
-def create_transitions():
-    return {
-        ("left", "step_2"): "left",
-        ("right", "step_2"): "right",
-        lbl.previous(): "previous",
-        lbl.to_start(): "start",
-        lbl.forward(): "forward",
-        lbl.backward(): "back",
-        lbl.previous(): "previous",
-        lbl.repeat(): "repeat",
-        lbl.to_fallback(): cnd.true(),
-    }
-
-
 def add_label_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
     processed_node = ctx.current_node
     processed_node.response = f"{ctx.last_label}: {processed_node.response}"
@@ -53,6 +38,12 @@ def add_prefix(prefix):
     return add_prefix_processing
 
 
+# %% [markdown]
+"""
+`PRE_RESPONSE_PROCESSING` is a keyword that can be used in `GLOBAL`, `LOCAL` or nodes.
+"""
+
+
 # %%
 toy_script = {
     "root": {
@@ -67,9 +58,14 @@ toy_script = {
     },
     "flow": {
         LOCAL: {
-            PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_local"), "proc_name_3": add_prefix("l3_local")}
+            PRE_RESPONSE_PROCESSING: {
+                "proc_name_2": add_prefix("l2_local"),
+                "proc_name_3": add_prefix("l3_local")
+            }
         },
-        "step_0": {RESPONSE: "first", TRANSITIONS: {lbl.forward(): cnd.true()}},
+        "step_0": {
+            RESPONSE: "first",
+            TRANSITIONS: {lbl.forward(): cnd.true()}},
         "step_1": {
             PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
             RESPONSE: "second",
@@ -106,7 +102,9 @@ happy_path = (
 
 
 # %%
-pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(
+    toy_script, start_label=("root", "start"), fallback_label=("root", "fallback")
+)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)
