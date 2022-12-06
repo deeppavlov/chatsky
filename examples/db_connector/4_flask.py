@@ -7,6 +7,10 @@
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 import pathlib
 
 from dff.core.pipeline import Pipeline

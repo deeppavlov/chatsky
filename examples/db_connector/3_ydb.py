@@ -6,6 +6,10 @@
 
 
 # %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 import os
 
 from dff.connectors.db import connector_factory
