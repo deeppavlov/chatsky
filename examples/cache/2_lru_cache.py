@@ -1,3 +1,16 @@
+# %% [markdown]
+"""
+1. Cache
+========
+
+"""
+
+
+# %%
+# pip install dff  # Uncomment this line to install the framework
+
+
+# %%
 from dff.core.engine.conditions import true
 from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
@@ -10,6 +23,7 @@ from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_
 external_data = {"counter": 0}
 
 
+#%%
 @lru_cache(maxsize=2)
 def cached_response(_):
     """
@@ -27,6 +41,7 @@ def response(ctx: Context, _: Actor, *__, **___):
     return f"{cached_response(1)}-{cached_response(2)}-{cached_response(3)}-{cached_response(2)}-{cached_response(1)}"
 
 
+#%%
 toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
@@ -37,6 +52,8 @@ happy_path = (
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
 
+
+#%%
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)
     if is_interactive_mode():

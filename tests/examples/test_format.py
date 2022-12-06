@@ -9,8 +9,8 @@ dff_example_py_files = dff_examples_dir.glob("./**/*.py")
 
 
 patterns = [
-    re.compile("# pip install dff.*# Uncomment this line"),  # check dff installation
-    re.compile("# %% [markdown]\n"),  # check comment block
+    re.compile("# pip install dff.* # Uncomment this line"),  # check dff installation
+    re.compile("# %% \[markdown\]\n"),  # check comment block
     re.compile("# %%\n"),  # check python block
 ]
 
