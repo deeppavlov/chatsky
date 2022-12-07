@@ -11,12 +11,18 @@ import logging
 try:
     from functools import cached_property
 except ImportError:
-    from cached_property import cached_property  # todo: remove this when python3.7 support is dropped
+    try:
+        from cached_property import cached_property  # todo: remove this when python3.7 support is dropped
+    except ImportError:
+        raise ImportError(f"Module `cached_property` is not installed. Install it with `pip install dff[parser]`.")
 
 try:
     from ast import unparse
 except ImportError:
-    from astunparse import unparse  # todo: remove this when python3.8 support is dropped
+    try:
+        from astunparse import unparse  # todo: remove this when python3.8 support is dropped
+    except ImportError:
+        raise ImportError(f"Module `astunparse` is not installed. Install it with `pip install dff[parser]`.")
 
 try:
     remove_suffix = str.removesuffix
