@@ -362,6 +362,10 @@ class Python(Expression):
         for key, value in node.__dict__.items():
             if isinstance(value, ast.expr):
                 self.add_child(Expression.from_ast(value), key)
+            elif isinstance(value, Iterable):
+                for index, child in enumerate(value):
+                    if isinstance(child, ast.expr):
+                        self.add_child(Expression.from_ast(child), key + "_" + str(index))
         self.string = remove_suffix(unparse(node), "\n")
 
     def __str__(self):
