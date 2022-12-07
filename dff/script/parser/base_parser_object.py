@@ -51,6 +51,15 @@ class BaseParserObject(ABC):
         self.children: tp.Dict[str, BaseParserObject] = {}
 
     @cached_property
+    def names(self) -> tp.Set[str]:
+        result = set()
+        if isinstance(self, Name):
+            result.add(self.name)
+        for child in self.children.values():
+            result.update(child.names)
+        return result
+
+    @cached_property
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
         result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
@@ -159,6 +168,8 @@ class Expression(BaseParserObject, ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node, **kwargs) -> 'Expression':
+        if isinstance(node, (ast.DictComp, ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+            return Comprehension.from_ast(node)
         if isinstance(node, ast.Call):
             return Call.from_ast(node)
         if isinstance(node, (ast.Tuple, ast.List, ast.Set)):
@@ -627,3 +638,112 @@ class Call(Expression):
                 raise StarError(f"Starred calls are not supported: {unparse(node)}")
             keywords[str(keyword.arg)] = Expression.from_ast(keyword.value)
         return cls(func, args, keywords)
+
+
+class Generator(BaseParserObject):
+    def __init__(self, target: Expression, iterator: Expression, ifs: tp.List[Expression], is_async: bool):
+        BaseParserObject.__init__(self)
+        self.add_child(target, "target")
+        self.generated_names = target.names
+        self.add_child(iterator, "iter")
+        for index, if_expr in enumerate(ifs):
+            self.add_child(if_expr, "if_" + str(index))
+        self.is_async = is_async
+
+    def __str__(self):
+        ifs = [f"if {str(expr)}" for key, expr in self.children.items() if key.startswith("if_")]
+        return ("async " if self.is_async else "") + f"for {self.children['target']} in {self.children['iter']}" + (" " if ifs else "") + " ".join(ifs)
+
+    def __repr__(self):
+        return f"Generator(target={self.children['target']}; iter={self.children['iter']}; ifs={[repr(expr) for key, expr in self.children.items() if key.startswith('if_')]}; is_async={self.is_async})"
+
+    @classmethod
+    def from_ast(cls, node: ast.comprehension, **kwargs):
+        if not isinstance(node, ast.comprehension):
+            raise TypeError(type(node))
+        return cls(
+            target=Expression.from_ast(node.target),
+            iterator=Expression.from_ast(node.iter),
+            ifs=[Expression.from_ast(if_expr) for if_expr in node.ifs],
+            is_async=node.is_async == 1,
+        )
+
+
+class Comprehension(Expression):
+    def __init__(
+        self,
+        element: tp.Union[Expression, tp.Tuple[Expression, Expression]],
+        generators: tp.List[Generator],
+        comp_type: tp.Optional[str]
+    ):
+        Expression.__init__(self)
+        if isinstance(element, tuple):
+            if not comp_type == "dict":
+                raise RuntimeError(comp_type)
+            self.add_child(element[0], "key")
+            self.add_child(element[1], "value")
+        else:
+            if comp_type == "dict":
+                raise RuntimeError(comp_type)
+            self.add_child(element, "element")
+
+        self.comp_type = comp_type
+        self.generated_names = set()
+        for index, generator in enumerate(generators):
+            self.add_child(generator, "gens_" + str(index))
+            self.generated_names.update(generator.generated_names)
+
+    @cached_property
+    def names(self) -> tp.Set[str]:
+        if cached_property.__module__ == "cached_property":
+            get = (self, BaseParserObject)
+        else:
+            get = (self,)
+        return BaseParserObject.names.__get__(*get).difference(self.generated_names)
+
+    def __str__(self):
+        gens = [str(gen) for key, gen in self.children.items() if key.startswith("gens_")]
+        if self.comp_type == "dict":
+            return f"{{{str(self.children['key'])}: {str(self.children['value'])}" + (" " if gens else "") + " ".join(gens) + "}"
+        else:
+            if self.comp_type == "list":
+                l_br, r_br = "[", "]"
+            elif self.comp_type == "set":
+                l_br, r_br = "{", "}"
+            elif self.comp_type == "gen":
+                l_br, r_br = "(", ")"
+            else:
+                raise RuntimeError(self.comp_type)
+            return l_br + str(self.children["element"]) + (" " if gens else "") + " ".join(gens) + r_br
+
+    def __repr__(self):
+        gens = [repr(gen) for key, gen in self.children.items() if key.startswith("gens_")]
+
+        if self.comp_type == "dict":
+            return "Comprehension:" + "dict" + f"(key={self.children['key']}; value={self.children['value']}; generators={gens})"
+        else:
+            return f"Comprehension:{self.comp_type}(element={self.children['element']}; generators={gens})"
+
+    @classmethod
+    def from_ast(cls, node: tp.Union[ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp], **kwargs) -> 'Expression':
+        gens = [Generator.from_ast(gen) for gen in node.generators]
+        if isinstance(node, ast.DictComp):
+            return cls(
+                (Expression.from_ast(node.key), Expression.from_ast(node.value)),
+                gens,
+                "dict",
+            )
+        if isinstance(node, ast.ListComp):
+            comp_type = "list"
+        elif isinstance(node, ast.SetComp):
+            comp_type = "set"
+        elif isinstance(node, ast.GeneratorExp):
+            comp_type = "gen"
+        else:
+            raise TypeError(type(node))
+        return cls(
+            Expression.from_ast(node.elt),
+            gens,
+            comp_type,
+        )
+
