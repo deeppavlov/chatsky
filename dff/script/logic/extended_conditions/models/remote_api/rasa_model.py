@@ -62,6 +62,8 @@ class AbstractRasaModel(BaseModel):
     ):
         super().__init__(namespace_key=namespace_key)
         self.headers = headers or {"Content-Type": "application/json"}
+        health_check = requests.get(model)
+        health_check.raise_for_status()
         self.parse_url = urljoin(model, ("model/parse" + (f"?token={api_key}" if api_key else "")))
         self.train_url = urljoin(model, ("model/train" + (f"?token={api_key}" if api_key else "")))
         if jwt_token is not None:

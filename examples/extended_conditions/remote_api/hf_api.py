@@ -12,7 +12,7 @@ from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 # to demonstrate, how custom classifiers can be easily adapted for use in dff.script.logic.extended_conditions
 api_model = HFAPIModel(
     model="obsei-ai/sell-buy-intent-classifier-bert-mini",
-    api_key=os.getenv("HF_API_KEY"),
+    api_key=os.getenv("HF_API_KEY") or input("Enter HF API key:"),
     namespace_key="hf_api",
 )
 

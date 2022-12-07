@@ -33,7 +33,7 @@ script = {
         },
         TRANSITIONS: {
             ("food", "offer", 1.2): i_cnd.has_cls_label("food", threshold=0.5, namespace="skc"),
-            ("food", "offer", 1.2): i_cnd.has_match(matcher, ["I want to eat"], threshold=0.6),
+            ("food", "offer", 1.1): i_cnd.has_match(matcher, ["I want to eat"], threshold=0.6),
         },
     },
     "root": {
