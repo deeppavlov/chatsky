@@ -175,7 +175,7 @@ toy_script = {
     "music_flow": {
         "node1": {
             RESPONSE: "I love `System of a Down` group,"
-            "would you like to talk about it?",
+            " would you like to talk about it?",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
@@ -183,7 +183,7 @@ toy_script = {
         },
         "node2": {
             RESPONSE: "System of a Down is an Armenian-American"
-            "heavy metal band formed in 1994.",
+            " heavy metal band formed in 1994.",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
@@ -192,7 +192,7 @@ toy_script = {
         },
         "node3": {
             RESPONSE: "The band achieved commercial success"
-            "with the release of five studio albums.",
+            " with the release of five studio albums.",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.backward(): cnd.regexp(r"back", re.IGNORECASE),
@@ -229,27 +229,27 @@ happy_path = (
     (
         "yes",
         "System of a Down is an Armenian-American"
-        "heavy metal band formed in 1994.",
+        " heavy metal band formed in 1994.",
     ),
     (
         "next",
         "The band achieved commercial success"
-        "with the release of five studio albums.",
+        " with the release of five studio albums.",
     ),
     (
         "back",
         "System of a Down is an Armenian-American"
-        "heavy metal band formed in 1994.",
+        " heavy metal band formed in 1994.",
     ),
     (
         "repeat",
         "System of a Down is an Armenian-American"
-        "heavy metal band formed in 1994.",
+        " heavy metal band formed in 1994.",
     ),
     (
         "next",
-        "The band achieved commercial success "
-        "with the release of five studio albums.",
+        "The band achieved commercial success"
+        " with the release of five studio albums.",
     ),
     ("next", "That's all what I know."),
     ("next", "Good. What do you want to talk about?"),

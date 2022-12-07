@@ -59,7 +59,7 @@ toy_script = {
             RESPONSE: Response(
                 **{
                     "text": "Starting test! What's 2 + 2?"
-                    "(type in the index of the correct option)",
+                    " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="5", payload="5"),
@@ -77,7 +77,7 @@ toy_script = {
             RESPONSE: Response(
                 **{
                     "text": "Next question: what's 6 * 8?"
-                    "(type in the index of the correct option)",
+                    " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="38", payload="38"),
@@ -95,7 +95,7 @@ toy_script = {
             RESPONSE: Response(
                 **{
                     "text": "What's 114 + 115?"
-                    "(type in the index of the correct option)",
+                    " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="229", payload="229"),
@@ -121,22 +121,22 @@ happy_path = (
     (
         "Hi",
         "\nStarting test! What's 2 + 2? (type in the index of the"
-        "correct option)\n0): 5\n1): 4",
+        " correct option)\n0): 5\n1): 4",
     ),
     (
         "0",
         "\nStarting test! What's 2 + 2? (type in the index of the"
-        "correct option)\n0): 5\n1): 4",
+        " correct option)\n0): 5\n1): 4",
     ),
     (
         "1",
         "\nNext question: what's 6 * 8? (type in the index of the"
-        "correct option)\n0): 38\n1): 48",
+        " correct option)\n0): 38\n1): 48",
     ),
     (
         "0",
         "\nNext question: what's 6 * 8? (type in the index of the"
-        "correct option)\n0): 38\n1): 48",
+        " correct option)\n0): 38\n1): 48",
     ),
     (
         "1",

@@ -105,7 +105,7 @@ toy_script = {
     "music_flow": {
         "node1": {
             RESPONSE: "I love `System of a Down` group,"
-            "would you like to talk about it?",
+            " would you like to talk about it?",
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
         "node2": {
