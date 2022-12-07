@@ -39,23 +39,14 @@ class AbstractRasaModel(BaseModel):
     Please, refer to the `RASA docs <https://rasa.com/docs/rasa/nlu-only-server>`_ on how to
     develop a RASA project and launch an NLU-only server.
 
-    Parameters
-    -----------
-
-    model: str
-        Rasa model url.
-    api_key: Optional[str]
-        Rasa api key for request authorization. The exact authentification method can be retrieved
+    :param model: Rasa model url.
+    :param api_key: Rasa api key for request authorization. The exact authentification method can be retrieved
         from your Rasa Server config.
-    jwt_token: Optional[str]
-        Rasa jwt token for request authorization. The exact authentification method can be retrieved
+    :param jwt_token: Rasa jwt token for request authorization. The exact authentification method can be retrieved
         from your Rasa Server config.
-    namespace_key: Optional[str]
-        Name of the namespace in framework states that the model will be using.
-    retries: int
-        The number of times requests will be repeated in case of failure.
-    headers: Optional[dict]
-        Fill in this parameter, if you want to override the standard set of headers with custom headers.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param retries: The number of times requests will be repeated in case of failure.
+    :param headers: Fill in this parameter, if you want to override the standard set of headers with custom headers.
 
     """
 

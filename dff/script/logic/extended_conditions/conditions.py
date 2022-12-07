@@ -7,7 +7,11 @@ This module provides condition functions for label processing.
 from typing import Callable, Optional, List
 from functools import singledispatch
 
-from sklearn.metrics.pairwise import cosine_similarity
+try:
+    from sklearn.metrics.pairwise import cosine_similarity
+    sklearn_available = True
+except ImportError:
+    sklearn_available = False
 from dff.core.engine.core import Context, Actor
 
 from .dataset import DatasetItem
@@ -21,15 +25,10 @@ def has_cls_label(label, namespace: Optional[str] = None, threshold: float = 0.9
     Use this condition, when you need to check, whether the probability
     of a particular label for the last user utterance surpasses the threshold.
 
-    Parameters
-    -----------
-    label: Any
-        String name or a reference to a DatasetItem object, or a collection thereof.
-    namespace: Optional[str]
-        Namespace key of a particular model that should detect the dataset_item.
+    :param label: String name or a reference to a DatasetItem object, or a collection thereof.
+    :param namespace: Namespace key of a particular model that should detect the dataset_item.
         If not set, all namespaces will be searched for the required dataset_item.
-    threshold: float = 0.9
-        The minimal label probability that triggers a positive response
+    :param threshold: The minimal label probability that triggers a positive response
         from the function.
     """
     raise NotImplementedError
@@ -88,22 +87,18 @@ def has_match(
     pre-defined phrases. N.B.: Note that the model you will use should be already fit by the time
     you pass it to the function.
 
-    Parameters
-    -----------
-    model: BaseModel
-        df_extended_conditions' model. Use one of the models from the `cosine_matchers` subpackage.
-    positive_examples: Optional[List[str]]
-        A list of phrases that an utterance should be close to.
-    negative_examples: Optional[List[str]] = None
-        A list of phrases that an utterance should be distant from.
-    threshold: float = 0.9
-        The minimal cosine similarity to positive examples that triggers
+    :param model: df_extended_conditions' model. Use one of the models from the `cosine_matchers` subpackage.
+    :param positive_examples: A list of phrases that an utterance should be close to.
+    :param negative_examples: A list of phrases that an utterance should be distant from.
+    :param threshold: The minimal cosine similarity to positive examples that triggers
         a positive response from the function.
     """
     if negative_examples is None:
         negative_examples = []
 
     def has_match_inner(ctx: Context, actor: Actor) -> bool:
+        if not sklearn_available:
+            raise ImportError("`sklearn` package missing. Try `pip install dff[ext].`")
         if not isinstance(ctx.last_request, str):
             return False
         input_vector = model.transform(ctx.last_request)

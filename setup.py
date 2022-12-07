@@ -83,6 +83,16 @@ sklearn_dependencies = [
     "scikit-learn<=1.1.1",
 ]
 
+extended_conditions_dependencies = merge_req_lists(
+    [
+        sklearn_dependencies,
+        [
+            "requests==2.28.1",
+            "pyyaml==6.0"
+        ]
+    ]
+)
+
 httpx_dependencies = [
     "httpx==0.23.0",
 ]
@@ -139,6 +149,7 @@ full = merge_req_lists(
         postgresql_dependencies,
         ydb_dependencies,
         sklearn_dependencies,
+        extended_conditions_dependencies,
         httpx_dependencies,
         huggingface_dependencies,
         gensim_dependencies,
@@ -175,6 +186,7 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,
     "postgresql": postgresql_dependencies,
     "ydb": ydb_dependencies,
+    "ext": extended_conditions_dependencies,
     "sklearn": sklearn_dependencies,
     "async": httpx_dependencies,
     "huggingface": huggingface_dependencies,

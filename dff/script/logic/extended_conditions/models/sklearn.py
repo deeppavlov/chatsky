@@ -29,17 +29,12 @@ class BaseSklearnModel(BaseModel):
     """
     Base class for Sklearn-based models.
 
-    Parameters
-    ----------
-    model: Optional[BaseEstimator]
-        Sklearn Estimator for prediction. Should implement 'fit' and 'predict' methods.
+    :param model: Sklearn Estimator for prediction. Should implement 'fit' and 'predict' methods.
         Example: LogisticRegression.
-    tokenizer: Optional[Union[BaseEstimator, Pipeline]]
-        Sklearn Estimator for preprocessing. Should implement 'fit' and 'transform' methods.
+    :param tokenizer: Sklearn Estimator for preprocessing. Should implement 'fit' and 'transform' methods.
         Example: TfidfVectorizer. Can also be a product of several preprocessors,
         unified with a pipeline.
-    namespace_key: Optional[str]
-        Name of the namespace in framework states that the model will be using.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
     """
 
     def __init__(
@@ -49,7 +44,7 @@ class BaseSklearnModel(BaseModel):
         namespace_key: Optional[str] = None,
     ) -> None:
         if not sklearn_availabe:
-            raise ImportError("`sklearn` package missing. Try `pip install dff[sklearn].`.")
+            raise ImportError("`sklearn` package missing. Try `pip install dff[ext].`.")
         assert tokenizer is not None, "tokenizer parameter is required."
         super().__init__(namespace_key=namespace_key)
         self.model = model

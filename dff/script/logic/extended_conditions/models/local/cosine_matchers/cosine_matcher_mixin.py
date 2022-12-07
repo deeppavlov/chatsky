@@ -4,10 +4,10 @@ from argparse import Namespace
 try:
     import numpy as np
 
-    IMPORT_ERROR_MESSAGE = None
+    numpy_available = True
 except ImportError as e:
-    np = Namespace(ndarray=None)
-    IMPORT_ERROR_MESSAGE = e.msg
+    np = Namespace(ndarray=None, max=None)
+    numpy_available = False
 
 
 from ....dataset import Dataset
@@ -18,13 +18,12 @@ class CosineMatcherMixin:
     This class imlements a 'predict' method that returns the likelihood of each label
     from a pre-defined collection, judging by how close the last request is to the examples.
 
-    Parameters
-    -----------
-    dataset: Dataset
-        Labels for the matcher. The prediction output depends on proximity to examples of different labels.
+    :param dataset: Labels for the matcher. The prediction output depends on proximity to examples of different labels.
     """
 
     def __init__(self, dataset: Dataset):
+        if not numpy_available:
+            raise ImportError("`numpy` package missing. Try `pip install dff[ext]`")
         self.dataset = dataset
 
     def predict(self, request: str) -> dict:

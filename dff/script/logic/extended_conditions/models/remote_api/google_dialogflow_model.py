@@ -36,16 +36,11 @@ class AbstractGDFModel(BaseModel):
     After this is done, you should obtain a service account JSON file from Google
     and pass it to this class, using `from_file` method.
 
-    Parameters
-    -----------
-    model: dict
-        A parsed service account json that contains a link to your dialogflow project.
+    :param model: A parsed service account json that contains a link to your dialogflow project.
         Calling json.load() on the file obtained from Google is sufficient to get the
         credentials object. Alternatively, :py:meth:`use from_file` method
-    namespace_key: str
-        Name of the namespace in framework states that the model will be using.
-    language: str
-        The language of your dialogflow project. Set to English per default.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param language: The language of your dialogflow project. Set to English per default.
 
     """
 

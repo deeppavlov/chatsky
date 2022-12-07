@@ -38,6 +38,12 @@ def hf_model_name():
 
 
 @pytest.fixture(scope="session")
-def save_file(tmpdir_factory):
-    file_name = tmpdir_factory.mktemp("testdir").join("testfile")
+def save_dir(tmpdir_factory):
+    dir_name = tmpdir_factory.mktemp("testdir")
+    yield dir_name
+
+
+@pytest.fixture(scope="session")
+def save_file(save_dir):
+    file_name = save_dir.join("testfile")
     return str(file_name)

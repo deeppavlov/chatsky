@@ -36,18 +36,11 @@ class AbstractHFAPIModel(BaseModel):
     Note, that the service can fail, if you exceed the usage limits defined by your
     subscription type.
 
-    Parameters
-    -----------
-    model: str
-        Hosted model name, e. g. 'bert-base-uncased', etc.
-    api_key: str
-        Huggingface inference API token.
-    namespace_key: Optional[str]
-        Name of the namespace in framework states that the model will be using.
-    retries: int
-        Number of retries in case of request failure.
-    headers: Optional[dict]
-        A dictionary that overrides a standard set of headers.
+    :param model: Hosted model name, e. g. 'bert-base-uncased', etc.
+    :param api_key: Huggingface inference API token.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param retries: Number of retries in case of request failure.
+    :param headers: A dictionary that overrides a standard set of headers.
 
     """
 

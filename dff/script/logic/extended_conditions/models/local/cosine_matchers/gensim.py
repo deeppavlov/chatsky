@@ -11,13 +11,11 @@ import joblib
 try:
     import gensim
     from gensim.models.word2vec import Word2Vec
-    import numpy as np
-
-    IMPORT_ERROR_MESSAGE = None
+    gensim_available = True
     ALL_MODELS = [name for name in dir(gensim.models) if name[0].isupper()]  # all classes
 except ImportError as e:
     Word2Vec = object
-    IMPORT_ERROR_MESSAGE = e.msg
+    gensim_available = False
     ALL_MODELS = []
 
 from ...base_model import BaseModel
@@ -31,18 +29,11 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
     GensimMatcher utilizes embeddings from Gensim models to measure
     proximity between utterances and pre-defined labels.
 
-    Parameters
-    -----------
-    model: gensim.models.word2vec.Word2Vec
-        Gensim vector model (Word2Vec, FastText, etc.)
-    dataset: Dataset
-        Labels for the matcher. The prediction output depends on proximity to different labels.
-    tokenizer: Optional[Callable[[str], List[str]]]
-        Class or function that performs string tokenization.
-    namespace_key: Optional[str]
-        Name of the namespace in framework states that the model will be using.
-    kwargs:
-        Keyword arguments are forwarded to the model constructor.
+    :param model: Gensim vector model (Word2Vec, FastText, etc.)
+    :param dataset: Labels for the matcher. The prediction output depends on proximity to different labels.
+    :param tokenizer: Class or function that performs string tokenization.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param kwargs: Keyword arguments are forwarded to the model constructor.
     """
 
     def __init__(
@@ -53,9 +44,8 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
         namespace_key: Optional[str] = None,
         **kwargs,
     ) -> None:
-        IMPORT_ERROR_MESSAGE = globals().get("IMPORT_ERROR_MESSAGE")
-        if IMPORT_ERROR_MESSAGE is not None:
-            raise ImportError(IMPORT_ERROR_MESSAGE)
+        if not gensim_available:
+            raise ImportError("`gensim` missing. Try `pip install dff[ext,gensim]`")
         CosineMatcherMixin.__init__(self, dataset=dataset)
         BaseModel.__init__(self, namespace_key=namespace_key)
         self.model = model

@@ -26,17 +26,11 @@ class SklearnMatcher(CosineMatcherMixin, BaseSklearnModel):
     SklearnMatcher utilizes embeddings from Sklearn models to measure
     proximity between utterances and pre-defined labels.
 
-    Parameters
-    -----------
-    model: Optional[BaseEstimator]
-        Sklearn-type model
-    dataset: Dataset
-        Labels for the matcher. The prediction output depends on proximity to different labels.
-    tokenizer: Optional[Union[BaseEstimator, Pipeline]] = None
-        An Sklearn-type tokenizer, like TdidfVectorizer or CountVectorizer. Can also be a product
+    :param model: Sklearn-type model
+    :param dataset: Labels for the matcher. The prediction output depends on proximity to different labels.
+    :param tokenizer: An Sklearn-type tokenizer, like TdidfVectorizer or CountVectorizer. Can also be a product
         of several preprocessors, unified with a pipeline.
-    namespace_key: Optional[str]
-        Name of the namespace in framework states that the model will be using.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
     """
 
     def __init__(

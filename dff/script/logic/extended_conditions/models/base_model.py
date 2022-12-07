@@ -20,10 +20,7 @@ class BaseModel(ABC):
     Namespace key should be declared, if you want the scores of your model
     to be stored in a separate namespace inside the :py:class:`~Context` object.
 
-    Parameters
-    -----------
-    namespace_key: str
-        Name of the namespace in framework states that the model will be using.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
 
     """
 

@@ -16,10 +16,7 @@ class RegexModel:
     """
     RegexModel implements utterance classification based on regex rules.
 
-    Parameters
-    -----------
-    dataset: Dataset
-        Labels for the matcher. The prediction output depends on proximity to different labels.
+    :param dataset: Labels for the matcher. The prediction output depends on proximity to different labels.
     """
 
     def __init__(self, dataset: Dataset):

@@ -33,20 +33,12 @@ class BaseHFModel(BaseModel):
     """
     Base class for Hugging Face-based models.
 
-    Parameters
-    -----------
-    model: PreTrainedModel
-        A pretrained Hugging Face format model.
-    tokenizer: Tokenizer
-        A pretrained Hugging Face tokenizer.
-    device: torch.device
-        Pytorch device object. The device will be used for inference and pre-training.
-    namespace_key: str
-        Name of the namespace in framework states that the model will be using.
-    tokenizer_kwargs: Optional[dict] = None
-        Default tokenizer arguments override.
-    model_kwargs: Optional[dict] = None
-        Default model arguments override.
+    :param model: A pretrained Hugging Face format model.
+    :param tokenizer: A pretrained Hugging Face tokenizer.
+    :param device: Pytorch device object. The device will be used for inference and pre-training.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param tokenizer_kwargs: Default tokenizer arguments override.
+    :param model_kwargs: Default model arguments override.
     """
 
     def __init__(
@@ -86,12 +78,8 @@ class BaseHFModel(BaseModel):
 
     def save(self, path: str, **kwargs) -> None:
         """
-        Parameters
-        -----------
-        path: str
-            Path to saving directory.
-        kwargs
-            Keyword arguments are forwarded to the 'save_pretrained' method of the underlying model.
+        :param path: Path to saving directory.
+        :param kwargs: Keyword arguments are forwarded to the 'save_pretrained' method of the underlying model.
         """
         self.model.save_pretrained(path, **kwargs)
         self.tokenizer.save_pretrained(path)

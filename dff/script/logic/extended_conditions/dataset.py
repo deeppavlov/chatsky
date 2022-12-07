@@ -10,7 +10,11 @@ from pathlib import Path
 from typing import List, Dict, Union
 
 from pydantic import BaseModel, Field, PrivateAttr, parse_file_as, parse_obj_as, validator, root_validator
-from yaml import load
+try:
+    from yaml import load
+    pyyaml_available = True
+except ImportError:
+    pyyaml_available = False
 
 try:
     from yaml import CSafeLoader as SafeLoader
@@ -59,6 +63,8 @@ class Dataset(BaseModel):
 
     @classmethod
     def parse_yaml(cls, file: Union[str, Path]) -> None:
+        if not pyyaml_available:
+            raise ImportError("`pyyaml` package missing. Try `pip install dff[ext].`")
         file_path = cls._get_path(file)
         raw_intents = load(file_path.open("r", encoding="utf-8").read(), SafeLoader)["items"]
         items = parse_obj_as(List[DatasetItem], raw_intents)
