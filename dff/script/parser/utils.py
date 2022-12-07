@@ -1,6 +1,7 @@
 from typing import Union, Iterable
 from collections.abc import Iterable as abc_Iterable
 
+
 # todo: remove this when python3.8 support is dropped
 def remove_prefix(self: str, prefix: str) -> str:
     if self.startswith(prefix):

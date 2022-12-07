@@ -1,11 +1,10 @@
-import typing as tp
 from pathlib import Path
-import logging
-from collections import defaultdict
+import builtins
 
-from .base_parser_object import BaseParserObject, cached_property, Expression, Assignment, Call, ReferenceObject, Dict, Iterable
+from .base_parser_object import *
 from .namespace import Namespace
 from .exceptions import ScriptValidationError
+from .yaml import yaml, python_factory as yaml_python_factory
 from dff.core.engine.core.actor import Actor
 from dff.core.engine.core.keywords import Keywords
 
@@ -114,8 +113,61 @@ class DFFProject(BaseParserObject):
                     script[resolve(flow)][resolve(node)] = resolve_node(info)
         return script
 
+    def to_dict(
+        self,
+        str_factory: tp.Callable[[BaseParserObject], object],
+        python_factory: tp.Callable[[BaseParserObject], object],
+        object_filter: tp.Dict[str, tp.Set[str]],
+    ) -> dict:
 
-    def __getitem__(self, item: tp.Union[tp.List[str], str]):
+        def process_base_parser_object(bpo: BaseParserObject):
+            allowed_objects = set(object_filter[bpo.namespace.name])
+            allowed_objects.update(set(builtins.__dict__.keys()))
+
+            if isinstance(bpo, Assignment):
+                return process_base_parser_object(bpo.children["value"])
+            if isinstance(bpo, Import):
+                return f"import {bpo.module}"
+            if isinstance(bpo, ImportFrom):
+                return f"from {bpo.level * '.' + bpo.module} import {bpo.obj}"
+            if isinstance(bpo, Dict):
+                processed_dict = {}
+                for key, value in bpo.items():
+                    processed_dict[process_base_parser_object(key)] = process_base_parser_object(value)
+                return processed_dict
+            if isinstance(bpo, String):
+                try:
+                    parsed = ast.parse(bpo.string).body
+                    if len(parsed) != 1:
+                        return bpo.string
+                    parsed_expr = parsed[0]
+                    if not isinstance(parsed_expr, ast.Expr):
+                        return bpo.string
+
+                    expr = Expression.from_ast(parsed_expr.value)
+                    if expr.names <= allowed_objects:  # dependencies alone are not enough to differ between str and python
+                        return str_factory(bpo)
+                    else:
+                        return bpo.string
+                except SyntaxError:  # string is not a valid python node
+                    return bpo.string
+            if isinstance(bpo, Expression):
+                if bpo.names <= allowed_objects:
+                    return str(bpo)
+                else:
+                    return python_factory(bpo)
+            raise TypeError(str(type(bpo)) + "_" + repr(bpo))
+
+        result = defaultdict(dict)
+        for namespace_name, namespace in self.children.items():
+            namespace_filter = object_filter.get(namespace_name)
+            if namespace_filter is not None:
+                for obj_name, obj in namespace.children.items():
+                    if obj_name in namespace_filter:
+                        result[namespace_name][obj_name] = process_base_parser_object(obj)
+        return dict(result)
+
+    def __getitem__(self, item: tp.Union[tp.List[str], str]) -> Namespace:
         if isinstance(item, str):
             return self.children[item]
         elif isinstance(item, list):
@@ -169,3 +221,7 @@ class DFFProject(BaseParserObject):
 
         _process_file(entry_point)
         return cls(list(namespaces.values()))
+
+    def to_yaml(self, file: Path):
+        with open(file, "w", encoding="utf-8") as fd:
+            yaml.dump(self.to_dict(str, yaml_python_factory, self.actor_call.dependencies), fd)

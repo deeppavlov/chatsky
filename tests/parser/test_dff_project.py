@@ -1,7 +1,12 @@
 from pathlib import Path
 
+import pytest
+
 from dff.script.parser.dff_project import DFFProject
 from dff.script.parser.base_parser_object import String
+from .utils import assert_dirs_equal, assert_files_equal
+
+TEST_DIR = Path(__file__).parent / "TEST_CASES"
 
 
 def test_from_python():
@@ -23,3 +28,15 @@ def test_resolved_script():
     resolved_script = dff_project.resolved_script
 
     assert resolved_script['dff.core.engine.core.keywords.GLOBAL']['dff.core.engine.core.keywords.MISC'][String("var1")] == String("global_data")
+
+
+@pytest.mark.parametrize(
+    "test_case",
+    [
+        TEST_DIR / "just_works",
+    ]
+)
+def test_conversions(test_case: Path, tmp_path):
+    dff_project = DFFProject.from_python(test_case / "python_files", test_case / "python_files" / "main.py")
+    dff_project.to_yaml(tmp_path / "script.yaml")
+    assert_files_equal(test_case / "script.yaml", tmp_path / "script.yaml")

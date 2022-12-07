@@ -81,6 +81,7 @@ ydb_dependencies = [
 parser_dependencies = [
     "cached-property==1.5.2; python_version<'3.8'",
     "astunparse==1.6.3; python_version<'3.9'",
+    "ruamel.yaml",
 ]
 
 test_requirements = [
