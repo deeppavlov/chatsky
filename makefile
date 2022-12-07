@@ -35,12 +35,14 @@ venv_test:
 	pip install -e .[test_full]
 
 format: venv
-	black --line-length=120 . --exclude venv*,build
+	black --line-length=120 --exclude='venv|build|examples' .
+	black --line-length=80 examples
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 . --exclude venv*,build
-	@set -e && black --line-length=120 --check . --exclude venv*,build|| ( \
+	flake8 --max-line-length=120 --exclude venv,build,examples .
+	flake8 --max-line-length=80 examples
+	@set -e && black --line-length=120 --check --exclude='venv|build|examples' . && black --line-length=80 --check examples || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \

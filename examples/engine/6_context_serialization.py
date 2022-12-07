@@ -2,7 +2,8 @@
 """
 # 6. Context serialization
 
-This example shows context serialization. First of all, let's do all the necessary imports from `dff`.
+This example shows context serialization.
+First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -18,7 +19,11 @@ from dff.core.engine.core import Context, Actor
 import dff.core.engine.conditions as cnd
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 
 
 # %% [markdown]
@@ -35,7 +40,12 @@ def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:
 # %%
 # a dialog script
 toy_script = {
-    "flow_start": {"node_start": {RESPONSE: response_handler, TRANSITIONS: {("flow_start", "node_start"): cnd.true()}}}
+    "flow_start": {
+        "node_start": {
+            RESPONSE: response_handler,
+            TRANSITIONS: {("flow_start", "node_start"): cnd.true()},
+        }
+    }
 }
 
 # testing
@@ -71,7 +81,11 @@ def process_response(ctx: Context):
 
 
 # %%
-pipeline = Pipeline.from_script(toy_script, start_label=("flow_start", "node_start"), post_services=[process_response])
+pipeline = Pipeline.from_script(
+    toy_script,
+    start_label=("flow_start", "node_start"),
+    post_services=[process_response],
+)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)

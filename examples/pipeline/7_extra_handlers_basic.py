@@ -21,21 +21,29 @@ from dff.core.engine.core import Context, Actor
 
 from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-Extra handlers are additional function lists (before-functions and/or after-functions)
+Extra handlers are additional function
+    lists (before-functions and/or after-functions)
     that can be added to any pipeline components (service and service groups).
-Extra handlers main purpose should be service and service groups statistics collection.
-Extra handlers can be attached to pipeline component using `before_handler` and `after_handler` constructor parameter.
+Extra handlers main purpose should be service
+and service groups statistics collection.
+Extra handlers can be attached to pipeline component using
+`before_handler` and `after_handler` constructor parameter.
 
 Here 5 `heavy_service`s are run in single asynchronous service group.
 Each of them sleeps for random amount of seconds (between 0 and 0.05).
-To each of them (as well as to group) time measurement extra handler is attached,
+To each of them (as well as to group)
+    time measurement extra handler is attached,
     that writes execution time to `ctx.misc`.
 In the end `ctx.misc` is logged to info channel.
 """
@@ -47,7 +55,12 @@ def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    ctx.misc.update({f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]})
+    ctx.misc.update(
+        {
+            f"{info['component']['name']}": datetime.now()
+            - ctx.misc[f"{info['component']['name']}"]
+        }
+    )
 
 
 async def heavy_service(_):

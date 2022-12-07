@@ -2,7 +2,8 @@
 """
 # 5. Asynchronous groups and services (basic)
 
-The following example shows pipeline asynchronous service and service group usage.
+The following example shows pipeline asynchronous
+service and service group usage.
 """
 
 
@@ -16,7 +17,11 @@ import asyncio
 from dff.core.engine.core import Actor
 from dff.core.pipeline import Pipeline
 
-from dff.utils.testing.common import is_interactive_mode, check_happy_path, run_interactive_mode
+from dff.utils.testing.common import (
+    is_interactive_mode,
+    check_happy_path,
+    run_interactive_mode,
+)
 from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
@@ -26,10 +31,13 @@ In synchronous service groups services are executed consequently.
 In asynchronous service groups all services are executed simultaneously.
 
 Service can be asynchronous if its handler is an async function.
-Service group can be asynchronous if all services and service groups inside it are asynchronous.
+Service group can be asynchronous if all services
+and service groups inside it are asynchronous.
 
-Here there is an asynchronous service group, that contains 10 services, each of them should sleep for 0.01 of a second.
-However, as the group is asynchronous, it is being executed for 0.01 of a second in total.
+Here there is an asynchronous service group, that contains 10 services,
+each of them should sleep for 0.01 of a second.
+However, as the group is asynchronous,
+it is being executed for 0.01 of a second in total.
 Service group `pipeline` can't be asynchronous because actor is synchronous.
 """
 

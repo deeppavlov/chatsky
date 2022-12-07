@@ -15,12 +15,18 @@ import os
 from dff.connectors.db import connector_factory
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 
 # %%
-db_uri = "redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0")
+db_uri = "redis://{}:{}@localhost:6379/{}".format(
+    "", os.getenv("REDIS_PASSWORD"), "0"
+)
 db = connector_factory(db_uri)
 
 

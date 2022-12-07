@@ -16,7 +16,11 @@ from platform import system
 from dff.connectors.db import connector_factory
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 

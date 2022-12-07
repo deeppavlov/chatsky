@@ -17,17 +17,29 @@ from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.engine import conditions as cnd
 
-from dff.connectors.messenger.generics.response import Attachments, Image, Response
+from dff.connectors.messenger.generics.response import (
+    Attachments,
+    Image,
+    Response,
+)
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 from dff.utils.testing.response_comparers import generics_comparer
 
 # %%
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
-kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
+kitten_url = (
+    f"https://unsplash.com/photos/"
+    f"{kitten_id}/download?ixid={kitten_ixid}"
+    f"&force=true&w={kitten_width}"
+)
 
 toy_script = {
     "root": {
@@ -36,7 +48,9 @@ toy_script = {
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
-            RESPONSE: Response(text="Final node reached, send any message to restart."),
+            RESPONSE: Response(
+                text="Final node reached, send any message to restart."
+            ),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
     },
@@ -50,7 +64,9 @@ toy_script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(text="here's my picture!", image=Image(source=kitten_url)),
+            RESPONSE: Response(
+                text="here's my picture!", image=Image(source=kitten_url)
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
@@ -61,7 +77,9 @@ toy_script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: Response(text="I cannot find the picture. Please, try again."),
+            RESPONSE: Response(
+                text="I cannot find the picture. Please, try again."
+            ),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.jpg$"),
@@ -74,10 +92,16 @@ toy_script = {
 happy_path = (
     ("Hi", "Please, send me a picture url"),
     ("no", "I cannot find the picture. Please, try again."),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.png", "\nhere's my picture!\nAttachment size: 51706 bytes."),
+    (
+        "https://sun9-49.userapi.com/s/v1/if2/gpquN.png",
+        "\nhere's my picture!\nAttachment size: 51706 bytes.",
+    ),
     ("ok", "Final node reached, send any message to restart."),
     ("ok", "Please, send me a picture url"),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg", "\nLook at my pictures\nGrouped attachment size: 517060 bytes."),
+    (
+        "https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg",
+        "\nLook at my pictures\nGrouped attachment size: 517060 bytes.",
+    ),
     ("ok", "Final node reached, send any message to restart."),
 )
 
@@ -88,7 +112,9 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
-    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
+    last_request: str = (
+        ctx.last_request
+    )  # TODO: add _really_ nice ways to modify user request and response
     last_index = get_last_index(ctx.requests)
 
     ui = ctx.last_response and ctx.last_response.ui
@@ -96,15 +122,23 @@ def process_request(ctx: Context):
         try:
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+            raise ValueError(
+                "Type in the index of the correct option"
+                "to choose from the buttons."
+            )
+        ctx.requests[last_index] = CallbackRequest(
+            payload=chosen_button.payload
+        )
         return
     ctx.requests[last_index] = last_request
 
 
 # %%
 pipeline = Pipeline.from_script(
-    toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"), pre_services=[process_request]
+    toy_script,
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
+    pre_services=[process_request],
 )
 
 if __name__ == "__main__":

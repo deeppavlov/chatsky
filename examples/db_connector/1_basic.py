@@ -15,7 +15,11 @@ import pathlib
 from dff.connectors.db import connector_factory
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
@@ -32,8 +36,12 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic example running (testing) with HAPPY_PATH
+    check_happy_path(
+        pipeline, HAPPY_PATH
+    )  # This is a function for automatic example running
+    # (testing) with HAPPY_PATH
 
-    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    # This runs example in interactive mode if not in IPython env
+    # + if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # This runs example in interactive mode

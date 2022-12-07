@@ -18,7 +18,11 @@ from dff.core.engine.core import Context
 from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 
 toy_script = {
     "greeting_flow": {
@@ -38,7 +42,10 @@ toy_script = {
             RESPONSE: Response(text="Sorry, I can not talk about music now."),
             TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
         },
-        "node4": {RESPONSE: Response(text="bye"), TRANSITIONS: {"node1": exact_match("Hi")}},
+        "node4": {
+            RESPONSE: Response(text="bye"),
+            TRANSITIONS: {"node1": exact_match("Hi")},
+        },
         "fallback_node": {
             RESPONSE: Response(text="Ooops"),
             TRANSITIONS: {"node1": exact_match("Hi")},
@@ -48,15 +55,27 @@ toy_script = {
 
 happy_path = (
     ("Hi", Response(text="Hi, how are you?")),
-    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
-    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
+    (
+        "i'm fine, how are you?",
+        Response(text="Good. What do you want to talk about?"),
+    ),
+    (
+        "Let's talk about music.",
+        Response(text="Sorry, I can not talk about music now."),
+    ),
     ("Ok, goodbye.", Response(text="bye")),
     ("Hi", Response(text="Hi, how are you?")),
     ("stop", Response(text="Ooops")),
     ("stop", Response(text="Ooops")),
     ("Hi", Response(text="Hi, how are you?")),
-    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
-    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
+    (
+        "i'm fine, how are you?",
+        Response(text="Good. What do you want to talk about?"),
+    ),
+    (
+        "Let's talk about music.",
+        Response(text="Sorry, I can not talk about music now."),
+    ),
     ("Ok, goodbye.", Response(text="bye")),
 )
 
@@ -66,7 +85,9 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
-    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
+    last_request: str = (
+        ctx.last_request
+    )  # TODO: add _really_ nice ways to modify user request and response
     last_index = get_last_index(ctx.requests)
 
     ui = ctx.last_response and ctx.last_response.ui
@@ -74,8 +95,13 @@ def process_request(ctx: Context):
         try:
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+            raise ValueError(
+                "Type in the index of the correct option"
+                "to choose from the buttons."
+            )
+        ctx.requests[last_index] = CallbackRequest(
+            payload=chosen_button.payload
+        )
         return
     ctx.requests[last_index] = last_request
 
@@ -91,8 +117,10 @@ if __name__ == "__main__":
     check_happy_path(
         pipeline,
         happy_path,
-    )  # This is a function for automatic example running (testing) with `happy_path`
+    )  # This is a function for automatic example running
+    # (testing) with `happy_path`
 
-    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    # This runs example in interactive mode if not in IPython env
+    # + if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # This runs example in interactive mode

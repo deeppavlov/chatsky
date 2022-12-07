@@ -2,7 +2,8 @@
 """
 # 7. Pre-response processing
 
-This example shows pre-response processing feature. First of all, let's do all the necessary imports from `dff`.
+This example shows pre-response processing feature.
+First of all, let's do all the necessary imports from `dff`.
 """
 
 
@@ -11,17 +12,29 @@ This example shows pre-response processing feature. First of all, let's do all t
 
 
 # %%
-from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, PRE_RESPONSE_PROCESSING
+from dff.core.engine.core.keywords import (
+    GLOBAL,
+    LOCAL,
+    RESPONSE,
+    TRANSITIONS,
+    PRE_RESPONSE_PROCESSING,
+)
 from dff.core.engine.core import Context, Actor
 import dff.core.engine.labels as lbl
 import dff.core.engine.conditions as cnd
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 
 
 # %%
-def add_label_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+def add_label_processing(
+    ctx: Context, actor: Actor, *args, **kwargs
+) -> Context:
     processed_node = ctx.current_node
     processed_node.response = f"{ctx.last_label}: {processed_node.response}"
     ctx.overwrite_current_node_in_processing(processed_node)
@@ -29,7 +42,9 @@ def add_label_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context
 
 
 def add_prefix(prefix):
-    def add_prefix_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+    def add_prefix_processing(
+        ctx: Context, actor: Actor, *args, **kwargs
+    ) -> Context:
         processed_node = ctx.current_node
         processed_node.response = f"{prefix}: {processed_node.response}"
         ctx.overwrite_current_node_in_processing(processed_node)
@@ -40,7 +55,8 @@ def add_prefix(prefix):
 
 # %% [markdown]
 """
-`PRE_RESPONSE_PROCESSING` is a keyword that can be used in `GLOBAL`, `LOCAL` or nodes.
+`PRE_RESPONSE_PROCESSING` is a keyword that
+can be used in `GLOBAL`, `LOCAL` or nodes.
 """
 
 
@@ -58,7 +74,10 @@ toy_script = {
     },
     "flow": {
         LOCAL: {
-            PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_local"), "proc_name_3": add_prefix("l3_local")}
+            PRE_RESPONSE_PROCESSING: {
+                "proc_name_2": add_prefix("l2_local"),
+                "proc_name_3": add_prefix("l3_local"),
+            }
         },
         "step_0": {RESPONSE: "first", TRANSITIONS: {lbl.forward(): cnd.true()}},
         "step_1": {
@@ -97,7 +116,11 @@ happy_path = (
 
 
 # %%
-pipeline = Pipeline.from_script(toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(
+    toy_script,
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
+)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, happy_path)
