@@ -225,19 +225,35 @@ class ReferenceObject(BaseParserObject, ABC):
 
     @cached_property
     @abstractmethod
-    def resolve_name(self) -> BaseParserObject:
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:
         """
         Same as `absolute` but instead of returning None at failed resolution returns the name of the absolute object
         """
         ...
 
     def __hash__(self):
-        return BaseParserObject.__hash__(self.resolve_name)
+        return BaseParserObject.__hash__(self.resolve_name or self)
 
     def __eq__(self, other):
         if isinstance(other, ReferenceObject):
-            return BaseParserObject.__eq__(self.resolve_name, other.resolve_name)
-        return BaseParserObject.__eq__(self.resolve_name, other)
+            return BaseParserObject.__eq__(self.resolve_name or self, other.resolve_name or self)
+        return BaseParserObject.__eq__(self.resolve_name or self, other)
+
+
+def module_name_to_expr(module_name: tp.List[str]) -> tp.Union['Name', 'Attribute']:
+    """Convert a module name in the form of a dot-separated string to an instance of Attribute or Name
+
+    :param module_name: Dot-separated string that represents a module or a module object
+    :type module_name: list[str]
+    :return: An instance of an object that would represent `module_name`
+    :rtype: :py:class:`.Name` | :py:class:`.Attribute`
+    """
+    if len(module_name) == 0:
+        raise RuntimeError("Empty name")
+    result = Name(module_name[0])
+    for attr in module_name[1:]:
+        result = Attribute(result, attr)
+    return result
 
 
 class Import(Statement, ReferenceObject):
@@ -262,8 +278,8 @@ class Import(Statement, ReferenceObject):
             return None
 
     @cached_property
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:  # todo: increase performance by instantiating Name and Attribute directly
-        return self.absolute or Expression.from_ast(ast.parse(self.module).body[0].value)
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+        return self.absolute or module_name_to_expr(self.module.split("."))
 
     @classmethod
     def from_ast(cls, node: ast.Import, **kwargs) -> tp.Dict[str, 'Import']:
@@ -291,7 +307,7 @@ class ImportFrom(Statement, ReferenceObject):
     @cached_property
     def resolve_self(self) -> tp.Optional[BaseParserObject]:
         try:
-            return self.dff_project[self.namespace.resolve_relative_import(self.module, self.level)][self.obj]
+            return self.dff_project[self.namespace.resolve_relative_import(self.module, self.level)][self.obj]  # todo: perf: use get instead
         except KeyError as error:
             logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
@@ -301,7 +317,11 @@ class ImportFrom(Statement, ReferenceObject):
         resolved = self.resolve_self
         if isinstance(resolved, ReferenceObject):
             resolved = resolved.resolve_name
-        return resolved or Expression.from_ast(ast.parse(self.module + "." + self.obj).body[0].value)  # todo: increase performance by instantiating Name and Attribute directly
+        if self.level > 0:
+            substitute_module_name = self.namespace.resolve_relative_import(self.module, self.level) + [self.obj]
+        else:
+            substitute_module_name = self.module.split(".") + [self.obj]
+        return resolved or module_name_to_expr(substitute_module_name)
 
     @classmethod
     def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:
