@@ -262,7 +262,7 @@ class Import(Statement, ReferenceObject):
             return None
 
     @cached_property
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+    def resolve_name(self) -> tp.Optional[BaseParserObject]:  # todo: increase performance by instantiating Name and Attribute directly
         return self.absolute or Expression.from_ast(ast.parse(self.module).body[0].value)
 
     @classmethod
@@ -301,7 +301,7 @@ class ImportFrom(Statement, ReferenceObject):
         resolved = self.resolve_self
         if isinstance(resolved, ReferenceObject):
             resolved = resolved.resolve_name
-        return resolved or Expression.from_ast(ast.parse(self.module + "." + self.obj).body[0].value)
+        return resolved or Expression.from_ast(ast.parse(self.module + "." + self.obj).body[0].value)  # todo: increase performance by instantiating Name and Attribute directly
 
     @classmethod
     def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:
