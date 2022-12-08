@@ -44,32 +44,32 @@ class ActorStage(Enum):
     for the actions of :py:class:`~dff.core.engine.core.actor.Actor`.
     """
 
-    #: This keyword is used for the context initializing.
+    #: This stage is used for the context initializing.
     CONTEXT_INIT = auto()
 
-    #: This keyword is used to get the previous node.
+    #: This stage is used to get the previous node.
     GET_PREVIOUS_NODE = auto()
 
-    #: This keyword is used for rewriting the previous node.
+    #: This stage is used for rewriting the previous node.
     REWRITE_PREVIOUS_NODE = auto()
 
-    #: This keyword is used for running pre-transitions processing.
+    #: This stage is used for running pre-transitions processing.
     RUN_PRE_TRANSITIONS_PROCESSING = auto()
 
-    #: This keyword is used to get true labels.
+    #: This stage is used to get true labels.
     GET_TRUE_LABELS = auto()
 
-    #: This keyword is used to get next node.
+    #: This stage is used to get next node.
     GET_NEXT_NODE = auto()
 
-    #: This keyword is used to rewrite the next node.
+    #: This stage is used to rewrite the next node.
     REWRITE_NEXT_NODE = auto()
 
-    #: This keyword is used for running pre-response processing.
+    #: This stage is used for running pre-response processing.
     RUN_PRE_RESPONSE_PROCESSING = auto()
 
-    #: This keyword is used for the response creation.
+    #: This stage is used for the response creation.
     CREATE_RESPONSE = auto()
 
-    #: This keyword is used for finish turn.
+    #: This stage is used for finish turn.
     FINISH_TURN = auto()
