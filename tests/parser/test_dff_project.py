@@ -29,7 +29,7 @@ def test_resolved_script():
 
     resolved_script = dff_project.resolved_script
 
-    assert resolved_script['dff.core.engine.core.keywords.GLOBAL'][None][1]['dff.core.engine.core.keywords.MISC']["'var1'"] == String("global_data")
+    assert resolved_script['dff.core.engine.core.keywords.GLOBAL'][None]['MISC']["'var1'"] == String("global_data")
 
 
 @pytest.mark.parametrize(
@@ -41,4 +41,6 @@ def test_resolved_script():
 def test_conversions(test_case: Path, tmp_path):
     dff_project = DFFProject.from_python(test_case / "python_files", test_case / "python_files" / "main.py")
     dff_project.to_yaml(tmp_path / "script.yaml")
-    assert_files_equal(test_case / "script.yaml", tmp_path / "script.yaml")
+    dff_project.to_graph(tmp_path / "graph.json")
+    assert_files_equal(tmp_path / "script.yaml", test_case / "yaml_files" / "script.yaml")
+    assert_files_equal(tmp_path / "graph.json", test_case / "graph_files" / "graph.json")

@@ -57,6 +57,12 @@ class BaseParserObject(ABC):
         self.children: tp.Dict[str, BaseParserObject] = {}
 
     @cached_property
+    def resolve(self) -> 'BaseParserObject':
+        if isinstance(self, ReferenceObject):
+            return self.absolute or self
+        return self
+
+    @cached_property
     def names(self) -> tp.Set[str]:
         result = set()
         if isinstance(self, Name):
@@ -243,7 +249,7 @@ class ReferenceObject(BaseParserObject, ABC):
 def module_name_to_expr(module_name: tp.List[str]) -> tp.Union['Name', 'Attribute']:
     """Convert a module name in the form of a dot-separated string to an instance of Attribute or Name
 
-    :param module_name: Dot-separated string that represents a module or a module object
+    :param module_name: a list of strings that represent a module or its objects
     :type module_name: list[str]
     :return: An instance of an object that would represent `module_name`
     :rtype: :py:class:`.Name` | :py:class:`.Attribute`
@@ -274,7 +280,7 @@ class Import(Statement, ReferenceObject):
         try:
             return self.dff_project[".".join(self.namespace.resolve_relative_import(self.module))]
         except KeyError as error:
-            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
 
     @cached_property
@@ -309,7 +315,7 @@ class ImportFrom(Statement, ReferenceObject):
         try:
             return self.dff_project[self.namespace.resolve_relative_import(self.module, self.level)][self.obj]  # todo: perf: use get instead
         except KeyError as error:
-            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
 
     @cached_property
@@ -504,7 +510,7 @@ class Name(Expression, ReferenceObject):
         try:
             return self.namespace[self.name]
         except KeyError as error:
-            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
             return None
 
     @cached_property
@@ -541,7 +547,7 @@ class Attribute(Expression, ReferenceObject):
             if is_instance(value, "dff.script.parser.namespace.Namespace"):
                 return value[self.attr]
         except KeyError as error:
-            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
         return None
 
     @cached_property
@@ -580,7 +586,7 @@ class Subscript(Expression, ReferenceObject):
         try:
             return value[index]
         except KeyError as error:
-            logger.warning(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
         return None
 
     @cached_property
@@ -672,6 +678,18 @@ class Call(Expression):
             self.add_child(arg, "arg_" + str(index))
         for key, value in keywords.items():
             self.add_child(value, "keyword_" + key)
+
+    def get_args(self, seq_arg_list: tp.List[str]) -> dict:
+        args = {}
+        for index, arg in enumerate(seq_arg_list):
+            args[arg] = self.children.get("arg_" + str(index)) or self.children.get("keyword_" + arg)
+        return args
+
+    @cached_property
+    def func_name(self) -> str:
+        if isinstance(self.children["func"], ReferenceObject):
+            return str(self.children["func"].resolve_name)
+        return str(self.children["func"])
 
     def __str__(self):
         return str(self.children["func"]) + "(" + \
