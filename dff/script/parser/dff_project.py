@@ -4,7 +4,7 @@ import builtins
 from .base_parser_object import *
 from .namespace import Namespace
 from .exceptions import ScriptValidationError
-from .yaml import yaml, python_factory as yaml_python_factory
+from .yaml import yaml
 from dff.core.engine.core.actor import Actor
 from dff.core.engine.core.keywords import Keywords
 
@@ -154,8 +154,6 @@ class DFFProject(BaseParserObject):
 
     def to_dict(
         self,
-        str_factory: tp.Callable[[BaseParserObject], object],
-        python_factory: tp.Callable[[BaseParserObject], object],
         object_filter: tp.Dict[str, tp.Set[str]],
     ) -> dict:
 
@@ -175,26 +173,9 @@ class DFFProject(BaseParserObject):
                     processed_dict[process_base_parser_object(key)] = process_base_parser_object(value)
                 return processed_dict
             if isinstance(bpo, String):
-                try:
-                    parsed = ast.parse(bpo.string).body
-                    if len(parsed) != 1:
-                        return bpo.string
-                    parsed_expr = parsed[0]
-                    if not isinstance(parsed_expr, ast.Expr):
-                        return bpo.string
-
-                    expr = Expression.from_ast(parsed_expr.value)
-                    if expr.names <= allowed_objects:  # dependencies alone are not enough to differ between str and python
-                        return str_factory(bpo)
-                    else:
-                        return bpo.string
-                except SyntaxError:  # string is not a valid python node
-                    return bpo.string
+                return str(bpo)
             if isinstance(bpo, Expression):
-                if bpo.names <= allowed_objects:
-                    return str(bpo)
-                else:
-                    return python_factory(bpo)
+                return str(bpo)
             raise TypeError(str(type(bpo)) + "_" + repr(bpo))
 
         result = defaultdict(dict)
@@ -263,4 +244,4 @@ class DFFProject(BaseParserObject):
 
     def to_yaml(self, file: Path):
         with open(file, "w", encoding="utf-8") as fd:
-            yaml.dump(self.to_dict(str, yaml_python_factory, self.actor_call.dependencies), fd)
+            yaml.dump(self.to_dict(self.actor_call.dependencies), fd)

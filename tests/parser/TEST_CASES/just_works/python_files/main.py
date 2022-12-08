@@ -42,7 +42,7 @@ script = {
             "var2": "global_data",
             "var3": "global_data",
         },
-        RESPONSE: "",
+        RESPONSE: """''""",
     },
     "global_flow": global_flow,
     "greeting_flow": {

@@ -8,8 +8,3 @@ except ImportError:
 yaml = YAML()
 
 yaml.width = inf  # type: ignore
-
-
-def python_factory(base_parser_object):
-    return "`" + str(base_parser_object) + "`"
-    # return str(base_parser_object)

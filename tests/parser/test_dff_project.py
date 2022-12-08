@@ -17,8 +17,10 @@ def test_from_python():
     assert set(dff_project.children.keys()) == {"flow", "main", "functions", "transitions"}
 
     assert dff_project.script[0] == dff_project["main"]["script"]
-    assert str(dff_project.script[1]) == "('global_flow', 'start_node')"
-    assert str(dff_project.script[2]) == "('global_flow', 'fallback_node')"
+    assert dff_project.script[1][0] == "'global_flow'"
+    assert dff_project.script[1][1] == "'start_node'"
+    assert dff_project.script[2][0] == "'global_flow'"
+    assert dff_project.script[2][1] == "'fallback_node'"
 
 
 def test_resolved_script():
@@ -27,7 +29,7 @@ def test_resolved_script():
 
     resolved_script = dff_project.resolved_script
 
-    assert resolved_script['dff.core.engine.core.keywords.GLOBAL']['dff.core.engine.core.keywords.MISC'][String("var1")] == String("global_data")
+    assert resolved_script['dff.core.engine.core.keywords.GLOBAL'][None][1]['dff.core.engine.core.keywords.MISC']["'var1'"] == String("global_data")
 
 
 @pytest.mark.parametrize(
