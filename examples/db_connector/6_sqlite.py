@@ -2,6 +2,7 @@
 """
 # 6. SQLite
 
+This is an example of using SQLite.
 """
 
 

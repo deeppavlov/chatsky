@@ -31,6 +31,13 @@ from dff.utils.testing.common import (
 )
 from dff.utils.testing.response_comparers import generics_comparer
 
+
+# %% [markdown]
+"""
+URL of a picture with a kitten.
+"""
+
+
 # %%
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"

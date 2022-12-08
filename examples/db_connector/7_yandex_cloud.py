@@ -2,6 +2,7 @@
 """
 # 7. Yandex Cloud
 
+This is an example of using Yandex Cloud.
 """
 
 

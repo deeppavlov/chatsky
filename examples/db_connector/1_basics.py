@@ -2,6 +2,7 @@
 """
 # 1. Basics
 
+The following example shows the basic use of the database connection.
 """
 
 

@@ -2,6 +2,7 @@
 """
 # 5. MySQL
 
+This is an example of using MySQL.
 """
 
 
