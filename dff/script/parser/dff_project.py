@@ -133,13 +133,23 @@ class DFFProject(BaseParserObject):
             raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
         for flow, nodes in flows.items():
             if flow in keywords_dict["GLOBAL"]:
-                script[resolve(flow)] = resolve_node(nodes)
+                script[resolve(flow)][None] = (nodes, resolve_node(nodes))
             else:
                 nodes = resolve(nodes)
                 if not isinstance(nodes, Dict):
                     raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
                 for node, info in nodes.items():
-                    script[resolve(flow)][resolve(node)] = resolve_node(info)
+                    script[resolve(flow)][resolve(node)] = (info, resolve_node(info))
+
+        # validate labels
+        for label in self.script[1:3]:
+            flow = script.get(label[0])
+            if flow is None:
+                raise ScriptValidationError(f"Not found flow {str(label[0])} in {[str(key) for key in script.keys()]}")
+            else:
+                if flow.get(label[1]) is None:
+                    raise ScriptValidationError(f"Not found node {str(label[1])} in {[str(key) for key in script.keys()]}")
+
         return script
 
     def to_dict(
