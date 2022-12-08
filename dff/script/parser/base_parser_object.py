@@ -414,24 +414,44 @@ class Dict(Expression):
         super().__init__()
         self.__keys: tp.List[tp.Tuple[Expression, str]] = []
         for key, value in zip(keys, values):
-            self.__keys.append((key, repr(key)))
-            self.add_child(key, repr(key) + "key")
-            self.add_child(value, repr(key) + "value")
+            self.__keys.append((key, str(key)))
+            self.add_child(key, self._key(key))
+            self.add_child(value, self._value(key))
+
+    @staticmethod
+    def _key(str_key) -> str:
+        if not isinstance(str_key, str):
+            str_key = str(str_key)
+        return "key_" + str_key
+
+    @staticmethod
+    def _value(str_value) -> str:
+        if not isinstance(str_value, str):
+            str_value = str(str_value)
+        return "value_" + str_value
+
+    @staticmethod
+    def _clear(string: str) -> str:
+        if string.startswith("value_"):
+            return string[len("value_"):]
+        if string.startswith("key_"):
+            return string[len("key_"):]
+        return string
 
     def key_by_value(self, value: Expression) -> Expression:
-        return self.children[remove_suffix(value.append_path, "value") + "key"]
+        return self.children[self._key(self._clear(value.append_path))]
 
     def keys(self) -> tp.Iterator[Expression]:
         for _, key_str in self.__keys:
-            yield self.children[key_str + "key"]
+            yield self.children[self._key(key_str)]
 
     def values(self) -> tp.Iterator[Expression]:
         for _, key_str in self.__keys:
-            yield self.children[key_str + "value"]
+            yield self.children[self._value(key_str)]
 
     def items(self) -> tp.Iterator[tp.Tuple[Expression, Expression]]:
         for _, key_str in self.__keys:
-            yield self.children[key_str + "key"], self.children[key_str + "value"]
+            yield self.children[self._key(key_str)], self.children[self._value(key_str)]
 
     @cached_property
     def _keys(self) -> tp.Dict[Expression, str]:
@@ -441,24 +461,24 @@ class Dict(Expression):
         return result
 
     def __str__(self):
-        return "{" + ", ".join(
-            [f"{str(self.children[key + 'key'])}: {str(self.children[key + 'value'])}" for key in self._keys.values()]
+        return "{\n" + "".join(
+            [f"\t{str(self.children[self._key(key)])}: {str(self.children[self._value(key)])},\n" for key in self._keys.values()]
         ) + "}"
 
     def __repr__(self):
         return "Dict(" + ", ".join(
             [
-                f"{repr(self.children[key + 'key'])}: "
-                f"{repr(self.children[key + 'value'])}" for key in self._keys.values()
+                f"{repr(self.children[self._key(key)])}: "
+                f"{repr(self.children[self._value(key)])}" for key in self._keys.values()
             ]
         ) + ")"
 
     def __getitem__(self, item: tp.Union[Expression, str]):
         if isinstance(item, Expression):
             key = self._keys[item]
-            return self.children[key + "value"]
+            return self.children[self._value(key)]
         elif isinstance(item, str):
-            return self.children[item + "value"]
+            return self.children[self._value(item)]
         else:
             raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
 
@@ -470,7 +490,7 @@ class Dict(Expression):
                 raise StarError(f"Dict comprehensions are not supported: {unparse(node)}")
             keys.append(Expression.from_ast(key))
             values.append(Expression.from_ast(value))
-        return cls(keys,values)
+        return cls(keys, values)
 
 
 class Name(Expression, ReferenceObject):
