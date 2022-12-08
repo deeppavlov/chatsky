@@ -2,7 +2,7 @@
 """
 # 5. Asynchronous groups and services (full)
 
-The following example shows pipeline
+The following example shows `pipeline`
 asynchronous service and service group usage.
 """
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 """
 Services and service groups can be synchronous and asynchronous.
 In synchronous service groups services are executed consequently,
-    some of them (actor) can even return Context object,
+    some of them (`actor`) can even return `Context` object,
     modifying it.
 In asynchronous service groups all services
     are executed simultaneously and should not return anything,
@@ -49,7 +49,7 @@ and service groups inside it are asynchronous.
 If service or service group can be asynchronous
 the `asynchronous` constructor parameter is checked.
 If the parameter is not set,
-the service becomes asynchronous, if it is, it is used instead.
+the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
 NB! Actor service is always synchronous.

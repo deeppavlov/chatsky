@@ -2,7 +2,7 @@
 """
 # 5. Asynchronous groups and services (basic)
 
-The following example shows pipeline asynchronous
+The following example shows `pipeline` asynchronous
 service and service group usage.
 """
 
@@ -38,7 +38,7 @@ Here there is an asynchronous service group, that contains 10 services,
 each of them should sleep for 0.01 of a second.
 However, as the group is asynchronous,
 it is being executed for 0.01 of a second in total.
-Service group `pipeline` can't be asynchronous because actor is synchronous.
+Service group `pipeline` can't be asynchronous because `actor` is synchronous.
 """
 
 

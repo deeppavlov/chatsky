@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 """
 Extra handlers are additional function
     lists (before-functions and/or after-functions)
-    that can be added to any pipeline components (service and service groups).
+    that can be added to any `pipeline` components (service and service groups).
 Extra handlers main purpose should be service
 and service groups statistics collection.
 Extra handlers can be attached to pipeline component using

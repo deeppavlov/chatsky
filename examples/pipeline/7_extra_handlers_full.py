@@ -52,26 +52,29 @@ So their main purpose should be _really_ lightweight data conversion (etc.)
     operations or service and service groups statistics collection.
 
 Extra handlers have the following constructor arguments / parameters:
-    `functions` - functions that will be run
-    `timeout` - timeout for that extra handler
-        (for asynchronous extra handlers only)
-    `asynchronous` - whether this extra handler should be asynchronous or not
+
+* `functions` - Functions that will be run.
+* `timeout` - Timeout for that extra handler
+        (for asynchronous extra handlers only).
+* `asynchronous` - Whether this extra handler should be asynchronous or not.
 NB! Extra handlers don't have execution state,
-so their names shouldn't appear in built-in condition functions
+so their names shouldn't appear in built-in condition functions.
 
 Extra handlers callable signature can be one of the following:
-[ctx], [ctx, actor] or [ctx, actor, info], where:
-    `ctx` - Context of the current dialog
-    `actor` - Actor of the pipeline
-    `info` - dictionary, containing information about current extra handler
-             and pipeline execution state (see example №4)
+`[ctx]`, `[ctx, actor]` or `[ctx, actor, info]`, where:
+    
+* `ctx` - `Context` of the current dialog.
+* `actor` - `Actor` of the pipeline.
+* `info` - Dictionary, containing information about current extra handler
+            and pipeline execution state (see example 4).
 
-Extra handlers can be attached to pipeline component in few different ways:
-    1. Directly in constructor - by adding extra handlers to
-    `before_handler` or `after_handler` constructor parameter
-    2. (Services only) `to_service` decorator -
-        transforms function to service with extra handlers
-        from `before_handler` and `after_handler` arguments
+Extra handlers can be attached to pipeline component in a few different ways:
+    
+1. Directly in constructor - by adding extra handlers to
+    `before_handler` or `after_handler` constructor parameter.
+2. (Services only) `to_service` decorator -
+    transforms function to service with extra handlers
+    from `before_handler` and `after_handler` arguments.
 
 Here 5 `heavy_service`s fill big amounts of memory with random numbers.
 Their runtime stats are captured and displayed by extra services,

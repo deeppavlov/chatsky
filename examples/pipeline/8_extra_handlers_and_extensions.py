@@ -44,28 +44,31 @@ Pipeline functionality can be extended by global extra handlers.
 Global extra handlers are special extra handlers
     that are called on some stages of pipeline execution.
 There are 4 types of global extra handlers:
-    `BEFORE_ALL` - is called before pipeline execution
-    `BEFORE` - is called before each service and service group execution
-    `AFTER` - is called after each service and service group execution
-    `AFTER_ALL` - is called after pipeline execution
+
+    * `BEFORE_ALL` is called before pipeline execution.
+    * `BEFORE` is called before each service and service group execution.
+    * `AFTER` is called after each service and service group execution.
+    * `AFTER_ALL` is called after pipeline execution.
+
 Global extra handlers have the same signature as regular extra handlers.
 Actually `BEFORE_ALL` and `AFTER_ALL`
     are attached to root service group named 'pipeline',
     so they return its runtime info
 
-All extra handlers warnings (see example №7)
+All extra handlers warnings (see example 7)
 are applicable to global extra handlers.
 Pipeline `add_global_extra_handler` function is used to register
     global extra handlers. It accepts following arguments:
-    `global_extra_handler_type` (required) - a GlobalExtraHandlerType instance,
-        indicates extra handler type to add
-    `extra_handler` (required) - the extra handler function itself
-    `whitelist` - an optional list of paths, if it's not None
-                  the extra handlers will be applied to
-                  specified pipeline components only
-    `blacklist` - an optional list of paths, if it's not None
-                  the extra handlers will be applied to
-                  all pipeline components except specified
+    
+* `global_extra_handler_type` (required) - A `GlobalExtraHandlerType` instance,
+    indicates extra handler type to add.
+* `extra_handler` (required) - The extra handler function itself.
+* `whitelist` - An optional list of paths, if it's not `None`
+                the extra handlers will be applied to
+                specified pipeline components only.
+* `blacklist` - An optional list of paths, if it's not `None`
+                the extra handlers will be applied to
+                all pipeline components except specified.
 
 Here basic functionality of `df-node-stats` library is emulated.
 Information about pipeline component execution time and
