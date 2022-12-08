@@ -615,12 +615,24 @@ class Subscript(Expression, ReferenceObject):
 class Iterable(Expression):
     def __init__(self, iterable: tp.Iterable[Expression], iterable_type: str):
         Expression.__init__(self)
+        self.children: tp.Dict[str, Expression]
         self.type = iterable_type
         for index, value in enumerate(iterable):
-            self.add_child(value, repr(Python.from_str(str(index))))
+            self.add_child(value, str(index))
 
-    def __getitem__(self, item: Python):
-        return self.children[repr(item)]
+    def __iter__(self):
+        yield from self.children.values()
+
+    def __len__(self):
+        return len(self.children)
+
+    def __getitem__(self, item: tp.Union[Expression, str, int]) -> Expression:
+        if isinstance(item, str):
+            return self.children[item]
+        elif isinstance(item, int):
+            return self.children[str(item)]
+        else:
+            return self.children[str(item)]
 
     def __str__(self):
         if self.type == "list":
