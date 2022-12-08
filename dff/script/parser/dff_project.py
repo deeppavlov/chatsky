@@ -54,18 +54,47 @@ class DFFProject(BaseParserObject):
         raise ScriptValidationError("Actor call is not found")
 
     @cached_property
-    def script(self) -> tp.Tuple[Expression, Expression, tp.Optional[Expression]]:
+    def script(self) -> tp.Tuple[Expression, tp.Tuple[Expression, Expression], tp.Tuple[Expression, Expression]]:
         call = self.actor_call
-        args = {}
+        args: tp.Dict[str, tp.Optional[Expression]] = {}
         func = call.resolve_path(("func", ))
         func_name = str(func.resolve_name)
         for index, arg in enumerate(ScriptInitializers[func_name]):
             args[arg] = call.children.get("arg_" + str(index)) or call.children.get("keyword_" + arg)
-        if args["script"] is None:
+        script = args.get("script")
+        start_label = args.get("start_label")
+        fallback_label = args.get("fallback_label")
+
+        # script validation
+        if script is None:
             raise ScriptValidationError(f"Actor argument `script` is not found: {str(call)}")
-        if args["start_label"] is None:
+
+        # start_label validation
+        if start_label is None:
             raise ScriptValidationError(f"Actor argument `start_label` is not found: {str(call)}")
-        return args["script"], args["start_label"], args["fallback_label"]
+        label = start_label
+        if isinstance(label, ReferenceObject):
+            label = label.absolute
+        if not isinstance(label, Iterable):
+            raise ScriptValidationError(f"Start label {start_label} resolves to {label} which is not iterable.")
+        if len(label) != 2:
+            raise ScriptValidationError(f"Length of start label should be 2: {label}")
+        start_label = (label[0], label[1])
+
+        # fallback_label validation
+        if fallback_label is None:
+            fallback_label = start_label
+        else:
+            label = fallback_label
+            if isinstance(label, ReferenceObject):
+                label = label.absolute
+            if not isinstance(label, Iterable):
+                raise ScriptValidationError(f"Start label {fallback_label} resolves to {label} which is not iterable.")
+            if len(label) != 2:
+                raise ScriptValidationError(f"Length of start label should be 2: {label}")
+            fallback_label = (label[0], label[1])
+
+        return script, start_label, fallback_label
 
     @cached_property
     def resolved_script(self) -> dict:
