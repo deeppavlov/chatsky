@@ -9,7 +9,7 @@ except ImportError:
 
 from .base_parser_object import *
 from .namespace import Namespace
-from .exceptions import ScriptValidationError
+from .exceptions import ScriptValidationError, ParsingError
 from .yaml import yaml
 from dff.core.engine.core.actor import Actor
 from dff.core.engine.core.keywords import Keywords
@@ -41,6 +41,8 @@ keywords_list = list(map(lambda x: "dff.core.engine.core.keywords." + x, Keyword
 reversed_keywords_dict = {
     prefix + k: k for k in Keywords.__members__ for prefix in ("dff.core.engine.core.keywords.", "dff.core.engine.core.keywords.Keywords.")
 }
+
+RecursiveDict = tp.Dict[str, 'RecursiveDict']
 
 
 class DFFProject(BaseParserObject):
@@ -267,6 +269,35 @@ class DFFProject(BaseParserObject):
                         result[namespace_name][obj_name] = process_base_parser_object(obj)
         return dict(result)
 
+    @classmethod
+    def from_dict(
+        cls,
+        dictionary: tp.Dict[str, RecursiveDict],
+    ):
+        def process_dict(d):
+            return "{" + ", ".join([f"{k}: {process_dict(v) if isinstance(v, dict) else v}" for k, v in d.items()]) + "}"
+
+        namespaces = []
+        for namespace_name, namespace in dictionary.items():
+            objects = []
+            for obj_name, obj in namespace.items():
+                if isinstance(obj, str):
+                    split = obj.split(" ")
+                    if split[0] == "import":
+                        if len(split) != 2:
+                            raise ParsingError(f"Import statement should contain 2 words. AsName can be set via key.\n{obj}")
+                        objects.append(obj if split[1] == obj_name else obj + " as " + obj_name)
+                    elif split[0] == "from":
+                        if len(split) != 4:
+                            raise ParsingError(f"ImportFrom statement should contain 4 words. AsName can be set via key.\n{obj}")
+                        objects.append(obj if split[3] == obj_name else obj + " as " + obj_name)
+                    else:
+                        objects.append(f"{obj_name} = {obj}")
+                else:
+                    objects.append(f"{obj_name} = {str(process_dict(obj))}")
+            namespaces.append(Namespace.from_ast(ast.parse("\n".join(objects)), location=namespace_name.split('.')))
+        return cls(namespaces)
+
     def __getitem__(self, item: tp.Union[tp.List[str], str]) -> Namespace:
         if isinstance(item, str):
             return self.children[item]
@@ -322,9 +353,19 @@ class DFFProject(BaseParserObject):
         _process_file(entry_point)
         return cls(list(namespaces.values()))
 
+    @classmethod
+    def from_yaml(cls, file: Path):
+        with open(file, "r", encoding="utf-8") as fd:
+            return cls.from_dict(yaml.load(fd))
+
     def to_yaml(self, file: Path):
         with open(file, "w", encoding="utf-8") as fd:
             yaml.dump(self.to_dict(self.actor_call.dependencies), fd)
+
+    @classmethod
+    def from_graph(cls, file: Path):
+        with open(file, "r", encoding="utf-8") as fd:
+            return cls.from_dict(json.load(fd)["graph"]["full_script"])
 
     def to_graph(self, file: Path):
         with open(file, "w", encoding="utf-8") as fd:

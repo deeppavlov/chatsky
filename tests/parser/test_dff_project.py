@@ -38,9 +38,25 @@ def test_resolved_script():
         TEST_DIR / "just_works",
     ]
 )
-def test_conversions(test_case: Path, tmp_path):
-    dff_project = DFFProject.from_python(test_case / "python_files", test_case / "python_files" / "main.py")
+def test_conversions(test_case: Path, tmp_path):  # todo: when to_python is implemented pass those methods as params
+    python_dir = test_case / "python_files"
+    main_file = python_dir / "main.py"
+    yaml_script = test_case / "yaml_files" / "script.yaml"
+    graph_script = test_case / "graph_files" / "graph.json"
+
+    # from_python
+    dff_project = DFFProject.from_python(python_dir, main_file)
     dff_project.to_yaml(tmp_path / "script.yaml")
     dff_project.to_graph(tmp_path / "graph.json")
-    assert_files_equal(tmp_path / "script.yaml", test_case / "yaml_files" / "script.yaml")
-    assert_files_equal(tmp_path / "graph.json", test_case / "graph_files" / "graph.json")
+    assert_files_equal(tmp_path / "script.yaml", yaml_script)
+    assert_files_equal(tmp_path / "graph.json", graph_script)
+
+    # from_yaml
+    dff_project = DFFProject.from_yaml(yaml_script)
+    dff_project.to_graph(tmp_path / "graph.json")
+    assert_files_equal(tmp_path / "graph.json", graph_script)
+
+    # from_graph
+    dff_project = DFFProject.from_graph(graph_script)
+    dff_project.to_yaml(tmp_path / "script.yaml")
+    assert_files_equal(tmp_path / "script.yaml", yaml_script)

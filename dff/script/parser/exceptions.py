@@ -8,6 +8,12 @@ class ScriptValidationError(BaseParserException):
     """
 
 
+class ParsingError(BaseParserException):
+    """
+    Raised during parsing
+    """
+
+
 class ResolutionError(BaseParserException):
     """
     Raised during name resolution
