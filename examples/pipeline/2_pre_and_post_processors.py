@@ -82,10 +82,6 @@ if __name__ == "__main__":
         while True:
             ctx: Context = pipeline(input("Send request: "), ctx_id)
             print(f"Response: {ctx.last_response}")
-            ping_pong = ctx.misc.get("ping", False) and ctx.misc.get(
-                "pong", False
-            )
-            print(
-                f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}."
-            )
+            ping_pong = ctx.misc.get("ping", False) and ctx.misc.get("pong", False)
+            print(f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}.")
             logger.info(f"Context misc: {ctx.misc}")

@@ -44,8 +44,7 @@ def get_previous_node_response_for_response_processing(
 ) -> Context:
     processed_node = ctx.current_node
     processed_node.response = (
-        f"previous={ctx.misc['previous_node_response']}:"
-        f" current={processed_node.response}"
+        f"previous={ctx.misc['previous_node_response']}:" f" current={processed_node.response}"
     )
     ctx.overwrite_current_node_in_processing(processed_node)
     return ctx
@@ -62,9 +61,7 @@ toy_script = {
         PRE_RESPONSE_PROCESSING: {
             "proc_name_1": get_previous_node_response_for_response_processing
         },
-        PRE_TRANSITIONS_PROCESSING: {
-            "proc_name_1": save_previous_node_response_to_ctx_processing
-        },
+        PRE_TRANSITIONS_PROCESSING: {"proc_name_1": save_previous_node_response_to_ctx_processing},
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
     "flow": {

@@ -62,14 +62,14 @@ so their names shouldn't appear in built-in condition functions.
 
 Extra handlers callable signature can be one of the following:
 `[ctx]`, `[ctx, actor]` or `[ctx, actor, info]`, where:
-    
+
 * `ctx` - `Context` of the current dialog.
 * `actor` - `Actor` of the pipeline.
 * `info` - Dictionary, containing information about current extra handler
             and pipeline execution state (see example 4).
 
 Extra handlers can be attached to pipeline component in a few different ways:
-    
+
 1. Directly in constructor - by adding extra handlers to
     `before_handler` or `after_handler` constructor parameter.
 2. (Services only) `to_service` decorator -
@@ -96,9 +96,7 @@ def get_extra_handler_misc_field(
 
 
 def time_measure_before_handler(ctx, _, info):
-    ctx.misc.update(
-        {get_extra_handler_misc_field(info, "time"): datetime.now()}
-    )
+    ctx.misc.update({get_extra_handler_misc_field(info, "time"): datetime.now()})
 
 
 def time_measure_after_handler(ctx, _, info):
@@ -111,13 +109,7 @@ def time_measure_after_handler(ctx, _, info):
 
 
 def ram_measure_before_handler(ctx, _, info):
-    ctx.misc.update(
-        {
-            get_extra_handler_misc_field(
-                info, "ram"
-            ): psutil.virtual_memory().available
-        }
-    )
+    ctx.misc.update({get_extra_handler_misc_field(info, "ram"): psutil.virtual_memory().available})
 
 
 def ram_measure_after_handler(ctx, _, info):
@@ -133,11 +125,7 @@ def ram_measure_after_handler(ctx, _, info):
 
 def json_converter_before_handler(ctx, _, info):
     ctx.misc.update(
-        {
-            get_extra_handler_misc_field(info, "str"): json.dumps(
-                ctx.misc, indent=4, default=str
-            )
-        }
+        {get_extra_handler_misc_field(info, "str"): json.dumps(ctx.misc, indent=4, default=str)}
     )
 
 
@@ -154,9 +142,7 @@ memory_heap = dict()  # This object plays part of some memory heap
     after_handler=[time_measure_after_handler, ram_measure_after_handler],
 )
 def heavy_service(ctx: Context):
-    memory_heap[ctx.last_request] = [
-        random.randint(0, num) for num in range(0, 1000)
-    ]
+    memory_heap[ctx.last_request] = [random.randint(0, num) for num in range(0, 1000)]
 
 
 @to_service(

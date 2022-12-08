@@ -39,16 +39,12 @@ with flow name, node name and priority.
 
 
 # %%
-def greeting_flow_n2_transition(
-    ctx: Context, actor: Actor, *args, **kwargs
-) -> NodeLabel3Type:
+def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
     return ("greeting_flow", "node2", 1.0)
 
 
 def high_priority_node_transition(flow_label, label):
-    def transition(
-        ctx: Context, actor: Actor, *args, **kwargs
-    ) -> NodeLabel3Type:
+    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
         return (flow_label, label, 2.0)
 
     return transition
@@ -96,12 +92,8 @@ toy_script = {
             # it doesn't need a `RESPONSE`.
             RESPONSE: "",
             TRANSITIONS: {
-                ("music_flow", "node1"): cnd.regexp(
-                    r"talk about music"
-                ),  # first check
-                ("greeting_flow", "node1"): cnd.regexp(
-                    r"hi|hello", re.IGNORECASE
-                ),  # second check
+                ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
+                ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
                 "fallback_node": cnd.true(),  # third check
                 # "fallback_node" is equivalent to
                 # ("global_flow", "fallback_node").
@@ -111,15 +103,9 @@ toy_script = {
             # an error occurred while the agent was running.
             RESPONSE: "Ooops",
             TRANSITIONS: {
-                ("music_flow", "node1"): cnd.regexp(
-                    r"talk about music"
-                ),  # first check
-                ("greeting_flow", "node1"): cnd.regexp(
-                    r"hi|hello", re.IGNORECASE
-                ),  # second check
-                lbl.previous(): cnd.regexp(
-                    r"previous", re.IGNORECASE
-                ),  # third check
+                ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
+                ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
+                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
                 # lbl.previous() is equivalent
                 # to ("previous_flow", "previous_node")
                 lbl.repeat(): cnd.true(),  # fourth check
@@ -150,14 +136,10 @@ toy_script = {
                 lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
                 # lbl.forward(0.5) is equivalent
                 # to ("greeting_flow", "node3", 0.5)
-                ("music_flow", "node1"): cnd.regexp(
-                    r"talk about music"
-                ),  # first check
+                ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
                 # ("music_flow", "node1") is equivalent
                 # to ("music_flow", "node1", 1.0)
-                lbl.previous(): cnd.regexp(
-                    r"previous", re.IGNORECASE
-                ),  # third check
+                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
             },
         },
         "node3": {
@@ -174,8 +156,7 @@ toy_script = {
     },
     "music_flow": {
         "node1": {
-            RESPONSE: "I love `System of a Down` group,"
-            " would you like to talk about it?",
+            RESPONSE: "I love `System of a Down` group," " would you like to talk about it?",
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
@@ -203,12 +184,8 @@ toy_script = {
         "node4": {
             RESPONSE: "That's all what I know.",
             TRANSITIONS: {
-                greeting_flow_n2_transition: cnd.regexp(
-                    r"next", re.IGNORECASE
-                ),  # second check
-                high_priority_node_transition(
-                    "greeting_flow", "node4"
-                ): cnd.regexp(
+                greeting_flow_n2_transition: cnd.regexp(r"next", re.IGNORECASE),  # second check
+                high_priority_node_transition("greeting_flow", "node4"): cnd.regexp(
                     r"next time", re.IGNORECASE
                 ),  # first check
                 lbl.to_fallback(): cnd.true(),  # third check
@@ -228,28 +205,23 @@ happy_path = (
     ),
     (
         "yes",
-        "System of a Down is an Armenian-American"
-        " heavy metal band formed in 1994.",
+        "System of a Down is an Armenian-American" " heavy metal band formed in 1994.",
     ),
     (
         "next",
-        "The band achieved commercial success"
-        " with the release of five studio albums.",
+        "The band achieved commercial success" " with the release of five studio albums.",
     ),
     (
         "back",
-        "System of a Down is an Armenian-American"
-        " heavy metal band formed in 1994.",
+        "System of a Down is an Armenian-American" " heavy metal band formed in 1994.",
     ),
     (
         "repeat",
-        "System of a Down is an Armenian-American"
-        " heavy metal band formed in 1994.",
+        "System of a Down is an Armenian-American" " heavy metal band formed in 1994.",
     ),
     (
         "next",
-        "The band achieved commercial success"
-        " with the release of five studio albums.",
+        "The band achieved commercial success" " with the release of five studio albums.",
     ),
     ("next", "That's all what I know."),
     ("next", "Good. What do you want to talk about?"),

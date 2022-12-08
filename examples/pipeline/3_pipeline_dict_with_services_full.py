@@ -61,7 +61,7 @@ If Actor instance is not found among `services` pipeline creation fails.
 There can be only one Actor in the pipeline.
 ServiceBuilder object can be defined either with callable (see example 2) or
 with dict of structure / object with following constructor arguments:
-    
+
 * `handler` (required) - ServiceBuilder,
         if handler is an object or a dict itself,
         it will be used instead of base ServiceBuilder.
@@ -92,9 +92,7 @@ Final service logs `ctx.misc` dict.
 
 # %%
 def prepreprocess(ctx: Context):
-    logger.info(
-        "preprocession intent-detection Service running (defined as a dict)"
-    )
+    logger.info("preprocession intent-detection Service running (defined as a dict)")
     ctx.misc["preprocess_detection"] = {
         ctx.last_request: "some_intent"
     }  # Similar syntax can be used to access
@@ -107,28 +105,19 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
         f"(defined as a callable), named '{info['name']}'"
     )
     with urllib.request.urlopen("https://example.com/") as webpage:
-        web_content = webpage.read().decode(
-            webpage.headers.get_content_charset()
-        )
+        web_content = webpage.read().decode(webpage.headers.get_content_charset())
         ctx.misc["another_detection"] = {
-            ctx.last_request: "online"
-            if "Example Domain" in web_content
-            else "offline"
+            ctx.last_request: "online" if "Example Domain" in web_content else "offline"
         }
 
 
 def postprocess(ctx: Context, actor: Actor):
     logger.info("postprocession Service (defined as an object)")
-    logger.info(
-        f"resulting misc looks like:"
-        f"{json.dumps(ctx.misc, indent=4, default=str)}"
-    )
+    logger.info(f"resulting misc looks like:" f"{json.dumps(ctx.misc, indent=4, default=str)}")
     fallback_flow, fallback_node, _ = actor.fallback_label
     received_response = actor.script[fallback_flow][fallback_node].response
     responses_match = received_response == ctx.last_response
-    logger.info(
-        f"actor is{'' if responses_match else ' not'} " "in fallback node"
-    )
+    logger.info(f"actor is{'' if responses_match else ' not'} " "in fallback node")
 
 
 # %%

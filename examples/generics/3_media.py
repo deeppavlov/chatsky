@@ -48,9 +48,7 @@ toy_script = {
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
-            RESPONSE: Response(
-                text="Final node reached, send any message to restart."
-            ),
+            RESPONSE: Response(text="Final node reached, send any message to restart."),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
     },
@@ -64,9 +62,7 @@ toy_script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(
-                text="here's my picture!", image=Image(source=kitten_url)
-            ),
+            RESPONSE: Response(text="here's my picture!", image=Image(source=kitten_url)),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
@@ -77,9 +73,7 @@ toy_script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: Response(
-                text="I cannot find the picture. Please, try again."
-            ),
+            RESPONSE: Response(text="I cannot find the picture. Please, try again."),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.jpg$"),
@@ -123,12 +117,9 @@ def process_request(ctx: Context):
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
             raise ValueError(
-                "Type in the index of the correct option"
-                "to choose from the buttons."
+                "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.requests[last_index] = CallbackRequest(
-            payload=chosen_button.payload
-        )
+        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
         return
     ctx.requests[last_index] = last_request
 

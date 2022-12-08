@@ -36,9 +36,7 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_happy_path(
-        pipeline, HAPPY_PATH
-    )  # This is a function for automatic example running
+    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic example running
     # (testing) with HAPPY_PATH
 
     # This runs example in interactive mode if not in IPython env

@@ -24,9 +24,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 
 # %%
-db_uri = "redis://{}:{}@localhost:6379/{}".format(
-    "", os.getenv("REDIS_PASSWORD"), "0"
-)
+db_uri = "redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0")
 db = connector_factory(db_uri)
 
 

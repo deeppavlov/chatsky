@@ -56,10 +56,7 @@ def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update(
-        {
-            f"{info['component']['name']}": datetime.now()
-            - ctx.misc[f"{info['component']['name']}"]
-        }
+        {f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]}
     )
 
 

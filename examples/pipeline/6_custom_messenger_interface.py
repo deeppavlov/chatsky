@@ -31,7 +31,7 @@ a way for communication between user and `pipeline`.
 They manage message channel initialization and termination
 as well as pipeline execution on every user request.
 There are two built-in messenger interface types (that may be overridden):
-    
+
 * `PollingMessengerInterface` - Starts polling for user request
         in a loop upon initialization,
         it has following methods:
@@ -74,9 +74,7 @@ Two services are used to process request:
 # %%
 app = Flask("examples.6_custom_messenger_interface")
 
-messenger_interface = (
-    CallbackMessengerInterface()
-)  # For this simple case of Flask,
+messenger_interface = CallbackMessengerInterface()  # For this simple case of Flask,
 # CallbackMessengerInterface may not be overridden
 
 
@@ -113,9 +111,7 @@ def purify_request(ctx: Context):
     elif isinstance(ctx.last_request, str):
         logger.info("Capturing request from CLI")
     else:
-        raise Exception(
-            f"Request of type {type(ctx.last_request)} can not be purified!"
-        )
+        raise Exception(f"Request of type {type(ctx.last_request)} can not be purified!")
 
 
 def cat_response2webpage(ctx: Context):

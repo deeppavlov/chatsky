@@ -50,9 +50,7 @@ def response(ctx: Context, _: Actor, *__, **___):
 
 
 # %%
-toy_script = {
-    "flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}
-}
+toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
     ("", "1-2-3-2-4"),

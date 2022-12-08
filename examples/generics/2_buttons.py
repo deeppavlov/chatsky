@@ -35,10 +35,7 @@ from dff.utils.testing.response_comparers import generics_comparer
 # %%
 def check_button_payload(value: str):
     def payload_check_inner(ctx: Context, actor: Actor):
-        return (
-            hasattr(ctx.last_request, "payload")
-            and ctx.last_request.payload == value
-        )
+        return hasattr(ctx.last_request, "payload") and ctx.last_request.payload == value
 
     return payload_check_inner
 
@@ -94,8 +91,7 @@ toy_script = {
         "question_3": {
             RESPONSE: Response(
                 **{
-                    "text": "What's 114 + 115?"
-                    " (type in the index of the correct option)",
+                    "text": "What's 114 + 115?" " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="229", payload="229"),
@@ -120,13 +116,11 @@ toy_script = {
 happy_path = (
     (
         "Hi",
-        "\nStarting test! What's 2 + 2? (type in the index of the"
-        " correct option)\n0): 5\n1): 4",
+        "\nStarting test! What's 2 + 2? (type in the index of the" " correct option)\n0): 5\n1): 4",
     ),
     (
         "0",
-        "\nStarting test! What's 2 + 2? (type in the index of the"
-        " correct option)\n0): 5\n1): 4",
+        "\nStarting test! What's 2 + 2? (type in the index of the" " correct option)\n0): 5\n1): 4",
     ),
     (
         "1",
@@ -140,13 +134,11 @@ happy_path = (
     ),
     (
         "1",
-        "\nWhat's 114 + 115? (type in the index of the correct option)"
-        "\n0): 229\n1): 283",
+        "\nWhat's 114 + 115? (type in the index of the correct option)" "\n0): 229\n1): 283",
     ),
     (
         "1",
-        "\nWhat's 114 + 115? (type in the index of the correct option)"
-        "\n0): 229\n1): 283",
+        "\nWhat's 114 + 115? (type in the index of the correct option)" "\n0): 229\n1): 283",
     ),
     ("0", "Success!"),
     ("ok", "Finishing test"),
@@ -170,12 +162,9 @@ def process_request(ctx: Context):
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
             raise ValueError(
-                "Type in the index of the correct option"
-                "to choose from the buttons."
+                "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.requests[last_index] = CallbackRequest(
-            payload=chosen_button.payload
-        )
+        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
         return
     ctx.requests[last_index] = last_request
 
