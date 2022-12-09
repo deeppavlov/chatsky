@@ -11,7 +11,8 @@ def create_notebook_link(file: Path, notebook_path: Path):
 def create_directory_index_file(file: Path, index: List[str]):
     title = " ".join(word.capitalize() for word in file.parent.stem.split("_"))
     directories = "\n   ".join(directory for directory in index)
-    contents = f"""
+    contents = f""":orphan:
+
 .. This is an auto-generated RST index file representing examples directory structure
 
 {title}

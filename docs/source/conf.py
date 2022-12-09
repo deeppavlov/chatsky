@@ -7,6 +7,7 @@ from jupytext import jupytext
 
 sys.path.append(os.path.abspath("."))
 from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from regenerate_apiref import regenerate  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -101,7 +102,7 @@ html_theme_options = {
     "tab_about_us": "#",
 }
 
-
+nbsphinx_allow_errors = True
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
@@ -109,5 +110,13 @@ def setup(_):
             "examples/pipeline/[1-9]*.py",
             "examples/db_connector/*.py",
             "examples/generics/*.py",
+        ]
+    )
+    regenerate(
+        [
+            ("dff.connectors.db", "db_connectors"),
+            ("dff.connectors.messenger", "messenger_interfaces"),
+            ("dff.core.engine", "engine"),
+            ("dff.core.pipeline", "pipeline"),
         ]
     )

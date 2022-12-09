@@ -57,25 +57,19 @@ Documentation and Examples
 --------------------------
 
 .. toctree::
-   :glob:
    :caption: Documentation
    :name: documentation
-   :maxdepth: 2
+   :glob:
+   :maxdepth: 1
 
-   apiref/dff.core.engine
-   apiref/dff.core.pipeline
-   apiref/dff.connectors.db
-   apiref/dff.connectors.messenger
+   apiref/index_*
 
 .. toctree::
    :caption: Examples
    :name: examples
    :glob:
 
-   examples/engine/index
-   examples/pipeline/index
-   examples/db_connector/index
-   examples/generics/index
+   examples/*/index
 
 Indices and tables
 ------------------
