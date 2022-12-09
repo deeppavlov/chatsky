@@ -1,13 +1,17 @@
 from pathlib import Path
 import builtins
 import json
+import typing as tp
+import logging
+from collections import defaultdict
+import ast
 
 try:
     import networkx as nx
 except ImportError:
     raise ImportError(f"Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
-from .base_parser_object import *
+from .base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable
 from .namespace import Namespace
 from .exceptions import ScriptValidationError, ParsingError
 from .yaml import yaml
@@ -208,6 +212,7 @@ class DFFProject(BaseParserObject):
                     return (f"BACKWARD_cyclicality={str(label.get_args(labels[label.func_name]).get('cyclicality_flag') or True)}",)
             logger.warning(f'Label did not resolve: {label}')
             return ("NONE",)
+
         graph = nx.MultiDiGraph(full_script=self.to_dict(self.actor_call.dependencies), start_label=self.script[1], fallback_label=self.script[2])
         for flow_name, flow in self.resolved_script.items():
             for node_name, node_info in flow.items():
