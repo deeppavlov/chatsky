@@ -46,11 +46,13 @@ RecursiveDict = tp.Dict[str, 'RecursiveDict']
 
 
 class DFFProject(BaseParserObject):
-    def __init__(self, namespaces: tp.List['Namespace']):
+    def __init__(self, namespaces: tp.List['Namespace'], validate: bool = True):
         super().__init__()
         self.children: tp.Dict[str, Namespace]
         for namespace in namespaces:
             self.add_child(namespace, namespace.name)
+        if validate:
+            _ = self.graph
 
     @cached_property
     def actor_call(self) -> Call:
@@ -206,7 +208,7 @@ class DFFProject(BaseParserObject):
                     return (f"BACKWARD_cyclicality={str(label.get_args(labels[label.func_name]).get('cyclicality_flag') or True)}",)
             logger.warning(f'Label did not resolve: {label}')
             return ("NONE",)
-        graph = nx.MultiDiGraph(full_script=self.to_dict(self.actor_call.dependencies, False), start_label=self.script[1], fallback_label=self.script[2])
+        graph = nx.MultiDiGraph(full_script=self.to_dict(self.actor_call.dependencies), start_label=self.script[1], fallback_label=self.script[2])
         for flow_name, flow in self.resolved_script.items():
             for node_name, node_info in flow.items():
                 current_label = (str(flow_name), str(node_name)) if node_name is not None else (str(flow_name), )
@@ -234,11 +236,7 @@ class DFFProject(BaseParserObject):
     def to_dict(
         self,
         object_filter: tp.Dict[str, tp.Set[str]],
-        validate: bool = True,
     ) -> dict:
-        if validate:
-            _ = self.resolved_script
-
         def process_base_parser_object(bpo: BaseParserObject):
             allowed_objects = set(object_filter[bpo.namespace.name])
             allowed_objects.update(set(builtins.__dict__.keys()))
