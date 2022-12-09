@@ -17,7 +17,7 @@ def generate_doc_container(file: Path, includes: List[Path]):
 
    {sources}
 """
-    file.with_stem(f"index_{file.stem}").write_text(contents)
+    file.with_name(f"index_{file.name}").write_text(contents)
 
 
 def regenerate(paths: Optional[List[Tuple[str, str]]] = None, destination: str = "apiref"):
