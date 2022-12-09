@@ -2,6 +2,7 @@
 """
 # 2. PostgreSQL
 
+This is an example of using PostgreSQL.
 """
 
 

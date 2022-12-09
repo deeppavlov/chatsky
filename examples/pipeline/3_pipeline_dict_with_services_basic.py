@@ -2,7 +2,7 @@
 """
 # 3. Pipeline dict with services (basic)
 
-The following example shows pipeline creation from
+The following example shows `pipeline` creation from
 dict and most important pipeline components.
 """
 
@@ -30,16 +30,16 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 """
 When Pipeline is created using `from_dict` method,
-pipeline should be defined as dictionary.
-It should contain `services` - a ServiceGroupBuilder object,
-basically a list of ServiceBuilder or ServiceGroupBuilder objects,
-see example №4.
+pipeline should be defined as a dictionary.
+It should contain `services` - a `ServiceGroupBuilder` object,
+basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
+see example 4.
 
 On pipeline execution services from `services`
 list are run without difference between pre- and postprocessors.
 Actor instance should also be present among services.
 ServiceBuilder object can be defined either with callable
-(see example №2) or with dict / object.
+(see example 2) or with dict / object.
 It should contain `handler` - a ServiceBuilder object.
 
 Not only Pipeline can be run using `__call__` method,
@@ -53,16 +53,11 @@ defined in 4 different ways with different signatures.
 
 # %%
 def prepreprocess(_):
-    logger.info(
-        "preprocession intent-detection Service running (defined as a dict)"
-    )
+    logger.info("preprocession intent-detection Service running (defined as a dict)")
 
 
 def preprocess(_):
-    logger.info(
-        "another preprocession web-based annotator"
-        "Service (defined as a callable)"
-    )
+    logger.info("another preprocession web-based annotator" "Service (defined as a callable)")
 
 
 def postprocess(_):

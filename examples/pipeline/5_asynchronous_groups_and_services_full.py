@@ -2,7 +2,7 @@
 """
 # 5. Asynchronous groups and services (full)
 
-The following example shows pipeline
+The following example shows `pipeline`
 asynchronous service and service group usage.
 """
 
@@ -34,7 +34,7 @@ logger = logging.getLogger(__name__)
 """
 Services and service groups can be synchronous and asynchronous.
 In synchronous service groups services are executed consequently,
-    some of them (actor) can even return Context object,
+    some of them (`actor`) can even return `Context` object,
     modifying it.
 In asynchronous service groups all services
     are executed simultaneously and should not return anything,
@@ -49,7 +49,7 @@ and service groups inside it are asynchronous.
 If service or service group can be asynchronous
 the `asynchronous` constructor parameter is checked.
 If the parameter is not set,
-the service becomes asynchronous, if it is, it is used instead.
+the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
 NB! Actor service is always synchronous.
@@ -98,15 +98,11 @@ def meta_web_querying_service(
         with urllib.request.urlopen(
             f"https://jsonplaceholder.typicode.com/photos/{photo_number}"
         ) as webpage:
-            web_content = webpage.read().decode(
-                webpage.headers.get_content_charset()
-            )
+            web_content = webpage.read().decode(webpage.headers.get_content_charset())
             ctx.misc["web_query"].update(
                 {
                     f"{ctx.last_request}"
-                    f":photo_number_{photo_number}": json.loads(web_content)[
-                        "title"
-                    ]
+                    f":photo_number_{photo_number}": json.loads(web_content)["title"]
                 }
             )
         logger.info(f"Service '{info['name']}' has completed HTTPS request")

@@ -72,18 +72,14 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def hi_lower_case_condition(
-    ctx: Context, actor: Actor, *args, **kwargs
-) -> bool:
+def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     request = ctx.last_request
     # Returns True if `hi` in both uppercase and lowercase
     # letters is contained in the user request.
     return "hi" in request.lower()
 
 
-def complex_user_answer_condition(
-    ctx: Context, actor: Actor, *args, **kwargs
-) -> bool:
+def complex_user_answer_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     request = ctx.last_request
     # The user request can be anything.
     return {"some_key": "some_value"} == request
@@ -91,9 +87,7 @@ def complex_user_answer_condition(
 
 def predetermined_condition(condition: bool):
     # Wrapper for internal condition function.
-    def internal_condition_function(
-        ctx: Context, actor: Actor, *args, **kwargs
-    ) -> bool:
+    def internal_condition_function(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         # It always returns `condition`.
         return condition
 
@@ -116,11 +110,7 @@ toy_script = {
         },
         "node2": {
             RESPONSE: "Good. What do you want to talk about?",
-            TRANSITIONS: {
-                "node3": cnd.all(
-                    [cnd.regexp(r"talk"), cnd.regexp(r"about.*music")]
-                )
-            },
+            TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
             # Mix sequence of condtions by `cnd.all`.
             # `all` is alias `aggregate` with
             # `aggregate_func` == `all`.
@@ -132,11 +122,7 @@ toy_script = {
         },
         "node4": {
             RESPONSE: "bye",
-            TRANSITIONS: {
-                "node1": cnd.any(
-                    [hi_lower_case_condition, cnd.exact_match("hello")]
-                )
-            },
+            TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match("hello")])},
             # Mix sequence of condtions by `cnd.any`.
             # `any` is alias `aggregate` with
             # `aggregate_func` == `any`.
@@ -152,9 +138,7 @@ toy_script = {
                 # If the value is `True` then we will go to `node1`.
                 # If the value is `False` then we will check a result of
                 # `predetermined_condition(True)` for `fallback_node`.
-                "fallback_node": predetermined_condition(
-                    True
-                ),  # or you can use `cnd.true()`
+                "fallback_node": predetermined_condition(True),  # or you can use `cnd.true()`
                 # Last condition function will return
                 # `true` and will repeat `fallback_node`
                 # if `complex_user_answer_condition` return `false`.

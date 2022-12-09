@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 1. Basic Example
+# 1. Basics
 
 The following example shows basic usage of `pipeline`
 module as an extension to `dff.core.engine`.
@@ -22,7 +22,7 @@ from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
 """
-Pipeline is an object, that automates Actor execution and context management.
+`Pipeline` is an object, that automates `Actor` execution and context management.
 `from_script` method can be used to create
 a pipeline of the most basic structure:
 "preprocessors -> actor -> postprocessors"
@@ -33,9 +33,9 @@ Here only required for Actor creating parameters are provided to pipeline.
 `context_storage` will default to simple Python dict and
 `messenger_interface` will never be used.
 pre- and postprocessors lists are empty.
-Pipeline object can be called with user input
+`Pipeline` object can be called with user input
 as first argument and dialog id (any immutable object).
-This call will return Context,
+This call will return `Context`,
 its `last_response` property will be actors response.
 """
 
@@ -49,9 +49,7 @@ pipeline = Pipeline.from_script(
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(
-        pipeline, HAPPY_PATH
-    )  # This is a function for automatic example running
+    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic example running
     # (testing) with HAPPY_PATH
 
     # This runs example in interactive mode if not in IPython env

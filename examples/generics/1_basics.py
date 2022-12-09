@@ -96,12 +96,9 @@ def process_request(ctx: Context):
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
             raise ValueError(
-                "Type in the index of the correct option"
-                "to choose from the buttons."
+                "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.requests[last_index] = CallbackRequest(
-            payload=chosen_button.payload
-        )
+        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
         return
     ctx.requests[last_index] = last_request
 

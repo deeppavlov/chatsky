@@ -46,15 +46,12 @@ def response(ctx: Context, _: Actor, *__, **___):
     if ctx.validation:
         return ""
     return (
-        f"{cached_response(1)}-{cached_response(2)}-"
-        f"{cached_response(1)}-{cached_response(2)}"
+        f"{cached_response(1)}-{cached_response(2)}-" f"{cached_response(1)}-{cached_response(2)}"
     )
 
 
 # %%
-toy_script = {
-    "flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}
-}
+toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
     ("", "1-2-1-2"),

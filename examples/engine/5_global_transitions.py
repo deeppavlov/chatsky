@@ -43,35 +43,25 @@ There are `GLOBAL` node and three flows:
 toy_script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("greeting_flow", "node1", 1.1): cnd.regexp(
-                r"\b(hi|hello)\b", re.I
-            ),  # first check
-            ("music_flow", "node1", 1.1): cnd.regexp(
-                r"talk about music"
-            ),  # second check
+            ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),  # first check
+            ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),  # second check
             lbl.to_fallback(0.1): cnd.true(),  # fifth check
             lbl.forward(): cnd.all(
                 [
                     cnd.regexp(r"next\b"),
-                    cnd.has_last_labels(
-                        labels=[("music_flow", i) for i in ["node2", "node3"]]
-                    ),
+                    cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]]),
                 ]  # third ckheck
             ),
             lbl.repeat(0.2): cnd.all(
                 [
                     cnd.regexp(r"repeat", re.I),
-                    cnd.negation(
-                        cnd.has_last_labels(flow_labels=["global_flow"])
-                    ),
+                    cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"])),
                 ]  # fourh check
             ),
         }
     },
     "global_flow": {
-        "start_node": {
-            RESPONSE: ""
-        },  # This is an initial node, it doesn't need a `RESPONSE`.
+        "start_node": {RESPONSE: ""},  # This is an initial node, it doesn't need a `RESPONSE`.
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: "Ooops",
@@ -104,8 +94,7 @@ toy_script = {
     },
     "music_flow": {
         "node1": {
-            RESPONSE: "I love `System of a Down` group,"
-            " would you like to talk about it?",
+            RESPONSE: "I love `System of a Down` group," " would you like to talk about it?",
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
         "node2": {
@@ -139,28 +128,23 @@ happy_path = (
     ),
     (
         "yes",
-        "System of a Down is an Armenian-American"
-        "heavy metal band formed in 1994.",
+        "System of a Down is an Armenian-American" "heavy metal band formed in 1994.",
     ),
     (
         "next",
-        "The band achieved commercial success"
-        "with the release of five studio albums.",
+        "The band achieved commercial success" "with the release of five studio albums.",
     ),
     (
         "back",
-        "System of a Down is an Armenian-American"
-        "heavy metal band formed in 1994.",
+        "System of a Down is an Armenian-American" "heavy metal band formed in 1994.",
     ),
     (
         "repeat",
-        "System of a Down is an Armenian-American"
-        "heavy metal band formed in 1994.",
+        "System of a Down is an Armenian-American" "heavy metal band formed in 1994.",
     ),
     (
         "next",
-        "The band achieved commercial success"
-        "with the release of five studio albums.",
+        "The band achieved commercial success" "with the release of five studio albums.",
     ),
     ("next", "That's all what I know."),
     ("next", "Good. What do you want to talk about?"),

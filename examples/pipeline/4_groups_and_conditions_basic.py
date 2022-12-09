@@ -2,7 +2,7 @@
 """
 # 4. Groups and conditions (basic)
 
-The following example shows pipeline service group usage and start conditions.
+The following example shows `pipeline` service group usage and start conditions.
 """
 
 
@@ -36,8 +36,8 @@ logger = logging.getLogger(__name__)
 # %% [markdown]
 """
 Pipeline can contain not only single services, but also service groups.
-Service groups can be defined as ServiceGroupBuilder objects:
-      lists of ServiceBuilders and ServiceGroupBuilders or objects.
+Service groups can be defined as `ServiceGroupBuilder` objects:
+      lists of `ServiceBuilders` and `ServiceGroupBuilders` or objects.
 The objects should contain `services` -
 a ServiceBuilder and ServiceGroupBuilder object list.
 
@@ -48,24 +48,27 @@ To receive serialized information about service,
 Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
 These functions should have following signature:
-(ctx: Context, actor: Actor) -> bool.
-Service is only executed if its start_condition returned True.
+
+    (ctx: Context, actor: Actor) -> bool.
+
+Service is only executed if its start_condition returned `True`.
 By default all the services start unconditionally.
 There are number of built-in condition functions.
 Built-in condition functions check other service states.
 These are most important built-in condition functions:
-    `always_start_condition` - default condition function, always starts service
-    `service_successful_condition(path)` - function that checks,
-        whether service with given `path` executed successfully
-    `not_condition(function)` - function that returns result
-        opposite from the one returned
-        by the `function` (condition function) argument
+
+* `always_start_condition` - Default condition function, always starts service.
+* `service_successful_condition(path)` - Function that checks,
+    whether service with given `path` executed successfully.
+* `not_condition(function)` - Function that returns result
+    opposite from the one returned
+    by the `function` (condition function) argument.
 
 Here there is a conditionally executed service named
 `never_running_service` is always executed.
 It is executed only if `always_running_service`
-is not finished, this should never happen.
-The service, named `context_printing_service`
+is not finished, that should never happen.
+The service named `context_printing_service`
 prints pipeline runtime information,
 that contains execution state of all previously run services.
 """

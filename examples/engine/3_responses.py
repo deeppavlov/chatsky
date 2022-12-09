@@ -48,9 +48,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def cannot_talk_about_topic_response(
-    ctx: Context, actor: Actor, *args, **kwargs
-) -> Any:
+def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
     request = ctx.last_request
     topic_pattern = re.compile(r"(.*talk about )(.*)\.")
     topic = topic_pattern.findall(request)
@@ -63,9 +61,7 @@ def cannot_talk_about_topic_response(
 
 def upper_case_response(response: str):
     # wrapper for internal response function
-    def cannot_talk_about_topic_response(
-        ctx: Context, actor: Actor, *args, **kwargs
-    ) -> Any:
+    def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
         return response.upper()
 
     return cannot_talk_about_topic_response
