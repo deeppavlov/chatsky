@@ -5,7 +5,7 @@ from pathlib import Path
 from telethon import TelegramClient
 
 from examples.telegram.no_pipeline.basic_bot import bot, actor
-from examples.telegram.basics.polling import pipeline
+from examples.telegram.interfaces.polling import pipeline
 from dff.utils.testing.common import check_env_var
 
 

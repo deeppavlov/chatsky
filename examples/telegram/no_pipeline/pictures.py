@@ -1,12 +1,16 @@
 """
-This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on.
-This approach remains much closer to the usual workflow of pytelegrambotapi developers, so go for it
-if you need a quick prototype or have no interest in using the dff.core.runner.
+Pictures
+========
+
+This module demonstrates how to use the TelegramConnector without the `pipeline` API.
+
+Here, we show, how you can receive and send miscellaneous media.
+This can be achieved with a single handler function.
 """
 import os
 import sys
 
-from dff.connectors.messenger.telegram.types import TelegramResponse
+from dff.connectors.messenger.telegram.local_types import TelegramResponse
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.engine.core import Context, Actor
 from dff.core.engine import conditions as cnd
@@ -14,14 +18,11 @@ from dff.core.engine import conditions as cnd
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.connectors.messenger.telegram.connector import DFFTeleBot
-from dff.connectors.messenger.telegram.utils import set_state, get_user_id, get_initial_context
-from dff.utils.testing.common import check_env_var
+from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
+from dff.utils.testing.common import check_env_var, set_framework_state
 
 db = dict()
-# Optionally, you can use database connection implementations from the dff ecosystem.
-# from df_db_connector import SqlConnector
-# db = SqlConnector("SOME_URI")
+# You can use any other type from `db_connector`.
 
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
@@ -33,7 +34,14 @@ def doc_is_photo(message: TelegramResponse):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
-bot = DFFTeleBot(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+
+"""
+Use bot.cnd.message_handler to catch and respond to images.
+
+It can be achieved by passing a function to the `func` parameter or filtering
+messages by their `content_type`.
+"""
 
 script = {
     "root": {
@@ -98,9 +106,10 @@ def extract_data(message):
 
 @bot.message_handler(func=lambda msg: True, content_types=content_type_media)
 def handler(update):
-    user_id = get_user_id(update)
-    context: Context = db.get(user_id, get_initial_context(user_id))
-    context = set_state(context, update)
+    user_id = (vars(update).get("from_user")).id
+    context: Context = db.get(user_id, Context(id=user_id))
+    context = set_framework_state(context, TELEGRAM_STATE_KEY, update, inner_key="data")
+    context.add_request(vars(update).get("text", "data"))
 
     # Extract data if present
     if isinstance(update, types.Message):

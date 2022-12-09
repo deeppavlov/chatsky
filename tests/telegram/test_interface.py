@@ -5,7 +5,9 @@ import time
 from telebot import types
 from dff.core.engine.core.context import Context
 from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
-from dff.connectors.messenger.telegram.utils import set_state, get_initial_context
+from dff.connectors.messenger.telegram.interface import extract_telegram_request_and_id
+from dff.connectors.messenger.telegram.utils import TELEGRAM_STATE_KEY
+from dff.utils.testing.common import set_framework_state
 
 
 def create_text_message(text: str):
@@ -32,21 +34,15 @@ def create_update(**kwargs):
 )
 def test_set_update(update):
     ctx = Context()
-    set_state(ctx, update)
-    assert ctx.framework_states["TELEGRAM_CONNECTOR"]["data"]
+    ctx = set_framework_state(ctx, TELEGRAM_STATE_KEY, update, inner_key="data")
+    ctx.add_request(vars(update).get("text", "data"))
+    assert ctx.framework_states[TELEGRAM_STATE_KEY]["data"]
     assert ctx.last_request
-
-
-def test_initial():
-    _id = 123
-    ctx = get_initial_context(_id)
-    assert "TELEGRAM_CONNECTOR" in ctx.framework_states
-    assert ctx.id == _id
 
 
 @pytest.mark.parametrize(
     [
-        "param",
+        "update",
     ],
     [
         (create_update(update_id=1, message=create_text_message("hello")),),
@@ -54,18 +50,18 @@ def test_initial():
     ],
 )
 @pytest.mark.asyncio
-async def test_update_handling(pipeline_instance, param, basic_bot, user_id):
-    interface = PollingTelegramInterface(bot=basic_bot)
-    inner_update, _id = interface._extract_telegram_request_and_id(param)
+async def test_update_handling(pipeline_instance, update, basic_bot, user_id):
+    interface = PollingTelegramInterface(messenger=basic_bot)
+    inner_update, _id = extract_telegram_request_and_id(interface.messenger, update)
     assert isinstance(inner_update, types.JsonDeserializable)
     assert _id == "1"
-    interface.bot.remove_webhook()
+    interface.messenger.remove_webhook()
     counter = 0
     while counter != 4:
         counter += 1
         try:
             await interface.connect(pipeline_instance._run_pipeline, loop=lambda: None)
-            except_result = interface._except(Exception())
+            except_result = interface._on_exception(Exception())
             assert except_result is None
             request_result = interface._request()
             assert isinstance(request_result, list)
@@ -82,10 +78,10 @@ async def test_update_handling(pipeline_instance, param, basic_bot, user_id):
 def test_message_handling(message, expected, actor_instance, basic_bot):
     condition = basic_bot.cnd.message_handler(func=lambda msg: msg.text == "Hello")
     context = Context(id=123)
-    context.framework_states["TELEGRAM_CONNECTOR"] = {"keep_flag": True, "data": message}
+    context.framework_states[TELEGRAM_STATE_KEY] = {"keep_flag": True, "data": message}
     assert condition(context, actor_instance) == expected
     wrong_type = create_query("some data")
-    context.framework_states["TELEGRAM_CONNECTOR"]["data"] = wrong_type
+    context.framework_states[TELEGRAM_STATE_KEY]["data"] = wrong_type
     assert not condition(context, actor_instance)
 
 
@@ -93,8 +89,8 @@ def test_message_handling(message, expected, actor_instance, basic_bot):
 def test_query_handling(query, expected, actor_instance, basic_bot):
     condition = basic_bot.cnd.callback_query_handler(func=lambda call: call.data == "4")
     context = Context(id=123)
-    context.framework_states["TELEGRAM_CONNECTOR"] = {"keep_flag": True, "data": query}
+    context.framework_states[TELEGRAM_STATE_KEY] = {"data": query}
     assert condition(context, actor_instance) == expected
     wrong_type = create_text_message("some text")
-    context.framework_states["TELEGRAM_CONNECTOR"]["data"] = wrong_type
+    context.framework_states[TELEGRAM_STATE_KEY]["data"] = wrong_type
     assert not condition(context, actor_instance)

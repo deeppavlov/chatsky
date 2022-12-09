@@ -14,7 +14,7 @@ from telethon.tl.types import (
     InputMessagesFilterVideo,
 )
 
-from dff.connectors.messenger.telegram.types import (
+from dff.connectors.messenger.telegram.local_types import (
     TelegramResponse,
     TelegramAttachments,
     TelegramAttachment,

@@ -1,31 +1,44 @@
 """
-The replies below use generic classes.
-When creating a UI, you can use the generic Keyboard class.
-It does not include all the options that are available in Telegram, so an InlineKeyboard will be created by default.
-If you want to remove the reply keyboard, pass an instance of telebot's ReplyKeyboardRemove
-to the TelegramUI class.
+Callback Queries
+=================
+
+This example shows how to use generic classes from dff.
+
+Here, we use Telegram API's callback queries and buttons.
 """
 import logging
 import os
 
-import dff.core.engine.conditions as cnd
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-
 from telebot import types
 
-from dff.connectors.messenger.telegram.connector import DFFTeleBot
-from dff.connectors.messenger.telegram.types import TelegramUI, TelegramButton
-from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
+import dff.core.engine.conditions as cnd
+from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.pipeline import Pipeline
-
+from dff.connectors.messenger.telegram import PollingTelegramInterface, TelegramMessenger, TelegramUI, TelegramButton
 from dff.connectors.messenger.generics import Response, Keyboard, Button
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
 
-bot = DFFTeleBot(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
+# Like Telebot, TelegramMessenger only requires a token to run.
+# However, all parameters from the Telebot class can be passed as keyword arguments.
+messenger = TelegramMessenger(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
+"""
+The replies below use generic classes.
+
+When creating a UI, you can use both generic (`Keyboard`) and telegram-specific (`TelegramUI`) classes.
+
+`Keyboard` does not include all the options that are available in Telegram,
+so an InlineKeyboard (see Telegram API) will be created by default.
+
+`TelegramUI` gives you more freedom in terms of managing the interface.
+You can configure the keyboard type using the parameter `is_inline`.
+
+If you want to remove the reply keyboard, pass an instance of telebot's `ReplyKeyboardRemove`
+to the `TelegramUI` class as the `keyboard` parameter (see below).
+"""
 
 script = {
     "root": {
@@ -37,7 +50,7 @@ script = {
         },
         "fallback": {
             RESPONSE: Response(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {("general", "keyboard"): bot.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {("general", "keyboard"): messenger.cnd.message_handler(commands=["start", "restart"])},
         },
     },
     "general": {
@@ -51,8 +64,10 @@ script = {
                 }
             ),
             TRANSITIONS: {
-                ("general", "native_keyboard"): bot.cnd.callback_query_handler(func=lambda call: call.data == "19"),
-                ("general", "fail"): bot.cnd.callback_query_handler(func=lambda call: call.data == "21"),
+                ("general", "native_keyboard"): messenger.cnd.callback_query_handler(
+                    func=lambda call: call.data == "19"
+                ),
+                ("general", "fail"): messenger.cnd.callback_query_handler(func=lambda call: call.data == "21"),
             },
         },
         "native_keyboard": {
@@ -70,7 +85,7 @@ script = {
                 }
             ),
             TRANSITIONS: {
-                ("general", "success", 1.2): bot.cnd.message_handler(func=lambda msg: msg.text == "4"),
+                ("general", "success", 1.2): messenger.cnd.message_handler(func=lambda msg: msg.text == "4"),
                 ("general", "fail", 1.0): cnd.true(),
             },
         },
@@ -90,7 +105,7 @@ script = {
     },
 }
 
-interface = PollingTelegramInterface(bot=bot)
+interface = PollingTelegramInterface(messenger=messenger)
 
 pipeline = Pipeline.from_script(
     script=script,

@@ -1,7 +1,12 @@
 """
-This module demonstrates how to use the TelegramConnector without the dff.core.runner add-on.
-This approach remains much closer to the usual workflow of pytelegrambotapi developers, so go for it
-if you need a quick prototype or have no interest in using the dff.core.runner.
+Commands and Buttons
+=====================
+
+This module demonstrates how to use the TelegramConnector without the `pipeline` API.
+
+Here, we show how you can integrate command and button reactions into your script.
+As in other cases, you only need one handler, as the logic is handled by the actor
+and the script.
 """
 import os
 import sys
@@ -14,16 +19,22 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.connectors.messenger.telegram.connector import DFFTeleBot
-from dff.connectors.messenger.telegram.utils import set_state, get_user_id, get_initial_context
-from dff.utils.testing.common import check_env_var
+from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
+from dff.utils.testing.common import check_env_var, set_framework_state
 
 db = dict()
-# Optionally, you can use database connection implementations from the dff ecosystem
-# from df_db_connector import SqlConnector
-# db = SqlConnector("SOME_URI")
+# You can use any other type from `db_connector`.
 
-bot = DFFTeleBot(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+
+"""
+You can handle various values inside your script.
+
+Use bot.cnd.message_handler to create conditions for message values.
+Use bot.cnd.callback_query_handler to create conditions depending on the query values.
+The signature of those functions is equivalent to that of the `telebot` methods.
+
+"""
 
 script = {
     "root": {
@@ -77,11 +88,12 @@ def get_markup(data: Optional[dict]):
 def handler(update):
 
     # retrieve or create a context for the user
-    user_id = get_user_id(update)
-    context: Context = db.get(user_id, get_initial_context(user_id))
+    user_id = (vars(update).get("from_user")).id
+    context: Context = db.get(user_id, Context(id=user_id))
 
     # add newly received user data to the context
-    context = set_state(context, update)
+    context = set_framework_state(context, TELEGRAM_STATE_KEY, update, inner_key="data")
+    context.add_request(vars(update).get("text", "data"))
 
     # apply the actor
     context = actor(context)

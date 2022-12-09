@@ -8,7 +8,26 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
 
-def check_env_var(env_var: str = "BOT_TOKEN"):
+def set_framework_state(ctx: Context, state_key: str, update: Any, inner_key: str = "data"):
+    """
+    Updates a context with an arbitrary framework state. If parameter `inner_key` is provided,
+    saves the state as a dict and puts the update inside as a value.
+
+    :param ctx: DFF context
+    :param state_key: Framework state key.
+    :param update: Any framework state update.
+    :param inner_key: Update key for nested states.
+    """
+    if inner_key is not None:
+        if state_key not in ctx.framework_states:
+            ctx.framework_states[state_key] = dict()
+        ctx.framework_states[state_key][inner_key] = update
+    else:
+        ctx.framework_states[state_key] = update
+    return ctx
+
+
+def check_env_var(env_var: str):
     if not getenv(env_var):
         print(f"{env_var} variable needs to be set to continue")
         sys.exit(1)

@@ -21,8 +21,8 @@ def test_unhappy_path(pipeline_instance):
 @pytest.mark.parametrize(
     "example_module_name",
     [
-        "basics.flask",
-        "basics.polling",
+        "interfaces.webhook",
+        "interfaces.polling",
     ],
 )
 def test_examples(example_module_name: str):

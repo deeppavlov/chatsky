@@ -1,63 +1,52 @@
 """
-Connector
+Messenger
 -----------------
-
-| The Connector module provides the :py:class:`~df_telegram_connector.connector.TelegramConnector` class.
-| The former inherits from the :py:class:`~telebot.TeleBot` class from the :py:mod:`~pytelegrambotapi` library.
-| Using it, you can put Telegram update handlers inside your script and condition your transitions accordingly.
+The Messenger module provides the :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger` class.
+The former inherits from the :py:class:`~TeleBot` class from the `pytelegrambotapi` library.
+Using it, you can put Telegram update handlers inside your script and condition your transitions accordingly.
 
 """
 from pathlib import Path
-from typing import Union
+from typing import Union, List, Optional, Callable
 
 from telebot import types, TeleBot
 
 from dff.core.engine.core import Context, Actor
 
 from .utils import partialmethod, open_io, close_io
-from .types import TelegramResponse
+from .local_types import TelegramResponse
 
 from dff.connectors.messenger.generics import Response
+from dff.connectors.messenger.telegram.utils import TELEGRAM_STATE_KEY
 
 
-class DFFTeleBot(TeleBot):
+class TelegramMessenger(TeleBot):
     """
-    This class inherits from `Telebot` and implements dff-specific functionality, including script conditions
-    and sending generic responses.
+    This class inherits from `Telebot` and implements framework-specific functionality
+    like sending generic responses.
 
     :param token: A Telegram API bot token.
-    :param threaded: This parameter is currently deprecated for the sake of compatibility with `dff.core.runner`.
-        We plan to add support for the threaded polling mode in the future.
-    :param args: The other parameters match those of the `Telebot` class. See the pytelegrambotapi docs
-        for more info: `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+    :param kwargs: Arbitrary parameters that match the signature of the `Telebot` class.
+        For reference see: `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
 
     """
 
     def __init__(
         self,
         token: str,
-        threaded: bool = False,
-        parse_mode: Union[str, None] = None,
-        skip_pending: bool = False,
-        *args,
         **kwargs,
     ):
-        super().__init__(token, threaded=threaded, parse_mode=parse_mode, skip_pending=skip_pending, *args, **kwargs)
-        self.cnd = TelegramConditions(self)
+        super().__init__(token, threaded=False, **kwargs)
+        self.cnd: TelegramConditions = TelegramConditions(self)
 
     def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]) -> None:
         """
-        Cast the `response` argument to the :py:class:`~df_telegram_connector.types.TelegramResponse` type and send it.
-        The order is that the media are sent first, after which the marked-up text message is sent.
+        Cast `response` to :py:class:`~dff.connectors.messenger.telegram.local_types.TelegramResponse` and send it.
+        Text content is sent after all the attachments.
 
-        :param chat_id: ID of the chat to send the response to
-        :param response: Response data. Can be passed as a :py:class:`~str`, a :py:class:`~dict`,
-            or a :py:class:`~dff.connectors.messenger.generics.Response`.
-            which will then be used to instantiate a :py:class:`~TelegramResponse` object.
-            A :py:class:`~TelegramResponse` can also be passed directly.
-            Note, that the dict should implement the :py:class:`~TelegramResponse` schema.
-
-
+        :param chat_id: Telegram chat ID.
+        :param response: Response data. String, dictionary or :py:class:`~dff.connectors.messenger.generics.Response`.
+            will be cast to :py:class:`~dff.connectors.messenger.telegram.local_types.TelegramResponse`.
         """
         if isinstance(response, TelegramResponse):
             ready_response = response
@@ -68,8 +57,7 @@ class DFFTeleBot(TeleBot):
         else:
             raise TypeError(
                 "Type of the response argument should be one of the following:"
-                " :py:class:`~str`, :py:class:`~dict`, :py:class:`~TelegramResponse`,"
-                " or :py:class:`~dff.connectors.messenger.generics.Response`"
+                " `str`, `dict`, `Response`, or `TelegramResponse`."
             )
 
         for attachment_prop, method in [
@@ -109,43 +97,49 @@ class DFFTeleBot(TeleBot):
 
 class TelegramConditions:
     """
-    This class includes methods that produce dff.core.engine conditions based on pytelegrambotapi updates.
+    This class includes methods that produce `Script` conditions based on `pytelegrambotapi` updates.
 
-    It is included to the :py:class:`~df_telegram_connector.connector.TelegramConnector` as :py:attr:`cnd` attribute.
-    This helps us avoid overriding the original methods.
+    It is included to the :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger`
+    as :py:attr:`cnd` attribute on instantiation.
 
-    To set a condition in your script, stick to the signature of the original :py:class:`~telebot.TeleBot` methods.
+    To set a condition in your script, stick to the signature of the original :py:class:`~TeleBot` methods.
     E. g. the result of
 
     .. code-block:: python
 
-        bot.cnd.message_handler(func=lambda msg: True)
+        messenger.cnd.message_handler(func=lambda msg: True)
 
     in your :py:class:`~dff.core.engine.core.Script` will always be `True`, unless the new update is not a message.
 
-    :param bot: Bot instance.
+    :param messenger: Messenger instance.
 
     """
 
-    def __init__(self, bot: DFFTeleBot):
-        self.bot = bot
+    def __init__(self, messenger: TelegramMessenger):
+        self.messenger = messenger
 
     def handler(
         self,
         target_type: type,
-        commands=None,
-        regexp=None,
-        func=None,
-        content_types=None,
-        chat_types=None,
+        commands: Optional[List[str]] = None,
+        regexp: Optional[str] = None,
+        func: Optional[Callable] = None,
+        content_types: Optional[List[str]] = None,
+        chat_types: Optional[List[str]] = None,
         **kwargs,
     ):
         """
-        Creates a dff.core.engine condition, triggered by update type {target_type}.
-        The signature is equal with the :py:class:`~telebot.Telebot` method of the same name.
+        Creates a condition triggered by updates that match the given parameters.
+        The signature is equal with the `Telebot` method of the same name.
+
+        :param commands: Telegram command trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
+        :param regexp: Regex trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
+        :param func: Callable trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
+        :param content_types: Content type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
+        :param chat_types: Chat type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
         """
 
-        update_handler = self.bot._build_handler_dict(
+        update_handler = self.messenger._build_handler_dict(
             None,
             False,
             commands=commands,
@@ -157,10 +151,10 @@ class TelegramConditions:
         )
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
-            update = ctx.framework_states.get("TELEGRAM_CONNECTOR", {}).get("data")
+            update = ctx.framework_states.get(TELEGRAM_STATE_KEY, {}).get("data")
             if not update or not isinstance(update, target_type):
                 return False
-            test_result = self.bot._test_message_handler(update_handler, update)
+            test_result = self.messenger._test_message_handler(update_handler, update)
             return test_result
 
         return condition

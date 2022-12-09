@@ -1,6 +1,11 @@
 """
-The replies below use generic classes.
-Using generic responses, you can use send local files as well as links to external ones.
+Pictures
+==========
+
+This example shows how to use generic classes from dff.
+
+Here, we show how to process miscellaneous media.
+Aside from pictures, you can also send and receive videos, documents, audio files, and locations.
 """
 import logging
 import os
@@ -11,10 +16,8 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 
-from dff.connectors.messenger.telegram.connector import DFFTeleBot
-from dff.connectors.messenger.telegram.interface import PollingTelegramInterface
+from dff.connectors.messenger.telegram import PollingTelegramInterface, TelegramMessenger, TELEGRAM_STATE_KEY
 from dff.core.pipeline import Pipeline
-
 from dff.connectors.messenger.generics import Response, Image, Attachments
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
 
@@ -27,18 +30,31 @@ kitten_width = 640
 kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
 
 
+"""
+To detect media, write a function that processes Telebot types, like `Message`.
+This function will be passed to `message_handler` in the script.
+"""
+
+
 def doc_is_photo(message: types.Message):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
-bot = DFFTeleBot(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+"""
+To send media, pass the `Response` class to the `RESPONSE` section of a node.
+Both local files and links to media files can be processed.
+"""
+
+# Like Telebot, TelegramMessenger only requires a token to run.
+# However, all parameters from the Telebot class can be passed as keyword arguments.
+messenger = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
 script = {
     "root": {
         "start": {RESPONSE: Response(text=""), TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
         "fallback": {
             RESPONSE: "Finishing test, send /restart command to restart",
-            TRANSITIONS: {("pics", "ask_picture"): bot.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {("pics", "ask_picture"): messenger.cnd.message_handler(commands=["start", "restart"])},
         },
     },
     "pics": {
@@ -47,11 +63,11 @@ script = {
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
-                        bot.cnd.message_handler(content_types=["photo"]),
-                        bot.cnd.message_handler(func=doc_is_photo, content_types=["document"]),
+                        messenger.cnd.message_handler(content_types=["photo"]),
+                        messenger.cnd.message_handler(func=doc_is_photo, content_types=["document"]),
                     ]
                 ),
-                ("pics", "send_many", 1.0): bot.cnd.message_handler(content_types=["sticker"]),
+                ("pics", "send_many", 1.0): messenger.cnd.message_handler(content_types=["sticker"]),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
@@ -73,11 +89,11 @@ script = {
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
-                        bot.cnd.message_handler(content_types=["photo"]),
-                        bot.cnd.message_handler(func=doc_is_photo, content_types=["document"]),
+                        messenger.cnd.message_handler(content_types=["photo"]),
+                        messenger.cnd.message_handler(func=doc_is_photo, content_types=["document"]),
                     ]
                 ),
-                ("pics", "send_many", 1.0): bot.cnd.message_handler(content_types=["sticker"]),
+                ("pics", "send_many", 1.0): messenger.cnd.message_handler(content_types=["sticker"]),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
@@ -87,18 +103,18 @@ script = {
 
 def extract_data(ctx: Context, actor: Actor):
     """A function to extract data with"""
-    message = ctx.framework_states["TELEGRAM_CONNECTOR"].get("data")
+    message = ctx.framework_states[TELEGRAM_STATE_KEY].get("data")
     if not message or (not message.photo and not doc_is_photo(message)):
         return ctx
     photo = message.document or message.photo[-1]
-    file = bot.get_file(photo.file_id)
-    result = bot.download_file(file.file_path)
+    file = messenger.get_file(photo.file_id)
+    result = messenger.download_file(file.file_path)
     with open("photo.jpg", "wb+") as new_file:
         new_file.write(result)
     return ctx
 
 
-interface = PollingTelegramInterface(bot=bot)
+interface = PollingTelegramInterface(messenger=messenger)
 
 pipeline = Pipeline.from_script(
     script=script,
