@@ -102,8 +102,6 @@ html_theme_options = {
     "tab_about_us": "#",
 }
 
-nbsphinx_allow_errors = True
-
 
 def setup(_):
     generate_example_links_for_notebook_creation(
