@@ -1,3 +1,9 @@
+"""
+Custom API Connector
+=====================
+
+This module demonstrates how you can write a connector for an external web API.
+"""
 import json
 
 import requests

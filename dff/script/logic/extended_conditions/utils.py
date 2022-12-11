@@ -1,8 +1,8 @@
 """
 Utils
-******
+------
 
-This module contains helpful constants and magic variables.
+This module contains helpful constants, magic variables and types that help parse API responses.
 """
 import re
 from typing import Optional, List

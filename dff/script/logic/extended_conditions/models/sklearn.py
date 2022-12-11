@@ -1,6 +1,6 @@
 """
 Base Sklearn Model
-*******************
+-------------------
 
 This module provides a base class for classifiers and matchers,
 built on top of Sklearn models.

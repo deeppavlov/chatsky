@@ -1,3 +1,9 @@
+"""
+Dialogflow
+==========
+
+The example below demonstrates, how to integrate Google Dialogflow into your script logic.
+"""
 import os
 
 from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
@@ -8,11 +14,16 @@ from dff.script.logic.extended_conditions import conditions as i_cnd
 from dff.core.pipeline import Pipeline, CLIMessengerInterface
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
+
+"""
+
+"""
 gdf_model = GoogleDialogFlowModel.from_file(filename=os.getenv("GDF_ACCOUNT_JSON", ""), namespace_key="dialogflow")
 
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {"get_intents": gdf_model},
+        PRE_TRANSITIONS_PROCESSING: {"get_intents": gdf_model},  # global processing extracts intents on each turn
+        # Intents from Google Dialogflow can be used in conditions to traverse your dialog graph
         TRANSITIONS: {("root", "finish", 1.2): i_cnd.has_cls_label("goodbye", namespace="dialogflow")},
     },
     "root": {
@@ -25,6 +36,7 @@ script = {
         "ask": {
             RESPONSE: "How do you feel today?",
             TRANSITIONS: {
+                # Here, we use intents to decide which branch of dialog should be picked
                 ("mood", "react_good"): i_cnd.has_cls_label("mood_great", threshold=0.95, namespace="dialogflow"),
                 ("mood", "react_bad"): i_cnd.has_cls_label("mood_unhappy", namespace="dialogflow"),
                 ("mood", "assert"): cnd.true(),

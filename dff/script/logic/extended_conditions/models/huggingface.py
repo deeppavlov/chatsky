@@ -1,6 +1,6 @@
 """
 Base HF Model
-***************
+--------------
 
 This module provides a base class for matchers and classifiers
 built on top of Hugging Face models.

@@ -1,8 +1,8 @@
 """
 Conditions
-***********
+------------
 
-This module provides condition functions for label processing.
+This module provides condition functions for annotation processing.
 """
 from typing import Callable, Optional, List
 from functools import singledispatch

@@ -1,3 +1,9 @@
+"""
+HF API
+=======
+
+This module explains, how to use web-hosted huggingface models in your conversational services.
+"""
 import os
 
 from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
@@ -7,6 +13,10 @@ from dff.script.logic.extended_conditions.models.remote_api.hf_api_model import 
 from dff.script.logic.extended_conditions import conditions as i_cnd
 from dff.core.pipeline import Pipeline, CLIMessengerInterface
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+
+"""
+
+"""
 
 # We are using this open source model by Obsei-AI
 # to demonstrate, how custom classifiers can be easily adapted for use in dff.script.logic.extended_conditions
@@ -18,8 +28,9 @@ api_model = HFAPIModel(
 
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {"get_intents_1": api_model},
+        PRE_TRANSITIONS_PROCESSING: {"get_intents_1": api_model},  # annotate intents on each turn
         TRANSITIONS: {
+            # We get to one of the dialog branches depending on the annotation
             ("service", "buy", 1.2): i_cnd.has_cls_label("LABEL_1", threshold=0.95),
             ("service", "sell", 1.2): i_cnd.has_cls_label("LABEL_0", threshold=0.95),
         },

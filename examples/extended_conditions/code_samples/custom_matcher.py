@@ -1,3 +1,9 @@
+"""
+Custom Matcher
+===============
+
+This module demonstrates the way in which a custom matcher can be implemented.
+"""
 from dff.script.logic.extended_conditions.models.base_model import BaseModel
 from dff.script.logic.extended_conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
@@ -11,6 +17,12 @@ that is used to obtain a two-dimensional vector (optimally, a Numpy array) from 
 Unlike the classifier case, the `predict` method is already implemented for you, so you don't have to tamper with it.
 
 Those two steps should suffice to get your matcher up and running.
+You can override the rest of the methods, namely `save`, `load`, and `fit` at your own convenience, 
+e.g. lack of those will not raise an error. 
+
+* `fit` should take a new dataset and retrain / update the underlying model.
+* `save` and `load` are self-explanatory. 
+    You may use pickle, utils from joblib, or any other serializer.
 
 """
 

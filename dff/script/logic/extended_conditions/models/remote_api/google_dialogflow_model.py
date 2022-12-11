@@ -1,8 +1,9 @@
 """
 Google Dialogflow Model
-************************
+------------------------
 
-The module allows you to use Dialogflow as a service to gain insights about user intents.
+The module allows you to use Google Dialogflow as a service
+to gain insights about user intents.
 """
 from typing import Optional
 import uuid
@@ -25,23 +26,7 @@ except ImportError as e:
 
 class AbstractGDFModel(BaseModel):
     """
-    This class implements a connection to Google Dialogflow for label scoring.
-
-    Prerequisites
-    --------------
-    Note, that before you use the class, you need to set up a Dialogflow project,
-    create intents, and train a language model, which can be easily done
-    using the Dialogflow web interface (see the official
-    `instructions <https://cloud.google.com/dialogflow/es/docs/quick/build-agent>`_).
-    After this is done, you should obtain a service account JSON file from Google
-    and pass it to this class, using `from_file` method.
-
-    :param model: A parsed service account json that contains a link to your dialogflow project.
-        Calling json.load() on the file obtained from Google is sufficient to get the
-        credentials object. Alternatively, :py:meth:`use from_file` method
-    :param namespace_key: Name of the namespace in framework states that the model will be using.
-    :param language: The language of your dialogflow project. Set to English per default.
-
+    Abstract class for a Google Dialogflow annotator.
     """
 
     def __init__(
@@ -71,6 +56,21 @@ class AbstractGDFModel(BaseModel):
 
 
 class GoogleDialogFlowModel(AbstractGDFModel):
+    """
+    This class implements a synchronous connection to Google Dialogflow for dialog annotation.
+    Note, that before you use this class, you need to set up a Dialogflow project,
+    create intents, and train a language model, which can be easily done
+    using the Dialogflow web interface (see the official
+    `instructions <https://cloud.google.com/dialogflow/es/docs/quick/build-agent>`_).
+    After this is done, you should obtain a service account JSON file from Google
+    and pass it to this class, using `from_file` method.
+
+    :param model: A parsed service account json that contains a link to your dialogflow project.
+        Calling json.load() on the file obtained from Google is sufficient to get the
+        credentials object. Alternatively, :py:meth:`use from_file` method
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param language: The language of your dialogflow project. Set to English per default.
+    """
     def predict(self, request: str) -> dict:
         session_id = uuid.uuid4()
         session_client = dialogflow_v2.SessionsClient(credentials=self._credentials)
@@ -85,6 +85,21 @@ class GoogleDialogFlowModel(AbstractGDFModel):
 
 
 class AsyncGoogleDialogFlowModel(AsyncMixin, AbstractGDFModel):
+    """
+    This class implements an asynchronous connection to Google Dialogflow for dialog annotation.
+    Note, that before you use the class, you need to set up a Dialogflow project,
+    create intents, and train a language model, which can be easily done
+    using the Dialogflow web interface (see the official
+    `instructions <https://cloud.google.com/dialogflow/es/docs/quick/build-agent>`_).
+    After this is done, you should obtain a service account JSON file from Google
+    and pass it to this class, using `from_file` method.
+
+    :param model: A parsed service account json that contains a link to your dialogflow project.
+        Calling json.load() on the file obtained from Google is sufficient to get the
+        credentials object. Alternatively, :py:meth:`use from_file` method
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param language: The language of your dialogflow project. Set to English per default.    
+    """
     async def predict(self, request: str) -> dict:
         session_id = uuid.uuid4()
         session_client = dialogflow_v2.SessionsAsyncClient(credentials=self._credentials)

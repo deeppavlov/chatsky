@@ -28,28 +28,8 @@ from .async_mixin import AsyncMixin
 
 class AbstractRasaModel(BaseModel):
     """
-    RasaModel
-    -----------
-    This class implements a connection to RASA nlu server for label scoring.
-
-    Prerequisites
-    --------------
-    In order to work with this class, you need to have a running instance of Rasa NLU Server
-    with the model trained to recognize your intents.
-    Please, refer to the `RASA docs <https://rasa.com/docs/rasa/nlu-only-server>`_ on how to
-    develop a RASA project and launch an NLU-only server.
-
-    :param model: Rasa model url.
-    :param api_key: Rasa api key for request authorization. The exact authentification method can be retrieved
-        from your Rasa Server config.
-    :param jwt_token: Rasa jwt token for request authorization. The exact authentification method can be retrieved
-        from your Rasa Server config.
-    :param namespace_key: Name of the namespace in framework states that the model will be using.
-    :param retries: The number of times requests will be repeated in case of failure.
-    :param headers: Fill in this parameter, if you want to override the standard set of headers with custom headers.
-
+    Abstract class for a RASA annotator.
     """
-
     def __init__(
         self,
         model: str,
@@ -72,6 +52,23 @@ class AbstractRasaModel(BaseModel):
 
 
 class RasaModel(AbstractRasaModel):
+    """
+    This class implements a synchronous connection to RASA NLU server for dialog annotation.
+    In order to work with this class, you need to have a running instance of Rasa NLU Server
+    with the model trained to recognize your intents.
+    Please, refer to the `RASA docs <https://rasa.com/docs/rasa/nlu-only-server>`_ on how to
+    develop a RASA project and launch an NLU-only server.
+
+    :param model: Rasa model url.
+    :param api_key: Rasa api key for request authorization. The exact authentification method can be retrieved
+        from your Rasa Server config.
+    :param jwt_token: Rasa jwt token for request authorization. The exact authentification method can be retrieved
+        from your Rasa Server config.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param retries: The number of times requests will be repeated in case of failure.
+    :param headers: Fill in this parameter, if you want to override the standard set of headers with custom headers.
+
+    """
     def predict(self, request: str) -> dict:
         message = {"text": request}
         retries = 0
@@ -92,6 +89,23 @@ class RasaModel(AbstractRasaModel):
 
 
 class AsyncRasaModel(AsyncMixin, AbstractRasaModel):
+    """
+    This class implements an asynchronous connection to RASA NLU server for dialog annotation.
+    In order to work with this class, you need to have a running instance of Rasa NLU Server
+    with the model trained to recognize your intents.
+    Please, refer to the `RASA docs <https://rasa.com/docs/rasa/nlu-only-server>`_ on how to
+    develop a RASA project and launch an NLU-only server.
+
+    :param model: Rasa model url.
+    :param api_key: Rasa api key for request authorization. The exact authentification method can be retrieved
+        from your Rasa Server config.
+    :param jwt_token: Rasa jwt token for request authorization. The exact authentification method can be retrieved
+        from your Rasa Server config.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param retries: The number of times requests will be repeated in case of failure.
+    :param headers: Fill in this parameter, if you want to override the standard set of headers with custom headers.
+
+    """
     def __init__(
         self,
         model: str,

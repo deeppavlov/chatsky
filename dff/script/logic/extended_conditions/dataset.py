@@ -1,6 +1,6 @@
 """
-Types
-******
+Dataset
+--------
 
 This module contains structures that are required to parse items from files
 and parse requests and responses to and from various APIs.

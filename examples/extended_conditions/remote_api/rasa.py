@@ -1,3 +1,10 @@
+"""
+Rasa
+=====
+
+In this module, we show how you can get annotations from a RASA NLU server
+and reuse them in your script. 
+"""
 from dff.core.engine.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS, LOCAL
 from dff.core.engine import conditions as cnd
 
@@ -6,11 +13,20 @@ from dff.script.logic.extended_conditions import conditions as i_cnd
 from dff.core.pipeline import Pipeline, CLIMessengerInterface
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
+
+"""
+Create a Rasa model and pass the url of a running RASA server.
+You can establish a connection both to a local and to a remote server.
+The class documentation shows which parameters can be passed for authorization.
+
+"""
 rasa_model = RasaModel(model="http://localhost:5005", namespace_key="rasa")
 
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {"get_intents": rasa_model},
+        PRE_TRANSITIONS_PROCESSING: {"get_intents": rasa_model},  # get intents on each turn
+        # Use the obtained intents in your conditions. Note the namespace key that matches the one
+        # passed to the model. 
         TRANSITIONS: {("root", "finish", 1.2): i_cnd.has_cls_label("goodbye", namespace="rasa")},
     },
     "root": {
@@ -22,6 +38,7 @@ script = {
     "mood": {
         "ask": {
             RESPONSE: "How do you feel today?",
+            # You can get to different branches depending on the intent values.
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label("mood_great", threshold=0.95, namespace="rasa"),
                 ("mood", "react_bad"): i_cnd.has_cls_label("mood_unhappy", namespace="rasa"),

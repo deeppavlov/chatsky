@@ -1,6 +1,6 @@
 """
 Base Model
-***********
+-----------
 
 This module defines an abstract interface for label-scoring models, :py:class:`~BaseModel`.
 When defining custom label-scoring models, always inherit from this class.
@@ -18,7 +18,7 @@ class BaseModel(ABC):
     """
     Base class for label-scoring models.
     Namespace key should be declared, if you want the scores of your model
-    to be stored in a separate namespace inside the :py:class:`~Context` object.
+    to be stored in a separate namespace inside the :py:class:`dff.core.engine.core.Context` object.
 
     :param namespace_key: Name of the namespace in framework states that the model will be using.
 
@@ -53,7 +53,6 @@ class BaseModel(ABC):
         """
         Saves the retrieved labels to a subspace inside the `framework_states` field of the context.
         Creates the missing namespaces, if necessary.
-        Suited for use with `df_runner` add-on.
         """
         labels: dict = self.predict(ctx.last_request) if ctx.last_request else dict()
 

@@ -1,6 +1,6 @@
 """
 HF API Model
-*************
+-------------
 
 This module provides the :py:class:`~HFAPIModel` class that allows you
 to use remotely hosted Hugging Face models. 
@@ -28,22 +28,8 @@ from .async_mixin import AsyncMixin
 
 class AbstractHFAPIModel(BaseModel):
     """
-    This class implements a connection to the Hugging Face inference API for label scoring.
-
-    Prerequisites
-    --------------
-    Obtain an API token from Hugging Face to gain full access to hosted models.
-    Note, that the service can fail, if you exceed the usage limits defined by your
-    subscription type.
-
-    :param model: Hosted model name, e. g. 'bert-base-uncased', etc.
-    :param api_key: Huggingface inference API token.
-    :param namespace_key: Name of the namespace in framework states that the model will be using.
-    :param retries: Number of retries in case of request failure.
-    :param headers: A dictionary that overrides a standard set of headers.
-
+    Abstract class for an HF API annotator.
     """
-
     def __init__(
         self,
         model: str,
@@ -67,6 +53,19 @@ class AbstractHFAPIModel(BaseModel):
 
 
 class HFAPIModel(AbstractHFAPIModel):
+    """
+    This class implements a synchronous connection to the Hugging Face inference API for dialog annotation.
+    Obtain an API token from Hugging Face to gain full access to hosted models.
+    Note, that the service can fail, if you exceed the usage limits determined by your
+    subscription type.
+
+    :param model: Hosted model name, e. g. 'bert-base-uncased', etc.
+    :param api_key: Huggingface inference API token.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param retries: Number of retries in case of request failure.
+    :param headers: A dictionary that overrides a standard set of headers.
+
+    """
     def predict(self, request: str) -> dict:
         retries = 0
         while retries < self.retries:
@@ -87,6 +86,19 @@ class HFAPIModel(AbstractHFAPIModel):
 
 
 class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
+    """
+    This class implements an asynchronous connection to the Hugging Face API for dialog annotation.
+    Obtain an API token from Hugging Face to gain full access to hosted models.
+    Note, that the service can fail, if you exceed the usage limits determined by your
+    subscription type.
+
+    :param model: Hosted model name, e. g. 'bert-base-uncased', etc.
+    :param api_key: Huggingface inference API token.
+    :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param retries: Number of retries in case of request failure.
+    :param headers: A dictionary that overrides a standard set of headers.
+
+    """
     def __init__(
         self,
         model: str,

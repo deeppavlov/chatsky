@@ -1,3 +1,9 @@
+"""
+Custom Classifier
+==================
+
+In this module, we show how you can implement a classifier.
+"""
 import pickle
 
 from dff.script.logic.extended_conditions.models.base_model import BaseModel
