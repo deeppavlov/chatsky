@@ -20,8 +20,7 @@ pip install dff
 ## Basic example
 
 ```python
-from dff.script.core import GLOBAL, TRANSITIONS, RESPONSE
-from dff.script.core import Context, Actor
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor
 import dff.script.conditions.std_conditions as cnd
 from typing import Union
 
@@ -110,8 +109,8 @@ pip install dff[ydb]
 ## Basic example
 
 ```python
-from dff.script.core import Context, Actor
-from dff.connectors.db_connectors import SQLConnector
+from dff.script import Context, Actor
+from dff.context_storages import SQLConnector
 from .script import some_df_script
 
 db = SQLConnector("postgresql://user:password@host:port/dbname")
