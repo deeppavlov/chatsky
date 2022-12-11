@@ -7,11 +7,10 @@ The following example shows pipeline asynchronous service and service group usag
 
 import asyncio
 
-from dff.core.engine.core import Actor
-from dff.core.pipeline import Pipeline
+from dff.script import Actor
+from dff.pipeline import Pipeline
 
-from dff.utils.testing.common import is_interactive_mode, check_happy_path, run_interactive_mode
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import is_interactive_mode, check_happy_path, run_interactive_mode, HAPPY_PATH, TOY_SCRIPT
 
 """
 Services and service groups can be synchronous and asynchronous.

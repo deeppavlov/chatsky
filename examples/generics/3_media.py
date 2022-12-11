@@ -1,15 +1,12 @@
 from typing import NamedTuple
 
-from dff.core.engine.core import Context
-from dff.core.engine.core.context import get_last_index
-from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.core.engine import conditions as cnd
+from dff.script import Context, get_last_index, RESPONSE, TRANSITIONS
+from dff.script.conditions import std_conditions as cnd
 
-from dff.connectors.messenger.generics.response import Attachments, Image, Response
+from dff.script.responses import Attachments, Image, Response
 
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-from dff.utils.testing.response_comparers import generics_comparer
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, generics_comparer
 
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"

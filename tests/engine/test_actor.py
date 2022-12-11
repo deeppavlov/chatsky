@@ -1,17 +1,16 @@
 # %%
-
-from dff.core.engine.core import Actor
-from dff.core.engine.core.context import Context
-from dff.core.engine.core.keywords import (
+from dff.script import (
     TRANSITIONS,
     RESPONSE,
     GLOBAL,
     LOCAL,
     PRE_TRANSITIONS_PROCESSING,
     PRE_RESPONSE_PROCESSING,
+    Actor,
+    Context,
 )
-from dff.core.engine.conditions import true
-from dff.core.engine.labels import repeat
+from dff.script.conditions import true
+from dff.script.labels import repeat
 
 
 def positive_test(samples, custom_class):

@@ -7,12 +7,12 @@ The following example shows more advanced usage of `pipeline` module, as an exte
 
 import logging
 
-from dff.core.engine.core import Context
+from dff.messengers.common import CLIMessengerInterface
+from dff.script import Context
 
-from dff.core.pipeline import Pipeline, CLIMessengerInterface
+from dff.pipeline import Pipeline
 
-from dff.utils.testing.common import check_happy_path, is_interactive_mode
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

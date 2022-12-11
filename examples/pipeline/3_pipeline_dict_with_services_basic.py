@@ -7,11 +7,10 @@ The following example shows pipeline creation from dict and most important pipel
 
 import logging
 
-from dff.core.engine.core import Actor
-from dff.core.pipeline import Service, Pipeline
+from dff.script import Actor
+from dff.pipeline import Service, Pipeline
 
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

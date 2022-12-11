@@ -9,11 +9,11 @@
 # 2. Fix PRE_RESPONSE_PROCESSING to PRE_TRANSITIONS_PROCESSING
 # 3. Specify that the nodes form an ordered set
 
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-import dff.core.engine.conditions as cnd
+from dff.script import TRANSITIONS, RESPONSE
+import dff.script.conditions as cnd
 
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 # First of all, to create a dialog agent, we need to create a dialog script.
 # Below, `script` is the dialog script.

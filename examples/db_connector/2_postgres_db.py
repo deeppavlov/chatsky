@@ -5,11 +5,10 @@
 
 import os
 
-from dff.connectors.db import connector_factory
+from dff.context_storages import connector_factory
 
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, TOY_SCRIPT, HAPPY_PATH
 
 # ######## mongodb #########
 # db_uri = "mongodb://{}:{}@localhost:27017/{}".format(

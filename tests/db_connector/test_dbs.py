@@ -3,24 +3,31 @@ import socket
 import os
 from platform import system
 
-from dff.connectors.db.protocol import get_protocol_install_suggestion
-from dff.connectors.db.json_connector import JSONConnector
-from dff.connectors.db.pickle_connector import PickleConnector
-from dff.connectors.db.shelve_connector import ShelveConnector
-from dff.connectors.db.db_connector import DBAbstractConnector
-from dff.connectors.db.sql_connector import SQLConnector, postgres_available, mysql_available, sqlite_available
-from dff.connectors.db.redis_connector import RedisConnector, redis_available
-from dff.connectors.db.mongo_connector import MongoConnector, mongo_available
-from dff.connectors.db.ydb_connector import YDBConnector, ydb_available
-from dff.connectors.db import connector_factory
+from dff.context_storages import (
+    connector_factory,
+    DBConnector,
+    get_protocol_install_suggestion,
+    JSONConnector,
+    PickleConnector,
+    ShelveConnector,
+    DBAbstractConnector,
+    SQLConnector,
+    postgres_available,
+    mysql_available,
+    sqlite_available,
+    RedisConnector,
+    redis_available,
+    MongoConnector,
+    mongo_available,
+    YDBConnector,
+    ydb_available,
+)
 
-from dff.core.engine.core import Context
+from dff.script import Context
 
-from dff.connectors.db import DBConnector
 import tests.utils as utils
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, TOY_SCRIPT, HAPPY_PATH
 
 dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
 

@@ -9,12 +9,11 @@
 
 from typing import Any
 
-from dff.core.engine.core.keywords import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, MISC
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.labels as lbl
-import dff.core.engine.conditions as cnd
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.script import GLOBAL, LOCAL, RESPONSE, TRANSITIONS, MISC, Context, Actor
+import dff.script.labels as lbl
+import dff.script.conditions as cnd
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def create_transitions():

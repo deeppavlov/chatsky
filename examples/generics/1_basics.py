@@ -1,12 +1,10 @@
 from typing import NamedTuple
 
-from dff.connectors.messenger.generics import Response
-from dff.core.engine.conditions import exact_match
-from dff.core.engine.core import Context
-from dff.core.engine.core.context import get_last_index
-from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.script.responses import Response
+from dff.script.conditions import exact_match
+from dff.script import Context, get_last_index, RESPONSE, TRANSITIONS
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 toy_script = {
     "greeting_flow": {

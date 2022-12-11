@@ -5,12 +5,11 @@
 
 import logging
 
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.conditions as cnd
+from dff.script import TRANSITIONS, RESPONSE, Context, Actor
+import dff.script.conditions as cnd
 
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:

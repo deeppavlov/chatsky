@@ -1,6 +1,6 @@
 import uuid
 
-from dff.core.engine.core.context import Context
+from dff.script import Context
 import pytest
 
 

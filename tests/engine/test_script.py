@@ -2,9 +2,7 @@
 import itertools
 from typing import Callable
 
-
-from dff.core.engine.core import Script, Node
-from dff.core.engine.core.keywords import (
+from dff.script import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
@@ -12,6 +10,8 @@ from dff.core.engine.core.keywords import (
     MISC,
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
+    Script,
+    Node,
 )
 
 

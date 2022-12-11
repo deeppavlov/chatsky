@@ -4,7 +4,7 @@ import logging
 import pytest
 
 import tests.utils as utils
-from dff.utils.testing.common import check_happy_path
+from dff.utils.testing import check_happy_path
 
 logger = logging.Logger(__name__)
 

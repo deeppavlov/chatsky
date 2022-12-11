@@ -1,10 +1,10 @@
 # %%
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.responses as rsp
+from dff.script import Context, Actor
+from dff.script.responses.std_responses import choice
 
 
 def test_response():
     ctx = Context()
     actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
     for _ in range(10):
-        assert rsp.choice(["text1", "text2"])(ctx, actor) in ["text1", "text2"]
+        assert choice(["text1", "text2"])(ctx, actor) in ["text1", "text2"]

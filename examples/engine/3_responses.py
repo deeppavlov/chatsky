@@ -12,13 +12,12 @@ import re
 import random
 from typing import Any
 
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-from dff.core.engine.core import Actor, Context
-import dff.core.engine.responses as rsp
-import dff.core.engine.conditions as cnd
+from dff.script import TRANSITIONS, RESPONSE, Actor, Context
+import dff.script.conditions as cnd
 
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.pipeline import Pipeline
+from dff.script.responses.std_responses import choice
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 
@@ -70,7 +69,7 @@ toy_script = {
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},  # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
+            RESPONSE: choice(["Hi, what is up?", "Hello, how are you?"]),  # random choice from candicate list
             TRANSITIONS: {"node2": cnd.exact_match("i'm fine, how are you?")},
         },
         "node2": {

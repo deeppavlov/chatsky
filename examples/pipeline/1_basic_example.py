@@ -5,12 +5,11 @@ The following example shows basic usage of `pipeline` module, as an extension to
 """
 
 # %%
-from dff.core.engine.core import Context
+from dff.script import Context
 
-from dff.core.pipeline import Pipeline
+from dff.pipeline import Pipeline
 
-from dff.utils.testing.common import check_happy_path, is_interactive_mode
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
 """
@@ -29,7 +28,7 @@ This call will return Context, its `last_response` property will be actors respo
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
+    TOY_SCRIPT,  # Actor script object, defined in `.turn_caching` module.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )

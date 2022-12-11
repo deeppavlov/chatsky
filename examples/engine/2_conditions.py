@@ -6,12 +6,11 @@
 import logging
 import re
 
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-from dff.core.engine.core import Actor, Context
-import dff.core.engine.conditions as cnd
+from dff.script import TRANSITIONS, RESPONSE, Actor, Context
+import dff.script.conditions as cnd
 
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 

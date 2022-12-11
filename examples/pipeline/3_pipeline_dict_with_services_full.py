@@ -8,12 +8,11 @@ import json
 import logging
 import urllib.request
 
-from dff.core.engine.core import Context, Actor
+from dff.messengers.common import CLIMessengerInterface
+from dff.script import Context, Actor
 
-from dff.core.pipeline import CLIMessengerInterface, Service, Pipeline, ServiceRuntimeInfo
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
-
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 

@@ -7,18 +7,19 @@
 # 1. Remove `create_transitions`
 # 2. Rename start to start_node, fallback to fallback_node, step to node?
 
-from dff.core.engine.core.keywords import (
+from dff.script import (
     GLOBAL,
     RESPONSE,
     TRANSITIONS,
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
+    Context,
+    Actor,
 )
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.labels as lbl
-import dff.core.engine.conditions as cnd
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+import dff.script.labels as lbl
+import dff.script.conditions as cnd
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def create_transitions():

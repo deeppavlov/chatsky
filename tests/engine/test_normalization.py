@@ -1,7 +1,7 @@
 # %%
 from typing import Callable
 
-from dff.core.engine.core.keywords import (
+from dff.script import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
@@ -9,14 +9,14 @@ from dff.core.engine.core.keywords import (
     MISC,
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
+    Actor,
+    Context,
+    NodeLabel3Type,
 )
-from dff.core.engine.core import Actor, Context
-from dff.core.engine.core.types import NodeLabel3Type
-from dff.core.engine.labels import repeat
-from dff.core.engine.conditions import true
+from dff.script.labels import repeat
+from dff.script.conditions import true
 
-# from dff.core.engine.labels
-from dff.core.engine.core.normalization import (
+from dff.script import (
     normalize_condition,
     normalize_keywords,
     normalize_label,

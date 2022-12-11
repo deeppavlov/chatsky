@@ -1,7 +1,7 @@
 # %%
 import random
 
-from dff.core.engine.core import Context, Node
+from dff.script import Context, Node
 
 
 def shuffle_dict_keys(dictionary: dict) -> dict:

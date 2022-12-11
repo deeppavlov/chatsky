@@ -5,12 +5,11 @@
 
 import re
 
-from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
-from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
+from dff.pipeline import Pipeline
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 def high_priority_node_transition(flow_label, label):

@@ -1,10 +1,9 @@
-from dff.core.engine.conditions import true
-from dff.core.engine.core import Context, Actor
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
-from dff.core.engine.labels import repeat
-from dff.core.pipeline import Pipeline
-from dff.script.utils.singleton_turn_caching import cache
-from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.script.conditions import true
+from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script.labels import repeat
+from dff.pipeline import Pipeline
+from dff.utils.turn_caching import cache
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 
 external_data = {"counter": 0}
