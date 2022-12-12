@@ -59,7 +59,7 @@ redis_dependencies = [
 ]
 
 mongodb_dependencies = [
-    "pymongo>=4.0.2",
+    "pymongo==4.3.2",  # TODO: wait for bson using bug will be fixed
     "bson>=0.5.10",
 ]
 
@@ -131,6 +131,7 @@ EXTRA_DEPENDENCIES = {
     "devel": devel,
     "full": full,
     "test_full": tests_full,
+    "examples": tests_full,
     "devel_full": devel_full,
     "sqlite": sqlite_dependencies,
     "redis": redis_dependencies,

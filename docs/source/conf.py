@@ -1,12 +1,12 @@
 import os
 import sys
 
-from jupytext import jupytext
 from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref  # noqa: E402
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
+from utils.notebook import add_installation_cell_into_py
 
 # -- Project information -----------------------------------------------------
 
@@ -65,24 +65,6 @@ html_short_title = "None"
 
 # -- Options for HTML output -------------------------------------------------
 
-
-def example_to_jupyter_adding_installation_cell(s: str):
-    return jupytext.reads(
-        f"""# %% [markdown]
-### Installing dependencies
-
-
-# %%
-%%bash
-pip install dff[full] --upgrade pip > /dev/null
-
-
-{s}
-""",
-        "py:percent",
-    )
-
-
 sphinx_gallery_conf = {
     "promote_jupyter_magic": True,
 }
@@ -101,7 +83,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": example_to_jupyter_adding_installation_cell}
+nbsphinx_custom_formats = {".py": add_installation_cell_into_py}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
