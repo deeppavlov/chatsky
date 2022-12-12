@@ -84,8 +84,8 @@ An `actor` is an object that processes user
 input replicas and returns responses.
 To create the actor you need to pass the script (`toy_script`),
 initial node (`start_label`) and
-the node to which the actor will move
-if none of the current conditions are performed (`fallback_label`).
+the node to which the actor will default
+if none of the current conditions are met (`fallback_label`).
 By default, if `fallback_label` is not set,
 then its value becomes equal to `start_label`.
 """
