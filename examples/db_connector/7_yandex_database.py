@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 7. Yandex Cloud
+# 7. Yandex DataBase
 
-This is an example of using Yandex Cloud.
+This is an example of using Yandex DataBase.
 """
 
 

@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 8. Flask
+# 8. JSON storage with web API
 
-This is an example of using Flask.
+This is an example of using JSON with web API.
 """
 
 
