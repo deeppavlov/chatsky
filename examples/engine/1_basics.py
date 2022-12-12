@@ -36,9 +36,9 @@ Each node has the keywords `RESPONSE` and `TRANSITIONS`.
 * `RESPONSE` contains the response
     that the agent will return from the current node.
 * `TRANSITIONS` describes transitions from the
-current node to another nodes. This is a dictionary,
-where keys are names of the nodes and
-values are conditions of transition to them.
+    current node to another nodes. This is a dictionary,
+    where keys are names of the nodes and
+    values are conditions of transition to them.
 """
 
 
