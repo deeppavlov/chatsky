@@ -2,7 +2,7 @@ SHELL = /bin/bash
 
 PYTHON = python3
 VENV_PATH = venv
-VERSIONING_FILES = setup.py makefile docs/source/conf.py docs/source/index.rst dff/__init__.py
+VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.10.1
 TEST_COVERAGE_THRESHOLD=93
 
