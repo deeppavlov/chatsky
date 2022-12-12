@@ -83,7 +83,6 @@ pip install dff[full] --upgrade pip > /dev/null
     )
 
 
-nbsphinx_allow_errors = True
 sphinx_gallery_conf = {
     "promote_jupyter_magic": True,
 }
