@@ -38,8 +38,7 @@ extensions = [
     "sphinx_copybutton",
     "sphinx_autodoc_typehints",
     "nbsphinx",
-    "sphinx_gallery.load_style",
-    "IPython.sphinxext.ipython_console_highlighting",
+    "sphinx_gallery.load_style"
 ]
 
 suppress_warnings = ["image.nonlocal_uri"]

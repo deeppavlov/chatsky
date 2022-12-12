@@ -14,7 +14,7 @@ from telebot import types, TeleBot
 from dff.core.engine.core import Context, Actor
 
 from .utils import partialmethod, open_io, close_io
-from .local_types import TelegramResponse
+from .types import TelegramResponse
 
 from dff.connectors.messenger.generics import Response
 from dff.connectors.messenger.telegram.utils import TELEGRAM_STATE_KEY
@@ -41,12 +41,12 @@ class TelegramMessenger(TeleBot):
 
     def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]) -> None:
         """
-        Cast `response` to :py:class:`~dff.connectors.messenger.telegram.local_types.TelegramResponse` and send it.
+        Cast `response` to :py:class:`~dff.connectors.messenger.telegram.types.TelegramResponse` and send it.
         Text content is sent after all the attachments.
 
         :param chat_id: Telegram chat ID.
         :param response: Response data. String, dictionary or :py:class:`~dff.connectors.messenger.generics.Response`.
-            will be cast to :py:class:`~dff.connectors.messenger.telegram.local_types.TelegramResponse`.
+            will be cast to :py:class:`~dff.connectors.messenger.telegram.types.TelegramResponse`.
         """
         if isinstance(response, TelegramResponse):
             ready_response = response
