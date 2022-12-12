@@ -7,10 +7,6 @@ The following example shows extra handlers possibilities and use cases.
 
 
 # %%
-# pip install dff  # Uncomment this line to install the framework
-
-
-# %%
 import asyncio
 import json
 import logging

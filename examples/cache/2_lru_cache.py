@@ -6,10 +6,6 @@
 
 
 # %%
-# pip install dff  # Uncomment this line to install the framework
-
-
-# %%
 from dff.core.engine.conditions import true
 from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE

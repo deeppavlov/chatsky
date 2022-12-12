@@ -8,10 +8,6 @@ and most important pipeline components.
 
 
 # %%
-# pip install dff  # Uncomment this line to install the framework
-
-
-# %%
 import json
 import logging
 import urllib.request

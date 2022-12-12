@@ -6,10 +6,6 @@
 
 
 # %%
-# pip install dff  # Uncomment this line to install the framework
-
-
-# %%
 from typing import NamedTuple
 
 import dff.core.engine.conditions as cnd

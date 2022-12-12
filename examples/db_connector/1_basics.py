@@ -7,10 +7,6 @@ The following example shows the basic use of the database connection.
 
 
 # %%
-# pip install dff  # Uncomment this line to install the framework
-
-
-# %%
 import pathlib
 
 from dff.connectors.db import connector_factory

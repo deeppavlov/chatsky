@@ -84,6 +84,13 @@ nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
 :github_url: deeppavlov/dialog_flow_framework
+
+Installing dependencies
+
+.. code-block:: console
+
+    python -m pip install dff[full]
+
 """
 
 # Theme options

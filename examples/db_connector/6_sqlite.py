@@ -7,10 +7,6 @@ This is an example of using SQLite.
 
 
 # %%
-# pip install dff  # Uncomment this line to install the framework
-
-
-# %%
 import pathlib
 from platform import system
 
