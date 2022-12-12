@@ -41,6 +41,6 @@ if __name__ == "__main__":
     # (testing) with HAPPY_PATH
 
     # This runs example in interactive mode if not in IPython env
-    # + if `DISABLE_INTERACTIVE_MODE` is not set
+    # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # This runs example in interactive mode
