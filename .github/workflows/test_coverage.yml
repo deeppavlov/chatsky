@@ -13,7 +13,6 @@ on:
 
 jobs:
   test_coverage:
-    concurrency: testing_environment
     strategy:
       fail-fast: false
 

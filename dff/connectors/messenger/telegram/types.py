@@ -1,5 +1,5 @@
 """
-Local Types
+Types
 --------------
 This module implements local classes that help cast generic types from `dff` to native Telegram types.
 """

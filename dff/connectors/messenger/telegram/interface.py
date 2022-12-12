@@ -38,7 +38,7 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     update_fields.pop("update_id")
     inner_update = next(filter(lambda val: val is not None, list(update_fields.values())))
 
-    ctx_id = (vars(inner_update).get("from_user")).id
+    ctx_id = getattr(vars(inner_update).get("from_user"), "id", None)
     return inner_update, ctx_id
 
 
