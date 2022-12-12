@@ -81,7 +81,7 @@ toy_script = {
 # %% [markdown]
 """
 An `actor` is an object that processes user
-input replicas and returns responses.
+inputs and returns responses.
 To create the actor you need to pass the script (`toy_script`),
 initial node (`start_label`) and
 the node to which the actor will default
