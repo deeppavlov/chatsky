@@ -2,13 +2,11 @@ import os
 import sys
 
 from jupytext import jupytext
+from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref  # noqa: E402
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
-from regenerate_apiref import regenerate_apiref  # noqa: E402
-
 
 # -- Project information -----------------------------------------------------
 
