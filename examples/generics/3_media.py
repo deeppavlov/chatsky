@@ -17,32 +17,18 @@ from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.engine import conditions as cnd
 
-from dff.connectors.messenger.generics.response import (
-    Attachments,
-    Image,
-    Response,
-)
+from dff.connectors.messenger.generics.response import Attachments, Image, Response
 
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import (
-    check_happy_path,
-    is_interactive_mode,
-    run_interactive_mode,
-)
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.utils.testing.response_comparers import generics_comparer
 
 
-# %% [markdown]
-"""
-URL of a picture with a kitten.
-"""
-
-
 # %%
-kitten_id = "Y0WXj3xqJz0"
-kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
-kitten_width = 640
-kitten_url = (
+kitten_id = "Y0WXj3xqJz0"  # id of the picture
+kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"  # ixid of the picture
+kitten_width = 640  # Width of the picture
+kitten_url = (  # URL of the picture with a kitten.
     f"https://unsplash.com/photos/"
     f"{kitten_id}/download?ixid={kitten_ixid}"
     f"&force=true&w={kitten_width}"

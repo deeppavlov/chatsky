@@ -18,12 +18,10 @@ from dff.core.engine.core import Context
 from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import (
-    check_happy_path,
-    is_interactive_mode,
-    run_interactive_mode,
-)
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 
+
+# %%
 toy_script = {
     "greeting_flow": {
         "start_node": {
@@ -55,39 +53,26 @@ toy_script = {
 
 happy_path = (
     ("Hi", Response(text="Hi, how are you?")),
-    (
-        "i'm fine, how are you?",
-        Response(text="Good. What do you want to talk about?"),
-    ),
-    (
-        "Let's talk about music.",
-        Response(text="Sorry, I can not talk about music now."),
-    ),
+    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
+    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
     ("Ok, goodbye.", Response(text="bye")),
     ("Hi", Response(text="Hi, how are you?")),
     ("stop", Response(text="Ooops")),
     ("stop", Response(text="Ooops")),
     ("Hi", Response(text="Hi, how are you?")),
-    (
-        "i'm fine, how are you?",
-        Response(text="Good. What do you want to talk about?"),
-    ),
-    (
-        "Let's talk about music.",
-        Response(text="Sorry, I can not talk about music now."),
-    ),
+    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
+    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
     ("Ok, goodbye.", Response(text="bye")),
 )
 
 
+# %%
 class CallbackRequest(NamedTuple):
     payload: str
 
 
 def process_request(ctx: Context):
-    last_request: str = (
-        ctx.last_request
-    )  # TODO: add _really_ nice ways to modify user request and response
+    last_request: str = ctx.last_request
     last_index = get_last_index(ctx.requests)
 
     ui = ctx.last_response and ctx.last_response.ui
@@ -103,6 +88,7 @@ def process_request(ctx: Context):
     ctx.requests[last_index] = last_request
 
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("greeting_flow", "start_node"),

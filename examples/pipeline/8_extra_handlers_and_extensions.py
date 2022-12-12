@@ -38,8 +38,6 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-TODO: update docs
-
 Pipeline functionality can be extended by global extra handlers.
 Global extra handlers are special extra handlers
     that are called on some stages of pipeline execution.
