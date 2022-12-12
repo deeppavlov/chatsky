@@ -7,7 +7,7 @@ from jupytext import jupytext
 
 sys.path.append(os.path.abspath("."))
 from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
-from regenerate_apiref import regenerate  # noqa: E402
+from regenerate_apiref import regenerate_apiref  # noqa: E402
 
 
 # -- Project information -----------------------------------------------------
@@ -112,7 +112,7 @@ def setup(_):
             "examples/generics/*.py",
         ]
     )
-    regenerate(
+    regenerate_apiref(
         [
             ("dff.connectors.db", "db_connectors"),
             ("dff.connectors.messenger", "messenger_interfaces"),

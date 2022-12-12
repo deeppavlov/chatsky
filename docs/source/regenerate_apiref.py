@@ -20,7 +20,7 @@ def generate_doc_container(file: Path, includes: List[Path]):
     file.with_name(f"index_{file.name}").write_text(contents)
 
 
-def regenerate(paths: Optional[List[Tuple[str, str]]] = None, destination: str = "apiref"):
+def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination: str = "apiref"):
     paths = list() if paths is None else paths
     source = Path(f"./docs/source/{destination}")
     doc_containers: Dict[str, List[Path]] = dict()
