@@ -111,7 +111,7 @@ class WebhookTelegramInterface(CallbackMessengerInterface):
     def __init__(
         self,
         messenger: TelegramMessenger,
-        app: Flask,
+        app: Optional[Flask] = None,
         host: str = "localhost",
         port: int = 8443,
         endpoint: str = "/telegram-webhook",
@@ -121,7 +121,7 @@ class WebhookTelegramInterface(CallbackMessengerInterface):
             raise ModuleNotFoundError("Flask is not installed")
 
         self.messenger: TelegramMessenger = messenger
-        self.app: Flask = app
+        self.app: Flask = app if app else Flask(__name__)
         self.host: str = host
         self.port: int = port
         self.endpoint: str = endpoint

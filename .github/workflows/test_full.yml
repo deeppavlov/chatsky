@@ -13,7 +13,6 @@ on:
 
 jobs:
   test_full:
-    concurrency: testing_environment
     strategy:
       fail-fast: false
       matrix:
@@ -53,5 +52,5 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           fi
-          pytest --tb=long -vv --cache-clear --cov=dff tests/
+          pytest --tb=long -vv --ignore=tests/telegram/ --cache-clear --cov=dff tests/
         shell: bash
