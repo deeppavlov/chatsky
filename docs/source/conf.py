@@ -1,12 +1,12 @@
 import os
 import sys
 
-from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref  # noqa: E402
+from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import add_installation_cell_into_py
+from utils.notebook import add_installation_cell_into_py  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
