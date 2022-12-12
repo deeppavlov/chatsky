@@ -52,8 +52,8 @@ toy_script = {
             # If "Hi" == request of the user then we make the transition.
         },
         "node1": {
-            RESPONSE: "Hi, how are you?",  # When the agent goes
-            # to node1 we return "Hi, how are you?".
+            RESPONSE: "Hi, how are you?",  # When the agent enters node1,
+            # return "Hi, how are you?".
             TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
         "node2": {
