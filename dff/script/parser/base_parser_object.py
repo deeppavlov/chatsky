@@ -156,7 +156,7 @@ class Statement(BaseParserObject, ABC):
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node, **kwargs) -> tp.Dict[str, 'Statement']:
+    def from_ast(cls, node, **kwargs) -> tp.Union[tp.Dict[str, 'Statement'], 'Python']:
         if isinstance(node, ast.Import):
             return Import.from_ast(node)
         if isinstance(node, ast.ImportFrom):
@@ -166,7 +166,7 @@ class Statement(BaseParserObject, ABC):
         if isinstance(node, ast.AnnAssign):
             if node.value is not None:
                 return Assignment.from_ast(node)
-        return {}
+        return Python.from_ast(node)
 
 
 class Expression(BaseParserObject, ABC):
@@ -467,15 +467,15 @@ class Dict(Expression):
         return result
 
     def __str__(self):
-        return "{\n" + "".join(
-            [f"\t{str(self.children[self._key(key)])}: {str(self.children[self._value(key)])},\n" for key in self._keys.values()]
+        return "{" + "".join(
+            [f"{str(self.children[self._key(key)])}: {str(self.children[self._value(key)])}, " for _, key in self.__keys]
         ) + "}"
 
     def __repr__(self):
         return "Dict(" + ", ".join(
             [
                 f"{repr(self.children[self._key(key)])}: "
-                f"{repr(self.children[self._value(key)])}" for key in self._keys.values()
+                f"{repr(self.children[self._value(key)])}" for _, key in self.__keys
             ]
         ) + ")"
 

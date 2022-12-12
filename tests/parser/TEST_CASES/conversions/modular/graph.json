@@ -1,0 +1,48 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "full_script": {
+            "script": {
+                "flow": "from flows.start import flow",
+                "Actor": "from dff.core.engine.core.actor import Actor",
+                "act": "Actor(script={'start_flow': flow, }, start_label=('start_flow', 'start_node'))"
+            },
+            "flows.start": {
+                "node": "from ..nodes.node_1 import node",
+                "flow": {
+                    "'start_node'": "node"
+                }
+            },
+            "nodes.node_1": {
+                "kw": "import dff.core.engine.core.keywords",
+                "node": {
+                    "kw.RESPONSE": "'hey'"
+                }
+            }
+        },
+        "start_label": [
+            "'start_flow'",
+            "'start_node'"
+        ],
+        "fallback_label": [
+            "'start_flow'",
+            "'start_node'"
+        ]
+    },
+    "nodes": [
+        {
+            "ref": [
+                "nodes.node_1",
+                "node",
+                "value"
+            ],
+            "local": false,
+            "id": [
+                "'start_flow'",
+                "'start_node'"
+            ]
+        }
+    ],
+    "links": []
+}

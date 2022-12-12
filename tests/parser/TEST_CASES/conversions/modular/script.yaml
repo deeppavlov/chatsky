@@ -1,0 +1,12 @@
+script:
+  flow: from flows.start import flow
+  Actor: from dff.core.engine.core.actor import Actor
+  act: "Actor(script={'start_flow': flow, }, start_label=('start_flow', 'start_node'))"
+flows.start:
+  node: from ..nodes.node_1 import node
+  flow:
+    "'start_node'": node
+nodes.node_1:
+  kw: import dff.core.engine.core.keywords
+  node:
+    kw.RESPONSE: "'hey'"

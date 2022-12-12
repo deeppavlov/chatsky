@@ -66,7 +66,9 @@ class Namespace(BaseParserObject):
     def from_ast(cls, node: ast.Module, **kwargs) -> 'Namespace':
         children = {}
         for statement in node.body:
-            children.update(Statement.from_ast(statement))
+            statements = Statement.from_ast(statement)
+            if isinstance(statements, dict):
+                children.update(statements)
         return cls(names=children, **kwargs)
 
     @classmethod

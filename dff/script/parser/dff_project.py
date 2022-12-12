@@ -11,7 +11,7 @@ try:
 except ImportError:
     raise ImportError(f"Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
-from .base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable
+from .base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable, Statement, Python
 from .namespace import Namespace
 from .exceptions import ScriptValidationError, ParsingError
 from .yaml import yaml
@@ -355,6 +355,47 @@ class DFFProject(BaseParserObject):
 
         _process_file(entry_point)
         return cls(list(namespaces.values()))
+
+    def to_python(self, project_root_dir: Path):
+        logger.info(f"Executing `to_python` with project_root_dir={project_root_dir}")
+        for namespace in self.children.values():
+            namespace: Namespace
+            file = project_root_dir.joinpath(*namespace.name.split(".")).with_suffix(".py")
+            if file.exists():
+                objects = []
+                names = {}
+
+                with open(file, "r", encoding="utf-8") as fd:
+                    parsed_file = ast.parse(fd.read())
+                for statement in parsed_file.body:
+                    statements = Statement.from_ast(statement)
+                    if isinstance(statements, dict):
+                        for obj_name, obj in statements.items():
+                            if names.get(obj_name) is not None:
+                                raise ParsingError(f"The same name is used twice:\n{str(names.get(obj_name))}\n{str(obj)}")
+                            names[obj_name] = len(objects)
+                            objects.append(str(obj))
+                    elif isinstance(statements, Python):
+                        objects.append(str(statements))
+                    else:
+                        raise RuntimeError(statements)
+
+                last_insertion_index = len(objects)
+                for replaced_obj_name, replaced_obj in reversed(list(namespace.children.items())):
+                    obj_index = names.get(replaced_obj_name)
+                    if obj_index is not None and obj_index < last_insertion_index:
+                        objects.pop(obj_index)
+                        objects.insert(obj_index, str(replaced_obj))
+                        last_insertion_index = obj_index
+                    else:
+                        objects.insert(last_insertion_index, str(replaced_obj))
+
+                with open(file, "w", encoding="utf-8") as fd:
+                    fd.write("\n".join(objects) + "\n")
+            else:
+                logger.warning(f"File {file} is not found. It will be created.")
+                with open(file, "w", encoding="utf-8") as fd:
+                    fd.write(str(namespace) + "\n")
 
     @classmethod
     def from_yaml(cls, file: Path):
