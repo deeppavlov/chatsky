@@ -34,14 +34,14 @@ from dff.utils.testing.response_comparers import generics_comparer
 
 # %% [markdown]
 """
-URL of a picture with a kitten.
+URL of the picture with a kitten.
 """
 
 
 # %%
-kitten_id = "Y0WXj3xqJz0"
-kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
-kitten_width = 640
+kitten_id = "Y0WXj3xqJz0"  # id of the picture
+kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"  # ixid of the picture
+kitten_width = 640  # Width of the picture
 kitten_url = (
     f"https://unsplash.com/photos/"
     f"{kitten_id}/download?ixid={kitten_ixid}"
