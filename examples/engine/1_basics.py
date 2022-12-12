@@ -25,7 +25,7 @@ from dff.utils.testing.common import (
 First of all, to create a dialog agent, we need to create a dialog script.
 Below script means a dialog script.
 A script is a dictionary, where the keys are the names of the flows.
-A script can contain multiple scripts, what is needed in order to divide
+A script can contain multiple scripts, which is needed in order to divide
 a dialog into sub-dialogs and process them separately.
 For example, the separation can be tied to the topic of the dialog.
 In this example there is one flow called `greeting_flow`.
