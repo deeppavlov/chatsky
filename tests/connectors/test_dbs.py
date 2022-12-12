@@ -25,11 +25,11 @@ from dff.context_storages import (
 
 from dff.script import Context
 
-import tests.utils as utils
+from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, TOY_SCRIPT, HAPPY_PATH
 
-dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
+dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 def ping_localhost(port: int, timeout=60):

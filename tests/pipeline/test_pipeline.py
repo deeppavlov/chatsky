@@ -2,13 +2,13 @@ import importlib
 import os
 import sys
 
-import tests.utils as utils
+from tests.test_utils import get_path_from_tests_to_current_dir
 
 
 # TODO: remove this as soon as turn_caching will be moved to PYPI
-sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
+sys.path.append(os.path.abspath(f"examples/{get_path_from_tests_to_current_dir(__file__)}"))
 
-dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
+dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 def test_pretty_format():
