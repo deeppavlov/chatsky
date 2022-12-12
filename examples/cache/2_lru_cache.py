@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 1. Cache
+# 2. LRU Cache
 
 """
 
