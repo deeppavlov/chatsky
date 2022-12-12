@@ -65,6 +65,29 @@ html_short_title = "None"
 
 # -- Options for HTML output -------------------------------------------------
 
+
+def example_to_jupyter_adding_installation_cell(s: str):
+    return jupytext.reads(
+        f"""# %% [markdown]
+### Installing dependencies
+
+
+# %%
+%%bash
+pip install dff[full] --upgrade pip > /dev/null
+
+
+{s}
+""",
+        "py:percent",
+    )
+
+
+nbsphinx_allow_errors = True
+sphinx_gallery_conf = {
+    "promote_jupyter_magic": True,
+}
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
@@ -79,18 +102,11 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
+nbsphinx_custom_formats = {".py": example_to_jupyter_adding_installation_cell}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
 :github_url: deeppavlov/dialog_flow_framework
-
-Installing dependencies
-
-.. code-block:: console
-
-    python -m pip install dff[full]
-
 """
 
 # Theme options
