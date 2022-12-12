@@ -21,10 +21,11 @@ from dff.utils.testing.response_comparers import generics_comparer
 
 
 # %%
-kitten_id = "Y0WXj3xqJz0"  # id of the picture
-kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"  # ixid of the picture
-kitten_width = 640  # Width of the picture
-kitten_url = (  # URL of the picture with a kitten.
+# kitten picture info:
+kitten_id = "Y0WXj3xqJz0"
+kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
+kitten_width = 640
+kitten_url = (
     f"https://unsplash.com/photos/"
     f"{kitten_id}/download?ixid={kitten_ixid}"
     f"&force=true&w={kitten_width}"
