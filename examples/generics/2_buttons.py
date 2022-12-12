@@ -18,17 +18,9 @@ from dff.core.engine.core import Context, Actor
 from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
-from dff.connectors.messenger.generics.response import (
-    Button,
-    Keyboard,
-    Response,
-)
+from dff.connectors.messenger.generics.response import Button, Keyboard, Response
 from dff.core.pipeline import Pipeline
-from dff.utils.testing.common import (
-    check_happy_path,
-    is_interactive_mode,
-    run_interactive_mode,
-)
+from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.utils.testing.response_comparers import generics_comparer
 
 

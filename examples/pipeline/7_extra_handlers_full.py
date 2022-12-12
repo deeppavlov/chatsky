@@ -38,8 +38,6 @@ logger = logging.getLogger(__name__)
 
 # %% [markdown]
 """
-TODO: update docs
-
 Extra handlers are additional function lists
     (before-functions and/or after-functions)
     that can be added to any pipeline components (service and service groups).
