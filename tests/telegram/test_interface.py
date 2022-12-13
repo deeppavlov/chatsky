@@ -43,7 +43,7 @@ def test_set_update(update):
     assert ctx.last_request
 
 
-@pytest.mark.skipif(BOT_TOKEN is None, "`BOT_TOKEN` is missing.")
+@pytest.mark.skipif(BOT_TOKEN is None, reason="`BOT_TOKEN` is missing.")
 @pytest.mark.parametrize(
     [
         "update",
@@ -76,7 +76,7 @@ async def test_update_handling(pipeline_instance, update, basic_bot, user_id):
             time.sleep(2)
 
 
-@pytest.mark.skipif(BOT_TOKEN is None, "`BOT_TOKEN` is missing.")
+@pytest.mark.skipif(BOT_TOKEN is None, reason="`BOT_TOKEN` is missing.")
 @pytest.mark.parametrize(
     "message,expected", [(create_text_message("Hello"), True), (create_text_message("Goodbye"), False)]
 )
@@ -90,7 +90,7 @@ def test_message_handling(message, expected, actor_instance, basic_bot):
     assert not condition(context, actor_instance)
 
 
-@pytest.mark.skipif(BOT_TOKEN is None, "`BOT_TOKEN` is missing.")
+@pytest.mark.skipif(BOT_TOKEN is None, reason="`BOT_TOKEN` is missing.")
 @pytest.mark.parametrize("query,expected", [(create_query("4"), True), (create_query("5"), False)])
 def test_query_handling(query, expected, actor_instance, basic_bot):
     condition = basic_bot.cnd.callback_query_handler(func=lambda call: call.data == "4")
