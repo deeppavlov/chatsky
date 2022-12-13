@@ -6,12 +6,16 @@ from telethon import TelegramClient
 
 from examples.telegram.no_pipeline.basic_bot import bot, actor
 from examples.telegram.interfaces.polling import pipeline
-from dff.utils.testing.common import check_env_var
 
 
 @pytest.fixture(scope="session")
 def env_var_presence():
-    yield check_env_var("BOT_TOKEN"), check_env_var("TG_API_ID"), check_env_var("TG_API_HASH")
+    token = os.getenv("BOT_TOKEN")
+    api_id = os.getenv("TG_API_ID")
+    api_hash = os.getenv("TG_API_HASH")
+    if not all([token, api_id, api_hash]):
+        raise ValueError("Env vars missing.")
+    yield token, api_id, api_hash
 
 
 @pytest.fixture(scope="session")

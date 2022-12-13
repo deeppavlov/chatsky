@@ -13,7 +13,6 @@ Here, we deploy a basic bot that only reacts to messages. For other message type
 see the other examples.
 """
 import os
-import sys
 
 import dff.core.engine.conditions as cnd
 from dff.core.engine.core import Context, Actor
@@ -22,7 +21,7 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from telebot.util import content_type_media
 
 from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
-from dff.utils.testing.common import check_env_var, set_framework_state
+from dff.utils.testing.common import set_framework_state
 
 db = dict()
 # You can use any other type from `db_connector`.
@@ -52,7 +51,10 @@ script = {
             RESPONSE: "Sorry, I can not talk about music now.",
             TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
         },
-        "node4": {RESPONSE: "bye", TRANSITIONS: {"node1": cnd.regexp(r".*(restart|start|start again).*")}},
+        "node4": {
+            RESPONSE: "bye",
+            TRANSITIONS: {"node1": cnd.regexp(r".*(restart|start|start again).*")},
+        },
         "fallback_node": {
             RESPONSE: "Ooops",
             TRANSITIONS: {"node1": cnd.true()},
@@ -60,7 +62,11 @@ script = {
     }
 }
 
-actor = Actor(script, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node"))
+actor = Actor(
+    script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 
 # The content_type parameter is set to the `content_type_media` constant,
@@ -73,7 +79,7 @@ def dialog_handler(update):
     | If you need to need to process other updates in addition to messages,
     | just stack the corresponding handler decorators on top of the function.
 
-    update: Any Telegram update. What types you process depends on the decorators you stack upon the handler.
+    update: Any Telegram update.
     """
     # retrieve or create a context for the user
     user_id = (vars(update).get("from_user")).id
@@ -98,9 +104,7 @@ def dialog_handler(update):
 
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    try:
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    else:
         bot.infinity_polling()
-    except KeyboardInterrupt:
-        print("Stopping bot")
-        sys.exit(0)

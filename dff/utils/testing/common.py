@@ -1,4 +1,3 @@
-import sys
 from os import getenv
 from typing import Callable, Tuple, Any, Optional
 from uuid import uuid4
@@ -25,12 +24,6 @@ def set_framework_state(ctx: Context, state_key: str, update: Any, inner_key: st
     else:
         ctx.framework_states[state_key] = update
     return ctx
-
-
-def check_env_var(env_var: str):
-    if not getenv(env_var):
-        print(f"{env_var} variable needs to be set to continue")
-        sys.exit(1)
 
 
 def is_interactive_mode() -> bool:

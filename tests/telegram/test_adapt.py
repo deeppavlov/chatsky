@@ -2,6 +2,7 @@ import json
 import pytest
 import time
 import datetime
+import os
 
 from io import IOBase
 from pathlib import Path
@@ -23,6 +24,10 @@ from dff.connectors.messenger.telegram.types import (
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
 from dff.connectors.messenger.telegram.utils import open_io, close_io
 
+BOT_TOKEN = os.getenv("BOT_TOKEN")
+TG_API_ID = os.getenv("TG_API_ID")
+TG_API_HASH = os.getenv("TG_API_HASH")
+
 
 def reiterate_response(bot, user, message):
     counter = 0
@@ -38,6 +43,8 @@ def reiterate_response(bot, user, message):
                 break
 
 
+@pytest.mark.skipif(not BOT_TOKEN, "`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, "TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["ui", "markup_type", "button_type"],
@@ -77,12 +84,13 @@ async def test_adapt_buttons(ui, button_type, markup_type, tg_client, basic_bot,
     print(telegram_response.ui.keyboard.keyboard)
     assert len(telegram_response.ui.keyboard.keyboard) == 2
     reiterate_response(basic_bot, user_id, telegram_response)
-    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, offset_date=minute_ago)
     assert messages
 
 
+@pytest.mark.skipif(not BOT_TOKEN, "`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, "TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["ui"],
@@ -96,12 +104,13 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui
     reiterate_response(basic_bot, user_id, telegram_response)
-    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, offset_date=minute_ago)
     assert messages
 
 
+@pytest.mark.skipif(not BOT_TOKEN, "`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, "TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["generic_response", "prop", "filter_type"],
@@ -133,13 +142,14 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
     assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
     assert telegram_prop.source == generic_prop.source
     reiterate_response(basic_bot, user_id, telegram_response)
-    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, filter=filter_type, offset_date=minute_ago)
     assert messages
     assert len(messages) > 0
 
 
+@pytest.mark.skipif(not BOT_TOKEN, "`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, "TG credentials missing")
 @pytest.mark.asyncio
 async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
     generic_response = Response(
@@ -158,7 +168,6 @@ async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
     assert isinstance(telegram_response.attachments.files[0], types.InputMediaPhoto)
     assert telegram_response.attachments.files[0].media == generic_response.attachments.files[0].source
     assert telegram_response.attachments.files[0].caption == generic_response.attachments.files[0].title
-    # basic_bot.send_response(user_id, telegram_response)
     reiterate_response(basic_bot, user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, filter=InputMessagesFilterPhotos, offset_date=minute_ago)
@@ -166,6 +175,8 @@ async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
     assert len(messages) > 0
 
 
+@pytest.mark.skipif(not BOT_TOKEN, "`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, "TG credentials missing")
 @pytest.mark.asyncio
 async def test_location(basic_bot, user_id, tg_client, bot_id):
     generic_response = Response(text="location", location=Location(longitude=39.0, latitude=43.0))
@@ -173,13 +184,13 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
     assert telegram_response.text == generic_response.text
     assert telegram_response.location
     reiterate_response(basic_bot, user_id, telegram_response)
-    # basic_bot.send_response(user_id, telegram_response)
     minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
     messages = await tg_client.get_messages(bot_id, None, filter=InputMessagesFilterGeo, offset_date=minute_ago)
     assert messages
     assert len(messages) > 0
 
 
+@pytest.mark.skipif(not BOT_TOKEN, "`BOT_TOKEN` missing")
 def test_adapt_error(basic_bot, user_id):
     with pytest.raises(TypeError) as e:
         basic_bot.send_response(user_id, 1.2)

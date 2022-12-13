@@ -7,6 +7,7 @@ This example shows how to use generic classes from dff.
 Here, we show how to process miscellaneous media.
 Aside from pictures, you can also send and receive videos, documents, audio files, and locations.
 """
+# flake8: noqa: E501
 import logging
 import os
 
@@ -16,10 +17,14 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot import types
 
-from dff.connectors.messenger.telegram import PollingTelegramInterface, TelegramMessenger, TELEGRAM_STATE_KEY
+from dff.connectors.messenger.telegram import (
+    PollingTelegramInterface,
+    TelegramMessenger,
+    TELEGRAM_STATE_KEY,
+)
 from dff.core.pipeline import Pipeline
 from dff.connectors.messenger.generics import Response, Image, Attachments
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -54,7 +59,11 @@ script = {
         "start": {RESPONSE: Response(text=""), TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
         "fallback": {
             RESPONSE: "Finishing test, send /restart command to restart",
-            TRANSITIONS: {("pics", "ask_picture"): messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("pics", "ask_picture"): messenger.cnd.message_handler(
+                    commands=["start", "restart"]
+                )
+            },
         },
     },
     "pics": {
@@ -64,10 +73,14 @@ script = {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
                         messenger.cnd.message_handler(content_types=["photo"]),
-                        messenger.cnd.message_handler(func=doc_is_photo, content_types=["document"]),
+                        messenger.cnd.message_handler(
+                            func=doc_is_photo, content_types=["document"]
+                        ),
                     ]
                 ),
-                ("pics", "send_many", 1.0): messenger.cnd.message_handler(content_types=["sticker"]),
+                ("pics", "send_many", 1.0): messenger.cnd.message_handler(
+                    content_types=["sticker"]
+                ),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
@@ -90,10 +103,14 @@ script = {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
                         messenger.cnd.message_handler(content_types=["photo"]),
-                        messenger.cnd.message_handler(func=doc_is_photo, content_types=["document"]),
+                        messenger.cnd.message_handler(
+                            func=doc_is_photo, content_types=["document"]
+                        ),
                     ]
                 ),
-                ("pics", "send_many", 1.0): messenger.cnd.message_handler(content_types=["sticker"]),
+                ("pics", "send_many", 1.0): messenger.cnd.message_handler(
+                    content_types=["sticker"]
+                ),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
@@ -126,8 +143,9 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    if is_interactive_mode():
-        run_interactive_mode(pipeline)
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    elif is_interactive_mode():
+        run_interactive_mode(pipeline)  # run in an interactive shell
     else:
-        pipeline.run()
+        pipeline.run()  # run in telegram

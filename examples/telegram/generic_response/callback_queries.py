@@ -14,9 +14,14 @@ from telebot import types
 import dff.core.engine.conditions as cnd
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 from dff.core.pipeline import Pipeline
-from dff.connectors.messenger.telegram import PollingTelegramInterface, TelegramMessenger, TelegramUI, TelegramButton
+from dff.connectors.messenger.telegram import (
+    PollingTelegramInterface,
+    TelegramMessenger,
+    TelegramUI,
+    TelegramButton,
+)
 from dff.connectors.messenger.generics import Response, Keyboard, Button
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.DEBUG)
@@ -28,7 +33,7 @@ messenger = TelegramMessenger(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
 """
 The replies below use generic classes.
 
-When creating a UI, you can use both generic (`Keyboard`) and telegram-specific (`TelegramUI`) classes.
+You can use both generic (`Keyboard`) and telegram-specific (`TelegramUI`) classes.
 
 `Keyboard` does not include all the options that are available in Telegram,
 so an InlineKeyboard (see Telegram API) will be created by default.
@@ -50,7 +55,11 @@ script = {
         },
         "fallback": {
             RESPONSE: Response(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {("general", "keyboard"): messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("general", "keyboard"): messenger.cnd.message_handler(
+                    commands=["start", "restart"]
+                )
+            },
         },
     },
     "general": {
@@ -58,16 +67,20 @@ script = {
             RESPONSE: Response(
                 **{
                     "text": "Starting test! What's 9 + 10?",
-                    # Here, we use a generic keyboard class that will be compatible with any other dff add-on.
+                    # Here, we use a generic keyboard class.
                     # Compare with the next script node.
-                    "ui": Keyboard(buttons=[Button(text="19", payload="19"), Button(text="21", payload="21")]),
+                    "ui": Keyboard(
+                        buttons=[Button(text="19", payload="19"), Button(text="21", payload="21")]
+                    ),
                 }
             ),
             TRANSITIONS: {
                 ("general", "native_keyboard"): messenger.cnd.callback_query_handler(
                     func=lambda call: call.data == "19"
                 ),
-                ("general", "fail"): messenger.cnd.callback_query_handler(func=lambda call: call.data == "21"),
+                ("general", "fail"): messenger.cnd.callback_query_handler(
+                    func=lambda call: call.data == "21"
+                ),
             },
         },
         "native_keyboard": {
@@ -78,19 +91,26 @@ script = {
                     # They derive from the generic ones and include more options,
                     # e.g. simple keyboard or inline keyboard.
                     "ui": TelegramUI(
-                        buttons=[TelegramButton(text="5", payload="5"), TelegramButton(text="4", payload="4")],
+                        buttons=[
+                            TelegramButton(text="5", payload="5"),
+                            TelegramButton(text="4", payload="4"),
+                        ],
                         is_inline=False,
                         row_width=4,
                     ),
                 }
             ),
             TRANSITIONS: {
-                ("general", "success", 1.2): messenger.cnd.message_handler(func=lambda msg: msg.text == "4"),
+                ("general", "success", 1.2): messenger.cnd.message_handler(
+                    func=lambda msg: msg.text == "4"
+                ),
                 ("general", "fail", 1.0): cnd.true(),
             },
         },
         "success": {
-            RESPONSE: Response(**{"text": "Success!", "ui": TelegramUI(keyboard=types.ReplyKeyboardRemove())}),
+            RESPONSE: Response(
+                **{"text": "Success!", "ui": TelegramUI(keyboard=types.ReplyKeyboardRemove())}
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
@@ -116,8 +136,9 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    if is_interactive_mode():
-        run_interactive_mode(pipeline)
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    elif is_interactive_mode():
+        run_interactive_mode(pipeline)  # run in an interactive shell
     else:
-        pipeline.run()
+        pipeline.run()  # run in telegram

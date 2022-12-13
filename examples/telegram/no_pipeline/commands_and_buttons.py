@@ -9,7 +9,6 @@ As in other cases, you only need one handler, as the logic is handled by the act
 and the script.
 """
 import os
-import sys
 from typing import Optional
 
 import dff.core.engine.conditions as cnd
@@ -20,7 +19,7 @@ from telebot import types
 from telebot.util import content_type_media
 
 from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
-from dff.utils.testing.common import check_env_var, set_framework_state
+from dff.utils.testing.common import set_framework_state
 
 db = dict()
 # You can use any other type from `db_connector`.
@@ -46,21 +45,33 @@ script = {
         },
         "fallback": {
             RESPONSE: "Finishing test, send /restart command to restart",
-            TRANSITIONS: {("general", "keyboard"): bot.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("general", "keyboard"): bot.cnd.message_handler(commands=["start", "restart"])
+            },
         },
     },
     "general": {
         "keyboard": {
             RESPONSE: {
                 "message": "What's 2 + 2?",
-                "markup": {0: {"text": "4", "callback_data": "4"}, 1: {"text": "5", "callback_data": "5"}},
+                "markup": {
+                    0: {"text": "4", "callback_data": "4"},
+                    1: {"text": "5", "callback_data": "5"},
+                },
             },
             TRANSITIONS: {
-                ("general", "success"): bot.cnd.callback_query_handler(func=lambda call: call.data == "4"),
-                ("general", "fail"): bot.cnd.callback_query_handler(func=lambda call: call.data == "5"),
+                ("general", "success"): bot.cnd.callback_query_handler(
+                    func=lambda call: call.data == "4"
+                ),
+                ("general", "fail"): bot.cnd.callback_query_handler(
+                    func=lambda call: call.data == "5"
+                ),
             },
         },
-        "success": {RESPONSE: {"message": "Success!", "markup": None}, TRANSITIONS: {("root", "fallback"): cnd.true()}},
+        "success": {
+            RESPONSE: {"message": "Success!", "markup": None},
+            TRANSITIONS: {("root", "fallback"): cnd.true()},
+        },
         "fail": {
             RESPONSE: {"message": "Incorrect answer, try again", "markup": None},
             TRANSITIONS: {("general", "keyboard"): cnd.true()},
@@ -105,13 +116,13 @@ def handler(update):
     if isinstance(response, str):
         bot.send_message(update.from_user.id, response)
     elif isinstance(response, dict):
-        bot.send_message(update.from_user.id, response["message"], reply_markup=get_markup(response["markup"]))
+        bot.send_message(
+            update.from_user.id, response["message"], reply_markup=get_markup(response["markup"])
+        )
 
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    try:
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    else:
         bot.infinity_polling()
-    except KeyboardInterrupt:
-        print("Stopping bot")
-        sys.exit(0)

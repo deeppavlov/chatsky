@@ -15,20 +15,16 @@ import os
 from dff.connectors.messenger.telegram.interface import WebhookTelegramInterface
 from dff.connectors.messenger.telegram.messenger import TelegramMessenger
 
-from flask import Flask
-
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
-
-app = Flask(__name__)
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 # Like Telebot, TelegramMessenger only requires a token to run.
 # However, all parameters from the Telebot class can be passed as keyword arguments.
 messenger = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
 
 # Setting up a webhook requires a messenger and a web application instance.
-interface = WebhookTelegramInterface(messenger=messenger, app=app)
+interface = WebhookTelegramInterface(messenger=messenger)
 
 pipeline = Pipeline.from_script(
     script=TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
@@ -39,8 +35,9 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    if is_interactive_mode():
-        run_interactive_mode(pipeline)
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    elif is_interactive_mode():
+        run_interactive_mode(pipeline)  # run in an interactive shell
     else:
-        pipeline.run()
+        pipeline.run()  # run in telegram

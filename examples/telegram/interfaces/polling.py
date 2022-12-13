@@ -14,7 +14,7 @@ import os
 from dff.connectors.messenger.telegram.interface import PollingTelegramInterface, TelegramMessenger
 from dff.core.pipeline import Pipeline
 
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode, check_env_var
+from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
 # Like Telebot, TelegramMessenger only requires a token to run.
@@ -33,8 +33,9 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    if is_interactive_mode():
-        run_interactive_mode(pipeline)
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    elif is_interactive_mode():
+        run_interactive_mode(pipeline)  # run in an interactive shell
     else:
-        pipeline.run()
+        pipeline.run()  # run in telegram

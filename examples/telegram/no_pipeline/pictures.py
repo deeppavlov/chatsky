@@ -7,10 +7,10 @@ This module demonstrates how to use the TelegramConnector without the `pipeline`
 Here, we show, how you can receive and send miscellaneous media.
 This can be achieved with a single handler function.
 """
+# flake8: noqa: E501
 import os
-import sys
 
-from dff.connectors.messenger.telegram.local_types import TelegramResponse
+from dff.connectors.messenger.telegram.types import TelegramResponse
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.engine.core import Context, Actor
 from dff.core.engine import conditions as cnd
@@ -19,7 +19,7 @@ from telebot import types
 from telebot.util import content_type_media
 
 from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
-from dff.utils.testing.common import check_env_var, set_framework_state
+from dff.utils.testing.common import set_framework_state
 
 db = dict()
 # You can use any other type from `db_connector`.
@@ -48,7 +48,9 @@ script = {
         "start": {RESPONSE: "", TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
         "fallback": {
             RESPONSE: "Finishing test, send /restart command to restart",
-            TRANSITIONS: {("pics", "ask_picture"): bot.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("pics", "ask_picture"): bot.cnd.message_handler(commands=["start", "restart"])
+            },
         },
     },
     "pics": {
@@ -129,9 +131,7 @@ def handler(update):
 
 
 if __name__ == "__main__":
-    check_env_var("BOT_TOKEN")
-    try:
+    if not os.getenv("BOT_TOKEN"):
+        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    else:
         bot.infinity_polling()
-    except KeyboardInterrupt:
-        print("Stopping bot")
-        sys.exit(0)
