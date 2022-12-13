@@ -3,10 +3,10 @@
 # 2. Commands and Buttons
 
 
-This module demonstrates how to use the TelegramConnector without the `pipeline` API.
+This example demonstrates how to use the TelegramConnector without the `pipeline` API.
 
-Here, we show how you can integrate command and button reactions into your script.
-As in other cases, you only need one handler, as the logic is handled by the actor
+This shows how you can integrate command and button reactions into your script.
+As in other cases, you only need one handler, since the logic is handled by the actor
 and the script.
 """
 
@@ -25,20 +25,19 @@ from telebot.util import content_type_media
 from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
 from dff.utils.testing.common import set_framework_state
 
-db = dict()
-# You can use any other type from `db_connector`.
+db = dict()  # You can use any other type from `db_connector`.
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %% [markdown]
 """
-You can handle various values inside your script.
+You can handle various values inside your script:
 
-Use bot.cnd.message_handler to create conditions for message values.
-Use bot.cnd.callback_query_handler to create conditions depending on the query values.
-The signature of those functions is equivalent to that of the `telebot` methods.
+* Use `bot.cnd.message_handler` to create conditions for message values.
+* Use `bot.cnd.callback_query_handler` to create conditions depending on the query values.
 
+The signature of these functions is equivalent to the signature of the `telebot` methods.
 """
 
 

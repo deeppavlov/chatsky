@@ -2,15 +2,15 @@
 """
 # 3. Pictures
 
-This module demonstrates how to use the TelegramConnector without the `pipeline` API.
+This example demonstrates how to use the TelegramConnector without the `pipeline` API.
 
-Here, we show, how you can receive and send miscellaneous media.
+It shows how you can receive and send miscellaneous media.
 This can be achieved with a single handler function.
 """
-# flake8: noqa: E501
 
 
 # %%
+# flake8: noqa: E501
 import os
 
 from dff.connectors.messenger.telegram.types import TelegramResponse
@@ -24,9 +24,9 @@ from telebot.util import content_type_media
 from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
 from dff.utils.testing.common import set_framework_state
 
-db = dict()
-# You can use any other type from `db_connector`.
+db = dict()  # You can use any other type from `db_connector`.
 
+# kitten picture info:
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
@@ -44,8 +44,7 @@ bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 # %% [markdown]
 """
-Use bot.cnd.message_handler to catch and respond to images.
-
+Use `bot.cnd.message_handler` to catch and respond to images.
 It can be achieved by passing a function to the `func` parameter or filtering
 messages by their `content_type`.
 """
@@ -105,14 +104,15 @@ actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fa
 
 # %% [markdown]
 """
-While most of the time you will be using only one handler to iterate over your script,
-you can always create a separate function that will take care of additional tasks.
+Although in most cases it makes sense to use only one handler to iterate over the script,
+you can always create a separate function that will perform additional tasks.
 """
 
 
 # %%
 def extract_data(message):
-    """A function to extract data with"""
+    """A function for extracting data."""
+
     if not message.photo and not message.document:
         return
     photo = message.document or message.photo[-1]

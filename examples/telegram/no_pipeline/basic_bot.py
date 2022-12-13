@@ -2,14 +2,14 @@
 """
 # 1. Basic Bot
 
-This module demonstrates how to use the TelegramConnector without the `pipeline` API.
+This example shows how to use the TelegramConnector without the `pipeline` API.
 
-This approach remains much closer to the usual workflow of pytelegrambotapi developers.
+This approach is much closer to the usual pytelegrambotapi developer workflow.
 You create a 'bot' (TelegramMessenger) and define handlers that react to messages.
-The conversation logic is in your script, so you only need one handler most of the time.
-Go for it, if you need a quick prototype or have no interest in using the `pipeline` API.
+The conversation logic is in your script, so in most cases you only need one handler.
+Use it if you need a quick prototype or aren't interested in using the `pipeline` API.
 
-Here, we deploy a basic bot that only reacts to messages. For other message types and triggers
+Here, we deploy a basic bot that reacts only to messages. For other message types and triggers
 see the other examples.
 """
 
@@ -26,15 +26,14 @@ from telebot.util import content_type_media
 from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
 from dff.utils.testing.common import set_framework_state
 
-db = dict()
-# You can use any other type from `db_connector`.
+db = dict()  # You can use any other type from `db_connector`.
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %% [markdown]
 """
-Here, we use a standard script without any Telegram-specific conversation logic.
+Here we use a standard script without any Telegram-specific conversation logic.
 This is enough to get a bot up and running.
 """
 
@@ -80,12 +79,11 @@ actor = Actor(
 
 # %% [markdown]
 """
-| Standard handler that replies with `Actor` responses.
+Standard handler that replies with `Actor` responses.
+If you need to process other updates in addition to messages,
+just stack the corresponding handler decorators on top of the function.
 
-| If you need to need to process other updates in addition to messages,
-| just stack the corresponding handler decorators on top of the function.
-
-The content_type parameter is set to the `content_type_media` constant,
+The `content_type` parameter is set to the `content_type_media` constant,
 so that the bot can reply to images, stickers, etc.
 """
 
@@ -108,12 +106,11 @@ def dialog_handler(update):
     response = updated_context.last_response
     if isinstance(response, str):
         bot.send_message(update.from_user.id, response)
-    # optionally provide conditions to use other response methods
+    # Optionally provide conditions to use other response methods.
     # elif isinstance(response, bytes):
     #     messenger.send_document(update.from_user.id, response)
 
-    # save the context
-    db[user_id] = updated_context
+    db[user_id] = updated_context  # Save the context.
 
 
 if __name__ == "__main__":
