@@ -11,7 +11,7 @@ dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator
 @pytest.mark.parametrize(
     "example_module_name",
     [
-        "1_basic_example",
+        "1_basics",
         "2_pre_and_post_processors",
         "3_pipeline_dict_with_services_basic",
         "3_pipeline_dict_with_services_full",
