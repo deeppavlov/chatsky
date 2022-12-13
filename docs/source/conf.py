@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 
 from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
 
@@ -15,7 +16,7 @@ copyright = "2021, Denis Kuznetsov"
 author = "Denis Kuznetsov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.10.1"
+release = "0.1.0rc0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,7 +46,7 @@ suppress_warnings = ["image.nonlocal_uri"]
 source_suffix = ".rst"
 master_doc = "index"
 
-version = "0.10.1"
+version = re.match(r"^\d\.\d.\d", release).group()
 language = "en"
 
 pygments_style = "default"
