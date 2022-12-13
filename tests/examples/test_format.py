@@ -5,10 +5,7 @@ import pytest
 
 
 dff_examples_dir = pathlib.Path(__file__).parent.parent.parent / "examples"
-all_dff_example_py_files = dff_examples_dir.glob("./**/*.py")
-telegram_example_py_files = dff_examples_dir.glob("./telegram/**/*.py")
-# remove files with telegram-specific logic
-dff_example_py_files = set(all_dff_example_py_files) - set(telegram_example_py_files)
+dff_example_py_files = dff_examples_dir.glob("./**/*.py")
 
 
 patterns = [
