@@ -1,12 +1,12 @@
+# %% [markdown]
 """
-Pictures
-==========
+# 2. Pictures
 
-This example shows how to use generic classes from dff.
-
-Here, we show how to process miscellaneous media.
-Aside from pictures, you can also send and receive videos, documents, audio files, and locations.
+This example shows how to process miscellaneous media and use generic classes from dff.
+In addition to pictures, you can also send and receive videos, documents, audio files, and locations.
 """
+
+# %%
 # flake8: noqa: E501
 import os
 
@@ -25,6 +25,8 @@ from dff.core.pipeline import Pipeline
 from dff.connectors.messenger.generics import Response, Image, Attachments
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
+
+# %%
 # kitten picture info:
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
@@ -35,21 +37,27 @@ kitten_url = (
     f"&force=true&w={kitten_width}"
 )
 
+
+# %% [markdown]
 """
 To detect media, write a function that processes Telebot types, like `Message`.
 This function will be passed to `message_handler` in the script.
 """
 
 
+# %%
 def doc_is_photo(message: types.Message):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
+# %% [markdown]
 """
 To send media, pass the `Response` class to the `RESPONSE` section of a node.
 Both local files and links to media files can be processed.
 """
 
+
+# %%
 # Like Telebot, TelegramMessenger only requires a token to run.
 # However, all parameters from the Telebot class can be passed as keyword arguments.
 messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
@@ -85,14 +93,14 @@ script = {
             },
         },
         "send_one": {
-            # An HTTP path or a path to a local file can be used here
+            # An HTTP path or a path to a local file can be used here.
             RESPONSE: Response(text="Here's my picture!", image=Image(source=kitten_url)),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
             RESPONSE: Response(
                 text="Look at my pictures",
-                # An HTTP path or a path to a local file can be used here
+                # An HTTP path or a path to a local file can be used here.
                 attachments=Attachments(files=[Image(source=kitten_url)] * 2),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
@@ -118,8 +126,7 @@ script = {
 }
 
 
-def extract_data(ctx: Context, actor: Actor):
-    """A function to extract data with"""
+def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
     message = ctx.framework_states[TELEGRAM_STATE_KEY].get("data")
     if not message or (not message.photo and not doc_is_photo(message)):
         return ctx
@@ -133,6 +140,8 @@ def extract_data(ctx: Context, actor: Actor):
 
 interface = PollingTelegramInterface(messenger=messenger)
 
+
+# %%
 pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
