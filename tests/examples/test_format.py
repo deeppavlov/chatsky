@@ -31,7 +31,11 @@ def notebook_start_checker(dff_example_py_file: pathlib.Path):
     result = start_pattern.search("".join(file_lines))
     if result is None:
         raise Exception(
-            f"Example `{dff_example_py_file.relative_to(dff_examples_dir.parent)}` doesn't start as a notebook."
+            (
+                f"Example `{dff_example_py_file.relative_to(dff_examples_dir.parent)}` "
+                + "does not have an initial markdown section. Notebook header should be prefixed "
+                + "with a single '#'."
+            )
         )
     else:
         return result.pos == 0
@@ -44,4 +48,4 @@ format_checkers = [regexp_format_checker, notebook_start_checker]
 def test_format(dff_example_py_file: pathlib.Path):
     current_path = dff_example_py_file.relative_to(dff_examples_dir.parent)
     for checker in format_checkers:
-        assert checker(dff_example_py_file), f"Example {current_path} didn't pass example checks!"
+        assert checker(dff_example_py_file), f"Example {current_path} didn't pass formatting checks!"

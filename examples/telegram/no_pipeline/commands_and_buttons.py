@@ -1,6 +1,7 @@
+# %% [markdown]
 """
-Commands and Buttons
-=====================
+# 2. Commands and Buttons
+
 
 This module demonstrates how to use the TelegramConnector without the `pipeline` API.
 
@@ -8,6 +9,9 @@ Here, we show how you can integrate command and button reactions into your scrip
 As in other cases, you only need one handler, as the logic is handled by the actor
 and the script.
 """
+
+
+# %%
 import os
 from typing import Optional
 
@@ -26,6 +30,8 @@ db = dict()
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
+
+# %% [markdown]
 """
 You can handle various values inside your script.
 
@@ -35,6 +41,8 @@ The signature of those functions is equivalent to that of the `telebot` methods.
 
 """
 
+
+# %%
 script = {
     "root": {
         "start": {
@@ -80,9 +88,11 @@ script = {
 }
 
 
+# %%
 actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 
+# %%
 def get_markup(data: Optional[dict]):
     if not data:
         return None
@@ -92,8 +102,14 @@ def get_markup(data: Optional[dict]):
     return markup
 
 
-# if you need to work with callback queries or other types
-# of queries, you can stack decorators upon the main handler
+# %% [markdown]
+"""
+If you need to work with callback queries or other types
+of queries, you can stack decorators upon the main handler.
+"""
+
+
+# %%
 @bot.callback_query_handler(func=lambda call: True)
 @bot.message_handler(func=lambda msg: True, content_types=content_type_media)
 def handler(update):

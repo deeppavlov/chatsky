@@ -1,6 +1,6 @@
+# %% [markdown]
 """
-Pictures
-========
+# 3. Pictures
 
 This module demonstrates how to use the TelegramConnector without the `pipeline` API.
 
@@ -8,6 +8,9 @@ Here, we show, how you can receive and send miscellaneous media.
 This can be achieved with a single handler function.
 """
 # flake8: noqa: E501
+
+
+# %%
 import os
 
 from dff.connectors.messenger.telegram.types import TelegramResponse
@@ -30,12 +33,16 @@ kitten_width = 640
 kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
 
 
+# %%
 def doc_is_photo(message: TelegramResponse):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
+# %%
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
+
+# %% [markdown]
 """
 Use bot.cnd.message_handler to catch and respond to images.
 
@@ -43,6 +50,8 @@ It can be achieved by passing a function to the `func` parameter or filtering
 messages by their `content_type`.
 """
 
+
+# %%
 script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
@@ -89,12 +98,19 @@ script = {
     },
 }
 
+
+# %%
 actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
-# While most of the time you will be using only one handler to iterate over your script,
-# you can always create a separate function that will take care of additional tasks.
+
+# %% [markdown]
+"""
+While most of the time you will be using only one handler to iterate over your script,
+you can always create a separate function that will take care of additional tasks.
+"""
 
 
+# %%
 def extract_data(message):
     """A function to extract data with"""
     if not message.photo and not message.document:
@@ -106,6 +122,7 @@ def extract_data(message):
         new_file.write(result)
 
 
+# %%
 @bot.message_handler(func=lambda msg: True, content_types=content_type_media)
 def handler(update):
     user_id = (vars(update).get("from_user")).id

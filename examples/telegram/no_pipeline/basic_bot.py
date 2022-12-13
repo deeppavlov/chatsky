@@ -1,6 +1,6 @@
+# %% [markdown]
 """
-Basic Bot
-==========
+# 1. Basic Bot
 
 This module demonstrates how to use the TelegramConnector without the `pipeline` API.
 
@@ -12,6 +12,9 @@ Go for it, if you need a quick prototype or have no interest in using the `pipel
 Here, we deploy a basic bot that only reacts to messages. For other message types and triggers
 see the other examples.
 """
+
+
+# %%
 import os
 
 import dff.core.engine.conditions as cnd
@@ -28,11 +31,15 @@ db = dict()
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
+
+# %% [markdown]
 """
 Here, we use a standard script without any Telegram-specific conversation logic.
 This is enough to get a bot up and running.
 """
 
+
+# %%
 script = {
     "greeting_flow": {
         "start_node": {
@@ -62,6 +69,8 @@ script = {
     }
 }
 
+
+# %%
 actor = Actor(
     script,
     start_label=("greeting_flow", "start_node"),
@@ -69,18 +78,22 @@ actor = Actor(
 )
 
 
-# The content_type parameter is set to the `content_type_media` constant,
-# so that the bot can reply to images, stickers, etc.
+# %% [markdown]
+"""
+| Standard handler that replies with `Actor` responses.
+
+| If you need to need to process other updates in addition to messages,
+| just stack the corresponding handler decorators on top of the function.
+
+The content_type parameter is set to the `content_type_media` constant,
+so that the bot can reply to images, stickers, etc.
+"""
+
+
+# %%
 @bot.message_handler(func=lambda message: True, content_types=content_type_media)
 def dialog_handler(update):
-    """
-    | Standard handler that replies with `Actor` responses.
 
-    | If you need to need to process other updates in addition to messages,
-    | just stack the corresponding handler decorators on top of the function.
-
-    update: Any Telegram update.
-    """
     # retrieve or create a context for the user
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
