@@ -1,11 +1,13 @@
+# %% [markdown]
 """
-Callback Queries
-=================
+# 1. Callback Queries
+
 
 This example shows how to use generic classes from dff.
-
-Here, we use Telegram API's callback queries and buttons.
+Here we use Telegram API's callback queries and buttons.
 """
+
+# %%
 import os
 
 from telebot import types
@@ -22,25 +24,30 @@ from dff.connectors.messenger.telegram import (
 from dff.connectors.messenger.generics import Response, Keyboard, Button
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
+
+# %%
 # Like Telebot, TelegramMessenger only requires a token to run.
 # However, all parameters from the Telebot class can be passed as keyword arguments.
 messenger = TelegramMessenger(token=os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
+
+# %% [markdown]
 """
 The replies below use generic classes.
-
 You can use both generic (`Keyboard`) and telegram-specific (`TelegramUI`) classes.
 
-`Keyboard` does not include all the options that are available in Telegram,
+* `Keyboard` does not include all the options that are available in Telegram,
 so an InlineKeyboard (see Telegram API) will be created by default.
 
-`TelegramUI` gives you more freedom in terms of managing the interface.
+* `TelegramUI` gives you more freedom in terms of managing the interface.
 You can configure the keyboard type using the parameter `is_inline`.
 
 If you want to remove the reply keyboard, pass an instance of telebot's `ReplyKeyboardRemove`
 to the `TelegramUI` class as the `keyboard` parameter (see below).
 """
 
+
+# %%
 script = {
     "root": {
         "start": {
@@ -123,6 +130,8 @@ script = {
 
 interface = PollingTelegramInterface(messenger=messenger)
 
+
+# %%
 pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
