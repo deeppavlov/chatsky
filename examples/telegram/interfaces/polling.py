@@ -1,13 +1,12 @@
 # %% [markdown]
 """
-# Polling
+# 1. Polling
 
 The following example shows how to integrate your bot with the Pipeline API.
 
 Assuming that you already have a script that you need to deploy, all you need to do
-is to instantiante a TelegramMessenger and pass it to an `Interface` class.
-
-This class uses `PollingTelegramInterface` for local deployment with no webhooks.
+is to instantiate a TelegramMessenger and pass it to an `Interface` class.
+This class uses `PollingTelegramInterface` for local deployment without webhooks.
 """
 
 
@@ -22,7 +21,8 @@ from dff.utils.testing.toy_script import TOY_SCRIPT
 
 
 # %% [markdown]
-"""Like Telebot, TelegramMessenger only requires a token to run.
+"""
+Like Telebot, TelegramMessenger only requires a token to run.
 However, all parameters from the Telebot class can be passed as keyword arguments.
 """
 
@@ -33,7 +33,7 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 # %% [markdown]
 """
-For polling, you only need a `TelegramMessenger` instance.
+You only need an instance of `TelegramMessenger` for polling.
 """
 
 
