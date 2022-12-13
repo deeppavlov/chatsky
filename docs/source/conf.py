@@ -1,13 +1,12 @@
 import os
 import sys
 
-from jupytext import jupytext
+from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
-
+from utils.notebook import add_installation_cell_into_py  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -39,6 +38,7 @@ extensions = [
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
 suppress_warnings = ["image.nonlocal_uri"]
@@ -59,11 +59,15 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["*.py", "**/_*.py"]
+exclude_patterns = ["*.py", "utils/*.py", "**/_*.py"]
 
 html_short_title = "None"
 
 # -- Options for HTML output -------------------------------------------------
+
+sphinx_gallery_conf = {
+    "promote_jupyter_magic": True,
+}
 
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
@@ -79,13 +83,12 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
+nbsphinx_custom_formats = {".py": add_installation_cell_into_py}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
 :github_url: deeppavlov/dialog_flow_framework
 """
-
 
 # Theme options
 html_theme_options = {
@@ -103,4 +106,19 @@ html_theme_options = {
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
+    generate_example_links_for_notebook_creation(
+        [
+            "examples/engine/*.py",
+            "examples/pipeline/*.py",
+            "examples/db_connector/*.py",
+            "examples/generics/*.py",
+        ]
+    )
+    regenerate_apiref(
+        [
+            ("dff.connectors.db", "db_connectors"),
+            ("dff.connectors.messenger", "messenger_interfaces"),
+            ("dff.core.engine", "engine"),
+            ("dff.core.pipeline", "pipeline"),
+        ]
+    )
