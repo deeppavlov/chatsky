@@ -1,7 +1,12 @@
+# %% [markdown]
 """
-1. Flask
-========
+# 8. JSON storage with web API
+
+This is an example of using JSON with web API.
 """
+
+
+# %%
 import pathlib
 
 from dff.core.pipeline import Pipeline
@@ -12,6 +17,8 @@ from flask import Flask, request
 
 from dff.connectors.db import connector_factory
 
+
+# %%
 app = Flask(__name__)
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
@@ -26,6 +33,7 @@ def respond():
     return {"response": str(context.last_response)}
 
 
+# %%
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,
     context_storage=db,
@@ -33,6 +41,8 @@ pipeline = Pipeline.from_script(
     fallback_label=("greeting_flow", "fallback_node"),
 )
 
+
+# %%
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
