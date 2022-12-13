@@ -45,6 +45,6 @@ jobs:
         env:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_API_ID: ${{ secrets.TG_API_ID }}
-          BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
         run: make test
         shell: bash
