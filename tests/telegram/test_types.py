@@ -76,7 +76,7 @@ def reiterate_response(bot, user, message):
         ),
     ],
 )
-async def test_adapt_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_id, bot_id):
+async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_id, bot_id):
     generic_response = Response(text="test", ui=ui)
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
@@ -151,7 +151,7 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
+async def test_attachments(basic_bot, user_id, tg_client, bot_id):
     generic_response = Response(
         text="test",
         attachments=Attachments(
@@ -191,7 +191,7 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-def test_adapt_error(basic_bot, user_id):
+def test_error(basic_bot, user_id):
     with pytest.raises(TypeError) as e:
         basic_bot.send_response(user_id, 1.2)
     assert e
