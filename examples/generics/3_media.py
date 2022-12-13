@@ -1,3 +1,11 @@
+# %% [markdown]
+"""
+# 3. Media
+
+"""
+
+
+# %%
 from typing import NamedTuple
 
 from dff.core.engine.core import Context
@@ -11,10 +19,17 @@ from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.utils.testing.response_comparers import generics_comparer
 
+
+# %%
+# kitten picture info:
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
-kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
+kitten_url = (
+    f"https://unsplash.com/photos/"
+    f"{kitten_id}/download?ixid={kitten_ixid}"
+    f"&force=true&w={kitten_width}"
+)
 
 toy_script = {
     "root": {
@@ -61,20 +76,29 @@ toy_script = {
 happy_path = (
     ("Hi", "Please, send me a picture url"),
     ("no", "I cannot find the picture. Please, try again."),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.png", "\nhere's my picture!\nAttachment size: 51706 bytes."),
+    (
+        "https://sun9-49.userapi.com/s/v1/if2/gpquN.png",
+        "\nhere's my picture!\nAttachment size: 51706 bytes.",
+    ),
     ("ok", "Final node reached, send any message to restart."),
     ("ok", "Please, send me a picture url"),
-    ("https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg", "\nLook at my pictures\nGrouped attachment size: 517060 bytes."),
+    (
+        "https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg",
+        "\nLook at my pictures\nGrouped attachment size: 517060 bytes.",
+    ),
     ("ok", "Final node reached, send any message to restart."),
 )
 
 
+# %%
 class CallbackRequest(NamedTuple):
     payload: str
 
 
 def process_request(ctx: Context):
-    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
+    last_request: str = (
+        ctx.last_request
+    )  # TODO: add _really_ nice ways to modify user request and response
     last_index = get_last_index(ctx.requests)
 
     ui = ctx.last_response and ctx.last_response.ui
@@ -82,14 +106,20 @@ def process_request(ctx: Context):
         try:
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+            raise ValueError(
+                "Type in the index of the correct option" "to choose from the buttons."
+            )
         ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
         return
     ctx.requests[last_index] = last_request
 
 
+# %%
 pipeline = Pipeline.from_script(
-    toy_script, start_label=("root", "start"), fallback_label=("root", "fallback"), pre_services=[process_request]
+    toy_script,
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
+    pre_services=[process_request],
 )
 
 if __name__ == "__main__":
