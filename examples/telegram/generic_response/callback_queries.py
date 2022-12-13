@@ -6,7 +6,6 @@ This example shows how to use generic classes from dff.
 
 Here, we use Telegram API's callback queries and buttons.
 """
-import logging
 import os
 
 from telebot import types
@@ -23,12 +22,9 @@ from dff.connectors.messenger.telegram import (
 from dff.connectors.messenger.generics import Response, Keyboard, Button
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
 # Like Telebot, TelegramMessenger only requires a token to run.
 # However, all parameters from the Telebot class can be passed as keyword arguments.
-messenger = TelegramMessenger(token=os.getenv("BOT_TOKEN", "SOMETOKEN"))
+messenger = TelegramMessenger(token=os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 """
 The replies below use generic classes.
@@ -136,8 +132,8 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    if not os.getenv("BOT_TOKEN"):
-        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    if not os.getenv("TG_BOT_TOKEN"):
+        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     elif is_interactive_mode():
         run_interactive_mode(pipeline)  # run in an interactive shell
     else:

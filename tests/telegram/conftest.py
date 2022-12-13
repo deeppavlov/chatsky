@@ -10,7 +10,7 @@ from examples.telegram.interfaces.polling import pipeline
 
 @pytest.fixture(scope="session")
 def env_var_presence():
-    token = os.getenv("BOT_TOKEN")
+    token = os.getenv("TG_BOT_TOKEN")
     api_id = os.getenv("TG_API_ID")
     api_hash = os.getenv("TG_API_HASH")
     if not all([token, api_id, api_hash]):

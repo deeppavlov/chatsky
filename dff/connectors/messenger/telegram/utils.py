@@ -13,11 +13,11 @@ from copy import copy
 from telebot import types
 
 TELEGRAM_STATE_KEY = "TELEGRAM_MESSENGER"
-_P = ParamSpec("_P")
-_R = TypeVar("_R")
+CallableParams = ParamSpec("CallableParams")
+ReturnType = TypeVar("ReturnType")
 
 
-def partialmethod(func: Callable[_P, _R], **part_kwargs) -> Callable[_P, _R]:
+def partialmethod(func: Callable[CallableParams, ReturnType], **part_kwargs) -> Callable[CallableParams, ReturnType]:
     """
     This function replaces the `partialmethod` implementation from functools.
     In contrast with the original class-based approach, it decorates the function, so we can use docstrings.
@@ -26,7 +26,7 @@ def partialmethod(func: Callable[_P, _R], **part_kwargs) -> Callable[_P, _R]:
     newfunc.__doc__ = func.__doc__.format(**part_kwargs)
 
     @wraps(newfunc)
-    def wrapper(self, *args: _P.args, **kwargs: _P.kwargs):
+    def wrapper(self, *args: CallableParams.args, **kwargs: CallableParams.kwargs):
         kwargs = {**kwargs, **part_kwargs}
         return newfunc(self, *args, **kwargs)
 

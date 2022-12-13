@@ -8,7 +8,6 @@ Here, we show how to process miscellaneous media.
 Aside from pictures, you can also send and receive videos, documents, audio files, and locations.
 """
 # flake8: noqa: E501
-import logging
 import os
 
 import dff.core.engine.conditions as cnd
@@ -26,14 +25,15 @@ from dff.core.pipeline import Pipeline
 from dff.connectors.messenger.generics import Response, Image, Attachments
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
-logger = logging.getLogger(__name__)
-logger.setLevel(logging.DEBUG)
-
+# kitten picture info:
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
-kitten_url = f"https://unsplash.com/photos/{kitten_id}/download?ixid={kitten_ixid}&force=true&w={kitten_width}"
-
+kitten_url = (
+    f"https://unsplash.com/photos/"
+    f"{kitten_id}/download?ixid={kitten_ixid}"
+    f"&force=true&w={kitten_width}"
+)
 
 """
 To detect media, write a function that processes Telebot types, like `Message`.
@@ -52,7 +52,7 @@ Both local files and links to media files can be processed.
 
 # Like Telebot, TelegramMessenger only requires a token to run.
 # However, all parameters from the Telebot class can be passed as keyword arguments.
-messenger = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 script = {
     "root": {
@@ -143,8 +143,8 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    if not os.getenv("BOT_TOKEN"):
-        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    if not os.getenv("TG_BOT_TOKEN"):
+        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     elif is_interactive_mode():
         run_interactive_mode(pipeline)  # run in an interactive shell
     else:

@@ -24,7 +24,7 @@ from dff.connectors.messenger.telegram.types import (
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
 from dff.connectors.messenger.telegram.utils import open_io, close_io
 
-BOT_TOKEN = os.getenv("BOT_TOKEN")
+TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
 TG_API_HASH = os.getenv("TG_API_HASH")
 
@@ -43,7 +43,7 @@ def reiterate_response(bot, user, message):
                 break
 
 
-@pytest.mark.skipif(not BOT_TOKEN, reason="`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -89,7 +89,7 @@ async def test_adapt_buttons(ui, button_type, markup_type, tg_client, basic_bot,
     assert messages
 
 
-@pytest.mark.skipif(not BOT_TOKEN, reason="`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -109,7 +109,7 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     assert messages
 
 
-@pytest.mark.skipif(not BOT_TOKEN, reason="`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -148,7 +148,7 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
     assert len(messages) > 0
 
 
-@pytest.mark.skipif(not BOT_TOKEN, reason="`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
@@ -175,7 +175,7 @@ async def test_adapt_attachments(basic_bot, user_id, tg_client, bot_id):
     assert len(messages) > 0
 
 
-@pytest.mark.skipif(not BOT_TOKEN, reason="`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_location(basic_bot, user_id, tg_client, bot_id):
@@ -190,7 +190,7 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
     assert len(messages) > 0
 
 
-@pytest.mark.skipif(not BOT_TOKEN, reason="`BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 def test_adapt_error(basic_bot, user_id):
     with pytest.raises(TypeError) as e:
         basic_bot.send_response(user_id, 1.2)

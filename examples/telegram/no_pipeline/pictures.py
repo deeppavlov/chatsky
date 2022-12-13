@@ -34,7 +34,7 @@ def doc_is_photo(message: TelegramResponse):
     return message.document and message.document.mime_type == "image/jpeg"
 
 
-bot = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 """
 Use bot.cnd.message_handler to catch and respond to images.
@@ -131,7 +131,7 @@ def handler(update):
 
 
 if __name__ == "__main__":
-    if not os.getenv("BOT_TOKEN"):
-        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    if not os.getenv("TG_BOT_TOKEN"):
+        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     else:
         bot.infinity_polling()

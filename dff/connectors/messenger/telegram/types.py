@@ -67,7 +67,7 @@ class TelegramAttachments(TelegramDataModel):
     files: List[types.InputMedia] = Field(default_factory=list, min_items=2, max_items=10)
 
     @validator("files", pre=True, each_item=True, always=True)
-    def cast_to_input_media_type(cls, file: Any):
+    def to_input_media_type(cls, file: Any):
         tg_cls = None
 
         if isinstance(file, Image):

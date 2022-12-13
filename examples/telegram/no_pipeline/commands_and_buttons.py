@@ -24,7 +24,7 @@ from dff.utils.testing.common import set_framework_state
 db = dict()
 # You can use any other type from `db_connector`.
 
-bot = TelegramMessenger(os.getenv("BOT_TOKEN", "SOMETOKEN"))
+bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 """
 You can handle various values inside your script.
@@ -122,7 +122,7 @@ def handler(update):
 
 
 if __name__ == "__main__":
-    if not os.getenv("BOT_TOKEN"):
-        print("`BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    if not os.getenv("TG_BOT_TOKEN"):
+        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     else:
         bot.infinity_polling()

@@ -112,6 +112,7 @@ def setup(_):
             "examples/pipeline/*.py",
             "examples/db_connector/*.py",
             "examples/generics/*.py",
+            "examples/telegram/interfaces/*.py",
         ]
     )
     regenerate_apiref(
