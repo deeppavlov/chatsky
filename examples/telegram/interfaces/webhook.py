@@ -4,9 +4,8 @@
 
 The following example shows how to integrate your bot with the Pipeline API.
 
-Assuming that you already have a script that you need to deploy, all you need to do
-is to instantiante a TelegramMessenger and pass it to an `Interface` class.
-
+Assuming you already have a script to deploy. All you need to do
+is to instantiate a TelegramMessenger and pass it to an `Interface` class.
 This class uses `WebhookTelegramInterface` that makes your bot accessible
 through a public webhook.
 """
@@ -36,7 +35,7 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 # %% [markdown]
 """
-Setting up a webhook requires a messenger and a web application instance.
+To set up a webhook, you need a messenger and a web application instance.
 """
 
 
