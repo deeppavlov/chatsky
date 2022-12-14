@@ -2,7 +2,7 @@ import asyncio
 import logging
 from typing import Any, Union, List, Dict, Optional, Hashable
 
-from dff.context_storages import DBAbstractConnector
+from dff.context_storages import DBAbstractContextStorage
 from dff.script import Actor, Script, Context
 from dff.script import NodeLabel2Type
 from dff.utils.turn_caching import cache_clear
@@ -48,7 +48,7 @@ class Pipeline:
         self,
         components: ServiceGroupBuilder,
         messenger_interface: Optional[MessengerInterface] = None,
-        context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
+        context_storage: Optional[Union[DBAbstractContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[float] = None,
@@ -147,7 +147,7 @@ class Pipeline:
         script: Union[Script, Dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
-        context_storage: Optional[Union[DBAbstractConnector, Dict]] = None,
+        context_storage: Optional[Union[DBAbstractContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,

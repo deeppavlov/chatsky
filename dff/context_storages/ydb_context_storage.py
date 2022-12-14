@@ -1,8 +1,8 @@
 """
-ydb_connector
+ydb_context_storage
 ---------------------------
 
-| Provides the version of the :py:class:`.DBConnector` for YDB.
+| Provides the version of the :py:class:`.DBContextStorage` for YDB.
 
 """
 
@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 
 from dff.script import Context
 
-from .db_connector import DBConnector, threadsafe_method
+from .db_context_storage import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -23,9 +23,9 @@ except ImportError:
     ydb_available = False
 
 
-class YDBConnector(DBConnector):
+class YDBContextStorage(DBContextStorage):
     """
-    | Version of the :py:class:`.DBConnector` for YDB.
+    | Version of the :py:class:`.DBContextStorage` for YDB.
 
     Parameters
     -----------
@@ -39,7 +39,7 @@ class YDBConnector(DBConnector):
     """
 
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):
-        super(YDBConnector, self).__init__(path)
+        super(YDBContextStorage, self).__init__(path)
         protocol, netloc, self.database, _, _ = urlsplit(path)
         self.endpoint = "{}://{}".format(protocol, netloc)
         self.table_name = table_name

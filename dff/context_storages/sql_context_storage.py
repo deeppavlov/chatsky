@@ -1,8 +1,8 @@
 """
-sql_connector
+sql_context_storage
 ---------------------------
 
-| Provides the sql-based version of the :py:class:`.DBConnector`.
+| Provides the sql-based version of the :py:class:`.DBContextStorage`.
 | You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 
 """
@@ -11,7 +11,7 @@ import json
 
 from dff.script import Context
 
-from .db_connector import DBConnector, threadsafe_method
+from .db_context_storage import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -65,9 +65,9 @@ def import_insert_for_dialect(dialect: str):
     )
 
 
-class SQLConnector(DBConnector):
+class SQLContextStorage(DBContextStorage):
     """
-    | Sql-based version of the :py:class:`.DBConnector`.
+    | Sql-based version of the :py:class:`.DBContextStorage`.
     | Compatible with MySQL, Postgresql, Sqlite.
 
     Parameters
@@ -85,7 +85,7 @@ class SQLConnector(DBConnector):
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
-        super(SQLConnector, self).__init__(path)
+        super(SQLContextStorage, self).__init__(path)
 
         self._check_availability(custom_driver)
         self.engine = create_engine(self.full_path)

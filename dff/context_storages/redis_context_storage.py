@@ -1,7 +1,7 @@
 """
-redis_connector
+redis_context_storage
 ---------------------------
-Provides the redis-based version of the :py:class:`.DBConnector`.
+Provides the redis-based version of the :py:class:`.DBContextStorage`.
 """
 import json
 
@@ -14,13 +14,13 @@ except ImportError:
 
 from dff.script import Context
 
-from .db_connector import DBConnector, threadsafe_method
+from .db_context_storage import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 
-class RedisConnector(DBConnector):
+class RedisContextStorage(DBContextStorage):
     """
-    Implements :py:class:`.DBConnector` with `redis` as the database backend.
+    Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
     Parameters
     -----------
@@ -30,7 +30,7 @@ class RedisConnector(DBConnector):
     """
 
     def __init__(self, path: str):
-        super(RedisConnector, self).__init__(path)
+        super(RedisContextStorage, self).__init__(path)
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")
             raise ImportError("`redis` package is missing.\n" + install_suggestion)

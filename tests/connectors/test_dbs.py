@@ -5,21 +5,21 @@ from platform import system
 
 from dff.context_storages import (
     connector_factory,
-    DBConnector,
+    DBContextStorage,
     get_protocol_install_suggestion,
-    JSONConnector,
-    PickleConnector,
-    ShelveConnector,
-    DBAbstractConnector,
-    SQLConnector,
+    JSONContextStorage,
+    PickleContextStorage,
+    ShelveContextStorage,
+    DBAbstractContextStorage,
+    SQLContextStorage,
     postgres_available,
     mysql_available,
     sqlite_available,
-    RedisConnector,
+    RedisContextStorage,
     redis_available,
-    MongoConnector,
+    MongoContextStorage,
     mongo_available,
-    YDBConnector,
+    YDBContextStorage,
     ydb_available,
 )
 
@@ -56,8 +56,8 @@ YDB_ACTIVE = ping_localhost(2136)
 
 
 def generic_test(db, testing_context, context_id):
-    assert isinstance(db, DBConnector)
-    assert isinstance(db, DBAbstractConnector)
+    assert isinstance(db, DBContextStorage)
+    assert isinstance(db, DBAbstractContextStorage)
     # perform cleanup
     db.clear()
     assert len(db) == 0
@@ -99,23 +99,23 @@ def test_protocol_suggestion(protocol, expected):
 
 
 def test_main(testing_file, testing_context, context_id):
-    assert issubclass(DBConnector, DBAbstractConnector)
+    assert issubclass(DBContextStorage, DBAbstractContextStorage)
     db = connector_factory(f"json://{testing_file}")
     generic_test(db, testing_context, context_id)
 
 
 def test_shelve(testing_file, testing_context, context_id):
-    db = ShelveConnector(f"shelve://{testing_file}")
+    db = ShelveContextStorage(f"shelve://{testing_file}")
     generic_test(db, testing_context, context_id)
 
 
 def test_json(testing_file, testing_context, context_id):
-    db = JSONConnector(f"json://{testing_file}")
+    db = JSONContextStorage(f"json://{testing_file}")
     generic_test(db, testing_context, context_id)
 
 
 def test_pickle(testing_file, testing_context, context_id):
-    db = PickleConnector(f"pickle://{testing_file}")
+    db = PickleContextStorage(f"pickle://{testing_file}")
     generic_test(db, testing_context, context_id)
 
 
@@ -125,7 +125,7 @@ def test_mongo(testing_context, context_id):
     if system() == "Windows":
         pytest.skip()
 
-    db = MongoConnector(
+    db = MongoContextStorage(
         "mongodb://{}:{}@localhost:27017/{}".format(
             os.getenv("MONGO_INITDB_ROOT_USERNAME"),
             os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
@@ -138,14 +138,14 @@ def test_mongo(testing_context, context_id):
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 def test_redis(testing_context, context_id):
-    db = RedisConnector("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
+    db = RedisContextStorage("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
     generic_test(db, testing_context, context_id)
 
 
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
 def test_postgres(testing_context, context_id):
-    db = SQLConnector(
+    db = SQLContextStorage(
         "postgresql://{}:{}@localhost:5432/{}".format(
             os.getenv("POSTGRES_USERNAME"),
             os.getenv("POSTGRES_PASSWORD"),
@@ -158,7 +158,7 @@ def test_postgres(testing_context, context_id):
 @pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
-    db = SQLConnector(f"sqlite:{separator}{testing_file}")
+    db = SQLContextStorage(f"sqlite:{separator}{testing_file}")
 
     generic_test(db, testing_context, context_id)
 
@@ -166,7 +166,7 @@ def test_sqlite(testing_file, testing_context, context_id):
 @pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
 def test_mysql(testing_context, context_id):
-    db = SQLConnector(
+    db = SQLContextStorage(
         "mysql+pymysql://{}:{}@localhost:3307/{}".format(
             os.getenv("MYSQL_USERNAME"),
             os.getenv("MYSQL_PASSWORD"),
@@ -179,7 +179,7 @@ def test_mysql(testing_context, context_id):
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
 def test_ydb(testing_context, context_id):
-    db = YDBConnector(
+    db = YDBContextStorage(
         "{}{}".format(
             os.getenv("YDB_ENDPOINT"),
             os.getenv("YDB_DATABASE"),

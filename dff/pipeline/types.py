@@ -2,7 +2,7 @@ from abc import ABC
 from enum import unique, Enum, auto
 from typing import Callable, Any, Union, Awaitable, Dict, List, Optional, NewType, Iterable, Hashable
 
-from dff.context_storages import DBAbstractConnector
+from dff.context_storages import DBAbstractContextStorage
 from dff.script import Context, Actor
 from typing_extensions import NotRequired, TypedDict
 
@@ -220,7 +220,7 @@ PipelineBuilder = TypedDict(
     "PipelineBuilder",
     {
         "messenger_interface": NotRequired[Optional[_ForwardProvider]],
-        "context_storage": NotRequired[Optional[Union[DBAbstractConnector, Dict]]],
+        "context_storage": NotRequired[Optional[Union[DBAbstractContextStorage, Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],

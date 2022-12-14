@@ -110,10 +110,10 @@ pip install dff[ydb]
 
 ```python
 from dff.script import Context, Actor
-from dff.context_storages import SQLConnector
+from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
-db = SQLConnector("postgresql://user:password@host:port/dbname")
+db = SQLContextStorage("postgresql://user:password@host:port/dbname")
 
 actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 

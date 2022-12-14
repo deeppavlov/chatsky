@@ -1,19 +1,19 @@
 """
-shelve_connector
+shelve_context_storage
 ---------------------------
-Provides the shelve-based version of the :py:class:`.DBConnector`.
+Provides the shelve-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
 from shelve import DbfilenameShelf
 
 from dff.script import Context
 
-from .db_connector import DBConnector
+from .db_context_storage import DBContextStorage
 
 
-class ShelveConnector(DBConnector):
+class ShelveContextStorage(DBContextStorage):
     """
-    Implements :py:class:`.DBConnector` with `shelve` as the driver.
+    Implements :py:class:`.DBContextStorage` with `shelve` as the driver.
 
     Parameters
     -----------
@@ -23,7 +23,7 @@ class ShelveConnector(DBConnector):
     """
 
     def __init__(self, path: str):
-        DBConnector.__init__(self, path)
+        DBContextStorage.__init__(self, path)
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
     def __del__(self):

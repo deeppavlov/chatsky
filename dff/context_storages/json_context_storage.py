@@ -1,13 +1,13 @@
 """
-json_connector
+json_context_storage
 ---------------------------
-Provides the json-based version of the :py:class:`.DBConnector`.
+Provides the json-based version of the :py:class:`.DBContextStorage`.
 """
 import os
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .db_connector import DBConnector, threadsafe_method
+from .db_context_storage import DBContextStorage, threadsafe_method
 from dff.script import Context
 
 
@@ -19,9 +19,9 @@ class SerializeableStorage(BaseModel, extra=Extra.allow):
         return vals
 
 
-class JSONConnector(DBConnector):
+class JSONContextStorage(DBContextStorage):
     """
-    Implements :py:class:`.DBConnector` with `json` as the storage format.
+    Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
     Parameters
     -----------
@@ -31,7 +31,7 @@ class JSONConnector(DBConnector):
     """
 
     def __init__(self, path: str):
-        DBConnector.__init__(self, path)
+        DBContextStorage.__init__(self, path)
 
         self._load()
 

@@ -1,9 +1,9 @@
 """
-db_connector
+db_context_storage
 ---------------------------
 | Base module. Provided classes:
-| Abstract connector interface :py:class:`.DBAbstractConnector`.
-| An intermediate class to inherit from: :py:class:`.DBConnector`
+| Abstract connector interface :py:class:`.DBAbstractContextStorage`.
+| An intermediate class to inherit from: :py:class:`.DBContextStorage`
 
 """
 import threading
@@ -12,9 +12,9 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 
-class DBAbstractConnector(ABC):
+class DBAbstractContextStorage(ABC):
     """
-    | An abstract interface for DF DB connectors. It includes the most essential methods of the python `dict` class.
+    | An abstract interface for DF DB context storages. It includes the most essential methods of the python `dict` class.
     | Can not be instantiated.
     """
 
@@ -50,10 +50,10 @@ class DBAbstractConnector(ABC):
         raise NotImplementedError
 
 
-class DBConnector(DBAbstractConnector):
+class DBContextStorage(DBAbstractContextStorage):
     """
     An intermediate class between the abstract connector interface,
-    :py:class:`.DBAbstractConnector`, and concrete implementations.
+    :py:class:`.DBAbstractContextStorage`, and concrete implementations.
 
     Parameters
     ----------
