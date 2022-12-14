@@ -8,7 +8,7 @@
 # %%
 from typing import NamedTuple
 
-from dff.script import Context, get_last_index, RESPONSE, TRANSITIONS
+from dff.script import Context, RESPONSE, TRANSITIONS, get_last_index
 from dff.script.conditions import std_conditions as cnd
 
 from dff.script.responses import Attachments, Image, Response
@@ -93,6 +93,8 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
+    last_index = get_last_index(ctx.requests)  # TODO: edit once Context setters are fixed
+
     ui = ctx.last_response and ctx.last_response.ui
     if ui and ctx.last_response.ui.buttons:
         try:
@@ -101,7 +103,7 @@ def process_request(ctx: Context):
             raise ValueError(
                 "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
+        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
 
 
 # %%

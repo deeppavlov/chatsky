@@ -110,7 +110,7 @@ def purify_request(ctx: Context):
 
 
 def cat_response2webpage(ctx: Context):
-    last_response = ctx.last_response
+    last_response = ctx.last_response  # TODO: edit once Context setters are fixed
     last_index = get_last_index(ctx.responses)
     ctx.responses[last_index] = construct_webpage_by_response(last_response)
 
@@ -139,7 +139,7 @@ pipeline_dict = {
 @app.route("/pipeline_web_interface")
 async def route():
     ctx_id = 0  # 0 will be current dialog (context) identification.
-    return messenger_interface.on_request(request, ctx_id).last_response
+    return messenger_interface.on_request(request.args["request"], ctx_id).last_response
 
 
 # %%

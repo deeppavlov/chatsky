@@ -117,9 +117,9 @@ def setup(_):
     )
     regenerate_apiref(
         [
-            ("dff.connectors.db", "db_connectors"),
-            ("dff.connectors.messenger", "messenger_interfaces"),
-            ("dff.core.engine", "engine"),
-            ("dff.core.pipeline", "pipeline"),
+            ("dff.context_storages", "context_storages"),
+            ("dff.messengers", "messenger_interfaces"),
+            ("dff.script.core", "engine"),
+            ("dff.pipeline", "pipeline"),
         ]
     )

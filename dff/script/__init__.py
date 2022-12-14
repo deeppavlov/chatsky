@@ -1,5 +1,5 @@
 from .core.actor import Actor  # noqa: F401
-from .core.context import Context, get_last_index  # noqa: F401
+from .core.context import Context, get_last_index  # noqa: F401 # TODO: remove get_last_index once Context setters are fixed
 from .core.keywords import *  # noqa: F401, F403
 from .core.normalization import (  # noqa: F401
     normalize_label,  # noqa: F401

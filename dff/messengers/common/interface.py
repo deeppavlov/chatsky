@@ -6,7 +6,7 @@ from typing import Optional, Any, List, Tuple, TextIO, Hashable
 
 from dff.script import Context
 
-from dff.pipeline import PipelineRunnerFunction, PollingProviderLoopFunction
+from .types import PipelineRunnerFunction, PollingInterfaceLoopFunction
 
 logger = logging.getLogger(__name__)
 
@@ -67,7 +67,7 @@ class PollingMessengerInterface(MessengerInterface):
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
-        loop: PollingProviderLoopFunction = lambda: True,
+        loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
         """

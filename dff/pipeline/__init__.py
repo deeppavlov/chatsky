@@ -1,3 +1,8 @@
+import nest_asyncio
+
+nest_asyncio.apply()
+
+
 from .conditions import *  # noqa: F401, F403
 from .types import *  # noqa: F401, F403
 

@@ -76,13 +76,6 @@ PIPELINE_STATE_KEY = "PIPELINE"
 
 
 """
-A function type for messenger_interface-to-client interaction.
-Accepts anything (user input) and hashable vaklue (current dialog id), returns string (answer from pipeline).
-"""
-PipelineRunnerFunction = Callable[[Any, Hashable], Awaitable[Context]]
-
-
-"""
 A function type for components start_conditions.
 Accepts context and actor (current pipeline state), returns boolean (whether service can be launched).
 """
@@ -103,13 +96,6 @@ Checks components path to be in whitelist (if defined) and not to be in blacklis
 Accepts str (component path), returns boolean (whether wrapper should be applied).
 """
 ExtraHandlerConditionFunction = Callable[[str], bool]
-
-
-"""
-A function type used in PollingMessengerInterface to control polling loop.
-Returns boolean (whether polling should be continued).
-"""
-PollingProviderLoopFunction = Callable[[], bool]
 
 
 """
