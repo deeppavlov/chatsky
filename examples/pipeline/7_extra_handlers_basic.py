@@ -1,10 +1,12 @@
+# %% [markdown]
 """
-Extra Handlers (basic)
-================
+# 7. Extra Handlers (basic)
 
-The following example shows extra handlers possibilities and use cases
+The following example shows extra handlers possibilities and use cases.
 """
 
+
+# %%
 import asyncio
 import json
 import logging
@@ -15,30 +17,43 @@ from dff.script import Context, Actor
 
 from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing.common import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
+from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
+# %% [markdown]
 """
-Extra handlers are additional function lists (before-functions and/or after-functions)
-    that can be added to any pipeline components (service and service groups).
-Extra handlers main purpose should be service and service groups statistics collection.
-Extra handlers can be attached to pipeline component using `before_handler` and `after_handler` constructor parameter.
+Extra handlers are additional function
+    lists (before-functions and/or after-functions)
+    that can be added to any `pipeline` components (service and service groups).
+Extra handlers main purpose should be service
+and service groups statistics collection.
+Extra handlers can be attached to pipeline component using
+`before_handler` and `after_handler` constructor parameter.
 
 Here 5 `heavy_service`s are run in single asynchronous service group.
 Each of them sleeps for random amount of seconds (between 0 and 0.05).
-To each of them (as well as to group) time measurement extra handler is attached,
+To each of them (as well as to group)
+    time measurement extra handler is attached,
     that writes execution time to `ctx.misc`.
 In the end `ctx.misc` is logged to info channel.
 """
 
 
+# %%
 def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc.update({f"{info['component']['name']}": datetime.now()})
 
 
 def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    ctx.misc.update({f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]})
+    ctx.misc.update(
+        {f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]}
+    )
 
 
 async def heavy_service(_):
@@ -49,6 +64,7 @@ def logging_service(ctx: Context):
     logger.info(f"Context misc: {json.dumps(ctx.misc, indent=4, default=str)}")
 
 
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -94,7 +110,7 @@ pipeline_dict = {
     ],
 }
 
-
+# %%
 pipeline = Pipeline(**pipeline_dict)
 
 if __name__ == "__main__":

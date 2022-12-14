@@ -1,3 +1,11 @@
+# %% [markdown]
+"""
+# 1. Basics
+
+"""
+
+
+# %%
 from typing import NamedTuple
 
 from dff.script.responses import Response
@@ -6,6 +14,8 @@ from dff.script import Context, get_last_index, RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
+
+# %%
 toy_script = {
     "greeting_flow": {
         "start_node": {
@@ -24,7 +34,10 @@ toy_script = {
             RESPONSE: Response(text="Sorry, I can not talk about music now."),
             TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
         },
-        "node4": {RESPONSE: Response(text="bye"), TRANSITIONS: {"node1": exact_match("Hi")}},
+        "node4": {
+            RESPONSE: Response(text="bye"),
+            TRANSITIONS: {"node1": exact_match("Hi")},
+        },
         "fallback_node": {
             RESPONSE: Response(text="Ooops"),
             TRANSITIONS: {"node1": exact_match("Hi")},
@@ -47,12 +60,13 @@ happy_path = (
 )
 
 
+# %%
 class CallbackRequest(NamedTuple):
     payload: str
 
 
 def process_request(ctx: Context):
-    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
+    last_request: str = ctx.last_request
     last_index = get_last_index(ctx.requests)
 
     ui = ctx.last_response and ctx.last_response.ui
@@ -60,12 +74,15 @@ def process_request(ctx: Context):
         try:
             chosen_button = ui.buttons[int(last_request)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+            raise ValueError(
+                "Type in the index of the correct option" "to choose from the buttons."
+            )
         ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
         return
     ctx.requests[last_index] = last_request
 
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("greeting_flow", "start_node"),
@@ -77,8 +94,10 @@ if __name__ == "__main__":
     check_happy_path(
         pipeline,
         happy_path,
-    )  # This is a function for automatic example running (testing) with `happy_path`
+    )  # This is a function for automatic example running
+    # (testing) with `happy_path`
 
-    # This runs example in interactive mode if not in IPython env + if `DISABLE_INTERACTIVE_MODE` is not set
+    # This runs example in interactive mode if not in IPython env
+    # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # This runs example in interactive mode

@@ -36,8 +36,8 @@ class MongoConnector(DBConnector):
     def __init__(self, path: str, collection: str = "context_collection"):
         super(MongoConnector, self).__init__(path)
         if not mongo_available:
-            install_suggestion = get_protocol_install_suggestion("pymongo")
-            raise ImportError("`pymongo` package is missing.\n" + install_suggestion)
+            install_suggestion = get_protocol_install_suggestion("mongodb")
+            raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
         self._mongo = MongoClient(self.full_path)
         db = self._mongo.get_default_database()
         self.collection = db[collection]

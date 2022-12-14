@@ -1,3 +1,11 @@
+# %% [markdown]
+"""
+# 2. Buttons
+
+"""
+
+
+# %%
 from typing import NamedTuple
 
 import dff.script.conditions as cnd
@@ -9,6 +17,7 @@ from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, generics_comparer
 
 
+# %%
 def check_button_payload(value: str):
     def payload_check_inner(ctx: Context, actor: Actor):
         return hasattr(ctx.last_request, "payload") and ctx.last_request.payload == value
@@ -16,6 +25,7 @@ def check_button_payload(value: str):
     return payload_check_inner
 
 
+# %%
 toy_script = {
     "root": {
         "start": {
@@ -30,7 +40,8 @@ toy_script = {
         "question_1": {
             RESPONSE: Response(
                 **{
-                    "text": "Starting test! What's 2 + 2? (type in the index of the correct option)",
+                    "text": "Starting test! What's 2 + 2?"
+                    " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="5", payload="5"),
@@ -47,7 +58,8 @@ toy_script = {
         "question_2": {
             RESPONSE: Response(
                 **{
-                    "text": "Next question: what's 6 * 8? (type in the index of the correct option)",
+                    "text": "Next question: what's 6 * 8?"
+                    " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="38", payload="38"),
@@ -64,7 +76,7 @@ toy_script = {
         "question_3": {
             RESPONSE: Response(
                 **{
-                    "text": "What's 114 + 115? (type in the index of the correct option)",
+                    "text": "What's 114 + 115?" " (type in the index of the correct option)",
                     "ui": Keyboard(
                         buttons=[
                             Button(text="229", payload="229"),
@@ -87,36 +99,55 @@ toy_script = {
 
 
 happy_path = (
-    ("Hi", "\nStarting test! What's 2 + 2? (type in the index of the correct option)\n0): 5\n1): 4"),
-    ("0", "\nStarting test! What's 2 + 2? (type in the index of the correct option)\n0): 5\n1): 4"),
-    ("1", "\nNext question: what's 6 * 8? (type in the index of the correct option)\n0): 38\n1): 48"),
-    ("0", "\nNext question: what's 6 * 8? (type in the index of the correct option)\n0): 38\n1): 48"),
-    ("1", "\nWhat's 114 + 115? (type in the index of the correct option)\n0): 229\n1): 283"),
-    ("1", "\nWhat's 114 + 115? (type in the index of the correct option)\n0): 229\n1): 283"),
+    (
+        "Hi",
+        "\nStarting test! What's 2 + 2? (type in the index of the" " correct option)\n0): 5\n1): 4",
+    ),
+    (
+        "0",
+        "\nStarting test! What's 2 + 2? (type in the index of the" " correct option)\n0): 5\n1): 4",
+    ),
+    (
+        "1",
+        "\nNext question: what's 6 * 8? (type in the index of the"
+        " correct option)\n0): 38\n1): 48",
+    ),
+    (
+        "0",
+        "\nNext question: what's 6 * 8? (type in the index of the"
+        " correct option)\n0): 38\n1): 48",
+    ),
+    (
+        "1",
+        "\nWhat's 114 + 115? (type in the index of the correct option)" "\n0): 229\n1): 283",
+    ),
+    (
+        "1",
+        "\nWhat's 114 + 115? (type in the index of the correct option)" "\n0): 229\n1): 283",
+    ),
     ("0", "Success!"),
     ("ok", "Finishing test"),
 )
 
 
+# %%
 class CallbackRequest(NamedTuple):
     payload: str
 
 
 def process_request(ctx: Context):
-    last_request: str = ctx.last_request  # TODO: add _really_ nice ways to modify user request and response
-    last_index = get_last_index(ctx.requests)
-
     ui = ctx.last_response and ctx.last_response.ui
     if ui and ctx.last_response.ui.buttons:
         try:
-            chosen_button = ui.buttons[int(last_request)]
+            chosen_button = ui.buttons[int(ctx.last_request)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
-        return
-    ctx.requests[last_index] = last_request
+            raise ValueError(
+                "Type in the index of the correct option" "to choose from the buttons."
+            )
+        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
 
 
+# %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("root", "start"),
@@ -129,6 +160,7 @@ if __name__ == "__main__":
         pipeline,
         happy_path,
         generics_comparer,
-    )  # For response object with `happy_path` string comparing, a special `generics_comparer` comparator is used
+    )  # For response object with `happy_path` string comparing,
+    # a special `generics_comparer` comparator is used
     if is_interactive_mode():
         run_interactive_mode(pipeline)
