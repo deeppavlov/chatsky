@@ -14,7 +14,8 @@ from typing import Any, Callable
 
 class DBAbstractContextStorage(ABC):
     """
-    | An abstract interface for DF DB context storages. It includes the most essential methods of the python `dict` class.
+    | An abstract interface for DF DB context storages.
+    | It includes the most essential methods of the python `dict` class.
     | Can not be instantiated.
     """
 

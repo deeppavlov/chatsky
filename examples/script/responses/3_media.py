@@ -14,7 +14,12 @@ from dff.script.conditions import std_conditions as cnd
 from dff.script.responses import Attachments, Image, Response
 
 from dff.pipeline import Pipeline
-from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, generics_comparer
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+    generics_comparer,
+)
 
 
 # %%

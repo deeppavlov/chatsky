@@ -14,7 +14,12 @@ from dff.script import Context, Actor, TRANSITIONS, RESPONSE, get_last_index
 
 from dff.script.responses import Button, Keyboard, Response
 from dff.pipeline import Pipeline
-from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode, generics_comparer
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+    generics_comparer,
+)
 
 
 # %%
@@ -143,9 +148,7 @@ def process_request(ctx: Context):
         try:
             chosen_button = ui.buttons[int(ctx.last_request)]
         except (IndexError, ValueError):
-            raise ValueError(
-                "Type in the index of the correct option to choose from the buttons."
-            )
+            raise ValueError("Type in the index of the correct option to choose from the buttons.")
         ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
 
 
