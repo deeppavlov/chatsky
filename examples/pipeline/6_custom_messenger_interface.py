@@ -10,7 +10,6 @@ The following example shows messenger interfaces usage.
 import logging
 
 from dff.core.engine.core import Context, Actor
-from dff.core.engine.core.context import get_last_index
 from flask import Flask, request, Request
 
 from dff.core.pipeline import Pipeline, CallbackMessengerInterface
@@ -111,9 +110,7 @@ def purify_request(ctx: Context):
 
 
 def cat_response2webpage(ctx: Context):
-    last_response = ctx.last_response
-    last_index = get_last_index(ctx.responses)
-    ctx.responses[last_index] = construct_webpage_by_response(last_response)
+    ctx.last_response = construct_webpage_by_response(ctx.last_response)
 
 
 # %%

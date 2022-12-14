@@ -11,7 +11,6 @@ from typing import NamedTuple
 from dff.connectors.messenger.generics import Response
 from dff.core.engine.conditions import exact_match
 from dff.core.engine.core import Context
-from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
 from dff.core.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode, run_interactive_mode
@@ -68,20 +67,15 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
-    last_request: str = ctx.last_request
-    last_index = get_last_index(ctx.requests)
-
     ui = ctx.last_response and ctx.last_response.ui
     if ui and ctx.last_response.ui.buttons:
         try:
-            chosen_button = ui.buttons[int(last_request)]
+            chosen_button = ui.buttons[int(ctx.last_request)]
         except (IndexError, ValueError):
             raise ValueError(
                 "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
-        return
-    ctx.requests[last_index] = last_request
+        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
 
 
 # %%

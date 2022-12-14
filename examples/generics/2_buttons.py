@@ -11,7 +11,6 @@ from typing import NamedTuple
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
 from dff.core.engine.core import Context, Actor
-from dff.core.engine.core.context import get_last_index
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.generics.response import Button, Keyboard, Response
@@ -139,22 +138,15 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
-    last_request: str = (
-        ctx.last_request
-    )  # TODO: add _really_ nice ways to modify user request and response
-    last_index = get_last_index(ctx.requests)
-
     ui = ctx.last_response and ctx.last_response.ui
     if ui and ctx.last_response.ui.buttons:
         try:
-            chosen_button = ui.buttons[int(last_request)]
+            chosen_button = ui.buttons[int(ctx.last_request)]
         except (IndexError, ValueError):
             raise ValueError(
                 "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
-        return
-    ctx.requests[last_index] = last_request
+        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
 
 
 # %%
