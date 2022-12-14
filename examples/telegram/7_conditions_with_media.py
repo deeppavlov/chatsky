@@ -38,7 +38,7 @@ kitten_url = (
 
 # %% [markdown]
 """
-To filter user messages depending on whether or not media files were sent, 
+To filter user messages depending on whether or not media files were sent,
 you can use the `content_types` parameter of the `message_handler`.
 
 If you want to access properties of some specific file, you can get

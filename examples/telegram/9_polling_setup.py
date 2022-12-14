@@ -23,7 +23,7 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 # %% [markdown]
 """
 `PollingTelegramInterface` can be configured with the same parameters
-that are used in the `pytelegrambotapi` library, specifically: 
+that are used in the `pytelegrambotapi` library, specifically:
 * interval - time between calls to the API.
 * allowed updates - updates that should be fetched.
 * timeout - general timeout.
@@ -37,7 +37,7 @@ interface = PollingTelegramInterface(
     interval=2,
     allowed_updates=["message"],
     timeout=30,
-    long_polling_timeout=30
+    long_polling_timeout=30,
 )
 
 

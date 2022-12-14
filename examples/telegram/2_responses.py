@@ -22,7 +22,7 @@ from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 # %% [markdown]
 """
-In modern messengers, a single message can include one or several attachments aside from text content.
+In messengers, a single message can include one or several attachments aside from text content.
 We handle this by introduding the generic `Response` class that can contain both media and text.
 In this example, we only use text content for simplicity.
 """

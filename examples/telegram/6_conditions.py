@@ -8,7 +8,6 @@ This example shows how to use the generic `Response` class provided by DFF.
 # %%
 import os
 
-import dff.core.engine.conditions as cnd
 from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from dff.connectors.messenger.telegram import (
@@ -22,9 +21,8 @@ from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 # %% [markdown]
 """
-In modern messengers, a single message can include one or several attachments aside from text content.
-We handle this by introduding the generic `Response` class that can contain both media and text.
-In this example, we only use text content for simplicity.
+In our Telegram connector, we adopted the system of filters
+available in the `pytelegrambotapi` library.
 
 You can use `message_handler` to filter text messages from telegram in various ways.
 Filling the `command` argument will cause the handler to only react to listed commands.
@@ -44,7 +42,9 @@ script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: "",
-            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])},
+            TRANSITIONS: {
+                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+            },
         },
         "node1": {
             RESPONSE: Response(text="Hi, how are you?"),
@@ -52,16 +52,25 @@ script = {
         },
         "node2": {
             RESPONSE: Response(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": messenger.cnd.message_handler(func=lambda msg: "music" in msg.text)},
+            TRANSITIONS: {
+                "node3": messenger.cnd.message_handler(func=lambda msg: "music" in msg.text)
+            },
         },
         "node3": {
             RESPONSE: Response(text="Sorry, I can not talk about music now."),
             TRANSITIONS: {"node4": messenger.cnd.message_handler(func=lambda msg: True)},
         },
-        "node4": {RESPONSE: Response(text="bye"), TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])}},
+        "node4": {
+            RESPONSE: Response(text="bye"),
+            TRANSITIONS: {
+                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+            },
+        },
         "fallback_node": {
             RESPONSE: Response(text="Ooops"),
-            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])},
+            TRANSITIONS: {
+                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+            },
         },
     }
 }

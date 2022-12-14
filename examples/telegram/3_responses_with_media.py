@@ -21,7 +21,7 @@ from dff.connectors.messenger.telegram import (
     TELEGRAM_STATE_KEY,
 )
 from dff.core.pipeline import Pipeline
-from dff.connectors.messenger.generics import Response, Image, Attachments
+from dff.connectors.messenger.generics import Response, Image
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 
