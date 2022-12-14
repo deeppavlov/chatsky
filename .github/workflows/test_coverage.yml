@@ -13,7 +13,6 @@ on:
 
 jobs:
   test_coverage:
-    concurrency: testing_environment
     strategy:
       fail-fast: false
 
@@ -34,15 +33,7 @@ jobs:
       - name: install dependencies
         run: make venv_test
         shell: bash
-      
-      - name: create session file
-        run: echo "${{ secrets.TG_SESSION }}" | base64 --decode > anon.session
-        shell: bash
 
       - name: build coverage file
-        env:
-          TG_API_HASH: ${{ secrets.TG_API_HASH }}
-          TG_API_ID: ${{ secrets.TG_API_ID }}
-          BOT_TOKEN: ${{ secrets.BOT_TOKEN }}
         run: make test
         shell: bash
