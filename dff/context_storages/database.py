@@ -1,5 +1,5 @@
 """
-db_context_storage
+database
 ---------------------------
 | Base module. Provided classes:
 | Abstract connector interface :py:class:`.DBAbstractContextStorage`.

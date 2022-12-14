@@ -1,5 +1,5 @@
 """
-mongo_context_storage
+mongo
 ---------------------------
 Provides the mongo-based version of the :py:class:`.DBContextStorage`.
 """
@@ -16,7 +16,7 @@ import json
 
 from dff.script import Context
 
-from .db_context_storage import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 

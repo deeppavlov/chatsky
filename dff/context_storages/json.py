@@ -1,5 +1,5 @@
 """
-json_context_storage
+json
 ---------------------------
 Provides the json-based version of the :py:class:`.DBContextStorage`.
 """
@@ -7,7 +7,7 @@ import os
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .db_context_storage import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
 
 

@@ -1,12 +1,12 @@
 """
-pickle_context_storage
+pickle
 ---------------------------
 Provides the pickle-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
 import os
 
-from .db_context_storage import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
 
 

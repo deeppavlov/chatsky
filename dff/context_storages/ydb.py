@@ -1,5 +1,5 @@
 """
-ydb_context_storage
+ydb
 ---------------------------
 
 | Provides the version of the :py:class:`.DBContextStorage` for YDB.
@@ -12,7 +12,7 @@ from urllib.parse import urlsplit
 
 from dff.script import Context
 
-from .db_context_storage import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:

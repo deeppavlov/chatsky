@@ -1,5 +1,5 @@
 """
-redis_context_storage
+redis
 ---------------------------
 Provides the redis-based version of the :py:class:`.DBContextStorage`.
 """
@@ -14,7 +14,7 @@ except ImportError:
 
 from dff.script import Context
 
-from .db_context_storage import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 

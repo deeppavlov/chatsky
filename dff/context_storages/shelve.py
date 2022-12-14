@@ -1,5 +1,5 @@
 """
-shelve_context_storage
+shelve
 ---------------------------
 Provides the shelve-based version of the :py:class:`.DBContextStorage`.
 """
@@ -8,7 +8,7 @@ from shelve import DbfilenameShelf
 
 from dff.script import Context
 
-from .db_context_storage import DBContextStorage
+from .database import DBContextStorage
 
 
 class ShelveContextStorage(DBContextStorage):

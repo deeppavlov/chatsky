@@ -1,7 +1,6 @@
 """
-sql_context_storage
+sql
 ---------------------------
-
 | Provides the sql-based version of the :py:class:`.DBContextStorage`.
 | You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 
@@ -11,7 +10,7 @@ import json
 
 from dff.script import Context
 
-from .db_context_storage import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:

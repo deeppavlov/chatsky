@@ -1,19 +1,19 @@
 import importlib
 
-from .db_context_storage import DBAbstractContextStorage, DBContextStorage, threadsafe_method  # noqa: F401
-from .json_context_storage import JSONContextStorage  # noqa: F401
-from .pickle_context_storage import PickleContextStorage  # noqa: F401
-from .sql_context_storage import (  # noqa: F401
+from .database import DBAbstractContextStorage, DBContextStorage, threadsafe_method  # noqa: F401
+from .json import JSONContextStorage  # noqa: F401
+from .pickle import PickleContextStorage  # noqa: F401
+from .sql import (  # noqa: F401
     SQLContextStorage,  # noqa: F401
     postgres_available,  # noqa: F401
     mysql_available,  # noqa: F401
     sqlite_available,  # noqa: F401
     sqlalchemy_available,  # noqa: F401
 )  # noqa: F401
-from .ydb_context_storage import YDBContextStorage, ydb_available  # noqa: F401
-from .redis_context_storage import RedisContextStorage, redis_available  # noqa: F401
-from .mongo_context_storage import MongoContextStorage, mongo_available  # noqa: F401
-from .shelve_context_storage import ShelveContextStorage  # noqa: F401
+from .ydb import YDBContextStorage, ydb_available  # noqa: F401
+from .redis import RedisContextStorage, redis_available  # noqa: F401
+from .mongo import MongoContextStorage, mongo_available  # noqa: F401
+from .shelve import ShelveContextStorage  # noqa: F401
 from .protocol import PROTOCOLS, get_protocol_install_suggestion  # noqa: F401
 
 
