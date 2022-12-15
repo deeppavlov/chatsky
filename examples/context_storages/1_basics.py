@@ -9,9 +9,9 @@ The following example shows the basic use of the database connection.
 # %%
 import pathlib
 
-from dff.connectors.db import connector_factory
+from dff.context_storages import context_storage_factory
 
-from dff.core.pipeline import Pipeline
+from dff.pipeline import Pipeline
 from dff.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -20,9 +20,8 @@ from dff.utils.testing.common import (
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
-db = connector_factory("json://dbs/file.json")
+db = context_storage_factory("json://dbs/file.json")
 # db = connector_factory("pickle://dbs/file.pkl")
-# db = connector_factory("shelve://dbs/file")
 # db = connector_factory("shelve://dbs/file")
 
 pipeline = Pipeline.from_script(

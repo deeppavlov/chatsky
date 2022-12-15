@@ -9,9 +9,9 @@ This is an example of using MongoDB.
 # %%
 import os
 
-from dff.connectors.db import connector_factory
+from dff.context_storages import context_storage_factory
 
-from dff.core.pipeline import Pipeline
+from dff.pipeline import Pipeline
 from dff.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -26,7 +26,7 @@ db_uri = "mongodb://{}:{}@localhost:27017/{}".format(
     os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
     os.getenv("MONGO_INITDB_ROOT_USERNAME"),
 )
-db = connector_factory(db_uri)
+db = context_storage_factory(db_uri)
 
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,

@@ -9,9 +9,9 @@ This is an example of using Yandex DataBase.
 # %%
 import os
 
-from dff.connectors.db import connector_factory
+from dff.context_storages import context_storage_factory
 
-from dff.core.pipeline import Pipeline
+from dff.pipeline import Pipeline
 from dff.utils.testing.common import (
     check_happy_path,
     run_interactive_mode,
@@ -33,7 +33,7 @@ db_uri = "{}{}".format(
     os.getenv("YDB_ENDPOINT"),
     os.getenv("YDB_DATABASE"),
 )
-db = connector_factory(db_uri)
+db = context_storage_factory(db_uri)
 
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,

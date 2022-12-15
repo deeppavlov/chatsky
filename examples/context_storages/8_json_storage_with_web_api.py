@@ -9,20 +9,20 @@ This is an example of using JSON with web API.
 # %%
 import pathlib
 
-from dff.core.pipeline import Pipeline
+from dff.context_storages import context_storage_factory
+
+from dff.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 from flask import Flask, request
-
-from dff.connectors.db import connector_factory
 
 
 # %%
 app = Flask(__name__)
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
-db = connector_factory("json://dbs/file.json")
+db = context_storage_factory("json://dbs/file.json")
 
 
 @app.route("/chat", methods=["GET", "POST"])

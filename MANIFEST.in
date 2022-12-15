@@ -1,7 +1,7 @@
 include CONTRIBUTING.md
 include LICENSE
 include README.md
-include dff/connectors/db/protocols.json
+include dff/context_storages/db/protocols.json
 
 exclude makefile
 
