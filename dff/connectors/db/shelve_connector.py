@@ -1,6 +1,7 @@
 """
-shelve_connector
+Shelve Connector
 ---------------------------
+
 Provides the shelve-based version of the :py:class:`.DBConnector`.
 """
 import pickle
@@ -15,11 +16,7 @@ class ShelveConnector(DBConnector):
     """
     Implements :py:class:`.DBConnector` with `shelve` as the driver.
 
-    Parameters
-    -----------
-
-    path: str
-        Target file URI. Example: `shelve://file.db`
+    :param path: Target file URI. Example: `shelve://file.db`.
     """
 
     def __init__(self, path: str):

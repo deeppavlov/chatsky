@@ -1,6 +1,7 @@
 """
-json_connector
+JSON Connector
 ---------------------------
+
 Provides the json-based version of the :py:class:`.DBConnector`.
 """
 import os
@@ -23,11 +24,7 @@ class JSONConnector(DBConnector):
     """
     Implements :py:class:`.DBConnector` with `json` as the storage format.
 
-    Parameters
-    -----------
-
-    path: str
-        Target file URI. Example: 'json://file.json'
+    :param path: Target file URI. Example: `json://file.json`.
     """
 
     def __init__(self, path: str):

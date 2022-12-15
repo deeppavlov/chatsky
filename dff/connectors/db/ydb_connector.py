@@ -1,9 +1,8 @@
 """
-ydb_connector
+Yandex DB Connector
 ---------------------------
 
-| Provides the version of the :py:class:`.DBConnector` for YDB.
-
+Provides the version of the :py:class:`.DBConnector` for Yandex DataBase.
 """
 
 import os
@@ -25,17 +24,12 @@ except ImportError:
 
 class YDBConnector(DBConnector):
     """
-    | Version of the :py:class:`.DBConnector` for YDB.
+    Version of the :py:class:`.DBConnector` for YDB.
 
-    Parameters
-    -----------
-
-    path: str
-        Standard sqlalchemy URI string.
-        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
+    :param path: Standard sqlalchemy URI string. When using sqlite backend in Windows,
+        keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    table_name: str
-        The name of the table to use.
+    :param table_name: The name of the table to use.
     """
 
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):

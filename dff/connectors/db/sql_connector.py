@@ -1,10 +1,9 @@
 """
-sql_connector
+SQL Connector
 ---------------------------
 
-| Provides the sql-based version of the :py:class:`.DBConnector`.
-| You can choose the backend option of your liking from mysql, postgresql, or sqlite.
-
+Provides the sql-based version of the :py:class:`.DBConnector`.
+You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 """
 import importlib
 import json
@@ -67,20 +66,14 @@ def import_insert_for_dialect(dialect: str):
 
 class SQLConnector(DBConnector):
     """
-    | Sql-based version of the :py:class:`.DBConnector`.
-    | Compatible with MySQL, Postgresql, Sqlite.
+    Sql-based version of the :py:class:`.DBConnector`.
+    Compatible with MySQL, Postgresql, Sqlite.
 
-    Parameters
-    -----------
-
-    path: str
-        Standard sqlalchemy URI string.
+    :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    table_name: str
-        The name of the table to use.
-    custom_driver: bool
-        If you intend to use some other database driver instead of the recommended ones,
+    :param table_name: The name of the table to use.
+    :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
     """
 

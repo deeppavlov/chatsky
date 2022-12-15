@@ -1,10 +1,9 @@
 """
-db_connector
+DB Connector
 ---------------------------
-| Base module. Provided classes:
-| Abstract connector interface :py:class:`.DBAbstractConnector`.
-| An intermediate class to inherit from: :py:class:`.DBConnector`
-
+Base module. Provided classes:
+    - Abstract connector interface :py:class:`.DBAbstractConnector`.
+    - An intermediate class to inherit from: :py:class:`.DBConnector`.
 """
 import threading
 from functools import wraps
@@ -14,8 +13,8 @@ from typing import Any, Callable
 
 class DBAbstractConnector(ABC):
     """
-    | An abstract interface for DF DB connectors. It includes the most essential methods of the python `dict` class.
-    | Can not be instantiated.
+    An abstract interface for `dff` DB connectors. It includes the most essential methods of the python `dict` class.
+    Can not be instantiated.
     """
 
     def __init__(self) -> None:
@@ -55,16 +54,13 @@ class DBConnector(DBAbstractConnector):
     An intermediate class between the abstract connector interface,
     :py:class:`.DBAbstractConnector`, and concrete implementations.
 
-    Parameters
-    ----------
-    path: str
-        | Parameter `path` should be set with the URI of the database.
-        | It includes a prefix and the required connection credentials.
-        | Example: postgresql://user:password@host:port/database
-        | In the case of classes that save data to hard drive instead of external databases
-        | you need to specify the location of the file, like you do in sqlite.
-        | Keep in mind that in Windows you will have to use double backslashes '\\'
-        | instead of forward slashes '/' when defining the file path.
+    :param path: Parameter `path` should be set with the URI of the database.
+        It includes a prefix and the required connection credentials.
+        Example: `postgresql://user:password@host:port/database`.
+        In the case of classes that save data to hard drive instead of external databases
+        you need to specify the location of the file, like you do in sqlite.
+        Keep in mind that in Windows you will have to use double backslashes '\\'
+        instead of forward slashes '/' when defining the file path.
 
     """
 

@@ -1,6 +1,7 @@
 """
-redis_connector
+Redis Connector
 ---------------------------
+
 Provides the redis-based version of the :py:class:`.DBConnector`.
 """
 import json
@@ -22,11 +23,7 @@ class RedisConnector(DBConnector):
     """
     Implements :py:class:`.DBConnector` with `redis` as the database backend.
 
-    Parameters
-    -----------
-
-    path: str
-        Database URI string. Example: redis://user:password@host:port
+    :param path: Database URI string. Example: `redis://user:password@host:port`.
     """
 
     def __init__(self, path: str):

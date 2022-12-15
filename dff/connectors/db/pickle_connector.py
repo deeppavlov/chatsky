@@ -1,5 +1,5 @@
 """
-pickle_connector
+Pickle Connector
 ---------------------------
 Provides the pickle-based version of the :py:class:`.DBConnector`.
 """
@@ -14,11 +14,7 @@ class PickleConnector(DBConnector):
     """
     Implements :py:class:`.DBConnector` with `pickle` as driver.
 
-    Parameters
-    -----------
-
-    path: str
-        Target file URI. Example: 'pickle://file.pkl'
+    :param path: Target file URI. Example: 'pickle://file.pkl'
     """
 
     def __init__(self, path: str):

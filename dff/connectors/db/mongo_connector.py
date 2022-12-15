@@ -1,5 +1,5 @@
 """
-mongo_connector
+Mongo Connector
 ---------------------------
 Provides the mongo-based version of the :py:class:`.DBConnector`.
 """
@@ -24,13 +24,8 @@ class MongoConnector(DBConnector):
     """
     Implements :py:class:`.DBConnector` with `mongodb` as the database backend.
 
-    Parameters
-    -----------
-
-    path: str
-        Database URI. Example: 'mongodb://user:password@host:port/dbname'
-    collection: str
-        Name of the collection to store the data in.
+    :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
+    :param collection: Name of the collection to store the data in.
     """
 
     def __init__(self, path: str, collection: str = "context_collection"):
