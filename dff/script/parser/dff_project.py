@@ -325,11 +325,8 @@ class DFFProject(BaseParserObject):
     def dff_project(self) -> 'DFFProject':
         return self
 
-    def __str__(self) -> str:
+    def dump(self, current_indent=0, indent=4) -> str:
         return "\n".join(map(str, self.children.values()))
-
-    def __repr__(self) -> str:
-        return f"DFFProject({'; '.join(map(repr, self.children.values()))})"
 
     @classmethod
     def from_ast(cls, node, **kwargs):

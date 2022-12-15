@@ -8,7 +8,9 @@ from dff.script.parser.dff_project import DFFProject
 def test_just_works():
     obj = Expression.from_ast(ast.parse("{1: {2: '3'}}").body[0].value)
     assert isinstance(obj, Dict)
-    assert str(obj.children["value_1"]) == "{2: '3', }"
+    assert str(obj.children["value_1"]) == """{
+    2: '3',
+}"""
 
 
 def test_path():

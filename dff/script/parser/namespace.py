@@ -47,11 +47,8 @@ class Namespace(BaseParserObject):
             return obj.children["value"]
         return obj
 
-    def __str__(self) -> str:
+    def dump(self, current_indent=0, indent=4) -> str:
         return "\n".join(map(str, self.children.values()))
-
-    def __repr__(self) -> str:
-        return f"Namespace(name={self.name}; {'; '.join(map(repr, self.children.values()))})"
 
     def get_imports(self) -> tp.List[tp.List[str]]:
         imports = []

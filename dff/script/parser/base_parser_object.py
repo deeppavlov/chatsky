@@ -122,13 +122,15 @@ class BaseParserObject(ABC):
     def dff_project(self) -> 'DFFProject':
         return self.namespace.dff_project
 
-    @abstractmethod  # todo: add dump function, repr calls it with certain params
-    def __repr__(self) -> str:
+    @abstractmethod
+    def dump(self, current_indent=0, indent=4) -> str:
         ...
 
-    @abstractmethod
+    def __repr__(self) -> str:
+        return self.__class__.__name__ + "(" + self.dump() + ")"
+
     def __str__(self) -> str:
-        ...
+        return self.dump()
 
     def __hash__(self):
         return hash(str(self))
@@ -269,11 +271,8 @@ class Import(Statement, ReferenceObject):
         self.module = module
         self.alias = alias
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return f"import {self.module}" + (f" as {self.alias}" if self.alias else "")
-
-    def __repr__(self):
-        return f"Import(module={self.module}, alias={self.alias})"
 
     @cached_property
     def resolve_self(self) -> tp.Optional[BaseParserObject]:
@@ -304,11 +303,8 @@ class ImportFrom(Statement, ReferenceObject):
         self.obj = obj
         self.alias = alias
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return f"from {self.level * '.' + self.module} import {self.obj}" + (f" as {self.alias}" if self.alias else "")
-
-    def __repr__(self):
-        return f"ImportFrom(module={self.module}, level={self.level}, obj={self.obj}, alias={self.alias})"
 
     @cached_property
     def resolve_self(self) -> tp.Optional[BaseParserObject]:
@@ -345,11 +341,8 @@ class Assignment(Statement):
         self.add_child(target, "target")
         self.add_child(value, "value")
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return f"{str(self.children['target'])} = {str(self.children['value'])}"
-
-    def __repr__(self):
-        return f"Assignment(target={repr(self.children['target'])}; value={repr(self.children['value'])}"
 
     @classmethod
     def from_ast(cls, node, **kwargs) -> tp.Dict[str, 'Assignment']:
@@ -373,11 +366,8 @@ class String(Expression):
         super().__init__()
         self.string = string
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return repr(self.string)
-
-    def __repr__(self):
-        return f"String({self.string})"
 
     @classmethod
     def from_ast(cls, node: tp.Union['ast.Str', ast.Constant], **kwargs) -> 'String':
@@ -400,11 +390,8 @@ class Python(Expression):
                         self.add_child(Expression.from_ast(child), key + "_" + str(index))
         self.string = remove_suffix(unparse(node), "\n")
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return self.string
-
-    def __repr__(self):
-        return f"Python({self.string})"
 
     @classmethod
     def from_str(cls, string: str) -> 'Python':
@@ -466,18 +453,10 @@ class Dict(Expression):
             result[key] = value
         return result
 
-    def __str__(self):
-        return "{" + "".join(
-            [f"{str(self.children[self._key(key)])}: {str(self.children[self._value(key)])}, " for _, key in self.__keys]
-        ) + "}"
-
-    def __repr__(self):
-        return "Dict(" + ", ".join(
-            [
-                f"{repr(self.children[self._key(key)])}: "
-                f"{repr(self.children[self._value(key)])}" for _, key in self.__keys
-            ]
-        ) + ")"
+    def dump(self, current_indent=0, indent=4) -> str:
+        return "{\n" + "".join(
+            [(current_indent + indent) * " " + f"{self.children[self._key(key)].dump(current_indent=(current_indent + indent))}: {self.children[self._value(key)].dump(current_indent=(current_indent + indent))},\n" for _, key in self.__keys]
+        ) + current_indent * " " + "}"
 
     def __getitem__(self, item: tp.Union[Expression, str]):
         if isinstance(item, Expression):
@@ -520,11 +499,8 @@ class Name(Expression, ReferenceObject):
             return resolved.resolve_name
         return resolved or self
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return self.name
-
-    def __repr__(self):
-        return f"Name({self.name})"
 
     @classmethod
     def from_ast(cls, node: ast.Name, **kwargs) -> 'Expression':
@@ -557,11 +533,8 @@ class Attribute(Expression, ReferenceObject):
             value = value.resolve_name
         return self.resolve_self or Attribute(value, self.attr)
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return str(self.children["value"]) + "." + self.attr
-
-    def __repr__(self):
-        return f"Attribute(value={repr(self.children['value'])}; attr={self.attr})"
 
     @classmethod
     def from_ast(cls, node: ast.Attribute, **kwargs) -> 'Expression':
@@ -599,11 +572,8 @@ class Subscript(Expression, ReferenceObject):
             index = index.resolve_name
         return self.resolve_self or Subscript(value, index)
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return str(self.children["value"]) + "[" + str(self.children["index"]) + "]"
-
-    def __repr__(self):
-        return f"Subscript(value={repr(self.children['value'])}; index={repr(self.children['index'])})"
 
     @classmethod
     def from_ast(cls, node: ast.Subscript, **kwargs) -> 'Expression':
@@ -640,7 +610,7 @@ class Iterable(Expression):
         else:
             return self.children[str(item)]
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         if self.type == "list":
             lbr, rbr = "[", "]"
         elif self.type == "tuple":
@@ -650,9 +620,6 @@ class Iterable(Expression):
         else:
             raise RuntimeError(f"{self.type}")
         return lbr + ", ".join(map(str, self.children.values())) + rbr
-
-    def __repr__(self):
-        return f"Iterable:{self.type}(" + "; ".join(f"{k}: {repr(v)}" for k, v in self.children.items()) + ")"
 
     @classmethod
     def from_ast(cls, node: tp.Union[ast.Tuple, ast.List, ast.Set], **kwargs) -> 'Expression':
@@ -691,7 +658,7 @@ class Call(Expression):
             return str(self.children["func"].resolve_name)
         return str(self.children["func"])
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         return str(self.children["func"]) + "(" + \
                ", ".join(
                    [
@@ -700,9 +667,6 @@ class Call(Expression):
                        f"{remove_prefix(keyword, 'keyword_')}={str(self.children[keyword])}" for keyword in self.children.keys() if keyword.startswith("keyword_")
                    ]
                ) + ")"
-
-    def __repr__(self):
-        return f"Call({'; '.join([k + ' = ' + repr(v) for k, v in self.children.items()])})"
 
     @classmethod
     def from_ast(cls, node: ast.Call, **kwargs) -> 'Call':
@@ -730,12 +694,9 @@ class Generator(BaseParserObject):
             self.add_child(if_expr, "if_" + str(index))
         self.is_async = is_async
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         ifs = [f"if {str(expr)}" for key, expr in self.children.items() if key.startswith("if_")]
         return ("async " if self.is_async else "") + f"for {self.children['target']} in {self.children['iter']}" + (" " if ifs else "") + " ".join(ifs)
-
-    def __repr__(self):
-        return f"Generator(target={self.children['target']}; iter={self.children['iter']}; ifs={[repr(expr) for key, expr in self.children.items() if key.startswith('if_')]}; is_async={self.is_async})"
 
     @classmethod
     def from_ast(cls, node: ast.comprehension, **kwargs):
@@ -781,7 +742,7 @@ class Comprehension(Expression):
             get = (self,)
         return BaseParserObject.names.__get__(*get).difference(self.generated_names)
 
-    def __str__(self):
+    def dump(self, current_indent=0, indent=4) -> str:
         gens = [str(gen) for key, gen in self.children.items() if key.startswith("gens_")]
         if self.comp_type == "dict":
             return f"{{{str(self.children['key'])}: {str(self.children['value'])}" + (" " if gens else "") + " ".join(gens) + "}"
@@ -795,14 +756,6 @@ class Comprehension(Expression):
             else:
                 raise RuntimeError(self.comp_type)
             return l_br + str(self.children["element"]) + (" " if gens else "") + " ".join(gens) + r_br
-
-    def __repr__(self):
-        gens = [repr(gen) for key, gen in self.children.items() if key.startswith("gens_")]
-
-        if self.comp_type == "dict":
-            return "Comprehension:" + "dict" + f"(key={self.children['key']}; value={self.children['value']}; generators={gens})"
-        else:
-            return f"Comprehension:{self.comp_type}(element={self.children['element']}; generators={gens})"
 
     @classmethod
     def from_ast(cls, node: tp.Union[ast.ListComp, ast.SetComp, ast.DictComp, ast.GeneratorExp], **kwargs) -> 'Expression':
