@@ -19,7 +19,7 @@ def add_installation_cell_into_example(default: str, dependencies: Optional[Dict
 
 # %% [markdown]
 \"\"\"
-#### Installing dependencies
+__Installing dependencies__
 \"\"\"
 
 # %%
@@ -27,7 +27,7 @@ def add_installation_cell_into_example(default: str, dependencies: Optional[Dict
 
 # %% [markdown]
 \"\"\"
-#### Running example
+__Running example__
 \"\"\"
 
 {example_body}
