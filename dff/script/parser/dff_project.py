@@ -5,6 +5,7 @@ import typing as tp
 import logging
 from collections import defaultdict
 import ast
+import inspect
 
 try:
     import networkx as nx
@@ -16,6 +17,7 @@ from .namespace import Namespace
 from .exceptions import ScriptValidationError, ParsingError
 from .yaml import yaml
 from dff.core.engine.core.actor import Actor
+from dff.core.pipeline.pipeline.pipeline import Pipeline
 from dff.core.engine.core.keywords import Keywords
 from dff.core.engine.labels import forward, backward
 
@@ -24,8 +26,16 @@ logger = logging.getLogger(__name__)
 
 
 script_initializers = {
-    "dff.core.engine.core.Actor": Actor.__init__.__wrapped__.__code__.co_varnames[1:],
-    "dff.core.engine.core.actor.Actor": Actor.__init__.__wrapped__.__code__.co_varnames[1:],
+    **{actor_name: inspect.getfullargspec(Actor.__init__.__wrapped__).args[1:] for actor_name in (
+        "dff.core.engine.core.Actor",
+        "dff.core.engine.core.actor.Actor",
+    )
+       },
+    **{pipeline_name: inspect.getfullargspec(Pipeline.from_script).args[1:] for pipeline_name in (
+        "dff.core.pipeline.Pipeline.from_script",
+        "dff.core.pipeline.pipeline.pipeline.Pipeline.from_script",
+    )
+       },
 }
 
 labels = {
@@ -75,7 +85,7 @@ class DFFProject(BaseParserObject):
                                 raise ScriptValidationError(f"Found two Actor calls\nFirst: {str(call)}\nSecond:{str(value)}")
         if call is not None:
             return call
-        raise ScriptValidationError("Actor call is not found")
+        raise ScriptValidationError("Script Initialization call is not found (use either `Actor` or `Pipeline.from_script`")
 
     @cached_property
     def script(self) -> tp.Tuple[Expression, tp.Tuple[Expression, Expression], tp.Tuple[Expression, Expression]]:
