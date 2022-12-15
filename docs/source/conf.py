@@ -82,7 +82,7 @@ html_static_path = []
 
 html_show_sourcelink = False
 
-nbsphinx_allow_errors = True
+
 # Finding examples directories
 nbsphinx_custom_formats = {".py": add_installation_cell_into_py}
 nbsphinx_prolog = """
