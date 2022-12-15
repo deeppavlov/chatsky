@@ -8,7 +8,7 @@ from enum import Enum, auto
 
 class Keywords(Enum):
     """
-    Keywords used to define the dialog script (:py:class:`~dff.core.engine.core.script.Script`).
+    Keywords used to define the dialog script (:py:class:`~dff.script.Script`).
     The data type `dict` is used to describe the scenario.
     `Enums` of this class are used as keys in this `dict`.
     Different keys correspond to the different value types aimed at different purposes.
@@ -20,7 +20,7 @@ class Keywords(Enum):
         The value that corresponds to this key has the `dict` type with keywords:
 
         `{TRANSITIONS:..., RESPONSE:..., PROCESSING:..., MISC:...}`.
-        There can be only one global node in a script :py:class:`~dff.core.engine.core.script.Script`.
+        There can be only one global node in a script :py:class:`~dff.script.Script`.
         The global node is defined at the flow level as opposed to regular nodes.
         This node allows to define default global values for all nodes.
 

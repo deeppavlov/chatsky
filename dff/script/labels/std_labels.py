@@ -1,11 +1,11 @@
 """
 Labels
 ---------------------------
-:py:const:`Labels <dff.core.engine.core.types.NodeLabel3Type>` are one of
+:py:const:`Labels <dff.script.NodeLabel3Type>` are one of
 the most important components of the dialog graph,
 which determine targeted node name of transition.
-This is a standard set of engine
-:py:const:`labels <dff.core.engine.core.types.NodeLabelType>`.
+This is a standard set of scripting
+:py:const:`labels <dff.script.NodeLabelType>`.
 """
 from typing import Optional, Callable
 from dff.script import Actor, Context, NodeLabel3Type
@@ -13,9 +13,9 @@ from dff.script import Actor, Context, NodeLabel3Type
 
 def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.core.engine.core.context.Context`,
-    :py:class:`~dff.core.engine.core.actor.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.core.engine.core.types.NodeLabelType>`
+    Returns transition handler that takes :py:class:`~dff.script.Context`,
+    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the last node with a given :py:const:`priority <float>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 
@@ -35,9 +35,9 @@ def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
 
 def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.core.engine.core.context.Context`,
-    :py:class:`~dff.core.engine.core.actor.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.core.engine.core.types.NodeLabelType>`
+    Returns transition handler that takes :py:class:`~dff.script.Context`,
+    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the previous node with a given :py:const:`priority <float>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 
@@ -57,9 +57,9 @@ def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
 
 def to_start(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.core.engine.core.context.Context`,
-    :py:class:`~dff.core.engine.core.actor.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.core.engine.core.types.NodeLabelType>`
+    Returns transition handler that takes :py:class:`~dff.script.Context`,
+    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the start node with a given :py:const:`priority <float>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 
@@ -75,9 +75,9 @@ def to_start(priority: Optional[float] = None, *args, **kwargs) -> Callable:
 
 def to_fallback(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.core.engine.core.context.Context`,
-    :py:class:`~dff.core.engine.core.actor.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.core.engine.core.types.NodeLabelType>`
+    Returns transition handler that takes :py:class:`~dff.script.Context`,
+    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the fallback node with a given :py:const:`priority <float>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 
@@ -130,9 +130,9 @@ def _get_label_by_index_shifting(
 
 def forward(priority: Optional[float] = None, cyclicality_flag: bool = True, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.core.engine.core.context.Context`,
-    :py:class:`~dff.core.engine.core.actor.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.core.engine.core.types.NodeLabelType>`
+    Returns transition handler that takes :py:class:`~dff.script.Context`,
+    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the forward node with a given :py:const:`priority <float>` and :py:const:`cyclicality_flag <bool>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 
@@ -151,9 +151,9 @@ def forward(priority: Optional[float] = None, cyclicality_flag: bool = True, *ar
 
 def backward(priority: Optional[float] = None, cyclicality_flag: bool = True, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.core.engine.core.context.Context`,
-    :py:class:`~dff.core.engine.core.actor.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.core.engine.core.types.NodeLabelType>`
+    Returns transition handler that takes :py:class:`~dff.script.Context`,
+    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the backward node with a given :py:const:`priority <float>` and :py:const:`cyclicality_flag <bool>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 

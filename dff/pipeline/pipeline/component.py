@@ -191,7 +191,7 @@ class PipelineComponent(abc.ABC):
         Method for retrieving runtime info about this component.
 
         :param ctx: current dialog Context
-        :return: :py:class:`~dff.core.engine.typing.ServiceRuntimeInfo`
+        :return: :py:class:`~dff.script.typing.ServiceRuntimeInfo`
             dict where all not set fields are replaced with ``[None]``.
         """
         return {

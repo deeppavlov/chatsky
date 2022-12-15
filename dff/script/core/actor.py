@@ -2,8 +2,8 @@
 Actor
 ---------------------------
 Actor is one of the main abstractions that processes incoming requests
-(:py:class:`~dff.core.engine.core.context.Context`)
-from the user in accordance with the dialog graph (:py:class:`~dff.core.engine.core.script.Script`).
+(:py:class:`~dff.script.Context`)
+from the user in accordance with the dialog graph (:py:class:`~dff.script.Script`).
 """
 import logging
 from typing import Union, Callable, Optional, Dict, List, Any
@@ -24,9 +24,9 @@ logger = logging.getLogger(__name__)
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """
-    This function handles errors during :py:class:`~dff.core.engine.core.script.Script` validation.
+    This function handles errors during :py:class:`~dff.script.Script` validation.
 
-    :param error_msgs: List that contains error messages. :py:func:`~dff.core.engine.core.actor.error_handler`
+    :param error_msgs: List that contains error messages. :py:func:`~dff.script.error_handler`
         adds every next error message to that list.
     :param msg: Error message which is to be added into `error_msgs`.
     :param exception: Invoked exception. If it has been set, it is used to obtain logging traceback.
@@ -40,8 +40,8 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
 
 class Actor(BaseModel):
     """
-    The class which is used to process :py:class:`~dff.core.engine.core.context.Context`
-    according to the :py:class:`~dff.core.engine.core.script.Script`.
+    The class which is used to process :py:class:`~dff.script.Context`
+    according to the :py:class:`~dff.script.Script`.
     """
 
     class Config:
@@ -49,22 +49,22 @@ class Actor(BaseModel):
 
     script: Union[Script, dict]
     """
-    The dialog scenario: a graph described by the :py:class:~dff.core.engine.core.keywords.Keywords.
+    The dialog scenario: a graph described by the :py:class:~dff.script.Keywords.
     While the graph is being initialized, it is validated and then used for the dialog.
     """
     start_label: NodeLabel3Type
     """
-    The start node of :py:class:`~dff.core.engine.core.script.Script`. The execution begins with it.
+    The start node of :py:class:`~dff.script.Script`. The execution begins with it.
     """
     fallback_label: Optional[NodeLabel3Type] = None
     """
-    The label of :py:class:`~dff.core.engine.core.script.Script`.
+    The label of :py:class:`~dff.script.Script`.
     Dialog comes into that label if all other transitions failed, or there was an error while executing the scenario.
     Defaults to `None`.
     """
     label_priority: float = 1.0
     """
-    Default priority value for all :py:const:`labels <dff.core.engine.core.types.NodeLabel3Type>`
+    Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
     where there is no priority. Defaults to `1.0`.
     """
     validation_stage: Optional[bool] = None
@@ -82,9 +82,9 @@ class Actor(BaseModel):
     handlers: Dict[ActorStage, List[Callable]] = {}
     """
     This variable is responsible for the usage of external handlers on
-    the certain stages of work of :py:class:`~dff.core.engine.core.actor.Actor`.
+    the certain stages of work of :py:class:`~dff.script.Actor`.
 
-        - key: :py:class:`~dff.core.engine.core.types.ActorStage` - Stage in which the handler is called.
+        - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage.
 
     Defaults to an empty `dict`.

@@ -76,16 +76,16 @@ class Context(BaseModel):
     """
     misc: Dict[str, Any] = {}
     """
-    `misc` stores any custom data. The engine doesn't use this dictionary by default,
-    so storage of any data won't reflect on the work on the internal Dialog Flow Engine functions.
+    `misc` stores any custom data. The scripting doesn't use this dictionary by default,
+    so storage of any data won't reflect on the work on the internal Dialog Flow Scripting functions.
 
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
     validation: bool = False
     """
-    `validation` is a flag that signals that :py:class:`~dff.core.engine.core.actor.Actor`,
-    while being initialized, checks the :py:class:`~dff.core.engine.core.script.Script`.
+    `validation` is a flag that signals that :py:class:`~dff.script.Actor`,
+    while being initialized, checks the :py:class:`~dff.script.Script`.
     The functions that can give not validable data
     while being validated must use this flag to take the validation mode into account.
     Otherwise the validation will not be passed.
@@ -93,12 +93,12 @@ class Context(BaseModel):
     framework_states: Dict[ModuleName, Dict[str, Any]] = {}
     """
     `framework_states` is used for addons states or for
-    :py:class:`~dff.core.engine.core.actor.Actor`'s states.
-    :py:class:`~dff.core.engine.core.actor.Actor`
+    :py:class:`~dff.script.Actor`'s states.
+    :py:class:`~dff.script.Actor`
     records all its intermediate conditions into the `framework_states`.
-    After :py:class:`~dff.core.engine.core.context.Context` processing is finished,
-    :py:class:`~dff.core.engine.core.actor.Actor` resets `framework_states` and
-    returns :py:class:`~dff.core.engine.core.context.Context`.
+    After :py:class:`~dff.script.Context` processing is finished,
+    :py:class:`~dff.script.Actor` resets `framework_states` and
+    returns :py:class:`~dff.script.Context`.
 
         - key - Temporary variable name.
         - value - Temporary variable data.
@@ -113,15 +113,15 @@ class Context(BaseModel):
     def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         """
         Transforms different data types to the objects of
-        :py:class:`~dff.core.engine.core.context.Context` class.
-        Returns an object of :py:class:`~dff.core.engine.core.context.Context`
+        :py:class:`~dff.script.Context` class.
+        Returns an object of :py:class:`~dff.script.Context`
         type that is initialized by the input data.
 
         :param ctx: Different data types, that are used to initialize object of
-            :py:class:`~dff.core.engine.core.context.Context` type.
-            The empty object of :py:class:`~dff.core.engine.core.context.Context`
+            :py:class:`~dff.script.Context` type.
+            The empty object of :py:class:`~dff.script.Context`
             type is created if no data are given.
-        :return: Object of :py:class:`~dff.core.engine.core.context.Context`
+        :return: Object of :py:class:`~dff.script.Context`
             type that is initialized by the input data.
         """
         if not ctx:
@@ -161,7 +161,7 @@ class Context(BaseModel):
     @validate_arguments
     def add_label(self, label: NodeLabel2Type):
         """
-        Adds to the context the next :py:const:`label <dff.core.engine.core.types.NodeLabel2Type>`,
+        Adds to the context the next :py:const:`label <dff.script.NodeLabel2Type>`,
         corresponding to the next turn.
         The addition takes place in the `labels`, and `new_index = last_index + 1`.
 
@@ -182,7 +182,7 @@ class Context(BaseModel):
         If `field_names` contains `misc` field, `misc` field is fully cleared.
 
         :param hold_last_n_indices: Number of last turns that remain under clearing.
-        :param field_names: Properties of :py:class:`~dff.core.engine.core.context.Context` we need to clear.
+        :param field_names: Properties of :py:class:`~dff.script.Context` we need to clear.
             Defaults to {"requests", "responses", "labels"}
         """
         field_names = field_names if isinstance(field_names, set) else set(field_names)
@@ -203,8 +203,8 @@ class Context(BaseModel):
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
         """
-        Returns the last :py:const:`~dff.core.engine.core.types.NodeLabel2Type` of
-        the :py:class:`~dff.core.engine.core.context.Context`.
+        Returns the last :py:const:`~dff.script.NodeLabel2Type` of
+        the :py:class:`~dff.script.Context`.
         Returns `None` if `labels` is empty.
         """
         last_index = get_last_index(self.labels)
@@ -213,7 +213,7 @@ class Context(BaseModel):
     @property
     def last_response(self) -> Optional[Any]:
         """
-        Returns the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Returns the last `response` of the current :py:class:`~dff.script.Context`.
         Returns `None` if `responses` is empty.
         """
         last_index = get_last_index(self.responses)
@@ -221,7 +221,7 @@ class Context(BaseModel):
 
     @last_response.setter
     def last_response(self, response: Optional[Any]):
-        """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        """Sets the last `response` of the current :py:class:`~dff.script.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
@@ -230,7 +230,7 @@ class Context(BaseModel):
     @property
     def last_request(self) -> Optional[Any]:
         """
-        Returns the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Returns the last `request` of the current :py:class:`~dff.script.Context`.
         Returns `None if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
@@ -238,7 +238,7 @@ class Context(BaseModel):
 
     @last_request.setter
     def last_request(self, request: Optional[Any]):
-        """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        """Sets the last `request` of the current :py:class:`~dff.script.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
@@ -247,7 +247,7 @@ class Context(BaseModel):
     @property
     def current_node(self) -> Optional[Node]:
         """
-        Returns current :py:class:`~dff.core.engine.core.script.Node`.
+        Returns current :py:class:`~dff.script.Node`.
         """
         actor = self.framework_states.get("actor", {})
         node = (

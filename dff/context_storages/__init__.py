@@ -1,4 +1,4 @@
-from .database import DBAbstractContextStorage, DBContextStorage, threadsafe_method, connector_factory
+from .database import DBAbstractContextStorage, DBContextStorage, threadsafe_method, context_storage_factory
 from .json import JSONContextStorage
 from .pickle import PickleContextStorage
 from .sql import SQLContextStorage, postgres_available, mysql_available, sqlite_available, sqlalchemy_available

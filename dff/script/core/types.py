@@ -9,7 +9,7 @@ from enum import Enum, auto
 from .keywords import Keywords
 
 LabelType = Union[str, Keywords]
-"""Label can be a casual string or :py:class:`~dff.core.engine.core.keywords.Keywords`."""
+"""Label can be a casual string or :py:class:`~dff.script.Keywords`."""
 
 NodeLabel1Type = Tuple[str, float]
 """Label type for transitions can be `[node_name, transition_priority]`."""
@@ -31,7 +31,7 @@ ConditionType = Callable
 
 ModuleName = str
 """
-Module name names addon state, or your own module state. For example module name can be `"df_db_connector"`.
+Module name names addon state, or your own module state. For example module name can be `"df_db_context_storage"`.
 """
 # TODO: change example
 
@@ -40,7 +40,7 @@ Module name names addon state, or your own module state. For example module name
 class ActorStage(Enum):
     """
     The class which holds keys for the handlers. These keys are used
-    for the actions of :py:class:`~dff.core.engine.core.actor.Actor`.
+    for the actions of :py:class:`~dff.script.Actor`.
 
     Enums:
 

@@ -4,7 +4,7 @@ import os
 from platform import system
 
 from dff.context_storages import (
-    connector_factory,
+    context_storage_factory,
     DBContextStorage,
     get_protocol_install_suggestion,
     JSONContextStorage,
@@ -100,7 +100,7 @@ def test_protocol_suggestion(protocol, expected):
 
 def test_main(testing_file, testing_context, context_id):
     assert issubclass(DBContextStorage, DBAbstractContextStorage)
-    db = connector_factory(f"json://{testing_file}")
+    db = context_storage_factory(f"json://{testing_file}")
     generic_test(db, testing_context, context_id)
 
 

@@ -3,7 +3,7 @@ Conditions
 ---------------------------
 Conditions are one of the most important components of the dialog graph,
 which determine the possibility of transition from one node of the graph to another.
-This is a standard set of engine conditions.
+This is a standard set of scripting conditions.
 """
 from typing import Callable, Pattern, Union, Any, List, Optional
 import logging
@@ -22,7 +22,7 @@ def exact_match(match: Any, *args, **kwargs) -> Callable[[Context, Actor, Any, A
     Returns function handler. This handler returns `True` only if the last user phrase is exactly
     the same as the :py:const:`match`.
 
-    :param match: The variable of the same type as :py:class:`~dff.core.engine.core.context.last_request`.
+    :param match: The variable of the same type as :py:class:`~dff.script.last_request`.
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
@@ -159,7 +159,7 @@ def has_last_labels(
     Returns condition handler. This handler returns `True` if any label from
     last :py:const:`last_n_indices` context labels is in
     the :py:const:`flow_labels` list or in
-    the :py:const:`~dff.core.engine.core.types.NodeLabel2Type` list.
+    the :py:const:`~dff.script.NodeLabel2Type` list.
 
     :param flow_labels: List of labels to check. Every label has type `str`. Empty if not set.
     :param labels: List of labels corresponding to the nodes. Empty if not set.

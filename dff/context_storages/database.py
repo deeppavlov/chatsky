@@ -2,7 +2,7 @@
 database
 ---------------------------
 | Base module. Provided classes:
-| Abstract connector interface :py:class:`.DBAbstractContextStorage`.
+| Abstract context storage interface :py:class:`.DBAbstractContextStorage`.
 | An intermediate class to inherit from: :py:class:`.DBContextStorage`
 
 """
@@ -56,7 +56,7 @@ class DBAbstractContextStorage(ABC):
 
 class DBContextStorage(DBAbstractContextStorage):
     """
-    An intermediate class between the abstract connector interface,
+    An intermediate class between the abstract context storage interface,
     :py:class:`.DBAbstractContextStorage`, and concrete implementations.
 
     Parameters
@@ -99,9 +99,9 @@ def threadsafe_method(func: Callable):
     return _synchronized
 
 
-def connector_factory(path: str, **kwargs):
+def context_storage_factory(path: str, **kwargs):
     """
-    Use connector_factory to lazy import connector types and instantiate them.
+    Use context_storage_factory to lazy import context storage types and instantiate them.
     The function takes a database connection URI or its equivalent. It should be prefixed with database name,
     followed by the symbol triplet '://'.
     Then, you should list the connection parameters like this: user:password@host:port/database
@@ -117,7 +117,7 @@ def connector_factory(path: str, **kwargs):
     - grpc://localhost:2136/local
     - grpcs://localhost:2135/local
 
-    For connectors that write to local files, the function expects a file path instead of connection params:
+    For context storages that write to local files, the function expects a file path instead of connection params:
     json://file.json
     When using sqlite backend your prefix should contain three slashes if you use Windows, or four in other cases.
     sqlite:////file.db
@@ -132,7 +132,7 @@ def connector_factory(path: str, **kwargs):
     ), f"""
     URI path should be prefixed with one of the following:\n
     {", ".join(PROTOCOLS.keys())}.\n
-    For more information, see the function doc:\n{connector_factory.__doc__}
+    For more information, see the function doc:\n{context_storage_factory.__doc__}
     """
     _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
     target_class = getattr(importlib.import_module(f".{module}", package="dff.context_storages"), _class)

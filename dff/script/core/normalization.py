@@ -22,7 +22,7 @@ Actor = BaseModel
 def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") -> Union[Callable, NodeLabel3Type]:
     """
     The function that is used for normalization of
-    :py:const:`default_flow_label <dff.core.engine.core.types.NodeLabelType>`.
+    :py:const:`default_flow_label <dff.script.NodeLabelType>`.
 
     :param label: If `label` is `Callable` the function is wrapped into try/except
         and normalization is used on the result of the function call with the name `label`.

@@ -2,7 +2,7 @@
 Dialog Flow Generics
 --------------------
 
-This module contains a universal response model that should be supported in all add-ons for df-engine.
+This module contains a universal response model that should be supported in all add-ons for df-script.
 It only contains types and properties that are compatible with most messaging services.
 On the other hand, it can support service-specific ui models.
 """
