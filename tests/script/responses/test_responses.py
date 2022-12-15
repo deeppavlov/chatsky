@@ -1,6 +1,6 @@
 # %%
 from dff.script import Context, Actor
-from dff.script.responses.std_responses import choice
+from dff.script.responses import choice
 
 
 def test_response():
