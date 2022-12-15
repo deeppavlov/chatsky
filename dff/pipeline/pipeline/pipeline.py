@@ -162,7 +162,8 @@ class Pipeline:
         :param script: (required) a Script instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param context_storage: an DBAbstractContextStorage instance for this pipeline or a dict to store dialog Contexts.
+        :param context_storage: an DBAbstractContextStorage instance for this pipeline
+            or a dict to store dialog Contexts.
         :param messenger_interface: an AbsMessagingInterface instance for this pipeline.
         :param pre_services: list of ServiceBuilder or ServiceGroupBuilder that will be executed before Actor.
         :param post_services: list of ServiceBuilder or ServiceGroupBuilder that will be executed after Actor.
