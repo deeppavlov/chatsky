@@ -118,7 +118,8 @@ def setup(_):
     regenerate_apiref(
         [
             ("dff.connectors.db", "db_connectors"),
-            ("dff.connectors.messenger", "messenger_interfaces"),
+            ("dff.connectors.messenger.generics", "messenger_common"),
+            ("dff.connectors.messenger.telegram", "messenger_telegram"),
             ("dff.core.engine", "engine"),
             ("dff.core.pipeline", "pipeline"),
         ]

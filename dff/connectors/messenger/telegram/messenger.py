@@ -103,7 +103,7 @@ class TelegramConditions:
     as :py:attr:`cnd` attribute on instantiation.
 
     To set a condition in your script, stick to the signature of the original :py:class:`~TeleBot` methods.
-    E. g. the result of
+    E.g. the result of
 
     .. code-block:: python
 
