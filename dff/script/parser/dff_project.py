@@ -355,7 +355,11 @@ class DFFProject(BaseParserObject):
 
     def to_python(self, project_root_dir: Path):
         logger.info(f"Executing `to_python` with project_root_dir={project_root_dir}")
+        object_filter = self.actor_call.dependencies
+
         for namespace in self.children.values():
+            namespace_object_filter = object_filter.get(namespace.name)
+
             namespace: Namespace
             file = project_root_dir.joinpath(*namespace.name.split(".")).with_suffix(".py")
             if file.exists():
@@ -379,20 +383,21 @@ class DFFProject(BaseParserObject):
 
                 last_insertion_index = len(objects)
                 for replaced_obj_name, replaced_obj in reversed(list(namespace.children.items())):
-                    obj_index = names.get(replaced_obj_name)
-                    if obj_index is not None and obj_index < last_insertion_index:
-                        objects.pop(obj_index)
-                        objects.insert(obj_index, str(replaced_obj))
-                        last_insertion_index = obj_index
-                    else:
-                        objects.insert(last_insertion_index, str(replaced_obj))
+                    if namespace_object_filter is None or replaced_obj_name in namespace_object_filter:
+                        obj_index = names.get(replaced_obj_name)
+                        if obj_index is not None and obj_index < last_insertion_index:
+                            objects.pop(obj_index)
+                            objects.insert(obj_index, str(replaced_obj))
+                            last_insertion_index = obj_index
+                        else:
+                            objects.insert(last_insertion_index, str(replaced_obj))
 
                 with open(file, "w", encoding="utf-8") as fd:
                     fd.write("\n".join(objects) + "\n")
             else:
                 logger.warning(f"File {file} is not found. It will be created.")
                 with open(file, "w", encoding="utf-8") as fd:
-                    fd.write(str(namespace) + "\n")
+                    fd.write(namespace.dump(object_filter=namespace_object_filter) + "\n")
 
     @classmethod
     def from_yaml(cls, file: Path):

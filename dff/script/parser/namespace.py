@@ -47,8 +47,10 @@ class Namespace(BaseParserObject):
             return obj.children["value"]
         return obj
 
-    def dump(self, current_indent=0, indent=4) -> str:
-        return "\n".join(map(str, self.children.values()))
+    def dump(self, current_indent=0, indent=4, object_filter: tp.Set[str] = None) -> str:
+        return "\n".join(
+            [str(obj) for obj_name, obj in self.children.items() if object_filter is None or obj_name in object_filter]
+        )
 
     def get_imports(self) -> tp.List[tp.List[str]]:
         imports = []
