@@ -85,10 +85,22 @@ def test_to_python(test_case: Path, tmp_path):
     ],
 )
 def test_engine_examples(example_name: str, tmp_path):
-    example_name = example_name + ".py"
+    python_name = example_name + ".py"
 
-    dff_project = DFFProject.from_python(ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / example_name))
+    dff_project = DFFProject.from_python(ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / python_name))
+
+    dff_project.to_yaml(tmp_path / (example_name + ".yaml"))
+
+    assert_files_equal(tmp_path / (example_name + ".yaml"), TEST_DIR / "engine_examples" / (example_name + ".yaml"))
+
+    dff_project = DFFProject.from_yaml(tmp_path / (example_name + ".yaml"))
+
+    dff_project.to_graph(tmp_path / (example_name + ".json"))
+
+    assert_files_equal(tmp_path / (example_name + ".json"), TEST_DIR / "engine_examples" / (example_name + ".json"))
+
+    dff_project = DFFProject.from_graph(tmp_path / (example_name + ".json"))
 
     dff_project.to_python(tmp_path)
 
-    assert_files_equal((tmp_path / example_name), TEST_DIR / "engine_examples" / example_name)
+    assert_files_equal((tmp_path / python_name), TEST_DIR / "engine_examples" / python_name)

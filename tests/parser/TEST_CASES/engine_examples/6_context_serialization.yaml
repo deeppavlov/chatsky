@@ -1,0 +1,12 @@
+6_context_serialization:
+  TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
+  RESPONSE: from dff.core.engine.core.keywords import RESPONSE
+  cnd: import dff.core.engine.conditions
+  Pipeline: from dff.core.pipeline import Pipeline
+  toy_script:
+    "'flow_start'":
+      "'node_start'":
+        RESPONSE: response_handler
+        TRANSITIONS:
+          ('flow_start', 'node_start'): cnd.true()
+  pipeline: Pipeline.from_script(toy_script, start_label=('flow_start', 'node_start'), post_services=[process_response])

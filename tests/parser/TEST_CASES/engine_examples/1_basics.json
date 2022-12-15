@@ -1,0 +1,337 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "full_script": {
+            "1_basics": {
+                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
+                "RESPONSE": "from dff.core.engine.core.keywords import RESPONSE",
+                "cnd": "import dff.core.engine.conditions",
+                "Pipeline": "from dff.core.pipeline import Pipeline",
+                "toy_script": {
+                    "'greeting_flow'": {
+                        "'start_node'": {
+                            "RESPONSE": "''",
+                            "TRANSITIONS": {
+                                "'node1'": "cnd.exact_match('Hi')"
+                            }
+                        },
+                        "'node1'": {
+                            "RESPONSE": "'Hi, how are you?'",
+                            "TRANSITIONS": {
+                                "'node2'": "cnd.exact_match(\"i'm fine, how are you?\")"
+                            }
+                        },
+                        "'node2'": {
+                            "RESPONSE": "'Good. What do you want to talk about?'",
+                            "TRANSITIONS": {
+                                "'node3'": "cnd.exact_match(\"Let's talk about music.\")"
+                            }
+                        },
+                        "'node3'": {
+                            "RESPONSE": "'Sorry, I can not talk about music now.'",
+                            "TRANSITIONS": {
+                                "'node4'": "cnd.exact_match('Ok, goodbye.')"
+                            }
+                        },
+                        "'node4'": {
+                            "RESPONSE": "'bye'",
+                            "TRANSITIONS": {
+                                "'node1'": "cnd.exact_match('Hi')"
+                            }
+                        },
+                        "'fallback_node'": {
+                            "RESPONSE": "'Ooops'",
+                            "TRANSITIONS": {
+                                "'node1'": "cnd.exact_match('Hi')"
+                            }
+                        }
+                    }
+                },
+                "pipeline": "Pipeline.from_script(toy_script, start_label=('greeting_flow', 'start_node'), fallback_label=('greeting_flow', 'fallback_node'))"
+            }
+        },
+        "start_label": [
+            "'greeting_flow'",
+            "'start_node'"
+        ],
+        "fallback_label": [
+            "'greeting_flow'",
+            "'fallback_node'"
+        ]
+    },
+    "nodes": [
+        {
+            "ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'start_node'"
+            ],
+            "local": false,
+            "id": [
+                "'greeting_flow'",
+                "'start_node'"
+            ]
+        },
+        {
+            "ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'"
+            ],
+            "local": false,
+            "id": [
+                "'greeting_flow'",
+                "'node1'"
+            ]
+        },
+        {
+            "ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'"
+            ],
+            "local": false,
+            "id": [
+                "'greeting_flow'",
+                "'node2'"
+            ]
+        },
+        {
+            "ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node3'"
+            ],
+            "local": false,
+            "id": [
+                "'greeting_flow'",
+                "'node3'"
+            ]
+        },
+        {
+            "ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'"
+            ],
+            "local": false,
+            "id": [
+                "'greeting_flow'",
+                "'node4'"
+            ]
+        },
+        {
+            "ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'fallback_node'"
+            ],
+            "local": false,
+            "id": [
+                "'greeting_flow'",
+                "'fallback_node'"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "label_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "key_'node1'"
+            ],
+            "label": "'node1'",
+            "condition_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "value_'node1'"
+            ],
+            "condition": "cnd.exact_match('Hi')",
+            "source": [
+                "'greeting_flow'",
+                "'start_node'"
+            ],
+            "target": [
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "key_'node2'"
+            ],
+            "label": "'node2'",
+            "condition_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "value_'node2'"
+            ],
+            "condition": "cnd.exact_match(\"i'm fine, how are you?\")",
+            "source": [
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "target": [
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_'node3'"
+            ],
+            "label": "'node3'",
+            "condition_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_'node3'"
+            ],
+            "condition": "cnd.exact_match(\"Let's talk about music.\")",
+            "source": [
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "'greeting_flow'",
+                "'node3'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "key_'node4'"
+            ],
+            "label": "'node4'",
+            "condition_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "value_'node4'"
+            ],
+            "condition": "cnd.exact_match('Ok, goodbye.')",
+            "source": [
+                "'greeting_flow'",
+                "'node3'"
+            ],
+            "target": [
+                "'greeting_flow'",
+                "'node4'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "key_'node1'"
+            ],
+            "label": "'node1'",
+            "condition_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "value_'node1'"
+            ],
+            "condition": "cnd.exact_match('Hi')",
+            "source": [
+                "'greeting_flow'",
+                "'node4'"
+            ],
+            "target": [
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "key_'node1'"
+            ],
+            "label": "'node1'",
+            "condition_ref": [
+                "1_basics",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "value_'node1'"
+            ],
+            "condition": "cnd.exact_match('Hi')",
+            "source": [
+                "'greeting_flow'",
+                "'fallback_node'"
+            ],
+            "target": [
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        }
+    ]
+}
