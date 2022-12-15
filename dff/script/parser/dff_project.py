@@ -406,6 +406,8 @@ class DFFProject(BaseParserObject):
                     fd.write("\n".join(objects) + "\n")
             else:
                 logger.warning(f"File {file} is not found. It will be created.")
+                file.parent.mkdir(parents=True, exist_ok=True)
+                file.touch()
                 with open(file, "w", encoding="utf-8") as fd:
                     fd.write(namespace.dump(object_filter=namespace_object_filter) + "\n")
 
@@ -415,6 +417,8 @@ class DFFProject(BaseParserObject):
             return cls.from_dict(yaml.load(fd))
 
     def to_yaml(self, file: Path):
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.touch()
         with open(file, "w", encoding="utf-8") as fd:
             yaml.dump(self.to_dict(self.actor_call.dependencies), fd)
 
@@ -424,5 +428,7 @@ class DFFProject(BaseParserObject):
             return cls.from_dict(json.load(fd)["graph"]["full_script"])
 
     def to_graph(self, file: Path):
+        file.parent.mkdir(parents=True, exist_ok=True)
+        file.touch()
         with open(file, "w", encoding="utf-8") as fd:
             json.dump(nx.readwrite.node_link_data(self.graph), fd, indent=4)
