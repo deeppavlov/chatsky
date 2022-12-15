@@ -32,7 +32,7 @@ ConditionType: TypeAlias = Callable
 
 ModuleName: TypeAlias = str
 """
-Module name names addon state, or your own module state. For example module name can be `"df_db_context_storage"`.
+Module name names addon state, or your own module state. For example module name can be `"dff_context_storages"`.
 """
 # TODO: change example
 

@@ -3,7 +3,7 @@
 # 2. Pre- and postprocessors
 
 The following example shows more advanced usage of `pipeline`
-module as an extension to `dff.core.engine`.
+module as an extension to `dff.script.core`.
 """
 
 

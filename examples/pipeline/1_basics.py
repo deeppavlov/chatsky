@@ -3,7 +3,7 @@
 # 1. Basics
 
 The following example shows basic usage of `pipeline`
-module as an extension to `dff.core.engine`.
+module as an extension to `dff.script.core`.
 """
 
 

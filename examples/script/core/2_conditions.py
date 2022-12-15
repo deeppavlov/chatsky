@@ -30,7 +30,7 @@ Condition functions have signature
 
     def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool
 
-Out of the box `dff.core.engine` offers the
+Out of the box `dff.script.conditions` offers the
     following options for setting conditions:
 
 * `exact_match` returns `True` if the user's request completely
@@ -60,7 +60,7 @@ def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
     return True
 ```
 always returns `True` and `always_true_condition` function
-is the same as `dff.core.engine.conditions.true()`.
+is the same as `dff.script.conditions.std_conditions.true()`.
 
 The functions to be used in the `toy_script` are declared here.
 """

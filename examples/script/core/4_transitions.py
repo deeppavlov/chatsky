@@ -54,8 +54,8 @@ the one that has the highest priority will be executed.
 Of the set of `True` conditions with largest
 priority the first met condition will be executed.
 
-Out of the box `dff.core.engine`
-ffers the following `dff.core.engine.labels` methods:
+Out of the box `dff.script.core.labels`
+offers the following methods:
 
 * `lbl.repeat()` returns transition handler
     which returns `NodeLabelType` to the last node,
