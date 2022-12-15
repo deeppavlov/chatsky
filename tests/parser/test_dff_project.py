@@ -8,6 +8,7 @@ from dff.script.parser.base_parser_object import String
 from .utils import assert_dirs_equal, assert_files_equal
 
 TEST_DIR = Path(__file__).parent / "TEST_CASES"
+ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "engine"
 
 
 # todo: add more parameters?
@@ -67,3 +68,27 @@ def test_to_python(test_case: Path, tmp_path):
     dff_project.to_python(edited)
 
     assert_dirs_equal(test_case / "result_editing", edited)
+
+
+@pytest.mark.parametrize(
+    "example_name",
+    [
+        "1_basics",
+        "2_conditions",
+        "3_responses",
+        "4_transitions",
+        "5_global_transitions",
+        "6_context_serialization",
+        "7_pre_response_processing",
+        "8_misc",
+        "9_pre_transitions_processing",
+    ],
+)
+def test_engine_examples(example_name: str, tmp_path):
+    example_name = example_name + ".py"
+
+    dff_project = DFFProject.from_python(ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / example_name))
+
+    dff_project.to_python(tmp_path)
+
+    assert_files_equal((tmp_path / example_name), TEST_DIR / "engine_examples" / example_name)
