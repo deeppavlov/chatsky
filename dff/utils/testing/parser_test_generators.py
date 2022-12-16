@@ -1,5 +1,6 @@
 from pathlib import Path
 from shutil import rmtree, copytree
+import difflib
 
 from dff.script.parser.dff_project import DFFProject
 
@@ -18,6 +19,26 @@ def rebuild_conversions():
 def rebuild_to_python_tests():
     for working_dir in (TEST_DIR / "to_python").iterdir():
         if working_dir.is_dir():
+            # GENERATE OLD SCRIPT
+            unedited = DFFProject.from_python(working_dir / "initial_files", working_dir / "initial_files" / "main.py")
+
+            unedited.to_yaml(working_dir / "old_script.yaml")
+
+            # GENERATE DIFF FILE
+
+            with open(working_dir / "old_script.yaml", "r") as fd:
+                original = fd.readlines()
+
+            with open(working_dir / "script.yaml", "r") as fd:
+                new = fd.readlines()
+
+            diff = difflib.ndiff(original, new)
+
+            with open(working_dir / "script.yaml.diff", "w") as fd:
+                fd.write("".join(diff))
+
+            # GENERATE RESULTS OF TO_PYTHON
+
             dff_project = DFFProject.from_yaml(working_dir / "script.yaml")
 
             creation_dir = working_dir / "result_creating"
@@ -30,7 +51,7 @@ def rebuild_to_python_tests():
 
             if editing_dir.exists():
                 rmtree(editing_dir)
-                copytree(working_dir / "initial_files", editing_dir)
+            copytree(working_dir / "initial_files", editing_dir)
 
             dff_project.to_python(working_dir / "result_creating")
             dff_project.to_python(working_dir / "result_editing")
