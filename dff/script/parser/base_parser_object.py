@@ -124,7 +124,7 @@ class BaseParserObject(ABC):
 
     @abstractmethod
     def dump(self, current_indent=0, indent=4) -> str:
-        ...
+        ...  # todo: replace str in all dump defs with dump calls
 
     def __repr__(self) -> str:
         return self.__class__.__name__ + "(" + self.dump() + ")"
@@ -378,7 +378,7 @@ class String(Expression):
         raise RuntimeError(f"Node {node} is not str")
 
 
-class Python(Expression):
+class Python(Expression, Statement):
     def __init__(self, node: ast.AST):
         super().__init__()
         for key, value in node.__dict__.items():
@@ -389,12 +389,13 @@ class Python(Expression):
                     if isinstance(child, ast.expr):
                         self.add_child(Expression.from_ast(child), key + "_" + str(index))
         self.string = remove_suffix(unparse(node), "\n")
+        self.type = node.__class__.__name__
 
     def dump(self, current_indent=0, indent=4) -> str:
         return self.string
 
     @classmethod
-    def from_str(cls, string: str) -> 'Python':
+    def from_str(cls, string: str) -> 'Python':  # todo: add support for statements
         return cls(ast.parse(string).body[0].value)
 
     @classmethod

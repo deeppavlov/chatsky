@@ -4,6 +4,7 @@ from dff.core.engine.core.keywords import RESPONSE
 import dff.core.engine.conditions as cnd
 import dff.core.engine.labels as lbl
 from dff.core.pipeline import Pipeline
+
 toy_script = {
     'global_flow': {
         'start_node': {
@@ -90,4 +91,5 @@ toy_script = {
         },
     },
 }
+
 pipeline = Pipeline.from_script(toy_script, start_label=('global_flow', 'start_node'), fallback_label=('global_flow', 'fallback_node'))

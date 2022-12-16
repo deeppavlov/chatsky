@@ -1,8 +1,9 @@
 import typing as tp
 import ast
 from pathlib import Path
+from itertools import pairwise
 
-from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom
+from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom, Python
 
 if tp.TYPE_CHECKING:
     from .dff_project import DFFProject
@@ -47,10 +48,22 @@ class Namespace(BaseParserObject):
             return obj.children["value"]
         return obj
 
+    @staticmethod
+    def dump_statements(statements: tp.List[Statement]) -> str:
+        def get_newline_count(statement: Statement):
+            if isinstance(statement, (Import, ImportFrom)):
+                return 1
+            if isinstance(statement, Python) and statement.type.endswith("Def"):  # function and class defs
+                return 3
+            return 2
+        result = [statements[0].dump()]
+        for first, second in pairwise(statements):
+            result.append(max(get_newline_count(first), get_newline_count(second)) * "\n")
+            result.append(str(second))
+        return "".join(result) + "\n"
+
     def dump(self, current_indent=0, indent=4, object_filter: tp.Set[str] = None) -> str:
-        return "\n".join(
-            [str(obj) for obj_name, obj in self.children.items() if object_filter is None or obj_name in object_filter]
-        )
+        return self.dump_statements(list(filter(lambda x: object_filter is None or x not in object_filter, self.children.values())))
 
     def get_imports(self) -> tp.List[tp.List[str]]:
         imports = []

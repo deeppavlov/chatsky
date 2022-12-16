@@ -373,7 +373,7 @@ class DFFProject(BaseParserObject):
             namespace: Namespace
             file = project_root_dir.joinpath(*namespace.name.split(".")).with_suffix(".py")
             if file.exists():
-                objects = []
+                objects: tp.List[BaseParserObject] = []
                 names = {}
 
                 with open(file, "r", encoding="utf-8") as fd:
@@ -385,9 +385,9 @@ class DFFProject(BaseParserObject):
                             if names.get(obj_name) is not None:
                                 raise ParsingError(f"The same name is used twice:\n{str(names.get(obj_name))}\n{str(obj)}")
                             names[obj_name] = len(objects)
-                            objects.append(str(obj))
+                            objects.append(obj)
                     elif isinstance(statements, Python):
-                        objects.append(str(statements))
+                        objects.append(statements)
                     else:
                         raise RuntimeError(statements)
 
@@ -398,22 +398,22 @@ class DFFProject(BaseParserObject):
                         if obj_index is not None:
                             if obj_index > last_insertion_index:
                                 logger.warning(f"Object order was changed. This might cause issues.\nInserting object: {str(replaced_obj)}\nNew script places it below: {str(objects[last_insertion_index])}")
-                                objects.insert(last_insertion_index, str(replaced_obj))
+                                objects.insert(last_insertion_index, replaced_obj)
                             else:
                                 objects.pop(obj_index)
-                                objects.insert(obj_index, str(replaced_obj))
+                                objects.insert(obj_index, replaced_obj)
                                 last_insertion_index = obj_index
                         else:
-                            objects.insert(last_insertion_index, str(replaced_obj))
+                            objects.insert(last_insertion_index, replaced_obj)
 
                 with open(file, "w", encoding="utf-8") as fd:
-                    fd.write("\n".join(objects) + "\n")
+                    fd.write(Namespace.dump_statements(objects))
             else:
                 logger.warning(f"File {file} is not found. It will be created.")
                 file.parent.mkdir(parents=True, exist_ok=True)
                 file.touch()
                 with open(file, "w", encoding="utf-8") as fd:
-                    fd.write(namespace.dump(object_filter=namespace_object_filter) + "\n")
+                    fd.write(namespace.dump(object_filter=namespace_object_filter))
 
     @classmethod
     def from_yaml(cls, file: Path):

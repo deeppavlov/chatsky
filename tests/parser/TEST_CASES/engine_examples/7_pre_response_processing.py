@@ -6,6 +6,7 @@ from dff.core.engine.core.keywords import PRE_RESPONSE_PROCESSING
 import dff.core.engine.labels as lbl
 import dff.core.engine.conditions as cnd
 from dff.core.pipeline import Pipeline
+
 toy_script = {
     'root': {
         'start': {
@@ -75,4 +76,5 @@ toy_script = {
         },
     },
 }
+
 pipeline = Pipeline.from_script(toy_script, start_label=('root', 'start'), fallback_label=('root', 'fallback'))

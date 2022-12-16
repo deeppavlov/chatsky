@@ -14,7 +14,9 @@ import typing as tp
 import re
 import transitions
 from flow import global_flow
+
 global_flow_1 = global_flow
+
 script = {
     GLOBAL: {
         TRANSITIONS: {
@@ -105,4 +107,5 @@ script = {
         },
     },
 }
+
 actor = Act(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))

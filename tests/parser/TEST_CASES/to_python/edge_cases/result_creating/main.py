@@ -2,6 +2,7 @@ from dff.core.engine.core.actor import Actor
 from dff.core.engine.core.keywords import TRANSITIONS
 from .transitions import transitions
 import variables
+
 script = {
     'start_flow': {
         'start_node': {
@@ -17,4 +18,5 @@ script = {
         },
     },
 }
+
 actor = Actor(script, start_label=('start_flow', 'start_node'), some_kwarg=another_func)
