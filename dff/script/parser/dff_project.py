@@ -395,10 +395,14 @@ class DFFProject(BaseParserObject):
                 for replaced_obj_name, replaced_obj in reversed(list(namespace.children.items())):
                     if namespace_object_filter is None or replaced_obj_name in namespace_object_filter:
                         obj_index = names.get(replaced_obj_name)
-                        if obj_index is not None and obj_index < last_insertion_index:
-                            objects.pop(obj_index)
-                            objects.insert(obj_index, str(replaced_obj))
-                            last_insertion_index = obj_index
+                        if obj_index is not None:
+                            if obj_index > last_insertion_index:
+                                logger.warning(f"Object order was changed. This might cause issues.\nInserting object: {str(replaced_obj)}\nNew script places it below: {str(objects[last_insertion_index])}")
+                                objects.insert(last_insertion_index, str(replaced_obj))
+                            else:
+                                objects.pop(obj_index)
+                                objects.insert(obj_index, str(replaced_obj))
+                                last_insertion_index = obj_index
                         else:
                             objects.insert(last_insertion_index, str(replaced_obj))
 
