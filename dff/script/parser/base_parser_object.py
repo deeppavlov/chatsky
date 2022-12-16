@@ -3,7 +3,7 @@ This module defines parser objects -- nodes that form a tree.
 """
 import typing as tp
 from abc import ABC, abstractmethod
-from collections.abc import Iterable
+from collections.abc import Iterable as TypeIterable
 from collections import defaultdict
 import ast
 import logging
@@ -384,7 +384,7 @@ class Python(Expression, Statement):
         for key, value in node.__dict__.items():
             if isinstance(value, ast.expr):
                 self.add_child(Expression.from_ast(value), key)
-            elif isinstance(value, Iterable):
+            elif isinstance(value, TypeIterable):
                 for index, child in enumerate(value):
                     if isinstance(child, ast.expr):
                         self.add_child(Expression.from_ast(child), key + "_" + str(index))

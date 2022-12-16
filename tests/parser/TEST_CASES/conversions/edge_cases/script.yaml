@@ -1,13 +1,15 @@
 main:
   Actor: from dff.core.engine.core.actor import Actor
   TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
+  some_var: from something import some_var
   transitions: from .transitions import transitions
   variables: import variables
+  var: some_var
   script:
     "'start_flow'":
       "'start_node'":
         TRANSITIONS:
-          transitions['two']: 'len(transitions[1]) > 0 > -2 > (lambda : -5)() > func()'
+          transitions['two']: 'len(transitions[1]) > 0 > -2 > (lambda : -5 + var)() > func()'
       "'label'":
         TRANSITIONS: transitions[7]
       "'another'":

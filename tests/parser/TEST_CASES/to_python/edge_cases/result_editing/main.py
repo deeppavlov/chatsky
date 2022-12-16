@@ -18,7 +18,7 @@ script = {
     'start_flow': {
         'start_node': {
             TRANSITIONS: {
-                transitions['two']: len(transitions[1]) > 0 > -2 > (lambda : -5)() > func(),
+                transitions['two']: len(transitions[1]) > 0 > -2 > (lambda : -5 + var)() > func(),
             },
         },
         'label': {
