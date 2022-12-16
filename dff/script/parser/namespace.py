@@ -56,6 +56,8 @@ class Namespace(BaseParserObject):
             if isinstance(statement, Python) and statement.type.endswith("Def"):  # function and class defs
                 return 3
             return 2
+        if len(statements) == 0:
+            return "\n"
         result = [statements[0].dump()]
         for first, second in pairwise(statements):
             result.append(max(get_newline_count(first), get_newline_count(second)) * "\n")
@@ -63,7 +65,7 @@ class Namespace(BaseParserObject):
         return "".join(result) + "\n"
 
     def dump(self, current_indent=0, indent=4, object_filter: tp.Set[str] = None) -> str:
-        return self.dump_statements(list(filter(lambda x: object_filter is None or x not in object_filter, self.children.values())))
+        return self.dump_statements([value for key, value in self.children.items() if object_filter is None or key in object_filter])
 
     def get_imports(self) -> tp.List[tp.List[str]]:
         imports = []

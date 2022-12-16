@@ -60,13 +60,19 @@ def rebuild_to_python_tests():
 def rebuild_engine_examples():
     engine_example_dir = Path("examples/engine")
 
+    test_dir = TEST_DIR / "engine_examples"
+
+    if test_dir.exists():
+        rmtree(test_dir)
+    test_dir.mkdir(parents=True)
+
     for file in engine_example_dir.iterdir():
         if file.is_file():
             dff_project = DFFProject.from_python(engine_example_dir, file)
 
-            dff_project.to_python(TEST_DIR / "engine_examples")
-            dff_project.to_yaml(TEST_DIR / "engine_examples" / (file.parts[-1].removesuffix(".py") + ".yaml"))
-            dff_project.to_graph(TEST_DIR / "engine_examples" / (file.parts[-1].removesuffix(".py") + ".json"))
+            dff_project.to_python(test_dir)
+            dff_project.to_yaml(test_dir / (file.parts[-1].removesuffix(".py") + ".yaml"))
+            dff_project.to_graph(test_dir / (file.parts[-1].removesuffix(".py") + ".json"))
 
 
 if __name__ == "__main__":

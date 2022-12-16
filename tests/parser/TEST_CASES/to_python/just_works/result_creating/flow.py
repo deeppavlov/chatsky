@@ -3,6 +3,7 @@ from dff.core.engine.core.keywords import RESPONSE
 from dff.core.engine.core.keywords import PROCESSING
 from dff.core.engine.core.keywords import LOCAL
 import dff.core.engine.conditions as cnd
+import re
 import dff.core.engine.labels as lbl
 from functions import add_prefix
 
