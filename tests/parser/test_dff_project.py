@@ -15,8 +15,7 @@ ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "engine
 @pytest.mark.parametrize(
     "test_case",
     [
-        TEST_DIR / "conversions" / "just_works",
-        TEST_DIR / "conversions" / "modular",
+        working_dir for working_dir in (TEST_DIR / "conversions").iterdir()
     ]
 )
 def test_conversions(test_case: Path, tmp_path):
@@ -46,7 +45,7 @@ def test_conversions(test_case: Path, tmp_path):
 @pytest.mark.parametrize(
     "test_case",
     [
-        TEST_DIR / "to_python" / "just_works",
+        working_dir for working_dir in (TEST_DIR / "to_python").iterdir()
     ]
 )
 def test_to_python(test_case: Path, tmp_path):
