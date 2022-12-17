@@ -143,7 +143,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.10.1",
+    version="0.1.0rc0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
