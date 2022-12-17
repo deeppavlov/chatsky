@@ -55,7 +55,6 @@ def on_opened_pull_request(event_info: dict):
 def main():
     with open(GITHUB_ARGS["GITHUB_EVENT_PATH"], "r", encoding="utf-8") as fd:
         event_info = json.load(fd)
-    print("In main")
     print(f"event info: {event_info}")
     if GITHUB_ARGS["GITHUB_EVENT_NAME"] == "pull_request_target" and event_info["action"] == "opened":
         on_opened_pull_request(event_info)
