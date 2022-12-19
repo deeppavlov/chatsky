@@ -21,8 +21,8 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
 db = context_storage_factory("json://dbs/file.json")
-# db = connector_factory("pickle://dbs/file.pkl")
-# db = connector_factory("shelve://dbs/file")
+# db = context_storage_factory("pickle://dbs/file.pkl")
+# db = context_storage_factory("shelve://dbs/file")
 
 pipeline = Pipeline.from_script(
     TOY_SCRIPT,
