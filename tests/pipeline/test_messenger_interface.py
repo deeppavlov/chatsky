@@ -25,7 +25,7 @@ SCRIPT = {
 }
 
 pipeline = Pipeline.from_script(
-    SCRIPT,  # Actor script object, defined in `.turn_caching` module.
+    SCRIPT,
     start_label=("pingpong_flow", "start_node"),
     fallback_label=("pingpong_flow", "fallback_node"),
 )
