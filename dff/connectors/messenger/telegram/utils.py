@@ -4,8 +4,7 @@ Utils
 This module contains utilities for the telegram connector.
 """
 from functools import wraps
-from typing import Callable, Union
-from collections import Iterable
+from typing import Callable, Union, Iterable
 from typing_extensions import ParamSpec, TypeVar
 from contextlib import contextmanager
 from pathlib import Path
