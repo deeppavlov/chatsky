@@ -118,7 +118,7 @@ class WebhookTelegramInterface(CallbackMessengerInterface):
         full_uri: Optional[str] = None,
     ):
         if not flask_imported:
-            raise ModuleNotFoundError("Flask is not installed")
+            raise ModuleNotFoundError("Flask is not installed. Install it with `pip install flask`.")
 
         self.messenger: TelegramMessenger = messenger
         self.app: Flask = app if app else Flask(__name__)

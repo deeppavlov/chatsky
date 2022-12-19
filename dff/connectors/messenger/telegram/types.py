@@ -36,7 +36,7 @@ class TelegramUI(TelegramDataModel):
             return values
         if not values.get("buttons"):
             raise ValueError(
-                "`buttons` parameter is required, when `keyboard` is not equal to telebot.types.ReplyKeyboardRemove."
+                "`buttons` parameter is required, when `keyboard` is None."
             )
         keyboard_kwargs = {"row_width": values.get("row_width")}
         is_inline = values.get("is_inline")
