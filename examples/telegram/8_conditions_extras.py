@@ -24,10 +24,25 @@ from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 In our Telegram connector, we adopted the system of filters
 available in the `pytelegrambotapi` library.
 
-You can use `message_handler` to filter text messages from telegram in various ways.
-Filling the `command` argument will cause the handler to only react to listed commands.
-`func` argument on the other hand allows you to define arbitrary conditions.
-`regexp` creates a regular expression filter, etc.
+Aside from `message_handler` and `callback_query_handler`, you can use
+other triggers to interact with the api. In this example, we use
+handlers of other type as global conditions that trigger a response
+from the bot.
+
+Here, we use the following triggers:
+* `chat_join_request_handler`: join request is sent to the chat where the bot is.
+* `my_chat_member_handler`: triggered when the bot is invited to a chat.
+* `inline_handler`: triggered when an inline query is being sent to the bot.
+
+The other available conditions are:
+* `channel_post_handler`: new post is created in a channel the bot is subscribed to;
+* `edited_channel_post_handler`: post is edited in a channel the bot is subscribed to;
+* `shipping_query_handler`: shipping query is sent by the user;
+* `pre_checkout_query_handler`: order confirmation is sent by the user;
+* `poll_handler`: poll is sent to the chat;
+* `poll_answer_handler`: users answered the poll sent by the bot.
+
+You can read more on those in the Telegram documentation or in the docs for the `telebot` library.
 """
 
 
