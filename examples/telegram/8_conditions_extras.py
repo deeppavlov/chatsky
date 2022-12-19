@@ -44,14 +44,18 @@ script = {
             "logging": lambda ctx, actor: print(ctx.framework_states) or ctx
         },
         TRANSITIONS: {
-            ("greeting_flow", "node1"): cnd.any([
-                # say hi when invited to a chat
-                messenger.cnd.chat_join_request_handler(func=lambda x: True),
-                # say hi when someone enters the chat
-                messenger.cnd.my_chat_member_handler(func=lambda x: True)
-            ]),
+            ("greeting_flow", "node1"): cnd.any(
+                [
+                    # say hi when invited to a chat
+                    messenger.cnd.chat_join_request_handler(func=lambda x: True),
+                    # say hi when someone enters the chat
+                    messenger.cnd.my_chat_member_handler(func=lambda x: True),
+                ]
+            ),
             # send a message when inline query is received
-            ("greeting_flow", "node2"): messenger.cnd.inline_handler(func=lambda query: print(query) or query.query is not None),
+            ("greeting_flow", "node2"): messenger.cnd.inline_handler(
+                func=lambda query: print(query) or query.query is not None
+            ),
         },
     },
     "greeting_flow": {
@@ -63,20 +67,16 @@ script = {
         },
         "node1": {
             RESPONSE: Response(text="Hi"),
-            TRANSITIONS: {
-                "start_node": cnd.true()
-            },
+            TRANSITIONS: {"start_node": cnd.true()},
         },
         "node2": {
             RESPONSE: Response(text="Inline query received."),
-            TRANSITIONS: {
-                "start_node": cnd.true()
-            }
+            TRANSITIONS: {"start_node": cnd.true()},
         },
         "fallback_node": {
             RESPONSE: Response(text="Ooops"),
         },
-    }
+    },
 }
 
 

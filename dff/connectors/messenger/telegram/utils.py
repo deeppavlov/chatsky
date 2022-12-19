@@ -4,11 +4,12 @@ Utils
 This module contains utilities for the telegram connector.
 """
 from functools import wraps
-from typing import Callable
+from typing import Callable, Union
+from collections import Iterable
 from typing_extensions import ParamSpec, TypeVar
+from contextlib import contextmanager
 from pathlib import Path
 from io import IOBase
-from copy import copy
 
 from telebot import types
 
@@ -21,6 +22,7 @@ def partialmethod(func: Callable[CallableParams, ReturnType], **part_kwargs) -> 
     This function replaces the `partialmethod` implementation from functools.
     In contrast with the original class-based approach, it decorates the function, so we can use docstrings.
     """
+
     @wraps(func)
     def wrapper(self, *args: CallableParams.args, **kwargs: CallableParams.kwargs):
         kwargs = {**kwargs, **part_kwargs}
@@ -30,13 +32,43 @@ def partialmethod(func: Callable[CallableParams, ReturnType], **part_kwargs) -> 
 
 
 def open_io(item: types.InputMedia):
-    """Returns `InputMedia` with an opened file descriptor instead of path."""
+    """
+    Returns `InputMedia` with an opened file descriptor instead of path.
+
+    :param item: input media object.
+    """
     if isinstance(item.media, Path):
         item.media = item.media.open(mode="rb")
     return item
 
 
 def close_io(item: types.InputMedia):
-    """Closes an IO in an `InputMedia` object to perform the cleanup."""
+    """
+    Closes an IO in an `InputMedia` object to perform the cleanup.
+
+    :param item: input media object.
+    """
     if isinstance(item.media, IOBase):
         item.media.close()
+
+
+@contextmanager
+def batch_open_io(item: Union[types.InputMedia, Iterable[types.InputMedia]]):
+    """
+    Context manager that controls the state of file descriptors inside InputMedia.
+    Can be used both for single objects and collections.
+
+    :param item: InputMedia objects that contain file descriptors.
+    """
+    if isinstance(item, Iterable):
+        resources = list(map(open_io, item))
+    else:
+        resources = open_io(item)
+    try:
+        yield resources
+    finally:
+        if isinstance(resources, Iterable):
+            for resource in resources:
+                close_io(resource)
+        else:
+            close_io(resources)
