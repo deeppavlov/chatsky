@@ -1,3 +1,7 @@
+# -*- coding: utf-8 -*-
+# flake8: noqa: F401
+# fmt: off
+
 import nest_asyncio
 
 nest_asyncio.apply()
