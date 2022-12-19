@@ -17,7 +17,6 @@ from .utils import partialmethod, open_io, close_io
 from .types import TelegramResponse
 
 from dff.connectors.messenger.generics import Response
-from dff.connectors.messenger.telegram.utils import TELEGRAM_STATE_KEY
 
 
 class TelegramMessenger(TeleBot):
@@ -151,7 +150,7 @@ class TelegramConditions:
         )
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
-            update = ctx.framework_states.get(TELEGRAM_STATE_KEY, {}).get("data")
+            update = ctx.last_request
             if not update or not isinstance(update, target_type):
                 return False
             test_result = self.messenger._test_message_handler(update_handler, update)

@@ -1,11 +1,14 @@
 import os
 import pytest
 import asyncio
+import importlib
 from pathlib import Path
 from telethon import TelegramClient
 
-from examples.telegram.no_pipeline.basic_bot import bot, actor
-from examples.telegram.interfaces.polling import pipeline
+module_11 = importlib.import_module("examples.telegram.11_no_pipeline")
+bot, actor = module_11.bot, module_11.actor
+module_9 = importlib.import_module("examples.telegram.9_polling_setup")
+pipeline = module_9.pipeline
 
 
 @pytest.fixture(scope="session")
