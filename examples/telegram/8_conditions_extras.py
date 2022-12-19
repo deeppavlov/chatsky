@@ -1,8 +1,9 @@
 # %% [markdown]
 """
-# 2. Responses
+# 8. Conditions Extras
 
-This example shows how to use the generic `Response` class provided by DFF.
+This example shows how to use additional update filters
+inherited from the `pytelegrambotapi` library.
 """
 
 # %%

@@ -1,8 +1,9 @@
 # %% [markdown]
 """
-# 2. Responses
+# 6. Conditions
 
-This example shows how to use the generic `Response` class provided by DFF.
+This example shows how to process Telegram updates in your script
+and reuse handler triggers from the `pytelegrambotapi` library.
 """
 
 # %%
