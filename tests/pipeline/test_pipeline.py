@@ -1,6 +1,4 @@
 import importlib
-import os
-import sys
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 
