@@ -91,7 +91,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
 
     async def connect(self, callback: PipelineRunnerFunction, loop: Optional[Callable] = None, *args, **kwargs):
         self.messenger._TeleBot__stop_polling.clear()
-        self.messenger.get_updates(offset=-1)
+        self.messenger.get_updates(offset=-1)  # forget all previous updates
 
         await super().connect(
             callback, loop=loop or (lambda: not self.messenger._TeleBot__stop_polling.wait(self.interval))
