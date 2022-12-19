@@ -2,8 +2,8 @@ from typing import Any, Optional
 
 from requests import get
 
-from dff.connectors.messenger.generics import Response
-from dff.core.engine.core.script import Context
+from dff.script import Context
+from dff.script.responses import Response
 
 
 def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[str]:

@@ -3,17 +3,16 @@
 # 1. Basics
 
 The following example shows basic usage of `pipeline`
-module as an extension to `dff.core.engine`.
+module as an extension to `dff.script.core`.
 """
 
 
 # %%
-from dff.core.engine.core import Context
+from dff.script import Context
 
-from dff.core.pipeline import Pipeline
+from dff.pipeline import Pipeline
 
-from dff.utils.testing.common import check_happy_path, is_interactive_mode
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
 
 
 # %% [markdown]
@@ -37,7 +36,7 @@ its `last_response` property will be actors response.
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
+    TOY_SCRIPT,  # Actor script object, defined in `dff.utils.testing.toy_script`.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
