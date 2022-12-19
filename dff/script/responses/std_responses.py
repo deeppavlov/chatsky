@@ -3,7 +3,7 @@ Responses
 ---------------------------
 Responses are one of the most important components of the dialog graph,
 which determine response for each node of a dialog graph.
-This is a standard set of scripting responses.
+This is a standard set of responses.
 """
 import random
 from dff.script import Context, Actor
