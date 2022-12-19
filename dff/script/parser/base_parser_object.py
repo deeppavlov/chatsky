@@ -63,15 +63,6 @@ class BaseParserObject(ABC):
         return self
 
     @cached_property
-    def names(self) -> tp.Set[str]:
-        result = set()
-        if isinstance(self, Name):
-            result.add(self.name)
-        for child in self.children.values():
-            result.update(child.names)
-        return result
-
-    @cached_property
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
         result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
@@ -689,7 +680,6 @@ class Generator(BaseParserObject):
     def __init__(self, target: Expression, iterator: Expression, ifs: tp.List[Expression], is_async: bool):
         BaseParserObject.__init__(self)
         self.add_child(target, "target")
-        self.generated_names = target.names
         self.add_child(iterator, "iter")
         for index, if_expr in enumerate(ifs):
             self.add_child(if_expr, "if_" + str(index))
@@ -730,18 +720,8 @@ class Comprehension(Expression):
             self.add_child(element, "element")
 
         self.comp_type = comp_type
-        self.generated_names = set()
         for index, generator in enumerate(generators):
             self.add_child(generator, "gens_" + str(index))
-            self.generated_names.update(generator.generated_names)
-
-    @cached_property
-    def names(self) -> tp.Set[str]:
-        if cached_property.__module__ == "cached_property":
-            get = (self, BaseParserObject)
-        else:
-            get = (self,)
-        return BaseParserObject.names.__get__(*get).difference(self.generated_names)
 
     def dump(self, current_indent=0, indent=4) -> str:
         gens = [str(gen) for key, gen in self.children.items() if key.startswith("gens_")]

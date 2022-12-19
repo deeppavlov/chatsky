@@ -156,13 +156,9 @@ def test_comprehensions():
     dff_project = DFFProject([namespace], validate=False)
 
     assert str(namespace["list_comp"]) == list_comp_str
-    assert namespace["list_comp"].names == {"a"}
     assert str(namespace["set_comp"]) == set_comp_str
-    assert namespace["set_comp"].names == {"b"}
     assert str(namespace["dict_comp"]) in correct_dict_comp_str
-    assert namespace["dict_comp"].names == {"c"}
     assert str(namespace["gen_comp"]) in correct_gen_comp_str
-    assert namespace["gen_comp"].names == {"a", "b", "c", "true"}
 
 
 
