@@ -84,7 +84,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": add_installation_cell_into_example("dff[examples]", {})}
+nbsphinx_custom_formats = {".py": add_installation_cell_into_example()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
