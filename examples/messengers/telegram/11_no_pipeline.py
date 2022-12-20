@@ -2,7 +2,7 @@
 """
 # 11. No Pipeline
 
-This example shows how to use the TelegramConnector without the `pipeline` API.
+This example shows how to connect to Telegram without the `pipeline` API.
 
 This approach is much closer to the usual pytelegrambotapi developer workflow.
 You create a 'bot' (TelegramMessenger) and define handlers that react to messages.
@@ -24,7 +24,7 @@ from telebot.util import content_type_media
 from dff.messengers.telegram import TelegramMessenger
 from dff.utils.testing.common import is_interactive_mode
 
-db = dict()  # You can use any other type from `db_connector`.
+db = dict()  # You can use any other context storage from the library.
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 

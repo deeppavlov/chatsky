@@ -1,7 +1,7 @@
 """
 Utils
 ------
-This module contains utilities for the telegram connector.
+This module contains utilities for connecting to Telegram.
 """
 from functools import wraps
 from typing import Callable, Union, Iterable

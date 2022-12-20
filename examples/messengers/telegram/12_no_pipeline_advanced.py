@@ -2,7 +2,7 @@
 """
 # 12. No Pipeline Advanced
 
-This example demonstrates how to use the TelegramConnector without the `pipeline` API.
+This example demonstrates how to connect to Telegram without the `pipeline` API.
 
 This shows how you can integrate command and button reactions into your script.
 As in other cases, you only need one handler, since the logic is handled by the actor
@@ -23,7 +23,7 @@ from telebot.util import content_type_media
 from dff.messengers.telegram import TelegramMessenger
 from dff.utils.testing.common import is_interactive_mode
 
-db = dict()  # You can use any other type from `db_connector`.
+db = dict()  # You can use any other context storage from the library.
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 

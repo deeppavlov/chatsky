@@ -22,7 +22,7 @@ from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
 
 # %% [markdown]
 """
-In our Telegram connector, we adopted the system of filters
+In our Telegram module, we adopted the system of filters
 available in the `pytelegrambotapi` library.
 
 You can use `message_handler` to filter text messages from telegram in various ways.
