@@ -34,7 +34,7 @@ def open_io(item: types.InputMedia):
     """
     Returns `InputMedia` with an opened file descriptor instead of path.
 
-    :param item: input media object.
+    :param item: InputMedia object.
     """
     if isinstance(item.media, Path):
         item.media = item.media.open(mode="rb")
@@ -45,7 +45,7 @@ def close_io(item: types.InputMedia):
     """
     Closes an IO in an `InputMedia` object to perform the cleanup.
 
-    :param item: input media object.
+    :param item: InputMedia object.
     """
     if isinstance(item.media, IOBase):
         item.media.close()
@@ -54,7 +54,7 @@ def close_io(item: types.InputMedia):
 @contextmanager
 def batch_open_io(item: Union[types.InputMedia, Iterable[types.InputMedia]]):
     """
-    Context manager that controls the state of file descriptors inside InputMedia.
+    Context manager that controls the state of file descriptors inside `InputMedia`.
     Can be used both for single objects and collections.
 
     :param item: InputMedia objects that contain file descriptors.
