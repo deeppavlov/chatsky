@@ -1,7 +1,7 @@
 """
 Interface
 ------------
-This module implements various interfaces for :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger`
+This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
 from typing import Any, Optional, List, Tuple, Hashable, Callable
@@ -50,7 +50,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
     Asynchronous Telegram interface that retrieves updates by polling.
     Multi-threaded polling is currently not supported, but will be implemented in the future.
 
-    :param messenger: :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger` instance.
+    :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
     :param interval: Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
     :param allowed_updates: Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
     :param timeout: General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
@@ -103,7 +103,7 @@ class WebhookTelegramInterface(CallbackMessengerInterface):
     Asynchronous Telegram interface that retrieves updates via webhook.
     Any Flask server can be passed to set up a webhook on a separate endpoint.
 
-    :param messenger: :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger` instance.
+    :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
     :param app: Flask instance.
     :param endpoint: Webhook endpoint. Should be prefixed with "/".
     :param host: Host IP.

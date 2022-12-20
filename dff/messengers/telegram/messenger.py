@@ -1,7 +1,7 @@
 """
 Messenger
 -----------------
-The Messenger module provides the :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger` class.
+The Messenger module provides the :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` class.
 The former inherits from the :py:class:`~TeleBot` class from the `pytelegrambotapi` library.
 Using it, you can put Telegram update handlers inside your script and condition your transitions accordingly.
 
@@ -40,12 +40,12 @@ class TelegramMessenger(TeleBot):
 
     def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]) -> None:
         """
-        Cast `response` to :py:class:`~dff.connectors.messenger.telegram.types.TelegramResponse` and send it.
+        Cast `response` to :py:class:`~dff.messengers.telegram.types.TelegramResponse` and send it.
         Text content is sent after all the attachments.
 
         :param chat_id: Telegram chat ID.
-        :param response: Response data. String, dictionary or :py:class:`~dff.connectors.messenger.generics.Response`.
-            will be cast to :py:class:`~dff.connectors.messenger.telegram.types.TelegramResponse`.
+        :param response: Response data. String, dictionary or :py:class:`~dff.script.responses.generics.Response`.
+            will be cast to :py:class:`~dff.messengers.telegram.types.TelegramResponse`.
         """
         if isinstance(response, TelegramResponse):
             ready_response = response
@@ -94,9 +94,10 @@ class TelegramMessenger(TeleBot):
 
 class TelegramConditions:
     """
-    This class includes methods that produce `Script` conditions based on `pytelegrambotapi` updates.
+    This class includes methods that produce :py:class:`~dff.script.core.script.Script`
+    conditions based on `pytelegrambotapi` updates.
 
-    It is included to the :py:class:`~dff.connectors.messenger.telegram.messenger.TelegramMessenger`
+    It is included to the :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
     as :py:attr:`cnd` attribute on instantiation.
 
     To set a condition in your script, stick to the signature of the original :py:class:`~TeleBot` methods.
@@ -106,7 +107,8 @@ class TelegramConditions:
 
         messenger.cnd.message_handler(func=lambda msg: True)
 
-    in your :py:class:`~dff.core.engine.core.Script` will always be `True`, unless the new update is not a message.
+    in your :py:class:`~dff.script.core.script.Script` will always be `True`,
+    unless the new update is not a message.
 
     :param messenger: Messenger instance.
 
