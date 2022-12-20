@@ -30,10 +30,24 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: install dependencies
-        run: make venv_test
-        shell: bash
+      - name: install package
+        run: |
+          python -m pip install build
+          python -m build
+          find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
 
-      - name: build coverage file
-        run: make test
+      - name: prepare testing environment
+        run: |
+          mkdir /tmp/testing_files
+          cp -r tests /tmp/testing_files
+          cp -r examples /tmp/testing_files
+          cp .env_file /tmp/testing_files
+          cp makefile /tmp/testing_files
+          rm -r ./*
+          cp -r /tmp/testing_files/* .
+          touch venv  # disable venv target
+
+      - name: run tests
+        run: |
+          make test
         shell: bash
