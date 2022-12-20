@@ -35,9 +35,7 @@ class TelegramUI(TelegramDataModel):
         if values["keyboard"] is not None:  # no changes if buttons are not required
             return values
         if not values.get("buttons"):
-            raise ValueError(
-                "`buttons` parameter is required, when `keyboard` is None."
-            )
+            raise ValueError("`buttons` parameter is required, when `keyboard` is None.")
         keyboard_kwargs = {"row_width": values.get("row_width")}
         is_inline = values.get("is_inline")
         if is_inline:

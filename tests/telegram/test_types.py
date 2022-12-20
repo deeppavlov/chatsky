@@ -22,7 +22,7 @@ from dff.connectors.messenger.telegram.types import (
     TelegramUI,
 )
 from dff.connectors.messenger.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
-from dff.connectors.messenger.telegram.utils import open_io, close_io
+from dff.connectors.messenger.telegram.utils import open_io, close_io, batch_open_io
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
@@ -226,3 +226,6 @@ def test_io(document):
     assert isinstance(opened_doc.media, IOBase)
     close_io(opened_doc)
     assert opened_doc.media.closed
+    with batch_open_io(tele_doc) as med:
+        assert isinstance(med.media, IOBase)
+    assert tele_doc.media.closed

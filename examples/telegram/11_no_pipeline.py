@@ -22,8 +22,8 @@ from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
 
 from telebot.util import content_type_media
 
-from dff.connectors.messenger.telegram import TELEGRAM_STATE_KEY, TelegramMessenger
-from dff.utils.testing.common import set_framework_state
+from dff.connectors.messenger.telegram import TelegramMessenger
+from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other type from `db_connector`.
 
@@ -94,10 +94,8 @@ def dialog_handler(update):
     # retrieve or create a context for the user
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
-    # add newly received user data to the context
-    context = set_framework_state(context, TELEGRAM_STATE_KEY, update, inner_key="data")
-    # this step is required for cnd.%_handler conditions to work
-    context.add_request(vars(update).get("text", "data"))
+    # add update
+    context.add_request(update)
 
     # apply the actor
     updated_context = actor(context)
@@ -116,4 +114,5 @@ if __name__ == "__main__":
     if not os.getenv("TG_BOT_TOKEN"):
         print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     else:
-        bot.infinity_polling()
+        if is_interactive_mode():
+            bot.infinity_polling()

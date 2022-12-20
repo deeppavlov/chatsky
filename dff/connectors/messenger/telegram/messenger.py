@@ -13,11 +13,10 @@ from telebot import types, TeleBot
 
 from dff.core.engine.core import Context, Actor
 
-from .utils import partialmethod, open_io, close_io
+from .utils import partialmethod, batch_open_io
 from .types import TelegramResponse
 
 from dff.connectors.messenger.generics import Response
-from dff.connectors.messenger.telegram.utils import TELEGRAM_STATE_KEY
 
 
 class TelegramMessenger(TeleBot):
@@ -83,10 +82,8 @@ class TelegramMessenger(TeleBot):
             )
 
         if ready_response.attachments:
-            opened_media = [open_io(item) for item in ready_response.attachments.files]
-            self.send_media_group(chat_id=chat_id, media=opened_media)
-            for item in opened_media:
-                close_io(item)
+            with batch_open_io(ready_response.attachments.files) as media:
+                self.send_media_group(chat_id=chat_id, media=media)
 
         self.send_message(
             chat_id=chat_id,
@@ -151,7 +148,7 @@ class TelegramConditions:
         )
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
-            update = ctx.framework_states.get(TELEGRAM_STATE_KEY, {}).get("data")
+            update = ctx.last_request
             if not update or not isinstance(update, target_type):
                 return False
             test_result = self.messenger._test_message_handler(update_handler, update)

@@ -17,7 +17,6 @@ from telebot import types
 from dff.connectors.messenger.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
-    TELEGRAM_STATE_KEY,
 )
 from dff.core.pipeline import Pipeline
 from dff.connectors.messenger.generics import Response, Image, Attachments
@@ -46,7 +45,7 @@ the message from the context:
 
 .. code-block:: python
 
-    message = ctx.framework_states[TELEGRAM_STATE_KEY].get("data")
+    message = ctx.last_request
 
 The files will then be accessible as properties: message.photo, etc.
 
@@ -129,7 +128,7 @@ script = {
 
 # %%
 def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
-    message = ctx.framework_states[TELEGRAM_STATE_KEY].get("data")
+    message = ctx.last_request
     if not message or (not message.photo and not doc_is_photo(message)):
         return ctx
     photo = message.document or message.photo[-1]
