@@ -20,6 +20,7 @@ class Keywords(Enum):
         The value that corresponds to this key has the `dict` type with keywords:
 
         `{TRANSITIONS:..., RESPONSE:..., PROCESSING:..., MISC:...}`.
+
         There can be only one global node in a script :py:class:`~dff.script.Script`.
         The global node is defined at the flow level as opposed to regular nodes.
         This node allows to define default global values for all nodes.
@@ -29,6 +30,7 @@ class Keywords(Enum):
         The value that corresponds to this key has the `dict` type with keywords:
 
         `{TRANSITIONS:..., RESPONSE:..., PROCESSING:..., MISC:...}`.
+
         The local node is defined in the same way as all other nodes in the flow of this node.
         It also allows to redefine default values for all nodes in this node's flow.
 
@@ -38,6 +40,7 @@ class Keywords(Enum):
         Every key-value pair describes the transition node and the condition:
 
         `{label_to_transition_0: condition_for_transition_0, ..., label_to_transition_N: condition_for_transition_N}`,
+
         where `label_to_transition_i` is a node into which the actor make the transition in case of
         `condition_for_transition_i == True`.
 
@@ -49,8 +52,9 @@ class Keywords(Enum):
         The keyword specifying the preprocessing that is called before the response generation.
         The value that corresponds to the `PROCESSING` key must have the `dict` type:
 
-        `{"PROC_0": proc_func_0, ..., "PROC_N": proc_func_N}`, where
-        `"PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
+        `{"PROC_0": proc_func_0, ..., "PROC_N": proc_func_N}`,
+        
+        where `"PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
         The order of `proc_func_i` calls is defined by the order  in which the preprocessing `dict` is defined.
 
     MISC: Enum(auto)
@@ -58,8 +62,9 @@ class Keywords(Enum):
         which were not aimed to be used in the standard functions of `DFE`.
         Value corresponding to the `MISC` key must have `dict` type:
 
-        `{"VAR_KEY_0": VAR_VALUE_0, ..., "VAR_KEY_N": VAR_VALUE_N}`, where
-        `"VAR_KEY_0"` is an arbitrary name of the value which is saved into the `MISC`.
+        `{"VAR_KEY_0": VAR_VALUE_0, ..., "VAR_KEY_N": VAR_VALUE_N}`,
+        
+        where `"VAR_KEY_0"` is an arbitrary name of the value which is saved into the `MISC`.
     """
 
     GLOBAL = auto()
