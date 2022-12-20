@@ -109,19 +109,19 @@ html_theme_options = {
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/engine/*.py",
+            "examples/script/*.py",
             "examples/pipeline/*.py",
-            "examples/db_connector/*.py",
-            "examples/generics/*.py",
+            "examples/context_storages/*.py",
+            "examples/messengers/*.py",
             "examples/telegram/interfaces/*.py",
         ]
     )
     regenerate_apiref(
         [
-            ("dff.connectors.db", "db_connectors"),
+            ("dff.context_storages", "context_storages"),
             ("dff.connectors.messenger.generics", "messenger_common"),
             ("dff.connectors.messenger.telegram", "messenger_telegram"),
-            ("dff.core.engine", "engine"),
-            ("dff.core.pipeline", "pipeline"),
+            ("dff.script", "script"),
+            ("dff.pipeline", "pipeline"),
         ]
     )

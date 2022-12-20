@@ -1,5 +1,5 @@
-from dff.core.engine.conditions import exact_match
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
+from dff.script.conditions import exact_match
+from dff.script import TRANSITIONS, RESPONSE
 
 TOY_SCRIPT = {
     "greeting_flow": {
