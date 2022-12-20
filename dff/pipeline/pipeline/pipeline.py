@@ -1,3 +1,8 @@
+"""
+Pipeline
+--------
+This module contains the Pipeline class.
+"""
 import asyncio
 import logging
 from typing import Any, Union, List, Dict, Optional, Hashable
@@ -28,20 +33,17 @@ class Pipeline:
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
 
-    :param messenger_interface: an AbsMessagingInterface instance for this pipeline
-    :param context_storage: an DBAbstractContextStorage instance for this pipeline or a dict to store dialog Contexts
-    :param services: (required) a ServiceGroupBuilder object, that will be transformed to root service group
-
-        - It should include Actor, but only once (raises exception otherwise)
-        - It will always be named `pipeline`
-
-    :param wrappers: list of Wrappers to add to pipeline root service group
-    :param timeout: timeout to add to pipeline root service group
-    :param optimization_warnings: asynchronous pipeline optimization check request flag;
+    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
+    :param context_storage: An `DBAbstractContextStorage` instance for this pipeline or
+        a dict to store dialog `Contexts`.
+    :param services: (required) A `ServiceGroupBuilder` object, that will be transformed to root service group.
+        It should include `Actor`, but only once (raises exception otherwise). It will always be named `pipeline`.
+    :param wrappers: List of Wrappers to add to pipeline root service group.
+    :param timeout: Timeout to add to pipeline root service group.
+    :param optimization_warnings: Asynchronous pipeline optimization check request flag;
         warnings will be sent to logs. Additionally it has some calculated fields:
-
-        - `_services_pipeline` is a pipeline root ServiceGroup object
-        - `actor` is a pipeline actor, found among services
+        1) `_services_pipeline` is a pipeline root `ServiceGroup` object,
+        2) `actor` is a pipeline actor, found among services.
     """
 
     def __init__(
@@ -97,7 +99,7 @@ class Pipeline:
         :param wrapper: (required) wrapper function itself.
         :param whitelist: a list of services to only add this wrapper to.
         :param blacklist: a list of services to not add this wrapper to.
-        :return: None
+        :return: `None`
         """
 
         def condition(name: str) -> bool:
@@ -136,8 +138,8 @@ class Pipeline:
         Resulting string structure is somewhat similar to YAML string.
         Should be used in debugging/logging purposes and should not be parsed.
 
-        :param show_wrappers: whether to include Wrappers or not (could be many and/or generated).
-        :param indent: offset from new line to add before component children.
+        :param show_wrappers: Whether to include Wrappers or not (could be many and/or generated).
+        :param indent: Offset from new line to add before component children.
         """
         return pretty_format_component_info_dict(self.info_dict, show_extra_handlers, indent=indent)
 
@@ -159,14 +161,14 @@ class Pipeline:
         Service and ServiceGroup customization becomes not as obvious as it could be with it.
         Should be preferred for simple workflows with Actor auto-execution.
 
-        :param script: (required) a Script instance (object or dict).
+        :param script: (required) A Script instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param context_storage: an DBAbstractContextStorage instance for this pipeline
-            or a dict to store dialog Contexts.
-        :param messenger_interface: an AbsMessagingInterface instance for this pipeline.
-        :param pre_services: list of ServiceBuilder or ServiceGroupBuilder that will be executed before Actor.
-        :param post_services: list of ServiceBuilder or ServiceGroupBuilder that will be executed after Actor.
+        :param context_storage: An `DBAbstractContextStorage` instance for this pipeline
+            or a dict to store dialog `Contexts`.
+        :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
+        :param pre_services: List of `ServiceBuilder` or `ServiceGroupBuilder` that will be executed before `Actor`.
+        :param post_services: List of `ServiceBuilder` or `ServiceGroupBuilder` that will be executed after `Actor`.
             It constructs root service group by merging `pre_services` + actor + `post_services`.
         """
         actor = Actor(script, start_label, fallback_label)
@@ -191,9 +193,9 @@ class Pipeline:
         """
         Method that runs pipeline once for user request.
 
-        :param request: (required) any user request.
-        :param ctx_id: current dialog id; if None, new dialog will be created.
-        :return: dialog Context.
+        :param request: (required) Any user request.
+        :param ctx_id: Current dialog id; if `None`, new dialog will be created.
+        :return: Dialog `Context`.
         """
         ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
 
@@ -224,8 +226,8 @@ class Pipeline:
         Basically, it is a shortcut for `_run_pipeline`.
         NB! When pipeline is executed this way, `messenger_interface` won't be initiated nor connected.
 
-        :param request: any user request.
-        :param ctx_id: current dialog id.
-        :return: dialog Context.
+        :param request: Any user request.
+        :param ctx_id: Current dialog id.
+        :return: Dialog `Context`.
         """
         return asyncio.run(self._run_pipeline(request, ctx_id))
