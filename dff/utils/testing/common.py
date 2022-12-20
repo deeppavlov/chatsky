@@ -2,8 +2,8 @@ from os import getenv
 from typing import Callable, Tuple, Any, Optional
 from uuid import uuid4
 
-from dff.core.engine.core import Context
-from dff.core.pipeline import Pipeline
+from dff.script import Context
+from dff.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
 

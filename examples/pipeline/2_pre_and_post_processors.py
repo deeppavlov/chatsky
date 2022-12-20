@@ -3,19 +3,19 @@
 # 2. Pre- and postprocessors
 
 The following example shows more advanced usage of `pipeline`
-module as an extension to `dff.core.engine`.
+module as an extension to `dff.script.core`.
 """
 
 
 # %%
 import logging
 
-from dff.core.engine.core import Context
+from dff.messengers.common import CLIMessengerInterface
+from dff.script import Context
 
-from dff.core.pipeline import Pipeline, CLIMessengerInterface
+from dff.pipeline import Pipeline
 
-from dff.utils.testing.common import check_happy_path, is_interactive_mode
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -61,7 +61,7 @@ pipeline = Pipeline.from_script(
     ("greeting_flow", "start_node"),
     ("greeting_flow", "fallback_node"),
     {},  # `context_storage` - a dictionary or
-    # a `DBAbstractConnector` instance,
+    # a `DBAbstractContextStorage` instance,
     # a place to store dialog contexts
     CLIMessengerInterface(),
     # `messenger_interface` - a message channel adapter,

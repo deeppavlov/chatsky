@@ -1,5 +1,6 @@
 import os
 import sys
+import re
 
 from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
 
@@ -15,7 +16,7 @@ copyright = "2021, Denis Kuznetsov"
 author = "Denis Kuznetsov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.10.1"
+release = "0.1.0rc0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -45,7 +46,7 @@ suppress_warnings = ["image.nonlocal_uri"]
 source_suffix = ".rst"
 master_doc = "index"
 
-version = "0.10.1"
+version = re.match(r"^\d\.\d.\d", release).group()
 language = "en"
 
 pygments_style = "default"
@@ -108,19 +109,17 @@ html_theme_options = {
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/engine/*.py",
+            "examples/script/*.py",
             "examples/pipeline/*.py",
-            "examples/db_connector/*.py",
-            "examples/generics/*.py",
-            "examples/telegram/interfaces/*.py",
+            "examples/context_storages/*.py",
+            "examples/messengers/*.py",
         ]
     )
     regenerate_apiref(
         [
-            ("dff.connectors.db", "db_connectors"),
-            ("dff.connectors.messenger.generics", "messenger_common"),
-            ("dff.connectors.messenger.telegram", "messenger_telegram"),
-            ("dff.core.engine", "engine"),
-            ("dff.core.pipeline", "pipeline"),
+            ("dff.context_storages", "context_storages"),
+            ("dff.messengers", "messenger_interfaces"),
+            ("dff.script", "script"),
+            ("dff.pipeline", "pipeline"),
         ]
     )
