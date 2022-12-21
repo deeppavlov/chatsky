@@ -2,9 +2,6 @@
 This script ensures that example scripts can successfully compile and are ready to run
 """
 import os
-import asyncio
-import datetime
-from multiprocessing import Process
 import importlib
 
 import pytest

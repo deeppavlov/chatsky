@@ -17,18 +17,14 @@ pipeline = module_9.pipeline
 
 @pytest.fixture(scope="session")
 def env_var_presence():
-    env_variables = {
-        "TG_BOT_TOKEN": None,
-        "TG_API_ID": None,
-        "TG_API_HASH": None
-    }
+    env_variables = {"TG_BOT_TOKEN": None, "TG_API_ID": None, "TG_API_HASH": None}
 
     for arg in env_variables:
         env_variables[arg] = os.getenv(arg)
 
         if env_variables[arg] is None:
             raise RuntimeError(f"`{arg}` is not set")
-    
+
     yield env_variables
 
 
