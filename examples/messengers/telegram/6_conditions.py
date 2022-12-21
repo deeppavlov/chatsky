@@ -49,7 +49,7 @@ script = {
         },
         "node1": {
             RESPONSE: Response(text="Hi, how are you?"),
-            TRANSITIONS: {"node2": messenger.cnd.message_handler(regexp="next")},
+            TRANSITIONS: {"node2": messenger.cnd.message_handler(regexp="fine")},
         },
         "node2": {
             RESPONSE: Response(text="Good. What do you want to talk about?"),
@@ -75,6 +75,15 @@ script = {
         },
     }
 }
+
+
+# testing
+happy_path = (
+    ("/start", "Hi, how are you?"),
+    ("I'm fine", "Good. What do you want to talk about?"),
+    ("About music", "Sorry, I can not talk about music now."),
+    ("ok", "bye"),
+)
 
 
 # %%

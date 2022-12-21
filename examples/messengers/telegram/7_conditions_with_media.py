@@ -125,6 +125,14 @@ script = {
 }
 
 
+# testing
+happy_path = (
+    ("/start", "Send me a picture"),
+    (kitten_url, "Here's my picture!"),
+    ("ok", "Finishing test, send /restart command to restart"),
+)
+
+
 # %%
 def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
     message = ctx.last_request

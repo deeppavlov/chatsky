@@ -14,7 +14,7 @@ from dff.messengers.telegram.interface import PollingTelegramInterface, Telegram
 from dff.pipeline import Pipeline
 
 from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
-from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %%
 messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
@@ -39,6 +39,10 @@ interface = PollingTelegramInterface(
     timeout=30,
     long_polling_timeout=30,
 )
+
+
+# testing
+happy_path = HAPPY_PATH
 
 
 # %%
