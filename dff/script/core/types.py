@@ -3,34 +3,33 @@ Types
 ---------------------------
 Basic types are defined here.
 """
-from typing import Union, Callable, Tuple
+from typing import Union, Callable, Tuple, NewType
 from enum import Enum, auto
-from typing_extensions import TypeAlias
 
 from .keywords import Keywords
 
-LabelType: TypeAlias = Union[str, Keywords]
+LabelType = NewType("LabelType", Union[str, Keywords])
 """Label can be a casual string or :py:class:`~dff.script.Keywords`."""
 
-NodeLabel1Type: TypeAlias = Tuple[str, float]
+NodeLabel1Type = NewType("NodeLabel1Type", Tuple[str, float])
 """Label type for transitions can be `[node_name, transition_priority]`."""
 
-NodeLabel2Type: TypeAlias = Tuple[str, str]
+NodeLabel2Type = NewType("NodeLabel2Type", Tuple[str, str])
 """Label type for transitions can be `[flow_name, node_name]`."""
 
-NodeLabel3Type: TypeAlias = Tuple[str, str, float]
+NodeLabel3Type = NewType("NodeLabel3Type", Tuple[str, str, float])
 """Label type for transitions can be `[flow_name, node_name, transition_priority]`."""
 
-NodeLabelTupledType: TypeAlias = Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type]
+NodeLabelTupledType = NewType("NodeLabelTupledType", Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type])
 """Label type for transitions can be one of three different types."""
 
-NodeLabelType: TypeAlias = Union[Callable, NodeLabelTupledType, str]
+NodeLabelType = NewType("NodeLabelType", Union[Callable, NodeLabelTupledType, str])
 """Label type for transitions can be one of three different types."""
 
-ConditionType: TypeAlias = Callable
+ConditionType = NewType("ConditionType", Callable)
 """Condition type can be only `Callable`."""
 
-ModuleName: TypeAlias = str
+ModuleName = NewType("ModuleName", str)
 """
 Module name names addon state, or your own module state. For example module name can be `"dff_context_storages"`.
 """
