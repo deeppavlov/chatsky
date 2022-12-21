@@ -17,12 +17,19 @@ pipeline = module_9.pipeline
 
 @pytest.fixture(scope="session")
 def env_var_presence():
-    token = os.getenv("TG_BOT_TOKEN")
-    api_id = os.getenv("TG_API_ID")
-    api_hash = os.getenv("TG_API_HASH")
-    if not all([token, api_id, api_hash]):
-        raise ValueError("Env vars missing.")
-    yield token, api_id, api_hash
+    env_variables = {
+        "TG_BOT_TOKEN": None,
+        "TG_API_ID": None,
+        "TG_API_HASH": None
+    }
+
+    for arg in env_variables:
+        env_variables[arg] = os.getenv(arg)
+
+        if env_variables[arg] is None:
+            raise RuntimeError(f"`{arg}` is not set")
+    
+    yield env_variables
 
 
 @pytest.fixture(scope="session")
@@ -65,12 +72,11 @@ def event_loop():
 
 @pytest.fixture(scope="module")
 def tg_client(session_file, env_var_presence, event_loop):
-    _, _, _ = env_var_presence
+    _ = env_var_presence
     with TelegramClient(
         str(session_file), int(os.getenv("TG_API_ID")), os.getenv("TG_API_HASH"), loop=event_loop
     ) as client:
         yield client
-    client: TelegramClient
     client.loop.close()
 
 
