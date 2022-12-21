@@ -5,7 +5,7 @@ from jupytext import jupytext
 start_pattern = re.compile(r'# %% \[markdown\]\n"""\n# (\d\. .*)\n\n[\S\s]*?"""\n')
 
 
-def add_installation_cell_into_example():
+def insert_installation_cell_into_py_example():
 
     def inner(example_text: str):
         match = start_pattern.match(example_text)

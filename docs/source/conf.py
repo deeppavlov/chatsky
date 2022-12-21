@@ -7,7 +7,7 @@ from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import add_installation_cell_into_example  # noqa: E402
+from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -84,7 +84,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": add_installation_cell_into_example()}
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
