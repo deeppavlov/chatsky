@@ -11,7 +11,7 @@ def is_interactive_mode() -> bool:
     """
     Checking whether the example code should be run in interactive mode.
 
-    :return: true only if it's being executed by Jupyter kernel AND DISABLE_INTERACTIVE_MODE env variable isn't set.
+    :return: true if it's not being executed by Jupyter kernel and DISABLE_INTERACTIVE_MODE env variable isn't set.
     """
 
     shell = None
