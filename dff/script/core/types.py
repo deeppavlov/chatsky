@@ -3,7 +3,7 @@ Types
 ---------------------------
 Basic types are defined here.
 """
-from typing import Union, Callable, Tuple, AnyStr
+from typing import Union, Callable, Tuple
 from enum import Enum, auto
 from typing_extensions import TypeAlias
 
@@ -30,7 +30,7 @@ NodeLabelType: TypeAlias = Union[Callable, NodeLabelTupledType, str]
 ConditionType: TypeAlias = Callable
 """Condition type can be only `Callable`."""
 
-ModuleName: TypeAlias = AnyStr
+ModuleName: TypeAlias = "str"
 """
 Module name names addon state, or your own module state. For example module name can be `"dff_context_storages"`.
 """
