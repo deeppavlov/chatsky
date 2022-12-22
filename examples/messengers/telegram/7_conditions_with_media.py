@@ -160,6 +160,7 @@ pipeline = Pipeline.from_script(
     pre_services=[extract_data],
 )
 
+
 if __name__ == "__main__":
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # run in an interactive shell

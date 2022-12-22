@@ -54,6 +54,7 @@ pipeline = Pipeline.from_script(
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )
 
+
 if __name__ == "__main__":
     if is_interactive_mode():
         run_interactive_mode(pipeline)  # run in an interactive shell

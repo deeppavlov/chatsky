@@ -32,17 +32,13 @@ UTC = pytz.UTC
 
 
 def reiterate_response(bot, user, message):
-    counter = 0
-    while True:
-        counter += 1
+    for _ in range(3):
         try:
             bot.send_response(user, message)
-            break
+            return
         except Exception:
             time.sleep(2)
-        finally:
-            if counter >= 4:
-                break
+    RuntimeError(f"Failed to send response: {message}")
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -83,12 +79,12 @@ async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui and isinstance(telegram_response.ui.keyboard, markup_type)
-    print(telegram_response.ui.keyboard.keyboard)
     assert len(telegram_response.ui.keyboard.keyboard) == 2
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     reiterate_response(basic_bot, user_id, telegram_response)
     time.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=3)
+    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
     assert len(messages) == 1
@@ -113,6 +109,7 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     reiterate_response(basic_bot, user_id, telegram_response)
     time.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=3)
+    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
     assert len(messages) == 1
@@ -155,6 +152,7 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
     reiterate_response(basic_bot, user_id, telegram_response)
     time.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=5, filter=filter_type)
+    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
     assert len(messages) == 1
@@ -184,6 +182,7 @@ async def test_attachments(basic_bot, user_id, tg_client, bot_id):
     reiterate_response(basic_bot, user_id, telegram_response)
     time.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterPhotos)
+    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
     assert len(messages) == 2
@@ -201,6 +200,7 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
     reiterate_response(basic_bot, user_id, telegram_response)
     time.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterGeo)
+    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
     assert len(messages) == 1
