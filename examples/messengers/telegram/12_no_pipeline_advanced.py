@@ -21,7 +21,6 @@ from telebot import types
 from telebot.util import content_type_media
 
 from dff.messengers.telegram import TelegramMessenger
-from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
 
