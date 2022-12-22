@@ -1,6 +1,6 @@
 """
 Message Interfaces
----------
+------------------
 This module contains several classes of message interfaces.
 """
 import abc

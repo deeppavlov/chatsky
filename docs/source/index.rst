@@ -22,7 +22,7 @@ Installation
    
    pip install dff
 
-You can also download the library from `Github <https://github.com/deeppavlov/dialog_flow_framework>`_:
+and supports Python 3.7 — 3.9. You can also download the library from `Github <https://github.com/deeppavlov/dialog_flow_framework>`_:
 
 .. code-block:: console
 
