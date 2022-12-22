@@ -1,3 +1,7 @@
+"""
+Conditions
+----------
+"""
 from typing import Optional
 
 from dff.script import Actor, Context
@@ -12,8 +16,7 @@ from .types import (
 
 def always_start_condition(_: Context, __: Actor) -> bool:
     """
-    Condition that always allows service execution, it's the default condition for all services.
-    Returns bool (True).
+    Condition that always allows service execution. It's the default condition for all services.
 
     :param ctx: Current dialog context.
     :param actor: Pipeline actor.
@@ -57,8 +60,7 @@ def aggregate_condition(
     Condition that returns aggregated boolean value from all booleans returned by incoming functions.
     Returns `StartConditionCheckerFunction`.
 
-    :param aggregator:
-        The function that accepts list of booleans and returns a single boolean.
+    :param aggregator: The function that accepts list of booleans and returns a single boolean.
     :param functions: Functions to aggregate.
     """
 
