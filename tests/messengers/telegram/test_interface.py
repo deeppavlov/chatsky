@@ -56,20 +56,14 @@ async def test_update_handling(pipeline_instance, update, basic_bot, user_id):
     assert isinstance(inner_update, types.JsonDeserializable)
     assert _id == "1"
     interface.messenger.remove_webhook()
-    counter = 0
-    while counter != 4:
-        counter += 1
-        try:
-            await interface.connect(pipeline_instance._run_pipeline, loop=lambda: None)
-            except_result = interface._on_exception(Exception())
-            assert except_result is None
-            request_result = interface._request()
-            assert isinstance(request_result, list)
-            response_result = interface._respond([Context(id=user_id, responses={0: "hi"})])
-            assert response_result is None
-            break
-        except Exception:
-            time.sleep(2)
+    await interface.connect(pipeline_instance._run_pipeline, loop=lambda: None)
+    except_result = interface._on_exception(Exception())
+    assert except_result is None
+    request_result = interface._request()
+    assert isinstance(request_result, list)
+    response_result = interface._respond([Context(id=user_id, responses={0: "hi"})])
+    assert response_result is None
+    time.sleep(2)
 
 
 @pytest.mark.skipif(TG_BOT_TOKEN is None, reason="`TG_BOT_TOKEN` is missing.")
