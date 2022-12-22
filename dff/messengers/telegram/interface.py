@@ -60,7 +60,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
     def __init__(
         self,
         messenger: TelegramMessenger,
-        interval: int = 3,
+        interval: int = 2,
         allowed_updates: Optional[List[str]] = None,
         timeout: int = 20,
         long_polling_timeout: int = 20,

@@ -115,3 +115,4 @@ if __name__ == "__main__":
     else:
         if not os.getenv("TG_BOT_TOKEN"):
             print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+        pipeline.run()

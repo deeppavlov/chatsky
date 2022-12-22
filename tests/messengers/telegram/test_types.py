@@ -3,6 +3,7 @@ import pytest
 import time
 import datetime
 import os
+import pytz
 
 from io import IOBase
 from pathlib import Path
@@ -27,6 +28,7 @@ from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
 TG_API_HASH = os.getenv("TG_API_HASH")
+UTC = pytz.UTC
 
 
 def reiterate_response(bot, user, message):
@@ -83,10 +85,14 @@ async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_
     assert telegram_response.ui and isinstance(telegram_response.ui.keyboard, markup_type)
     print(telegram_response.ui.keyboard.keyboard)
     assert len(telegram_response.ui.keyboard.keyboard) == 2
+    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     reiterate_response(basic_bot, user_id, telegram_response)
-    minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
-    messages = await tg_client.get_messages(bot_id, None, offset_date=minute_ago)
+    time.sleep(2.5)
+    messages = await tg_client.get_messages(bot_id, limit=3)
+    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
+    assert len(messages) == 1
+    assert messages[0].text == telegram_response.text
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -103,10 +109,14 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui
+    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     reiterate_response(basic_bot, user_id, telegram_response)
-    minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
-    messages = await tg_client.get_messages(bot_id, None, offset_date=minute_ago)
+    time.sleep(2.5)
+    messages = await tg_client.get_messages(bot_id, limit=3)
+    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
+    assert len(messages) == 1
+    assert messages[0].text == telegram_response.text
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -141,11 +151,13 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
     generic_prop = vars(generic_response).get(prop)
     assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
     assert telegram_prop.source == generic_prop.source
+    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     reiterate_response(basic_bot, user_id, telegram_response)
-    minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
-    messages = await tg_client.get_messages(bot_id, None, filter=filter_type, offset_date=minute_ago)
+    time.sleep(2.5)
+    messages = await tg_client.get_messages(bot_id, limit=5, filter=filter_type)
+    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
-    assert len(messages) > 0
+    assert len(messages) == 1
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -168,11 +180,13 @@ async def test_attachments(basic_bot, user_id, tg_client, bot_id):
     assert isinstance(telegram_response.attachments.files[0], types.InputMediaPhoto)
     assert telegram_response.attachments.files[0].media == generic_response.attachments.files[0].source
     assert telegram_response.attachments.files[0].caption == generic_response.attachments.files[0].title
+    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     reiterate_response(basic_bot, user_id, telegram_response)
-    minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
-    messages = await tg_client.get_messages(bot_id, None, filter=InputMessagesFilterPhotos, offset_date=minute_ago)
+    time.sleep(2.5)
+    messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterPhotos)
+    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
-    assert len(messages) > 0
+    assert len(messages) == 2
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -183,11 +197,13 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
     telegram_response = TelegramResponse.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.location
+    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     reiterate_response(basic_bot, user_id, telegram_response)
-    minute_ago = datetime.datetime.now() - datetime.timedelta(minutes=1)
-    messages = await tg_client.get_messages(bot_id, None, filter=InputMessagesFilterGeo, offset_date=minute_ago)
+    time.sleep(2.5)
+    messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterGeo)
+    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
     assert messages
-    assert len(messages) > 0
+    assert len(messages) == 1
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
