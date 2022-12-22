@@ -130,5 +130,5 @@ if __name__ == "__main__":
         run_interactive_mode(pipeline)  # run in an interactive shell
     else:
         if not os.getenv("TG_BOT_TOKEN"):
-            print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+            raise RuntimeError("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
         pipeline.run()

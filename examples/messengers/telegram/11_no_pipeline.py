@@ -111,7 +111,6 @@ def dialog_handler(update):
 
 if __name__ == "__main__":
     if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+        raise RuntimeError("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     else:
-        if is_interactive_mode():
-            bot.infinity_polling()
+        bot.infinity_polling()
