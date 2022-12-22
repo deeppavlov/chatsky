@@ -94,6 +94,7 @@ test_requirements = [
     "psutil>=5.9.1",
     "requests>=2.28.1",
     "telethon<=1.26.0",
+    "pytz>=2022.6"
 ]
 
 devel = [
