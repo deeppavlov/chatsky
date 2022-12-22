@@ -105,6 +105,7 @@ html_theme_options = {
     "tab_about_us": "#",
 }
 
+autodoc_default_options = {"members": True, "undoc-members": True, "private-members": True}
 
 def setup(_):
     generate_example_links_for_notebook_creation(
