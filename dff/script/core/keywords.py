@@ -53,7 +53,7 @@ class Keywords(Enum):
         The value that corresponds to the `PROCESSING` key must have the `dict` type:
 
         `{"PROC_0": proc_func_0, ..., "PROC_N": proc_func_N}`,
-        
+
         where `"PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
         The order of `proc_func_i` calls is defined by the order  in which the preprocessing `dict` is defined.
 
@@ -63,7 +63,7 @@ class Keywords(Enum):
         Value corresponding to the `MISC` key must have `dict` type:
 
         `{"VAR_KEY_0": VAR_VALUE_0, ..., "VAR_KEY_N": VAR_VALUE_N}`,
-        
+
         where `"VAR_KEY_0"` is an arbitrary name of the value which is saved into the `MISC`.
     """
 

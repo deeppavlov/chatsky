@@ -157,7 +157,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
-        :param \**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
+        :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()
         if self._intro is not None:

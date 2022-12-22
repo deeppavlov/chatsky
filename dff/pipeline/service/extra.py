@@ -151,7 +151,7 @@ class _ComponentExtraHandler:
     def info_dict(self) -> dict:
         """
         Property for retrieving info dictionary about this wrapper.
-        
+
         :return: Info dict, containing its fields as well as its type.
             All not set fields there are replaced with `[None]`.
         """
