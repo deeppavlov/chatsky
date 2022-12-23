@@ -14,6 +14,7 @@ from dff.script import TRANSITIONS, RESPONSE
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
+    update_processing_service,
 )
 from dff.pipeline import Pipeline
 from dff.script.responses.generics import Response
@@ -96,6 +97,7 @@ pipeline = Pipeline.from_script(
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
     context_storage=dict(),
+    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 

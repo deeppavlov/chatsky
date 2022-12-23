@@ -13,7 +13,7 @@ from telebot import types, TeleBot
 
 from dff.script import Context, Actor
 
-from .utils import partialmethod, batch_open_io
+from .utils import partialmethod, batch_open_io, TELEGRAM_KEY
 from .types import TelegramResponse
 
 from dff.script.responses.generics import Response
@@ -150,7 +150,7 @@ class TelegramConditions:
         )
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
-            update = ctx.last_request
+            update = ctx.framework_states.get(TELEGRAM_KEY)
             if not update or not isinstance(update, target_type):
                 return False
             test_result = self.messenger._test_message_handler(update_handler, update)

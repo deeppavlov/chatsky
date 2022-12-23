@@ -17,6 +17,7 @@ from telebot import types
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
+    update_processing_service,
 )
 from dff.pipeline import Pipeline
 from dff.script.responses.generics import Response, Image
@@ -121,7 +122,7 @@ pipeline = Pipeline.from_script(
     fallback_label=("root", "fallback"),
     context_storage=dict(),
     messenger_interface=interface,
-    pre_services=[extract_data],
+    pre_services=[extract_data, update_processing_service],
 )
 
 

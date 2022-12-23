@@ -20,7 +20,7 @@ from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.messengers.telegram import TelegramMessenger
+from dff.messengers.telegram import TelegramMessenger, TELEGRAM_KEY
 from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
@@ -115,7 +115,8 @@ def handler(update):
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
     # add update
-    context.add_request(update)
+    context.framework_states[TELEGRAM_KEY] = update
+    context.add_request(getattr(update, "text", "No text"))
 
     # apply the actor
     context = actor(context)

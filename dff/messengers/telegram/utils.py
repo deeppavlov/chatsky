@@ -16,9 +16,23 @@ except ImportError:
     from typing_extensions import TypeVar
 
 from telebot import types
+from dff.script import Context
 
 CallableParams = ParamSpec("CallableParams")
 ReturnType = TypeVar("ReturnType")
+
+
+TELEGRAM_KEY = "TELEGRAM_SERVICE"
+
+
+def update_processing_service(ctx: Context):
+    tg_update = ctx.last_request
+    if not tg_update:
+        return
+    ctx.framework_states[TELEGRAM_KEY] = tg_update
+    last_request = 0 if len(ctx.requests) == 0 else len(ctx.requests) - 1
+    ctx.requests[last_request] = getattr(tg_update, "text", "No text.")
+    return
 
 
 def partialmethod(func: Callable[CallableParams, ReturnType], **part_kwargs) -> Callable[CallableParams, ReturnType]:

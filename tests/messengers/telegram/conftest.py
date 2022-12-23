@@ -61,22 +61,23 @@ def user_id():
     yield "5889282756"
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def event_loop():
     yield asyncio.get_event_loop()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 def tg_client(session_file, env_var_presence, event_loop):
     _ = env_var_presence
     with TelegramClient(
         str(session_file), int(os.getenv("TG_API_ID")), os.getenv("TG_API_HASH"), loop=event_loop
     ) as client:
         yield client
+    client.disconnect()
     client.loop.close()
 
 
-@pytest.fixture(scope="module")
+@pytest.fixture(scope="session")
 async def bot_id(tg_client):
     user = await tg_client.get_entity("https://t.me/test_dff_bot")
     yield user

@@ -16,6 +16,7 @@ from dff.pipeline import Pipeline
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
+    update_processing_service,
 )
 from dff.script.responses.generics import Response, Keyboard, Button
 from dff.utils.testing.common import is_interactive_mode
@@ -100,6 +101,7 @@ pipeline = Pipeline.from_script(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     context_storage=dict(),
+    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 

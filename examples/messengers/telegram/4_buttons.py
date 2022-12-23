@@ -19,6 +19,7 @@ from dff.messengers.telegram import (
     TelegramMessenger,
     TelegramUI,
     TelegramButton,
+    update_processing_service,
 )
 from dff.script.responses import Response
 from dff.utils.testing.common import is_interactive_mode
@@ -105,12 +106,21 @@ script = {
 interface = PollingTelegramInterface(messenger=messenger)
 
 
+happy_path = (
+    ("hi", "Question: What's 2 + 2?"),
+    ("5", "Incorrect answer, type anything to try again"),
+    ("ok", "Question: What's 2 + 2?"),
+    ("4", "Success!"),
+)
+
+
 # %%
 pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     context_storage=dict(),
+    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 
