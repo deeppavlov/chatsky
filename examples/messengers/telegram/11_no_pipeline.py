@@ -22,6 +22,7 @@ from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 from telebot.util import content_type_media
 
 from dff.messengers.telegram import TelegramMessenger
+from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
 
@@ -108,8 +109,7 @@ def dialog_handler(update):
     db[user_id] = updated_context  # Save the context.
 
 
-if __name__ == "__main__":
+if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
     if not os.getenv("TG_BOT_TOKEN"):
-        raise RuntimeError("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
-    else:
-        bot.infinity_polling()
+        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+    bot.infinity_polling()
