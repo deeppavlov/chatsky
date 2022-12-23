@@ -8,7 +8,7 @@ from typing import Any, List, Optional, Union
 from telebot import types
 from pydantic import BaseModel, validator, root_validator, Field, Extra, FilePath, HttpUrl, Required
 
-from dff.script.responses.generics import Image, Audio, Document, Video, Response, Location
+from dff.script.responses.generics import Image, Audio, Document, Video, Location
 
 
 class TelegramDataModel(BaseModel):
@@ -82,7 +82,7 @@ class TelegramAttachments(TelegramDataModel):
         return file
 
 
-class TelegramResponse(Response, TelegramDataModel):
+class TelegramResponse(TelegramDataModel):
     text: str = Required
     ui: Optional[TelegramUI] = None
     location: Optional[types.Location] = None

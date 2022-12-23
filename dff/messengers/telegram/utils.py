@@ -5,10 +5,15 @@ This module contains utilities for connecting to Telegram.
 """
 from functools import wraps
 from typing import Callable, Union, Iterable
-from typing_extensions import ParamSpec, TypeVar
+from typing_extensions import ParamSpec
 from contextlib import contextmanager
 from pathlib import Path
 from io import IOBase
+
+try:
+    from typing import TypeVar
+except ImportError:
+    from typing_extensions import TypeVar
 
 from telebot import types
 
@@ -23,9 +28,9 @@ def partialmethod(func: Callable[CallableParams, ReturnType], **part_kwargs) -> 
     """
 
     @wraps(func)
-    def wrapper(self, *args: CallableParams.args, **kwargs: CallableParams.kwargs):
-        kwargs = {**kwargs, **part_kwargs}
-        return func(self, *args, **kwargs)
+    def wrapper(self, *args: CallableParams.args, **kwargs: CallableParams.kwargs) -> ReturnType:
+        new_kwargs = {**kwargs, **part_kwargs}
+        return func(self, *args, **new_kwargs)
 
     return wrapper
 
