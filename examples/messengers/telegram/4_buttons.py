@@ -21,7 +21,7 @@ from dff.messengers.telegram import (
     TelegramButton,
 )
 from dff.script.responses import Response
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %%

@@ -17,7 +17,7 @@ from dff.messengers.telegram import (
 )
 from dff.pipeline import Pipeline
 from dff.script.responses.generics import Response
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]

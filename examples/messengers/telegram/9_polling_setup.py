@@ -13,7 +13,7 @@ import os
 from dff.messengers.telegram.interface import PollingTelegramInterface, TelegramMessenger
 from dff.pipeline import Pipeline
 
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 # %%

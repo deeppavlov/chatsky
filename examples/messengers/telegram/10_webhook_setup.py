@@ -19,7 +19,7 @@ from dff.messengers.telegram.messenger import TelegramMessenger
 
 from dff.pipeline import Pipeline
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %%

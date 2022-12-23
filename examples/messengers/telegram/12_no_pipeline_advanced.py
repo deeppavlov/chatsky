@@ -132,7 +132,7 @@ def handler(update):
         )
 
 
-if __name__ == "__main__" and is_interactive_mode():  #  prevent run during dog building
+if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
     if not os.getenv("TG_BOT_TOKEN"):
         print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     bot.infinity_polling()

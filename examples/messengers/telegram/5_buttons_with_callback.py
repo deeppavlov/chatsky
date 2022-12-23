@@ -18,7 +18,7 @@ from dff.messengers.telegram import (
     TelegramMessenger,
 )
 from dff.script.responses.generics import Response, Keyboard, Button
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %%
