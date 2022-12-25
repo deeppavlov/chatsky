@@ -105,6 +105,7 @@ html_theme_options = {
     "tab_about_us": "#",
 }
 
+
 autodoc_default_options = {"members": True, "undoc-members": True, "private-members": True}
 
 
@@ -123,6 +124,5 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
-
         ]
     )
