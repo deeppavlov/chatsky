@@ -10,7 +10,7 @@ from typing import NamedTuple
 
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE, get_last_index
+from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
 from dff.script.responses import Button, Keyboard, Response
 from dff.pipeline import Pipeline
@@ -141,15 +141,15 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
-    last_index = get_last_index(ctx.requests)  # TODO: edit once Context setters are fixed
-
     ui = ctx.last_response and ctx.last_response.ui
     if ui and ctx.last_response.ui.buttons:
         try:
             chosen_button = ui.buttons[int(ctx.last_request)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+            raise ValueError(
+                "Type in the index of the correct option" "to choose from the buttons."
+            )
+        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
 
 
 # %%
