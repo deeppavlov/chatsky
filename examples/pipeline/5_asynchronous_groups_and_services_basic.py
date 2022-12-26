@@ -10,8 +10,8 @@ service and service group usage.
 # %%
 import asyncio
 
-from dff.core.engine.core import Actor
-from dff.core.pipeline import Pipeline
+from dff.script import Actor
+from dff.pipeline import Pipeline
 
 from dff.utils.testing.common import (
     is_interactive_mode,

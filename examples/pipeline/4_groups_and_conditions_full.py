@@ -10,8 +10,8 @@ The following example shows `pipeline` service group usage and start conditions.
 import json
 import logging
 
-from dff.core.engine.core import Actor
-from dff.core.pipeline import (
+from dff.script import Actor
+from dff.pipeline import (
     Service,
     Pipeline,
     ServiceGroup,

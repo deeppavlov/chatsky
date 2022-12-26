@@ -9,12 +9,12 @@ The following example shows messenger interfaces usage.
 # %%
 import logging
 
-from dff.core.engine.core import Context, Actor
+from dff.messengers.common.interface import CallbackMessengerInterface
+from dff.script import Context, Actor
 from flask import Flask, request, Request
 
-from dff.core.pipeline import Pipeline, CallbackMessengerInterface
-from dff.utils.testing.common import is_interactive_mode
-from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.pipeline import Pipeline
+from dff.utils.testing import is_interactive_mode, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

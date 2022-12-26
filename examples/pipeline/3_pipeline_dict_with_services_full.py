@@ -12,14 +12,9 @@ import json
 import logging
 import urllib.request
 
-from dff.core.engine.core import Context, Actor
-
-from dff.core.pipeline import (
-    CLIMessengerInterface,
-    Service,
-    Pipeline,
-    ServiceRuntimeInfo,
-)
+from dff.script import Context, Actor
+from dff.messengers.common import CLIMessengerInterface
+from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo
 from dff.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -41,7 +36,7 @@ These objects are dictionaries of particular structure:
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts
-        (dictionary or a `DBAbstractConnector` instance).
+        (dictionary or a `DBAbstractContextStorage` instance).
 * `services` (required) - A `ServiceGroupBuilder` object,
         basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
         see example 4.

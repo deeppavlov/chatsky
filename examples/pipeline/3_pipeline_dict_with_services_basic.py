@@ -10,8 +10,8 @@ dict and most important pipeline components.
 # %%
 import logging
 
-from dff.core.engine.core import Actor
-from dff.core.pipeline import Service, Pipeline
+from dff.script import Actor
+from dff.pipeline import Service, Pipeline
 
 from dff.utils.testing.common import (
     check_happy_path,

@@ -41,7 +41,7 @@ You can use it to write chatbots for social networks, call centers, websites, wr
 
 `DFF` has the following important concepts:
 
-**Script**: First of all, to create a dialog agent it is necessary to create a dialog (:py:class:`~dff.core.engine.core.script.Script`).
+**Script**: First of all, to create a dialog agent it is necessary to create a dialog (:py:class:`~dff.script.core.script.Script`).
 A dialog `script` is a dictionary, where keys correspond to different `flows`. A script can contain multiple `scripts`, what is needed in order to divide
 a dialog into sub-dialogs and process them separately.
 
@@ -50,7 +50,7 @@ Each `flow` represent a sub-dialog corresponding to the discussion of a particul
 Each `flow` is also a dictionary, where the keys are the `nodes`.
 
 **Node**: Each `node` necessarily contains a `response` of the bot and
-the `condition` (:py:class:`~dff.core.engine.conditions`) of `transition` to another `node`
+the `condition` of `transition` to another `node`
 in this or another `flow`.
 
 Documentation and Examples
