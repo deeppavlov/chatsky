@@ -5,7 +5,6 @@ venv/
 build/
 docs/source/apiref
 docs/source/examples
-docs/examples
 *__pycache__*
 *.idea/*
 .idea/*
@@ -24,4 +23,4 @@ venv*
 .coverage
 .pytest_cache
 htmlcov
-examples/db_connector/dbs/
+examples/context_storages/dbs

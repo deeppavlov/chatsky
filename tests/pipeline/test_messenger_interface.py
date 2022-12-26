@@ -2,9 +2,10 @@ import asyncio
 import sys
 import pathlib
 
-from dff.core.engine.core.keywords import RESPONSE, TRANSITIONS
-from dff.core.pipeline import CLIMessengerInterface, Pipeline, CallbackMessengerInterface
-import dff.core.engine.conditions as cnd
+from dff.script import RESPONSE, TRANSITIONS
+from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
+from dff.pipeline import Pipeline
+import dff.script.conditions as cnd
 
 SCRIPT = {
     "pingpong_flow": {
@@ -24,7 +25,7 @@ SCRIPT = {
 }
 
 pipeline = Pipeline.from_script(
-    SCRIPT,  # Actor script object, defined in `.utils` module.
+    SCRIPT,
     start_label=("pingpong_flow", "start_node"),
     fallback_label=("pingpong_flow", "fallback_node"),
 )
