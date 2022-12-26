@@ -5,6 +5,7 @@ import os
 
 from telebot import types
 from dff.script import Context
+from dff.messengers.telegram import update_processing_service, TELEGRAM_KEY
 from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.interface import extract_telegram_request_and_id
 
@@ -36,6 +37,8 @@ def create_update(**kwargs):
 def test_set_update(update):
     ctx = Context()
     ctx.add_request(update)
+    update_processing_service(ctx)
+    assert ctx.framework_states.get(TELEGRAM_KEY)
     assert ctx.last_request
 
 
@@ -74,9 +77,11 @@ def test_message_handling(message, expected, actor_instance, basic_bot):
     condition = basic_bot.cnd.message_handler(func=lambda msg: msg.text == "Hello")
     context = Context(id=123)
     context.add_request(message)
+    update_processing_service(context)
     assert condition(context, actor_instance) == expected
     wrong_type = create_query("some data")
     context.add_request(wrong_type)
+    update_processing_service(context)
     assert not condition(context, actor_instance)
 
 
@@ -86,7 +91,9 @@ def test_query_handling(query, expected, actor_instance, basic_bot):
     condition = basic_bot.cnd.callback_query_handler(func=lambda call: call.data == "4")
     context = Context(id=123)
     context.add_request(query)
+    update_processing_service(context)
     assert condition(context, actor_instance) == expected
     wrong_type = create_text_message("some text")
     context.add_request(wrong_type)
+    update_processing_service(context)
     assert not condition(context, actor_instance)
