@@ -8,6 +8,7 @@ from dff.script import Context
 from dff.messengers.telegram import update_processing_service, TELEGRAM_KEY
 from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.interface import extract_telegram_request_and_id
+from dff.utils.testing.common import set_framework_state
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 
@@ -37,8 +38,10 @@ def create_update(**kwargs):
 def test_set_update(update):
     ctx = Context()
     ctx.add_request(update)
+    other_ctx = set_framework_state(ctx.copy(), TELEGRAM_KEY, update)
     update_processing_service(ctx)
     assert ctx.framework_states.get(TELEGRAM_KEY)
+    assert ctx.framework_states.get(TELEGRAM_KEY) == other_ctx.framework_states.get(TELEGRAM_KEY)
     assert ctx.last_request
 
 
