@@ -1,7 +1,8 @@
 """
-StatsStorage
-*************
-| Defines the StatsStorage class that can be used to persist information to a database.
+Storage
+----------------
+The following module includes the :py:class:`~StatsStorage` class
+that can be used to persist information to a database.
 
 """
 
@@ -20,13 +21,8 @@ class StatsStorage(PoolSubscriber):
     batches of data and persists them to a database. The batch size is individual
     for each instance.
 
-    Parameters
-    ----------
-
-    saver: :py:class:`~dff.stats.savers.Saver`
-        An instance of the Saver class that is used to save the collected data.
-    batch_size: int = 1
-        The number of records that should be accumulated before they get persisted to the db.
+    :param saver: An instance of the Saver class that is used to save the collected data.
+    :param batch_size: The number of records that should be accumulated before they get persisted to the db.
 
     """
 

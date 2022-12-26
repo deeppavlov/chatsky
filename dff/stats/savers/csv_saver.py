@@ -2,8 +2,8 @@
 CSV
 ---------------------------
 Provides the CSV version of the :py:class:`~dff.stats.savers.saver.Saver`.
-You don't need to interact with this class manually, as it will be automatically
-initialized when you construct a :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
+The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+factory with specific parameters.
 
 Statistical data collected to csv cannot be directly displayed in Superset.
 Use this class, if you want to permute or analyze your data manually.
@@ -24,25 +24,20 @@ FIELDNAMES = list(StatsRecord.schema()["properties"].keys())
 class CsvSaver(Saver):
     """
     Saves and reads the stats dataframe from a csv file.
-    You don't need to interact with this class manually, as it will be automatically
-    initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
+    The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+    factory with specific parameters.
 
     Statistical data collected to csv cannot be directly displayed in Superset.
     Use this class, if you want to permute or analyze your data manually.
 
-    Parameters
-    ----------
-
-    path: str
-        | The construction path.
-        | The part after :// should contain a path to the file that pandas will be able to recognize.
+    :param path: The construction path.
+        The part after :// should contain a path to the file that pandas will be able to recognize.
 
         .. code-block::
 
             CsvSaver("csv://foo/bar.csv")
 
-    table: str
-        Does not affect the class. Added for constructor uniformity.
+    :param table: Does not affect the class. Added for constructor uniformity.
     """
 
     def __init__(self, path: str, _: str = "df_stats") -> None:

@@ -1,10 +1,9 @@
 """
 Saver
-******
+------------
 Provides the base class :py:class:`~dff.stats.savers.saver.Saver`.
-It is an interface class that defines methods for saving and loading dataframes.
-On the other hand, it is also used to automatically construct the child classes
-depending on the input parameters. See the class documentation for more info.
+It serves as an interface class
+that defines methods for saving and loading data.
 
 """
 from typing import List
@@ -20,37 +19,11 @@ class Saver(ABC):
     #. :py:meth:`~dff.stats.savers.saver.Saver.save`
     #. :py:meth:`~dff.stats.savers.saver.Saver.load`
 
-    | A call to Saver is needed to instantiate one of the predefined child classes.
-    | The subclass is chosen depending on the `path` parameter value (see Parameters).
+    You can construct your own `Saver` by subclassing the abstract interface and implementing
+    the methods named above.
 
-    | Your own Saver can be implemented in the following manner:
-    | You should subclass the `Saver` class and pass the url prefix as the `storage_type` parameter.
-    | Abstract methods `save` and `load` should necessarily be implemented.
-
-    .. code: python
-        class MongoSaver(Saver, storage_type="mongo"):
-            def __init__(self, path, table):
-                ...
-
-            def save(self, data):
-                ...
-
-            def load(self):
-                ...
-
-    Parameters
-    ----------
-
-    path: str
-        A string that contains a prefix and a url of the target data storage, separated by ://.
-        The prefix is used to automatically import a child class from one of the submodules
-        and instantiate it.
-        For instance, a call to `Saver("csv://...")` will eventually produce
-        a :py:class:`~dff.stats.savers.csv_saver.CsvSaver`,
-        while a call to `Saver("clickhouse://...")` produces a :py:class:`~dff.stats.savers.clickhouse.ClickHouseSaver`
-
-    table: str
-        Sets the name of the db table to use, if necessary. Defaults to "dff_stats".
+    :param path: A string that contains a prefix and a url of the target data storage, separated by ://.
+    :param table: Sets the name of the db table to use, if necessary. Defaults to "dff_stats".
     """
 
     @abstractmethod
@@ -62,12 +35,7 @@ class Saver(ABC):
         Save the data to a database or a file.
         Append if the table already exists.
 
-        Parameters
-        ----------
-
-        dfs: List[pd.DataFrame]
-        column_types: Optional[Dict[str, str]] = None
-        parse_dates: Union[List[str], bool] = False
+        :param data: Collection of data to persist to the database.
         """
         raise NotImplementedError
 
@@ -76,10 +44,5 @@ class Saver(ABC):
         """
         Load the data from a database or a file.
 
-        Parameters
-        ----------
-
-        column_types: Optional[Dict[str, str]] = None
-        parse_dates: Union[List[str], bool] = False
         """
         raise NotImplementedError

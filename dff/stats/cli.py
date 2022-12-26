@@ -1,3 +1,9 @@
+"""
+CLI
+-----
+This modules defines routines that can be called via the command line interface.
+
+"""
 import tempfile
 import shutil
 import sys

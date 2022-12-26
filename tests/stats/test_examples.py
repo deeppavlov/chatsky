@@ -1,11 +1,11 @@
 import importlib
 import pytest
 
-import tests.utils as utils
+from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.toy_script import HAPPY_PATH
 
-dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__)
+dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
 
 
 @pytest.mark.parametrize(

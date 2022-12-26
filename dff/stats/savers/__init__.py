@@ -3,7 +3,6 @@ from .postgresql import PostgresSaver
 from .csv_saver import CsvSaver
 from .saver import Saver
 
-# TODO: do we have some others options for saver choosing? For example 'clickhouse+sql' - some thing like that.
 SAVER_MAPPING = {"csv": CsvSaver, "postgresql": PostgresSaver, "clickhouse": ClickHouseSaver}
 
 

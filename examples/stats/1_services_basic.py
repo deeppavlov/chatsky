@@ -1,11 +1,24 @@
+# %% [markdown]
+"""
+# 1. Services Basic
+
+The following examples shows the basics of using the `stats` module.
+Assuming that your pipeline includes various services, you can decorate
+these functions to collect statistics and persist them to a database.
+"""
+
+
+# %%
 import asyncio
 
-from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.script import Context, Actor
+from dff.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
+
+# %% [markdown]
 """
 The statistics are collected from services by wrapping them in special 'extractor' functions.
 These functions have a specific signature: their arguments are always a `Context`, an `Actor`,
@@ -30,6 +43,8 @@ The whole process is illustrated in the example below.
 
 """
 
+
+# %%
 # Create a pool.
 extractor_pool = ExtractorPool()
 
@@ -45,13 +60,16 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return StatsRecord.from_context(ctx, info, data)
 
 
-@to_service(after_handler=[get_service_state])  # set get_service_state to rubn it after the `heavy_service`
+# %%
+# set get_service_state to run it after the `heavy_service`
+@to_service(after_handler=[get_service_state])
 async def heavy_service(ctx: Context, actor: Actor):
     _ = ctx  # get something from ctx if it needs
     _ = actor  # get something from actor if it needs
     await asyncio.sleep(0.02)
 
 
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -66,6 +84,7 @@ pipeline = Pipeline.from_dict(
         ]
     }
 )
+
 
 if __name__ == "__main__":
     args = parse_args()

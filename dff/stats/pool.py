@@ -1,15 +1,21 @@
+"""
+Pool
+----------
+This module includes the :py:class:`~ExtractorPool` class.
+
+"""
 import functools
 import asyncio
 from typing import List, Callable, Optional
 
-from dff.core.engine.core import Context
-from dff.core.pipeline import ExtraHandlerRuntimeInfo
+from dff.script import Context
+from dff.pipeline import ExtraHandlerRuntimeInfo
 from .subscriber import PoolSubscriber
 
 
 class ExtractorPool:
     """
-    This class can be used to store sets of wrappers for statistics collection, aka extractors.
+    This class can be used to store sets of wrappers for statistics collection a.k.a. extractors.
     New wrappers can be added with the :py:meth:`new_extractor` decorator.
     The added wrappers can be accessed by their name:
 
@@ -21,14 +27,10 @@ class ExtractorPool:
     Subscribers can belong to any class, given that they implement the `on_record_event` method.
     Currently, this method exists in the :py:class:`StatsStorage` class.
 
-    When you call the `add_extractor_pool` method on the `StatsStorage`, you subscribe it
+    When you call the :py:meth:`add_extractor_pool` method on the :py:class:`~StatsStorage`, you subscribe it
     to changes in the given pool.
 
-    Parameters
-    -----------
-
-    extractors: Optional[List[Callable]]
-        You can pass a set of wrappers as a list on the class construction.
+    :param extractors: You can pass a set of wrappers as a list on the class construction.
         They will be registered as normal.
 
     """

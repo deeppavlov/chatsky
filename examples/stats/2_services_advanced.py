@@ -1,14 +1,28 @@
+# %% [markdown]
+"""
+# 2. Services Advanced
+
+The following examples shows how to decorate several functions
+for statistics collection.
+"""
+
+
+# %%
 import asyncio
 
-from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
-from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool  # import default pool from addon
+from dff.script import Context, Actor
+from dff.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.stats import StatsStorage, ExtractorPool, StatsRecord
+from dff.stats import default_extractor_pool  # import default pool from addon
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
+
+# %% [markdown]
 """
-As is the case with the regular handlers, you can add extractors both before and after the
-target service. You can use a handler that runs before the service to compare the pre-service and post-service
+As is the case with the regular handlers, you can add extractors
+both before and after the target service.
+You can use a handler that runs before the service to compare the pre-service and post-service
 states of the context, measure the running time, etc.
 An example of such handler can be found in the default extractor pool.
 
@@ -18,6 +32,8 @@ As for using multiple pools, you can subscribe your storage to any number of poo
 
 """
 
+
+# %%
 extractor_pool = ExtractorPool()
 
 
@@ -31,6 +47,7 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return StatsRecord.from_context(ctx, info, data)
 
 
+# %%
 # use together extractor_pool and default_extractor_pool
 # run extract_timing_before before `heavy_service`
 # run get_service_state and extract_timing_after after `heavy_service`
@@ -44,6 +61,7 @@ async def heavy_service(ctx: Context, actor: Actor):
     await asyncio.sleep(0.02)
 
 
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -57,7 +75,10 @@ pipeline = Pipeline.from_dict(
             Service(
                 handler=to_service(
                     before_handler=[default_extractor_pool["extract_timing_before"]],
-                    after_handler=[get_service_state, default_extractor_pool["extract_timing_after"]],
+                    after_handler=[
+                        get_service_state,
+                        default_extractor_pool["extract_timing_after"],
+                    ],
                 )(
                     actor
                 )  # wrap and add the actor
@@ -65,6 +86,7 @@ pipeline = Pipeline.from_dict(
         ]
     }
 )
+
 
 if __name__ == "__main__":
     args = parse_args()

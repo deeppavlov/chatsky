@@ -1,12 +1,30 @@
+# %% [markdown]
+"""
+# 4. Service Groups Advanced
+
+The following examples illustrates how to obtain statistics from
+several service groups.
+"""
+
+
+# %%
 import asyncio
 
-from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
+from dff.script import Context, Actor
+from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
 
+# %% [markdown]
+"""
+You can also collect statistics of service groups that consist of multiple services.
+This can be done in the manner demonstrated below.
+"""
+
+
+# %%
 extractor_pool = ExtractorPool()
 
 
@@ -21,6 +39,7 @@ async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return group_stats
 
 
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),

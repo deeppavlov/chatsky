@@ -2,8 +2,8 @@
 Clickhouse
 ---------------------------
 Provides the Clickhouse version of the :py:class:`~dff.stats.savers.saver.Saver`.
-You don't need to interact with this class manually, as it will be automatically
-imported and initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
+The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+factory with specific parameters.
 
 """
 import json
@@ -37,22 +37,17 @@ class CHItem(StatsRecord):
 class ClickHouseSaver(Saver):
     """
     Saves and reads the stats dataframe from a csv file.
-    You don't need to interact with this class manually, as it will be automatically
-    initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
+    The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+    factory with specific parameters.
 
-    Parameters
-    ----------
-
-    path: str
-        | The construction path.
-        | It should match the sqlalchemy :py:class:`~sqlalchemy.engine.Engine` initialization string.
+    :param path: The construction path.
+        It should match the sqlalchemy :py:class:`~sqlalchemy.engine.Engine` initialization string.
 
         .. code-block::
 
             ClickHouseSaver("clickhouse://user:password@localhost:8000/default")
 
-    table: str
-        Sets the name of the db table to use. Defaults to "df_stats".
+    :param table: Sets the name of the db table to use. Defaults to "df_stats".
     """
 
     def __init__(self, path: str, table: str = "df_stats") -> None:

@@ -1,11 +1,32 @@
+# %% [markdown]
+"""
+# 5. Global Services Basic
+
+The following example shows how to collect statistics
+of global services.
+"""
+
+
+# %%
 import asyncio
 
-from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
+from dff.script import Context, Actor
+from dff.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
+
+# %% [markdown]
+"""
+Like with regular handlers, you can define global statistic handlers,
+which will be applied to every element inside the pipeline.
+
+Use the `add_global_handler` method provided by the `Pipeline` class.
+"""
+
+
+# %%
 extractor_pool = ExtractorPool()
 
 
@@ -20,6 +41,7 @@ async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return group_stats
 
 
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),

@@ -2,8 +2,8 @@
 Postgresql
 ---------------------------
 Provides the Postgresql version of the :py:class:`~dff.stats.savers.saver.Saver`.
-You don't need to interact with this class manually, as it will be automatically
-imported and initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
+The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+factory with specific parameters.
 
 """
 from typing import List
@@ -24,22 +24,17 @@ from ..record import StatsRecord
 class PostgresSaver(Saver):
     """
     Saves the stats dataframe to - and reads from a Postgresql database.
-    You don't need to interact with this class manually, as it will be automatically
-    initialized when you construct :py:class:`~dff.stats.savers.saver.Saver` with specific parameters.
+    The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+    factory with specific parameters.
 
-    Parameters
-    ----------
-
-    path: str
-        | The construction path.
-        | It should match the sqlalchemy :py:class:`~sqlalchemy.engine.Engine` initialization string.
+    :param path: The construction path.
+        It should match the sqlalchemy :py:class:`~sqlalchemy.engine.Engine` initialization string.
 
         .. code-block::
 
             Saver("postgresql://user:password@localhost:5432/default")
 
-    table: str
-        Sets the name of the db table to use. Defaults to "dff_stats".
+    :param table: Sets the name of the db table to use. Defaults to "dff_stats".
     """
 
     def __init__(self, path: str, table: str = "df_stats") -> None:

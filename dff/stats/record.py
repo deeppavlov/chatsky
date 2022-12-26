@@ -1,10 +1,17 @@
+"""
+Record
+---------
+The following module defines a data model for a standard database record
+persisted by `dff.stats`.
+
+"""
 import datetime
 import json
 from typing import Any
 
 from pydantic import BaseModel, Field, validator
-from dff.core.engine.core.context import Context, get_last_index
-from dff.core.pipeline import ExtraHandlerRuntimeInfo
+from dff.script.core.context import Context, get_last_index
+from dff.pipeline import ExtraHandlerRuntimeInfo
 
 from .utils import get_wrapper_field
 

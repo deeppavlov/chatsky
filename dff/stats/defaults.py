@@ -1,13 +1,14 @@
 """
 Defaults
-*********
+--------------
+This module includes a pool of default extractors
+that you can use out of the box.
 
-This module includes default utilities which you can use out of the box.
 """
 from datetime import datetime
 
-from dff.core.engine.core import Context
-from dff.core.pipeline import ExtraHandlerRuntimeInfo
+from dff.script import Context
+from dff.pipeline import ExtraHandlerRuntimeInfo
 from .pool import ExtractorPool
 from .record import StatsRecord
 from .utils import get_wrapper_field

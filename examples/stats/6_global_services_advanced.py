@@ -1,19 +1,33 @@
+# %% [markdown]
+"""
+# 6. Global Services Advanced
+
+The following example demonstrates how to collect statistics
+from several global services.
+"""
+
+
+# %%
 import asyncio
 
-from dff.core.engine.core import Context, Actor
-from dff.core.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
+from dff.script import Context, Actor
+from dff.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.stats_cli import parse_args
 
+
+# %% [markdown]
 """
-Like with regular handlers, you can define global statistic handlers,
-which will be applied to every element inside the pipeline.
+Like any global handler, handlers for statistics collection can be wired
+to run at any stage of `Pipeline` execution.
 
-Use the `add_global_handler` method.
+In the following examples, we add handlers before and after all the services
+in order to measure the exact running time of the pipeline.
 """
 
 
+# %%
 extractor_pool = ExtractorPool()
 
 
@@ -28,6 +42,7 @@ async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return group_stats
 
 
+# %%
 actor = Actor(
     TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
@@ -41,8 +56,12 @@ pipeline_dict = {
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
-pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, default_extractor_pool["extract_timing_before"])
-pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, default_extractor_pool["extract_timing_after"])
+pipeline.add_global_handler(
+    GlobalExtraHandlerType.BEFORE_ALL, default_extractor_pool["extract_timing_before"]
+)
+pipeline.add_global_handler(
+    GlobalExtraHandlerType.AFTER_ALL, default_extractor_pool["extract_timing_after"]
+)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
