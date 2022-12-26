@@ -34,12 +34,12 @@ core = [
 
 doc = [
     "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.7",
+    "dff_sphinx_theme>=0.1.17",
     "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
-    "sphinx_gallery>=0.11.1",
+    "sphinx_gallery==0.7.0",
     "sphinx-autodoc-typehints>=1.19.4",
     "nbsphinx>=0.8.9",
     "jupytext>=1.14.1",
@@ -61,7 +61,7 @@ redis_dependencies = [
 ]
 
 mongodb_dependencies = [
-    "pymongo>=4.0.2",
+    "pymongo==4.3.2",  # TODO: wait for bson using bug will be fixed
     "bson>=0.5.10",
 ]
 
@@ -160,6 +160,7 @@ EXTRA_DEPENDENCIES = {
     "devel": devel,
     "full": full,
     "test_full": tests_full,
+    "examples": tests_full,
     "devel_full": devel_full,
     "sqlite": sqlite_dependencies,
     "redis": redis_dependencies,
@@ -173,7 +174,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.10.1",
+    version="0.1.0rc0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",

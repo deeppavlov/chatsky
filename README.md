@@ -11,17 +11,17 @@ The Dialog Flow Framework (DFF) allows you to write conversational services. The
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
 [![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
-# Quick Start -- df_engine
+# Quick Start -- dff
 ## Installation
 ```bash
 pip install dff
 ```
 
 ## Basic example
+
 ```python
-from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.conditions as cnd
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor
+import dff.script.conditions.std_conditions as cnd
 from typing import Union
 
 # create script of dialog
@@ -107,12 +107,13 @@ pip install dff[ydb]
 ```
 
 ## Basic example
+
 ```python
-from dff.core.engine.core import Context, Actor
-from dff.connectors.db_connectors import SQLConnector
+from dff.script import Context, Actor
+from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
-db = SQLConnector("postgresql://user:password@host:port/dbname")
+db = SQLContextStorage("postgresql://user:password@host:port/dbname")
 
 actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
