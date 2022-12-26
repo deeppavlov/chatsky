@@ -40,10 +40,11 @@ jobs:
         run: |
           export backup_files=( tests examples .env_file makefile )
           mkdir /tmp/backup
-          for i in $backup_files; do mv $i  /tmp/backup ; done
+          for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
-          for i in $backup_files ; do mv  /tmp/backup/$i  .  ; done
+          for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
+          ls .
           touch venv  # disable venv target
 
       - name: run tests
