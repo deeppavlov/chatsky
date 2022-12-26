@@ -30,7 +30,7 @@ NodeLabelType: TypeAlias = Union[Callable, NodeLabelTupledType, str]
 ConditionType: TypeAlias = Callable
 """Condition type can be only `Callable`."""
 
-ModuleName: TypeAlias = str
+ModuleName: TypeAlias = "str"
 """
 Module name names addon state, or your own module state. For example module name can be `"dff_context_storages"`.
 """
