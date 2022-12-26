@@ -1,24 +1,28 @@
 """
-Pickle Connector
+pickle
 ---------------------------
-Provides the pickle-based version of the :py:class:`.DBConnector`.
+Provides the pickle-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
 import os
 
-from .db_connector import DBConnector, threadsafe_method
-from dff.core.engine.core.context import Context
+from .database import DBContextStorage, threadsafe_method
+from dff.script import Context
 
 
-class PickleConnector(DBConnector):
+class PickleContextStorage(DBContextStorage):
     """
-    Implements :py:class:`.DBConnector` with `pickle` as driver.
+    Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
-    :param path: Target file URI. Example: 'pickle://file.pkl'
+    Parameters
+    -----------
+
+    path: str
+        Target file URI. Example: 'pickle://file.pkl'
     """
 
     def __init__(self, path: str):
-        DBConnector.__init__(self, path)
+        DBContextStorage.__init__(self, path)
 
         self._load()
 

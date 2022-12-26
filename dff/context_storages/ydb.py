@@ -1,17 +1,18 @@
 """
-Yandex DB Connector
+ydb
 ---------------------------
 
-Provides the version of the :py:class:`.DBConnector` for Yandex DataBase.
+| Provides the version of the :py:class:`.DBContextStorage` for YDB.
+
 """
 
 import os
 from urllib.parse import urlsplit
 
 
-from dff.core.engine.core.context import Context
+from dff.script import Context
 
-from .db_connector import DBConnector, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -22,18 +23,23 @@ except ImportError:
     ydb_available = False
 
 
-class YDBConnector(DBConnector):
+class YDBContextStorage(DBContextStorage):
     """
-    Version of the :py:class:`.DBConnector` for YDB.
+    | Version of the :py:class:`.DBContextStorage` for YDB.
 
-    :param path: Standard sqlalchemy URI string. When using sqlite backend in Windows,
-        keep in mind that you have to use double backslashes '\\'
+    Parameters
+    -----------
+
+    path: str
+        Standard sqlalchemy URI string.
+        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    :param table_name: The name of the table to use.
+    table_name: str
+        The name of the table to use.
     """
 
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):
-        super(YDBConnector, self).__init__(path)
+        super(YDBContextStorage, self).__init__(path)
         protocol, netloc, self.database, _, _ = urlsplit(path)
         self.endpoint = "{}://{}".format(protocol, netloc)
         self.table_name = table_name

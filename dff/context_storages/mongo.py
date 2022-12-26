@@ -1,7 +1,7 @@
 """
-Mongo Connector
+mongo
 ---------------------------
-Provides the mongo-based version of the :py:class:`.DBConnector`.
+Provides the mongo-based version of the :py:class:`.DBContextStorage`.
 """
 
 try:
@@ -14,22 +14,27 @@ except ImportError:
 
 import json
 
-from dff.core.engine.core.context import Context
+from dff.script import Context
 
-from .db_connector import DBConnector, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 
-class MongoConnector(DBConnector):
+class MongoContextStorage(DBContextStorage):
     """
-    Implements :py:class:`.DBConnector` with `mongodb` as the database backend.
+    Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
-    :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
-    :param collection: Name of the collection to store the data in.
+    Parameters
+    -----------
+
+    path: str
+        Database URI. Example: 'mongodb://user:password@host:port/dbname'
+    collection: str
+        Name of the collection to store the data in.
     """
 
     def __init__(self, path: str, collection: str = "context_collection"):
-        super(MongoConnector, self).__init__(path)
+        super(MongoContextStorage, self).__init__(path)
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)

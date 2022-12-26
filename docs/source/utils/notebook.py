@@ -20,7 +20,7 @@ __Installing dependencies__
 \"\"\"
 
 # %%
-!python3 -m pip install -q dff[full]
+!python3 -m pip install -q dff[examples]
 
 # %% [markdown]
 \"\"\"

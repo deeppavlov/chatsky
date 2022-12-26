@@ -1,16 +1,16 @@
 """
-SQL Connector
+sql
 ---------------------------
+| Provides the sql-based version of the :py:class:`.DBContextStorage`.
+| You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 
-Provides the sql-based version of the :py:class:`.DBConnector`.
-You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 """
 import importlib
 import json
 
-from dff.core.engine.core.context import Context
+from dff.script import Context
 
-from .db_connector import DBConnector, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -64,21 +64,27 @@ def import_insert_for_dialect(dialect: str):
     )
 
 
-class SQLConnector(DBConnector):
+class SQLContextStorage(DBContextStorage):
     """
-    Sql-based version of the :py:class:`.DBConnector`.
-    Compatible with MySQL, Postgresql, Sqlite.
+    | Sql-based version of the :py:class:`.DBContextStorage`.
+    | Compatible with MySQL, Postgresql, Sqlite.
 
-    :param path: Standard sqlalchemy URI string.
+    Parameters
+    -----------
+
+    path: str
+        Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    :param table_name: The name of the table to use.
-    :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
+    table_name: str
+        The name of the table to use.
+    custom_driver: bool
+        If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
-        super(SQLConnector, self).__init__(path)
+        super(SQLContextStorage, self).__init__(path)
 
         self._check_availability(custom_driver)
         self.engine = create_engine(self.full_path)
