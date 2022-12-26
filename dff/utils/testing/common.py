@@ -11,7 +11,8 @@ def is_interactive_mode() -> bool:
     """
     Checking whether the example code should be run in interactive mode.
 
-    :return: true if it's not being executed by Jupyter kernel and DISABLE_INTERACTIVE_MODE env variable isn't set.
+    :return: `True` if it's being executed by Jupyter kernel and DISABLE_INTERACTIVE_MODE env variable isn't set,
+        `False` otherwise.
     """
 
     shell = None
@@ -35,12 +36,12 @@ def check_happy_path(
     In cases when additional processing of responses is needed (e.g. in case of response being an HTML string),
     a special function (response comparer) is used.
 
-    :param pipeline: the Pipeline instance, that will be used for checking.
-    :param happy_path: a tuple of (request, response) tuples, so-called happy path,
+    :param pipeline: The Pipeline instance, that will be used for checking.
+    :param happy_path: A tuple of (request, response) tuples, so-called happy path,
         its requests are passed to pipeline and the pipeline responses are compared to its responses.
-    :param response_comparer: a special comparer function that accepts received response, true response and context;
-        it returns None is two responses are equal and transformed received response if they are different.
-    :param printout_enable: a flag that enables requests and responses fancy printing (to STDOUT).
+    :param response_comparer: A special comparer function that accepts received response, true response and context;
+        it returns `None` is two responses are equal and transformed received response if they are different.
+    :param printout_enable: A flag that enables requests and responses fancy printing (to STDOUT).
     """
 
     ctx_id = uuid4()  # get random ID for current context
@@ -67,7 +68,7 @@ def run_interactive_mode(pipeline: Pipeline):
     Running example with provided pipeline in interactive mode, just like with CLI messenger interface.
     The dialog won't be stored anywhere, it will only be outputted to STDOUT.
 
-    :param pipeline: the Pipeline instance, that will be used for running.
+    :param pipeline: The Pipeline instance, that will be used for running.
     """
 
     ctx_id = uuid4()  # Random UID
