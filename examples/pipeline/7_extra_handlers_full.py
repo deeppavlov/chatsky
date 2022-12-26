@@ -13,9 +13,9 @@ import random
 from datetime import datetime
 
 import psutil
-from dff.core.engine.core import Context, Actor
+from dff.script import Context, Actor
 
-from dff.core.pipeline import (
+from dff.pipeline import (
     Pipeline,
     ServiceGroup,
     to_service,

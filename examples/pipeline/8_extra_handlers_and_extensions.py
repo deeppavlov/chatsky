@@ -14,8 +14,8 @@ import logging
 import random
 from datetime import datetime
 
-from dff.core.engine.core import Actor
-from dff.core.pipeline import (
+from dff.script import Actor
+from dff.pipeline import (
     Pipeline,
     ComponentExecutionState,
     GlobalExtraHandlerType,

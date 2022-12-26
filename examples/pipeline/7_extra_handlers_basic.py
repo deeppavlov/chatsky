@@ -13,9 +13,9 @@ import logging
 import random
 from datetime import datetime
 
-from dff.core.engine.core import Context, Actor
+from dff.script import Context, Actor
 
-from dff.core.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
+from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
 
 from dff.utils.testing.common import (
     check_happy_path,
