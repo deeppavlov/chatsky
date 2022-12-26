@@ -1,9 +1,9 @@
 """
-Protocol
+protocol
 ---------------------------
-
-Base protocol code. Protocols :py:data:`.PROTOCOLS`.
-A func is used for suggestion of installation: :py:func:`.get_protocol_install_suggestion`.
+| Base protocol code.
+| Protocols :py:data:`.PROTOCOLS`.
+| A func is used for suggestion of installation: :py:func:`.get_protocol_install_suggestion`
 """
 import json
 import pathlib
