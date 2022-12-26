@@ -45,14 +45,6 @@ class Keywords(Enum):
         The keyword specifying the result which is returned to the user after getting to the node.
         Value corresponding to the `RESPONSE` key can have any data type.
 
-    PROCESSING: Enum(auto)
-        The keyword specifying the preprocessing that is called before the response generation.
-        The value that corresponds to the `PROCESSING` key must have the `dict` type:
-
-        `{"PROC_0": proc_func_0, ..., "PROC_N": proc_func_N}`, where
-        `"PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
-        The order of `proc_func_i` calls is defined by the order  in which the preprocessing `dict` is defined.
-
     MISC: Enum(auto)
         The keyword specifying `dict` containing extra data,
         which were not aimed to be used in the standard functions of `DFE`.
@@ -66,7 +58,6 @@ class Keywords(Enum):
     LOCAL = auto()
     TRANSITIONS = auto()
     RESPONSE = auto()
-    PROCESSING = auto()
     MISC = auto()
     PRE_RESPONSE_PROCESSING = auto()
     PRE_TRANSITIONS_PROCESSING = auto()
@@ -77,7 +68,6 @@ GLOBAL = Keywords.GLOBAL
 LOCAL = Keywords.LOCAL
 TRANSITIONS = Keywords.TRANSITIONS
 RESPONSE = Keywords.RESPONSE
-PROCESSING = Keywords.PROCESSING
 MISC = Keywords.MISC
 PRE_RESPONSE_PROCESSING = Keywords.PRE_RESPONSE_PROCESSING
 PRE_TRANSITIONS_PROCESSING = Keywords.PRE_TRANSITIONS_PROCESSING
