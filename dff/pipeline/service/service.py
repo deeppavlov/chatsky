@@ -1,6 +1,7 @@
 """
 Service Class
 -------------
+This module contains `Service` class. A description of the class is given below.
 """
 import logging
 import asyncio
@@ -29,7 +30,6 @@ class Service(PipelineComponent):
     Service group can be synchronous or asynchronous.
     Service can be asynchronous only if its handler is a coroutine.
     Actor wrapping service can be synchronous only.
-    It accepts constructor parameters:
 
     :param handler: A service function or an actor.
     :param wrappers: List of Wrappers to add to the service.

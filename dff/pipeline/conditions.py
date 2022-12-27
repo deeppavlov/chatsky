@@ -58,7 +58,7 @@ def aggregate_condition(
 ) -> StartConditionCheckerFunction:
     """
     Condition that returns aggregated boolean value from all booleans returned by incoming functions.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:class:`~StartConditionCheckerFunction`.
 
     :param aggregator: The function that accepts list of booleans and returns a single boolean.
     :param functions: Functions to aggregate.
@@ -73,7 +73,7 @@ def aggregate_condition(
 def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns `True` only if all incoming functions return `True`.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:class:`~StartConditionCheckerFunction`.
 
     :param functions: Functions to aggregate.
     """
@@ -83,7 +83,7 @@ def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCh
 def any_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns `True` if any of incoming functions returns `True`.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:class:`~StartConditionCheckerFunction`.
 
     :param functions: Functions to aggregate.
     """

@@ -1,7 +1,7 @@
 """
 Message Interfaces
 ------------------
-This module contains several classes of message interfaces.
+This module contains several basic classes of message interfaces.
 """
 import abc
 import asyncio
@@ -29,7 +29,7 @@ class MessengerInterface(abc.ABC):
         May be used for sending an introduction message or displaying general bot information.
 
         :param pipeline_runner: A function that should return pipeline response to user request;
-            usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
+            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
         """
         raise NotImplementedError
 
@@ -82,7 +82,7 @@ class PollingMessengerInterface(MessengerInterface):
         for most cases the loop itself shouldn't be overridden.
 
         :param pipeline_runner: A function that should return pipeline response to user request;
-            usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
+            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
@@ -113,7 +113,7 @@ class CallbackMessengerInterface(MessengerInterface):
     def on_request(self, request: Any, ctx_id: Hashable) -> Context:
         """
         Method invoked on user input.
-        This method works just like `Pipeline.__call__(request, ctx_id)`,
+        This method works just like :py:meth:`~Pipeline.__call__(request, ctx_id)`,
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Returns context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
@@ -156,7 +156,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
         :param pipeline_runner: A function that should return pipeline response to user request;
-            usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
+            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()

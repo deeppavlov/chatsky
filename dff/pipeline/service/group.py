@@ -1,6 +1,7 @@
 """
 Service Group
 -------------
+This module contatins `ServiceGroup` class. This class represents a service group.
 """
 import asyncio
 import logging
@@ -27,19 +28,18 @@ logger = logging.getLogger(__name__)
 
 class ServiceGroup(PipelineComponent):
     """
-    This class represents a service group.
-    Service group can be included into pipeline as object or a pipeline component list.
+    A service group class.
+    Service group can be included into pipeline as an object or a pipeline component list.
     Service group can be synchronous or asynchronous.
     Components in synchronous groups are executed consequently (no matter is they are synchronous or asynchronous).
     Components in asynchronous groups are executed simultaneously.
     Group can be asynchronous only if all components in it are asynchronous.
     Group containing actor can be synchronous only.
-    It accepts constructor parameters:
 
-    :param components: a `ServiceGroupBuilder` object, that will be added to the group.
-    :param wrappers: list of `Wrappers` to add to the group.
-    :param timeout: timeout to add to the group.
-    :param asynchronous: requested asynchronous property.
+    :param components: A `ServiceGroupBuilder` object, that will be added to the group.
+    :param wrappers: List of `Wrappers` to add to the group.
+    :param timeout: Timeout to add to the group.
+    :param asynchronous: Requested asynchronous property.
     :param start_condition: `StartConditionCheckerFunction` that is invoked before each group execution;
         group is executed only if it returns `True`.
     :param name: Requested group name.

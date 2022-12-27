@@ -2,6 +2,7 @@
 Types
 -----
 This module contains two special types.
+One is used for the messenger interface to client interaction, the other to the polling loop control.
 """
 from typing import Callable, Any, Hashable, Awaitable
 
@@ -17,6 +18,6 @@ Accepts anything (user input) and hashable vaklue (current dialog id), returns s
 
 PollingInterfaceLoopFunction = Callable[[], bool]
 """
-A function type used in `PollingMessengerInterface` to control polling loop.
+A function type used in :py:class:`~PollingMessengerInterface` to control polling loop.
 Returns boolean (whether polling should be continued).
 """

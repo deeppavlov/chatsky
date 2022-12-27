@@ -1,6 +1,7 @@
 """
 Types
 -----
+This module contains several classes and special types (see below).
 """
 from abc import ABC
 from enum import unique, Enum, auto
@@ -81,14 +82,14 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 
 StartConditionCheckerFunction = Callable[[Context, Actor], bool]
 """
-A function type for components start_conditions.
+A function type for components `start_conditions`.
 Accepts context and actor (current pipeline state), returns boolean (whether service can be launched).
 """
 
 
 StartConditionCheckerAggregationFunction = Callable[[Iterable[bool]], bool]
 """
-A function type for creating aggregation start_conditions for components.
+A function type for creating aggregation `start_conditions` for components.
 Accepts list of functions (other start_conditions to aggregate), returns boolean (whether service can be launched).
 """
 

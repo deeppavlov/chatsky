@@ -39,10 +39,10 @@ class PipelineComponent(abc.ABC):
     :param requested_async_flag: Requested asynchronous property;
         if not defined, `calculated_async_flag` is used instead.
     :param calculated_async_flag: Whether the component can be asynchronous or not
-        1) for :py:class:`~pipeline.service.service.Service`: whether its ``handler`` is asynchronous or not,
-        2) for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its ``services`` are asynchronous or not.
+        1) for :py:class:`~pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
+        2) for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
 
-    :param start_condition: `StartConditionCheckerFunction` that is invoked before each component execution;
+    :param start_condition: :py:class:`~StartConditionCheckerFunction` that is invoked before each component execution;
         component is executed only if it returns `True`.
     :param name: Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
         should not be blank or contain `.` symbol.
@@ -87,12 +87,12 @@ class PipelineComponent(abc.ABC):
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
-        Method for component runtime state setting, state is preserved in ``ctx.framework_states`` dict,
+        Method for component runtime state setting, state is preserved in `ctx.framework_states` dict,
         in subdict, dedicated to this library.
 
-        :param ctx: Context to keep state in.
+        :param ctx: :py:class:`~Context` to keep state in.
         :param value: State to set.
-        :return: None
+        :return: `None`
         """
         if PIPELINE_STATE_KEY not in ctx.framework_states:
             ctx.framework_states[PIPELINE_STATE_KEY] = {}
@@ -103,7 +103,7 @@ class PipelineComponent(abc.ABC):
         Method for component runtime state getting, state is preserved in `ctx.framework_states` dict,
         in subdict, dedicated to this library.
 
-        :param ctx: Context to get state from.
+        :param ctx: :py:class:`~Context` to get state from.
         :param default: Default to return if no record found
             (usually it's :py:attr:`~pipeline.types.ComponentExecutionState.NOT_RUN`).
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
@@ -151,9 +151,11 @@ class PipelineComponent(abc.ABC):
         A method for running pipeline component, it is overridden in all its children.
         This method is run after the component's timeout is set (if needed).
 
-        :param ctx: Current dialog `Context`.
-        :param actor: This `Pipeline` `Actor` or `None` if this is a service, that wraps `Actor`.
-        :return: `Context` if this is a synchronous service or `None`, asynchronous services shouldn't modify `Context`.
+        :param ctx: Current dialog :py:class:`~Context`.
+        :param actor: This :py:class:`Pipeline` :py:class:`~Actor` or
+            `None` if this is a service, that wraps :py:class:`~Actor`.
+        :return: :py:class:`~Context` if this is a synchronous service or `None`,
+            asynchronous services shouldn't modify :py:class:`~Context`.
         """
         raise NotImplementedError
 
@@ -162,10 +164,11 @@ class PipelineComponent(abc.ABC):
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`~_run` method.
 
-        :param ctx: Current dialog `Context`.
-        :param actor: This `Pipeline` `Actor` or `None` if this is a service, that wraps `Actor`.
-        :return: `Context` if this is a synchronous service or :py:class:`~typing.const.Awaitable`,
-            asynchronous services shouldn't modify `Context`.
+        :param ctx: Current dialog :py:class:`~Context`.
+        :param actor: This :py:class:`~Pipeline` :py:class:`~Actor` or
+            `None` if this is a service, that wraps :py:class:`~Actor`.
+        :return: :py:class:`~Context` if this is a synchronous service or :py:class:`~typing.const.Awaitable`,
+            asynchronous services shouldn't modify :py:class:`~Context`.
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, actor))
@@ -178,7 +181,7 @@ class PipelineComponent(abc.ABC):
         Method for adding a global extra handler to this particular component.
 
         :param global_extra_handler_type: A type of extra handler to add.
-        :param extra_handler: A `GlobalExtraHandlerType` to add to the component as an extra handler.
+        :param extra_handler: A :py:class:`~GlobalExtraHandlerType` to add to the component as an extra handler.
         :return: `None`
         """
         target = (
@@ -190,7 +193,7 @@ class PipelineComponent(abc.ABC):
         """
         Method for retrieving runtime info about this component.
 
-        :param ctx: Current dialog `Context`.
+        :param ctx: Current dialog :py:class:`~Context`.
         :return: :py:class:`~dff.script.typing.ServiceRuntimeInfo`
             dict where all not set fields are replaced with ``[None]``.
         """
