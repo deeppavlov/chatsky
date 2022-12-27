@@ -146,7 +146,7 @@ def test_redis(testing_context, context_id):
 @pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
 def test_postgres(testing_context, context_id):
     db = SQLContextStorage(
-        "postgresql://{}:{}@localhost:5432/{}".format(
+        "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
             os.getenv("POSTGRES_USERNAME"),
             os.getenv("POSTGRES_PASSWORD"),
             os.getenv("POSTGRES_DB"),

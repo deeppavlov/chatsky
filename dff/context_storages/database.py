@@ -64,7 +64,7 @@ class DBContextStorage(DBAbstractContextStorage):
     path: str
         | Parameter `path` should be set with the URI of the database.
         | It includes a prefix and the required connection credentials.
-        | Example: postgresql://user:password@host:port/database
+        | Example: postgresql+asyncpg://user:password@host:port/database
         | In the case of classes that save data to hard drive instead of external databases
         | you need to specify the location of the file, like you do in sqlite.
         | Keep in mind that in Windows you will have to use double backslashes '\\'
@@ -113,7 +113,7 @@ def context_storage_factory(path: str, **kwargs):
     - redis://:pass@localhost:6379/0
     - mongodb://admin:pass@localhost:27017/admin
     - mysql+pymysql://root:pass@localhost:3307/test
-    - postgresql://postgres:pass@localhost:5432/test
+    - postgresql+asyncpg://postgres:pass@localhost:5432/test
     - grpc://localhost:2136/local
     - grpcs://localhost:2135/local
 

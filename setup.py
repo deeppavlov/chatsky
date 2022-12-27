@@ -70,8 +70,8 @@ mysql_dependencies = [
 ]
 
 postgresql_dependencies = [
-    "sqlalchemy>=1.4.27",
-    "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stabe for windows
+    "sqlalchemy[asyncio]>=1.4.27",
+    "asyncpg>=0.27.0",
 ]
 
 ydb_dependencies = [

@@ -45,7 +45,7 @@
         "module": "sql",
         "class": "SQLContextStorage",
         "slug": "postgresql",
-        "uri_example": "postgresql://postgres:pass@localhost:5432/test"
+        "uri_example": "postgresql+asyncpg://postgres:pass@localhost:5432/test"
     },
     "grpc": {
         "module": "ydb",

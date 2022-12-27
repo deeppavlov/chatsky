@@ -23,9 +23,9 @@ except (ImportError, ModuleNotFoundError):
 postgres_available = sqlite_available = mysql_available = False
 
 try:
-    import psycopg2
+    import asyncpg
 
-    _ = psycopg2
+    _ = asyncpg
 
     postgres_available = True
 except (ImportError, ModuleNotFoundError):
@@ -173,7 +173,7 @@ class SQLContextStorage(DBContextStorage):
         if not custom_driver:
             if self.full_path.startswith("postgresql") and not postgres_available:
                 install_suggestion = get_protocol_install_suggestion("postgresql")
-                raise ImportError("Packages `sqlalchemy` and/or `psycopg2-binary` are missing.\n" + install_suggestion)
+                raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("mysql") and not mysql_available:
                 install_suggestion = get_protocol_install_suggestion("mysql")
                 raise ImportError("Packages `sqlalchemy` and/or `pymysql` are missing.\n" + install_suggestion)
