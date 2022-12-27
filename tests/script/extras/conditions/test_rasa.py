@@ -2,7 +2,7 @@ import os
 import pytest
 
 from dff.script.extras.conditions.models.remote_api.rasa_model import RasaModel, AsyncRasaModel, rasa_available
-from tests.db_connector.test_dbs import ping_localhost
+from tests.context_storages.test_dbs import ping_localhost
 
 RASA_ACTIVE = ping_localhost(5005)
 

@@ -1,5 +1,3 @@
-from pathlib import Path
-
 import pytest
 from sklearn.feature_extraction.text import TfidfVectorizer
 
@@ -8,7 +6,7 @@ from dff.script.extras.conditions.models.local.cosine_matchers.sklearn import Sk
 from dff.script.extras.conditions.dataset import Dataset
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
-import tests.utils as utils
+from tests.test_utils import get_path_from_tests_to_current_dir
 
 
 @pytest.fixture(scope="session")
@@ -21,10 +19,7 @@ def testing_actor():
 
 @pytest.fixture(scope="session")
 def testing_dataset():
-    yield Dataset.parse_yaml(
-        Path(__file__).parent.parent.parent
-        / f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}/data/example.yaml"
-    )
+    yield Dataset.parse_yaml(f"examples/{get_path_from_tests_to_current_dir(__file__)}/data/example.yaml")
 
 
 @pytest.fixture(scope="session")

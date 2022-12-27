@@ -10,9 +10,9 @@ except ImportError as e:
 
 
 from dff.script.extras.conditions.dataset import Dataset
-from tests import utils
+from tests.test_utils import get_path_from_tests_to_current_dir
 
-path = utils.get_path_from_tests_to_current_dir(__file__)
+path = get_path_from_tests_to_current_dir(__file__)
 
 
 @pytest.mark.parametrize(

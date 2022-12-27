@@ -98,8 +98,6 @@ def has_match(
         negative_examples = []
 
     def has_match_inner(ctx: Context, actor: Actor) -> bool:
-        if not sklearn_available:
-            raise ImportError("`sklearn` package missing. Try `pip install dff[ext].`")
         if not isinstance(ctx.last_request, str):
             return False
         input_vector = model.transform(ctx.last_request)
@@ -109,6 +107,6 @@ def has_match(
         negative_sims = [cosine_similarity(input_vector, item)[0][0] for item in negative_vectors]
         max_pos_sim = max(positive_sims)
         max_neg_sim = 0 if len(negative_sims) == 0 else max(negative_sims)
-        return max_pos_sim > threshold > max_neg_sim
+        return bool(max_pos_sim > threshold > max_neg_sim)
 
     return has_match_inner
