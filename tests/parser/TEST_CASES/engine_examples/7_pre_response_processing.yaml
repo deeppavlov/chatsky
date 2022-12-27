@@ -1,12 +1,12 @@
 7_pre_response_processing:
-  GLOBAL: from dff.core.engine.core.keywords import GLOBAL
-  LOCAL: from dff.core.engine.core.keywords import LOCAL
-  RESPONSE: from dff.core.engine.core.keywords import RESPONSE
-  TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
-  PRE_RESPONSE_PROCESSING: from dff.core.engine.core.keywords import PRE_RESPONSE_PROCESSING
-  lbl: import dff.core.engine.labels
-  cnd: import dff.core.engine.conditions
-  Pipeline: from dff.core.pipeline import Pipeline
+  GLOBAL: from dff.script import GLOBAL
+  LOCAL: from dff.script import LOCAL
+  RESPONSE: from dff.script import RESPONSE
+  TRANSITIONS: from dff.script import TRANSITIONS
+  PRE_RESPONSE_PROCESSING: from dff.script import PRE_RESPONSE_PROCESSING
+  lbl: import dff.script.labels
+  cnd: import dff.script.conditions
+  Pipeline: from dff.pipeline import Pipeline
   toy_script:
     "'root'":
       "'start'":

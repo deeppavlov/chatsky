@@ -1,13 +1,13 @@
   main:
-    TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
-    RESPONSE: from dff.core.engine.core.keywords import RESPONSE
-    PROCESSING: from dff.core.engine.core.keywords import PROCESSING
-    GLOBAL: from dff.core.engine.core.keywords import GLOBAL
-    MISC: from dff.core.engine.core.keywords import MISC
-    cnd: import dff.core.engine.conditions
-    lbl: import dff.core.engine.labels
-    Act: from dff.core.engine.core import Actor
-    rsp: import dff.core.engine.responses
+    TRANSITIONS: from dff.script import TRANSITIONS
+    RESPONSE: from dff.script import RESPONSE
+    PROCESSING: from dff.script import PROCESSING
+    GLOBAL: from dff.script import GLOBAL
+    MISC: from dff.script import MISC
+    cnd: import dff.script.conditions
+    lbl: import dff.script.labels
+    Act: from dff.script import Actor
+    rsp: import dff.script.responses
     add_prefix: from functions import add_prefix
     re: import re
     transitions: import transitions
@@ -83,13 +83,13 @@
             lbl.to_fallback(): cnd.true()
     actor: Act(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))
   flow:
-    TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
-    RESPONSE: from dff.core.engine.core.keywords import RESPONSE
-    PROCESSING: from dff.core.engine.core.keywords import PROCESSING
-    LOCAL: from dff.core.engine.core.keywords import LOCAL
-    cnd: import dff.core.engine.conditions
+    TRANSITIONS: from dff.script import TRANSITIONS
+    RESPONSE: from dff.script import RESPONSE
+    PROCESSING: from dff.script import PROCESSING
+    LOCAL: from dff.script import LOCAL
+    cnd: import dff.script.conditions
 +   re: import re
-    lbl: import dff.core.engine.labels
+    lbl: import dff.script.labels
 -   re: import re
     add_prefix: from functions import add_prefix
     global_flow:

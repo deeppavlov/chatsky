@@ -5,10 +5,10 @@
         "full_script": {
             "2_conditions": {
                 "re": "import re",
-                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
-                "RESPONSE": "from dff.core.engine.core.keywords import RESPONSE",
-                "cnd": "import dff.core.engine.conditions",
-                "Pipeline": "from dff.core.pipeline import Pipeline",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "cnd": "import dff.script.conditions",
+                "Pipeline": "from dff.pipeline import Pipeline",
                 "toy_script": {
                     "'greeting_flow'": {
                         "'start_node'": {
@@ -73,6 +73,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'start_node'"
             ]
@@ -87,6 +88,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ]
@@ -101,6 +103,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ]
@@ -115,6 +118,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ]
@@ -129,6 +133,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ]
@@ -143,6 +148,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'fallback_node'"
             ]
@@ -171,10 +177,12 @@
             ],
             "condition": "cnd.exact_match('Hi')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'start_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -202,10 +210,12 @@
             ],
             "condition": "cnd.regexp('.*how are you', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
@@ -233,10 +243,12 @@
             ],
             "condition": "cnd.all([cnd.regexp('talk'), cnd.regexp('about.*music')])",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ],
@@ -264,10 +276,12 @@
             ],
             "condition": "cnd.regexp(re.compile('Ok, goodbye.'))",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ],
@@ -295,10 +309,12 @@
             ],
             "condition": "cnd.any([hi_lower_case_condition, cnd.exact_match('hello')])",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -326,10 +342,12 @@
             ],
             "condition": "complex_user_answer_condition",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'fallback_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -357,10 +375,12 @@
             ],
             "condition": "predetermined_condition(True)",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'fallback_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'fallback_node'"
             ],

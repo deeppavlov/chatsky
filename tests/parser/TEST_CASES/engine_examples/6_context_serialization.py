@@ -1,7 +1,7 @@
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-import dff.core.engine.conditions as cnd
-from dff.core.pipeline import Pipeline
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+import dff.script.conditions as cnd
+from dff.pipeline import Pipeline
 
 toy_script = {
     'flow_start': {

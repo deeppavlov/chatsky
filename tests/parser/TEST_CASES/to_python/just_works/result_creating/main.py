@@ -1,12 +1,12 @@
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-from dff.core.engine.core.keywords import PROCESSING
-from dff.core.engine.core.keywords import GLOBAL
-from dff.core.engine.core.keywords import MISC
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
-from dff.core.engine.core import Actor as Act
-import dff.core.engine.responses as rsp
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+from dff.script import PROCESSING
+from dff.script import GLOBAL
+from dff.script import MISC
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
+from dff.script import Actor as Act
+import dff.script.responses as rsp
 from functions import add_prefix
 import re
 import transitions

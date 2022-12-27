@@ -1,7 +1,7 @@
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-import dff.core.engine.conditions as cnd
-from dff.core.pipeline import Pipeline
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+from dff.pipeline import Pipeline
+import dff.script.conditions as cnd
 
 toy_script = {
     'greeting_flow': {
@@ -14,7 +14,7 @@ toy_script = {
         'node1': {
             RESPONSE: 'Hi, how are you?',
             TRANSITIONS: {
-                'node2': cnd.exact_match("i'm fine, how are you?"),
+                'node2': cnd.exact_match("I'm fine, how are you?"),
             },
         },
         'node2': {
@@ -30,7 +30,7 @@ toy_script = {
             },
         },
         'node4': {
-            RESPONSE: 'bye',
+            RESPONSE: 'Bye',
             TRANSITIONS: {
                 'node1': cnd.exact_match('Hi'),
             },

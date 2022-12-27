@@ -3,8 +3,7 @@ from shutil import copytree
 
 import pytest
 
-from dff.script.parser.dff_project import DFFProject
-from dff.script.parser.base_parser_object import String
+from dff.utils.parser.dff_project import DFFProject
 from .utils import assert_dirs_equal, assert_files_equal
 
 TEST_DIR = Path(__file__).parent / "TEST_CASES"
@@ -86,7 +85,7 @@ def test_to_python(test_case: Path, tmp_path):
 def test_engine_examples(example_name: str, tmp_path):
     python_name = example_name + ".py"
 
-    dff_project = DFFProject.from_python(ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / python_name))
+    dff_project = DFFProject.from_python(ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / python_name), script_initializer="pipeline")
 
     dff_project.to_yaml(tmp_path / (example_name + ".yaml"))
 

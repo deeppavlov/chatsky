@@ -1,6 +1,6 @@
   main:
-    Actor: from dff.core.engine.core.actor import Actor
-    TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
+    Actor: from dff.script import Actor
+    TRANSITIONS: from dff.script import TRANSITIONS
     some_var: from something import some_var
     transitions: from .transitions import transitions
     variables: import variables

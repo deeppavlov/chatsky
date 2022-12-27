@@ -1,5 +1,5 @@
-from dff.core.engine.core.actor import Actor
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE
+from dff.script.core.actor import Actor
+from dff.script import TRANSITIONS, RESPONSE
 from something import some_func, some_var
 from .transitions import transitions
 import variables

@@ -4,11 +4,11 @@
     "graph": {
         "full_script": {
             "3_responses": {
-                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
-                "RESPONSE": "from dff.core.engine.core.keywords import RESPONSE",
-                "rsp": "import dff.core.engine.responses",
-                "cnd": "import dff.core.engine.conditions",
-                "Pipeline": "from dff.core.pipeline import Pipeline",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "rsp": "import dff.script.responses",
+                "cnd": "import dff.script.conditions",
+                "Pipeline": "from dff.pipeline import Pipeline",
                 "toy_script": {
                     "'greeting_flow'": {
                         "'start_node'": {
@@ -20,7 +20,7 @@
                         "'node1'": {
                             "RESPONSE": "rsp.choice(['Hi, what is up?', 'Hello, how are you?'])",
                             "TRANSITIONS": {
-                                "'node2'": "cnd.exact_match(\"i'm fine, how are you?\")"
+                                "'node2'": "cnd.exact_match(\"I'm fine, how are you?\")"
                             }
                         },
                         "'node2'": {
@@ -72,6 +72,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'start_node'"
             ]
@@ -86,6 +87,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ]
@@ -100,6 +102,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ]
@@ -114,6 +117,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ]
@@ -128,6 +132,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ]
@@ -142,6 +147,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'fallback_node'"
             ]
@@ -170,10 +176,12 @@
             ],
             "condition": "cnd.exact_match('Hi')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'start_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -199,12 +207,14 @@
                 "value_TRANSITIONS",
                 "value_'node2'"
             ],
-            "condition": "cnd.exact_match(\"i'm fine, how are you?\")",
+            "condition": "cnd.exact_match(\"I'm fine, how are you?\")",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
@@ -232,10 +242,12 @@
             ],
             "condition": "cnd.exact_match(\"Let's talk about music.\")",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ],
@@ -263,10 +275,12 @@
             ],
             "condition": "cnd.exact_match('Ok, goodbye.')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ],
@@ -294,10 +308,12 @@
             ],
             "condition": "cnd.exact_match('Hi')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -325,10 +341,12 @@
             ],
             "condition": "cnd.exact_match('Hi')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'fallback_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],

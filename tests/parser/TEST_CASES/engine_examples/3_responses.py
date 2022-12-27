@@ -1,8 +1,8 @@
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-import dff.core.engine.responses as rsp
-import dff.core.engine.conditions as cnd
-from dff.core.pipeline import Pipeline
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+import dff.script.responses as rsp
+import dff.script.conditions as cnd
+from dff.pipeline import Pipeline
 
 toy_script = {
     'greeting_flow': {
@@ -15,7 +15,7 @@ toy_script = {
         'node1': {
             RESPONSE: rsp.choice(['Hi, what is up?', 'Hello, how are you?']),
             TRANSITIONS: {
-                'node2': cnd.exact_match("i'm fine, how are you?"),
+                'node2': cnd.exact_match("I'm fine, how are you?"),
             },
         },
         'node2': {

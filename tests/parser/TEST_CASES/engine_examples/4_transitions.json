@@ -5,11 +5,11 @@
         "full_script": {
             "4_transitions": {
                 "re": "import re",
-                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
-                "RESPONSE": "from dff.core.engine.core.keywords import RESPONSE",
-                "cnd": "import dff.core.engine.conditions",
-                "lbl": "import dff.core.engine.labels",
-                "Pipeline": "from dff.core.pipeline import Pipeline",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "cnd": "import dff.script.conditions",
+                "lbl": "import dff.script.labels",
+                "Pipeline": "from dff.pipeline import Pipeline",
                 "toy_script": {
                     "'global_flow'": {
                         "'start_node'": {
@@ -54,7 +54,7 @@
                             }
                         },
                         "'node4'": {
-                            "RESPONSE": "'bye'",
+                            "RESPONSE": "'Bye'",
                             "TRANSITIONS": {
                                 "'node1'": "cnd.regexp('hi|hello', re.IGNORECASE)",
                                 "lbl.to_fallback()": "cnd.true()"
@@ -63,7 +63,7 @@
                     },
                     "'music_flow'": {
                         "'node1'": {
-                            "RESPONSE": "'I love `System of a Down` group, would you like to tell about it? '",
+                            "RESPONSE": "'I love `System of a Down` group, would you like to talk about it?'",
                             "TRANSITIONS": {
                                 "lbl.forward()": "cnd.regexp('yes|yep|ok', re.IGNORECASE)",
                                 "lbl.to_fallback()": "cnd.true()"
@@ -87,7 +87,7 @@
                             }
                         },
                         "'node4'": {
-                            "RESPONSE": "\"That's all what I know\"",
+                            "RESPONSE": "\"That's all what I know.\"",
                             "TRANSITIONS": {
                                 "greeting_flow_n2_transition": "cnd.regexp('next', re.IGNORECASE)",
                                 "high_priority_node_transition('greeting_flow', 'node4')": "cnd.regexp('next time', re.IGNORECASE)",
@@ -119,6 +119,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'global_flow'",
                 "'start_node'"
             ]
@@ -133,6 +134,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'music_flow'",
                 "'node1'"
             ]
@@ -147,6 +149,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ]
@@ -161,18 +164,29 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ]
         },
         {
             "id": [
-                "PREVIOUS"
+                "LABEL",
+                "previous",
+                [
+                    "priority",
+                    "None"
+                ]
             ]
         },
         {
             "id": [
-                "REPEAT"
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
             ]
         },
         {
@@ -185,18 +199,33 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ]
         },
         {
             "id": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "0.1"
+                ]
             ]
         },
         {
             "id": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "0.5"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ]
         },
         {
@@ -209,8 +238,23 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ]
         },
         {
@@ -223,11 +267,22 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ]
         },
         {
+            "id": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ]
+        },
+        {
             "ref": [
                 "4_transitions",
                 "toy_script",
@@ -237,6 +292,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'music_flow'",
                 "'node2'"
             ]
@@ -251,13 +307,23 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'music_flow'",
                 "'node3'"
             ]
         },
         {
             "id": [
-                "BACKWARD_cyclicality=True"
+                "LABEL",
+                "backward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ]
         },
         {
@@ -270,6 +336,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'music_flow'",
                 "'node4'"
             ]
@@ -303,10 +370,12 @@
             ],
             "condition": "cnd.regexp('talk about music')",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'start_node'"
             ],
             "target": [
+                "NODE",
                 "'music_flow'",
                 "'node1'"
             ],
@@ -334,10 +403,12 @@
             ],
             "condition": "cnd.regexp('hi|hello', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'start_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -365,10 +436,12 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'start_node'"
             ],
             "target": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ],
@@ -396,11 +469,21 @@
             ],
             "condition": "cnd.regexp('yes|yep|ok', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node1'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -426,11 +509,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node1'"
             ],
             "target": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -456,10 +545,12 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
             "target": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ],
@@ -487,10 +578,12 @@
             ],
             "condition": "cnd.regexp('how are you')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
@@ -518,10 +611,12 @@
             ],
             "condition": "cnd.regexp('talk about music')",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ],
             "target": [
+                "NODE",
                 "'music_flow'",
                 "'node1'"
             ],
@@ -549,10 +644,12 @@
             ],
             "condition": "cnd.regexp('hi|hello', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -580,11 +677,17 @@
             ],
             "condition": "cnd.regexp('previous', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ],
             "target": [
-                "PREVIOUS"
+                "LABEL",
+                "previous",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -610,11 +713,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'global_flow'",
                 "'fallback_node'"
             ],
             "target": [
-                "REPEAT"
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -640,11 +749,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
             "target": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "0.1"
+                ]
             ],
             "key": 0
         },
@@ -670,11 +785,21 @@
             ],
             "condition": "cnd.regexp('talk about')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "0.5"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -700,10 +825,12 @@
             ],
             "condition": "cnd.regexp('talk about music')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
             "target": [
+                "NODE",
                 "'music_flow'",
                 "'node1'"
             ],
@@ -731,11 +858,17 @@
             ],
             "condition": "cnd.regexp('previous', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node2'"
             ],
             "target": [
-                "PREVIOUS"
+                "LABEL",
+                "previous",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -761,11 +894,21 @@
             ],
             "condition": "cnd.regexp('bye')",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node3'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -791,10 +934,12 @@
             ],
             "condition": "cnd.regexp('hi|hello', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ],
             "target": [
+                "NODE",
                 "'greeting_flow'",
                 "'node1'"
             ],
@@ -822,11 +967,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'greeting_flow'",
                 "'node4'"
             ],
             "target": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -852,11 +1003,21 @@
             ],
             "condition": "cnd.regexp('next', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node2'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -882,11 +1043,17 @@
             ],
             "condition": "cnd.regexp('repeat', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node2'"
             ],
             "target": [
-                "REPEAT"
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -912,11 +1079,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node2'"
             ],
             "target": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -942,11 +1115,21 @@
             ],
             "condition": "cnd.regexp('next', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node3'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -972,11 +1155,21 @@
             ],
             "condition": "cnd.regexp('back', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node3'"
             ],
             "target": [
-                "BACKWARD_cyclicality=True"
+                "LABEL",
+                "backward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -1002,11 +1195,17 @@
             ],
             "condition": "cnd.regexp('repeat', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node3'"
             ],
             "target": [
-                "REPEAT"
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -1032,11 +1231,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node3'"
             ],
             "target": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         },
@@ -1062,6 +1267,7 @@
             ],
             "condition": "cnd.regexp('next', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node4'"
             ],
@@ -1092,6 +1298,7 @@
             ],
             "condition": "cnd.regexp('next time', re.IGNORECASE)",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node4'"
             ],
@@ -1122,11 +1329,17 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'music_flow'",
                 "'node4'"
             ],
             "target": [
-                "FALLBACK"
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
             ],
             "key": 0
         }

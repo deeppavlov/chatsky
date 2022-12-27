@@ -2,7 +2,7 @@ from pathlib import Path
 from shutil import rmtree, copytree
 import difflib
 
-from dff.script.parser.dff_project import DFFProject
+from dff.utils.parser.dff_project import DFFProject
 
 TEST_DIR = Path("tests/parser/TEST_CASES")
 
@@ -58,7 +58,7 @@ def rebuild_to_python_tests():
 
 
 def rebuild_engine_examples():
-    engine_example_dir = Path("examples/engine")
+    engine_example_dir = Path("examples/script/core")
 
     test_dir = TEST_DIR / "engine_examples"
 
@@ -68,7 +68,7 @@ def rebuild_engine_examples():
 
     for file in engine_example_dir.iterdir():
         if file.is_file():
-            dff_project = DFFProject.from_python(engine_example_dir, file)
+            dff_project = DFFProject.from_python(engine_example_dir, file, script_initializer="pipeline")
 
             dff_project.to_python(test_dir)
             dff_project.to_yaml(test_dir / (file.parts[-1].removesuffix(".py") + ".yaml"))

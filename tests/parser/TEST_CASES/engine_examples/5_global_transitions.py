@@ -1,10 +1,10 @@
 import re
-from dff.core.engine.core.keywords import GLOBAL
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
-from dff.core.pipeline import Pipeline
+from dff.script import GLOBAL
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
+from dff.pipeline import Pipeline
 
 toy_script = {
     GLOBAL: {
@@ -53,22 +53,22 @@ toy_script = {
     },
     'music_flow': {
         'node1': {
-            RESPONSE: 'I love `System of a Down` group, would you like to tell about it? ',
+            RESPONSE: 'I love `System of a Down` group, would you like to talk about it?',
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp('yes|yep|ok', re.I),
             },
         },
         'node2': {
-            RESPONSE: 'System of a Downis an Armenian-American heavy metal band formed in in 1994.',
+            RESPONSE: 'System of a Down is an Armenian-Americanheavy metal band formed in 1994.',
         },
         'node3': {
-            RESPONSE: 'The band achieved commercial success with the release of five studio albums.',
+            RESPONSE: 'The band achieved commercial successwith the release of five studio albums.',
             TRANSITIONS: {
                 lbl.backward(): cnd.regexp('back', re.I),
             },
         },
         'node4': {
-            RESPONSE: "That's all what I know",
+            RESPONSE: "That's all what I know.",
             TRANSITIONS: {
                 ('greeting_flow', 'node4'): cnd.regexp('next time', re.I),
                 ('greeting_flow', 'node2'): cnd.regexp('next', re.I),

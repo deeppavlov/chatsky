@@ -4,14 +4,14 @@
     "graph": {
         "full_script": {
             "9_pre_transitions_processing": {
-                "GLOBAL": "from dff.core.engine.core.keywords import GLOBAL",
-                "RESPONSE": "from dff.core.engine.core.keywords import RESPONSE",
-                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
-                "PRE_RESPONSE_PROCESSING": "from dff.core.engine.core.keywords import PRE_RESPONSE_PROCESSING",
-                "PRE_TRANSITIONS_PROCESSING": "from dff.core.engine.core.keywords import PRE_TRANSITIONS_PROCESSING",
-                "lbl": "import dff.core.engine.labels",
-                "cnd": "import dff.core.engine.conditions",
-                "Pipeline": "from dff.core.pipeline import Pipeline",
+                "GLOBAL": "from dff.script import GLOBAL",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "PRE_RESPONSE_PROCESSING": "from dff.script import PRE_RESPONSE_PROCESSING",
+                "PRE_TRANSITIONS_PROCESSING": "from dff.script import PRE_TRANSITIONS_PROCESSING",
+                "lbl": "import dff.script.labels",
+                "cnd": "import dff.script.conditions",
+                "Pipeline": "from dff.pipeline import Pipeline",
                 "toy_script": {
                     "'root'": {
                         "'start'": {
@@ -76,6 +76,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'root'",
                 "'start'"
             ]
@@ -90,6 +91,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_0'"
             ]
@@ -104,6 +106,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'root'",
                 "'fallback'"
             ]
@@ -117,12 +120,22 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "GLOBAL"
             ]
         },
         {
             "id": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "0.1"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ]
         },
         {
@@ -135,6 +148,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_1'"
             ]
@@ -149,6 +163,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_2'"
             ]
@@ -163,6 +178,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_3'"
             ]
@@ -177,6 +193,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_4'"
             ]
@@ -205,10 +222,12 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'root'",
                 "'start'"
             ],
             "target": [
+                "NODE",
                 "'flow'",
                 "'step_0'"
             ],
@@ -234,10 +253,20 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "GLOBAL"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "0.1"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         }

@@ -1,9 +1,9 @@
 2_conditions:
   re: import re
-  TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
-  RESPONSE: from dff.core.engine.core.keywords import RESPONSE
-  cnd: import dff.core.engine.conditions
-  Pipeline: from dff.core.pipeline import Pipeline
+  TRANSITIONS: from dff.script import TRANSITIONS
+  RESPONSE: from dff.script import RESPONSE
+  cnd: import dff.script.conditions
+  Pipeline: from dff.pipeline import Pipeline
   toy_script:
     "'greeting_flow'":
       "'start_node'":

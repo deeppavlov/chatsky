@@ -1,11 +1,11 @@
-from dff.core.engine.core.keywords import GLOBAL
-from dff.core.engine.core.keywords import RESPONSE
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import PRE_RESPONSE_PROCESSING
-from dff.core.engine.core.keywords import PRE_TRANSITIONS_PROCESSING
-import dff.core.engine.labels as lbl
-import dff.core.engine.conditions as cnd
-from dff.core.pipeline import Pipeline
+from dff.script import GLOBAL
+from dff.script import RESPONSE
+from dff.script import TRANSITIONS
+from dff.script import PRE_RESPONSE_PROCESSING
+from dff.script import PRE_TRANSITIONS_PROCESSING
+import dff.script.labels as lbl
+import dff.script.conditions as cnd
+from dff.pipeline import Pipeline
 
 toy_script = {
     'root': {

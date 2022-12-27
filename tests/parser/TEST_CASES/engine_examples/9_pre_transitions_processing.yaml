@@ -1,12 +1,12 @@
 9_pre_transitions_processing:
-  GLOBAL: from dff.core.engine.core.keywords import GLOBAL
-  RESPONSE: from dff.core.engine.core.keywords import RESPONSE
-  TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
-  PRE_RESPONSE_PROCESSING: from dff.core.engine.core.keywords import PRE_RESPONSE_PROCESSING
-  PRE_TRANSITIONS_PROCESSING: from dff.core.engine.core.keywords import PRE_TRANSITIONS_PROCESSING
-  lbl: import dff.core.engine.labels
-  cnd: import dff.core.engine.conditions
-  Pipeline: from dff.core.pipeline import Pipeline
+  GLOBAL: from dff.script import GLOBAL
+  RESPONSE: from dff.script import RESPONSE
+  TRANSITIONS: from dff.script import TRANSITIONS
+  PRE_RESPONSE_PROCESSING: from dff.script import PRE_RESPONSE_PROCESSING
+  PRE_TRANSITIONS_PROCESSING: from dff.script import PRE_TRANSITIONS_PROCESSING
+  lbl: import dff.script.labels
+  cnd: import dff.script.conditions
+  Pipeline: from dff.pipeline import Pipeline
   toy_script:
     "'root'":
       "'start'":

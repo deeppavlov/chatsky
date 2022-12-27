@@ -1,5 +1,5 @@
-from dff.core.engine.core.types import NodeLabel3Type
-from dff.core.engine.core import Actor, Context
+from dff.script.core.types import NodeLabel3Type
+from dff.script import Actor, Context
 import typing as tp
 
 

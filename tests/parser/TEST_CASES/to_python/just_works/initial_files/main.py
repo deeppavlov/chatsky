@@ -1,4 +1,4 @@
-from dff.core.engine.core.keywords import (
+from dff.script import (
     TRANSITIONS,
     RESPONSE,
     PROCESSING,
@@ -6,10 +6,10 @@ from dff.core.engine.core.keywords import (
     MISC,
     LOCAL,
 )
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
-from dff.core.engine.core import Actor as Act, Context
-import dff.core.engine.responses as rsp
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
+from dff.script import Actor as Act, Context
+import dff.script.responses as rsp
 from functions import add_prefix
 import typing as tp, re, transitions
 from flow import global_flow

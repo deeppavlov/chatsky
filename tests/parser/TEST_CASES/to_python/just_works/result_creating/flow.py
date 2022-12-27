@@ -1,10 +1,10 @@
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-from dff.core.engine.core.keywords import PROCESSING
-from dff.core.engine.core.keywords import LOCAL
-import dff.core.engine.conditions as cnd
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+from dff.script import PROCESSING
+from dff.script import LOCAL
+import dff.script.conditions as cnd
 import re
-import dff.core.engine.labels as lbl
+import dff.script.labels as lbl
 from functions import add_prefix
 
 global_flow = {

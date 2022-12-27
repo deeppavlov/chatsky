@@ -1,9 +1,9 @@
 import re
-from dff.core.engine.core.keywords import TRANSITIONS
-from dff.core.engine.core.keywords import RESPONSE
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
-from dff.core.pipeline import Pipeline
+from dff.script import TRANSITIONS
+from dff.script import RESPONSE
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
+from dff.pipeline import Pipeline
 
 toy_script = {
     'global_flow': {
@@ -49,7 +49,7 @@ toy_script = {
             },
         },
         'node4': {
-            RESPONSE: 'bye',
+            RESPONSE: 'Bye',
             TRANSITIONS: {
                 'node1': cnd.regexp('hi|hello', re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
@@ -58,7 +58,7 @@ toy_script = {
     },
     'music_flow': {
         'node1': {
-            RESPONSE: 'I love `System of a Down` group, would you like to tell about it? ',
+            RESPONSE: 'I love `System of a Down` group, would you like to talk about it?',
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp('yes|yep|ok', re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
@@ -82,7 +82,7 @@ toy_script = {
             },
         },
         'node4': {
-            RESPONSE: "That's all what I know",
+            RESPONSE: "That's all what I know.",
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp('next', re.IGNORECASE),
                 high_priority_node_transition('greeting_flow', 'node4'): cnd.regexp('next time', re.IGNORECASE),

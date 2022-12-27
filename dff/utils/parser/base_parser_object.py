@@ -7,6 +7,7 @@ from collections.abc import Iterable as TypeIterable
 from collections import defaultdict
 import ast
 import logging
+from inspect import FullArgSpec
 
 try:
     from functools import cached_property
@@ -34,7 +35,7 @@ except AttributeError:
 if tp.TYPE_CHECKING:
     from .namespace import Namespace
     from .dff_project import DFFProject
-from .exceptions import StarError
+from .exceptions import StarError, ParsingError, ScriptValidationError
 from .utils import is_instance
 
 
@@ -169,6 +170,16 @@ class Expression(BaseParserObject, ABC):
     def __init__(self):
         BaseParserObject.__init__(self)
         self.children: tp.Dict[str, 'Expression']
+
+    @classmethod
+    def from_str(cls, string: str) -> 'Expression':  # todo: add `from_object` method
+        body = ast.parse(string).body
+        if len(body) != 1:
+            raise ParsingError(f"Body should contain only one expression: {string}")
+        statement = body[0]
+        if not isinstance(statement, ast.Expr):
+            raise ParsingError(f"Body should contain only expressions: {string}")
+        return cls.from_ast(statement.value)
 
     @classmethod
     @abstractmethod
@@ -512,7 +523,7 @@ class Attribute(Expression, ReferenceObject):
         if isinstance(value, ReferenceObject):
             value = value.absolute
         try:
-            if is_instance(value, "dff.script.parser.namespace.Namespace"):
+            if is_instance(value, "dff.utils.parser.namespace.Namespace"):
                 return value[self.attr]
         except KeyError as error:
             logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
@@ -638,11 +649,28 @@ class Call(Expression):
         for key, value in keywords.items():
             self.add_child(value, "keyword_" + key)
 
-    def get_args(self, seq_arg_list: tp.List[str]) -> dict:
-        args = {}
-        for index, arg in enumerate(seq_arg_list):
-            args[arg] = self.children.get("arg_" + str(index)) or self.children.get("keyword_" + arg)
-        return args
+    def get_args(self, func_args: FullArgSpec) -> dict:
+        result = {}
+        if len(func_args.args) > 0 and func_args.args[0] in ("self", "cls"):
+            args = func_args.args[1:]
+        else:
+            args = func_args.args
+        for index, arg in enumerate(args):
+            value = self.children.get("keyword_" + arg) or self.children.get("arg_" + str(index))
+            if func_args.defaults is not None and index + len(func_args.defaults) >= len(args):
+                default = func_args.defaults[index - len(args)]
+                value = value or Expression.from_str(repr(default))
+            if value is None:
+                raise ScriptValidationError(f"Argument {arg} is not set")
+            result[arg] = value
+        for arg in func_args.kwonlyargs:
+            value = self.children.get("keyword_" + arg)
+            if func_args.kwonlydefaults is not None:
+                value = value or func_args.kwonlydefaults.get(arg)
+            if value is None:
+                raise ScriptValidationError(f"Argument {arg} is not set")
+            result[arg] = value
+        return result
 
     @cached_property
     def func_name(self) -> str:

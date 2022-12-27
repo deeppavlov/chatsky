@@ -4,14 +4,14 @@
     "graph": {
         "full_script": {
             "8_misc": {
-                "GLOBAL": "from dff.core.engine.core.keywords import GLOBAL",
-                "LOCAL": "from dff.core.engine.core.keywords import LOCAL",
-                "RESPONSE": "from dff.core.engine.core.keywords import RESPONSE",
-                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
-                "MISC": "from dff.core.engine.core.keywords import MISC",
-                "lbl": "import dff.core.engine.labels",
-                "cnd": "import dff.core.engine.conditions",
-                "Pipeline": "from dff.core.pipeline import Pipeline",
+                "GLOBAL": "from dff.script import GLOBAL",
+                "LOCAL": "from dff.script import LOCAL",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "MISC": "from dff.script import MISC",
+                "lbl": "import dff.script.labels",
+                "cnd": "import dff.script.conditions",
+                "Pipeline": "from dff.pipeline import Pipeline",
                 "toy_script": {
                     "'root'": {
                         "'start'": {
@@ -108,6 +108,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'root'",
                 "'start'"
             ]
@@ -122,6 +123,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_0'"
             ]
@@ -136,6 +138,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'root'",
                 "'fallback'"
             ]
@@ -149,6 +152,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "GLOBAL"
             ]
         },
@@ -162,13 +166,23 @@
             ],
             "local": true,
             "id": [
+                "NODE",
                 "'flow'",
                 "LOCAL"
             ]
         },
         {
             "id": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ]
         },
         {
@@ -181,6 +195,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_1'"
             ]
@@ -195,6 +210,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_2'"
             ]
@@ -209,6 +225,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_3'"
             ]
@@ -223,6 +240,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'flow'",
                 "'step_4'"
             ]
@@ -251,10 +269,12 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'root'",
                 "'start'"
             ],
             "target": [
+                "NODE",
                 "'flow'",
                 "'step_0'"
             ],
@@ -282,11 +302,21 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'flow'",
                 "'step_0'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -312,11 +342,21 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'flow'",
                 "'step_1'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -342,11 +382,21 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'flow'",
                 "'step_2'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -372,11 +422,21 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'flow'",
                 "'step_3'"
             ],
             "target": [
-                "FORWARD_cyclicality=True"
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
             ],
             "key": 0
         },
@@ -402,10 +462,12 @@
             ],
             "condition": "cnd.true()",
             "source": [
+                "NODE",
                 "'flow'",
                 "'step_4'"
             ],
             "target": [
+                "NODE",
                 "'flow'",
                 "'step_0'"
             ],

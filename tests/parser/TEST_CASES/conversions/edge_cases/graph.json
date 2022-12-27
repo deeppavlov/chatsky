@@ -4,8 +4,8 @@
     "graph": {
         "full_script": {
             "main": {
-                "Actor": "from dff.core.engine.core.actor import Actor",
-                "TRANSITIONS": "from dff.core.engine.core.keywords import TRANSITIONS",
+                "Actor": "from dff.script.core.actor import Actor",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
                 "some_var": "from something import some_var",
                 "transitions": "from .transitions import transitions",
                 "variables": "import variables",
@@ -66,6 +66,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'start_flow'",
                 "'start_node'"
             ]
@@ -80,6 +81,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'start_flow'",
                 "'label'"
             ]
@@ -94,6 +96,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'start_flow'",
                 "'another'"
             ]
@@ -119,10 +122,12 @@
             ],
             "condition": "len(transitions[1]) > 0 > -2 > (lambda : -5 + var)() > func()",
             "source": [
+                "NODE",
                 "'start_flow'",
                 "'start_node'"
             ],
             "target": [
+                "NODE",
                 "'start_flow'",
                 "'label'"
             ],
@@ -142,10 +147,12 @@
             ],
             "condition": "True",
             "source": [
+                "NODE",
                 "'start_flow'",
                 "'label'"
             ],
             "target": [
+                "NODE",
                 "'start_flow'",
                 "'start_node'"
             ],
@@ -165,10 +172,12 @@
             ],
             "condition": "True",
             "source": [
+                "NODE",
                 "'start_flow'",
                 "'another'"
             ],
             "target": [
+                "NODE",
                 "'start_flow'",
                 "'start_node'"
             ],

@@ -1,12 +1,12 @@
 8_misc:
-  GLOBAL: from dff.core.engine.core.keywords import GLOBAL
-  LOCAL: from dff.core.engine.core.keywords import LOCAL
-  RESPONSE: from dff.core.engine.core.keywords import RESPONSE
-  TRANSITIONS: from dff.core.engine.core.keywords import TRANSITIONS
-  MISC: from dff.core.engine.core.keywords import MISC
-  lbl: import dff.core.engine.labels
-  cnd: import dff.core.engine.conditions
-  Pipeline: from dff.core.pipeline import Pipeline
+  GLOBAL: from dff.script import GLOBAL
+  LOCAL: from dff.script import LOCAL
+  RESPONSE: from dff.script import RESPONSE
+  TRANSITIONS: from dff.script import TRANSITIONS
+  MISC: from dff.script import MISC
+  lbl: import dff.script.labels
+  cnd: import dff.script.conditions
+  Pipeline: from dff.pipeline import Pipeline
   toy_script:
     "'root'":
       "'start'":

@@ -5,7 +5,7 @@
         "full_script": {
             "script": {
                 "flow": "from flows.start import flow",
-                "Actor": "from dff.core.engine.core.actor import Actor",
+                "Actor": "from dff.script import Actor",
                 "act": "Actor(script={\n    'start_flow': flow,\n}, start_label=('start_flow', 'start_node'))"
             },
             "flows.start": {
@@ -15,7 +15,7 @@
                 }
             },
             "nodes.node_1": {
-                "kw": "import dff.core.engine.core.keywords",
+                "kw": "from dff.script import Keywords",
                 "node": {
                     "kw.RESPONSE": "'hey'"
                 }
@@ -39,6 +39,7 @@
             ],
             "local": false,
             "id": [
+                "NODE",
                 "'start_flow'",
                 "'start_node'"
             ]

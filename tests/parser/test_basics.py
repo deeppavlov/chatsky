@@ -1,8 +1,8 @@
 import ast
 
-from dff.script.parser.base_parser_object import Dict, Expression, Python, String, Import, Attribute, Subscript, Call, ReferenceObject
-from dff.script.parser.namespace import Namespace
-from dff.script.parser.dff_project import DFFProject
+from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call
+from dff.utils.parser.namespace import Namespace
+from dff.utils.parser.dff_project import DFFProject
 
 
 def test_just_works():
