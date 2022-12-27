@@ -153,7 +153,7 @@ class _ComponentExtraHandler:
         Property for retrieving info dictionary about this wrapper.
 
         :return: Info dict, containing its fields as well as its type.
-            All not set fields there are replaced with `[None]`.
+            All not set fields there are replaced with `None`.
         """
         return {
             "type": type(self).__name__,
