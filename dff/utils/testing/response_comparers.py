@@ -6,11 +6,34 @@ from dff.script import Context
 from dff.script.responses import Response
 
 
-def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[str]:
+def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[Any]:
+    """
+    The default response comparer. Literally compares two response objects.
+
+    :param candidate: the received (candidate) response
+    :param reference: the true (reference) response
+    :param _: current Context (unused)
+    :return: None if two responses are equal or candidate response otherwise
+    """
     return None if candidate == reference else candidate
 
 
 def generics_comparer(candidate: Response, reference: str, _: Context) -> Optional[str]:
+    """
+    The generics response comparer. Assumes that true response is a :py:class:`~dff.script.responses.Response` instance
+    and received response is a :py:class:`str` instance.
+    If received response contains `ui.buttons` it compares its text representation to true response.
+    If received response contains `image`, `document`, `audio` or `video`
+    it compares its `attachment` text representation to true response.
+    If received response contains `attachments` it compares its `attachments` text representation to true response.
+    Otherwise, it compares its `text` to true response.
+
+    :param candidate: the received (candidate) response
+    :param reference: the true response
+    :param _: current Context (unused)
+    :return: None if two responses are equal or candidate response text otherwise
+    """
+
     ui = candidate.ui
     if ui and ui.buttons:
         options = [f"{str(idx)}): {item.text}" for idx, item in enumerate(ui.buttons)]
