@@ -32,7 +32,7 @@ class PipelineComponent(abc.ABC):
     This class represents a pipeline component, which is a service or a service group.
     It contains some fields that they have in common.
 
-    :param before_handler: Before handler, associated with this component.
+    :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
     :param after_handler: After handler, associated with this component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted.
