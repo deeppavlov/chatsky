@@ -2,7 +2,6 @@ from jupytext import jupytext
 
 
 def insert_installation_cell_into_py_example():
-
     def inner(example_text: str):
         second_cell = example_text.find("\n# %%", 5)
         return jupytext.reads(
