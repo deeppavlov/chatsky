@@ -7,7 +7,7 @@ from dff.utils.parser.dff_project import DFFProject
 from .utils import assert_dirs_equal, assert_files_equal
 
 TEST_DIR = Path(__file__).parent / "TEST_CASES"
-ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "engine"
+ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "script" / "core"
 
 
 # todo: add more parameters?
