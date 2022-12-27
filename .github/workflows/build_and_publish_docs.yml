@@ -23,10 +23,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Build images
-        run: |
-          docker-compose up -d
-
       - name: install dependencies
         run: |
             sudo apt install pandoc
