@@ -223,7 +223,8 @@ class YDBContextStorage(DBContextStorage):
 
         self.pool = SessionPool(self.driver, 100)
 
-        if not await self._is_table_exists(self.pool, self.database, self.table_name):  # create table if it does not exist
+        # create table if it does not exist
+        if not await self._is_table_exists(self.pool, self.database, self.table_name):
             await self._create_table(self.pool, self.database, self.table_name)
 
     @staticmethod

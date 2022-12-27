@@ -4,11 +4,6 @@
 
 """
 
-"""
-# %% [markdown]
-LOL!!
-"""
-
 
 # %%
 from dff.script.conditions import true
@@ -21,6 +16,7 @@ from dff.utils.testing.common import (
     is_interactive_mode,
     run_interactive_mode,
 )
+
 external_data = {"counter": 0}
 
 

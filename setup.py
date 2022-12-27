@@ -69,6 +69,7 @@ sqlite_dependencies = [
 
 mysql_dependencies = [
     "asyncmy>=0.2.5",
+    "cryptography>=36.0.2",
     "sqlalchemy[asyncio]>=1.4.27",
 ]
 
