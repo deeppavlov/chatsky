@@ -33,8 +33,8 @@ class Pipeline:
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
 
-    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An `DBAbstractContextStorage` instance for this pipeline or
+    :param messenger_interface: An :py:class:`~AbsMessagingInterface` instance for this pipeline.
+    :param context_storage: An :py:class:`~DBAbstractContextStorage` instance for this pipeline or
         a dict to store dialog `Contexts`.
     :param services: (required) A `ServiceGroupBuilder` object, that will be transformed to root service group.
         It should include `Actor`, but only once (raises exception otherwise). It will always be named `pipeline`.

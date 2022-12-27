@@ -99,7 +99,7 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Acto
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
     Components are renamed only if user didn't set a name for them. Their paths are also generated here.
-    It also searches for `Actor` in the group, throwing exception if no actor or multiple actors found.
+    It also searches for :py:class:`~Actor` in the group, throwing exception if no actor or multiple actors found.
 
     :param service_group: Service group to resolve name collisions in.
     """
