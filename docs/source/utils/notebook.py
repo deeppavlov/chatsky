@@ -2,17 +2,15 @@ import re
 
 from jupytext import jupytext
 
-start_pattern = re.compile(r'# %% \[markdown\]\n"""\n# (\d\. .*)\n\n[\S\s]*?"""\n')
+second_cell = re.compile(r'# %%\n')
 
 
 def insert_installation_cell_into_py_example():
 
     def inner(example_text: str):
-        match = start_pattern.match(example_text)
-        example_title = example_text[: match.span()[1]]
-        example_body = example_text[match.span()[1] :]
+        match = second_cell.search(example_text)
         return jupytext.reads(
-            f"""{example_title}
+            f"""{example_text[: match.span()[0]]}
 
 # %% [markdown]
 \"\"\"
@@ -27,7 +25,7 @@ __Installing dependencies__
 __Running example__
 \"\"\"
 
-{example_body}
+{example_text[match.span()[0] :]}
 """,
             "py:percent",
         )
