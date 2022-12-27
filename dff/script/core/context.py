@@ -15,7 +15,6 @@ from .types import NodeLabel2Type, ModuleName
 
 logger = logging.getLogger(__name__)
 
-Context = BaseModel
 Node = BaseModel
 
 
@@ -47,6 +46,12 @@ class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
     """
+
+    class Config:
+        property_set_methods = {
+            "last_response": "set_last_response",
+            "last_request": "set_last_request",
+        }
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
@@ -110,7 +115,7 @@ class Context(BaseModel):
     _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
 
     @classmethod
-    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
+    def cast(cls, ctx: Optional[Union["Context", dict, str]] = None, *args, **kwargs) -> "Context":
         """
         Transforms different data types to the objects of
         :py:class:`~dff.script.Context` class.
@@ -219,9 +224,8 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    @last_response.setter
-    def last_response(self, response: Optional[Any]):
-        """Sets the last `response` of the current :py:class:`~dff.script.Context`.
+    def set_last_response(self, response: Optional[Any]):
+        """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
@@ -236,9 +240,8 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    @last_request.setter
-    def last_request(self, request: Optional[Any]):
-        """Sets the last `request` of the current :py:class:`~dff.script.Context`.
+    def set_last_request(self, request: Optional[Any]):
+        """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
@@ -280,6 +283,13 @@ class Context(BaseModel):
                 f"The `{self.overwrite_current_node_in_processing.__name__}` "
                 "function can only be run during processing functions."
             )
+
+    def __setattr__(self, key, val):
+        method = self.__config__.property_set_methods.get(key, None)
+        if method is None:
+            super().__setattr__(key, val)
+        else:
+            getattr(self, method)(val)
 
 
 Context.update_forward_refs()
