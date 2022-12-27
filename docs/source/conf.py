@@ -12,8 +12,8 @@ from utils.notebook import add_installation_cell_into_py  # noqa: E402
 # -- Project information -----------------------------------------------------
 
 project = "Dialog Flow Framework"
-copyright = "2021, Denis Kuznetsov"
-author = "Denis Kuznetsov"
+copyright = "2023, DeepPavlov"
+author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
 release = "0.1.0rc0"
