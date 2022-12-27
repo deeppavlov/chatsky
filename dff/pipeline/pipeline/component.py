@@ -33,7 +33,7 @@ class PipelineComponent(abc.ABC):
     It contains some fields that they have in common.
 
     :param before_handler: :py:class:`~.BeforeHandler`, associated with this component.
-    :param after_handler: After handler, associated with this component.
+    :param after_handler: :py:class:`~.AfterHandler`, associated with this component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted.
     :param requested_async_flag: Requested asynchronous property;
