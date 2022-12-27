@@ -83,15 +83,7 @@ sklearn_dependencies = [
     "scikit-learn<=1.1.1",
 ]
 
-extended_conditions_dependencies = merge_req_lists(
-    [
-        sklearn_dependencies,
-        [
-            "requests==2.28.1",
-            "pyyaml==6.0"
-        ]
-    ]
-)
+extended_conditions_dependencies = merge_req_lists([sklearn_dependencies, ["requests==2.28.1", "pyyaml==6.0"]])
 
 httpx_dependencies = [
     "httpx==0.23.0",
