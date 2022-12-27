@@ -29,11 +29,7 @@ from dff.utils.testing.common import is_interactive_mode
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
-kitten_url = (
-    f"https://unsplash.com/photos/"
-    f"{kitten_id}/download?ixid={kitten_ixid}"
-    f"&force=true&w={kitten_width}"
-)
+kitten_url = f"https://unsplash.com/photos/" f"{kitten_id}/download?ixid={kitten_ixid}" f"&force=true&w={kitten_width}"
 
 
 # %% [markdown]
@@ -69,11 +65,7 @@ script = {
         "start": {RESPONSE: Response(text=""), TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
         "fallback": {
             RESPONSE: "Finishing test, send /restart command to restart",
-            TRANSITIONS: {
-                ("pics", "ask_picture"): messenger.cnd.message_handler(
-                    commands=["start", "restart"]
-                )
-            },
+            TRANSITIONS: {("pics", "ask_picture"): messenger.cnd.message_handler(commands=["start", "restart"])},
         },
     },
     "pics": {
@@ -99,7 +91,7 @@ script = {
 
 
 # %%
-def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
+def extract_and_save_photo_on_disk(ctx: Context, actor: Actor):  # A function to extract data with
     message = ctx.last_request
     if not message or (not message.photo and not doc_is_photo(message)):
         return ctx
@@ -122,7 +114,7 @@ pipeline = Pipeline.from_script(
     fallback_label=("root", "fallback"),
     context_storage=dict(),
     messenger_interface=interface,
-    pre_services=[extract_data, update_processing_service],
+    pre_services=[extract_and_save_photo_on_disk, update_processing_service],
 )
 
 
