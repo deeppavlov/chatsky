@@ -42,7 +42,7 @@ class PipelineComponent(abc.ABC):
         1) for :py:class:`~pipeline.service.service.Service`: whether its `handler` is asynchronous or not,
         2) for :py:class:`~pipeline.service.group.ServiceGroup`: whether all its `services` are asynchronous or not.
 
-    :param start_condition: :py:class:`~StartConditionCheckerFunction` that is invoked before each component execution;
+    :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each component execution;
         component is executed only if it returns `True`.
     :param name: Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
         should not be blank or contain `.` symbol.
