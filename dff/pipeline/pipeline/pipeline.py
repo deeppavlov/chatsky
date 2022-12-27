@@ -195,14 +195,20 @@ class Pipeline:
         :param ctx_id: current dialog id; if None, new dialog will be created.
         :return: dialog Context.
         """
-        ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
+        if isinstance(self.context_storage, DBAbstractContextStorage):
+            ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
+        else:
+            ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.add_request(request)
         ctx = await self._services_pipeline(ctx, self.actor)
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
-        self.context_storage[ctx_id] = ctx
+        if isinstance(self.context_storage, DBAbstractContextStorage):
+            await self.context_storage.setitem(ctx_id, ctx)
+        else:
+            self.context_storage[ctx_id] = ctx
         if self._clean_turn_cache:
             cache_clear()
 

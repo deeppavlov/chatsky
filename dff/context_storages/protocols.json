@@ -21,7 +21,7 @@
         "module": "sql",
         "class": "SQLContextStorage",
         "slug": "sqlite",
-        "uri_example": "sqlite://path_to_the_file/file_name"
+        "uri_example": "sqlite+aiosqlite://path_to_the_file/file_name"
     },
     "redis": {
         "module": "redis",
@@ -39,7 +39,7 @@
         "module": "sql",
         "class": "SQLContextStorage",
         "slug": "mysql",
-        "uri_example": "mysql+pymysql://root:pass@localhost:3307/test"
+        "uri_example": "mysql+asyncmy://root:pass@localhost:3307/test"
     },
     "postgresql": {
         "module": "sql",

@@ -50,28 +50,31 @@ mypy_dependencies = [
     "mypy",
 ]
 
-sqlite_dependencies = [
-    "sqlalchemy>=1.4.27",
+async_files_dependencies = [
+    "aiofiles>=22.1.0",
 ]
 
 redis_dependencies = [
-    "redis>=4.1.2",
+    "aioredis>=2.0.1",
 ]
 
 mongodb_dependencies = [
-    "pymongo==4.3.2",  # TODO: wait for bson using bug will be fixed
-    "bson>=0.5.10",
+    "motor>=3.1.1",
+]
+
+sqlite_dependencies = [
+    "aiosqlite>=0.18.0",
+    "sqlalchemy[asyncio]>=1.4.27",
 ]
 
 mysql_dependencies = [
-    "sqlalchemy>=1.4.27",
-    "pymysql>=1.0.2",
-    "cryptography>=36.0.2",
+    "asyncmy>=0.2.5",
+    "sqlalchemy[asyncio]>=1.4.27",
 ]
 
 postgresql_dependencies = [
-    "sqlalchemy[asyncio]>=1.4.27",
     "asyncpg>=0.27.0",
+    "sqlalchemy[asyncio]>=1.4.27",
 ]
 
 ydb_dependencies = [
@@ -100,6 +103,7 @@ devel = [
 full = merge_req_lists(
     [
         core,
+        async_files_dependencies,
         sqlite_dependencies,
         redis_dependencies,
         mongodb_dependencies,
@@ -133,6 +137,7 @@ EXTRA_DEPENDENCIES = {
     "test_full": tests_full,
     "examples": tests_full,
     "devel_full": devel_full,
+    "async_files": async_files_dependencies,
     "sqlite": sqlite_dependencies,
     "redis": redis_dependencies,
     "mongodb": mongodb_dependencies,

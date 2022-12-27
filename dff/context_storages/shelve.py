@@ -5,6 +5,7 @@ Provides the shelve-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
 from shelve import DbfilenameShelf
+from typing import Any
 
 from dff.script import Context
 
@@ -30,23 +31,26 @@ class ShelveContextStorage(DBContextStorage):
         self.shelve_db.close()
         del self
 
-    def get(self, key: str, default=None):
+    async def delete(self):
+        self.__del__()
+
+    async def get_async(self, key: Any, default=None):
         return self.shelve_db.get(str(key), default)
 
-    def __setitem__(self, key: str, item: Context) -> None:
+    async def setitem(self, key: Any, item: Context):
         return self.shelve_db.__setitem__(str(key), item)
 
-    def __getitem__(self, key: str) -> Context:
+    async def getitem(self, key: Any) -> Context:
         return self.shelve_db.__getitem__(str(key))
 
-    def __delitem__(self, key: str) -> None:
+    async def delitem(self, key: str) -> None:
         return self.shelve_db.__delitem__(str(key))
 
-    def __contains__(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         return self.shelve_db.__contains__(str(key))
 
-    def __len__(self) -> int:
+    async def len(self) -> int:
         return self.shelve_db.__len__()
 
-    def clear(self) -> None:
+    async def clear_async(self) -> None:
         return self.shelve_db.clear()

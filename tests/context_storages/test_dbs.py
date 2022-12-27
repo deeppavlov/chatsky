@@ -158,7 +158,7 @@ def test_postgres(testing_context, context_id):
 @pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
-    db = SQLContextStorage(f"sqlite:{separator}{testing_file}")
+    db = SQLContextStorage(f"sqlite+aiosqlite:{separator}{testing_file}")
 
     generic_test(db, testing_context, context_id)
 
@@ -167,7 +167,7 @@ def test_sqlite(testing_file, testing_context, context_id):
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
 def test_mysql(testing_context, context_id):
     db = SQLContextStorage(
-        "mysql+pymysql://{}:{}@localhost:3307/{}".format(
+        "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
             os.getenv("MYSQL_USERNAME"),
             os.getenv("MYSQL_PASSWORD"),
             os.getenv("MYSQL_DATABASE"),

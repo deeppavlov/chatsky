@@ -6,6 +6,7 @@ database
 | An intermediate class to inherit from: :py:class:`.DBContextStorage`
 
 """
+import asyncio
 import importlib
 import threading
 from functools import wraps
@@ -13,6 +14,7 @@ from abc import ABC, abstractmethod
 from typing import Any, Callable
 
 from .protocol import PROTOCOLS
+from ..script import Context
 
 
 class DBAbstractContextStorage(ABC):
@@ -25,32 +27,53 @@ class DBAbstractContextStorage(ABC):
     def __init__(self) -> None:
         pass
 
-    @abstractmethod
-    def __getitem__(self, key: str) -> Any:
-        raise NotImplementedError
+    def __getitem__(self, key: Any) -> Any:
+        return asyncio.run(self.getitem(key))
 
     @abstractmethod
-    def __setitem__(self, key: str, value: dict) -> None:
+    async def getitem(self, key: Any) -> Context:
         raise NotImplementedError
 
+    def __setitem__(self, key: Any, value: Context):
+        return asyncio.run(self.setitem(key, value))
+
     @abstractmethod
+    async def setitem(self, key: Any, value: Context):
+        raise NotImplementedError
+
     def __delitem__(self, key: str) -> None:
-        raise NotImplementedError
+        return asyncio.run(self.delitem(key))
 
     @abstractmethod
+    async def delitem(self, key: str) -> Any:
+        raise NotImplementedError
+
     def __contains__(self, key: str) -> bool:
-        raise NotImplementedError
+        return asyncio.run(self.contains(key))
 
     @abstractmethod
+    async def contains(self, key: str) -> Any:
+        raise NotImplementedError
+
     def __len__(self) -> int:
-        raise NotImplementedError
+        return asyncio.run(self.len())
 
     @abstractmethod
-    def get(self, item) -> Any:
+    async def len(self) -> Any:
         raise NotImplementedError
 
+    def get(self, key: Any, default=None) -> Any:
+        return asyncio.run(self.get_async(key, default))
+
     @abstractmethod
+    async def get_async(self, key: Any, default=None) -> Any:
+        raise NotImplementedError
+
     def clear(self) -> None:
+        return asyncio.run(self.clear_async())
+
+    @abstractmethod
+    async def clear_async(self) -> Any:
         raise NotImplementedError
 
 
@@ -78,12 +101,12 @@ class DBContextStorage(DBAbstractContextStorage):
         self.path = file_path
         self._lock = threading.Lock()
 
-    def get(self, key: str, default=None) -> Any:
+    async def get_async(self, key: Any, default=None):
+        key = str(key)
         try:
-            value = self.__getitem__(key)
+            return await self.getitem(key)
         except KeyError:
-            value = default
-        return value
+            return default
 
 
 def threadsafe_method(func: Callable):
@@ -99,7 +122,7 @@ def threadsafe_method(func: Callable):
     return _synchronized
 
 
-def context_storage_factory(path: str, **kwargs):
+def context_storage_factory(path: str, **kwargs) -> DBAbstractContextStorage:
     """
     Use context_storage_factory to lazy import context storage types and instantiate them.
     The function takes a database connection URI or its equivalent. It should be prefixed with database name,
@@ -109,10 +132,10 @@ def context_storage_factory(path: str, **kwargs):
     - shelve://path_to_the_file/file_name
     - json://path_to_the_file/file_name
     - pickle://path_to_the_file/file_name
-    - sqlite://path_to_the_file/file_name
+    - sqlite+aiosqlite://path_to_the_file/file_name
     - redis://:pass@localhost:6379/0
     - mongodb://admin:pass@localhost:27017/admin
-    - mysql+pymysql://root:pass@localhost:3307/test
+    - mysql+asyncmy://root:pass@localhost:3307/test
     - postgresql+asyncpg://postgres:pass@localhost:5432/test
     - grpc://localhost:2136/local
     - grpcs://localhost:2135/local

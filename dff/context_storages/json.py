@@ -3,8 +3,11 @@ json
 ---------------------------
 Provides the json-based version of the :py:class:`.DBContextStorage`.
 """
-import os
+import asyncio
+from typing import Any
 
+import aiofiles
+import aiofiles.os
 from pydantic import BaseModel, Extra, root_validator
 
 from .database import DBContextStorage, threadsafe_method
@@ -33,57 +36,50 @@ class JSONContextStorage(DBContextStorage):
     def __init__(self, path: str):
         DBContextStorage.__init__(self, path)
 
-        self._load()
-
-    def get(self, key: str, default=None):
-        key = str(key)
-        try:
-            return self.__getitem__(key)
-        except KeyError:
-            return default
+        asyncio.run(self._load())
 
     @threadsafe_method
-    def __len__(self):
+    async def len(self):
         return len(self.storage.__dict__)
 
     @threadsafe_method
-    def __setitem__(self, key: str, item: Context) -> None:
+    async def setitem(self, key: Any, item: Context):
         key = str(key)
         self.storage.__dict__.__setitem__(key, item)
-        self._save()
+        await self._save()
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
+    async def getitem(self, key: Any) -> Context:
         key = str(key)
-        self._load()
+        await self._load()
         value = self.storage.__dict__.__getitem__(key)
         return Context.cast(value)
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
+    async def delitem(self, key: str) -> None:
         key = str(key)
         self.storage.__dict__.__delitem__(key)
-        self._save()
+        await self._save()
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         key = str(key)
-        self._load()
+        await self._load()
         return self.storage.__dict__.__contains__(key)
 
     @threadsafe_method
-    def clear(self) -> None:
+    async def clear_async(self) -> None:
         self.storage.__dict__.clear()
-        self._save()
+        await self._save()
 
-    def _save(self) -> None:
-        with open(self.path, "w+", encoding="utf-8") as file_stream:
-            file_stream.write(self.storage.json())
+    async def _save(self) -> None:
+        async with aiofiles.open(self.path, "w+", encoding="utf-8") as file_stream:
+            await file_stream.write(self.storage.json())
 
-    def _load(self) -> None:
-        if not os.path.isfile(self.path) or os.stat(self.path).st_size == 0:
+    async def _load(self) -> None:
+        if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
             self.storage = SerializeableStorage()
-            self._save()
+            await self._save()
         else:
-            with open(self.path, "r", encoding="utf-8") as file_stream:
-                self.storage = SerializeableStorage.parse_raw(file_stream.read())
+            async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
+                self.storage = SerializeableStorage.parse_raw(await file_stream.read())

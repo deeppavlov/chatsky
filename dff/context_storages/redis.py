@@ -4,9 +4,10 @@ redis
 Provides the redis-based version of the :py:class:`.DBContextStorage`.
 """
 import json
+from typing import Any
 
 try:
-    from redis import Redis
+    from aioredis import Redis
 
     redis_available = True
 except ImportError:
@@ -37,34 +38,34 @@ class RedisContextStorage(DBContextStorage):
         self._redis = Redis.from_url(self.full_path)
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         key = str(key)
-        return bool(self._redis.exists(key))
+        return bool(await self._redis.exists(key))
 
     @threadsafe_method
-    def __setitem__(self, key: str, value: Context) -> None:
+    async def setitem(self, key: Any, value: Context):
         key = str(key)
         value = value if isinstance(value, Context) else Context.cast(value)
-        self._redis.set(key, value.json())
+        await self._redis.set(key, value.json())
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
+    async def getitem(self, key: Any) -> Context:
         key = str(key)
-        result = self._redis.get(key)
+        result = await self._redis.get(key)
         if result:
             result_dict = json.loads(result.decode("utf-8"))
             return Context.cast(result_dict)
         raise KeyError(f"No entry for key {key}.")
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
+    async def delitem(self, key: str) -> None:
         key = str(key)
-        self._redis.delete(key)
+        await self._redis.delete(key)
 
     @threadsafe_method
-    def __len__(self) -> int:
-        return self._redis.dbsize()
+    async def len(self) -> int:
+        return await self._redis.dbsize()
 
     @threadsafe_method
-    def clear(self) -> None:
-        self._redis.flushdb()
+    async def clear_async(self) -> None:
+        await self._redis.flushdb()

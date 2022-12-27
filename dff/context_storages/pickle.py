@@ -3,8 +3,12 @@ pickle
 ---------------------------
 Provides the pickle-based version of the :py:class:`.DBContextStorage`.
 """
+import asyncio
 import pickle
-import os
+from typing import Any
+
+import aiofiles
+import aiofiles.os
 
 from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
@@ -24,45 +28,48 @@ class PickleContextStorage(DBContextStorage):
     def __init__(self, path: str):
         DBContextStorage.__init__(self, path)
 
-        self._load()
+        asyncio.run(self._load())
 
     @threadsafe_method
-    def __len__(self):
+    async def len(self):
         return len(self.dict)
 
     @threadsafe_method
-    def __setitem__(self, key: str, item: Context) -> None:
+    async def setitem(self, key: Any, item: Context):
+        key = str(key)
         self.dict.__setitem__(key, item)
-        self._save()
+        await self._save()
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
-        self._load()
-        return self.dict.__getitem__(key)
+    async def getitem(self, key: Any) -> Context:
+        key = str(key)
+        await self._load()
+        return Context.cast(self.dict.__getitem__(key))
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
+    async def delitem(self, key: str) -> None:
         self.dict.__delitem__(key)
-        self._save()
+        await self._save()
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
-        self._load()
+    async def contains(self, key: str) -> bool:
+        key = str(key)
+        await self._load()
         return self.dict.__contains__(key)
 
     @threadsafe_method
-    def clear(self) -> None:
+    async def clear_async(self) -> None:
         self.dict.clear()
-        self._save()
+        await self._save()
 
-    def _save(self) -> None:
-        with open(self.path, "wb+") as file:
-            pickle.dump(self.dict, file)
+    async def _save(self) -> None:
+        async with aiofiles.open(self.path, "wb+") as file:
+            await file.write(pickle.dumps(self.dict))
 
-    def _load(self) -> None:
-        if not os.path.isfile(self.path) or os.stat(self.path).st_size == 0:
+    async def _load(self) -> None:
+        if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
             self.dict = dict()
-            open(self.path, "a").close()
+            await self._save()
         else:
-            with open(self.path, "rb") as file:
-                self.dict = pickle.load(file)
+            async with aiofiles.open(self.path, "rb") as file:
+                self.dict = pickle.loads(await file.read())

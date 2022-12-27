@@ -5,8 +5,10 @@ sql
 | You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 
 """
+import asyncio
 import importlib
 import json
+from typing import Any
 
 from dff.script import Context
 
@@ -14,7 +16,8 @@ from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
-    from sqlalchemy import create_engine, Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy import Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True
 except (ImportError, ModuleNotFoundError):
@@ -32,18 +35,18 @@ except (ImportError, ModuleNotFoundError):
     pass
 
 try:
-    import pymysql
+    import asyncmy
 
-    _ = pymysql
+    _ = asyncmy
 
     mysql_available = True
 except (ImportError, ModuleNotFoundError):
     pass
 
 try:
-    import sqlite3
+    import aiosqlite
 
-    _ = sqlite3
+    _ = aiosqlite
 
     sqlite_available = True
 except (ImportError, ModuleNotFoundError):
@@ -87,7 +90,7 @@ class SQLContextStorage(DBContextStorage):
         super(SQLContextStorage, self).__init__(path)
 
         self._check_availability(custom_driver)
-        self.engine = create_engine(self.full_path)
+        self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
 
         id_column_args = {"primary_key": True}
@@ -102,63 +105,70 @@ class SQLContextStorage(DBContextStorage):
             Column("context", JSON),  # column for storing serialized contexts
         )
 
-        if not inspect(self.engine).has_table(self.table.name):  # create table if it does not exist
-            self.table.create(self.engine)
+        asyncio.run(self._create_self_table())
 
         import_insert_for_dialect(self.dialect)
 
     @threadsafe_method
-    def __setitem__(self, key: str, value: Context) -> None:
+    async def setitem(self, key: Any, value: Context):
         key = str(key)
         value = value if isinstance(value, Context) else Context.cast(value)
         value = json.loads(value.json())
 
-        insert_stmt = insert(self.table).values(id=str(key), context=value)
-        update_stmt = self._get_update_stmt(insert_stmt)
+        insert_stmt = insert(self.table).values(id=key, context=value)
+        update_stmt = await self._get_update_stmt(insert_stmt)
 
-        with self.engine.connect() as conn:
-            conn.execute(update_stmt)
+        async with self.engine.connect() as conn:
+            await conn.execute(update_stmt)
+            await conn.commit()
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
+    async def getitem(self, key: Any) -> Context:
         key = str(key)
         stmt = select(self.table.c.context).where(self.table.c.id == key)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
+        async with self.engine.connect() as conn:
+            result = await conn.execute(stmt)
             row = result.fetchone()
             if row:
                 return Context.cast(row[0])
         raise KeyError
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
+    async def delitem(self, key: str) -> None:
         key = str(key)
         stmt = delete(self.table).where(self.table.c.id == key)
-        with self.engine.connect() as conn:
-            conn.execute(stmt)
+        async with self.engine.connect() as conn:
+            await conn.execute(stmt)
+            await conn.commit()
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         key = str(key)
         stmt = select(self.table.c.context).where(self.table.c.id == key)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
+        async with self.engine.connect() as conn:
+            result = await conn.execute(stmt)
             return bool(result.fetchone())
 
     @threadsafe_method
-    def __len__(self) -> int:
+    async def len(self) -> int:
         stmt = select([func.count()]).select_from(self.table)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
+        async with self.engine.connect() as conn:
+            result = await conn.execute(stmt)
             return result.fetchone()[0]
 
     @threadsafe_method
-    def clear(self) -> None:
+    async def clear_async(self) -> None:
         stmt = delete(self.table)
-        with self.engine.connect() as conn:
-            conn.execute(stmt)
+        async with self.engine.connect() as conn:
+            await conn.execute(stmt)
+            await conn.commit()
 
-    def _get_update_stmt(self, insert_stmt):
+    async def _create_self_table(self):
+        async with self.engine.begin() as conn:
+            if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(self.table.name)):
+                await conn.run_sync(self.table.create, self.engine)
+
+    async def _get_update_stmt(self, insert_stmt):
         if self.dialect == "sqlite":
             return insert_stmt
         elif self.dialect == "mysql":
@@ -176,7 +186,7 @@ class SQLContextStorage(DBContextStorage):
                 raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("mysql") and not mysql_available:
                 install_suggestion = get_protocol_install_suggestion("mysql")
-                raise ImportError("Packages `sqlalchemy` and/or `pymysql` are missing.\n" + install_suggestion)
+                raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("sqlite") and not sqlite_available:
                 install_suggestion = get_protocol_install_suggestion("sqlite")
-                raise ImportError("Package `sqlalchemy` and/or `sqlite3` is missing.\n" + install_suggestion)
+                raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
