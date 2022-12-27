@@ -10,7 +10,7 @@ from typing import Callable, Any, Optional, Tuple, Mapping
 async def wrap_sync_function_in_async(function: Callable, *args, **kwargs) -> Any:
     """
     Utility function, that wraps both functions and coroutines in coroutines.
-    Invokes function if it is just a callable and awaits, if this is a coroutine.
+    Invokes `function` if it is just a callable and awaits, if this is a coroutine.
 
     :param function: Callable to wrap.
     :param \\*args: Function args.
