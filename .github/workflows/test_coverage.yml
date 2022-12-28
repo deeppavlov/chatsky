@@ -47,5 +47,5 @@ jobs:
         run: make test
         shell: bash
         env:
-          - HF_API_KEY: ${{ secrets.HF_API_KEY }}
-          - GDF_ACCOUNT_JSON: ./gdf_account.json
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
+          GDF_ACCOUNT_JSON: ./gdf_account.json
