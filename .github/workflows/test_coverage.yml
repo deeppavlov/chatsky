@@ -46,6 +46,10 @@ jobs:
           rm -rf /tmp/backup
           touch venv  # disable venv target
 
+      - name: create session file
+        run: echo "${{ secrets.TG_SESSION }}" | base64 --decode > anon.session
+        shell: bash
+
       - name: set up mutex
         uses: ben-z/gh-action-mutex@v1.0-alpha-6
 

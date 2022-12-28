@@ -34,6 +34,7 @@ to the DFF `Pipeline` instance.
 """
 
 
+# %%
 script = {
     "greeting_flow": {
         "start_node": {RESPONSE: "", TRANSITIONS: {"greeting_node": cnd.exact_match("/start")}},
@@ -53,7 +54,7 @@ interface = PollingTelegramInterface(messenger=messenger)
 
 # %%
 pipeline = Pipeline.from_script(
-    script=script,  # Actor script object, defined in `.utils` module.
+    script=script,  # Actor script object
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
     pre_services=[update_processing_service],
