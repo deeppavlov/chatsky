@@ -2,7 +2,7 @@ import pytest
 from sklearn.feature_extraction.text import TfidfVectorizer
 
 from dff.script import Actor
-from dff.script.extras.conditions.models.local.cosine_matchers.sklearn import SklearnMatcher
+from dff.script.extras.conditions.models import SklearnMatcher
 from dff.script.extras.conditions.dataset import Dataset
 from dff.utils.testing.toy_script import TOY_SCRIPT
 

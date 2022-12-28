@@ -29,7 +29,7 @@ def testing_async_model(gdf_json):
 @pytest.mark.skipif(not dialogflow_available, reason="Dialogflow deps missing.")
 @pytest.mark.skipif(
     not os.getenv("GDF_ACCOUNT_JSON") or not os.path.exists(os.getenv("GDF_ACCOUNT_JSON")),
-    reason="GDF_ACCOUNT_JSON missing."
+    reason="GDF_ACCOUNT_JSON missing.",
 )
 def test_predict(testing_model: GoogleDialogFlowModel):
     test_phrase = "I would like some food"  # no matching intent in test project
