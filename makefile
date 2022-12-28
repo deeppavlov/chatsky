@@ -28,12 +28,6 @@ venv:
 	pip install --upgrade pip
 	pip install -e .[devel_full]
 
-venv_test:
-	@echo "Start creating virtual environment (test)"
-	$(PYTHON) -m venv $(VENV_PATH)
-	pip install --upgrade pip
-	pip install -e .[test_full]
-
 format: venv
 	black --line-length=120 --exclude='venv|build|examples' .
 	black --line-length=100 examples
