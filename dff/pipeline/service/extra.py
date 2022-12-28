@@ -24,6 +24,7 @@ class _ComponentExtraHandler:
 
     :param functions: An `ExtraHandlerBuilder` object, an `_ComponentExtraHandler` instance,
         a dict or a list of `ExtraHandlerFunctions`.
+    :type functions: :py:data:`~.ExtraHandlerBuilder`
     :param stage: An `ExtraHandlerType`, specifying whether this handler will be executed before or
         after pipeline component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),

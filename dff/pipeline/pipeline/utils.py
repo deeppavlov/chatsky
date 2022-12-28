@@ -70,7 +70,7 @@ def rename_component_incrementing(
     - If it's a service group, it is named `service_group`.
     - Otherwise, it is names `noname_service`.
     - | After that, `_[NUMBER]` is added to the resulting name,
-        where number is number of components with the same name in current service group.
+        where `_[NUMBER]` is number of components with the same name in current service group.
 
     :param service: Service to be renamed.
     :param collisions: Services in the same service group as service.
@@ -99,7 +99,7 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Acto
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
     Components are renamed only if user didn't set a name for them. Their paths are also generated here.
-    It also searches for :py:class:`~Actor` in the group, throwing exception if no actor or multiple actors found.
+    It also searches for :py:class:`~.Actor` in the group, throwing exception if no actor or multiple actors found.
 
     :param service_group: Service group to resolve name collisions in.
     """

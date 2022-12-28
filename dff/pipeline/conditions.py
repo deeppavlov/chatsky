@@ -27,7 +27,7 @@ def always_start_condition(_: Context, __: Actor) -> bool:
 def service_successful_condition(path: Optional[str] = None) -> StartConditionCheckerFunction:
     """
     Condition that allows service execution, only if the other service was executed successfully.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param path: The path of the condition pipeline component.
     """
@@ -42,7 +42,7 @@ def service_successful_condition(path: Optional[str] = None) -> StartConditionCh
 def not_condition(function: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns opposite boolean value to the one returned by incoming function.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param function: The function to return opposite of.
     """
@@ -58,7 +58,7 @@ def aggregate_condition(
 ) -> StartConditionCheckerFunction:
     """
     Condition that returns aggregated boolean value from all booleans returned by incoming functions.
-    Returns :py:class:`~StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param aggregator: The function that accepts list of booleans and returns a single boolean.
     :param functions: Functions to aggregate.
@@ -73,7 +73,7 @@ def aggregate_condition(
 def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns `True` only if all incoming functions return `True`.
-    Returns :py:class:`~StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param functions: Functions to aggregate.
     """
@@ -83,7 +83,7 @@ def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCh
 def any_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns `True` if any of incoming functions returns `True`.
-    Returns :py:class:`~StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param functions: Functions to aggregate.
     """

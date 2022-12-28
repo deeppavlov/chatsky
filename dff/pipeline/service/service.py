@@ -32,11 +32,13 @@ class Service(PipelineComponent):
     Actor wrapping service can be synchronous only.
 
     :param handler: A service function or an actor.
+    :type handler: :py:data:`~.ServiceBuilder`
     :param wrappers: List of Wrappers to add to the service.
     :param timeout: Timeout to add to the group.
     :param asynchronous: Requested asynchronous property.
-    :param start_condition: `StartConditionCheckerFunction` that is invoked before each service execution;
+    :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
         service is executed only if it returns `True`.
+    :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
     :param name: Requested service name.
     """
 

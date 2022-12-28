@@ -33,16 +33,17 @@ class Pipeline:
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
 
-    :param messenger_interface: An :py:class:`~AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An :py:class:`~DBAbstractContextStorage` instance for this pipeline or
-        a dict to store dialog `Contexts`.
-    :param services: (required) A `ServiceGroupBuilder` object, that will be transformed to root service group.
-        It should include `Actor`, but only once (raises exception otherwise). It will always be named `pipeline`.
-    :param wrappers: List of Wrappers to add to pipeline root service group.
+    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
+    :param context_storage: An :py:class:`~.DBAbstractContextStorage` instance for this pipeline or
+        a dict to store dialog :py:class:`~.Context`.
+    :param services: (required) A :py:data:`~.ServiceGroupBuilder` object,
+        that will be transformed to root service group. It should include :py:class:`~.Actor`,
+        but only once (raises exception otherwise). It will always be named pipeline.
+    :param wrappers: List of wrappers to add to pipeline root service group.
     :param timeout: Timeout to add to pipeline root service group.
     :param optimization_warnings: Asynchronous pipeline optimization check request flag;
         warnings will be sent to logs. Additionally it has some calculated fields:
-        1) `_services_pipeline` is a pipeline root `ServiceGroup` object,
+        1) `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         2) `actor` is a pipeline actor, found among services.
     """
 
@@ -94,9 +95,9 @@ class Pipeline:
         NB! Global wrappers are still wrappers,
         they shouldn't be used for much time-consuming tasks (see ../service/wrapper.py).
 
-        :param global_wrapper_type: (required) GlobalWrapperType indication where the wrapper
+        :param global_handler_type: (required) indication where the wrapper
             function should be executed.
-        :param wrapper: (required) wrapper function itself.
+        :param extra_handler: (required) wrapper function itself.
         :param whitelist: a list of services to only add this wrapper to.
         :param blacklist: a list of services to not add this wrapper to.
         :return: `None`
@@ -156,20 +157,25 @@ class Pipeline:
     ):
         """
         Pipeline script-based constructor.
-        It creates Actor object and wraps it with pipeline.
+        It creates :py:class:`~.Actor` object and wraps it with pipeline.
         NB! It is generally not designed for projects with complex structure.
-        Service and ServiceGroup customization becomes not as obvious as it could be with it.
+        :py:class:`~.Service` and :py:class:`~.ServiceGroup` customization
+        becomes not as obvious as it could be with it.
         Should be preferred for simple workflows with Actor auto-execution.
 
-        :param script: (required) A Script instance (object or dict).
+        :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param context_storage: An `DBAbstractContextStorage` instance for this pipeline
-            or a dict to store dialog `Contexts`.
-        :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-        :param pre_services: List of `ServiceBuilder` or `ServiceGroupBuilder` that will be executed before `Actor`.
-        :param post_services: List of `ServiceBuilder` or `ServiceGroupBuilder` that will be executed after `Actor`.
+        :param context_storage: An :py:class:`~.DBAbstractContextStorage` instance for this pipeline
+            or a dict to store dialog :py:class:`~.Context`.
+        :param messenger_interface: An instance for this pipeline.
+        :param pre_services: List of :py:data:`~.ServiceBuilder` or
+            :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
+        :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
+        :param post_services: List of :py:data:`~.ServiceBuilder` or
+            :py:data:`~.ServiceGroupBuilder` that will be executed after Actor.
             It constructs root service group by merging `pre_services` + actor + `post_services`.
+        :type post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
         """
         actor = Actor(script, start_label, fallback_label)
         pre_services = [] if pre_services is None else pre_services
