@@ -11,8 +11,6 @@ import os
 import dff.script.conditions as cnd
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
-from telebot import types
-
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
@@ -53,11 +51,6 @@ The files will then be accessible as properties: message.photo, etc.
 
 
 # %%
-def doc_is_photo(message: types.Message):
-    return message.document and message.document.mime_type == "image/jpeg"
-
-
-# %%
 messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
@@ -80,9 +73,16 @@ script = {
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
+                        # Telegram can put photos both in 'photo' and 'document' fields.
+                        # We should consider both cases when we check the message for media.
                         messenger.cnd.message_handler(content_types=["photo"]),
                         messenger.cnd.message_handler(
-                            func=doc_is_photo, content_types=["document"]
+                            func=lambda message: (
+                                # check attachments in message properties
+                                message.document
+                                and message.document.mime_type == "image/jpeg"
+                            ),
+                            content_types=["document"],
                         ),
                     ]
                 ),
@@ -110,9 +110,16 @@ script = {
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
+                        # Telegram can put photos both in 'photo' and 'document' fields.
+                        # We should consider both cases when we check the message for media.
                         messenger.cnd.message_handler(content_types=["photo"]),
                         messenger.cnd.message_handler(
-                            func=doc_is_photo, content_types=["document"]
+                            func=lambda message: (
+                                # check attachments in message properties
+                                message.document
+                                and message.document.mime_type == "image/jpeg"
+                            ),
+                            content_types=["document"],
                         ),
                     ]
                 ),
@@ -137,7 +144,11 @@ happy_path = (
 # %%
 def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
     message = ctx.last_request
-    if not message or (not message.photo and not doc_is_photo(message)):
+    if not message or (
+        # check attachments in message properties
+        not message.photo
+        and not (message.document and message.document.mime_type == "image/jpeg")
+    ):
         return ctx
     photo = message.document or message.photo[-1]
     file = messenger.get_file(photo.file_id)
@@ -156,7 +167,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    context_storage=dict(),
     messenger_interface=interface,
     pre_services=[extract_data, update_processing_service],
 )

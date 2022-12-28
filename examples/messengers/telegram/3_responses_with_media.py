@@ -12,8 +12,6 @@ import os
 import dff.script.conditions as cnd
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
-from telebot import types
-
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
@@ -29,19 +27,11 @@ from dff.utils.testing.common import is_interactive_mode
 kitten_id = "Y0WXj3xqJz0"
 kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
 kitten_width = 640
-kitten_url = f"https://unsplash.com/photos/" f"{kitten_id}/download?ixid={kitten_ixid}" f"&force=true&w={kitten_width}"
-
-
-# %% [markdown]
-"""
-To detect media, write a function that processes Telebot types, like `Message`.
-This function will be passed to `message_handler` in the script.
-"""
-
-
-# %%
-def doc_is_photo(message: types.Message):
-    return message.document and message.document.mime_type == "image/jpeg"
+kitten_url = (
+    f"https://unsplash.com/photos/"
+    f"{kitten_id}/download?ixid={kitten_ixid}"
+    f"&force=true&w={kitten_width}"
+)
 
 
 # %% [markdown]
@@ -65,7 +55,11 @@ script = {
         "start": {RESPONSE: Response(text=""), TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
         "fallback": {
             RESPONSE: "Finishing test, send /restart command to restart",
-            TRANSITIONS: {("pics", "ask_picture"): messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("pics", "ask_picture"): messenger.cnd.message_handler(
+                    commands=["start", "restart"]
+                )
+            },
         },
     },
     "pics": {
@@ -93,7 +87,11 @@ script = {
 # %%
 def extract_and_save_photo_on_disk(ctx: Context, actor: Actor):  # A function to extract data with
     message = ctx.last_request
-    if not message or (not message.photo and not doc_is_photo(message)):
+    if not message or (
+        # check attachments in message properties
+        not message.photo
+        and not (message.document and message.document.mime_type == "image/jpeg")
+    ):
         return ctx
     photo = message.document or message.photo[-1]
     file = messenger.get_file(photo.file_id)
@@ -112,7 +110,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    context_storage=dict(),
     messenger_interface=interface,
     pre_services=[extract_and_save_photo_on_disk, update_processing_service],
 )

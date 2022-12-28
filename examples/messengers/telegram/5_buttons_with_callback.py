@@ -100,7 +100,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    context_storage=dict(),
     pre_services=[update_processing_service],
     messenger_interface=interface,
 )

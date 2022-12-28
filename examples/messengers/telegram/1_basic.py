@@ -3,18 +3,20 @@
 # 1. Basic
 
 The following example shows how to run a regular DFF script in Telegram.
-This example does not contain any Telegram-specific logic.
+It asks users for the '/start' command and then loops in one place.
 """
 
 
 # %%
 import os
 
+from dff.script import conditions as cnd
+from dff.script import labels as lbl
+from dff.script import RESPONSE, TRANSITIONS
 from dff.messengers.telegram import PollingTelegramInterface, TelegramMessenger
 from dff.pipeline import Pipeline
 from dff.messengers.telegram import update_processing_service
 from dff.utils.testing.common import is_interactive_mode
-from dff.utils.testing.toy_script import TOY_SCRIPT
 
 
 # %% [markdown]
@@ -32,6 +34,18 @@ to the DFF `Pipeline` instance.
 """
 
 
+script = {
+    "greeting_flow": {
+        "start_node": {RESPONSE: "", TRANSITIONS: {"greeting_node": cnd.exact_match("/start")}},
+        "greeting_node": {RESPONSE: "Hi", TRANSITIONS: {lbl.repeat(): cnd.true()}},
+        "fallback_node": {
+            RESPONSE: "Please, repeat the request",
+            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
+        },
+    }
+}
+
+
 # %%
 messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 interface = PollingTelegramInterface(messenger=messenger)
@@ -39,10 +53,9 @@ interface = PollingTelegramInterface(messenger=messenger)
 
 # %%
 pipeline = Pipeline.from_script(
-    script=TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
+    script=script,  # Actor script object, defined in `.utils` module.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    context_storage=dict(),
     pre_services=[update_processing_service],
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )

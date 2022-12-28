@@ -16,11 +16,10 @@ Here, we deploy a basic bot that reacts only to messages.
 # %%
 import os
 
-import dff.script.conditions as cnd
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script import Context, Actor
 from dff.messengers.telegram import TELEGRAM_KEY
 from telebot.util import content_type_media
-
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.messengers.telegram import TelegramMessenger
 from dff.utils.testing.common import is_interactive_mode
 
@@ -37,42 +36,13 @@ This is enough to get a bot up and running.
 
 
 # %%
-script = {
-    "greeting_flow": {
-        "start_node": {
-            RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
-        },
-        "node1": {
-            RESPONSE: "Hi, how are you?",
-            TRANSITIONS: {"node2": cnd.regexp(r".*(good|fine|great).*")},
-        },
-        "node2": {
-            RESPONSE: "Good. What do you want to talk about?",
-            TRANSITIONS: {"node3": cnd.regexp(r"(music[.!]{0,1}|.*about music[.!]{0,1})")},
-        },
-        "node3": {
-            RESPONSE: "Sorry, I can not talk about music now.",
-            TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
-        },
-        "node4": {
-            RESPONSE: "bye",
-            TRANSITIONS: {"node1": cnd.regexp(r".*(restart|start|start again).*")},
-        },
-        "fallback_node": {
-            RESPONSE: "Ooops",
-            TRANSITIONS: {"node1": cnd.true()},
-        },
-    }
-}
-
-
-# %%
 actor = Actor(
-    script,
+    TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
+
+happy_path = HAPPY_PATH
 
 
 # %% [markdown]
