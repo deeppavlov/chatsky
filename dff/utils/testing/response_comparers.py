@@ -3,7 +3,7 @@ from typing import Any, Optional
 from requests import get
 
 from dff.script import Context
-from dff.script.responses import Response
+from dff.script.responses import Message
 
 
 def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[Any]:
@@ -18,9 +18,9 @@ def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[Any
     return None if candidate == reference else candidate
 
 
-def generics_comparer(candidate: Response, reference: str, _: Context) -> Optional[str]:
+def generics_comparer(candidate: Message, reference: str, _: Context) -> Optional[str]:
     """
-    The generics response comparer. Assumes that true response is a :py:class:`~dff.script.responses.Response` instance
+    The generics response comparer. Assumes that true response is a :py:class:`~dff.script.responses.Message` instance
     and received response is a :py:class:`str` instance.
     If received response contains `ui.buttons` it compares its text representation to true response.
     If received response contains `image`, `document`, `audio` or `video`

@@ -12,7 +12,7 @@ import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
-from dff.script.responses import Button, Keyboard, Response
+from dff.script.responses import Button, Keyboard, Message
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
     check_happy_path,
@@ -34,16 +34,16 @@ def check_button_payload(value: str):
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Response(text=""),
+            RESPONSE: Message(text=""),
             TRANSITIONS: {
                 ("general", "question_1"): cnd.true(),
             },
         },
-        "fallback": {RESPONSE: Response(text="Finishing test")},
+        "fallback": {RESPONSE: Message(text="Finishing test")},
     },
     "general": {
         "question_1": {
-            RESPONSE: Response(
+            RESPONSE: Message(
                 **{
                     "text": "Starting test! What's 2 + 2?"
                     " (type in the index of the correct option)",
@@ -61,7 +61,7 @@ toy_script = {
             },
         },
         "question_2": {
-            RESPONSE: Response(
+            RESPONSE: Message(
                 **{
                     "text": "Next question: what's 6 * 8?"
                     " (type in the index of the correct option)",
@@ -79,7 +79,7 @@ toy_script = {
             },
         },
         "question_3": {
-            RESPONSE: Response(
+            RESPONSE: Message(
                 **{
                     "text": "What's 114 + 115?" " (type in the index of the correct option)",
                     "ui": Keyboard(
@@ -96,7 +96,7 @@ toy_script = {
             },
         },
         "success": {
-            RESPONSE: Response(text="Success!"),
+            RESPONSE: Message(text="Success!"),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
     },

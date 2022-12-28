@@ -11,7 +11,7 @@ from typing import NamedTuple
 from dff.script import Context, RESPONSE, TRANSITIONS
 from dff.script.conditions import std_conditions as cnd
 
-from dff.script.responses import Attachments, Image, Response
+from dff.script.responses import Attachments, Image, Message
 
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
@@ -36,17 +36,17 @@ kitten_url = (
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Response(text=""),
+            RESPONSE: Message(text=""),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
-            RESPONSE: Response(text="Final node reached, send any message to restart."),
+            RESPONSE: Message(text="Final node reached, send any message to restart."),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
     },
     "pics": {
         "ask_picture": {
-            RESPONSE: Response(text="Please, send me a picture url"),
+            RESPONSE: Message(text="Please, send me a picture url"),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.jpg$"),
@@ -54,18 +54,18 @@ toy_script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(text="here's my picture!", image=Image(source=kitten_url)),
+            RESPONSE: Message(text="here's my picture!", image=Image(source=kitten_url)),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
-            RESPONSE: Response(
+            RESPONSE: Message(
                 text="Look at my pictures",
                 attachments=Attachments(files=[Image(source=kitten_url)] * 10),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: Response(text="I cannot find the picture. Please, try again."),
+            RESPONSE: Message(text="I cannot find the picture. Please, try again."),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.jpg$"),
