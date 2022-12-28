@@ -19,7 +19,7 @@ class Keywords(Enum):
         This keyword is used to define a global node.
         The value that corresponds to this key has the `dict` type with keywords:
 
-        `{TRANSITIONS:..., RESPONSE:..., PROCESSING:..., MISC:...}`.
+        `{TRANSITIONS:..., RESPONSE:..., PRE_RESPONSE_PROCESSING:..., MISC:...}`.
         There can be only one global node in a script :py:class:`~dff.script.Script`.
         The global node is defined at the flow level as opposed to regular nodes.
         This node allows to define default global values for all nodes.
@@ -28,7 +28,7 @@ class Keywords(Enum):
         This keyword is used to define the local node.
         The value that corresponds to this key has the `dict` type with keywords:
 
-        `{TRANSITIONS:..., RESPONSE:..., PROCESSING:..., MISC:...}`.
+        `{TRANSITIONS:..., RESPONSE:..., PRE_RESPONSE_PROCESSING:..., MISC:...}`.
         The local node is defined in the same way as all other nodes in the flow of this node.
         It also allows to redefine default values for all nodes in this node's flow.
 
