@@ -9,7 +9,7 @@ from dff.script.extras.conditions.models.remote_api.google_dialogflow_model impo
 
 
 @pytest.fixture(scope="session")
-def testing_model(gdf_json):
+def testing_model():
     gdf_json = os.getenv("GDF_ACCOUNT_JSON")
     if gdf_json:
         yield GoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="dialogflow")
@@ -18,7 +18,7 @@ def testing_model(gdf_json):
 
 
 @pytest.fixture(scope="session")
-def testing_async_model(gdf_json):
+def testing_async_model():
     gdf_json = os.getenv("GDF_ACCOUNT_JSON")
     if gdf_json:
         yield AsyncGoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="gdf_async")
