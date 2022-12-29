@@ -148,8 +148,8 @@ class CLIMessengerInterface(PollingMessengerInterface):
     def _request(self) -> List[Tuple[Any, Any]]:
         return [(input(self._prompt_request), self._ctx_id)]
 
-    def _respond(self, response: List[Context]):
-        print(f"{self._prompt_response}{response[0].last_response}", file=self._descriptor)
+    def _respond(self, responses: List[Context]):
+        print(f"{self._prompt_response}{responses[0].last_response}", file=self._descriptor)
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """
