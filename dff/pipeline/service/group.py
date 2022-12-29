@@ -36,13 +36,12 @@ class ServiceGroup(PipelineComponent):
     Group can be asynchronous only if all components in it are asynchronous.
     Group containing actor can be synchronous only.
 
-    :param components: A :py:data:`~.ServiceGroupBuilder` object, that will be added to the group.
-    :type components: ServiceGroupBuilder
-    :param wrappers: List of `Wrappers` to add to the group.
-    :param before_handler:
-    :type before_handler: Optional[ExtraHandlerBuilder]
-    :param after_handler:
-    :type after_handler: Optional[ExtraHandlerBuilder]
+    :param components: A `ServiceGroupBuilder` object, that will be added to the group.
+    :type components: :py:data:`~.ServiceGroupBuilder`
+    :param before_handler: List of `ExtraHandlerBuilder` to add to the group.
+    :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
+    :param after_handler: List of `ExtraHandlerBuilder` to add to the group.
+    :type after_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
     :param timeout: Timeout to add to the group.
     :param asynchronous: Requested asynchronous property.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
