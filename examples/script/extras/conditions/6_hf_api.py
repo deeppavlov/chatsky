@@ -22,7 +22,7 @@ from dff.script.extras.conditions.models.remote_api.hf_api_model import HFAPIMod
 from dff.script.extras.conditions import conditions as i_cnd
 from dff.pipeline import Pipeline
 from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
@@ -100,12 +100,5 @@ happy_path = [
 
 
 # %%
-def main():
-    if is_interactive_mode():
-        run_interactive_mode(pipeline)
-    else:
-        pipeline.run()
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__" and is_interactive_mode():
+    pipeline.run()

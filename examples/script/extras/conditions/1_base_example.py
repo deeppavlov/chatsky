@@ -26,7 +26,7 @@ from dff.script.extras.conditions.dataset import Dataset
 from dff.script.extras.conditions import conditions as i_cnd
 from dff.pipeline import Pipeline
 from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import is_interactive_mode, run_interactive_mode
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
@@ -122,12 +122,5 @@ pipeline = Pipeline.from_script(
 
 
 # %%
-def main():
-    if is_interactive_mode():
-        run_interactive_mode(pipeline)
-    else:
-        pipeline.run()
-
-
-if __name__ == "__main__":
-    main()
+if __name__ == "__main__" and is_interactive_mode():
+    pipeline.run()
