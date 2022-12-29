@@ -175,7 +175,11 @@ ExtraHandlerBuilder: TypeAlias = Union[
     List[ExtraHandlerFunction],
 ]
 """
-?
+A type, representing anything that can be transformed to ExtraHandlers.
+It can be:
+
+- _ForwardComponentExtraHandler object
+- Dictionary, containing keys `timeout`, `asynchronous`, `functions`
 """
 
 
