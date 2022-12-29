@@ -9,7 +9,7 @@ from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, It
 
 from dff.context_storages import DBAbstractContextStorage
 from dff.script import Context, Actor
-from typing_extensions import NotRequired, TypedDict
+from typing_extensions import NotRequired, TypedDict, TypeAlias
 
 
 _ForwardPipelineComponent = NewType("PipelineComponent", None)
@@ -87,14 +87,14 @@ Accepts context and actor (current pipeline state), returns boolean (whether ser
 """
 
 
-StartConditionCheckerAggregationFunction = Callable[[Iterable[bool]], bool]
+StartConditionCheckerAggregationFunction: TypeAlias = Callable[[Iterable[bool]], bool]
 """
 A function type for creating aggregation `start_conditions` for components.
 Accepts list of functions (other start_conditions to aggregate), returns boolean (whether service can be launched).
 """
 
 
-ExtraHandlerConditionFunction = Callable[[str], bool]
+ExtraHandlerConditionFunction: TypeAlias = Callable[[str], bool]
 """
 A function type used during global wrappers initialization to determine
 whether wrapper should be applied to component with given path or not.
@@ -103,7 +103,7 @@ Accepts str (component path), returns boolean (whether wrapper should be applied
 """
 
 
-ServiceRuntimeInfo = TypedDict(
+ServiceRuntimeInfo: TypeAlias = TypedDict(
     "ServiceRuntimeInfo",
     {
         "name": str,
@@ -121,7 +121,7 @@ containing other pipeline components execution stats mapped to their paths.
 """
 
 
-ExtraHandlerRuntimeInfo = TypedDict(
+ExtraHandlerRuntimeInfo: TypeAlias = TypedDict(
     "ExtraHandlerRuntimeInfo",
     {
         "function": _ForwardExtraHandlerFunction,
@@ -136,7 +136,7 @@ Also contains `component` - runtime info dictionary of the component this wrappe
 """
 
 
-ExtraHandlerFunction = Union[
+ExtraHandlerFunction: TypeAlias = Union[
     Callable[[Context], None],
     Callable[[Context, Actor], None],
     Callable[[Context, Actor, ExtraHandlerRuntimeInfo], None],
@@ -147,7 +147,7 @@ Can accept current dialog context, actor, attached to the pipeline, and current 
 """
 
 
-ServiceFunction = Union[
+ServiceFunction: TypeAlias = Union[
     Callable[[Context], None],
     Callable[[Context], Awaitable[None]],
     Callable[[Context, Actor], None],
@@ -162,7 +162,7 @@ Can be both synchronous and asynchronous.
 """
 
 
-ExtraHandlerBuilder = Union[
+ExtraHandlerBuilder: TypeAlias = Union[
     _ForwardComponentExtraHandler,
     TypedDict(
         "WrapperDict",
@@ -175,11 +175,11 @@ ExtraHandlerBuilder = Union[
     List[ExtraHandlerFunction],
 ]
 """
-
+?
 """
 
 
-ServiceBuilder = Union[
+ServiceBuilder: TypeAlias = Union[
     ServiceFunction,
     _ForwardService,
     Actor,
@@ -207,7 +207,7 @@ It can be:
 """
 
 
-ServiceGroupBuilder = Union[
+ServiceGroupBuilder: TypeAlias = Union[
     List[Union[ServiceBuilder, List[ServiceBuilder], _ForwardServiceGroup]],
     _ForwardServiceGroup,
 ]
@@ -220,7 +220,7 @@ It can be:
 """
 
 
-PipelineBuilder = TypedDict(
+PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
         "messenger_interface": NotRequired[Optional[_ForwardProvider]],
