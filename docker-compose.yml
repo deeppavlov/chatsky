@@ -37,7 +37,7 @@ services:
   rasa:
     env_file: [.env_file]
     build:
-      context: .
-      dockerfile: ./dockerfile_extended_conditions
+      context: ./dff/utils/docker
+      dockerfile: dockerfile_extended_conditions
     ports:
       - "5005:5005"

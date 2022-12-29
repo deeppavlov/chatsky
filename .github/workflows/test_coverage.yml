@@ -17,10 +17,6 @@ jobs:
       fail-fast: false
 
     runs-on: ubuntu-latest
-
-    env:
-      HF_API_KEY: ${{ secrets.HF_API_KEY }}
-
     steps:
       - uses: actions/checkout@v2
 
@@ -60,5 +56,6 @@ jobs:
           make test
         shell: bash
         env:
+          RASA_API_KEY: rasa
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
           GDF_ACCOUNT_JSON: ./gdf_account.json
