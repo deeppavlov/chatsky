@@ -35,8 +35,8 @@ def test_predict(testing_model: RasaModel):
     assert result["greet"] > 0.9  # testing on default intents that include 'greet'
 
 
-@pytest.mark.skipif(not rasa_available, reason="Async deps missing.")
-@pytest.mark.skipif(not RASA_ACTIVE, reason="RASA inactive.")
+# @pytest.mark.skipif(not rasa_available, reason="Async deps missing.")
+# @pytest.mark.skipif(not RASA_ACTIVE, reason="RASA inactive.")
 @pytest.mark.skipif(not os.getenv("RASA_URL") or not os.getenv("RASA_API_KEY"), reason="No RASA API key.")
 @pytest.mark.asyncio
 async def test_async_predict(testing_async_model: AsyncRasaModel):

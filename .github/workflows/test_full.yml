@@ -47,5 +47,6 @@ jobs:
           pytest --tb=long -vv --cache-clear --cov=dff tests/
         shell: bash
         env:
+          RASA_API_KEY: rasa
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
           GDF_ACCOUNT_JSON: ./gdf_account.json

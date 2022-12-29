@@ -20,12 +20,6 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Create gdf_account.json
-        uses: jsdaniell/create-json@v1.2.1
-        with:
-          name: "gdf_account.json"
-          json: ${{ secrets.GDF_ACCOUNT_JSON }}
-
       - name: Build images
         run: |
           docker-compose up -d
@@ -50,6 +44,12 @@ jobs:
           for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
           touch venv  # disable venv target
+
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
       - name: run tests
         run: |

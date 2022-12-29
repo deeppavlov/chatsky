@@ -8,6 +8,7 @@ and reuse them in your script.
 
 
 # %%
+import os
 from dff.script.core.keywords import (
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -34,7 +35,9 @@ The class documentation shows which parameters can be passed for authorization.
 
 
 # %%
-rasa_model = RasaModel(model="http://localhost:5005", namespace_key="rasa")
+rasa_model = RasaModel(
+    model="http://localhost:5005", api_key=os.getenv("RASA_API_KEY", "rasa"), namespace_key="rasa"
+)
 
 
 # %%
