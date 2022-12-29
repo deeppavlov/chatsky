@@ -23,9 +23,9 @@ class _ComponentExtraHandler:
     Extra handlers should NOT edit context or actor, use services for that purpose instead.
 
     :param functions: An `ExtraHandlerBuilder` object, an `_ComponentExtraHandler` instance,
-        a dict or a list of `ExtraHandlerFunctions`.
+        a dict or a list of :py:data:`~.ExtraHandlerFunction`.
     :type functions: :py:data:`~.ExtraHandlerBuilder`
-    :param stage: An `ExtraHandlerType`, specifying whether this handler will be executed before or
+    :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
         after pipeline component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted.

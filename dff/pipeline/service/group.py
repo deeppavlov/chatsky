@@ -39,6 +39,10 @@ class ServiceGroup(PipelineComponent):
     :param components: A :py:data:`~.ServiceGroupBuilder` object, that will be added to the group.
     :type components: ServiceGroupBuilder
     :param wrappers: List of `Wrappers` to add to the group.
+    :param before_handler:
+    :type before_handler: Optional[ExtraHandlerBuilder]
+    :param after_handler:
+    :type after_handler: Optional[ExtraHandlerBuilder]
     :param timeout: Timeout to add to the group.
     :param asynchronous: Requested asynchronous property.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
@@ -199,8 +203,9 @@ class ServiceGroup(PipelineComponent):
         Uses a special condition function to determine whether to add wrapper to any particular inner component or not.
         Condition checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
 
-        :param global_wrapper_type: A type of wrapper to add.
-        :param wrapper: A `WrapperFunction` to add as a wrapper.
+        :param global_extra_handler_type: A type of wrapper to add.
+        :param extra_handler: A `WrapperFunction` to add as a wrapper.
+        :type extra_handler: :py:data:`~.ExtraHandlerFunction`
         :param condition: A condition function.
         :return: `None`
         """
