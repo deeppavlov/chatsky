@@ -80,7 +80,7 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 """
 
 
-StartConditionCheckerFunction = Callable[[Context, Actor], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[[Context, Actor], bool]
 """
 A function type for components `start_conditions`.
 Accepts context and actor (current pipeline state), returns boolean (whether service can be launched).
