@@ -10,12 +10,10 @@ import joblib
 
 try:
     import gensim
-    from gensim.models.word2vec import Word2Vec
 
     gensim_available = True
     ALL_MODELS = [name for name in dir(gensim.models) if name[0].isupper()]  # all classes
 except ImportError:
-    Word2Vec = object
     gensim_available = False
     ALL_MODELS = []
 
@@ -39,7 +37,7 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
 
     def __init__(
         self,
-        model: Word2Vec,
+        model: object,
         dataset: Dataset,
         tokenizer: Optional[Callable[[str], List[str]]] = None,
         namespace_key: Optional[str] = None,

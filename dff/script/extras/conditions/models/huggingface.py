@@ -5,23 +5,15 @@ Base HF Model
 This module provides a base class for matchers and classifiers
 built on top of Hugging Face models.
 """
-from argparse import Namespace
 from typing import Optional
 from collections.abc import Iterable
 
 try:
-    import numpy as np
-    from tokenizers import Tokenizer
-    from transformers.modeling_utils import PreTrainedModel
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
     import torch
 
     hf_available = True
 except ImportError:
-    np = Namespace(ndarray=None)
-    torch = Namespace(device=None)
-    Tokenizer = None
-    PreTrainedModel = None
     hf_available = False
 
 from .base_model import BaseModel
@@ -42,8 +34,8 @@ class BaseHFModel(BaseModel):
 
     def __init__(
         self,
-        model: PreTrainedModel,
-        tokenizer: Tokenizer,
+        model: object,
+        tokenizer: object,
         device: torch.device,
         namespace_key: Optional[str] = None,
         tokenizer_kwargs: Optional[dict] = None,

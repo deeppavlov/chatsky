@@ -5,16 +5,11 @@ Sklearn Classifier
 This module provides an adapter interface for Sklearn models.
 Use Sklearn classifiers to achieve great results on a limited set of data.
 """
-from typing import Optional, Union
+from typing import Optional
 
 try:
-    from sklearn.base import BaseEstimator
-    from sklearn.pipeline import Pipeline
-
     sklearn_available = True
 except ImportError:
-    BaseEstimator = object
-    Pipeline = object
     sklearn_available = False
 
 from ...sklearn import BaseSklearnModel
@@ -32,8 +27,8 @@ class SklearnClassifier(BaseSklearnModel):
 
     def __init__(
         self,
-        model: Optional[BaseEstimator] = None,
-        tokenizer: Optional[Union[BaseEstimator, Pipeline]] = None,
+        model: object = None,
+        tokenizer: object = None,
         namespace_key: Optional[str] = None,
     ) -> None:
         if not sklearn_available:

@@ -6,23 +6,16 @@ This module provides an adapter interface for Huggingface models.
 It leverages transformer embeddings to compute distances between utterances.
 """
 from typing import Optional
-from argparse import Namespace
 from pathlib import Path
 
 from ...huggingface import BaseHFModel, hf_available
 
 try:
-    import numpy as np
-    from tokenizers import Tokenizer
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
     import torch
 
     hf_available = hf_available and True
 except ImportError:
-    np = Namespace(ndarray=None)
-    torch = Namespace(device=None)
-    Tokenizer = None
-    PreTrainedModel = None
     hf_available = hf_available and False
 
 from ....dataset import Dataset
@@ -45,9 +38,9 @@ class HFMatcher(CosineMatcherMixin, BaseHFModel):
 
     def __init__(
         self,
-        model: AutoModelForSequenceClassification,
-        tokenizer: Tokenizer,
-        device: torch.device,
+        model: object,
+        tokenizer: object,
+        device: object,
         namespace_key: str,
         dataset: Dataset,
         tokenizer_kwargs: Optional[dict] = None,

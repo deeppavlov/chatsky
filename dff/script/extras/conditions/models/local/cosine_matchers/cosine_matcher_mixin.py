@@ -1,12 +1,10 @@
 from sklearn.metrics.pairwise import cosine_similarity
-from argparse import Namespace
 
 try:
     import numpy as np
 
     numpy_available = True
 except ImportError:
-    np = Namespace(ndarray=None, max=None)
     numpy_available = False
 
 

@@ -60,9 +60,11 @@ script = {
             # You can get to different branches depending on the intent values.
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    "mood_great", threshold=0.95, namespace="rasa"
+                    "mood_great", threshold=0.90, namespace="rasa"
                 ),
-                ("mood", "react_bad"): i_cnd.has_cls_label("mood_unhappy", namespace="rasa"),
+                ("mood", "react_bad"): i_cnd.has_cls_label(
+                    "mood_unhappy", threshold=0.90, namespace="rasa"
+                ),
                 ("mood", "assert"): cnd.true(),
             },
         },
@@ -70,7 +72,7 @@ script = {
             RESPONSE: "What you mean is you're feeling down, isn't it?",
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
-                    "deny", threshold=0.95, namespace="rasa"
+                    "deny", threshold=0.90, namespace="rasa"
                 ),
                 ("mood", "react_bad"): i_cnd.has_cls_label("affirm", namespace="rasa"),
             },

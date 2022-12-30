@@ -5,15 +5,11 @@ Sklearn Cosine Matcher
 This module provides an adapter interface for sklearn models.
 It uses Sklearn BOW representations and other features to compute distances between utterances.
 """
-from typing import Optional, Union
+from typing import Optional
 
 try:
-    from sklearn.base import BaseEstimator
-    from sklearn.pipeline import Pipeline
-
     IMPORT_ERROR_MESSAGE = None
 except ImportError as e:
-    BaseEstimator = object
     IMPORT_ERROR_MESSAGE = e.msg
 
 from ...sklearn import BaseSklearnModel
@@ -35,9 +31,9 @@ class SklearnMatcher(CosineMatcherMixin, BaseSklearnModel):
 
     def __init__(
         self,
-        model: Optional[BaseEstimator] = None,
+        model: object = None,
         dataset: Optional[Dataset] = None,
-        tokenizer: Optional[Union[BaseEstimator, Pipeline]] = None,
+        tokenizer: object = None,
         namespace_key: Optional[str] = None,
     ) -> None:
         CosineMatcherMixin.__init__(self, dataset=dataset)

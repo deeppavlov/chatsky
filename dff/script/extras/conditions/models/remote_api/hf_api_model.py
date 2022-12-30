@@ -18,7 +18,6 @@ try:
 
     hf_api_available = True
 except ImportError:
-    htppx = object()
     hf_api_available = False
 
 from ...utils import STATUS_SUCCESS, STATUS_UNAVAILABLE
@@ -120,7 +119,7 @@ class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
         retries = 0
         while retries < self.retries:
             retries += 1
-            response: httpx.Response = await client.post(self.url, headers=self.headers, data=json.dumps(request))
+            response = await client.post(self.url, headers=self.headers, data=json.dumps(request))
             if response.status_code == STATUS_UNAVAILABLE:  # Wait for model to warm up
                 await asyncio.sleep(1)
             elif response.status_code == STATUS_SUCCESS:

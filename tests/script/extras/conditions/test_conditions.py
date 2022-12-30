@@ -20,6 +20,10 @@ from dff.script.extras.conditions.conditions import has_cls_label, has_match
 def test_conditions(input, testing_actor):
     ctx = Context(framework_states={LABEL_KEY: {"model_a": {"a": 1, "b": 1}, "model_b": {"b": 1, "c": 1}}})
     assert has_cls_label(input)(ctx, testing_actor) is True
+    assert has_cls_label(input, namespace="model_a")(ctx, testing_actor) is True
+    assert has_cls_label(input, threshold=1.1)(ctx, testing_actor) is False
+    ctx2 = Context()
+    assert has_cls_label(input)(ctx2, testing_actor) is False
 
 
 @pytest.mark.parametrize(["input"], [(1,), (3.3,), ({"a", "b"},)])
