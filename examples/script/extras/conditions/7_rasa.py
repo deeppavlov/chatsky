@@ -62,7 +62,9 @@ script = {
                 ("mood", "react_good"): i_cnd.has_cls_label(
                     "mood_great", threshold=0.95, namespace="rasa"
                 ),
-                ("mood", "react_bad"): i_cnd.has_cls_label("mood_unhappy", namespace="rasa"),
+                ("mood", "react_bad"): i_cnd.has_cls_label(
+                    "mood_unhappy", threshold=0.99, namespace="rasa"
+                ),
                 ("mood", "assert"): cnd.true(),
             },
         },
