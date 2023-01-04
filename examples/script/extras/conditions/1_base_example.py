@@ -49,8 +49,12 @@ inside the `Context` object.
 
 
 # %%
-dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/example.yaml"))
-# dataset = Dataset.parse_obj({"items": [..., {"label": "greet", "samples": ["hello", "hi"]}, ...]})
+dataset = Dataset.parse_obj({"items": [
+    {"label": "hello", "samples": ["hello", "hi", "hi there", "hello there"]},
+    {"label": "goodbye", "samples": ["bye", "see you", "goodbye"]},
+    {"label": "food", "samples": ["something to eat", "have a snack", "have a meal"]},
+]})
+# dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/example.yaml"))
 
 regex_model = RegexClassifier(namespace_key="regex", model=RegexModel(dataset))
 

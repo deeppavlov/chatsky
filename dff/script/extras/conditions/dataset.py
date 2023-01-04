@@ -72,8 +72,9 @@ class Dataset(BaseModel):
     @validator("items", pre=True)
     def pre_validate_items(cls, value: Union[Dict[str, DatasetItem], List[DatasetItem]]):
         if isinstance(value, list):  # if items were passed as a list, cast them to a dict
-            item_labels = [item.label for item in value]
-            return {label: item for label, item in zip(item_labels, value)}
+            new_value = [DatasetItem.parse_obj(item) for item in value]
+            item_labels = [item.label for item in new_value]
+            return {label: item for label, item in zip(item_labels, new_value)}
         return value
 
     @validator("items")
