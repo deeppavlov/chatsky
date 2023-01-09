@@ -1,12 +1,12 @@
 import ast
 
-from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call
+from dff.utils.parser.base_parser_object import Dict, expr, Expression, Python, Import, Attribute, Subscript, Call
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.dff_project import DFFProject
 
 
 def test_just_works():
-    obj = Expression.from_ast(ast.parse("{1: {2: '3'}}").body[0].value)
+    obj = Expression.from_str("{1: {2: '3'}}")
     assert isinstance(obj, Dict)
     assert str(obj.children["value_1"]) == """{
     2: '3',
@@ -14,13 +14,13 @@ def test_just_works():
 
 
 def test_path():
-    obj = Expression.from_ast(ast.parse("{1: {2: '3'}}").body[0].value)
+    obj = Expression.from_str("{1: {2: '3'}}")
     assert obj.children["value_1"].children["key_2"] == \
            obj.resolve_path(("value_1", "key_2"))
 
 
 def test_multiple_keys():
-    obj = Expression.from_ast(ast.parse("{1: 1, '1': '1'}").body[0].value)
+    obj = Expression.from_str("{1: 1, '1': '1'}")
     assert obj.resolve_path(("value_1",)) == "1"
     assert obj.resolve_path(("key_1",)) == "1"
     assert obj.resolve_path(("value_'1'",)) == "'1'"
@@ -28,7 +28,7 @@ def test_multiple_keys():
 
 
 def test_get_item():
-    obj = Expression.from_ast(ast.parse("{1: 1, '1': '1'}").body[0].value)
+    obj = Expression.from_str("{1: 1, '1': '1'}")
     assert isinstance(obj, Dict)
     assert obj["1"] == "1"
     assert obj["'1'"] == "'1'"
@@ -41,7 +41,7 @@ def test_import_resolution():
     import_stmt = dff_project.resolve_path(("namespace1", "namespace2"))
 
     assert isinstance(import_stmt, Import)
-    assert import_stmt.resolve_self == namespace2
+    assert import_stmt._resolve_once == namespace2
     assert import_stmt == namespace1.resolve_path(("namespace2",))
     assert import_stmt.path == ("namespace1", "namespace2")
 
@@ -58,8 +58,8 @@ def test_multiple_imports():
     assert isinstance(import_2, Import)
     assert isinstance(import_3, Import)
 
-    assert import_2.resolve_self == namespace2
-    assert import_3.resolve_self == namespace3
+    assert import_2._resolve_once == namespace2
+    assert import_3._resolve_once == namespace3
 
     assert str(import_2) == "import namespace2"
     assert str(import_3) == "import namespace3"
@@ -72,7 +72,7 @@ def test_multilevel_import_resolution():
     import_stmt1 = dff_project.resolve_path(("namespace1", "n2"))
 
     assert isinstance(import_stmt1, Import)
-    assert import_stmt1.resolve_self == namespace2
+    assert import_stmt1._resolve_once == namespace2
     assert import_stmt1 == namespace1.resolve_path(("n2",))
     assert import_stmt1.path == ("namespace1", "n2")
 
@@ -90,8 +90,8 @@ def test_import_from():
     namespace3 = Namespace.from_ast(ast.parse("a = 1"), location=["module", "__init__"])
     dff_project = DFFProject([namespace1, namespace2, namespace3], validate=False)
 
-    assert dff_project["namespace1"]["n2"].resolve_self["a"] == Python.from_str("1")
     assert namespace2["a"] == Python.from_str("1")
+    assert dff_project["namespace1"]["n2"].absolute["a"] == Python.from_str("1")
 
 
 def test_name():
@@ -179,8 +179,8 @@ def test_name_resolution():
 
 def test_dependency_extraction():
     namespace1 = Namespace.from_ast(ast.parse("import namespace2\na = namespace2.a"), location=["namespace1"])
-    namespace2 = Namespace.from_ast(ast.parse("from namespace3 import c\nimport namespace3\nfrom namespace4 import d\na = print(c[d] + namespace3.j)"), location=["namespace2"])
-    namespace3 = Namespace.from_ast(ast.parse("c=e\ne={1: 2}\nf=1\nj=2"), location=["namespace3"])
+    namespace2 = Namespace.from_ast(ast.parse("from namespace3 import c\nimport namespace3\nfrom namespace4 import d\na = print(c[d] + namespace3.j[1])"), location=["namespace2"])
+    namespace3 = Namespace.from_ast(ast.parse("c=e\ne={1: 2}\nf=1\nj={1: 2}"), location=["namespace3"])
     namespace4 = Namespace.from_ast(ast.parse("d=1\nq=4\nz=1"), location=["namespace4"])
 
     dff_project = DFFProject([namespace1, namespace2, namespace3, namespace4], validate=False)

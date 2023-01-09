@@ -3,16 +3,16 @@ import ast
 from pathlib import Path
 from itertools import pairwise
 
-from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom, Python
+from .base_parser_object import BaseParserObject, cached_property, stmt, Statement, Assignment, Import, ImportFrom, Python
 
 if tp.TYPE_CHECKING:
     from .dff_project import DFFProject
 
 
 class Namespace(BaseParserObject):
-    def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
+    def __init__(self, location: tp.List[str], names: tp.Dict[str, stmt]):
         super().__init__()
-        self.children: tp.Dict[str, Statement]
+        self.children: tp.Dict[str, stmt] = {}
         self.location = location
         self.name = ".".join(location)
         for key, value in names.items():
@@ -42,6 +42,12 @@ class Namespace(BaseParserObject):
             raise RuntimeError(f"Parent is not set: {repr(self)}")
         return self.parent.dff_project
 
+    def get_object(self, item: str):
+        obj = self.children.get(item)
+        if isinstance(obj, Assignment):
+            return obj.children["value"]
+        return obj
+
     def __getitem__(self, item: str):
         obj = self.children[item]
         if isinstance(obj, Assignment):
@@ -49,8 +55,8 @@ class Namespace(BaseParserObject):
         return obj
 
     @staticmethod
-    def dump_statements(statements: tp.List[Statement]) -> str:
-        def get_newline_count(statement: Statement):
+    def dump_statements(statements: tp.List[stmt]) -> str:
+        def get_newline_count(statement: stmt):
             if isinstance(statement, (Import, ImportFrom)):
                 return 1
             if isinstance(statement, Python) and statement.type.endswith("Def"):  # function and class defs
