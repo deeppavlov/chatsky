@@ -12,7 +12,7 @@ import re
 import random
 from typing import Any
 
-from dff.script import TRANSITIONS, RESPONSE, Actor, Context
+from dff.script import TRANSITIONS, RESPONSE, Actor, Context, Message
 import dff.script.responses as rsp
 import dff.script.conditions as cnd
 
@@ -49,24 +49,26 @@ def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs
     topic = topic_pattern.findall(request)
     topic = topic and topic[0] and topic[0][-1]
     if topic:
-        return f"Sorry, I can not talk about {topic} now."
+        return Message(text=f"Sorry, I can not talk about {topic} now.")
     else:
-        return "Sorry, I can not talk about that now."
+        return Message(text="Sorry, I can not talk about that now.")
 
 
-def upper_case_response(response: str):
+def upper_case_response(response: Message):
     # wrapper for internal response function
     def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
-        return response.upper()
+        if response.text is not None:
+            response.text = response.text.upper()
+        return response
 
     return cannot_talk_about_topic_response
 
 
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
-    return {
+    return Message(text=repr({
         "previous_node": list(ctx.labels.values())[-2],
         "last_request": ctx.last_request,
-    }
+    }))
 
 
 # %%
@@ -74,12 +76,12 @@ toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node,
             # it doesn't need a `RESPONSE`.
-            RESPONSE: "",
+            RESPONSE: Message(),
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),
+            RESPONSE: rsp.choice([Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]),
             # Random choice from candicate list.
             TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
@@ -92,7 +94,7 @@ toy_script = {
             TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
         },
         "node4": {
-            RESPONSE: upper_case_response("bye"),
+            RESPONSE: upper_case_response(Message(text="bye")),
             TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
         "fallback_node": {  # We get to this node
@@ -118,29 +120,29 @@ happy_path = (
     ("Hi", "Hi, what is up?"),  # node4 -> node1
     (
         "stop",
-        {"previous_node": ("greeting_flow", "node1"), "last_request": "stop"},
+        repr({"previous_node": ("greeting_flow", "node1"), "last_request": "stop"}),
     ),
     # node1 -> fallback_node
     (
         "one",
-        {
+        repr({
             "previous_node": ("greeting_flow", "fallback_node"),
             "last_request": "one",
-        },
+        }),
     ),  # f_n->f_n
     (
         "help",
-        {
+        repr({
             "previous_node": ("greeting_flow", "fallback_node"),
             "last_request": "help",
-        },
+        }),
     ),  # f_n->f_n
     (
         "nope",
-        {
+        repr({
             "previous_node": ("greeting_flow", "fallback_node"),
             "last_request": "nope",
-        },
+        }),
     ),  # f_n->f_n
     ("Hi", "Hello, how are you?"),  # fallback_node -> node1
     (

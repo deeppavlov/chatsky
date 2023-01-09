@@ -1,15 +1,15 @@
 # %%
-from dff.script import Context, Actor
+from dff.script import Context, Actor, Message
 import dff.script.conditions as cnd
 
 
 def test_conditions():
-    label = ["flow", "node"]
+    label = ("flow", "node")
     ctx = Context()
-    ctx.add_request("text")
+    ctx.add_request(Message(text="text"))
     ctx.add_label(label)
     failed_ctx = Context()
-    failed_ctx.add_request({})
+    failed_ctx.add_request(Message())
     failed_ctx.add_label(label)
     actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 

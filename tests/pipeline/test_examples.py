@@ -3,6 +3,7 @@ import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.utils.testing import check_happy_path, HAPPY_PATH
+from dff.script import Message
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -27,7 +28,9 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     if example_module_name == "6_custom_messenger_interface":
-        happy_path = tuple((req, example_module.construct_webpage_by_response(res)) for req, res in HAPPY_PATH)
+        happy_path = tuple((req, Message(misc={
+            "webpage": example_module.construct_webpage_by_response(res.text)
+        })) for req, res in HAPPY_PATH)
         check_happy_path(example_module.pipeline, happy_path)
     else:
         check_happy_path(example_module.pipeline, HAPPY_PATH)

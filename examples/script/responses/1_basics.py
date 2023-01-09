@@ -8,7 +8,7 @@
 # %%
 from typing import NamedTuple
 
-from dff.script.responses import Message
+from dff.script import Message
 from dff.script.conditions import exact_match
 from dff.script import Context, RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
@@ -46,17 +46,17 @@ toy_script = {
 }
 
 happy_path = (
-    ("Hi", Message(text="Hi, how are you?")),
-    ("i'm fine, how are you?", Message(text="Good. What do you want to talk about?")),
-    ("Let's talk about music.", Message(text="Sorry, I can not talk about music now.")),
-    ("Ok, goodbye.", Message(text="bye")),
-    ("Hi", Message(text="Hi, how are you?")),
-    ("stop", Message(text="Ooops")),
-    ("stop", Message(text="Ooops")),
-    ("Hi", Message(text="Hi, how are you?")),
-    ("i'm fine, how are you?", Message(text="Good. What do you want to talk about?")),
-    ("Let's talk about music.", Message(text="Sorry, I can not talk about music now.")),
-    ("Ok, goodbye.", Message(text="bye")),
+    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (Message(text="Let's talk about music."), Message(text="Sorry, I can not talk about music now.")),
+    (Message(text="Ok, goodbye."), Message(text="bye")),
+    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (Message(text="Let's talk about music."), Message(text="Sorry, I can not talk about music now.")),
+    (Message(text="Ok, goodbye."), Message(text="bye")),
 )
 
 

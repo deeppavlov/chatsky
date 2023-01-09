@@ -2,11 +2,10 @@ from typing import Any, Optional
 
 from requests import get
 
-from dff.script import Context
-from dff.script.responses import Message
+from dff.script import Context, Message
 
 
-def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[Any]:
+def default_comparer(candidate: Message, reference: Message, _: Context) -> Optional[Any]:
     """
     The default response comparer. Literally compares two response objects.
 
@@ -18,7 +17,7 @@ def default_comparer(candidate: Any, reference: Any, _: Context) -> Optional[Any
     return None if candidate == reference else candidate
 
 
-def generics_comparer(candidate: Message, reference: str, _: Context) -> Optional[str]:
+def generics_comparer(candidate: Message, reference: Message, _: Context) -> Optional[str]:
     """
     The generics response comparer. Assumes that true response is a :py:class:`~dff.script.responses.Message` instance
     and received response is a :py:class:`str` instance.
@@ -33,25 +32,4 @@ def generics_comparer(candidate: Message, reference: str, _: Context) -> Optiona
     :param _: current Context (unused)
     :return: None if two responses are equal or candidate response text otherwise
     """
-
-    ui = candidate.ui
-    if ui and ui.buttons:
-        options = [f"{str(idx)}): {item.text}" for idx, item in enumerate(ui.buttons)]
-        transformed = "\n".join(["", candidate.text] + options)
-        return None if transformed == reference else transformed
-
-    attachment = candidate.image or candidate.document or candidate.audio or candidate.video
-    if attachment and attachment.source:
-        attachment_size = int(get(attachment.source, stream=True).headers["Content-length"])
-        transformed = "\n".join(["", candidate.text, f"Attachment size: {attachment_size} bytes."])
-        return None if transformed == reference else transformed
-
-    attachments = candidate.attachments
-    if attachments:
-        attachment_size = 0
-        for attach in attachments.files:
-            attachment_size += int(get(attach.source, stream=True).headers["Content-length"])
-        transformed = "\n".join(["", candidate.text, f"Grouped attachment size: {attachment_size} bytes."])
-        return None if transformed == reference else transformed
-
-    return None if candidate.text == reference else candidate.text
+    raise DeprecationWarning()

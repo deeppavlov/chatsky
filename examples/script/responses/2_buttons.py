@@ -4,7 +4,6 @@
 
 """
 
-
 # %%
 from typing import NamedTuple
 
@@ -12,7 +11,7 @@ import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
-from dff.script.responses import Button, Keyboard, Message
+from dff.script.core.message import Button, Keyboard, Message
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
     check_happy_path,
@@ -25,7 +24,7 @@ from dff.utils.testing import (
 # %%
 def check_button_payload(value: str):
     def payload_check_inner(ctx: Context, actor: Actor):
-        return hasattr(ctx.last_request, "payload") and ctx.last_request.payload == value
+        return ctx.last_request.misc.get("payload") == value
 
     return payload_check_inner
 
@@ -46,13 +45,15 @@ toy_script = {
             RESPONSE: Message(
                 **{
                     "text": "Starting test! What's 2 + 2?"
-                    " (type in the index of the correct option)",
-                    "ui": Keyboard(
-                        buttons=[
-                            Button(text="5", payload="5"),
-                            Button(text="4", payload="4"),
-                        ]
-                    ),
+                            " (type in the index of the correct option)",
+                    "misc": {
+                        "ui": Keyboard(
+                            buttons=[
+                                Button(text="5", payload="5"),
+                                Button(text="4", payload="4"),
+                            ]
+                        ),
+                    }
                 }
             ),
             TRANSITIONS: {
@@ -64,13 +65,15 @@ toy_script = {
             RESPONSE: Message(
                 **{
                     "text": "Next question: what's 6 * 8?"
-                    " (type in the index of the correct option)",
-                    "ui": Keyboard(
-                        buttons=[
-                            Button(text="38", payload="38"),
-                            Button(text="48", payload="48"),
-                        ]
-                    ),
+                            " (type in the index of the correct option)",
+                    "misc": {
+                        "ui": Keyboard(
+                            buttons=[
+                                Button(text="38", payload="38"),
+                                Button(text="48", payload="48"),
+                            ]
+                        ),
+                    }
                 }
             ),
             TRANSITIONS: {
@@ -82,12 +85,14 @@ toy_script = {
             RESPONSE: Message(
                 **{
                     "text": "What's 114 + 115?" " (type in the index of the correct option)",
-                    "ui": Keyboard(
-                        buttons=[
-                            Button(text="229", payload="229"),
-                            Button(text="283", payload="283"),
-                        ]
-                    ),
+                    "misc": {
+                        "ui": Keyboard(
+                            buttons=[
+                                Button(text="229", payload="229"),
+                                Button(text="283", payload="283"),
+                            ]
+                        ),
+                    }
                 }
             ),
             TRANSITIONS: {
@@ -102,54 +107,122 @@ toy_script = {
     },
 }
 
-
 happy_path = (
     (
-        "Hi",
-        "\nStarting test! What's 2 + 2? (type in the index of the" " correct option)\n0): 5\n1): 4",
+        Message(text="Hi"),
+        Message(
+            **{
+                "text": "Starting test! What's 2 + 2?"
+                        " (type in the index of the correct option)",
+                "misc": {
+                    "ui": Keyboard(
+                        buttons=[
+                            Button(text="5", payload="5"),
+                            Button(text="4", payload="4"),
+                        ]
+                    )
+                }
+            }
+        ),
     ),
     (
-        "0",
-        "\nStarting test! What's 2 + 2? (type in the index of the" " correct option)\n0): 5\n1): 4",
+        Message(text="0"),
+        Message(
+            **{
+                "text": "Starting test! What's 2 + 2?"
+                        " (type in the index of the correct option)",
+                "misc": {
+                    "ui": Keyboard(
+                        buttons=[
+                            Button(text="5", payload="5"),
+                            Button(text="4", payload="4"),
+                        ]
+                    ),
+                }
+            }
+        ),
     ),
     (
-        "1",
-        "\nNext question: what's 6 * 8? (type in the index of the"
-        " correct option)\n0): 38\n1): 48",
+        Message(text="1"),
+        Message(
+            **{
+                "text": "Next question: what's 6 * 8?"
+                        " (type in the index of the correct option)",
+                "misc": {
+                    "ui": Keyboard(
+                        buttons=[
+                            Button(text="38", payload="38"),
+                            Button(text="48", payload="48"),
+                        ]
+                    ),
+                }
+            }
+        ),
     ),
     (
-        "0",
-        "\nNext question: what's 6 * 8? (type in the index of the"
-        " correct option)\n0): 38\n1): 48",
+        Message(text="0"),
+        Message(
+            **{
+                "text": "Next question: what's 6 * 8?"
+                        " (type in the index of the correct option)",
+                "misc": {
+                    "ui": Keyboard(
+                        buttons=[
+                            Button(text="38", payload="38"),
+                            Button(text="48", payload="48"),
+                        ]
+                    ),
+                }
+            }
+        ),
     ),
     (
-        "1",
-        "\nWhat's 114 + 115? (type in the index of the correct option)" "\n0): 229\n1): 283",
+        Message(text="1"),
+        Message(
+            **{
+                "text": "What's 114 + 115?" " (type in the index of the correct option)",
+                "misc": {
+                    "ui": Keyboard(
+                        buttons=[
+                            Button(text="229", payload="229"),
+                            Button(text="283", payload="283"),
+                        ]
+                    ),
+                }
+            }
+        ),
     ),
     (
-        "1",
-        "\nWhat's 114 + 115? (type in the index of the correct option)" "\n0): 229\n1): 283",
+        Message(text="1"),
+        Message(
+            **{
+                "text": "What's 114 + 115?" " (type in the index of the correct option)",
+                "misc": {
+                    "ui": Keyboard(
+                        buttons=[
+                            Button(text="229", payload="229"),
+                            Button(text="283", payload="283"),
+                        ]
+                    ),
+                }
+            }
+        ),
     ),
-    ("0", "Success!"),
-    ("ok", "Finishing test"),
+    (Message(text="0"), Message(text="Success!")),
+    (Message(text="ok"), Message(text="Finishing test")),
 )
 
 
-# %%
-class CallbackRequest(NamedTuple):
-    payload: str
-
-
 def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.ui
-    if ui and ctx.last_response.ui.buttons:
+    ui = ctx.last_response and ctx.last_response.misc.get("ui")
+    if ui and ui.buttons:
         try:
-            chosen_button = ui.buttons[int(ctx.last_request)]
+            chosen_button = ui.buttons[int(ctx.last_request.text)]
         except (IndexError, ValueError):
             raise ValueError(
                 "Type in the index of the correct option" "to choose from the buttons."
             )
-        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
+        ctx.last_request = Message(misc={"payload": chosen_button.payload})
 
 
 # %%

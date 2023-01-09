@@ -11,7 +11,7 @@ from typing import NamedTuple
 from dff.script import Context, RESPONSE, TRANSITIONS
 from dff.script.conditions import std_conditions as cnd
 
-from dff.script.responses import Attachments, Image, Message
+from dff.script.core.message import Attachments, Image, Message
 
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
@@ -76,19 +76,22 @@ toy_script = {
 }
 
 happy_path = (
-    ("Hi", "Please, send me a picture url"),
-    ("no", "I cannot find the picture. Please, try again."),
+    (Message(text="Hi"), Message(text="Please, send me a picture url")),
+    (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
     (
-        "https://sun9-49.userapi.com/s/v1/if2/gpquN.png",
-        "\nhere's my picture!\nAttachment size: 51706 bytes.",
+        Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.png"),
+        Message(text="here's my picture!", image=Image(source=kitten_url)),
     ),
-    ("ok", "Final node reached, send any message to restart."),
-    ("ok", "Please, send me a picture url"),
+    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
+    (Message(text="ok"), Message(text="Please, send me a picture url")),
     (
-        "https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg",
-        "\nLook at my pictures\nGrouped attachment size: 517060 bytes.",
+        Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg"),
+        Message(
+            text="Look at my pictures",
+            attachments=Attachments(files=[Image(source=kitten_url)] * 10),
+        ),
     ),
-    ("ok", "Final node reached, send any message to restart."),
+    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
 )
 
 

@@ -10,7 +10,7 @@ The following example shows messenger interfaces usage.
 import logging
 
 from dff.messengers.common.interface import CallbackMessengerInterface
-from dff.script import Context, Actor
+from dff.script import Context, Actor, Message
 from flask import Flask, request, Request
 
 from dff.pipeline import Pipeline
@@ -100,17 +100,20 @@ def construct_webpage_by_response(response: str) -> str:
 
 
 def purify_request(ctx: Context):
-    if isinstance(ctx.last_request, Request):
-        logger.info(f"Capturing request from: {ctx.last_request.base_url}")
-        ctx.last_request = ctx.last_request.args.get("request")
-    elif isinstance(ctx.last_request, str):
+    last_request = ctx.last_request
+    if isinstance(last_request, Request):
+        logger.info(f"Capturing request from: {last_request.base_url}")
+        ctx.last_request = Message(text=last_request.args.get("request"))
+    elif isinstance(last_request, Message):
         logger.info("Capturing request from CLI")
     else:
-        raise Exception(f"Request of type {type(ctx.last_request)} can not be purified!")
+        raise Exception(f"Request of type {type(last_request)} can not be purified!")
 
 
 def cat_response2webpage(ctx: Context):
-    ctx.last_response = construct_webpage_by_response(ctx.last_response)
+    ctx.last_response = Message(misc={
+        "webpage": construct_webpage_by_response(ctx.last_response.text)
+    })
 
 
 # %%
@@ -137,7 +140,7 @@ pipeline_dict = {
 @app.route("/pipeline_web_interface")
 async def route():
     ctx_id = 0  # 0 will be current dialog (context) identification.
-    return messenger_interface.on_request(request, ctx_id).last_response
+    return messenger_interface.on_request(request, ctx_id).last_response.text
 
 
 # %%
