@@ -68,7 +68,7 @@ class Document(Attachment):
 
 
 class Attachments(DataModel):
-    files: List[Attachment] = Field(default_factory=list, min_items=2, max_items=10)
+    files: List[Attachment] = Field(default_factory=list)
 
 
 class Link(DataModel):
