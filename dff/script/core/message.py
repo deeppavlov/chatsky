@@ -101,5 +101,3 @@ class Message(DataModel):
     # state: Optional[Session] = Session.ACTIVE
     # ui: Optional[Union[Keyboard, DataModel]] = None
 
-    def __init__(self, text: str, *args, **kwargs) -> None:
-        super().__init__(text=text, **kwargs)
