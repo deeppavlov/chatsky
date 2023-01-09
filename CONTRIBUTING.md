@@ -4,13 +4,15 @@ We always look forward to your contributions to the Dialog Flow Framework (DFF).
 
 ## Rules for submitting a PR
 
-All PRs are reviewed by DFF developers team. In order to make the job of reviewing easier and increase the chance that your PR will be accepted,
+All PRs are reviewed by DFF developers team.
+In order to make the job of reviewing easier and increase the chance that your PR will be accepted,
 please add a short description with information about why this PR is needed and what changes will be made.
 Please use the following rules to write the names of branches and commit messages.
 
 ### Rules for writing names of branches
 
-We hope that you adhere to the following format of branch naming: `<type>/<subject>`,
+We hope that you adhere to the following
+[format](https://gist.github.com/seunggabi/87f8c722d35cd07deb3f649d45a31082) of branch naming: `<type>/<subject>`,
 where `<type>` can be taken from the following list:
 
 - `feat` or `feature`: (new feature for the user, not a new feature for build script)
@@ -34,7 +36,8 @@ style/formatting_file_1
 
 ### Commit message rules
 
-We ask that you adhere to the following commit format: `<type>: <subject>`,
+We ask that you adhere to the following commit
+[format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716): `<type>: <subject>`,
 where `<type>` can be taken from the following list:
 
 - `feat`: (new feature for the user, not a new feature for build script)
