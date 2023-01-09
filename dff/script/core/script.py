@@ -1,7 +1,7 @@
 """
 Script
 ---------------------------
-Here is a set of pydantic Models for the dialog graph.
+Here is a set of `pydantic` models for the dialog graph.
 """
 # %%
 
