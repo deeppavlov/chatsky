@@ -6,11 +6,12 @@ Here is a set of pydantic Models for the dialog graph.
 # %%
 
 import logging
-from typing import Callable, Optional, Any, Dict
+from typing import Callable, Optional, Any, Dict, Union
 
 from pydantic import BaseModel, validator, Extra
 
 from .types import LabelType, NodeLabelType, ConditionType
+from .message import Message
 from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_script
 from typing import ForwardRef
 
@@ -27,7 +28,7 @@ class Node(BaseModel, extra=Extra.forbid):
     """
 
     transitions: Dict[NodeLabelType, ConditionType] = {}
-    response: Optional[Any] = None
+    response: Optional[Union[Message, Callable[[Context, Actor], Message]]] = None
     pre_transitions_processing: Dict[Any, Callable] = {}
     pre_response_processing: Dict[Any, Callable] = {}
     misc: dict = {}

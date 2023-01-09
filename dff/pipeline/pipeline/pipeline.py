@@ -4,7 +4,7 @@ from typing import Any, Union, List, Dict, Optional, Hashable
 
 from dff.context_storages import DBAbstractContextStorage
 from dff.script import Actor, Script, Context
-from dff.script import NodeLabel2Type
+from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
 from dff.messengers.common import MessengerInterface, CLIMessengerInterface
@@ -187,7 +187,7 @@ class Pipeline:
         """
         return cls(**dictionary)
 
-    async def _run_pipeline(self, request: Any, ctx_id: Optional[Hashable] = None) -> Context:
+    async def _run_pipeline(self, request: Message, ctx_id: Optional[Hashable] = None) -> Context:
         """
         Method that runs pipeline once for user request.
 
@@ -218,7 +218,7 @@ class Pipeline:
         """
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
-    def __call__(self, request: Any, ctx_id: Hashable) -> Context:
+    def __call__(self, request: Message, ctx_id: Hashable) -> Context:
         """
         Method that executes pipeline once.
         Basically, it is a shortcut for `_run_pipeline`.

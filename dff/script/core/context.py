@@ -12,6 +12,7 @@ from typing import Any, Optional, Union, Dict, List, Set
 
 from pydantic import BaseModel, validate_arguments, Field, validator
 from .types import NodeLabel2Type, ModuleName
+from .message import Message
 
 logger = logging.getLogger(__name__)
 
@@ -65,14 +66,14 @@ class Context(BaseModel):
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    requests: Dict[int, Any] = {}
+    requests: Dict[int, Message] = {}
     """
     `requests` stores the history of all `requests` received by the agent
 
         - key - `id` of the turn.
         - value - `request` on this turn.
     """
-    responses: Dict[int, Any] = {}
+    responses: Dict[int, Message] = {}
     """
     `responses` stores the history of all agent `responses`
 
@@ -142,7 +143,7 @@ class Context(BaseModel):
         return ctx
 
     @validate_arguments
-    def add_request(self, request: Any):
+    def add_request(self, request: Message):
         """
         Adds to the context the next `request` corresponding to the next turn.
         The addition takes place in the `requests` and `new_index = last_index + 1`.
@@ -153,7 +154,7 @@ class Context(BaseModel):
         self.requests[last_index + 1] = request
 
     @validate_arguments
-    def add_response(self, response: Any):
+    def add_response(self, response: Message):
         """
         Adds to the context the next `response` corresponding to the next turn.
         The addition takes place in the `responses`, and `new_index = last_index + 1`.
@@ -216,7 +217,7 @@ class Context(BaseModel):
         return self.labels.get(last_index)
 
     @property
-    def last_response(self) -> Optional[Any]:
+    def last_response(self) -> Optional[Message]:
         """
         Returns the last `response` of the current :py:class:`~dff.script.Context`.
         Returns `None` if `responses` is empty.
@@ -224,15 +225,15 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    def set_last_response(self, response: Optional[Any]):
+    def set_last_response(self, response: Optional[Message]):
         """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
-        self.responses[last_index] = response
+        self.responses[last_index] = Message() if response is None else response
 
     @property
-    def last_request(self) -> Optional[Any]:
+    def last_request(self) -> Optional[Message]:
         """
         Returns the last `request` of the current :py:class:`~dff.script.Context`.
         Returns `None if `requests` is empty.
@@ -240,12 +241,12 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    def set_last_request(self, request: Optional[Any]):
+    def set_last_request(self, request: Optional[Message]):
         """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
-        self.requests[last_index] = request
+        self.requests[last_index] = Message() if request is None else request
 
     @property
     def current_node(self) -> Optional[Node]:

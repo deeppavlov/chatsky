@@ -10,6 +10,7 @@ from typing import Union, Callable, Any, Dict
 from .keywords import GLOBAL, Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
+from .message import Message
 
 from pydantic import validate_arguments, BaseModel
 
@@ -107,10 +108,16 @@ def normalize_response(response: Any) -> Callable:
     if isinstance(response, Callable):
         return response
     else:
+        if response is None:
+            result = Message()
+        elif isinstance(response, Message):
+            result = response
+        else:
+            raise TypeError(type(response))
 
         @validate_arguments
         def response_handler(ctx: Context, actor: Actor, *args, **kwargs):
-            return response
+            return result
 
         return response_handler
 

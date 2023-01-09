@@ -4,7 +4,7 @@ import logging
 import uuid
 from typing import Optional, Any, List, Tuple, TextIO, Hashable
 
-from dff.script import Context
+from dff.script import Context, Message
 
 from .types import PipelineRunnerFunction, PollingInterfaceLoopFunction
 
@@ -138,10 +138,10 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Any, Any]]:
-        return [(input(self._prompt_request), self._ctx_id)]
+        return [(Message(text=input(self._prompt_request)), self._ctx_id)]
 
     def _respond(self, response: List[Context]):
-        print(f"{self._prompt_response}{response[0].last_response}", file=self._descriptor)
+        print(f"{self._prompt_response}{response[0].last_response.text}", file=self._descriptor)
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """

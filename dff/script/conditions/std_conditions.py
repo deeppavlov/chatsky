@@ -11,7 +11,7 @@ import re
 
 from pydantic import validate_arguments
 
-from dff.script import NodeLabel2Type, Actor, Context
+from dff.script import NodeLabel2Type, Actor, Context, Message
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +27,9 @@ def exact_match(match: Any, *args, **kwargs) -> Callable[[Context, Actor, Any, A
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        return match == request
+        if request is None:
+            return False
+        return match == request.text
 
     return exact_match_condition_handler
 
@@ -47,8 +49,10 @@ def regexp(
 
     def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        if isinstance(request, str):
-            return bool(pattern.search(request))
+        if isinstance(request, Message):
+            if request.text is None:
+                return False
+            return bool(pattern.search(request.text))
         else:
             logger.error(f"request has to be str type, but got request={request}")
             return False
