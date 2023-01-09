@@ -9,7 +9,6 @@ for annotating user phrases.
 
 # %%
 import logging
-from pathlib import Path
 
 from gensim.models import Word2Vec, KeyedVectors
 import gensim.downloader as api
@@ -38,8 +37,57 @@ Then, the model can be used in the script for annotating user input.
 logger = logging.getLogger(__name__)
 
 # load dataset
-data_path = Path(__file__).parent.joinpath("data/chitchat.yaml")
-dataset = Dataset.parse_yaml(data_path)
+dataset = Dataset.parse_obj(
+    {
+        "items": [
+            {
+                "label": "hello",
+                "samples": [
+                    "hi",
+                    "hello",
+                ],
+            },
+            {
+                "label": "consent",
+                "samples": [
+                    "totally",
+                    "yes",
+                    "ok",
+                    "surely",
+                ],
+            },
+            {
+                "label": "animals",
+                "samples": [
+                    "dog",
+                    "cat",
+                    "pet",
+                    "I like animals",
+                ],
+            },
+            {
+                "label": "sport_news",
+                "samples": [
+                    "sport",
+                    "athletics",
+                    "world championship",
+                ],
+            },
+            {
+                "label": "science_news",
+                "samples": [
+                    "discovery",
+                    "scientific progress",
+                    "science",
+                ],
+            },
+        ]
+    }
+)
+# You can also parse static files using the Dataset structure:
+# from pathlib import Path
+# dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/chitchat.yaml"))
+
 # load model
 wv: KeyedVectors = api.load("glove-wiki-gigaword-50")
 model = Word2Vec(vector_size=wv.vector_size)

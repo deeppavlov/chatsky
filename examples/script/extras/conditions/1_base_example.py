@@ -10,8 +10,6 @@ Examples for other models can be found in the same section.
 
 
 # %%
-from pathlib import Path
-
 from dff.script.core.keywords import (
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -49,11 +47,17 @@ inside the `Context` object.
 
 
 # %%
-dataset = Dataset.parse_obj({"items": [
-    {"label": "hello", "samples": ["hello", "hi", "hi there", "hello there"]},
-    {"label": "goodbye", "samples": ["bye", "see you", "goodbye"]},
-    {"label": "food", "samples": ["something to eat", "have a snack", "have a meal"]},
-]})
+dataset = Dataset.parse_obj(
+    {
+        "items": [
+            {"label": "hello", "samples": ["hello", "hi", "hi there", "hello there"]},
+            {"label": "goodbye", "samples": ["bye", "see you", "goodbye"]},
+            {"label": "food", "samples": ["something to eat", "have a snack", "have a meal"]},
+        ]
+    }
+)
+# You can also parse static files using the Dataset structure:
+# from pathlib import Path
 # dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/example.yaml"))
 
 regex_model = RegexClassifier(namespace_key="regex", model=RegexModel(dataset))

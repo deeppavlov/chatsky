@@ -2,13 +2,12 @@
 """
 # 4. Sklearn Example
 
-AAAAAAAAAAA
+The following example show how to use Sklearn models
+for annotating user phrases.
 """
 
 
 # %%
-from pathlib import Path
-
 from dff.script.core.keywords import (
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
@@ -30,8 +29,18 @@ from dff.utils.testing.common import is_interactive_mode
 
 
 # %%
-data_path = Path(__file__).parent.joinpath("data/example.jsonl")
-common_collection = Dataset.parse_jsonl(data_path)
+common_label_collection = Dataset.parse_obj(
+    {
+        "items": [
+            {"label": "hello", "samples": ["hello", "hi", "hi there", "hello there"]},
+            {"label": "goodbye", "samples": ["bye", "see you", "goodbye"]},
+            {"label": "food", "samples": ["something to eat", "have a snack", "have a meal"]},
+        ]
+    }
+)
+# You can also parse static files using the Dataset structure:
+# from pathlib import Path
+# common_label_collection= Dataset.parse_jsonl(Path(__file__).parent.joinpath("data/example.jsonl"))
 
 classifier = SklearnClassifier(
     tokenizer=TfidfVectorizer(stop_words=["to"]),
@@ -48,11 +57,13 @@ To achieve this, call the `fit` method with your dataset as an argument.
 
 
 # %%
-classifier.fit(common_collection)
+classifier.fit(common_label_collection)
 matcher = SklearnMatcher(
-    tokenizer=TfidfVectorizer(stop_words=["to"]), dataset=common_collection, namespace_key="skm"
+    tokenizer=TfidfVectorizer(stop_words=["to"]),
+    dataset=common_label_collection,
+    namespace_key="skm",
 )
-matcher.fit(common_collection)
+matcher.fit(common_label_collection)
 
 
 # %%

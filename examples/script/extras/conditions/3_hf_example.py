@@ -8,8 +8,6 @@ for annotating user phrases.
 
 
 # %%
-from pathlib import Path
-
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
 
 from dff.script.core.keywords import (
@@ -53,8 +51,18 @@ model = AutoModelForSequenceClassification.from_pretrained(
     "obsei-ai/sell-buy-intent-classifier-bert-mini"
 )
 
-data_path = Path(__file__).parent.joinpath("data/example.json")
-common_label_collection = Dataset.parse_json(data_path)
+common_label_collection = Dataset.parse_obj(
+    {
+        "items": [
+            {"label": "hello", "samples": ["hello", "hi", "hi there", "hello there"]},
+            {"label": "goodbye", "samples": ["bye", "see you", "goodbye"]},
+            {"label": "food", "samples": ["something to eat", "have a snack", "have a meal"]},
+        ]
+    }
+)
+# You can also parse static files using the Dataset structure:
+# from pathlib import Path
+# common_label_collection = Dataset.parse_json(Path(__file__).parent.joinpath("data/example.json"))
 
 model_1 = HFClassifier(namespace_key="hf_classifier", tokenizer=tokenizer, model=model)
 
