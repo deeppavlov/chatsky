@@ -120,8 +120,7 @@ class DFFProject(BaseParserObject):
                 if isinstance(statement, Assignment):
                     value = statement.children["value"]
                     if isinstance(value, Call):
-                        func = value.resolve_path(("func", ))
-                        func_name = str(func.resolve_name)
+                        func_name = value.func_name
                         if func_name in script_initializers.keys():
                             if call is None:
                                 call = value
