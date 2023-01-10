@@ -582,7 +582,12 @@ class Python(expr, stmt):  # type: ignore
                 for index, child in enumerate(value):
                     if isinstance(child, ast.expr):
                         self.add_child(Expression.from_ast(child), key + "_" + str(index))
-        self.string = remove_suffix(unparse(node), "\n")
+        if unparse.__module__ == "astunparse":
+            self.string = remove_prefix(remove_suffix(unparse(node), "\n"), "\n")
+            # astunparse.unparse adds "\n"
+            # todo: remove this when python3.8 support is dropped
+        else:
+            self.string = unparse(node)
         self.type = node.__class__.__name__
 
     def dump(self, current_indent=0, indent=4) -> str:
