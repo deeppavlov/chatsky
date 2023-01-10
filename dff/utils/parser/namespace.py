@@ -1,7 +1,6 @@
 import typing as tp
 import ast
 from pathlib import Path
-from itertools import pairwise
 
 from .base_parser_object import BaseParserObject, cached_property, stmt, Statement, Assignment, Import, ImportFrom, Python
 
@@ -65,9 +64,11 @@ class Namespace(BaseParserObject):
         if len(statements) == 0:
             return "\n"
         result = [statements[0].dump()]
-        for first, second in pairwise(statements):
-            result.append(max(get_newline_count(first), get_newline_count(second)) * "\n")
-            result.append(str(second))
+        previous_stmt = statements[0]
+        for current_stmt in statements[1:]:
+            result.append(max(get_newline_count(previous_stmt), get_newline_count(current_stmt)) * "\n")
+            result.append(current_stmt.dump())
+            previous_stmt = current_stmt
         return "".join(result) + "\n"
 
     def dump(self, current_indent=0, indent=4, object_filter: tp.Set[str] = None) -> str:
