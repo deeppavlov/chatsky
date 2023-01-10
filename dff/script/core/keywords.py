@@ -46,15 +46,6 @@ class Keywords(Enum):
         The keyword specifying the result which is returned to the user after getting to the node.
         Value corresponding to the `RESPONSE` key can have any data type.
 
-    PROCESSING: Enum(auto)
-        The keyword specifying the preprocessing that is called before the response generation.
-        The value that corresponds to the `PROCESSING` key must have the `dict` type:
-
-        `{"PROC_0": proc_func_0, ..., "PROC_N": proc_func_N}`,
-
-        where `"PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
-        The order of `proc_func_i` calls is defined by the order  in which the preprocessing `dict` is defined.
-
     MISC: Enum(auto)
         The keyword specifying `dict` containing extra data,
         which were not aimed to be used in the standard functions of `DFE`.
@@ -63,6 +54,28 @@ class Keywords(Enum):
         `{"VAR_KEY_0": VAR_VALUE_0, ..., "VAR_KEY_N": VAR_VALUE_N}`,
 
         where `"VAR_KEY_0"` is an arbitrary name of the value which is saved into the `MISC`.
+
+    PRE_RESPONSE_PROCESSING: Enum(auto)
+        The keyword specifying the preprocessing that is called before the response generation.
+        The value that corresponds to the `PRE_RESPONSE_PROCESSING` key must have the `dict` type:
+
+        `{"PRE_RESPONSE_PROC_0": pre_response_proc_func_0, ..., "PRE_RESPONSE_PROC_N": pre_response_proc__func_N}`,
+
+        where `"PRE_RESPONSE_PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
+        The order of `pre_response_proc__func_i` calls is defined by the order
+        in which the preprocessing `dict` is defined.
+
+    PRE_TRANSITIONS_PROCESSING: Enum(auto)
+        The keyword specifying the preprocessing that is called before the transition.
+        The value that corresponds to the `PRE_TRANSITIONS_PROCESSING` key must have the `dict` type:
+
+        `{"PRE_TRANSITIONS_PROC_0": pre_transitions_proc_func_0, ...,
+        "PRE_TRANSITIONS_PROC_N": pre_transitions_proc_func_N}`,
+
+        where `"PRE_TRANSITIONS_PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
+        The order of `pre_transitions_proc_func_i` calls is defined by the order
+        in which the preprocessing `dict` is defined.
+
     """
 
     GLOBAL = auto()
