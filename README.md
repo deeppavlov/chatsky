@@ -1,7 +1,10 @@
 
 # Dialog Flow Framework
 
-The Dialog Flow Framework (DFF) allows you to write conversational services. The service is written by defining a special dialog graph that describes the behavior of the dialog service. The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs. You can use it in such services for writing skills for Amazon Alexa and etc, chat-bots for social networks, websites call-centers and etc. 
+The Dialog Flow Framework (DFF) allows you to write conversational services.
+The service is written by defining a special dialog graph that describes the behavior of the dialog service.
+The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs.
+You can use it in services such as writing skills for Amazon Alexa, etc., chatbots for social networks, website call centers, etc.
 
 [![Documentation Status](https://readthedocs.org/projects/dialog-flow-engine/badge/?version=latest)](https://readthedocs.org/projects/dialog-flow-engine/badge/?version=latest)
 [![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions)
@@ -11,8 +14,11 @@ The Dialog Flow Framework (DFF) allows you to write conversational services. The
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
 [![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
-# Quick Start -- dff
+# Quick Start
 ## Installation
+
+DFF can be installed via pip:
+
 ```bash
 pip install dff
 ```
@@ -24,16 +30,21 @@ from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor
 import dff.script.conditions.std_conditions as cnd
 from typing import Union
 
-# create script of dialog
+# create a dialog script
 script = {
-    GLOBAL: {TRANSITIONS: {("flow", "node_hi"): cnd.exact_match("Hi"), ("flow", "node_ok"): cnd.true()}},
+    GLOBAL: {
+        TRANSITIONS: {
+            ("flow", "node_hi"): cnd.exact_match("Hi"),
+            ("flow", "node_ok"): cnd.true()
+        }
+    },
     "flow": {
         "node_hi": {RESPONSE: "Hi!!!"},
         "node_ok": {RESPONSE: "Okey"},
     },
 }
 
-# init actor
+# actor initialization
 actor = Actor(script, start_label=("flow", "node_hi"))
 
 
@@ -43,11 +54,11 @@ def turn_handler(in_request: str, ctx: Union[Context, dict], actor: Actor):
     ctx = Context.cast(ctx)
     # Add in current context a next request of user
     ctx.add_request(in_request)
-    # pass the context into actor and it returns updated context with actor response
+    # Pass the context into actor and it returns updated context with actor response
     ctx = actor(ctx)
-    # get last actor response from the context
+    # Get last actor response from the context
     out_response = ctx.last_response
-    # the next condition branching needs for testing
+    # The next condition branching needs for testing
     return out_response, ctx
 
 
@@ -71,32 +82,33 @@ Okey
 
 ```
 
-To get more advanced examples, take a look at [examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
+To get more advanced examples, take a look at
+[examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
 
-# Quick Start -- db_connector
+# DataBase Connectors
 ## Description
 
-Dialog Flow DB Connector allows you to save and retrieve user dialogue states (in the form of a `Context` object) using various database backends. 
+Dialog Flow DB Connector allows you to save and retrieve user dialogue states
+(in the form of a `Context` object) using various database backends. 
 
-Currently, the supported options are: 
-* [json](https://www.json.org/json-en.html)
+The following options are currently supported:
+* [JSON](https://www.json.org/json-en.html)
 * [pickle](https://docs.python.org/3/library/pickle.html)
 * [shelve](https://docs.python.org/3/library/shelve.html)
-* [Sqlite](https://www.sqlite.org/index.html)
-* [Postgresql](https://www.postgresql.org/)
+* [SQLite](https://www.sqlite.org/index.html)
+* [PostgreSQL](https://www.postgresql.org/)
 * [MySQL](https://www.mysql.com/)
 * [MongoDB](https://www.mongodb.com/)
 * [Redis](https://redis.io/)
-* [YDB](https://ydb.tech/)
+* [Yandex DataBase](https://ydb.tech/)
 
-Aside from this, we offer some interfaces for saving data to your local file system. These are not meant to be used in production, but can be helpful for prototyping your application.
+Aside from this, we offer some interfaces for saving data to your local file system.
+These are not meant to be used in production, but can be helpful for prototyping your application.
 
 ## Installation
-```bash
-pip install dff
-```
 
-Please, note that if you are going to use one of the database backends, you will have to specify an extra or install the corresponding requirements yourself.
+Please, note that if you are going to use one of the database backends,
+you will have to specify an extra or install the corresponding requirements yourself.
 ```bash
 pip install dff[redis]
 pip install dff[mongodb]
@@ -131,7 +143,8 @@ def handle_request(request):
 
 ```
 
-To get more advanced examples, take a look at [examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
+To get more advanced examples, take a look at
+[examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples/context_storages) on GitHub.
 
 # Contributing to the Dialog Flow Framework
 
