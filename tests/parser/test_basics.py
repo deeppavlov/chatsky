@@ -91,6 +91,7 @@ def test_import_from():
     dff_project = DFFProject([namespace1, namespace2, namespace3], validate=False)
 
     assert namespace2["a"] == Python.from_str("1")
+    assert Python.from_str("1") == namespace2["a"]
     assert dff_project["namespace1"]["n2"].absolute["a"] == Python.from_str("1")
 
 
