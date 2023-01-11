@@ -48,14 +48,20 @@ toy_script = {
 happy_path = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),
     (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
-    (Message(text="Let's talk about music."), Message(text="Sorry, I can not talk about music now.")),
+    (
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
+    ),
     (Message(text="Ok, goodbye."), Message(text="bye")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
     (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
-    (Message(text="Let's talk about music."), Message(text="Sorry, I can not talk about music now.")),
+    (
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
+    ),
     (Message(text="Ok, goodbye."), Message(text="bye")),
 )
 

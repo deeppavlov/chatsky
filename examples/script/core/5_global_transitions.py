@@ -54,7 +54,9 @@ toy_script = {
         }
     },
     "global_flow": {
-        "start_node": {RESPONSE: Message()},  # This is an initial node, it doesn't need a `RESPONSE`.
+        "start_node": {
+            RESPONSE: Message()
+        },  # This is an initial node, it doesn't need a `RESPONSE`.
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: Message(text="Ooops"),
@@ -87,17 +89,22 @@ toy_script = {
     },
     "music_flow": {
         "node1": {
-            RESPONSE: Message(text="I love `System of a Down` group," " would you like to talk about it?"),
+            RESPONSE: Message(
+                text="I love `System of a Down` group," " would you like to talk about it?"
+            ),
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
         "node2": {
-            RESPONSE: Message(text="System of a Down is an Armenian-American"
-                                   "heavy metal band formed in 1994.")
+            RESPONSE: Message(
+                text="System of a Down is an Armenian-American" "heavy metal band formed in 1994."
+            )
             # Only the global transitions setting are used in this node.
         },
         "node3": {
-            RESPONSE: Message(text="The band achieved commercial success"
-                                   "with the release of five studio albums."),
+            RESPONSE: Message(
+                text="The band achieved commercial success"
+                "with the release of five studio albums."
+            ),
             TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
         },
         "node4": {
@@ -112,94 +119,49 @@ toy_script = {
 
 # testing
 happy_path = (
-    (
-        Message(text="hi"),
-        Message(text="Hi, how are you?")
-    ),
-    (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?")
-    ),
+    (Message(text="hi"), Message(text="Hi, how are you?")),
+    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
     (
         Message(text="talk about music."),
-        Message(text="I love `System of a Down` group, would you like to talk about it?")
+        Message(text="I love `System of a Down` group, would you like to talk about it?"),
     ),
     (
         Message(text="yes"),
-        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994.")
+        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994."),
     ),
     (
         Message(text="next"),
-        Message(text="The band achieved commercial successwith the release of five studio albums.")
+        Message(text="The band achieved commercial successwith the release of five studio albums."),
     ),
     (
         Message(text="back"),
-        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994.")
+        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994."),
     ),
     (
         Message(text="repeat"),
-        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994.")
+        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994."),
     ),
     (
         Message(text="next"),
-        Message(text="The band achieved commercial successwith the release of five studio albums.")
+        Message(text="The band achieved commercial successwith the release of five studio albums."),
     ),
-    (
-        Message(text="next"),
-        Message(text="That's all what I know.")
-    ),
-    (
-        Message(text="next"),
-        Message(text="Good. What do you want to talk about?")
-    ),
-    (
-        Message(text="previous"),
-        Message(text="That's all what I know.")
-    ),
-    (
-        Message(text="next time"),
-        Message(text="bye")
-    ),
-    (
-        Message(text="stop"),
-        Message(text="Ooops")
-    ),
-    (
-        Message(text="previous"),
-        Message(text="bye")
-    ),
-    (
-        Message(text="stop"),
-        Message(text="Ooops")
-    ),
-    (
-        Message(text="nope"),
-        Message(text="Ooops")
-    ),
-    (
-        Message(text="hi"),
-        Message(text="Hi, how are you?")
-    ),
-    (
-        Message(text="stop"),
-        Message(text="Ooops")
-    ),
-    (
-        Message(text="previous"),
-        Message(text="Hi, how are you?")
-    ),
-    (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?")
-    ),
+    (Message(text="next"), Message(text="That's all what I know.")),
+    (Message(text="next"), Message(text="Good. What do you want to talk about?")),
+    (Message(text="previous"), Message(text="That's all what I know.")),
+    (Message(text="next time"), Message(text="bye")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="previous"), Message(text="bye")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="nope"), Message(text="Ooops")),
+    (Message(text="hi"), Message(text="Hi, how are you?")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="previous"), Message(text="Hi, how are you?")),
+    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
     (
         Message(text="let's talk about something."),
-        Message(text="Sorry, I can not talk about that now.")
+        Message(text="Sorry, I can not talk about that now."),
     ),
-    (
-        Message(text="Ok, goodbye."),
-        Message(text="bye")
-    )
+    (Message(text="Ok, goodbye."), Message(text="bye")),
 )
 
 # %%

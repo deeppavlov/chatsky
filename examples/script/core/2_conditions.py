@@ -121,7 +121,9 @@ toy_script = {
         },
         "node4": {
             RESPONSE: Message(text="bye"),
-            TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text="hello"))])},
+            TRANSITIONS: {
+                "node1": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text="hello"))])
+            },
             # Mix sequence of condtions by `cnd.any`.
             # `any` is alias `aggregate` with
             # `aggregate_func` == `any`.
@@ -163,7 +165,10 @@ happy_path = (
     (Message(text="one"), Message(text="Ooops")),  # fallback_node -> fallback_node
     (Message(text="help"), Message(text="Ooops")),  # fallback_node -> fallback_node
     (Message(text="nope"), Message(text="Ooops")),  # fallback_node -> fallback_node
-    (Message(misc={"some_key": "some_value"}), Message(text="Hi, how are you?")),  # fallback_node -> node1
+    (
+        Message(misc={"some_key": "some_value"}),
+        Message(text="Hi, how are you?"),
+    ),  # fallback_node -> node1
     (
         Message(text="i'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),

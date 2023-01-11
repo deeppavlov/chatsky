@@ -5,7 +5,7 @@ This module contains the Pipeline class.
 """
 import asyncio
 import logging
-from typing import Any, Union, List, Dict, Optional, Hashable
+from typing import Union, List, Dict, Optional, Hashable
 
 from dff.context_storages import DBAbstractContextStorage
 from dff.script import Actor, Script, Context

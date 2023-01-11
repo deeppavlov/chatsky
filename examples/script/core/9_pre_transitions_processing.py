@@ -42,7 +42,8 @@ def get_previous_node_response_for_response_processing(
 ) -> Context:
     processed_node = ctx.current_node
     processed_node.response = Message(
-        text=f"previous={ctx.misc['previous_node_response'].text}:" f" current={processed_node.response.text}"
+        text=f"previous={ctx.misc['previous_node_response'].text}:"
+        f" current={processed_node.response.text}"
     )
     ctx.overwrite_current_node_in_processing(processed_node)
     return ctx
@@ -74,26 +75,11 @@ toy_script = {
 
 # testing
 happy_path = (
-    (
-        Message(text="1"),
-        Message(text="previous=None: current=first")
-    ),
-    (
-        Message(text="2"),
-        Message(text="previous=first: current=second")
-    ),
-    (
-        Message(text="3"),
-        Message(text="previous=second: current=third")
-    ),
-    (
-        Message(text="4"),
-        Message(text="previous=third: current=fourth")
-    ),
-    (
-        Message(text="5"),
-        Message(text="previous=fourth: current=fifth")
-    )
+    (Message(text="1"), Message(text="previous=None: current=first")),
+    (Message(text="2"), Message(text="previous=first: current=second")),
+    (Message(text="3"), Message(text="previous=second: current=third")),
+    (Message(text="4"), Message(text="previous=third: current=fourth")),
+    (Message(text="5"), Message(text="previous=fourth: current=fifth")),
 )
 
 

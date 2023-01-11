@@ -5,8 +5,6 @@
 """
 
 # %%
-from typing import NamedTuple
-
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
@@ -45,7 +43,7 @@ toy_script = {
             RESPONSE: Message(
                 **{
                     "text": "Starting test! What's 2 + 2?"
-                            " (type in the index of the correct option)",
+                    " (type in the index of the correct option)",
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
@@ -53,7 +51,7 @@ toy_script = {
                                 Button(text="4", payload="4"),
                             ]
                         ),
-                    }
+                    },
                 }
             ),
             TRANSITIONS: {
@@ -65,7 +63,7 @@ toy_script = {
             RESPONSE: Message(
                 **{
                     "text": "Next question: what's 6 * 8?"
-                            " (type in the index of the correct option)",
+                    " (type in the index of the correct option)",
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
@@ -73,7 +71,7 @@ toy_script = {
                                 Button(text="48", payload="48"),
                             ]
                         ),
-                    }
+                    },
                 }
             ),
             TRANSITIONS: {
@@ -92,7 +90,7 @@ toy_script = {
                                 Button(text="283", payload="283"),
                             ]
                         ),
-                    }
+                    },
                 }
             ),
             TRANSITIONS: {
@@ -112,8 +110,7 @@ happy_path = (
         Message(text="Hi"),
         Message(
             **{
-                "text": "Starting test! What's 2 + 2?"
-                        " (type in the index of the correct option)",
+                "text": "Starting test! What's 2 + 2?" " (type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -121,7 +118,7 @@ happy_path = (
                             Button(text="4", payload="4"),
                         ]
                     )
-                }
+                },
             }
         ),
     ),
@@ -129,8 +126,7 @@ happy_path = (
         Message(text="0"),
         Message(
             **{
-                "text": "Starting test! What's 2 + 2?"
-                        " (type in the index of the correct option)",
+                "text": "Starting test! What's 2 + 2?" " (type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -138,7 +134,7 @@ happy_path = (
                             Button(text="4", payload="4"),
                         ]
                     ),
-                }
+                },
             }
         ),
     ),
@@ -146,8 +142,7 @@ happy_path = (
         Message(text="1"),
         Message(
             **{
-                "text": "Next question: what's 6 * 8?"
-                        " (type in the index of the correct option)",
+                "text": "Next question: what's 6 * 8?" " (type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -155,7 +150,7 @@ happy_path = (
                             Button(text="48", payload="48"),
                         ]
                     ),
-                }
+                },
             }
         ),
     ),
@@ -163,8 +158,7 @@ happy_path = (
         Message(text="0"),
         Message(
             **{
-                "text": "Next question: what's 6 * 8?"
-                        " (type in the index of the correct option)",
+                "text": "Next question: what's 6 * 8?" " (type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -172,7 +166,7 @@ happy_path = (
                             Button(text="48", payload="48"),
                         ]
                     ),
-                }
+                },
             }
         ),
     ),
@@ -188,7 +182,7 @@ happy_path = (
                             Button(text="283", payload="283"),
                         ]
                     ),
-                }
+                },
             }
         ),
     ),
@@ -204,7 +198,7 @@ happy_path = (
                             Button(text="283", payload="283"),
                         ]
                     ),
-                }
+                },
             }
         ),
     ),

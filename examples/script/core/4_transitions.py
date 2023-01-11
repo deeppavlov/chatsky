@@ -147,15 +147,18 @@ toy_script = {
     },
     "music_flow": {
         "node1": {
-            RESPONSE: Message(text="I love `System of a Down` group," " would you like to talk about it?"),
+            RESPONSE: Message(
+                text="I love `System of a Down` group," " would you like to talk about it?"
+            ),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
             },
         },
         "node2": {
-            RESPONSE: Message(text="System of a Down is an Armenian-American"
-                                   " heavy metal band formed in 1994."),
+            RESPONSE: Message(
+                text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."
+            ),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.repeat(): cnd.regexp(r"repeat", re.IGNORECASE),
@@ -163,8 +166,10 @@ toy_script = {
             },
         },
         "node3": {
-            RESPONSE: Message(text="The band achieved commercial success"
-                                   " with the release of five studio albums."),
+            RESPONSE: Message(
+                text="The band achieved commercial success"
+                " with the release of five studio albums."
+            ),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
                 lbl.backward(): cnd.regexp(r"back", re.IGNORECASE),
@@ -195,23 +200,33 @@ happy_path = (
     ),
     (
         Message(text="yes"),
-        Message(text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="next"),
-        Message(text="The band achieved commercial success" " with the release of five studio albums."),
+        Message(
+            text="The band achieved commercial success" " with the release of five studio albums."
+        ),
     ),
     (
         Message(text="back"),
-        Message(text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="repeat"),
-        Message(text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is an Armenian-American" " heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="next"),
-        Message(text="The band achieved commercial success" " with the release of five studio albums."),
+        Message(
+            text="The band achieved commercial success" " with the release of five studio albums."
+        ),
     ),
     (Message(text="next"), Message(text="That's all what I know.")),
     (Message(text="next"), Message(text="Good. What do you want to talk about?")),
@@ -225,7 +240,10 @@ happy_path = (
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="previous"), Message(text="Hi, how are you?")),
     (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
-    (Message(text="let's talk about something."), Message(text="Sorry, I can not talk about that now.")),
+    (
+        Message(text="let's talk about something."),
+        Message(text="Sorry, I can not talk about that now."),
+    ),
     (Message(text="Ok, goodbye."), Message(text="Bye")),
 )
 

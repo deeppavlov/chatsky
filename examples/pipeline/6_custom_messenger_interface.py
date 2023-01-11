@@ -111,9 +111,9 @@ def purify_request(ctx: Context):
 
 
 def cat_response2webpage(ctx: Context):
-    ctx.last_response = Message(misc={
-        "webpage": construct_webpage_by_response(ctx.last_response.text)
-    })
+    ctx.last_response = Message(
+        misc={"webpage": construct_webpage_by_response(ctx.last_response.text)}
+    )
 
 
 # %%

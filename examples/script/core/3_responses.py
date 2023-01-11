@@ -10,7 +10,6 @@ Let's do all the necessary imports from `dff`.
 # %%
 import re
 import random
-from typing import Any
 
 from dff.script import TRANSITIONS, RESPONSE, Actor, Context, Message
 import dff.script.responses as rsp
@@ -68,10 +67,12 @@ def upper_case_response(response: Message):
 
 
 def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
-    return Message(misc={
-        "previous_node": list(ctx.labels.values())[-2],
-        "last_request": ctx.last_request,
-    })
+    return Message(
+        misc={
+            "previous_node": list(ctx.labels.values())[-2],
+            "last_request": ctx.last_request,
+        }
+    )
 
 
 # %%
@@ -84,7 +85,9 @@ toy_script = {
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice([Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]),
+            RESPONSE: rsp.choice(
+                [Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]
+            ),
             # Random choice from candicate list.
             TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
         },
@@ -123,29 +126,37 @@ happy_path = (
     (Message(text="Hi"), Message(text="Hi, what is up?")),  # node4 -> node1
     (
         Message(text="stop"),
-        Message(misc={"previous_node": ("greeting_flow", "node1"), "last_request": Message(text="stop")}),
+        Message(
+            misc={"previous_node": ("greeting_flow", "node1"), "last_request": Message(text="stop")}
+        ),
     ),
     # node1 -> fallback_node
     (
         Message(text="one"),
-        Message(misc={
-            "previous_node": ("greeting_flow", "fallback_node"),
-            "last_request": Message(text="one"),
-        }),
+        Message(
+            misc={
+                "previous_node": ("greeting_flow", "fallback_node"),
+                "last_request": Message(text="one"),
+            }
+        ),
     ),  # f_n->f_n
     (
         Message(text="help"),
-        Message(misc={
-            "previous_node": ("greeting_flow", "fallback_node"),
-            "last_request": Message(text="help"),
-        }),
+        Message(
+            misc={
+                "previous_node": ("greeting_flow", "fallback_node"),
+                "last_request": Message(text="help"),
+            }
+        ),
     ),  # f_n->f_n
     (
         Message(text="nope"),
-        Message(misc={
-            "previous_node": ("greeting_flow", "fallback_node"),
-            "last_request": Message(text="nope"),
-        }),
+        Message(
+            misc={
+                "previous_node": ("greeting_flow", "fallback_node"),
+                "last_request": Message(text="nope"),
+            }
+        ),
     ),  # f_n->f_n
     (Message(text="Hi"), Message(text="Hello, how are you?")),  # fallback_node -> node1
     (

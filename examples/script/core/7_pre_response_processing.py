@@ -100,30 +100,12 @@ toy_script = {
 
 # testing
 happy_path = (
-    (
-        Message(),
-        Message(text="l3_local: l2_local: l1_global: first")
-    ),
-    (
-        Message(),
-        Message(text="l3_local: l2_local: l1_step_1: second")
-    ),
-    (
-        Message(),
-        Message(text="l3_local: l2_step_2: l1_global: third")
-    ),
-    (
-        Message(),
-        Message(text="l3_step_3: l2_local: l1_global: fourth")
-    ),
-    (
-        Message(),
-        Message(text="l4_step_4: l3_local: l2_local: l1_global: fifth")
-    ),
-    (
-        Message(),
-        Message(text="l3_local: l2_local: l1_global: first")
-    )
+    (Message(), Message(text="l3_local: l2_local: l1_global: first")),
+    (Message(), Message(text="l3_local: l2_local: l1_step_1: second")),
+    (Message(), Message(text="l3_local: l2_step_2: l1_global: third")),
+    (Message(), Message(text="l3_step_3: l2_local: l1_global: fourth")),
+    (Message(), Message(text="l4_step_4: l3_local: l2_local: l1_global: fifth")),
+    (Message(), Message(text="l3_local: l2_local: l1_global: first")),
 )
 
 

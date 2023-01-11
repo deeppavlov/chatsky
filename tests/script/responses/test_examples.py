@@ -3,7 +3,7 @@ import importlib
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing import check_happy_path, generics_comparer, default_comparer
+from dff.utils.testing import check_happy_path, default_comparer
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
