@@ -16,6 +16,7 @@ from dff.script import (
     PRE_RESPONSE_PROCESSING,
     Context,
     Actor,
+    Message,
 )
 import dff.script.labels as lbl
 import dff.script.conditions as cnd
@@ -31,7 +32,7 @@ from dff.utils.testing.common import (
 # %%
 def add_label_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
     processed_node = ctx.current_node
-    processed_node.response = f"{ctx.last_label}: {processed_node.response}"
+    processed_node.response = Message(text=f"{ctx.last_label}: {processed_node.response.text}")
     ctx.overwrite_current_node_in_processing(processed_node)
     return ctx
 
@@ -39,7 +40,7 @@ def add_label_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context
 def add_prefix(prefix):
     def add_prefix_processing(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
         processed_node = ctx.current_node
-        processed_node.response = f"{prefix}: {processed_node.response}"
+        processed_node.response = Message(text=f"{prefix}: {processed_node.response.text}")
         ctx.overwrite_current_node_in_processing(processed_node)
         return ctx
 
@@ -56,8 +57,8 @@ can be used in `GLOBAL`, `LOCAL` or nodes.
 # %%
 toy_script = {
     "root": {
-        "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
-        "fallback": {RESPONSE: "the end"},
+        "start": {RESPONSE: Message(), TRANSITIONS: {("flow", "step_0"): cnd.true()}},
+        "fallback": {RESPONSE: Message(text="the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
@@ -72,25 +73,25 @@ toy_script = {
                 "proc_name_3": add_prefix("l3_local"),
             }
         },
-        "step_0": {RESPONSE: "first", TRANSITIONS: {lbl.forward(): cnd.true()}},
+        "step_0": {RESPONSE: Message(text="first"), TRANSITIONS: {lbl.forward(): cnd.true()}},
         "step_1": {
             PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
-            RESPONSE: "second",
+            RESPONSE: Message(text="second"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_2": {
             PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_step_2")},
-            RESPONSE: "third",
+            RESPONSE: Message(text="third"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_3": {
             PRE_RESPONSE_PROCESSING: {"proc_name_3": add_prefix("l3_step_3")},
-            RESPONSE: "fourth",
+            RESPONSE: Message(text="fourth"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_4": {
             PRE_RESPONSE_PROCESSING: {"proc_name_4": add_prefix("l4_step_4")},
-            RESPONSE: "fifth",
+            RESPONSE: Message(text="fifth"),
             TRANSITIONS: {"step_0": cnd.true()},
         },
     },
@@ -99,12 +100,30 @@ toy_script = {
 
 # testing
 happy_path = (
-    ("", "l3_local: l2_local: l1_global: first"),
-    ("", "l3_local: l2_local: l1_step_1: second"),
-    ("", "l3_local: l2_step_2: l1_global: third"),
-    ("", "l3_step_3: l2_local: l1_global: fourth"),
-    ("", "l4_step_4: l3_local: l2_local: l1_global: fifth"),
-    ("", "l3_local: l2_local: l1_global: first"),
+    (
+        Message(),
+        Message(text="l3_local: l2_local: l1_global: first")
+    ),
+    (
+        Message(),
+        Message(text="l3_local: l2_local: l1_step_1: second")
+    ),
+    (
+        Message(),
+        Message(text="l3_local: l2_step_2: l1_global: third")
+    ),
+    (
+        Message(),
+        Message(text="l3_step_3: l2_local: l1_global: fourth")
+    ),
+    (
+        Message(),
+        Message(text="l4_step_4: l3_local: l2_local: l1_global: fifth")
+    ),
+    (
+        Message(),
+        Message(text="l3_local: l2_local: l1_global: first")
+    )
 )
 
 

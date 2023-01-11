@@ -99,7 +99,7 @@ toy_script = {
         "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -121,7 +121,7 @@ toy_script = {
         },
         "node4": {
             RESPONSE: Message(text="bye"),
-            TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match("hello")])},
+            TRANSITIONS: {"node1": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text="hello"))])},
             # Mix sequence of condtions by `cnd.any`.
             # `any` is alias `aggregate` with
             # `aggregate_func` == `any`.

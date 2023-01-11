@@ -13,24 +13,24 @@ def test_conditions():
     failed_ctx.add_label(label)
     actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 
-    assert cnd.exact_match("text")(ctx, actor)
-    assert not cnd.exact_match("text1")(ctx, actor)
+    assert cnd.exact_match(Message(text="text"))(ctx, actor)
+    assert not cnd.exact_match(Message(text="text1"))(ctx, actor)
 
     assert cnd.regexp("t.*t")(ctx, actor)
     assert not cnd.regexp("t.*t1")(ctx, actor)
     assert not cnd.regexp("t.*t1")(failed_ctx, actor)
 
-    assert cnd.agg([cnd.regexp("t.*t"), cnd.exact_match("text")], aggregate_func=all)(ctx, actor)
-    assert not cnd.agg([cnd.regexp("t.*t1"), cnd.exact_match("text")], aggregate_func=all)(ctx, actor)
+    assert cnd.agg([cnd.regexp("t.*t"), cnd.exact_match(Message(text="text"))], aggregate_func=all)(ctx, actor)
+    assert not cnd.agg([cnd.regexp("t.*t1"), cnd.exact_match(Message(text="text"))], aggregate_func=all)(ctx, actor)
 
-    assert cnd.any([cnd.regexp("t.*t1"), cnd.exact_match("text")])(ctx, actor)
-    assert not cnd.any([cnd.regexp("t.*t1"), cnd.exact_match("text1")])(ctx, actor)
+    assert cnd.any([cnd.regexp("t.*t1"), cnd.exact_match(Message(text="text"))])(ctx, actor)
+    assert not cnd.any([cnd.regexp("t.*t1"), cnd.exact_match(Message(text="text1"))])(ctx, actor)
 
-    assert cnd.all([cnd.regexp("t.*t"), cnd.exact_match("text")])(ctx, actor)
-    assert not cnd.all([cnd.regexp("t.*t1"), cnd.exact_match("text")])(ctx, actor)
+    assert cnd.all([cnd.regexp("t.*t"), cnd.exact_match(Message(text="text"))])(ctx, actor)
+    assert not cnd.all([cnd.regexp("t.*t1"), cnd.exact_match(Message(text="text"))])(ctx, actor)
 
-    assert cnd.neg(cnd.exact_match("text1"))(ctx, actor)
-    assert not cnd.neg(cnd.exact_match("text"))(ctx, actor)
+    assert cnd.neg(cnd.exact_match(Message(text="text1")))(ctx, actor)
+    assert not cnd.neg(cnd.exact_match(Message(text="text")))(ctx, actor)
 
     assert cnd.has_last_labels(flow_labels=["flow"])(ctx, actor)
     assert not cnd.has_last_labels(flow_labels=["flow1"])(ctx, actor)

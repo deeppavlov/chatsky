@@ -6,11 +6,10 @@ This example shows the global setting of transitions.
 First of all, let's do all the necessary imports from `dff`.
 """
 
-
 # %%
 import re
 
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline
@@ -19,7 +18,6 @@ from dff.utils.testing.common import (
     is_interactive_mode,
     run_interactive_mode,
 )
-
 
 # %% [markdown]
 """
@@ -33,7 +31,6 @@ This node allows to define default global values for all nodes.
 There are `GLOBAL` node and three flows:
 `global_flow`, `greeting_flow`, `music_flow`.
 """
-
 
 # %%
 toy_script = {
@@ -57,10 +54,10 @@ toy_script = {
         }
     },
     "global_flow": {
-        "start_node": {RESPONSE: ""},  # This is an initial node, it doesn't need a `RESPONSE`.
+        "start_node": {RESPONSE: Message()},  # This is an initial node, it doesn't need a `RESPONSE`.
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
-            RESPONSE: "Ooops",
+            RESPONSE: Message(text="Ooops"),
             TRANSITIONS: {lbl.previous(): cnd.regexp(r"previous", re.I)},
             # lbl.previous() is equivalent to
             # ("previous_flow", "previous_node", 1.0)
@@ -68,12 +65,12 @@ toy_script = {
     },
     "greeting_flow": {
         "node1": {
-            RESPONSE: "Hi, how are you?",
+            RESPONSE: Message(text="Hi, how are you?"),
             TRANSITIONS: {"node2": cnd.regexp(r"how are you")},
             # "node2" is equivalent to ("greeting_flow", "node2", 1.0)
         },
         "node2": {
-            RESPONSE: "Good. What do you want to talk about?",
+            RESPONSE: Message(text="Good. What do you want to talk about?"),
             TRANSITIONS: {
                 lbl.forward(0.5): cnd.regexp(r"talk about"),
                 # lbl.forward(0.5) is equivalent to
@@ -82,29 +79,29 @@ toy_script = {
             },
         },
         "node3": {
-            RESPONSE: "Sorry, I can not talk about that now.",
+            RESPONSE: Message(text="Sorry, I can not talk about that now."),
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
         },
-        "node4": {RESPONSE: "bye"},
+        "node4": {RESPONSE: Message(text="bye")},
         # Only the global transitions setting are used in this node.
     },
     "music_flow": {
         "node1": {
-            RESPONSE: "I love `System of a Down` group," " would you like to talk about it?",
+            RESPONSE: Message(text="I love `System of a Down` group," " would you like to talk about it?"),
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
         "node2": {
-            RESPONSE: "System of a Down is an Armenian-American"
-            "heavy metal band formed in 1994."
+            RESPONSE: Message(text="System of a Down is an Armenian-American"
+                                   "heavy metal band formed in 1994.")
             # Only the global transitions setting are used in this node.
         },
         "node3": {
-            RESPONSE: "The band achieved commercial success"
-            "with the release of five studio albums.",
+            RESPONSE: Message(text="The band achieved commercial success"
+                                   "with the release of five studio albums."),
             TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
         },
         "node4": {
-            RESPONSE: "That's all what I know.",
+            RESPONSE: Message(text="That's all what I know."),
             TRANSITIONS: {
                 ("greeting_flow", "node4"): cnd.regexp(r"next time", re.I),
                 ("greeting_flow", "node2"): cnd.regexp(r"next", re.I),
@@ -113,51 +110,97 @@ toy_script = {
     },
 }
 
-
 # testing
 happy_path = (
-    ("hi", "Hi, how are you?"),
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
     (
-        "talk about music.",
-        "I love `System of a Down` group, would you like to talk about it?",
+        Message(text="hi"),
+        Message(text="Hi, how are you?")
     ),
     (
-        "yes",
-        "System of a Down is an Armenian-American" "heavy metal band formed in 1994.",
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?")
     ),
     (
-        "next",
-        "The band achieved commercial success" "with the release of five studio albums.",
+        Message(text="talk about music."),
+        Message(text="I love `System of a Down` group, would you like to talk about it?")
     ),
     (
-        "back",
-        "System of a Down is an Armenian-American" "heavy metal band formed in 1994.",
+        Message(text="yes"),
+        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994.")
     ),
     (
-        "repeat",
-        "System of a Down is an Armenian-American" "heavy metal band formed in 1994.",
+        Message(text="next"),
+        Message(text="The band achieved commercial successwith the release of five studio albums.")
     ),
     (
-        "next",
-        "The band achieved commercial success" "with the release of five studio albums.",
+        Message(text="back"),
+        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994.")
     ),
-    ("next", "That's all what I know."),
-    ("next", "Good. What do you want to talk about?"),
-    ("previous", "That's all what I know."),
-    ("next time", "bye"),
-    ("stop", "Ooops"),
-    ("previous", "bye"),
-    ("stop", "Ooops"),
-    ("nope", "Ooops"),
-    ("hi", "Hi, how are you?"),
-    ("stop", "Ooops"),
-    ("previous", "Hi, how are you?"),
-    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
-    ("let's talk about something.", "Sorry, I can not talk about that now."),
-    ("Ok, goodbye.", "bye"),
+    (
+        Message(text="repeat"),
+        Message(text="System of a Down is an Armenian-Americanheavy metal band formed in 1994.")
+    ),
+    (
+        Message(text="next"),
+        Message(text="The band achieved commercial successwith the release of five studio albums.")
+    ),
+    (
+        Message(text="next"),
+        Message(text="That's all what I know.")
+    ),
+    (
+        Message(text="next"),
+        Message(text="Good. What do you want to talk about?")
+    ),
+    (
+        Message(text="previous"),
+        Message(text="That's all what I know.")
+    ),
+    (
+        Message(text="next time"),
+        Message(text="bye")
+    ),
+    (
+        Message(text="stop"),
+        Message(text="Ooops")
+    ),
+    (
+        Message(text="previous"),
+        Message(text="bye")
+    ),
+    (
+        Message(text="stop"),
+        Message(text="Ooops")
+    ),
+    (
+        Message(text="nope"),
+        Message(text="Ooops")
+    ),
+    (
+        Message(text="hi"),
+        Message(text="Hi, how are you?")
+    ),
+    (
+        Message(text="stop"),
+        Message(text="Ooops")
+    ),
+    (
+        Message(text="previous"),
+        Message(text="Hi, how are you?")
+    ),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?")
+    ),
+    (
+        Message(text="let's talk about something."),
+        Message(text="Sorry, I can not talk about that now.")
+    ),
+    (
+        Message(text="Ok, goodbye."),
+        Message(text="bye")
+    )
 )
-
 
 # %%
 pipeline = Pipeline.from_script(

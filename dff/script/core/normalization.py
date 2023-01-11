@@ -5,7 +5,7 @@ A basic set of functions for normalizing data in a dialog script is placed here.
 """
 import logging
 
-from typing import Union, Callable, Any, Dict
+from typing import Union, Callable, Any, Dict, Optional
 
 from .keywords import GLOBAL, Keywords
 from .context import Context
@@ -97,7 +97,7 @@ def normalize_transitions(
 
 
 @validate_arguments
-def normalize_response(response: Any) -> Callable:
+def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
     """
     This function is used to normalize `response`, if `response` Callable, it is returned, otherwise
     `response` is wrapped to the function and this function is returned.

@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @validate_arguments
-def exact_match(match: Any, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def exact_match(match: Message, *_, **__) -> Callable[..., bool]:
     """
     Returns function handler. This handler returns `True` only if the last user phrase is exactly
     the same as the :py:const:`match`.
@@ -29,7 +29,23 @@ def exact_match(match: Any, *args, **kwargs) -> Callable[[Context, Actor, Any, A
         request = ctx.last_request
         if request is None:
             return False
-        return match == request.text
+        for field in match.__fields__:
+            if field in request.__fields__.keys():
+                if request.__getattribute__(field) != match.__getattribute__(field):
+                    return False
+            else:
+                return False
+        if match.misc is None:
+            return True
+        if request.misc is None:
+            return False
+        for key in match.misc:
+            if key in request.misc.keys():
+                if request.misc[key] != match.misc[key]:
+                    return False
+            else:
+                return False
+        return True
 
     return exact_match_condition_handler
 

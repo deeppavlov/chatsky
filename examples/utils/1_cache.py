@@ -7,7 +7,7 @@
 
 # %%
 from dff.script.conditions import true
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script import Context, Actor, TRANSITIONS, RESPONSE, Message
 from dff.script.labels import repeat
 from dff.pipeline import Pipeline
 from dff.utils.turn_caching import cache
@@ -37,11 +37,11 @@ def cached_response(_):
     return external_data["counter"]
 
 
-def response(ctx: Context, _: Actor, *__, **___):
+def response(ctx: Context, _: Actor, *__, **___) -> Message:
     if ctx.validation:
-        return ""
+        return Message()
     return (
-        f"{cached_response(1)}-{cached_response(2)}-" f"{cached_response(1)}-{cached_response(2)}"
+        Message(text=f"{cached_response(1)}-{cached_response(2)}-" f"{cached_response(1)}-{cached_response(2)}")
     )
 
 
@@ -49,9 +49,9 @@ def response(ctx: Context, _: Actor, *__, **___):
 toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
 
 happy_path = (
-    ("", "1-2-1-2"),
-    ("", "3-4-3-4"),
-    ("", "5-6-5-6"),
+    (Message(), Message(text="1-2-1-2")),
+    (Message(), Message(text="3-4-3-4")),
+    (Message(), Message(text="5-6-5-6")),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
