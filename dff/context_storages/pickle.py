@@ -1,6 +1,6 @@
 """
-pickle
----------------------------
+Pickle
+------
 Provides the pickle-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
@@ -14,11 +14,8 @@ class PickleContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
-    Parameters
-    -----------
-
-    path: str
-        Target file URI. Example: 'pickle://file.pkl'
+    :param path: Target file URI. Example: 'pickle://file.pkl'.
+    :type path: str
     """
 
     def __init__(self, path: str):

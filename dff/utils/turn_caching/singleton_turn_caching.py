@@ -21,7 +21,7 @@ def cache_clear():
 def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
     """
     Decorator function for caching function results in scripts.
-    Works like the standard `functools.lru_cache` function.
+    Works like the standard :py:func:`~functools.lru_cache` function.
     Caches are kept in a library-wide singleton and cleared in the end of each turn.
     """
 
@@ -42,7 +42,7 @@ def lru_cache(maxsize: Optional[int] = None, typed: bool = False) -> Callable:
 def cache(func):
     """
     Decorator function for caching function results in scripts.
-    Works like the standard `functools.cache` function.
+    Works like the standard :py:func:`~functools.cache` function.
     Caches are kept in a library-wide singleton and cleared in the end of each turn.
     """
     return lru_cache(maxsize=None)(func)

@@ -5,7 +5,6 @@ from dff.script import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
-    PROCESSING,
     MISC,
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
@@ -115,7 +114,6 @@ def test_normalize_processing():
 
 def test_normalize_keywords():
     # TODO: Add full check for functions
-    subtest_normalize_keywords(PROCESSING)
     subtest_normalize_keywords(PRE_RESPONSE_PROCESSING)
 
 
@@ -146,7 +144,7 @@ def test_normalize_script():
     node_template = {
         TRANSITIONS: {"node": std_func},
         RESPONSE: Message(text="text"),
-        PROCESSING: {1: std_func},
+        PRE_RESPONSE_PROCESSING: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }

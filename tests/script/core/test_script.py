@@ -6,7 +6,6 @@ from dff.script import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
-    PROCESSING,
     MISC,
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
@@ -123,7 +122,6 @@ def test_node_exec():
 
 
 def test_script():
-    script_test(PROCESSING)
     script_test(PRE_RESPONSE_PROCESSING)
 
 

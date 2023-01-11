@@ -1,11 +1,8 @@
 """
-ydb
----------------------------
-
-| Provides the version of the :py:class:`.DBContextStorage` for YDB.
-
+Yandex DB
+---------
+Provides the version of the :py:class:`.DBContextStorage` for Yandex DataBase.
 """
-
 import os
 from urllib.parse import urlsplit
 
@@ -27,15 +24,12 @@ class YDBContextStorage(DBContextStorage):
     """
     | Version of the :py:class:`.DBContextStorage` for YDB.
 
-    Parameters
-    -----------
-
-    path: str
-        Standard sqlalchemy URI string.
+    :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    table_name: str
-        The name of the table to use.
+    :type path: str
+    :param table_name: The name of the table to use.
+    :type table_name: str
     """
 
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):
