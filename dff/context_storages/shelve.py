@@ -1,6 +1,6 @@
 """
-shelve
----------------------------
+Shelve
+------
 Provides the shelve-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
@@ -15,11 +15,8 @@ class ShelveContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `shelve` as the driver.
 
-    Parameters
-    -----------
-
-    path: str
-        Target file URI. Example: `shelve://file.db`
+    :param path: Target file URI. Example: `shelve://file.db`.
+    :type path: str
     """
 
     def __init__(self, path: str):
