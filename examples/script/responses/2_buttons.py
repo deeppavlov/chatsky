@@ -15,7 +15,6 @@ from dff.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
-    generics_comparer,
 )
 
 
@@ -231,7 +230,6 @@ if __name__ == "__main__":
     check_happy_path(
         pipeline,
         happy_path,
-        generics_comparer,
     )  # For response object with `happy_path` string comparing,
     # a special `generics_comparer` comparator is used
     if is_interactive_mode():

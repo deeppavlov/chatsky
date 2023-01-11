@@ -18,7 +18,6 @@ from dff.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
-    generics_comparer,
 )
 
 
@@ -121,6 +120,6 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path, generics_comparer)
+    check_happy_path(pipeline, happy_path)
     if is_interactive_mode():
         run_interactive_mode(pipeline)
