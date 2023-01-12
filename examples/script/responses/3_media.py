@@ -53,7 +53,9 @@ toy_script = {
             },
         },
         "send_one": {
-            RESPONSE: Message(text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])),
+            RESPONSE: Message(
+                text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
@@ -79,7 +81,9 @@ happy_path = (
     (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
     (
         Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.png"),
-        Message(text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])),
+        Message(
+            text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
+        ),
     ),
     (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
     (Message(text="ok"), Message(text="Please, send me a picture url")),
