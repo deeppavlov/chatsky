@@ -119,10 +119,17 @@ We use `black`, `mypy`, `flake8` as code style checkers and `pytest` as unit-tes
 make test_all
 ```
 
+To run only tests, execute
+```bash
+make test
+```
+
 To make sure that the code satisfies only the style requirements, run
 ```bash
 make lint
 ```
+
+Tests are configured via [`.env_file`](.env_file).
 
 ### Other provided features 
 You can get more info about `make` commands by `help`:
