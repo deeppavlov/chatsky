@@ -108,7 +108,7 @@ def postprocess(ctx: Context, actor: Actor):
     fallback_flow, fallback_node, _ = actor.fallback_label
     received_response = actor.script[fallback_flow][fallback_node].response
     responses_match = received_response == ctx.last_response
-    logger.info(f"actor is{'' if responses_match else ' not'} " "in fallback node")
+    logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
 
 # %%
