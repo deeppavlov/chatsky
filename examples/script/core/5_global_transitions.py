@@ -131,8 +131,9 @@ happy_path = (
     ),
     (
         Message(text="next"),
-        Message(text="The band achieved commercial "
-                     "success with the release of five studio albums."),
+        Message(
+            text="The band achieved commercial success with the release of five studio albums."
+        ),
     ),
     (
         Message(text="back"),
@@ -144,8 +145,9 @@ happy_path = (
     ),
     (
         Message(text="next"),
-        Message(text="The band achieved commercial "
-                     "success with the release of five studio albums."),
+        Message(
+            text="The band achieved commercial success with the release of five studio albums."
+        ),
     ),
     (Message(text="next"), Message(text="That's all what I know.")),
     (Message(text="next"), Message(text="Good. What do you want to talk about?")),

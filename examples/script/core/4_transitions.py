@@ -200,9 +200,7 @@ happy_path = (
     ),
     (
         Message(text="yes"),
-        Message(
-            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
-        ),
+        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ),
     (
         Message(text="next"),
@@ -212,15 +210,11 @@ happy_path = (
     ),
     (
         Message(text="back"),
-        Message(
-            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
-        ),
+        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ),
     (
         Message(text="repeat"),
-        Message(
-            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
-        ),
+        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
     ),
     (
         Message(text="next"),
