@@ -6,10 +6,10 @@ which determine response for each node of a dialog graph.
 This is a standard set of responses.
 """
 import random
-from dff.script import Context, Actor
+from dff.script import Context, Actor, Message
 
 
-def choice(responses: list):
+def choice(responses: list[Message]):
     """
     Function wrapper that takes the list of responses as an input
     and returns handler which outputs a response randomly chosen from that list.
