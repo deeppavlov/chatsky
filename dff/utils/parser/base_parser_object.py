@@ -63,7 +63,6 @@ class BaseParserObject(ABC):
         """Resolve current node if it references another node
 
         :return: `self.absolute` if this is a :py:class:`.ReferenceObject` else `self`
-        :rtype: :py:class:`.BaseParserObject`
         """
         if isinstance(self, ReferenceObject):
             return self.absolute or self
@@ -74,7 +73,6 @@ class BaseParserObject(ABC):
         """A list of objects defined in :py:class:`.Namespace`s that are used inside current node
 
         :return: A mapping from :py:class:`.Namespace`s' names to sets of object names
-        :rtype: dict[str, set[str]]
         """
         result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
@@ -97,10 +95,7 @@ class BaseParserObject(ABC):
         """Add a child node `child` by the name `asname`
 
         :param child: Child node to add
-        :type child: :py:class:`.BaseParserObject`
         :param asname: Name of the child node
-        :type asname: str
-        :return: None
         """
         child.parent = self
         child._name = asname
@@ -110,11 +105,9 @@ class BaseParserObject(ABC):
         """Resolve tree path relative to this node
 
         :param path: A tuple of child names
-        :type path: tuple[str, ...]
         :raises KeyError:
             If a key in `path` cannot be found in children.
         :return: A child path[-1] of a child path[-2] of .. a child path[0] of this object
-        :rtype: :py:class:`.BaseParserObject`
         """
         if len(path) == 0:
             return self
@@ -126,8 +119,6 @@ class BaseParserObject(ABC):
     @cached_property
     def path(self) -> tp.Tuple[str, ...]:
         """Path to this node from the tree root node
-
-        :rtype: tuple[str, ...]
         """
         if self._name is None:
             raise RuntimeError(f"Name is not set: {repr(self)}")
@@ -138,8 +129,6 @@ class BaseParserObject(ABC):
     @cached_property
     def namespace(self) -> 'Namespace':
         """Namespace this object belongs to
-
-        :rtype: :py:class:`.Namespace`
         """
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {repr(self)}")
@@ -148,8 +137,6 @@ class BaseParserObject(ABC):
     @cached_property
     def dff_project(self) -> 'DFFProject':
         """DFFProject this object belongs to
-
-        :rtype: :py:class:`.DFFProject`
         """
         return self.namespace.dff_project
 
@@ -159,13 +146,10 @@ class BaseParserObject(ABC):
         `current_indent` is supposed to be used only when creating new lines.
 
         :param current_indent: Current indentation level (in whitespace number), defaults to 0
-        :type current_indent: int
         :param indent: Indentation increment (in whitespace number), defaults to 4
             If set to None indentation is not applied
-        :type indent: Optional[int]
 
         :return: Representation of the object as a string
-        :rtype: str
         """
         ...
 
@@ -193,7 +177,6 @@ class BaseParserObject(ABC):
         """Construct the object from an :py:class:`ast.stmt` or :py:class:`ast.expr`
 
         :param node: AST node to construct the object from
-        :type node: :py:class:`ast.stmt` | :py:class:`ast.expr`
         :param kwargs:
         :return: Constructed object(s) or None if an object cannot be constructed from `node`
         """
@@ -319,7 +302,6 @@ class ReferenceObject(BaseParserObject, ABC):
         """Try to find the object being referenced by the object.
 
         :return: Referenced object or None if it can't be resolved
-        :rtype: Optional[:py:class:`.BaseParserObject`]
         """
         ...
 
@@ -329,7 +311,6 @@ class ReferenceObject(BaseParserObject, ABC):
         be resolved as well.
 
         :return: A final object that is not :py:class:`.ReferenceObject` or None if any object cannot be resolved
-        :rtype: Optional[:py:class:`.BaseParserObject`]
         """
         resolved = self._resolve_once
         if isinstance(resolved, ReferenceObject):
@@ -345,7 +326,6 @@ class ReferenceObject(BaseParserObject, ABC):
 
         :return:
             :py:meth:`ReferenceObject.absolute` or a BaseParserObject the str of which represents the referenced object
-        :rtype: Optional[:py:class:`.BaseParserObject`]
         """
         ...
 
@@ -362,9 +342,7 @@ def module_name_to_expr(module_name: tp.List[str]) -> tp.Union['Name', 'Attribut
     """Convert a module name in the form of a dot-separated string to an instance of Attribute or Name
 
     :param module_name: a list of strings that represent a module or its objects
-    :type module_name: list[str]
     :return: An instance of an object that would represent `module_name`
-    :rtype: :py:class:`.Name` | :py:class:`.Attribute`
     """
     if len(module_name) == 0:
         raise RuntimeError("Empty name")
@@ -626,28 +604,24 @@ class Dict(expr):
             self.add_child(value, self._value(key))
 
     @staticmethod
-    def _key(str_key) -> str:
+    def _key(str_key: tp.Union[expr, str]) -> str:
         """Get a name which is used to store a child that is a key in the dictionary
 
         :param str_key: An object or a string representation of an object.
             The object represents a key in the dictionary
-        :type str_key: :py:class:`.expr` | str
         :return: Name of a child-key
-        :rtype: str
         """
         if not isinstance(str_key, str):
             str_key = str(str_key)
         return "key_" + str_key
 
     @staticmethod
-    def _value(str_value) -> str:
+    def _value(str_value: tp.Union[expr, str]) -> str:
         """Get a name which is used to store a child that is a value in the dictionary
 
         :param str_value: An object or a string representation of an object.
             The object represents a value in the dictionary
-        :type str_value: :py:class:`.expr` | str
         :return: Name of a child-value
-        :rtype: str
         """
         if not isinstance(str_value, str):
             str_value = str(str_value)
@@ -658,9 +632,7 @@ class Dict(expr):
         """Get a string representation of a key that is associated with a child under the name `child_name`
 
         :param child_name: A name of a child
-        :type child_name: str
         :return: A string representation of the corresponding key
-        :rtype: str
         """
         if child_name.startswith("value_"):
             return child_name[len("value_"):]
@@ -672,9 +644,7 @@ class Dict(expr):
         """Get a key by the value
 
         :param value: Value stored in a dictionary
-        :type value: :py:class:`.expr`
         :return: A key that is associated with the value
-        :rtype: :py:class:`.expr`
         """
         child_name = value._name
         if child_name is None:
@@ -683,24 +653,18 @@ class Dict(expr):
 
     def keys(self) -> tp.Iterator[expr]:
         """An iterator over keys in the dictionary
-
-        :rtype: Iterable[:py:class:`.expr`]
         """
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)]
 
     def values(self) -> tp.Iterator[expr]:
         """An iterator over values in the dictionary
-
-        :rtype: Iterable[:py:class:`.expr`]
         """
         for _, key_str in self.__keys:
             yield self.children[self._value(key_str)]
 
     def items(self) -> tp.Iterator[tp.Tuple[expr, expr]]:
         """An iterator over tuples of keys and values in the dictionary
-
-        :rtype: Iterable[tuple[:py:class:`.expr`, :py:class:`.expr`]]
         """
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)], self.children[self._value(key_str)]
@@ -708,8 +672,6 @@ class Dict(expr):
     @cached_property
     def _keys(self) -> tp.Dict[expr, str]:
         """A mapping from dictionary keys to their string representations
-
-        :rtype: dict[:py:class:`.expr`, str]
         """
         result = {}
         for key, value in self.__keys:
@@ -738,9 +700,7 @@ class Dict(expr):
         """Get value in the dictionary
 
         :param item: Either a key or a string representation of a key
-        :type item: :py:class:`.expr` | str
         :return: Value under the key
-        :rtype: :py:class:`.expr`
         :raises TypeError:
             If the type of `item` is not :py:class:`.BaseParserObject` nor `str`
         :raises KeyError:
