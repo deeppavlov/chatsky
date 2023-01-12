@@ -1,5 +1,5 @@
 from dff.script import Actor
-from dff.script import TRANSITIONS, RESPONSE
+from dff.script import TRANSITIONS, MISC
 from something import some_func, some_var
 from .transitions import transitions
 import variables
@@ -20,7 +20,10 @@ script = {
             }
         },
         "label": {
-            TRANSITIONS: transitions[7]
+            TRANSITIONS: transitions[7],
+            MISC: {
+                1: {2: 7}[{3: 2}[3]]
+            }
         },
         "another": {
             TRANSITIONS: transitions[variables.number]

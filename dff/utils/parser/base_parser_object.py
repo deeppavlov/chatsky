@@ -154,19 +154,20 @@ class BaseParserObject(ABC):
         return self.namespace.dff_project
 
     @abstractmethod
-    def dump(self, current_indent=0, indent=4) -> str:
-        """Dump object as string
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
+        """Dump object as string. `current_indent` should already be applied to the current line by the node's parent.
+        `current_indent` is supposed to be used only when creating new lines.
 
         :param current_indent: Current indentation level (in whitespace number), defaults to 0
         :type current_indent: int
         :param indent: Indentation increment (in whitespace number), defaults to 4
             If set to None indentation is not applied
-        :type indent: int
+        :type indent: Optional[int]
 
         :return: Representation of the object as a string
         :rtype: str
         """
-        ...  # todo: replace str in all dump defs with dump calls
+        ...
 
     def __repr__(self) -> str:
         return self.__class__.__name__ + "(" + self.dump() + ")"
@@ -384,7 +385,7 @@ class Import(stmt, ReferenceObject):
         self.module = module
         self.alias = alias
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return f"import {self.module}" + (f" as {self.alias}" if self.alias else "")
 
     @cached_property
@@ -433,7 +434,7 @@ class ImportFrom(stmt, ReferenceObject):
         self.obj = obj
         self.alias = alias
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return f"from {self.level * '.' + self.module} import {self.obj}" + (f" as {self.alias}" if self.alias else "")
 
     @cached_property
@@ -497,7 +498,7 @@ class Assignment(stmt):
         self.add_child(target, "target")
         self.add_child(value, "value")
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return f"{self.children['target'].dump(current_indent, indent)} = {self.children['value'].dump(current_indent, indent)}"
 
     @classmethod
@@ -543,7 +544,7 @@ class String(expr):
         super().__init__()
         self.string = string
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return repr(self.string)
 
     @classmethod
@@ -590,7 +591,7 @@ class Python(expr, stmt):  # type: ignore
             self.string = unparse(node)
         self.type = node.__class__.__name__
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.string
 
     @classmethod
@@ -715,22 +716,23 @@ class Dict(expr):
             result[key] = value
         return result
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         items = [
+            indent * " " +
             self.children[self._key(key)].dump(
-                current_indent=None if indent is None else (current_indent + indent), indent=indent
+                current_indent=0 if indent is None else (current_indent + indent), indent=indent
             ) +
             ": " + self.children[self._value(key)].dump(
-                current_indent=None if indent is None else (current_indent + indent), indent=indent
+                current_indent=0 if indent is None else (current_indent + indent), indent=indent
             ) +
             "," for _, key in self.__keys
         ]
         if indent is None:
             return "{" + " ".join(items) + "}"
         else:
-            return ("\n" + (current_indent + indent) * " ").join(
-                ["{", *items]
-            ) + "\n" + current_indent * " " + "}"
+            return ("\n" + current_indent * " ").join(
+                ["{", *items, "}"]
+            )
 
     def __getitem__(self, item: tp.Union[expr, str]) -> expr:
         """Get value in the dictionary
@@ -800,7 +802,7 @@ class Name(expr, ReferenceObject):
             return resolved.resolve_name
         return resolved or self
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.name
 
     @classmethod
@@ -850,8 +852,8 @@ class Attribute(expr, ReferenceObject):
             value = value.resolve_name
         return self._resolve_once or Attribute(value, self.attr)
 
-    def dump(self, current_indent=0, indent=4) -> str:
-        return str(self.children["value"]) + "." + self.attr
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
+        return self.children["value"].dump(current_indent, indent) + "." + self.attr
 
     @classmethod
     @tp.overload
@@ -905,8 +907,8 @@ class Subscript(expr, ReferenceObject):
             index = index.resolve_name
         return self._resolve_once or Subscript(value, index)
 
-    def dump(self, current_indent=0, indent=4) -> str:
-        return str(self.children["value"]) + "[" + str(self.children["index"]) + "]"
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
+        return self.children["value"].dump(current_indent, indent) + "[" + self.children["index"].dump(current_indent, indent) + "]"
 
     @classmethod
     @tp.overload
@@ -961,7 +963,7 @@ class Iterable(expr):
         else:
             return self.children[str(item)]
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         if self.type == "list":
             lbr, rbr = "[", "]"
         elif self.type == "tuple":
@@ -970,7 +972,7 @@ class Iterable(expr):
             lbr, rbr = "{", "}"
         else:
             raise RuntimeError(f"{self.type}")
-        return lbr + ", ".join(map(str, self.children.values())) + rbr
+        return lbr + ", ".join([child.dump(current_indent, indent) for child in self.children.values()]) + rbr
 
     @classmethod
     @tp.overload
@@ -1040,13 +1042,13 @@ class Call(expr):
             return str(self.children["func"].resolve_name)
         return str(self.children["func"])
 
-    def dump(self, current_indent=0, indent=4) -> str:
-        return str(self.children["func"]) + "(" + \
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
+        return self.children["func"].dump(current_indent, indent) + "(" + \
                ", ".join(
                    [
-                       str(self.children[arg]) for arg in self.children.keys() if arg.startswith("arg_")
+                       self.children[arg].dump(current_indent, indent) for arg in self.children.keys() if arg.startswith("arg_")
                    ] + [
-                       f"{remove_prefix(keyword, 'keyword_')}={str(self.children[keyword])}" for keyword in self.children.keys() if keyword.startswith("keyword_")
+                       f"{remove_prefix(keyword, 'keyword_')}={self.children[keyword].dump(current_indent, indent)}" for keyword in self.children.keys() if keyword.startswith("keyword_")
                    ]
                ) + ")"
 
@@ -1091,7 +1093,7 @@ class Generator(BaseParserObject):
             self.add_child(if_expr, "if_" + str(index))
         self.is_async = is_async
 
-    def dump(self, current_indent=0, indent=4) -> str:
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         ifs = [f"if {expression.dump(current_indent, indent)}" for key, expression in self.children.items() if key.startswith("if_")]
         return ("async " if self.is_async else "") + f"for {self.children['target'].dump(current_indent, indent)} in {self.children['iter'].dump(current_indent, indent)}" + (" " if ifs else "") + " ".join(ifs)
 
@@ -1145,8 +1147,8 @@ class Comprehension(expr):
         for index, generator in enumerate(generators):
             self.add_child(generator, "gens_" + str(index))
 
-    def dump(self, current_indent=0, indent=4) -> str:
-        gens = [str(gen) for key, gen in self.children.items() if key.startswith("gens_")]
+    def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
+        gens = [gen.dump(current_indent, indent) for key, gen in self.children.items() if key.startswith("gens_")]
         if self.comp_type == "dict":
             return f"{{{self.children['key'].dump(current_indent, indent)}: {self.children['value'].dump(current_indent, indent)}" + (" " if gens else "") + " ".join(gens) + "}"
         else:

@@ -1,6 +1,7 @@
   main:
     Actor: from dff.script import Actor
     TRANSITIONS: from dff.script import TRANSITIONS
+    MISC: from dff.script import MISC
     some_var: from something import some_var
     transitions: from .transitions import transitions
     variables: import variables
@@ -15,6 +16,8 @@
 ?                                  ^
 +         TRANSITIONS: transitions[8]
 ?                                  ^
+          MISC:
+            '1': "{\n    2: 7,\n}[{\n    3: 2,\n}[3]]"
 -       "'another'":
 ?         - --- ^
 +       "'new'":

@@ -1,6 +1,7 @@
 main:
   Actor: from dff.script import Actor
   TRANSITIONS: from dff.script import TRANSITIONS
+  MISC: from dff.script import MISC
   some_var: from something import some_var
   transitions: from .transitions import transitions
   variables: import variables
@@ -12,6 +13,8 @@ main:
           transitions['two']: 'len(transitions[1]) > 0 > -2 > (lambda : -5 + var)() > func()'
       "'label'":
         TRANSITIONS: transitions[7]
+        MISC:
+          '1': "{\n    2: 7,\n}[{\n    3: 2,\n}[3]]"
       "'another'":
         TRANSITIONS: transitions[variables.number]
   actor: Actor(script, start_label=('start_flow', 'start_node'), some_kwarg=another_func)
