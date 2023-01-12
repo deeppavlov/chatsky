@@ -6,7 +6,7 @@ import dff.script.conditions as cnd
 def test_conditions():
     label = ("flow", "node")
     ctx = Context()
-    ctx.add_request(Message(text="text"))
+    ctx.add_request(Message(text="text", misc={}))
     ctx.add_label(label)
     failed_ctx = Context()
     failed_ctx.add_request(Message())
@@ -14,7 +14,11 @@ def test_conditions():
     actor = Actor(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 
     assert cnd.exact_match(Message(text="text"))(ctx, actor)
+    assert cnd.exact_match(Message(text="text", misc={}))(ctx, actor)
+    assert not cnd.exact_match(Message(text="text", misc={1: 1}))(ctx, actor)
     assert not cnd.exact_match(Message(text="text1"))(ctx, actor)
+    assert cnd.exact_match(Message())(ctx, actor)
+    assert not cnd.exact_match(Message(), skip_none=False)(ctx, actor)
 
     assert cnd.regexp("t.*t")(ctx, actor)
     assert not cnd.regexp("t.*t1")(ctx, actor)
