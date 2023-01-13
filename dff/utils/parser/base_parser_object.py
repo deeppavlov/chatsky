@@ -322,7 +322,7 @@ class ReferenceObject(BaseParserObject, ABC):
     @abstractmethod
     def resolve_name(self) -> tp.Optional[BaseParserObject]:
         """Same as :py:meth:`ReferenceObject.absolute` but instead of returning None at failed resolution
-        returns a fictional (not tied to any Namespace) object that represents the location of the referenced object
+        returns a pseudo (not tied to any Namespace) object that represents the location of the referenced object
         e.g. `ImportFrom("from typing import Dict").resolve_name' would return `Attribute(Name("typing")."Dict")`
 
         :return:
@@ -973,6 +973,14 @@ class Call(expr):
             self.add_child(value, "keyword_" + key)
 
     def get_args(self, func_args: FullArgSpec) -> dict:
+        """Return a dictionary of pairs `{arg_name: arg_value}`.
+        Use `func_args` to obtain information about function signature.
+
+        :param func_args: Full argument specification of the function.
+        :type func_args:
+            [:py:class:`inspect.FullArgSpec`](https://docs.python.org/3/library/inspect.html#inspect.getfullargspec)
+        :return: A mapping from argument names to their values (represented by :py:class:`.expr`)
+        """
         result = {}
         if len(func_args.args) > 0 and func_args.args[0] in ("self", "cls"):
             args = func_args.args[1:]
@@ -997,9 +1005,12 @@ class Call(expr):
 
     @cached_property
     def func_name(self) -> str:
-        if isinstance(self.children["func"], ReferenceObject):
-            return str(self.children["func"].resolve_name)
-        return str(self.children["func"])
+        """Name of the function being called. If function being called is a lambda function, it's body is returned.
+        """
+        func = self.children["func"]
+        if isinstance(func, ReferenceObject):
+            return str(func.resolve_name)
+        return str(func)
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.children["func"].dump(current_indent, indent) + "(" + \
