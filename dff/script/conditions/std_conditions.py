@@ -24,9 +24,7 @@ def exact_match(match: Message, skip_none: bool = True, *_, **__) -> Callable[..
     If :py:const:`skip_none` the handler will not compare None fields of :py:const:`match`.
 
     :param match: A Message variable to compare user request with.
-    :type match: :py:class:`~.Message`
     :param skip_none: Whether fields should be compared if they are None in :py:const:`match`.
-    :type skip_none: bool
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
