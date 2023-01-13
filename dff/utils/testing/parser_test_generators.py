@@ -1,10 +1,15 @@
 from pathlib import Path
 from shutil import rmtree, copytree
 import difflib
+from sys import version_info
 
 from dff.utils.parser.dff_project import DFFProject
+from dff.utils.parser.base_parser_object import remove_suffix
 
-TEST_DIR = Path("tests/parser/TEST_CASES")
+if version_info >= (3, 9):
+    TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.9+")
+else:
+    TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.8-")
 
 
 def rebuild_conversions():
@@ -71,12 +76,11 @@ def rebuild_engine_examples():
             dff_project = DFFProject.from_python(engine_example_dir, file, script_initializer="pipeline")
 
             dff_project.to_python(test_dir)
-            dff_project.to_yaml(test_dir / (file.parts[-1].removesuffix(".py") + ".yaml"))
-            dff_project.to_graph(test_dir / (file.parts[-1].removesuffix(".py") + ".json"))
+            dff_project.to_yaml(test_dir / (remove_suffix(file.parts[-1], ".py") + ".yaml"))
+            dff_project.to_graph(test_dir / (remove_suffix(file.parts[-1], ".py") + ".json"))
 
 
 if __name__ == "__main__":
     rebuild_conversions()
     rebuild_to_python_tests()
     rebuild_engine_examples()
-

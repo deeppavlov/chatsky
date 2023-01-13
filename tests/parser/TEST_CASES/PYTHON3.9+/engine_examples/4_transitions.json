@@ -1,0 +1,1347 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "full_script": {
+            "4_transitions": {
+                "re": "import re",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "cnd": "import dff.script.conditions",
+                "lbl": "import dff.script.labels",
+                "Pipeline": "from dff.pipeline import Pipeline",
+                "toy_script": {
+                    "'global_flow'": {
+                        "'start_node'": {
+                            "RESPONSE": "''",
+                            "TRANSITIONS": {
+                                "('music_flow', 'node1')": "cnd.regexp('talk about music')",
+                                "('greeting_flow', 'node1')": "cnd.regexp('hi|hello', re.IGNORECASE)",
+                                "'fallback_node'": "cnd.true()"
+                            }
+                        },
+                        "'fallback_node'": {
+                            "RESPONSE": "'Ooops'",
+                            "TRANSITIONS": {
+                                "('music_flow', 'node1')": "cnd.regexp('talk about music')",
+                                "('greeting_flow', 'node1')": "cnd.regexp('hi|hello', re.IGNORECASE)",
+                                "lbl.previous()": "cnd.regexp('previous', re.IGNORECASE)",
+                                "lbl.repeat()": "cnd.true()"
+                            }
+                        }
+                    },
+                    "'greeting_flow'": {
+                        "'node1'": {
+                            "RESPONSE": "'Hi, how are you?'",
+                            "TRANSITIONS": {
+                                "('global_flow', 'fallback_node', 0.1)": "cnd.true()",
+                                "'node2'": "cnd.regexp('how are you')"
+                            }
+                        },
+                        "'node2'": {
+                            "RESPONSE": "'Good. What do you want to talk about?'",
+                            "TRANSITIONS": {
+                                "lbl.to_fallback(0.1)": "cnd.true()",
+                                "lbl.forward(0.5)": "cnd.regexp('talk about')",
+                                "('music_flow', 'node1')": "cnd.regexp('talk about music')",
+                                "lbl.previous()": "cnd.regexp('previous', re.IGNORECASE)"
+                            }
+                        },
+                        "'node3'": {
+                            "RESPONSE": "'Sorry, I can not talk about that now.'",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.regexp('bye')"
+                            }
+                        },
+                        "'node4'": {
+                            "RESPONSE": "'Bye'",
+                            "TRANSITIONS": {
+                                "'node1'": "cnd.regexp('hi|hello', re.IGNORECASE)",
+                                "lbl.to_fallback()": "cnd.true()"
+                            }
+                        }
+                    },
+                    "'music_flow'": {
+                        "'node1'": {
+                            "RESPONSE": "'I love `System of a Down` group, would you like to talk about it?'",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.regexp('yes|yep|ok', re.IGNORECASE)",
+                                "lbl.to_fallback()": "cnd.true()"
+                            }
+                        },
+                        "'node2'": {
+                            "RESPONSE": "'System of a Down is an Armenian-American heavy metal band formed in 1994.'",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.regexp('next', re.IGNORECASE)",
+                                "lbl.repeat()": "cnd.regexp('repeat', re.IGNORECASE)",
+                                "lbl.to_fallback()": "cnd.true()"
+                            }
+                        },
+                        "'node3'": {
+                            "RESPONSE": "'The band achieved commercial success with the release of five studio albums.'",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.regexp('next', re.IGNORECASE)",
+                                "lbl.backward()": "cnd.regexp('back', re.IGNORECASE)",
+                                "lbl.repeat()": "cnd.regexp('repeat', re.IGNORECASE)",
+                                "lbl.to_fallback()": "cnd.true()"
+                            }
+                        },
+                        "'node4'": {
+                            "RESPONSE": "\"That's all what I know.\"",
+                            "TRANSITIONS": {
+                                "greeting_flow_n2_transition": "cnd.regexp('next', re.IGNORECASE)",
+                                "high_priority_node_transition('greeting_flow', 'node4')": "cnd.regexp('next time', re.IGNORECASE)",
+                                "lbl.to_fallback()": "cnd.true()"
+                            }
+                        }
+                    }
+                },
+                "pipeline": "Pipeline.from_script(toy_script, start_label=('global_flow', 'start_node'), fallback_label=('global_flow', 'fallback_node'))"
+            }
+        },
+        "start_label": [
+            "'global_flow'",
+            "'start_node'"
+        ],
+        "fallback_label": [
+            "'global_flow'",
+            "'fallback_node'"
+        ]
+    },
+    "nodes": [
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'global_flow'",
+                "'start_node'"
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node1'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'music_flow'",
+                "'node1'"
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'greeting_flow'",
+                "'node1'"
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "previous",
+                [
+                    "priority",
+                    "None"
+                ]
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'greeting_flow'",
+                "'node2'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "0.1"
+                ]
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "0.5"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node3'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'greeting_flow'",
+                "'node3'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'greeting_flow'",
+                "'node4'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'music_flow'",
+                "'node2'"
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'music_flow'",
+                "'node3'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "backward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ]
+        },
+        {
+            "ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'music_flow'",
+                "'node4'"
+            ]
+        },
+        {
+            "id": [
+                "NONE"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "key_('music_flow', 'node1')"
+            ],
+            "label": "('music_flow', 'node1')",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "value_('music_flow', 'node1')"
+            ],
+            "condition": "cnd.regexp('talk about music')",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'start_node'"
+            ],
+            "target": [
+                "NODE",
+                "'music_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "key_('greeting_flow', 'node1')"
+            ],
+            "label": "('greeting_flow', 'node1')",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "value_('greeting_flow', 'node1')"
+            ],
+            "condition": "cnd.regexp('hi|hello', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'start_node'"
+            ],
+            "target": [
+                "NODE",
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "key_'fallback_node'"
+            ],
+            "label": "'fallback_node'",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'start_node'",
+                "value_TRANSITIONS",
+                "value_'fallback_node'"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'start_node'"
+            ],
+            "target": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.regexp('yes|yep|ok', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node1'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback()"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node1'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "key_('global_flow', 'fallback_node', 0.1)"
+            ],
+            "label": "('global_flow', 'fallback_node', 0.1)",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "value_('global_flow', 'fallback_node', 0.1)"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "target": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "key_'node2'"
+            ],
+            "label": "'node2'",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node1'",
+                "value_TRANSITIONS",
+                "value_'node2'"
+            ],
+            "condition": "cnd.regexp('how are you')",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "target": [
+                "NODE",
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "key_('music_flow', 'node1')"
+            ],
+            "label": "('music_flow', 'node1')",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "value_('music_flow', 'node1')"
+            ],
+            "condition": "cnd.regexp('talk about music')",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ],
+            "target": [
+                "NODE",
+                "'music_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "key_('greeting_flow', 'node1')"
+            ],
+            "label": "('greeting_flow', 'node1')",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "value_('greeting_flow', 'node1')"
+            ],
+            "condition": "cnd.regexp('hi|hello', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ],
+            "target": [
+                "NODE",
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "key_lbl.previous()"
+            ],
+            "label": "lbl.previous()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "value_lbl.previous()"
+            ],
+            "condition": "cnd.regexp('previous', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ],
+            "target": [
+                "LABEL",
+                "previous",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "key_lbl.repeat()"
+            ],
+            "label": "lbl.repeat()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'global_flow'",
+                "value_'fallback_node'",
+                "value_TRANSITIONS",
+                "value_lbl.repeat()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'global_flow'",
+                "'fallback_node'"
+            ],
+            "target": [
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback(0.1)"
+            ],
+            "label": "lbl.to_fallback(0.1)",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback(0.1)"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "0.1"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_lbl.forward(0.5)"
+            ],
+            "label": "lbl.forward(0.5)",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_lbl.forward(0.5)"
+            ],
+            "condition": "cnd.regexp('talk about')",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "0.5"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_('music_flow', 'node1')"
+            ],
+            "label": "('music_flow', 'node1')",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_('music_flow', 'node1')"
+            ],
+            "condition": "cnd.regexp('talk about music')",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "NODE",
+                "'music_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_lbl.previous()"
+            ],
+            "label": "lbl.previous()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_lbl.previous()"
+            ],
+            "condition": "cnd.regexp('previous', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "LABEL",
+                "previous",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.regexp('bye')",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node3'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "key_'node1'"
+            ],
+            "label": "'node1'",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "value_'node1'"
+            ],
+            "condition": "cnd.regexp('hi|hello', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node4'"
+            ],
+            "target": [
+                "NODE",
+                "'greeting_flow'",
+                "'node1'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback()"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'greeting_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'greeting_flow'",
+                "'node4'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.regexp('next', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_lbl.repeat()"
+            ],
+            "label": "lbl.repeat()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_lbl.repeat()"
+            ],
+            "condition": "cnd.regexp('repeat', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback()"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node2'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node2'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.regexp('next', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node3'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "key_lbl.backward()"
+            ],
+            "label": "lbl.backward()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "value_lbl.backward()"
+            ],
+            "condition": "cnd.regexp('back', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node3'"
+            ],
+            "target": [
+                "LABEL",
+                "backward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "key_lbl.repeat()"
+            ],
+            "label": "lbl.repeat()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "value_lbl.repeat()"
+            ],
+            "condition": "cnd.regexp('repeat', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node3'"
+            ],
+            "target": [
+                "LABEL",
+                "repeat",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback()"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node3'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node3'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "key_greeting_flow_n2_transition"
+            ],
+            "label": "greeting_flow_n2_transition",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "value_greeting_flow_n2_transition"
+            ],
+            "condition": "cnd.regexp('next', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node4'"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "key_high_priority_node_transition('greeting_flow', 'node4')"
+            ],
+            "label": "high_priority_node_transition('greeting_flow', 'node4')",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "value_high_priority_node_transition('greeting_flow', 'node4')"
+            ],
+            "condition": "cnd.regexp('next time', re.IGNORECASE)",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node4'"
+            ],
+            "target": [
+                "NONE"
+            ],
+            "key": 1
+        },
+        {
+            "label_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback()"
+            ],
+            "label": "lbl.to_fallback()",
+            "condition_ref": [
+                "4_transitions",
+                "toy_script",
+                "value",
+                "value_'music_flow'",
+                "value_'node4'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'music_flow'",
+                "'node4'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "None"
+                ]
+            ],
+            "key": 0
+        }
+    ]
+}

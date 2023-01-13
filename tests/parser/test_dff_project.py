@@ -1,12 +1,17 @@
 from pathlib import Path
 from shutil import copytree
+from sys import version_info
 
 import pytest
 
 from dff.utils.parser.dff_project import DFFProject
-from .utils import assert_dirs_equal, assert_files_equal
+from tests.parser.utils import assert_dirs_equal, assert_files_equal
 
-TEST_DIR = Path(__file__).parent / "TEST_CASES"
+if version_info >= (3, 9):
+    TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.9+")
+else:
+    TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.8-")
+
 ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "script" / "core"
 
 

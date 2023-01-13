@@ -1,4 +1,5 @@
 import ast
+from sys import version_info
 
 from dff.utils.parser.base_parser_object import Dict, expr, Expression, Python, Import, Attribute, Subscript, Call
 from dff.utils.parser.namespace import Namespace
@@ -132,34 +133,45 @@ def test_iterable():
 
 def test_call():
     namespace = Namespace.from_ast(ast.parse("import Actor\na = Actor(1, 2, c=3)"), location=["namespace"])
+    dff_project = DFFProject([namespace], validate=False)
 
-    assert isinstance(namespace["a"], Call)
-    assert repr(namespace["a"].resolve_path(("func",))) == "Name(Actor)"
-    assert namespace["a"].resolve_path(("arg_1",)) == Python.from_str("2")
-    assert namespace["a"].resolve_path(("keyword_c",)) == Python.from_str("3")
+    call = namespace["a"]
+
+    assert isinstance(call, Call)
+    assert repr(call.resolve_path(("func",))) == "Name(Actor)"
+    assert call.resolve_path(("arg_1",)) == Python.from_str("2")
+    assert call.resolve_path(("keyword_c",)) == Python.from_str("3")
+    assert call.func_name == "Actor"
+
+    namespace = Namespace.from_ast(ast.parse("a = (lambda x, y, z: 1)(1, 2, c=3)"), location=["namespace"])
+    dff_project = DFFProject([namespace], validate=False)
+
+    call = namespace["a"]
+    assert isinstance(call, Call)
+    if version_info >= (3, 9):
+        assert call.func_name == "lambda x, y, z: 1"
+    else:
+        assert call.func_name == "(lambda x, y, z: 1)"
 
 
 def test_comprehensions():
     list_comp_str = "[x for x in a]"
     set_comp_str = "{x for q in b for x in q}"
     dict_comp_str = "{x: x ** 2 for q in c if q for x in q if x > 0}"
-    correct_dict_comp_str = [
-        "{x: (x ** 2) for q in c if q for x in q if (x > 0)}",
-        "{x: x ** 2 for q in c if q for x in q if x > 0}",
-    ]
     gen_comp_str = "((x, q, z) for x in a if x > 0 if x < 10 for q, z in b if q.startswith('i') for y in c if true(y))"
-    correct_gen_comp_str = [
-        "((x, q, z) for x in a if x > 0 if x < 10 for q, z in b if q.startswith('i') for y in c if true(y))",
-        "((x, q, z) for x in a if x > 0 if x < 10 for (q, z) in b if q.startswith('i') for y in c if true(y))",
-        "((x, q, z) for x in a if (x > 0) if (x < 10) for (q, z) in b if q.startswith('i') for y in c if true(y))"
-    ]
     namespace = Namespace.from_ast(ast.parse(f"import a, b, c\nlist_comp={list_comp_str}\nset_comp={set_comp_str}\ndict_comp={dict_comp_str}\ngen_comp={gen_comp_str}"), location=["namespace"])
     dff_project = DFFProject([namespace], validate=False)
 
     assert str(namespace["list_comp"]) == list_comp_str
     assert str(namespace["set_comp"]) == set_comp_str
-    assert str(namespace["dict_comp"]) in correct_dict_comp_str
-    assert str(namespace["gen_comp"]) in correct_gen_comp_str
+    if version_info >= (3, 9):
+        assert str(namespace["dict_comp"]) == dict_comp_str
+    else:
+        assert str(namespace["dict_comp"]) == "{x: (x ** 2) for q in c if q for x in q if (x > 0)}"
+    if version_info >= (3, 9):
+        assert str(namespace["gen_comp"]) == "((x, q, z) for x in a if x > 0 if x < 10 for (q, z) in b if q.startswith('i') for y in c if true(y))"
+    else:
+        assert str(namespace["gen_comp"]) == "((x, q, z) for x in a if (x > 0) if (x < 10) for (q, z) in b if q.startswith('i') for y in c if true(y))"
 
 
 
