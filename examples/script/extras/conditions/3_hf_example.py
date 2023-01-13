@@ -26,6 +26,7 @@ from dff.script.extras.conditions import conditions as i_cnd
 from dff.pipeline import Pipeline
 from dff.messengers.common import CLIMessengerInterface
 from dff.utils.testing.common import is_interactive_mode
+from torch import device
 
 
 # %% [markdown]
@@ -64,7 +65,7 @@ common_label_collection = Dataset.parse_obj(
 # from pathlib import Path
 # common_label_collection = Dataset.parse_json(Path(__file__).parent.joinpath("data/example.json"))
 
-model_1 = HFClassifier(namespace_key="hf_classifier", tokenizer=tokenizer, model=model)
+model_1 = HFClassifier(namespace_key="hf_classifier", tokenizer=tokenizer, device=device("cpu"), model=model)
 
 model_2 = HFMatcher(
     namespace_key="hf_matcher", dataset=common_label_collection, tokenizer=tokenizer, model=model

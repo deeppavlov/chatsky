@@ -203,7 +203,7 @@ happy_path = [
     ("news", "what kind of news do you prefer?"),
     ("science", "i got news about science, would you like to hear them?"),
     (
-        "yeah",
+        "yes",
         "The newly discovered comet will be named after DeepPavlov team. More at 11.",
     ),
     ("totally", "what kind of news do you prefer?"),
