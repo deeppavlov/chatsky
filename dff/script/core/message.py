@@ -100,3 +100,9 @@ class Message(DataModel):
     # that use an intermediate backend server, like Yandex's Alice
     # state: Optional[Session] = Session.ACTIVE
     # ui: Optional[Union[Keyboard, DataModel]] = None
+
+    def __repr__(self) -> str:
+        representation = list()
+        for key, value in self.dict(exclude_none=True).items():
+            representation += f"key={value}"
+        return " ".join(representation)
