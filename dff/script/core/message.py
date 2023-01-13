@@ -104,5 +104,6 @@ class Message(DataModel):
     def __repr__(self) -> str:
         representation = list()
         for key, value in self.dict(exclude_none=True).items():
-            representation += f"key={value}"
+            if value is not None:
+                representation += f"key={value}"
         return " ".join(representation)
