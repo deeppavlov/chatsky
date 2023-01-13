@@ -8,3 +8,4 @@ from .core.keywords import Keywords, GLOBAL, LOCAL, TRANSITIONS, RESPONSE, MISC,
 from .core.normalization import normalize_label, normalize_condition, normalize_transitions, normalize_response, normalize_processing, normalize_keywords, normalize_script
 from .core.script import Node, Script
 from .core.types import LabelType, NodeLabel1Type, NodeLabel2Type, NodeLabel3Type, NodeLabelTupledType, NodeLabelType, ConditionType, ModuleName, ActorStage
+from .core.message import Message

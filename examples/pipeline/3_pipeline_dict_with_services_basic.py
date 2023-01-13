@@ -53,7 +53,7 @@ def prepreprocess(_):
 
 
 def preprocess(_):
-    logger.info("another preprocession web-based annotator" "Service (defined as a callable)")
+    logger.info("another preprocession web-based annotator Service (defined as a callable)")
 
 
 def postprocess(_):

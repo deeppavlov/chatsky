@@ -11,6 +11,7 @@ from dff.script import (
     Actor,
     Context,
     NodeLabel3Type,
+    Message,
 )
 from dff.script.labels import repeat
 from dff.script.conditions import true
@@ -32,9 +33,9 @@ def std_func(ctx, actor, *args, **kwargs):
 
 def create_env():
     ctx = Context()
-    script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: "response"}}}
+    script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: Message(text="response")}}}
     actor = Actor(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
-    ctx.add_request("text")
+    ctx.add_request(Message(text="text"))
     return ctx, actor
 
 
@@ -87,10 +88,7 @@ def test_normalize_transitions():
 
 def test_normalize_response():
     assert isinstance(normalize_response(std_func), Callable)
-    assert isinstance(normalize_response(123), Callable)
-    assert isinstance(normalize_response("text"), Callable)
-    assert isinstance(normalize_response({"k": "v"}), Callable)
-    assert isinstance(normalize_response(["v"]), Callable)
+    assert isinstance(normalize_response(Message(text="text")), Callable)
 
 
 def test_normalize_processing():
@@ -123,14 +121,14 @@ def subtest_normalize_keywords(pre_response_processing):
     # TODO: Add full check for functions
     node_template = {
         TRANSITIONS: {"node": std_func},
-        RESPONSE: "text",
+        RESPONSE: Message(text="text"),
         pre_response_processing: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
-        RESPONSE.name.lower(): "text",
+        RESPONSE.name.lower(): Message(text="text"),
         PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
         PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
@@ -145,14 +143,14 @@ def test_normalize_script():
     # TODO: Add full check for functions
     node_template = {
         TRANSITIONS: {"node": std_func},
-        RESPONSE: "text",
+        RESPONSE: Message(text="text"),
         PRE_RESPONSE_PROCESSING: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
-        RESPONSE.name.lower(): "text",
+        RESPONSE.name.lower(): Message(text="text"),
         PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
         PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
