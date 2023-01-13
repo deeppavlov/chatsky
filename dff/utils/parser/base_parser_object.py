@@ -9,6 +9,7 @@ from collections import defaultdict
 import ast
 import logging
 from inspect import FullArgSpec
+from enum import Enum
 
 try:
     from functools import cached_property
@@ -902,10 +903,16 @@ class Iterable(expr):
     [:py:class:`ast.List`](https://docs.python.org/3.10/library/ast.html#ast.List) or
     [:py:class:`ast.Set`](https://docs.python.org/3.10/library/ast.html#ast.Set)
     """
-    def __init__(self, iterable: tp.Iterable[expr], iterable_type: str):
+    class Type(tuple, Enum):
+        LIST = ("[", "]")
+        TUPLE = ("(", ")")
+        SET = ("{", "}")
+
+    def __init__(self, iterable: tp.Iterable[expr], iterable_type: Type):
         expr.__init__(self)
         self.children: tp.Dict[str, expr]
-        self.type = iterable_type
+        self.type: Iterable.Type = iterable_type
+        """Type of the iterable"""
         for index, value in enumerate(iterable):
             self.add_child(value, str(index))
 
@@ -924,15 +931,7 @@ class Iterable(expr):
             return self.children[str(item)]
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        if self.type == "list":
-            lbr, rbr = "[", "]"
-        elif self.type == "tuple":
-            lbr, rbr = "(", ")"
-        elif self.type == "set":
-            lbr, rbr = "{", "}"
-        else:
-            raise RuntimeError(f"{self.type}")
-        return lbr + ", ".join([child.dump(current_indent, indent) for child in self.children.values()]) + rbr
+        return self.type.value[0] + ", ".join([child.dump(current_indent, indent) for child in self.children.values()]) + self.type.value[1]
 
     @classmethod
     @tp.overload
@@ -952,11 +951,11 @@ class Iterable(expr):
         for item in node.elts:
             result.append(Expression.from_ast(item))
         if isinstance(node, ast.Tuple):
-            iterable_type = "tuple"
+            iterable_type = Iterable.Type.TUPLE
         elif isinstance(node, ast.List):
-            iterable_type = "list"
-        elif isinstance(node, ast.Set):
-            iterable_type = "set"
+            iterable_type = Iterable.Type.LIST
+        else:
+            iterable_type = Iterable.Type.SET
         return cls(result, iterable_type)
 
 
@@ -1082,45 +1081,45 @@ class Generator(BaseParserObject):
 class Comprehension(expr):
     """
     This class if for nodes that represent
+    [:py:class:`ast.DictComp`](https://docs.python.org/3.10/library/ast.html#ast.DictComp),
     [:py:class:`ast.ListComp`](https://docs.python.org/3.10/library/ast.html#ast.ListComp),
     [:py:class:`ast.SetComp`](https://docs.python.org/3.10/library/ast.html#ast.SetComp) or
     [:py:class:`ast.GeneratorExp`](https://docs.python.org/3.10/library/ast.html#ast.GeneratorExp)
     """
+    class Type(tuple, Enum):
+        LIST = ("[", "]")
+        GEN = ("(", ")")
+        SET = ("{", "}")
+        DICT = (None, None)
+
     def __init__(
         self,
         element: tp.Union[expr, tp.Tuple[expr, expr]],
         generators: tp.List[Generator],
-        comp_type: tp.Optional[str]
+        comp_type: Type,
     ):
         expr.__init__(self)
         if isinstance(element, tuple):
-            if not comp_type == "dict":
+            if comp_type is not Comprehension.Type.DICT:
                 raise RuntimeError(comp_type)
             self.add_child(element[0], "key")
             self.add_child(element[1], "value")
         else:
-            if comp_type == "dict":
+            if comp_type is Comprehension.Type.DICT:
                 raise RuntimeError(comp_type)
             self.add_child(element, "element")
 
-        self.comp_type = comp_type
+        self.comp_type: Comprehension.Type = comp_type
+        """Type of comprehension"""
         for index, generator in enumerate(generators):
             self.add_child(generator, "gens_" + str(index))
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         gens = [gen.dump(current_indent, indent) for key, gen in self.children.items() if key.startswith("gens_")]
-        if self.comp_type == "dict":
+        if self.comp_type is Comprehension.Type.DICT:
             return f"{{{self.children['key'].dump(current_indent, indent)}: {self.children['value'].dump(current_indent, indent)}" + (" " if gens else "") + " ".join(gens) + "}"
         else:
-            if self.comp_type == "list":
-                l_br, r_br = "[", "]"
-            elif self.comp_type == "set":
-                l_br, r_br = "{", "}"
-            elif self.comp_type == "gen":
-                l_br, r_br = "(", ")"
-            else:
-                raise RuntimeError(self.comp_type)
-            return l_br + self.children["element"].dump(current_indent, indent) + (" " if gens else "") + " ".join(gens) + r_br
+            return self.comp_type.value[0] + self.children["element"].dump(current_indent, indent) + (" " if gens else "") + " ".join(gens) + self.comp_type.value[1]
 
     @classmethod
     @tp.overload
@@ -1134,21 +1133,21 @@ class Comprehension(expr):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
-        if not isinstance(node, (ast.ListComp, ast.SetComp, ast.GeneratorExp)):
+        if not isinstance(node, (ast.DictComp, ast.ListComp, ast.SetComp, ast.GeneratorExp)):
             return None
         gens = [Generator.from_ast(gen) for gen in node.generators]
         if isinstance(node, ast.DictComp):
             return cls(
                 (Expression.from_ast(node.key), Expression.from_ast(node.value)),
                 gens,
-                "dict",
+                Comprehension.Type.DICT,
             )
         if isinstance(node, ast.ListComp):
-            comp_type = "list"
+            comp_type = Comprehension.Type.LIST
         elif isinstance(node, ast.SetComp):
-            comp_type = "set"
+            comp_type = Comprehension.Type.SET
         elif isinstance(node, ast.GeneratorExp):
-            comp_type = "gen"
+            comp_type = Comprehension.Type.GEN
         return cls(
             Expression.from_ast(node.elt),
             gens,
