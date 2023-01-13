@@ -102,8 +102,7 @@ toy_script = {
         },
         "node3": {
             RESPONSE: Message(
-                text="The band achieved commercial success "
-                "with the release of five studio albums."
+                text="The band achieved commercial success with the release of five studio albums."
             ),
             TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
         },
