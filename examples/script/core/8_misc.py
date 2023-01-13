@@ -33,9 +33,7 @@ def custom_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
     if ctx.validation:
         return Message()
     current_node = ctx.current_node
-    return Message(
-        text=f"ctx.last_label={ctx.last_label}:" f" current_node.misc={current_node.misc}"
-    )
+    return Message(text=f"ctx.last_label={ctx.last_label}: current_node.misc={current_node.misc}")
 
 
 # %%
