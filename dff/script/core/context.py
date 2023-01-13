@@ -284,6 +284,9 @@ class Context(BaseModel):
                 "function can only be run during processing functions."
             )
 
+    def items(self):
+        return self.dict().items()
+
     def __setattr__(self, key, val):
         method = self.__config__.property_set_methods.get(key, None)
         if method is None:
