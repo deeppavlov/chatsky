@@ -18,6 +18,9 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
+      - name: set up pages
+        uses: actions/configure-pages@v2
+
       - name: set up python 3.9
         uses: actions/setup-python@v2
         with:
@@ -39,10 +42,10 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: deploy website
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        uses: JamesIves/github-pages-deploy-action@v4
+      - name: upload artifact
+        uses: actions/upload-pages-artifact@v1
         with:
-          branch: gh-pages
-          folder: docs/build/
-          single-commit: True
+          path: docs/build/
+
+      - name: deploy to GitHub pages
+        uses: actions/deploy-pages@v1
