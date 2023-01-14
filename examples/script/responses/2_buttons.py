@@ -210,7 +210,7 @@ happy_path = (
 
 
 def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.misc is not None and ctx.last_response.misc.get("ui")
+    ui = ctx.last_response and ctx.last_response.misc and ctx.last_response.misc.get("ui")
     if ui and ui.buttons:
         try:
             chosen_button = ui.buttons[int(ctx.last_request.text)]
