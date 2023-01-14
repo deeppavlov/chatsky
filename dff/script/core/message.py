@@ -101,9 +101,5 @@ class Message(DataModel):
     # state: Optional[Session] = Session.ACTIVE
     # ui: Optional[Union[Keyboard, DataModel]] = None
 
-    def __repr__(self) -> str:
-        representation = list()
-        for key, value in self.dict(exclude_none=True).items():
-            if value is not None:
-                representation += f"key={value}"
-        return " ".join(representation)
+    def __str__(self) -> str:
+        return " ".join([f"{key}='{value}'" for key, value in self.dict(exclude_none=True).items()])
