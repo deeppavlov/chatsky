@@ -49,16 +49,16 @@ def check_happy_path(
         ctx = pipeline(request, ctx_id)
         candidate_response = ctx.last_response
         if printout_enable:
-            print(f"(user) >>> {request}")
-            print(f" (bot) <<< {candidate_response}")
+            print(f"(user) >>> {repr(request)}")
+            print(f" (bot) <<< {repr(candidate_response)}")
         parsed_response_with_deviation = response_comparer(candidate_response, reference_response, ctx)
         if parsed_response_with_deviation is not None:
             error_msg = f"\n\npipeline = {pipeline.info_dict}\n\n"
             error_msg += f"ctx = {ctx}\n\n"
             error_msg += f"step_id = {step_id}\n"
-            error_msg += f"request = {request}\n"
-            error_msg += f"candidate_response = {parsed_response_with_deviation}\n"
-            error_msg += f"reference_response = {reference_response}\n"
+            error_msg += f"request = {repr(request)}\n"
+            error_msg += f"candidate_response = {repr(parsed_response_with_deviation)}\n"
+            error_msg += f"reference_response = {repr(reference_response)}\n"
             error_msg += "candidate_response != reference_response"
             raise Exception(error_msg)
 
@@ -76,4 +76,4 @@ def run_interactive_mode(pipeline: Pipeline):
     while True:
         request = input(">>> ")
         ctx = pipeline(request=request, ctx_id=ctx_id)
-        print(f"<<< {ctx.last_response}")
+        print(f"<<< {repr(ctx.last_response)}")
