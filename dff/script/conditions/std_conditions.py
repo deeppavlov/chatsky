@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @validate_arguments
-def exact_match(match: Message, skip_none: bool = True, *_, **__) -> Callable[..., bool]:
+def exact_match(match: Message, skip_none: bool = True, *arguments, **kw_arguments) -> Callable[..., bool]:
     """
     Returns function handler. This handler returns `True` only if the last user phrase
     is the same Message as the :py:const:`match`.

@@ -136,7 +136,7 @@ memory_heap = dict()  # This object plays part of some memory heap
     after_handler=[time_measure_after_handler, ram_measure_after_handler],
 )
 def heavy_service(ctx: Context):
-    memory_heap[ctx.last_request] = [random.randint(0, num) for num in range(0, 1000)]
+    memory_heap[ctx.last_request.text] = [random.randint(0, num) for num in range(0, 1000)]
 
 
 @to_service(
