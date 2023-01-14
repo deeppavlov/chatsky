@@ -13,7 +13,12 @@ __Installing dependencies__
 \"\"\"
 
 # %%
-!python3 -m pip install -q dff[examples]
+!python3 -m pip install -q dff[examples] # Installs dff with dependencies for running examples
+# To install the minimal version of dff, use `pip install dff`
+# To install other options of dff, use `pip install dff[OPTION_NAME]`
+# where OPTION_NAME can be one of the options from EXTRA_DEPENDENCIES
+# EXTRA_DEPENDENCIES can be found in https://github.com/deeppavlov/dialog_flow_framework/blob/dev/setup.py
+
 
 # %% [markdown]
 \"\"\"

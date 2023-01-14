@@ -126,19 +126,19 @@ devel_full = merge_req_lists(
 )
 
 EXTRA_DEPENDENCIES = {
-    "doc": doc,
-    "tests": test_requirements,
-    "devel": devel,
-    "full": full,
-    "test_full": tests_full,
-    "examples": tests_full,
-    "devel_full": devel_full,
-    "sqlite": sqlite_dependencies,
-    "redis": redis_dependencies,
-    "mongodb": mongodb_dependencies,
-    "mysql": mysql_dependencies,
-    "postgresql": postgresql_dependencies,
-    "ydb": ydb_dependencies,
+    "doc": doc,  # dependencies for documentation
+    "tests": test_requirements,  # dependencies for running tests
+    "devel": devel,  # dependencies for development
+    "full": full,  # full dependencies including all options
+    "test_full": tests_full,  # full dependencies for running all tests
+    "examples": tests_full,  # dependencies for running examples
+    "devel_full": devel_full,  # full dependencies for development
+    "sqlite": sqlite_dependencies,  # dependencies for using SQLite
+    "redis": redis_dependencies,  # dependencies for using Redis
+    "mongodb": mongodb_dependencies,  # dependencies for using MongoDB
+    "mysql": mysql_dependencies,  # dependencies for using MySQL
+    "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
+    "ydb": ydb_dependencies,  # dependencies for using Yandex Database
 }
 
 setup(
