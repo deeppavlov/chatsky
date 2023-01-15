@@ -5,7 +5,7 @@ Provides the pickle-based version of the :py:class:`.DBContextStorage`.
 """
 import asyncio
 import pickle
-from typing import Any
+from typing import Hashable
 
 import aiofiles
 import aiofiles.os
@@ -27,46 +27,42 @@ class PickleContextStorage(DBContextStorage):
 
     def __init__(self, path: str):
         DBContextStorage.__init__(self, path)
-
         asyncio.run(self._load())
 
     @threadsafe_method
-    async def len(self):
+    async def len_async(self) -> int:
         return len(self.dict)
 
     @threadsafe_method
-    async def setitem(self, key: Any, item: Context):
-        key = str(key)
-        self.dict.__setitem__(key, item)
+    async def setitem_async(self, key: Hashable, value: Context):
+        self.dict.__setitem__(str(key), value)
         await self._save()
 
     @threadsafe_method
-    async def getitem(self, key: Any) -> Context:
-        key = str(key)
+    async def getitem_async(self, key: Hashable) -> Context:
         await self._load()
-        return Context.cast(self.dict.__getitem__(key))
+        return Context.cast(self.dict.__getitem__(str(key)))
 
     @threadsafe_method
-    async def delitem(self, key: str) -> None:
-        self.dict.__delitem__(key)
+    async def delitem_async(self, key: Hashable):
+        self.dict.__delitem__(str(key))
         await self._save()
 
     @threadsafe_method
-    async def contains(self, key: str) -> bool:
-        key = str(key)
+    async def contains_async(self, key: Hashable) -> bool:
         await self._load()
-        return self.dict.__contains__(key)
+        return self.dict.__contains__(str(key))
 
     @threadsafe_method
-    async def clear_async(self) -> None:
+    async def clear_async(self):
         self.dict.clear()
         await self._save()
 
-    async def _save(self) -> None:
+    async def _save(self):
         async with aiofiles.open(self.path, "wb+") as file:
             await file.write(pickle.dumps(self.dict))
 
-    async def _load(self) -> None:
+    async def _load(self):
         if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
             self.dict = dict()
             await self._save()

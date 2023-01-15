@@ -4,13 +4,13 @@ Yandex DB
 Provides the version of the :py:class:`.DBContextStorage` for Yandex DataBase.
 """
 import os
-from typing import Any
+from typing import Hashable
 from urllib.parse import urlsplit
 
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -49,8 +49,7 @@ class YDBContextStorage(DBContextStorage):
         if not self._is_table_exists(self.pool, self.database, self.table_name):  # create table if it does not exist
             self._create_table(self.pool, self.database, self.table_name)
 
-    async def setitem(self, key: str, value: Context) -> None:
-
+    async def setitem_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
 
         def callee(session):
@@ -81,7 +80,8 @@ class YDBContextStorage(DBContextStorage):
 
         return self.pool.retry_operation_sync(callee)
 
-    async def getitem(self, key: str) -> Context:
+    async def getitem_async(self, key: Hashable) -> Context:
+
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -110,7 +110,7 @@ class YDBContextStorage(DBContextStorage):
 
         return self.pool.retry_operation_sync(callee)
 
-    async def delitem(self, key: str) -> None:
+    async def delitem_async(self, key: Hashable):
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -133,7 +133,8 @@ class YDBContextStorage(DBContextStorage):
 
         return self.pool.retry_operation_sync(callee)
 
-    async def contains(self, key: str) -> bool:
+    async def contains_async(self, key: Hashable) -> bool:
+
         def callee(session):
             # new transaction in serializable read write mode
             # if query successfully completed you will get result sets.
@@ -162,7 +163,8 @@ class YDBContextStorage(DBContextStorage):
 
         return self.pool.retry_operation_sync(callee)
 
-    async def len(self) -> int:
+    async def len_async(self) -> int:
+
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -182,7 +184,8 @@ class YDBContextStorage(DBContextStorage):
 
         return self.pool.retry_operation_sync(callee)
 
-    async def clear_async(self) -> None:
+    async def clear_async(self):
+
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -203,7 +206,7 @@ class YDBContextStorage(DBContextStorage):
 
         return self.pool.retry_operation_sync(callee)
 
-    def _is_table_exists(self, pool, path, table_name):
+    def _is_table_exists(self, pool, path, table_name) -> bool:
         try:
 
             def callee(session):

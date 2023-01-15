@@ -11,7 +11,7 @@ import importlib
 import threading
 from functools import wraps
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Callable, Hashable, Optional
 
 from .protocol import PROTOCOLS
 from ..script import Context
@@ -24,60 +24,57 @@ class DBAbstractContextStorage(ABC):
     | Can not be instantiated.
     """
 
-    def __init__(self) -> None:
-        pass
-
-    def __getitem__(self, key: Any) -> Any:
-        return asyncio.run(self.getitem(key))
+    def __getitem__(self, key: Hashable) -> Context:
+        return asyncio.run(self.getitem_async(key))
 
     @abstractmethod
-    async def getitem(self, key: Any) -> Context:
+    async def getitem_async(self, key: Hashable) -> Context:
         raise NotImplementedError
 
-    def __setitem__(self, key: Any, value: Context):
-        return asyncio.run(self.setitem(key, value))
+    def __setitem__(self, key: Hashable, value: Context):
+        return asyncio.run(self.setitem_async(key, value))
 
     @abstractmethod
-    async def setitem(self, key: Any, value: Context):
+    async def setitem_async(self, key: Hashable, value: Context):
         raise NotImplementedError
 
-    def __delitem__(self, key: str) -> None:
-        return asyncio.run(self.delitem(key))
+    def __delitem__(self, key: Hashable):
+        return asyncio.run(self.delitem_async(key))
 
     @abstractmethod
-    async def delitem(self, key: str) -> Any:
+    async def delitem_async(self, key: Hashable):
         raise NotImplementedError
 
-    def __contains__(self, key: str) -> bool:
-        return asyncio.run(self.contains(key))
+    def __contains__(self, key: Hashable) -> bool:
+        return asyncio.run(self.contains_async(key))
 
     @abstractmethod
-    async def contains(self, key: str) -> Any:
+    async def contains_async(self, key: Hashable) -> bool:
         raise NotImplementedError
 
     def __len__(self) -> int:
-        return asyncio.run(self.len())
+        return asyncio.run(self.len_async())
 
     @abstractmethod
-    async def len(self) -> Any:
+    async def len_async(self) -> int:
         raise NotImplementedError
 
-    def get(self, key: Any, default=None) -> Any:
+    def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
         return asyncio.run(self.get_async(key, default))
 
     @abstractmethod
-    async def get_async(self, key: Any, default=None) -> Any:
+    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
         raise NotImplementedError
 
-    def clear(self) -> None:
+    def clear(self):
         return asyncio.run(self.clear_async())
 
     @abstractmethod
-    async def clear_async(self) -> Any:
+    async def clear_async(self):
         raise NotImplementedError
 
 
-class DBContextStorage(DBAbstractContextStorage):
+class DBContextStorage(DBAbstractContextStorage, ABC):
     """
     An intermediate class between the abstract context storage interface,
     :py:class:`.DBAbstractContextStorage`, and concrete implementations.
@@ -101,10 +98,10 @@ class DBContextStorage(DBAbstractContextStorage):
         self.path = file_path
         self._lock = threading.Lock()
 
-    async def get_async(self, key: Any, default=None):
+    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
         key = str(key)
         try:
-            return await self.getitem(key)
+            return await self.getitem_async(key)
         except KeyError:
             return default
 

@@ -8,7 +8,7 @@ sql
 import asyncio
 import importlib
 import json
-from typing import Any
+from typing import Hashable
 
 from dff.script import Context
 
@@ -110,12 +110,11 @@ class SQLContextStorage(DBContextStorage):
         import_insert_for_dialect(self.dialect)
 
     @threadsafe_method
-    async def setitem(self, key: Any, value: Context):
-        key = str(key)
+    async def setitem_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
         value = json.loads(value.json())
 
-        insert_stmt = insert(self.table).values(id=key, context=value)
+        insert_stmt = insert(self.table).values(id=str(key), context=value)
         update_stmt = await self._get_update_stmt(insert_stmt)
 
         async with self.engine.connect() as conn:
@@ -123,9 +122,8 @@ class SQLContextStorage(DBContextStorage):
             await conn.commit()
 
     @threadsafe_method
-    async def getitem(self, key: Any) -> Context:
-        key = str(key)
-        stmt = select(self.table.c.context).where(self.table.c.id == key)
+    async def getitem_async(self, key: Hashable) -> Context:
+        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
         async with self.engine.connect() as conn:
             result = await conn.execute(stmt)
             row = result.fetchone()
@@ -134,30 +132,28 @@ class SQLContextStorage(DBContextStorage):
         raise KeyError
 
     @threadsafe_method
-    async def delitem(self, key: str) -> None:
-        key = str(key)
-        stmt = delete(self.table).where(self.table.c.id == key)
+    async def delitem_async(self, key: Hashable):
+        stmt = delete(self.table).where(self.table.c.id == str(key))
         async with self.engine.connect() as conn:
             await conn.execute(stmt)
             await conn.commit()
 
     @threadsafe_method
-    async def contains(self, key: str) -> bool:
-        key = str(key)
-        stmt = select(self.table.c.context).where(self.table.c.id == key)
+    async def contains_async(self, key: Hashable) -> bool:
+        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
         async with self.engine.connect() as conn:
             result = await conn.execute(stmt)
             return bool(result.fetchone())
 
     @threadsafe_method
-    async def len(self) -> int:
+    async def len_async(self) -> int:
         stmt = select([func.count()]).select_from(self.table)
         async with self.engine.connect() as conn:
             result = await conn.execute(stmt)
             return result.fetchone()[0]
 
     @threadsafe_method
-    async def clear_async(self) -> None:
+    async def clear_async(self):
         stmt = delete(self.table)
         async with self.engine.connect() as conn:
             await conn.execute(stmt)
@@ -179,7 +175,7 @@ class SQLContextStorage(DBContextStorage):
             )
         return update_stmt
 
-    def _check_availability(self, custom_driver: bool) -> None:
+    def _check_availability(self, custom_driver: bool):
         if not custom_driver:
             if self.full_path.startswith("postgresql") and not postgres_available:
                 install_suggestion = get_protocol_install_suggestion("postgresql")

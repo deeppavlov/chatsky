@@ -4,7 +4,7 @@ redis
 Provides the redis-based version of the :py:class:`.DBContextStorage`.
 """
 import json
-from typing import Any
+from typing import Hashable
 
 try:
     from aioredis import Redis
@@ -38,34 +38,30 @@ class RedisContextStorage(DBContextStorage):
         self._redis = Redis.from_url(self.full_path)
 
     @threadsafe_method
-    async def contains(self, key: str) -> bool:
-        key = str(key)
-        return bool(await self._redis.exists(key))
+    async def contains_async(self, key: Hashable) -> bool:
+        return bool(await self._redis.exists(str(key)))
 
     @threadsafe_method
-    async def setitem(self, key: Any, value: Context):
-        key = str(key)
+    async def setitem_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
-        await self._redis.set(key, value.json())
+        await self._redis.set(str(key), value.json())
 
     @threadsafe_method
-    async def getitem(self, key: Any) -> Context:
-        key = str(key)
-        result = await self._redis.get(key)
+    async def getitem_async(self, key: Hashable) -> Context:
+        result = await self._redis.get(str(key))
         if result:
             result_dict = json.loads(result.decode("utf-8"))
             return Context.cast(result_dict)
         raise KeyError(f"No entry for key {key}.")
 
     @threadsafe_method
-    async def delitem(self, key: str) -> None:
-        key = str(key)
-        await self._redis.delete(key)
+    async def delitem_async(self, key: Hashable):
+        await self._redis.delete(str(key))
 
     @threadsafe_method
-    async def len(self) -> int:
+    async def len_async(self) -> int:
         return await self._redis.dbsize()
 
     @threadsafe_method
-    async def clear_async(self) -> None:
+    async def clear_async(self):
         await self._redis.flushdb()

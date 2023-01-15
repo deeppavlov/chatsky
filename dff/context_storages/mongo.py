@@ -3,7 +3,7 @@ mongo
 ---------------------------
 Provides the mongo-based version of the :py:class:`.DBContextStorage`.
 """
-from typing import Any
+from typing import Hashable, Dict
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -44,7 +44,7 @@ class MongoContextStorage(DBContextStorage):
         self.collection = db[collection]
 
     @staticmethod
-    def _adjust_key(key: str):
+    def _adjust_key(key: Hashable) -> Dict[str, ObjectId]:
         """Convert a n-digit context id to a 24-digit mongo id"""
         new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
         new_key = (new_key * (24 // len(new_key) + 1))[:24]
@@ -52,7 +52,7 @@ class MongoContextStorage(DBContextStorage):
         return {"_id": ObjectId(new_key)}
 
     @threadsafe_method
-    async def setitem(self, key: Any, value: Context) -> None:
+    async def setitem_async(self, key: Hashable, value: Context):
         new_key = self._adjust_key(key)
         value = value if isinstance(value, Context) else Context.cast(value)
         document = json.loads(value.json())
@@ -61,7 +61,7 @@ class MongoContextStorage(DBContextStorage):
         await self.collection.replace_one(new_key, document, upsert=True)
 
     @threadsafe_method
-    async def getitem(self, key: Any) -> Context:
+    async def getitem_async(self, key: Hashable) -> Context:
         adjust_key = self._adjust_key(key)
         document = await self.collection.find_one(adjust_key)
         if document:
@@ -71,17 +71,17 @@ class MongoContextStorage(DBContextStorage):
         raise KeyError
 
     @threadsafe_method
-    async def delitem(self, key: str) -> None:
+    async def delitem_async(self, key: Hashable):
         adjust_key = self._adjust_key(key)
         await self.collection.delete_one(adjust_key)
 
     @threadsafe_method
-    async def contains(self, key: str) -> bool:
+    async def contains_async(self, key: Hashable) -> bool:
         adjust_key = self._adjust_key(key)
         return bool(await self.collection.find_one(adjust_key))
 
     @threadsafe_method
-    async def len(self) -> int:
+    async def len_async(self) -> int:
         return await self.collection.estimated_document_count()
 
     @threadsafe_method

@@ -5,7 +5,7 @@ Provides the shelve-based version of the :py:class:`.DBContextStorage`.
 """
 import pickle
 from shelve import DbfilenameShelf
-from typing import Any
+from typing import Hashable
 
 from dff.script import Context
 
@@ -27,30 +27,20 @@ class ShelveContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path)
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
-    def __del__(self):
-        self.shelve_db.close()
-        del self
+    async def getitem_async(self, key: Hashable) -> Context:
+        return self.shelve_db.get(str(key))
 
-    async def delete(self):
-        self.__del__()
+    async def setitem_async(self, key: Hashable, value: Context):
+        return self.shelve_db.__setitem__(str(key), value)
 
-    async def get_async(self, key: Any, default=None):
-        return self.shelve_db.get(str(key), default)
-
-    async def setitem(self, key: Any, item: Context):
-        return self.shelve_db.__setitem__(str(key), item)
-
-    async def getitem(self, key: Any) -> Context:
-        return self.shelve_db.__getitem__(str(key))
-
-    async def delitem(self, key: str) -> None:
+    async def delitem_async(self, key: Hashable):
         return self.shelve_db.__delitem__(str(key))
 
-    async def contains(self, key: str) -> bool:
+    async def contains_async(self, key: Hashable) -> bool:
         return self.shelve_db.__contains__(str(key))
 
-    async def len(self) -> int:
+    async def len_async(self) -> int:
         return self.shelve_db.__len__()
 
-    async def clear_async(self) -> None:
+    async def clear_async(self):
         return self.shelve_db.clear()
