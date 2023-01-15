@@ -33,6 +33,7 @@ class DBAbstractContextStorage(ABC):
         | Keep in mind that in Windows you will have to use double backslashes '\\'
         | instead of forward slashes '/' when defining the file path.
     :type path: str
+
     """
 
     def __init__(self, path: str):
@@ -113,16 +114,16 @@ def context_storage_factory(path: str, **kwargs) -> DBAbstractContextStorage:
     followed by the symbol triplet '://'.
     Then, you should list the connection parameters like this: user:password@host:port/database
     The whole URI will then look like this:
-        - shelve://path_to_the_file/file_name
-        - json://path_to_the_file/file_name
-        - pickle://path_to_the_file/file_name
-        - sqlite+aiosqlite://path_to_the_file/file_name
-        - redis://:pass@localhost:6378/0
-        - mongodb://admin:pass@localhost:27016/admin
-        - mysql+asyncmy://root:pass@localhost:3306/test
-        - postgresql+asyncpg://postgres:pass@localhost:5430/test
-        - grpc://localhost:2134/local
-        - grpcs://localhost:2134/local
+    - shelve://path_to_the_file/file_name
+    - json://path_to_the_file/file_name
+    - pickle://path_to_the_file/file_name
+    - sqlite+aiosqlite://path_to_the_file/file_name
+    - redis://:pass@localhost:6378/0
+    - mongodb://admin:pass@localhost:27016/admin
+    - mysql+asyncmy://root:pass@localhost:3306/test
+    - postgresql+asyncpg://postgres:pass@localhost:5430/test
+    - grpc://localhost:2134/local
+    - grpcs://localhost:2134/local
 
     For context storages that write to local files, the function expects a file path instead of connection params:
     json://file.json
