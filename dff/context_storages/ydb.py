@@ -10,7 +10,7 @@ from urllib.parse import urlsplit
 
 from dff.script import Context
 
-from .database import DBContextStorage
+from .database import DBAbstractContextStorage
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -21,7 +21,7 @@ except ImportError:
     ydb_available = False
 
 
-class YDBContextStorage(DBContextStorage):
+class YDBContextStorage(DBAbstractContextStorage):
     """
     | Version of the :py:class:`.DBContextStorage` for YDB.
 
@@ -34,7 +34,7 @@ class YDBContextStorage(DBContextStorage):
     """
 
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):
-        super(YDBContextStorage, self).__init__(path)
+        DBAbstractContextStorage.__init__(self, path)
         protocol, netloc, self.database, _, _ = urlsplit(path)
         self.endpoint = "{}://{}".format(protocol, netloc)
         self.table_name = table_name

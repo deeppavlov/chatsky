@@ -21,7 +21,25 @@ class DBAbstractContextStorage(ABC):
     An abstract interface for `dff` DB context storages.
     It includes the most essential methods of the python `dict` class.
     Can not be instantiated.
+
+    Parameters
+    ----------
+    : param path:
+        | Parameter `path` should be set with the URI of the database.
+        | It includes a prefix and the required connection credentials.
+        | Example: postgresql+asyncpg://user:password@host:port/database
+        | In the case of classes that save data to hard drive instead of external databases
+        | you need to specify the location of the file, like you do in sqlite.
+        | Keep in mind that in Windows you will have to use double backslashes '\\'
+        | instead of forward slashes '/' when defining the file path.
+    :type path: str
     """
+
+    def __init__(self, path: str):
+        _, _, file_path = path.partition("://")
+        self.full_path = path
+        self.path = file_path
+        self._lock = threading.Lock()
 
     def __getitem__(self, key: Hashable) -> Context:
         return asyncio.run(self.getitem_async(key))
@@ -61,9 +79,11 @@ class DBAbstractContextStorage(ABC):
     def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
         return asyncio.run(self.get_async(key, default))
 
-    @abstractmethod
     async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
-        raise NotImplementedError
+        try:
+            return await self.getitem_async(str(key))
+        except KeyError:
+            return default
 
     def clear(self):
         return asyncio.run(self.clear_async())
@@ -71,38 +91,6 @@ class DBAbstractContextStorage(ABC):
     @abstractmethod
     async def clear_async(self):
         raise NotImplementedError
-
-
-class DBContextStorage(DBAbstractContextStorage, ABC):
-    """
-    An intermediate class between the abstract context storage interface,
-    :py:class:`.DBAbstractContextStorage`, and concrete implementations.
-
-    Parameters
-    ----------
-    : param path:
-        | Parameter `path` should be set with the URI of the database.
-        | It includes a prefix and the required connection credentials.
-        | Example: postgresql+asyncpg://user:password@host:port/database
-        | In the case of classes that save data to hard drive instead of external databases
-        | you need to specify the location of the file, like you do in sqlite.
-        | Keep in mind that in Windows you will have to use double backslashes '\\'
-        | instead of forward slashes '/' when defining the file path.
-    :type path: str
-
-    """
-
-    def __init__(self, path: str):
-        _, _, file_path = path.partition("://")
-        self.full_path = path
-        self.path = file_path
-        self._lock = threading.Lock()
-
-    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
-        try:
-            return await self.getitem_async(str(key))
-        except KeyError:
-            return default
 
 
 def threadsafe_method(func: Callable):

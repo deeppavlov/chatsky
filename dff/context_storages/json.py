@@ -10,7 +10,7 @@ import aiofiles
 import aiofiles.os
 from pydantic import BaseModel, Extra, root_validator
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBAbstractContextStorage, threadsafe_method
 from dff.script import Context
 
 
@@ -22,7 +22,7 @@ class SerializableStorage(BaseModel, extra=Extra.allow):
         return vals
 
 
-class JSONContextStorage(DBContextStorage):
+class JSONContextStorage(DBAbstractContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
@@ -31,7 +31,7 @@ class JSONContextStorage(DBContextStorage):
     """
 
     def __init__(self, path: str):
-        DBContextStorage.__init__(self, path)
+        DBAbstractContextStorage.__init__(self, path)
         asyncio.run(self._load())
 
     @threadsafe_method

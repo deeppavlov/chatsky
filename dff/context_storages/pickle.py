@@ -10,11 +10,11 @@ from typing import Hashable
 import aiofiles
 import aiofiles.os
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBAbstractContextStorage, threadsafe_method
 from dff.script import Context
 
 
-class PickleContextStorage(DBContextStorage):
+class PickleContextStorage(DBAbstractContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
@@ -23,7 +23,7 @@ class PickleContextStorage(DBContextStorage):
     """
 
     def __init__(self, path: str):
-        DBContextStorage.__init__(self, path)
+        DBAbstractContextStorage.__init__(self, path)
         asyncio.run(self._load())
 
     @threadsafe_method

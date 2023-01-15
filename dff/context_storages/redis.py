@@ -15,11 +15,11 @@ except ImportError:
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBAbstractContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 
-class RedisContextStorage(DBContextStorage):
+class RedisContextStorage(DBAbstractContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
@@ -28,7 +28,7 @@ class RedisContextStorage(DBContextStorage):
     """
 
     def __init__(self, path: str):
-        super(RedisContextStorage, self).__init__(path)
+        DBAbstractContextStorage.__init__(self, path)
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")
             raise ImportError("`redis` package is missing.\n" + install_suggestion)

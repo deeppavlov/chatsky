@@ -17,11 +17,11 @@ import json
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBAbstractContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 
-class MongoContextStorage(DBContextStorage):
+class MongoContextStorage(DBAbstractContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
@@ -32,7 +32,7 @@ class MongoContextStorage(DBContextStorage):
     """
 
     def __init__(self, path: str, collection: str = "context_collection"):
-        super(MongoContextStorage, self).__init__(path)
+        DBAbstractContextStorage.__init__(self, path)
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
