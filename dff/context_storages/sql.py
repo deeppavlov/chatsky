@@ -1,9 +1,8 @@
 """
-sql
----------------------------
-| Provides the SQL-based version of the :py:class:`.DBContextStorage`.
-| You can choose the backend option of your liking from mysql, postgresql, or sqlite.
-
+SQL
+---
+Provides the SQL-based version of the :py:class:`.DBContextStorage`.
+You can choose the backend option of your liking from MySQL, PostgreSQL, or SQLite.
 """
 import asyncio
 import importlib
@@ -72,18 +71,15 @@ class SQLContextStorage(DBContextStorage):
     | SQL-based version of the :py:class:`.DBContextStorage`.
     | Compatible with MySQL, Postgresql, Sqlite.
 
-    Parameters
-    -----------
-
-    path: str
-        Standard sqlalchemy URI string.
+    :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    table_name: str
-        The name of the table to use.
-    custom_driver: bool
-        If you intend to use some other database driver instead of the recommended ones,
+    :type path: str
+    :param table_name: The name of the table to use.
+    :type table_name: str
+    :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
+    :type custom_driver: bool
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):

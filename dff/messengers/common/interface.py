@@ -1,10 +1,15 @@
+"""
+Message Interfaces
+------------------
+This module contains several basic classes of message interfaces.
+"""
 import abc
 import asyncio
 import logging
 import uuid
 from typing import Optional, Any, List, Tuple, TextIO, Hashable
 
-from dff.script import Context
+from dff.script import Context, Message
 
 from .types import PipelineRunnerFunction, PollingInterfaceLoopFunction
 
@@ -23,8 +28,8 @@ class MessengerInterface(abc.ABC):
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
 
-        :pipeline_runner: a function that should return pipeline response to user request;
-            usually it's a `Pipeline._run_pipeline(request, ctx_id)` function.
+        :param pipeline_runner: A function that should return pipeline response to user request;
+            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
         """
         raise NotImplementedError
 
@@ -39,7 +44,7 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method used for sending users request for their input.
 
-        :return: Returns a list of tuples: user inputs and context ids (any user ids) associated with inputs.
+        :return: A list of tuples: user inputs and context ids (any user ids) associated with the inputs.
         """
         raise NotImplementedError
 
@@ -57,7 +62,8 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method that is called on polling cycle exceptions, in some cases it should show users the exception.
         By default, it logs all exit exceptions to `info` log and all non-exit exceptions to `error`.
-        :e: - the exception.
+
+        :param e: The exception.
         """
         if isinstance(e, Exception):
             logger.error(f"Exception in {type(self).__name__} loop!\n{str(e)}")
@@ -75,8 +81,10 @@ class PollingMessengerInterface(MessengerInterface):
         The looping behaviour is determined by `loop` and `timeout`,
         for most cases the loop itself shouldn't be overridden.
 
+        :param pipeline_runner: A function that should return pipeline response to user request;
+            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
         :param loop: a function that determines whether polling should be continued;
-            called in each cycle, should return True to continue polling or False to stop.
+            called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
         """
         while loop():
@@ -105,12 +113,12 @@ class CallbackMessengerInterface(MessengerInterface):
     def on_request(self, request: Any, ctx_id: Hashable) -> Context:
         """
         Method invoked on user input.
-        This method works just like `Pipeline.__call__(request, ctx_id)`,
+        This method works just like :py:meth:`~Pipeline.__call__(request, ctx_id)`,
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Returns context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
 
-        :param request: user input.
+        :param request: User input.
         :param ctx_id: Any unique id that will be associated with dialog between this user and pipeline.
         :return: Context that represents dialog with the user.
         """
@@ -119,7 +127,7 @@ class CallbackMessengerInterface(MessengerInterface):
 
 class CLIMessengerInterface(PollingMessengerInterface):
     """
-    Command line message interface is the default message interface, communicating with user via STDIN/STDOUT.
+    Command line message interface is the default message interface, communicating with user via `STDIN/STDOUT`.
     This message interface can maintain dialog with one user at a time only.
     """
 
@@ -137,17 +145,19 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._prompt_response: str = prompt_response
         self._descriptor: Optional[TextIO] = out_descriptor
 
-    def _request(self) -> List[Tuple[Any, Any]]:
-        return [(input(self._prompt_request), self._ctx_id)]
+    def _request(self) -> List[Tuple[Message, Any]]:
+        return [(Message(text=input(self._prompt_request)), self._ctx_id)]
 
-    def _respond(self, response: List[Context]):
-        print(f"{self._prompt_response}{response[0].last_response}", file=self._descriptor)
+    def _respond(self, responses: List[Context]):
+        print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
-        :param kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
+        :param pipeline_runner: A function that should return pipeline response to user request;
+            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()
         if self._intro is not None:

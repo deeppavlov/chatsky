@@ -3,7 +3,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.1.0rc0
+CURRENT_VERSION = 0.2.0c
 TEST_COVERAGE_THRESHOLD=93
 
 PATH := $(VENV_PATH)/bin:$(PATH)
@@ -27,12 +27,6 @@ venv:
 	$(PYTHON) -m venv $(VENV_PATH)
 	pip install --upgrade pip
 	pip install -e .[devel_full]
-
-venv_test:
-	@echo "Start creating virtual environment (test)"
-	$(PYTHON) -m venv $(VENV_PATH)
-	pip install --upgrade pip
-	pip install -e .[test_full]
 
 format: venv
 	black --line-length=120 --exclude='venv|build|examples' .

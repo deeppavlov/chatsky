@@ -4,13 +4,12 @@ Yandex DB
 Provides the version of the :py:class:`.DBContextStorage` for Yandex DataBase.
 """
 import os
-from typing import Any
 from urllib.parse import urlsplit
 
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -24,7 +23,8 @@ except ImportError:
 class YDBContextStorage(DBContextStorage):
     """
     | Version of the :py:class:`.DBContextStorage` for YDB.
-    :param path: Standard sqlalchemy URI string.
+
+        :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
     :type path: str

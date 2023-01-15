@@ -8,17 +8,16 @@
 # %%
 from typing import NamedTuple
 
-from dff.script import Context, RESPONSE, TRANSITIONS, get_last_index
+from dff.script import Context, RESPONSE, TRANSITIONS
 from dff.script.conditions import std_conditions as cnd
 
-from dff.script.responses import Attachments, Image, Response
+from dff.script.core.message import Attachments, Image, Message
 
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
-    generics_comparer,
 )
 
 
@@ -36,17 +35,17 @@ kitten_url = (
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Response(text=""),
+            RESPONSE: Message(text=""),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
-            RESPONSE: Response(text="Final node reached, send any message to restart."),
+            RESPONSE: Message(text="Final node reached, send any message to restart."),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
     },
     "pics": {
         "ask_picture": {
-            RESPONSE: Response(text="Please, send me a picture url"),
+            RESPONSE: Message(text="Please, send me a picture url"),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.jpg$"),
@@ -54,18 +53,20 @@ toy_script = {
             },
         },
         "send_one": {
-            RESPONSE: Response(text="here's my picture!", image=Image(source=kitten_url)),
+            RESPONSE: Message(
+                text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
-            RESPONSE: Response(
+            RESPONSE: Message(
                 text="Look at my pictures",
                 attachments=Attachments(files=[Image(source=kitten_url)] * 10),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: Response(text="I cannot find the picture. Please, try again."),
+            RESPONSE: Message(text="I cannot find the picture. Please, try again."),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.jpg$"),
@@ -76,19 +77,24 @@ toy_script = {
 }
 
 happy_path = (
-    ("Hi", "Please, send me a picture url"),
-    ("no", "I cannot find the picture. Please, try again."),
+    (Message(text="Hi"), Message(text="Please, send me a picture url")),
+    (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
     (
-        "https://sun9-49.userapi.com/s/v1/if2/gpquN.png",
-        "\nhere's my picture!\nAttachment size: 51706 bytes.",
+        Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.png"),
+        Message(
+            text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
+        ),
     ),
-    ("ok", "Final node reached, send any message to restart."),
-    ("ok", "Please, send me a picture url"),
+    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
+    (Message(text="ok"), Message(text="Please, send me a picture url")),
     (
-        "https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg",
-        "\nLook at my pictures\nGrouped attachment size: 517060 bytes.",
+        Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg"),
+        Message(
+            text="Look at my pictures",
+            attachments=Attachments(files=[Image(source=kitten_url)] * 10),
+        ),
     ),
-    ("ok", "Final node reached, send any message to restart."),
+    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
 )
 
 
@@ -98,17 +104,13 @@ class CallbackRequest(NamedTuple):
 
 
 def process_request(ctx: Context):
-    last_index = get_last_index(ctx.requests)  # TODO: edit once Context setters are fixed
-
     ui = ctx.last_response and ctx.last_response.ui
     if ui and ctx.last_response.ui.buttons:
         try:
-            chosen_button = ui.buttons[int(ctx.last_request)]
+            chosen_button = ui.buttons[int(ctx.last_request.text)]
         except (IndexError, ValueError):
-            raise ValueError(
-                "Type in the index of the correct option" "to choose from the buttons."
-            )
-        ctx.requests[last_index] = CallbackRequest(payload=chosen_button.payload)
+            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
 
 
 # %%
@@ -120,6 +122,6 @@ pipeline = Pipeline.from_script(
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, happy_path, generics_comparer)
+    check_happy_path(pipeline, happy_path)
     if is_interactive_mode():
         run_interactive_mode(pipeline)
