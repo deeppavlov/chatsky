@@ -82,7 +82,6 @@ class YDBContextStorage(DBContextStorage):
         return self.pool.retry_operation_sync(callee)
 
     async def getitem_async(self, key: Hashable) -> Context:
-
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -112,7 +111,6 @@ class YDBContextStorage(DBContextStorage):
         return self.pool.retry_operation_sync(callee)
 
     async def delitem_async(self, key: Hashable):
-
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -136,7 +134,6 @@ class YDBContextStorage(DBContextStorage):
         return self.pool.retry_operation_sync(callee)
 
     async def contains_async(self, key: Hashable) -> bool:
-
         def callee(session):
             # new transaction in serializable read write mode
             # if query successfully completed you will get result sets.
@@ -166,7 +163,6 @@ class YDBContextStorage(DBContextStorage):
         return self.pool.retry_operation_sync(callee)
 
     async def len_async(self) -> int:
-
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -187,7 +183,6 @@ class YDBContextStorage(DBContextStorage):
         return self.pool.retry_operation_sync(callee)
 
     async def clear_async(self):
-
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
