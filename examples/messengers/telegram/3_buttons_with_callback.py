@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 5. Buttons with Callback
+# 3. Buttons with Callback
 
 
 This example demonstrates, how to add an inline keyboard and utilize
@@ -16,9 +16,10 @@ from dff.pipeline import Pipeline
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
-    update_processing_service,
+    TelegramUI,
+    TelegramButton,
+    TelegramMessage,
 )
-from dff.script.responses.generics import Response, Keyboard, Button
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -46,13 +47,13 @@ in transition conditions (see below).
 script = {
     "root": {
         "start": {
-            RESPONSE: Response(text="hi"),
+            RESPONSE: TelegramMessage(text="hi"),
             TRANSITIONS: {
                 ("general", "keyboard"): cnd.true(),
             },
         },
         "fallback": {
-            RESPONSE: Response(text="Finishing test, send /restart command to restart"),
+            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
                 ("general", "keyboard"): messenger.cnd.message_handler(
                     commands=["start", "restart"]
@@ -62,13 +63,15 @@ script = {
     },
     "general": {
         "keyboard": {
-            RESPONSE: Response(
+            RESPONSE: TelegramMessage(
                 **{
                     "text": "Starting test! What's 9 + 10?",
-                    # Here, we use a generic keyboard class.
-                    # Compare with the next script node.
-                    "ui": Keyboard(
-                        buttons=[Button(text="19", payload="19"), Button(text="21", payload="21")]
+                    "ui": TelegramUI(
+                        buttons=[
+                            TelegramButton(text="19", payload="19"),
+                            TelegramButton(text="21", payload="21"),
+                        ],
+                        is_inline=True,
                     ),
                 }
             ),
@@ -82,11 +85,11 @@ script = {
             },
         },
         "success": {
-            RESPONSE: Response(text="Success!"),
+            RESPONSE: TelegramMessage(text="Success!"),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
-            RESPONSE: Response(text="Incorrect answer, type anything to try again"),
+            RESPONSE: TelegramMessage(text="Incorrect answer, type anything to try again"),
             TRANSITIONS: {("general", "keyboard"): cnd.true()},
         },
     },
@@ -100,7 +103,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 

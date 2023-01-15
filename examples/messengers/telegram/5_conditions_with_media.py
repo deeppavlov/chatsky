@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 7. Conditions with Media
+# 5. Conditions with Media
 
 This example shows how to use media-related logic in your script.
 """
@@ -14,10 +14,10 @@ from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
-    update_processing_service,
+    TelegramMessage,
 )
 from dff.pipeline import Pipeline
-from dff.script.responses.generics import Response, Image, Attachments
+from dff.script.core.message import Image, Attachments
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -57,9 +57,12 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 # %%
 script = {
     "root": {
-        "start": {RESPONSE: Response(text=""), TRANSITIONS: {("pics", "ask_picture"): cnd.true()}},
+        "start": {
+            RESPONSE: TelegramMessage(text=""),
+            TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
+        },
         "fallback": {
-            RESPONSE: "Finishing test, send /restart command to restart",
+            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
                 ("pics", "ask_picture"): messenger.cnd.message_handler(
                     commands=["start", "restart"]
@@ -69,7 +72,7 @@ script = {
     },
     "pics": {
         "ask_picture": {
-            RESPONSE: Response(text="Send me a picture"),
+            RESPONSE: TelegramMessage(text="Send me a picture"),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
@@ -94,11 +97,11 @@ script = {
         },
         "send_one": {
             # An HTTP path or a path to a local file can be used here.
-            RESPONSE: Response(text="Here's my picture!", image=Image(source=kitten_url)),
+            RESPONSE: TelegramMessage(text="Here's my picture!", image=Image(source=kitten_url)),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
-            RESPONSE: Response(
+            RESPONSE: TelegramMessage(
                 text="Look at my pictures",
                 # An HTTP path or a path to a local file can be used here.
                 attachments=Attachments(files=[Image(source=kitten_url)] * 2),
@@ -106,7 +109,7 @@ script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: "I cannot find the picture. Please, try again.",
+            RESPONSE: TelegramMessage(text="I cannot find the picture. Please, try again."),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.any(
                     [
@@ -168,7 +171,7 @@ pipeline = Pipeline.from_script(
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     messenger_interface=interface,
-    pre_services=[extract_data, update_processing_service],
+    pre_services=[extract_data],
 )
 
 

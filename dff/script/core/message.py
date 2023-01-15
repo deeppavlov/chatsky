@@ -22,6 +22,7 @@ class Session(Enum):
 class DataModel(BaseModel):
     class Config:
         extra = Extra.allow
+        arbitrary_types_allowed = True
 
 
 class Command(DataModel):

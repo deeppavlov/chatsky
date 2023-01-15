@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 6. Conditions
+# 4. Conditions
 
 This example shows how to process Telegram updates in your script
 and reuse handler triggers from the `pytelegrambotapi` library.
@@ -9,15 +9,14 @@ and reuse handler triggers from the `pytelegrambotapi` library.
 # %%
 import os
 
-from dff.script import TRANSITIONS, RESPONSE
+from dff.script import TRANSITIONS, RESPONSE, Message
 
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
-    update_processing_service,
 )
 from dff.pipeline import Pipeline
-from dff.script.responses.generics import Response
+from dff.messengers.telegram import TelegramMessage
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -43,33 +42,33 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 script = {
     "greeting_flow": {
         "start_node": {
-            RESPONSE: "",
+            RESPONSE: TelegramMessage(text=""),
             TRANSITIONS: {
                 "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
             },
         },
         "node1": {
-            RESPONSE: Response(text="Hi, how are you?"),
+            RESPONSE: TelegramMessage(text="Hi, how are you?"),
             TRANSITIONS: {"node2": messenger.cnd.message_handler(regexp="fine")},
         },
         "node2": {
-            RESPONSE: Response(text="Good. What do you want to talk about?"),
+            RESPONSE: TelegramMessage(text="Good. What do you want to talk about?"),
             TRANSITIONS: {
                 "node3": messenger.cnd.message_handler(func=lambda msg: "music" in msg.text)
             },
         },
         "node3": {
-            RESPONSE: Response(text="Sorry, I can not talk about music now."),
+            RESPONSE: TelegramMessage(text="Sorry, I can not talk about music now."),
             TRANSITIONS: {"node4": messenger.cnd.message_handler(func=lambda msg: True)},
         },
         "node4": {
-            RESPONSE: Response(text="bye"),
+            RESPONSE: TelegramMessage(text="bye"),
             TRANSITIONS: {
                 "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
             },
         },
         "fallback_node": {
-            RESPONSE: Response(text="Ooops"),
+            RESPONSE: TelegramMessage(text="Ooops"),
             TRANSITIONS: {
                 "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
             },
@@ -80,10 +79,10 @@ script = {
 
 # testing
 happy_path = (
-    ("/start", "Hi, how are you?"),
-    ("I'm fine", "Good. What do you want to talk about?"),
-    ("About music", "Sorry, I can not talk about music now."),
-    ("ok", "bye"),
+    (Message(text="/start"), Message(text="Hi, how are you?")),
+    (Message(text="I'm fine"), Message(text="Good. What do you want to talk about?")),
+    (Message(text="About music"), Message(text="Sorry, I can not talk about music now.")),
+    (Message(text="ok"), Message(text="bye")),
 )
 
 
@@ -96,7 +95,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 

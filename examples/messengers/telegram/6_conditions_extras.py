@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 8. Conditions Extras
+# 6. Conditions Extras
 
 This example shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
@@ -9,15 +9,14 @@ inherited from the `pytelegrambotapi` library.
 # %%
 import os
 
-from dff.script import TRANSITIONS, RESPONSE, GLOBAL, PRE_TRANSITIONS_PROCESSING
+from dff.script import TRANSITIONS, RESPONSE, GLOBAL
 import dff.script.conditions as cnd
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
-    update_processing_service,
+    TelegramMessage,
 )
 from dff.pipeline import Pipeline
-from dff.script.responses.generics import Response
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -57,9 +56,6 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 # %%
 script = {
     GLOBAL: {
-        PRE_TRANSITIONS_PROCESSING: {
-            "logging": lambda ctx, actor: print(ctx.framework_states) or ctx
-        },
         TRANSITIONS: {
             ("greeting_flow", "node1"): cnd.any(
                 [
@@ -77,21 +73,21 @@ script = {
     },
     "greeting_flow": {
         "start_node": {
-            RESPONSE: "Bot running",
+            RESPONSE: TelegramMessage(text="Bot running"),
             TRANSITIONS: {
                 "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
             },
         },
         "node1": {
-            RESPONSE: Response(text="Hi"),
+            RESPONSE: TelegramMessage(text="Hi"),
             TRANSITIONS: {"start_node": cnd.true()},
         },
         "node2": {
-            RESPONSE: Response(text="Inline query received."),
+            RESPONSE: TelegramMessage(text="Inline query received."),
             TRANSITIONS: {"start_node": cnd.true()},
         },
         "fallback_node": {
-            RESPONSE: Response(text="Ooops"),
+            RESPONSE: TelegramMessage(text="Ooops"),
         },
     },
 }
@@ -106,7 +102,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 

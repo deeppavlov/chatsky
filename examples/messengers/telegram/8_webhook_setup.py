@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 10. Webhook Setup
+# 8. Webhook Setup
 
 The following example shows how to integrate your bot with the Pipeline API.
 
@@ -17,7 +17,6 @@ import os
 from dff.messengers.telegram import (
     TelegramMessenger,
     WebhookTelegramInterface,
-    update_processing_service,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.toy_script import TOY_SCRIPT
@@ -51,7 +50,6 @@ pipeline = Pipeline.from_script(
     script=TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    pre_services=[update_processing_service],
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )
 

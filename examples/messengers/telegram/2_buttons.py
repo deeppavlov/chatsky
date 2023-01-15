@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 4. Buttons
+# 2. Buttons
 
 
 This example shows how to display and hide a basic keyboard in Telegram.
@@ -19,9 +19,8 @@ from dff.messengers.telegram import (
     TelegramMessenger,
     TelegramUI,
     TelegramButton,
-    update_processing_service,
+    TelegramMessage,
 )
-from dff.script.responses import Response
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -46,13 +45,13 @@ of the generic `Response` class.
 script = {
     "root": {
         "start": {
-            RESPONSE: Response(text="hi"),
+            RESPONSE: TelegramMessage(text="hi"),
             TRANSITIONS: {
                 ("general", "native_keyboard"): cnd.true(),
             },
         },
         "fallback": {
-            RESPONSE: Response(text="Finishing test, send /restart command to restart"),
+            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
                 ("general", "native_keyboard"): messenger.cnd.message_handler(
                     commands=["start", "restart"]
@@ -62,7 +61,7 @@ script = {
     },
     "general": {
         "native_keyboard": {
-            RESPONSE: Response(
+            RESPONSE: TelegramMessage(
                 text="Question: What's 2 + 2?",
                 # In this case, we use telegram-specific classes.
                 # They derive from the generic ones and include more options,
@@ -84,13 +83,13 @@ script = {
             },
         },
         "success": {
-            RESPONSE: Response(
+            RESPONSE: TelegramMessage(
                 **{"text": "Success!", "ui": TelegramUI(keyboard=types.ReplyKeyboardRemove())}
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
-            RESPONSE: Response(
+            RESPONSE: TelegramMessage(
                 **{
                     "text": "Incorrect answer, type anything to try again",
                     "ui": TelegramUI(keyboard=types.ReplyKeyboardRemove()),
@@ -117,7 +116,6 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    pre_services=[update_processing_service],
     messenger_interface=interface,
 )
 

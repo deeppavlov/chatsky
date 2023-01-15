@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 11. No Pipeline
+# 9. No Pipeline
 
 This example shows how to connect to Telegram without the `pipeline` API.
 
@@ -17,7 +17,6 @@ Here, we deploy a basic bot that reacts only to messages.
 import os
 
 from dff.script import Context, Actor
-from dff.messengers.telegram import TELEGRAM_KEY
 from telebot.util import content_type_media
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.messengers.telegram import TelegramMessenger
@@ -64,8 +63,7 @@ def dialog_handler(update):
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
     # add update
-    context.framework_states[TELEGRAM_KEY] = update
-    context.add_request(getattr(update, "text", "No text."))
+    context.add_request(update)
 
     # apply the actor
     updated_context = actor(context)

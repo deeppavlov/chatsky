@@ -13,9 +13,8 @@ import os
 from dff.script import conditions as cnd
 from dff.script import labels as lbl
 from dff.script import RESPONSE, TRANSITIONS
-from dff.messengers.telegram import PollingTelegramInterface, TelegramMessenger
+from dff.messengers.telegram import PollingTelegramInterface, TelegramMessenger, TelegramMessage
 from dff.pipeline import Pipeline
-from dff.messengers.telegram import update_processing_service
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -37,10 +36,16 @@ to the DFF `Pipeline` instance.
 # %%
 script = {
     "greeting_flow": {
-        "start_node": {RESPONSE: "", TRANSITIONS: {"greeting_node": cnd.exact_match("/start")}},
-        "greeting_node": {RESPONSE: "Hi", TRANSITIONS: {lbl.repeat(): cnd.true()}},
+        "start_node": {
+            RESPONSE: TelegramMessage(text=""),
+            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
+        },
+        "greeting_node": {
+            RESPONSE: TelegramMessage(text="Hi"),
+            TRANSITIONS: {lbl.repeat(): cnd.true()},
+        },
         "fallback_node": {
-            RESPONSE: "Please, repeat the request",
+            RESPONSE: TelegramMessage(text="Please, repeat the request"),
             TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
         },
     }
@@ -57,7 +62,6 @@ pipeline = Pipeline.from_script(
     script=script,  # Actor script object
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    pre_services=[update_processing_service],
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )
 

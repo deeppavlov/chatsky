@@ -9,9 +9,9 @@ from tests.test_utils import get_path_from_tests_to_current_dir
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
-module_11 = importlib.import_module(f"examples.{dot_path_to_addon}.{'11_no_pipeline'}")
+module_11 = importlib.import_module(f"examples.{dot_path_to_addon}.{'9_no_pipeline'}")
 bot, actor = module_11.bot, module_11.actor
-module_9 = importlib.import_module(f"examples.{dot_path_to_addon}.{'9_polling_setup'}")
+module_9 = importlib.import_module(f"examples.{dot_path_to_addon}.{'7_polling_setup'}")
 pipeline = module_9.pipeline
 
 

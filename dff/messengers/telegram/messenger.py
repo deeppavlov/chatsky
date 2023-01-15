@@ -13,10 +13,10 @@ from telebot import types, TeleBot
 
 from dff.script import Context, Actor
 
-from .utils import partialmethod, batch_open_io, TELEGRAM_KEY
-from .types import TelegramResponse
+from .utils import partialmethod, batch_open_io
+from .types import TelegramMessage
 
-from dff.script.responses.generics import Response
+from dff.script import Message
 
 
 class TelegramMessenger(TeleBot):
@@ -38,25 +38,25 @@ class TelegramMessenger(TeleBot):
         super().__init__(token, threaded=False, **kwargs)
         self.cnd: TelegramConditions = TelegramConditions(self)
 
-    def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Response, TelegramResponse]) -> None:
+    def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Message, TelegramMessage]) -> None:
         """
-        Cast `response` to :py:class:`~dff.messengers.telegram.types.TelegramResponse` and send it.
+        Cast `response` to :py:class:`~dff.messengers.telegram.types.TelegramMessage` and send it.
         Text content is sent after all the attachments.
 
         :param chat_id: Telegram chat ID.
         :param response: Response data. String, dictionary or :py:class:`~dff.script.responses.generics.Response`.
-            will be cast to :py:class:`~dff.messengers.telegram.types.TelegramResponse`.
+            will be cast to :py:class:`~dff.messengers.telegram.types.TelegramMessage`.
         """
-        if isinstance(response, TelegramResponse):
+        if isinstance(response, TelegramMessage):
             ready_response = response
         elif isinstance(response, str):
-            ready_response = TelegramResponse(text=response)
-        elif isinstance(response, dict) or isinstance(response, Response):
-            ready_response = TelegramResponse.parse_obj(response)
+            ready_response = TelegramMessage(text=response)
+        elif isinstance(response, dict) or isinstance(response, Message):
+            ready_response = TelegramMessage.parse_obj(response)
         else:
             raise TypeError(
                 "Type of the response argument should be one of the following:"
-                " `str`, `dict`, `Response`, or `TelegramResponse`."
+                " `str`, `dict`, `Response`, or `TelegramMessage`."
             )
 
         for attachment_prop, method in [
@@ -150,7 +150,10 @@ class TelegramConditions:
         )
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
-            update = ctx.framework_states.get(TELEGRAM_KEY)
+            last_request = ctx.last_request
+            if not last_request:
+                return False
+            update = last_request.misc.get("update")
             if not update or not isinstance(update, target_type):
                 return False
             test_result = self.messenger._test_message_handler(update_handler, update)

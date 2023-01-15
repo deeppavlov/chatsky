@@ -17,12 +17,13 @@ from telethon.tl.types import (
 )
 
 from dff.messengers.telegram.types import (
-    TelegramResponse,
+    TelegramMessage,
     TelegramAttachments,
     TelegramAttachment,
     TelegramUI,
 )
-from dff.script.responses.generics import Attachments, Response, Keyboard, Button, Image, Location, Audio, Video
+from dff.script import Message
+from dff.script.core.message import Attachments, Keyboard, Button, Image, Location, Audio, Video
 from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
@@ -65,8 +66,8 @@ UTC = pytz.UTC
     ],
 )
 async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_id, bot_id):
-    generic_response = Response(text="test", ui=ui)
-    telegram_response = TelegramResponse.parse_obj(generic_response)
+    generic_response = Message(text="test", ui=ui)
+    telegram_response = TelegramMessage.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui and isinstance(telegram_response.ui.keyboard, markup_type)
     assert len(telegram_response.ui.keyboard.keyboard) == 2
@@ -91,8 +92,8 @@ async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_
     ],
 )
 async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
-    generic_response = Response(text="test", ui=ui)
-    telegram_response = TelegramResponse.parse_obj(generic_response)
+    generic_response = Message(text="test", ui=ui)
+    telegram_response = TelegramMessage.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.ui
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
@@ -113,17 +114,17 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     ["generic_response", "prop", "filter_type"],
     [
         (
-            Response(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")),
+            Message(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")),
             "image",
             InputMessagesFilterPhotos,
         ),
         (
-            Response(text="test", audio=Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")),
+            Message(text="test", audio=Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")),
             "audio",
             InputMessagesFilterMusic,
         ),
         (
-            Response(
+            Message(
                 text="test",
                 video=Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"),
             ),
@@ -133,7 +134,7 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     ],
 )
 async def test_telegram_attachment(generic_response, prop, filter_type, basic_bot, user_id, tg_client, bot_id):
-    telegram_response = TelegramResponse.parse_obj(generic_response)
+    telegram_response = TelegramMessage.parse_obj(generic_response)
     telegram_prop = vars(telegram_response).get(prop)
     generic_prop = vars(generic_response).get(prop)
     assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
@@ -152,7 +153,7 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_attachments(basic_bot, user_id, tg_client, bot_id):
-    generic_response = Response(
+    generic_response = Message(
         text="test",
         attachments=Attachments(
             files=[
@@ -161,7 +162,7 @@ async def test_attachments(basic_bot, user_id, tg_client, bot_id):
             ]
         ),
     )
-    telegram_response = TelegramResponse.parse_obj(generic_response)
+    telegram_response = TelegramMessage.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.attachments and isinstance(telegram_response.attachments, TelegramAttachments)
     assert len(telegram_response.attachments.files) == 2
@@ -182,8 +183,8 @@ async def test_attachments(basic_bot, user_id, tg_client, bot_id):
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_location(basic_bot, user_id, tg_client, bot_id):
-    generic_response = Response(text="location", location=Location(longitude=39.0, latitude=43.0))
-    telegram_response = TelegramResponse.parse_obj(generic_response)
+    generic_response = Message(text="location", location=Location(longitude=39.0, latitude=43.0))
+    telegram_response = TelegramMessage.parse_obj(generic_response)
     assert telegram_response.text == generic_response.text
     assert telegram_response.location
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)

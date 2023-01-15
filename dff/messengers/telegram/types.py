@@ -6,25 +6,18 @@ This module implements local classes that help cast generic types from `dff` to 
 from typing import Any, List, Optional, Union
 
 from telebot import types
-from pydantic import BaseModel, validator, root_validator, Field, Extra, FilePath, HttpUrl, Required
+from pydantic import validator, root_validator, Field, FilePath, HttpUrl, Required
 
-from dff.script.responses.generics import Image, Audio, Document, Video, Location
-
-
-class TelegramDataModel(BaseModel):
-    class Config:
-        extra = Extra.ignore
-        allow_population_by_field_name = True
-        arbitrary_types_allowed = True
+from dff.script.core.message import DataModel, Message, Image, Audio, Document, Video, Location
 
 
-class TelegramButton(TelegramDataModel):
+class TelegramButton(DataModel):
     text: str = Field(alias="text")
     url: Optional[str] = Field(default=None, alias="source")
     callback_data: Optional[str] = Field(default=None, alias="payload")
 
 
-class TelegramUI(TelegramDataModel):
+class TelegramUI(DataModel):
     buttons: Optional[List[TelegramButton]] = None
     is_inline: bool = True
     keyboard: Optional[Union[types.ReplyKeyboardRemove, types.ReplyKeyboardMarkup, types.InlineKeyboardMarkup]] = None
@@ -49,7 +42,7 @@ class TelegramUI(TelegramDataModel):
         return values
 
 
-class TelegramAttachment(TelegramDataModel):
+class TelegramAttachment(DataModel):
     source: Optional[Union[HttpUrl, FilePath]] = None
     id: Optional[str] = None  # id field is made separate to simplify validation.
     title: Optional[str] = None
@@ -61,7 +54,7 @@ class TelegramAttachment(TelegramDataModel):
         return values
 
 
-class TelegramAttachments(TelegramDataModel):
+class TelegramAttachments(DataModel):
     files: List[types.InputMedia] = Field(default_factory=list, min_items=2, max_items=10)
 
     @validator("files", pre=True, each_item=True, always=True)
@@ -82,7 +75,7 @@ class TelegramAttachments(TelegramDataModel):
         return file
 
 
-class TelegramResponse(TelegramDataModel):
+class TelegramMessage(Message):
     text: str = Required
     ui: Optional[TelegramUI] = None
     location: Optional[types.Location] = None
