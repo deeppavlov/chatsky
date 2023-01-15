@@ -143,7 +143,7 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def len_async(self) -> int:
-        stmt = select([func.count()]).select_from(self.table)
+        stmt = select(func.count()).select_from(self.table)
         async with self.engine.connect() as conn:
             result = await conn.execute(stmt)
             return result.fetchone()[0]
