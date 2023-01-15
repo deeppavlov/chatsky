@@ -1,7 +1,7 @@
 """
 sql
 ---------------------------
-| Provides the sql-based version of the :py:class:`.DBContextStorage`.
+| Provides the SQL-based version of the :py:class:`.DBContextStorage`.
 | You can choose the backend option of your liking from mysql, postgresql, or sqlite.
 
 """
@@ -69,7 +69,7 @@ def import_insert_for_dialect(dialect: str):
 
 class SQLContextStorage(DBContextStorage):
     """
-    | Sql-based version of the :py:class:`.DBContextStorage`.
+    | SQL-based version of the :py:class:`.DBContextStorage`.
     | Compatible with MySQL, Postgresql, Sqlite.
 
     Parameters
