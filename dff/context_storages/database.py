@@ -11,7 +11,7 @@ import importlib
 import threading
 from functools import wraps
 from abc import ABC, abstractmethod
-from typing import Any, Callable
+from typing import Any, Callable, Optional
 
 from .protocol import PROTOCOLS
 from ..script import Context
@@ -27,7 +27,7 @@ class DBAbstractContextStorage(ABC):
     def __init__(self) -> None:
         pass
 
-    def __getitem__(self, key: Any) -> Any:
+    def __getitem__(self, key: Any) -> Context:
         return asyncio.run(self.getitem(key))
 
     @abstractmethod
@@ -41,39 +41,39 @@ class DBAbstractContextStorage(ABC):
     async def setitem(self, key: Any, value: Context):
         raise NotImplementedError
 
-    def __delitem__(self, key: str) -> None:
+    def __delitem__(self, key: str):
         return asyncio.run(self.delitem(key))
 
     @abstractmethod
-    async def delitem(self, key: str) -> Any:
+    async def delitem(self, key: str):
         raise NotImplementedError
 
     def __contains__(self, key: str) -> bool:
         return asyncio.run(self.contains(key))
 
     @abstractmethod
-    async def contains(self, key: str) -> Any:
+    async def contains(self, key: str) -> bool:
         raise NotImplementedError
 
     def __len__(self) -> int:
         return asyncio.run(self.len())
 
     @abstractmethod
-    async def len(self) -> Any:
+    async def len(self) -> int:
         raise NotImplementedError
 
-    def get(self, key: Any, default=None) -> Any:
+    def get(self, key: Any, default: Optional[Context] = None) -> Optional[Context]:
         return asyncio.run(self.get_async(key, default))
 
     @abstractmethod
-    async def get_async(self, key: Any, default=None) -> Any:
+    async def get_async(self, key: Any, default: Optional[Context] = None) -> Optional[Context]:
         raise NotImplementedError
 
-    def clear(self) -> None:
+    def clear(self):
         return asyncio.run(self.clear_async())
 
     @abstractmethod
-    async def clear_async(self) -> Any:
+    async def clear_async(self):
         raise NotImplementedError
 
 
