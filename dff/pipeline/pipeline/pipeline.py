@@ -214,7 +214,7 @@ class Pipeline:
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
         if isinstance(self.context_storage, DBAbstractContextStorage):
-            await self.context_storage.setitem(ctx_id, ctx)
+            await self.context_storage.setitem_async(ctx_id, ctx)
         else:
             self.context_storage[ctx_id] = ctx
         if self._clean_turn_cache:

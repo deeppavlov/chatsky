@@ -99,9 +99,8 @@ class DBContextStorage(DBAbstractContextStorage, ABC):
         self._lock = threading.Lock()
 
     async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
-        key = str(key)
         try:
-            return await self.getitem_async(key)
+            return await self.getitem_async(str(key))
         except KeyError:
             return default
 
