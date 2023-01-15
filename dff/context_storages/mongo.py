@@ -1,6 +1,6 @@
 """
-mongo
----------------------------
+Mongo
+-----
 Provides the mongo-based version of the :py:class:`.DBContextStorage`.
 """
 from typing import Hashable, Dict
@@ -25,13 +25,10 @@ class MongoContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
-    Parameters
-    -----------
-
-    path: str
-        Database URI. Example: 'mongodb://user:password@host:port/dbname'
-    collection: str
-        Name of the collection to store the data in.
+    :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
+    :type path: str
+    :param collection: Name of the collection to store the data in.
+    :type collection: str
     """
 
     def __init__(self, path: str, collection: str = "context_collection"):

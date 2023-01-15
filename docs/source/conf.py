@@ -7,16 +7,16 @@ from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import add_installation_cell_into_py  # noqa: E402
+from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
 project = "Dialog Flow Framework"
-copyright = "2021, Denis Kuznetsov"
-author = "Denis Kuznetsov"
+copyright = "2023, DeepPavlov"
+author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0rc0"
+release = "0.2.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -84,7 +84,7 @@ html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": add_installation_cell_into_py}
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 :tutorial_path: \\.
@@ -106,6 +106,9 @@ html_theme_options = {
 }
 
 
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
+
+
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
@@ -117,9 +120,9 @@ def setup(_):
     )
     regenerate_apiref(
         [
-            ("dff.context_storages", "context_storages"),
-            ("dff.messengers", "messenger_interfaces"),
-            ("dff.script", "script"),
-            ("dff.pipeline", "pipeline"),
+            ("dff.context_storages", "Context Storages"),
+            ("dff.messengers", "Messenger Interfaces"),
+            ("dff.pipeline", "Pipeline"),
+            ("dff.script", "Script"),
         ]
     )

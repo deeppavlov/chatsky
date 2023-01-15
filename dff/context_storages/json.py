@@ -1,6 +1,6 @@
 """
-json
----------------------------
+JSON
+----
 Provides the json-based version of the :py:class:`.DBContextStorage`.
 """
 import asyncio
@@ -26,11 +26,8 @@ class JSONContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
-    Parameters
-    -----------
-
-    path: str
-        Target file URI. Example: 'json://file.json'
+    :param path: Target file URI. Example: `json://file.json`.
+    :type path: str
     """
 
     def __init__(self, path: str):

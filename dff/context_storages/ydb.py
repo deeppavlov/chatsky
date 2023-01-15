@@ -24,7 +24,8 @@ except ImportError:
 class YDBContextStorage(DBContextStorage):
     """
     | Version of the :py:class:`.DBContextStorage` for YDB.
-    :param path: Standard sqlalchemy URI string.
+
+        :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
     :type path: str
@@ -111,6 +112,7 @@ class YDBContextStorage(DBContextStorage):
         return self.pool.retry_operation_sync(callee)
 
     async def delitem_async(self, key: Hashable):
+
         def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
