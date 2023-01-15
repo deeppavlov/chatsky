@@ -6,9 +6,7 @@
 
 
 # %%
-from typing import NamedTuple
-
-from dff.script import Context, RESPONSE, TRANSITIONS
+from dff.script import RESPONSE, TRANSITIONS
 from dff.script.conditions import std_conditions as cnd
 
 from dff.script.core.message import Attachments, Image, Message
@@ -99,26 +97,10 @@ happy_path = (
 
 
 # %%
-class CallbackRequest(NamedTuple):
-    payload: str
-
-
-def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.ui
-    if ui and ctx.last_response.ui.buttons:
-        try:
-            chosen_button = ui.buttons[int(ctx.last_request.text)]
-        except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
-        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
-
-
-# %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    pre_services=[process_request],
 )
 
 if __name__ == "__main__":
