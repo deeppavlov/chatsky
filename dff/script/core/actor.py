@@ -1,6 +1,6 @@
 """
 Actor
----------------------------
+-----
 Actor is one of the main abstractions that processes incoming requests
 (:py:class:`~dff.script.Context`)
 from the user in accordance with the dialog graph (:py:class:`~dff.script.Script`).

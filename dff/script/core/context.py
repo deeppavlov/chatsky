@@ -1,6 +1,6 @@
 """
 Context
----------------------------
+-------
 Data structure that is used for the context storage.
 It provides a convenient interface for working with data:
 adding data, data serialization, type checking etc.
@@ -226,7 +226,8 @@ class Context(BaseModel):
         return self.responses.get(last_index)
 
     def set_last_response(self, response: Optional[Message]):
-        """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        """
+        Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
@@ -236,13 +237,14 @@ class Context(BaseModel):
     def last_request(self) -> Optional[Message]:
         """
         Returns the last `request` of the current :py:class:`~dff.script.Context`.
-        Returns `None if `requests` is empty.
+        Returns `None` if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
     def set_last_request(self, request: Optional[Message]):
-        """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        """
+        Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
