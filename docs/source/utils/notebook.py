@@ -1,7 +1,23 @@
 from jupytext import jupytext
 
 
+def get_extra_deps_line_number():
+    """
+    This function finds the line number of the EXTRA_DEPENDENCIES variable in the setup.py file.
+    It opens the setup.py file, reads its lines and finds the index of the line containing the
+    'EXTRA_DEPENDENCIES = {' string. It then returns the index + 1 (to account for 0-based indexing)
+    """
+    with open("setup.py", "r", encoding="utf-8") as setup:
+        return setup.readlines().index("EXTRA_DEPENDENCIES = {\n") + 1
+
+
 def insert_installation_cell_into_py_example():
+    """
+    This function modifies a Jupyter notebook by inserting a code cell for installing 'dff' package
+    and its dependencies, and a markdown cell with instructions for the user. It uses the location of
+    the second cell in the notebook as a reference point to insert the new cells.
+    """
+
     def inner(example_text: str):
         second_cell = example_text.find("\n# %%", 5)
         return jupytext.reads(
@@ -19,7 +35,8 @@ __Installing dependencies__
 # To install other options of dff, use `pip install dff[OPTION_NAME1,OPTION_NAME2]`
 # where OPTION_NAME can be one of the options from EXTRA_DEPENDENCIES.
 # e.g `pip install dff[ydb, mysql]` installs dff with dependencies for using Yandex Database and MySQL
-# EXTRA_DEPENDENCIES can be found in https://github.com/deeppavlov/dialog_flow_framework/blob/dev/setup.py
+# EXTRA_DEPENDENCIES can be found in
+# https://github.com/deeppavlov/dialog_flow_framework/blob/dev/setup.py#{get_extra_deps_line_number()}
 
 
 # %% [markdown]
