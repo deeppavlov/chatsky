@@ -112,10 +112,10 @@ autodoc_default_options = {"members": True, "undoc-members": False, "private-mem
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/script/*.py",
-            "examples/pipeline/*.py",
             "examples/context_storages/*.py",
-            "examples/messengers/*.py",
+            "examples/pipeline/*.py",
+            "examples/script/*.py",
+            "examples/utils/*.py",
         ]
     )
     regenerate_apiref(
