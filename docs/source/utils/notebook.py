@@ -33,7 +33,7 @@ __Installing dependencies__
 # where OPTION_NAME can be one of the options from EXTRA_DEPENDENCIES.
 # e.g `pip install dff[ydb, mysql]` installs dff with dependencies for using Yandex Database and MySQL
 # EXTRA_DEPENDENCIES can be found in
-# https://github.com/deeppavlov/dialog_flow_framework/blob/dev/setup.py#{get_extra_deps_line_number()}
+# https://github.com/deeppavlov/dialog_flow_framework/blob/dev/setup.py#L{get_extra_deps_line_number()}
 
 
 # %% [markdown]
