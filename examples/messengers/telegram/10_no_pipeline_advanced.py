@@ -15,12 +15,12 @@ import os
 from typing import Optional
 
 import dff.script.conditions as cnd
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script import Context, Actor, TRANSITIONS, RESPONSE, Message
 
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.messengers.telegram import TelegramMessenger
+from dff.messengers.telegram import TelegramMessenger, TelegramMessage, TelegramUI, TelegramButton
 from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
@@ -43,13 +43,13 @@ The signature of these functions is equivalent to the signature of the `telebot`
 script = {
     "root": {
         "start": {
-            RESPONSE: "",
+            RESPONSE: TelegramMessage(text=""),
             TRANSITIONS: {
                 ("general", "keyboard"): cnd.true(),
             },
         },
         "fallback": {
-            RESPONSE: "Finishing test, send /restart command to restart",
+            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
                 ("general", "keyboard"): bot.cnd.message_handler(commands=["start", "restart"])
             },
@@ -57,13 +57,16 @@ script = {
     },
     "general": {
         "keyboard": {
-            RESPONSE: {
-                "message": "What's 2 + 2?",
-                "markup": {
-                    0: {"text": "4", "callback_data": "4"},
-                    1: {"text": "5", "callback_data": "5"},
-                },
-            },
+            RESPONSE: TelegramMessage(
+                text="What's 2 + 2?",
+                ui=TelegramUI(
+                    buttons=[
+                        TelegramButton(text="4", payload="4"),
+                        TelegramButton(text="5", payload="5"),
+                    ],
+                    is_inline=True,
+                ),
+            ),
             TRANSITIONS: {
                 ("general", "success"): bot.cnd.callback_query_handler(
                     func=lambda call: call.data == "4"
@@ -74,11 +77,11 @@ script = {
             },
         },
         "success": {
-            RESPONSE: {"message": "Success!", "markup": None},
+            RESPONSE: TelegramMessage(text="success"),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
-            RESPONSE: {"message": "Incorrect answer, try again", "markup": None},
+            RESPONSE: TelegramMessage(text="Incorrect answer, try again"),
             TRANSITIONS: {("general", "keyboard"): cnd.true()},
         },
     },
@@ -115,7 +118,7 @@ def handler(update):
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
     # add update
-    context.add_request(update)
+    context.add_request(Message(text=getattr(update, "text", None), misc={"update": update}))
 
     # apply the actor
     context = actor(context)
@@ -124,12 +127,7 @@ def handler(update):
     db[user_id] = context
 
     response = context.last_response
-    if isinstance(response, str):
-        bot.send_message(update.from_user.id, response)
-    elif isinstance(response, dict):
-        bot.send_message(
-            update.from_user.id, response["message"], reply_markup=get_markup(response["markup"])
-        )
+    bot.send_response(update.from_user.id, response)
 
 
 if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building

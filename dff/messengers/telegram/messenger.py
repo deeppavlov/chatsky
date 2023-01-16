@@ -151,7 +151,7 @@ class TelegramConditions:
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
             last_request = ctx.last_request
-            if not last_request:
+            if last_request is None:
                 return False
             update = last_request.misc.get("update")
             if not update or not isinstance(update, target_type):
