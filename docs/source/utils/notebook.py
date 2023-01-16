@@ -2,10 +2,7 @@ from jupytext import jupytext
 
 
 def get_extra_deps_line_number():
-    """
-    This function finds the line number of the EXTRA_DEPENDENCIES variable in the setup.py file.
-    It opens the setup.py file, reads its lines and finds the index of the line containing the
-    'EXTRA_DEPENDENCIES = {' string. It then returns the index + 1 (to account for 0-based indexing)
+    """This function finds the line number of the EXTRA_DEPENDENCIES variable in the setup.py file.
     """
     with open("setup.py", "r", encoding="utf-8") as setup:
         return setup.readlines().index("EXTRA_DEPENDENCIES = {\n") + 1
