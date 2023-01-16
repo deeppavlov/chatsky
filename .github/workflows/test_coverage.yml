@@ -44,7 +44,6 @@ jobs:
           rm -rf ..?* .[!.]* *
           for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
-          touch venv  # disable venv target
 
       - name: run tests
         run: |

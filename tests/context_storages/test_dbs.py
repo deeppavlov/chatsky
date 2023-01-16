@@ -4,7 +4,6 @@ import os
 from platform import system
 
 from dff.context_storages import (
-    context_storage_factory,
     get_protocol_install_suggestion,
     JSONContextStorage,
     PickleContextStorage,
