@@ -48,5 +48,6 @@ jobs:
 
       - name: run tests
         run: |
+          pip list
           make test
         shell: bash
