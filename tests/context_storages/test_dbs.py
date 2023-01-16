@@ -96,11 +96,6 @@ def test_protocol_suggestion(protocol, expected):
     assert result == expected
 
 
-def test_main(testing_file, testing_context, context_id):
-    db = context_storage_factory(f"json://{testing_file}")
-    generic_test(db, testing_context, context_id)
-
-
 def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
     generic_test(db, testing_context, context_id)

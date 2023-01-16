@@ -3,7 +3,6 @@ Database
 --------
 Base module. Provided classes:
     - Abstract context storage interface :py:class:`.DBAbstractContextStorage`.
-    - An intermediate class to inherit from: :py:class:`.DBContextStorage`
 """
 import asyncio
 import importlib

@@ -82,5 +82,5 @@ class MongoContextStorage(DBAbstractContextStorage):
         return await self.collection.estimated_document_count()
 
     @threadsafe_method
-    async def clear_async(self) -> None:
+    async def clear_async(self):
         await self.collection.delete_many(dict())
