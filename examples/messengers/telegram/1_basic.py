@@ -12,8 +12,8 @@ import os
 
 from dff.script import conditions as cnd
 from dff.script import labels as lbl
-from dff.script import RESPONSE, TRANSITIONS
-from dff.messengers.telegram import PollingTelegramInterface, TelegramMessenger, TelegramMessage
+from dff.script import RESPONSE, TRANSITIONS, Message
+from dff.messengers.telegram import PollingTelegramInterface, TelegramMessenger
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
 
@@ -37,16 +37,16 @@ to the DFF `Pipeline` instance.
 script = {
     "greeting_flow": {
         "start_node": {
-            RESPONSE: TelegramMessage(text=""),
-            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
+            RESPONSE: Message(text=""),
+            TRANSITIONS: {"greeting_node": cnd.exact_match(Message(text="/start"))},
         },
         "greeting_node": {
-            RESPONSE: TelegramMessage(text="Hi"),
+            RESPONSE: Message(text="Hi"),
             TRANSITIONS: {lbl.repeat(): cnd.true()},
         },
         "fallback_node": {
-            RESPONSE: TelegramMessage(text="Please, repeat the request"),
-            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
+            RESPONSE: Message(text="Please, repeat the request"),
+            TRANSITIONS: {"greeting_node": cnd.exact_match(Message(text="/start"))},
         },
     }
 }

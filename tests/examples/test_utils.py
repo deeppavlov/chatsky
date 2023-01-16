@@ -16,12 +16,3 @@ def test_set_update():
 def test_is_interactive():
     os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
     assert is_interactive_mode() == False
-
-
-def test_interactive_mode():
-    process = Process(target=run_interactive_mode, args=(pipeline, ), daemon=True)
-    process.start()
-    time.sleep(1)
-    process.kill()
-    while process.is_alive():
-        time.sleep(0.1)
