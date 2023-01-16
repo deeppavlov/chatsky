@@ -49,5 +49,6 @@ jobs:
       - name: run tests
         run: |
           pip list
+          python3 -c "import ydb"
           make test
         shell: bash
