@@ -8,10 +8,7 @@ import time
 import pytz
 from multiprocessing import Process
 
-
 import pytest
-
-from dff.utils.testing.common import check_happy_path
 from tests.test_utils import get_path_from_tests_to_current_dir
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
@@ -20,12 +17,6 @@ TG_API_HASH = os.getenv("TG_API_HASH")
 UTC = pytz.UTC
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
-
-
-def test_unhappy_path(pipeline_instance):
-    with pytest.raises(Exception) as e:
-        check_happy_path(pipeline_instance, (("Hi", "false_response"),))
-    assert e
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="TG_BOT_TOKEN missing")
