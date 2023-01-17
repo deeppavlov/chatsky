@@ -1,6 +1,6 @@
 import json
 import pytest
-import time
+import asyncio
 import datetime
 import os
 import pytz
@@ -73,7 +73,7 @@ async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_
     assert len(telegram_response.ui.keyboard.keyboard) == 2
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     basic_bot.send_response(user_id, telegram_response)
-    time.sleep(2.5)
+    await asyncio.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=3)
     print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
@@ -98,7 +98,7 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     assert telegram_response.ui
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     basic_bot.send_response(user_id, telegram_response)
-    time.sleep(2.5)
+    await asyncio.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=3)
     print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
@@ -141,7 +141,7 @@ async def test_telegram_attachment(generic_response, prop, filter_type, basic_bo
     assert telegram_prop.source == generic_prop.source
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     basic_bot.send_response(user_id, telegram_response)
-    time.sleep(2.5)
+    await asyncio.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=5, filter=filter_type)
     print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
@@ -171,7 +171,7 @@ async def test_attachments(basic_bot, user_id, tg_client, bot_id):
     assert telegram_response.attachments.files[0].caption == generic_response.attachments.files[0].title
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     basic_bot.send_response(user_id, telegram_response)
-    time.sleep(2.5)
+    await asyncio.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterPhotos)
     print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))
@@ -189,7 +189,7 @@ async def test_location(basic_bot, user_id, tg_client, bot_id):
     assert telegram_response.location
     sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
     basic_bot.send_response(user_id, telegram_response)
-    time.sleep(2.5)
+    await asyncio.sleep(2.5)
     messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterGeo)
     print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
     messages = list(filter(lambda msg: msg.date >= sending_time, messages))

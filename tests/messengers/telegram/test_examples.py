@@ -4,7 +4,7 @@ This script ensures that example scripts can successfully compile and are ready 
 import os
 import datetime
 import importlib
-import time
+import asyncio
 import pytz
 from multiprocessing import Process
 
@@ -35,11 +35,11 @@ async def test_client_examples(example_module_name, bot_id, tg_client):
     process = Process(target=pipeline.run, args=(), daemon=True)
     process.start()
     happy_path = example_module.happy_path
-    time.sleep(12)
+    await asyncio.sleep(12)
     for request, response in happy_path:
         sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
         await tg_client.send_message(bot_id, request.text)
-        time.sleep(2.5)
+        await asyncio.sleep(2.5)
         messages = await tg_client.get_messages(bot_id, limit=5)
         new_messages = list(filter(lambda msg: msg.date >= sending_time, messages))
         print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in new_messages], sep="\n")
@@ -47,4 +47,4 @@ async def test_client_examples(example_module_name, bot_id, tg_client):
         assert new_messages[0].text == response.text
     process.kill()
     while process.is_alive():
-        time.sleep(0.1)
+        await asyncio.sleep(0.1)

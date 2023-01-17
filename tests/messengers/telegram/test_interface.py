@@ -1,6 +1,6 @@
 import pytest
 import inspect
-import time
+import asyncio
 import os
 
 from telebot import types
@@ -51,7 +51,7 @@ async def test_update_handling(pipeline_instance, update, basic_bot, user_id):
     assert isinstance(request_result, list)
     response_result = interface._respond([Context(id=user_id, responses={0: Message(text="hi")})])
     assert response_result is None
-    time.sleep(2)
+    await asyncio.sleep(2)
 
 
 @pytest.mark.skipif(TG_BOT_TOKEN is None, reason="`TG_BOT_TOKEN` is missing.")
