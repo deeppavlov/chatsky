@@ -36,7 +36,7 @@ class TelegramMessenger(TeleBot):
         **kwargs,
     ):
         super().__init__(token, threaded=False, **kwargs)
-        self.cnd: TelegramConditions = TelegramConditions(self)
+        self.cnd = TelegramConditions(self)
 
     def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Message, TelegramMessage]) -> None:
         """

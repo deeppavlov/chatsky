@@ -65,11 +65,11 @@ class PollingTelegramInterface(PollingMessengerInterface):
         timeout: int = 20,
         long_polling_timeout: int = 20,
     ):
-        self.messenger: TelegramMessenger = messenger
-        self.interval: int = interval
-        self.allowed_updates: Optional[List[str]] = allowed_updates
-        self.timeout: int = timeout
-        self.long_polling_timeout: int = long_polling_timeout
+        self.messenger = messenger
+        self.interval = interval
+        self.allowed_updates = allowed_updates
+        self.timeout = timeout
+        self.long_polling_timeout = long_polling_timeout
 
     def _request(self) -> List[Tuple[Any, Hashable]]:
         updates = self.messenger.get_updates(
@@ -123,12 +123,12 @@ class WebhookTelegramInterface(CallbackMessengerInterface):
         if not flask_imported:
             raise ModuleNotFoundError("Flask is not installed. Install it with `pip install flask`.")
 
-        self.messenger: TelegramMessenger = messenger
-        self.app: Flask = app if app else Flask(__name__)
-        self.host: str = host
-        self.port: int = port
-        self.endpoint: str = endpoint
-        self.full_uri: str = full_uri or "".join([f"https://{host}:{port}", endpoint])
+        self.messenger = messenger
+        self.app = app if app else Flask(__name__)
+        self.host = host
+        self.port = port
+        self.endpoint = endpoint
+        self.full_uri = full_uri if full_uri is not None else "".join([f"https://{host}:{port}", endpoint])
 
         async def endpoint():
             if not request.headers.get("content-type") == "application/json":
