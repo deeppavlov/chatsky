@@ -51,10 +51,18 @@ class PollingTelegramInterface(PollingMessengerInterface):
     Multi-threaded polling is currently not supported, but will be implemented in the future.
 
     :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
-    :param interval: Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
-    :param allowed_updates: Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
-    :param timeout: General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
-    :param long_polling_timeout: Polling timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+    :param interval:
+        Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Defaults to 2.
+    :param allowed_updates:
+        Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Defaults to None.
+    :param timeout:
+        General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Defaults to 20.
+    :param long_polling_timeout:
+        Polling timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Defaults to 20.
     """
 
     def __init__(
@@ -104,11 +112,21 @@ class WebhookTelegramInterface(CallbackMessengerInterface):
     Any Flask server can be passed to set up a webhook on a separate endpoint.
 
     :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
-    :param app: Flask instance.
-    :param endpoint: Webhook endpoint. Should be prefixed with "/".
-    :param host: Host IP.
-    :param port: Port of the app.
-    :param full_uri: Full public IP of your webhook that is accessible by https.
+    :param app:
+        Flask instance.
+        Defaults to `Flask(__name__)`.
+    :param endpoint:
+        Webhook endpoint. Should be prefixed with "/".
+        Defaults to "/telegram-webhook".
+    :param host:
+        Host IP.
+        Defaults to "localhost".
+    :param port:
+        Port of the app.
+        Defaults to 8443.
+    :param full_uri:
+        Full public IP of your webhook that is accessible by https.
+        Defaults to `"https://{host}:{port}{endpoint}"`.
     """
 
     def __init__(
