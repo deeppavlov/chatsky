@@ -12,7 +12,6 @@ from dff.script import Context, Message
 from dff.messengers.common import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
 from .messenger import TelegramMessenger
 
-flask_imported: bool
 try:
     from flask import Flask, request, abort
 
