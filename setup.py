@@ -140,7 +140,7 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,  # dependencies for using MySQL
     "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
-    "telegram": telegram_dependencies, # dependencies for using Telegram
+    "telegram": telegram_dependencies,  # dependencies for using Telegram
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
