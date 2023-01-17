@@ -43,7 +43,7 @@ class YDBContextStorage(DBAbstractContextStorage):
         if not ydb_available:
             install_suggestion = get_protocol_install_suggestion("grpc")
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
-        asyncio.run(self._init_drive(timeout))
+        self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, self.table_name))
 
     async def setitem_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
@@ -66,9 +66,9 @@ class YDBContextStorage(DBAbstractContextStorage):
                 """.format(
                 self.database, self.table_name
             )
-            prepared_query = session.prepare(query)
+            prepared_query = await session.prepare(query)
 
-            await session.transaction(ydb.SerializableReadWrite()).execute(
+            await (session.transaction(ydb.SerializableReadWrite())).execute(
                 prepared_query,
                 {"$queryId": str(key), "$queryContext": value.json()},
                 commit_tx=True,
@@ -89,9 +89,9 @@ class YDBContextStorage(DBAbstractContextStorage):
                 """.format(
                 self.database, self.table_name
             )
-            prepared_query = session.prepare(query)
+            prepared_query = await session.prepare(query)
 
-            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
+            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
                 prepared_query,
                 {
                     "$queryId": str(key),
@@ -118,9 +118,9 @@ class YDBContextStorage(DBAbstractContextStorage):
                 """.format(
                 self.database, self.table_name
             )
-            prepared_query = session.prepare(query)
+            prepared_query = await session.prepare(query)
 
-            await session.transaction(ydb.SerializableReadWrite()).execute(
+            await (session.transaction(ydb.SerializableReadWrite())).execute(
                 prepared_query,
                 {"$queryId": str(key)},
                 commit_tx=True,
@@ -144,9 +144,9 @@ class YDBContextStorage(DBAbstractContextStorage):
                 """.format(
                 self.database, self.table_name
             )
-            prepared_query = session.prepare(query)
+            prepared_query = await session.prepare(query)
 
-            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
+            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
                 prepared_query,
                 {
                     "$queryId": str(key),
@@ -167,9 +167,9 @@ class YDBContextStorage(DBAbstractContextStorage):
                 """.format(
                 self.database, self.table_name
             )
-            prepared_query = session.prepare(query)
+            prepared_query = await session.prepare(query)
 
-            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
+            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
                 prepared_query,
                 commit_tx=True,
             )
@@ -188,9 +188,9 @@ class YDBContextStorage(DBAbstractContextStorage):
                 """.format(
                 self.database, self.table_name
             )
-            prepared_query = session.prepare(query)
+            prepared_query = await session.prepare(query)
 
-            await session.transaction(ydb.SerializableReadWrite()).execute(
+            await (session.transaction(ydb.SerializableReadWrite())).execute(
                 prepared_query,
                 {},
                 commit_tx=True,
@@ -198,34 +198,38 @@ class YDBContextStorage(DBAbstractContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _init_drive(self, timeout: int):
-        self.driver = ydb.aio.Driver(endpoint=self.endpoint, database=self.database)
-        await self.driver.wait(timeout=timeout, fail_fast=True)
 
-        self.pool = ydb.aio.SessionPool(self.driver, size=10)
+async def _init_drive(timeout: int, endpoint: str, database: str, table_name: str):
+    driver = ydb.aio.Driver(endpoint=endpoint, database=database)
+    await driver.wait(fail_fast=True, timeout=timeout)
 
-        if not await self._is_table_exists(self.pool, self.database, self.table_name):  # create table if it does not exist
-            await self._create_table(self.pool, self.database, self.table_name)
+    pool = ydb.aio.SessionPool(driver, size=10)
 
-    async def _is_table_exists(self, pool, path, table_name) -> bool:
-        try:
+    if not await _is_table_exists(pool, database, table_name):  # create table if it does not exist
+        await _create_table(pool, database, table_name)
+    return driver, pool
 
-            async def callee(session):
-                await session.describe_table(os.path.join(path, table_name))
 
-            await pool.retry_operation(callee)
-            return True
-        except ydb.SchemeError:
-            return False
+async def _is_table_exists(pool, path, table_name) -> bool:
+    try:
 
-    async def _create_table(self, pool, path, table_name):
         async def callee(session):
-            await session.create_table(
-                "/".join([path, table_name]),
-                ydb.TableDescription()
-                .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
-                .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
-                .with_primary_key("id"),
-            )
+            await session.describe_table(os.path.join(path, table_name))
 
-        return pool.retry_operation(callee)
+        await pool.retry_operation(callee)
+        return True
+    except ydb.SchemeError:
+        return False
+
+
+async def _create_table(pool, path, table_name):
+    async def callee(session):
+        session.create_table(
+            "/".join([path, table_name]),
+            ydb.TableDescription()
+            .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
+            .with_column(ydb.Column("context", ydb.OptionalType(ydb.PrimitiveType.Json)))
+            .with_primary_key("id"),
+        )
+
+    return pool.retry_operation(callee)
