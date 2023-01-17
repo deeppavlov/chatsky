@@ -22,10 +22,13 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="TG_BOT_TOKEN missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-@pytest.mark.parametrize("example_module_name", [
-    "4_conditions",
-    "7_polling_setup",
-])
+@pytest.mark.parametrize(
+    "example_module_name",
+    [
+        "4_conditions",
+        "7_polling_setup",
+    ],
+)
 async def test_client_examples(example_module_name, bot_id, tg_client):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     pipeline = example_module.pipeline

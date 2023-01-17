@@ -25,4 +25,4 @@ def test_set_update():
 
 def test_is_interactive():
     os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
-    assert is_interactive_mode() == False
+    assert not is_interactive_mode()
