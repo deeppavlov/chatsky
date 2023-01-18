@@ -123,7 +123,7 @@ To execute all tests, including integration with DBs and APIs tests, run
 ```bash
 make test_all
 ```
-for successful execution of this command `Docker` version & and `docker-compose` version ? are required.
+for successful execution of this command `Docker` and `docker-compose` are required.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash
