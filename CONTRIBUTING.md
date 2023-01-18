@@ -115,21 +115,42 @@ make format
 
 ### Test
 We use `black`, `mypy`, `flake8` as code style checkers and `pytest` as unit-test runner.
-```bash
-make test_all
-```
-
-To run only tests, execute
+To run unit-tests only, use
 ```bash
 make test
 ```
+To execute all tests, including integration with DBs and APIs tests, run
+```bash
+make test_all
+```
+for successful execution of this command `Docker` version & and `docker-compose` version ? are required.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash
 make lint
 ```
+And if it doesn't, to automatically fix whatever is possible with `black`, run
+```bash
+make format
+```
 
 Tests are configured via [`.env_file`](.env_file).
+
+### Docker
+For integration tests, DFF uses Docker images of supported databases as well as docker-compose configuration.
+The following images are required for complete integration testing:
+1. `mysql`
+2. `postgres`
+3. `redis`
+4. `mongo`
+5. `cr.yandex/yc/yandex-docker-local-ydb`
+
+All of them will be downloaded, launched and awaited upon running integration test make command (`make test_all`).
+However, they can be downloaded separately with `make docker_up` and awaited with `make wait_db` commands.
+
+```bash
+make help
+```
 
 ### Other provided features 
 You can get more info about `make` commands by `help`:
