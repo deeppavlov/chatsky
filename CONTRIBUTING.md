@@ -148,10 +148,6 @@ The following images are required for complete integration testing:
 All of them will be downloaded, launched and awaited upon running integration test make command (`make test_all`).
 However, they can be downloaded separately with `make docker_up` and awaited with `make wait_db` commands.
 
-```bash
-make help
-```
-
 ### Other provided features 
 You can get more info about `make` commands by `help`:
 
