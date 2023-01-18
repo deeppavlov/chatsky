@@ -1,7 +1,16 @@
 """
 Pipeline
 --------
-This module contains the Pipeline class.
+The Pipeline module contains the :py:class:`.Pipeline` class,
+which is a fundamental component of the `DFF`. The Pipeline class is responsible
+for managing and executing the various components that make up a conversation flow.
+It provides a way to organize and structure the conversation flow.
+The Pipeline class is designed to be highly customizable and configurable,
+allowing developers to easily add, remove, or modify the components that make up the conversation flow.
+
+The Pipeline class is designed to be used in conjunction with the :py:class:`.PipelineComponent`
+class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
+to structure and manage the conversation flow.
 """
 import asyncio
 import logging

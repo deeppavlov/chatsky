@@ -1,6 +1,14 @@
 """
 Extra Handler
 -------------
+The Extra Handler module contains additional functionality that extends the capabilities of the system
+beyond the core functionality provided by the other modules.
+This module provides a set of specialized handlers, that can be added to the system to handle specific
+use cases or edge cases that are not covered by the core functionality.
+
+This module can include functionality such as handling specific types of input,
+integrating with external services, or providing additional data processing capabilities.
+It is an optional component of the system and is not required for basic functionality.
 """
 import asyncio
 import logging

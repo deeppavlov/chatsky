@@ -1,7 +1,14 @@
 """
 Service Group
 -------------
-This module contatins `ServiceGroup` class. This class represents a service group.
+The Service Group module contains the
+:py:class:`~dff.pipeline.service.ServiceGroup` class, which is used to represent a group of related services.
+This class provides a way to organize and manage multiple services as a single unit,
+allowing for easier management and organization of the services within the system.
+
+This class can be used to group services that have similar functionality or that are used together
+in a specific workflow. It is a useful tool for managing complex systems with multiple services and
+can help to reduce the complexity of managing those services.
 """
 import asyncio
 import logging
