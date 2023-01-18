@@ -1,9 +1,12 @@
 """
 Conditions
 ----------
-Conditions are one of the most important components of the dialog graph,
-which determine the possibility of transition from one node of the graph to another.
-This is a standard set of scripting conditions.
+Conditions are one of the most important components of the dialog graph.
+They determine the possibility of transition from one node of the graph to another.
+The conditions are used to specify when a particular transition should occur, based on certain criteria.
+This module contains a standard set of scripting conditions that can be used to control the flow of a conversation.
+These conditions can be used to check the current context, the user's input,
+or other factors that may affect the conversation flow.
 """
 from typing import Callable, Pattern, Union, Any, List, Optional
 import logging

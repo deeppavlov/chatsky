@@ -1,7 +1,11 @@
 """
 Normalization
----------------------------
-A basic set of functions for normalizing data in a dialog script is placed here.
+-------------
+Normalization is the process of preparing data for use in a dialog script
+by making it consistent and suitable for processing.
+Normalization is needed to make sure that what the developer passed to the graph during
+script development is reduced to standard Python objects.
+This module contains a basic set of functions for normalizing data in a dialog script.
 """
 import logging
 

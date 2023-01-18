@@ -1,11 +1,14 @@
 """
 Labels
----------------------------
-:py:const:`Labels <dff.script.NodeLabel3Type>` are one of
-the most important components of the dialog graph,
-which determine targeted node name of transition.
-This is a standard set of scripting
-:py:const:`labels <dff.script.NodeLabelType>`.
+------
+Labels are one of the important components of the dialog graph,
+which determine the targeted node name of the transition.
+They are used to identify the next step in the conversation.
+Labels can also be used in combination with other conditions,
+such as the current context or user data, to create more complex and dynamic conversations.
+
+This module contains a standard set of scripting labels that
+can be used by developers to define the conversation flow.
 """
 from typing import Optional, Callable
 from dff.script import Actor, Context, NodeLabel3Type

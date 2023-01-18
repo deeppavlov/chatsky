@@ -1,9 +1,21 @@
 """
 Context
 -------
-Data structure that is used for the context storage.
-It provides a convenient interface for working with data:
-adding data, data serialization, type checking etc.
+A Context is a data structure that is used to store information about the current state of a conversation.
+It is used to keep track of the user's input, the current stage of the conversation, and any other
+information that is relevant to the current context.
+The Context provides a convenient interface for working with data, allowing developers to easily add,
+retrieve, and manipulate data as the conversation progresses.
+
+The Context data structure provides several key features to make working with data easier.
+One of the main features is the ability to add data.
+Developers can use the context to store any information that is relevant to the current conversation,
+such as user data, session data, or conversation history.
+This allows developers to easily access and use this data throughout the conversation flow.
+
+Another important feature of the context is data serialization.
+The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
+This allows developers to save the context data and resume the conversation later.
 """
 import logging
 from uuid import UUID, uuid4

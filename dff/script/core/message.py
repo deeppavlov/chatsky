@@ -1,10 +1,8 @@
 """
-Dialog Flow Generics
---------------------
-
-This module contains a universal response model that should be supported in all `dff` add-ons.
-It only contains types and properties that are compatible with most messaging services.
-On the other hand, it can support service-specific ui models.
+Message
+-------
+The :py:class:`.Message` class is a universal model for representing a message that should be supported by
+`DFF`. It only contains types and properties that are compatible with most messaging services.
 """
 from typing import Any, Optional, List, Union
 from enum import Enum, auto
@@ -91,6 +89,10 @@ class Keyboard(DataModel):
 
 
 class Message(DataModel):
+    """
+    Class representing a message and contains several class level variables to store message information.
+    """
+
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
     attachments: Optional[Attachments] = None

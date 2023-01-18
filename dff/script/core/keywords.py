@@ -1,7 +1,13 @@
 """
 Keywords
----------------------------
-Keywords are used to define the dialog graph.
+--------
+Keywords are used to define the dialog graph, which is the structure of a conversation.
+Keywords are specific words or phrases that are used to identify the intent of the user's input.
+They are used to determine the next step in the conversation and to trigger specific actions or responses.
+
+Keywords can be used in different ways in the dialog graph.
+They can be used to trigger a transition from one node of the graph to another,
+or to execute a specific action, such as calling an external API or sending a message to the user.
 """
 from enum import Enum, auto
 
