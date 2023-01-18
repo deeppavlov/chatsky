@@ -119,7 +119,7 @@ Pipeline
 - **Component:** This module contains the :py:class:`.PipelineComponent` class.
    This class represents an individual component in a pipeline.
 
-- **Extra Handler:** This module contains an :py:class:`.ExtraHandler` class that can be used to handle additional
+- **Extra Handler:** This module contains an extra handlers that can be used to handle additional
    functionality or features that are not included in the standard pipeline classes.
 
 - **Pipeline:** This module contains the :py:class:`.Pipeline` class. This class represents the main pipeline of
@@ -168,12 +168,12 @@ Script
    These responses can be used to specify the text, commands, attachments, and other properties
    of a message that will be sent to the user.
 
-- **Context:** This module contains the :py:class`.Context` class, which is used for the context storage.
+- **Context:** This module contains the :py:class:`.Context` class, which is used for the context storage.
    It provides a convenient interface for working with data, adding data, data serialization, type checking ,etc.
 
-- **Labels:** This module contains the :py:class`.Labels` class. Labels determine targeted node name of transition.
+- **Labels:** This module contains labels that define the target name of the transition node.
 
-- **Actor:** This module contains the :py:class`.Actor` class.
+- **Actor:** This module contains the :py:class:`.Actor` class.
    It is one of the main abstractions that processes incoming requests
    from the user in accordance with the dialog graph.
 
