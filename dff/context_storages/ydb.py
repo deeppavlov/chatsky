@@ -1,7 +1,13 @@
 """
 Yandex DB
 ---------
-Provides the version of the :py:class:`.DBContextStorage` for Yandex DataBase.
+The Yandex DB module provides a version of the :py:class:`.DBContextStorage` class that designed to work with
+Yandex and other databases. Yandex DataBase is a fully-managed cloud-native SQL service that makes it easy to set up,
+operate, and scale high-performance and high-availability databases for your applications.
+
+The Yandex DB module uses the Yandex Cloud SDK, which is a python library that allows you to work
+with Yandex Cloud services using python. This allows the DFF to easily integrate with the Yandex DataBase and
+take advantage of the scalability and high-availability features provided by the service.
 """
 import os
 from urllib.parse import urlsplit

@@ -1,7 +1,12 @@
 """
 JSON
-----
-Provides the json-based version of the :py:class:`.DBContextStorage`.
+-----
+The JSON module provides a json-based version of the :py:class:`.DBContextStorage` class.
+This class is used to store and retrieve context data in a JSON and other formats. It allows the `DFF` to easily
+store and retrieve context data in a format that is human-readable and easy to work with.
+
+The JSON format is widely used in web and mobile applications, and is a popular choice for data storage and exchange.
+It is also a lightweight format that is easy to parse and generate, which makes it well-suited for use in the `DFF`.
 """
 import os
 
