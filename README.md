@@ -68,6 +68,7 @@ while True:
     out_response, ctx = turn_handler(Message(text=in_request), ctx, actor)
     print(out_response.text)
 ```
+
 When you run this code, you get similar output:
 ```
 type your answer: hi

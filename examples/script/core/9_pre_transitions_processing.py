@@ -16,6 +16,7 @@ from dff.script import (
     PRE_TRANSITIONS_PROCESSING,
     Context,
     Actor,
+    Message,
 )
 import dff.script.labels as lbl
 import dff.script.conditions as cnd
@@ -40,8 +41,9 @@ def get_previous_node_response_for_response_processing(
     ctx: Context, actor: Actor, *args, **kwargs
 ) -> Context:
     processed_node = ctx.current_node
-    processed_node.response = (
-        f"previous={ctx.misc['previous_node_response']}:" f" current={processed_node.response}"
+    processed_node.response = Message(
+        text=f"previous={ctx.misc['previous_node_response'].text}:"
+        f" current={processed_node.response.text}"
     )
     ctx.overwrite_current_node_in_processing(processed_node)
     return ctx
@@ -51,8 +53,8 @@ def get_previous_node_response_for_response_processing(
 # a dialog script
 toy_script = {
     "root": {
-        "start": {RESPONSE: "", TRANSITIONS: {("flow", "step_0"): cnd.true()}},
-        "fallback": {RESPONSE: "the end"},
+        "start": {RESPONSE: Message(), TRANSITIONS: {("flow", "step_0"): cnd.true()}},
+        "fallback": {RESPONSE: Message(text="the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
@@ -62,22 +64,22 @@ toy_script = {
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
     "flow": {
-        "step_0": {RESPONSE: "first"},
-        "step_1": {RESPONSE: "second"},
-        "step_2": {RESPONSE: "third"},
-        "step_3": {RESPONSE: "fourth"},
-        "step_4": {RESPONSE: "fifth"},
+        "step_0": {RESPONSE: Message(text="first")},
+        "step_1": {RESPONSE: Message(text="second")},
+        "step_2": {RESPONSE: Message(text="third")},
+        "step_3": {RESPONSE: Message(text="fourth")},
+        "step_4": {RESPONSE: Message(text="fifth")},
     },
 }
 
 
 # testing
 happy_path = (
-    ("1", "previous=: current=first"),
-    ("2", "previous=first: current=second"),
-    ("3", "previous=second: current=third"),
-    ("4", "previous=third: current=fourth"),
-    ("5", "previous=fourth: current=fifth"),
+    (Message(text="1"), Message(text="previous=None: current=first")),
+    (Message(text="2"), Message(text="previous=first: current=second")),
+    (Message(text="3"), Message(text="previous=second: current=third")),
+    (Message(text="4"), Message(text="previous=third: current=fourth")),
+    (Message(text="5"), Message(text="previous=fourth: current=fifth")),
 )
 
 

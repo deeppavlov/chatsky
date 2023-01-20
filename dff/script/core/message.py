@@ -68,7 +68,7 @@ class Document(Attachment):
 
 
 class Attachments(DataModel):
-    files: List[Attachment] = Field(default_factory=list, min_items=2, max_items=10)
+    files: List[Attachment] = Field(default_factory=list)
 
 
 class Link(DataModel):
@@ -90,18 +90,16 @@ class Keyboard(DataModel):
     buttons: List[Button] = Field(default_factory=list, min_items=1)
 
 
-class Response(DataModel):
-    text: str
-    ui: Optional[Union[Keyboard, DataModel]] = None
-    document: Optional[Document] = None
-    image: Optional[Image] = None
+class Message(DataModel):
+    text: Optional[str] = None
+    commands: Optional[List[Command]] = None
     attachments: Optional[Attachments] = None
-    video: Optional[Video] = None
-    audio: Optional[Audio] = None
+    annotations: Optional[dict] = None
+    misc: Optional[dict] = None
     # commands and state options are required for integration with services
     # that use an intermediate backend server, like Yandex's Alice
-    commands: Optional[List[Command]] = None
-    state: Optional[Session] = Session.ACTIVE
+    # state: Optional[Session] = Session.ACTIVE
+    # ui: Optional[Union[Keyboard, DataModel]] = None
 
-    def __init__(self, text: str, *args, **kwargs) -> None:
-        super().__init__(text=text, **kwargs)
+    def __repr__(self) -> str:
+        return " ".join([f"{key}='{value}'" for key, value in self.dict(exclude_none=True).items()])

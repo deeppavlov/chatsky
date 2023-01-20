@@ -13,6 +13,7 @@ from pydantic import BaseModel, validate_arguments, Extra
 
 from dff.utils.turn_caching import cache_clear
 from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
+from .message import Message
 
 from .context import Context
 from .script import Script, Node
@@ -196,7 +197,7 @@ class Actor(BaseModel):
         ctx = Context.cast(ctx)
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
-            ctx.add_request("")
+            ctx.add_request(Message())
         ctx.framework_states["actor"] = {}
         return ctx
 
@@ -375,7 +376,7 @@ class Actor(BaseModel):
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
-            ctx.add_request("text")
+            ctx.add_request(Message(text="text"))
             actor = self.copy(deep=True)
 
             label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
@@ -395,10 +396,10 @@ class Actor(BaseModel):
             response_func = normalize_response(node.response)
             try:
                 response_result = response_func(ctx, actor)
-                if isinstance(response_result, Callable):
+                if not isinstance(response_result, Message):
                     msg = (
-                        "Expected type of response_result needed not Callable "
-                        + f"but got type(response_result)={type(response_result)}"
+                        "Expected type of response_result is `Message`.\n"
+                        + f"Got type(response_result)={type(response_result)}"
                         f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
