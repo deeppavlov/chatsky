@@ -6,7 +6,7 @@ The following example shows how to integrate your bot with the Pipeline API.
 
 Assuming you already have a script to deploy. All you need to do
 is to instantiate a TelegramMessenger and pass it to an `Interface` class.
-This class uses `WebhookTelegramInterface` that makes your bot accessible
+This class uses `CallbackTelegramInterface` that makes your bot accessible
 through a public webhook.
 """
 
@@ -16,7 +16,7 @@ import os
 
 from dff.messengers.telegram import (
     TelegramMessenger,
-    WebhookTelegramInterface,
+    CallbackTelegramInterface,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.toy_script import TOY_SCRIPT
@@ -42,7 +42,7 @@ This class can be configured with the following parameters:
 
 
 # %%
-interface = WebhookTelegramInterface(messenger=messenger)
+interface = CallbackTelegramInterface(messenger=messenger)
 
 
 # %%

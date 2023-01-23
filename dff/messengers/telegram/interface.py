@@ -106,7 +106,8 @@ class PollingTelegramInterface(PollingMessengerInterface):
         )
 
 
-class WebhookTelegramInterface(CallbackMessengerInterface):
+
+class CallbackTelegramInterface(CallbackMessengerInterface):
     """
     Asynchronous Telegram interface that retrieves updates via webhook.
     Any Flask server can be passed to set up a webhook on a separate endpoint.
