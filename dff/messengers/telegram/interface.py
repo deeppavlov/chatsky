@@ -4,7 +4,8 @@ Interface
 This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
-from typing import Any, Optional, List, Tuple, Hashable, Callable
+import asyncio
+from typing import Any, Optional, List, Tuple, Callable
 
 from telebot import types, logger
 
@@ -22,7 +23,7 @@ except ImportError:
     request, abort = None, None
 
 
-def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.Update) -> Tuple[Any, Hashable]:
+def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.Update) -> Tuple[Message, int]:
     """
     Utility function that extracts parameters from a telegram update.
     Changes the messenger state, setting the last update id.
@@ -36,7 +37,7 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     update_fields = vars(update).copy()
     update_fields.pop("update_id")
     inner_update = next(filter(lambda val: val is not None, list(update_fields.values())))
-    message = Message(text=getattr(inner_update, "text", None), misc={"update": inner_update})
+    message = Message(text=getattr(inner_update, "text", None), misc={"update": inner_update, "update_id": update.update_id})
 
     dict_update = vars(inner_update)
     # if 'chat' is not available, fall back to 'from_user', then to 'user'
@@ -78,8 +79,10 @@ class PollingTelegramInterface(PollingMessengerInterface):
         self.allowed_updates = allowed_updates
         self.timeout = timeout
         self.long_polling_timeout = long_polling_timeout
+        self.last_processed_update = -1
+        self.stop_polling = asyncio.Event()
 
-    def _request(self) -> List[Tuple[Any, Hashable]]:
+    def _request(self) -> List[Tuple[Message, int]]:
         updates = self.messenger.get_updates(
             offset=(self.messenger.last_update_id + 1),
             allowed_updates=self.allowed_updates,
@@ -92,19 +95,31 @@ class PollingTelegramInterface(PollingMessengerInterface):
     def _respond(self, response: List[Context]):
         for resp in response:
             self.messenger.send_response(resp.id, resp.last_response)
+            if resp.last_request.misc["update_id"] > self.last_processed_update:
+                self.last_processed_update = resp.last_request.misc["update_id"]
 
     def _on_exception(self, e: Exception):
         logger.error(e)
-        self.messenger._TeleBot__stop_polling.set()
+        self.stop_polling.set()
 
     async def connect(self, callback: PipelineRunnerFunction, loop: Optional[Callable] = None, *args, **kwargs):
-        self.messenger._TeleBot__stop_polling.clear()
-        self.messenger.get_updates(offset=-1)  # forget all previous updates
+        self.stop_polling.clear()
 
-        await super().connect(
-            callback, loop=loop or (lambda: not self.messenger._TeleBot__stop_polling.wait(self.interval))
-        )
+        try:
+            await asyncio.sleep(0)
+            await super().connect(
+                callback, loop=loop or (lambda: not self.stop_polling.is_set()), timeout=self.interval
+            )
+        finally:
+            self.messenger.get_updates(
+                offset=self.last_processed_update + 1,
+                allowed_updates=self.allowed_updates,
+                timeout=0,
+                long_polling_timeout=0,
+            )  # forget processed updates
 
+    def stop(self):
+        self.stop_polling.set()
 
 
 class CallbackTelegramInterface(CallbackMessengerInterface):
