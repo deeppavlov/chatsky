@@ -34,7 +34,7 @@ def notebook_start_checker(dff_example_py_file: pathlib.Path):
             (
                 f"Example `{dff_example_py_file.relative_to(dff_examples_dir.parent)}` "
                 + "does not have an initial markdown section. Notebook header should be prefixed "
-                + "with a single '#'."
+                + "with a single '# %% [markdown]'."
             )
         )
     else:
