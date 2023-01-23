@@ -48,7 +48,7 @@ jobs:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
           BRANCH_NAME=${{ env.BRANCH_NAME }}
-          BRANCH_NAME=${BRANCH_NAME////-}
+          BRANCH_NAME=${BRANCH_NAME////_}
           echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
 
       - name: save artifact
