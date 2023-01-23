@@ -16,14 +16,12 @@ from telethon.tl.types import (
     InputMessagesFilterVideo,
 )
 
-from dff.messengers.telegram.types import (
+from dff.messengers.telegram.message import (
     TelegramMessage,
-    TelegramAttachments,
-    TelegramAttachment,
     TelegramUI,
 )
 from dff.script import Message
-from dff.script.core.message import Attachments, Keyboard, Button, Image, Location, Audio, Video
+from dff.script.core.message import Attachments, Keyboard, Button, Image, Location, Audio, Video, Attachment
 from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
@@ -51,7 +49,7 @@ UTC = pytz.UTC
             types.InlineKeyboardButton,
         ),
         (
-            Keyboard(
+            TelegramUI(
                 is_inline=False,
                 buttons=[
                     Button(text="button 1", payload=json.dumps({"text": "1", "other_prop": "4"})),
@@ -65,46 +63,19 @@ UTC = pytz.UTC
         ),
     ],
 )
-async def test_buttons(ui, button_type, markup_type, tg_client, basic_bot, user_id, bot_id):
-    generic_response = Message(text="test", ui=ui)
-    telegram_response = TelegramMessage.parse_obj(generic_response)
-    assert telegram_response.text == generic_response.text
-    assert telegram_response.ui and isinstance(telegram_response.ui.keyboard, markup_type)
-    assert len(telegram_response.ui.keyboard.keyboard) == 2
-    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
-    basic_bot.send_response(user_id, telegram_response)
-    await asyncio.sleep(2.5)
-    messages = await tg_client.get_messages(bot_id, limit=3)
-    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
-    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
-    assert messages
-    assert len(messages) == 1
-    assert messages[0].text == telegram_response.text
+async def test_buttons(ui, button_type, markup_type, bot_id, tg_client, helper, tmp_path, pipeline_instance):
+    telegram_response = TelegramMessage(text="test", ui=ui)
+    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-@pytest.mark.parametrize(
-    ["ui"],
-    [
-        (TelegramUI(keyboard=types.ReplyKeyboardRemove()),),
-    ],
-)
-async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
-    generic_response = Message(text="test", ui=ui)
-    telegram_response = TelegramMessage.parse_obj(generic_response)
-    assert telegram_response.text == generic_response.text
-    assert telegram_response.ui
-    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
-    basic_bot.send_response(user_id, telegram_response)
-    await asyncio.sleep(2.5)
-    messages = await tg_client.get_messages(bot_id, limit=3)
-    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
-    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
-    assert messages
-    assert len(messages) == 1
-    assert messages[0].text == telegram_response.text
+async def test_keyboard_remove(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+    telegram_response = TelegramMessage(text="test", ui=types.ReplyKeyboardRemove())
+    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -114,45 +85,35 @@ async def test_keyboard_remove(ui, basic_bot, user_id, tg_client, bot_id):
     ["generic_response", "prop", "filter_type"],
     [
         (
-            Message(text="test", image=Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")),
+            Message(text="test", attachments=Attachments(files=[Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")])),
             "image",
             InputMessagesFilterPhotos,
         ),
         (
-            Message(text="test", audio=Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")),
+            Message(text="test", attachments=Attachments(files=[Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")])),
             "audio",
             InputMessagesFilterMusic,
         ),
         (
             Message(
                 text="test",
-                video=Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4"),
+                attachments=Attachments(files=[Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")]),
             ),
             "video",
             InputMessagesFilterVideo,
         ),
     ],
 )
-async def test_telegram_attachment(generic_response, prop, filter_type, basic_bot, user_id, tg_client, bot_id):
+async def test_telegram_attachment(generic_response, prop, filter_type, bot_id, tg_client, helper, tmp_path, pipeline_instance):
     telegram_response = TelegramMessage.parse_obj(generic_response)
-    telegram_prop = vars(telegram_response).get(prop)
-    generic_prop = vars(generic_response).get(prop)
-    assert telegram_prop and isinstance(telegram_prop, TelegramAttachment)
-    assert telegram_prop.source == generic_prop.source
-    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
-    basic_bot.send_response(user_id, telegram_response)
-    await asyncio.sleep(2.5)
-    messages = await tg_client.get_messages(bot_id, limit=5, filter=filter_type)
-    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
-    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
-    assert messages
-    assert len(messages) == 1
+    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_attachments(basic_bot, user_id, tg_client, bot_id):
+async def test_attachments(bot_id, tg_client, helper, tmp_path, pipeline_instance):
     generic_response = Message(
         text="test",
         attachments=Attachments(
@@ -163,38 +124,17 @@ async def test_attachments(basic_bot, user_id, tg_client, bot_id):
         ),
     )
     telegram_response = TelegramMessage.parse_obj(generic_response)
-    assert telegram_response.text == generic_response.text
-    assert telegram_response.attachments and isinstance(telegram_response.attachments, TelegramAttachments)
-    assert len(telegram_response.attachments.files) == 2
-    assert isinstance(telegram_response.attachments.files[0], types.InputMediaPhoto)
-    assert telegram_response.attachments.files[0].media == generic_response.attachments.files[0].source
-    assert telegram_response.attachments.files[0].caption == generic_response.attachments.files[0].title
-    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
-    basic_bot.send_response(user_id, telegram_response)
-    await asyncio.sleep(2.5)
-    messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterPhotos)
-    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
-    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
-    assert messages
-    assert len(messages) == 2
+    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_location(basic_bot, user_id, tg_client, bot_id):
-    generic_response = Message(text="location", location=Location(longitude=39.0, latitude=43.0))
-    telegram_response = TelegramMessage.parse_obj(generic_response)
-    assert telegram_response.text == generic_response.text
-    assert telegram_response.location
-    sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
-    basic_bot.send_response(user_id, telegram_response)
-    await asyncio.sleep(2.5)
-    messages = await tg_client.get_messages(bot_id, limit=5, filter=InputMessagesFilterGeo)
-    print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in messages], sep="\n")
-    messages = list(filter(lambda msg: msg.date >= sending_time, messages))
-    assert messages
-    assert len(messages) == 1
+async def test_location(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+    telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
+    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -206,17 +146,17 @@ def test_error(basic_bot, user_id):
 
 def test_missing_error():
     with pytest.raises(ValidationError) as e:
-        _ = TelegramAttachment(source="http://google.com", id="123")
+        _ = Attachment(source="http://google.com", id="123")
     assert e
 
     with pytest.raises(ValidationError) as e:
-        _ = TelegramAttachment(source="/etc/missing_file")
+        _ = Attachment(source="/etc/missing_file")
     assert e
 
 
 def test_attachment_error():
     with pytest.raises(ValidationError) as e:
-        _ = TelegramAttachments(files=["a", "b"])
+        _ = Attachments(files=["a", "b"])
     assert e
 
 

@@ -6,7 +6,7 @@ import datetime
 import importlib
 import asyncio
 import pytz
-from multiprocessing import Process
+import logging
 
 import pytest
 from tests.test_utils import get_path_from_tests_to_current_dir
@@ -25,26 +25,16 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 @pytest.mark.parametrize(
     "example_module_name",
     [
+        "1_basic",
         "4_conditions",
         "7_polling_setup",
     ],
 )
-async def test_client_examples(example_module_name, bot_id, tg_client):
+async def test_client_examples(example_module_name, bot_id, tg_client, helper, tmp_path):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     pipeline = example_module.pipeline
-    process = Process(target=pipeline.run, args=(), daemon=True)
-    process.start()
     happy_path = example_module.happy_path
-    await asyncio.sleep(12)
-    for request, response in happy_path:
-        sending_time = datetime.datetime.now(tz=UTC) - datetime.timedelta(seconds=2)
-        await tg_client.send_message(bot_id, request.text)
-        await asyncio.sleep(2.5)
-        messages = await tg_client.get_messages(bot_id, limit=5)
-        new_messages = list(filter(lambda msg: msg.date >= sending_time, messages))
-        print(*[f"{'bot' if not i.out else 'user'}: {i.text}: {i.date}" for i in new_messages], sep="\n")
-        assert new_messages[0].out is False
-        assert new_messages[0].text == response.text
-    process.kill()
-    while process.is_alive():
-        await asyncio.sleep(0.1)
+    test_helper = helper(tg_client, pipeline, bot_id)
+    logging.info("Test start")
+    await test_helper.check_happy_path(happy_path, tmp_path)
+
