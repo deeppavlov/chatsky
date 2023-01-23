@@ -8,4 +8,4 @@ except ImportError:
 
 from .messenger import TelegramMessenger
 from .interface import PollingTelegramInterface, WebhookTelegramInterface
-from .types import TelegramUI, TelegramButton, TelegramMessage
+from .message import TelegramUI, TelegramMessage
