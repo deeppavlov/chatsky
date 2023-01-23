@@ -40,7 +40,7 @@ class PollingMessengerInterface(MessengerInterface):
     """
 
     @abc.abstractmethod
-    def _request(self) -> List[Tuple[Any, Hashable]]:
+    def _request(self) -> List[Tuple[Message, Hashable]]:
         """
         Method used for sending users request for their input.
 
