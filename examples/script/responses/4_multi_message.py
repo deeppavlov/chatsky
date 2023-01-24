@@ -33,8 +33,6 @@ The response can be set by any object of python:
 * Non-callable objects. If the object is not callable,
     it will be returned by the agent as a response.
 
-Out of the box `DSL` has a single response function `choice`
-that gives one random response from the list of responses.
 
 The functions to be used in the `toy_script` are declared here.
 """
