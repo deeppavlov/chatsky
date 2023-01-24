@@ -90,7 +90,6 @@ toy_script = {
                     Message(text="Hello, how are you?", misc={"confidences": 0.9}),
                 ]
             ),
-            # Random choice from candicate list.
             TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
         },
         "node2": {
