@@ -85,7 +85,7 @@ toy_script = {
         },
         "node1": {
             RESPONSE: MultiMessage(
-                hypotheses=[
+                messages=[
                     Message(text="Hi, what is up?", misc={"confidences": 0.85}),
                     Message(text="Hello, how are you?", misc={"confidences": 0.9}),
                 ]
@@ -118,7 +118,7 @@ happy_path = (
     (
         Message(text="Hi"),
         MultiMessage(
-            hypotheses=[
+            messages=[
                 Message(text="Hi, what is up?", misc={"confidences": 0.85}),
                 Message(text="Hello, how are you?", misc={"confidences": 0.9}),
             ]
@@ -136,7 +136,7 @@ happy_path = (
     (
         Message(text="Hi"),
         MultiMessage(
-            hypotheses=[
+            messages=[
                 Message(text="Hi, what is up?", misc={"confidences": 0.85}),
                 Message(text="Hello, how are you?", misc={"confidences": 0.9}),
             ]
@@ -179,7 +179,7 @@ happy_path = (
     (
         Message(text="Hi"),
         MultiMessage(
-            hypotheses=[
+            messages=[
                 Message(text="Hi, what is up?", misc={"confidences": 0.85}),
                 Message(text="Hello, how are you?", misc={"confidences": 0.9}),
             ]

@@ -106,4 +106,4 @@ class Message(DataModel):
 
 
 class MultiMessage(Message):
-    hypotheses: Optional[List[Message]] = None
+    messages: Optional[List[Message]] = None
