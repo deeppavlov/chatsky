@@ -11,8 +11,7 @@ Let's do all the necessary imports from `dff`.
 import re
 import random
 
-from dff.script import TRANSITIONS, RESPONSE, Actor, Context, Message
-import dff.script.responses as rsp
+from dff.script import TRANSITIONS, RESPONSE, Actor, Context, Message, MultiMessage
 import dff.script.conditions as cnd
 
 from dff.pipeline import Pipeline
@@ -85,8 +84,8 @@ toy_script = {
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(
-                [Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]
+            RESPONSE: MultiMessage(
+                hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]
             ),
             # Random choice from candicate list.
             TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
@@ -113,7 +112,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="Hi"), Message(text="Hello, how are you?")),  # start_node -> node1
+    (
+        Message(text="Hi"),
+        MultiMessage(hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]),
+    ),  # start_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -123,7 +125,10 @@ happy_path = (
         Message(text="Sorry, I can not talk about music now."),
     ),  # node2 -> node3
     (Message(text="Ok, goodbye."), Message(text="BYE")),  # node3 -> node4
-    (Message(text="Hi"), Message(text="Hi, what is up?")),  # node4 -> node1
+    (
+        Message(text="Hi"),
+        MultiMessage(hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]),
+    ),  # node4 -> node1
     (
         Message(text="stop"),
         Message(
@@ -158,7 +163,10 @@ happy_path = (
             }
         ),
     ),  # f_n->f_n
-    (Message(text="Hi"), Message(text="Hello, how are you?")),  # fallback_node -> node1
+    (
+        Message(text="Hi"),
+        MultiMessage(hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]),
+    ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
