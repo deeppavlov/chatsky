@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 3. Responses
+# 4. Multi Message
 
 This example shows different options for setting responses.
 Let's do all the necessary imports from `dff`.
@@ -85,7 +85,10 @@ toy_script = {
         },
         "node1": {
             RESPONSE: MultiMessage(
-                hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]
+                hypotheses=[
+                    Message(text="Hi, what is up?", misc={"confidences": 0.85}),
+                    Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+                ]
             ),
             # Random choice from candicate list.
             TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
@@ -114,7 +117,12 @@ toy_script = {
 happy_path = (
     (
         Message(text="Hi"),
-        MultiMessage(hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]),
+        MultiMessage(
+            hypotheses=[
+                Message(text="Hi, what is up?", misc={"confidences": 0.85}),
+                Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+            ]
+        ),
     ),  # start_node -> node1
     (
         Message(text="I'm fine, how are you?"),
@@ -127,7 +135,12 @@ happy_path = (
     (Message(text="Ok, goodbye."), Message(text="BYE")),  # node3 -> node4
     (
         Message(text="Hi"),
-        MultiMessage(hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]),
+        MultiMessage(
+            hypotheses=[
+                Message(text="Hi, what is up?", misc={"confidences": 0.85}),
+                Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+            ]
+        ),
     ),  # node4 -> node1
     (
         Message(text="stop"),
@@ -165,7 +178,12 @@ happy_path = (
     ),  # f_n->f_n
     (
         Message(text="Hi"),
-        MultiMessage(hypotheses=[["Hi, what is up?", 0.85], ["Hello, how are you?", 0.9]]),
+        MultiMessage(
+            hypotheses=[
+                Message(text="Hi, what is up?", misc={"confidences": 0.85}),
+                Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+            ]
+        ),
     ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 4. Transitions
+# 3. Transitions
 
 This example shows settings for transitions between flows and nodes.
 First of all, let's do all the necessary imports from `dff`.

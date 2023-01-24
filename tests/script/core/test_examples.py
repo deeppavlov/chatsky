@@ -16,13 +16,12 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
     [
         "1_basics",
         "2_conditions",
-        "3_responses",
-        "4_transitions",
-        "5_global_transitions",
-        "6_context_serialization",
-        "7_pre_response_processing",
-        "8_misc",
-        "9_pre_transitions_processing",
+        "3_transitions",
+        "4_global_transitions",
+        "5_context_serialization",
+        "6_pre_response_processing",
+        "7_misc",
+        "8_pre_transitions_processing",
     ],
 )
 def test_examples(example_module_name: str):

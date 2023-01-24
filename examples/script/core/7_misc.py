@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 8. Misc
+# 7. Misc
 
 This example shows `MISC` (miscellaneous) keyword usage.
 First of all, let's do all the necessary imports from `dff`.
