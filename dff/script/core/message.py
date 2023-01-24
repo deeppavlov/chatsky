@@ -103,3 +103,7 @@ class Message(DataModel):
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.dict(exclude_none=True).items()])
+
+
+class MultiMessage(Message):
+    messages: Optional[List[Message]] = None
