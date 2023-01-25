@@ -1,9 +1,6 @@
 import json
 import pytest
-import asyncio
-import datetime
 import os
-import pytz
 
 from io import IOBase
 from pathlib import Path
@@ -19,6 +16,7 @@ from telethon.tl.types import (
 from dff.messengers.telegram.message import (
     TelegramMessage,
     TelegramUI,
+    RemoveKeyboard,
 )
 from dff.script import Message
 from dff.script.core.message import Attachments, Keyboard, Button, Image, Location, Audio, Video, Attachment
@@ -27,7 +25,15 @@ from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
 TG_API_HASH = os.getenv("TG_API_HASH")
-UTC = pytz.UTC
+
+
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
+@pytest.mark.asyncio
+async def test_text(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+    telegram_response = TelegramMessage(text="test")
+    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
@@ -52,10 +58,10 @@ UTC = pytz.UTC
             TelegramUI(
                 is_inline=False,
                 buttons=[
-                    Button(text="button 1", payload=json.dumps({"text": "1", "other_prop": "4"})),
-                    Button(text="button 2", payload=json.dumps({"text": "2", "other_prop": "3"})),
-                    Button(text="button 3", payload=json.dumps({"text": "3", "other_prop": "2"})),
-                    Button(text="button 4", payload=json.dumps({"text": "4", "other_prop": "1"})),
+                    Button(text="button 1"),
+                    Button(text="button 2"),
+                    Button(text="button 3"),
+                    Button(text="button 4"),
                 ],
             ),
             types.ReplyKeyboardMarkup,
@@ -73,7 +79,7 @@ async def test_buttons(ui, button_type, markup_type, bot_id, tg_client, helper, 
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_keyboard_remove(bot_id, tg_client, helper, tmp_path, pipeline_instance):
-    telegram_response = TelegramMessage(text="test", ui=types.ReplyKeyboardRemove())
+    telegram_response = TelegramMessage(text="test", ui=RemoveKeyboard())
     test_helper = helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
@@ -131,7 +137,7 @@ async def test_attachments(bot_id, tg_client, helper, tmp_path, pipeline_instanc
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_location(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+async def test_location(bot_id, tg_client, helper, tmp_path, pipeline_instance, message_equality):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
     test_helper = helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
@@ -164,6 +170,11 @@ def test_empty_keyboard():
     with pytest.raises(ValidationError) as e:
         _ = TelegramUI(buttons=[])
     assert e
+
+def test_non_inline_keyboard_with_payload():
+    with pytest.raises(ValidationError) as error:
+        TelegramUI(buttons=[Button(text="", payload="")], is_inline=False)
+    assert error
 
 
 def test_io(document):

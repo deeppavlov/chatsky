@@ -6,16 +6,20 @@ from pathlib import Path
 from typing import List
 from contextlib import asynccontextmanager
 import logging
+from urllib.request import urlopen
 
+import telethon.tl.types
 from telethon import TelegramClient
 from telethon.types import User
 from telethon.custom import Message as TlMessage
+from telebot import types
+from pydantic import HttpUrl
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.pipeline.pipeline.pipeline import Pipeline
-from dff.script.core.message import Message, Attachments, Attachment, Button
+from dff.script.core.message import Message, Attachments, Attachment, Button, Location, Keyboard
 from dff.messengers.telegram.interface import PollingTelegramInterface
-from dff.messengers.telegram.message import TelegramMessage, TelegramUI
+from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -106,26 +110,44 @@ class Helper:
             return self.client.send_file(self.bot, files, caption=message.text)
 
     @staticmethod
-    def parse_responses(responses: List[TlMessage], tmp_dir) -> Message:
+    async def parse_responses(responses: List[TlMessage], tmp_dir) -> Message:
         """
         Convert a list of bot responses into a single message.
         This function accepts a list because messages with multiple attachments are split.
         """
         msg = TelegramMessage()
         for response in responses:
-            if response.text is not None:
-                msg.text = response.text
+            if response.text is not None and response.file is None:
+                if msg.text:
+                    raise RuntimeError(f"Several messages with text:\n{msg.text}\n{response.text}")
+                msg.text = response.text or msg.text
             if response.file is not None:
-                file = tmp_dir / str(response.file.media.id) + response.file.ext
-                response.download_media(file=file)
+                file = tmp_dir / (str(response.file.media.id) + response.file.ext)
+                await response.download_media(file=file)
                 if msg.attachments is None:
                     msg.attachments = Attachments()
-                msg.attachments.files.append(Attachment(source=file, title=response.file.title))
+                msg.attachments.files.append(Attachment(source=file, id=None, title=response.file.title or response.text))
             if response.buttons is not None:
-                raise NotImplementedError()
-                # msg.ui = TelegramUI(buttons=[
-                #
-                # ])
+                buttons = []
+                for row in response.buttons:
+                    for button in row:
+                        buttons.append(Button(
+                            source=button.url,
+                            text=button.text,
+                            payload=button.data,
+                        ))
+                if msg.ui is not None:
+                    raise RuntimeError(f"Several messages with ui:\n{msg.ui}\n{TelegramUI(buttons=buttons)}")
+                msg.ui = TelegramUI(buttons=buttons)
+            if isinstance(response.reply_markup, telethon.tl.types.ReplyKeyboardHide):
+                if msg.ui is not None:
+                    raise RuntimeError(f"Several messages with ui:\n{msg.ui}\n{types.ReplyKeyboardRemove()}")
+                msg.ui = RemoveKeyboard()
+            if response.geo is not None:
+                location = Location(latitude=response.geo.lat, longitude=response.geo.long)
+                if msg.location is not None:
+                    raise RuntimeError(f"Several messages with location:\n{msg.location}\n{location}")
+                msg.location = location
         return msg
 
     @asynccontextmanager
@@ -144,29 +166,30 @@ class Helper:
         messenger_interface = self.pipeline.messenger_interface
         assert isinstance(messenger_interface, PollingTelegramInterface)
 
-        user_message = await self.send_message(Message(text=f"send_and_check: {repr(message)}"))
-        received_user_message = messenger_interface._request()
-        if len(received_user_message) != 1:
-            raise ValueError(received_user_message)
+        messages = await self.client.get_messages(self.bot, limit=1)
+        if len(messages) == 0:
+            last_message_id = 0
         else:
-            chat_id = received_user_message[0][1]
-        messenger_interface.messenger.send_response(chat_id, message)
+            last_message_id = messages[0].id
+
+        messenger_interface.messenger.send_response((await self.client.get_me(input_peer=True)).user_id, message)
 
         await asyncio.sleep(2)
         bot_messages = [
             x async for x in self.client.iter_messages(
-                self.bot, min_id=user_message.id, from_user=self.bot
+                self.bot, min_id=last_message_id, from_user=self.bot
             )
         ]
         bot_messages.reverse()
-        result = self.parse_responses(bot_messages, tmp_dir)
+        result = await self.parse_responses(bot_messages, tmp_dir)
+
         assert result == message
 
     async def check_happy_path(self, happy_path, tmp_dir):
         async with self.run_bot():
             for request, response in happy_path:
                 logging.info("Sending request")
-                user_message = await self.send_message(request)
+                user_message = await self.send_message(TelegramMessage.parse_obj(request))
                 logging.info("Request sent")
                 await asyncio.sleep(3)
                 logging.info("Extracting responses")
@@ -176,8 +199,8 @@ class Helper:
                                 ]
                 bot_messages.reverse()
                 logging.info("Got responses")
-                result = self.parse_responses(bot_messages, tmp_dir)
-                assert result == response
+                result = await self.parse_responses(bot_messages, tmp_dir)
+                assert result == TelegramMessage.parse_obj(response)
             self.pipeline.messenger_interface.stop()
 
 

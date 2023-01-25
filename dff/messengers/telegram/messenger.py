@@ -14,7 +14,7 @@ from telebot import types, TeleBot
 from dff.script import Context, Actor
 
 from .utils import partialmethod, batch_open_io
-from .message import TelegramMessage, TelegramUI
+from .message import TelegramMessage, TelegramUI, RemoveKeyboard
 
 from dff.script import Message
 from dff.script.core.message import Audio, Video, Image, Document
@@ -104,9 +104,9 @@ class TelegramMessenger(TeleBot):
             )
 
         if ready_response.ui is not None:
-            if not isinstance(ready_response.ui, TelegramUI):
-                keyboard = ready_response.ui
-            else:
+            if isinstance(ready_response.ui, RemoveKeyboard):
+                keyboard = types.ReplyKeyboardRemove()
+            elif isinstance(ready_response.ui, TelegramUI):
                 if ready_response.ui.is_inline:
                     keyboard = types.InlineKeyboardMarkup(row_width=ready_response.ui.row_width)
                     buttons = [types.InlineKeyboardButton(
@@ -120,6 +120,8 @@ class TelegramMessenger(TeleBot):
                         text=item.text,
                     ) for item in ready_response.ui.buttons]
                 keyboard.add(*buttons, row_width=ready_response.ui.row_width)
+            else:
+                keyboard = ready_response.ui
         else:
             keyboard = None
 
