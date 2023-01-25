@@ -18,7 +18,6 @@ from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
     TelegramUI,
-    TelegramButton,
     TelegramMessage,
 )
 from dff.utils.testing.common import is_interactive_mode
@@ -76,10 +75,10 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success", 1.2): messenger.cnd.message_handler(
+                ("general", "success"): messenger.cnd.message_handler(
                     func=lambda msg: msg.text == "4"
                 ),
-                ("general", "fail", 1.0): cnd.true(),
+                ("general", "fail"): cnd.true(),
             },
         },
         "success": {

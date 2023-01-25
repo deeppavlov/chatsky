@@ -74,7 +74,7 @@ script = {
         "ask_picture": {
             RESPONSE: TelegramMessage(text="Send me a picture"),
             TRANSITIONS: {
-                ("pics", "send_one", 1.1): cnd.any(
+                ("pics", "send_one"): cnd.any(
                     [
                         # Telegram can put photos both in 'photo' and 'document' fields.
                         # We should consider both cases when we check the message for media.
@@ -89,10 +89,10 @@ script = {
                         ),
                     ]
                 ),
-                ("pics", "send_many", 1.0): messenger.cnd.message_handler(
+                ("pics", "send_many"): messenger.cnd.message_handler(
                     content_types=["sticker"]
                 ),
-                ("pics", "repeat", 0.9): cnd.true(),
+                ("pics", "repeat"): cnd.true(),
             },
         },
         "send_one": {
@@ -111,7 +111,7 @@ script = {
         "repeat": {
             RESPONSE: TelegramMessage(text="I cannot find the picture. Please, try again."),
             TRANSITIONS: {
-                ("pics", "send_one", 1.1): cnd.any(
+                ("pics", "send_one"): cnd.any(
                     [
                         # Telegram can put photos both in 'photo' and 'document' fields.
                         # We should consider both cases when we check the message for media.
@@ -126,10 +126,10 @@ script = {
                         ),
                     ]
                 ),
-                ("pics", "send_many", 1.0): messenger.cnd.message_handler(
+                ("pics", "send_many"): messenger.cnd.message_handler(
                     content_types=["sticker"]
                 ),
-                ("pics", "repeat", 0.9): cnd.true(),
+                ("pics", "repeat"): cnd.true(),
             },
         },
     },
