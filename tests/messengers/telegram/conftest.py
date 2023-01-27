@@ -19,7 +19,7 @@ from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.pipeline.pipeline.pipeline import Pipeline
 from dff.script.core.message import Message, Attachments, Attachment, Button, Location, Keyboard
 from dff.messengers.telegram.interface import PollingTelegramInterface
-from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard
+from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard, _ClickButton
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -96,18 +96,30 @@ class Helper:
         self.bot = bot
         """Bot user (to know to whom to send messages from client)."""
 
-    def send_message(self, message: Message):
+    async def send_message(self, message: Message, last_bot_messages: List[TlMessage]):
         """Send a message from client to bot."""
-        if message.commands is not None:  # Maybe use it to click inline buttons?
-            raise RuntimeError("`commands` field is not used in Telegram. Use `text` instead.")
+        if message.commands is not None:
+            if len(message.commands) != 1:
+                raise RuntimeError(f"Multiple commands are not used in telegram: {message.commands}")
+            command = message.commands[0]
+            if not isinstance(command, _ClickButton):
+                raise RuntimeError(f"Only `_ClickButton` command is supported by telegram.")
+            button_clicked = False
+            for bot_message in last_bot_messages:
+                if bot_message.buttons is not None:
+                    if button_clicked:
+                        raise RuntimeError("Found multiple messages with buttons")
+                    await bot_message.click(i=command.button_index)
+                    return None
         if message.attachments is None or len(message.attachments.files) == 0:
-            return self.client.send_message(self.bot, message.text)
+            return await self.client.send_message(self.bot, message.text)
         else:
             if len(message.attachments.files) == 1:
-                files = message.attachments.files[0].source
+                attachment = message.attachments.files[0]
+                files = attachment.source
             else:
                 files = [file.source for file in message.attachments.files]
-            return self.client.send_file(self.bot, files, caption=message.text)
+            return await self.client.send_file(self.bot, files, caption=message.text)
 
     @staticmethod
     async def parse_responses(responses: List[TlMessage], tmp_dir) -> Message:
@@ -126,7 +138,7 @@ class Helper:
                 await response.download_media(file=file)
                 if msg.attachments is None:
                     msg.attachments = Attachments()
-                msg.attachments.files.append(Attachment(source=file, id=None, title=response.file.title or response.text))
+                msg.attachments.files.append(Attachment(source=file, id=None, title=response.file.title or response.text or None))
             if response.buttons is not None:
                 buttons = []
                 for row in response.buttons:
@@ -174,7 +186,7 @@ class Helper:
 
         messenger_interface.messenger.send_response((await self.client.get_me(input_peer=True)).user_id, message)
 
-        await asyncio.sleep(2)
+        await asyncio.sleep(3)
         bot_messages = [
             x async for x in self.client.iter_messages(
                 self.bot, min_id=last_message_id, from_user=self.bot
@@ -187,17 +199,23 @@ class Helper:
 
     async def check_happy_path(self, happy_path, tmp_dir):
         async with self.run_bot():
+            bot_messages = []
+            last_message = None
             for request, response in happy_path:
                 logging.info("Sending request")
-                user_message = await self.send_message(TelegramMessage.parse_obj(request))
+                user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
+                if user_message is not None:
+                    last_message = user_message
                 logging.info("Request sent")
                 await asyncio.sleep(3)
                 logging.info("Extracting responses")
-                bot_messages = [x async for x in self.client.iter_messages(
-                    self.bot, min_id=user_message.id, from_user=self.bot
-                )
-                                ]
-                bot_messages.reverse()
+                bot_messages = [
+                    x async for x in self.client.iter_messages(
+                        self.bot, min_id=(user_message or last_message).id, from_user=self.bot
+                    )
+                ]
+                if len(bot_messages) > 0:
+                    last_message = bot_messages[0]
                 logging.info("Got responses")
                 result = await self.parse_responses(bot_messages, tmp_dir)
                 assert result == TelegramMessage.parse_obj(response)

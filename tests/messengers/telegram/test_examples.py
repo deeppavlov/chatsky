@@ -2,9 +2,7 @@
 This script ensures that example scripts can successfully compile and are ready to run
 """
 import os
-import datetime
 import importlib
-import asyncio
 import pytz
 import logging
 
@@ -26,7 +24,10 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
     "example_module_name",
     [
         "1_basic",
+        "2_buttons",
+        "3_buttons_with_callback",
         "4_conditions",
+        "5_conditions_with_media",
         "7_polling_setup",
     ],
 )
