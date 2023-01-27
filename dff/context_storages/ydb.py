@@ -224,7 +224,7 @@ async def _is_table_exists(pool, path, table_name) -> bool:
 
 async def _create_table(pool, path, table_name):
     async def callee(session):
-        session.create_table(
+        await session.create_table(
             "/".join([path, table_name]),
             ydb.TableDescription()
             .with_column(ydb.Column("id", ydb.OptionalType(ydb.PrimitiveType.Utf8)))
@@ -232,4 +232,4 @@ async def _create_table(pool, path, table_name):
             .with_primary_key("id"),
         )
 
-    return pool.retry_operation(callee)
+    return await pool.retry_operation(callee)
