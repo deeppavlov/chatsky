@@ -17,9 +17,10 @@ from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
     TelegramUI,
-    TelegramButton,
+    Button,
     TelegramMessage,
 )
+from dff.messengers.telegram.message import _ClickButton
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -49,7 +50,9 @@ script = {
         "start": {
             RESPONSE: TelegramMessage(text="hi"),
             TRANSITIONS: {
-                ("general", "keyboard"): cnd.true(),
+                ("general", "keyboard"): messenger.cnd.message_handler(
+                    commands=["start", "restart"]
+                ),
             },
         },
         "fallback": {
@@ -68,8 +71,8 @@ script = {
                     "text": "Starting test! What's 9 + 10?",
                     "ui": TelegramUI(
                         buttons=[
-                            TelegramButton(text="19", payload="19"),
-                            TelegramButton(text="21", payload="21"),
+                            Button(text="19", payload="correct"),
+                            Button(text="21", payload="wrong"),
                         ],
                         is_inline=True,
                     ),
@@ -77,10 +80,10 @@ script = {
             ),
             TRANSITIONS: {
                 ("general", "success"): messenger.cnd.callback_query_handler(
-                    func=lambda call: call.data == "19"
+                    func=lambda call: call.data == "correct"
                 ),
                 ("general", "fail"): messenger.cnd.callback_query_handler(
-                    func=lambda call: call.data == "21"
+                    func=lambda call: call.data == "wrong"
                 ),
             },
         },
@@ -94,6 +97,57 @@ script = {
         },
     },
 }
+
+happy_path = (
+    (
+        TelegramMessage(text="/start"),
+        TelegramMessage(
+            text="Starting test! What's 9 + 10?",
+            ui=TelegramUI(
+                buttons=[
+                    Button(text="19", payload="correct"),
+                    Button(text="21", payload="wrong"),
+                ],
+            ),
+        ),
+    ),
+    (
+        TelegramMessage(commands=[_ClickButton(button_index=1)]),
+        TelegramMessage(text="Incorrect answer, type anything to try again"),
+    ),
+    (
+        TelegramMessage(text="try again"),
+        TelegramMessage(
+            text="Starting test! What's 9 + 10?",
+            ui=TelegramUI(
+                buttons=[
+                    Button(text="19", payload="correct"),
+                    Button(text="21", payload="wrong"),
+                ],
+            ),
+        ),
+    ),
+    (
+        TelegramMessage(commands=[_ClickButton(button_index=0)]),
+        TelegramMessage(text="Success!"),
+    ),
+    (
+        TelegramMessage(text="Yay!"),
+        TelegramMessage(text="Finishing test, send /restart command to restart"),
+    ),
+    (
+        TelegramMessage(text="/restart"),
+        TelegramMessage(
+            text="Starting test! What's 9 + 10?",
+            ui=TelegramUI(
+                buttons=[
+                    Button(text="19", payload="correct"),
+                    Button(text="21", payload="wrong"),
+                ],
+            ),
+        ),
+    )
+)
 
 interface = PollingTelegramInterface(messenger=messenger)
 

@@ -19,9 +19,8 @@ import os
 from dff.script import Context, Actor
 from telebot.util import content_type_media
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.messengers.telegram import TelegramMessenger
+from dff.messengers.telegram import TelegramMessenger, TelegramMessage
 from dff.utils.testing.common import is_interactive_mode
-from dff.script import Message
 
 db = dict()  # You can use any other context storage from the library.
 
@@ -64,7 +63,7 @@ def dialog_handler(update):
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
     # add update
-    context.add_request(Message(text=getattr(update, "text", None), misc={"update": update}))
+    context.add_request(TelegramMessage(text=getattr(update, "text", None), update=update))
 
     # apply the actor
     updated_context = actor(context)

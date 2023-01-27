@@ -19,6 +19,8 @@ from dff.messengers.telegram import (
     TelegramMessenger,
     TelegramUI,
     TelegramMessage,
+    RemoveKeyboard,
+    Button,
 )
 from dff.utils.testing.common import is_interactive_mode
 
@@ -46,7 +48,9 @@ script = {
         "start": {
             RESPONSE: TelegramMessage(text="hi"),
             TRANSITIONS: {
-                ("general", "native_keyboard"): cnd.true(),
+                ("general", "native_keyboard"): messenger.cnd.message_handler(
+                    commands=["start", "restart"]
+                ),
             },
         },
         "fallback": {
@@ -67,8 +71,8 @@ script = {
                 # e.g. simple keyboard or inline keyboard.
                 ui=TelegramUI(
                     buttons=[
-                        TelegramButton(text="5", payload="5"),
-                        TelegramButton(text="4", payload="4"),
+                        Button(text="5"),
+                        Button(text="4"),
                     ],
                     is_inline=False,
                     row_width=4,
@@ -83,7 +87,7 @@ script = {
         },
         "success": {
             RESPONSE: TelegramMessage(
-                **{"text": "Success!", "ui": TelegramUI(keyboard=types.ReplyKeyboardRemove())}
+                **{"text": "Success!", "ui": RemoveKeyboard()}
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -91,7 +95,7 @@ script = {
             RESPONSE: TelegramMessage(
                 **{
                     "text": "Incorrect answer, type anything to try again",
-                    "ui": TelegramUI(keyboard=types.ReplyKeyboardRemove()),
+                    "ui": RemoveKeyboard(),
                 }
             ),
             TRANSITIONS: {("general", "native_keyboard"): cnd.true()},
@@ -103,10 +107,33 @@ interface = PollingTelegramInterface(messenger=messenger)
 
 
 happy_path = (
-    ("hi", "Question: What's 2 + 2?"),
-    ("5", "Incorrect answer, type anything to try again"),
-    ("ok", "Question: What's 2 + 2?"),
-    ("4", "Success!"),
+    (TelegramMessage(text="/start"), TelegramMessage(text="Question: What's 2 + 2?", ui=TelegramUI(
+                    buttons=[
+                        Button(text="5"),
+                        Button(text="4"),
+                    ],
+                    is_inline=False,
+                    row_width=4,
+                ),)),
+    (TelegramMessage(text="5"), TelegramMessage(text="Incorrect answer, type anything to try again", ui=RemoveKeyboard())),
+    (TelegramMessage(text="ok"), TelegramMessage(text="Question: What's 2 + 2?", ui=TelegramUI(
+                    buttons=[
+                        Button(text="5"),
+                        Button(text="4"),
+                    ],
+                    is_inline=False,
+                    row_width=4,
+                ),)),
+    (TelegramMessage(text="4"), TelegramMessage(text="Success!", ui=RemoveKeyboard())),
+    (TelegramMessage(text="Yay!"), TelegramMessage(text="Finishing test, send /restart command to restart")),
+    (TelegramMessage(text="/start"), TelegramMessage(text="Question: What's 2 + 2?", ui=TelegramUI(
+                    buttons=[
+                        Button(text="5"),
+                        Button(text="4"),
+                    ],
+                    is_inline=False,
+                    row_width=4,
+                ),))
 )
 
 

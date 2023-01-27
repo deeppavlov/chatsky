@@ -75,7 +75,7 @@ script = {
         "start_node": {
             RESPONSE: TelegramMessage(text="Bot running"),
             TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
             },
         },
         "node1": {

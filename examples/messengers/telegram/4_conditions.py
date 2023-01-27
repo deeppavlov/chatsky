@@ -9,7 +9,7 @@ and reuse handler triggers from the `pytelegrambotapi` library.
 # %%
 import os
 
-from dff.script import TRANSITIONS, RESPONSE, Message
+from dff.script import TRANSITIONS, RESPONSE
 
 from dff.messengers.telegram import (
     PollingTelegramInterface,
@@ -42,9 +42,9 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 script = {
     "greeting_flow": {
         "start_node": {
-            RESPONSE: TelegramMessage(text=""),
+            RESPONSE: TelegramMessage(text="Hi"),
             TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
             },
         },
         "node1": {
@@ -64,13 +64,13 @@ script = {
         "node4": {
             RESPONSE: TelegramMessage(text="bye"),
             TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
             },
         },
         "fallback_node": {
             RESPONSE: TelegramMessage(text="Ooops"),
             TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart", "init"])
+                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
             },
         },
     }
@@ -79,10 +79,10 @@ script = {
 
 # testing
 happy_path = (
-    (Message(text="/start"), Message(text="Hi, how are you?")),
-    (Message(text="I'm fine"), Message(text="Good. What do you want to talk about?")),
-    (Message(text="About music"), Message(text="Sorry, I can not talk about music now.")),
-    (Message(text="ok"), Message(text="bye")),
+    (TelegramMessage(text="/start"), TelegramMessage(text="Hi, how are you?")),
+    (TelegramMessage(text="I'm fine"), TelegramMessage(text="Good. What do you want to talk about?")),
+    (TelegramMessage(text="About music"), TelegramMessage(text="Sorry, I can not talk about music now.")),
+    (TelegramMessage(text="ok"), TelegramMessage(text="bye")),
 )
 
 

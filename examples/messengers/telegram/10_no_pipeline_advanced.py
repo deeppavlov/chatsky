@@ -15,12 +15,13 @@ import os
 from typing import Optional
 
 import dff.script.conditions as cnd
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE, Message
+from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.messengers.telegram import TelegramMessenger, TelegramMessage, TelegramUI, TelegramButton
+from dff.messengers.telegram import TelegramMessenger, TelegramMessage, TelegramUI
+from dff.script.core.message import Button
 from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
@@ -61,10 +62,9 @@ script = {
                 text="What's 2 + 2?",
                 ui=TelegramUI(
                     buttons=[
-                        TelegramButton(text="4", payload="4"),
-                        TelegramButton(text="5", payload="5"),
+                        Button(text="4", payload="4"),
+                        Button(text="5", payload="5"),
                     ],
-                    is_inline=True,
                 ),
             ),
             TRANSITIONS: {
@@ -118,7 +118,7 @@ def handler(update):
     user_id = (vars(update).get("from_user")).id
     context: Context = db.get(user_id, Context(id=user_id))
     # add update
-    context.add_request(Message(text=getattr(update, "text", None), misc={"update": update}))
+    context.add_request(TelegramMessage(text=getattr(update, "text", None), update=update))
 
     # apply the actor
     context = actor(context)
