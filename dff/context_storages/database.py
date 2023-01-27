@@ -42,24 +42,24 @@ class DBAbstractContextStorage(ABC):
         self._lock = threading.Lock()
 
     def __getitem__(self, key: Hashable) -> Context:
-        return asyncio.run(self.getitem_async(key))
+        return asyncio.run(self.get_item_async(key))
 
     @abstractmethod
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         raise NotImplementedError
 
     def __setitem__(self, key: Hashable, value: Context):
-        return asyncio.run(self.setitem_async(key, value))
+        return asyncio.run(self.set_item_async(key, value))
 
     @abstractmethod
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         raise NotImplementedError
 
     def __delitem__(self, key: Hashable):
-        return asyncio.run(self.delitem_async(key))
+        return asyncio.run(self.del_item_async(key))
 
     @abstractmethod
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         raise NotImplementedError
 
     def __contains__(self, key: Hashable) -> bool:
@@ -81,7 +81,7 @@ class DBAbstractContextStorage(ABC):
 
     async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
         try:
-            return await self.getitem_async(str(key))
+            return await self.get_item_async(str(key))
         except KeyError:
             return default
 

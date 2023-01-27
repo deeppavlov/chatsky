@@ -39,12 +39,12 @@ class RedisContextStorage(DBAbstractContextStorage):
         return bool(await self._redis.exists(str(key)))
 
     @threadsafe_method
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
         await self._redis.set(str(key), value.json())
 
     @threadsafe_method
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         result = await self._redis.get(str(key))
         if result:
             result_dict = json.loads(result.decode("utf-8"))
@@ -52,7 +52,7 @@ class RedisContextStorage(DBAbstractContextStorage):
         raise KeyError(f"No entry for key {key}.")
 
     @threadsafe_method
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         await self._redis.delete(str(key))
 
     @threadsafe_method

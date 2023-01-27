@@ -24,13 +24,13 @@ class ShelveContextStorage(DBAbstractContextStorage):
         DBAbstractContextStorage.__init__(self, path)
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         return self.shelve_db[str(key)]
 
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         return self.shelve_db.__setitem__(str(key), value)
 
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         return self.shelve_db.__delitem__(str(key))
 
     async def contains_async(self, key: Hashable) -> bool:

@@ -31,17 +31,17 @@ class PickleContextStorage(DBAbstractContextStorage):
         return len(self.dict)
 
     @threadsafe_method
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         self.dict.__setitem__(str(key), value)
         await self._save()
 
     @threadsafe_method
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         await self._load()
         return Context.cast(self.dict.__getitem__(str(key)))
 
     @threadsafe_method
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         self.dict.__delitem__(str(key))
         await self._save()
 

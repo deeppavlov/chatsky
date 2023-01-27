@@ -49,7 +49,7 @@ class MongoContextStorage(DBAbstractContextStorage):
         return {"_id": ObjectId(new_key)}
 
     @threadsafe_method
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         new_key = self._adjust_key(key)
         value = value if isinstance(value, Context) else Context.cast(value)
         document = json.loads(value.json())
@@ -58,7 +58,7 @@ class MongoContextStorage(DBAbstractContextStorage):
         await self.collection.replace_one(new_key, document, upsert=True)
 
     @threadsafe_method
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         adjust_key = self._adjust_key(key)
         document = await self.collection.find_one(adjust_key)
         if document:
@@ -68,7 +68,7 @@ class MongoContextStorage(DBAbstractContextStorage):
         raise KeyError
 
     @threadsafe_method
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         adjust_key = self._adjust_key(key)
         await self.collection.delete_one(adjust_key)
 

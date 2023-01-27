@@ -106,7 +106,7 @@ class SQLContextStorage(DBAbstractContextStorage):
         import_insert_for_dialect(self.dialect)
 
     @threadsafe_method
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
         value = json.loads(value.json())
 
@@ -118,7 +118,7 @@ class SQLContextStorage(DBAbstractContextStorage):
             await conn.commit()
 
     @threadsafe_method
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         stmt = select(self.table.c.context).where(self.table.c.id == str(key))
         async with self.engine.connect() as conn:
             result = await conn.execute(stmt)
@@ -128,7 +128,7 @@ class SQLContextStorage(DBAbstractContextStorage):
         raise KeyError
 
     @threadsafe_method
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         stmt = delete(self.table).where(self.table.c.id == str(key))
         async with self.engine.connect() as conn:
             await conn.execute(stmt)

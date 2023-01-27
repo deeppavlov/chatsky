@@ -45,7 +45,7 @@ class YDBContextStorage(DBAbstractContextStorage):
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
         self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, self.table_name))
 
-    async def setitem_async(self, key: Hashable, value: Context):
+    async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
 
         async def callee(session):
@@ -76,7 +76,7 @@ class YDBContextStorage(DBAbstractContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def getitem_async(self, key: Hashable) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         async def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
@@ -105,7 +105,7 @@ class YDBContextStorage(DBAbstractContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def delitem_async(self, key: Hashable):
+    async def del_item_async(self, key: Hashable):
         async def callee(session):
             query = """
                 PRAGMA TablePathPrefix("{}");
