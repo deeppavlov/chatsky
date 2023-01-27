@@ -27,7 +27,7 @@ class DataModel(BaseModel):
 
 
 class Command(DataModel):
-    command: str
+    ...
 
 
 class Location(DataModel):
@@ -45,17 +45,23 @@ class Attachment(DataModel):
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
 
+    def get_bytes(self) -> Optional[bytes]:
+        if self.source is None:
+            return None
+        if isinstance(self.source, HttpUrl):
+            with urlopen(self.source) as file:
+                return file.read()
+        else:
+            with open(self.source, "rb") as file:
+                return file.read()
+
     def __eq__(self, other):
         if isinstance(other, Attachment):
-            def get_file(source):
-                if isinstance(source, HttpUrl):
-                    with urlopen(source) as file:
-                        return file.read()
-                else:
-                    with open(source, "rb") as file:
-                        return file.read()
-
-            return get_file(self.source) == get_file(other.source)
+            if self.title != other.title:
+                return False
+            if self.id != other.id:
+                return False
+            return self.get_bytes() == other.get_bytes()
         return NotImplemented
 
     @root_validator

@@ -171,11 +171,11 @@ class TelegramConditions:
         Creates a condition triggered by updates that match the given parameters.
         The signature is equal with the `Telebot` method of the same name.
 
-        :param commands: Telegram command trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
-        :param regexp: Regex trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
-        :param func: Callable trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
-        :param content_types: Content type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
-        :param chat_types: Chat type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_.
+        :param commands: Telegram command trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param regexp: Regex trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param func: Callable trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param content_types: Content type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param chat_types: Chat type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
         """
 
         update_handler = self.messenger._build_handler_dict(
@@ -191,9 +191,9 @@ class TelegramConditions:
 
         def condition(ctx: Context, actor: Actor, *args, **kwargs):
             last_request = ctx.last_request
-            if last_request is None or last_request.misc is None:
+            if last_request is None:
                 return False
-            update = last_request.misc.get("update")
+            update = getattr(last_request, "update", None)
             if not update or not isinstance(update, target_type):
                 return False
             test_result = self.messenger._test_message_handler(update_handler, update)

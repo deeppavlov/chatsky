@@ -5,9 +5,23 @@ This module implements inherited classes :py:module:`dff.script.core.message` mo
 """
 from typing import Optional, Union
 
-from telebot import types
+from telebot.types import (
+    ReplyKeyboardRemove,
+    ReplyKeyboardMarkup,
+    InlineKeyboardMarkup,
+    Message as tlMessage,
+    InlineQuery,
+    ChosenInlineResult,
+    CallbackQuery,
+    ShippingQuery,
+    PreCheckoutQuery,
+    Poll,
+    PollAnswer,
+    ChatMemberUpdated,
+    ChatJoinRequest,
+)
 
-from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError
+from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError, Command, Attachment
 
 
 class TelegramUI(Keyboard):
@@ -23,6 +37,11 @@ class TelegramUI(Keyboard):
         return values
 
 
+class _ClickButton(Command):  # maybe this should be in `utils/testing`
+    """This class is only used in telegram tests (to click buttons as a client)."""
+    button_index: int
+
+
 class RemoveKeyboard(DataModel):
     """Pass an instance of this class to :py:attr:`~.TelegramMessage.ui` to remove current keyboard."""
     ...
@@ -31,5 +50,21 @@ class RemoveKeyboard(DataModel):
 class TelegramMessage(Message):
     class Config:
         smart_union = True
-    ui: Optional[Union[TelegramUI, RemoveKeyboard, types.ReplyKeyboardRemove, types.ReplyKeyboardMarkup, types.InlineKeyboardMarkup]] = None
+    ui: Optional[Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]] = None
     location: Optional[Location] = None
+    update: Optional[
+        Union[
+            tlMessage,
+            InlineQuery,
+            ChosenInlineResult,
+            CallbackQuery,
+            ShippingQuery,
+            PreCheckoutQuery,
+            Poll,
+            PollAnswer,
+            ChatMemberUpdated,
+            ChatJoinRequest,
+        ]
+    ] = None
+    """This field stores an update representing this message."""
+    update_id: Optional[int] = None

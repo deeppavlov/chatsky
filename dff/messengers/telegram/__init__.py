@@ -8,4 +8,5 @@ except ImportError:
 
 from .messenger import TelegramMessenger
 from .interface import PollingTelegramInterface, CallbackTelegramInterface
-from .message import TelegramUI, TelegramMessage
+from .message import TelegramUI, TelegramMessage, RemoveKeyboard
+from dff.script.core.message import Location, Attachment, Audio, Video, Image, Document, Attachments, Button, Command

@@ -9,9 +9,10 @@ from typing import Any, Optional, List, Tuple, Callable
 
 from telebot import types, logger
 
-from dff.script import Context, Message
+from dff.script import Context
 from dff.messengers.common import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
 from .messenger import TelegramMessenger
+from .message import TelegramMessage, Message
 
 try:
     from flask import Flask, request, abort
@@ -37,7 +38,7 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     update_fields = vars(update).copy()
     update_fields.pop("update_id")
     inner_update = next(filter(lambda val: val is not None, list(update_fields.values())))
-    message = Message(text=getattr(inner_update, "text", None), misc={"update": inner_update, "update_id": update.update_id})
+    message = TelegramMessage(text=getattr(inner_update, "text", None), update=inner_update, update_id=update.update_id)
 
     dict_update = vars(inner_update)
     # if 'chat' is not available, fall back to 'from_user', then to 'user'
@@ -95,8 +96,10 @@ class PollingTelegramInterface(PollingMessengerInterface):
     def _respond(self, response: List[Context]):
         for resp in response:
             self.messenger.send_response(resp.id, resp.last_response)
-            if resp.last_request.misc["update_id"] > self.last_processed_update:
-                self.last_processed_update = resp.last_request.misc["update_id"]
+            update_id = getattr(resp.last_request, "update_id", None)
+            if update_id is not None:
+                if update_id > self.last_processed_update:
+                    self.last_processed_update = update_id
 
     def _on_exception(self, e: Exception):
         logger.error(e)
