@@ -28,10 +28,12 @@ class ShelveContextStorage(DBAbstractContextStorage):
         return self.shelve_db[str(key)]
 
     async def set_item_async(self, key: Hashable, value: Context):
-        return self.shelve_db.__setitem__(str(key), value)
+        self.shelve_db.__setitem__(str(key), value)
+        self.shelve_db.sync()
 
     async def del_item_async(self, key: Hashable):
-        return self.shelve_db.__delitem__(str(key))
+        self.shelve_db.__delitem__(str(key))
+        self.shelve_db.sync()
 
     async def contains_async(self, key: Hashable) -> bool:
         return self.shelve_db.__contains__(str(key))
@@ -40,4 +42,5 @@ class ShelveContextStorage(DBAbstractContextStorage):
         return self.shelve_db.__len__()
 
     async def clear_async(self):
-        return self.shelve_db.clear()
+        self.shelve_db.clear()
+        self.shelve_db.sync()
