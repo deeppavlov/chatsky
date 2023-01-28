@@ -18,7 +18,8 @@ from dff.context_storages import (
 
 
 async def delete_json(storage: JSONContextStorage):
-    os.remove(storage.path)
+    if os.path.isfile(storage.path):
+        os.remove(storage.path)
 
 
 async def delete_mongo(storage: MongoContextStorage):
@@ -28,7 +29,8 @@ async def delete_mongo(storage: MongoContextStorage):
 
 
 async def delete_pickle(storage: PickleContextStorage):
-    os.remove(storage.path)
+    if os.path.isfile(storage.path):
+        os.remove(storage.path)
 
 
 async def delete_redis(storage: RedisContextStorage):
@@ -38,7 +40,8 @@ async def delete_redis(storage: RedisContextStorage):
 
 
 async def delete_shelve(storage: ShelveContextStorage):
-    os.remove(storage.path)
+    if os.path.isfile(storage.path):
+        os.remove(storage.path)
 
 
 async def delete_sql(storage: SQLContextStorage):
