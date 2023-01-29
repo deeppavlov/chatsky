@@ -6,18 +6,16 @@ from pathlib import Path
 from typing import List
 from contextlib import asynccontextmanager
 import logging
-from urllib.request import urlopen
 
 import telethon.tl.types
 from telethon import TelegramClient
 from telethon.types import User
 from telethon.custom import Message as TlMessage
 from telebot import types
-from pydantic import HttpUrl
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.pipeline.pipeline.pipeline import Pipeline
-from dff.script.core.message import Message, Attachments, Attachment, Button, Location, Keyboard
+from dff.script.core.message import Message, Attachments, Attachment, Button, Location
 from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard, _ClickButton
 
