@@ -79,6 +79,7 @@ class TelegramMessenger(TeleBot):
                 else:
                     method(chat_id, attachment.source or attachment.id, **params)
             else:
+
                 def cast(file):
                     if isinstance(file, Image):
                         cast_to_media_type = types.InputMediaPhoto
@@ -109,16 +110,22 @@ class TelegramMessenger(TeleBot):
             elif isinstance(ready_response.ui, TelegramUI):
                 if ready_response.ui.is_inline:
                     keyboard = types.InlineKeyboardMarkup(row_width=ready_response.ui.row_width)
-                    buttons = [types.InlineKeyboardButton(
-                        text=item.text,
-                        url=item.source,
-                        callback_data=item.payload,
-                    ) for item in ready_response.ui.buttons]
+                    buttons = [
+                        types.InlineKeyboardButton(
+                            text=item.text,
+                            url=item.source,
+                            callback_data=item.payload,
+                        )
+                        for item in ready_response.ui.buttons
+                    ]
                 else:
                     keyboard = types.ReplyKeyboardMarkup(row_width=ready_response.ui.row_width)
-                    buttons = [types.KeyboardButton(
-                        text=item.text,
-                    ) for item in ready_response.ui.buttons]
+                    buttons = [
+                        types.KeyboardButton(
+                            text=item.text,
+                        )
+                        for item in ready_response.ui.buttons
+                    ]
                 keyboard.add(*buttons, row_width=ready_response.ui.row_width)
             else:
                 keyboard = ready_response.ui
@@ -171,11 +178,21 @@ class TelegramConditions:
         Creates a condition triggered by updates that match the given parameters.
         The signature is equal with the `Telebot` method of the same name.
 
-        :param commands: Telegram command trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param regexp: Regex trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param func: Callable trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param content_types: Content type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param chat_types: Chat type trigger. See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param commands:
+            Telegram command trigger.
+            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param regexp:
+            Regex trigger.
+            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param func:
+            Callable trigger.
+            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param content_types:
+            Content type trigger.
+            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
+        :param chat_types:
+            Chat type trigger.
+            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
         """
 
         update_handler = self.messenger._build_handler_dict(

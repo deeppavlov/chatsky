@@ -43,9 +43,7 @@ script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: TelegramMessage(text="Hi"),
-            TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
-            },
+            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi, how are you?"),
@@ -63,15 +61,11 @@ script = {
         },
         "node4": {
             RESPONSE: TelegramMessage(text="bye"),
-            TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
-            },
+            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
         },
         "fallback_node": {
             RESPONSE: TelegramMessage(text="Ooops"),
-            TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
-            },
+            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
         },
     }
 }
@@ -80,8 +74,14 @@ script = {
 # testing
 happy_path = (
     (TelegramMessage(text="/start"), TelegramMessage(text="Hi, how are you?")),
-    (TelegramMessage(text="I'm fine"), TelegramMessage(text="Good. What do you want to talk about?")),
-    (TelegramMessage(text="About music"), TelegramMessage(text="Sorry, I can not talk about music now.")),
+    (
+        TelegramMessage(text="I'm fine"),
+        TelegramMessage(text="Good. What do you want to talk about?"),
+    ),
+    (
+        TelegramMessage(text="About music"),
+        TelegramMessage(text="Sorry, I can not talk about music now."),
+    ),
     (TelegramMessage(text="ok"), TelegramMessage(text="bye")),
 )
 

@@ -21,7 +21,7 @@ from telebot.types import (
     ChatJoinRequest,
 )
 
-from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError, Command, Attachment
+from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError, Command
 
 
 class TelegramUI(Keyboard):
@@ -39,18 +39,23 @@ class TelegramUI(Keyboard):
 
 class _ClickButton(Command):  # maybe this should be in `utils/testing`
     """This class is only used in telegram tests (to click buttons as a client)."""
+
     button_index: int
 
 
 class RemoveKeyboard(DataModel):
     """Pass an instance of this class to :py:attr:`~.TelegramMessage.ui` to remove current keyboard."""
+
     ...
 
 
 class TelegramMessage(Message):
     class Config:
         smart_union = True
-    ui: Optional[Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]] = None
+
+    ui: Optional[
+        Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
+    ] = None
     location: Optional[Location] = None
     update: Optional[
         Union[

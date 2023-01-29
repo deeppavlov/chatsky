@@ -8,7 +8,6 @@ from pydantic import ValidationError
 from telebot import types
 from telethon.tl.types import (
     InputMessagesFilterPhotos,
-    InputMessagesFilterGeo,
     InputMessagesFilterMusic,
     InputMessagesFilterVideo,
 )
@@ -91,26 +90,36 @@ async def test_keyboard_remove(bot_id, tg_client, helper, tmp_path, pipeline_ins
     ["generic_response", "prop", "filter_type"],
     [
         (
-            Message(text="test", attachments=Attachments(files=[Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")])),
+            Message(
+                text="test",
+                attachments=Attachments(files=[Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")]),
+            ),
             "image",
             InputMessagesFilterPhotos,
         ),
         (
-            Message(text="test", attachments=Attachments(files=[Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")])),
+            Message(
+                text="test",
+                attachments=Attachments(files=[Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")]),
+            ),
             "audio",
             InputMessagesFilterMusic,
         ),
         (
             Message(
                 text="test",
-                attachments=Attachments(files=[Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")]),
+                attachments=Attachments(
+                    files=[Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")]
+                ),
             ),
             "video",
             InputMessagesFilterVideo,
         ),
     ],
 )
-async def test_telegram_attachment(generic_response, prop, filter_type, bot_id, tg_client, helper, tmp_path, pipeline_instance):
+async def test_telegram_attachment(
+    generic_response, prop, filter_type, bot_id, tg_client, helper, tmp_path, pipeline_instance
+):
     telegram_response = TelegramMessage.parse_obj(generic_response)
     test_helper = helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
@@ -170,6 +179,7 @@ def test_empty_keyboard():
     with pytest.raises(ValidationError) as e:
         _ = TelegramUI(buttons=[])
     assert e
+
 
 def test_non_inline_keyboard_with_payload():
     with pytest.raises(ValidationError) as error:

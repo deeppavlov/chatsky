@@ -74,9 +74,7 @@ script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: TelegramMessage(text="Bot running"),
-            TRANSITIONS: {
-                "node1": messenger.cnd.message_handler(commands=["start", "restart"])
-            },
+            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi"),

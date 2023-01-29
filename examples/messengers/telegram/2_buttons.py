@@ -9,8 +9,6 @@ This example shows how to display and hide a basic keyboard in Telegram.
 # %%
 import os
 
-from telebot import types
-
 import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
 from dff.pipeline import Pipeline
@@ -86,9 +84,7 @@ script = {
             },
         },
         "success": {
-            RESPONSE: TelegramMessage(
-                **{"text": "Success!", "ui": RemoveKeyboard()}
-            ),
+            RESPONSE: TelegramMessage(**{"text": "Success!", "ui": RemoveKeyboard()}),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
@@ -107,33 +103,57 @@ interface = PollingTelegramInterface(messenger=messenger)
 
 
 happy_path = (
-    (TelegramMessage(text="/start"), TelegramMessage(text="Question: What's 2 + 2?", ui=TelegramUI(
-                    buttons=[
-                        Button(text="5"),
-                        Button(text="4"),
-                    ],
-                    is_inline=False,
-                    row_width=4,
-                ),)),
-    (TelegramMessage(text="5"), TelegramMessage(text="Incorrect answer, type anything to try again", ui=RemoveKeyboard())),
-    (TelegramMessage(text="ok"), TelegramMessage(text="Question: What's 2 + 2?", ui=TelegramUI(
-                    buttons=[
-                        Button(text="5"),
-                        Button(text="4"),
-                    ],
-                    is_inline=False,
-                    row_width=4,
-                ),)),
+    (
+        TelegramMessage(text="/start"),
+        TelegramMessage(
+            text="Question: What's 2 + 2?",
+            ui=TelegramUI(
+                buttons=[
+                    Button(text="5"),
+                    Button(text="4"),
+                ],
+                is_inline=False,
+                row_width=4,
+            ),
+        ),
+    ),
+    (
+        TelegramMessage(text="5"),
+        TelegramMessage(text="Incorrect answer, type anything to try again", ui=RemoveKeyboard()),
+    ),
+    (
+        TelegramMessage(text="ok"),
+        TelegramMessage(
+            text="Question: What's 2 + 2?",
+            ui=TelegramUI(
+                buttons=[
+                    Button(text="5"),
+                    Button(text="4"),
+                ],
+                is_inline=False,
+                row_width=4,
+            ),
+        ),
+    ),
     (TelegramMessage(text="4"), TelegramMessage(text="Success!", ui=RemoveKeyboard())),
-    (TelegramMessage(text="Yay!"), TelegramMessage(text="Finishing test, send /restart command to restart")),
-    (TelegramMessage(text="/start"), TelegramMessage(text="Question: What's 2 + 2?", ui=TelegramUI(
-                    buttons=[
-                        Button(text="5"),
-                        Button(text="4"),
-                    ],
-                    is_inline=False,
-                    row_width=4,
-                ),))
+    (
+        TelegramMessage(text="Yay!"),
+        TelegramMessage(text="Finishing test, send /restart command to restart"),
+    ),
+    (
+        TelegramMessage(text="/start"),
+        TelegramMessage(
+            text="Question: What's 2 + 2?",
+            ui=TelegramUI(
+                buttons=[
+                    Button(text="5"),
+                    Button(text="4"),
+                ],
+                is_inline=False,
+                row_width=4,
+            ),
+        ),
+    ),
 )
 
 

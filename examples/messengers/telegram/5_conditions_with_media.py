@@ -130,13 +130,13 @@ happy_path = (
         TelegramMessage(
             text="Here's my picture!",
             attachments=Attachments(files=[Image(source=picture_url)]),
-        )
+        ),
     ),
-    (TelegramMessage(text="ok"), TelegramMessage(text="Finishing test, send /restart command to restart")),
     (
-        TelegramMessage(text="/restart"),
-        TelegramMessage(text="Send me a picture")
+        TelegramMessage(text="ok"),
+        TelegramMessage(text="Finishing test, send /restart command to restart"),
     ),
+    (TelegramMessage(text="/restart"), TelegramMessage(text="Send me a picture")),
     (
         TelegramMessage(text="No"),
         TelegramMessage(
@@ -144,11 +144,11 @@ happy_path = (
             attachments=Attachments(files=[Image(source=picture_url)] * 2),
         ),
     ),
-    (TelegramMessage(text="ok"), TelegramMessage(text="Finishing test, send /restart command to restart")),
     (
-        TelegramMessage(text="/restart"),
-        TelegramMessage(text="Send me a picture")
+        TelegramMessage(text="ok"),
+        TelegramMessage(text="Finishing test, send /restart command to restart"),
     ),
+    (TelegramMessage(text="/restart"), TelegramMessage(text="Send me a picture")),
 )
 
 

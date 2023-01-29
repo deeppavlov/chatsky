@@ -38,4 +38,3 @@ async def test_client_examples(example_module_name, bot_id, tg_client, helper, t
     test_helper = helper(tg_client, pipeline, bot_id)
     logging.info("Test start")
     await test_helper.check_happy_path(happy_path, tmp_path)
-

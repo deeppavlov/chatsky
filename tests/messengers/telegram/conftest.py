@@ -79,9 +79,7 @@ def event_loop():
 @pytest.fixture(scope="session")
 def tg_client(session_file, env_var_presence, event_loop):
     _ = env_var_presence
-    client = TelegramClient(
-        str(session_file), int(os.getenv("TG_API_ID")), os.getenv("TG_API_HASH"), loop=event_loop
-    )
+    client = TelegramClient(str(session_file), int(os.getenv("TG_API_ID")), os.getenv("TG_API_HASH"), loop=event_loop)
     with client:
         yield client
     client.loop.close()
@@ -89,6 +87,7 @@ def tg_client(session_file, env_var_presence, event_loop):
 
 class Helper:
     """Defines functions for testing."""
+
     def __init__(self, client: TelegramClient, pipeline: Pipeline, bot: User):
         self.client = client
         """Telegram client (not bot). Needed to verify bot replies."""
@@ -103,7 +102,7 @@ class Helper:
                 raise RuntimeError(f"Multiple commands are not used in telegram: {message.commands}")
             command = message.commands[0]
             if not isinstance(command, _ClickButton):
-                raise RuntimeError(f"Only `_ClickButton` command is supported by telegram.")
+                raise RuntimeError(f"Only `_ClickButton` command is supported by telegram: {command}")
             button_clicked = False
             for bot_message in last_bot_messages:
                 if bot_message.buttons is not None:
@@ -138,16 +137,20 @@ class Helper:
                 await response.download_media(file=file)
                 if msg.attachments is None:
                     msg.attachments = Attachments()
-                msg.attachments.files.append(Attachment(source=file, id=None, title=response.file.title or response.text or None))
+                msg.attachments.files.append(
+                    Attachment(source=file, id=None, title=response.file.title or response.text or None)
+                )
             if response.buttons is not None:
                 buttons = []
                 for row in response.buttons:
                     for button in row:
-                        buttons.append(Button(
-                            source=button.url,
-                            text=button.text,
-                            payload=button.data,
-                        ))
+                        buttons.append(
+                            Button(
+                                source=button.url,
+                                text=button.text,
+                                payload=button.data,
+                            )
+                        )
                 if msg.ui is not None:
                     raise RuntimeError(f"Several messages with ui:\n{msg.ui}\n{TelegramUI(buttons=buttons)}")
                 msg.ui = TelegramUI(buttons=buttons)
@@ -188,9 +191,7 @@ class Helper:
 
         await asyncio.sleep(3)
         bot_messages = [
-            x async for x in self.client.iter_messages(
-                self.bot, min_id=last_message_id, from_user=self.bot
-            )
+            x async for x in self.client.iter_messages(self.bot, min_id=last_message_id, from_user=self.bot)
         ]
         bot_messages.reverse()
         result = await self.parse_responses(bot_messages, tmp_dir)
@@ -210,7 +211,8 @@ class Helper:
                 await asyncio.sleep(3)
                 logging.info("Extracting responses")
                 bot_messages = [
-                    x async for x in self.client.iter_messages(
+                    x
+                    async for x in self.client.iter_messages(
                         self.bot, min_id=(user_message or last_message).id, from_user=self.bot
                     )
                 ]
@@ -235,7 +237,7 @@ async def user_id(tg_client):
 
 @pytest.fixture(scope="session")
 async def bot_id(tg_client):
-    user = await tg_client.get_entity(os.getenv('TG_BOT_USERNAME'))
+    user = await tg_client.get_entity(os.getenv("TG_BOT_USERNAME"))
     yield user
 
 

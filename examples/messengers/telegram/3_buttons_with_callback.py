@@ -146,7 +146,7 @@ happy_path = (
                 ],
             ),
         ),
-    )
+    ),
 )
 
 interface = PollingTelegramInterface(messenger=messenger)
