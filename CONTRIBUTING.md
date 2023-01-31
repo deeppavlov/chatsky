@@ -93,7 +93,8 @@ by activating the virtual environment and then running
 make doc
 ```
 
-After that `docs/build` dir will be created and you can open index file by your browser:
+After that `docs/build` dir will be created and you can open index file by your browser
+(it is assumed that the `firefox` browser is installed):
 
 ```bash
 export BROWSER=firefox
@@ -101,7 +102,8 @@ $BROWSER docs/build/index.html
 ```
 
 ### Style
-For style supporting we propose `black`, which is a PEP 8 compliant opinionated formatter. It doesn't take previous formatting into account. See more about [black](https://github.com/psf/black). 
+For style supporting we propose `black`, which is a PEP 8 compliant opinionated formatter.
+It doesn't take previous formatting into account. See more about [black](https://github.com/psf/black). 
 To format your code, run
 
 ```bash
