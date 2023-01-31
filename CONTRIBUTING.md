@@ -37,16 +37,7 @@ style/formatting_file_1
 ### Commit message rules
 
 We ask that you adhere to the following
-[commit message format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716): `<type>: <subject>`,
-where `<type>` can be taken from the following list:
-
-- `feat`: (new feature for the user, not a new feature for build script)
-- `fix`: (bug fix for the user, not a fix to a build script)
-- `docs`: (changes to the documentation)
-- `style`: (formatting, missing semi colons, etc; no production code change)
-- `refactor`: (refactoring production code, eg. renaming a variable)
-- `test`: (adding missing tests, refactoring tests; no production code change)
-- `chore`: (updating grunt tasks etc; no production code change)
+[commit message format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716): `<type>: <subject>`.
 
 For example:
 
@@ -61,21 +52,25 @@ docs: add description to the func
 
 ## Managing your workflow
 We use `make` as handy automation tool, which reads `makefile` to get specification for commands.
-`make` is a quite popular tool for building software. Usage signature of the `make` is `make COMMAND`.
+`make` is a tool for command running automatization. Usage signature of the `make` is `make COMMAND`.
 If your environment supports `make` autocompletions you can use Tab to complete the `COMMAND`.
 
 ### Platforms
 
 We suggest using a linux-based platform for addon development.
-While the template can be cloned to any platforms that can run `python` and `cookiecutter`,
-the `make` functionality will not be available for Windows out of the box.
+While the repository can be cloned to any platforms that can run `python`,
+the `make` and `docker` functionality will not be available for Windows out of the box.
 
 ### Virtual Environment
 The most essential part is setting up the virtual environment.
-The following command installs all the dependencies, which are required for development.
-
+The following command create `venv` dir and installs all the dependencies, which are required for development.
 ```bash
 make venv
+```
+
+If you need to update the dependencies, run
+```bash
+make clean && make venv
 ```
 
 Do not forget to activate the environment, if you aim to install any other dependencies.
@@ -84,8 +79,7 @@ source venv/bin/activate
 ```
 
 ### Pre-commit
-We also provide a simple pre-commit hook for `git` that prevents you from commiting unchecked code. Note that this action will reinitialize the git repository inside the project directory, if you have already created one. To use it, run
-
+We also provide a simple pre-commit hook for `git` that prevents you from committing unformatted code. To use it, run
 ```bash
 make pre_commit
 ```
@@ -106,7 +100,7 @@ $BROWSER docs/build/index.html
 ```
 
 ### Style
-For style supporting we propose `black`, which is a PEP 8 compliant opinionated formatter. `Black` reformats entire files in place. Style configuration options are deliberately limited and rarely added. It doesn't take previous formatting into account. See more about [black](https://github.com/psf/black). 
+For style supporting we propose `black`, which is a PEP 8 compliant opinionated formatter. It doesn't take previous formatting into account. See more about [black](https://github.com/psf/black). 
 To format your code, run
 
 ```bash

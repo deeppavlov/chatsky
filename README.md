@@ -90,7 +90,7 @@ To get more advanced examples, take a look at
 Dialog Flow DB Connector allows you to save and retrieve user dialogue states
 (in the form of a `Context` object) using various database backends. 
 
-The following options are currently supported:
+The following backends are currently supported:
 * [JSON](https://www.json.org/json-en.html)
 * [pickle](https://docs.python.org/3/library/pickle.html)
 * [shelve](https://docs.python.org/3/library/shelve.html)
@@ -148,5 +148,3 @@ To get more advanced examples, take a look at
 # Contributing to the Dialog Flow Framework
 
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md).
-
-TODO: split README.md to addons/README.rst & split examples and docs
