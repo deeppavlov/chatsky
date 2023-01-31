@@ -237,3 +237,16 @@ class Pipeline:
         :return: Dialog `Context`.
         """
         return asyncio.run(self._run_pipeline(request, ctx_id))
+
+    @property
+    def script(self) -> Script:
+        return self.actor.script
+
+    @script.setter
+    def script(self, script: Union[Script, dict]):
+        script = script if isinstance(script, Script) else Script(script=script)
+        if script.get(self.actor.start_label[0], {}).get(self.actor.start_label[1]) is None:
+            raise ValueError(f"Unknown start_label={self.actor.start_label}")
+        if script.get(self.actor.fallback_label[0], {}).get(self.actor.fallback_label[1]) is None:
+            raise ValueError(f"Unknown fallback_label={self.actor.fallback_label}")
+        self.actor.script = script

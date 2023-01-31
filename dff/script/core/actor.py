@@ -111,13 +111,13 @@ class Actor(BaseModel):
         # node labels validation
         start_label = normalize_label(start_label)
         if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unkown start_label={start_label}")
+            raise ValueError(f"Unknown start_label={start_label}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unkown fallback_label={fallback_label}")
+                raise ValueError(f"Unknown fallback_label={fallback_label}")
         if condition_handler is None:
             condition_handler = deep_copy_condition_handler
 
