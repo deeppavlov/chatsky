@@ -96,6 +96,7 @@ make doc
 After that `docs/build` dir will be created and you can open index file by your browser:
 
 ```bash
+export BROWSER=firefox
 $BROWSER docs/build/index.html
 ```
 
