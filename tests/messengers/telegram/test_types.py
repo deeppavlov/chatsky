@@ -29,9 +29,9 @@ TG_API_HASH = os.getenv("TG_API_HASH")
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_text(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+async def test_text(bot_id, tg_client, testing_helper, tmp_path, pipeline_instance):
     telegram_response = TelegramMessage(text="test")
-    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    test_helper = testing_helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
@@ -68,18 +68,18 @@ async def test_text(bot_id, tg_client, helper, tmp_path, pipeline_instance):
         ),
     ],
 )
-async def test_buttons(ui, button_type, markup_type, bot_id, tg_client, helper, tmp_path, pipeline_instance):
+async def test_buttons(ui, button_type, markup_type, bot_id, tg_client, testing_helper, tmp_path, pipeline_instance):
     telegram_response = TelegramMessage(text="test", ui=ui)
-    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    test_helper = testing_helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_keyboard_remove(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+async def test_keyboard_remove(bot_id, tg_client, testing_helper, tmp_path, pipeline_instance):
     telegram_response = TelegramMessage(text="test", ui=RemoveKeyboard())
-    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    test_helper = testing_helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
@@ -118,17 +118,17 @@ async def test_keyboard_remove(bot_id, tg_client, helper, tmp_path, pipeline_ins
     ],
 )
 async def test_telegram_attachment(
-    generic_response, prop, filter_type, bot_id, tg_client, helper, tmp_path, pipeline_instance
+    generic_response, prop, filter_type, bot_id, tg_client, testing_helper, tmp_path, pipeline_instance
 ):
     telegram_response = TelegramMessage.parse_obj(generic_response)
-    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    test_helper = testing_helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_attachments(bot_id, tg_client, helper, tmp_path, pipeline_instance):
+async def test_attachments(bot_id, tg_client, testing_helper, tmp_path, pipeline_instance):
     generic_response = Message(
         text="test",
         attachments=Attachments(
@@ -139,16 +139,16 @@ async def test_attachments(bot_id, tg_client, helper, tmp_path, pipeline_instanc
         ),
     )
     telegram_response = TelegramMessage.parse_obj(generic_response)
-    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    test_helper = testing_helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_location(bot_id, tg_client, helper, tmp_path, pipeline_instance, message_equality):
+async def test_location(bot_id, tg_client, testing_helper, tmp_path, pipeline_instance):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
-    test_helper = helper(tg_client, pipeline_instance, bot_id)
+    test_helper = testing_helper(tg_client, pipeline_instance, bot_id)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
