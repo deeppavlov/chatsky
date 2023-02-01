@@ -1,7 +1,7 @@
 """
 Telegram Message
---------------
-This module implements inherited classes :py:module:`dff.script.core.message` modified for usage with Telegram.
+----------------
+This module implements inherited classes :py:mod:`dff.script.core.message` modified for usage with Telegram.
 """
 from typing import Optional, Union
 
@@ -73,3 +73,5 @@ class TelegramMessage(Message):
     ] = None
     """This field stores an update representing this message."""
     update_id: Optional[int] = None
+    update_type: Optional[str] = None
+    """Name of the field that stores an update representing this message."""

@@ -20,7 +20,13 @@ from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 from telebot import types
 from telebot.util import content_type_media
 
-from dff.messengers.telegram import TelegramMessenger, TelegramMessage, TelegramUI
+from dff.messengers.telegram import (
+    TelegramMessenger,
+    TelegramMessage,
+    TelegramUI,
+    message_handler,
+    callback_query_handler,
+)
 from dff.script.core.message import Button
 from dff.utils.testing.common import is_interactive_mode
 
@@ -51,9 +57,7 @@ script = {
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {
-                ("general", "keyboard"): bot.cnd.message_handler(commands=["start", "restart"])
-            },
+            TRANSITIONS: {("general", "keyboard"): message_handler(commands=["start", "restart"])},
         },
     },
     "general": {
@@ -68,12 +72,8 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success"): bot.cnd.callback_query_handler(
-                    func=lambda call: call.data == "4"
-                ),
-                ("general", "fail"): bot.cnd.callback_query_handler(
-                    func=lambda call: call.data == "5"
-                ),
+                ("general", "success"): callback_query_handler(func=lambda call: call.data == "4"),
+                ("general", "fail"): callback_query_handler(func=lambda call: call.data == "5"),
             },
         },
         "success": {

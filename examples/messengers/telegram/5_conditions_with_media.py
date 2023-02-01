@@ -19,6 +19,7 @@ from dff.messengers.telegram import (
     TelegramMessage,
     Image,
     Attachments,
+    message_handler,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
@@ -64,19 +65,11 @@ script = {
     "root": {
         "start": {
             RESPONSE: TelegramMessage(text=""),
-            TRANSITIONS: {
-                ("pics", "ask_picture"): messenger.cnd.message_handler(
-                    commands=["start", "restart"]
-                )
-            },
+            TRANSITIONS: {("pics", "ask_picture"): message_handler(commands=["start", "restart"])},
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {
-                ("pics", "ask_picture"): messenger.cnd.message_handler(
-                    commands=["start", "restart"]
-                )
-            },
+            TRANSITIONS: {("pics", "ask_picture"): message_handler(commands=["start", "restart"])},
         },
     },
     "pics": {
@@ -87,8 +80,8 @@ script = {
                     [
                         # Telegram can put photos both in 'photo' and 'document' fields.
                         # We should consider both cases when we check the message for media.
-                        messenger.cnd.message_handler(content_types=["photo"]),
-                        messenger.cnd.message_handler(
+                        message_handler(content_types=["photo"]),
+                        message_handler(
                             func=lambda message: (
                                 # check attachments in message properties
                                 message.document
@@ -98,7 +91,7 @@ script = {
                         ),
                     ]
                 ),
-                ("pics", "send_many"): messenger.cnd.message_handler(content_types=["text"]),
+                ("pics", "send_many"): message_handler(content_types=["text"]),
                 ("pics", "ask_picture"): cnd.true(),
             },
         },

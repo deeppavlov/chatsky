@@ -8,12 +8,14 @@ Using it, you can put Telegram update handlers inside your script and condition 
 """
 from pathlib import Path
 from typing import Union, List, Optional, Callable
+from enum import Enum
+from functools import partial
 
 from telebot import types, TeleBot
 
 from dff.script import Context, Actor
 
-from .utils import partialmethod, batch_open_io
+from .utils import batch_open_io
 from .message import TelegramMessage, TelegramUI, RemoveKeyboard
 
 from dff.script import Message
@@ -37,7 +39,6 @@ class TelegramMessenger(TeleBot):
         **kwargs,
     ):
         super().__init__(token, threaded=False, **kwargs)
-        self.cnd = TelegramConditions(self)
 
     def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Message]) -> None:
         """
@@ -139,109 +140,120 @@ class TelegramMessenger(TeleBot):
         )
 
 
-class TelegramConditions:
+_default_messenger = TeleBot("")
+
+
+class UpdateType(Enum):
     """
-    This class includes methods that produce :py:class:`~dff.script.core.script.Script`
-    conditions based on `pytelegrambotapi` updates.
+    Represents a type of the telegram update.
+    (Which field contains an update in :py:class:`telebot.types.Update`)
 
-    It is included to the :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
-    as :py:attr:`cnd` attribute on instantiation.
+    See `link <https://pytba.readthedocs.io/en/latest/types.html#telebot.types.Update>`__.
+    """
+    MESSAGE = "message"
+    EDITED_MESSAGE = "edited_message"
+    CHANNEL_POST = "channel_post"
+    EDITED_CHANNEL_POST = "edited_channel_post"
+    INLINE_QUERY = "inline_query"
+    CHOSEN_INLINE_RESULT = "chosen_inline_result"
+    CALLBACK_QUERY = "callback_query"
+    SHIPPING_QUERY = "shipping_query"
+    PRE_CHECKOUT_QUERY = "pre_checkout_query"
+    POLL = "poll"
+    POLL_ANSWER = "poll_answer"
+    MY_CHAT_MEMBER = "my_chat_member"
+    CHAT_MEMBER = "chat_member"
+    CHAT_JOIN_REQUEST = "chat_join_request"
 
-    To set a condition in your script, stick to the signature of the original :py:class:`~TeleBot` methods.
-    E.g. the result of
 
-    .. code-block:: python
+def handler(
+    messenger: TeleBot = _default_messenger,
+    target_type: Optional[UpdateType] = None,
+    commands: Optional[List[str]] = None,
+    regexp: Optional[str] = None,
+    func: Optional[Callable] = None,
+    content_types: Optional[List[str]] = None,
+    chat_types: Optional[List[str]] = None,
+    **kwargs,
+):
+    """
+    Creates a condition triggered by updates that match the given parameters.
+    The signature is equal with the `Telebot` method of the same name.
 
-        messenger.cnd.message_handler(func=lambda msg: True)
-
-    in your :py:class:`~dff.script.core.script.Script` will always be `True`,
-    unless the new update is not a message.
-
-    :param messenger: Messenger instance.
-
+    :param messenger:
+        Messenger to test filters on. Used only for :py:attr:`Telebot.custom_filters`.
+        Defaults to :py:data:`._default_messenger`.
+    :param target_type:
+        If set to `UpdateType` it will check that an update is of the same type.
+        Defaults to None.
+    :param commands:
+        Telegram command trigger.
+        See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
+    :param regexp:
+        Regex trigger.
+        See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
+    :param func:
+        Callable trigger.
+        See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
+    :param content_types:
+        Content type trigger.
+        See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
+    :param chat_types:
+        Chat type trigger.
+        See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
     """
 
-    def __init__(self, messenger: TelegramMessenger):
-        self.messenger = messenger
-
-    def handler(
-        self,
-        target_type: type,
-        commands: Optional[List[str]] = None,
-        regexp: Optional[str] = None,
-        func: Optional[Callable] = None,
-        content_types: Optional[List[str]] = None,
-        chat_types: Optional[List[str]] = None,
+    update_handler = messenger._build_handler_dict(
+        None,
+        False,
+        commands=commands,
+        regexp=regexp,
+        func=func,
+        content_types=content_types,
+        chat_types=chat_types,
         **kwargs,
-    ):
-        """
-        Creates a condition triggered by updates that match the given parameters.
-        The signature is equal with the `Telebot` method of the same name.
+    )
 
-        :param commands:
-            Telegram command trigger.
-            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param regexp:
-            Regex trigger.
-            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param func:
-            Callable trigger.
-            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param content_types:
-            Content type trigger.
-            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        :param chat_types:
-            Chat type trigger.
-            See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`_.
-        """
+    def condition(ctx: Context, actor: Actor, *args, **kwargs):
+        last_request = ctx.last_request
+        if last_request is None:
+            return False
+        update = getattr(last_request, "update", None)
+        update_type = getattr(last_request, "update_type", None)
+        if update is None:
+            return False
+        if target_type is not None and update_type != target_type.value:
+            return False
+        test_result = messenger._test_message_handler(update_handler, update)
+        return test_result
 
-        update_handler = self.messenger._build_handler_dict(
-            None,
-            False,
-            commands=commands,
-            regexp=regexp,
-            func=func,
-            content_types=content_types,
-            chat_types=chat_types,
-            **kwargs,
-        )
+    return condition
 
-        def condition(ctx: Context, actor: Actor, *args, **kwargs):
-            last_request = ctx.last_request
-            if last_request is None:
-                return False
-            update = getattr(last_request, "update", None)
-            if not update or not isinstance(update, target_type):
-                return False
-            test_result = self.messenger._test_message_handler(update_handler, update)
-            return test_result
 
-        return condition
+message_handler = partial(handler, target_type=UpdateType.MESSAGE)
 
-    message_handler = partialmethod(handler, target_type=types.Message)
+edited_message_handler = partial(handler, target_type=UpdateType.EDITED_MESSAGE)
 
-    edited_message_handler = partialmethod(handler, target_type=types.Message)
+channel_post_handler = partial(handler, target_type=UpdateType.CHANNEL_POST)
 
-    channel_post_handler = partialmethod(handler, target_type=types.Message)
+edited_channel_post_handler = partial(handler, target_type=UpdateType.EDITED_CHANNEL_POST)
 
-    edited_channel_post_handler = partialmethod(handler, target_type=types.Message)
+inline_handler = partial(handler, target_type=UpdateType.INLINE_QUERY)
 
-    inline_handler = partialmethod(handler, target_type=types.InlineQuery)
+chosen_inline_handler = partial(handler, target_type=UpdateType.CHOSEN_INLINE_RESULT)
 
-    chosen_inline_handler = partialmethod(handler, target_type=types.ChosenInlineResult)
+callback_query_handler = partial(handler, target_type=UpdateType.CALLBACK_QUERY)
 
-    callback_query_handler = partialmethod(handler, target_type=types.CallbackQuery)
+shipping_query_handler = partial(handler, target_type=UpdateType.SHIPPING_QUERY)
 
-    shipping_query_handler = partialmethod(handler, target_type=types.ShippingQuery)
+pre_checkout_query_handler = partial(handler, target_type=UpdateType.PRE_CHECKOUT_QUERY)
 
-    pre_checkout_query_handler = partialmethod(handler, target_type=types.PreCheckoutQuery)
+poll_handler = partial(handler, target_type=UpdateType.POLL)
 
-    poll_handler = partialmethod(handler, target_type=types.Poll)
+poll_answer_handler = partial(handler, target_type=UpdateType.POLL_ANSWER)
 
-    poll_answer_handler = partialmethod(handler, target_type=types.PollAnswer)
+chat_member_handler = partial(handler, target_type=UpdateType.CHAT_MEMBER)
 
-    chat_member_handler = partialmethod(handler, target_type=types.ChatMemberUpdated)
+my_chat_member_handler = partial(handler, target_type=UpdateType.MY_CHAT_MEMBER)
 
-    my_chat_member_handler = partialmethod(handler, target_type=types.ChatMemberUpdated)
-
-    chat_join_request_handler = partialmethod(handler, target_type=types.ChatJoinRequest)
+chat_join_request_handler = partial(handler, target_type=UpdateType.CHAT_JOIN_REQUEST)

@@ -5,7 +5,7 @@ import os
 
 from telebot import types
 from dff.script import Context
-from dff.messengers.telegram import TelegramMessage
+from dff.messengers.telegram import TelegramMessage, message_handler, callback_query_handler
 from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.interface import extract_telegram_request_and_id
 
@@ -60,22 +60,22 @@ async def test_update_handling(pipeline_instance, update, basic_bot, user_id):
     "message,expected", [(create_text_message("Hello"), True), (create_text_message("Goodbye"), False)]
 )
 def test_message_handling(message, expected, actor_instance, basic_bot):
-    condition = basic_bot.cnd.message_handler(func=lambda msg: msg.text == "Hello")
+    condition = message_handler(func=lambda msg: msg.text == "Hello")
     context = Context(id=123)
-    context.add_request(TelegramMessage(update=message))
+    context.add_request(TelegramMessage(update=message, update_type="message"))
     assert condition(context, actor_instance) == expected
     wrong_type = create_query("some data")
-    context.add_request(TelegramMessage(update=wrong_type))
+    context.add_request(TelegramMessage(update=wrong_type, update_type="callback_query"))
     assert not condition(context, actor_instance)
 
 
 @pytest.mark.skipif(TG_BOT_TOKEN is None, reason="`TG_BOT_TOKEN` is missing.")
 @pytest.mark.parametrize("query,expected", [(create_query("4"), True), (create_query("5"), False)])
 def test_query_handling(query, expected, actor_instance, basic_bot):
-    condition = basic_bot.cnd.callback_query_handler(func=lambda call: call.data == "4")
+    condition = callback_query_handler(func=lambda call: call.data == "4")
     context = Context(id=123)
-    context.add_request(TelegramMessage(update=query))
+    context.add_request(TelegramMessage(update=query, update_type="callback_query"))
     assert condition(context, actor_instance) == expected
     wrong_type = create_text_message("some text")
-    context.add_request(TelegramMessage(update=wrong_type))
+    context.add_request(TelegramMessage(update=wrong_type, update_type="message"))
     assert not condition(context, actor_instance)

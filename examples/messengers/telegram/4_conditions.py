@@ -14,6 +14,9 @@ from dff.script import TRANSITIONS, RESPONSE
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
+    message_handler,
+    handler,
+    UpdateType,
 )
 from dff.pipeline import Pipeline
 from dff.messengers.telegram import TelegramMessage
@@ -29,6 +32,9 @@ You can use `message_handler` to filter text messages from telegram in various w
 Filling the `command` argument will cause the handler to only react to listed commands.
 `func` argument on the other hand allows you to define arbitrary conditions.
 `regexp` creates a regular expression filter, etc.
+
+Note:
+Using `message_handler(...)` is the same as using `handler(target_type=UpdateTypes.MESSAGE, ...)`.
 """
 
 
@@ -43,29 +49,27 @@ script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: TelegramMessage(text="Hi"),
-            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi, how are you?"),
-            TRANSITIONS: {"node2": messenger.cnd.message_handler(regexp="fine")},
+            TRANSITIONS: {"node2": handler(target_type=UpdateType.MESSAGE, regexp="fine")},
         },
         "node2": {
             RESPONSE: TelegramMessage(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {
-                "node3": messenger.cnd.message_handler(func=lambda msg: "music" in msg.text)
-            },
+            TRANSITIONS: {"node3": message_handler(func=lambda msg: "music" in msg.text)},
         },
         "node3": {
             RESPONSE: TelegramMessage(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": messenger.cnd.message_handler(func=lambda msg: True)},
+            TRANSITIONS: {"node4": message_handler(func=lambda msg: True)},
         },
         "node4": {
             RESPONSE: TelegramMessage(text="bye"),
-            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
         },
         "fallback_node": {
             RESPONSE: TelegramMessage(text="Ooops"),
-            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
         },
     }
 }

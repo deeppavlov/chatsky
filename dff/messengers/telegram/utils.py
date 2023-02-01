@@ -3,8 +3,7 @@ Utils
 ------
 This module contains utilities for connecting to Telegram.
 """
-from functools import wraps
-from typing import Callable, Union, Iterable
+from typing import Union, Iterable
 from typing_extensions import ParamSpec
 from contextlib import contextmanager
 from pathlib import Path
@@ -19,20 +18,6 @@ from telebot import types
 
 CallableParams = ParamSpec("CallableParams")
 ReturnType = TypeVar("ReturnType")
-
-
-def partialmethod(func: Callable[CallableParams, ReturnType], **part_kwargs) -> Callable[CallableParams, ReturnType]:
-    """
-    This function replaces the `partialmethod` implementation from functools.
-    In contrast with the original class-based approach, it decorates the function, so we can use docstrings.
-    """
-
-    @wraps(func)
-    def wrapper(self, *args: CallableParams.args, **kwargs: CallableParams.kwargs) -> ReturnType:
-        new_kwargs = {**kwargs, **part_kwargs}
-        return func(self, *args, **new_kwargs)
-
-    return wrapper
 
 
 def open_io(item: types.InputMedia):

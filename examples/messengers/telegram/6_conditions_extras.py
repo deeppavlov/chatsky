@@ -15,6 +15,10 @@ from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
     TelegramMessage,
+    chat_join_request_handler,
+    my_chat_member_handler,
+    inline_handler,
+    message_handler,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
@@ -60,13 +64,13 @@ script = {
             ("greeting_flow", "node1"): cnd.any(
                 [
                     # say hi when invited to a chat
-                    messenger.cnd.chat_join_request_handler(func=lambda x: True),
+                    chat_join_request_handler(func=lambda x: True),
                     # say hi when someone enters the chat
-                    messenger.cnd.my_chat_member_handler(func=lambda x: True),
+                    my_chat_member_handler(func=lambda x: True),
                 ]
             ),
             # send a message when inline query is received
-            ("greeting_flow", "node2"): messenger.cnd.inline_handler(
+            ("greeting_flow", "node2"): inline_handler(
                 func=lambda query: print(query) or query.query is not None
             ),
         },
@@ -74,7 +78,7 @@ script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: TelegramMessage(text="Bot running"),
-            TRANSITIONS: {"node1": messenger.cnd.message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi"),

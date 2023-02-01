@@ -35,15 +35,25 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     if update.update_id > messenger.last_update_id:
         messenger.last_update_id = update.update_id
 
-    update_fields = vars(update).copy()
-    update_fields.pop("update_id")
-    inner_update = next(filter(lambda val: val is not None, list(update_fields.values())))
-    message = TelegramMessage(text=getattr(inner_update, "text", None), update=inner_update, update_id=update.update_id)
+    message = TelegramMessage(update_id=update.update_id)
+    ctx_id = None
 
-    dict_update = vars(inner_update)
-    # if 'chat' is not available, fall back to 'from_user', then to 'user'
-    user = dict_update.get("chat", dict_update.get("from_user", dict_update.get("user")))
-    ctx_id = getattr(user, "id", None)
+    for field in vars(update):
+        if field != "update_id":
+            if getattr(update, field) is not None:
+                if message.update is not None:
+                    raise RuntimeError(f"Two update fields. First: {message.update_type}; second: {field}")
+                message.update_type = field
+                message.update = getattr(update, field)
+                message.text = getattr(message.update, "text", None)
+
+                dict_update = vars(message.update)
+                # if 'chat' is not available, fall back to 'from_user', then to 'user'
+                user = dict_update.get("chat", dict_update.get("from_user", dict_update.get("user")))
+                ctx_id = getattr(user, "id", None)
+    if message.update is None:
+        raise RuntimeError(f"No update fields found: {update}")
+
     return message, ctx_id
 
 

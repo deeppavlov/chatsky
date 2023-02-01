@@ -19,6 +19,7 @@ from dff.messengers.telegram import (
     TelegramMessage,
     RemoveKeyboard,
     Button,
+    message_handler,
 )
 from dff.utils.testing.common import is_interactive_mode
 
@@ -44,19 +45,15 @@ of the generic `Response` class.
 script = {
     "root": {
         "start": {
-            RESPONSE: TelegramMessage(text="hi"),
+            RESPONSE: TelegramMessage(),
             TRANSITIONS: {
-                ("general", "native_keyboard"): messenger.cnd.message_handler(
-                    commands=["start", "restart"]
-                ),
+                ("general", "native_keyboard"): message_handler(commands=["start", "restart"]),
             },
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
-                ("general", "native_keyboard"): messenger.cnd.message_handler(
-                    commands=["start", "restart"]
-                )
+                ("general", "native_keyboard"): message_handler(commands=["start", "restart"])
             },
         },
     },
@@ -77,9 +74,7 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success"): messenger.cnd.message_handler(
-                    func=lambda msg: msg.text == "4"
-                ),
+                ("general", "success"): message_handler(func=lambda msg: msg.text == "4"),
                 ("general", "fail"): cnd.true(),
             },
         },
