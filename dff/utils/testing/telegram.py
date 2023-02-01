@@ -108,6 +108,8 @@ class TelegramTesting:
 
     async def send_and_check(self, message: Message, tmp_dir):
         """Send a message from a bot, receive it as client, verify it."""
+        await self.forget_previous_updates()
+
         messenger_interface = self.pipeline.messenger_interface
         assert isinstance(messenger_interface, PollingTelegramInterface)
 
@@ -128,7 +130,13 @@ class TelegramTesting:
 
         assert result == message
 
+    async def forget_previous_updates(self):
+        async with self.run_bot():
+            await asyncio.sleep(7)
+
     async def check_happy_path(self, happy_path, tmp_dir):
+        await self.forget_previous_updates()
+
         async with self.run_bot():
             bot_messages = []
             last_message = None
