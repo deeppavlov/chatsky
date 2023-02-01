@@ -9,13 +9,12 @@ Using it, you can put Telegram update handlers inside your script and condition 
 from pathlib import Path
 from typing import Union, List, Optional, Callable
 from enum import Enum
-from functools import partial
 
 from telebot import types, TeleBot
 
 from dff.script import Context, Actor
 
-from .utils import batch_open_io
+from .utils import batch_open_io, partial
 from .message import TelegramMessage, TelegramUI, RemoveKeyboard
 
 from dff.script import Message
