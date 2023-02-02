@@ -11,25 +11,25 @@ The Dialog Flow Framework (DFF) allows you to write conversational services. The
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
 [![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
-# Quick Start -- df_engine
+# Quick Start -- dff
 ## Installation
 ```bash
 pip install dff
 ```
 
 ## Basic example
+
 ```python
-from dff.core.engine.core.keywords import GLOBAL, TRANSITIONS, RESPONSE
-from dff.core.engine.core import Context, Actor
-import dff.core.engine.conditions as cnd
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor, Message
+import dff.script.conditions.std_conditions as cnd
 from typing import Union
 
 # create script of dialog
 script = {
-    GLOBAL: {TRANSITIONS: {("flow", "node_hi"): cnd.exact_match("Hi"), ("flow", "node_ok"): cnd.true()}},
+    GLOBAL: {TRANSITIONS: {("flow", "node_hi"): cnd.exact_match(Message(text="Hi")), ("flow", "node_ok"): cnd.true()}},
     "flow": {
-        "node_hi": {RESPONSE: "Hi!!!"},
-        "node_ok": {RESPONSE: "Okey"},
+        "node_hi": {RESPONSE: Message(text="Hi!!!")},
+        "node_ok": {RESPONSE: Message(text="Okey")},
     },
 }
 
@@ -38,7 +38,7 @@ actor = Actor(script, start_label=("flow", "node_hi"))
 
 
 # handler requests
-def turn_handler(in_request: str, ctx: Union[Context, dict], actor: Actor):
+def turn_handler(in_request: Message, ctx: Union[Context, dict], actor: Actor):
     # Context.cast - gets an object type of [Context, str, dict] returns an object type of Context
     ctx = Context.cast(ctx)
     # Add in current context a next request of user
@@ -54,8 +54,8 @@ def turn_handler(in_request: str, ctx: Union[Context, dict], actor: Actor):
 ctx = {}
 while True:
     in_request = input("type your answer: ")
-    out_response, ctx = turn_handler(in_request, ctx, actor)
-    print(out_response)
+    out_response, ctx = turn_handler(Message(text=in_request), ctx, actor)
+    print(out_response.text)
 
 ```
 When you run this code, you get similar output:
@@ -107,12 +107,13 @@ pip install dff[ydb]
 ```
 
 ## Basic example
+
 ```python
-from dff.core.engine.core import Context, Actor
-from dff.connectors.db_connectors import SQLConnector
+from dff.script import Context, Actor
+from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
-db = SQLConnector("postgresql://user:password@host:port/dbname")
+db = SQLContextStorage("postgresql://user:password@host:port/dbname")
 
 actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
