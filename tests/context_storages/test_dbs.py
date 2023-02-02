@@ -23,7 +23,8 @@ from dff.context_storages import (
     MongoContextStorage,
     mongo_available,
     YDBContextStorage,
-    ydb_available, context_storage_factory,
+    ydb_available,
+    context_storage_factory,
 )
 
 from dff.script import Context
@@ -135,13 +136,16 @@ def test_mongo(testing_context, context_id):
     if system() == "Windows":
         pytest.skip()
 
-    db = cast(MongoContextStorage, context_storage_factory(
-        "mongodb://{}:{}@localhost:27017/{}".format(
-            os.getenv("MONGO_INITDB_ROOT_USERNAME"),
-            os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
-            os.getenv("MONGO_INITDB_ROOT_USERNAME"),
-        )
-    ))
+    db = cast(
+        MongoContextStorage,
+        context_storage_factory(
+            "mongodb://{}:{}@localhost:27017/{}".format(
+                os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+                os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
+                os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+            )
+        ),
+    )
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_mongo(db))
 
@@ -149,7 +153,10 @@ def test_mongo(testing_context, context_id):
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 def test_redis(testing_context, context_id):
-    db = cast(RedisContextStorage, context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0")))
+    db = cast(
+        RedisContextStorage,
+        context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0")),
+    )
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_redis(db))
 
@@ -157,13 +164,16 @@ def test_redis(testing_context, context_id):
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
 def test_postgres(testing_context, context_id):
-    db = cast(SQLContextStorage, context_storage_factory(
-        "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
-            os.getenv("POSTGRES_USERNAME"),
-            os.getenv("POSTGRES_PASSWORD"),
-            os.getenv("POSTGRES_DB"),
-        )
-    ))
+    db = cast(
+        SQLContextStorage,
+        context_storage_factory(
+            "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
+                os.getenv("POSTGRES_USERNAME"),
+                os.getenv("POSTGRES_PASSWORD"),
+                os.getenv("POSTGRES_DB"),
+            )
+        ),
+    )
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
@@ -179,13 +189,16 @@ def test_sqlite(testing_file, testing_context, context_id):
 @pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
 def test_mysql(testing_context, context_id):
-    db = cast(SQLContextStorage, context_storage_factory(
-        "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
-            os.getenv("MYSQL_USERNAME"),
-            os.getenv("MYSQL_PASSWORD"),
-            os.getenv("MYSQL_DATABASE"),
-        )
-    ))
+    db = cast(
+        SQLContextStorage,
+        context_storage_factory(
+            "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
+                os.getenv("MYSQL_USERNAME"),
+                os.getenv("MYSQL_PASSWORD"),
+                os.getenv("MYSQL_DATABASE"),
+            )
+        ),
+    )
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
@@ -193,12 +206,15 @@ def test_mysql(testing_context, context_id):
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
 def test_ydb(testing_context, context_id):
-    db = cast(YDBContextStorage, context_storage_factory(
-        "{}{}".format(
-            os.getenv("YDB_ENDPOINT"),
-            os.getenv("YDB_DATABASE"),
+    db = cast(
+        YDBContextStorage,
+        context_storage_factory(
+            "{}{}".format(
+                os.getenv("YDB_ENDPOINT"),
+                os.getenv("YDB_DATABASE"),
+            ),
+            table_name="test",
         ),
-        table_name="test",
-    ))
+    )
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_ydb(db))

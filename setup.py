@@ -54,7 +54,7 @@ sqlite_dependencies = merge_req_lists(
         [
             "aiosqlite>=0.18.0",
             "sqlalchemy[asyncio]>=1.4.27",
-        ]
+        ],
     ]
 )
 
@@ -64,7 +64,7 @@ mysql_dependencies = merge_req_lists(
         [
             "asyncmy>=0.2.5",
             "cryptography>=36.0.2",
-        ]
+        ],
     ]
 )
 
@@ -73,7 +73,7 @@ postgresql_dependencies = merge_req_lists(
         _sql_dependencies,
         [
             "asyncpg>=0.27.0",
-        ]
+        ],
     ]
 )
 
