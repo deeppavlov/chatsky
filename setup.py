@@ -33,7 +33,7 @@ core = [
 ]
 
 sqlite_dependencies = [
-    "sqlalchemy>=1.4.27",
+    "sqlalchemy==1.4.27",
 ]
 
 redis_dependencies = [
