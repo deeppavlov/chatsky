@@ -23,7 +23,7 @@ class DBAbstractContextStorage(ABC):
 
     Parameters
     ----------
-    : param path:
+    :param path:
         | Parameter `path` should be set with the URI of the database.
         | It includes a prefix and the required connection credentials.
         | Example: postgresql+asyncpg://user:password@host:port/database
