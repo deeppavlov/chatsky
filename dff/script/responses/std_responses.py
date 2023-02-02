@@ -5,7 +5,7 @@ Responses determine the response that will be sent to the user for each node of 
 Responses are used to provide the user with information, ask questions,
 or guide the conversation in a particular direction.
 
-This module provides a set of predefined responses that can be used to quickly
+This module provides only one predefined response function that can be used to quickly
 respond to the user and keep the conversation flowing.
 """
 import random

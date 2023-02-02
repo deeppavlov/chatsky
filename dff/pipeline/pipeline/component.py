@@ -5,9 +5,8 @@ The Component module defines a :py:class:`.PipelineComponent` class,
 which is a fundamental building block of the framework. A PipelineComponent represents a single
 step in a processing pipeline, and is responsible for performing a specific task or set of tasks.
 
-The PipelineComponent class is designed to be reusable and composable,
-allowing developers to easily create complex processing pipelines
-by combining multiple components.
+The PipelineComponent class can be a group or a service. It is designed to be reusable and composable,
+allowing developers to create complex processing pipelines by combining multiple components.
 """
 import logging
 import abc

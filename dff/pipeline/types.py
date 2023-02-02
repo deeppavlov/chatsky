@@ -3,7 +3,7 @@ Types
 -----
 The Types module contains several classes and special types that are used throughout the `DFF`.
 The classes and special types in this module can include data models,
-data structures, and other types that are used to define the data used by the `DFF`.
+data structures, and other types that are defined for type hinting.
 """
 from abc import ABC
 from enum import unique, Enum, auto

@@ -2,9 +2,8 @@
 Database
 --------
 The `Database` module provides classes for managing the context storage of a dialog system.
-The module can be used to store information such as the current state of the conversation,
-user preferences, and other data that is necessary for the bot to respond appropriately.
-This module includes two key classes that developers can use to create their own context storage solutions:
+The module can be used to store information such as the current state of the conversation
+and other data. This module includes two key classes:
 
     - The Abstract context storage interface (:py:class:`.DBAbstractContextStorage`) is an abstract class
       that defines the basic interface for storing and retrieving context data.
@@ -15,9 +14,9 @@ This module includes two key classes that developers can use to create their own
       in order to create their own context storage solutions.
       This class implements the basic functionality provided by the :py:class:`.DBAbstractContextStorage`
       interface and can be extended to add additional features as needed.
-      By inheriting from this class, developers can create a context storage solution that is fully
-      compatible with the `DFF`, without having to start from scratch.
 """
+# TODO: rewrite description after merge PR 60.
+
 import importlib
 import threading
 from functools import wraps

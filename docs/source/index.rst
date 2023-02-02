@@ -27,6 +27,7 @@ Installation
    pip install dff
 
 This framework is compatible with Python 3.7 and newer versions.
+Note that if you are going to use one of the database backends, you will have to specify an extra or install the corresponding requirements yourself.
 Additionally, you also have the option to download the source code directly from the
 `GitHub <https://github.com/deeppavlov/dialog_flow_framework>`_ repository using the commands:
 
@@ -56,7 +57,7 @@ a dialog into sub-dialogs and process them separately.
 Each `flow` represent a sub-dialog corresponding to the discussion of a particular topic.
 Each `flow` is also a dictionary, where the keys are the `nodes`.
 
-**Node**: A `node` is the smallest unit of a dialog `flow`, and it contains the bot's response to a user's input as well as a `condition`` that determines
+**Node**: A `node` is the smallest unit of a dialog `flow`, and it contains the bot's response to a user's input as well as a `condition` that determines
 the `transition` to another `node`, whether it's within the current or another `flow`.
 
 ToCs
@@ -67,8 +68,8 @@ Context Storages
 
 - **Redis:** Provides a Redis-based version of the :py:class:`.DBContextStorage` class.
 
-- **Protocol:** This module contains base protocol code. Protocols like HTTP, MQTT, etc.
-   A function is also used for suggestion of installation.
+- **Protocol:** This module contains base protocol code. Supported protocols fot db:
+   shelve, json, pickle, sqlite, redis, mongodb, mysql, postgresql, grpc, grpcs.
 
 - **SQL:** Provides a SQL-based version of the :py:class:`.DBContextStorage` class.
    It allows the user to choose the backend option of his liking from MySQL, PostgreSQL, or SQLite.
@@ -116,8 +117,7 @@ Pipeline
 - **Utils:** This module contains several utility functions that are used to perform various
    tasks such as data processing, error handling, and debugging.
 
-- **Component:** This module contains the :py:class:`.PipelineComponent` class.
-   This class represents an individual component in a pipeline.
+- **Component:** This module contains the :py:class:`.PipelineComponent` class, which can be group or a service.
 
 - **Extra Handler:** This module contains an extra handlers that can be used to handle additional
    functionality or features that are not included in the standard pipeline classes.
@@ -125,9 +125,8 @@ Pipeline
 - **Pipeline:** This module contains the :py:class:`.Pipeline` class. This class represents the main pipeline of
    the `DFF` and is responsible for managing the execution of services.
 
-- **Service:** This module contains the :py:class:`.Service` class.
-   This class represents an individual service in a pipeline.
-   It defines the behavior of a single service and can be used to create custom services.
+- **Service:** This module contains the :py:class:`.Service` class,
+   which is used to represent a single service within the pipeline.
 
 - **Utility Functions:** This module contains several utility functions that are used to perform various
    tasks such as data processing, error handling, and debugging.
@@ -143,8 +142,8 @@ Script
 - **dff.script.extras.slots package:** This package contains classes and functions specific to the use of slots
    in a dialog script.
 
-- **Conditions:** This module contains a set of functions that are used to determine the possibility
-   of transition from one node of the dialog graph to another.
+- **Conditions:** This module contains a standard set of scripting conditions that
+   can be used to control the flow of a conversation.
 
 - **Message:** This module contains a universal response model that is supported in `DFF`.
    It only contains types and properties that are compatible with most messaging services and

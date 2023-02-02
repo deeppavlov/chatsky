@@ -8,7 +8,6 @@ The Context provides a convenient interface for working with data, allowing deve
 retrieve, and manipulate data as the conversation progresses.
 
 The Context data structure provides several key features to make working with data easier.
-One of the main features is the ability to add data.
 Developers can use the context to store any information that is relevant to the current conversation,
 such as user data, session data, or conversation history.
 This allows developers to easily access and use this data throughout the conversation flow.

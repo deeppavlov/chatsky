@@ -1,12 +1,12 @@
 """
 Service
 -------
-The Service module contains the :py:class:`~dff.pipeline.service.Service` class,
-which is used to represent a single service within the system.
+The Service module contains the :py:class:`.Service` class,
+which is used to represent a single service within the pipeline.
 This class provides a way to manage and interact with the service,
 such as starting, stopping, or updating the service.
-It also provides a consistent interface for working with the service,
-allowing for easier integration and management within the system.
+It also provides a consistent interface for working with the service
+for easier integration and management within the system.
 """
 import logging
 import asyncio
