@@ -25,17 +25,15 @@ from dff.utils.testing.common import (
 
 # %% [markdown]
 """
-The response can be set by any object of python:
+The response can be set by Callable or *Message:
 
 * Callable objects. If the object is callable it must have a special signature:
 
         func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
 
-* Non-callable objects. If the object is not callable,
+* *Message objects. If the object is *Message
     it will be returned by the agent as a response.
 
-Out of the box `DSL` has a single response function `choice`
-that gives one random response from the list of responses.
 
 The functions to be used in the `toy_script` are declared here.
 """
