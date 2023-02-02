@@ -156,6 +156,7 @@ class UpdateType(Enum):
 
     See `link <https://pytba.readthedocs.io/en/latest/types.html#telebot.types.Update>`__.
     """
+
     MESSAGE = "message"
     EDITED_MESSAGE = "edited_message"
     CHANNEL_POST = "channel_post"
