@@ -44,21 +44,38 @@ mongodb_dependencies = [
     "motor>=3.1.1",
 ]
 
-sqlite_dependencies = [
-    "aiosqlite>=0.18.0",
+_sql_dependencies = [
     "sqlalchemy[asyncio]>=1.4.27",
 ]
 
-mysql_dependencies = [
-    "asyncmy>=0.2.5",
-    "cryptography>=36.0.2",
-    "sqlalchemy[asyncio]>=1.4.27",
-]
+sqlite_dependencies = merge_req_lists(
+    [
+        _sql_dependencies,
+        [
+            "aiosqlite>=0.18.0",
+            "sqlalchemy[asyncio]>=1.4.27",
+        ]
+    ]
+)
 
-postgresql_dependencies = [
-    "asyncpg>=0.27.0",
-    "sqlalchemy[asyncio]>=1.4.27",
-]
+mysql_dependencies = merge_req_lists(
+    [
+        _sql_dependencies,
+        [
+            "asyncmy>=0.2.5",
+            "cryptography>=36.0.2",
+        ]
+    ]
+)
+
+postgresql_dependencies = merge_req_lists(
+    [
+        _sql_dependencies,
+        [
+            "asyncpg>=0.27.0",
+        ]
+    ]
+)
 
 ydb_dependencies = [
     "ydb>=2.5.0",
