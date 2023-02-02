@@ -7,8 +7,13 @@ import asyncio
 import pickle
 from typing import Hashable
 
-import aiofiles
-import aiofiles.os
+try:
+    import aiofiles
+    import aiofiles.os
+
+    pickle_available = True
+except ImportError:
+    pickle_available = False
 
 from .database import DBAbstractContextStorage, threadsafe_method
 from dff.script import Context

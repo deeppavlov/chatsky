@@ -8,7 +8,9 @@ from dff.context_storages import (
     ShelveContextStorage,
     SQLContextStorage,
     YDBContextStorage,
+    json_available,
     mongo_available,
+    pickle_available,
     redis_available,
     sqlite_available,
     postgres_available,
@@ -18,6 +20,8 @@ from dff.context_storages import (
 
 
 async def delete_json(storage: JSONContextStorage):
+    if not json_available:
+        raise Exception("Can't delete JSON database - JSON provider unavailable!")
     if os.path.isfile(storage.path):
         os.remove(storage.path)
 
@@ -29,6 +33,8 @@ async def delete_mongo(storage: MongoContextStorage):
 
 
 async def delete_pickle(storage: PickleContextStorage):
+    if not pickle_available:
+        raise Exception("Can't delete pickle database - pickle provider unavailable!")
     if os.path.isfile(storage.path):
         os.remove(storage.path)
 

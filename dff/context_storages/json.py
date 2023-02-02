@@ -6,8 +6,14 @@ Provides the json-based version of the :py:class:`.DBContextStorage`.
 import asyncio
 from typing import Hashable
 
-import aiofiles
-import aiofiles.os
+try:
+    import aiofiles
+    import aiofiles.os
+
+    json_available = True
+except ImportError:
+    json_available = False
+
 from pydantic import BaseModel, Extra, root_validator
 
 from .database import DBAbstractContextStorage, threadsafe_method

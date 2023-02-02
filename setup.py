@@ -133,6 +133,8 @@ devel_full = merge_req_lists(
 
 EXTRA_DEPENDENCIES = {
     "core": core,  # minimal dependencies (by default)
+    "json": async_files_dependencies,  # dependencies for using JSON
+    "pickle": async_files_dependencies,  # dependencies for using Pickle
     "sqlite": sqlite_dependencies,  # dependencies for using SQLite
     "redis": redis_dependencies,  # dependencies for using Redis
     "mongodb": mongodb_dependencies,  # dependencies for using MongoDB

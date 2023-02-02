@@ -8,7 +8,9 @@ from platform import system
 from dff.context_storages import (
     get_protocol_install_suggestion,
     JSONContextStorage,
+    json_available,
     PickleContextStorage,
+    pickle_available,
     ShelveContextStorage,
     DBAbstractContextStorage,
     SQLContextStorage,
@@ -112,12 +114,14 @@ def test_shelve(testing_file, testing_context, context_id):
     asyncio.run(delete_shelve(db))
 
 
+@pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
 def test_json(testing_file, testing_context, context_id):
     db = JSONContextStorage(f"json://{testing_file}")
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_json(db))
 
 
+@pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
 def test_pickle(testing_file, testing_context, context_id):
     db = PickleContextStorage(f"pickle://{testing_file}")
     generic_test(db, testing_context, context_id)
