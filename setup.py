@@ -32,26 +32,8 @@ core = [
     "typing_extensions>=4.0.0",
 ]
 
-doc = [
-    "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.17",
-    "sphinxcontrib-apidoc==0.3.0",
-    "sphinxcontrib-httpdomain>=1.8.0",
-    "sphinxcontrib-katex==0.9.0",
-    "sphinx_copybutton>=0.5",
-    "sphinx_gallery==0.7.0",
-    "sphinx-autodoc-typehints>=1.19.4",
-    "nbsphinx>=0.8.9",
-    "jupytext>=1.14.1",
-    "jupyter>=1.0.0",
-]
-
-mypy_dependencies = [
-    "mypy",
-]
-
 sqlite_dependencies = [
-    "sqlalchemy>=1.4.27",
+    "sqlalchemy>=1.4.27, <2.0",
 ]
 
 redis_dependencies = [
@@ -78,6 +60,18 @@ ydb_dependencies = [
     "ydb>=2.5.0",
 ]
 
+full = merge_req_lists(
+    [
+        core,
+        sqlite_dependencies,
+        redis_dependencies,
+        mongodb_dependencies,
+        mysql_dependencies,
+        postgresql_dependencies,
+        ydb_dependencies,
+    ]
+)
+
 test_requirements = [
     "pytest >=6.2.4,<7.0.0",
     "pytest-cov >=2.12.0,<3.0.0",
@@ -91,30 +85,36 @@ test_requirements = [
     "requests>=2.28.1",
 ]
 
-devel = [
-    "bump2version>=1.0.1",
-    "build==0.7.0",
-    "twine==4.0.0",
-]
-
-full = merge_req_lists(
-    [
-        core,
-        sqlite_dependencies,
-        redis_dependencies,
-        mongodb_dependencies,
-        mysql_dependencies,
-        postgresql_dependencies,
-        ydb_dependencies,
-    ]
-)
-
 tests_full = merge_req_lists(
     [
         full,
         test_requirements,
     ]
 )
+
+doc = [
+    "sphinx>=1.7.9",
+    "dff_sphinx_theme>=0.1.17",
+    "sphinxcontrib-apidoc==0.3.0",
+    "sphinxcontrib-httpdomain>=1.8.0",
+    "sphinxcontrib-katex==0.9.0",
+    "sphinx_copybutton>=0.5",
+    "sphinx_gallery==0.7.0",
+    "sphinx-autodoc-typehints>=1.19.4",
+    "nbsphinx>=0.8.9",
+    "jupytext>=1.14.1",
+    "jupyter>=1.0.0",
+]
+
+devel = [
+    "bump2version>=1.0.1",
+    "build==0.7.0",
+    "twine==4.0.0",
+]
+
+mypy_dependencies = [
+    "mypy",
+]
 
 devel_full = merge_req_lists(
     [
@@ -126,19 +126,20 @@ devel_full = merge_req_lists(
 )
 
 EXTRA_DEPENDENCIES = {
-    "doc": doc,
-    "tests": test_requirements,
-    "devel": devel,
-    "full": full,
-    "test_full": tests_full,
-    "examples": tests_full,
-    "devel_full": devel_full,
-    "sqlite": sqlite_dependencies,
-    "redis": redis_dependencies,
-    "mongodb": mongodb_dependencies,
-    "mysql": mysql_dependencies,
-    "postgresql": postgresql_dependencies,
-    "ydb": ydb_dependencies,
+    "core": core,  # minimal dependencies (by default)
+    "sqlite": sqlite_dependencies,  # dependencies for using SQLite
+    "redis": redis_dependencies,  # dependencies for using Redis
+    "mongodb": mongodb_dependencies,  # dependencies for using MongoDB
+    "mysql": mysql_dependencies,  # dependencies for using MySQL
+    "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
+    "ydb": ydb_dependencies,  # dependencies for using Yandex Database
+    "full": full,  # full dependencies including all options above
+    "tests": test_requirements,  # dependencies for running tests
+    "test_full": tests_full,  # full dependencies for running all tests (all options above)
+    "examples": tests_full,  # dependencies for running examples (all options above)
+    "devel": devel,  # dependencies for development
+    "doc": doc,  # dependencies for documentation
+    "devel_full": devel_full,  # full dependencies for development (all options above)
 }
 
 setup(
