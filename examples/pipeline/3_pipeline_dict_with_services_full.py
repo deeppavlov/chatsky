@@ -85,7 +85,7 @@ Final service logs `ctx.misc` dict.
 def prepreprocess(ctx: Context):
     logger.info("preprocession intent-detection Service running (defined as a dict)")
     ctx.misc["preprocess_detection"] = {
-        ctx.last_request: "some_intent"
+        ctx.last_request.text: "some_intent"
     }  # Similar syntax can be used to access
     # service output dedicated to current pipeline run
 
@@ -98,7 +98,7 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
     with urllib.request.urlopen("https://example.com/") as webpage:
         web_content = webpage.read().decode(webpage.headers.get_content_charset())
         ctx.misc["another_detection"] = {
-            ctx.last_request: "online" if "Example Domain" in web_content else "offline"
+            ctx.last_request.text: "online" if "Example Domain" in web_content else "offline"
         }
 
 
