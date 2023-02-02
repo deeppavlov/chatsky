@@ -37,7 +37,7 @@ def cached_response(_):
     return external_data["counter"]
 
 
-def response(ctx: Context, _: Actor, *__, **___) -> Message:
+def response(ctx: Context, _, *__, **___) -> Message:
     if ctx.validation:
         return Message()
     return Message(

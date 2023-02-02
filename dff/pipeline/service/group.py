@@ -5,9 +5,9 @@ This module contatins `ServiceGroup` class. This class represents a service grou
 """
 import asyncio
 import logging
-from typing import Optional, List, Union, Awaitable
+from typing import Optional, List, Union, Awaitable, ForwardRef
 
-from dff.script import Actor, Context
+from dff.script import Context
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from ..pipeline.component import PipelineComponent
@@ -24,6 +24,8 @@ from ..types import (
 from .service import Service
 
 logger = logging.getLogger(__name__)
+
+Pipeline = ForwardRef("Pipeline")
 
 
 class ServiceGroup(PipelineComponent):
@@ -91,7 +93,7 @@ class ServiceGroup(PipelineComponent):
         else:
             raise Exception(f"Unknown type for ServiceGroup {components}")
 
-    async def _run_services_group(self, ctx: Context, actor: Actor) -> Context:
+    async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> Context:
         """
         Method for running this service group.
         It doesn't include wrappers execution, start condition checking or error handling - pure execution only.
@@ -100,13 +102,13 @@ class ServiceGroup(PipelineComponent):
         only if all components in it finished successfully.
 
         :param ctx: Current dialog context.
-        :param actor: Actor, associated with the pipeline.
+        :param pipeline: The current pipeline.
         :return: Current dialog context.
         """
         self._set_state(ctx, ComponentExecutionState.RUNNING)
 
         if self.asynchronous:
-            service_futures = [service(ctx, actor) for service in self.components]
+            service_futures = [service(ctx, pipeline) for service in self.components]
             for service, future in zip(self.components, asyncio.as_completed(service_futures)):
                 try:
                     service_result = await future
@@ -117,7 +119,7 @@ class ServiceGroup(PipelineComponent):
 
         else:
             for service in self.components:
-                service_result = await service(ctx, actor)
+                service_result = await service(ctx, pipeline)
                 if not service.asynchronous and isinstance(service_result, Context):
                     ctx = service_result
                 elif service.asynchronous and isinstance(service_result, Awaitable):
@@ -130,21 +132,21 @@ class ServiceGroup(PipelineComponent):
     async def _run(
         self,
         ctx: Context,
-        actor: Actor = None,
+        pipeline: Pipeline = None,
     ) -> Optional[Context]:
         """
         Method for handling this group execution.
         Executes before and after execution wrappers, checks start condition and catches runtime exceptions.
 
         :param ctx: Current dialog context.
-        :param actor: Actor, associated with the pipeline.
+        :param pipeline: The current pipeline.
         :return: Current dialog context if synchronous, else `None`.
         """
-        await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, actor)
+        await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
         try:
-            if self.start_condition(ctx, actor):
-                ctx = await self._run_services_group(ctx, actor)
+            if self.start_condition(ctx, pipeline):
+                ctx = await self._run_services_group(ctx, pipeline)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
 
@@ -152,7 +154,7 @@ class ServiceGroup(PipelineComponent):
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"ServiceGroup '{self.name}' execution failed!\n{e}")
 
-        await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, actor)
+        await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
         return ctx if not self.asynchronous else None
 
     def log_optimization_warnings(self):

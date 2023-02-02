@@ -20,7 +20,7 @@ from dff.utils.testing import (
 
 # %%
 def check_button_payload(value: str):
-    def payload_check_inner(ctx: Context, actor: Actor):
+    def payload_check_inner(ctx: Context, line: Pipeline):
         return ctx.last_request.misc.get("payload") == value
 
     return payload_check_inner

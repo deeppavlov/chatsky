@@ -5,14 +5,16 @@ Extra Handler
 import asyncio
 import logging
 import inspect
-from typing import Optional, List
+from typing import Optional, List, ForwardRef
 
-from dff.script import Context, Actor
+from dff.script import Context
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates, wrap_sync_function_in_async
 from ..types import ServiceRuntimeInfo, ExtraHandlerType, ExtraHandlerBuilder, ExtraHandlerFunction
 
 logger = logging.getLogger(__name__)
+
+Pipeline = ForwardRef("Pipeline")
 
 
 class _ComponentExtraHandler:
@@ -82,18 +84,18 @@ class _ComponentExtraHandler:
         return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
     async def _run_function(
-        self, function: ExtraHandlerFunction, ctx: Context, actor: Actor, component_info: ServiceRuntimeInfo
+        self, function: ExtraHandlerFunction, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo
     ):
         handler_params = len(inspect.signature(function).parameters)
         if handler_params == 1:
             await wrap_sync_function_in_async(function, ctx)
         elif handler_params == 2:
-            await wrap_sync_function_in_async(function, ctx, actor)
+            await wrap_sync_function_in_async(function, ctx, pipeline)
         elif handler_params == 3:
             await wrap_sync_function_in_async(
                 function,
                 ctx,
-                actor,
+                pipeline,
                 {
                     "function": function,
                     "stage": self.stage,
@@ -106,20 +108,20 @@ class _ComponentExtraHandler:
                 f" wrapper handler '{function.__name__}': {handler_params}!"
             )
 
-    async def _run(self, ctx: Context, actor: Actor, component_info: ServiceRuntimeInfo):
+    async def _run(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
         """
         Method for executing one of the wrapper functions (before or after).
         If the function is not set, nothing happens.
 
         :param stage: current `WrapperStage` (before or after).
         :param ctx: current dialog context.
-        :param actor: actor, associated with current pipeline.
+        :param pipeline: the current pipeline.
         :param component_info: associated component's info dictionary.
         :return: `None`
         """
 
         if self.asynchronous:
-            futures = [self._run_function(function, ctx, actor, component_info) for function in self.functions]
+            futures = [self._run_function(function, ctx, pipeline, component_info) for function in self.functions]
             for function, future in zip(self.functions, asyncio.as_completed(futures)):
                 try:
                     await future
@@ -130,23 +132,23 @@ class _ComponentExtraHandler:
 
         else:
             for function in self.functions:
-                await self._run_function(function, ctx, actor, component_info)
+                await self._run_function(function, ctx, pipeline, component_info)
 
-    async def __call__(self, ctx: Context, actor: Actor, component_info: ServiceRuntimeInfo):
+    async def __call__(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using `_run` method.
 
         :param ctx: (required) Current dialog `Context`.
-        :param actor: This `Pipeline` `Actor` or `None` if this is a service, that wraps `Actor`.
+        :param pipeline: This `Pipeline` or `None` if this is a service, that wraps `Actor`.
         :return: `Context` if this is a synchronous service or
             `Awaitable` if this is an asynchronous component or `None`.
         """
         if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, actor, component_info))
+            task = asyncio.create_task(self._run(ctx, pipeline, component_info))
             return await asyncio.wait_for(task, timeout=self.timeout)
         else:
-            return await self._run(ctx, actor, component_info)
+            return await self._run(ctx, pipeline, component_info)
 
     @property
     def info_dict(self) -> dict:

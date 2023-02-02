@@ -12,6 +12,7 @@ from dff.script import Context, Actor
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 
 
+_ForwardPipeline = NewType("Pipeline", None)
 _ForwardPipelineComponent = NewType("PipelineComponent", None)
 _ForwardService = NewType("Service", _ForwardPipelineComponent)
 _ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
@@ -80,7 +81,7 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 """
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[[Context, Actor], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[[Context, _ForwardPipeline], bool]
 """
 A function type for components `start_conditions`.
 Accepts context and actor (current pipeline state), returns boolean (whether service can be launched).

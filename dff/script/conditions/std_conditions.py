@@ -11,7 +11,8 @@ import re
 
 from pydantic import validate_arguments
 
-from dff.script import NodeLabel2Type, Actor, Context, Message
+from dff.pipeline import Pipeline
+from dff.script import NodeLabel2Type, Context, Message
 
 logger = logging.getLogger(__name__)
 
@@ -27,7 +28,7 @@ def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Call
     :param skip_none: Whether fields should be compared if they are None in :py:const:`match`.
     """
 
-    def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def exact_match_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         request = ctx.last_request
         if request is None:
             return False
@@ -48,7 +49,7 @@ def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Call
 @validate_arguments
 def regexp(
     pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs
-) -> Callable[[Context, Actor, Any, Any], bool]:
+) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns function handler. This handler returns `True` only if the last user phrase contains
     :py:const:`pattern <Union[str, Pattern]>` with :py:const:`flags <Union[int, re.RegexFlag]>`.
@@ -58,7 +59,7 @@ def regexp(
     """
     pattern = re.compile(pattern, flags)
 
-    def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def regexp_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         request = ctx.last_request
         if isinstance(request, Message):
             if request.text is None:
@@ -96,7 +97,7 @@ _all is an alias for all.
 @validate_arguments
 def aggregate(
     cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs
-) -> Callable[[Context, Actor, Any, Any], bool]:
+) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Aggregates multiple functions into one by using aggregating function.
 
@@ -105,9 +106,9 @@ def aggregate(
     """
     check_cond_seq(cond_seq)
 
-    def aggregate_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def aggregate_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         try:
-            return bool(aggregate_func([cond(ctx, actor, *args, **kwargs) for cond in cond_seq]))
+            return bool(aggregate_func([cond(ctx, pipeline, *args, **kwargs) for cond in cond_seq]))
         except Exception as exc:
             logger.error(f"Exception {exc} for {cond_seq}, {aggregate_func} and {ctx.last_request}", exc_info=exc)
             return False
@@ -116,7 +117,7 @@ def aggregate(
 
 
 @validate_arguments
-def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns function handler. This handler returns `True`
     if any function from the list is `True`.
@@ -125,14 +126,14 @@ def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Actor, Any, Any],
     """
     _agg = aggregate(cond_seq, _any)
 
-    def any_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        return _agg(ctx, actor, *args, **kwargs)
+    def any_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+        return _agg(ctx, pipeline, *args, **kwargs)
 
     return any_condition_handler
 
 
 @validate_arguments
-def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns function handler. This handler returns `True` only
     if all functions from the list are `True`.
@@ -141,14 +142,14 @@ def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Actor, Any, Any],
     """
     _agg = aggregate(cond_seq, _all)
 
-    def all_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        return _agg(ctx, actor, *args, **kwargs)
+    def all_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+        return _agg(ctx, pipeline, *args, **kwargs)
 
     return all_condition_handler
 
 
 @validate_arguments
-def negation(condition: Callable, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def negation(condition: Callable, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns function handler. This handler returns negation of the :py:func:`~condition`: `False`
     if :py:func:`~condition` holds `True` and returns `True` otherwise.
@@ -156,8 +157,8 @@ def negation(condition: Callable, *args, **kwargs) -> Callable[[Context, Actor, 
     :param condition: Any :py:func:`~condition`.
     """
 
-    def negation_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
-        return not condition(ctx, actor, *args, **kwargs)
+    def negation_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+        return not condition(ctx, pipeline, *args, **kwargs)
 
     return negation_condition_handler
 
@@ -169,7 +170,7 @@ def has_last_labels(
     last_n_indices: int = 1,
     *args,
     **kwargs,
-) -> Callable[[Context, Actor, Any, Any], bool]:
+) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns condition handler. This handler returns `True` if any label from
     last :py:const:`last_n_indices` context labels is in
@@ -183,7 +184,7 @@ def has_last_labels(
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
 
-    def has_last_labels_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def has_last_labels_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         label = list(ctx.labels.values())[-last_n_indices:]
         for label in list(ctx.labels.values())[-last_n_indices:]:
             label = label if label else (None, None)
@@ -195,24 +196,24 @@ def has_last_labels(
 
 
 @validate_arguments
-def true(*args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def true(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns function handler. This handler always returns `True`.
     """
 
-    def true_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def true_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         return True
 
     return true_handler
 
 
 @validate_arguments
-def false(*args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def false(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Returns function handler. This handler always returns `False`.
     """
 
-    def false_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def false_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         return False
 
     return false_handler
