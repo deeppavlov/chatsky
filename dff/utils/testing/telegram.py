@@ -97,7 +97,7 @@ class TelegramTesting:
 
     @asynccontextmanager
     async def run_bot(self):
-        """A context manager that start a bot"""
+        """A context manager that starts a bot defined in `pipeline`"""
         self.pipeline.messenger_interface.timeout = 2
         self.pipeline.messenger_interface.long_polling_timeout = 2
         task = asyncio.create_task(self.pipeline.messenger_interface.connect(self.pipeline._run_pipeline))
