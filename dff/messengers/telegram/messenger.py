@@ -132,11 +132,18 @@ class TelegramMessenger(TeleBot):
         else:
             keyboard = None
 
-        self.send_message(
-            chat_id=chat_id,
-            text=ready_response.text,
-            reply_markup=keyboard,
-        )
+        if ready_response.text is not None:
+            self.send_message(
+                chat_id=chat_id,
+                text=ready_response.text,
+                reply_markup=keyboard,
+            )
+        elif keyboard is not None:
+            self.send_message(
+                chat_id=chat_id,
+                text="",
+                reply_markup=keyboard,
+            )
 
 
 _default_messenger = TeleBot("")
