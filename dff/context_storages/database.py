@@ -32,6 +32,9 @@ class DBAbstractContextStorage(ABC):
         | Keep in mind that in Windows you will have to use double backslashes '\\'
         | instead of forward slashes '/' when defining the file path.
     :type path: str
+    :param full_path: Full path to access the context storage, as it was provided by user.
+    :type full_path: str
+    :param _lock: Threading for methods that require single thread access.
 
     """
 
@@ -42,54 +45,132 @@ class DBAbstractContextStorage(ABC):
         self._lock = threading.Lock()
 
     def __getitem__(self, key: Hashable) -> Context:
+        """
+        Synchronous method for accessing stored Context.
+        :param key: Hashable key used to store Context instance.
+        :type key: Hashable
+        :returns: The stored context, associated with the given key.
+        """
         return asyncio.run(self.get_item_async(key))
 
     @abstractmethod
     async def get_item_async(self, key: Hashable) -> Context:
+        """
+        Asynchronous method for accessing stored Context.
+        :param key: Hashable key used to store Context instance.
+        :type key: Hashable
+        :returns: The stored context, associated with the given key.
+        """
         raise NotImplementedError
 
     def __setitem__(self, key: Hashable, value: Context):
+        """
+        Synchronous method for storing Context.
+        :param key: Hashable key used to store Context instance.
+        :type key: Hashable
+        :param value: Context to store.
+        :type value: Context
+        """
         return asyncio.run(self.set_item_async(key, value))
 
     @abstractmethod
     async def set_item_async(self, key: Hashable, value: Context):
+        """
+        Asynchronous method for storing Context.
+        :param key: Hashable key used to store Context instance.
+        :type key: Hashable
+        :param value: Context to store.
+        :type value: Context
+        """
         raise NotImplementedError
 
     def __delitem__(self, key: Hashable):
+        """
+        Synchronous method for removing stored Context.
+        :param key: Hashable key used to identify Context instance for deletion.
+        :type key: Hashable
+        """
         return asyncio.run(self.del_item_async(key))
 
     @abstractmethod
     async def del_item_async(self, key: Hashable):
+        """
+        Asynchronous method for removing stored Context.
+        :param key: Hashable key used to identify Context instance for deletion.
+        :type key: Hashable
+        """
         raise NotImplementedError
 
     def __contains__(self, key: Hashable) -> bool:
+        """
+        Synchronous method for finding whether any Context is stored with given key.
+        :param key: Hashable key used to check if Context instance is stored.
+        :type key: Hashable
+        :returns: True if there is Context accessible by given key, False otherwise.
+        """
         return asyncio.run(self.contains_async(key))
 
     @abstractmethod
     async def contains_async(self, key: Hashable) -> bool:
+        """
+        Asynchronous method for finding whether any Context is stored with given key.
+        :param key: Hashable key used to check if Context instance is stored.
+        :type key: Hashable
+        :returns: True if there is Context accessible by given key, False otherwise.
+        """
         raise NotImplementedError
 
     def __len__(self) -> int:
+        """
+        Synchronous method for retrieving number of stored Contexts.
+        :returns: The number of stored Contexts.
+        """
         return asyncio.run(self.len_async())
 
     @abstractmethod
     async def len_async(self) -> int:
+        """
+        Asynchronous method for retrieving number of stored Contexts.
+        :returns: The number of stored Contexts.
+        """
         raise NotImplementedError
 
     def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
+        """
+        Synchronous method for accessing stored Context, returning default if no Context is stored with the given key.
+        :param key: Hashable key used to store Context instance.
+        :type key: Hashable
+        :param default: Optional default value to be returned if no Context is found.
+        :type key: Optional[Context]
+        :returns: The stored context, associated with the given key or default value.
+        """
         return asyncio.run(self.get_async(key, default))
 
     async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
+        """
+        Asynchronous method for accessing stored Context, returning default if no Context is stored with the given key.
+        :param key: Hashable key used to store Context instance.
+        :type key: Hashable
+        :param default: Optional default value to be returned if no Context is found.
+        :type key: Optional[Context]
+        :returns: The stored context, associated with the given key or default value.
+        """
         try:
             return await self.get_item_async(str(key))
         except KeyError:
             return default
 
     def clear(self):
+        """
+        Synchronous method for clearing context storage, removing all the stored Contexts.
+        """
         return asyncio.run(self.clear_async())
 
     @abstractmethod
     async def clear_async(self):
+        """
+        Asynchronous method for clearing context storage, removing all the stored Contexts.
+        """
         raise NotImplementedError
 
 
