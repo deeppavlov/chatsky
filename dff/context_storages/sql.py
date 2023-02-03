@@ -2,7 +2,7 @@
 SQL
 ---
 The SQL module provides a SQL-based version of the :py:class:`.DBContextStorage` class.
-This class is used to store and retrieve context data in a SQL and other databases.
+This class is used to store and retrieve context data from SQL databases.
 It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
