@@ -9,7 +9,7 @@ retrieve, and manipulate data as the conversation progresses.
 
 The Context data structure provides several key features to make working with data easier.
 Developers can use the context to store any information that is relevant to the current conversation,
-such as user data, session data, or conversation history.
+such as user data, session data, conversation history, or etc.
 This allows developers to easily access and use this data throughout the conversation flow.
 
 Another important feature of the context is data serialization.
