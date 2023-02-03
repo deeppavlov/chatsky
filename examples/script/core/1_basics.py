@@ -118,11 +118,11 @@ then its value becomes equal to `start_label`.
 
 
 # %%
-# actor = Actor(
-#     toy_script,
-#     start_label=("greeting_flow", "start_node"),
-#     fallback_label=("greeting_flow", "fallback_node"),
-# )
+actor = Actor(
+    toy_script,
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
+)
 
 # %% [markdown]
 """
