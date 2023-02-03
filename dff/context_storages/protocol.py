@@ -10,7 +10,7 @@ This function takes the name of the desired protocol as an argument and returns
 a string containing the necessary installation commands for that protocol.
 
 The `DFF` supports a variety of communication protocols,
-such as HTTP, WebSockets, and MQTT, which allows it to communicate with different types of clients and servers.
+which allows it to communicate with different types of databases.
 """
 import json
 import pathlib
