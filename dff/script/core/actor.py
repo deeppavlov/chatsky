@@ -119,7 +119,7 @@ class Actor(BaseModel):
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
                 raise ValueError(f"Unkown fallback_label={fallback_label}")
         if condition_handler is None:
-            condition_handler = deep_copy_condition_handler
+            condition_handler = default_condition_handler
 
         super(Actor, self).__init__(
             script=script,
@@ -372,12 +372,12 @@ class Actor(BaseModel):
                 labels += list(node.transitions.keys())
                 conditions += list(node.transitions.values())
 
+        actor = self.copy(deep=True)
         error_msgs = []
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
             ctx.add_request(Message(text="text"))
-            actor = self.copy(deep=True)
 
             label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
 
@@ -426,14 +426,14 @@ class Actor(BaseModel):
 
 
 @validate_arguments()
-def deep_copy_condition_handler(
+def default_condition_handler(
     condition: Callable, ctx: Context, actor: Actor, *args, **kwargs
 ) -> Callable[[Context, Actor, Any, Any], bool]:
     """
-    This function returns a deep copy of the callable conditions:
+    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
 
     :param condition: Condition to copy.
     :param ctx: Context of current condition.
     :param actor: Actor we use in this condition.
     """
-    return condition(ctx.copy(deep=True), actor.copy(deep=True), *args, **kwargs)
+    return condition(ctx, actor, *args, **kwargs)
