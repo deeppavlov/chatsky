@@ -2,7 +2,7 @@
 Redis
 -----
 The Redis module provides a Redis-based version of the :py:class:`.DBContextStorage` class.
-This class is used to store and retrieve context data in a Redis and other databases.
+This class is used to store and retrieve context data in a Redis.
 It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
