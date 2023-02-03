@@ -77,26 +77,6 @@ toy_script = {
 }
 
 
-# %% [markdown]
-"""
-An `actor` is an object that processes user
-inputs and returns responses.
-To create the actor you need to pass the script (`toy_script`),
-initial node (`start_label`) and
-the node to which the actor will default
-if none of the current conditions are met (`fallback_label`).
-By default, if `fallback_label` is not set,
-then its value becomes equal to `start_label`.
-"""
-
-
-# %%
-actor = Actor(
-    toy_script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 happy_path = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),  # start_node -> node1
     (
@@ -123,6 +103,26 @@ happy_path = (
     (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
 )
 
+
+# %% [markdown]
+"""
+An `actor` is an object that processes user
+inputs and returns responses.
+To create the actor you need to pass the script (`toy_script`),
+initial node (`start_label`) and
+the node to which the actor will default
+if none of the current conditions are met (`fallback_label`).
+By default, if `fallback_label` is not set,
+then its value becomes equal to `start_label`.
+"""
+
+
+# %%
+# actor = Actor(
+#     toy_script,
+#     start_label=("greeting_flow", "start_node"),
+#     fallback_label=("greeting_flow", "fallback_node"),
+# )
 
 # %% [markdown]
 """
