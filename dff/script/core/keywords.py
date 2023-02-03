@@ -2,8 +2,7 @@
 Keywords
 --------
 Keywords are used to define the dialog graph, which is the structure of a conversation.
-Keywords are specific words or phrases that are used to identify the intent of the user's input.
-They are used to determine the next step in the conversation and to trigger specific actions or responses.
+They are used to determine all nodes in the script and to assign  python objects and python functions for nodes.
 
 Keywords can be used in different ways in the dialog graph.
 They can be used to trigger a transition from one node of the graph to another,
