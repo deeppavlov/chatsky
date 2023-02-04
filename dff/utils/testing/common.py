@@ -2,7 +2,7 @@ from os import getenv
 from typing import Callable, Tuple, Any, Optional
 from uuid import uuid4
 
-from dff.script import Context
+from dff.script import Context, Message
 from dff.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
@@ -75,5 +75,5 @@ def run_interactive_mode(pipeline: Pipeline):
     print("Start a dialogue with the bot")
     while True:
         request = input(">>> ")
-        ctx = pipeline(request=request, ctx_id=ctx_id)
+        ctx = pipeline(request=Message(text=request), ctx_id=ctx_id)
         print(f"<<< {repr(ctx.last_response)}")

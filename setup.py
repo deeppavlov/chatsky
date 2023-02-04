@@ -45,7 +45,7 @@ mongodb_dependencies = [
 ]
 
 _sql_dependencies = [
-    "sqlalchemy[asyncio]>=1.4.27",
+    "sqlalchemy[asyncio]>=1.4.27, <2.0",
 ]
 
 sqlite_dependencies = merge_req_lists(
@@ -169,7 +169,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.2.0",
+    version="0.2.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
