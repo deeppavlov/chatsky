@@ -126,7 +126,7 @@ Pipeline
    the `DFF` and is responsible for managing the execution of services.
 
 - **Service:** This module contains the :py:class:`.Service` class,
-   which is used to represent a single service within the pipeline.
+   which can be included into pipeline as object or a dictionary.
 
 - **Utility Functions:** This module contains several utility functions that are used to perform various
    tasks such as data processing, error handling, and debugging.
@@ -135,6 +135,7 @@ Pipeline
    These types include classes and special types that are used to define the structure of data
    and the behavior of different components in the pipeline.
 
+# TODO: remove Utils, Extra Handler, Utility Functions, Type
 
 Script
 ~~~~~~
