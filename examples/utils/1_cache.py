@@ -7,7 +7,7 @@
 
 # %%
 from dff.script.conditions import true
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE, Message
+from dff.script import Context, TRANSITIONS, RESPONSE, Message
 from dff.script.labels import repeat
 from dff.pipeline import Pipeline
 from dff.utils.turn_caching import cache

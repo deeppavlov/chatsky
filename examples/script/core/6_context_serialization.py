@@ -10,7 +10,7 @@ First of all, let's do all the necessary imports from `dff`.
 # %%
 import logging
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Actor, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, Message
 import dff.script.conditions as cnd
 
 from dff.pipeline import Pipeline

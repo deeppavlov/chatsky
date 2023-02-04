@@ -11,7 +11,7 @@ First of all, let's do all the necessary imports from `dff`.
 # %%
 import re
 
-from dff.script import Actor, Context, TRANSITIONS, RESPONSE, Message
+from dff.script import Context, TRANSITIONS, RESPONSE, Message
 import dff.script.conditions as cnd
 from dff.pipeline import Pipeline
 

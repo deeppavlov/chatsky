@@ -11,7 +11,7 @@ Let's do all the necessary imports from `dff`.
 import re
 import random
 
-from dff.script import TRANSITIONS, RESPONSE, Actor, Context, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, Message
 import dff.script.responses as rsp
 import dff.script.conditions as cnd
 

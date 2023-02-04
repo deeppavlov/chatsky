@@ -9,7 +9,7 @@ First of all, let's do all the necessary imports from `dff`.
 # %%
 import re
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Actor, NodeLabel3Type, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, NodeLabel3Type, Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline

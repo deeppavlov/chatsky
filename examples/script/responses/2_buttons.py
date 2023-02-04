@@ -7,7 +7,7 @@
 # %%
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script import Context, TRANSITIONS, RESPONSE
 
 from dff.script.core.message import Button, Keyboard, Message
 from dff.pipeline import Pipeline

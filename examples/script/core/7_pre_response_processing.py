@@ -15,7 +15,6 @@ from dff.script import (
     TRANSITIONS,
     PRE_RESPONSE_PROCESSING,
     Context,
-    Actor,
     Message,
 )
 import dff.script.labels as lbl
