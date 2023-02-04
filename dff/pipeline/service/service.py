@@ -2,11 +2,12 @@
 Service
 -------
 The Service module contains the :py:class:`.Service` class,
-which is used to represent a single service within the pipeline.
-This class provides a way to manage and interact with the service,
-such as starting, stopping, or updating the service.
-It also provides a consistent interface for working with the service
-for easier integration and management within the system.
+which can be included into pipeline as object or a dictionary.
+Pipeline consists of services and service groups.
+Service group can be synchronous or asynchronous.
+Service is an atomic part of a pipeline.
+Service can be asynchronous only if its handler is a coroutine.
+Actor wrapping service can be synchronous only.
 """
 import logging
 import asyncio
