@@ -1,7 +1,8 @@
-from typing import List
+from typing import List, Optional
 from contextlib import asynccontextmanager
 import logging
 import asyncio
+from os import getenv
 
 import telethon.tl.types
 from telethon import TelegramClient
@@ -15,13 +16,30 @@ from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard, _ClickButton
 
 
+async def get_bot_user(client: TelegramClient, username: str):
+    async with client:
+        return await client.get_entity(username)
+
+
 class TelegramTesting:
     """Defines functions for testing."""
 
-    def __init__(self, client: TelegramClient, pipeline: Pipeline, bot: User):
+    def __init__(self, pipeline: Pipeline, client: Optional[TelegramClient] = None, bot: Optional[User] = None):
+        if client is None:
+            tg_id = getenv("TG_API_ID")
+            tg_hash = getenv("TG_API_HASH")
+            if tg_id is not None and tg_hash is not None:
+                client = TelegramClient("anon", int(tg_id), tg_hash)
+            else:
+                raise RuntimeError("Telegram API credentials are not set, client argument is not specified")
         self.client = client
         """Telegram client (not bot). Needed to verify bot replies."""
         self.pipeline = pipeline
+        if bot is None:
+            bot = getenv("TG_BOT_USERNAME")
+            if bot is None:
+                raise RuntimeError("Bot username is not set, bot argument is not specified")
+            bot = asyncio.run(get_bot_user(self.client, bot))
         self.bot = bot
         """Bot user (to know to whom to send messages from client)."""
 
@@ -110,25 +128,26 @@ class TelegramTesting:
         """Send a message from a bot, receive it as client, verify it."""
         await self.forget_previous_updates()
 
-        messenger_interface = self.pipeline.messenger_interface
-        assert isinstance(messenger_interface, PollingTelegramInterface)
+        async with self.client:
+            messenger_interface = self.pipeline.messenger_interface
+            assert isinstance(messenger_interface, PollingTelegramInterface)
 
-        messages = await self.client.get_messages(self.bot, limit=1)
-        if len(messages) == 0:
-            last_message_id = 0
-        else:
-            last_message_id = messages[0].id
+            messages = await self.client.get_messages(self.bot, limit=1)
+            if len(messages) == 0:
+                last_message_id = 0
+            else:
+                last_message_id = messages[0].id
 
-        messenger_interface.messenger.send_response((await self.client.get_me(input_peer=True)).user_id, message)
+            messenger_interface.messenger.send_response((await self.client.get_me(input_peer=True)).user_id, message)
 
-        await asyncio.sleep(3)
-        bot_messages = [
-            x async for x in self.client.iter_messages(self.bot, min_id=last_message_id, from_user=self.bot)
-        ]
-        bot_messages.reverse()
-        result = await self.parse_responses(bot_messages, tmp_dir)
+            await asyncio.sleep(3)
+            bot_messages = [
+                x async for x in self.client.iter_messages(self.bot, min_id=last_message_id, from_user=self.bot)
+            ]
+            bot_messages.reverse()
+            result = await self.parse_responses(bot_messages, tmp_dir)
 
-        assert result == message
+            assert result == message
 
     async def forget_previous_updates(self):
         async with self.run_bot():
@@ -137,26 +156,27 @@ class TelegramTesting:
     async def check_happy_path(self, happy_path, tmp_dir):
         await self.forget_previous_updates()
 
-        async with self.run_bot():
-            bot_messages = []
-            last_message = None
-            for request, response in happy_path:
-                logging.info("Sending request")
-                user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
-                if user_message is not None:
-                    last_message = user_message
-                logging.info("Request sent")
-                await asyncio.sleep(3)
-                logging.info("Extracting responses")
-                bot_messages = [
-                    x
-                    async for x in self.client.iter_messages(
-                        self.bot, min_id=(user_message or last_message).id, from_user=self.bot
-                    )
-                ]
-                if len(bot_messages) > 0:
-                    last_message = bot_messages[0]
-                logging.info("Got responses")
-                result = await self.parse_responses(bot_messages, tmp_dir)
-                assert result == TelegramMessage.parse_obj(response)
-            self.pipeline.messenger_interface.stop()
+        async with self.client:
+            async with self.run_bot():
+                bot_messages = []
+                last_message = None
+                for request, response in happy_path:
+                    logging.info("Sending request")
+                    user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
+                    if user_message is not None:
+                        last_message = user_message
+                    logging.info("Request sent")
+                    await asyncio.sleep(3)
+                    logging.info("Extracting responses")
+                    bot_messages = [
+                        x
+                        async for x in self.client.iter_messages(
+                            self.bot, min_id=(user_message or last_message).id, from_user=self.bot
+                        )
+                    ]
+                    if len(bot_messages) > 0:
+                        last_message = bot_messages[0]
+                    logging.info("Got responses")
+                    result = await self.parse_responses(bot_messages, tmp_dir)
+                    assert result == TelegramMessage.parse_obj(response)
+                self.pipeline.messenger_interface.stop()

@@ -1,12 +1,11 @@
 import os
-import pytest
 import asyncio
 import importlib
 from pathlib import Path
-from telethon import TelegramClient
+
+import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing.telegram import TelegramTesting
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -49,11 +48,6 @@ def document(tmpdir_factory):
 
 
 @pytest.fixture(scope="session")
-def session_file(tmpdir_factory):
-    yield "anon"
-
-
-@pytest.fixture(scope="session")
 def basic_bot():
     yield _bot
 
@@ -61,26 +55,6 @@ def basic_bot():
 @pytest.fixture(scope="session")
 def event_loop():
     yield asyncio.get_event_loop()
-
-
-@pytest.fixture(scope="session")
-def tg_client(session_file, env_var_presence, event_loop):
-    _ = env_var_presence
-    client = TelegramClient(str(session_file), int(os.getenv("TG_API_ID")), os.getenv("TG_API_HASH"), loop=event_loop)
-    with client:
-        yield client
-    client.loop.close()
-
-
-@pytest.fixture(scope="session")
-def testing_helper():
-    return TelegramTesting
-
-
-@pytest.fixture(scope="session")
-async def user_id(tg_client):
-    user = await tg_client.get_me(input_peer=True)
-    yield str(user.user_id)
 
 
 @pytest.fixture(scope="session")
