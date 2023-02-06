@@ -35,6 +35,16 @@ Filling the `command` argument will cause the handler to only react to listed co
 
 Note:
 Using `message_handler(...)` is the same as using `handler(target_type=UpdateTypes.MESSAGE, ...)`.
+
+Note:
+It is possible to use `cnd.exact_match` as a condition (as seen in previous examples).
+However, the functionality of that approach is lacking:
+At this moment only two fields of `Message` are set during update processing:
+
+- `text` stores a `text` field of `message` updates
+- `commands` stores a `data` field of `callback_query` updates
+
+For more information see example `3_buttons_with_callback.py`.
 """
 
 

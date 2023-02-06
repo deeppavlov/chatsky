@@ -12,7 +12,7 @@ from telebot.types import (
     Message as tlMessage,
     InlineQuery,
     ChosenInlineResult,
-    CallbackQuery,
+    CallbackQuery as tlCallbackQuery,
     ShippingQuery,
     PreCheckoutQuery,
     Poll,
@@ -37,7 +37,13 @@ class TelegramUI(Keyboard):
         return values
 
 
-class _ClickButton(Command):  # maybe this should be in `utils/testing`
+class CallbackQuery(Command):
+    """This class represents the event of user sending data by pressing a button."""
+
+    data: str
+
+
+class _ClickButton(Command):
     """This class is only used in telegram tests (to click buttons as a client)."""
 
     button_index: int
@@ -62,7 +68,7 @@ class TelegramMessage(Message):
             tlMessage,
             InlineQuery,
             ChosenInlineResult,
-            CallbackQuery,
+            tlCallbackQuery,
             ShippingQuery,
             PreCheckoutQuery,
             Poll,

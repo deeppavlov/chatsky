@@ -19,7 +19,6 @@ from dff.messengers.telegram import (
     TelegramUI,
     TelegramMessage,
     RemoveKeyboard,
-    message_handler,
 )
 from dff.utils.testing.common import is_interactive_mode
 
@@ -47,13 +46,17 @@ script = {
         "start": {
             RESPONSE: TelegramMessage(),
             TRANSITIONS: {
-                ("general", "native_keyboard"): message_handler(commands=["start", "restart"]),
+                ("general", "native_keyboard"): (
+                    lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
+                ),
             },
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
-                ("general", "native_keyboard"): message_handler(commands=["start", "restart"])
+                ("general", "native_keyboard"): (
+                    lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
+                ),
             },
         },
     },
@@ -74,7 +77,7 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success"): message_handler(func=lambda msg: msg.text == "4"),
+                ("general", "success"): cnd.exact_match(TelegramMessage(text="4")),
                 ("general", "fail"): cnd.true(),
             },
         },

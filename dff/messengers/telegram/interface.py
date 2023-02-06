@@ -5,14 +5,14 @@ This module implements various interfaces for :py:class:`~dff.messengers.telegra
 that can be used to interact with the Telegram API.
 """
 import asyncio
-from typing import Any, Optional, List, Tuple, Callable
+from typing import Any, Optional, List, Tuple, Callable, cast
 
 from telebot import types, logger
 
 from dff.script import Context
 from dff.messengers.common import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
 from .messenger import TelegramMessenger
-from .message import TelegramMessage, Message
+from .message import TelegramMessage, Message, CallbackQuery
 
 try:
     from flask import Flask, request, abort
@@ -29,6 +29,15 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     Utility function that extracts parameters from a telegram update.
     Changes the messenger state, setting the last update id.
 
+    Returned message has the following fields:
+
+    * `update_id` -- this field stores `update.update_id`
+    * `update` -- this field stores the first non-empty field of `update`
+    * `update_type` -- this field stores the name of the first non-empty field of `update`
+    * `text` -- this field stores `update.message.text`
+    * `commands` -- this field stores a list of one object (a CallbackQuery instance
+        with `data=update.callback_query.data`), or None if `data` is None
+
     :param messenger: Messenger instance.
     :param update: Update to process.
     """
@@ -40,12 +49,21 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
 
     for field in vars(update):
         if field != "update_id":
-            if getattr(update, field) is not None:
+            inner_update = getattr(update, field)
+            if inner_update is not None:
                 if message.update is not None:
                     raise RuntimeError(f"Two update fields. First: {message.update_type}; second: {field}")
                 message.update_type = field
-                message.update = getattr(update, field)
-                message.text = getattr(message.update, "text", None)
+                message.update = inner_update
+                if field == "message":
+                    inner_update = cast(types.Message, inner_update)
+                    message.text = inner_update.text
+
+                if field == "callback_query":
+                    inner_update = cast(types.CallbackQuery, inner_update)
+                    data = inner_update.data
+                    if data is not None:
+                        message.commands = [CallbackQuery(data=data)]
 
                 dict_update = vars(message.update)
                 # if 'chat' is not available, fall back to 'from_user', then to 'user'

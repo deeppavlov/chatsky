@@ -19,8 +19,7 @@ from dff.messengers.telegram import (
     TelegramMessenger,
     TelegramUI,
     TelegramMessage,
-    message_handler,
-    callback_query_handler,
+    CallbackQuery,
 )
 from dff.messengers.telegram.message import _ClickButton
 from dff.utils.testing.common import is_interactive_mode
@@ -52,12 +51,18 @@ script = {
         "start": {
             RESPONSE: TelegramMessage(text="hi"),
             TRANSITIONS: {
-                ("general", "keyboard"): message_handler(commands=["start", "restart"]),
+                ("general", "keyboard"): (
+                    lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
+                ),
             },
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {("general", "keyboard"): message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("general", "keyboard"): (
+                    lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
+                )
+            },
         },
     },
     "general": {
@@ -75,10 +80,12 @@ script = {
                 }
             ),
             TRANSITIONS: {
-                ("general", "success"): callback_query_handler(
-                    func=lambda call: call.data == "correct"
+                ("general", "success"): cnd.exact_match(
+                    TelegramMessage(commands=[CallbackQuery(data="correct")])
                 ),
-                ("general", "fail"): callback_query_handler(func=lambda call: call.data == "wrong"),
+                ("general", "fail"): cnd.exact_match(
+                    TelegramMessage(commands=[CallbackQuery(data="wrong")])
+                ),
             },
         },
         "success": {
