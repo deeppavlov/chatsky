@@ -12,13 +12,12 @@ from telebot.types import Message
 
 import dff.script.conditions as cnd
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script.core.message import Image, Attachments
 
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
     TelegramMessage,
-    Image,
-    Attachments,
     message_handler,
 )
 from dff.pipeline import Pipeline

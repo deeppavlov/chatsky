@@ -13,11 +13,11 @@ import os
 import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
 from dff.pipeline import Pipeline
+from dff.script.core.message import Button
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessenger,
     TelegramUI,
-    Button,
     TelegramMessage,
     message_handler,
     callback_query_handler,

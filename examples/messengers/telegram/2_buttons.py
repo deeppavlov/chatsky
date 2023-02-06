@@ -11,6 +11,7 @@ import os
 
 import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
+from dff.script.core.message import Button
 from dff.pipeline import Pipeline
 from dff.messengers.telegram import (
     PollingTelegramInterface,
@@ -18,7 +19,6 @@ from dff.messengers.telegram import (
     TelegramUI,
     TelegramMessage,
     RemoveKeyboard,
-    Button,
     message_handler,
 )
 from dff.utils.testing.common import is_interactive_mode
