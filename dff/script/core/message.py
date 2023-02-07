@@ -36,7 +36,7 @@ class Location(DataModel):
 
     def __eq__(self, other):
         if isinstance(other, Location):
-            return abs(self.latitude - other.latitude) + abs(self.longitude - other.longitude) < 0.002
+            return abs(self.latitude - other.latitude) + abs(self.longitude - other.longitude) < 0.00004
         return NotImplemented
 
 
