@@ -16,6 +16,7 @@ from dff.messengers.telegram.message import (
     TelegramMessage,
     TelegramUI,
     RemoveKeyboard,
+    ParseMode,
 )
 from dff.script import Message
 from dff.script.core.message import Attachments, Keyboard, Button, Image, Location, Audio, Video, Attachment
@@ -147,6 +148,15 @@ async def test_attachments(tmp_path, pipeline_instance):
 @pytest.mark.asyncio
 async def test_location(tmp_path, pipeline_instance):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
+    test_helper = TelegramTesting(pipeline_instance)
+    await test_helper.send_and_check(telegram_response, tmp_path)
+
+
+@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
+@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
+@pytest.mark.asyncio
+async def test_parsed_text(tmp_path, pipeline_instance):
+    telegram_response = TelegramMessage(text="[inline URL](http://www.example.com/)", parse_mode=ParseMode.MARKDOWN)
     test_helper = TelegramTesting(pipeline_instance)
     await test_helper.send_and_check(telegram_response, tmp_path)
 

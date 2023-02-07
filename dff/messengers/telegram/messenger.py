@@ -59,6 +59,7 @@ class TelegramMessenger(TeleBot):
                 "Type of the response argument should be one of the following:"
                 " `str`, `dict`, `Message`, or `TelegramMessage`."
             )
+        parse_mode = ready_response.parse_mode.value if ready_response.parse_mode is not None else None
         if ready_response.attachments is not None:
             if len(ready_response.attachments.files) == 1:
                 attachment = ready_response.attachments.files[0]
@@ -72,7 +73,7 @@ class TelegramMessenger(TeleBot):
                     method = self.send_photo
                 else:
                     raise TypeError(type(attachment))
-                params = {"caption": attachment.title}
+                params = {"caption": attachment.title, "parse_mode": parse_mode}
                 if isinstance(attachment.source, Path):
                     with open(attachment.source, "rb") as file:
                         method(chat_id, file, **params)
@@ -137,12 +138,14 @@ class TelegramMessenger(TeleBot):
                 chat_id=chat_id,
                 text=ready_response.text,
                 reply_markup=keyboard,
+                parse_mode=parse_mode,
             )
         elif keyboard is not None:
             self.send_message(
                 chat_id=chat_id,
                 text="",
                 reply_markup=keyboard,
+                parse_mode=parse_mode,
             )
 
 

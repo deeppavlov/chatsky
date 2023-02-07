@@ -4,6 +4,7 @@ Telegram Message
 This module implements inherited classes :py:mod:`dff.script.core.message` modified for usage with Telegram.
 """
 from typing import Optional, Union
+from enum import Enum
 
 from telebot.types import (
     ReplyKeyboardRemove,
@@ -55,6 +56,15 @@ class RemoveKeyboard(DataModel):
     ...
 
 
+class ParseMode(Enum):
+    """
+    Parse mode of the message.
+    More info: https://core.telegram.org/bots/api#formatting-options.
+    """
+    HTML = "HTML"
+    MARKDOWN = "MarkdownV2"
+
+
 class TelegramMessage(Message):
     class Config:
         smart_union = True
@@ -81,3 +91,16 @@ class TelegramMessage(Message):
     update_id: Optional[int] = None
     update_type: Optional[str] = None
     """Name of the field that stores an update representing this message."""
+    parse_mode: Optional[ParseMode] = None
+    """Parse mode of the message"""
+
+    def __eq__(self, other):
+        if isinstance(other, Message):
+            for field in self.__fields__:
+                if field not in ("parse_mode", "update_id", "update", "update_type"):
+                    if field not in other.__fields__:
+                        return False
+                    if self.__getattribute__(field) != other.__getattribute__(field):
+                        return False
+            return True
+        return NotImplemented
