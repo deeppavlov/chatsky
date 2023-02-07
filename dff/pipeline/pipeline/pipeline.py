@@ -154,6 +154,7 @@ class Pipeline:
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
+        **kwargs,
     ):
         """
         Pipeline script-based constructor.
@@ -176,8 +177,9 @@ class Pipeline:
             :py:data:`~.ServiceGroupBuilder` that will be executed after Actor.
             It constructs root service group by merging `pre_services` + actor + `post_services`.
         :type post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
+        :param kwargs: Keyword arguments to pass to :py:meth:`dff.script.core.actor.Actor.__init__`
         """
-        actor = Actor(script, start_label, fallback_label)
+        actor = Actor(script, start_label, fallback_label, **kwargs)
         pre_services = [] if pre_services is None else pre_services
         post_services = [] if post_services is None else post_services
         return cls(
