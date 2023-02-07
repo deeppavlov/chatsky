@@ -107,9 +107,8 @@ Messenger Interfaces
 Pipeline
 ~~~~~~~~
 
-- **Conditions:** This module contains a set of functions that are used to determine the possibility of transition
-   from one node of the dialog graph to another. Condition functions
-   are used to check the current state of the dialog and make decisions about how to proceed with the conversation.
+- **Conditions:** The conditions module contains functions that can be used to determine whether the pipeline
+   component to which they are attached should be executed or not.
 
 - **Service Group:** This module contains the :py:class:`.ServiceGroup` class. This class represents a group
    of services that can be executed together in a specific order.

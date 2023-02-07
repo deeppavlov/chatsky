@@ -1,12 +1,9 @@
 """
 Conditions
 ----------
-The Conditions module contains a set of scripting conditions that are used to determine the possibility
-of transition from one node of the dialog graph to another.
-These conditions are used to define the conversation flow and ensure that the conversation progresses
-in a logical and predictable manner.
-They can include various types of checks and more complex logic, and are used in combination with the
-labels and responses to create complex and dynamic conversations.
+The conditions module contains functions that can be used to determine whether the pipeline component to which they
+are attached should be executed or not.
+The standard set of them allows user to setup dependencies between pipeline components.
 """
 from typing import Optional
 
