@@ -8,7 +8,7 @@ except ImportError:
 
 from .messenger import TelegramMessenger
 from .interface import PollingTelegramInterface, CallbackTelegramInterface
-from .message import TelegramUI, TelegramMessage, RemoveKeyboard, CallbackQuery
+from .message import TelegramUI, TelegramMessage, RemoveKeyboard, CallbackQuery, ParseMode
 from .messenger import (
     UpdateType,
     handler,
