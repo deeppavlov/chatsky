@@ -61,6 +61,7 @@ class ParseMode(Enum):
     Parse mode of the message.
     More info: https://core.telegram.org/bots/api#formatting-options.
     """
+
     HTML = "HTML"
     MARKDOWN = "MarkdownV2"
 

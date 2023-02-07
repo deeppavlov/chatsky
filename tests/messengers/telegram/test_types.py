@@ -6,11 +6,6 @@ from io import IOBase
 from pathlib import Path
 from pydantic import ValidationError
 from telebot import types
-from telethon.tl.types import (
-    InputMessagesFilterPhotos,
-    InputMessagesFilterMusic,
-    InputMessagesFilterVideo,
-)
 
 from dff.messengers.telegram.message import (
     TelegramMessage,
@@ -111,18 +106,10 @@ async def test_keyboard_remove(tmp_path, pipeline_instance):
         (
             Message(
                 text="test",
-                attachments=Attachments(
-                    files=[video]
-                ),
+                attachments=Attachments(files=[video]),
             ),
         ),
-        (
-            Message(
-                attachments=Attachments(
-                    files=[document]
-                )
-            ),
-        ),
+        (Message(attachments=Attachments(files=[document])),),
     ],
 )
 async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance):
