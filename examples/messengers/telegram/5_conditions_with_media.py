@@ -46,8 +46,6 @@ you can use the `content_types` parameter of the `message_handler`.
 If you want to access properties of some specific file, you can get
 the message from the context:
 
-.. code-block:: python
-
     message = ctx.last_request
 
 The files will then be accessible as properties: message.photo, etc.
