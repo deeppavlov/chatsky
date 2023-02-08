@@ -31,6 +31,7 @@ messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 """
 To set up a webhook, you need a messenger and a web application instance.
 This class can be configured with the following parameters:
+
 * app - Flask application. You can pass an application with an arbitrary
     number of pre-configured routes. Created automatically if not set.
 * host - application host.
