@@ -154,9 +154,8 @@ _default_messenger = TeleBot("")
 
 class UpdateType(Enum):
     """
-    Represents a type of the telegram update.
-    (Which field contains an update in :py:class:`telebot.types.Update`)
-
+    Represents a type of the telegram update
+    (which field contains an update in :py:class:`telebot.types.Update`).
     See `link <https://pytba.readthedocs.io/en/latest/types.html#telebot.types.Update>`__.
     """
 

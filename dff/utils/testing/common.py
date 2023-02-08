@@ -12,7 +12,7 @@ def set_framework_state(ctx: Context, state_key: str, update: Any):
     Updates a context with an arbitrary framework state. If parameter `inner_key` is provided,
     saves the state as a dict and puts the update inside as a value.
 
-    :param ctx: DFF context
+    :param ctx: DFF context.
     :param state_key: Framework state key.
     :param update: Any framework state update.
     """

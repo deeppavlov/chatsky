@@ -31,12 +31,12 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
 
     Returned message has the following fields:
 
-    * `update_id` -- this field stores `update.update_id`
-    * `update` -- this field stores the first non-empty field of `update`
-    * `update_type` -- this field stores the name of the first non-empty field of `update`
-    * `text` -- this field stores `update.message.text`
-    * `commands` -- this field stores a list of one object (a CallbackQuery instance
-        with `data=update.callback_query.data`), or None if `data` is None
+    - | `update_id` -- this field stores `update.update_id`,
+    - | `update` -- this field stores the first non-empty field of `update`,
+    - | `update_type` -- this field stores the name of the first non-empty field of `update`,
+    - | `text` -- this field stores `update.message.text`,
+    - | `commands` -- this field stores a list of one object (a CallbackQuery instance
+        with `data=update.callback_query.data`), or None if `data` is None.
 
     :param messenger: Messenger instance.
     :param update: Update to process.
@@ -82,16 +82,16 @@ class PollingTelegramInterface(PollingMessengerInterface):
 
     :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
     :param interval:
-        Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 2.
     :param allowed_updates:
-        Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to None.
     :param timeout:
-        General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 20.
     :param long_polling_timeout:
-        Polling timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Polling timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 20.
     """
 
