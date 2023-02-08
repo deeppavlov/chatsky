@@ -31,12 +31,12 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
 
     Returned message has the following fields:
 
-    * `update_id` -- this field stores `update.update_id`
-    * `update` -- this field stores the first non-empty field of `update`
-    * `update_type` -- this field stores the name of the first non-empty field of `update`
-    * `text` -- this field stores `update.message.text`
-    * `commands` -- this field stores a list of one object (a CallbackQuery instance
-        with `data=update.callback_query.data`), or None if `data` is None
+    - | `update_id` -- this field stores `update.update_id`,
+    - | `update` -- this field stores the first non-empty field of `update`,
+    - | `update_type` -- this field stores the name of the first non-empty field of `update`,
+    - | `text` -- this field stores `update.message.text`,
+    - | `commands` -- this field stores a list of one object (a CallbackQuery instance
+        with `data=update.callback_query.data`), or None if `data` is None.
 
     :param messenger: Messenger instance.
     :param update: Update to process.
