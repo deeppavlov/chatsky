@@ -1,5 +1,5 @@
 """
-This script ensures that example scripts can successfully compile and are ready to run
+These tests check that pipelines defined in examples follow `happy_path` defined in the same examples.
 """
 import os
 import importlib
