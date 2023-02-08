@@ -82,16 +82,16 @@ class PollingTelegramInterface(PollingMessengerInterface):
 
     :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
     :param interval:
-        Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 2.
     :param allowed_updates:
-        Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Processed updates. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to None.
     :param timeout:
-        General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        General timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 20.
     :param long_polling_timeout:
-        Polling timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`_ .
+        Polling timeout. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 20.
     """
 
