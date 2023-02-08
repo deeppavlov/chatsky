@@ -52,16 +52,5 @@ def basic_bot():
     yield _bot
 
 
-@pytest.fixture(scope="session")
-def event_loop():
-    yield asyncio.get_event_loop()
-
-
-@pytest.fixture(scope="session")
-async def bot_id(tg_client):
-    user = await tg_client.get_entity(os.getenv("TG_BOT_USERNAME"))
-    yield user
-
-
 def pytest_sessionfinish(session, exitstatus):
     asyncio.get_event_loop().close()
