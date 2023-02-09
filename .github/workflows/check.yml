@@ -1,0 +1,142 @@
+name: Check documentation, codestyle, run tests
+
+on:
+  push:
+    branches:
+    - dev
+    - test/**
+  pull_request:
+    branches:
+    - dev
+  workflow_dispatch:
+
+concurrency:
+  group: "${{ github.ref }}"
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+
+jobs:
+  test_coverage:
+    strategy:
+      fail-fast: false
+
+    runs-on: ubuntu-latest
+
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build images
+        run: |
+          docker-compose up -d
+
+      - name: set up python 3.10
+        uses: actions/setup-python@v2
+        with:
+          python-version: "3.10"
+
+      - name: install package
+        run: |
+          python -m pip install build
+          python -m build
+          find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
+
+      - name: prepare testing environment
+        run: |
+          export backup_files=( tests examples .env_file makefile )
+          mkdir /tmp/backup
+          for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
+          rm -rf ..?* .[!.]* *
+          for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
+          rm -rf /tmp/backup
+          touch venv  # disable venv target
+
+      - name: run tests
+        run: |
+          make test
+        shell: bash
+  codestyle:
+    name:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: install dependencies
+        run: |
+            make venv
+
+      - name: run codestyle
+        run: |
+            make lint
+
+  test_full:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        os: [macOS-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build images
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          docker-compose up -d
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test_full]
+        shell: bash
+
+      - name: run pytest
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
+          fi
+          pytest --tb=long -vv --cache-clear --cov=dff tests/
+        shell: bash
+  publish:
+    name: build and publish docs
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: set up python 3.9
+        uses: actions/setup-python@v2
+        with:
+          python-version: 3.9
+
+      - name: Build images
+        run: |
+          docker-compose up -d
+
+      - name: install dependencies
+        run: |
+            sudo apt install pandoc
+            make venv
+
+      - name: build documentation
+        run: |
+            make doc
+
+      - name: remove jekyll theming
+        run: touch docs/build/.nojekyll
+
+      - name: deploy website
+        if: ${{ github.ref == 'refs/heads/dev' }}
+        uses: JamesIves/github-pages-deploy-action@v4
+        with:
+          branch: gh-pages
+          folder: docs/build/
+          single-commit: True
