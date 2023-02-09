@@ -22,6 +22,28 @@ DFF can be installed via pip:
 pip install dff
 ```
 
+The above command will set the minimum dependencies to start working with DFF. 
+The installation process allows the user to choose from different packages based on their dependencies, which are:
+```bash
+pip install dff[core]  # minimal dependencies (by default)
+pip install dff[redis]  # dependencies for using Redis
+pip install dff[mongodb]  # dependencies for using MongoDB
+pip install dff[mysql]  # dependencies for using MySQL
+pip install dff[postgresql]  # dependencies for using PostgreSQL
+pip install dff[sqlite]  # dependencies for using SQLite
+pip install dff[ydb]  # dependencies for using Yandex Database
+pip install dff[full]  # full dependencies including all options above
+pip install dff[tests]  # dependencies for running tests
+pip install dff[test_full]  # full dependencies for running all tests (all options above)
+pip install dff[examples]  # dependencies for running examples (all options above)
+pip install dff[devel]  # dependencies for development
+pip install dff[doc]  # dependencies for documentation
+pip install dff[devel_full]  # full dependencies for development (all options above)
+```
+
+For example, if you are going to use one of the database backends,
+you can specify the corresponding requirements yourself.
+
 ## Basic example
 
 ```python
@@ -102,19 +124,6 @@ The following backends are currently supported:
 
 Aside from this, we offer some interfaces for saving data to your local file system.
 These are not meant to be used in production, but can be helpful for prototyping your application.
-
-## Installation
-
-Please, note that if you are going to use one of the database backends,
-you will have to specify an extra or install the corresponding requirements yourself.
-```bash
-pip install dff[redis]
-pip install dff[mongodb]
-pip install dff[mysql]
-pip install dff[postgresql]
-pip install dff[sqlite]
-pip install dff[ydb]
-```
 
 ## Basic example
 
