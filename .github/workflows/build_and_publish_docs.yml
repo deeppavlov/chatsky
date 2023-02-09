@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: "${{ github.ref }}/docs"
+  group: "${{ github.ref }}/build_and_publish_docs"
   cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:

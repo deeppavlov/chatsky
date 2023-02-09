@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: "${{ github.ref }}/coverage"
+  group: "${{ github.ref }}/test_coverage"
   cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:
