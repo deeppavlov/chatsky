@@ -47,25 +47,22 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     message = TelegramMessage(update_id=update.update_id)
     ctx_id = None
 
-    for field in vars(update):
+    for field, value in vars(update).items():
         if field != "update_id":
-            inner_update = getattr(update, field)
-            if inner_update is not None:
+            if value is not None:
                 if message.update is not None:
                     raise RuntimeError(f"Two update fields. First: {message.update_type}; second: {field}")
                 message.update_type = field
-                message.update = inner_update
-                if field == "message":
-                    inner_update = cast(types.Message, inner_update)
-                    message.text = inner_update.text
+                message.update = value
+                if isinstance(value, types.Message):
+                    message.text = value.text
 
-                if field == "callback_query":
-                    inner_update = cast(types.CallbackQuery, inner_update)
-                    data = inner_update.data
+                if isinstance(value, types.CallbackQuery):
+                    data = value.data
                     if data is not None:
                         message.commands = [CallbackQuery(data=data)]
 
-                dict_update = vars(message.update)
+                dict_update = vars(value)
                 # if 'chat' is not available, fall back to 'from_user', then to 'user'
                 user = dict_update.get("chat", dict_update.get("from_user", dict_update.get("user")))
                 ctx_id = getattr(user, "id", None)
