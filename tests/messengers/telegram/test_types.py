@@ -21,10 +21,13 @@ TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
 TG_API_HASH = os.getenv("TG_API_HASH")
 
-image = Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG")
-audio = Audio(source="https://north-folklore.ru/static/sound/IVD_No44.MP3")
-video = Video(source="https://storage.googleapis.com/gtv-videos-bucket/sample/ForBiggerFun.mp4")
-document = Document(source=__file__)
+image = Image(
+    source="https://gist.githubusercontent.com/scotthaleen/32f76a413e0dfd4b4d79c2a534d49c0b/raw"
+    "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
+)
+audio = Audio(source="https://github.com/mathiasbynens/small/raw/master/mp3.mp3")
+video = Video(source="https://github.com/mathiasbynens/small/raw/master/Mpeg4.mp4")
+document = Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf")
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
