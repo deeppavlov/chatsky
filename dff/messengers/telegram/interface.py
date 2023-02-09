@@ -24,7 +24,7 @@ except ImportError:
     request, abort = None, None
 
 
-def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.Update) -> Tuple[Message, int]:
+def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.Update) -> Tuple[TelegramMessage, int]:
     """
     Utility function that extracts parameters from a telegram update.
     Changes the messenger state, setting the last update id.
