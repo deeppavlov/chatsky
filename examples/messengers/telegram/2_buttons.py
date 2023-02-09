@@ -164,7 +164,11 @@ pipeline = Pipeline.from_script(
 )
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+def main():
     if not os.getenv("TG_BOT_TOKEN"):
         print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
+
+
+if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+    main()

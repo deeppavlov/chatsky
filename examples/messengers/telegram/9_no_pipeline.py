@@ -73,7 +73,11 @@ def dialog_handler(update):
     db[user_id] = updated_context  # Save the context.
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+def main():
     if not os.getenv("TG_BOT_TOKEN"):
         print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     bot.infinity_polling()
+
+
+if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+    main()

@@ -19,7 +19,7 @@ from dff.messengers.telegram import (
     CallbackTelegramInterface,
 )
 from dff.pipeline import Pipeline
-from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -54,8 +54,15 @@ pipeline = Pipeline.from_script(
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )
 
+# testing
+happy_path = HAPPY_PATH
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+
+def main():
     if not os.getenv("TG_BOT_TOKEN"):
         print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
+
+
+if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+    main()
