@@ -15,16 +15,11 @@ through a public webhook.
 import os
 
 from dff.messengers.telegram import (
-    TelegramMessenger,
     CallbackTelegramInterface,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.utils.testing.common import is_interactive_mode
-
-
-# %%
-messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %% [markdown]
@@ -43,7 +38,7 @@ This class can be configured with the following parameters:
 
 
 # %%
-interface = CallbackTelegramInterface(messenger=messenger)
+interface = CallbackTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%

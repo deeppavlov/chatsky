@@ -32,7 +32,7 @@ from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
 
-bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
+bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %% [markdown]

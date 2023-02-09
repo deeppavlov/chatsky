@@ -16,7 +16,6 @@ from dff.script.core.message import Image, Attachments
 
 from dff.messengers.telegram import (
     PollingTelegramInterface,
-    TelegramMessenger,
     TelegramMessage,
     message_handler,
 )
@@ -51,10 +50,6 @@ the message from the context:
 The files will then be accessible as properties: message.photo, etc.
 
 """
-
-
-# %%
-messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %%
@@ -167,7 +162,7 @@ def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
 
 
 # %%
-interface = PollingTelegramInterface(messenger=messenger)
+interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%

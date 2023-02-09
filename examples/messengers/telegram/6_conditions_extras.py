@@ -13,7 +13,6 @@ from dff.script import TRANSITIONS, RESPONSE, GLOBAL
 import dff.script.conditions as cnd
 from dff.messengers.telegram import (
     PollingTelegramInterface,
-    TelegramMessenger,
     TelegramMessage,
     chat_join_request_handler,
     my_chat_member_handler,
@@ -51,12 +50,6 @@ The other available conditions are:
 
 You can read more on those in the Telegram documentation or in the docs for the `telebot` library.
 """
-
-
-# %%
-# Like Telebot, TelegramMessenger only requires a token to run.
-# However, all parameters from the Telebot class can be passed as keyword arguments.
-messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %%
@@ -98,7 +91,7 @@ script = {
 
 
 # %%
-interface = PollingTelegramInterface(messenger=messenger)
+interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%

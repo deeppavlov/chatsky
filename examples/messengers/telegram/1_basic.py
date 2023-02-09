@@ -13,7 +13,7 @@ import os
 from dff.script import conditions as cnd
 from dff.script import labels as lbl
 from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import PollingTelegramInterface, TelegramMessenger
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
 
@@ -60,8 +60,7 @@ happy_path = (
 
 
 # %%
-messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
-interface = PollingTelegramInterface(messenger=messenger)
+interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%

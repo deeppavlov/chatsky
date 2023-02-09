@@ -16,19 +16,12 @@ from dff.pipeline import Pipeline
 from dff.script.core.message import Button
 from dff.messengers.telegram import (
     PollingTelegramInterface,
-    TelegramMessenger,
     TelegramUI,
     TelegramMessage,
     CallbackQuery,
 )
 from dff.messengers.telegram.message import _ClickButton
 from dff.utils.testing.common import is_interactive_mode
-
-
-# %%
-# Like Telebot, TelegramMessenger only requires a token to run.
-# However, all parameters from the Telebot class can be passed as keyword arguments.
-messenger = TelegramMessenger(token=os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %% [markdown]
@@ -150,7 +143,7 @@ happy_path = (
     ),
 )
 
-interface = PollingTelegramInterface(messenger=messenger)
+interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%

@@ -13,7 +13,6 @@ from dff.script import TRANSITIONS, RESPONSE
 
 from dff.messengers.telegram import (
     PollingTelegramInterface,
-    TelegramMessenger,
     message_handler,
     handler,
     UpdateType,
@@ -46,12 +45,6 @@ At this moment only two fields of `Message` are set during update processing:
 
 For more information see example `3_buttons_with_callback.py`.
 """
-
-
-# %%
-# Like Telebot, TelegramMessenger only requires a token to run.
-# However, all parameters from the Telebot class can be passed as keyword arguments.
-messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %%
@@ -101,7 +94,7 @@ happy_path = (
 
 
 # %%
-interface = PollingTelegramInterface(messenger=messenger)
+interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%

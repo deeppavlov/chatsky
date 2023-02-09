@@ -10,15 +10,12 @@ The following example shows how to deploy a DFF bot locally using polling.
 # %%
 import os
 
-from dff.messengers.telegram.interface import PollingTelegramInterface, TelegramMessenger
+from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.pipeline import Pipeline
 
 from dff.utils.testing.common import is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from telebot.util import update_types
-
-# %%
-messenger = TelegramMessenger(os.getenv("TG_BOT_TOKEN", "SOMETOKEN"))
 
 
 # %% [markdown]
@@ -35,7 +32,7 @@ that are used in the `pytelegrambotapi` library, specifically:
 
 # %%
 interface = PollingTelegramInterface(
-    messenger=messenger,
+    token=os.getenv("TG_BOT_TOKEN", ""),
     interval=2,
     allowed_updates=update_types,
     timeout=30,

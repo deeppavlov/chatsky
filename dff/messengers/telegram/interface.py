@@ -5,7 +5,7 @@ This module implements various interfaces for :py:class:`~dff.messengers.telegra
 that can be used to interact with the Telegram API.
 """
 import asyncio
-from typing import Any, Optional, List, Tuple, Callable, cast
+from typing import Any, Optional, List, Tuple, Callable
 
 from telebot import types, logger
 
@@ -77,7 +77,13 @@ class PollingTelegramInterface(PollingMessengerInterface):
     Asynchronous Telegram interface that retrieves updates by polling.
     Multi-threaded polling is currently not supported, but will be implemented in the future.
 
-    :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
+    :param token: Bot token
+    :param messenger:
+        :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
+        If not `None` will be used instead of creating messenger from token.
+        Token value does not matter in that case.
+        Defaults to None.
+    :param messenger:
     :param interval:
         Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 2.
@@ -94,13 +100,14 @@ class PollingTelegramInterface(PollingMessengerInterface):
 
     def __init__(
         self,
-        messenger: TelegramMessenger,
+        token: str,
         interval: int = 2,
         allowed_updates: Optional[List[str]] = None,
         timeout: int = 20,
         long_polling_timeout: int = 20,
+        messenger: Optional[TelegramMessenger] = None,
     ):
-        self.messenger = messenger
+        self.messenger = messenger if messenger is not None else TelegramMessenger(token)
         self.interval = interval
         self.allowed_updates = allowed_updates
         self.timeout = timeout
@@ -155,7 +162,12 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
     Asynchronous Telegram interface that retrieves updates via webhook.
     Any Flask server can be passed to set up a webhook on a separate endpoint.
 
-    :param messenger: :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
+    :param token: Bot token
+    :param messenger:
+        :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger` instance.
+        If not `None` will be used instead of creating messenger from token.
+        Token value does not matter in that case.
+        Defaults to None.
     :param app:
         Flask instance.
         Defaults to `Flask(__name__)`.
@@ -175,17 +187,18 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
 
     def __init__(
         self,
-        messenger: TelegramMessenger,
+        token: str,
         app: Optional[Flask] = None,
         host: str = "localhost",
         port: int = 8443,
         endpoint: str = "/telegram-webhook",
         full_uri: Optional[str] = None,
+        messenger: Optional[TelegramMessenger] = None,
     ):
         if not flask_imported:
             raise ModuleNotFoundError("Flask is not installed. Install it with `pip install flask`.")
 
-        self.messenger = messenger
+        self.messenger = messenger if messenger is not None else TelegramMessenger(token)
         self.app = app if app else Flask(__name__)
         self.host = host
         self.port = port
