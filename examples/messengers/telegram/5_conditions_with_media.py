@@ -53,6 +53,10 @@ The files will then be accessible as properties: message.photo, etc.
 
 
 # %%
+interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+
+
+# %%
 script = {
     "root": {
         "start": {
@@ -153,15 +157,11 @@ def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
     ):
         return ctx
     photo = update.document or update.photo[-1]
-    file = messenger.get_file(photo.file_id)
-    result = messenger.download_file(file.file_path)
+    file = interface.messenger.get_file(photo.file_id)
+    result = interface.messenger.download_file(file.file_path)
     with open("photo.jpg", "wb+") as new_file:
         new_file.write(result)
     return ctx
-
-
-# %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 
 # %%
