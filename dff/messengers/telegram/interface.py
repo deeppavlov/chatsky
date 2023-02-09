@@ -60,7 +60,7 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
                 if isinstance(value, types.CallbackQuery):
                     data = value.data
                     if data is not None:
-                        message.commands = [CallbackQuery(data=data)]
+                        message.callback_query = CallbackQuery(data=data)
 
                 dict_update = vars(value)
                 # if 'chat' is not available, fall back to 'from_user', then to 'user'

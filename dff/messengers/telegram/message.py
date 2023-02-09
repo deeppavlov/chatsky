@@ -38,13 +38,13 @@ class TelegramUI(Keyboard):
         return values
 
 
-class CallbackQuery(Command):
+class CallbackQuery(DataModel):
     """This class represents the event of user sending data by pressing a button."""
 
     data: str
 
 
-class _ClickButton(Command):
+class _ClickButton(DataModel):
     """This class is only used in telegram tests (to click buttons as a client)."""
 
     button_index: int
@@ -74,6 +74,7 @@ class TelegramMessage(Message):
         Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
     ] = None
     location: Optional[Location] = None
+    callback_query: Optional[Union[CallbackQuery, _ClickButton]] = None
     update: Optional[
         Union[
             tlMessage,

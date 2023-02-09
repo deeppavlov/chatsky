@@ -43,20 +43,18 @@ class TelegramTesting:
         self.bot = bot
         """Bot user (to know to whom to send messages from client)."""
 
-    async def send_message(self, message: Message, last_bot_messages: List[TlMessage]):
+    async def send_message(self, message: TelegramMessage, last_bot_messages: List[TlMessage]):
         """Send a message from client to bot."""
-        if message.commands is not None:
-            if len(message.commands) != 1:
-                raise RuntimeError(f"Multiple commands are not used in telegram: {message.commands}")
-            command = message.commands[0]
-            if not isinstance(command, _ClickButton):
-                raise RuntimeError(f"Only `_ClickButton` command is supported by telegram: {command}")
+        if message.callback_query is not None:
+            query = message.callback_query
+            if not isinstance(query, _ClickButton):
+                raise RuntimeError(f"Use `_ClickButton` during tests: {query}")
             button_clicked = False
             for bot_message in last_bot_messages:
                 if bot_message.buttons is not None:
                     if button_clicked:
                         raise RuntimeError("Found multiple messages with buttons")
-                    await bot_message.click(i=command.button_index)
+                    await bot_message.click(i=query.button_index)
                     return None
         if message.attachments is None or len(message.attachments.files) == 0:
             return await self.client.send_message(self.bot, message.text)

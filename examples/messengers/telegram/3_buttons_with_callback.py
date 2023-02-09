@@ -73,10 +73,10 @@ script = {
             ),
             TRANSITIONS: {
                 ("general", "success"): cnd.exact_match(
-                    TelegramMessage(commands=[CallbackQuery(data="correct")])
+                    TelegramMessage(callback_query=CallbackQuery(data="correct"))
                 ),
                 ("general", "fail"): cnd.exact_match(
-                    TelegramMessage(commands=[CallbackQuery(data="wrong")])
+                    TelegramMessage(callback_query=CallbackQuery(data="wrong"))
                 ),
             },
         },
@@ -105,7 +105,7 @@ happy_path = (
         ),
     ),
     (
-        TelegramMessage(commands=[_ClickButton(button_index=1)]),
+        TelegramMessage(callback_query=_ClickButton(button_index=1)),
         TelegramMessage(text="Incorrect answer, type anything to try again"),
     ),
     (
@@ -121,7 +121,7 @@ happy_path = (
         ),
     ),
     (
-        TelegramMessage(commands=[_ClickButton(button_index=0)]),
+        TelegramMessage(callback_query=_ClickButton(button_index=0)),
         TelegramMessage(text="Success!"),
     ),
     (
