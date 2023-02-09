@@ -145,8 +145,8 @@ class PollingTelegramInterface(PollingMessengerInterface):
             self.messenger.get_updates(
                 offset=self.last_processed_update + 1,
                 allowed_updates=self.allowed_updates,
-                timeout=0,
-                long_polling_timeout=0,
+                timeout=1,
+                long_polling_timeout=1,
             )  # forget processed updates
 
     def stop(self):
