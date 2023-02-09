@@ -108,7 +108,12 @@ async def test_keyboard_remove(tmp_path, pipeline_instance, test_helper):
                 attachments=Attachments(files=[video]),
             ),
         ),
-        (Message(attachments=Attachments(files=[document])),),
+        (
+            Message(
+                text="test",
+                attachments=Attachments(files=[document])
+            ),
+        ),
     ],
 )
 async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance, test_helper):
@@ -120,18 +125,38 @@ async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_attachments(tmp_path, pipeline_instance):
-    generic_response = Message(
-        text="test",
-        attachments=Attachments(
-            files=[
-                Image(source="https://folklore.linghub.ru/api/gallery/300/23.JPG", title="image 1"),
-                Image(source="https://folklore.linghub.ru/api/gallery/300/22.JPG", title="image 2"),
-            ]
+@pytest.mark.parametrize(
+    ["attachments"],
+    [
+        (
+            Message(
+                text="test",
+                attachments=Attachments(files=2 * [image]),
+            ),
         ),
-    )
-    telegram_response = TelegramMessage.parse_obj(generic_response)
-    test_helper = TelegramTesting(pipeline_instance)
+        (
+            Message(
+                text="test",
+                attachments=Attachments(files=2 * [audio]),
+            ),
+        ),
+        (
+            Message(
+                text="test",
+                attachments=Attachments(files=2 * [video]),
+            ),
+        ),
+        (
+            Message(
+                text="test",
+                attachments=Attachments(files=2 * [document])
+            ),
+        ),
+    ],
+)
+async def test_attachments(attachments, tmp_path, pipeline_instance, test_helper):
+    telegram_response = TelegramMessage.parse_obj(attachments)
+    test_helper.pipeline = pipeline_instance
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
