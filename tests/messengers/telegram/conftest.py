@@ -6,6 +6,7 @@ from pathlib import Path
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
+from dff.utils.testing.telegram import TelegramTesting
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -50,6 +51,11 @@ def document(tmpdir_factory):
 @pytest.fixture(scope="session")
 def basic_bot():
     yield _bot
+
+
+@pytest.fixture(scope="session")
+def test_helper():
+    yield TelegramTesting(pipeline=None)
 
 
 def pytest_sessionfinish(session, exitstatus):
