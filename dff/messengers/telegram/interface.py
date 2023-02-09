@@ -153,7 +153,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
         self.stop_polling.set()
 
 
-class CallbackTelegramInterface(CallbackMessengerInterface):
+class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
     """
     Asynchronous Telegram interface that retrieves updates via webhook.
     Any Flask server can be passed to set up a webhook on a separate endpoint.
