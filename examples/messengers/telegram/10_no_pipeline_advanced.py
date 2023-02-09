@@ -50,7 +50,6 @@ The signature of these functions is equivalent to the signature of the `telebot`
 script = {
     "root": {
         "start": {
-            RESPONSE: TelegramMessage(text=""),
             TRANSITIONS: {
                 ("general", "keyboard"): cnd.true(),
             },

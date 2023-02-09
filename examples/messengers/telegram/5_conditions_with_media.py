@@ -56,7 +56,6 @@ The files will then be accessible as properties: message.photo, etc.
 script = {
     "root": {
         "start": {
-            RESPONSE: TelegramMessage(text=""),
             TRANSITIONS: {("pics", "ask_picture"): message_handler(commands=["start", "restart"])},
         },
         "fallback": {

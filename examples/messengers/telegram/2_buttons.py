@@ -37,7 +37,6 @@ of the generic `Response` class.
 script = {
     "root": {
         "start": {
-            RESPONSE: TelegramMessage(),
             TRANSITIONS: {
                 ("general", "native_keyboard"): (
                     lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")

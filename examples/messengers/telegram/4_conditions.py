@@ -51,7 +51,6 @@ For more information see example `3_buttons_with_callback.py`.
 script = {
     "greeting_flow": {
         "start_node": {
-            RESPONSE: TelegramMessage(text="Hi"),
             TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
         },
         "node1": {

@@ -42,7 +42,6 @@ in transition conditions (see below).
 script = {
     "root": {
         "start": {
-            RESPONSE: TelegramMessage(text="hi"),
             TRANSITIONS: {
                 ("general", "keyboard"): (
                     lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
