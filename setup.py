@@ -45,7 +45,7 @@ mongodb_dependencies = [
 ]
 
 _sql_dependencies = [
-    "sqlalchemy[asyncio]>=1.4.27, <2.0",
+    "sqlalchemy[asyncio]>=2.0.2",
 ]
 
 sqlite_dependencies = merge_req_lists(
