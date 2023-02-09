@@ -151,7 +151,7 @@ class TelegramTesting:
     async def forget_previous_updates(self):
         messenger_interface = cast(PollingTelegramInterface, self.pipeline.messenger_interface)
         messenger = messenger_interface.messenger
-        updates = messenger.get_updates(offset=messenger.last_update_id+1, timeout=1, long_polling_timeout=1)
+        updates = messenger.get_updates(offset=messenger.last_update_id + 1, timeout=1, long_polling_timeout=1)
         max_update_id = max([*map(lambda x: x.update_id, updates), -1])
         messenger.get_updates(offset=max_update_id + 1, timeout=1, long_polling_timeout=1)
 
@@ -164,6 +164,7 @@ class TelegramTesting:
         :param run_bot: Whether a bot inside pipeline should be running (disable this to test non-async bots)
         :return:
         """
+
         async def _check_happy_path():
             bot_messages = []
             last_message = None

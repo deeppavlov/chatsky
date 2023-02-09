@@ -111,12 +111,7 @@ async def test_keyboard_remove(tmp_path, pipeline_instance, test_helper):
                 attachments=Attachments(files=[video]),
             ),
         ),
-        (
-            Message(
-                text="test",
-                attachments=Attachments(files=[document])
-            ),
-        ),
+        (Message(text="test", attachments=Attachments(files=[document])),),
     ],
 )
 async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance, test_helper):
@@ -149,12 +144,7 @@ async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance
                 attachments=Attachments(files=2 * [video]),
             ),
         ),
-        (
-            Message(
-                text="test",
-                attachments=Attachments(files=2 * [document])
-            ),
-        ),
+        (Message(text="test", attachments=Attachments(files=2 * [document])),),
     ],
 )
 async def test_attachments(attachments, tmp_path, pipeline_instance, test_helper):
