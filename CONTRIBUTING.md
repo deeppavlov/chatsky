@@ -12,43 +12,12 @@ Please use the following rules to write the names of branches and commit message
 ### Rules for writing names of branches
 
 We hope that you adhere to the following
-[format](https://gist.github.com/seunggabi/87f8c722d35cd07deb3f649d45a31082)
-of branch naming: `<type>/<subject>`, where `<type>` can be taken from the following list:
-
-- `feat` or `feature`: (new feature for the user, not a new feature for build script)
-- `fix`: (bug fix for the user, not a fix to a build script)
-- `docs`: (changes to the documentation)
-- `style`: (formatting, missing semi colons, etc; no production code change)
-- `refactor`: (refactoring production code, eg. renaming a variable)
-- `test`: (adding missing tests, refactoring tests; no production code change)
-- `chore`: (updating grunt tasks etc; no production code change)
-
-For example:
-
-```
-style/formatting_file_1
-^---^ ^---------------^
-|     |
-|     +---> Issue's keywords
-|
-+---------> Type
-```
+[format](https://gist.github.com/seunggabi/87f8c722d35cd07deb3f649d45a31082).
 
 ### Commit message rules
 
 We ask that you adhere to the following
-[commit message format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716): `<type>: <subject>`.
-
-For example:
-
-```
-docs: add description to the func
-^--^  ^-------------------------^
-|     |
-|     +-> Summary in present tense.
-|
-+-------> Type
-```
+[commit message format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716).
 
 ## Managing your workflow
 We use `make` as handy automation tool, which reads `makefile` to get specification for commands.
