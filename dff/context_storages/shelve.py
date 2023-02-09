@@ -9,10 +9,10 @@ from typing import Hashable
 
 from dff.script import Context
 
-from .database import DBAbstractContextStorage
+from .database import DBContextStorage
 
 
-class ShelveContextStorage(DBAbstractContextStorage):
+class ShelveContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `shelve` as the driver.
 
@@ -21,7 +21,7 @@ class ShelveContextStorage(DBAbstractContextStorage):
     """
 
     def __init__(self, path: str):
-        DBAbstractContextStorage.__init__(self, path)
+        DBContextStorage.__init__(self, path)
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
     async def get_item_async(self, key: Hashable) -> Context:

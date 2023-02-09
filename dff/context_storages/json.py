@@ -16,7 +16,7 @@ except ImportError:
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .database import DBAbstractContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
 
 
@@ -28,7 +28,7 @@ class SerializableStorage(BaseModel, extra=Extra.allow):
         return vals
 
 
-class JSONContextStorage(DBAbstractContextStorage):
+class JSONContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
@@ -37,7 +37,7 @@ class JSONContextStorage(DBAbstractContextStorage):
     """
 
     def __init__(self, path: str):
-        DBAbstractContextStorage.__init__(self, path)
+        DBContextStorage.__init__(self, path)
         asyncio.run(self._load())
 
     @threadsafe_method

@@ -2,7 +2,7 @@
 Database
 --------
 Base module. Provided classes:
-    - Abstract context storage interface :py:class:`.DBAbstractContextStorage`.
+    - Abstract context storage interface :py:class:`.DBContextStorage`.
 """
 import asyncio
 import importlib
@@ -15,7 +15,7 @@ from .protocol import PROTOCOLS
 from ..script import Context
 
 
-class DBAbstractContextStorage(ABC):
+class DBContextStorage(ABC):
     """
     An abstract interface for `dff` DB context storages.
     It includes the most essential methods of the python `dict` class.
@@ -187,7 +187,7 @@ def threadsafe_method(func: Callable):
     return _synchronized
 
 
-def context_storage_factory(path: str, **kwargs) -> DBAbstractContextStorage:
+def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     """
     Use context_storage_factory to lazy import context storage types and instantiate them.
     The function takes a database connection URI or its equivalent. It should be prefixed with database name,

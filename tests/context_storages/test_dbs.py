@@ -13,7 +13,7 @@ from dff.context_storages import (
     PickleContextStorage,
     pickle_available,
     ShelveContextStorage,
-    DBAbstractContextStorage,
+    DBContextStorage,
     SQLContextStorage,
     postgres_available,
     mysql_available,
@@ -28,7 +28,7 @@ from dff.context_storages import (
 )
 
 from dff.script import Context
-from dff.utils.testing.delete_db import (
+from dff.utils.testing.cleanup_db import (
     delete_shelve,
     delete_json,
     delete_pickle,
@@ -69,7 +69,7 @@ YDB_ACTIVE = ping_localhost(2136)
 
 
 def generic_test(db, testing_context, context_id):
-    assert isinstance(db, DBAbstractContextStorage)
+    assert isinstance(db, DBContextStorage)
     # perform cleanup
     db.clear()
     assert len(db) == 0

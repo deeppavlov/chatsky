@@ -17,6 +17,7 @@ from dff.utils.testing.common import (
     run_interactive_mode,
 )
 
+
 external_data = {"counter": 0}
 
 

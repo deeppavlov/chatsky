@@ -11,7 +11,7 @@ from typing import Hashable
 
 from dff.script import Context
 
-from .database import DBAbstractContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
@@ -66,7 +66,7 @@ def import_insert_for_dialect(dialect: str):
     )
 
 
-class SQLContextStorage(DBAbstractContextStorage):
+class SQLContextStorage(DBContextStorage):
     """
     | SQL-based version of the :py:class:`.DBContextStorage`.
     | Compatible with MySQL, Postgresql, Sqlite.
@@ -83,7 +83,7 @@ class SQLContextStorage(DBAbstractContextStorage):
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
-        DBAbstractContextStorage.__init__(self, path)
+        DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path)

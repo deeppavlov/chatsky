@@ -15,11 +15,11 @@ try:
 except ImportError:
     pickle_available = False
 
-from .database import DBAbstractContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
 
 
-class PickleContextStorage(DBAbstractContextStorage):
+class PickleContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
@@ -28,7 +28,7 @@ class PickleContextStorage(DBAbstractContextStorage):
     """
 
     def __init__(self, path: str):
-        DBAbstractContextStorage.__init__(self, path)
+        DBContextStorage.__init__(self, path)
         asyncio.run(self._load())
 
     @threadsafe_method

@@ -7,7 +7,6 @@ A func is used for suggestion of installation: :py:func:`.get_protocol_install_s
 import json
 import pathlib
 
-
 with open(pathlib.Path(__file__).parent / "protocols.json", "r", encoding="utf-8") as protocols:
     PROTOCOLS = json.load(protocols)
 _prtocol_keys = {"module", "class", "slug", "uri_example"}
