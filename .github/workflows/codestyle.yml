@@ -11,7 +11,7 @@ on:
   workflow_dispatch:
 
 concurrency:
-  group: ${{ github.ref }}
+  group: "${{ github.ref }}/codestyle"
   cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:
