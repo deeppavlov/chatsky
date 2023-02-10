@@ -7,7 +7,7 @@ for managing and executing the various components (:py:class:`.PipelineComponent
 the processing of messages from and to users.
 It provides a way to organize and structure the messages processing flow.
 The Pipeline class is designed to be highly customizable and configurable,
-allowing developers to add, remove, or modify the components that make up the conversation flow.
+allowing developers to add, remove, or modify the components that make up the messages processing flow.
 
 The Pipeline class is designed to be used in conjunction with the :py:class:`.PipelineComponent`
 class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
