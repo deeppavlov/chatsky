@@ -174,7 +174,7 @@ def test_sqlite(testing_file, testing_context, context_id):
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
 def test_mysql(testing_context, context_id):
     db = context_storage_factory(
-         "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
+        "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
             os.getenv("MYSQL_USERNAME"),
             os.getenv("MYSQL_PASSWORD"),
             os.getenv("MYSQL_DATABASE"),
