@@ -3,7 +3,7 @@ Pipeline
 --------
 The Pipeline module contains the :py:class:`.Pipeline` class,
 which is a fundamental element of the `DFF`. The Pipeline class is responsible
-for managing and executing the various components (:py:class:`.PipelineComponent`)which make up 
+for managing and executing the various components (:py:class:`.PipelineComponent`)which make up
 the processing of messages from and to users.
 It provides a way to organize and structure the messages processing flow.
 The Pipeline class is designed to be highly customizable and configurable,

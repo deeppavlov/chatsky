@@ -37,14 +37,14 @@ Additionally, you also have the option to download the source code directly from
    cd dialog_flow_framework
 
 Once you are in the directory, you can run the command ``make venv`` to set up all the necessary requirements for the library.
-If you need to update the requirements in the future, use the command ``make clean`` to ensure that the new requirements are properly installed.
+If you need to update the requirements, use the command ``make clean`` to remove `venv` first.
 
 Key concepts
 ~~~~~~~~~~~~
 
-`DFF`` is a powerful tool for creating conversational services.
+`DFF` is a powerful tool for creating conversational services.
 It allows developers to easily write and manage dialog systems by defining a special dialog graph that describes the behavior of the service.
-`DFF`` offers a specialized language (`DSL`) for quickly writing dialog graphs, making it easy for developers to create chatbots for a wide
+`DFF` offers a specialized language (`DSL`) for quickly writing dialog graphs, making it easy for developers to create chatbots for a wide
 range of applications such as social networks, call centers, websites, skills for Amazon Alexa, etc.
 
 `DFF` has several important concepts:
