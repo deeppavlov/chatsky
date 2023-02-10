@@ -3,6 +3,15 @@ from typing import List, Optional, Tuple, Dict
 
 
 def generate_doc_container(file: Path, includes: List[Path]):
+    """
+    Generates source files index.
+    The generated file contains a toctree of included files.
+    The resulting file is marked 'orphan' not to emit warning if not included in any toctree.
+    It is also has maximum depth of 1 (only filenames) and includes titles only.
+
+    :param file: Path to directory index file (file name will be prefixed 'index_').
+    :param includes: List of the files to include into the directory, should be sorted previously.
+    """
     title = file.stem
     sources = "\n   ".join(str(include.stem) for include in includes)
     contents = f""":orphan:
@@ -22,6 +31,16 @@ def generate_doc_container(file: Path, includes: List[Path]):
 
 
 def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination: str = "apiref"):
+    """
+    Regenerate files in apiref root.
+    Not all the files there are generally useful: mostly the folder consists of module toctrees  that look ugly.
+    The purpose of this function is removing all sources that represent a module
+    and create convenient indexes for the remaining files.
+
+    :param paths: Paths to the modules that should be merged together, separated by '.'.
+    Should be prefixes of files in apiref root.
+    :param destination: Apiref root path, default: apiref.
+    """
     paths = list() if paths is None else paths
     source = Path(f"./docs/source/{destination}")
     doc_containers: Dict[str, List[Path]] = dict()
