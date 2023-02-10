@@ -1,6 +1,6 @@
 # .coveragerc to control coverage.py
 [run]
-concurrency=thread,gevent
+concurrency=thread,multiprocessing,greenlet
 
 [report]
 # Regexes for lines to exclude from consideration
