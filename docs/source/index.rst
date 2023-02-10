@@ -93,6 +93,10 @@ ToCs
 Context Storages
 ~~~~~~~~~~~~~~~~
 
+Context Storages allow you to save and retrieve user dialogue states
+(in the form of a `Context` object) using various database backends. 
+The following backends are currently supported:
+
 - **Redis:** Provides a Redis-based version of the :py:class:`.DBContextStorage` class.
 
 - **Protocol:** This module contains base protocol code. Supported protocols fot db:
@@ -122,7 +126,7 @@ Messenger Interfaces
    These classes provide a standardized way of interacting with different messaging services,
    allowing the application to work with multiple messaging platforms seamlessly.
 
-- **dff.messengers.telegram package:** This package contains classes and functions specific
+- **dff.messengers.telegram:** This package contains classes and functions specific
    to the Telegram messenger service. It provides an interface for the application to interact with Telegram,
    allowing it to send and receive messages, handle callbacks, and perform other actions.
 
