@@ -65,21 +65,26 @@ Key concepts
 ~~~~~~~~~~~~
 
 `DFF` is a powerful tool for creating conversational services.
-It allows developers to easily write and manage dialog systems by defining a special dialog graph that describes the behavior of the service.
-`DFF` offers a specialized language (`DSL`) for quickly writing dialog graphs, making it easy for developers to create chatbots for a wide
+It allows developers to easily write and manage dialog systems by defining a special
+dialog graph that describes the behavior of the service.
+`DFF` offers a specialized language (`DSL`) for quickly writing dialog graphs,
+making it easy for developers to create chatbots for a wide
 range of applications such as social networks, call centers, websites, skills for Amazon Alexa, etc.
 
 `DFF` has several important concepts:
 
-**Script**: First of all, to create a dialog agent it is necessary to create a dialog (:py:class:`~dff.script.core.script.Script`).
-A dialog `script` is a dictionary, where keys correspond to different `flows`. A script can contain multiple `scripts`, what is needed in order to divide
+**Script**: First of all, to create a dialog agent it is necessary
+to create a dialog (:py:class:`~dff.script.core.script.Script`).
+A dialog `script` is a dictionary, where keys correspond to different `flows`.
+A script can contain multiple `scripts`, which are `flows` too, what is needed in order to divide
 a dialog into sub-dialogs and process them separately.
 
 **Flow**: As mentioned above, the dialog is divided into `flows`.
 Each `flow` represent a sub-dialog corresponding to the discussion of a particular topic.
 Each `flow` is also a dictionary, where the keys are the `nodes`.
 
-**Node**: A `node` is the smallest unit of a dialog `flow`, and it contains the bot's response to a user's input as well as a `condition` that determines
+**Node**: A `node` is the smallest unit of a dialog `flow`, and it contains the bot's response
+to a user's input as well as a `condition` that determines
 the `transition` to another `node`, whether it's within the current or another `flow`.
 
 ToCs
