@@ -27,7 +27,29 @@ Installation
    pip install dff
 
 This framework is compatible with Python 3.7 and newer versions.
-Note that if you are going to use one of the database backends, you will have to specify an extra or install the corresponding requirements yourself.
+
+The above command will set the minimum dependencies to start working with DFF. 
+The installation process allows the user to choose from different packages based on their dependencies, which are:
+.. code-block:: console
+
+   pip install dff[core]  # minimal dependencies (by default)
+   pip install dff[redis]  # dependencies for using Redis
+   pip install dff[mongodb]  # dependencies for using MongoDB
+   pip install dff[mysql]  # dependencies for using MySQL
+   pip install dff[postgresql]  # dependencies for using PostgreSQL
+   pip install dff[sqlite]  # dependencies for using SQLite
+   pip install dff[ydb]  # dependencies for using Yandex Database
+   pip install dff[full]  # full dependencies including all options above
+   pip install dff[tests]  # dependencies for running tests
+   pip install dff[test_full]  # full dependencies for running all tests (all options above)
+   pip install dff[examples]  # dependencies for running examples (all options above)
+   pip install dff[devel]  # dependencies for development
+   pip install dff[doc]  # dependencies for documentation
+   pip install dff[devel_full]  # full dependencies for development (all options above)
+
+For example, if you are going to use one of the database backends,
+you can specify the corresponding requirements yourself.
+
 Additionally, you also have the option to download the source code directly from the
 `GitHub <https://github.com/deeppavlov/dialog_flow_framework>`_ repository using the commands:
 
