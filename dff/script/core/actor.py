@@ -3,7 +3,7 @@ Actor
 -----
 Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script` and handles it.
 It is responsible for processing user input and determining the appropriate response based
-on the current state of the conversation.
+on the current state of the conversation and the script.
 The actor receives requests in the form of a :py:class:`.Context` class, which contains
 information about the user's input, the current state of the conversation, and other relevant data.
 
