@@ -32,17 +32,17 @@ class DBContextStorage(ABC):
         | Keep in mind that in Windows you will have to use double backslashes '\\'
         | instead of forward slashes '/' when defining the file path.
     :type path: str
-    :param full_path: Full path to access the context storage, as it was provided by user.
-    :type full_path: str
-    :param _lock: Threading for methods that require single thread access.
 
     """
 
     def __init__(self, path: str):
         _, _, file_path = path.partition("://")
         self.full_path = path
+        """Full path to access the context storage, as it was provided by user."""
         self.path = file_path
+        """`full_path` without a prefix defining db used"""
         self._lock = threading.Lock()
+        """Threading for methods that require single thread access."""
 
     def __getitem__(self, key: Hashable) -> Context:
         """
