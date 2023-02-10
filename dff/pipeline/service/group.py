@@ -4,7 +4,7 @@ Service Group
 The Service Group module contains the
 :py:class:`~.ServiceGroup` class, which is used to represent a group of related services.
 This class provides a way to organize and manage multiple services as a single unit,
-allowing for easier management and organization of the services within the system.
+allowing for easier management and organization of the services within the pipeline.
 The first and foremost purpose of :py:class:`~.ServiceGroup` is parallelism.
 """
 import asyncio
