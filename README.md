@@ -106,10 +106,10 @@ Okey
 To get more advanced examples, take a look at
 [examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
 
-# DataBase Connectors
+# Context Storages
 ## Description
 
-Dialog Flow DB Connector allows you to save and retrieve user dialogue states
+Context Storages allow you to save and retrieve user dialogue states
 (in the form of a `Context` object) using various database backends. 
 
 The following backends are currently supported:
