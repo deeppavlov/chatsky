@@ -11,7 +11,7 @@ allowing developers to add, remove, or modify the components that make up the co
 
 The Pipeline class is designed to be used in conjunction with the :py:class:`.PipelineComponent`
 class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
-to structure and manage the conversation flow.
+to structure and manage the messages processing flow.
 """
 import asyncio
 import logging
