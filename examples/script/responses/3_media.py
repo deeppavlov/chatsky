@@ -78,7 +78,7 @@ happy_path = (
     (Message(text="Hi"), Message(text="Please, send me a picture url")),
     (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
     (
-        Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.png"),
+        Message(text=kitten_url),
         Message(
             text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
         ),
@@ -86,7 +86,7 @@ happy_path = (
     (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
     (Message(text="ok"), Message(text="Please, send me a picture url")),
     (
-        Message(text="https://sun9-49.userapi.com/s/v1/if2/gpquN.jpg"),
+        Message(text=kitten_url),
         Message(
             text="Look at my pictures",
             attachments=Attachments(files=[Image(source=kitten_url)] * 10),
