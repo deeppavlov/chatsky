@@ -5,3 +5,8 @@
 __author__ = "Denis Kuznetsov"
 __email__ = "kuznetsov.den.p@gmail.com"
 __version__ = "0.2.1"
+
+
+import nest_asyncio
+
+nest_asyncio.apply()
