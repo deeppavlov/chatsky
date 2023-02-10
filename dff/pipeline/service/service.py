@@ -9,6 +9,8 @@ Service is an atomic part of a pipeline.
 Service can be asynchronous only if its handler is a coroutine.
 Actor wrapping service can be synchronous only.
 """
+# TODO: change last sentence, when actor will be asynchronous
+
 import logging
 import asyncio
 import inspect
