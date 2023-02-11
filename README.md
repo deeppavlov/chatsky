@@ -26,7 +26,6 @@ pip install dff
 The above command will set the minimum dependencies to start working with DFF. 
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 ```bash
-pip install dff[core]  # minimal dependencies (by default)
 pip install dff[redis]  # dependencies for using Redis
 pip install dff[mongodb]  # dependencies for using MongoDB
 pip install dff[mysql]  # dependencies for using MySQL
@@ -43,7 +42,10 @@ pip install dff[devel_full]  # full dependencies for development (all options ab
 ```
 
 For example, if you are going to use one of the database backends,
-you can specify the corresponding requirements yourself.
+you can specify the corresponding requirements yourself. Multiple dependencies can be installed at once, e.g.
+```bash
+pip install dff[postgresql, mysql]
+```
 
 ## Basic example
 
