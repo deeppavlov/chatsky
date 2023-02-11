@@ -114,9 +114,3 @@ You can get more info about `make` commands by `help`:
 ```bash
 make help
 ```
-
-## Deployment
-
-The template includes a handful of `github` workflows that allow you to lint and test your code as well as to deploy your newly made package straight to [PYPI](https://pypi.org/).
-
-If you plan to use the latter feature, be sure to set the `PYPI_TOKEN` secret in your repository.
