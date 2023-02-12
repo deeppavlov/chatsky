@@ -1,6 +1,5 @@
 import json
 import pytest
-import os
 
 from io import IOBase
 from pathlib import Path
@@ -19,10 +18,6 @@ from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 
 from dff.utils.testing.telegram import TelegramTesting
 
-TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
-TG_API_ID = os.getenv("TG_API_ID")
-TG_API_HASH = os.getenv("TG_API_HASH")
-
 image = Image(
     source="https://gist.githubusercontent.com/scotthaleen/32f76a413e0dfd4b4d79c2a534d49c0b/raw"
     "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
@@ -32,8 +27,6 @@ video = Video(source="https://github.com/mathiasbynens/small/raw/master/Mpeg4.mp
 document = Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf")
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_text(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test")
@@ -41,8 +34,6 @@ async def test_text(tmp_path, pipeline_instance, api_credentials, bot_user):
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["ui", "markup_type", "button_type"],
@@ -80,8 +71,6 @@ async def test_buttons(ui, button_type, markup_type, tmp_path, pipeline_instance
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_keyboard_remove(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test", ui=RemoveKeyboard())
@@ -89,8 +78,6 @@ async def test_keyboard_remove(tmp_path, pipeline_instance, api_credentials, bot
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["generic_response"],
@@ -122,8 +109,6 @@ async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["attachments"],
@@ -155,8 +140,6 @@ async def test_attachments(attachments, tmp_path, pipeline_instance, api_credent
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_location(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
@@ -164,8 +147,6 @@ async def test_location(tmp_path, pipeline_instance, api_credentials, bot_user):
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 async def test_parsed_text(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="[inline URL](http://www.example.com/)", parse_mode=ParseMode.MARKDOWN)
@@ -173,7 +154,6 @@ async def test_parsed_text(tmp_path, pipeline_instance, api_credentials, bot_use
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 def test_error(basic_bot):
     with pytest.raises(TypeError) as e:
         basic_bot.send_response(0, 1.2)

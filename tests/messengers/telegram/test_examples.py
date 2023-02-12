@@ -1,7 +1,6 @@
 """
 These tests check that pipelines defined in examples follow `happy_path` defined in the same examples.
 """
-import os
 import importlib
 import logging
 
@@ -9,15 +8,9 @@ import pytest
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.utils.testing.telegram import TelegramTesting
 
-TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
-TG_API_ID = os.getenv("TG_API_ID")
-TG_API_HASH = os.getenv("TG_API_HASH")
-
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
-@pytest.mark.skipif(not TG_BOT_TOKEN, reason="TG_BOT_TOKEN missing")
-@pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "example_module_name",
