@@ -14,7 +14,7 @@ from telebot import types, TeleBot
 
 from dff.script import Context, Actor
 
-from .utils import batch_open_io, partial
+from .utils import batch_open_io
 from .message import TelegramMessage, TelegramUI, RemoveKeyboard
 
 from dff.script import Message
@@ -159,6 +159,7 @@ class UpdateType(Enum):
     See `link <https://pytba.readthedocs.io/en/latest/types.html#telebot.types.Update>`__.
     """
 
+    ALL = "ALL"
     MESSAGE = "message"
     EDITED_MESSAGE = "edited_message"
     CHANNEL_POST = "channel_post"
@@ -175,9 +176,9 @@ class UpdateType(Enum):
     CHAT_JOIN_REQUEST = "chat_join_request"
 
 
-def handler(
+def telegram_condition(
     messenger: TeleBot = _default_messenger,
-    target_type: Optional[UpdateType] = None,
+    update_type: UpdateType = UpdateType.MESSAGE,
     commands: Optional[List[str]] = None,
     regexp: Optional[str] = None,
     func: Optional[Callable] = None,
@@ -192,9 +193,10 @@ def handler(
     :param messenger:
         Messenger to test filters on. Used only for :py:attr:`Telebot.custom_filters`.
         Defaults to :py:data:`._default_messenger`.
-    :param target_type:
-        If set to `UpdateType` it will check that an update is of the same type.
-        Defaults to None.
+    :param update_type:
+        If set to any `UpdateType` other than `UpdateType.ALL`
+        it will check that an update is of the same type.
+        Defaults to `UpdateType.Message`.
     :param commands:
         Telegram command trigger.
         See `link <https://github.com/eternnoir/pyTelegramBotAPI#general-api-documentation>`__.
@@ -228,41 +230,12 @@ def handler(
         if last_request is None:
             return False
         update = getattr(last_request, "update", None)
-        update_type = getattr(last_request, "update_type", None)
+        request_update_type = getattr(last_request, "update_type", None)
         if update is None:
             return False
-        if target_type is not None and update_type != target_type.value:
+        if update_type != UpdateType.ALL and request_update_type != update_type.value:
             return False
         test_result = messenger._test_message_handler(update_handler, update)
         return test_result
 
     return condition
-
-
-message_handler = partial(handler, target_type=UpdateType.MESSAGE)
-
-edited_message_handler = partial(handler, target_type=UpdateType.EDITED_MESSAGE)
-
-channel_post_handler = partial(handler, target_type=UpdateType.CHANNEL_POST)
-
-edited_channel_post_handler = partial(handler, target_type=UpdateType.EDITED_CHANNEL_POST)
-
-inline_handler = partial(handler, target_type=UpdateType.INLINE_QUERY)
-
-chosen_inline_handler = partial(handler, target_type=UpdateType.CHOSEN_INLINE_RESULT)
-
-callback_query_handler = partial(handler, target_type=UpdateType.CALLBACK_QUERY)
-
-shipping_query_handler = partial(handler, target_type=UpdateType.SHIPPING_QUERY)
-
-pre_checkout_query_handler = partial(handler, target_type=UpdateType.PRE_CHECKOUT_QUERY)
-
-poll_handler = partial(handler, target_type=UpdateType.POLL)
-
-poll_answer_handler = partial(handler, target_type=UpdateType.POLL_ANSWER)
-
-chat_member_handler = partial(handler, target_type=UpdateType.CHAT_MEMBER)
-
-my_chat_member_handler = partial(handler, target_type=UpdateType.MY_CHAT_MEMBER)
-
-chat_join_request_handler = partial(handler, target_type=UpdateType.CHAT_JOIN_REQUEST)

@@ -12,7 +12,7 @@ from telebot import types, logger
 from dff.script import Context
 from dff.messengers.common import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
 from .messenger import TelegramMessenger
-from .message import TelegramMessage, Message, CallbackQuery
+from .message import TelegramMessage, Message
 
 try:
     from flask import Flask, request, abort
@@ -35,8 +35,7 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     - | `update` -- this field stores the first non-empty field of `update`,
     - | `update_type` -- this field stores the name of the first non-empty field of `update`,
     - | `text` -- this field stores `update.message.text`,
-    - | `commands` -- this field stores a list of one object (a CallbackQuery instance
-        with `data=update.callback_query.data`), or None if `data` is None.
+    - | `callback_query` -- this field stores `update.callback_query.data` or None if `data` is None.
 
     :param messenger: Messenger instance.
     :param update: Update to process.
@@ -60,7 +59,7 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
                 if isinstance(value, types.CallbackQuery):
                     data = value.data
                     if data is not None:
-                        message.callback_query = CallbackQuery(data=data)
+                        message.callback_query = data
 
                 dict_update = vars(value)
                 # if 'chat' is not available, fall back to 'from_user', then to 'user'

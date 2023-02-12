@@ -3,7 +3,7 @@
 # 4. Conditions
 
 This example shows how to process Telegram updates in your script
-and reuse handler triggers from the `pytelegrambotapi` library.
+and reuse telegram_condition triggers from the `pytelegrambotapi` library.
 """
 
 # %%
@@ -13,8 +13,7 @@ from dff.script import TRANSITIONS, RESPONSE
 
 from dff.messengers.telegram import (
     PollingTelegramInterface,
-    message_handler,
-    handler,
+    telegram_condition,
     UpdateType,
 )
 from dff.pipeline import Pipeline
@@ -27,21 +26,23 @@ from dff.utils.testing.common import is_interactive_mode
 In our Telegram module, we adopted the system of filters
 available in the `pytelegrambotapi` library.
 
-You can use `message_handler` to filter text messages from telegram in various ways.
-Filling the `command` argument will cause the handler to only react to listed commands.
-`func` argument on the other hand allows you to define arbitrary conditions.
-`regexp` creates a regular expression filter, etc.
+You can use `telegram_condition` to filter text messages from telegram in various ways.
 
-Note:
-Using `message_handler(...)` is the same as using `handler(target_type=UpdateTypes.MESSAGE, ...)`.
+- Setting the `update_type` will allow filtering by update type:
+  if you want the condition to trigger only on updates of the type `edited_message`,
+  set it to `UpdateType.EDITED_MESSAGE`.
+  The field defaults to `message`.
+- Setting the `command` argument will cause the telegram_condition to only react to listed commands.
+- `func` argument on the other hand allows you to define arbitrary conditions.
+- `regexp` creates a regular expression filter, etc.
 
 Note:
 It is possible to use `cnd.exact_match` as a condition (as seen in previous examples).
 However, the functionality of that approach is lacking:
 At this moment only two fields of `Message` are set during update processing:
 
-- `text` stores a `text` field of `message` updates
-- `commands` stores a `data` field of `callback_query` updates
+- `text` stores the `text` field of `message` updates
+- `callback_query` stores the `data` field of `callback_query` updates
 
 For more information see example `3_buttons_with_callback.py`.
 """
@@ -51,27 +52,33 @@ For more information see example `3_buttons_with_callback.py`.
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi, how are you?"),
-            TRANSITIONS: {"node2": handler(target_type=UpdateType.MESSAGE, regexp="fine")},
+            TRANSITIONS: {
+                "node2": telegram_condition(update_type=UpdateType.MESSAGE, regexp="fine")
+            },
+            # this is the same as
+            # TRANSITIONS: {"node2": telegram_condition(regexp="fine")},
         },
         "node2": {
             RESPONSE: TelegramMessage(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": message_handler(func=lambda msg: "music" in msg.text)},
+            TRANSITIONS: {"node3": telegram_condition(func=lambda msg: "music" in msg.text)},
         },
         "node3": {
             RESPONSE: TelegramMessage(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": message_handler(func=lambda msg: True)},
+            TRANSITIONS: {"node4": telegram_condition(update_type=UpdateType.ALL)},
+            # This condition is true for any type of update
         },
         "node4": {
             RESPONSE: TelegramMessage(text="bye"),
-            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": telegram_condition()},
+            # This condition is true if the last update is of type `message`
         },
         "fallback_node": {
             RESPONSE: TelegramMessage(text="Ooops"),
-            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
         },
     }
 }
@@ -89,6 +96,7 @@ happy_path = (
         TelegramMessage(text="Sorry, I can not talk about music now."),
     ),
     (TelegramMessage(text="ok"), TelegramMessage(text="bye")),
+    (TelegramMessage(text="bye"), TelegramMessage(text="Hi, how are you?")),
 )
 
 

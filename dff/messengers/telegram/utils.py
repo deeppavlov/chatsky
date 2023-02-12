@@ -21,20 +21,6 @@ CallableParams = ParamSpec("CallableParams")
 ReturnType = TypeVar("ReturnType")
 
 
-def partial(func: Callable[CallableParams, ReturnType], **part_kwargs) -> Callable[CallableParams, ReturnType]:
-    """
-    This function replaces the `partial` implementation from functools.
-    In contrast with the original class-based approach, it decorates the function, so we can use docstrings.
-    """
-
-    @wraps(func)
-    def wrapper(*args: CallableParams.args, **kwargs: CallableParams.kwargs) -> ReturnType:
-        new_kwargs = {**kwargs, **part_kwargs}
-        return func(*args, **new_kwargs)
-
-    return wrapper
-
-
 def open_io(item: types.InputMedia):
     """
     Returns `InputMedia` with an opened file descriptor instead of path.

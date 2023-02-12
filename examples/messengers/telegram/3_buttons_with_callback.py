@@ -18,7 +18,6 @@ from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramUI,
     TelegramMessage,
-    CallbackQuery,
 )
 from dff.messengers.telegram.message import _ClickButton
 from dff.utils.testing.common import is_interactive_mode
@@ -72,12 +71,8 @@ script = {
                 }
             ),
             TRANSITIONS: {
-                ("general", "success"): cnd.exact_match(
-                    TelegramMessage(callback_query=CallbackQuery(data="correct"))
-                ),
-                ("general", "fail"): cnd.exact_match(
-                    TelegramMessage(callback_query=CallbackQuery(data="wrong"))
-                ),
+                ("general", "success"): cnd.exact_match(TelegramMessage(callback_query="correct")),
+                ("general", "fail"): cnd.exact_match(TelegramMessage(callback_query="wrong")),
             },
         },
         "success": {

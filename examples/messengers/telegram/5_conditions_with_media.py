@@ -17,7 +17,7 @@ from dff.script.core.message import Image, Attachments
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessage,
-    message_handler,
+    telegram_condition,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
@@ -40,15 +40,7 @@ picture_url = "https://folklore.linghub.ru/api/gallery/300/23.JPG"
 # %% [markdown]
 """
 To filter user messages depending on whether or not media files were sent,
-you can use the `content_types` parameter of the `message_handler`.
-
-If you want to access properties of some specific file, you can get
-the message from the context:
-
-    message = ctx.last_request
-
-The files will then be accessible as properties: message.photo, etc.
-
+you can use the `content_types` parameter of the `telegram_condition`.
 """
 
 
@@ -60,11 +52,15 @@ interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 script = {
     "root": {
         "start": {
-            TRANSITIONS: {("pics", "ask_picture"): message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("pics", "ask_picture"): telegram_condition(commands=["start", "restart"])
+            },
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {("pics", "ask_picture"): message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("pics", "ask_picture"): telegram_condition(commands=["start", "restart"])
+            },
         },
     },
     "pics": {
@@ -75,8 +71,8 @@ script = {
                     [
                         # Telegram can put photos both in 'photo' and 'document' fields.
                         # We should consider both cases when we check the message for media.
-                        message_handler(content_types=["photo"]),
-                        message_handler(
+                        telegram_condition(content_types=["photo"]),
+                        telegram_condition(
                             func=lambda message: (
                                 # check attachments in message properties
                                 message.document
@@ -86,7 +82,7 @@ script = {
                         ),
                     ]
                 ),
-                ("pics", "send_many"): message_handler(content_types=["text"]),
+                ("pics", "send_many"): telegram_condition(content_types=["text"]),
                 ("pics", "ask_picture"): cnd.true(),
             },
         },

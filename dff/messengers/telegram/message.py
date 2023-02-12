@@ -22,7 +22,7 @@ from telebot.types import (
     ChatJoinRequest,
 )
 
-from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError, Command
+from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError
 
 
 class TelegramUI(Keyboard):
@@ -36,12 +36,6 @@ class TelegramUI(Keyboard):
                 if button.payload is not None or button.source is not None:
                     raise ValidationError(f"`payload` and `source` are only used for inline keyboards: {button}")
         return values
-
-
-class CallbackQuery(DataModel):
-    """This class represents the event of user sending data by pressing a button."""
-
-    data: str
 
 
 class _ClickButton(DataModel):
@@ -74,7 +68,7 @@ class TelegramMessage(Message):
         Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
     ] = None
     location: Optional[Location] = None
-    callback_query: Optional[Union[CallbackQuery, _ClickButton]] = None
+    callback_query: Optional[Union[str, _ClickButton]] = None
     update: Optional[
         Union[
             tlMessage,

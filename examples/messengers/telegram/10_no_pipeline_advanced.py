@@ -24,8 +24,7 @@ from dff.messengers.telegram import (
     TelegramMessenger,
     TelegramMessage,
     TelegramUI,
-    message_handler,
-    callback_query_handler,
+    telegram_condition,
 )
 from dff.script.core.message import Button
 from dff.utils.testing.common import is_interactive_mode
@@ -39,8 +38,8 @@ bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", ""))
 """
 You can handle various values inside your script:
 
-* Use `bot.cnd.message_handler` to create conditions for message values.
-* Use `bot.cnd.callback_query_handler` to create conditions depending on the query values.
+* Use `message_telegram_condition` to create conditions for message values.
+* Use `callback_query_handler` to create conditions depending on the query values.
 
 The signature of these functions is equivalent to the signature of the `telebot` methods.
 """
@@ -56,7 +55,9 @@ script = {
         },
         "fallback": {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
-            TRANSITIONS: {("general", "keyboard"): message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {
+                ("general", "keyboard"): telegram_condition(commands=["start", "restart"])
+            },
         },
     },
     "general": {
@@ -71,8 +72,8 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success"): callback_query_handler(func=lambda call: call.data == "4"),
-                ("general", "fail"): callback_query_handler(func=lambda call: call.data == "5"),
+                ("general", "success"): cnd.exact_match(TelegramMessage(callback_query="4")),
+                ("general", "fail"): cnd.exact_match(TelegramMessage(callback_query="5")),
             },
         },
         "success": {

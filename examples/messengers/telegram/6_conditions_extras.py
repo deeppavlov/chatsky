@@ -14,10 +14,8 @@ import dff.script.conditions as cnd
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessage,
-    chat_join_request_handler,
-    my_chat_member_handler,
-    inline_handler,
-    message_handler,
+    telegram_condition,
+    UpdateType,
 )
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
@@ -28,25 +26,25 @@ from dff.utils.testing.common import is_interactive_mode
 In our Telegram module, we adopted the system of filters
 available in the `pytelegrambotapi` library.
 
-Aside from `message_handler` and `callback_query_handler`, you can use
+Aside from `MESSAGE` you can use
 other triggers to interact with the api. In this example, we use
 handlers of other type as global conditions that trigger a response
 from the bot.
 
 Here, we use the following triggers:
 
-* `chat_join_request_handler`: join request is sent to the chat where the bot is.
-* `my_chat_member_handler`: triggered when the bot is invited to a chat.
-* `inline_handler`: triggered when an inline query is being sent to the bot.
+* `chat_join_request`: join request is sent to the chat where the bot is.
+* `my_chat_member`: triggered when the bot is invited to a chat.
+* `inline_query`: triggered when an inline query is being sent to the bot.
 
 The other available conditions are:
 
-* `channel_post_handler`: new post is created in a channel the bot is subscribed to;
-* `edited_channel_post_handler`: post is edited in a channel the bot is subscribed to;
-* `shipping_query_handler`: shipping query is sent by the user;
-* `pre_checkout_query_handler`: order confirmation is sent by the user;
-* `poll_handler`: poll is sent to the chat;
-* `poll_answer_handler`: users answered the poll sent by the bot.
+* `channel_post`: new post is created in a channel the bot is subscribed to;
+* `edited_channel_post`: post is edited in a channel the bot is subscribed to;
+* `shipping_query`: shipping query is sent by the user;
+* `pre_checkout_query`: order confirmation is sent by the user;
+* `poll`: poll is sent to the chat;
+* `poll_answer`: users answered the poll sent by the bot.
 
 You can read more on those in the Telegram documentation or in the docs for the `telebot` library.
 """
@@ -59,21 +57,24 @@ script = {
             ("greeting_flow", "node1"): cnd.any(
                 [
                     # say hi when invited to a chat
-                    chat_join_request_handler(func=lambda x: True),
+                    telegram_condition(
+                        update_type=UpdateType.CHAT_JOIN_REQUEST, func=lambda x: True
+                    ),
                     # say hi when someone enters the chat
-                    my_chat_member_handler(func=lambda x: True),
+                    telegram_condition(update_type=UpdateType.MY_CHAT_MEMBER, func=lambda x: True),
                 ]
             ),
             # send a message when inline query is received
-            ("greeting_flow", "node2"): inline_handler(
-                func=lambda query: print(query) or query.query is not None
+            ("greeting_flow", "node2"): telegram_condition(
+                update_type=UpdateType.INLINE_QUERY,
+                func=lambda query: print(query) or query.query is not None,
             ),
         },
     },
     "greeting_flow": {
         "start_node": {
             RESPONSE: TelegramMessage(text="Bot running"),
-            TRANSITIONS: {"node1": message_handler(commands=["start", "restart"])},
+            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi"),
