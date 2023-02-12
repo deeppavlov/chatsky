@@ -67,7 +67,6 @@ script = {
             # send a message when inline query is received
             ("greeting_flow", "node2"): telegram_condition(
                 update_type=UpdateType.INLINE_QUERY,
-                func=lambda query: print(query) or query.query is not None,
             ),
         },
     },
