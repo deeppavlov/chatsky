@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing.telegram import TelegramTesting
+from dff.utils.testing.telegram import get_bot_user, TelegramClient
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -18,8 +18,8 @@ _pipeline = module_9.pipeline
 
 
 @pytest.fixture(scope="session")
-def env_var_presence():
-    env_variables = {"TG_BOT_TOKEN": None, "TG_API_ID": None, "TG_API_HASH": None}
+def env_vars():
+    env_variables = {"TG_BOT_TOKEN": None, "TG_API_ID": None, "TG_API_HASH": None, "TG_BOT_USERNAME": None}
 
     for arg in env_variables:
         env_variables[arg] = os.getenv(arg)
@@ -54,8 +54,14 @@ def basic_bot():
 
 
 @pytest.fixture(scope="session")
-def test_helper():
-    yield TelegramTesting(pipeline=None)
+def api_credentials(env_vars):
+    yield (int(env_vars["TG_API_ID"]), env_vars["TG_API_HASH"])
+
+
+@pytest.fixture(scope="session")
+def bot_user(api_credentials, env_vars):
+    client = TelegramClient("anon", *api_credentials)
+    yield asyncio.run(get_bot_user(client, env_vars["TG_BOT_USERNAME"]))
 
 
 def pytest_sessionfinish(session, exitstatus):

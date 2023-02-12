@@ -1,8 +1,7 @@
-from typing import List, Optional, cast
+from typing import List, Optional, cast, Tuple
 from contextlib import asynccontextmanager
 import logging
 import asyncio
-from os import getenv
 
 import telethon.tl.types
 from telethon import TelegramClient
@@ -24,24 +23,27 @@ async def get_bot_user(client: TelegramClient, username: str):
 class TelegramTesting:
     """Defines functions for testing."""
 
-    def __init__(self, pipeline: Pipeline, client: Optional[TelegramClient] = None, bot: Optional[User] = None):
+    def __init__(
+        self,
+        pipeline: Pipeline,
+        api_credentials: Optional[Tuple[int, str]] = None,
+        client: Optional[TelegramClient] = None,
+        bot_username: Optional[str] = None,
+        bot: Optional[User] = None,
+    ):
         if client is None:
-            tg_id = getenv("TG_API_ID")
-            tg_hash = getenv("TG_API_HASH")
-            if tg_id is not None and tg_hash is not None:
-                client = TelegramClient("anon", int(tg_id), tg_hash)
-            else:
-                raise RuntimeError("Telegram API credentials are not set, client argument is not specified")
+            if api_credentials is None:
+                raise RuntimeError("Pass either `client` or `api_credentials`.")
+            client = TelegramClient("anon", *api_credentials)
         self.client = client
         """Telegram client (not bot). Needed to verify bot replies."""
         self.pipeline = pipeline
         if bot is None:
-            bot = getenv("TG_BOT_USERNAME")
-            if bot is None:
-                raise RuntimeError("Bot username is not set, bot argument is not specified")
-            bot = asyncio.run(get_bot_user(self.client, bot))
+            if bot_username is None:
+                raise RuntimeError("Pass either `bot_username` or `bot`.")
+            bot = asyncio.run(get_bot_user(self.client, bot_username))
         self.bot = bot
-        """Bot user (to know to whom to send messages from client)."""
+        """Bot user (to know whom to send messages to from client)."""
 
     async def send_message(self, message: TelegramMessage, last_bot_messages: List[TlMessage]):
         """Send a message from client to bot."""

@@ -7,6 +7,7 @@ import logging
 
 import pytest
 from tests.test_utils import get_path_from_tests_to_current_dir
+from dff.utils.testing.telegram import TelegramTesting
 
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
@@ -29,10 +30,10 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
         "7_polling_setup",
     ],
 )
-async def test_client_examples(example_module_name, tmp_path, test_helper):
+async def test_client_examples(example_module_name, tmp_path, api_credentials, bot_user):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
     pipeline = example_module.pipeline
     happy_path = example_module.happy_path
-    test_helper.pipeline = pipeline
+    test_helper = TelegramTesting(pipeline=pipeline, api_credentials=api_credentials, bot=bot_user)
     logging.info("Test start")
     await test_helper.check_happy_path(happy_path, tmp_path)

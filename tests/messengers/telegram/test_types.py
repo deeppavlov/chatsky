@@ -17,6 +17,8 @@ from dff.script import Message
 from dff.script.core.message import Attachments, Keyboard, Button, Image, Location, Audio, Video, Attachment, Document
 from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 
+from dff.utils.testing.telegram import TelegramTesting
+
 TG_BOT_TOKEN = os.getenv("TG_BOT_TOKEN")
 TG_API_ID = os.getenv("TG_API_ID")
 TG_API_HASH = os.getenv("TG_API_HASH")
@@ -33,9 +35,9 @@ document = Document(source="https://github.com/mathiasbynens/small/raw/master/pd
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_text(tmp_path, pipeline_instance, test_helper):
+async def test_text(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test")
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
@@ -72,18 +74,18 @@ async def test_text(tmp_path, pipeline_instance, test_helper):
         ),
     ],
 )
-async def test_buttons(ui, button_type, markup_type, tmp_path, pipeline_instance, test_helper):
+async def test_buttons(ui, button_type, markup_type, tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test", ui=ui)
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_keyboard_remove(tmp_path, pipeline_instance, test_helper):
+async def test_keyboard_remove(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test", ui=RemoveKeyboard())
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
@@ -114,9 +116,9 @@ async def test_keyboard_remove(tmp_path, pipeline_instance, test_helper):
         (Message(text="test", attachments=Attachments(files=[document])),),
     ],
 )
-async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance, test_helper):
+async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage.parse_obj(generic_response)
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
@@ -147,27 +149,27 @@ async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance
         (Message(text="test", attachments=Attachments(files=2 * [document])),),
     ],
 )
-async def test_attachments(attachments, tmp_path, pipeline_instance, test_helper):
+async def test_attachments(attachments, tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage.parse_obj(attachments)
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_location(tmp_path, pipeline_instance, test_helper):
+async def test_location(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
 @pytest.mark.skipif(not TG_BOT_TOKEN, reason="`TG_BOT_TOKEN` missing")
 @pytest.mark.skipif(not TG_API_ID or not TG_API_HASH, reason="TG credentials missing")
 @pytest.mark.asyncio
-async def test_parsed_text(tmp_path, pipeline_instance, test_helper):
+async def test_parsed_text(tmp_path, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="[inline URL](http://www.example.com/)", parse_mode=ParseMode.MARKDOWN)
-    test_helper.pipeline = pipeline_instance
+    test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
     await test_helper.send_and_check(telegram_response, tmp_path)
 
 
