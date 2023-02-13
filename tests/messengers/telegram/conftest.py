@@ -6,7 +6,7 @@ from pathlib import Path
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing.telegram import get_bot_user, TelegramClient
+from dff.utils.testing.telegram import get_bot_user, TelegramClient, get_session_file
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -58,7 +58,7 @@ def api_credentials(env_vars):
 
 @pytest.fixture(scope="session")
 def bot_user(api_credentials, env_vars):
-    client = TelegramClient("anon", *api_credentials)
+    client = TelegramClient(get_session_file(), *api_credentials)
     yield asyncio.run(get_bot_user(client, env_vars["TG_BOT_USERNAME"]))
 
 

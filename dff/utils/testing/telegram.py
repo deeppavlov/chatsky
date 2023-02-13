@@ -17,6 +17,12 @@ from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard, _ClickButton
 
 
+def get_session_file():
+    dff_root_dir = Path(__file__).parent.parent.parent.parent
+
+    return str(dff_root_dir / "anon.session")
+
+
 async def get_bot_user(client: TelegramClient, username: str):
     async with client:
         return await client.get_entity(username)
@@ -36,7 +42,7 @@ class TelegramTesting:
         if client is None:
             if api_credentials is None:
                 raise RuntimeError("Pass either `client` or `api_credentials`.")
-            client = TelegramClient("anon", *api_credentials)
+            client = TelegramClient(get_session_file(), *api_credentials)
         self.client = client
         """Telegram client (not bot). Needed to verify bot replies."""
         self.pipeline = pipeline
