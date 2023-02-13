@@ -61,7 +61,7 @@ pipeline = Pipeline.from_script(
     ("greeting_flow", "start_node"),
     ("greeting_flow", "fallback_node"),
     {},  # `context_storage` - a dictionary or
-    # a `DBAbstractContextStorage` instance,
+    # a `DBContextStorage` instance,
     # a place to store dialog contexts
     CLIMessengerInterface(),
     # `messenger_interface` - a message channel adapter,
