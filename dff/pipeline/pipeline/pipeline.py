@@ -7,7 +7,7 @@ import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable
 
-from dff.context_storages import DBAbstractContextStorage
+from dff.context_storages import DBContextStorage
 from dff.script import Actor, Script, Context
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
@@ -34,7 +34,7 @@ class Pipeline:
     It accepts constructor parameters:
 
     :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An :py:class:`~.DBAbstractContextStorage` instance for this pipeline or
+    :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
     :param services: (required) A :py:data:`~.ServiceGroupBuilder` object,
         that will be transformed to root service group. It should include :py:class:`~.Actor`,
@@ -51,7 +51,7 @@ class Pipeline:
         self,
         components: ServiceGroupBuilder,
         messenger_interface: Optional[MessengerInterface] = None,
-        context_storage: Optional[Union[DBAbstractContextStorage, Dict]] = None,
+        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[float] = None,
@@ -150,7 +150,7 @@ class Pipeline:
         script: Union[Script, Dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
-        context_storage: Optional[Union[DBAbstractContextStorage, Dict]] = None,
+        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
@@ -166,7 +166,7 @@ class Pipeline:
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param context_storage: An :py:class:`~.DBAbstractContextStorage` instance for this pipeline
+        :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
             or a dict to store dialog :py:class:`~.Context`.
         :param messenger_interface: An instance for this pipeline.
         :param pre_services: List of :py:data:`~.ServiceBuilder` or
@@ -203,14 +203,20 @@ class Pipeline:
         :param ctx_id: Current dialog id; if `None`, new dialog will be created.
         :return: Dialog `Context`.
         """
-        ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
+        if isinstance(self.context_storage, DBContextStorage):
+            ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
+        else:
+            ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.add_request(request)
         ctx = await self._services_pipeline(ctx, self.actor)
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
-        self.context_storage[ctx_id] = ctx
+        if isinstance(self.context_storage, DBContextStorage):
+            await self.context_storage.set_item_async(ctx_id, ctx)
+        else:
+            self.context_storage[ctx_id] = ctx
         if self._clean_turn_cache:
             cache_clear()
 

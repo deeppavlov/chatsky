@@ -1,11 +1,13 @@
 """
 SQL
 ---
-Provides the sql-based version of the :py:class:`.DBContextStorage`.
+Provides the SQL-based version of the :py:class:`.DBContextStorage`.
 You can choose the backend option of your liking from MySQL, PostgreSQL, or SQLite.
 """
+import asyncio
 import importlib
 import json
+from typing import Hashable
 
 from dff.script import Context
 
@@ -13,7 +15,8 @@ from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
 
 try:
-    from sqlalchemy import create_engine, Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy import Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True
 except (ImportError, ModuleNotFoundError):
@@ -22,27 +25,27 @@ except (ImportError, ModuleNotFoundError):
 postgres_available = sqlite_available = mysql_available = False
 
 try:
-    import psycopg2
+    import asyncpg
 
-    _ = psycopg2
+    _ = asyncpg
 
     postgres_available = True
 except (ImportError, ModuleNotFoundError):
     pass
 
 try:
-    import pymysql
+    import asyncmy
 
-    _ = pymysql
+    _ = asyncmy
 
     mysql_available = True
 except (ImportError, ModuleNotFoundError):
     pass
 
 try:
-    import sqlite3
+    import aiosqlite
 
-    _ = sqlite3
+    _ = aiosqlite
 
     sqlite_available = True
 except (ImportError, ModuleNotFoundError):
@@ -65,8 +68,8 @@ def import_insert_for_dialect(dialect: str):
 
 class SQLContextStorage(DBContextStorage):
     """
-    Sql-based version of the :py:class:`.DBContextStorage`.
-    Compatible with MySQL, PostgreSQL, SQLite.
+    | SQL-based version of the :py:class:`.DBContextStorage`.
+    | Compatible with MySQL, Postgresql, Sqlite.
 
     :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
@@ -80,10 +83,10 @@ class SQLContextStorage(DBContextStorage):
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
-        super(SQLContextStorage, self).__init__(path)
+        DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
-        self.engine = create_engine(self.full_path)
+        self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
 
         id_column_args = {"primary_key": True}
@@ -98,63 +101,66 @@ class SQLContextStorage(DBContextStorage):
             Column("context", JSON),  # column for storing serialized contexts
         )
 
-        if not inspect(self.engine).has_table(self.table.name):  # create table if it does not exist
-            self.table.create(self.engine)
+        asyncio.run(self._create_self_table())
 
         import_insert_for_dialect(self.dialect)
 
     @threadsafe_method
-    def __setitem__(self, key: str, value: Context) -> None:
-        key = str(key)
+    async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
         value = json.loads(value.json())
 
         insert_stmt = insert(self.table).values(id=str(key), context=value)
-        update_stmt = self._get_update_stmt(insert_stmt)
+        update_stmt = await self._get_update_stmt(insert_stmt)
 
-        with self.engine.connect() as conn:
-            conn.execute(update_stmt)
+        async with self.engine.connect() as conn:
+            await conn.execute(update_stmt)
+            await conn.commit()
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
-        key = str(key)
-        stmt = select(self.table.c.context).where(self.table.c.id == key)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
+    async def get_item_async(self, key: Hashable) -> Context:
+        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
+        async with self.engine.connect() as conn:
+            result = await conn.execute(stmt)
             row = result.fetchone()
             if row:
                 return Context.cast(row[0])
         raise KeyError
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
-        key = str(key)
-        stmt = delete(self.table).where(self.table.c.id == key)
-        with self.engine.connect() as conn:
-            conn.execute(stmt)
+    async def del_item_async(self, key: Hashable):
+        stmt = delete(self.table).where(self.table.c.id == str(key))
+        async with self.engine.connect() as conn:
+            await conn.execute(stmt)
+            await conn.commit()
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
-        key = str(key)
-        stmt = select(self.table.c.context).where(self.table.c.id == key)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
+    async def contains_async(self, key: Hashable) -> bool:
+        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
+        async with self.engine.connect() as conn:
+            result = await conn.execute(stmt)
             return bool(result.fetchone())
 
     @threadsafe_method
-    def __len__(self) -> int:
-        stmt = select([func.count()]).select_from(self.table)
-        with self.engine.connect() as conn:
-            result = conn.execute(stmt)
+    async def len_async(self) -> int:
+        stmt = select(func.count()).select_from(self.table)
+        async with self.engine.connect() as conn:
+            result = await conn.execute(stmt)
             return result.fetchone()[0]
 
     @threadsafe_method
-    def clear(self) -> None:
+    async def clear_async(self):
         stmt = delete(self.table)
-        with self.engine.connect() as conn:
-            conn.execute(stmt)
+        async with self.engine.connect() as conn:
+            await conn.execute(stmt)
+            await conn.commit()
 
-    def _get_update_stmt(self, insert_stmt):
+    async def _create_self_table(self):
+        async with self.engine.begin() as conn:
+            if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(self.table.name)):
+                await conn.run_sync(self.table.create, self.engine)
+
+    async def _get_update_stmt(self, insert_stmt):
         if self.dialect == "sqlite":
             return insert_stmt
         elif self.dialect == "mysql":
@@ -165,14 +171,14 @@ class SQLContextStorage(DBContextStorage):
             )
         return update_stmt
 
-    def _check_availability(self, custom_driver: bool) -> None:
+    def _check_availability(self, custom_driver: bool):
         if not custom_driver:
             if self.full_path.startswith("postgresql") and not postgres_available:
                 install_suggestion = get_protocol_install_suggestion("postgresql")
-                raise ImportError("Packages `sqlalchemy` and/or `psycopg2-binary` are missing.\n" + install_suggestion)
+                raise ImportError("Packages `sqlalchemy` and/or `asyncpg` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("mysql") and not mysql_available:
                 install_suggestion = get_protocol_install_suggestion("mysql")
-                raise ImportError("Packages `sqlalchemy` and/or `pymysql` are missing.\n" + install_suggestion)
+                raise ImportError("Packages `sqlalchemy` and/or `asyncmy` are missing.\n" + install_suggestion)
             elif self.full_path.startswith("sqlite") and not sqlite_available:
                 install_suggestion = get_protocol_install_suggestion("sqlite")
-                raise ImportError("Package `sqlalchemy` and/or `sqlite3` is missing.\n" + install_suggestion)
+                raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)

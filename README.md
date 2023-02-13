@@ -113,7 +113,7 @@ from dff.script import Context, Actor
 from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
-db = SQLContextStorage("postgresql://user:password@host:port/dbname")
+db = SQLContextStorage("postgresql+asyncpg://user:password@host:port/dbname")
 
 actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 

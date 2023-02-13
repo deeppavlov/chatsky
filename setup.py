@@ -32,37 +32,60 @@ core = [
     "typing_extensions>=4.0.0",
 ]
 
-sqlite_dependencies = [
-    "sqlalchemy>=1.4.27, <2.0",
+async_files_dependencies = [
+    "aiofiles>=22.1.0",
 ]
 
 redis_dependencies = [
-    "redis>=4.1.2",
+    "aioredis>=2.0.1",
 ]
 
 mongodb_dependencies = [
-    "pymongo==4.3.2",  # TODO: wait for bson using bug will be fixed
-    "bson>=0.5.10",
+    "motor>=3.1.1",
 ]
 
-mysql_dependencies = [
-    "sqlalchemy>=1.4.27",
-    "pymysql>=1.0.2",
-    "cryptography>=36.0.2",
+_sql_dependencies = [
+    "sqlalchemy[asyncio]>=2.0.2",
 ]
 
-postgresql_dependencies = [
-    "sqlalchemy>=1.4.27",
-    "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stabe for windows
-]
+sqlite_dependencies = merge_req_lists(
+    [
+        _sql_dependencies,
+        [
+            "aiosqlite>=0.18.0",
+            "sqlalchemy[asyncio]>=1.4.27",
+        ],
+    ]
+)
+
+mysql_dependencies = merge_req_lists(
+    [
+        _sql_dependencies,
+        [
+            "asyncmy>=0.2.5",
+            "cryptography>=36.0.2",
+        ],
+    ]
+)
+
+postgresql_dependencies = merge_req_lists(
+    [
+        _sql_dependencies,
+        [
+            "asyncpg>=0.27.0",
+        ],
+    ]
+)
 
 ydb_dependencies = [
     "ydb>=2.5.0",
+    "six>=1.16.0",
 ]
 
 full = merge_req_lists(
     [
         core,
+        async_files_dependencies,
         sqlite_dependencies,
         redis_dependencies,
         mongodb_dependencies,
@@ -73,8 +96,8 @@ full = merge_req_lists(
 )
 
 test_requirements = [
-    "pytest >=6.2.4,<7.0.0",
-    "pytest-cov >=2.12.0,<3.0.0",
+    "pytest >=7.2.1,<8.0.0",
+    "pytest-cov >=4.0.0,<5.0.0",
     "pytest-asyncio >=0.14.0,<0.15.0",
     "flake8 >=3.8.3,<4.0.0",
     "click<=8.0.4",
@@ -93,7 +116,8 @@ tests_full = merge_req_lists(
 )
 
 doc = [
-    "sphinx>=1.7.9",
+    "sphinx<6",
+    "pydata_sphinx_theme>=0.12.0",
     "dff_sphinx_theme>=0.1.17",
     "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
@@ -127,6 +151,8 @@ devel_full = merge_req_lists(
 
 EXTRA_DEPENDENCIES = {
     "core": core,  # minimal dependencies (by default)
+    "json": async_files_dependencies,  # dependencies for using JSON
+    "pickle": async_files_dependencies,  # dependencies for using Pickle
     "sqlite": sqlite_dependencies,  # dependencies for using SQLite
     "redis": redis_dependencies,  # dependencies for using Redis
     "mongodb": mongodb_dependencies,  # dependencies for using MongoDB
@@ -144,7 +170,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.2.0",
+    version="0.2.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
