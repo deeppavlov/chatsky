@@ -7,19 +7,6 @@ from dff.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
 
-def set_framework_state(ctx: Context, state_key: str, update: Any):
-    """
-    Updates a context with an arbitrary framework state. If parameter `inner_key` is provided,
-    saves the state as a dict and puts the update inside as a value.
-
-    :param ctx: DFF context.
-    :param state_key: Framework state key.
-    :param update: Any framework state update.
-    """
-    ctx.framework_states[state_key] = update
-    return ctx
-
-
 def is_interactive_mode() -> bool:
     """
     Checking whether the example code should be run in interactive mode.
