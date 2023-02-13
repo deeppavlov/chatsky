@@ -46,25 +46,24 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     message = TelegramMessage(update_id=update.update_id)
     ctx_id = None
 
-    for field, value in vars(update).items():
-        if field != "update_id":
-            if value is not None:
-                if message.update is not None:
-                    raise RuntimeError(f"Two update fields. First: {message.update_type}; second: {field}")
-                message.update_type = field
-                message.update = value
-                if isinstance(value, types.Message):
-                    message.text = value.text
+    for update_field, update_value in vars(update).items():
+        if update_field != "update_id" and update_value is not None:
+            if message.update is not None:
+                raise RuntimeError(f"Two update fields. First: {message.update_type}; second: {update_field}")
+            message.update_type = update_field
+            message.update = update_value
+            if isinstance(update_value, types.Message):
+                message.text = update_value.text
 
-                if isinstance(value, types.CallbackQuery):
-                    data = value.data
-                    if data is not None:
-                        message.callback_query = data
+            if isinstance(update_value, types.CallbackQuery):
+                data = update_value.data
+                if data is not None:
+                    message.callback_query = data
 
-                dict_update = vars(value)
-                # if 'chat' is not available, fall back to 'from_user', then to 'user'
-                user = dict_update.get("chat", dict_update.get("from_user", dict_update.get("user")))
-                ctx_id = getattr(user, "id", None)
+            dict_update = vars(update_value)
+            # if 'chat' is not available, fall back to 'from_user', then to 'user'
+            user = dict_update.get("chat", dict_update.get("from_user", dict_update.get("user")))
+            ctx_id = getattr(user, "id", None)
     if message.update is None:
         raise RuntimeError(f"No update fields found: {update}")
 
