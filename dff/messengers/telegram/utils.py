@@ -3,12 +3,11 @@ Utils
 ------
 This module contains utilities for connecting to Telegram.
 """
-from typing import Union, Iterable, Callable
+from typing import Union, Iterable
 from typing_extensions import ParamSpec
 from contextlib import contextmanager
 from pathlib import Path
 from io import IOBase
-from functools import wraps
 
 try:
     from typing import TypeVar
