@@ -60,14 +60,14 @@ pipeline = Pipeline.from_script(
     TOY_SCRIPT,
     ("greeting_flow", "start_node"),
     ("greeting_flow", "fallback_node"),
-    {},  # `context_storage` - a dictionary or
+    context_storage={},  # `context_storage` - a dictionary or
     # a `DBContextStorage` instance,
     # a place to store dialog contexts
-    CLIMessengerInterface(),
+    messenger_interface=CLIMessengerInterface(),
     # `messenger_interface` - a message channel adapter,
     # it's not used in this example
-    [ping_processor],
-    [pong_processor],
+    pre_services=[ping_processor],
+    post_services=[pong_processor],
 )
 
 

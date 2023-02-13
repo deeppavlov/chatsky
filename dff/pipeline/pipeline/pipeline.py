@@ -5,10 +5,10 @@ This module contains the Pipeline class.
 """
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable
+from typing import Union, List, Dict, Optional, Hashable, Callable
 
 from dff.context_storages import DBContextStorage
-from dff.script import Actor, Script, Context
+from dff.script import Actor, Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
@@ -45,6 +45,7 @@ class Pipeline:
         warnings will be sent to logs. Additionally it has some calculated fields:
         1) `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         2) `actor` is a pipeline actor, found among services.
+
     """
 
     def __init__(
@@ -150,6 +151,11 @@ class Pipeline:
         script: Union[Script, Dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
+        label_priority: float = 1.0,
+        validation_stage: Optional[bool] = None,
+        condition_handler: Optional[Callable] = None,
+        verbose: bool = True,
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
@@ -166,6 +172,17 @@ class Pipeline:
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+            where there is no priority. Defaults to `1.0`.
+        :param validation_stage: This flag sets whether the validation stage is executed in actor.
+            It is executed by default. Defaults to `None`.
+        :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
+        :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
+        :param handlers: This variable is responsible for the usage of external handlers on
+            the certain stages of work of :py:class:`~dff.script.Actor`.
+            - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+            - value: List[Callable] - The list of called handlers for each stage.
+            Defaults to an empty `dict`.
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
             or a dict to store dialog :py:class:`~.Context`.
         :param messenger_interface: An instance for this pipeline.
@@ -177,7 +194,9 @@ class Pipeline:
             It constructs root service group by merging `pre_services` + actor + `post_services`.
         :type post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
         """
-        actor = Actor(script, start_label, fallback_label)
+        actor = Actor(
+            script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose, handlers
+        )
         pre_services = [] if pre_services is None else pre_services
         post_services = [] if post_services is None else post_services
         return cls(
