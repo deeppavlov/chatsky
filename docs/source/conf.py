@@ -131,8 +131,8 @@ def setup(_):
     generate_example_links_for_notebook_creation(
         [
             "examples/script/*.py",
-            "examples/pipeline/[1]*.py",
-            "examples/context_storages/[1]*.py",
+            "examples/pipeline/*.py",
+            "examples/context_storages/*.py",
             "examples/messengers/*.py",
         ]
     )
