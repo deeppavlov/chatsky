@@ -135,6 +135,17 @@ class PollingTelegramInterface(PollingMessengerInterface):
         logger.error(e)
         self.stop_polling.set()
 
+    def forget_processed_updates(self):
+        """
+        Forget updates already processed by the pipeline.
+        """
+        self.messenger.get_updates(
+            offset=self.last_processed_update + 1,
+            allowed_updates=self.allowed_updates,
+            timeout=1,
+            long_polling_timeout=1,
+        )
+
     async def connect(self, callback: PipelineRunnerFunction, loop: Optional[Callable] = None, *args, **kwargs):
         self.stop_polling.clear()
 
@@ -143,12 +154,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
                 callback, loop=loop or (lambda: not self.stop_polling.is_set()), timeout=self.interval
             )
         finally:
-            self.messenger.get_updates(
-                offset=self.last_processed_update + 1,
-                allowed_updates=self.allowed_updates,
-                timeout=1,
-                long_polling_timeout=1,
-            )  # forget processed updates
+            self.forget_processed_updates()
 
     def stop(self):
         self.stop_polling.set()

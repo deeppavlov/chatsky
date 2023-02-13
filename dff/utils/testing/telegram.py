@@ -116,15 +116,15 @@ class TelegramTesting:
         return msg
 
     @asynccontextmanager
-    async def run_bot(self):
+    async def run_bot_loop(self):
         """A context manager that starts a bot defined in `pipeline`"""
         self.pipeline.messenger_interface.timeout = 2
         self.pipeline.messenger_interface.long_polling_timeout = 2
-        task = asyncio.create_task(self.pipeline.messenger_interface.connect(self.pipeline._run_pipeline))
-        logging.info("Bot created")
-        yield
-        self.pipeline.messenger_interface.stop()
-        await task
+        await self.forget_previous_updates()
+
+        yield lambda: self.pipeline.messenger_interface._polling_loop(self.pipeline._run_pipeline)
+
+        self.pipeline.messenger_interface.forget_processed_updates()
 
     async def send_and_check(self, message: Message, file_download_destination=None):
         """Send a message from a bot, receive it as client, verify it."""
@@ -174,17 +174,20 @@ class TelegramTesting:
         :return:
         """
         if run_bot:
-            await self.forget_previous_updates()
-            bot = self.run_bot()
+            bot = self.run_bot_loop()
         else:
-            bot = nullcontext()
+
+            async def null():
+                ...
+
+            bot = nullcontext(null)
 
         if file_download_destination is None:
             fd_context = TemporaryDirectory()
         else:
             fd_context = nullcontext(file_download_destination)
 
-        async with self.client, bot:
+        async with self.client, bot as boot_loop:
             with fd_context as file_download_destination:
                 bot_messages = []
                 last_message = None
@@ -194,7 +197,8 @@ class TelegramTesting:
                     if user_message is not None:
                         last_message = user_message
                     logging.info("Request sent")
-                    await asyncio.sleep(3)
+                    await boot_loop()
+                    await asyncio.sleep(2)
                     logging.info("Extracting responses")
                     bot_messages = [
                         x
