@@ -96,9 +96,9 @@ full = merge_req_lists(
 )
 
 test_requirements = [
-    "pytest >=6.2.4,<7.0.0",
-    "pytest-cov >=2.12.0,<3.0.0",
-    "pytest-asyncio >=0.14.0,<0.15.0",
+    "pytest >=7.2.1",
+    "pytest-cov >=4.0.0",
+    "pytest-asyncio>=0.14.0",
     "flake8 >=3.8.3,<4.0.0",
     "click<=8.0.4",
     "black ==20.8b1",
