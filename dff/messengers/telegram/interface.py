@@ -140,7 +140,6 @@ class PollingTelegramInterface(PollingMessengerInterface):
         self.stop_polling.clear()
 
         try:
-            await asyncio.sleep(0)
             await super().connect(
                 callback, loop=loop or (lambda: not self.stop_polling.is_set()), timeout=self.interval
             )
