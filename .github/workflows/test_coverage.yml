@@ -47,7 +47,9 @@ jobs:
           touch venv  # disable venv target
 
       - name: create session file
-        run: echo "${{ secrets.TG_SESSION }}" | base64 --decode > anon.session
+        run: |
+          echo "${{ secrets.TG_SESSION }}" | base64 --decode > anon.session
+          ls -al
         shell: bash
 
       - name: set up mutex

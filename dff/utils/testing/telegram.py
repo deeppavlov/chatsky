@@ -20,6 +20,8 @@ from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveK
 def get_session_file():
     dff_root_dir = Path(__file__).parent.parent.parent.parent
 
+    print(str(dff_root_dir / "anon.session"))
+
     return str(dff_root_dir / "anon.session")
 
 
