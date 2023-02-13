@@ -1,7 +1,9 @@
 from typing import List, Optional, cast, Tuple
-from contextlib import asynccontextmanager
+from contextlib import asynccontextmanager, nullcontext
 import logging
 import asyncio
+from tempfile import TemporaryDirectory
+from pathlib import Path
 
 import telethon.tl.types
 from telethon import TelegramClient
@@ -69,7 +71,7 @@ class TelegramTesting:
             return await self.client.send_file(self.bot, files, caption=message.text)
 
     @staticmethod
-    async def parse_responses(responses: List[TlMessage], tmp_dir) -> Message:
+    async def parse_responses(responses: List[TlMessage], file_download_destination) -> Message:
         """
         Convert a list of bot responses into a single message.
         This function accepts a list because messages with multiple attachments are split.
@@ -81,7 +83,7 @@ class TelegramTesting:
                     raise RuntimeError(f"Several messages with text:\n{msg.text}\n{response.text}")
                 msg.text = response.text or msg.text
             if response.file is not None:
-                file = tmp_dir / (str(response.file.media.id) + response.file.ext)
+                file = Path(file_download_destination) / (str(response.file.media.id) + response.file.ext)
                 await response.download_media(file=file)
                 if msg.attachments is None:
                     msg.attachments = Attachments()
@@ -124,7 +126,7 @@ class TelegramTesting:
         self.pipeline.messenger_interface.stop()
         await task
 
-    async def send_and_check(self, message: Message, tmp_dir):
+    async def send_and_check(self, message: Message, file_download_destination=None):
         """Send a message from a bot, receive it as client, verify it."""
         await self.forget_previous_updates()
 
@@ -144,9 +146,16 @@ class TelegramTesting:
                 x async for x in self.client.iter_messages(self.bot, min_id=last_message_id, from_user=self.bot)
             ]
             bot_messages.reverse()
-            result = await self.parse_responses(bot_messages, tmp_dir)
 
-            assert result == message
+            if file_download_destination is None:
+                fd_context = TemporaryDirectory()
+            else:
+                fd_context = nullcontext(file_download_destination)
+
+            with fd_context as file_download_destination:
+                result = await self.parse_responses(bot_messages, file_download_destination)
+
+                assert result == message
 
     async def forget_previous_updates(self):
         messenger_interface = cast(PollingTelegramInterface, self.pipeline.messenger_interface)
@@ -155,44 +164,46 @@ class TelegramTesting:
         max_update_id = max([*map(lambda x: x.update_id, updates), -1])
         messenger.get_updates(offset=max_update_id + 1, timeout=1, long_polling_timeout=1)
 
-    async def check_happy_path(self, happy_path, tmp_dir, run_bot: bool = True):
+    async def check_happy_path(self, happy_path, file_download_destination=None, run_bot: bool = True):
         """
         Play out a dialogue with the bot. Check that the dialogue is correct.
 
         :param happy_path: Expected dialogue
-        :param tmp_dir: Temporary directory (used to download sent files to)
+        :param file_download_destination: Temporary directory (used to download sent files)
         :param run_bot: Whether a bot inside pipeline should be running (disable this to test non-async bots)
         :return:
         """
+        if run_bot:
+            await self.forget_previous_updates()
+            bot = self.run_bot()
+        else:
+            bot = nullcontext()
 
-        async def _check_happy_path():
-            bot_messages = []
-            last_message = None
-            for request, response in happy_path:
-                logging.info(f"Sending request {request}")
-                user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
-                if user_message is not None:
-                    last_message = user_message
-                logging.info("Request sent")
-                await asyncio.sleep(3)
-                logging.info("Extracting responses")
-                bot_messages = [
-                    x
-                    async for x in self.client.iter_messages(
-                        self.bot, min_id=(user_message or last_message).id, from_user=self.bot
-                    )
-                ]
-                if len(bot_messages) > 0:
-                    last_message = bot_messages[0]
-                logging.info("Got responses")
-                result = await self.parse_responses(bot_messages, tmp_dir)
-                assert result == TelegramMessage.parse_obj(response)
+        if file_download_destination is None:
+            fd_context = TemporaryDirectory()
+        else:
+            fd_context = nullcontext(file_download_destination)
 
-        async with self.client:
-            if run_bot:
-                await self.forget_previous_updates()
-
-                async with self.run_bot():
-                    await _check_happy_path()
-            else:
-                await _check_happy_path()
+        async with self.client, bot:
+            with fd_context as file_download_destination:
+                bot_messages = []
+                last_message = None
+                for request, response in happy_path:
+                    logging.info(f"Sending request {request}")
+                    user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
+                    if user_message is not None:
+                        last_message = user_message
+                    logging.info("Request sent")
+                    await asyncio.sleep(3)
+                    logging.info("Extracting responses")
+                    bot_messages = [
+                        x
+                        async for x in self.client.iter_messages(
+                            self.bot, min_id=(user_message or last_message).id, from_user=self.bot
+                        )
+                    ]
+                    if len(bot_messages) > 0:
+                        last_message = bot_messages[0]
+                    logging.info("Got responses")
+                    result = await self.parse_responses(bot_messages, file_download_destination)
+                    assert result == TelegramMessage.parse_obj(response)

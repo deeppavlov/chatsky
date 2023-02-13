@@ -28,10 +28,10 @@ document = Document(source="https://github.com/mathiasbynens/small/raw/master/pd
 
 
 @pytest.mark.asyncio
-async def test_text(tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_text(pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test")
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 @pytest.mark.asyncio
@@ -65,17 +65,17 @@ async def test_text(tmp_path, pipeline_instance, api_credentials, bot_user):
         ),
     ],
 )
-async def test_buttons(ui, button_type, markup_type, tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_buttons(ui, button_type, markup_type, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test", ui=ui)
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 @pytest.mark.asyncio
-async def test_keyboard_remove(tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_keyboard_remove(pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="test", ui=RemoveKeyboard())
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 @pytest.mark.asyncio
@@ -103,10 +103,10 @@ async def test_keyboard_remove(tmp_path, pipeline_instance, api_credentials, bot
         (Message(text="test", attachments=Attachments(files=[document])),),
     ],
 )
-async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_telegram_attachment(generic_response, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage.parse_obj(generic_response)
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 @pytest.mark.asyncio
@@ -134,24 +134,24 @@ async def test_telegram_attachment(generic_response, tmp_path, pipeline_instance
         (Message(text="test", attachments=Attachments(files=2 * [document])),),
     ],
 )
-async def test_attachments(attachments, tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_attachments(attachments, pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage.parse_obj(attachments)
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 @pytest.mark.asyncio
-async def test_location(tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_location(pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 @pytest.mark.asyncio
-async def test_parsed_text(tmp_path, pipeline_instance, api_credentials, bot_user):
+async def test_parsed_text(pipeline_instance, api_credentials, bot_user):
     telegram_response = TelegramMessage(text="[inline URL](http://www.example.com/)", parse_mode=ParseMode.MARKDOWN)
     test_helper = TelegramTesting(pipeline=pipeline_instance, api_credentials=api_credentials, bot=bot_user)
-    await test_helper.send_and_check(telegram_response, tmp_path)
+    await test_helper.send_and_check(telegram_response)
 
 
 def test_error(basic_bot):
