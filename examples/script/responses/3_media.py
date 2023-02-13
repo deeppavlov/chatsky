@@ -20,16 +20,7 @@ from dff.utils.testing import (
 
 
 # %%
-# kitten picture info:
-kitten_id = "Y0WXj3xqJz0"
-kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
-kitten_width = 640
-kitten_url = (
-    f"https://unsplash.com/photos/"
-    f"{kitten_id}/download?ixid={kitten_ixid}"
-    f"&force=true&w={kitten_width}"
-)
-
+img_url = "https://www.python.org/static/img/python-logo.png"
 toy_script = {
     "root": {
         "start": {
@@ -52,14 +43,14 @@ toy_script = {
         },
         "send_one": {
             RESPONSE: Message(
-                text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
+                text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
             RESPONSE: Message(
                 text="Look at my pictures",
-                attachments=Attachments(files=[Image(source=kitten_url)] * 10),
+                attachments=Attachments(files=[Image(source=img_url)] * 10),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -78,18 +69,16 @@ happy_path = (
     (Message(text="Hi"), Message(text="Please, send me a picture url")),
     (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
     (
-        Message(text=kitten_url),
-        Message(
-            text="here's my picture!", attachments=Attachments(files=[Image(source=kitten_url)])
-        ),
+        Message(text=img_url),
+        Message(text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])),
     ),
     (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
     (Message(text="ok"), Message(text="Please, send me a picture url")),
     (
-        Message(text=kitten_url),
+        Message(text=img_url),
         Message(
             text="Look at my pictures",
-            attachments=Attachments(files=[Image(source=kitten_url)] * 10),
+            attachments=Attachments(files=[Image(source=img_url)] * 10),
         ),
     ),
     (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
