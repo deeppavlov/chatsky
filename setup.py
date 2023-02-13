@@ -88,7 +88,7 @@ test_requirements = [
     "flask[async]>=2.1.2",
     "psutil>=5.9.1",
     "requests>=2.28.1",
-    "telethon<=1.26.0",
+    "telethon>=1.27.0,<2.0",
     "pytz>=2022.6",
 ]
 
