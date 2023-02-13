@@ -104,7 +104,7 @@ html_theme_options = {
     "icon_links": [
         {
             "name": "Deeppavlov Forum",
-            "url": "https://github.com/<your-org>/<your-repo>",
+            "url": "https://forum.deeppavlov.ai",
             "icon": "https://static.tildacdn.com/tild6538-3537-4239-b632-623238366335/_DeepPavlov_200x200-.svg",
             "type": "url",
         },
@@ -124,15 +124,15 @@ html_theme_options = {
 }
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
 
 
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
             "examples/script/*.py",
-            "examples/pipeline/*.py",
-            "examples/context_storages/*.py",
+            "examples/pipeline/[1]*.py",
+            "examples/context_storages/[1]*.py",
             "examples/messengers/*.py",
         ]
     )

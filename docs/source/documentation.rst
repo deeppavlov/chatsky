@@ -1,5 +1,5 @@
-Documentation and Examples
---------------------------
+Documentation
+-------------
 
 .. toctree::
    :caption: Documentation
@@ -8,10 +8,3 @@ Documentation and Examples
    :maxdepth: 1
 
    apiref/index_*
-
-.. toctree::
-   :caption: Examples
-   :name: examples
-   :glob:
-
-   examples/*/index
