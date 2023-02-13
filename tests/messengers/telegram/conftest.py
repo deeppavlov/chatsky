@@ -18,10 +18,12 @@ pipeline_example = importlib.import_module(f"examples.{dot_path_to_addon}.{'7_po
 @pytest.fixture(scope="session")
 def session_file():
     dff_root_dir = Path(__file__).parent.parent.parent.parent
+    file = dff_root_dir / "anon.session"
 
-    print(str(dff_root_dir / "anon.session"))
+    if not file.exists():
+        pytest.skip(f"Session file does not exist at {str(file)}")
 
-    return str(dff_root_dir / "anon.session")
+    return str(file)
 
 
 @pytest.fixture(scope="session")
