@@ -70,9 +70,7 @@ happy_path = (
     (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
     (
         Message(text=img_url),
-        Message(
-            text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])
-        ),
+        Message(text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])),
     ),
     (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
     (Message(text="ok"), Message(text="Please, send me a picture url")),
