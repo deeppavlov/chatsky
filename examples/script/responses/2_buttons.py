@@ -21,7 +21,10 @@ from dff.utils.testing import (
 # %%
 def check_button_payload(value: str):
     def payload_check_inner(ctx: Context, actor: Actor):
-        return ctx.last_request.misc.get("payload") == value
+        if ctx.last_request.misc is not None:
+            return ctx.last_request.misc.get("payload") == value
+        else:
+            return False
 
     return payload_check_inner
 
@@ -207,7 +210,7 @@ happy_path = (
 
 
 def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.misc.get("ui")
+    ui = ctx.last_response and ctx.last_response.misc and ctx.last_response.misc.get("ui")
     if ui and ui.buttons:
         try:
             chosen_button = ui.buttons[int(ctx.last_request.text)]

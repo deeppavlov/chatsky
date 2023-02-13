@@ -97,4 +97,5 @@ clean: clean_docs
 	rm -rf *.egg-info
 	rm -rf htmlcov
 	rm -f .coverage
+	rm -rf build
 .PHONY: clean
