@@ -81,7 +81,6 @@ class PollingTelegramInterface(PollingMessengerInterface):
         If not `None` will be used instead of creating messenger from token.
         Token value does not matter in that case.
         Defaults to None.
-    :param messenger:
     :param interval:
         Polling interval. See `link <https://github.com/eternnoir/pyTelegramBotAPI#telebot>`__.
         Defaults to 2.
