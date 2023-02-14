@@ -6,8 +6,9 @@ The service is written by defining a special dialog graph that describes the beh
 The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs.
 You can use it in services such as writing skills for Amazon Alexa, etc., chatbots for social networks, website call centers, etc.
 
-[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions)
-[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions)
+[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
+[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
+[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
 ![Python 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
@@ -42,8 +43,10 @@ pip install dff[devel_full]  # full dependencies for development (all options ab
 ```
 
 For example, if you are going to use one of the database backends,
-you can specify the corresponding requirements yourself.
-
+you can specify the corresponding requirements yourself. Multiple dependencies can be installed at once, e.g.
+```bash
+pip install dff[postgresql, mysql]
+```
 
 ## Basic example
 
@@ -133,7 +136,7 @@ from dff.script import Context, Actor
 from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
-db = SQLContextStorage("postgresql://user:password@host:port/dbname")
+db = SQLContextStorage("postgresql+asyncpg://user:password@host:port/dbname")
 
 actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 

@@ -3,8 +3,8 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.2.0c
-TEST_COVERAGE_THRESHOLD=93
+CURRENT_VERSION = 0.2.1
+TEST_COVERAGE_THRESHOLD=97
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
@@ -97,4 +97,5 @@ clean: clean_docs
 	rm -rf *.egg-info
 	rm -rf htmlcov
 	rm -f .coverage
+	rm -rf build
 .PHONY: clean

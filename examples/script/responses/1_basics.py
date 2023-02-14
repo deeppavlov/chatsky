@@ -10,7 +10,7 @@ from typing import NamedTuple
 
 from dff.script import Message
 from dff.script.conditions import exact_match
-from dff.script import Context, RESPONSE, TRANSITIONS
+from dff.script import RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
@@ -71,22 +71,11 @@ class CallbackRequest(NamedTuple):
     payload: str
 
 
-def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.ui
-    if ui and ctx.last_response.ui.buttons:
-        try:
-            chosen_button = ui.buttons[int(ctx.last_request.text)]
-        except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
-        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
-
-
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    pre_services=[process_request],
 )
 
 if __name__ == "__main__":

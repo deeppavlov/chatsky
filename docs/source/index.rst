@@ -2,8 +2,8 @@
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Dialog Flow Framework Documentation
-=====================================
+Dialog Flow Framework
+=====================
 
 *Date*: |today| *Version*: |version|
 
@@ -31,7 +31,7 @@ This framework is compatible with Python 3.7 and newer versions.
 The above command will set the minimum dependencies to start working with DFF. 
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 .. code-block:: console
-
+   
    pip install dff[core]  # minimal dependencies (by default)
    pip install dff[redis]  # dependencies for using Redis
    pip install dff[mongodb]  # dependencies for using MongoDB
@@ -214,19 +214,15 @@ Documentation and Examples
 --------------------------
 
 .. toctree::
-   :caption: Documentation
-   :name: documentation
-   :glob:
    :maxdepth: 1
 
-   apiref/index_*
-
-.. toctree::
-   :caption: Examples
-   :name: examples
-   :glob:
-
-   examples/*/index
+   get_started
+   documentation
+   examples
+   tutorials
+   development
+   community
+   about_us
 
 Indices and tables
 ------------------
