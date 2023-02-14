@@ -64,28 +64,13 @@ Pipeline
 - | **Service Group:** This module contains the :py:class:`.ServiceGroup` class. This class represents a group
     of services that can be executed together in a specific order.
 
-- | **Utils:** This module contains several utility functions that are used to perform various
-    tasks such as data processing, error handling, and debugging.
-
 - **Component:** This module contains the :py:class:`.PipelineComponent` class, which can be group or a service.
-
-- | **Extra Handler:** This module contains an extra handlers that can be used to handle additional
-    functionality or features that are not included in the standard pipeline classes.
 
 - | **Pipeline:** This module contains the :py:class:`.Pipeline` class. This class represents the main pipeline of
     the DFF and is responsible for managing the execution of services.
 
 - | **Service:** This module contains the :py:class:`.Service` class,
     which can be included into pipeline as object or a dictionary.
-
-- | **Utility Functions:** This module contains several utility functions that are used to perform various
-    tasks such as data processing, error handling, and debugging.
-
-- | **Types:** This module contains basic types that are used throughout the `DFF`.
-    These types include classes and special types that are used to define the structure of data
-    and the behavior of different components in the pipeline.
-
-# TODO: remove Utils, Extra Handler, Utility Functions, Type
 
 Script
 ~~~~~~
