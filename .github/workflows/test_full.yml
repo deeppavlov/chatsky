@@ -47,5 +47,5 @@ jobs:
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           fi
-          pytest --tb=long -vv --cache-clear --cov=dff tests/
+          pytest --tb=long -vv --cache-clear --no-cov tests/
         shell: bash
