@@ -7,7 +7,7 @@ from dff.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
 
-def is_interactive_mode() -> bool:
+def is_interactive_mode() -> bool:  # pragma: no cover
     """
     Checking whether the example code should be run in interactive mode.
 
@@ -64,7 +64,7 @@ def check_happy_path(
             )
 
 
-def run_interactive_mode(pipeline: Pipeline):
+def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
     """
     Running example with provided pipeline in interactive mode, just like with CLI messenger interface.
     The dialog won't be stored anywhere, it will only be outputted to STDOUT.

@@ -77,8 +77,8 @@ class Pipeline:
             errors = self.actor.validate_script(self, self.actor.verbose) if val_stage or val_stage is None else []
             if errors:
                 raise ValueError(
-                    f"Found len(errors)={len(errors)} errors: " + " ".join(
-                        [f"{i}) {er}" for i, er in enumerate(errors, 1)])
+                    f"Found len(errors)={len(errors)} errors: "
+                    + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
                 )
 
         if optimization_warnings:

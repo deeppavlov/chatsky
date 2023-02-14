@@ -95,12 +95,16 @@ def test_actor():
         pass
 
     # empty ctx stability
-    pipeline = Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1"))
+    pipeline = Pipeline.from_script(
+        {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1")
+    )
     ctx = Context()
     pipeline.actor(pipeline, ctx)
 
     # fake label stability
-    pipeline = Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1"))
+    pipeline = Pipeline.from_script(
+        {"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
+    )
     ctx = Context()
     pipeline.actor(pipeline, ctx)
 

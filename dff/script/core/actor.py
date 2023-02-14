@@ -137,7 +137,9 @@ class Actor(BaseModel):
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-    def __call__(self, pipeline: Pipeline, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Union[Context, dict, str]:
+    def __call__(
+        self, pipeline: Pipeline, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs
+    ) -> Union[Context, dict, str]:
 
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
@@ -219,7 +221,8 @@ class Actor(BaseModel):
         )
         ctx.framework_states["actor"]["local_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["local_transitions"],
-            ctx, pipeline,
+            ctx,
+            pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
             "local",
         )
@@ -230,7 +233,8 @@ class Actor(BaseModel):
         ].transitions
         ctx.framework_states["actor"]["node_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["node_transitions"],
-            ctx, pipeline,
+            ctx,
+            pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
             "node",
         )
@@ -289,7 +293,9 @@ class Actor(BaseModel):
 
     def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
-        ctx = ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
+        ctx = ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing(
+            ctx, pipeline, *args, **kwargs
+        )
         ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
             "processed_node"
         ]
@@ -304,7 +310,14 @@ class Actor(BaseModel):
         return ctx
 
     def _get_true_label(
-        self, transitions: dict, ctx: Context, pipeline: Pipeline, flow_label: LabelType, transition_info: str = "", *args, **kwargs
+        self,
+        transitions: dict,
+        ctx: Context,
+        pipeline: Pipeline,
+        flow_label: LabelType,
+        transition_info: str = "",
+        *args,
+        **kwargs,
     ) -> Optional[NodeLabel3Type]:
         true_labels = []
         for label, condition in transitions.items():

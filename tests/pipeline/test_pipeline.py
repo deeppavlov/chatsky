@@ -1,6 +1,7 @@
 import importlib
 import pytest
 
+from dff.script import Message
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.pipeline import Pipeline
 from dff.script.core.keywords import RESPONSE, TRANSITIONS
@@ -27,3 +28,12 @@ def test_from_script_with_validation(validation):
             _ = Pipeline.from_script(script=script, start_label=("", ""), validation_stage=validation)
     else:
         _ = Pipeline.from_script(script=script, start_label=("", ""), validation_stage=validation)
+
+
+def test_script_getting_and_setting():
+    script = {"": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.true()}}}}
+    pipeline = Pipeline.from_script(script=script, start_label=("", ""))
+
+    new_script = {"": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.false()}}}, "new_flow": {}}
+    pipeline.script = new_script
+    assert len(pipeline.script.script.keys()) == len(new_script.keys())
