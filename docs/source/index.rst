@@ -30,6 +30,7 @@ This framework is compatible with Python 3.7 and newer versions.
 
 The above command will set the minimum dependencies to start working with DFF. 
 The installation process allows the user to choose from different packages based on their dependencies, which are:
+
 .. code-block:: console
    
    pip install dff[core]  # minimal dependencies (by default)
