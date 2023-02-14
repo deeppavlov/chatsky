@@ -1,6 +1,9 @@
 About us
 --------
 
-`DFF` is developed by the DeepPavlov development team (aka MIPT Neural Systems and Deep Learning Laboratories):
+Dilog Flow Framework is developed by the DFF development department `DeepPavlov <https://deeppavlov.ai>`_
+(aka MIPT Neural Systems and Deep Learning Laboratories).
 
-Denis Kuznetsov, etc.
+Founder and leader of the project -- Denis Kuznetsov.
+
+Developers -- Roman Zlobin, Aleksandr Sergeev, Daniil Ignatiev, Aleksandr Sakharov.
