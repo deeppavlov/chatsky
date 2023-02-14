@@ -1,8 +1,11 @@
 """
 Database
 --------
-Base module. Provided classes:
-    - Abstract context storage interface :py:class:`.DBContextStorage`.
+The `Database` module provides classes for managing the context storage of a dialog system.
+The module can be used to store information such as the current state of the conversation
+and other data. This module includes the intermediate class (:py:class:`.DBContextStorage`) is a class
+that developers can inherit from in order to create their own context storage solutions.
+This class implements the basic functionality and can be extended to add additional features as needed.
 """
 import asyncio
 import importlib

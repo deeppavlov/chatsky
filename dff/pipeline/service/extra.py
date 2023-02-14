@@ -1,6 +1,9 @@
 """
 Extra Handler
 -------------
+The Extra Handler module contains additional functionality that extends the capabilities of the system
+beyond the core functionality. Extra handlers is an input converting addition to :py:class:`.PipelineComponent`.
+For examples, it is used to grep statistics from components, timeing, logging, etc.
 """
 import asyncio
 import logging

@@ -1,8 +1,16 @@
 """
 Protocol
 --------
-Base protocol code. Protocols :py:data:`.PROTOCOLS`.
-A func is used for suggestion of installation: :py:func:`.get_protocol_install_suggestion`.
+The Protocol module contains the base code for the different communication protocols used in the `DFF`.
+It defines the :py:data:`.PROTOCOLS` constant, which lists all the supported protocols in the `DFF`.
+
+The module also includes a function :py:func:`.get_protocol_install_suggestion()` that is used to provide
+suggestions for installing the necessary dependencies for a specific protocol.
+This function takes the name of the desired protocol as an argument and returns
+a string containing the necessary installation commands for that protocol.
+
+The `DFF` supports a variety of communication protocols,
+which allows it to communicate with different types of databases.
 """
 import json
 import pathlib
