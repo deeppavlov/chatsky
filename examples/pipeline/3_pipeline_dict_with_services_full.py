@@ -36,7 +36,7 @@ These objects are dictionaries of particular structure:
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts
-        (dictionary or a `DBAbstractContextStorage` instance).
+        (dictionary or a `DBContextStorage` instance).
 * `services` (required) - A `ServiceGroupBuilder` object,
         basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
         see example 4.

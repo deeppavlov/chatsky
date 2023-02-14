@@ -10,6 +10,9 @@ on:
     - dev
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:
   test_coverage:
@@ -38,7 +41,7 @@ jobs:
 
       - name: prepare testing environment
         run: |
-          export backup_files=( tests examples .env_file makefile )
+          export backup_files=( tests examples .env_file makefile .coveragerc )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
