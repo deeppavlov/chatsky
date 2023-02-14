@@ -5,18 +5,18 @@ A basic set of functions for normalizing data in a dialog script is placed here.
 """
 import logging
 
-from typing import Union, Callable, Any, Dict, Optional
+from typing import Union, Callable, Any, Dict, Optional, ForwardRef
 
 from .keywords import GLOBAL, Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
-from pydantic import validate_arguments, BaseModel
+from pydantic import validate_arguments
 
 logger = logging.getLogger(__name__)
 
-Actor = BaseModel
+Pipeline = ForwardRef("Pipeline")
 
 
 @validate_arguments
@@ -34,15 +34,14 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
     """
     if isinstance(label, Callable):
 
-        @validate_arguments
-        def get_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        def get_label_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
             try:
-                new_label = label(ctx, actor, *args, **kwargs)
+                new_label = label(ctx, pipeline, *args, **kwargs)
                 new_label = normalize_label(new_label, default_flow_label)
                 flow_label, node_label, _ = new_label
-                node = actor.script.get(flow_label, {}).get(node_label)
+                node = pipeline.script.get(flow_label, {}).get(node_label)
                 if not node:
-                    raise Exception(f"Unknown transitions {new_label} for actor.script={actor.script}")
+                    raise Exception(f"Unknown transitions {new_label} for pipeline.script={pipeline.script}")
             except Exception as exc:
                 new_label = None
                 logger.error(f"Exception {exc} of function {label}", exc_info=exc)
@@ -71,10 +70,9 @@ def normalize_condition(condition: ConditionType) -> Callable:
     """
     if isinstance(condition, Callable):
 
-        @validate_arguments
-        def callable_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        def callable_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
             try:
-                return condition(ctx, actor, *args, **kwargs)
+                return condition(ctx, pipeline, *args, **kwargs)
             except Exception as exc:
                 logger.error(f"Exception {exc} of function {condition}", exc_info=exc)
                 return False
@@ -115,8 +113,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         else:
             raise TypeError(type(response))
 
-        @validate_arguments
-        def response_handler(ctx: Context, actor: Actor, *args, **kwargs):
+        def response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
             return result
 
         return response_handler
@@ -133,12 +130,11 @@ def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
     """
     if isinstance(processing, dict):
 
-        @validate_arguments
-        def processing_handler(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+        def processing_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
             for processing_name, processing_func in processing.items():
                 try:
                     if processing_func is not None:
-                        ctx = processing_func(ctx, actor, *args, **kwargs)
+                        ctx = processing_func(ctx, pipeline, *args, **kwargs)
                 except Exception as exc:
                     logger.error(
                         f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",

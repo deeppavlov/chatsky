@@ -72,6 +72,14 @@ class Pipeline:
         self.actor = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
         if self.actor is None:
             raise Exception("Actor not found in pipeline!")
+        else:
+            val_stage = self.actor.validation_stage
+            errors = self.actor.validate_script(self, self.actor.verbose) if val_stage or val_stage is None else []
+            if errors:
+                raise ValueError(
+                    f"Found len(errors)={len(errors)} errors: " + " ".join(
+                        [f"{i}) {er}" for i, er in enumerate(errors, 1)])
+                )
 
         if optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
@@ -229,7 +237,7 @@ class Pipeline:
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.add_request(request)
-        ctx = await self._services_pipeline(ctx, self.actor)
+        ctx = await self._services_pipeline(ctx, self)
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
         if isinstance(self.context_storage, DBContextStorage):

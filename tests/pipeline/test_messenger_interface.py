@@ -54,9 +54,6 @@ def test_cli_messenger_interface(monkeypatch):
 
 
 def test_callback_messenger_interface(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda _: "Ping")
-    sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
-
     interface = CallbackMessengerInterface()
     pipeline.messenger_interface = interface
 
