@@ -6,7 +6,7 @@ The service is written by defining a special dialog graph that describes the beh
 The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs.
 You can use it in services such as writing skills for Amazon Alexa, etc., chatbots for social networks, website call centers, etc.
 
-[![Documentation Status](https://readthedocs.org/projects/dialog-flow-engine/badge/?version=latest)](https://github.com/deeppavlov/dialog_flow_framework/actions)
+[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
 [![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
 [![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
