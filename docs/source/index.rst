@@ -88,8 +88,8 @@ Each `flow` is also a dictionary, where the keys are the `nodes`.
 to a user's input as well as a `condition` that determines
 the `transition` to another `node`, whether it's within the current or another `flow`.
 
-ToCs
-----
+Table of Content
+----------------
 
 Context Storages
 ~~~~~~~~~~~~~~~~
@@ -127,7 +127,7 @@ Messenger Interfaces
    These classes provide a standardized way of interacting with different messaging services,
    allowing the application to work with multiple messaging platforms seamlessly.
 
-- **dff.messengers.telegram:** This package contains classes and functions specific
+- **Telegram interface:** This package contains classes and functions specific
    to the Telegram messenger service. It provides an interface for the application to interact with Telegram,
    allowing it to send and receive messages, handle callbacks, and perform other actions.
 
