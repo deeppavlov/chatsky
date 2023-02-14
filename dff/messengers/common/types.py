@@ -1,9 +1,9 @@
 """
 Types
 -----
- The Types module contains two special types that are used throughout the `DFF Messengers`.
- The first type is used for the messenger interface to client interaction and the second one
- to control the polling loop.
+The Types module contains two special types that are used throughout the `DFF Messengers`.
+The first type is used for the messenger interface to client interaction and the second one
+to control the polling loop.
 """
 from typing import Callable, Any, Hashable, Awaitable
 from typing_extensions import TypeAlias
