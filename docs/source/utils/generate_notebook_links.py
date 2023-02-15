@@ -34,7 +34,6 @@ def create_directory_index_file(file: Path, index: List[str]):
 
 .. nbgallery::
    :glob:
-   :caption: {title}
 
    {directories}
 """
