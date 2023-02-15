@@ -63,7 +63,7 @@ def rename_component_incrementing(
     that has similar name with other components in the same group.
     The name is generated according to these rules:
 
-    - If service's handler is `Actor`, it is named `actor`.
+    - If service's handler is "ACTOR", it is named `actor`.
     - If service's handler is `Callable`, it is named after this `callable`.
     - If it's a service group, it is named `service_group`.
     - Otherwise, it is names `noname_service`.
@@ -97,7 +97,7 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> bool
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
     Components are renamed only if user didn't set a name for them. Their paths are also generated here.
-    It also searches for :py:class:`~.Actor` in the group, throwing exception if no actor or multiple actors found.
+    It also searches for "ACTOR" in the group, throwing exception if no actor or multiple actors found.
 
     :param service_group: Service group to resolve name collisions in.
     """

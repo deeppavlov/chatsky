@@ -157,8 +157,7 @@ class PipelineComponent(abc.ABC):
         This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param pipeline: This :py:class:`~.Pipeline` or
-            `None` if this is a service, that wraps :py:class:`~.Actor`.
+        :param pipeline: This :py:class:`~.Pipeline`.
         :return: :py:class:`~.Context` if this is a synchronous service or `None`,
             asynchronous services shouldn't modify :py:class:`~.Context`.
         """
@@ -170,8 +169,7 @@ class PipelineComponent(abc.ABC):
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`~._run` method.
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param pipeline: This :py:class:`~.Pipeline` or
-            `None` if this is a service, that wraps :py:class:`~.Actor`.
+        :param pipeline: This :py:class:`~.Pipeline`.
         :return: :py:class:`~.Context` if this is a synchronous service or :py:class:`~.typing.const.Awaitable`,
             asynchronous services shouldn't modify :py:class:`~.Context`.
         """

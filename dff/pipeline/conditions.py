@@ -20,8 +20,8 @@ def always_start_condition(_: Context, __: Pipeline) -> bool:
     """
     Condition that always allows service execution. It's the default condition for all services.
 
-    :param ctx: Current dialog context.
-    :param actor: Pipeline actor.
+    :param _: Current dialog context.
+    :param __: Pipeline.
     """
     return True
 

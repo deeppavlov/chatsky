@@ -36,6 +36,20 @@ class Pipeline:
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
 
+    :param script: (required) A :py:class:`~.Script` instance (object or dict).
+    :param start_label: (required) Actor start label.
+    :param fallback_label: Actor fallback label.
+    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+        where there is no priority. Defaults to `1.0`.
+    :param validation_stage: This flag sets whether the validation stage is executed in actor.
+        It is executed by default. Defaults to `None`.
+    :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
+    :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
+    :param handlers: This variable is responsible for the usage of external handlers on
+        the certain stages of work of :py:class:`~dff.script.Actor`.
+        - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+        - value: List[Callable] - The list of called handlers for each stage.
+        Defaults to an empty `dict`.
     :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
     :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
@@ -240,6 +254,25 @@ class Pipeline:
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
+        """
+        Sets actor for the current pipeline and conducts necessary checks.
+        Resets actor to previous if any errors are found.
+
+        :param script: (required) A :py:class:`~.Script` instance (object or dict).
+        :param start_label: (required) Actor start label.
+        :param fallback_label: Actor fallback label.
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+            where there is no priority. Defaults to `1.0`.
+        :param validation_stage: This flag sets whether the validation stage is executed in actor.
+            It is executed by default. Defaults to `None`.
+        :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
+        :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
+        :param handlers: This variable is responsible for the usage of external handlers on
+            the certain stages of work of :py:class:`~dff.script.Actor`.
+            - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+            - value: List[Callable] - The list of called handlers for each stage.
+            Defaults to an empty `dict`.
+        """
         old_actor = self.actor
         self.actor = Actor(
             script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose, handlers
@@ -248,7 +281,7 @@ class Pipeline:
         if errors:
             self.actor = old_actor
             raise ValueError(
-                f"Found len(errors)={len(errors)} errors: "
+                f"Found {len(errors)} errors: "
                 + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
             )
 

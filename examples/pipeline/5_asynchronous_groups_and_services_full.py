@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 """
 Services and service groups can be synchronous and asynchronous.
 In synchronous service groups services are executed consequently,
-    some of them (`actor`) can even return `Context` object,
+    some of them (`ACTOR`) can even return `Context` object,
     modifying it.
 In asynchronous service groups all services
     are executed simultaneously and should not return anything,
@@ -48,7 +48,7 @@ If the parameter is not set,
 the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
-NB! Actor service is always synchronous.
+NB! ACTOR service is always synchronous.
 
 The timeout field only works for asynchronous services and service groups.
 If service execution takes more time than timeout,
@@ -72,7 +72,7 @@ Service group `service_group_1` is also asynchronous,
 it logs HTTPS requests (from 1 to 15),
     running simultaneously, in random order.
 Service group `pipeline` can't be asynchronous because
-`balanced_group` and actor are synchronous.
+`balanced_group` and ACTOR are synchronous.
 """
 
 
