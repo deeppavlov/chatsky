@@ -78,7 +78,7 @@ html_theme = "pydata_sphinx_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
@@ -87,8 +87,6 @@ html_show_sourcelink = False
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
-:tutorial_path: \\.
-:github_url: deeppavlov/dialog_flow_framework
 """
 
 html_context = {
@@ -97,6 +95,10 @@ html_context = {
     "github_version": "dev",
     "doc_path": "docs/source",
 }
+
+html_css_files = [
+    'css/custom.css',
+]
 
 # Theme options
 html_theme_options = {
@@ -121,6 +123,7 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab_links"],
 }
 
 
