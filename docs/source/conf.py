@@ -97,12 +97,11 @@ html_context = {
 }
 
 html_css_files = [
-    'css/custom.css',
+    "css/custom.css",
 ]
 
 # Theme options
 html_theme_options = {
-    "use_edit_page_button": True,
     "icon_links": [
         {
             "name": "Deeppavlov Forum",
