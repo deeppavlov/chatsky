@@ -100,8 +100,14 @@ class Pipeline:
             raise Exception("Actor not found in pipeline!")
         else:
             self.set_actor(
-                script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose,
-                handlers
+                script,
+                start_label,
+                fallback_label,
+                label_priority,
+                validation_stage,
+                condition_handler,
+                verbose,
+                handlers,
             )
         if self.actor is None:
             raise Exception("Actor wasn't initialized correctly!")
@@ -281,8 +287,7 @@ class Pipeline:
         if errors:
             self.actor = old_actor
             raise ValueError(
-                f"Found {len(errors)} errors: "
-                + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
+                f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
             )
 
     @classmethod

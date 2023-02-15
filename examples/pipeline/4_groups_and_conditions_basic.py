@@ -15,7 +15,8 @@ from dff.pipeline import (
     Pipeline,
     not_condition,
     service_successful_condition,
-    ServiceRuntimeInfo, ACTOR,
+    ServiceRuntimeInfo,
+    ACTOR,
 )
 
 from dff.utils.testing.common import (

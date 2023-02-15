@@ -19,7 +19,8 @@ from dff.pipeline import (
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
-    ServiceRuntimeInfo, ACTOR,
+    ServiceRuntimeInfo,
+    ACTOR,
 )
 
 from dff.utils.testing.common import (

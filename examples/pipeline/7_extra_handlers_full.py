@@ -20,7 +20,8 @@ from dff.pipeline import (
     ServiceGroup,
     to_service,
     ExtraHandlerRuntimeInfo,
-    ServiceRuntimeInfo, ACTOR,
+    ServiceRuntimeInfo,
+    ACTOR,
 )
 
 from dff.utils.testing.common import (
