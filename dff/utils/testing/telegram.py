@@ -4,6 +4,7 @@ import logging
 import asyncio
 from tempfile import TemporaryDirectory
 from pathlib import Path
+from copy import deepcopy
 
 import telethon.tl.types
 from telethon import TelegramClient
@@ -15,6 +16,30 @@ from dff.pipeline.pipeline.pipeline import Pipeline
 from dff.script.core.message import Message, Attachments, Attachment, Button, Location
 from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard, _ClickButton
+
+
+def replace_click_button(happy_path):
+    """
+    Replace all _ClickButton instances in `happy_path`.
+    This allows using :py:func:`~dff.utils.testing.common.check_happy_path` instead of
+    :py:meth:~dff.utils.testing.telegram.TelegramTesting.check_happy_path`.
+
+    :return: A `happy_path` with all `_ClickButton` replaced with payload values of the buttons.
+    """
+    result = deepcopy(happy_path)
+    for index in range(len(happy_path)):
+        user_request = happy_path[index][0]
+        if not isinstance(user_request, TelegramMessage):
+            continue
+        if isinstance(user_request.callback_query, _ClickButton):
+            callback_query = None
+            for _, bot_response in reversed(happy_path[:index]):
+                if isinstance(bot_response, TelegramMessage) and bot_response.ui is not None and callback_query is None:
+                    callback_query = bot_response.ui.buttons[user_request.callback_query.button_index].payload
+            if callback_query is None:
+                raise RuntimeError("Bot response with buttons not found.")
+            result[index][0].callback_query = callback_query
+    return result
 
 
 async def get_bot_user(client: TelegramClient, username: str):
