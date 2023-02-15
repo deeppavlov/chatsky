@@ -123,7 +123,7 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
-    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab_links"],
+    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab-links"],
 }
 
 
