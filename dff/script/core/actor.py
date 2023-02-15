@@ -9,8 +9,6 @@ import logging
 from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
 import copy
 
-from pydantic import BaseModel, validate_arguments, Extra
-
 from dff.utils.turn_caching import cache_clear
 from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 from .message import Message
@@ -41,59 +39,31 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
         logger.error(msg, exc_info=exception)
 
 
-class Actor(BaseModel):
+class Actor:
     """
     The class which is used to process :py:class:`~dff.script.Context`
     according to the :py:class:`~dff.script.Script`.
-    """
 
-    class Config:
-        extra = Extra.allow
-
-    script: Union[Script, dict]
-    """
-    The dialog scenario: a graph described by the :py:class:~dff.script.Keywords.
-    While the graph is being initialized, it is validated and then used for the dialog.
-    """
-    start_label: NodeLabel3Type
-    """
-    The start node of :py:class:`~dff.script.Script`. The execution begins with it.
-    """
-    fallback_label: Optional[NodeLabel3Type] = None
-    """
-    The label of :py:class:`~dff.script.Script`.
-    Dialog comes into that label if all other transitions failed, or there was an error while executing the scenario.
-    Defaults to `None`.
-    """
-    label_priority: float = 1.0
-    """
-    Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
-    where there is no priority. Defaults to `1.0`.
-    """
-    validation_stage: Optional[bool] = None
-    """
-    This flag sets whether the validation stage is executed. It is executed by default. Defaults to `None`.
-    """
-    condition_handler: Optional[Callable] = None
-    """
-    Handler that processes a call of condition functions. Defaults to `None`.
-    """
-    verbose: bool = True
-    """
-    If it is `True`, logging is used. Defaults to `True`.
-    """
-    handlers: Dict[ActorStage, List[Callable]] = {}
-    """
-    This variable is responsible for the usage of external handlers on
-    the certain stages of work of :py:class:`~dff.script.Actor`.
-
+    :param script: The dialog scenario: a graph described by the :py:class:~dff.script.Keywords.
+        While the graph is being initialized, it is validated and then used for the dialog.
+    :param start_label: The start node of :py:class:`~dff.script.Script`. The execution begins with it.
+    :param fallback_label: The label of :py:class:`~dff.script.Script`.
+        Dialog comes into that label if all other transitions failed,
+        or there was an error while executing the scenario.
+        Defaults to `None`.
+    :param label_priority: Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
+        where there is no priority. Defaults to `1.0`.
+    :param validation_stage: This flag sets whether the validation stage is executed.
+        It is executed by default. Defaults to `None`.
+    :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
+    :param verbose: If it is `True`, logging is used. Defaults to `True`.
+    :param handlers: This variable is responsible for the usage of external handlers on
+        the certain stages of work of :py:class:`~dff.script.Actor`.
         - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage.
-
-    Defaults to an empty `dict`.
+        Defaults to an empty `dict`.
     """
 
-    @validate_arguments
     def __init__(
         self,
         script: Union[Script, dict],
@@ -104,35 +74,26 @@ class Actor(BaseModel):
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        *args,
-        **kwargs,
     ):
         # script validation
-        script = script if isinstance(script, Script) else Script(script=script)
+        self.script = script if isinstance(script, Script) else Script(script=script)
 
         # node labels validation
-        start_label = normalize_label(start_label)
-        if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unknown start_label={start_label}")
+        self.start_label = normalize_label(start_label)
+        if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
+            raise ValueError(f"Unknown start_label={self.start_label}")
         if fallback_label is None:
-            fallback_label = start_label
+            self.fallback_label = self.start_label
         else:
-            fallback_label = normalize_label(fallback_label)
-            if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unknown fallback_label={fallback_label}")
-        if condition_handler is None:
-            condition_handler = default_condition_handler
+            self.fallback_label = normalize_label(fallback_label)
+            if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
+                raise ValueError(f"Unknown fallback_label={self.fallback_label}")
+        self.condition_handler = default_condition_handler if condition_handler is None else condition_handler
 
-        super(Actor, self).__init__(
-            script=script,
-            start_label=start_label,
-            fallback_label=fallback_label,
-            label_priority=label_priority,
-            validation_stage=validation_stage,
-            condition_handler=condition_handler,
-            verbose=verbose,
-            handlers={} if handlers is None else handlers,
-        )
+        self.label_priority = label_priority
+        self.validation_stage = validation_stage
+        self.verbose = verbose
+        self.handlers = {} if handlers is None else handlers
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True

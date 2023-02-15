@@ -181,7 +181,7 @@ class Service(PipelineComponent):
         """
         representation = super(Service, self).info_dict
         if isinstance(self.handler, str) and self.handler == "ACTOR":
-            service_representation = f"Instance of Actor"
+            service_representation = "Instance of Actor"
         elif isinstance(self.handler, Callable):
             service_representation = f"Callable '{self.handler.__name__}'"
         else:
