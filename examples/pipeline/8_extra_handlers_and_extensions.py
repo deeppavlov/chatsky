@@ -14,13 +14,12 @@ import logging
 import random
 from datetime import datetime
 
-from dff.script import Actor
 from dff.pipeline import (
     Pipeline,
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerRuntimeInfo,
-    ServiceRuntimeInfo,
+    ServiceRuntimeInfo, ACTOR,
 )
 
 from dff.utils.testing.common import (
@@ -111,17 +110,13 @@ async def long_service(_, __, info: ServiceRuntimeInfo):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         [long_service for _ in range(0, 25)],
-        actor,
+        ACTOR,
     ],
 }
 

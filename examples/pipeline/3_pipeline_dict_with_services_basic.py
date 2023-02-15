@@ -10,8 +10,7 @@ dict and most important pipeline components.
 # %%
 import logging
 
-from dff.script import Actor
-from dff.pipeline import Service, Pipeline
+from dff.pipeline import Service, Pipeline, ACTOR
 
 from dff.utils.testing.common import (
     check_happy_path,
@@ -61,20 +60,16 @@ def postprocess(_):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-# %%
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         {
             "handler": prepreprocess,
         },
         preprocess,
-        actor,
+        ACTOR,
         Service(
             handler=postprocess,
         ),

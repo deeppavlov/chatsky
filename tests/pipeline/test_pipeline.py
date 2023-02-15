@@ -31,9 +31,9 @@ def test_from_script_with_validation(validation):
 
 
 def test_script_getting_and_setting():
-    script = {"": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.true()}}}}
-    pipeline = Pipeline.from_script(script=script, start_label=("", ""))
+    script = {"old_flow": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.true()}}}}
+    pipeline = Pipeline.from_script(script=script, start_label=("old_flow", ""))
 
-    new_script = {"": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.false()}}}, "new_flow": {}}
-    pipeline.script = new_script
-    assert len(pipeline.script.script.keys()) == len(new_script.keys())
+    new_script = {"new_flow": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.false()}}}}
+    pipeline.set_actor(script=new_script, start_label=("new_flow", ""))
+    assert list(pipeline.script.script.keys())[0] == list(new_script.keys())[0]

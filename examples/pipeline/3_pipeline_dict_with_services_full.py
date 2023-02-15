@@ -12,9 +12,9 @@ import json
 import logging
 import urllib.request
 
-from dff.script import Context, Actor
+from dff.script import Context
 from dff.messengers.common import CLIMessengerInterface
-from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo
+from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
 from dff.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -112,15 +112,10 @@ def postprocess(ctx: Context, line: Pipeline):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
-# %%
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "messenger_interface": CLIMessengerInterface(
         intro="Hi, this is a brand new Pipeline running!",
         prompt_request="Request: ",
@@ -141,7 +136,7 @@ pipeline_dict = {
         },  # This service will be named `preprocessor`
         # handler name will be overridden
         preprocess,
-        actor,
+        ACTOR,
         Service(
             handler=postprocess,
             name="postprocessor",

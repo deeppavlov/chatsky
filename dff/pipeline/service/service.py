@@ -8,7 +8,7 @@ import asyncio
 import inspect
 from typing import Optional, Callable, ForwardRef
 
-from dff.script import Actor, Context
+from dff.script import Context
 
 from .utils import wrap_sync_function_in_async, collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from ..types import (
@@ -77,7 +77,7 @@ class Service(PipelineComponent):
                     overridden_parameters,
                 )
             )
-        elif isinstance(handler, Callable):
+        elif isinstance(handler, Callable) or isinstance(handler, str) and handler == "ACTOR":
             self.handler = handler
             super(Service, self).__init__(
                 before_handler,
@@ -125,7 +125,7 @@ class Service(PipelineComponent):
         :return: Context, mutated by actor.
         """
         try:
-            ctx = self.handler(pipeline, ctx)
+            ctx = pipeline.actor(pipeline, ctx)
             self._set_state(ctx, ComponentExecutionState.FINISHED)
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
@@ -163,14 +163,14 @@ class Service(PipelineComponent):
         """
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
-        if isinstance(self.handler, Actor):
+        if isinstance(self.handler, str) and self.handler == "ACTOR":
             ctx = self._run_as_actor(ctx, pipeline)
         else:
             await self._run_as_service(ctx, pipeline)
 
         await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
 
-        if isinstance(self.handler, Actor):
+        if isinstance(self.handler, str) and self.handler == "ACTOR":
             return ctx
 
     @property
@@ -180,8 +180,8 @@ class Service(PipelineComponent):
         Adds `handler` key to base info dictionary.
         """
         representation = super(Service, self).info_dict
-        if isinstance(self.handler, Actor):
-            service_representation = f"Instance of {type(self.handler).__name__}"
+        if isinstance(self.handler, str) and self.handler == "ACTOR":
+            service_representation = f"Instance of Actor"
         elif isinstance(self.handler, Callable):
             service_representation = f"Callable '{self.handler.__name__}'"
         else:

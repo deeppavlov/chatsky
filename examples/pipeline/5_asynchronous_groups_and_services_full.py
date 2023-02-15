@@ -13,9 +13,9 @@ import json
 import logging
 import urllib.request
 
-from dff.script import Context, Actor
+from dff.script import Context
 
-from dff.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo
+from dff.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo, ACTOR
 
 from dff.utils.testing.common import (
     check_happy_path,
@@ -111,14 +111,10 @@ def context_printing_service(ctx: Context):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "optimization_warnings": True,
     # There are no warnings - pipeline is well-optimized
     "components": [
@@ -134,7 +130,7 @@ pipeline_dict = {
                 simple_asynchronous_service,
             ],
         ),
-        actor,
+        ACTOR,
         [meta_web_querying_service(photo) for photo in range(1, 16)],
         context_printing_service,
     ],

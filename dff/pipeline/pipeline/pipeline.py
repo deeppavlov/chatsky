@@ -8,7 +8,7 @@ import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
 from dff.context_storages import DBContextStorage
-from dff.script import Actor, Script, Context, ActorStage
+from dff.script import Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
@@ -24,8 +24,11 @@ from ..types import (
 )
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
+from ...script.core.actor import Actor
 
 logger = logging.getLogger(__name__)
+
+ACTOR = "ACTOR"
 
 
 class Pipeline:
@@ -51,6 +54,14 @@ class Pipeline:
     def __init__(
         self,
         components: ServiceGroupBuilder,
+        script: Union[Script, Dict],
+        start_label: NodeLabel2Type,
+        fallback_label: Optional[NodeLabel2Type] = None,
+        label_priority: float = 1.0,
+        validation_stage: Optional[bool] = None,
+        condition_handler: Optional[Callable] = None,
+        verbose: bool = True,
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
@@ -58,6 +69,7 @@ class Pipeline:
         timeout: Optional[float] = None,
         optimization_warnings: bool = False,
     ):
+        self.actor: Actor = None
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
@@ -69,17 +81,16 @@ class Pipeline:
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
-        self.actor = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
-        if self.actor is None:
+        actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
+        if not actor_exists:
             raise Exception("Actor not found in pipeline!")
         else:
-            val_stage = self.actor.validation_stage
-            errors = self.actor.validate_script(self, self.actor.verbose) if val_stage or val_stage is None else []
-            if errors:
-                raise ValueError(
-                    f"Found len(errors)={len(errors)} errors: "
-                    + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
-                )
+            self.set_actor(
+                script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose,
+                handlers
+            )
+        if self.actor is None:
+            raise Exception("Actor wasn't initialized correctly!")
 
         if optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
@@ -202,16 +213,44 @@ class Pipeline:
             It constructs root service group by merging `pre_services` + actor + `post_services`.
         :type post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
         """
-        actor = Actor(
-            script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose, handlers
-        )
         pre_services = [] if pre_services is None else pre_services
         post_services = [] if post_services is None else post_services
         return cls(
+            script=script,
+            start_label=start_label,
+            fallback_label=fallback_label,
+            label_priority=label_priority,
+            validation_stage=validation_stage,
+            condition_handler=condition_handler,
+            verbose=verbose,
+            handlers=handlers,
             messenger_interface=messenger_interface,
             context_storage=context_storage,
-            components=[*pre_services, actor, *post_services],
+            components=[*pre_services, ACTOR, *post_services],
         )
+
+    def set_actor(
+        self,
+        script: Union[Script, Dict],
+        start_label: NodeLabel2Type,
+        fallback_label: Optional[NodeLabel2Type] = None,
+        label_priority: float = 1.0,
+        validation_stage: Optional[bool] = None,
+        condition_handler: Optional[Callable] = None,
+        verbose: bool = True,
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
+    ):
+        old_actor = self.actor
+        self.actor = Actor(
+            script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose, handlers
+        )
+        errors = self.actor.validate_script(self, self.actor.verbose) if validation_stage is not False else []
+        if errors:
+            self.actor = old_actor
+            raise ValueError(
+                f"Found len(errors)={len(errors)} errors: "
+                + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
+            )
 
     @classmethod
     def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":
@@ -274,12 +313,3 @@ class Pipeline:
     @property
     def script(self) -> Script:
         return self.actor.script
-
-    @script.setter
-    def script(self, script: Union[Script, dict]):
-        script = script if isinstance(script, Script) else Script(script=script)
-        if script.get(self.actor.start_label[0], {}).get(self.actor.start_label[1]) is None:
-            raise ValueError(f"Unknown start_label={self.actor.start_label}")
-        if script.get(self.actor.fallback_label[0], {}).get(self.actor.fallback_label[1]) is None:
-            raise ValueError(f"Unknown fallback_label={self.actor.fallback_label}")
-        self.actor.script = script

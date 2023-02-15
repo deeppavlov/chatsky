@@ -13,9 +13,9 @@ import logging
 import random
 from datetime import datetime
 
-from dff.script import Context, Actor
+from dff.script import Context
 
-from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
+from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo, ACTOR
 
 from dff.utils.testing.common import (
     check_happy_path,
@@ -65,14 +65,10 @@ def logging_service(ctx: Context):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         ServiceGroup(
             before_handler=[collect_timestamp_before],
@@ -105,7 +101,7 @@ pipeline_dict = {
                 },
             ],
         ),
-        actor,
+        ACTOR,
         logging_service,
     ],
 }

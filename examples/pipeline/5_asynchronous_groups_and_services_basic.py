@@ -10,8 +10,7 @@ service and service group usage.
 # %%
 import asyncio
 
-from dff.script import Actor
-from dff.pipeline import Pipeline
+from dff.pipeline import Pipeline, ACTOR
 
 from dff.utils.testing.common import (
     is_interactive_mode,
@@ -43,17 +42,13 @@ async def time_consuming_service(_):
     await asyncio.sleep(0.01)
 
 
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         [time_consuming_service for _ in range(0, 10)],
-        actor,
+        ACTOR,
     ],
 }
 

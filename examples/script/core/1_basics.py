@@ -8,7 +8,7 @@ Let's do all the necessary imports from `dff`:
 
 
 # %%
-from dff.script import Actor, TRANSITIONS, RESPONSE, Message
+from dff.script import TRANSITIONS, RESPONSE, Message
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
 
@@ -106,29 +106,14 @@ happy_path = (
 
 # %% [markdown]
 """
-An `actor` is an object that processes user
+A `Pipeline` is an object that processes user
 inputs and returns responses.
-To create the actor you need to pass the script (`toy_script`),
+To create the pipeline you need to pass the script (`toy_script`),
 initial node (`start_label`) and
 the node to which the actor will default
 if none of the current conditions are met (`fallback_label`).
 By default, if `fallback_label` is not set,
 then its value becomes equal to `start_label`.
-"""
-
-
-# %%
-actor = Actor(
-    toy_script,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-# %% [markdown]
-"""
-`Actor` is a low-level API way of working with `dff`.
-We recommend going the other way and using `Pipeline`,
-which has the same functionality but a high-level API.
 """
 
 

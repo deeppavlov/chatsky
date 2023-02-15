@@ -360,7 +360,7 @@ class Actor(BaseModel):
         node_labels = []
         labels = []
         conditions = []
-        for flow_name, flow in pipeline.script.items():
+        for flow_name, flow in self.script.items():
             for node_name, node in flow.items():
                 flow_labels += [flow_name] * len(node.transitions)
                 node_labels += [node_name] * len(node.transitions)
@@ -377,7 +377,7 @@ class Actor(BaseModel):
 
             # validate labeling
             try:
-                node = pipeline.script[label[0]][label[1]]
+                node = self.script[label[0]][label[1]]
             except Exception as exc:
                 msg = (
                     f"Could not find node with label={label}, "

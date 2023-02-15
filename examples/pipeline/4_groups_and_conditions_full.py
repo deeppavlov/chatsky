@@ -10,7 +10,6 @@ The following example shows `pipeline` service group usage and start conditions.
 import json
 import logging
 
-from dff.script import Actor
 from dff.pipeline import (
     Service,
     Pipeline,
@@ -18,7 +17,7 @@ from dff.pipeline import (
     not_condition,
     service_successful_condition,
     all_condition,
-    ServiceRuntimeInfo,
+    ServiceRuntimeInfo, ACTOR,
 )
 
 from dff.utils.testing.common import (
@@ -157,14 +156,10 @@ def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         [
             simple_service,  # This simple service
@@ -173,7 +168,7 @@ pipeline_dict = {
             # will be named `simple_service_1`
         ],  # Despite this is the unnamed service group in the root
         # service group, it will be named `service_group_0`
-        actor,
+        ACTOR,
         ServiceGroup(
             name="named_group",
             components=[

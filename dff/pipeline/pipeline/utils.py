@@ -7,8 +7,6 @@ import collections
 from typing import Union, List, Callable
 from inspect import isfunction
 
-from dff.script import Actor
-
 from ..service.service import Service
 from ..service.group import ServiceGroup
 
@@ -76,7 +74,7 @@ def rename_component_incrementing(
     :param collisions: Services in the same service group as service.
     :return: Generated name
     """
-    if isinstance(service, Service) and isinstance(service.handler, Actor):
+    if isinstance(service, Service) and isinstance(service.handler, str) and service.handler == "ACTOR":
         base_name = "actor"
     elif isinstance(service, Service) and isinstance(service.handler, Callable):
         if isfunction(service.handler):
@@ -94,7 +92,7 @@ def rename_component_incrementing(
     return f"{base_name}_{name_index}"
 
 
-def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Actor:
+def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> bool:
     """
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
@@ -103,7 +101,7 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Acto
 
     :param service_group: Service group to resolve name collisions in.
     """
-    actor = None
+    actor = False
     names_counter = collections.Counter([component.name for component in service_group.components])
     for component in service_group.components:
         if component.name is None:
@@ -112,16 +110,16 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Acto
             raise Exception(f"User defined service name collision ({path})!")
         component.path = f"{path}.{component.name}"
 
-        if isinstance(component, Service) and isinstance(component.handler, Actor):
-            current_actor = component.handler
+        if isinstance(component, Service) and isinstance(component.handler, str) and component.handler == "ACTOR":
+            actor_found = True
         elif isinstance(component, ServiceGroup):
-            current_actor = finalize_service_group(component, f"{path}.{component.name}")
+            actor_found = finalize_service_group(component, f"{path}.{component.name}")
         else:
-            current_actor = None
+            actor_found = False
 
-        if current_actor is not None:
-            if actor is None:
-                actor = current_actor
+        if actor_found:
+            if not actor:
+                actor = actor_found
             else:
                 raise Exception(f"More than one actor found in group ({path})!")
     return actor
