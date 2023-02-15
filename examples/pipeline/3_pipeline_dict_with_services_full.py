@@ -102,11 +102,11 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
         }
 
 
-def postprocess(ctx: Context, line: Pipeline):
+def postprocess(ctx: Context, pl: Pipeline):
     logger.info("postprocession Service (defined as an object)")
     logger.info(f"resulting misc looks like:" f"{json.dumps(ctx.misc, indent=4, default=str)}")
-    fallback_flow, fallback_node, _ = line.actor.fallback_label
-    received_response = line.script[fallback_flow][fallback_node].response
+    fallback_flow, fallback_node, _ = pl.actor.fallback_label
+    received_response = pl.script[fallback_flow][fallback_node].response
     responses_match = received_response == ctx.last_response
     logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
