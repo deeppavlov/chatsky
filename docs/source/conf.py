@@ -4,6 +4,8 @@ import re
 
 # -- Path setup --------------------------------------------------------------
 
+import pydata_sphinx_theme  # noqa: F401
+
 sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
 from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
@@ -102,6 +104,8 @@ html_css_files = [
 
 # Theme options
 html_theme_options = {
+    "use_edit_page_button": True,
+    "header_links_before_dropdown": 7,
     "icon_links": [
         {
             "name": "Deeppavlov Forum",
