@@ -1,8 +1,16 @@
 """
-Service Class
--------------
-This module contains `Service` class. A description of the class is given below.
+Service
+-------
+The Service module contains the :py:class:`.Service` class,
+which can be included into pipeline as object or a dictionary.
+Pipeline consists of services and service groups.
+Service group can be synchronous or asynchronous.
+Service is an atomic part of a pipeline.
+Service can be asynchronous only if its handler is a coroutine.
+Actor wrapping service can be synchronous only.
 """
+# TODO: change last sentence, when actor will be asynchronous
+
 import logging
 import asyncio
 import inspect

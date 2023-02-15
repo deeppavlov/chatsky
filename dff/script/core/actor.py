@@ -1,9 +1,21 @@
 """
 Actor
----------------------------
-Actor is one of the main abstractions that processes incoming requests
-(:py:class:`~dff.script.Context`)
-from the user in accordance with the dialog graph (:py:class:`~dff.script.Script`).
+-----
+Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script` and handles it.
+It is responsible for processing user input and determining the appropriate response based
+on the current state of the conversation and the script.
+The actor receives requests in the form of a :py:class:`.Context` class, which contains
+information about the user's input, the current state of the conversation, and other relevant data.
+
+The actor uses the dialog graph, represented by the :py:class:`.Script` class,
+to determine the appropriate response. The script contains the structure of the conversation,
+including the different `nodes` and `transitions`.
+It defines the possible paths that the conversation can take, and the conditions that must be met
+for a transition to occur. The actor uses this information to navigate the graph
+and determine the next step in the conversation.
+
+Overall, the actor acts as a bridge between the user's input and the dialog graph,
+making sure that the conversation follows the expected flow and providing a personalized experience to the user.
 """
 import logging
 from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef

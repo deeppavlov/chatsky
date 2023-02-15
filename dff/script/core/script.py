@@ -1,7 +1,9 @@
 """
 Script
----------------------------
-Here is a set of `pydantic` models for the dialog graph.
+------
+The Script module provides a set of `pydantic` models for representing the dialog graph.
+These models are used to define the conversation flow, and to determine the appropriate response based on
+the user's input and the current state of the conversation.
 """
 # %%
 

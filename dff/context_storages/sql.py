@@ -1,8 +1,16 @@
 """
 SQL
 ---
-Provides the SQL-based version of the :py:class:`.DBContextStorage`.
-You can choose the backend option of your liking from MySQL, PostgreSQL, or SQLite.
+The SQL module provides a SQL-based version of the :py:class:`.DBContextStorage` class.
+This class is used to store and retrieve context data from SQL databases.
+It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+and easy to work with.
+
+The SQL module provides the ability to choose the backend of your choice from
+MySQL, PostgreSQL, or SQLite. You can choose the one that is most suitable for your use case and environment.
+MySQL and PostgreSQL are widely used open-source relational databases that are known for their
+reliability and scalability. SQLite is a self-contained, high-reliability, embedded, full-featured,
+public-domain, SQL database engine.
 """
 import asyncio
 import importlib

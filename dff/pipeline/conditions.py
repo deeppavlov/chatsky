@@ -1,6 +1,9 @@
 """
 Conditions
 ----------
+The conditions module contains functions that can be used to determine whether the pipeline component to which they
+are attached should be executed or not.
+The standard set of them allows user to setup dependencies between pipeline components.
 """
 from typing import Optional, ForwardRef
 

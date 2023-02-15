@@ -1,7 +1,9 @@
 """
 Normalization
----------------------------
-A basic set of functions for normalizing data in a dialog script is placed here.
+-------------
+Normalization module is used to normalize all python objects and functions to a format
+that is suitable for script and actor execution process.
+This module contains a basic set of functions for normalizing data in a dialog script.
 """
 import logging
 

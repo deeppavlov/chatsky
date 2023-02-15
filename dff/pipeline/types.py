@@ -1,7 +1,9 @@
 """
 Types
 -----
-This module contains several classes and special types (see below).
+The Types module contains several classes and special types that are used throughout the `DFF Pipeline`.
+The classes and special types in this module can include data models,
+data structures, and other types that are defined for type hinting.
 """
 from abc import ABC
 from enum import unique, Enum, auto
