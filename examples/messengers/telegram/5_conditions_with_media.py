@@ -24,17 +24,10 @@ from dff.utils.testing.common import is_interactive_mode
 
 
 # %%
-# kitten picture info:
-kitten_id = "Y0WXj3xqJz0"
-kitten_ixid = "MnwxMjA3fDB8MXxhbGx8fHx8fHx8fHwxNjY4NjA2NTI0"
-kitten_width = 640
-kitten_url = (
-    f"https://unsplash.com/photos/"
-    f"{kitten_id}/download?ixid={kitten_ixid}"
-    f"&force=true&w={kitten_width}"
-)
 
-picture_url = "https://folklore.linghub.ru/api/gallery/300/23.JPG"
+picture_url = "https://gist.githubusercontent.com/scotthaleen/" \
+              "32f76a413e0dfd4b4d79c2a534d49c0b/raw" \
+              "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
 
 
 # %% [markdown]
@@ -110,7 +103,7 @@ script = {
 happy_path = (
     (TelegramMessage(text="/start"), TelegramMessage(text="Send me a picture")),
     (
-        TelegramMessage(attachments=Attachments(files=[Image(source=kitten_url)])),
+        TelegramMessage(attachments=Attachments(files=[Image(source=picture_url)])),
         TelegramMessage(
             text="Here's my picture!",
             attachments=Attachments(files=[Image(source=picture_url)]),

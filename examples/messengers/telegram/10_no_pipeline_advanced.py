@@ -12,12 +12,10 @@ and the script.
 
 # %%
 import os
-from typing import Optional
 
 import dff.script.conditions as cnd
 from dff.script import Context, Actor, TRANSITIONS, RESPONSE
 
-from telebot import types
 from telebot.util import content_type_media
 
 from dff.messengers.telegram import (
@@ -26,23 +24,13 @@ from dff.messengers.telegram import (
     TelegramUI,
     telegram_condition,
 )
+from dff.messengers.telegram.interface import extract_telegram_request_and_id
 from dff.script.core.message import Button
 from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
 
 bot = TelegramMessenger(os.getenv("TG_BOT_TOKEN", ""))
-
-
-# %% [markdown]
-"""
-You can handle various values inside your script:
-
-* Use `message_telegram_condition` to create conditions for message values.
-* Use `callback_query_handler` to create conditions depending on the query values.
-
-The signature of these functions is equivalent to the signature of the `telebot` methods.
-"""
 
 
 # %%
@@ -92,19 +80,9 @@ script = {
 actor = Actor(script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 
-# %%
-def get_markup(data: Optional[dict]):
-    if not data:
-        return None
-    markup = types.InlineKeyboardMarkup(row_width=2)
-    for key, item in data.items():
-        markup.add(types.InlineKeyboardButton(**item))
-    return markup
-
-
 # %% [markdown]
 """
-If you need to work with callback queries or other types
+If you need to work with other types
 of queries, you can stack decorators upon the main handler.
 """
 
@@ -113,21 +91,19 @@ of queries, you can stack decorators upon the main handler.
 @bot.callback_query_handler(func=lambda call: True)
 @bot.message_handler(func=lambda msg: True, content_types=content_type_media)
 def handler(update):
+    message, ctx_id = extract_telegram_request_and_id(update)
 
     # retrieve or create a context for the user
-    user_id = (vars(update).get("from_user")).id
-    context: Context = db.get(user_id, Context(id=user_id))
+    context: Context = db.get(ctx_id, Context(id=ctx_id))
     # add update
-    context.add_request(TelegramMessage(text=getattr(update, "text", None), update=update))
+    context.add_request(message)
 
     # apply the actor
-    context = actor(context)
+    updated_context = actor(context)
 
-    # save the context
-    db[user_id] = context
-
-    response = context.last_response
+    response = updated_context.last_response
     bot.send_response(update.from_user.id, response)
+    db[ctx_id] = updated_context  # Save the context.
 
 
 def main():

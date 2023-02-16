@@ -19,7 +19,8 @@ import os
 from dff.script import Context, Actor
 from telebot.util import content_type_media
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.messengers.telegram import TelegramMessenger, TelegramMessage
+from dff.messengers.telegram import TelegramMessenger
+from dff.messengers.telegram.interface import extract_telegram_request_and_id
 from dff.utils.testing.common import is_interactive_mode
 
 db = dict()  # You can use any other context storage from the library.
@@ -58,19 +59,19 @@ so that the bot can reply to images, stickers, etc.
 # %%
 @bot.message_handler(func=lambda message: True, content_types=content_type_media)
 def dialog_handler(update):
+    message, ctx_id = extract_telegram_request_and_id(update)
 
     # retrieve or create a context for the user
-    user_id = (vars(update).get("from_user")).id
-    context: Context = db.get(user_id, Context(id=user_id))
+    context: Context = db.get(ctx_id, Context(id=ctx_id))
     # add update
-    context.add_request(TelegramMessage(text=getattr(update, "text", None), update=update))
+    context.add_request(message)
 
     # apply the actor
     updated_context = actor(context)
 
     response = updated_context.last_response
-    bot.send_message(update.from_user.id, response.text)
-    db[user_id] = updated_context  # Save the context.
+    bot.send_response(update.from_user.id, response)
+    db[ctx_id] = updated_context  # Save the context.
 
 
 def main():

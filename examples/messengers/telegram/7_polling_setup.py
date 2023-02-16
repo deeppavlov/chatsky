@@ -2,7 +2,7 @@
 """
 # 7. Polling Setup
 
-The following example shows how to deploy a DFF bot locally using polling.
+The following example shows how to configure `PollingTelegramInterface`.
 
 """
 

@@ -3,7 +3,7 @@
 # 4. Conditions
 
 This example shows how to process Telegram updates in your script
-and reuse telegram_condition triggers from the `pytelegrambotapi` library.
+and reuse handler triggers from the `pytelegrambotapi` library.
 """
 
 # %%
@@ -83,8 +83,7 @@ script = {
     }
 }
 
-
-# testing
+# this variable is only for testing
 happy_path = (
     (TelegramMessage(text="/start"), TelegramMessage(text="Hi, how are you?")),
     (

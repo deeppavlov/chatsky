@@ -24,12 +24,11 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
-To display or hide a keyboard, you can utilize the `TelegramUI` class.
-It can be initialized either with the `keyboard` parameter (allows `telebot` keyboards)
-or with the `buttons` parameter (the keyboard will be constructed under the hood).
+To display or hide a keyboard, you can utilize the `ui` field of the `TelegramMessage` class.
+It can be initialized either with a `TelegramUI` instance or with a custom telebot keyboard.
 
-`TelegramUI` should be passed to the `ui` field
-of the generic `Response` class.
+Passing an instance of `RemoveKeyboard` to the `ui` field will indicate that the keyboard
+should be removed.
 """
 
 
@@ -91,7 +90,7 @@ script = {
 
 interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
-
+# this variable is only for testing
 happy_path = (
     (
         TelegramMessage(text="/start"),

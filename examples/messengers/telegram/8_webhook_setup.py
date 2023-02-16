@@ -2,12 +2,8 @@
 """
 # 8. Webhook Setup
 
-The following example shows how to integrate your bot with the Pipeline API.
-
-Assuming you already have a script to deploy. All you need to do
-is to instantiate a TelegramMessenger and pass it to an `Interface` class.
-This class uses `CallbackTelegramInterface` that makes your bot accessible
-through a public webhook.
+The following example shows how to use `CallbackTelegramInterface`
+that makes your bot accessible through a public webhook.
 """
 
 

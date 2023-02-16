@@ -50,7 +50,7 @@ script = {
     }
 }
 
-# testing
+# this variable is only for testing
 happy_path = (
     (Message(text="/start"), Message(text="Hi")),
     (Message(text="Hi"), Message(text="Hi")),

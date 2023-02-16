@@ -26,14 +26,12 @@ from dff.utils.testing.common import is_interactive_mode
 # %% [markdown]
 """
 If you want to send an inline keyboard to your Telegram chat,
-one of the ways is to use the generic `Keyboard` class
-that fills the `ui` field of the `Response` class.
+set `is_inline` field of the `TelegramUI` instance to `True`
+(note that it is inline by default, so you could also omit it).
 
 Pushing a button of an inline keyboard results in a callback
-query being sent to your bot. To process these results,
-you need to employ the `callback_query_handler`
-in transition conditions (see below).
-
+query being sent to your bot. The data of the query
+is stored in the `callback_query` field of a user `TelegramMessage`.
 """
 
 
@@ -86,6 +84,7 @@ script = {
     },
 }
 
+# this variable is only for testing
 happy_path = (
     (
         TelegramMessage(text="/start"),
