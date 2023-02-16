@@ -8,5 +8,6 @@ __version__ = "0.2.1"
 
 
 import nest_asyncio
-
-nest_asyncio.apply()
+import asyncio
+loop = asyncio.get_event_loop_policy().new_event_loop()
+nest_asyncio.apply(loop)
