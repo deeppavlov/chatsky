@@ -48,8 +48,8 @@ These objects are dictionaries of particular structure:
 
 On pipeline execution services from `services` list are run
 without difference between pre- and postprocessors.
-If Actor instance is not found among `services` pipeline creation fails.
-There can be only one Actor in the pipeline.
+If "ACTOR" constant is not found among `services` pipeline creation fails.
+There can be only one "ACTOR" constant in the pipeline.
 ServiceBuilder object can be defined either with callable (see example 2) or
 with dict of structure / object with following constructor arguments:
 
@@ -76,7 +76,7 @@ Here pipeline contains 4 services,
 defined in 4 different ways with different signatures.
 First two of them write sample feature detection data to `ctx.misc`.
 The first uses a constant expression and the second fetches from `example.com`.
-Third one is Actor (it acts like a _special_ service here).
+Third one is "ACTOR" constant (it acts like a _special_ service here).
 Final service logs `ctx.misc` dict.
 """
 

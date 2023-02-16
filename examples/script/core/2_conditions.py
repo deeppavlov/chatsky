@@ -28,7 +28,7 @@ If this function returns the value `True`,
 then the actor performs the corresponding transition.
 Condition functions have signature
 
-    def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool
+    def func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool
 
 Out of the box `dff.script.conditions` offers the
     following options for setting conditions:
@@ -56,7 +56,7 @@ Out of the box `dff.script.conditions` offers the
 
 For example function
 ```
-def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+def always_true_condition(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
     return True
 ```
 always returns `True` and `always_true_condition` function

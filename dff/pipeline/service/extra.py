@@ -143,7 +143,7 @@ class _ComponentExtraHandler:
         It sets up timeout if this component is asynchronous and executes it using `_run` method.
 
         :param ctx: (required) Current dialog `Context`.
-        :param pipeline: This `Pipeline` or `None` if this is a service, that wraps `Actor`.
+        :param pipeline: This `Pipeline`.
         :return: `Context` if this is a synchronous service or
             `Awaitable` if this is an asynchronous component or `None`.
         """

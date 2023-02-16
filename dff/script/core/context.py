@@ -101,7 +101,7 @@ class Context(BaseModel):
     """
     validation: bool = False
     """
-    `validation` is a flag that signals that :py:class:`~dff.script.Actor`,
+    `validation` is a flag that signals that :py:class:`~dff.script.Pipeline`,
     while being initialized, checks the :py:class:`~dff.script.Script`.
     The functions that can give not validable data
     while being validated must use this flag to take the validation mode into account.
@@ -110,11 +110,11 @@ class Context(BaseModel):
     framework_states: Dict[ModuleName, Dict[str, Any]] = {}
     """
     `framework_states` is used for addons states or for
-    :py:class:`~dff.script.Actor`'s states.
-    :py:class:`~dff.script.Actor`
+    :py:class:`~dff.script.Pipeline`'s states.
+    :py:class:`~dff.script.Pipeline`
     records all its intermediate conditions into the `framework_states`.
     After :py:class:`~dff.script.Context` processing is finished,
-    :py:class:`~dff.script.Actor` resets `framework_states` and
+    :py:class:`~dff.script.Pipeline` resets `framework_states` and
     returns :py:class:`~dff.script.Context`.
 
         - key - Temporary variable name.

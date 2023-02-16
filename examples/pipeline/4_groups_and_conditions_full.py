@@ -86,7 +86,7 @@ Services and service groups can be executed conditionally.
 Conditions are functions passed to `start_condition` argument.
 These functions should have following signature:
 
-    (ctx: Context, actor: Actor) -> bool.
+    (ctx: Context, pipeline: Pipeline) -> bool.
 
 Service is only executed if its start_condition returned `True`.
 By default all the services start unconditionally.

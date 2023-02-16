@@ -32,7 +32,7 @@ see example 4.
 
 On pipeline execution services from `services`
 list are run without difference between pre- and postprocessors.
-Actor instance should also be present among services.
+Actor constant "ACTOR" should also be present among services.
 ServiceBuilder object can be defined either with callable
 (see example 2) or with dict / object.
 It should contain `handler` - a ServiceBuilder object.
