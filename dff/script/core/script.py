@@ -43,27 +43,29 @@ class Node(BaseModel, extra=Extra.forbid):
         See details in the :py:func:`~normalize_response` function of `normalization.py`.
         """
         response = normalize_response(self.response)
-        return response(ctx, actor, *args, **kwargs)
+        return response(ctx, pipeline, *args, **kwargs)
 
     def run_pre_response_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         """
         Executes pre-processing of responses.
         """
-        return self.run_processing(self.pre_response_processing, ctx, actor, *args, **kwargs)
+        return self.run_processing(self.pre_response_processing, ctx, pipeline, *args, **kwargs)
 
     def run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         """
         Executes pre-processing of transitions.
         """
-        return self.run_processing(self.pre_transitions_processing, ctx, actor, *args, **kwargs)
+        return self.run_processing(self.pre_transitions_processing, ctx, pipeline, *args, **kwargs)
 
-    def run_processing(self, processing: Dict[Any, Callable], ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
+    def run_processing(
+        self, processing: Dict[Any, Callable], ctx: Context, pipeline: Pipeline, *args, **kwargs
+    ) -> Context:
         """
         Executes the normalized processing.
         See details in the :py:func:`~normalize_processing` function of `normalization.py`.
         """
         processing = normalize_processing(processing)
-        return processing(ctx, actor, *args, **kwargs)
+        return processing(ctx, pipeline, *args, **kwargs)
 
 
 class Script(BaseModel, extra=Extra.forbid):
