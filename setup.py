@@ -89,7 +89,6 @@ test_requirements = [
     "psutil>=5.9.1",
     "requests>=2.28.1",
     "telethon>=1.27.0,<2.0",
-    "pytz>=2022.6",
 ]
 
 tests_full = merge_req_lists(
