@@ -107,8 +107,8 @@ html_theme_options = {
         {
             "name": "Deeppavlov Forum",
             "url": "https://forum.deeppavlov.ai",
-            "icon": "https://static.tildacdn.com/tild6538-3537-4239-b632-623238366335/_DeepPavlov_200x200-.svg",
-            "type": "url",
+            "icon": "_static/images/logo-deeppavlov.png",
+            "type": "local",
         },
         {
             "name": "Telegram",
@@ -121,6 +121,13 @@ html_theme_options = {
             "url": "https://github.com/deeppavlov/dialog_flow_framework",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
+        },
+    ],
+    "favicons": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "href": "images/logo-dff.svg",
         },
     ],
     "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab-links"],
