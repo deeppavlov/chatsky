@@ -109,8 +109,8 @@ class PollingTelegramInterface(PollingMessengerInterface):
         self.allowed_updates = allowed_updates
         self.timeout = timeout
         self.long_polling_timeout = long_polling_timeout
-        self.last_processed_update = -1
-        self.stop_polling = asyncio.Event()
+        self._last_processed_update = -1
+        self._stop_polling = asyncio.Event()
 
     def _request(self) -> List[Tuple[Message, int]]:
         updates = self.messenger.get_updates(
@@ -127,36 +127,36 @@ class PollingTelegramInterface(PollingMessengerInterface):
             self.messenger.send_response(resp.id, resp.last_response)
             update_id = getattr(resp.last_request, "update_id", None)
             if update_id is not None:
-                if update_id > self.last_processed_update:
-                    self.last_processed_update = update_id
+                if update_id > self._last_processed_update:
+                    self._last_processed_update = update_id
 
     def _on_exception(self, e: Exception):
         logger.error(e)
-        self.stop_polling.set()
+        self._stop_polling.set()
 
     def forget_processed_updates(self):
         """
         Forget updates already processed by the pipeline.
         """
         self.messenger.get_updates(
-            offset=self.last_processed_update + 1,
+            offset=self._last_processed_update + 1,
             allowed_updates=self.allowed_updates,
             timeout=1,
             long_polling_timeout=1,
         )
 
     async def connect(self, callback: PipelineRunnerFunction, loop: Optional[Callable] = None, *args, **kwargs):
-        self.stop_polling.clear()
+        self._stop_polling.clear()
 
         try:
             await super().connect(
-                callback, loop=loop or (lambda: not self.stop_polling.is_set()), timeout=self.interval
+                callback, loop=loop or (lambda: not self._stop_polling.is_set()), timeout=self.interval
             )
         finally:
             self.forget_processed_updates()
 
     def stop(self):
-        self.stop_polling.set()
+        self._stop_polling.set()
 
 
 class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
