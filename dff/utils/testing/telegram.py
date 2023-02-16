@@ -139,7 +139,7 @@ class TelegramTesting:
         """
         msg = TelegramMessage()
         for response in responses:
-            if response.text is not None and response.file is None:
+            if response.text and response.file is None:
                 if msg.text:
                     raise RuntimeError(f"Several messages with text:\n{msg.text}\n{response.text}")
                 msg.text = response.text or msg.text
