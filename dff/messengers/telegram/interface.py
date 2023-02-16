@@ -25,8 +25,7 @@ except ImportError:
 
 
 def extract_telegram_request_and_id(
-    update: types.Update,
-    messenger: Optional[TelegramMessenger] = None
+    update: types.Update, messenger: Optional[TelegramMessenger] = None
 ) -> Tuple[TelegramMessage, int]:
     """
     Utility function that extracts parameters from a telegram update.

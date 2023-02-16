@@ -25,9 +25,11 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %%
 
-picture_url = "https://gist.githubusercontent.com/scotthaleen/" \
-              "32f76a413e0dfd4b4d79c2a534d49c0b/raw" \
-              "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
+picture_url = (
+    "https://gist.githubusercontent.com/scotthaleen/"
+    "32f76a413e0dfd4b4d79c2a534d49c0b/raw"
+    "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
+)
 
 
 # %% [markdown]
@@ -130,7 +132,7 @@ happy_path = (
 
 
 # %%
-def extract_data(ctx: Context, actor: Actor):  # A function to extract data with
+def extract_data(ctx: Context, _: Actor):  # A function to extract data with
     message = ctx.last_request
     if message is None:
         return ctx
