@@ -42,7 +42,11 @@ class TelegramMessenger(TeleBot):
     def send_response(self, chat_id: Union[str, int], response: Union[str, dict, Message]) -> None:
         """
         Cast `response` to :py:class:`~dff.messengers.telegram.types.TelegramMessage` and send it.
-        Text content is sent after all the attachments.
+        Message fields are sent in separate messages in the following order:
+
+        1. Attachments
+        2. Location
+        3. Text with keyboard
 
         :param chat_id: Telegram chat ID.
         :param response: Response data. String, dictionary or :py:class:`~dff.script.responses.generics.Response`.
@@ -187,8 +191,7 @@ def telegram_condition(
     **kwargs,
 ):
     """
-    Creates a condition triggered by updates that match the given parameters.
-    The signature is equal with the `Telebot` method of the same name.
+    A condition triggered by updates that match the given parameters.
 
     :param messenger:
         Messenger to test filters on. Used only for :py:attr:`Telebot.custom_filters`.

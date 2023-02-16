@@ -35,7 +35,9 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
     - | `update` -- this field stores the first non-empty field of `update`,
     - | `update_type` -- this field stores the name of the first non-empty field of `update`,
     - | `text` -- this field stores `update.message.text`,
-    - | `callback_query` -- this field stores `update.callback_query.data` or None if `data` is None.
+    - | `callback_query` -- this field stores `update.callback_query.data`.
+
+    Also return context id which is `chat`, `from_user` or `user` of the update.
 
     :param messenger: Messenger instance.
     :param update: Update to process.
@@ -72,8 +74,8 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
 
 class PollingTelegramInterface(PollingMessengerInterface):
     """
-    Asynchronous Telegram interface that retrieves updates by polling.
-    Multi-threaded polling is currently not supported, but will be implemented in the future.
+    Telegram interface that retrieves updates by polling.
+    Multi-threaded polling is currently not supported.
 
     :param token: Bot token
     :param messenger:
@@ -156,6 +158,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
             self.forget_processed_updates()
 
     def stop(self):
+        """Stop polling."""
         self._stop_polling.set()
 
 

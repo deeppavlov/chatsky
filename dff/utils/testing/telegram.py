@@ -1,3 +1,8 @@
+"""
+Telegram testing utils
+----------------------
+This module defines functions used to test Telegram interface.
+"""
 from typing import List, Optional, cast, Tuple
 from contextlib import asynccontextmanager, nullcontext
 import logging
@@ -48,7 +53,27 @@ async def get_bot_user(client: TelegramClient, username: str):
 
 
 class TelegramTesting:
-    """Defines functions for testing."""
+    """
+    Defines functions for testing.
+
+    :param pipeline:
+        Pipeline with the telegram messenger interface.
+        Required for :py:meth:`~dff.utils.testing.telegram.TelegramTesting.send_and_check` and
+        :py:meth`~dff.utils.testing.telegram.TelegramTesting.check_happy_path` with `run_bot=True`
+    :param api_credentials:
+        Telegram API id and hash.
+        Obtainable via https://core.telegram.org/api/obtaining_api_id.
+    :param session_file:
+        A `telethon` session file.
+        Obtainable by connecting to :py:class:`telethon.TelegramClient` and entering phone number and code.
+    :param client:
+        An alternative to passing `api_credentials` and `session_file`.
+    :param bot_username:
+        Either a link to the bot user or its handle. Used to determine whom to talk with as a client.
+    :param bot:
+        An alternative to passing `bot_username`.
+        Result of calling :py:func:`~dff.utils.testing.telegram.get_bot_user` with `bot_username` as parameter.
+    """
 
     def __init__(
         self,
@@ -74,7 +99,17 @@ class TelegramTesting:
         """Bot user (to know whom to send messages to from client)."""
 
     async def send_message(self, message: TelegramMessage, last_bot_messages: List[TlMessage]):
-        """Send a message from client to bot."""
+        """
+        Send a message from client to bot.
+        If the message contains `callback_query`, only press the button, ignore other fields.
+
+        :param message: Message to send.
+        :param last_bot_messages:
+            The last bot response. Accepts a list because messages with multiple fields are split in telegram.
+            Can only contain one keyboard in the list.
+            Used to determine which button to press when message contains
+            :py:class:`~dff.messengers.telegram.message._ClickButton`.
+        """
         if message.callback_query is not None:
             query = message.callback_query
             if not isinstance(query, _ClickButton):
@@ -101,6 +136,9 @@ class TelegramTesting:
         """
         Convert a list of bot responses into a single message.
         This function accepts a list because messages with multiple attachments are split.
+
+        :param responses: A list of bot responses that are considered to be a single message.
+        :param file_download_destination: A directory to download sent media to.
         """
         msg = TelegramMessage()
         for response in responses:
@@ -143,7 +181,7 @@ class TelegramTesting:
 
     @asynccontextmanager
     async def run_bot_loop(self):
-        """A context manager that starts a bot defined in `pipeline`"""
+        """A context manager that returns a function to run one polling loop of a messenger interface."""
         self.pipeline.messenger_interface.timeout = 2
         self.pipeline.messenger_interface.long_polling_timeout = 2
         await self.forget_previous_updates()
@@ -153,7 +191,14 @@ class TelegramTesting:
         self.pipeline.messenger_interface.forget_processed_updates()
 
     async def send_and_check(self, message: Message, file_download_destination=None):
-        """Send a message from a bot, receive it as client, verify it."""
+        """
+        Send a message from a bot, receive it as client, verify it.
+
+        :param message: Message to send and check.
+        :param file_download_destination:
+            Temporary directory (used to download sent files).
+            Defaults to :py:class:`tempfile.TemporaryDirectory`.
+        """
         await self.forget_previous_updates()
 
         async with self.client:
@@ -170,7 +215,7 @@ class TelegramTesting:
             await asyncio.sleep(3)
             bot_messages = [
                 x async for x in self.client.iter_messages(self.bot, min_id=last_message_id, from_user=self.bot)
-            ]
+            ]  # iter_messages is used instead of get_messages because get_messages requires bot min_id and max_id
             bot_messages.reverse()
 
             if file_download_destination is None:
@@ -232,6 +277,7 @@ class TelegramTesting:
                             self.bot, min_id=(user_message or last_message).id, from_user=self.bot
                         )
                     ]
+                    # iter_messages is used instead of get_messages because get_messages requires bot min_id and max_id
                     if len(bot_messages) > 0:
                         last_message = bot_messages[0]
                     logging.info("Got responses")

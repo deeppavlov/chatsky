@@ -27,7 +27,12 @@ from dff.script.core.message import Message, Location, Keyboard, DataModel, root
 
 class TelegramUI(Keyboard):
     is_inline: bool = True
+    """
+    Whether to use `inline keyboard <https://core.telegram.org/bots/features#inline-keyboards>`__ or
+    a `keyboard <https://core.telegram.org/bots/features#keyboards>`__.
+    """
     row_width: int = 3
+    """Limits the maximum number of buttons in a row."""
 
     @root_validator
     def validate_buttons(cls, values):
@@ -88,7 +93,7 @@ class TelegramMessage(Message):
     update_type: Optional[str] = None
     """Name of the field that stores an update representing this message."""
     parse_mode: Optional[ParseMode] = None
-    """Parse mode of the message"""
+    """Parse mode of the message."""
 
     def __eq__(self, other):
         if isinstance(other, Message):
