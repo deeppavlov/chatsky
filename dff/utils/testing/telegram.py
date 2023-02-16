@@ -114,11 +114,8 @@ class TelegramTesting:
             query = message.callback_query
             if not isinstance(query, _ClickButton):
                 raise RuntimeError(f"Use `_ClickButton` during tests: {query}")
-            button_clicked = False
             for bot_message in last_bot_messages:
                 if bot_message.buttons is not None:
-                    if button_clicked:
-                        raise RuntimeError("Found multiple messages with buttons")
                     await bot_message.click(i=query.button_index)
                     return None
         if message.attachments is None or len(message.attachments.files) == 0:
@@ -216,7 +213,6 @@ class TelegramTesting:
             bot_messages = [
                 x async for x in self.client.iter_messages(self.bot, min_id=last_message_id, from_user=self.bot)
             ]  # iter_messages is used instead of get_messages because get_messages requires bot min_id and max_id
-            bot_messages.reverse()
 
             if file_download_destination is None:
                 fd_context = TemporaryDirectory()
@@ -272,10 +268,7 @@ class TelegramTesting:
                     await asyncio.sleep(2)
                     logging.info("Extracting responses")
                     bot_messages = [
-                        x
-                        async for x in self.client.iter_messages(
-                            self.bot, min_id=(user_message or last_message).id, from_user=self.bot
-                        )
+                        x async for x in self.client.iter_messages(self.bot, min_id=last_message.id, from_user=self.bot)
                     ]
                     # iter_messages is used instead of get_messages because get_messages requires bot min_id and max_id
                     if len(bot_messages) > 0:
