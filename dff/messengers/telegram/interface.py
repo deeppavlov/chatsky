@@ -24,7 +24,10 @@ except ImportError:
     request, abort = None, None
 
 
-def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.Update) -> Tuple[TelegramMessage, int]:
+def extract_telegram_request_and_id(
+    update: types.Update,
+    messenger: Optional[TelegramMessenger] = None
+) -> Tuple[TelegramMessage, int]:
     """
     Utility function that extracts parameters from a telegram update.
     Changes the messenger state, setting the last update id.
@@ -39,11 +42,14 @@ def extract_telegram_request_and_id(messenger: TelegramMessenger, update: types.
 
     Also return context id which is `chat`, `from_user` or `user` of the update.
 
-    :param messenger: Messenger instance.
     :param update: Update to process.
+    :param messenger:
+        Messenger instance. If passed updates `last_update_id`.
+        Defaults to None.
     """
-    if update.update_id > messenger.last_update_id:
-        messenger.last_update_id = update.update_id
+    if messenger is not None:
+        if update.update_id > messenger.last_update_id:
+            messenger.last_update_id = update.update_id
 
     message = TelegramMessage(update_id=update.update_id)
     ctx_id = None
@@ -121,7 +127,7 @@ class PollingTelegramInterface(PollingMessengerInterface):
             timeout=self.timeout,
             long_polling_timeout=self.long_polling_timeout,
         )
-        update_list = [extract_telegram_request_and_id(self.messenger, update) for update in updates]
+        update_list = [extract_telegram_request_and_id(update, self.messenger) for update in updates]
         return update_list
 
     def _respond(self, response: List[Context]):
@@ -216,7 +222,7 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
 
             json_string = request.get_data().decode("utf-8")
             update = types.Update.de_json(json_string)
-            return self.on_request(*extract_telegram_request_and_id(self.messenger, update))
+            return self.on_request(*extract_telegram_request_and_id(update, self.messenger))
 
         self.app.route(self.endpoint, methods=["POST"])(endpoint)
 
