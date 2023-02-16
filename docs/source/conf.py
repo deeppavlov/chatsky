@@ -107,7 +107,7 @@ html_theme_options = {
         {
             "name": "Deeppavlov Forum",
             "url": "https://forum.deeppavlov.ai",
-            "icon": "_static/images/logo-deeppavlov.png",
+            "icon": "_static/images/logo-deeppavlov.svg",
             "type": "local",
         },
         {
