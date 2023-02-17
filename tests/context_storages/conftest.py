@@ -12,8 +12,6 @@ def event_loop():
     asyncio.get_event_loop_policy().set_event_loop(loop)
     nest_asyncio.apply(loop)
     yield loop
-    tasks = asyncio.all_tasks(loop)
-    loop.run_until_complete(asyncio.gather(*tasks))
     loop.close()
 
 
