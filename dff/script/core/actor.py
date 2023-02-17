@@ -1,9 +1,21 @@
 """
 Actor
----------------------------
-Actor is one of the main abstractions that processes incoming requests
-(:py:class:`~dff.script.Context`)
-from the user in accordance with the dialog graph (:py:class:`~dff.script.Script`).
+-----
+Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script` and handles it.
+It is responsible for processing user input and determining the appropriate response based
+on the current state of the conversation and the script.
+The actor receives requests in the form of a :py:class:`.Context` class, which contains
+information about the user's input, the current state of the conversation, and other relevant data.
+
+The actor uses the dialog graph, represented by the :py:class:`.Script` class,
+to determine the appropriate response. The script contains the structure of the conversation,
+including the different `nodes` and `transitions`.
+It defines the possible paths that the conversation can take, and the conditions that must be met
+for a transition to occur. The actor uses this information to navigate the graph
+and determine the next step in the conversation.
+
+Overall, the actor acts as a bridge between the user's input and the dialog graph,
+making sure that the conversation follows the expected flow and providing a personalized experience to the user.
 """
 import logging
 from typing import Union, Callable, Optional, Dict, List, Any
@@ -119,7 +131,7 @@ class Actor(BaseModel):
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
                 raise ValueError(f"Unkown fallback_label={fallback_label}")
         if condition_handler is None:
-            condition_handler = deep_copy_condition_handler
+            condition_handler = default_condition_handler
 
         super(Actor, self).__init__(
             script=script,
@@ -372,12 +384,12 @@ class Actor(BaseModel):
                 labels += list(node.transitions.keys())
                 conditions += list(node.transitions.values())
 
+        actor = self.copy(deep=True)
         error_msgs = []
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
             ctx.add_request(Message(text="text"))
-            actor = self.copy(deep=True)
 
             label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
 
@@ -426,14 +438,14 @@ class Actor(BaseModel):
 
 
 @validate_arguments()
-def deep_copy_condition_handler(
+def default_condition_handler(
     condition: Callable, ctx: Context, actor: Actor, *args, **kwargs
 ) -> Callable[[Context, Actor, Any, Any], bool]:
     """
-    This function returns a deep copy of the callable conditions:
+    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
 
     :param condition: Condition to copy.
     :param ctx: Context of current condition.
     :param actor: Actor we use in this condition.
     """
-    return condition(ctx.copy(deep=True), actor.copy(deep=True), *args, **kwargs)
+    return condition(ctx, actor, *args, **kwargs)

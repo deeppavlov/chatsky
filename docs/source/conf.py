@@ -11,12 +11,12 @@ from utils.notebook import insert_installation_cell_into_py_example  # noqa: E40
 
 # -- Project information -----------------------------------------------------
 
-project = "Dialog Flow Framework"
+project = "DFF"
 copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.0"
+release = "0.2.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -73,7 +73,7 @@ sphinx_gallery_conf = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "dff_sphinx_theme"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
@@ -91,31 +91,49 @@ nbsphinx_prolog = """
 :github_url: deeppavlov/dialog_flow_framework
 """
 
+html_context = {
+    "github_user": "deeppavlov",
+    "github_repo": "dialog_flow_framework",
+    "github_version": "dev",
+    "doc_path": "docs/source",
+}
+
 # Theme options
 html_theme_options = {
-    "logo_only": True,
-    "tab_intro_dff": "#",
-    "tab_intro_addons": "#",
-    "tab_intro_designer": "#",
-    "tab_get_started": "#",
-    "tab_tutorials": "#",
-    # Matches ROOT tag, should be ONE PER MODULE, other tabs = other modules (may be relative paths)
-    "tab_documentation": "./",
-    "tab_ecosystem": "#",
-    "tab_about_us": "#",
+    "use_edit_page_button": True,
+    "icon_links": [
+        {
+            "name": "Deeppavlov Forum",
+            "url": "https://forum.deeppavlov.ai",
+            "icon": "https://static.tildacdn.com/tild6538-3537-4239-b632-623238366335/_DeepPavlov_200x200-.svg",
+            "type": "url",
+        },
+        {
+            "name": "Telegram",
+            "url": "https://t.me/DeepPavlovDreamDiscussions",
+            "icon": "fa-brands fa-telegram",
+            "type": "fontawesome",
+        },
+        {
+            "name": "GitHub",
+            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+    ],
 }
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
 
 
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/script/*.py",
-            "examples/pipeline/*.py",
             "examples/context_storages/*.py",
-            "examples/messengers/*.py",
+            "examples/pipeline/*.py",
+            "examples/script/*.py",
+            "examples/utils/*.py",
         ]
     )
     regenerate_apiref(

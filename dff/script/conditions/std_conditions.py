@@ -1,9 +1,12 @@
 """
 Conditions
----------------------------
-Conditions are one of the most important components of the dialog graph,
-which determine the possibility of transition from one node of the graph to another.
-This is a standard set of scripting conditions.
+----------
+Conditions are one of the most important components of the dialog graph.
+They determine the possibility of transition from one node of the graph to another.
+The conditions are used to specify when a particular transition should occur, based on certain criteria.
+This module contains a standard set of scripting conditions that can be used to control the flow of a conversation.
+These conditions can be used to check the current context, the user's input,
+or other factors that may affect the conversation flow.
 """
 from typing import Callable, Pattern, Union, Any, List, Optional
 import logging
@@ -21,10 +24,10 @@ def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Call
     """
     Returns function handler. This handler returns `True` only if the last user phrase
     is the same Message as the :py:const:`match`.
-    If :py:const:`skip_none` the handler will not compare None fields of :py:const:`match`.
+    If :py:const:`skip_none` the handler will not compare `None` fields of :py:const:`match`.
 
     :param match: A Message variable to compare user request with.
-    :param skip_none: Whether fields should be compared if they are None in :py:const:`match`.
+    :param skip_none: Whether fields should be compared if they are `None` in :py:const:`match`.
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:

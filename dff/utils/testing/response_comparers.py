@@ -7,9 +7,9 @@ def default_comparer(candidate: Message, reference: Message, _: Context) -> Opti
     """
     The default response comparer. Literally compares two response objects.
 
-    :param candidate: the received (candidate) response
-    :param reference: the true (reference) response
-    :param _: current Context (unused)
-    :return: None if two responses are equal or candidate response otherwise
+    :param candidate: The received (candidate) response.
+    :param reference: The true (reference) response.
+    :param _: Current Context (unused).
+    :return: `None` if two responses are equal or candidate response otherwise.
     """
     return None if candidate == reference else candidate

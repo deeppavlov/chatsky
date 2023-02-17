@@ -1,13 +1,15 @@
 """
 Types
 -----
-This module contains several classes and special types (see below).
+The Types module contains several classes and special types that are used throughout the `DFF Pipeline`.
+The classes and special types in this module can include data models,
+data structures, and other types that are defined for type hinting.
 """
 from abc import ABC
 from enum import unique, Enum, auto
 from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable
 
-from dff.context_storages import DBAbstractContextStorage
+from dff.context_storages import DBContextStorage
 from dff.script import Context, Actor
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 
@@ -228,7 +230,7 @@ PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
         "messenger_interface": NotRequired[Optional[_ForwardProvider]],
-        "context_storage": NotRequired[Optional[Union[DBAbstractContextStorage, Dict]]],
+        "context_storage": NotRequired[Optional[Union[DBContextStorage, Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],

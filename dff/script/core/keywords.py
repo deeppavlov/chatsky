@@ -1,7 +1,9 @@
 """
 Keywords
----------------------------
-Keywords are used to define the dialog graph.
+--------
+Keywords are used to define the dialog graph, which is the structure of a conversation.
+They are used to determine all nodes in the script and to assign python objects and python functions for nodes.
+
 """
 from enum import Enum, auto
 

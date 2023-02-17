@@ -1,7 +1,8 @@
 """
 Message Interfaces
 ------------------
-This module contains several basic classes of message interfaces.
+The Message Interfaces module contains several basic classes that define the message interfaces.
+These classes provide a way to define the structure of the messengers that are used to communicate with the `DFF`.
 """
 import abc
 import asyncio
