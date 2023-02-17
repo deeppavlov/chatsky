@@ -52,7 +52,7 @@ async def get_bot_user(client: TelegramClient, username: str):
         return await client.get_entity(username)
 
 
-class TelegramTesting:
+class TelegramTesting:  # pragma: no cover
     """
     Defines functions for testing.
 

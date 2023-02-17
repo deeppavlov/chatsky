@@ -21,7 +21,7 @@ from dff.script import Message
 from dff.script.core.message import Audio, Video, Image, Document
 
 
-class TelegramMessenger(TeleBot):
+class TelegramMessenger(TeleBot):  # pragma: no cover
     """
     This class inherits from `Telebot` and implements framework-specific functionality
     like sending generic responses.
@@ -228,7 +228,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, actor: Actor, *args, **kwargs):
+    def condition(ctx: Context, actor: Actor, *args, **kwargs):  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False

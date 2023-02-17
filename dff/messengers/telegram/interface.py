@@ -26,7 +26,7 @@ except ImportError:
 
 def extract_telegram_request_and_id(
     update: types.Update, messenger: Optional[TelegramMessenger] = None
-) -> Tuple[TelegramMessage, int]:
+) -> Tuple[TelegramMessage, int]:  # pragma: no cover
     """
     Utility function that extracts parameters from a telegram update.
     Changes the messenger state, setting the last update id.
@@ -77,7 +77,7 @@ def extract_telegram_request_and_id(
     return message, ctx_id
 
 
-class PollingTelegramInterface(PollingMessengerInterface):
+class PollingTelegramInterface(PollingMessengerInterface):  # pragma: no cover
     """
     Telegram interface that retrieves updates by polling.
     Multi-threaded polling is currently not supported.
