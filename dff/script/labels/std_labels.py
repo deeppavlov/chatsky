@@ -1,11 +1,14 @@
 """
 Labels
----------------------------
-:py:const:`Labels <dff.script.NodeLabel3Type>` are one of
-the most important components of the dialog graph,
-which determine targeted node name of transition.
-This is a standard set of scripting
-:py:const:`labels <dff.script.NodeLabelType>`.
+------
+:py:const:`Labels <dff.script.NodeLabel3Type>` are one of the important components of the dialog graph,
+which determine the targeted node name of the transition.
+They are used to identify the next step in the conversation.
+Labels can also be used in combination with other conditions,
+such as the current context or user data, to create more complex and dynamic conversations.
+
+This module contains a standard set of scripting :py:const:`labels <dff.script.NodeLabelType>` that
+can be used by developers to define the conversation flow.
 """
 from typing import Optional, Callable
 from dff.script import Actor, Context, NodeLabel3Type
@@ -13,9 +16,9 @@ from dff.script import Actor, Context, NodeLabel3Type
 
 def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     """
-    Returns transition handler that takes :py:class:`~dff.script.Context`,
-    :py:class:`~dff.script.Actor` and :py:const:`priority <float>`.
-    This handler returns a :py:const:`label <dff.script.NodeLabelType>`
+    Returns transition handler that takes :py:class:`.Context`,
+    :py:class:`.Actor` and :py:const:`priority <float>`.
+    This handler returns a :py:const:`label <NodeLabelType>`
     to the last node with a given :py:const:`priority <float>`.
     If the priority is not given, `Actor.label_priority` is used as default.
 
