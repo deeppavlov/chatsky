@@ -64,7 +64,7 @@ def check_happy_path(
             )
 
 
-def run_interactive_mode(pipeline: Pipeline):
+def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
     """
     Running example with provided pipeline in interactive mode, just like with CLI messenger interface.
     The dialog won't be stored anywhere, it will only be outputted to STDOUT.
