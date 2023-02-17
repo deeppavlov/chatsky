@@ -6,12 +6,14 @@ from dff.script import Context
 import pytest
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def event_loop():
     loop = asyncio.get_event_loop_policy().new_event_loop()
     asyncio.get_event_loop_policy().set_event_loop(loop)
     nest_asyncio.apply(loop)
     yield loop
+    tasks = asyncio.all_tasks(loop)
+    loop.run_until_complete(asyncio.gather(*tasks))
     loop.close()
 
 
