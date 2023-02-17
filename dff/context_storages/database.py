@@ -1,8 +1,11 @@
 """
 Database
 --------
-Base module. Provided classes:
-    - Abstract context storage interface :py:class:`.DBContextStorage`.
+The `Database` module provides classes for managing the context storage of a dialog system.
+The module can be used to store information such as the current state of the conversation
+and other data. This module includes the intermediate class (:py:class:`.DBContextStorage`) is a class
+that developers can inherit from in order to create their own context storage solutions.
+This class implements the basic functionality and can be extended to add additional features as needed.
 """
 import asyncio
 import importlib
@@ -21,17 +24,13 @@ class DBContextStorage(ABC):
     It includes the most essential methods of the python `dict` class.
     Can not be instantiated.
 
-    Parameters
-    ----------
-    :param path:
-        | Parameter `path` should be set with the URI of the database.
-        | It includes a prefix and the required connection credentials.
-        | Example: postgresql+asyncpg://user:password@host:port/database
-        | In the case of classes that save data to hard drive instead of external databases
-        | you need to specify the location of the file, like you do in sqlite.
-        | Keep in mind that in Windows you will have to use double backslashes '\\'
-        | instead of forward slashes '/' when defining the file path.
-    :type path: str
+    :param path: Parameter `path` should be set with the URI of the database.
+        It includes a prefix and the required connection credentials.
+        Example: postgresql+asyncpg://user:password@host:port/database
+        In the case of classes that save data to hard drive instead of external databases
+        you need to specify the location of the file, like you do in sqlite.
+        Keep in mind that in Windows you will have to use double backslashes '\\'
+        instead of forward slashes '/' when defining the file path.
 
     """
 
@@ -47,8 +46,8 @@ class DBContextStorage(ABC):
     def __getitem__(self, key: Hashable) -> Context:
         """
         Synchronous method for accessing stored Context.
+
         :param key: Hashable key used to store Context instance.
-        :type key: Hashable
         :returns: The stored context, associated with the given key.
         """
         return asyncio.run(self.get_item_async(key))
@@ -57,8 +56,8 @@ class DBContextStorage(ABC):
     async def get_item_async(self, key: Hashable) -> Context:
         """
         Asynchronous method for accessing stored Context.
+
         :param key: Hashable key used to store Context instance.
-        :type key: Hashable
         :returns: The stored context, associated with the given key.
         """
         raise NotImplementedError
@@ -66,10 +65,9 @@ class DBContextStorage(ABC):
     def __setitem__(self, key: Hashable, value: Context):
         """
         Synchronous method for storing Context.
+
         :param key: Hashable key used to store Context instance.
-        :type key: Hashable
         :param value: Context to store.
-        :type value: Context
         """
         return asyncio.run(self.set_item_async(key, value))
 
@@ -77,18 +75,17 @@ class DBContextStorage(ABC):
     async def set_item_async(self, key: Hashable, value: Context):
         """
         Asynchronous method for storing Context.
+
         :param key: Hashable key used to store Context instance.
-        :type key: Hashable
         :param value: Context to store.
-        :type value: Context
         """
         raise NotImplementedError
 
     def __delitem__(self, key: Hashable):
         """
         Synchronous method for removing stored Context.
+
         :param key: Hashable key used to identify Context instance for deletion.
-        :type key: Hashable
         """
         return asyncio.run(self.del_item_async(key))
 
@@ -96,16 +93,16 @@ class DBContextStorage(ABC):
     async def del_item_async(self, key: Hashable):
         """
         Asynchronous method for removing stored Context.
+
         :param key: Hashable key used to identify Context instance for deletion.
-        :type key: Hashable
         """
         raise NotImplementedError
 
     def __contains__(self, key: Hashable) -> bool:
         """
         Synchronous method for finding whether any Context is stored with given key.
+
         :param key: Hashable key used to check if Context instance is stored.
-        :type key: Hashable
         :returns: True if there is Context accessible by given key, False otherwise.
         """
         return asyncio.run(self.contains_async(key))
@@ -114,8 +111,8 @@ class DBContextStorage(ABC):
     async def contains_async(self, key: Hashable) -> bool:
         """
         Asynchronous method for finding whether any Context is stored with given key.
+
         :param key: Hashable key used to check if Context instance is stored.
-        :type key: Hashable
         :returns: True if there is Context accessible by given key, False otherwise.
         """
         raise NotImplementedError
@@ -123,6 +120,7 @@ class DBContextStorage(ABC):
     def __len__(self) -> int:
         """
         Synchronous method for retrieving number of stored Contexts.
+
         :returns: The number of stored Contexts.
         """
         return asyncio.run(self.len_async())
@@ -131,6 +129,7 @@ class DBContextStorage(ABC):
     async def len_async(self) -> int:
         """
         Asynchronous method for retrieving number of stored Contexts.
+
         :returns: The number of stored Contexts.
         """
         raise NotImplementedError
@@ -138,10 +137,9 @@ class DBContextStorage(ABC):
     def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
         """
         Synchronous method for accessing stored Context, returning default if no Context is stored with the given key.
+
         :param key: Hashable key used to store Context instance.
-        :type key: Hashable
         :param default: Optional default value to be returned if no Context is found.
-        :type key: Optional[Context]
         :returns: The stored context, associated with the given key or default value.
         """
         return asyncio.run(self.get_async(key, default))
@@ -149,10 +147,9 @@ class DBContextStorage(ABC):
     async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
         """
         Asynchronous method for accessing stored Context, returning default if no Context is stored with the given key.
+
         :param key: Hashable key used to store Context instance.
-        :type key: Hashable
         :param default: Optional default value to be returned if no Context is found.
-        :type key: Optional[Context]
         :returns: The stored context, associated with the given key or default value.
         """
         try:
@@ -192,8 +189,10 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     Use context_storage_factory to lazy import context storage types and instantiate them.
     The function takes a database connection URI or its equivalent. It should be prefixed with database name,
     followed by the symbol triplet '://'.
+
     Then, you should list the connection parameters like this: user:password@host:port/database
     The whole URI will then look like this:
+
     - shelve://path_to_the_file/file_name
     - json://path_to_the_file/file_name
     - pickle://path_to_the_file/file_name
@@ -207,10 +206,11 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
 
     For context storages that write to local files, the function expects a file path instead of connection params:
     json://file.json
-    When using sqlite backend your prefix should contain three slashes if you use Windows, or four in other cases.
+    When using sqlite backend your prefix should contain three slashes if you use Windows, or four in other cases:
     sqlite:////file.db
     If you want to use additional parameters in class constructors, you can pass them to this function as kwargs.
 
+    :param path: Path to the file.
     """
     prefix, _, _ = path.partition("://")
     if "sql" in prefix:

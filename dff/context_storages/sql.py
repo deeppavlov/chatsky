@@ -1,8 +1,16 @@
 """
 SQL
 ---
-Provides the SQL-based version of the :py:class:`.DBContextStorage`.
-You can choose the backend option of your liking from MySQL, PostgreSQL, or SQLite.
+The SQL module provides a SQL-based version of the :py:class:`.DBContextStorage` class.
+This class is used to store and retrieve context data from SQL databases.
+It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+and easy to work with.
+
+The SQL module provides the ability to choose the backend of your choice from
+MySQL, PostgreSQL, or SQLite. You can choose the one that is most suitable for your use case and environment.
+MySQL and PostgreSQL are widely used open-source relational databases that are known for their
+reliability and scalability. SQLite is a self-contained, high-reliability, embedded, full-featured,
+public-domain, SQL database engine.
 """
 import asyncio
 import importlib
@@ -58,6 +66,8 @@ if not sqlalchemy_available:
 def import_insert_for_dialect(dialect: str):
     """
     Imports the insert function into global scope depending on the chosen sqlalchemy dialect.
+
+    :param dialect: Chosen sqlalchemy dialect.
     """
     global insert
     insert = getattr(
@@ -74,12 +84,9 @@ class SQLContextStorage(DBContextStorage):
     :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    :type path: str
     :param table_name: The name of the table to use.
-    :type table_name: str
     :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
-    :type custom_driver: bool
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):

@@ -1,7 +1,16 @@
 """
 Redis
 -----
-Provides the redis-based version of the :py:class:`.DBContextStorage`.
+The Redis module provides a Redis-based version of the :py:class:`.DBContextStorage` class.
+This class is used to store and retrieve context data in a Redis.
+It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+and easy to work with.
+
+Redis is an open-source, in-memory data structure store that is known for its
+high performance and scalability. It stores data in key-value pairs and supports a variety of data
+structures such as strings, hashes, lists, sets, and more.
+Additionally, Redis can be used as a cache, message broker, and database, making it a versatile
+and powerful choice for data storage and management.
 """
 import json
 from typing import Hashable
