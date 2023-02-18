@@ -82,6 +82,10 @@ ydb_dependencies = [
     "six>=1.16.0",
 ]
 
+telegram_dependencies = [
+    "pytelegrambotapi==4.5.1",
+]
+
 full = merge_req_lists(
     [
         core,
@@ -92,6 +96,7 @@ full = merge_req_lists(
         mysql_dependencies,
         postgresql_dependencies,
         ydb_dependencies,
+        telegram_dependencies,
     ]
 )
 
@@ -106,6 +111,7 @@ test_requirements = [
     "flask[async]>=2.1.2",
     "psutil>=5.9.1",
     "requests>=2.28.1",
+    "telethon>=1.27.0,<2.0",
 ]
 
 tests_full = merge_req_lists(
@@ -136,7 +142,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy",
+    "mypy==0.950",
 ]
 
 devel_full = merge_req_lists(
@@ -158,6 +164,7 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,  # dependencies for using MySQL
     "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
+    "telegram": telegram_dependencies,  # dependencies for using Telegram
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)

@@ -41,7 +41,7 @@ class PollingMessengerInterface(MessengerInterface):
     """
 
     @abc.abstractmethod
-    def _request(self) -> List[Tuple[Any, Hashable]]:
+    def _request(self) -> List[Tuple[Message, Hashable]]:
         """
         Method used for sending users request for their input.
 
@@ -71,6 +71,19 @@ class PollingMessengerInterface(MessengerInterface):
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
 
+    async def _polling_loop(
+        self,
+        pipeline_runner: PipelineRunnerFunction,
+        timeout: float = 0,
+    ):
+        """
+        Method running the request - response cycle once.
+        """
+        user_updates = self._request()
+        responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
+        self._respond(responses)
+        await asyncio.sleep(timeout)
+
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
@@ -90,10 +103,7 @@ class PollingMessengerInterface(MessengerInterface):
         """
         while loop():
             try:
-                user_updates = self._request()
-                responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
-                self._respond(responses)
-                await asyncio.sleep(timeout)
+                await self._polling_loop(pipeline_runner, timeout)
 
             except BaseException as e:
                 self._on_exception(e)
