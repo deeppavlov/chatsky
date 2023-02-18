@@ -141,6 +141,7 @@ def setup(_):
     generate_example_links_for_notebook_creation(
         [
             "examples/context_storages/*.py",
+            "examples/messengers/*.py",
             "examples/pipeline/*.py",
             "examples/script/*.py",
             "examples/utils/*.py",
@@ -152,5 +153,6 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.utils", "Utils"),
         ]
     )

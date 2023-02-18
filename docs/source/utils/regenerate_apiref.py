@@ -42,7 +42,7 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
     :param destination: Apiref root path, default: apiref.
     """
     paths = list() if paths is None else paths
-    source = Path(f"./docs/source/{destination}")
+    source = Path(f"./docs/source/{destination.lower().replace(' ', '_')}")
     doc_containers: Dict[str, List[Path]] = dict()
 
     for doc_file in iter(source.glob("./*.rst")):
