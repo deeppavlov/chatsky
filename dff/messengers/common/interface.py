@@ -31,6 +31,7 @@ class MessengerInterface(abc.ABC):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :type pipeline_runner: PipelineRunnerFunction
         """
         raise NotImplementedError
 
@@ -97,8 +98,10 @@ class PollingMessengerInterface(MessengerInterface):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :type pipeline_runner: PipelineRunnerFunction
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return `True` to continue polling or `False` to stop.
+        :type loop: PollingInterfaceLoopFunction
         :param timeout: a time interval between polls (in seconds).
         """
         while loop():
@@ -123,8 +126,7 @@ class CallbackMessengerInterface(MessengerInterface):
 
     def on_request(self, request: Any, ctx_id: Hashable) -> Context:
         """
-        Method invoked on user input.
-        This method works just like :py:meth:`~Pipeline.__call__(request, ctx_id)`,
+        Method invoked on user input. This method works just like :py:meth:`.__call__(request, ctx_id)`,
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Returns context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
@@ -168,6 +170,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :type pipeline_runner: PipelineRunnerFunction
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()

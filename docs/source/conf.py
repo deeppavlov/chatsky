@@ -2,12 +2,12 @@ import os
 import sys
 import re
 
-from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
-
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
+from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -78,7 +78,7 @@ html_theme = "pydata_sphinx_theme"
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
@@ -87,8 +87,6 @@ html_show_sourcelink = False
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
-:tutorial_path: \\.
-:github_url: deeppavlov/dialog_flow_framework
 """
 
 html_context = {
@@ -98,15 +96,19 @@ html_context = {
     "doc_path": "docs/source",
 }
 
+html_css_files = [
+    "css/custom.css",
+]
+
 # Theme options
 html_theme_options = {
-    "use_edit_page_button": True,
+    "header_links_before_dropdown": 7,
     "icon_links": [
         {
             "name": "Deeppavlov Forum",
             "url": "https://forum.deeppavlov.ai",
-            "icon": "https://static.tildacdn.com/tild6538-3537-4239-b632-623238366335/_DeepPavlov_200x200-.svg",
-            "type": "url",
+            "icon": "_static/images/logo-deeppavlov.svg",
+            "type": "local",
         },
         {
             "name": "Telegram",
@@ -121,6 +123,14 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
+    "favicons": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "href": "images/logo-dff.svg",
+        },
+    ],
+    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab-links"],
 }
 
 
@@ -131,6 +141,7 @@ def setup(_):
     generate_example_links_for_notebook_creation(
         [
             "examples/context_storages/*.py",
+            "examples/messengers/*.py",
             "examples/pipeline/*.py",
             "examples/script/*.py",
             "examples/utils/*.py",

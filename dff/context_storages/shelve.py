@@ -26,7 +26,6 @@ class ShelveContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `shelve` as the driver.
 
     :param path: Target file URI. Example: `shelve://file.db`.
-    :type path: str
     """
 
     def __init__(self, path: str):
