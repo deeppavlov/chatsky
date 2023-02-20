@@ -33,13 +33,13 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: install package
+      - name:  build & install package
         run: |
           python -m pip install build
           python -m build
           find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
 
-      - name: prepare testing environment
+      - name: clean environment
         run: |
           export backup_files=( tests examples .env_file makefile .coveragerc )
           mkdir /tmp/backup
@@ -49,7 +49,9 @@ jobs:
           rm -rf /tmp/backup
           touch venv  # disable venv target
 
+      - name: set up mutex
+        uses: ben-z/gh-action-mutex@v1.0-alpha-6
+
       - name: run tests
         run: |
           make test
-        shell: bash

@@ -31,6 +31,7 @@ class MessengerInterface(abc.ABC):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :type pipeline_runner: PipelineRunnerFunction
         """
         raise NotImplementedError
 
@@ -41,7 +42,7 @@ class PollingMessengerInterface(MessengerInterface):
     """
 
     @abc.abstractmethod
-    def _request(self) -> List[Tuple[Any, Hashable]]:
+    def _request(self) -> List[Tuple[Message, Hashable]]:
         """
         Method used for sending users request for their input.
 
@@ -71,6 +72,19 @@ class PollingMessengerInterface(MessengerInterface):
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
 
+    async def _polling_loop(
+        self,
+        pipeline_runner: PipelineRunnerFunction,
+        timeout: float = 0,
+    ):
+        """
+        Method running the request - response cycle once.
+        """
+        user_updates = self._request()
+        responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
+        self._respond(responses)
+        await asyncio.sleep(timeout)
+
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
@@ -84,16 +98,15 @@ class PollingMessengerInterface(MessengerInterface):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :type pipeline_runner: PipelineRunnerFunction
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return `True` to continue polling or `False` to stop.
+        :type loop: PollingInterfaceLoopFunction
         :param timeout: a time interval between polls (in seconds).
         """
         while loop():
             try:
-                user_updates = self._request()
-                responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
-                self._respond(responses)
-                await asyncio.sleep(timeout)
+                await self._polling_loop(pipeline_runner, timeout)
 
             except BaseException as e:
                 self._on_exception(e)
@@ -113,8 +126,7 @@ class CallbackMessengerInterface(MessengerInterface):
 
     def on_request(self, request: Any, ctx_id: Hashable) -> Context:
         """
-        Method invoked on user input.
-        This method works just like :py:meth:`~Pipeline.__call__(request, ctx_id)`,
+        Method invoked on user input. This method works just like :py:meth:`.__call__(request, ctx_id)`,
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Returns context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
@@ -158,6 +170,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
 
         :param pipeline_runner: A function that should return pipeline response to user request;
             usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
+        :type pipeline_runner: PipelineRunnerFunction
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()

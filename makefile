@@ -3,7 +3,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.2.1
+CURRENT_VERSION = 0.3.0
 TEST_COVERAGE_THRESHOLD=97
 
 PATH := $(VENV_PATH)/bin:$(PATH)
@@ -64,7 +64,7 @@ test_all: venv wait_db test lint
 doc: venv clean_docs
 	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
