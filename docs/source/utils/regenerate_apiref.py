@@ -1,3 +1,4 @@
+from os.path import join
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict
 
@@ -54,8 +55,13 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
         container = next((alias for flat, alias in paths if doc_file.name.startswith(flat)), None)
         if container is None:
             doc_file.unlink()
+            continue
         else:
             doc_containers[container] = doc_containers.get(container, list()) + [doc_file]
+
+        with open(doc_file, "r+") as file:
+            contents = file.read()
+            doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n\n{contents}")
 
     for name, files in doc_containers.items():
         generate_doc_container(source / Path(f"{name}.rst"), files)

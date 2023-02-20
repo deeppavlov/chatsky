@@ -1,0 +1,11 @@
+{% if meta is defined and meta is not none and 'source_name' in meta %}
+    {% set github_link = 'https://github.com/deeppavlov/dialog_flow_framework/blob/dev/' ~ meta['source_name'] ~ '.py' %}
+
+    <a href="{{ github_link }}" data-behavior="call-to-action-event" data-response="View on Github" target="_blank">
+        <div id="github-view-link">
+            <span class="pytorch-github call-to-action-any"></span>
+            <div class="call-to-action-desktop-view">View on GitHub</div>
+            <div class="call-to-action-mobile-view">GitHub</div>
+        </div>
+    </a>
+{% endif %}
