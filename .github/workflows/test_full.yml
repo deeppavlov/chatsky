@@ -40,10 +40,10 @@ jobs:
       - name: install dependencies
         run: |
           python -m pip install --upgrade pip
-          if [ ${{ matrix.install-dependencies }} == "false"]; then
-              python -m pip install -e .[tests]
-          else
+          if ${{ matrix.install-dependencies }}; then
               python -m pip install -e .[test_full]
+          else
+              python -m pip install -e .[tests]
           fi
         shell: bash
 
