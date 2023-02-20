@@ -37,6 +37,8 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
     Not all the files there are generally useful: mostly the folder consists of module toctrees  that look ugly.
     The purpose of this function is removing all sources that represent a module
     and create convenient indexes for the remaining files.
+    The function also adds a special 'source_name' meta variable to every file, containing path to ots source on GitHub.
+    This special variable will be used by 'View on GitHub' button on dicumentation pages.
 
     :param paths: Paths to the modules that should be merged together, separated by '.'.
     Should be prefixes of files in apiref root.
