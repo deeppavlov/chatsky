@@ -11,7 +11,7 @@ It stores data in a format similar to JSON, making it easy to work with the data
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
 """
-from typing import Hashable, Dict
+from typing import Hashable, Dict, Any
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -20,6 +20,8 @@ try:
     mongo_available = True
 except ImportError:
     mongo_available = False
+    AsyncIOMotorClient = None
+    ObjectId = Any
 
 import json
 
