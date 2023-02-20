@@ -124,7 +124,7 @@ tests_full = merge_req_lists(
 doc = [
     "sphinx<6",
     "pydata_sphinx_theme>=0.12.0",
-    "sphinxcontrib-apidoc==0.3.1",
+    "sphinxcontrib-apidoc==0.3.0",
     "sphinxcontrib-httpdomain>=1.8.0",
     "sphinxcontrib-katex==0.9.0",
     "sphinx_copybutton>=0.5",
@@ -176,7 +176,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.3.1",
+    version="0.3.2",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
