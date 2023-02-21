@@ -33,7 +33,7 @@ def generate_doc_container(file: Path, includes: List[Path]):
 def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination: str = "apiref"):
     """
     Regenerate files in apiref root.
-    Not all the files there are generally useful: mostly the folder consists of module toctrees  that look ugly.
+    Not all the files there are generally useful: mostly the folder consists of module toctrees that look ugly.
     The purpose of this function is removing all sources that represent a module
     and create convenient indexes for the remaining files.
 

@@ -1,7 +1,7 @@
 About us
 --------
 
-Dilog Flow Framework is developed by the DFF development department of `DeepPavlov <https://deeppavlov.ai>`_.
+Dialog Flow Framework is developed by the DFF development department of `DeepPavlov <https://deeppavlov.ai>`_.
 
 Founder and leader of the project -- Denis Kuznetsov.
 
