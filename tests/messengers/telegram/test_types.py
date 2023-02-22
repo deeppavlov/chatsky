@@ -1,8 +1,10 @@
 import json
-import pytest
-
 from io import IOBase
 from pathlib import Path
+
+import pytest
+pytest.importorskip("telebot")
+pytest.importorskip("telethon")
 from pydantic import ValidationError
 from telebot import types
 
