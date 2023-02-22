@@ -11,11 +11,18 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from copy import deepcopy
 
-from telethon.tl.types import ReplyKeyboardHide
-from telethon import TelegramClient
-from telethon.types import User
-from telethon.custom import Message as TlMessage
-from telebot import types
+import pytest
+try:
+    from telethon.tl.types import ReplyKeyboardHide
+    from telethon import TelegramClient
+    from telethon.types import User
+    from telethon.custom import Message as TlMessage
+except ImportError:
+    pytest.skip(reason="telethon is not installed")
+try:
+    from telebot import types
+except ImportError:
+    pytest.skip(reason="telebot is not installed")
 
 from dff.pipeline.pipeline.pipeline import Pipeline
 from dff.script.core.message import Message, Attachments, Attachment, Button, Location

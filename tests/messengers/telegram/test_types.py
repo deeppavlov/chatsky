@@ -3,10 +3,11 @@ from io import IOBase
 from pathlib import Path
 
 import pytest
-pytest.importorskip("telebot")
-pytest.importorskip("telethon")
 from pydantic import ValidationError
-from telebot import types
+try:
+    from telebot import types
+except ImportError:
+    pytest.skip(reason="telebot is not installed")
 
 from dff.messengers.telegram.message import (
     TelegramMessage,
