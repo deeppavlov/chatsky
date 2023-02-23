@@ -66,7 +66,7 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
 @validate_arguments
 def normalize_condition(condition: ConditionType) -> Callable:
     """
-    The functon that is used to normalize `condition`
+    The function that is used to normalize `condition`
 
     :param condition: `condition` to normalize.
     :return: The function `condition` wrapped into the try/except.

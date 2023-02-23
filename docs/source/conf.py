@@ -105,7 +105,7 @@ html_theme_options = {
     "header_links_before_dropdown": 7,
     "icon_links": [
         {
-            "name": "Deeppavlov Forum",
+            "name": "DeepPavlov Forum",
             "url": "https://forum.deeppavlov.ai",
             "icon": "_static/images/logo-deeppavlov.svg",
             "type": "local",

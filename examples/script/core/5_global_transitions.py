@@ -3,7 +3,7 @@
 # 5. Global transitions
 
 This example shows the global setting of transitions.
-First of all, let's do all the necessary imports from `dff`.
+First of all, let's do all the necessary imports from `DFF`.
 """
 
 # %%
@@ -43,13 +43,13 @@ toy_script = {
                 [
                     cnd.regexp(r"next\b"),
                     cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]]),
-                ]  # third ckheck
+                ]  # third check
             ),
             lbl.repeat(0.2): cnd.all(
                 [
                     cnd.regexp(r"repeat", re.I),
                     cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"])),
-                ]  # fourh check
+                ]  # fourth check
             ),
         }
     },
