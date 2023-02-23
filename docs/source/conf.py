@@ -130,7 +130,7 @@ html_theme_options = {
             "href": "images/logo-dff.svg",
         },
     ],
-    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab-links"],
+    "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
 
 

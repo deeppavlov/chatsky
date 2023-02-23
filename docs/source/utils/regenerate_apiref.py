@@ -1,3 +1,4 @@
+from os.path import join
 from pathlib import Path
 from typing import List, Optional, Tuple, Dict
 
@@ -36,6 +37,8 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
     Not all the files there are generally useful: mostly the folder consists of module toctrees that look ugly.
     The purpose of this function is removing all sources that represent a module
     and create convenient indexes for the remaining files.
+    The function also adds a special 'source_name' meta variable to every file, containing path to ots source on GitHub.
+    This special variable will be used by 'View on GitHub' button on dicumentation pages.
 
     :param paths: Paths to the modules that should be merged together, separated by '.'.
     Should be prefixes of files in apiref root.
@@ -54,8 +57,13 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
         container = next((alias for flat, alias in paths if doc_file.name.startswith(flat)), None)
         if container is None:
             doc_file.unlink()
+            continue
         else:
             doc_containers[container] = doc_containers.get(container, list()) + [doc_file]
+
+        with open(doc_file, "r+") as file:
+            contents = file.read()
+            doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n\n{contents}")
 
     for name, files in doc_containers.items():
         generate_doc_container(source / Path(f"{name}.rst"), files)
