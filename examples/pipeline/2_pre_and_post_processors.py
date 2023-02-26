@@ -31,11 +31,11 @@ that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 
 Service callable signature can be one of the following:
-`[ctx]`, `[ctx, actor]` or `[ctx, actor, info]` (see example 3),
+`[ctx]`, `[ctx, pipeline]` or `[ctx, pipeline, info]` (see example 3),
 where:
 
 * `ctx` - Context of the current dialog.
-* `actor` - Actor of the pipeline.
+* `pipeline` - The current pipeline.
 * `info` - dictionary, containing information about
         current service and pipeline execution state (see example 4).
 

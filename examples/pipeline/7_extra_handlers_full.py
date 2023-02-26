@@ -56,10 +56,10 @@ NB! Extra handlers don't have execution state,
 so their names shouldn't appear in built-in condition functions.
 
 Extra handlers callable signature can be one of the following:
-`[ctx]`, `[ctx, actor]` or `[ctx, actor, info]`, where:
+`[ctx]`, `[ctx, pipeline]` or `[ctx, pipeline, info]`, where:
 
 * `ctx` - `Context` of the current dialog.
-* `actor` - `Actor` of the pipeline.
+* `pipeline` - The current pipeline.
 * `info` - Dictionary, containing information about current extra handler
             and pipeline execution state (see example 4).
 

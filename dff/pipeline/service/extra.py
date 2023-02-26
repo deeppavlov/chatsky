@@ -25,7 +25,7 @@ class _ComponentExtraHandler:
     Class, representing an extra pipeline component handler.
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
-    Extra handlers should NOT edit context or actor, use services for that purpose instead.
+    Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
 
     :param functions: An `ExtraHandlerBuilder` object, an `_ComponentExtraHandler` instance,
         a dict or a list of :py:data:`~.ExtraHandlerFunction`.

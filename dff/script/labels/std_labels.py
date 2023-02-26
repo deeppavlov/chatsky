@@ -106,10 +106,10 @@ def _get_label_by_index_shifting(
     **kwargs,
 ) -> NodeLabel3Type:
     """
-    Function that returns node label from the context and actor after shifting the index.
+    Function that returns node label from the context and pipeline after shifting the index.
 
     :param ctx: Dialog context.
-    :param actor: Dialog actor.
+    :param pipeline: Dialog pipeline.
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     :param increment_flag: If it is `True`, label index is incremented by `1`,
         otherwise it is decreased by `1`. Defaults to `True`.
