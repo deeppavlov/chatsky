@@ -118,7 +118,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
             raise TypeError(type(response))
 
         @validate_arguments
-        def response_handler(ctx: Context, actor: Actor, *args, **kwargs):
+        def response_handler(_: Context, __: Actor, *args, **kwargs):
             return result
 
         return response_handler

@@ -69,7 +69,7 @@ def to_start(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     :param priority: Priority of transition. Uses `Actor.label_priority` if priority not defined.
     """
 
-    def to_start_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def to_start_transition_handler(_: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
         current_priority = actor.label_priority if priority is None else priority
         return (*actor.start_label[:2], current_priority)
 
@@ -87,7 +87,7 @@ def to_fallback(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     :param priority: Priority of transition. Uses `Actor.label_priority` if priority not defined.
     """
 
-    def to_fallback_transition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def to_fallback_transition_handler(_: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
         current_priority = actor.label_priority if priority is None else priority
         return (*actor.fallback_label[:2], current_priority)
 

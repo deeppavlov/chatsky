@@ -61,7 +61,7 @@ def regexp(
     """
     pattern = re.compile(pattern, flags)
 
-    def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def regexp_condition_handler(ctx: Context, _: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
         if isinstance(request, Message):
             if request.text is None:
@@ -186,7 +186,7 @@ def has_last_labels(
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
 
-    def has_last_labels_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def has_last_labels_condition_handler(ctx: Context, _: Actor, *args, **kwargs) -> bool:
         label = list(ctx.labels.values())[-last_n_indices:]
         for label in list(ctx.labels.values())[-last_n_indices:]:
             label = label if label else (None, None)
@@ -203,7 +203,7 @@ def true(*args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
     Returns function handler. This handler always returns `True`.
     """
 
-    def true_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def true_handler(_: Context, __: Actor, *args, **kwargs) -> bool:
         return True
 
     return true_handler
@@ -215,7 +215,7 @@ def false(*args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
     Returns function handler. This handler always returns `False`.
     """
 
-    def false_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def false_handler(_: Context, __: Actor, *args, **kwargs) -> bool:
         return False
 
     return false_handler

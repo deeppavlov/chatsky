@@ -22,7 +22,7 @@ def choice(responses: List[Message]):
     :param responses: A list of responses for random sampling.
     """
 
-    def choice_response_handler(ctx: Context, actor: Actor, *args, **kwargs):
+    def choice_response_handler(_: Context, __: Actor, *args, **kwargs):
         return random.choice(responses)
 
     return choice_response_handler

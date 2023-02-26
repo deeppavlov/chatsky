@@ -228,7 +228,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, actor: Actor, *args, **kwargs):  # pragma: no cover
+    def condition(ctx: Context, _: Actor, *args, **kwargs):  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False

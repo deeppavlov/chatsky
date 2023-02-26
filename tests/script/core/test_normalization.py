@@ -42,10 +42,10 @@ def create_env():
 def test_normalize_label():
     ctx, actor = create_env()
 
-    def true_label_func(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def true_label_func(_: Context, __: Actor, *args, **kwargs) -> NodeLabel3Type:
         return ("flow", "node1", 1)
 
-    def false_label_func(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def false_label_func(_: Context, __: Actor, *args, **kwargs) -> NodeLabel3Type:
         return ("flow", "node2", 1)
 
     n_f = normalize_label(true_label_func)
@@ -63,10 +63,10 @@ def test_normalize_label():
 def test_normalize_condition():
     ctx, actor = create_env()
 
-    def true_condition_func(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def true_condition_func(_: Context, __: Actor, *args, **kwargs) -> bool:
         return True
 
-    def false_condition_func(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def false_condition_func(_: Context, __: Actor, *args, **kwargs) -> bool:
         raise Exception("False condition")
 
     n_f = normalize_condition(true_condition_func)
@@ -94,10 +94,10 @@ def test_normalize_response():
 def test_normalize_processing():
     ctx, actor = create_env()
 
-    def true_processing_func(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+    def true_processing_func(ctx: Context, __: Actor, *args, **kwargs) -> Context:
         return ctx
 
-    def false_processing_func(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+    def false_processing_func(_: Context, __: Actor, *args, **kwargs) -> Context:
         raise Exception("False processing")
 
     n_f = normalize_processing({1: true_processing_func})

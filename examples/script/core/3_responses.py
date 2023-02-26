@@ -40,7 +40,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+def cannot_talk_about_topic_response(ctx: Context, _: Actor, *args, **kwargs) -> Message:
     request = ctx.last_request
     if request is None or request.text is None:
         topic = None
@@ -56,7 +56,7 @@ def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs
 
 def upper_case_response(response: Message):
     # wrapper for internal response function
-    def func(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+    def func(_: Context, __: Actor, *args, **kwargs) -> Message:
         if response.text is not None:
             response.text = response.text.upper()
         return response
@@ -64,7 +64,7 @@ def upper_case_response(response: Message):
     return func
 
 
-def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+def fallback_trace_response(ctx: Context, _: Actor, *args, **kwargs) -> Message:
     return Message(
         misc={
             "previous_node": list(ctx.labels.values())[-2],

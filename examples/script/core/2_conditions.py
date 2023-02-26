@@ -67,7 +67,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+def hi_lower_case_condition(ctx: Context, _: Actor, *args, **kwargs) -> bool:
     request = ctx.last_request
     # Returns True if `hi` in both uppercase and lowercase
     # letters is contained in the user request.
@@ -76,7 +76,7 @@ def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool
     return "hi" in request.text.lower()
 
 
-def complex_user_answer_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+def complex_user_answer_condition(ctx: Context, _: Actor, *args, **kwargs) -> bool:
     request = ctx.last_request
     # The user request can be anything.
     if request is None or request.misc is None:
@@ -86,7 +86,7 @@ def complex_user_answer_condition(ctx: Context, actor: Actor, *args, **kwargs) -
 
 def predetermined_condition(condition: bool):
     # Wrapper for internal condition function.
-    def internal_condition_function(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def internal_condition_function(_: Context, __: Actor, *args, **kwargs) -> bool:
         # It always returns `condition`.
         return condition
 
