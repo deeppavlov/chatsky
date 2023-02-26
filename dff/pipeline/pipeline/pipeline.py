@@ -51,7 +51,7 @@ class Pipeline:
     :param fallback_label: Actor fallback label.
     :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
         where there is no priority. Defaults to `1.0`.
-    :param validation_stage: This flag sets whether the validation stage is executed in actor.
+    :param validation_stage: This flag sets whether the validation stage is executed after actor creation.
         It is executed by default. Defaults to `None`.
     :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
     :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
@@ -223,7 +223,7 @@ class Pipeline:
         :param fallback_label: Actor fallback label.
         :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
             where there is no priority. Defaults to `1.0`.
-        :param validation_stage: This flag sets whether the validation stage is executed in actor.
+        :param validation_stage: This flag sets whether the validation stage is executed after actor creation.
             It is executed by default. Defaults to `None`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
@@ -237,7 +237,6 @@ class Pipeline:
         :param messenger_interface: An instance for this pipeline.
         :param pre_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
-        :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
         :param post_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed after Actor.
             It constructs root service group by merging `pre_services` + actor + `post_services`.

@@ -63,12 +63,7 @@ class Actor:
         Dialog comes into that label if all other transitions failed,
         or there was an error while executing the scenario.
         Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
-        where there is no priority. Defaults to `1.0`.
-    :param validation_stage: This flag sets whether the validation stage is executed.
-        It is executed by default. Defaults to `None`.
     :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
-    :param verbose: If it is `True`, logging is used. Defaults to `True`.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
         - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
@@ -102,9 +97,6 @@ class Actor:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
         self.condition_handler = default_condition_handler if condition_handler is None else condition_handler
 
-        self.label_priority = label_priority
-        self.validation_stage = validation_stage
-        self.verbose = verbose
         self.handlers = {} if handlers is None else handlers
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!

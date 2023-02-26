@@ -209,7 +209,7 @@ It can be:
 
 - ServiceFunction (will become handler)
 - Service object (will be spread and recreated)
-- Pipeline (will be wrapped in a Service as a handler)
+- String 'ACTOR' - the pipeline Actor will be placed there
 - Dictionary, containing keys that are present in Service constructor parameters
 """
 
