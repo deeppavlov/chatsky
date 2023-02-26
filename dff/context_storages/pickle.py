@@ -31,7 +31,6 @@ class PickleContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
     :param path: Target file URI. Example: 'pickle://file.pkl'.
-    :type path: str
     """
 
     def __init__(self, path: str):

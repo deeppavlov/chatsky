@@ -18,14 +18,8 @@ jobs:
   publish:
     name: build and publish docs
     runs-on: ubuntu-latest
-    permissions:
-      contents: 'read'
-      id-token: 'write'
     steps:
       - uses: actions/checkout@v2
-
-      - name: set up pages
-        uses: actions/configure-pages@v2
 
       - name: set up python 3.9
         uses: actions/setup-python@v2
@@ -65,12 +59,10 @@ jobs:
           path: docs/build/
           retention-days: 3
 
-      - name: upload artifact
+      - name: deploy website
         if: ${{ github.ref == 'refs/heads/dev' }}
-        uses: actions/upload-pages-artifact@v1
+        uses: JamesIves/github-pages-deploy-action@v4
         with:
-          path: docs/build/
-
-      - name: deploy to GitHub pages
-        if: ${{ github.ref == 'refs/heads/dev' }}
-        uses: actions/deploy-pages@v1
+          branch: gh-pages
+          folder: docs/build/
+          single-commit: True

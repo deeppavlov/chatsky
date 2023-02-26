@@ -66,6 +66,8 @@ if not sqlalchemy_available:
 def import_insert_for_dialect(dialect: str):
     """
     Imports the insert function into global scope depending on the chosen sqlalchemy dialect.
+
+    :param dialect: Chosen sqlalchemy dialect.
     """
     global insert
     insert = getattr(
@@ -82,12 +84,9 @@ class SQLContextStorage(DBContextStorage):
     :param path: Standard sqlalchemy URI string.
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
-    :type path: str
     :param table_name: The name of the table to use.
-    :type table_name: str
     :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
-    :type custom_driver: bool
     """
 
     def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
