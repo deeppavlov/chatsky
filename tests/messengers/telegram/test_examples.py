@@ -5,6 +5,7 @@ import importlib
 import logging
 
 import pytest
+
 try:
     import telebot  # noqa: F401
     import telethon  # noqa: F401

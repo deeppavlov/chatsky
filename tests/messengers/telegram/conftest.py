@@ -6,8 +6,10 @@ from pathlib import Path
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
+
 try:
     from dff.utils.testing.telegram import get_bot_user, TelegramClient
+
     telegram_available = True
 except ImportError:
     telegram_available = False

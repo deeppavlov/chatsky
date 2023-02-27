@@ -3,6 +3,7 @@ from io import IOBase
 from pathlib import Path
 
 import pytest
+
 try:
     import telebot  # noqa: F401
     import telethon  # noqa: F401
