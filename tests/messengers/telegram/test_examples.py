@@ -5,8 +5,11 @@ import importlib
 import logging
 
 import pytest
-pytest.importorskip("telebot")
-pytest.importorskip("telethon")
+try:
+    import telebot  # noqa: F401
+    import telethon  # noqa: F401
+except ImportError:
+    pytest.skip(reason="`telegram` is not available", allow_module_level=True)
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.utils.testing.common import check_happy_path

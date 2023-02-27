@@ -57,13 +57,16 @@ def env_vars():
 def pipeline_instance(env_vars, pipeline_example):
     yield pipeline_example.pipeline
 
+
 @pytest.fixture(scope="session")
 def actor_instance(env_vars, no_pipeline_example):
     yield no_pipeline_example.actor
 
+
 @pytest.fixture(scope="session")
 def basic_bot(env_vars, no_pipeline_example):
     yield no_pipeline_example.bot
+
 
 @pytest.fixture(scope="session")
 def document(tmpdir_factory):
