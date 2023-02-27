@@ -105,7 +105,7 @@ html_theme_options = {
     "header_links_before_dropdown": 7,
     "icon_links": [
         {
-            "name": "Deeppavlov Forum",
+            "name": "DeepPavlov Forum",
             "url": "https://forum.deeppavlov.ai",
             "icon": "_static/images/logo-deeppavlov.svg",
             "type": "local",
@@ -130,7 +130,7 @@ html_theme_options = {
             "href": "images/logo-dff.svg",
         },
     ],
-    "secondary_sidebar_items": ["page-toc", "edit-this-page", "sourcelink", "colab-links"],
+    "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
 
 

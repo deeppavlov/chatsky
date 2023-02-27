@@ -93,7 +93,7 @@ class PollingMessengerInterface(MessengerInterface):
     ):
         """
         Method, running a request - response cycle in a loop.
-        The looping behaviour is determined by `loop` and `timeout`,
+        The looping behavior is determined by `loop` and `timeout`,
         for most cases the loop itself shouldn't be overridden.
 
         :param pipeline_runner: A function that should return pipeline response to user request;

@@ -3,7 +3,7 @@
 # 1. Basics
 
 This notebook shows basic example of creating a simple dialog bot (agent).
-Let's do all the necessary imports from `dff`:
+Let's do all the necessary imports from `DFF`:
 """
 
 

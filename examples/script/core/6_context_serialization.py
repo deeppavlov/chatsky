@@ -3,7 +3,7 @@
 # 6. Context serialization
 
 This example shows context serialization.
-First of all, let's do all the necessary imports from `dff`.
+First of all, let's do all the necessary imports from `DFF`.
 """
 
 
