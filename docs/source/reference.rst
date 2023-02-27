@@ -1,8 +1,8 @@
-Documentation
+API reference
 -------------
 
 .. toctree::
-   :name: documentation
+   :name: reference
    :glob:
    :maxdepth: 1
 
