@@ -51,9 +51,10 @@ pip install dff[postgresql, mysql]
 ## Basic example
 
 ```python
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor, Message
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Message
+from dff.pipeline import Pipeline
 import dff.script.conditions.std_conditions as cnd
-from typing import Union
+from typing import Tuple
 
 # create a dialog script
 script = {
@@ -69,28 +70,23 @@ script = {
     },
 }
 
-# init actor
-actor = Actor(script, start_label=("flow", "node_hi"))
+# init pipeline
+pipeline = Pipeline.from_script(script, start_label=("flow", "node_hi"))
 
 
 # handler requests
-def turn_handler(in_request: Message, ctx: Union[Context, dict], actor: Actor):
-    # Context.cast - gets an object type of [Context, str, dict] returns an object type of Context
-    ctx = Context.cast(ctx)
-    # Add in current context a next request of user
-    ctx.add_request(in_request)
-    # Pass the context into actor and it returns updated context with actor response
-    ctx = actor(ctx)
+def turn_handler(in_request: Message, pipeline: Pipeline) -> Tuple[Message, Context]:
+    # Pass the next request of user into pipeline and it returns updated context with actor response
+    ctx = pipeline(in_request, 0)
     # Get last actor response from the context
     out_response = ctx.last_response
     # The next condition branching needs for testing
     return out_response, ctx
 
 
-ctx = {}
 while True:
     in_request = input("type your answer: ")
-    out_response, ctx = turn_handler(Message(text=in_request), ctx, actor)
+    out_response, ctx = turn_handler(Message(text=in_request), pipeline)
     print(out_response.text)
 ```
 
