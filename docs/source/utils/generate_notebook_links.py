@@ -6,7 +6,7 @@ from typing import List, Optional, Set
 def create_notebook_link(file: Path, notebook_path: Path):
     """
     Create a symlink between two files.
-    Used to create links to examples under docs/source/examples/ root.
+    Used to create links to tutorials under docs/source/tutorials/ root.
 
     :param file: File to create link from (a code example).
     :param notebook_path: Path to create the link.
@@ -41,26 +41,26 @@ def create_directory_index_file(file: Path, index: List[str]):
     file.write_text(contents)
 
 
-def sort_example_file_tree(files: Set[Path]) -> List[Path]:
+def sort_tutorial_file_tree(files: Set[Path]) -> List[Path]:
     """
-    Sort files alphabetically; for the example files (whose names start with number) numerical sort is applied.
+    Sort files alphabetically; for the tutorial files (whose names start with number) numerical sort is applied.
 
     :param files: Files list to sort.
     """
-    examples = {file for file in files if file.stem.split("_")[0].isdigit()}
-    return sorted(examples, key=lambda file: int(file.stem.split("_")[0])) + sorted(files - examples)
+    tutorials = {file for file in files if file.stem.split("_")[0].isdigit()}
+    return sorted(tutorials, key=lambda file: int(file.stem.split("_")[0])) + sorted(files - tutorials)
 
 
 def iterate_dir_generating_notebook_links(
     current: Path, source: str, dest: str, include: List[str], exclude: List[str]
 ) -> List[str]:
     """
-    Recursively travel through examples directory, creating links for all files under docs/source/examples/ root.
+    Recursively travel through tutorials directory, creating links for all files under docs/source/tutorials/ root.
     Also creates indexes for all created links for them to be easily included into RST documentation.
 
     :param current: Path being searched currently.
-    :param source: Examples root (usually examples/).
-    :param dest: Examples destination (usually docs/source/examples/).
+    :param source: TUtorials root (usually tutorials/).
+    :param dest: Tutorials destination (usually docs/source/tutorials/).
     :param include: List of files to include to search (is applied before exclude list).
     :param exclude: List of files to exclude from search (is applied after include list).
     """
@@ -68,7 +68,7 @@ def iterate_dir_generating_notebook_links(
     if not current.is_dir():
         raise Exception(f"Entity {current} appeared to be a file during processing!")
     includes = list()
-    for entity in sort_example_file_tree(set(current.glob("./*"))):
+    for entity in sort_tutorial_file_tree(set(current.glob("./*"))):
         doc_path = dest_path / entity.relative_to(source)
         if not entity.name.startswith("__"):
             if (
@@ -88,22 +88,22 @@ def iterate_dir_generating_notebook_links(
     return includes
 
 
-def generate_example_links_for_notebook_creation(
+def generate_tutorial_links_for_notebook_creation(
     include: Optional[List[str]] = None,
     exclude: Optional[List[str]] = None,
-    source: str = "examples/",
-    destination: str = "docs/source/examples/",
+    source: str = "tutorials/",
+    destination: str = "docs/source/tutorials/",
 ):
     """
-    Generate symbolic links to examples files (examples/) in docs directory (docs/source/examples/).
+    Generate symbolic links to tutorials files (tutorials/) in docs directory (docs/source/tutorials/).
     That is required because Sphinx doesn't allow to include files from parent directories into documentation.
     Also, this function creates index files inside each generated folder.
     That index includes each folder contents, so any folder can be imported with 'folder/index'.
 
     :param include: Files to copy (supports file templates, like *).
     :param exclude: Files to skip (supports file templates, like *).
-    :param source: Examples root, default: 'examples/'.
-    :param destination: Destination root, default: 'docs/source/examples/'.
+    :param source: Tutorials root, default: 'tutorials/'.
+    :param destination: Destination root, default: 'docs/source/tutorials/'.
     """
     iterate_dir_generating_notebook_links(
         Path(source),

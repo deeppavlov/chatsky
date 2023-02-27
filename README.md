@@ -36,7 +36,7 @@ pip install dff[ydb]  # dependencies for using Yandex Database
 pip install dff[full]  # full dependencies including all options above
 pip install dff[tests]  # dependencies for running tests
 pip install dff[test_full]  # full dependencies for running all tests (all options above)
-pip install dff[examples]  # dependencies for running examples (all options above)
+pip install dff[tutorials]  # dependencies for running tutorials (all options above)
 pip install dff[devel]  # dependencies for development
 pip install dff[doc]  # dependencies for documentation
 pip install dff[devel_full]  # full dependencies for development (all options above)
@@ -151,7 +151,7 @@ def handle_request(request):
 ```
 
 To get more advanced examples, take a look at
-[examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples/context_storages) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/context_storages) on GitHub.
 
 # Contributing to the Dialog Flow Framework
 

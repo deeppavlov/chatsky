@@ -1,0 +1,1 @@
+/home/avsakharov/deeppavlov/dialog_flow_framework/tutorials/messengers/telegram/6_conditions_extras.py

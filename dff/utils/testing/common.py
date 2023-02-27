@@ -9,7 +9,7 @@ from dff.utils.testing.response_comparers import default_comparer
 
 def is_interactive_mode() -> bool:
     """
-    Checking whether the example code should be run in interactive mode.
+    Checking whether the tutorial code should be run in interactive mode.
 
     :return: `True` if it's being executed by Jupyter kernel and DISABLE_INTERACTIVE_MODE env variable isn't set,
         `False` otherwise.
@@ -32,7 +32,7 @@ def check_happy_path(
     printout_enable: bool = True,
 ):
     """
-    Running example with provided pipeline for provided requests, comparing responses with correct expected responses.
+    Running tutorial with provided pipeline for provided requests, comparing responses with correct expected responses.
     In cases when additional processing of responses is needed (e.g. in case of response being an HTML string),
     a special function (response comparer) is used.
 
@@ -66,7 +66,7 @@ def check_happy_path(
 
 def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
     """
-    Running example with provided pipeline in interactive mode, just like with CLI messenger interface.
+    Running tutorial with provided pipeline in interactive mode, just like with CLI messenger interface.
     The dialog won't be stored anywhere, it will only be outputted to STDOUT.
 
     :param pipeline: The Pipeline instance, that will be used for running.

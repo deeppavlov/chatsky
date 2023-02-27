@@ -1,0 +1,1 @@
+/home/avsakharov/deeppavlov/dialog_flow_framework/tutorials/script/responses/1_basics.py

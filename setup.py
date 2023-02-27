@@ -168,7 +168,7 @@ EXTRA_DEPENDENCIES = {
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
-    "examples": tests_full,  # dependencies for running examples (all options above)
+    "tutorials": tests_full,  # dependencies for running tutorials (all options above)
     "devel": devel,  # dependencies for development
     "doc": doc,  # dependencies for documentation
     "devel_full": devel_full,  # full dependencies for development (all options above)
