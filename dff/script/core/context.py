@@ -68,7 +68,7 @@ class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behaviour, e.g while collecting the statistical data.
+    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     labels: Dict[int, NodeLabel2Type] = {}
     """
@@ -103,7 +103,7 @@ class Context(BaseModel):
     """
     `validation` is a flag that signals that :py:class:`~dff.script.Actor`,
     while being initialized, checks the :py:class:`~dff.script.Script`.
-    The functions that can give not validable data
+    The functions that can give not valid data
     while being validated must use this flag to take the validation mode into account.
     Otherwise the validation will not be passed.
     """

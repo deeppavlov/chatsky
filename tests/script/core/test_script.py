@@ -21,8 +21,8 @@ def positive_test(samples, custom_class):
         try:
             res = custom_class(**sample)
             results += [res]
-        except Exception as exeption:
-            raise Exception(f"sample={sample} gets exception={exeption}")
+        except Exception as exception:
+            raise Exception(f"sample={sample} gets exception={exception}")
     return results
 
 

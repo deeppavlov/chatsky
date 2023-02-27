@@ -3,7 +3,7 @@
 # 4. Multi Message
 
 This example shows Multi Message usage.
-Let's do all the necessary imports from `dff`.
+Let's do all the necessary imports from `DFF`.
 """
 
 

@@ -123,13 +123,13 @@ class Actor(BaseModel):
         # node labels validation
         start_label = normalize_label(start_label)
         if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unkown start_label={start_label}")
+            raise ValueError(f"Unknown start_label={start_label}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unkown fallback_label={fallback_label}")
+                raise ValueError(f"Unknown fallback_label={fallback_label}")
         if condition_handler is None:
             condition_handler = default_condition_handler
 
@@ -355,8 +355,8 @@ class Actor(BaseModel):
         return true_label
 
     @validate_arguments
-    def _run_handlers(self, ctx, actor_stade: ActorStage, *args, **kwargs):
-        [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
+    def _run_handlers(self, ctx, actor_stage: ActorStage, *args, **kwargs):
+        [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stage, [])]
 
     @validate_arguments
     def _choose_label(

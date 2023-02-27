@@ -3,7 +3,7 @@
 # 3. Responses
 
 This example shows different options for setting responses.
-Let's do all the necessary imports from `dff`.
+Let's do all the necessary imports from `DFF`.
 """
 
 
@@ -86,7 +86,7 @@ toy_script = {
             RESPONSE: rsp.choice(
                 [Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]
             ),
-            # Random choice from candicate list.
+            # Random choice from candidate list.
             TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
         },
         "node2": {
