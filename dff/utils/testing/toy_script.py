@@ -1,3 +1,9 @@
+"""
+Toy script
+----------
+This module contains a simple :py:class:`~.Script` and dialog which are used
+in tutorials.
+"""
 from dff.script.conditions import exact_match
 from dff.script import TRANSITIONS, RESPONSE, Message
 
@@ -26,6 +32,9 @@ TOY_SCRIPT = {
         },
     }
 }
+"""
+"""
+
 
 HAPPY_PATH = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),
@@ -34,3 +43,5 @@ HAPPY_PATH = (
     (Message(text="Ok, goodbye."), Message(text="bye")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
 )
+"""
+"""

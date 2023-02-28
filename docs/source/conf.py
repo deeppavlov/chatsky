@@ -153,5 +153,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.utils.testing.common", "Utils"),
+            ("dff.utils.testing.toy_script", "Utils"),
         ]
     )

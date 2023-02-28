@@ -8,5 +8,3 @@ Community
 `GitHub Issues <https://github.com/deeppavlov/dialog_flow_framework/issues>`_
 
 `Stack Overflow <https://stackoverflow.com/questions/tagged/dff>`_
-
-`Contribution rules <https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md>`_
