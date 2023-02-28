@@ -33,7 +33,6 @@ class RedisContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
     :param path: Database URI string. Example: `redis://user:password@host:port`.
-    :type path: str
     """
 
     def __init__(self, path: str):
