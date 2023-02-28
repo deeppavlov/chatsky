@@ -1,3 +1,10 @@
+"""
+Extra Handler
+-------------
+The Extra Handler module contains additional functionality that extends the capabilities of the system
+beyond the core functionality. Extra handlers is an input converting addition to :py:class:`.PipelineComponent`.
+For examples, it is used to grep statistics from components, timing, logging, etc.
+"""
 import asyncio
 import logging
 import inspect
@@ -17,14 +24,15 @@ class _ComponentExtraHandler:
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or actor, use services for that purpose instead.
-    It accepts constructor parameters:
-        `functions` - an ExtraHandlerBuilder object, an _ComponentExtraHandler instance,
-        a dict or a list of ExtraHandlerFunctions
-        `stage` - an ExtraHandlerType,
-        specifying whether this handler will be executed before or after pipeline component
-        `timeout` - (for asynchronous only!) maximum component execution time (in seconds),
-        if it exceeds this time, it is interrupted
-        `asynchronous` - requested asynchronous property
+
+    :param functions: An `ExtraHandlerBuilder` object, an `_ComponentExtraHandler` instance,
+        a dict or a list of :py:data:`~.ExtraHandlerFunction`.
+    :type functions: :py:data:`~.ExtraHandlerBuilder`
+    :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
+        after pipeline component.
+    :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
+        if it exceeds this time, it is interrupted.
+    :param asynchronous: Requested asynchronous property.
     """
 
     def __init__(
@@ -62,13 +70,17 @@ class _ComponentExtraHandler:
     def asynchronous(self) -> bool:
         """
         Property, that indicates, whether this component extra handler is synchronous or asynchronous.
-        It is calculated according to following rule:
-            1. If component can be asynchronous and `requested_async_flag` is set, it returns `requested_async_flag`
-            2. If component can be asynchronous and `requested_async_flag` isn't set, it returns True
-            3. If component can't be asynchronous and `requested_async_flag` is False or not set, it returns False
-            4. If component can't be asynchronous and `requested_async_flag` is True,
-                an Exception is thrown in constructor
-        Returns bool.
+        It is calculated according to the following rules:
+
+        - | If component **can** be asynchronous and :py:attr:`~requested_async_flag` is set,
+            it returns :py:attr:`~requested_async_flag`.
+        - | If component **can** be asynchronous and :py:attr:`~requested_async_flag` isn't set,
+            it returns `True`.
+        - | If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is `False` or not set,
+            it returns `False`.
+        - | If component **can't** be asynchronous and :py:attr:`~requested_async_flag` is `True`,
+            an Exception is thrown in constructor.
+
         """
         return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
@@ -101,20 +113,14 @@ class _ComponentExtraHandler:
         """
         Method for executing one of the wrapper functions (before or after).
         If the function is not set, nothing happens.
-        :param stage: current WrapperStage (before or after).
+
+        :param stage: current `WrapperStage` (before or after).
         :param ctx: current dialog context.
         :param actor: actor, associated with current pipeline.
-        :component_info: associated component's info dictionary.
-        :return: None.
+        :param component_info: associated component's info dictionary.
+        :return: `None`
         """
 
-        """
-        Method for retrieving runtime info about this wrapper.
-        It embeds runtime info of the component it wraps under `component` key.
-        :param stage: - current WrapperStage (before or after).
-        :param component_info: - associated component's info dictionary.
-        :return: A WrapperRuntimeInfo dict where all not set fields are replaced with '[None]'.
-        """
         if self.asynchronous:
             futures = [self._run_function(function, ctx, actor, component_info) for function in self.functions]
             for function, future in zip(self.functions, asyncio.as_completed(futures)):
@@ -133,9 +139,11 @@ class _ComponentExtraHandler:
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using `_run` method.
-        :param ctx: (required) Current dialog Context.
-        :param actor: This Pipeline Actor or None if this is a service, that wraps Actor.
-        :return: Context if this is a synchronous service or Awaitable if this is an asynchronous component or None.
+
+        :param ctx: (required) Current dialog `Context`.
+        :param actor: This `Pipeline` `Actor` or `None` if this is a service, that wraps `Actor`.
+        :return: `Context` if this is a synchronous service or
+            `Awaitable` if this is an asynchronous component or `None`.
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, actor, component_info))
@@ -147,8 +155,9 @@ class _ComponentExtraHandler:
     def info_dict(self) -> dict:
         """
         Property for retrieving info dictionary about this wrapper.
-        Returns info dict, containing its fields as well as its type.
-        All not set fields there are replaced with '[None]'.
+
+        :return: Info dict, containing its fields as well as its type.
+            All not set fields there are replaced with `None`.
         """
         return {
             "type": type(self).__name__,

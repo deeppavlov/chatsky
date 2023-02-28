@@ -21,7 +21,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 
 # %%
-db_uri = "postgresql://{}:{}@localhost:5432/{}".format(
+db_uri = "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
     os.getenv("POSTGRES_USERNAME"),
     os.getenv("POSTGRES_PASSWORD"),
     os.getenv("POSTGRES_DB"),

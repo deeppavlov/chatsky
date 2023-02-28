@@ -36,7 +36,7 @@ These objects are dictionaries of particular structure:
 * `messenger_interface` - `MessengerInterface` instance,
         is used to connect to channel and transfer IO to user.
 * `context_storage` - Place to store dialog contexts
-        (dictionary or a `DBAbstractContextStorage` instance).
+        (dictionary or a `DBContextStorage` instance).
 * `services` (required) - A `ServiceGroupBuilder` object,
         basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
         see example 4.
@@ -85,7 +85,7 @@ Final service logs `ctx.misc` dict.
 def prepreprocess(ctx: Context):
     logger.info("preprocession intent-detection Service running (defined as a dict)")
     ctx.misc["preprocess_detection"] = {
-        ctx.last_request: "some_intent"
+        ctx.last_request.text: "some_intent"
     }  # Similar syntax can be used to access
     # service output dedicated to current pipeline run
 
@@ -98,7 +98,7 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
     with urllib.request.urlopen("https://example.com/") as webpage:
         web_content = webpage.read().decode(webpage.headers.get_content_charset())
         ctx.misc["another_detection"] = {
-            ctx.last_request: "online" if "Example Domain" in web_content else "offline"
+            ctx.last_request.text: "online" if "Example Domain" in web_content else "offline"
         }
 
 
@@ -108,7 +108,7 @@ def postprocess(ctx: Context, actor: Actor):
     fallback_flow, fallback_node, _ = actor.fallback_label
     received_response = actor.script[fallback_flow][fallback_node].response
     responses_match = received_response == ctx.last_response
-    logger.info(f"actor is{'' if responses_match else ' not'} " "in fallback node")
+    logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
 
 # %%

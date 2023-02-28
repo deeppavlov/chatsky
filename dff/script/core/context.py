@@ -1,9 +1,20 @@
 """
 Context
----------------------------
-Data structure that is used for the context storage.
-It provides a convenient interface for working with data:
-adding data, data serialization, type checking etc.
+-------
+A Context is a data structure that is used to store information about the current state of a conversation.
+It is used to keep track of the user's input, the current stage of the conversation, and any other
+information that is relevant to the current context of a dialog.
+The Context provides a convenient interface for working with data, allowing developers to easily add,
+retrieve, and manipulate data as the conversation progresses.
+
+The Context data structure provides several key features to make working with data easier.
+Developers can use the context to store any information that is relevant to the current conversation,
+such as user data, session data, conversation history, or etc.
+This allows developers to easily access and use this data throughout the conversation flow.
+
+Another important feature of the context is data serialization.
+The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
+This allows developers to save the context data and resume the conversation later.
 """
 import logging
 from uuid import UUID, uuid4
@@ -12,6 +23,7 @@ from typing import Any, Optional, Union, Dict, List, Set
 
 from pydantic import BaseModel, validate_arguments, Field, validator
 from .types import NodeLabel2Type, ModuleName
+from .message import Message
 
 logger = logging.getLogger(__name__)
 
@@ -56,7 +68,7 @@ class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behaviour, e.g while collecting the statistical data.
+    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     labels: Dict[int, NodeLabel2Type] = {}
     """
@@ -65,14 +77,14 @@ class Context(BaseModel):
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    requests: Dict[int, Any] = {}
+    requests: Dict[int, Message] = {}
     """
     `requests` stores the history of all `requests` received by the agent
 
         - key - `id` of the turn.
         - value - `request` on this turn.
     """
-    responses: Dict[int, Any] = {}
+    responses: Dict[int, Message] = {}
     """
     `responses` stores the history of all agent `responses`
 
@@ -91,7 +103,7 @@ class Context(BaseModel):
     """
     `validation` is a flag that signals that :py:class:`~dff.script.Actor`,
     while being initialized, checks the :py:class:`~dff.script.Script`.
-    The functions that can give not validable data
+    The functions that can give not valid data
     while being validated must use this flag to take the validation mode into account.
     Otherwise the validation will not be passed.
     """
@@ -142,7 +154,7 @@ class Context(BaseModel):
         return ctx
 
     @validate_arguments
-    def add_request(self, request: Any):
+    def add_request(self, request: Message):
         """
         Adds to the context the next `request` corresponding to the next turn.
         The addition takes place in the `requests` and `new_index = last_index + 1`.
@@ -153,7 +165,7 @@ class Context(BaseModel):
         self.requests[last_index + 1] = request
 
     @validate_arguments
-    def add_response(self, response: Any):
+    def add_response(self, response: Message):
         """
         Adds to the context the next `response` corresponding to the next turn.
         The addition takes place in the `responses`, and `new_index = last_index + 1`.
@@ -216,7 +228,7 @@ class Context(BaseModel):
         return self.labels.get(last_index)
 
     @property
-    def last_response(self) -> Optional[Any]:
+    def last_response(self) -> Optional[Message]:
         """
         Returns the last `response` of the current :py:class:`~dff.script.Context`.
         Returns `None` if `responses` is empty.
@@ -224,28 +236,30 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    def set_last_response(self, response: Optional[Any]):
-        """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+    def set_last_response(self, response: Optional[Message]):
+        """
+        Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
-        self.responses[last_index] = response
+        self.responses[last_index] = Message() if response is None else response
 
     @property
-    def last_request(self) -> Optional[Any]:
+    def last_request(self) -> Optional[Message]:
         """
         Returns the last `request` of the current :py:class:`~dff.script.Context`.
-        Returns `None if `requests` is empty.
+        Returns `None` if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    def set_last_request(self, request: Optional[Any]):
-        """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+    def set_last_request(self, request: Optional[Message]):
+        """
+        Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
-        self.requests[last_index] = request
+        self.requests[last_index] = Message() if request is None else request
 
     @property
     def current_node(self) -> Optional[Node]:

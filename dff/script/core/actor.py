@@ -1,9 +1,21 @@
 """
 Actor
----------------------------
-Actor is one of the main abstractions that processes incoming requests
-(:py:class:`~dff.script.Context`)
-from the user in accordance with the dialog graph (:py:class:`~dff.script.Script`).
+-----
+Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script` and handles it.
+It is responsible for processing user input and determining the appropriate response based
+on the current state of the conversation and the script.
+The actor receives requests in the form of a :py:class:`.Context` class, which contains
+information about the user's input, the current state of the conversation, and other relevant data.
+
+The actor uses the dialog graph, represented by the :py:class:`.Script` class,
+to determine the appropriate response. The script contains the structure of the conversation,
+including the different `nodes` and `transitions`.
+It defines the possible paths that the conversation can take, and the conditions that must be met
+for a transition to occur. The actor uses this information to navigate the graph
+and determine the next step in the conversation.
+
+Overall, the actor acts as a bridge between the user's input and the dialog graph,
+making sure that the conversation follows the expected flow and providing a personalized experience to the user.
 """
 import logging
 from typing import Union, Callable, Optional, Dict, List, Any
@@ -13,6 +25,7 @@ from pydantic import BaseModel, validate_arguments, Extra
 
 from dff.utils.turn_caching import cache_clear
 from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
+from .message import Message
 
 from .context import Context
 from .script import Script, Node
@@ -110,15 +123,15 @@ class Actor(BaseModel):
         # node labels validation
         start_label = normalize_label(start_label)
         if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unkown start_label={start_label}")
+            raise ValueError(f"Unknown start_label={start_label}")
         if fallback_label is None:
             fallback_label = start_label
         else:
             fallback_label = normalize_label(fallback_label)
             if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unkown fallback_label={fallback_label}")
+                raise ValueError(f"Unknown fallback_label={fallback_label}")
         if condition_handler is None:
-            condition_handler = deep_copy_condition_handler
+            condition_handler = default_condition_handler
 
         super(Actor, self).__init__(
             script=script,
@@ -196,7 +209,7 @@ class Actor(BaseModel):
         ctx = Context.cast(ctx)
         if not ctx.requests:
             ctx.add_label(self.start_label[:2])
-            ctx.add_request("")
+            ctx.add_request(Message())
         ctx.framework_states["actor"] = {}
         return ctx
 
@@ -342,8 +355,8 @@ class Actor(BaseModel):
         return true_label
 
     @validate_arguments
-    def _run_handlers(self, ctx, actor_stade: ActorStage, *args, **kwargs):
-        [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
+    def _run_handlers(self, ctx, actor_stage: ActorStage, *args, **kwargs):
+        [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stage, [])]
 
     @validate_arguments
     def _choose_label(
@@ -371,12 +384,12 @@ class Actor(BaseModel):
                 labels += list(node.transitions.keys())
                 conditions += list(node.transitions.values())
 
+        actor = self.copy(deep=True)
         error_msgs = []
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
-            ctx.add_request("text")
-            actor = self.copy(deep=True)
+            ctx.add_request(Message(text="text"))
 
             label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
 
@@ -395,10 +408,10 @@ class Actor(BaseModel):
             response_func = normalize_response(node.response)
             try:
                 response_result = response_func(ctx, actor)
-                if isinstance(response_result, Callable):
+                if not isinstance(response_result, Message):
                     msg = (
-                        "Expected type of response_result needed not Callable "
-                        + f"but got type(response_result)={type(response_result)}"
+                        "Expected type of response_result is `Message`.\n"
+                        + f"Got type(response_result)={type(response_result)}"
                         f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
@@ -425,14 +438,14 @@ class Actor(BaseModel):
 
 
 @validate_arguments()
-def deep_copy_condition_handler(
+def default_condition_handler(
     condition: Callable, ctx: Context, actor: Actor, *args, **kwargs
 ) -> Callable[[Context, Actor, Any, Any], bool]:
     """
-    This function returns a deep copy of the callable conditions:
+    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
 
     :param condition: Condition to copy.
     :param ctx: Context of current condition.
     :param actor: Actor we use in this condition.
     """
-    return condition(ctx.copy(deep=True), actor.copy(deep=True), *args, **kwargs)
+    return condition(ctx, actor, *args, **kwargs)
