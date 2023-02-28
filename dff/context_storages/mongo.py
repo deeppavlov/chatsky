@@ -11,7 +11,7 @@ It stores data in a format similar to JSON, making it easy to work with the data
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
 """
-from typing import Hashable, Dict
+from typing import Hashable, Dict, Any
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -20,6 +20,8 @@ try:
     mongo_available = True
 except ImportError:
     mongo_available = False
+    AsyncIOMotorClient = None
+    ObjectId = Any
 
 import json
 
@@ -34,9 +36,7 @@ class MongoContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
     :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
-    :type path: str
     :param collection: Name of the collection to store the data in.
-    :type collection: str
     """
 
     def __init__(self, path: str, collection: str = "context_collection"):

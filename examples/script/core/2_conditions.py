@@ -4,7 +4,7 @@
 
 This example shows different options for
 setting transition conditions from one node to another.
-First of all, let's do all the necessary imports from `dff`.
+First of all, let's do all the necessary imports from `DFF`.
 """
 
 
@@ -40,13 +40,13 @@ Out of the box `dff.script.conditions` offers the
     `regexp` has same signature as `re.compile` function.
 * `aggregate` returns `bool` value as
     a result after aggregate by `aggregate_func`
-    for input sequence of condtions.
+    for input sequence of conditions.
     `aggregate_func == any` by default. `aggregate` has alias `agg`.
-* `any` returns `True` if one element of input sequence of condtions is `True`.
+* `any` returns `True` if one element of input sequence of conditions is `True`.
     `any(input_sequence)` is equivalent to
     `aggregate(input sequence, aggregate_func=any)`.
 * `all` returns `True` if all elements of input
-    sequence of condtions are `True`.
+    sequence of conditions are `True`.
     `all(input_sequence)` is equivalent to
     `aggregate(input sequence, aggregate_func=all)`.
 * `negation` returns negation of passed function. `negation` has alias `neg`.
@@ -110,7 +110,7 @@ toy_script = {
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
             TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
-            # Mix sequence of condtions by `cnd.all`.
+            # Mix sequence of conditions by `cnd.all`.
             # `all` is alias `aggregate` with
             # `aggregate_func` == `all`.
         },
@@ -124,7 +124,7 @@ toy_script = {
             TRANSITIONS: {
                 "node1": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text="hello"))])
             },
-            # Mix sequence of condtions by `cnd.any`.
+            # Mix sequence of conditions by `cnd.any`.
             # `any` is alias `aggregate` with
             # `aggregate_func` == `any`.
         },
