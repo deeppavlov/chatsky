@@ -41,7 +41,7 @@ script = {
         "start": {
             TRANSITIONS: {
                 ("general", "keyboard"): (
-                    lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
                 ),
             },
         },
@@ -49,7 +49,7 @@ script = {
             RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
             TRANSITIONS: {
                 ("general", "keyboard"): (
-                    lambda ctx, actor: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
                 )
             },
         },
