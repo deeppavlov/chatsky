@@ -1,15 +1,13 @@
-from dff.script import TRANSITIONS
-from dff.script import RESPONSE
-from dff.script import PROCESSING
-from dff.script import GLOBAL
-from dff.script import MISC
-from dff.script import LOCAL
+from dff.script.core.keywords import TRANSITIONS
+from dff.script.core.keywords import RESPONSE
+from dff.script.core.keywords import GLOBAL
+from dff.script.core.keywords import MISC
+from dff.script.core.keywords import LOCAL
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.script import Actor as Act
 from dff.script import Context
 import dff.script.responses as rsp
-from functions import add_prefix
 import typing as tp
 import re
 import transitions
@@ -25,10 +23,6 @@ script = {
             lbl.to_fallback(0.1): cnd.true(),
             lbl.forward(): cnd.all([cnd.regexp('next\\b'), cnd.has_last_labels(labels=[('music_flow', i) for i in ['node2', 'node3']])]),
             lbl.repeat(0.2): cnd.all([cnd.regexp('repeat', re.I), cnd.negation(cnd.has_last_labels(flow_labels=['global_flow']))]),
-        },
-        PROCESSING: {
-            1: add_prefix('l1_global'),
-            2: add_prefix('l2_global'),
         },
         MISC: {
             'var1': 'global_data',

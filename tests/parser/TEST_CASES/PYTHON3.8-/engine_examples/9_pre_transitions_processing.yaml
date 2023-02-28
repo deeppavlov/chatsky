@@ -4,17 +4,18 @@
   TRANSITIONS: from dff.script import TRANSITIONS
   PRE_RESPONSE_PROCESSING: from dff.script import PRE_RESPONSE_PROCESSING
   PRE_TRANSITIONS_PROCESSING: from dff.script import PRE_TRANSITIONS_PROCESSING
+  Message: from dff.script import Message
   lbl: import dff.script.labels
   cnd: import dff.script.conditions
   Pipeline: from dff.pipeline import Pipeline
   toy_script:
     "'root'":
       "'start'":
-        RESPONSE: "''"
+        RESPONSE: Message()
         TRANSITIONS:
           ('flow', 'step_0'): cnd.true()
       "'fallback'":
-        RESPONSE: "'the end'"
+        RESPONSE: Message(text='the end')
     GLOBAL:
       PRE_RESPONSE_PROCESSING:
         "'proc_name_1'": get_previous_node_response_for_response_processing
@@ -24,13 +25,13 @@
         lbl.forward(0.1): cnd.true()
     "'flow'":
       "'step_0'":
-        RESPONSE: "'first'"
+        RESPONSE: Message(text='first')
       "'step_1'":
-        RESPONSE: "'second'"
+        RESPONSE: Message(text='second')
       "'step_2'":
-        RESPONSE: "'third'"
+        RESPONSE: Message(text='third')
       "'step_3'":
-        RESPONSE: "'fourth'"
+        RESPONSE: Message(text='fourth')
       "'step_4'":
-        RESPONSE: "'fifth'"
+        RESPONSE: Message(text='fifth')
   pipeline: Pipeline.from_script(toy_script, start_label=('root', 'start'), fallback_label=('root', 'fallback'))

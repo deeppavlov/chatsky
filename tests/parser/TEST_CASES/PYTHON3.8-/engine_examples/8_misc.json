@@ -9,19 +9,20 @@
                 "RESPONSE": "from dff.script import RESPONSE",
                 "TRANSITIONS": "from dff.script import TRANSITIONS",
                 "MISC": "from dff.script import MISC",
+                "Message": "from dff.script import Message",
                 "lbl": "import dff.script.labels",
                 "cnd": "import dff.script.conditions",
                 "Pipeline": "from dff.pipeline import Pipeline",
                 "toy_script": {
                     "'root'": {
                         "'start'": {
-                            "RESPONSE": "''",
+                            "RESPONSE": "Message()",
                             "TRANSITIONS": {
                                 "('flow', 'step_0')": "cnd.true()"
                             }
                         },
                         "'fallback'": {
-                            "RESPONSE": "'the end'"
+                            "RESPONSE": "Message(text='the end')"
                         }
                     },
                     "GLOBAL": {

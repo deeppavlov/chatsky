@@ -3,6 +3,7 @@ from dff.script import RESPONSE
 from dff.script import TRANSITIONS
 from dff.script import PRE_RESPONSE_PROCESSING
 from dff.script import PRE_TRANSITIONS_PROCESSING
+from dff.script import Message
 import dff.script.labels as lbl
 import dff.script.conditions as cnd
 from dff.pipeline import Pipeline
@@ -10,13 +11,13 @@ from dff.pipeline import Pipeline
 toy_script = {
     'root': {
         'start': {
-            RESPONSE: '',
+            RESPONSE: Message(),
             TRANSITIONS: {
                 ('flow', 'step_0'): cnd.true(),
             },
         },
         'fallback': {
-            RESPONSE: 'the end',
+            RESPONSE: Message(text='the end'),
         },
     },
     GLOBAL: {
@@ -32,19 +33,19 @@ toy_script = {
     },
     'flow': {
         'step_0': {
-            RESPONSE: 'first',
+            RESPONSE: Message(text='first'),
         },
         'step_1': {
-            RESPONSE: 'second',
+            RESPONSE: Message(text='second'),
         },
         'step_2': {
-            RESPONSE: 'third',
+            RESPONSE: Message(text='third'),
         },
         'step_3': {
-            RESPONSE: 'fourth',
+            RESPONSE: Message(text='fourth'),
         },
         'step_4': {
-            RESPONSE: 'fifth',
+            RESPONSE: Message(text='fifth'),
         },
     },
 }

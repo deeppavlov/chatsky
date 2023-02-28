@@ -3,6 +3,7 @@ from dff.script import LOCAL
 from dff.script import RESPONSE
 from dff.script import TRANSITIONS
 from dff.script import PRE_RESPONSE_PROCESSING
+from dff.script import Message
 import dff.script.labels as lbl
 import dff.script.conditions as cnd
 from dff.pipeline import Pipeline
@@ -10,13 +11,13 @@ from dff.pipeline import Pipeline
 toy_script = {
     'root': {
         'start': {
-            RESPONSE: '',
+            RESPONSE: Message(),
             TRANSITIONS: {
                 ('flow', 'step_0'): cnd.true(),
             },
         },
         'fallback': {
-            RESPONSE: 'the end',
+            RESPONSE: Message(text='the end'),
         },
     },
     GLOBAL: {
@@ -33,7 +34,7 @@ toy_script = {
             },
         },
         'step_0': {
-            RESPONSE: 'first',
+            RESPONSE: Message(text='first'),
             TRANSITIONS: {
                 lbl.forward(): cnd.true(),
             },
@@ -42,7 +43,7 @@ toy_script = {
             PRE_RESPONSE_PROCESSING: {
                 'proc_name_1': add_prefix('l1_step_1'),
             },
-            RESPONSE: 'second',
+            RESPONSE: Message(text='second'),
             TRANSITIONS: {
                 lbl.forward(): cnd.true(),
             },
@@ -51,7 +52,7 @@ toy_script = {
             PRE_RESPONSE_PROCESSING: {
                 'proc_name_2': add_prefix('l2_step_2'),
             },
-            RESPONSE: 'third',
+            RESPONSE: Message(text='third'),
             TRANSITIONS: {
                 lbl.forward(): cnd.true(),
             },
@@ -60,7 +61,7 @@ toy_script = {
             PRE_RESPONSE_PROCESSING: {
                 'proc_name_3': add_prefix('l3_step_3'),
             },
-            RESPONSE: 'fourth',
+            RESPONSE: Message(text='fourth'),
             TRANSITIONS: {
                 lbl.forward(): cnd.true(),
             },
@@ -69,7 +70,7 @@ toy_script = {
             PRE_RESPONSE_PROCESSING: {
                 'proc_name_4': add_prefix('l4_step_4'),
             },
-            RESPONSE: 'fifth',
+            RESPONSE: Message(text='fifth'),
             TRANSITIONS: {
                 'step_0': cnd.true(),
             },

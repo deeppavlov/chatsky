@@ -1,14 +1,12 @@
 main:
-  TRANSITIONS: from dff.script import TRANSITIONS
-  RESPONSE: from dff.script import RESPONSE
-  PROCESSING: from dff.script import PROCESSING
-  GLOBAL: from dff.script import GLOBAL
-  MISC: from dff.script import MISC
+  TRANSITIONS: from dff.script.core.keywords import TRANSITIONS
+  RESPONSE: from dff.script.core.keywords import RESPONSE
+  GLOBAL: from dff.script.core.keywords import GLOBAL
+  MISC: from dff.script.core.keywords import MISC
   cnd: import dff.script.conditions
   lbl: import dff.script.labels
   Act: from dff.script import Actor
   rsp: import dff.script.responses
-  add_prefix: from functions import add_prefix
   re: import re
   transitions: import transitions
   global_flow: from flow import global_flow
@@ -21,9 +19,6 @@ main:
         lbl.to_fallback(0.1): cnd.true()
         lbl.forward(): cnd.all([cnd.regexp('next\\b'), cnd.has_last_labels(labels=[('music_flow', i) for i in ['node2', 'node3']])])
         lbl.repeat(0.2): cnd.all([cnd.regexp('repeat', re.I), cnd.negation(cnd.has_last_labels(flow_labels=['global_flow']))])
-      PROCESSING:
-        '1': add_prefix('l1_global')
-        '2': add_prefix('l2_global')
       MISC:
         "'var1'": "'global_data'"
         "'var2'": "'global_data'"
@@ -81,19 +76,12 @@ main:
           lbl.to_fallback(): cnd.true()
   actor: Act(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))
 flow:
-  TRANSITIONS: from dff.script import TRANSITIONS
-  RESPONSE: from dff.script import RESPONSE
-  PROCESSING: from dff.script import PROCESSING
-  LOCAL: from dff.script import LOCAL
+  TRANSITIONS: from dff.script.core.keywords import TRANSITIONS
+  RESPONSE: from dff.script.core.keywords import RESPONSE
   cnd: import dff.script.conditions
   re: import re
-  lbl: import dff.script.labels
-  add_prefix: from functions import add_prefix
+  lbl: import dff.script.labels.std_labels
   global_flow:
-    LOCAL:
-      PROCESSING:
-        '2': add_prefix('l2_local')
-        '3': add_prefix('l3_local')
     "'start_node'":
       RESPONSE: "''"
       TRANSITIONS:

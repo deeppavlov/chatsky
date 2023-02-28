@@ -1,7 +1,6 @@
-from dff.script import (
+from dff.script.core.keywords import (
     TRANSITIONS,
     RESPONSE,
-    PROCESSING,
     GLOBAL,
     MISC,
     LOCAL,
@@ -10,7 +9,6 @@ import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.script import Actor as Act, Context
 import dff.script.responses as rsp
-from functions import add_prefix
 import typing as tp, re, transitions
 from flow import global_flow
 
@@ -36,7 +34,6 @@ script = {
                 ]
             ),
         },
-        PROCESSING: {1: add_prefix("l1_global"), 2: add_prefix("l2_global")},
         MISC: {
             "var1": "global_data",
             "var2": "global_data",

@@ -2,32 +2,33 @@
   re: import re
   TRANSITIONS: from dff.script import TRANSITIONS
   RESPONSE: from dff.script import RESPONSE
+  Message: from dff.script import Message
   cnd: import dff.script.conditions
   Pipeline: from dff.pipeline import Pipeline
   toy_script:
     "'greeting_flow'":
       "'start_node'":
-        RESPONSE: "''"
+        RESPONSE: Message()
         TRANSITIONS:
-          "'node1'": cnd.exact_match('Hi')
+          "'node1'": cnd.exact_match(Message(text='Hi'))
       "'node1'":
-        RESPONSE: "'Hi, how are you?'"
+        RESPONSE: Message(text='Hi, how are you?')
         TRANSITIONS:
           "'node2'": cnd.regexp('.*how are you', re.IGNORECASE)
       "'node2'":
-        RESPONSE: "'Good. What do you want to talk about?'"
+        RESPONSE: Message(text='Good. What do you want to talk about?')
         TRANSITIONS:
           "'node3'": cnd.all([cnd.regexp('talk'), cnd.regexp('about.*music')])
       "'node3'":
-        RESPONSE: "'Sorry, I can not talk about music now.'"
+        RESPONSE: Message(text='Sorry, I can not talk about music now.')
         TRANSITIONS:
           "'node4'": cnd.regexp(re.compile('Ok, goodbye.'))
       "'node4'":
-        RESPONSE: "'bye'"
+        RESPONSE: Message(text='bye')
         TRANSITIONS:
-          "'node1'": cnd.any([hi_lower_case_condition, cnd.exact_match('hello')])
+          "'node1'": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text='hello'))])
       "'fallback_node'":
-        RESPONSE: "'Ooops'"
+        RESPONSE: Message(text='Ooops')
         TRANSITIONS:
           "'node1'": complex_user_answer_condition
           "'fallback_node'": predetermined_condition(True)

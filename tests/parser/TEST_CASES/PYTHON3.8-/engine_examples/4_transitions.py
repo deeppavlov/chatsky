@@ -1,6 +1,7 @@
 import re
 from dff.script import TRANSITIONS
 from dff.script import RESPONSE
+from dff.script import Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline
@@ -8,7 +9,7 @@ from dff.pipeline import Pipeline
 toy_script = {
     'global_flow': {
         'start_node': {
-            RESPONSE: '',
+            RESPONSE: Message(),
             TRANSITIONS: {
                 ('music_flow', 'node1'): cnd.regexp('talk about music'),
                 ('greeting_flow', 'node1'): cnd.regexp('hi|hello', re.IGNORECASE),
@@ -16,7 +17,7 @@ toy_script = {
             },
         },
         'fallback_node': {
-            RESPONSE: 'Ooops',
+            RESPONSE: Message(text='Ooops'),
             TRANSITIONS: {
                 ('music_flow', 'node1'): cnd.regexp('talk about music'),
                 ('greeting_flow', 'node1'): cnd.regexp('hi|hello', re.IGNORECASE),
@@ -27,14 +28,14 @@ toy_script = {
     },
     'greeting_flow': {
         'node1': {
-            RESPONSE: 'Hi, how are you?',
+            RESPONSE: Message(text='Hi, how are you?'),
             TRANSITIONS: {
                 ('global_flow', 'fallback_node', 0.1): cnd.true(),
                 'node2': cnd.regexp('how are you'),
             },
         },
         'node2': {
-            RESPONSE: 'Good. What do you want to talk about?',
+            RESPONSE: Message(text='Good. What do you want to talk about?'),
             TRANSITIONS: {
                 lbl.to_fallback(0.1): cnd.true(),
                 lbl.forward(0.5): cnd.regexp('talk about'),
@@ -43,13 +44,13 @@ toy_script = {
             },
         },
         'node3': {
-            RESPONSE: 'Sorry, I can not talk about that now.',
+            RESPONSE: Message(text='Sorry, I can not talk about that now.'),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp('bye'),
             },
         },
         'node4': {
-            RESPONSE: 'Bye',
+            RESPONSE: Message(text='Bye'),
             TRANSITIONS: {
                 'node1': cnd.regexp('hi|hello', re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
@@ -58,14 +59,14 @@ toy_script = {
     },
     'music_flow': {
         'node1': {
-            RESPONSE: 'I love `System of a Down` group, would you like to talk about it?',
+            RESPONSE: Message(text='I love `System of a Down` group, would you like to talk about it?'),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp('yes|yep|ok', re.IGNORECASE),
                 lbl.to_fallback(): cnd.true(),
             },
         },
         'node2': {
-            RESPONSE: 'System of a Down is an Armenian-American heavy metal band formed in 1994.',
+            RESPONSE: Message(text='System of a Down is an Armenian-American heavy metal band formed in 1994.'),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp('next', re.IGNORECASE),
                 lbl.repeat(): cnd.regexp('repeat', re.IGNORECASE),
@@ -73,7 +74,7 @@ toy_script = {
             },
         },
         'node3': {
-            RESPONSE: 'The band achieved commercial success with the release of five studio albums.',
+            RESPONSE: Message(text='The band achieved commercial success with the release of five studio albums.'),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp('next', re.IGNORECASE),
                 lbl.backward(): cnd.regexp('back', re.IGNORECASE),
@@ -82,7 +83,7 @@ toy_script = {
             },
         },
         'node4': {
-            RESPONSE: "That's all what I know.",
+            RESPONSE: Message(text="That's all what I know."),
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp('next', re.IGNORECASE),
                 high_priority_node_transition('greeting_flow', 'node4'): cnd.regexp('next time', re.IGNORECASE),

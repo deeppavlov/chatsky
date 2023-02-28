@@ -3,6 +3,7 @@ from dff.script import LOCAL
 from dff.script import RESPONSE
 from dff.script import TRANSITIONS
 from dff.script import MISC
+from dff.script import Message
 import dff.script.labels as lbl
 import dff.script.conditions as cnd
 from dff.pipeline import Pipeline
@@ -10,13 +11,13 @@ from dff.pipeline import Pipeline
 toy_script = {
     'root': {
         'start': {
-            RESPONSE: '',
+            RESPONSE: Message(),
             TRANSITIONS: {
                 ('flow', 'step_0'): cnd.true(),
             },
         },
         'fallback': {
-            RESPONSE: 'the end',
+            RESPONSE: Message(text='the end'),
         },
     },
     GLOBAL: {

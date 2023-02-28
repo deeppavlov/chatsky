@@ -1,19 +1,10 @@
-from dff.script import TRANSITIONS
-from dff.script import RESPONSE
-from dff.script import PROCESSING
-from dff.script import LOCAL
+from dff.script.core.keywords import TRANSITIONS
+from dff.script.core.keywords import RESPONSE
 import dff.script.conditions as cnd
 import re
-import dff.script.labels as lbl
-from functions import add_prefix
+import dff.script.labels.std_labels as lbl
 
 global_flow = {
-    LOCAL: {
-        PROCESSING: {
-            2: add_prefix('l2_local'),
-            3: add_prefix('l3_local'),
-        },
-    },
     'start_node': {
         RESPONSE: '',
         TRANSITIONS: {
