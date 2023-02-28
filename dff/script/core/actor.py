@@ -76,10 +76,7 @@ class Actor:
         script: Union[Script, dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
-        label_priority: float = 1.0,
-        validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
         # script validation
