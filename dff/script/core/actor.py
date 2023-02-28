@@ -83,29 +83,19 @@ class Actor:
         self.script = script if isinstance(script, Script) else Script(script=script)
 
         # node labels validation
-        start_label = normalize_label(start_label)
-        if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unknown start_label={start_label}")
+        self.start_label = normalize_label(start_label)
+        if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
+            raise ValueError(f"Unknown start_label={self.start_label}")
 
         if fallback_label is None:
             self.fallback_label = self.start_label
         else:
-            fallback_label = normalize_label(fallback_label)
-            if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unknown fallback_label={fallback_label}")
-        if condition_handler is None:
-            condition_handler = default_condition_handler
+            self.fallback_label = normalize_label(fallback_label)
+            if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
+                raise ValueError(f"Unknown fallback_label={self.fallback_label}")
+        self.condition_handler = default_condition_handler if condition_handler is None else condition_handler
 
-        super(Actor, self).__init__(
-            script=script,
-            start_label=start_label,
-            fallback_label=fallback_label,
-            label_priority=label_priority,
-            validation_stage=validation_stage,
-            condition_handler=condition_handler,
-            verbose=verbose,
-            handlers={} if handlers is None else handlers,
-        )
+        self.handlers = {} if handlers is None else handlers
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
