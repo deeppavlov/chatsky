@@ -289,10 +289,8 @@ class Pipeline:
             Defaults to an empty `dict`.
         """
         old_actor = self.actor
-        self.actor = Actor(
-            script, start_label, fallback_label, label_priority, validation_stage, condition_handler, verbose, handlers
-        )
-        errors = self.actor.validate_script(self, self.actor.verbose) if validation_stage is not False else []
+        self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
+        errors = self.actor.validate_script(self, verbose) if validation_stage is not False else []
         if errors:
             self.actor = old_actor
             raise ValueError(
