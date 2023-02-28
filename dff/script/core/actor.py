@@ -63,6 +63,8 @@ class Actor:
         Dialog comes into that label if all other transitions failed,
         or there was an error while executing the scenario.
         Defaults to `None`.
+    :param label_priority: Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
+        where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
@@ -76,11 +78,13 @@ class Actor:
         script: Union[Script, dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
+        label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
         # script validation
         self.script = script if isinstance(script, Script) else Script(script=script)
+        self.label_priority = label_priority
 
         # node labels validation
         self.start_label = normalize_label(start_label)
