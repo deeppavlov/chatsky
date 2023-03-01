@@ -56,7 +56,7 @@ def cannot_talk_about_topic_response(ctx: Context, _: Pipeline, *args, **kwargs)
 
 def upper_case_response(response: Message):
     # wrapper for internal response function
-    def func(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+    def func(_: Context, __: Pipeline, *args, **kwargs) -> Message:
         if response.text is not None:
             response.text = response.text.upper()
         return response
