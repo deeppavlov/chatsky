@@ -22,6 +22,9 @@ from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH,
 a pipeline of the most basic structure:
 "preprocessors -> actor -> postprocessors"
 as well as to define `context_storage` and `messenger_interface`.
+Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script`
+and handles it. It is responsible for processing user input and determining
+the appropriate response based on the current state of the conversation and the script.
 These parameters usage will be shown in examples 2, 3 and 6.
 
 Here only required parameters are provided to pipeline.
