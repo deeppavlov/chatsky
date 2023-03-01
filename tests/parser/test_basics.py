@@ -1,7 +1,7 @@
 import ast
 from sys import version_info
 
-from dff.utils.parser.base_parser_object import Dict, expr, Expression, Python, Import, Attribute, Subscript, Call
+from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.dff_project import DFFProject
 

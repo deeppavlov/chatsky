@@ -184,7 +184,7 @@ class BaseParserObject(ABC):
         ...
 
 
-class stmt(BaseParserObject, ABC):
+class Statement(BaseParserObject, ABC):
     """
     This class is for nodes that represent
     [:py:class:`ast.stmt`](https://docs.python.org/3.10/library/ast.html#statements)
@@ -192,35 +192,26 @@ class stmt(BaseParserObject, ABC):
     def __init__(self):
         BaseParserObject.__init__(self)
         self.parent: tp.Optional[Namespace] = None
-        self.children: tp.Dict[str, expr] = {}
+        self.children: tp.Dict[str, Expression] = {}
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional[tp.Union[tp.Mapping[str, 'stmt'], 'Python']]:
-        ...
-
-
-class Statement(stmt):
-    """
-    A constructor for :py:class:`.stmt` objects
-    """
-    def __init__(self):
-        BaseParserObject.__init__(self)
-        self.parent: tp.Optional[Namespace] = None
-        self.children: tp.Dict[str, expr] = {}
-
-    @classmethod
-    @tp.overload
-    def from_ast(cls, node: ast.stmt, **kwargs) -> tp.Union[tp.Mapping[str, 'stmt'], 'Python']:  # type: ignore
+    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional[tp.Union[tp.Mapping[str, 'Statement'], 'Python']]:
         ...
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> None:
+    def auto(cls, node: ast.stmt, **kwargs) -> tp.Union[tp.Mapping[str, 'Statement'], 'Python']:  # type: ignore
         ...
 
     @classmethod
-    def from_ast(cls, node, **kwargs):
+    @tp.overload
+    def auto(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> None:
+        ...
+
+    @classmethod
+    def auto(cls, node, **kwargs):
+        """Construct a statement automatically choosing the correct type."""
         if not isinstance(node, ast.stmt):
             return None
         for _cls in (Import, ImportFrom, Assignment, Python):
@@ -230,56 +221,44 @@ class Statement(stmt):
         raise RuntimeError(node)
 
 
-class expr(BaseParserObject, ABC):
+class Expression(BaseParserObject, ABC):
     """
     This class is for nodes that represent
     [:py:class:`ast.expr`](https://docs.python.org/3.10/library/ast.html#expressions)
     """
     def __init__(self):
         BaseParserObject.__init__(self)
-        self.parent: tp.Optional[tp.Union[stmt, expr]] = None
-        self.children: tp.Dict[str, 'expr'] = {}
+        self.parent: tp.Optional[tp.Union[Statement, Expression]] = None
+        self.children: tp.Dict[str, 'Expression'] = {}
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node: ast.expr, **kwargs) -> tp.Optional['expr']:
+    def from_ast(cls, node: ast.expr, **kwargs) -> tp.Optional['Expression']:
         ...
 
-
-class Expression(expr):
-    """
-    A constructor for :py:class:`.expr` objects
-    """
-    def __init__(self):
-        BaseParserObject.__init__(self)
-        self.parent: tp.Optional[tp.Union[stmt, expr]] = None
-        self.children: tp.Dict[str, 'expr'] = {}
-
     @classmethod
-    def from_str(cls, string: str) -> 'expr':  # todo: add `from_object` method
+    def from_str(cls, string: str) -> 'Expression':  # todo: add `from_object` method
         body = ast.parse(string).body
         if len(body) != 1:
             raise ParsingError(f"Body should contain only one expression: {string}")
         statement = body[0]
         if not isinstance(statement, ast.Expr):
             raise ParsingError(f"Body should contain only expressions: {string}")
-        return cls.from_ast(statement.value)
+        return cls.auto(statement.value)
 
     @classmethod
-    @abstractmethod
     @tp.overload
-    def from_ast(cls, node: ast.expr, **kwargs) -> 'expr':  # type: ignore
+    def auto(cls, node: ast.expr, **kwargs) -> 'Expression':  # type: ignore
         ...
 
     @classmethod
-    @abstractmethod
     @tp.overload
-    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> None:
+    def auto(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> None:
         ...
 
     @classmethod
-    @abstractmethod
-    def from_ast(cls, node, **kwargs):
+    def auto(cls, node, **kwargs):
+        """Construct an expression automatically choosing the correct type."""
         if not isinstance(node, ast.expr):
             return None
         for _cls in (Comprehension, Call, Iterable, Subscript, Name, Attribute, Dict, String, Python):
@@ -353,14 +332,14 @@ def module_name_to_expr(module_name: tp.List[str]) -> tp.Union['Name', 'Attribut
     return result
 
 
-class Import(stmt, ReferenceObject):
+class Import(Statement, ReferenceObject):
     """
     This class if for nodes that represent
     [:py:class:`ast.Import`](https://docs.python.org/3.10/library/ast.html#ast.Import)
     """
     def __init__(self, module: str, alias: tp.Optional[str] = None):
         ReferenceObject.__init__(self)
-        stmt.__init__(self)
+        Statement.__init__(self)
         self.module = module
         self.alias = alias
 
@@ -400,14 +379,14 @@ class Import(stmt, ReferenceObject):
         return result
 
 
-class ImportFrom(stmt, ReferenceObject):
+class ImportFrom(Statement, ReferenceObject):
     """
     This class if for nodes that represent
     [:py:class:`ast.ImportFrom`](https://docs.python.org/3.10/library/ast.html#ast.ImportFrom)
     """
     def __init__(self, module: str, level: int, obj: str, alias: tp.Optional[str] = None):
         ReferenceObject.__init__(self)
-        stmt.__init__(self)
+        Statement.__init__(self)
         self.module = module
         self.level = level
         self.obj = obj
@@ -466,13 +445,13 @@ class ImportFrom(stmt, ReferenceObject):
         return result
 
 
-class Assignment(stmt):
+class Assignment(Statement):
     """
     This class if for nodes that represent
     [:py:class:`ast.Assign`](https://docs.python.org/3.10/library/ast.html#ast.Assign) or
     [:py:class:`ast.AnnAssign`](https://docs.python.org/3.10/library/ast.html#ast.AnnAssign)
     """
-    def __init__(self, target: expr, value: expr):
+    def __init__(self, target: Expression, value: Expression):
         super().__init__()
         self.add_child(target, "target")
         self.add_child(value, "value")
@@ -494,10 +473,10 @@ class Assignment(stmt):
     def from_ast(cls, node, **kwargs):
         if isinstance(node, ast.Assign):
             result = {}
-            target = Expression.from_ast(node.targets[-1])
-            value = Expression.from_ast(node.value)
+            target = Expression.auto(node.targets[-1])
+            value = Expression.auto(node.value)
             result[str(target)] = cls(target=target, value=value)
-            for new_target in map(Expression.from_ast, node.targets[:-1]):
+            for new_target in map(Expression.auto, node.targets[:-1]):
                 # todo: add support for tuple targets
                 result[str(new_target)] = cls(target=new_target, value=target)
             return result
@@ -506,14 +485,14 @@ class Assignment(stmt):
             if node.value is None:
                 logger.warning(f"Assignment has no value: {unparse(node)}")
                 return None
-            target = Expression.from_ast(node.target)
-            value = Expression.from_ast(node.value)
+            target = Expression.auto(node.target)
+            value = Expression.auto(node.value)
             result[str(target)] = cls(target=target, value=value)
             return result
         return None
 
 
-class String(expr):
+class String(Expression):
     """
     This class is for nodes that represent
     [:py:class:`ast.Str`](https://docs.python.org/3.7/library/ast.html#abstract-grammar) or
@@ -546,22 +525,22 @@ class String(expr):
         return None
 
 
-class Python(expr, stmt):  # type: ignore
+class Python(Expression, Statement):  # type: ignore
     """
     This class is for nodes that cannot be represented by any other classes. It's children contain direct children
     as well as children inside iterable fields.
     """
     def __init__(self, node: tp.Union[ast.expr, ast.stmt]):
-        expr.__init__(self)
-        stmt.__init__(self)
-        self.parent: tp.Optional[tp.Union[Namespace, stmt, expr]] = None  # type: ignore
+        Expression.__init__(self)
+        Statement.__init__(self)
+        self.parent: tp.Optional[tp.Union[Namespace, Statement, Expression]] = None  # type: ignore
         for key, value in node.__dict__.items():
             if isinstance(value, ast.expr):
-                self.add_child(Expression.from_ast(value), key)
+                self.add_child(Expression.auto(value), key)
             elif isinstance(value, tp.Iterable):
                 for index, child in enumerate(value):
                     if isinstance(child, ast.expr):
-                        self.add_child(Expression.from_ast(child), key + "_" + str(index))
+                        self.add_child(Expression.auto(child), key + "_" + str(index))
         if unparse.__module__ == "astunparse":
             self.string = remove_prefix(remove_suffix(unparse(node), "\n"), "\n")
             # astunparse.unparse adds "\n"
@@ -591,21 +570,21 @@ class Python(expr, stmt):  # type: ignore
         return cls(node)
 
 
-class Dict(expr):
+class Dict(Expression):
     """
     This class if for nodes that represent
     [:py:class:`ast.Dict`](https://docs.python.org/3.10/library/ast.html#ast.Dict)
     """
-    def __init__(self, keys: tp.List[expr], values: tp.List[expr]):
+    def __init__(self, keys: tp.List[Expression], values: tp.List[Expression]):
         super().__init__()
-        self.__keys: tp.List[tp.Tuple[expr, str]] = []
+        self.__keys: tp.List[tp.Tuple[Expression, str]] = []
         for key, value in zip(keys, values):
             self.__keys.append((key, str(key)))
             self.add_child(key, self._key(key))
             self.add_child(value, self._value(key))
 
     @staticmethod
-    def _key(str_key: tp.Union[expr, str]) -> str:
+    def _key(str_key: tp.Union[Expression, str]) -> str:
         """Get a name which is used to store a child that is a key in the dictionary
 
         :param str_key: An object or a string representation of an object.
@@ -617,7 +596,7 @@ class Dict(expr):
         return "key_" + str_key
 
     @staticmethod
-    def _value(str_value: tp.Union[expr, str]) -> str:
+    def _value(str_value: tp.Union[Expression, str]) -> str:
         """Get a name which is used to store a child that is a value in the dictionary
 
         :param str_value: An object or a string representation of an object.
@@ -641,7 +620,7 @@ class Dict(expr):
             return child_name[len("key_"):]
         return child_name
 
-    def key_by_value(self, value: expr) -> expr:
+    def key_by_value(self, value: Expression) -> Expression:
         """Get a key by the value
 
         :param value: Value stored in a dictionary
@@ -652,26 +631,26 @@ class Dict(expr):
             raise RuntimeError(f"Value does not have a parent: {value}")
         return self.children[self._key(self._clear(child_name))]
 
-    def keys(self) -> tp.Iterator[expr]:
+    def keys(self) -> tp.Iterator[Expression]:
         """An iterator over keys in the dictionary
         """
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)]
 
-    def values(self) -> tp.Iterator[expr]:
+    def values(self) -> tp.Iterator[Expression]:
         """An iterator over values in the dictionary
         """
         for _, key_str in self.__keys:
             yield self.children[self._value(key_str)]
 
-    def items(self) -> tp.Iterator[tp.Tuple[expr, expr]]:
+    def items(self) -> tp.Iterator[tp.Tuple[Expression, Expression]]:
         """An iterator over tuples of keys and values in the dictionary
         """
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)], self.children[self._value(key_str)]
 
     @cached_property
-    def _keys(self) -> tp.Dict[expr, str]:
+    def _keys(self) -> tp.Dict[Expression, str]:
         """A mapping from dictionary keys to their string representations
         """
         result = {}
@@ -697,7 +676,7 @@ class Dict(expr):
                 ["{", *items, "}"]
             )
 
-    def __getitem__(self, item: tp.Union[expr, str]) -> expr:
+    def __getitem__(self, item: tp.Union[Expression, str]) -> Expression:
         """Get value in the dictionary
 
         :param item: Either a key or a string representation of a key
@@ -707,7 +686,7 @@ class Dict(expr):
         :raises KeyError:
             If the key is not in the dictionary
         """
-        if isinstance(item, expr):
+        if isinstance(item, Expression):
             key = self._keys[item]
             return self.children[self._value(key)]
         elif isinstance(item, str):
@@ -733,18 +712,18 @@ class Dict(expr):
         for key, value in zip(node.keys, node.values):
             if key is None:
                 raise StarError(f"Dict unpacking is not supported: {unparse(node)}")
-            keys.append(Expression.from_ast(key))
-            values.append(Expression.from_ast(value))
+            keys.append(Expression.auto(key))
+            values.append(Expression.auto(value))
         return cls(keys, values)
 
 
-class Name(expr, ReferenceObject):
+class Name(Expression, ReferenceObject):
     """
     This class if for nodes that represent
     [:py:class:`ast.Name`](https://docs.python.org/3.10/library/ast.html#ast.Name)
     """
     def __init__(self, name: str):
-        expr.__init__(self)
+        Expression.__init__(self)
         ReferenceObject.__init__(self)
         self.name = name
 
@@ -783,13 +762,13 @@ class Name(expr, ReferenceObject):
         return cls(node.id)
 
 
-class Attribute(expr, ReferenceObject):
+class Attribute(Expression, ReferenceObject):
     """
     This class if for nodes that represent
     [:py:class:`ast.Attribute`](https://docs.python.org/3.10/library/ast.html#ast.Attribute)
     """
-    def __init__(self, value: expr, attr: str):
-        expr.__init__(self)
+    def __init__(self, value: Expression, attr: str):
+        Expression.__init__(self)
         ReferenceObject.__init__(self)
         self.add_child(value, "value")
         self.attr = attr
@@ -830,16 +809,16 @@ class Attribute(expr, ReferenceObject):
     def from_ast(cls, node, **kwargs):
         if not isinstance(node, ast.Attribute):
             return None
-        return cls(Expression.from_ast(node.value), node.attr)
+        return cls(Expression.auto(node.value), node.attr)
 
 
-class Subscript(expr, ReferenceObject):
+class Subscript(Expression, ReferenceObject):
     """
     This class if for nodes that represent
     [:py:class:`ast.Subscript`](https://docs.python.org/3.10/library/ast.html#ast.Subscript)
     """
-    def __init__(self, value: expr, index: expr):
-        expr.__init__(self)
+    def __init__(self, value: Expression, index: Expression):
+        Expression.__init__(self)
         ReferenceObject.__init__(self)
         self.add_child(value, "value")
         self.add_child(index, "index")
@@ -885,7 +864,7 @@ class Subscript(expr, ReferenceObject):
     def from_ast(cls, node, **kwargs):
         if not isinstance(node, ast.Subscript):
             return None
-        value = Expression.from_ast(node.value)
+        value = Expression.auto(node.value)
         # todo: remove the right part when python3.8 support is dropped
         if isinstance(node.slice, ast.Slice) or is_instance(node.slice, "_ast.ExtSlice"):
             raise RuntimeError(f"Slices are not supported: {unparse(node)}")
@@ -893,10 +872,10 @@ class Subscript(expr, ReferenceObject):
         # todo: remove this when python3.8 support is dropped
         if is_instance(index, "_ast.Index"):
             index = index.value
-        return cls(value, Expression.from_ast(index))
+        return cls(value, Expression.auto(index))
 
 
-class Iterable(expr):
+class Iterable(Expression):
     """
     This class if for nodes that represent
     [:py:class:`ast.Tuple`](https://docs.python.org/3.10/library/ast.html#ast.Tuple),
@@ -908,9 +887,9 @@ class Iterable(expr):
         TUPLE = ("(", ")")
         SET = ("{", "}")
 
-    def __init__(self, iterable: tp.Iterable[expr], iterable_type: Type):
-        expr.__init__(self)
-        self.children: tp.Dict[str, expr]
+    def __init__(self, iterable: tp.Iterable[Expression], iterable_type: Type):
+        Expression.__init__(self)
+        self.children: tp.Dict[str, Expression]
         self.type: Iterable.Type = iterable_type
         """Type of the iterable"""
         for index, value in enumerate(iterable):
@@ -922,7 +901,7 @@ class Iterable(expr):
     def __len__(self):
         return len(self.children)
 
-    def __getitem__(self, item: tp.Union[expr, str, int]) -> expr:
+    def __getitem__(self, item: tp.Union[Expression, str, int]) -> Expression:
         if isinstance(item, str):
             return self.children[item]
         elif isinstance(item, int):
@@ -949,7 +928,7 @@ class Iterable(expr):
             return None
         result = []
         for item in node.elts:
-            result.append(Expression.from_ast(item))
+            result.append(Expression.auto(item))
         if isinstance(node, ast.Tuple):
             iterable_type = Iterable.Type.TUPLE
         elif isinstance(node, ast.List):
@@ -959,13 +938,13 @@ class Iterable(expr):
         return cls(result, iterable_type)
 
 
-class Call(expr):
+class Call(Expression):
     """
     This class if for nodes that represent
     [:py:class:`ast.Call`](https://docs.python.org/3.10/library/ast.html#ast.Call)
     """
-    def __init__(self, func: expr, args: tp.List[expr], keywords: tp.Dict[str, expr]):
-        expr.__init__(self)
+    def __init__(self, func: Expression, args: tp.List[Expression], keywords: tp.Dict[str, Expression]):
+        Expression.__init__(self)
         self.add_child(func, "func")
         for index, arg in enumerate(args):
             self.add_child(arg, "arg_" + str(index))
@@ -979,7 +958,7 @@ class Call(expr):
         :param func_args: Full argument specification of the function.
         :type func_args:
             [:py:class:`inspect.FullArgSpec`](https://docs.python.org/3/library/inspect.html#inspect.getfullargspec)
-        :return: A mapping from argument names to their values (represented by :py:class:`.expr`)
+        :return: A mapping from argument names to their values (represented by :py:class:`.Expression`)
         """
         result = {}
         if len(func_args.args) > 0 and func_args.args[0] in ("self", "cls"):
@@ -1036,17 +1015,17 @@ class Call(expr):
     def from_ast(cls, node, **kwargs):
         if not isinstance(node, ast.Call):
             return None
-        func = Expression.from_ast(node.func)
+        func = Expression.auto(node.func)
         args = []
         keywords = {}
         for arg in node.args:
             if isinstance(arg, ast.Starred):
                 raise StarError(f"Starred calls are not supported: {unparse(node)}")
-            args.append(Expression.from_ast(arg))
+            args.append(Expression.auto(arg))
         for keyword in node.keywords:
             if keyword.arg is None:
                 raise StarError(f"Starred calls are not supported: {unparse(node)}")
-            keywords[str(keyword.arg)] = Expression.from_ast(keyword.value)
+            keywords[str(keyword.arg)] = Expression.auto(keyword.value)
         return cls(func, args, keywords)
 
 
@@ -1055,7 +1034,7 @@ class Generator(BaseParserObject):
     This class if for nodes that represent
     [:py:class:`ast.comprehension`](https://docs.python.org/3.10/library/ast.html#ast.comprehension)
     """
-    def __init__(self, target: expr, iterator: expr, ifs: tp.List[expr], is_async: bool):
+    def __init__(self, target: Expression, iterator: Expression, ifs: tp.List[Expression], is_async: bool):
         BaseParserObject.__init__(self)
         self.add_child(target, "target")
         self.add_child(iterator, "iter")
@@ -1082,14 +1061,14 @@ class Generator(BaseParserObject):
         if not isinstance(node, ast.comprehension):
             return None
         return cls(
-            target=Expression.from_ast(node.target),
-            iterator=Expression.from_ast(node.iter),
-            ifs=[Expression.from_ast(if_expr) for if_expr in node.ifs],
+            target=Expression.auto(node.target),
+            iterator=Expression.auto(node.iter),
+            ifs=[Expression.auto(if_expr) for if_expr in node.ifs],
             is_async=node.is_async == 1,
         )
 
 
-class Comprehension(expr):
+class Comprehension(Expression):
     """
     This class if for nodes that represent
     [:py:class:`ast.DictComp`](https://docs.python.org/3.10/library/ast.html#ast.DictComp),
@@ -1105,11 +1084,11 @@ class Comprehension(expr):
 
     def __init__(
         self,
-        element: tp.Union[expr, tp.Tuple[expr, expr]],
+        element: tp.Union[Expression, tp.Tuple[Expression, Expression]],
         generators: tp.List[Generator],
         comp_type: Type,
     ):
-        expr.__init__(self)
+        Expression.__init__(self)
         if isinstance(element, tuple):
             if comp_type is not Comprehension.Type.DICT:
                 raise RuntimeError(comp_type)
@@ -1149,7 +1128,7 @@ class Comprehension(expr):
         gens = [Generator.from_ast(gen) for gen in node.generators]
         if isinstance(node, ast.DictComp):
             return cls(
-                (Expression.from_ast(node.key), Expression.from_ast(node.value)),
+                (Expression.auto(node.key), Expression.auto(node.value)),
                 gens,
                 Comprehension.Type.DICT,
             )
@@ -1160,7 +1139,7 @@ class Comprehension(expr):
         elif isinstance(node, ast.GeneratorExp):
             comp_type = Comprehension.Type.GEN
         return cls(
-            Expression.from_ast(node.elt),
+            Expression.auto(node.elt),
             gens,
             comp_type,
         )

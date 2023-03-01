@@ -13,7 +13,7 @@ try:
 except ImportError:
     raise ImportError(f"Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
-from .base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, expr, Dict, String, Iterable, Statement, Python
+from .base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable, Statement, Python
 from .namespace import Namespace
 from .exceptions import ScriptValidationError, ParsingError
 from .yaml import yaml
@@ -131,9 +131,9 @@ class DFFProject(BaseParserObject):
         raise ScriptValidationError("Script Initialization call is not found (use either `Actor` or `Pipeline.from_script`")
 
     @cached_property
-    def script(self) -> tp.Tuple[expr, tp.Tuple[expr, expr], tp.Tuple[expr, expr]]:
+    def script(self) -> tp.Tuple[Expression, tp.Tuple[Expression, Expression], tp.Tuple[Expression, Expression]]:
         call = self.actor_call
-        args: tp.Dict[str, tp.Optional[expr]] = call.get_args(script_initializers[call.func_name])
+        args: tp.Dict[str, tp.Optional[Expression]] = call.get_args(script_initializers[call.func_name])
         script = args.get("script")
         start_label = args.get("start_label")
         fallback_label = args.get("fallback_label")
@@ -181,7 +181,7 @@ class DFFProject(BaseParserObject):
         """
         script = defaultdict(dict)
 
-        def resolve_node(node_info: expr) -> tp.Dict[str, BaseParserObject]:
+        def resolve_node(node_info: Expression) -> tp.Dict[str, BaseParserObject]:
             result = {}
             node_info = node_info.resolve
             if not isinstance(node_info, Dict):
@@ -232,7 +232,7 @@ class DFFProject(BaseParserObject):
 
     @cached_property
     def graph(self) -> nx.MultiDiGraph:
-        def resolve_label(label: expr, current_flow: expr) -> tuple:
+        def resolve_label(label: Expression, current_flow: Expression) -> tuple:
             if isinstance(label,  ReferenceObject):  # label did not resolve (possibly due to a missing func def)
                 return ("NONE", )
             if isinstance(label, String):
@@ -304,7 +304,7 @@ class DFFProject(BaseParserObject):
                 return processed_dict
             if isinstance(bpo, String):
                 return str(bpo)
-            if isinstance(bpo, expr):
+            if isinstance(bpo, Expression):
                 return str(bpo)
             raise TypeError(str(type(bpo)) + "_" + repr(bpo))
 
@@ -421,7 +421,7 @@ class DFFProject(BaseParserObject):
                 with open(file, "r", encoding="utf-8") as fd:
                     parsed_file = ast.parse(fd.read())
                 for statement in parsed_file.body:
-                    statements = Statement.from_ast(statement)
+                    statements = Statement.auto(statement)
                     if isinstance(statements, dict):
                         for obj_name, obj in statements.items():
                             if names.get(obj_name) is not None:

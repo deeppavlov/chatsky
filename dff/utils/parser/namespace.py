@@ -7,7 +7,7 @@ import typing as tp
 import ast
 from pathlib import Path
 
-from .base_parser_object import BaseParserObject, cached_property, stmt, Statement, Assignment, Import, ImportFrom, Python
+from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom, Python
 
 if tp.TYPE_CHECKING:
     from dff.utils.parser.dff_project import DFFProject
@@ -17,9 +17,9 @@ class Namespace(BaseParserObject):
     """
     This class represents a python file (all the objects defined in it + its location).
     """
-    def __init__(self, location: tp.List[str], names: tp.Dict[str, stmt]):
+    def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
         super().__init__()
-        self.children: tp.Dict[str, stmt] = {}
+        self.children: tp.Dict[str, Statement] = {}
         self.location: tp.List[str] = location
         """Location of the file (as a list of path extensions from `project_root_dir`)"""
         self.name: str = ".".join(location)
@@ -76,7 +76,7 @@ class Namespace(BaseParserObject):
         return obj
 
     @staticmethod
-    def dump_statements(statements: tp.List[stmt]) -> str:
+    def dump_statements(statements: tp.List[Statement]) -> str:
         """A method for dumping a list of statements. Inserts newlines between statements in the following amount:
             - If any of the two neighboring statements is `Def` -- 3 new lines
             - If both neighboring statements are :py:class:`~.Import` or :py:class:`.~ImportFrom` -- 1 new line
@@ -85,7 +85,7 @@ class Namespace(BaseParserObject):
         :param statements: A list of statements to dump
         :return: Dumps of the statements separated by an appropriate amount of new lines
         """
-        def get_newline_count(statement: stmt):
+        def get_newline_count(statement: Statement):
             if isinstance(statement, (Import, ImportFrom)):
                 return 1
             if isinstance(statement, Python) and statement.type.endswith("Def"):  # function and class defs
@@ -120,7 +120,7 @@ class Namespace(BaseParserObject):
     def from_ast(cls, node: ast.Module, **kwargs) -> 'Namespace':
         children = {}
         for statement in node.body:
-            statements = Statement.from_ast(statement)
+            statements = Statement.auto(statement)
             if isinstance(statements, dict):
                 children.update(statements)
         return cls(names=children, **kwargs)
