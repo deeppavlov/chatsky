@@ -144,14 +144,22 @@ def setup(_):
     generate_example_links_for_notebook_creation(
         [
             ("examples.context_storages", "Context Storages"),
-            ("examples.messengers", "Messengers", [
-                ("telegram", "Telegram"),
-            ]),
+            (
+                "examples.messengers",
+                "Messengers",
+                [
+                    ("telegram", "Telegram"),
+                ],
+            ),
             ("examples.pipeline", "Pipeline"),
-            ("examples.script", "Script", [
-                ("core", "Core"),
-                ("responses", "Responses"),
-            ]),
+            (
+                "examples.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
             ("examples.utils", "Utils"),
         ]
     )
