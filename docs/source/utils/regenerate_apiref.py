@@ -58,8 +58,8 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
             doc_file.unlink()
             continue
         else:
-            container_filename = container.replace(" ", "_").lower()
-            doc_containers[container_filename] = container, doc_containers.get(container_filename, ("", list()))[1] + [doc_file]
+            filename = container.replace(" ", "_").lower()
+            doc_containers[filename] = container, doc_containers.get(filename, ("", list()))[1] + [doc_file]
 
         with open(doc_file, "r+") as file:
             contents = file.read()

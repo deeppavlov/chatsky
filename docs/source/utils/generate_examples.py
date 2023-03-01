@@ -29,7 +29,11 @@ def generate_nb_gallery(package: str, files: List[Path]) -> str:
 """
 
 
-def create_index_file(included: Union[Tuple[str, str], Tuple[str, List[Tuple[str, str]]]], files: List[Path], destination: Path):
+def create_index_file(
+    included: Union[Tuple[str, str], Tuple[str, List[Tuple[str, str]]]],
+    files: List[Path],
+    destination: Path
+):
     """
     Create a package index file.
     Contains a nbgalleries of files inside the package (and subpackages).
