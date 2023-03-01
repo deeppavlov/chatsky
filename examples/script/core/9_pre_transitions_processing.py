@@ -29,7 +29,7 @@ from dff.utils.testing.common import (
 
 # %%
 def save_previous_node_response_to_ctx_processing(
-    ctx: Context, liplne: Pipeline, *args, **kwargs
+    ctx: Context, _: Pipeline, *args, **kwargs
 ) -> Context:
     processed_node = ctx.current_node
     ctx.misc["previous_node_response"] = processed_node.response
@@ -37,7 +37,7 @@ def save_previous_node_response_to_ctx_processing(
 
 
 def get_previous_node_response_for_response_processing(
-    ctx: Context, pl: Pipeline, *args, **kwargs
+    ctx: Context, _: Pipeline, *args, **kwargs
 ) -> Context:
     processed_node = ctx.current_node
     processed_node.response = Message(
