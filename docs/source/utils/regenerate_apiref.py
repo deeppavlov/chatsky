@@ -3,7 +3,7 @@ from pathlib import Path
 from typing import List, Optional, Tuple, Dict
 
 
-def generate_doc_container(file: Path, includes: List[Path]):
+def generate_doc_container(file: Path, alias: str, includes: List[Path]):
     """
     Generates source files index.
     The generated file contains a toctree of included files.
@@ -11,20 +11,19 @@ def generate_doc_container(file: Path, includes: List[Path]):
     It is also has maximum depth of 1 (only filenames) and includes titles only.
 
     :param file: Path to directory index file (file name will be prefixed 'index_').
+    :param alias: Module name alias.
     :param includes: List of the files to include into the directory, should be sorted previously.
     """
-    title = file.stem
     sources = "\n   ".join(str(include.stem) for include in includes)
     contents = f""":orphan:
 
 .. This is an auto-generated RST file representing documentation source directory structure
 
-{title}
-{"=" * len(title)}
+{alias}
+{"=" * len(alias)}
 
-.. toctree::
-   :maxdepth: 1
-   :titlesonly:
+.. autosummary::
+   :toctree:
 
    {sources}
 """
@@ -45,8 +44,8 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
     :param destination: Apiref root path, default: apiref.
     """
     paths = list() if paths is None else paths
-    source = Path(f"./docs/source/{destination.lower().replace(' ', '_')}")
-    doc_containers: Dict[str, List[Path]] = dict()
+    source = Path(f"./docs/source/{destination}")
+    doc_containers: Dict[str, Tuple[str, List[Path]]] = dict()
 
     for doc_file in iter(source.glob("./*.rst")):
         contents = doc_file.read_text()
@@ -59,11 +58,12 @@ def regenerate_apiref(paths: Optional[List[Tuple[str, str]]] = None, destination
             doc_file.unlink()
             continue
         else:
-            doc_containers[container] = doc_containers.get(container, list()) + [doc_file]
+            container_filename = container.replace(" ", "_").lower()
+            doc_containers[container_filename] = container, doc_containers.get(container_filename, ("", list()))[1] + [doc_file]
 
         with open(doc_file, "r+") as file:
             contents = file.read()
             doc_file.write_text(f":source_name: {join(*doc_file.stem.split('.'))}\n\n{contents}")
 
-    for name, files in doc_containers.items():
-        generate_doc_container(source / Path(f"{name}.rst"), files)
+    for name, (alias, files) in doc_containers.items():
+        generate_doc_container(source / Path(f"{name}.rst"), alias, files)

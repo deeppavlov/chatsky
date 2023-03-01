@@ -27,6 +27,7 @@ release = "0.3.2"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -81,6 +82,8 @@ html_theme = "pydata_sphinx_theme"
 html_static_path = ["_static"]
 
 html_show_sourcelink = False
+
+autosummary_generate_overwrite = False
 
 
 # Finding examples directories
