@@ -2,21 +2,21 @@ import os
 import sys
 import re
 
-from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
-
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import add_installation_cell_into_py  # noqa: E402
+from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
+from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-project = "Dialog Flow Framework"
-copyright = "2021, Denis Kuznetsov"
-author = "Denis Kuznetsov"
+project = "DFF"
+copyright = "2023, DeepPavlov"
+author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.1.0rc0"
+release = "0.3.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -73,53 +73,85 @@ sphinx_gallery_conf = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "dff_sphinx_theme"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": add_installation_cell_into_py}
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
-:tutorial_path: \\.
-:github_url: deeppavlov/dialog_flow_framework
 """
+
+html_context = {
+    "github_user": "deeppavlov",
+    "github_repo": "dialog_flow_framework",
+    "github_version": "dev",
+    "doc_path": "docs/source",
+}
+
+html_css_files = [
+    "css/custom.css",
+]
 
 # Theme options
 html_theme_options = {
-    "logo_only": True,
-    "tab_intro_dff": "#",
-    "tab_intro_addons": "#",
-    "tab_intro_designer": "#",
-    "tab_get_started": "#",
-    "tab_tutorials": "#",
-    # Matches ROOT tag, should be ONE PER MODULE, other tabs = other modules (may be relative paths)
-    "tab_documentation": "./",
-    "tab_ecosystem": "#",
-    "tab_about_us": "#",
+    "header_links_before_dropdown": 7,
+    "icon_links": [
+        {
+            "name": "DeepPavlov Forum",
+            "url": "https://forum.deeppavlov.ai",
+            "icon": "_static/images/logo-deeppavlov.svg",
+            "type": "local",
+        },
+        {
+            "name": "Telegram",
+            "url": "https://t.me/DeepPavlovDreamDiscussions",
+            "icon": "fa-brands fa-telegram",
+            "type": "fontawesome",
+        },
+        {
+            "name": "GitHub",
+            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+    ],
+    "favicons": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "href": "images/logo-dff.svg",
+        },
+    ],
+    "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
+
+
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
 
 
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/script/*.py",
-            "examples/pipeline/*.py",
             "examples/context_storages/*.py",
             "examples/messengers/*.py",
+            "examples/pipeline/*.py",
+            "examples/script/*.py",
+            "examples/utils/*.py",
         ]
     )
     regenerate_apiref(
         [
-            ("dff.context_storages", "context_storages"),
-            ("dff.messengers", "messenger_interfaces"),
-            ("dff.script", "script"),
-            ("dff.pipeline", "pipeline"),
+            ("dff.context_storages", "Context Storages"),
+            ("dff.messengers", "Messenger Interfaces"),
+            ("dff.pipeline", "Pipeline"),
+            ("dff.script", "Script"),
         ]
     )

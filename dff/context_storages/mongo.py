@@ -1,16 +1,27 @@
 """
-mongo
----------------------------
-Provides the mongo-based version of the :py:class:`.DBContextStorage`.
+Mongo
+-----
+The Mongo module provides a MongoDB-based version of the :py:class:`.DBContextStorage` class.
+This class is used to store and retrieve context data in a MongoDB.
+It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+and easy to work with.
+
+MongoDB is a widely-used, open-source NoSQL database that is known for its scalability and performance.
+It stores data in a format similar to JSON, making it easy to work with the data in a variety of programming languages
+and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
+and high levels of read and write traffic.
 """
+from typing import Hashable, Dict, Any
 
 try:
+    from motor.motor_asyncio import AsyncIOMotorClient
     from bson.objectid import ObjectId
-    from pymongo import MongoClient
 
     mongo_available = True
 except ImportError:
     mongo_available = False
+    AsyncIOMotorClient = None
+    ObjectId = Any
 
 import json
 
@@ -24,26 +35,21 @@ class MongoContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
-    Parameters
-    -----------
-
-    path: str
-        Database URI. Example: 'mongodb://user:password@host:port/dbname'
-    collection: str
-        Name of the collection to store the data in.
+    :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
+    :param collection: Name of the collection to store the data in.
     """
 
     def __init__(self, path: str, collection: str = "context_collection"):
-        super(MongoContextStorage, self).__init__(path)
+        DBContextStorage.__init__(self, path)
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
-        self._mongo = MongoClient(self.full_path)
+        self._mongo = AsyncIOMotorClient(self.full_path)
         db = self._mongo.get_default_database()
         self.collection = db[collection]
 
     @staticmethod
-    def _adjust_key(key: str):
+    def _adjust_key(key: Hashable) -> Dict[str, ObjectId]:
         """Convert a n-digit context id to a 24-digit mongo id"""
         new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
         new_key = (new_key * (24 // len(new_key) + 1))[:24]
@@ -51,18 +57,18 @@ class MongoContextStorage(DBContextStorage):
         return {"_id": ObjectId(new_key)}
 
     @threadsafe_method
-    def __setitem__(self, key: str, value: Context) -> None:
+    async def set_item_async(self, key: Hashable, value: Context):
         new_key = self._adjust_key(key)
         value = value if isinstance(value, Context) else Context.cast(value)
         document = json.loads(value.json())
 
         document.update(new_key)
-        self.collection.replace_one(new_key, document, upsert=True)
+        await self.collection.replace_one(new_key, document, upsert=True)
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
+    async def get_item_async(self, key: Hashable) -> Context:
         adjust_key = self._adjust_key(key)
-        document = self.collection.find_one(adjust_key)
+        document = await self.collection.find_one(adjust_key)
         if document:
             document.pop("_id")
             ctx = Context.cast(document)
@@ -70,19 +76,19 @@ class MongoContextStorage(DBContextStorage):
         raise KeyError
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
+    async def del_item_async(self, key: Hashable):
         adjust_key = self._adjust_key(key)
-        self.collection.delete_one(adjust_key)
+        await self.collection.delete_one(adjust_key)
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
+    async def contains_async(self, key: Hashable) -> bool:
         adjust_key = self._adjust_key(key)
-        return bool(self.collection.find_one(adjust_key))
+        return bool(await self.collection.find_one(adjust_key))
 
     @threadsafe_method
-    def __len__(self) -> int:
-        return self.collection.estimated_document_count()
+    async def len_async(self) -> int:
+        return await self.collection.estimated_document_count()
 
     @threadsafe_method
-    def clear(self) -> None:
-        self.collection.delete_many(dict())
+    async def clear_async(self):
+        await self.collection.delete_many(dict())

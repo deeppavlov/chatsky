@@ -21,7 +21,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 
 # %%
-db_uri = "mysql+pymysql://{}:{}@localhost:3307/{}".format(
+db_uri = "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
     os.getenv("MYSQL_USERNAME"),
     os.getenv("MYSQL_PASSWORD"),
     os.getenv("MYSQL_DATABASE"),

@@ -2,7 +2,7 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import RESPONSE, TRANSITIONS
+from dff.script import RESPONSE, TRANSITIONS, Message
 from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
@@ -10,16 +10,22 @@ import dff.script.conditions as cnd
 SCRIPT = {
     "pingpong_flow": {
         "start_node": {
-            RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
+            RESPONSE: {
+                "text": "",
+            },
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Ping"))},
         },
         "node1": {
-            RESPONSE: "Pong",
-            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
+            RESPONSE: {
+                "text": "Pong",
+            },
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Ping"))},
         },
         "fallback_node": {
-            RESPONSE: "Ooops",
-            TRANSITIONS: {"node1": cnd.exact_match("Ping")},
+            RESPONSE: {
+                "text": "Ooops",
+            },
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Ping"))},
         },
     }
 }
@@ -58,4 +64,4 @@ def test_callback_messenger_interface(monkeypatch):
     asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline))
 
     for _ in range(0, 5):
-        assert interface.on_request("Ping", 0).last_response == "Pong"
+        assert interface.on_request(Message(text="Ping"), 0).last_response == Message(text="Pong")

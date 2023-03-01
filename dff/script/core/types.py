@@ -1,7 +1,10 @@
 """
 Types
----------------------------
-Basic types are defined here.
+-----
+The Types module contains a set of basic data types that
+are used to define the expected input and output of various components of the framework.
+The types defined in this module include basic data types such as strings
+and lists, as well as more complex types that are specific to the framework.
 """
 from typing import Union, Callable, Tuple
 from enum import Enum, auto
@@ -30,7 +33,7 @@ NodeLabelType: TypeAlias = Union[Callable, NodeLabelTupledType, str]
 ConditionType: TypeAlias = Callable
 """Condition type can be only `Callable`."""
 
-ModuleName: TypeAlias = str
+ModuleName: TypeAlias = "str"
 """
 Module name names addon state, or your own module state. For example module name can be `"dff_context_storages"`.
 """

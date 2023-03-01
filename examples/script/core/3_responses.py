@@ -3,16 +3,15 @@
 # 3. Responses
 
 This example shows different options for setting responses.
-Let's do all the necessary imports from `dff`.
+Let's do all the necessary imports from `DFF`.
 """
 
 
 # %%
 import re
 import random
-from typing import Any
 
-from dff.script import TRANSITIONS, RESPONSE, Actor, Context
+from dff.script import TRANSITIONS, RESPONSE, Actor, Context, Message
 import dff.script.responses as rsp
 import dff.script.conditions as cnd
 
@@ -26,47 +25,52 @@ from dff.utils.testing.common import (
 
 # %% [markdown]
 """
-The response can be set by any object of python:
+The response can be set by Callable or *Message:
 
 * Callable objects. If the object is callable it must have a special signature:
 
         func(ctx: Context, actor: Actor, *args, **kwargs) -> Any
 
-* Non-callable objects. If the object is not callable,
+* *Message objects. If the object is *Message
     it will be returned by the agent as a response.
 
-Out of the box `DSL` has a single response function `choice`
-that gives one random response from the list of responses.
 
 The functions to be used in the `toy_script` are declared here.
 """
 
 
 # %%
-def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
+def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
     request = ctx.last_request
-    topic_pattern = re.compile(r"(.*talk about )(.*)\.")
-    topic = topic_pattern.findall(request)
-    topic = topic and topic[0] and topic[0][-1]
-    if topic:
-        return f"Sorry, I can not talk about {topic} now."
+    if request is None or request.text is None:
+        topic = None
     else:
-        return "Sorry, I can not talk about that now."
+        topic_pattern = re.compile(r"(.*talk about )(.*)\.")
+        topic = topic_pattern.findall(request.text)
+        topic = topic and topic[0] and topic[0][-1]
+    if topic:
+        return Message(text=f"Sorry, I can not talk about {topic} now.")
+    else:
+        return Message(text="Sorry, I can not talk about that now.")
 
 
-def upper_case_response(response: str):
+def upper_case_response(response: Message):
     # wrapper for internal response function
-    def cannot_talk_about_topic_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
-        return response.upper()
+    def func(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+        if response.text is not None:
+            response.text = response.text.upper()
+        return response
 
-    return cannot_talk_about_topic_response
+    return func
 
 
-def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
-    return {
-        "previous_node": list(ctx.labels.values())[-2],
-        "last_request": ctx.last_request,
-    }
+def fallback_trace_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+    return Message(
+        misc={
+            "previous_node": list(ctx.labels.values())[-2],
+            "last_request": ctx.last_request,
+        }
+    )
 
 
 # %%
@@ -74,84 +78,94 @@ toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node,
             # it doesn't need a `RESPONSE`.
-            RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            RESPONSE: Message(),
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(["Hi, what is up?", "Hello, how are you?"]),
-            # Random choice from candicate list.
-            TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
+            RESPONSE: rsp.choice(
+                [Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]
+            ),
+            # Random choice from candidate list.
+            TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
         },
         "node2": {
-            RESPONSE: "Good. What do you want to talk about?",
-            TRANSITIONS: {"node3": cnd.exact_match("Let's talk about music.")},
+            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            TRANSITIONS: {"node3": cnd.exact_match(Message(text="Let's talk about music."))},
         },
         "node3": {
             RESPONSE: cannot_talk_about_topic_response,
-            TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
+            TRANSITIONS: {"node4": cnd.exact_match(Message(text="Ok, goodbye."))},
         },
         "node4": {
-            RESPONSE: upper_case_response("bye"),
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            RESPONSE: upper_case_response(Message(text="bye")),
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
         },
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: fallback_trace_response,
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
         },
     }
 }
 
 # testing
 happy_path = (
-    ("Hi", "Hello, how are you?"),  # start_node -> node1
+    (Message(text="Hi"), Message(text="Hello, how are you?")),  # start_node -> node1
     (
-        "I'm fine, how are you?",
-        "Good. What do you want to talk about?",
+        Message(text="I'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        "Let's talk about music.",
-        "Sorry, I can not talk about music now.",
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
     ),  # node2 -> node3
-    ("Ok, goodbye.", "BYE"),  # node3 -> node4
-    ("Hi", "Hi, what is up?"),  # node4 -> node1
+    (Message(text="Ok, goodbye."), Message(text="BYE")),  # node3 -> node4
+    (Message(text="Hi"), Message(text="Hi, what is up?")),  # node4 -> node1
     (
-        "stop",
-        {"previous_node": ("greeting_flow", "node1"), "last_request": "stop"},
+        Message(text="stop"),
+        Message(
+            misc={"previous_node": ("greeting_flow", "node1"), "last_request": Message(text="stop")}
+        ),
     ),
     # node1 -> fallback_node
     (
-        "one",
-        {
-            "previous_node": ("greeting_flow", "fallback_node"),
-            "last_request": "one",
-        },
+        Message(text="one"),
+        Message(
+            misc={
+                "previous_node": ("greeting_flow", "fallback_node"),
+                "last_request": Message(text="one"),
+            }
+        ),
     ),  # f_n->f_n
     (
-        "help",
-        {
-            "previous_node": ("greeting_flow", "fallback_node"),
-            "last_request": "help",
-        },
+        Message(text="help"),
+        Message(
+            misc={
+                "previous_node": ("greeting_flow", "fallback_node"),
+                "last_request": Message(text="help"),
+            }
+        ),
     ),  # f_n->f_n
     (
-        "nope",
-        {
-            "previous_node": ("greeting_flow", "fallback_node"),
-            "last_request": "nope",
-        },
+        Message(text="nope"),
+        Message(
+            misc={
+                "previous_node": ("greeting_flow", "fallback_node"),
+                "last_request": Message(text="nope"),
+            }
+        ),
     ),  # f_n->f_n
-    ("Hi", "Hello, how are you?"),  # fallback_node -> node1
+    (Message(text="Hi"), Message(text="Hello, how are you?")),  # fallback_node -> node1
     (
-        "I'm fine, how are you?",
-        "Good. What do you want to talk about?",
+        Message(text="I'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        "Let's talk about music.",
-        "Sorry, I can not talk about music now.",
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
     ),  # node2 -> node3
-    ("Ok, goodbye.", "BYE"),  # node3 -> node4
+    (Message(text="Ok, goodbye."), Message(text="BYE")),  # node3 -> node4
 )
 
 # %%

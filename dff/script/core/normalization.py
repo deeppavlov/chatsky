@@ -1,15 +1,18 @@
 """
 Normalization
----------------------------
-A basic set of functions for normalizing data in a dialog script is placed here.
+-------------
+Normalization module is used to normalize all python objects and functions to a format
+that is suitable for script and actor execution process.
+This module contains a basic set of functions for normalizing data in a dialog script.
 """
 import logging
 
-from typing import Union, Callable, Any, Dict
+from typing import Union, Callable, Any, Dict, Optional
 
 from .keywords import GLOBAL, Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
+from .message import Message
 
 from pydantic import validate_arguments, BaseModel
 
@@ -63,7 +66,7 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
 @validate_arguments
 def normalize_condition(condition: ConditionType) -> Callable:
     """
-    The functon that is used to normalize `condition`
+    The function that is used to normalize `condition`
 
     :param condition: `condition` to normalize.
     :return: The function `condition` wrapped into the try/except.
@@ -96,7 +99,7 @@ def normalize_transitions(
 
 
 @validate_arguments
-def normalize_response(response: Any) -> Callable:
+def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
     """
     This function is used to normalize `response`, if `response` Callable, it is returned, otherwise
     `response` is wrapped to the function and this function is returned.
@@ -107,10 +110,16 @@ def normalize_response(response: Any) -> Callable:
     if isinstance(response, Callable):
         return response
     else:
+        if response is None:
+            result = Message()
+        elif isinstance(response, Message):
+            result = response
+        else:
+            raise TypeError(type(response))
 
         @validate_arguments
         def response_handler(ctx: Context, actor: Actor, *args, **kwargs):
-            return response
+            return result
 
         return response_handler
 

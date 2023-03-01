@@ -1,9 +1,12 @@
 """
 Conditions
----------------------------
-Conditions are one of the most important components of the dialog graph,
-which determine the possibility of transition from one node of the graph to another.
-This is a standard set of scripting conditions.
+----------
+Conditions are one of the most important components of the dialog graph.
+They determine the possibility of transition from one node of the graph to another.
+The conditions are used to specify when a particular transition should occur, based on certain criteria.
+This module contains a standard set of scripting conditions that can be used to control the flow of a conversation.
+These conditions can be used to check the current context, the user's input,
+or other factors that may affect the conversation flow.
 """
 from typing import Callable, Pattern, Union, Any, List, Optional
 import logging
@@ -11,23 +14,36 @@ import re
 
 from pydantic import validate_arguments
 
-from dff.script import NodeLabel2Type, Actor, Context
+from dff.script import NodeLabel2Type, Actor, Context, Message
 
 logger = logging.getLogger(__name__)
 
 
 @validate_arguments
-def exact_match(match: Any, *args, **kwargs) -> Callable[[Context, Actor, Any, Any], bool]:
+def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Callable[..., bool]:
     """
-    Returns function handler. This handler returns `True` only if the last user phrase is exactly
-    the same as the :py:const:`match`.
+    Returns function handler. This handler returns `True` only if the last user phrase
+    is the same Message as the :py:const:`match`.
+    If :py:const:`skip_none` the handler will not compare `None` fields of :py:const:`match`.
 
-    :param match: The variable of the same type as :py:class:`~dff.script.last_request`.
+    :param match: A Message variable to compare user request with.
+    :param skip_none: Whether fields should be compared if they are `None` in :py:const:`match`.
     """
 
     def exact_match_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        return match == request
+        if request is None:
+            return False
+        for field in match.__fields__:
+            match_value = match.__getattribute__(field)
+            if skip_none and match_value is None:
+                continue
+            if field in request.__fields__.keys():
+                if request.__getattribute__(field) != match.__getattribute__(field):
+                    return False
+            else:
+                return False
+        return True
 
     return exact_match_condition_handler
 
@@ -47,8 +63,10 @@ def regexp(
 
     def regexp_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
         request = ctx.last_request
-        if isinstance(request, str):
-            return bool(pattern.search(request))
+        if isinstance(request, Message):
+            if request.text is None:
+                return False
+            return bool(pattern.search(request.text))
         else:
             logger.error(f"request has to be str type, but got request={request}")
             return False

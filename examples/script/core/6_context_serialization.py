@@ -3,14 +3,14 @@
 # 6. Context serialization
 
 This example shows context serialization.
-First of all, let's do all the necessary imports from `dff`.
+First of all, let's do all the necessary imports from `DFF`.
 """
 
 
 # %%
 import logging
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Actor
+from dff.script import TRANSITIONS, RESPONSE, Context, Actor, Message
 import dff.script.conditions as cnd
 
 from dff.pipeline import Pipeline
@@ -28,8 +28,8 @@ This function returns the user request number.
 
 
 # %%
-def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> str:
-    return f"answer {len(ctx.requests)}"
+def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+    return Message(text=f"answer {len(ctx.requests)}")
 
 
 # %%
@@ -45,10 +45,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    ("hi", "answer 1"),
-    ("how are you?", "answer 2"),
-    ("ok", "answer 3"),
-    ("good", "answer 4"),
+    (Message(text="hi"), Message(text="answer 1")),
+    (Message(text="how are you?"), Message(text="answer 2")),
+    (Message(text="ok"), Message(text="answer 3")),
+    (Message(text="good"), Message(text="answer 4")),
 )
 
 # %% [markdown]

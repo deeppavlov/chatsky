@@ -1,3 +1,10 @@
+"""
+Conditions
+----------
+The conditions module contains functions that can be used to determine whether the pipeline component to which they
+are attached should be executed or not.
+The standard set of them allows user to setup dependencies between pipeline components.
+"""
 from typing import Optional
 
 from dff.script import Actor, Context
@@ -12,8 +19,7 @@ from .types import (
 
 def always_start_condition(_: Context, __: Actor) -> bool:
     """
-    Condition that always allows service execution, it's the default condition for all services.
-    Returns bool (True).
+    Condition that always allows service execution. It's the default condition for all services.
 
     :param ctx: Current dialog context.
     :param actor: Pipeline actor.
@@ -24,7 +30,7 @@ def always_start_condition(_: Context, __: Actor) -> bool:
 def service_successful_condition(path: Optional[str] = None) -> StartConditionCheckerFunction:
     """
     Condition that allows service execution, only if the other service was executed successfully.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param path: The path of the condition pipeline component.
     """
@@ -39,7 +45,7 @@ def service_successful_condition(path: Optional[str] = None) -> StartConditionCh
 def not_condition(function: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns opposite boolean value to the one returned by incoming function.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param function: The function to return opposite of.
     """
@@ -55,10 +61,9 @@ def aggregate_condition(
 ) -> StartConditionCheckerFunction:
     """
     Condition that returns aggregated boolean value from all booleans returned by incoming functions.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
-    :param aggregator:
-        The function that accepts list of booleans and returns a single boolean.
+    :param aggregator: The function that accepts list of booleans and returns a single boolean.
     :param functions: Functions to aggregate.
     """
 
@@ -71,7 +76,7 @@ def aggregate_condition(
 def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns `True` only if all incoming functions return `True`.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param functions: Functions to aggregate.
     """
@@ -81,7 +86,7 @@ def all_condition(*functions: StartConditionCheckerFunction) -> StartConditionCh
 def any_condition(*functions: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns `True` if any of incoming functions returns `True`.
-    Returns `StartConditionCheckerFunction`.
+    Returns :py:data:`~.StartConditionCheckerFunction`.
 
     :param functions: Functions to aggregate.
     """

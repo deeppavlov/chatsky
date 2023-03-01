@@ -1,3 +1,9 @@
+"""
+Utils
+-----
+The Utils module contains several service functions that are commonly used throughout the framework.
+These functions provide a variety of utility functionality.
+"""
 import collections
 from typing import Union, List, Callable
 from inspect import isfunction
@@ -22,14 +28,14 @@ def pretty_format_component_info_dict(
     Resulting string is formatted with YAML-like format, however it's not strict and shouldn't be parsed.
     However, most preferable usage is via `pipeline.pretty_format`.
 
-    :param service: (required) pipeline components info dictionary.
-    :param show_wrappers: (required) whether to include Wrappers or not (could be many and/or generated).
-    :param offset: current level new line offset.
-    :param wrappers_key: key that is mapped to Wrappers lists.
-    :param type_key: key that is mapped to components type name.
-    :param name_key: key that is mapped to components name.
-    :param indent: current level new line offset (whitespace number).
-    :return: formatted string.
+    :param service: (required) Pipeline components info dictionary.
+    :param show_wrappers: (required) Whether to include Wrappers or not (could be many and/or generated).
+    :param offset: Current level new line offset.
+    :param wrappers_key: Key that is mapped to Wrappers lists.
+    :param type_key: Key that is mapped to components type name.
+    :param name_key: Key that is mapped to components name.
+    :param indent: Current level new line offset (whitespace number).
+    :return: Formatted string
     """
     indent = " " * indent
     representation = f"{offset}{service.get(type_key, '[None]')}%s:\n" % (
@@ -54,22 +60,22 @@ def pretty_format_component_info_dict(
 
 def rename_component_incrementing(
     service: Union[Service, ServiceGroup], collisions: List[Union[Service, ServiceGroup]]
-):
+) -> str:
     """
     Function for generating new name for a pipeline component,
     that has similar name with other components in the same group.
     The name is generated according to these rules:
 
-        - If service's handler is Actor, it is named 'actor'
-        - If service's handler is Callable, it is named after this callable
-        - If it's a service group, it is named 'service_group'
-        - Otherwise, it is names 'noname_service'
-        - After that, '_[NUMBER]' is added to the resulting name,
-          where number is number of components with the same name in current service group.
+    - If service's handler is `Actor`, it is named `actor`.
+    - If service's handler is `Callable`, it is named after this `callable`.
+    - If it's a service group, it is named `service_group`.
+    - Otherwise, it is names `noname_service`.
+    - | After that, `_[NUMBER]` is added to the resulting name,
+        where `_[NUMBER]` is number of components with the same name in current service group.
 
-    :param service: service to be renamed.
-    :param collisions: services in the same service group as service.
-    :return: string - generated name.
+    :param service: Service to be renamed.
+    :param collisions: Services in the same service group as service.
+    :return: Generated name
     """
     if isinstance(service, Service) and isinstance(service.handler, Actor):
         base_name = "actor"
@@ -94,10 +100,9 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Acto
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
     Components are renamed only if user didn't set a name for them. Their paths are also generated here.
-    It also searches for Actor in th group, throwing exception if no actor or multiple actors found.
+    It also searches for :py:class:`~.Actor` in the group, throwing exception if no actor or multiple actors found.
 
-    :param service_group: service group to resolve name collisions in.
-    :return: Actor.
+    :param service_group: Service group to resolve name collisions in.
     """
     actor = None
     names_counter = collections.Counter([component.name for component in service_group.components])
