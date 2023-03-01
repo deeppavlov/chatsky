@@ -6,7 +6,7 @@ import re
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
-from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.generate_examples import generate_example_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
@@ -143,11 +143,16 @@ autodoc_default_options = {"members": True, "undoc-members": False, "private-mem
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/context_storages/*.py",
-            "examples/messengers/*.py",
-            "examples/pipeline/*.py",
-            "examples/script/*.py",
-            "examples/utils/*.py",
+            ("examples.context_storages", "Context Storages"),
+            ("examples.messengers", "Messengers", [
+                ("telegram", "Telegram"),
+            ]),
+            ("examples.pipeline", "Pipeline"),
+            ("examples.script", "Script", [
+                ("core", "Core"),
+                ("responses", "Responses"),
+            ]),
+            ("examples.utils", "Utils"),
         ]
     )
     regenerate_apiref(
