@@ -85,9 +85,9 @@ def import_dashboard(
     tries = 0
     while tries < 10:
         try:
+            tries += 1
             response = requests.get(base_url, timeout=10)
             response.raise_for_status()
-            tries += 1
             break
         except Exception:
             pass
