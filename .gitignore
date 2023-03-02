@@ -23,4 +23,4 @@ venv*
 .coverage
 .pytest_cache
 htmlcov
-tutorials/context_storages/dbs
+examples/context_storages/dbs
