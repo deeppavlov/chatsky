@@ -9,7 +9,5 @@ Tutorials
    :glob:
 
    context_storages/index
-   messengers/index
    pipeline/index
-   script/index
    utils/index

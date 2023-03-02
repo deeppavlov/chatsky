@@ -1,1 +1,0 @@
-/home/avsakharov/deeppavlov/dialog_flow_framework/tutorials/pipeline/6_custom_messenger_interface.py

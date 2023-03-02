@@ -1,1 +1,0 @@
-/home/avsakharov/deeppavlov/dialog_flow_framework/tutorials/script/responses/4_multi_message.py

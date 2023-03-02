@@ -11,8 +11,8 @@ from dff.utils.testing.telegram import get_bot_user, TelegramClient
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
-no_pipeline_example = importlib.import_module(f"examples.{dot_path_to_addon}.{'9_no_pipeline'}")
-pipeline_example = importlib.import_module(f"examples.{dot_path_to_addon}.{'7_polling_setup'}")
+no_pipeline_tutorial = importlib.import_module(f"tutorials.{dot_path_to_addon}.{'9_no_pipeline'}")
+pipeline_tutorial = importlib.import_module(f"tutorials.{dot_path_to_addon}.{'7_polling_setup'}")
 
 
 @pytest.fixture(scope="session")
@@ -41,17 +41,17 @@ def env_vars():
 
 @pytest.fixture(scope="session")
 def pipeline_instance(env_vars):
-    yield pipeline_example.pipeline
+    yield pipeline_tutorial.pipeline
 
 
 @pytest.fixture(scope="session")
 def actor_instance(env_vars):
-    yield no_pipeline_example.actor
+    yield no_pipeline_tutorial.actor
 
 
 @pytest.fixture(scope="session")
 def basic_bot(env_vars):
-    yield no_pipeline_example.bot
+    yield no_pipeline_tutorial.bot
 
 
 @pytest.fixture(scope="session")

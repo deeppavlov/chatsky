@@ -1,1 +1,0 @@
-/home/avsakharov/deeppavlov/dialog_flow_framework/tutorials/script/core/5_global_transitions.py

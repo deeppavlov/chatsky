@@ -1,1 +1,0 @@
-/home/avsakharov/deeppavlov/dialog_flow_framework/tutorials/messengers/telegram/10_no_pipeline_advanced.py
