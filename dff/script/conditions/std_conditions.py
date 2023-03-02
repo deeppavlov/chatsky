@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 @validate_arguments
 def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Callable[..., bool]:
     """
-    Returns function handler. This handler returns `True` only if the last user phrase
+    Return function handler. This handler returns `True` only if the last user phrase
     is the same Message as the :py:const:`match`.
     If :py:const:`skip_none` the handler will not compare `None` fields of :py:const:`match`.
 
@@ -54,7 +54,7 @@ def regexp(
     pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs
 ) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns function handler. This handler returns `True` only if the last user phrase contains
+    Return function handler. This handler returns `True` only if the last user phrase contains
     :py:const:`pattern <Union[str, Pattern]>` with :py:const:`flags <Union[int, re.RegexFlag]>`.
 
     :param pattern: The `RegExp` pattern.
@@ -78,7 +78,7 @@ def regexp(
 @validate_arguments
 def check_cond_seq(cond_seq: list):
     """
-    Checks if the list consists only of Callables.
+    Check if the list consists only of Callables.
 
     :param cond_seq: List of conditions to check.
     """
@@ -102,7 +102,7 @@ def aggregate(
     cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs
 ) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Aggregates multiple functions into one by using aggregating function.
+    Aggregate multiple functions into one by using aggregating function.
 
     :param cond_seq: List of conditions to check.
     :param aggregate_func: Function to aggregate conditions. Defaults to :py:func:`_any`.
@@ -122,7 +122,7 @@ def aggregate(
 @validate_arguments
 def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns function handler. This handler returns `True`
+    Return function handler. This handler returns `True`
     if any function from the list is `True`.
 
     :param cond_seq: List of conditions to check.
@@ -138,7 +138,7 @@ def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, An
 @validate_arguments
 def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns function handler. This handler returns `True` only
+    Return function handler. This handler returns `True` only
     if all functions from the list are `True`.
 
     :param cond_seq: List of conditions to check.
@@ -154,7 +154,7 @@ def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, An
 @validate_arguments
 def negation(condition: Callable, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns function handler. This handler returns negation of the :py:func:`~condition`: `False`
+    Return function handler. This handler returns negation of the :py:func:`~condition`: `False`
     if :py:func:`~condition` holds `True` and returns `True` otherwise.
 
     :param condition: Any :py:func:`~condition`.
@@ -175,7 +175,7 @@ def has_last_labels(
     **kwargs,
 ) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns condition handler. This handler returns `True` if any label from
+    Return condition handler. This handler returns `True` if any label from
     last :py:const:`last_n_indices` context labels is in
     the :py:const:`flow_labels` list or in
     the :py:const:`~dff.script.NodeLabel2Type` list.
@@ -201,7 +201,7 @@ def has_last_labels(
 @validate_arguments
 def true(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns function handler. This handler always returns `True`.
+    Return function handler. This handler always returns `True`.
     """
 
     def true_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
@@ -213,7 +213,7 @@ def true(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
 @validate_arguments
 def false(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
-    Returns function handler. This handler always returns `False`.
+    Return function handler. This handler always returns `False`.
     """
 
     def false_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
@@ -226,10 +226,8 @@ def false(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
 agg = aggregate
 """
 :py:func:`~agg` is an alias for :py:func:`~aggregate`.
-:rtype:
 """
 neg = negation
 """
 :py:func:`~neg` is an alias for :py:func:`~negation`.
-:rtype:
 """
