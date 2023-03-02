@@ -71,7 +71,7 @@ class Pipeline:
     :param timeout: Timeout to add to pipeline root service group.
     :param optimization_warnings: Asynchronous pipeline optimization check request flag;
         warnings will be sent to logs. Additionally it has some calculated fields:
-        
+
         - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         - `actor` is a pipeline actor, found among services.
 
@@ -235,7 +235,7 @@ class Pipeline:
 
             - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
             - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
-        
+
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
             or a dict to store dialog :py:class:`~.Context`.
         :param messenger_interface: An instance for this pipeline.
