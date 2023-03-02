@@ -34,6 +34,7 @@ def parse_args():
 
     elif hasattr(parsed_args, "file"):  # parse yaml input
         conf = OmegaConf.load(parsed_args.file)
+        sys.argv = [__file__] + [f"{key.lstrip('-')}={value}" for key, value in parsed_args.__dict__.items()]
         conf.merge_with_cli()
 
     else:

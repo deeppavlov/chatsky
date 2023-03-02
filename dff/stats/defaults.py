@@ -19,8 +19,9 @@ default_extractor_pool = ExtractorPool()
 @default_extractor_pool.new_extractor
 async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     last_label = ctx.last_label or ("", "")
+    label_repr = ": ".join(last_label) if all(last_label) else ""
     default_data = StatsRecord.from_context(
-        ctx, info, {"flow": last_label[0], "node": last_label[1], "label": ": ".join(last_label)}
+        ctx, info, {"flow": last_label[0], "node": last_label[1], "label": label_repr}
     )
     return default_data
 

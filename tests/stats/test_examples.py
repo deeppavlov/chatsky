@@ -1,11 +1,33 @@
+import sys
 import importlib
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
+from dff.utils.testing.stats_cli import parse_args
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.toy_script import HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
+
+
+@pytest.mark.parametrize("args", [
+    [
+        '',
+        'cfg_from_opts',
+        '--db.type=postgresql',
+        '--db.user=user',
+        '--db.password=password',
+        '--db.host=localhost',
+        '--db.port=5432',
+        '--db.name=db',
+        '--db.table=test'
+    ],
+    ['', 'cfg_from_file', '--db.password=pass', './examples/stats/example_config.yaml'],
+    ['', 'cfg_from_uri', '--uri=postgresql://user:password@localhost:5432/db/test']
+])
+def test_parse_args(args):
+    sys.argv = args
+    assert parse_args()
 
 
 @pytest.mark.parametrize(
