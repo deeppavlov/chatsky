@@ -76,7 +76,7 @@ pipeline = Pipeline.from_script(script, start_label=("flow", "node_hi"))
 
 # handler requests
 def turn_handler(in_request: Message, pipeline: Pipeline) -> Tuple[Message, Context]:
-    # Pass the next request of user into pipeline and it returns updated context with actor response
+    # Pass the next request of user into pipeline and it returns updated context
     ctx = pipeline(in_request, 0)
     # Get last actor response from the context
     out_response = ctx.last_response
