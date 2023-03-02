@@ -133,7 +133,9 @@ def import_dashboard(
         files = [("formData", (zip_filename, f, "application/zip"))]
         headers = {"Accept": "application/json", "Cookie": f"session={session_cookie}", "X-CSRFToken": csrf_token}
 
-        response = requests.request("POST", import_dashboard_url, headers=headers, data=payload, files=files, timeout=10)
+        response = requests.request(
+            "POST", import_dashboard_url, headers=headers, data=payload, files=files, timeout=10
+        )
         response.raise_for_status()
         logger.info(f"Upload finished with status {response.status_code}.")
 
