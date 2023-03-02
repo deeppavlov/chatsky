@@ -270,12 +270,15 @@ class Pipeline:
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
         """
-        Sets actor for the current pipeline and conducts necessary checks.
-        Resets actor to previous if any errors are found.
+        Set actor for the current pipeline and conducts necessary checks.
+        Reset actor to previous if any errors are found.
 
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
-        :param fallback_label: Actor fallback label.
+            The start node of :py:class:`~dff.script.Script`. The execution begins with it.
+        :param fallback_label: Actor fallback label. The label of :py:class:`~dff.script.Script`.
+            Dialog comes into that label if all other transitions failed,
+            or there was an error while executing the scenario.
         :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
             where there is no priority. Defaults to `1.0`.
         :param validation_stage: This flag sets whether the validation stage is executed in actor.
