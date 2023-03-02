@@ -19,14 +19,15 @@ ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "script
 @pytest.mark.parametrize(
     "test_case",
     [
-        working_dir for working_dir in (TEST_DIR / "conversions").iterdir()
+        str(working_dir) for working_dir in (TEST_DIR / "conversions").iterdir()
     ]
 )
-def test_conversions(test_case: Path, tmp_path):
-    python_dir = test_case / "python_files"
+def test_conversions(test_case: str, tmp_path):
+    working_dir = Path(test_case)
+    python_dir = working_dir / "python_files"
     main_file = python_dir / "main.py"
-    yaml_script = test_case / "script.yaml"
-    graph_script = test_case / "graph.json"
+    yaml_script = working_dir / "script.yaml"
+    graph_script = working_dir / "graph.json"
 
     # from_python
     dff_project = DFFProject.from_python(python_dir, main_file)
@@ -49,11 +50,13 @@ def test_conversions(test_case: Path, tmp_path):
 @pytest.mark.parametrize(
     "test_case",
     [
-        working_dir for working_dir in (TEST_DIR / "to_python").iterdir()
+        str(working_dir) for working_dir in (TEST_DIR / "to_python").iterdir()
     ]
 )
-def test_to_python(test_case: Path, tmp_path):
-    dff_project = DFFProject.from_yaml(test_case / "script.yaml")
+def test_to_python(test_case: str, tmp_path):
+    working_dir = Path(test_case)
+
+    dff_project = DFFProject.from_yaml(working_dir / "script.yaml")
 
     # test creation
 
@@ -62,15 +65,15 @@ def test_to_python(test_case: Path, tmp_path):
 
     dff_project.to_python(created)
 
-    assert_dirs_equal(test_case / "result_creating", created)
+    assert_dirs_equal(working_dir / "result_creating", created)
 
     # test editing
 
-    edited = copytree(test_case / "initial_files", tmp_path / "edited")
+    edited = copytree(working_dir / "initial_files", tmp_path / "edited")
 
     dff_project.to_python(edited)
 
-    assert_dirs_equal(test_case / "result_editing", edited)
+    assert_dirs_equal(working_dir / "result_editing", edited)
 
 
 @pytest.mark.parametrize(
