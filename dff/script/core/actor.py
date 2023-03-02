@@ -56,7 +56,7 @@ class Actor:
     The class which is used to process :py:class:`~dff.script.Context`
     according to the :py:class:`~dff.script.Script`.
 
-    :param script: The dialog scenario: a graph described by the :py:class:~dff.script.Keywords.
+    :param script: The dialog scenario: a graph described by the :py:class:`.Keywords`.
         While the graph is being initialized, it is validated and then used for the dialog.
     :param start_label: The start node of :py:class:`~dff.script.Script`. The execution begins with it.
     :param fallback_label: The label of :py:class:`~dff.script.Script`.
@@ -68,9 +68,9 @@ class Actor:
     :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
-        - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
-        - value: List[Callable] - The list of called handlers for each stage.
-        Defaults to an empty `dict`.
+
+        - key (:py:class:`~dff.script.ActorStage`) - Stage in which the handler is called.
+        - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
     def __init__(
