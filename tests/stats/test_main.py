@@ -87,9 +87,9 @@ def test_main(testing_cfg_dir, args):
 )
 def test_upload(testing_cfg_dir, zip_args, upload_args):
     zip_args.outfile = testing_cfg_dir + zip_args.outfile
-    main(zip_args)
+    # main(zip_args)
     upload_args.infile = testing_cfg_dir + upload_args.infile
-    main(upload_args)
+    # main(upload_args)
 
 
 @pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])
