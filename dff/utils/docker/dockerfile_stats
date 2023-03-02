@@ -1,4 +1,4 @@
-FROM apache/superset:latest
+FROM apache/superset:superset:2.0.0rc2
 USER root
 RUN pip install clickhouse-connect
 COPY init_superset.sh /app/docker/

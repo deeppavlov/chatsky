@@ -105,7 +105,7 @@ def import_dashboard(
         "Accept-Language": "en-US,en;q=0.9",
     }
 
-    response = session.request("GET", login_url, headers=headers, data=payload)
+    response = session.request("GET", login_url, headers=headers, data=payload, timeout=10)
     csrf_token = response.text.split('<input id="csrf_token" name="csrf_token" type="hidden" value="')[1].split('">')[0]
 
     payload = f"csrf_token={csrf_token}&username={username}&password={password}"
@@ -133,7 +133,7 @@ def import_dashboard(
         files = [("formData", (zip_filename, f, "application/zip"))]
         headers = {"Accept": "application/json", "Cookie": f"session={session_cookie}", "X-CSRFToken": csrf_token}
 
-        response = requests.request("POST", import_dashboard_url, headers=headers, data=payload, files=files)
+        response = requests.request("POST", import_dashboard_url, headers=headers, data=payload, files=files, timeout=10)
         response.raise_for_status()
         logger.info(f"Upload finished with status {response.status_code}.")
 
