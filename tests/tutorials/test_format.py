@@ -46,6 +46,6 @@ format_checkers = [regexp_format_checker, notebook_start_checker]
 
 @pytest.mark.parametrize("dff_tutorial_py_file", dff_tutorial_py_files)
 def test_format(dff_tutorial_py_file: pathlib.Path):
-    current_path = dff_tutorial_py_file.relative_to(dff_tutorial_dir.parent)
+    current_path = dff_tutorial_py_file.relative_to(dff_tutorials_dir.parent)
     for checker in format_checkers:
         assert checker(dff_tutorial_py_file), f"Tutorial {current_path} didn't pass formatting checks!"
