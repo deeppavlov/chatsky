@@ -57,9 +57,10 @@ class Pipeline:
     :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
+
         - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
-        - value: List[Callable] - The list of called handlers for each stage.
-        Defaults to an empty `dict`.
+        - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
+
     :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
     :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
@@ -70,8 +71,9 @@ class Pipeline:
     :param timeout: Timeout to add to pipeline root service group.
     :param optimization_warnings: Asynchronous pipeline optimization check request flag;
         warnings will be sent to logs. Additionally it has some calculated fields:
-        1) `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
-        2) `actor` is a pipeline actor, found among services.
+        
+        - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
+        - `actor` is a pipeline actor, found among services.
 
     """
 
@@ -148,6 +150,7 @@ class Pipeline:
         :param global_handler_type: (required) indication where the wrapper
             function should be executed.
         :param extra_handler: (required) wrapper function itself.
+        :type extra_handler: ExtraHandlerFunction
         :param whitelist: a list of services to only add this wrapper to.
         :param blacklist: a list of services to not add this wrapper to.
         :return: `None`
@@ -229,14 +232,16 @@ class Pipeline:
         :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
         :param handlers: This variable is responsible for the usage of external handlers on
             the certain stages of work of :py:class:`~dff.script.Actor`.
+
             - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
-            - value: List[Callable] - The list of called handlers for each stage.
-            Defaults to an empty `dict`.
+            - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
+        
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
             or a dict to store dialog :py:class:`~.Context`.
         :param messenger_interface: An instance for this pipeline.
         :param pre_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
+        :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
         :param post_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed after Actor.
             It constructs root service group by merging `pre_services` + actor + `post_services`.
@@ -287,9 +292,9 @@ class Pipeline:
         :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
         :param handlers: This variable is responsible for the usage of external handlers on
             the certain stages of work of :py:class:`~dff.script.Actor`.
-            - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
-            - value: List[Callable] - The list of called handlers for each stage.
-            Defaults to an empty `dict`.
+
+            - key :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+            - value List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
         """
         old_actor = self.actor
         self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
