@@ -1,10 +1,11 @@
 Development
 -----------
 
-`Release notes < >`_ contain information about the latest releases of DFF,
-including new features, improvements, and bug fixes.
+`Release notes <https://deeppavlov.github.io/dialog_flow_framework/development.html>`_
+contain information about the latest releases of DFF, including new features, improvements, and bug fixes.
 
-`Project roadmap < >`_ outlines the future development plans for DFF, including new features and enhancements
+`Project roadmap <https://deeppavlov.github.io/dialog_flow_framework/development.html>`_
+outlines the future development plans for DFF, including new features and enhancements
 that are planned for upcoming releases.
 
 `Contribution rules <https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md>`_  provide
