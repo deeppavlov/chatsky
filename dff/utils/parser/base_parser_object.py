@@ -788,11 +788,12 @@ class Attribute(Expression, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        value = self.children["value"]
+        value: tp.Optional[tp.Union[BaseParserObject, 'Namespace']] = self.children["value"]
         if isinstance(value, ReferenceObject):
             value = value.absolute
         try:
             if is_instance(value, "dff.utils.parser.namespace.Namespace"):
+                value = tp.cast('Namespace', value)
                 return value[self.attr]
         except KeyError as error:
             logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
