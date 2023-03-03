@@ -146,13 +146,13 @@ class BaseParserObject(ABC):
         """Dump object as string. `current_indent` should already be applied to the current line by the node's parent.
         `current_indent` is supposed to be used only when creating new lines.
 
-        :param current_indent: Current indentation level (in whitespace number), defaults to 0
-        :param indent: Indentation increment (in whitespace number), defaults to 4
+        :param current_indent: Current indentation level (in whitespace number), defaults to 0.
+        :param indent:
+            Indentation increment (in whitespace number), defaults to 4.
             If set to None indentation is not applied
 
         :return: Representation of the object as a string
         """
-        ...
 
     def __repr__(self) -> str:
         return self.__class__.__name__ + "(" + self.dump() + ")"
@@ -177,13 +177,12 @@ class BaseParserObject(ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs):
-        """Construct the object from an :py:class:`ast.stmt` or :py:class:`ast.expr`
+        """Construct an object from an :py:class:`ast.stmt` or :py:class:`ast.expr`
 
         :param node: AST node to construct the object from
         :param kwargs:
         :return: Constructed object(s) or None if an object cannot be constructed from `node`
         """
-        ...
 
 
 class Statement(BaseParserObject, ABC):
@@ -235,7 +234,7 @@ class Expression(BaseParserObject, ABC):
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node: ast.expr, **kwargs) -> tp.Optional['Expression']:
+    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional['Expression']:
         ...
 
     @classmethod
@@ -672,10 +671,10 @@ class Dict(Expression):
             )
 
     def __getitem__(self, item: tp.Union[Expression, str]) -> Expression:
-        """Get value in the dictionary
+        """Get dictionary value based on a key.
 
         :param item: Either a key or a string representation of a key
-        :return: Value under the key
+        :return: Dictionary value.
         :raises TypeError:
             If the type of `item` is not :py:class:`.BaseParserObject` nor `str`
         :raises KeyError:
