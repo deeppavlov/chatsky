@@ -688,6 +688,25 @@ class Dict(Expression):
         else:
             raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
 
+    def get(self, item: tp.Union[Expression, str], default=None) -> Expression:
+        """Get dictionary value based on a key.
+
+        :param item: Either a key or a string representation of a key.
+        :param default: Value to return if the dictionary does not have the `item` key.
+        :return: Dictionary value.
+        :raises TypeError:
+            If the type of `item` is not :py:class:`.BaseParserObject` nor `str`.
+        """
+        if isinstance(item, Expression):
+            key = self._keys.get(item)
+            if key is None:
+                return default
+            return self.children.get(self._value(key), default)
+        elif isinstance(item, str):
+            return self.children.get(self._value(item), default)
+        else:
+            raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
+
     @classmethod
     @tp.overload
     def from_ast(cls, node: ast.Dict, **kwargs) -> 'Dict':  # type: ignore
@@ -825,11 +844,23 @@ class Subscript(Expression, ReferenceObject):
         index = self.children["index"]
         if isinstance(index, ReferenceObject):
             index = index.absolute
-        try:
-            return value[index]
-        except KeyError as error:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
-        return None
+
+        debug_message = f"{self.__class__.__name__} did not resolve: {repr(self)}"
+
+        if value is None:
+            logger.debug(f"{debug_message}\nValue did not resolve: {self.children['value']}")
+            return None
+        if index is None:
+            logger.debug(f"{debug_message}\nIndex did not resolve: {self.children['index']}")
+            return None
+        if not isinstance(value, (Dict, Iterable)):
+            logger.debug(f"{debug_message}\nValue is not a `Dict`: {value}")
+            return None
+        result = value.get(index)
+        if result is None:
+            logger.debug(f"{debug_message}\nKey not found.\nKey: {index}\nDict: {value}")
+            return None
+        return result
 
     @cached_property
     def resolve_name(self) -> BaseParserObject:
@@ -902,6 +933,14 @@ class Iterable(Expression):
             return self.children[str(item)]
         else:
             return self.children[str(item)]
+
+    def get(self, item: tp.Union[Expression, str, int], default=None) -> Expression:
+        if isinstance(item, str):
+            return self.children.get(item, default)
+        elif isinstance(item, int):
+            return self.children.get(str(item), default)
+        else:
+            return self.children.get(str(item), default)
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.type.value[0] + ", ".join([child.dump(current_indent, indent) for child in self.children.values()]) + self.type.value[1]
