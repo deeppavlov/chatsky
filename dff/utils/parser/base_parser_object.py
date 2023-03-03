@@ -657,13 +657,11 @@ class Dict(Expression):
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         items = [
-            indent * " " +
-            self.children[self._key(key)].dump(
-                current_indent=0 if indent is None else (current_indent + indent), indent=indent
-            ) +
+            (indent * " " if indent else "") +
+            self.children[self._key(key)].dump(current_indent=0 if indent is None else (current_indent + indent),
+                                               indent=indent) +
             ": " + self.children[self._value(key)].dump(
-                current_indent=0 if indent is None else (current_indent + indent), indent=indent
-            ) +
+                current_indent=0 if indent is None else (current_indent + indent), indent=indent) +
             "," for _, key in self.__keys
         ]
         if indent is None:
