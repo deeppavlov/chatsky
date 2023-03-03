@@ -160,16 +160,18 @@ class BaseParserObject(ABC):
     def __str__(self) -> str:
         return self.dump()
 
+    def true_value(self) -> str:
+        """Return the true value of the object that is used to compare objects and compute hash."""
+        return str(self)
+
     def __hash__(self):
-        return hash(str(self))
+        return hash(self.true_value())
 
     def __eq__(self, other):
-        if isinstance(other, ReferenceObject):
-            return ReferenceObject.__eq__(other, self)
         if isinstance(other, BaseParserObject):
-            return str(self) == str(other)
+            return self.true_value() == other.true_value()
         if isinstance(other, str):
-            return str(self) == other
+            return self.true_value() == other
         return NotImplemented
 
     @classmethod
@@ -309,13 +311,8 @@ class ReferenceObject(BaseParserObject, ABC):
         """
         ...
 
-    def __hash__(self):
-        return BaseParserObject.__hash__(self.resolve_name or self)
-
-    def __eq__(self, other):
-        if isinstance(other, ReferenceObject):
-            return BaseParserObject.__eq__(self.resolve_name or self, other.resolve_name or self)
-        return BaseParserObject.__eq__(self.resolve_name or self, other)
+    def true_value(self) -> str:
+        return self.resolve_name.dump()
 
 
 def module_name_to_expr(module_name: tp.List[str]) -> tp.Union['Name', 'Attribute']:
