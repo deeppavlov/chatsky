@@ -874,7 +874,8 @@ class Subscript(Expression, ReferenceObject):
         return self._resolve_once or Subscript(value, index)
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        return self.children["value"].dump(current_indent, indent) + "[" + self.children["index"].dump(current_indent, indent) + "]"
+        return self.children["value"].dump(current_indent, indent) + "[" + self.children["index"].dump(current_indent,
+                                                                                                       indent) + "]"
 
     @classmethod
     @tp.overload
