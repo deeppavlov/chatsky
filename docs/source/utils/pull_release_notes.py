@@ -9,7 +9,7 @@ from sphinx.util import logging
 logger = logging.getLogger(__name__)
 
 release_notes_query = """
-query { 
+query {
   repository(owner: "deeppavlov", name: "dialog_flow_framework") {
     releases($pagination) {
       nodes {
@@ -36,10 +36,17 @@ def run_github_api_releases_query(pagination, retries_count: int = 5) -> Tuple[L
     :return: tuple of list of release info and pagination info.
     """
     headers = {"Authorization": f"Bearer {environ['GTIHUB_API_TOKEN']}"}
-    res = post("https://api.github.com/graphql", json={"query": Template(release_notes_query).substitute(pagination=pagination)}, headers=headers)
+    res = post(
+        "https://api.github.com/graphql",
+        json={"query": Template(release_notes_query).substitute(pagination=pagination)},
+        headers=headers,
+    )
     if res.status_code == 200:
         response = res.json()
-        return response["data"]["repository"]["releases"]["nodes"], response["data"]["repository"]["releases"]["pageInfo"]
+        return (
+            response["data"]["repository"]["releases"]["nodes"],
+            response["data"]["repository"]["releases"]["pageInfo"],
+        )
     elif res.status_code == 502 and retries_count > 0:
         return run_github_api_releases_query(pagination, retries_count - 1)
     else:
