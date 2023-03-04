@@ -5,6 +5,7 @@ venv/
 build/
 docs/source/apiref
 docs/source/examples
+docs/source/release_notes.rst
 *__pycache__*
 *.idea/*
 .idea/*
