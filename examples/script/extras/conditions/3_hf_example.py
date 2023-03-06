@@ -71,7 +71,11 @@ model_1 = HFClassifier(
 )
 
 model_2 = HFMatcher(
-    namespace_key="hf_matcher", dataset=common_label_collection, tokenizer=tokenizer, model=model
+    namespace_key="hf_matcher",
+    dataset=common_label_collection,
+    device=device("cpu"),
+    tokenizer=tokenizer,
+    model=model,
 )
 
 
