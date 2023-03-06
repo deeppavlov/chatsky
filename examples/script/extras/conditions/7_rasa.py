@@ -9,7 +9,8 @@ and reuse them in your script.
 
 # %%
 import os
-from dff.script.core.keywords import (
+from dff.script import (
+    Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
@@ -50,13 +51,13 @@ script = {
     },
     "root": {
         LOCAL: {TRANSITIONS: {("mood", "ask", 1.2): cnd.true()}},
-        "start": {RESPONSE: "Hi!"},
-        "fallback": {RESPONSE: "I can't quite get what you mean."},
-        "finish": {RESPONSE: "Ok, see you soon!"},
+        "start": {RESPONSE: Message(text="Hi!")},
+        "fallback": {RESPONSE: Message(text="I can't quite get what you mean.")},
+        "finish": {RESPONSE: Message(text="Ok, see you soon!")},
     },
     "mood": {
         "ask": {
-            RESPONSE: "How do you feel today?",
+            RESPONSE: Message(text="How do you feel today?"),
             # You can get to different branches depending on the intent values.
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
@@ -69,7 +70,7 @@ script = {
             },
         },
         "assert": {
-            RESPONSE: "What you mean is you're feeling down, isn't it?",
+            RESPONSE: Message(text="What you mean is you're feeling down, isn't it?"),
             TRANSITIONS: {
                 ("mood", "react_good"): i_cnd.has_cls_label(
                     "deny", threshold=0.95, namespace="rasa"
@@ -78,11 +79,11 @@ script = {
             },
         },
         "react_good": {
-            RESPONSE: "Now that's the right talk! You'd better stay happy and stuff.",
+            RESPONSE: Message(text="Now that's the right talk! You'd better stay happy and stuff."),
             TRANSITIONS: {("root", "finish"): cnd.true()},
         },
         "react_bad": {
-            RESPONSE: "I feel you, fellow human. Watch a good movie, it might help.",
+            RESPONSE: Message(text="I feel you, fellow human. Watch a good movie, it might help."),
             TRANSITIONS: {("root", "finish"): cnd.true()},
         },
     },
@@ -100,15 +101,24 @@ pipeline = Pipeline.from_script(
 
 # %%
 happy_path = [
-    ("hi", "How do you feel today?"),
-    ("i'm rather unhappy", "I feel you, fellow human. Watch a good movie, it might help."),
-    ("ok", "Ok, see you soon!"),
-    ("hi", "How do you feel today?"),
-    ("rather bad", "What you mean is you're feeling down, isn't it?"),
-    ("yes", "I feel you, fellow human. Watch a good movie, it might help."),
-    ("good", "Ok, see you soon!"),
-    ("hi", "How do you feel today?"),
-    ("I'm feeling great", "Now that's the right talk! You'd better stay happy and stuff."),
+    (Message(text="hi"), Message(text="How do you feel today?")),
+    (
+        Message(text="i'm rather unhappy"),
+        Message(text="I feel you, fellow human. Watch a good movie, it might help."),
+    ),
+    (Message(text="ok"), Message(text="Ok, see you soon!")),
+    (Message(text="hi"), Message(text="How do you feel today?")),
+    (Message(text="rather bad"), Message(text="What you mean is you're feeling down, isn't it?")),
+    (
+        Message(text="yes"),
+        Message(text="I feel you, fellow human. Watch a good movie, it might help."),
+    ),
+    (Message(text="good"), Message(text="Ok, see you soon!")),
+    (Message(text="hi"), Message(text="How do you feel today?")),
+    (
+        Message(text="I'm feeling great"),
+        Message(text="Now that's the right talk! You'd better stay happy and stuff."),
+    ),
 ]
 
 

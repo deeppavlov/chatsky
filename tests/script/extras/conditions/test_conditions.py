@@ -2,7 +2,7 @@ from typing import List
 
 import pytest
 from pydantic import parse_obj_as
-from dff.script import Context
+from dff.script import Context, Message
 from dff.script.extras.conditions.utils import LABEL_KEY
 from dff.script.extras.conditions.dataset import DatasetItem, Dataset
 from dff.script.extras.conditions.conditions import has_cls_label, has_match
@@ -48,7 +48,7 @@ def test_conds_invalid(input, testing_actor):
 )
 def test_has_match(_input: dict, testing_actor, thresh, standard_model, last_request):
     ctx = Context()
-    ctx.add_request(last_request)
+    ctx.add_request(Message(text=last_request))
     # Per default, we assume that the model has already been fit.
     # For this test case we fit it manually.
     collection = Dataset(

@@ -8,7 +8,7 @@ When defining custom label-scoring models, always inherit from this class.
 from copy import copy
 from abc import ABC, abstractmethod
 
-from dff.script import Context, Actor
+from dff.script import Context
 
 from ..dataset import Dataset
 from ..utils import LABEL_KEY
@@ -49,13 +49,16 @@ class BaseModel(ABC):
         """
         raise NotImplementedError
 
-    def __call__(self, ctx: Context, actor: Actor):
+    def __call__(self, ctx: Context, _):
         """
         Saves the retrieved labels to a subspace inside the `framework_states` field of the context.
         Creates the missing namespaces, if necessary.
         """
-        labels: dict = self.predict(ctx.last_request) if ctx.last_request else dict()
 
+        if ctx.last_request and ctx.last_request.text:
+            labels: dict = self.predict(ctx.last_request.text)
+        else:
+            labels = dict()
         if LABEL_KEY not in ctx.framework_states:
             ctx.framework_states[LABEL_KEY] = dict()
 

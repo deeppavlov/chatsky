@@ -8,7 +8,8 @@ for annotating user phrases.
 
 
 # %%
-from dff.script.core.keywords import (
+from dff.script import (
+    Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
@@ -80,24 +81,26 @@ script = {
     },
     "root": {
         LOCAL: {TRANSITIONS: {("service", "offer", 1.2): cnd.true()}},
-        "start": {RESPONSE: "Hi!"},
-        "fallback": {RESPONSE: "I can't quite get what you mean."},
+        "start": {RESPONSE: Message(text="Hi!")},
+        "fallback": {RESPONSE: Message(text="I can't quite get what you mean.")},
         "finish": {
-            RESPONSE: "Ok, see you soon!",
+            RESPONSE: Message(text="Ok, see you soon!"),
             TRANSITIONS: {("root", "start", 1.3): cnd.true()},
         },
     },
-    "service": {"offer": {RESPONSE: "What would you like me to look up?"}},
+    "service": {"offer": {RESPONSE: Message(text="What would you like me to look up?")}},
     "food": {
         "offer": {
-            RESPONSE: "Would you like me to look up a restaurant for you?",
+            RESPONSE: Message(text="Would you like me to look up a restaurant for you?"),
             TRANSITIONS: {
                 ("food", "no_results", 1.2): cnd.regexp(r"yes|yeah|good|ok|yep"),
                 ("root", "finish", 0.8): cnd.true(),
             },
         },
         "no_results": {
-            RESPONSE: "Sorry, all the restaurants are closed due to COVID restrictions.",
+            RESPONSE: Message(
+                text="Sorry, all the restaurants are closed due to COVID restrictions."
+            ),
             TRANSITIONS: {("root", "finish"): cnd.true()},
         },
     },
@@ -115,14 +118,20 @@ pipeline = Pipeline.from_script(
 
 # %%
 happy_path = [
-    ("hi", "What would you like me to look up?"),
-    ("get something to eat", "Would you like me to look up a restaurant for you?"),
-    ("yes", "Sorry, all the restaurants are closed due to COVID restrictions."),
-    ("ok", "Ok, see you soon!"),
-    ("bye", "Hi!"),
-    ("hi", "What would you like me to look up?"),
-    ("place to sleep", "I can't quite get what you mean."),
-    ("ok", "What would you like me to look up?"),
+    (Message(text="hi"), Message(text="What would you like me to look up?")),
+    (
+        Message(text="get something to eat"),
+        Message(text="Would you like me to look up a restaurant for you?"),
+    ),
+    (
+        Message(text="yes"),
+        Message(text="Sorry, all the restaurants are closed due to COVID restrictions."),
+    ),
+    (Message(text="ok"), Message(text="Ok, see you soon!")),
+    (Message(text="bye"), Message(text="Hi!")),
+    (Message(text="hi"), Message(text="What would you like me to look up?")),
+    (Message(text="place to sleep"), Message(text="I can't quite get what you mean.")),
+    (Message(text="ok"), Message(text="What would you like me to look up?")),
 ]
 
 

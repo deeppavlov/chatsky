@@ -37,7 +37,7 @@ def has_cls_label(label, namespace: Optional[str] = None, threshold: float = 0.9
 
 @has_cls_label.register(str)
 def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
-    def has_cls_label_innner(ctx: Context, actor: Actor) -> bool:
+    def has_cls_label_innner(ctx: Context, _) -> bool:
         if LABEL_KEY not in ctx.framework_states:
             return False
         if namespace is not None:
@@ -51,7 +51,7 @@ def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
 
 @has_cls_label.register(DatasetItem)
 def _(label, namespace: Optional[str] = None, threshold: float = 0.9) -> Callable[[Context, Actor], bool]:
-    def has_cls_label_innner(ctx: Context, actor: Actor) -> bool:
+    def has_cls_label_innner(ctx: Context, _) -> bool:
         if LABEL_KEY not in ctx.framework_states:
             return False
         if namespace is not None:
@@ -97,10 +97,10 @@ def has_match(
     if negative_examples is None:
         negative_examples = []
 
-    def has_match_inner(ctx: Context, actor: Actor) -> bool:
-        if not isinstance(ctx.last_request, str):
+    def has_match_inner(ctx: Context, _) -> bool:
+        if not (ctx.last_request and ctx.last_request.text):
             return False
-        input_vector = model.transform(ctx.last_request)
+        input_vector = model.transform(ctx.last_request.text)
         positive_vectors = [model.transform(item) for item in positive_examples]
         negative_vectors = [model.transform(item) for item in negative_examples]
         positive_sims = [cosine_similarity(input_vector, item)[0][0] for item in positive_vectors]

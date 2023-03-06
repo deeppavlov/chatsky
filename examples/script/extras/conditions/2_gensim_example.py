@@ -13,7 +13,13 @@ import logging
 from gensim.models import Word2Vec, KeyedVectors
 import gensim.downloader as api
 
-from dff.script.core.keywords import RESPONSE, PRE_TRANSITIONS_PROCESSING, GLOBAL, TRANSITIONS
+from dff.script import (
+    Message,
+    RESPONSE,
+    PRE_TRANSITIONS_PROCESSING,
+    GLOBAL,
+    TRANSITIONS,
+)
 from dff.script import conditions as cnd
 
 from dff.script.extras.conditions.models import GensimMatcher
@@ -100,76 +106,85 @@ script = {
     GLOBAL: {PRE_TRANSITIONS_PROCESSING: {"annotate": gensim_matcher}},
     "root": {
         "start": {
-            RESPONSE: "Hi",
+            RESPONSE: Message(text="Hi"),
             TRANSITIONS: {
-                ("small_talk", "ask_some_questions"): cnd.exact_match("hi"),
+                ("small_talk", "ask_some_questions"): cnd.exact_match(Message(text=("hi"))),
                 ("animals", "like_animals"): i_cnd.has_cls_label("animals"),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
         },
-        "fallback": {RESPONSE: "Oops", TRANSITIONS: {("small_talk", "ask_talk_about"): cnd.true()}},
+        "fallback": {
+            RESPONSE: Message(text="Oops"),
+            TRANSITIONS: {("small_talk", "ask_talk_about"): cnd.true()},
+        },
     },
     "animals": {
         "have_pets": {
-            RESPONSE: "do you have pets?",
+            RESPONSE: Message(text="do you have pets?"),
             TRANSITIONS: {"what_animal": i_cnd.has_cls_label("consent")},
         },
         "like_animals": {
-            RESPONSE: "do you like it?",
+            RESPONSE: Message(text="do you like it?"),
             TRANSITIONS: {"what_animal": i_cnd.has_cls_label("consent")},
         },
         "what_animal": {
-            RESPONSE: "what animals do you have?",
+            RESPONSE: Message(text="what animals do you have?"),
             TRANSITIONS: {
-                "ask_about_color": cnd.exact_match("bird"),
-                "ask_about_breed": cnd.exact_match("dog"),
+                "ask_about_color": cnd.exact_match(Message(text=("bird"))),
+                "ask_about_breed": cnd.exact_match(Message(text=("dog"))),
             },
         },
-        "ask_about_color": {RESPONSE: "what color is it"},
+        "ask_about_color": {RESPONSE: Message(text="what color is it")},
         "ask_about_breed": {
-            RESPONSE: "what is this breed?",
+            RESPONSE: Message(text="what is this breed?"),
             TRANSITIONS: {
-                "ask_about_breed": cnd.exact_match("pereat"),
-                "tell_fact_about_breed": cnd.exact_match("bulldog"),
+                "ask_about_breed": cnd.exact_match(Message(text=("pereat"))),
+                "tell_fact_about_breed": cnd.exact_match(Message(text=("bulldog"))),
                 "ask_about_training": cnd.regexp("no idea|n[o']t know"),
             },
         },
         "tell_fact_about_breed": {
-            RESPONSE: "Bulldogs appeared in England as specialized bull-baiting dogs. ",
+            RESPONSE: Message(
+                text="Bulldogs appeared in England as specialized bull-baiting dogs. "
+            ),
         },
-        "ask_about_training": {RESPONSE: "Do you train your dog? "},
+        "ask_about_training": {RESPONSE: Message(text="Do you train your dog? ")},
     },
     "news": {
         "what_news": {
-            RESPONSE: "what kind of news do you prefer?",
+            RESPONSE: Message(text="what kind of news do you prefer?"),
             TRANSITIONS: {
                 "ask_about_science": i_cnd.has_cls_label("science_news"),
                 "ask_about_sport": i_cnd.has_cls_label("sport_news"),
             },
         },
         "ask_about_science": {
-            RESPONSE: "i got news about science, would you like to hear them?",
+            RESPONSE: Message(text="i got news about science, would you like to hear them?"),
             TRANSITIONS: {
                 "science_news": i_cnd.has_cls_label("consent"),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
         "science_news": {
-            RESPONSE: "The newly discovered comet will be named after DeepPavlov team. More at 11.",
+            RESPONSE: Message(
+                text="The newly discovered comet will be named after DeepPavlov team. More at 11."
+            ),
             TRANSITIONS: {
                 "what_news": i_cnd.has_cls_label("consent"),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
         "ask_about_sport": {
-            RESPONSE: "i got news about sport, do you want to hear?",
+            RESPONSE: Message(text="i got news about sport, do you want to hear?"),
             TRANSITIONS: {
                 "sport_news": i_cnd.has_cls_label("consent"),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
         "sport_news": {
-            RESPONSE: "Did you know that an AI-controlled robot plays soccer better than humans?",
+            RESPONSE: Message(
+                text="Did you know that an AI-controlled robot plays soccer better than humans?"
+            ),
             TRANSITIONS: {
                 "what_news": i_cnd.has_cls_label("consent"),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
@@ -178,7 +193,7 @@ script = {
     },
     "small_talk": {
         "ask_some_questions": {
-            RESPONSE: "how are you",
+            RESPONSE: Message(text="how are you"),
             TRANSITIONS: {
                 "ask_talk_about": cnd.regexp("fine"),
                 ("animals", "like_animals"): i_cnd.has_cls_label("animals"),
@@ -186,7 +201,7 @@ script = {
             },
         },
         "ask_talk_about": {
-            RESPONSE: "what do you want to talk about",
+            RESPONSE: Message(text="what do you want to talk about"),
             TRANSITIONS: {
                 ("animals", "like_animals"): i_cnd.has_cls_label("animals"),
                 ("news", "what_news"): cnd.regexp("news|event"),
@@ -198,16 +213,19 @@ script = {
 
 # %%
 happy_path = [
-    ("hi", "how are you"),
-    ("fine", "what do you want to talk about"),
-    ("news", "what kind of news do you prefer?"),
-    ("science", "i got news about science, would you like to hear them?"),
+    (Message(text="hi"), Message(text="how are you")),
+    (Message(text="fine"), Message(text="what do you want to talk about")),
+    (Message(text="news"), Message(text="what kind of news do you prefer?")),
     (
-        "yes",
-        "The newly discovered comet will be named after DeepPavlov team. More at 11.",
+        Message(text="science"),
+        Message(text="i got news about science, would you like to hear them?"),
     ),
-    ("totally", "what kind of news do you prefer?"),
-    ("sport", "i got news about sport, do you want to hear?"),
+    (
+        Message(text="yes"),
+        Message(text="The newly discovered comet will be named after DeepPavlov team. More at 11."),
+    ),
+    (Message(text="totally"), Message(text="what kind of news do you prefer?")),
+    (Message(text="sport"), Message(text="i got news about sport, do you want to hear?")),
 ]
 
 

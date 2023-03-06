@@ -1,6 +1,6 @@
 import pytest
 
-from dff.script import Context
+from dff.script import Context, Message
 from dff.script.extras.conditions.dataset import Dataset
 from dff.script.extras.conditions.utils import LABEL_KEY
 from dff.script.extras.conditions.models.remote_api.async_mixin import AsyncMixin
@@ -58,7 +58,7 @@ async def test_mixin(testing_actor):
             return RESULT
 
     ctx = Context()
-    ctx.add_request(REQUEST)
+    ctx.add_request(Message(text=REQUEST))
     model = Model(namespace_key=NAMESPACE)
     new_ctx: Context = await model(ctx, testing_actor)
     assert isinstance(new_ctx.framework_states[LABEL_KEY], dict)

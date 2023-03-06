@@ -8,8 +8,8 @@ This module explains, how to use web-hosted huggingface models in your conversat
 
 # %%
 import os
-
-from dff.script.core.keywords import (
+from dff.script import (
+    Message,
     RESPONSE,
     PRE_TRANSITIONS_PROCESSING,
     GLOBAL,
@@ -56,19 +56,21 @@ script = {
     },
     "root": {
         LOCAL: {TRANSITIONS: {("service", "offer", 1.2): cnd.true()}},
-        "start": {RESPONSE: "Hi!"},
-        "fallback": {RESPONSE: "I can't quite get what you mean."},
+        "start": {RESPONSE: Message(text="Hi!")},
+        "fallback": {RESPONSE: Message(text="I can't quite get what you mean.")},
         "finish": {
-            RESPONSE: "Ok, see you soon!",
+            RESPONSE: Message(text="Ok, see you soon!"),
             TRANSITIONS: {("root", "start", 1.3): cnd.true()},
         },
     },
     "service": {
         "offer": {
-            RESPONSE: "Welcome to the e-marketplace. Tell us, what you would like to buy or sell."
+            RESPONSE: Message(
+                text="Welcome to the e-marketplace. Tell us, what you would like to buy or sell."
+            )
         },
-        "buy": {RESPONSE: "Unfortunately, the item is out of stock at the moment."},
-        "sell": {RESPONSE: "Your advertisement has been registered."},
+        "buy": {RESPONSE: Message(text="Unfortunately, the item is out of stock at the moment.")},
+        "sell": {RESPONSE: Message(text="Your advertisement has been registered.")},
     },
 }
 
@@ -84,18 +86,24 @@ pipeline = Pipeline.from_script(
 
 # %%
 happy_path = [
-    ("hi", "Welcome to the e-marketplace. Tell us, what you would like to buy or sell."),
     (
-        "I would like to buy a car",
-        "Unfortunately, the item is out of stock at the moment.",
+        Message(text="hi"),
+        Message(text="Welcome to the e-marketplace. Tell us, what you would like to buy or sell."),
     ),
-    ("ok", "I can't quite get what you mean."),
-    ("ok", "Welcome to the e-marketplace. Tell us, what you would like to buy or sell."),
     (
-        "sell a bike",
-        "Your advertisement has been registered.",
+        Message(text="I would like to buy a car"),
+        Message(text="Unfortunately, the item is out of stock at the moment."),
     ),
-    ("goodbye", "I can't quite get what you mean."),
+    (Message(text="ok"), Message(text="I can't quite get what you mean.")),
+    (
+        Message(text="ok"),
+        Message(text="Welcome to the e-marketplace. Tell us, what you would like to buy or sell."),
+    ),
+    (
+        Message(text="sell a bike"),
+        Message(text="Your advertisement has been registered."),
+    ),
+    (Message(text="goodbye"), Message(text="I can't quite get what you mean.")),
 ]
 
 
