@@ -58,7 +58,12 @@ SQL_STMT_MAPPING = {
 
 def add_to_zip(zip_file, path, zippath):
     """
-    Recursively add files from a folder to a zip-archive.
+    Recursively add files from a folder to a zip-archive. Recreates the standard
+    library function of the same name.
+
+    :param zip_file: file descriptor for source zip file.
+    :param path: path to target file or directory.
+    :param zippath: path to output zip file.
     """
     if os.path.isfile(path):
         zip_file.write(path, zippath, ZIP_DEFLATED)
@@ -74,6 +79,8 @@ def import_dashboard(
 ):
     """
     Import an Apache Superset dashboard to a local instance with specified arguments.
+
+    :param parsed_args: command line arguments produced by `argparse`.
     """
     zip_file = parsed_args.infile
     zip_filename = os.path.basename(zip_file)
@@ -143,6 +150,8 @@ def import_dashboard(
 def make_zip_config(parsed_args: argparse.Namespace):
     """
     Make a zip-archived Apache Superset dashboard config, using specified arguments.
+
+    :param parsed_args: command line arguments produced by `argparse`.
     """
     outfile_name = parsed_args.outfile
 

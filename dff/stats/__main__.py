@@ -40,6 +40,11 @@ from .cli import import_dashboard, make_zip_config
 
 
 def main(parsed_args: Optional[argparse.Namespace] = None):
+    """
+    Function that evokes procedures defined in `cli` module.
+
+    :param parsed_args: Set of command line arguments. If passed, overrides the command line contents.
+    """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="cmd", description="update or import config", required=True)
     opts_parser = subparsers.add_parser("cfg_from_opts")

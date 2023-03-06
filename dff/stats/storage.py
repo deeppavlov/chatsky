@@ -22,7 +22,7 @@ class StatsStorage(PoolSubscriber):
     for each instance.
 
     :param saver: An instance of the Saver class that is used to save the collected data.
-    :param batch_size: The number of records that should be accumulated before they get persisted to the db.
+    :param batch_size: The number of records that triggers the saving operations.
 
     """
 
@@ -51,5 +51,9 @@ class StatsStorage(PoolSubscriber):
     def from_uri(cls, uri: str, table: str = "df_stats", batch_size: int = 1):
         """
         Instantiates the saver from the given arguments.
+
+        :param uri: Database identifier.
+        :param table: Database table to use for data persistence.
+        :param batch_size: Number of records that will trigger the saving operation.
         """
         return cls(saver=make_saver(uri, table), batch_size=batch_size)

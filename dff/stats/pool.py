@@ -16,7 +16,7 @@ from .subscriber import PoolSubscriber
 class ExtractorPool:
     """
     This class can be used to store sets of wrappers for statistics collection a.k.a. extractors.
-    New wrappers can be added with the :py:meth:`new_extractor` decorator.
+    New wrappers can be added with the help of the :py:meth:`new_extractor` decorator.
     The added wrappers can be accessed by their name:
 
     .. code: python
@@ -62,6 +62,12 @@ class ExtractorPool:
         return extractor_wrapper
 
     def new_extractor(self, extractor: Callable) -> Callable:
+        """
+        This method is used to decorate functions that must be added
+        as new extractors.
+
+        :param extractor: Decorated extractor function.
+        """
         wrapped_extractor = self._wrap_extractor(extractor)
         self.extractors[extractor.__name__] = wrapped_extractor
         return self.extractors[extractor.__name__]
