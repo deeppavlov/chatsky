@@ -8,6 +8,7 @@ from dff.script import (
     PRE_RESPONSE_PROCESSING,
     Actor,
     Context,
+    Message,
 )
 from dff.script.conditions import true
 from dff.script.labels import repeat
@@ -19,8 +20,8 @@ def positive_test(samples, custom_class):
         try:
             res = custom_class(**sample)
             results += [res]
-        except Exception as exeption:
-            raise Exception(f"sample={sample} gets exception={exeption}")
+        except Exception as exception:
+            raise Exception(f"sample={sample} gets exception={exception}")
     return results
 
 
@@ -73,7 +74,7 @@ def test_actor():
     except ValueError:
         pass
     try:
-        # fail of response reterned Callable
+        # fail of response returned Callable
         actor = Actor(
             {"flow": {"node1": {RESPONSE: lambda c, a: lambda x: 1, TRANSITIONS: {repeat(): true()}}}},
             start_label=("flow", "node1"),
@@ -143,7 +144,7 @@ def test_call_limit():
                 PRE_RESPONSE_PROCESSING: {"rpl": check_call_limit(3, "ctx", "rpl")},
             },
             "node1": {
-                RESPONSE: check_call_limit(1, "r1", "flow1_node1"),
+                RESPONSE: check_call_limit(1, Message(text="r1"), "flow1_node1"),
                 PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow1_node1_tp1")},
                 TRANSITIONS: {
                     check_call_limit(1, ("flow1", "node2"), "cond flow1_node2"): check_call_limit(
@@ -155,7 +156,7 @@ def test_call_limit():
                 PRE_RESPONSE_PROCESSING: {"rp1": check_call_limit(1, "ctx", "flow1_node1_rp1")},
             },
             "node2": {
-                RESPONSE: check_call_limit(1, "r1", "flow1_node2"),
+                RESPONSE: check_call_limit(1, Message(text="r1"), "flow1_node2"),
                 PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow1_node2_tp1")},
                 TRANSITIONS: {
                     check_call_limit(1, ("flow2", "node1"), "cond flow2_node1"): check_call_limit(
@@ -178,7 +179,7 @@ def test_call_limit():
                 PRE_RESPONSE_PROCESSING: {"rpl": check_call_limit(2, "ctx", "rpl")},
             },
             "node1": {
-                RESPONSE: check_call_limit(1, "r1", "flow2_node1"),
+                RESPONSE: check_call_limit(1, Message(text="r1"), "flow2_node1"),
                 PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow2_node1_tp1")},
                 TRANSITIONS: {
                     check_call_limit(1, ("flow2", "node2"), "label flow2_node2"): check_call_limit(
@@ -190,7 +191,7 @@ def test_call_limit():
                 PRE_RESPONSE_PROCESSING: {"rp1": check_call_limit(1, "ctx", "flow2_node1_rp1")},
             },
             "node2": {
-                RESPONSE: check_call_limit(1, "r1", "flow2_node2"),
+                RESPONSE: check_call_limit(1, Message(text="r1"), "flow2_node2"),
                 PRE_TRANSITIONS_PROCESSING: {"tp1": check_call_limit(1, "ctx", "flow2_node2_tp1")},
                 TRANSITIONS: {
                     check_call_limit(1, ("flow1", "node1"), "label flow2_node2"): check_call_limit(
@@ -207,7 +208,7 @@ def test_call_limit():
     ctx = Context()
     actor = Actor(script=script, start_label=("flow1", "node1"), validation_stage=False)
     for i in range(4):
-        ctx.add_request("req1")
+        ctx.add_request(Message(text="req1"))
         ctx = actor(ctx)
     if limit_errors:
         error_msg = repr(limit_errors)

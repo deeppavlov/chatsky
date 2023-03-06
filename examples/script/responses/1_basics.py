@@ -8,9 +8,9 @@
 # %%
 from typing import NamedTuple
 
-from dff.script.responses import Response
+from dff.script import Message
 from dff.script.conditions import exact_match
-from dff.script import Context, RESPONSE, TRANSITIONS
+from dff.script import RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
@@ -19,44 +19,50 @@ from dff.utils.testing import check_happy_path, is_interactive_mode, run_interac
 toy_script = {
     "greeting_flow": {
         "start_node": {
-            RESPONSE: Response(text=""),
-            TRANSITIONS: {"node1": exact_match("Hi")},
+            RESPONSE: Message(text=""),
+            TRANSITIONS: {"node1": exact_match(Message(text="Hi"))},
         },
         "node1": {
-            RESPONSE: Response(text="Hi, how are you?"),
-            TRANSITIONS: {"node2": exact_match("i'm fine, how are you?")},
+            RESPONSE: Message(text="Hi, how are you?"),
+            TRANSITIONS: {"node2": exact_match(Message(text="i'm fine, how are you?"))},
         },
         "node2": {
-            RESPONSE: Response(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
+            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            TRANSITIONS: {"node3": exact_match(Message(text="Let's talk about music."))},
         },
         "node3": {
-            RESPONSE: Response(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
+            RESPONSE: Message(text="Sorry, I can not talk about music now."),
+            TRANSITIONS: {"node4": exact_match(Message(text="Ok, goodbye."))},
         },
         "node4": {
-            RESPONSE: Response(text="bye"),
-            TRANSITIONS: {"node1": exact_match("Hi")},
+            RESPONSE: Message(text="bye"),
+            TRANSITIONS: {"node1": exact_match(Message(text="Hi"))},
         },
         "fallback_node": {
-            RESPONSE: Response(text="Ooops"),
-            TRANSITIONS: {"node1": exact_match("Hi")},
+            RESPONSE: Message(text="Ooops"),
+            TRANSITIONS: {"node1": exact_match(Message(text="Hi"))},
         },
     }
 }
 
 happy_path = (
-    ("Hi", Response(text="Hi, how are you?")),
-    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
-    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
-    ("Ok, goodbye.", Response(text="bye")),
-    ("Hi", Response(text="Hi, how are you?")),
-    ("stop", Response(text="Ooops")),
-    ("stop", Response(text="Ooops")),
-    ("Hi", Response(text="Hi, how are you?")),
-    ("i'm fine, how are you?", Response(text="Good. What do you want to talk about?")),
-    ("Let's talk about music.", Response(text="Sorry, I can not talk about music now.")),
-    ("Ok, goodbye.", Response(text="bye")),
+    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
+    ),
+    (Message(text="Ok, goodbye."), Message(text="bye")),
+    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="stop"), Message(text="Ooops")),
+    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
+    ),
+    (Message(text="Ok, goodbye."), Message(text="bye")),
 )
 
 
@@ -65,24 +71,11 @@ class CallbackRequest(NamedTuple):
     payload: str
 
 
-def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.ui
-    if ui and ctx.last_response.ui.buttons:
-        try:
-            chosen_button = ui.buttons[int(ctx.last_request)]
-        except (IndexError, ValueError):
-            raise ValueError(
-                "Type in the index of the correct option" "to choose from the buttons."
-            )
-        ctx.last_request = CallbackRequest(payload=chosen_button.payload)
-
-
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    pre_services=[process_request],
 )
 
 if __name__ == "__main__":

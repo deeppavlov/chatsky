@@ -3,12 +3,12 @@
 # 1. Basics
 
 This notebook shows basic example of creating a simple dialog bot (agent).
-Let's do all the necessary imports from `dff`:
+Let's do all the necessary imports from `DFF`:
 """
 
 
 # %%
-from dff.script import Actor, TRANSITIONS, RESPONSE
+from dff.script import Actor, TRANSITIONS, RESPONSE, Message
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
 
@@ -46,35 +46,62 @@ toy_script = {
     "greeting_flow": {
         "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
-            RESPONSE: "",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            RESPONSE: Message(),
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
             # If "Hi" == request of the user then we make the transition.
         },
         "node1": {
-            RESPONSE: "Hi, how are you?",  # When the agent enters node1,
+            RESPONSE: Message(text="Hi, how are you?"),  # When the agent enters node1,
             # return "Hi, how are you?".
-            TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
+            TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
         },
         "node2": {
-            RESPONSE: "Good. What do you want to talk about?",
-            TRANSITIONS: {"node3": cnd.exact_match("Let's talk about music.")},
+            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            TRANSITIONS: {"node3": cnd.exact_match(Message(text="Let's talk about music."))},
         },
         "node3": {
-            RESPONSE: "Sorry, I can not talk about music now.",
-            TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
+            RESPONSE: Message(text="Sorry, I can not talk about music now."),
+            TRANSITIONS: {"node4": cnd.exact_match(Message(text="Ok, goodbye."))},
         },
         "node4": {
-            RESPONSE: "Bye",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            RESPONSE: Message(text="Bye"),
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
         },
         "fallback_node": {
             # We get to this node if the conditions
             # for switching to other nodes are not performed.
-            RESPONSE: "Ooops",
-            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
+            RESPONSE: Message(text="Ooops"),
+            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
         },
     }
 }
+
+
+happy_path = (
+    (Message(text="Hi"), Message(text="Hi, how are you?")),  # start_node -> node1
+    (
+        Message(text="I'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),  # node1 -> node2
+    (
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
+    ),  # node2 -> node3
+    (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
+    (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
+    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
+    (Message(text="stop"), Message(text="Ooops")),  # fallback_node -> fallback_node
+    (Message(text="Hi"), Message(text="Hi, how are you?")),  # fallback_node -> node1
+    (
+        Message(text="I'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),  # node1 -> node2
+    (
+        Message(text="Let's talk about music."),
+        Message(text="Sorry, I can not talk about music now."),
+    ),  # node2 -> node3
+    (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
+)
 
 
 # %% [markdown]
@@ -96,33 +123,6 @@ actor = Actor(
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
-
-happy_path = (
-    ("Hi", "Hi, how are you?"),  # start_node -> node1
-    (
-        "I'm fine, how are you?",
-        "Good. What do you want to talk about?",
-    ),  # node1 -> node2
-    (
-        "Let's talk about music.",
-        "Sorry, I can not talk about music now.",
-    ),  # node2 -> node3
-    ("Ok, goodbye.", "Bye"),  # node3 -> node4
-    ("Hi", "Hi, how are you?"),  # node4 -> node1
-    ("stop", "Ooops"),  # node1 -> fallback_node
-    ("stop", "Ooops"),  # fallback_node -> fallback_node
-    ("Hi", "Hi, how are you?"),  # fallback_node -> node1
-    (
-        "I'm fine, how are you?",
-        "Good. What do you want to talk about?",
-    ),  # node1 -> node2
-    (
-        "Let's talk about music.",
-        "Sorry, I can not talk about music now.",
-    ),  # node2 -> node3
-    ("Ok, goodbye.", "Bye"),  # node3 -> node4
-)
-
 
 # %% [markdown]
 """

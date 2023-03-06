@@ -1,15 +1,20 @@
 """
 Responses
----------------------------
-Responses are one of the most important components of the dialog graph,
-which determine response for each node of a dialog graph.
-This is a standard set of responses.
+---------
+Responses determine the response that will be sent to the user for each node of the dialog graph.
+Responses are used to provide the user with information, ask questions,
+or guide the conversation in a particular direction.
+
+This module provides only one predefined response function that can be used to quickly
+respond to the user and keep the conversation flowing.
 """
 import random
-from dff.script import Context, Actor
+from typing import List
+
+from dff.script import Context, Actor, Message
 
 
-def choice(responses: list):
+def choice(responses: List[Message]):
     """
     Function wrapper that takes the list of responses as an input
     and returns handler which outputs a response randomly chosen from that list.

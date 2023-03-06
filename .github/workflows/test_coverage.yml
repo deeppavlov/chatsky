@@ -10,6 +10,9 @@ on:
     - dev
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:
   test_coverage:
@@ -29,15 +32,15 @@ jobs:
         with:
           python-version: "3.10"
 
-      - name: install package
+      - name:  build & install package
         run: |
           python -m pip install build
           python -m build
           find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
 
-      - name: prepare testing environment
+      - name: clean environment
         run: |
-          export backup_files=( tests examples .env_file makefile )
+          export backup_files=( tests examples .env_file makefile .coveragerc )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
@@ -51,11 +54,9 @@ jobs:
           name: "gdf_account.json"
           json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
+      - name: set up mutex
+        uses: ben-z/gh-action-mutex@v1.0-alpha-6
+
       - name: run tests
         run: |
           make test
-        shell: bash
-        env:
-          RASA_API_KEY: rasa
-          HF_API_KEY: ${{ secrets.HF_API_KEY }}
-          GDF_ACCOUNT_JSON: ./gdf_account.json
