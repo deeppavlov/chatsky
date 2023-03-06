@@ -35,9 +35,18 @@ jobs:
             sudo apt install pandoc
             make venv
 
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
+
       - name: build documentation
         run: |
             make doc
+        env:
+          GDF_ACCOUNT_JSON: .gdf_account.json
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll

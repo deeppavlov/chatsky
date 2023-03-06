@@ -34,18 +34,24 @@ class BaseModel(ABC):
     def predict(self, request: str) -> dict:
         """
         Predict the probability of one or several classes.
+
+        :param request: Any string.
         """
         raise NotImplementedError
 
     def transform(self, request: str):
         """
         Get a representation of the input data.
+
+        :param request: Any string.
         """
         raise NotImplementedError
 
     def fit(self, dataset: Dataset) -> None:
         """
         Reinitialize the inner model with the given data.
+
+        :param dataset: Data formatted as required by the `Dataset` class.
         """
         raise NotImplementedError
 
@@ -71,6 +77,9 @@ class BaseModel(ABC):
     def save(self, path: str, **kwargs) -> None:
         """
         Save the model to a specified location.
+
+        :param path: string-formatted path. If tokenizer state
+        needs to be saved, the path is used as the base.
         """
         raise NotImplementedError
 
@@ -78,5 +87,8 @@ class BaseModel(ABC):
     def load(cls, path: str, namespace_key: str) -> __qualname__:
         """
         Load a model from the specified location and instantiate the model.
+
+        :param path: String formatted path.
+        :param namespace_key: Namespace key for the target model.
         """
         raise NotImplementedError
