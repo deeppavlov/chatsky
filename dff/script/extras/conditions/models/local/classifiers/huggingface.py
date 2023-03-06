@@ -1,6 +1,6 @@
 """
 HuggingFace classifier
-***********************
+----------------------
 
 This module provides an adapter interface for Hugging Face models.
 Use pre-trained NLU classifiers to make the most of your conversational data.
@@ -33,7 +33,7 @@ class HFClassifier(BaseHFModel):
         super().__init__(*args, **kwargs)
         if not torch_available:
             raise ImportError("`torch` missing. Try `pip install dff[huggingface].`.")
-        self.sofmax = Softmax()
+        self.sofmax = Softmax(dim=0)
 
     def predict(self, request: str) -> dict:
         model_output = self.call_model(request)

@@ -1,6 +1,6 @@
 """
 Gensim Cosine Model
---------------------------
+-------------------
 
 This module provides an adapter interface for Gensim models.
 We use word2vec embeddings to compute distances between utterances.

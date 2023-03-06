@@ -60,3 +60,5 @@ jobs:
       - name: run tests
         run: |
           make test
+        env:
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}

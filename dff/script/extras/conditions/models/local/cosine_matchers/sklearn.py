@@ -1,6 +1,6 @@
 """
 Sklearn Cosine Matcher
---------------------------
+----------------------
 
 This module provides an adapter interface for sklearn models.
 It uses Sklearn BOW representations and other features to compute distances between utterances.

@@ -1,6 +1,6 @@
 """
 Regex Classifier
-*****************
+----------------
 
 This module provides a regex-based labelling model.
 Initialize it with a :py:class:`~Dataset` with regex-compliant examples.

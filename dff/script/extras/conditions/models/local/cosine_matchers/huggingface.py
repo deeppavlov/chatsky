@@ -1,6 +1,6 @@
 """
 HuggingFace Cosine Model
---------------------------
+------------------------
 
 This module provides an adapter interface for Huggingface models.
 It leverages transformer embeddings to compute distances between utterances.
