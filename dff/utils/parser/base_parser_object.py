@@ -114,7 +114,7 @@ class BaseParserObject(ABC):
             return self
         child = self.children.get(path[0])
         if child is None:
-            raise KeyError(f"Not found key {path[0]} in {repr(self)}")
+            raise KeyError(f"Not found key {path[0]} in {str(self)}")
         return child.resolve_path(path[1:])
 
     @cached_property
@@ -122,9 +122,9 @@ class BaseParserObject(ABC):
         """Path to this node from the tree root node
         """
         if self._name is None:
-            raise RuntimeError(f"Name is not set: {repr(self)}")
+            raise RuntimeError(f"Name is not set: {str(self)}")
         if self.parent is None:
-            raise RuntimeError(f"Parent is not set: {repr(self)}")
+            raise RuntimeError(f"Parent is not set: {str(self)}")
         return self.parent.path + (self._name,)
 
     @cached_property
@@ -132,7 +132,7 @@ class BaseParserObject(ABC):
         """Namespace this object belongs to
         """
         if self.parent is None:
-            raise RuntimeError(f"Parent is not set: {repr(self)}")
+            raise RuntimeError(f"Parent is not set: {str(self)}")
         return self.parent.namespace
 
     @cached_property
@@ -155,7 +155,7 @@ class BaseParserObject(ABC):
         """
 
     def __repr__(self) -> str:
-        return self.__class__.__name__ + "(" + self.dump() + ")"
+        return self.__class__.__name__ + "(dump=" + self.dump() + "; true_value=" + self.true_value() + ")"
 
     def __str__(self) -> str:
         return self.dump()
@@ -334,7 +334,7 @@ class Import(Statement, ReferenceObject):
         namespace_name = self.namespace.resolve_relative_import(self.module)
         namespace = self.dff_project.get_namespace(namespace_name)
         if namespace is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nNamespace {namespace_name} not found")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nNamespace {namespace_name} not found")
             return None
         return namespace
 
@@ -383,14 +383,14 @@ class ImportFrom(Statement, ReferenceObject):
         namespace_name = self.namespace.resolve_relative_import(self.module, self.level)
         namespace = self.dff_project.get_namespace(namespace_name)
         if namespace is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nNamespace {namespace_name} not found")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nNamespace {namespace_name} not found")
             return None
         if not is_instance(namespace, "dff.utils.parser.namespace.Namespace"):
             raise RuntimeError(namespace)
 
         obj = namespace.get_object(self.obj)
         if obj is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nObject {self.obj} not found in namespace {namespace}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nObject {self.obj} not found in namespace {namespace}")
             return None
 
         return obj
@@ -729,11 +729,10 @@ class Name(Expression, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        try:
-            return self.namespace[self.name]
-        except KeyError as error:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
-            return None
+        result = self.namespace.get_object(self.name)
+        if result is None:
+            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nObject {self.name} not found in {self.namespace}")
+        return result
 
     @cached_property
     def referenced_object(self) -> str:
@@ -783,7 +782,7 @@ class Attribute(Expression, ReferenceObject):
                 value = tp.cast('Namespace', value)
                 return value[self.attr]
         except KeyError as error:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nKeyError: {error}")
+            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nKeyError: {error}")
         return None
 
     @cached_property
@@ -834,7 +833,7 @@ class Subscript(Expression, ReferenceObject):
         if isinstance(index, ReferenceObject):
             index = index.absolute
 
-        debug_message = f"{self.__class__.__name__} did not resolve: {repr(self)}"
+        debug_message = f"{self.__class__.__name__} did not resolve: {str(self)}"
 
         if value is None:
             logger.debug(f"{debug_message}\nValue did not resolve: {self.children['value']}")
