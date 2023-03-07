@@ -190,7 +190,7 @@ class DFFProject(BaseParserObject):
             for key, value in node_info.items():
                 str_key = str(key)
                 if isinstance(key, ReferenceObject):
-                    str_key = str(key.resolve_name)
+                    str_key = key.referenced_object
                 if str_key not in keyword_list:
                     raise ScriptValidationError(f"Node key {str_key} is not a keyword")
                 if str_key in keyword_dict["GLOBAL"]:
@@ -397,8 +397,8 @@ class DFFProject(BaseParserObject):
                     kwargs["script_initializer"] = namespace.name + ":" + si
 
             for imported_file in namespace.get_imports():
-                if ".".join(imported_file) not in namespaces.keys():
-                    path = project_root_dir.joinpath(*imported_file).with_suffix(".py")
+                if imported_file not in namespaces.keys():
+                    path = project_root_dir.joinpath(*imported_file.split(".")).with_suffix(".py")
                     if path.exists():
                         _process_file(path)
 

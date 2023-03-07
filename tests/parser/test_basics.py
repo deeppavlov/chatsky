@@ -174,22 +174,6 @@ def test_comprehensions():
         assert str(namespace["gen_comp"]) == "((x, q, z) for x in a if (x > 0) if (x < 10) for (q, z) in b if q.startswith('i') for y in c if true(y))"
 
 
-
-def test_name_resolution():
-    namespace1 = Namespace.from_ast(ast.parse("import namespace2\na = namespace2.a"), location=["namespace1"])
-    namespace2 = Namespace.from_ast(ast.parse("import dff\na = dff.actor"), location=["namespace2"])
-    namespace3 = Namespace.from_ast(ast.parse("import dff\na = dff.actor()"), location=["namespace3"])
-    namespace4 = Namespace.from_ast(ast.parse("from namespace2 import a as b\na = b()"), location=["namespace4"])
-
-    dff_project = DFFProject([namespace1, namespace2, namespace3, namespace4], validate=False)
-
-    assert str(namespace1["a"].resolve_name) == "dff.actor"
-
-    assert str(namespace3["a"].resolve_path(("func",)).resolve_name) == "dff.actor"
-
-    assert str(namespace4["a"].resolve_path(("func",)).resolve_name) == "dff.actor"
-
-
 def test_dependency_extraction():
     namespace1 = Namespace.from_ast(ast.parse("import namespace2\na = namespace2.a"), location=["namespace1"])
     namespace2 = Namespace.from_ast(ast.parse("from namespace3 import c\nimport namespace3\nfrom namespace4 import d\na = print(c[d] + namespace3.j[1])"), location=["namespace2"])

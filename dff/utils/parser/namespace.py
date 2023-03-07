@@ -27,12 +27,12 @@ class Namespace(BaseParserObject):
         for key, value in names.items():
             self.add_child(value, key)
 
-    def resolve_relative_import(self, module: str, level: int = 0) -> tp.List[str]:
+    def resolve_relative_import(self, module: str, level: int = 0) -> str:
         """Find a location of a namespace referenced by `level * "." + module` in this namespace
 
         :param module: Name of the module
         :param level: Relative position of the module
-        :return: A location of the module
+        :return: A location of the module (a string representing path to the module separated by dots).
         """
         stripped_module = module.lstrip(".")
         leading_dots = len(module) - len(stripped_module)
@@ -45,7 +45,7 @@ class Namespace(BaseParserObject):
             level = 1
         if level > len(self.location):
             raise ImportError(f"Cannot import file outside the project_root_dir\nCurrent file location={self.location}\nAttempted import of {module} at level {level}")
-        return self.location[:-level] + (stripped_module.split('.') if stripped_module != "" else [])
+        return ".".join(self.location[:-level] + ([stripped_module] if stripped_module else []))
 
     @cached_property
     def namespace(self) -> 'Namespace':
@@ -105,7 +105,7 @@ class Namespace(BaseParserObject):
     def dump(self, current_indent=0, indent=4, object_filter: tp.Set[str] = None) -> str:
         return self.dump_statements([value for key, value in self.children.items() if object_filter is None or key in object_filter])
 
-    def get_imports(self) -> tp.List[tp.List[str]]:
+    def get_imports(self) -> tp.List[str]:
         """Return a list of imported modules (represented by their locations)
         """
         imports = []

@@ -300,32 +300,19 @@ class ReferenceObject(BaseParserObject, ABC):
 
     @cached_property
     @abstractmethod
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:
-        """Same as :py:meth:`ReferenceObject.absolute` but instead of returning None at failed resolution
-        returns a pseudo (not tied to any Namespace) object that represents the location of the referenced object
-        e.g. `ImportFrom("from typing import Dict").resolve_name' would return `Attribute(Name("typing")."Dict")`
-
-        :return:
-            :py:meth:`ReferenceObject.absolute` or a BaseParserObject the str of which represents the referenced object
+    def referenced_object(self) -> str:
         """
-        ...
+        Return a path of a referenced object (as well as modifiers such as indexes or attribute references).
+
+        So if `ReferenceObject` is `from dff import pipeline as pl` referenced_object` for `pl` is `dff.pipeline`.
+        However, if `ReferencedObject` is `pl.Pipeline` or `pl.dictionary[pl.number][5]` then their `referenced_object`s
+        are, respectively, `dff.pipeline.Pipeline` and `dff.pipeline.dictionary[dff.pipeline.number][5]`.
+        """
 
     def true_value(self) -> str:
-        return self.resolve_name.dump()
-
-
-def module_name_to_expr(module_name: tp.List[str]) -> tp.Union['Name', 'Attribute']:
-    """Convert a module name in the form of a dot-separated string to an instance of Attribute or Name
-
-    :param module_name: a list of strings that represent a module or its objects
-    :return: An instance of an object that would represent `module_name`
-    """
-    if len(module_name) == 0:
-        raise RuntimeError("Empty name")
-    result: tp.Union[Name, Attribute] = Name(module_name[0])
-    for attr in module_name[1:]:
-        result = Attribute(result, attr)
-    return result
+        if self.absolute is not None:
+            return str(self.absolute)
+        return self.referenced_object
 
 
 class Import(Statement, ReferenceObject):
@@ -344,7 +331,7 @@ class Import(Statement, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        namespace_name = ".".join(self.namespace.resolve_relative_import(self.module))
+        namespace_name = self.namespace.resolve_relative_import(self.module)
         namespace = self.dff_project.get_namespace(namespace_name)
         if namespace is None:
             logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nNamespace {namespace_name} not found")
@@ -352,8 +339,8 @@ class Import(Statement, ReferenceObject):
         return namespace
 
     @cached_property
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:
-        return self.absolute or module_name_to_expr(self.module.split("."))
+    def referenced_object(self) -> str:
+        return self.namespace.resolve_relative_import(self.module)
 
     @classmethod
     @tp.overload
@@ -393,7 +380,7 @@ class ImportFrom(Statement, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        namespace_name = ".".join(self.namespace.resolve_relative_import(self.module, self.level))
+        namespace_name = self.namespace.resolve_relative_import(self.module, self.level)
         namespace = self.dff_project.get_namespace(namespace_name)
         if namespace is None:
             logger.debug(f"{self.__class__.__name__} did not resolve: {repr(self)}\nNamespace {namespace_name} not found")
@@ -409,15 +396,15 @@ class ImportFrom(Statement, ReferenceObject):
         return obj
 
     @cached_property
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+    def referenced_object(self) -> str:
         resolved = self._resolve_once
         if isinstance(resolved, ReferenceObject):
-            resolved = resolved.resolve_name
+            return resolved.referenced_object
         if self.level > 0:
-            substitute_module_name = self.namespace.resolve_relative_import(self.module, self.level) + [self.obj]
+            substitute_module_name = self.namespace.resolve_relative_import(self.module, self.level) + "." + self.obj
         else:
-            substitute_module_name = self.module.split(".") + [self.obj]
-        return resolved or module_name_to_expr(substitute_module_name)
+            substitute_module_name = self.module + "." + self.obj
+        return substitute_module_name
 
     @classmethod
     @tp.overload
@@ -749,11 +736,11 @@ class Name(Expression, ReferenceObject):
             return None
 
     @cached_property
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+    def referenced_object(self) -> str:
         resolved = self._resolve_once
         if isinstance(resolved, ReferenceObject):
-            return resolved.resolve_name
-        return resolved or self
+            return resolved.referenced_object
+        return ".".join([*self.namespace.location, self.name])
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.name
@@ -800,11 +787,12 @@ class Attribute(Expression, ReferenceObject):
         return None
 
     @cached_property
-    def resolve_name(self) -> tp.Optional[BaseParserObject]:
+    def referenced_object(self) -> str:
+        resolved = self._resolve_once
+        if isinstance(resolved, ReferenceObject):
+            return resolved.referenced_object
         value = self.children["value"]
-        if isinstance(value, ReferenceObject):
-            value = value.resolve_name
-        return self._resolve_once or Attribute(value, self.attr)
+        return value.true_value() + "." + self.attr
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.children["value"].dump(current_indent, indent) + "." + self.attr
@@ -864,14 +852,13 @@ class Subscript(Expression, ReferenceObject):
         return result
 
     @cached_property
-    def resolve_name(self) -> BaseParserObject:
+    def referenced_object(self) -> str:
+        resolved = self._resolve_once
+        if isinstance(resolved, ReferenceObject):
+            return resolved.referenced_object
         value = self.children["value"]
-        if isinstance(value, ReferenceObject):
-            value = value.resolve_name
         index = self.children["index"]
-        if isinstance(index, ReferenceObject):
-            index = index.resolve_name
-        return self._resolve_once or Subscript(value, index)
+        return value.true_value() + "[" + index.true_value() + "]"
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         return self.children["value"].dump(current_indent, indent) + "[" + self.children["index"].dump(current_indent,
@@ -1023,7 +1010,7 @@ class Call(Expression):
         """
         func = self.children["func"]
         if isinstance(func, ReferenceObject):
-            return str(func.resolve_name)
+            return func.referenced_object
         return str(func)
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
