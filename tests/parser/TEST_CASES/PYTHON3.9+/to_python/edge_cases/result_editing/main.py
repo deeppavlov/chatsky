@@ -12,6 +12,8 @@ def func():
     some_func(some_var)
 
 
+unused_var = 1
+
 var = some_var
 
 script = {

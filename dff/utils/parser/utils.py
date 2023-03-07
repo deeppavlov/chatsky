@@ -3,7 +3,7 @@ from collections.abc import Iterable as abc_Iterable
 
 
 # todo: remove this when python3.8 support is dropped
-def remove_prefix(self: str, prefix: str) -> str:
+def remove_prefix(self: str, prefix: str) -> str:  # pragma: no cover
     if self.startswith(prefix):
         return self[len(prefix):]
     else:
@@ -11,7 +11,7 @@ def remove_prefix(self: str, prefix: str) -> str:
 
 
 # todo: remove this when python3.8 support is dropped
-def remove_suffix(self: str, suffix: str) -> str:
+def remove_suffix(self: str, suffix: str) -> str:  # pragma: no cover
     # suffix='' should not call self[:-0].
     if suffix and self.endswith(suffix):
         return self[:-len(suffix)]

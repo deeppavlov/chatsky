@@ -1,6 +1,7 @@
 from pathlib import Path
 from shutil import copytree
 from sys import version_info
+from tempfile import TemporaryDirectory
 
 import pytest
 
@@ -53,27 +54,25 @@ def test_conversions(test_case: str, tmp_path):
         str(working_dir) for working_dir in (TEST_DIR / "to_python").iterdir()
     ]
 )
-def test_to_python(test_case: str, tmp_path):
+def test_to_python(test_case: str):
     working_dir = Path(test_case)
 
     dff_project = DFFProject.from_yaml(working_dir / "script.yaml")
 
     # test creation
+    with TemporaryDirectory() as tmpdir:
+        created = Path(tmpdir)
+        dff_project.to_python(created)
 
-    created = tmp_path / "created"
-    created.mkdir()
-
-    dff_project.to_python(created)
-
-    assert_dirs_equal(working_dir / "result_creating", created)
+        assert_dirs_equal(working_dir / "result_creating", created)
 
     # test editing
+    with TemporaryDirectory() as tmpdir:
+        edited = Path(copytree(working_dir / "initial_files", tmpdir + "/edited"))
 
-    edited = copytree(working_dir / "initial_files", tmp_path / "edited")
+        dff_project.to_python(edited)
 
-    dff_project.to_python(edited)
-
-    assert_dirs_equal(working_dir / "result_editing", edited)
+        assert_dirs_equal(working_dir / "result_editing", edited)
 
 
 @pytest.mark.parametrize(

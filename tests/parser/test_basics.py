@@ -1,9 +1,12 @@
 import ast
 from sys import version_info
+from pathlib import Path
+from tempfile import TemporaryDirectory
 
 from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.dff_project import DFFProject
+from .utils import assert_dirs_equal
 
 
 def test_just_works():
@@ -138,7 +141,7 @@ def test_call():
     call = namespace["a"]
 
     assert isinstance(call, Call)
-    assert repr(call.resolve_path(("func",))) == "Name(Actor)"
+    assert repr(call.resolve_path(("func",))) == "Name(dump=Actor; true_value=Actor)"
     assert call.resolve_path(("arg_1",)) == Python.from_str("2")
     assert call.resolve_path(("keyword_c",)) == Python.from_str("3")
     assert call.func_name == "Actor"
@@ -196,3 +199,48 @@ def test_eq_operator():
 
     assert "dff.keywords.RESPONSE" == namespace["a"]
     assert namespace['b'] in ["dff.keywords.RESPONSE"]
+
+
+def test_long_import_chain():
+    dff_project = DFFProject.from_dict(
+        {
+            "main": {
+                "imp": "from imp_1 import imp"
+            },
+            "imp_1": {
+                "imp": "from imp_2 import imp"
+            },
+            "imp_2": {
+                "imp": "from module.imp import obj"
+            },
+            "module.imp": {
+                "obj": "from variables import number"
+            },
+            "module.variables": {
+                "number": "1"
+            }
+        },
+        validate=False
+    )
+
+    assert dff_project["main"]["imp"].absolute == "1"
+    assert dff_project["main"]["imp"] == "1"
+
+
+def test_namespace_filter():
+    init_file = "from dff.pipeline import Pipeline\nunused_var=1\npipeline=Pipeline.from_script({'':{'':{}}},('',''))"
+    clean_file = "from dff.pipeline import Pipeline\npipeline=Pipeline.from_script({'':{'':{}}},('',''))"
+
+    with TemporaryDirectory() as tmpdir, TemporaryDirectory() as tmpdir_clean:
+        file = Path(tmpdir) / "main.py"
+        file.touch()
+        with open(file, "w", encoding="utf-8") as fd:
+            fd.write(init_file)
+        file_clean = Path(tmpdir_clean) / "main.py"
+        file_clean.touch()
+        with open(file_clean, "w", encoding="utf-8") as fd:
+            fd.write(clean_file)
+        with TemporaryDirectory() as result, TemporaryDirectory() as correct_result:
+            DFFProject.from_python(Path(tmpdir), file).to_python(Path(result))
+            DFFProject.from_python(Path(tmpdir_clean), file_clean).to_python(Path(correct_result))
+            assert_dirs_equal(Path(result), Path(correct_result))
