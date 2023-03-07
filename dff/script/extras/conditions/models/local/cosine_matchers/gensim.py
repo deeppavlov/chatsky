@@ -1,7 +1,6 @@
 """
 Gensim Cosine Model
--------------------
-
+--------------------
 This module provides an adapter interface for Gensim models.
 We use word2vec embeddings to compute distances between utterances.
 """
@@ -33,6 +32,7 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
     :param tokenizer: Class or function that performs string tokenization.
     :param namespace_key: Name of the namespace in framework states that the model will be using.
     :param kwargs: Keyword arguments are forwarded to the model constructor.
+
     """
 
     def __init__(

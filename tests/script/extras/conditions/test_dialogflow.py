@@ -1,5 +1,6 @@
 import os
 import pytest
+import ast
 
 from dff.script.extras.conditions.models.remote_api.google_dialogflow_model import (
     GoogleDialogFlowModel,
@@ -12,7 +13,8 @@ from dff.script.extras.conditions.models.remote_api.google_dialogflow_model impo
 def testing_model():
     gdf_json = os.getenv("GDF_ACCOUNT_JSON")
     if gdf_json:
-        yield GoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="dialogflow")
+        gdf_eval = ast.literal_eval(gdf_json)
+        yield GoogleDialogFlowModel(model=gdf_eval, namespace_key="dialogflow")
     else:
         yield None
 
@@ -21,7 +23,8 @@ def testing_model():
 def testing_async_model():
     gdf_json = os.getenv("GDF_ACCOUNT_JSON")
     if gdf_json:
-        yield AsyncGoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="gdf_async")
+        gdf_eval = ast.literal_eval(gdf_json)
+        yield AsyncGoogleDialogFlowModel(model=gdf_eval, namespace_key="gdf_async")
     else:
         yield None
 

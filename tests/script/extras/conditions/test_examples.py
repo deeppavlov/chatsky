@@ -15,9 +15,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
     [
         ("1_base_example", None),
         ("7_rasa", os.getenv("RASA_API_KEY") is None),
-        (
-            "5_dialogflow",
-            not (os.getenv("GDF_ACCOUNT_JSON") and os.path.exists(os.getenv("GDF_ACCOUNT_JSON")))),
+        ("5_dialogflow", os.getenv("GDF_ACCOUNT_JSON") is None),
         ("6_hf_api", os.getenv("HF_API_KEY") is None),
         ("2_gensim_example", None),
         ("4_sklearn_example", None),
