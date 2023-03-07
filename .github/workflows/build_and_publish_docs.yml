@@ -26,6 +26,12 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
+
       - name: Build images
         run: |
           docker-compose up -d
@@ -34,12 +40,6 @@ jobs:
         run: |
             sudo apt install pandoc
             make venv
-
-      - name: Create gdf_account.json
-        uses: jsdaniell/create-json@v1.2.1
-        with:
-          name: "gdf_account.json"
-          json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
       - name: build documentation
         run: |
