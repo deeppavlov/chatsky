@@ -26,12 +26,6 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Create gdf_account.json
-        uses: jsdaniell/create-json@v1.2.1
-        with:
-          name: "gdf_account.json"
-          json: ${{ secrets.GDF_ACCOUNT_JSON }}
-
       - name: Build images
         run: |
           docker-compose up -d
@@ -45,7 +39,7 @@ jobs:
         run: |
             make doc
         env:
-          GDF_ACCOUNT_JSON: .gdf_account.json
+          GDF_ACCOUNT_JSON: ${{ secrets.GDF_ACCOUNT_JSON }}
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
 
       - name: remove jekyll theming

@@ -8,6 +8,7 @@ The example below demonstrates, how to integrate Google Dialogflow into your scr
 
 # %%
 import os
+import ast
 
 from dff.script import (
     Message,
@@ -40,10 +41,9 @@ you can use them to construct the class.
 
 
 # %%
-gdf_model = GoogleDialogFlowModel.from_file(
-    filename=os.getenv("GDF_ACCOUNT_JSON", ""), namespace_key="dialogflow"
+gdf_model = GoogleDialogFlowModel(
+    model=ast.literal_eval(os.getenv("GDF_ACCOUNT_JSON", "{}")), namespace_key="dialogflow"
 )
-
 
 # %%
 script = {
