@@ -37,7 +37,7 @@ jobs:
 
       - name: build documentation
         env:
-          GTIHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
             make doc
 

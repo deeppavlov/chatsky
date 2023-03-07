@@ -35,7 +35,7 @@ def run_github_api_releases_query(pagination, retries_count: int = 5) -> Tuple[L
     :param retries_count: number of retries if query is not successful.
     :return: tuple of list of release info and pagination info.
     """
-    headers = {"Authorization": f"Bearer {environ['GTIHUB_API_TOKEN']}"}
+    headers = {"Authorization": f"Bearer {environ['GITHUB_API_TOKEN']}"}
     res = post(
         "https://api.github.com/graphql",
         json={"query": Template(release_notes_query).substitute(pagination=pagination)},
@@ -73,12 +73,12 @@ def pull_release_notes_from_github(path: str = "docs/source/release_notes.rst"):
     """
     Fetch GitHub release info and dump it into file.
     Each release is represented with a header with description content.
-    If 'GTIHUB_API_TOKEN' is not in environment variables, throws a warning.
+    If 'GITHUB_API_TOKEN' is not in environment variables, throws a warning.
 
     :param path: path to output .RST file.
     """
-    if "GTIHUB_API_TOKEN" not in environ:
-        logger.warning("GitHub API token not defined ('GTIHUB_API_TOKEN' environmental variable not set)!")
+    if "GITHUB_API_TOKEN" not in environ:
+        logger.warning("GitHub API token not defined ('GITHUB_API_TOKEN' environmental variable not set)!")
         return
     with open(Path(path), "w") as file:
         for name, desc in get_github_releases_paginated():
