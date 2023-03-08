@@ -83,4 +83,4 @@ def pull_release_notes_from_github(path: str = "docs/source/release_notes.rst"):
     with open(Path(path), "w") as file:
         for name, desc in get_github_releases_paginated():
             description = "\n   ".join(desc.split("\n"))
-            file.write(f"{name}\n{'-' * len(name)}\n\n.. raw:: html\n\n   {description}\n\n\n")
+            file.write(f"{name}\n{'^' * len(name)}\n\n.. raw:: html\n\n   {description}\n\n\n")
