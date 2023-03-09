@@ -122,10 +122,10 @@ def import_dashboard(
                 "Authorization": f"Bearer {access_token}",
                 "X-CSRFToken": csrf_token,
             },
-            data=json.dumps({
-                "passwords": {"databases/dff_database.yaml": db_password},
-                "overwrite": True,
-            }),
+            data={
+                "passwords": '{"databases/dff_database.yaml":"' + db_password + '"}',
+                "overwrite": "true",
+            },
             files=[("formData", (zip_filename, f, "application/zip"))],
             timeout=10,
         )
