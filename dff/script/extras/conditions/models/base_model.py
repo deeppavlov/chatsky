@@ -20,7 +20,6 @@ class BaseModel(ABC):
     to be stored in a separate namespace inside the :py:class:`~dff.script.Context` object.
 
     :param namespace_key: Name of the namespace in framework states that the model will be using.
-
     """
 
     def __init__(self, namespace_key: str = "default") -> None:
@@ -78,7 +77,7 @@ class BaseModel(ABC):
         Save the model to a specified location.
 
         :param path: string-formatted path. If tokenizer state
-        needs to be saved, the path is used as the base.
+            needs to be saved, the path is used as the base.
         """
         raise NotImplementedError
 

@@ -35,7 +35,6 @@ class BaseSklearnModel(BaseModel):
         Example: TfidfVectorizer. Can also be a product of several preprocessors,
         unified with a pipeline.
     :param namespace_key: Name of the namespace in framework states that the model will be using.
-
     """
 
     def __init__(
