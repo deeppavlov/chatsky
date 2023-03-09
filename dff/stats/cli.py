@@ -102,13 +102,13 @@ def import_dashboard(
     # get access token
     access_request = session.post(
         login_url,
-        headers={"Accept": "*/*", "Content-Type": "application/json"},
+        headers={"Content-Type": "application/json"},
         data={"username": username, "password": password, "refresh": True, "provider": "db"},
     )
     access_request.raise_for_status()
     access_token = access_request.json()["access_token"]
     # get csrf_token
-    csrf_request = session.get(csrf_url, headers={"Accept": "*/*", "Authorization": f"Bearer {access_token}"})
+    csrf_request = session.get(csrf_url, headers={"Authorization": f"Bearer {access_token}"})
     csrf_request.raise_for_status()
     csrf_token = csrf_request.json()["result"]
 
@@ -118,7 +118,6 @@ def import_dashboard(
             "POST",
             import_dashboard_url,
             headers={
-                "Accept": "application/json",
                 "Authorization": f"Bearer {access_token}",
                 "X-CSRFToken": csrf_token,
             },
