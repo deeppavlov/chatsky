@@ -93,7 +93,7 @@ def import_dashboard(
     while tries < 10:
         try:
             tries += 1
-            response = requests.get(base_url, timeout=10)
+            response = requests.get(f"{base_url}/healthcheck", timeout=10)
             response.raise_for_status()
             break
         except Exception:
@@ -112,17 +112,17 @@ def import_dashboard(
         "Accept-Language": "en-US,en;q=0.9",
     }
 
-    response = session.request("GET", login_url, headers=headers, data=payload, timeout=10)
+    response = session.request("GET", login_url, headers=headers, timeout=10)
     csrf_token = response.text.split('<input id="csrf_token" name="csrf_token" type="hidden" value="')[1].split('">')[0]
 
-    payload = f"csrf_token={csrf_token}&username={username}&password={password}"
+    payload = {"csrf_token": csrf_token, "username": username, "password": password}
     headers = {
         "Accept": (
             "text/html,application/xhtml+xml,application/xml;"
             + "q=0.9,image/avif,image/webp,image/apng,*/*;"
             + "q=0.8,application/signed-exchange;v=b3;q=0.9"
         ),
-        "Content-Type": "application/x-www-form-urlencoded",
+        "Content-Type": "application/json",
     }
 
     session.request("POST", login_url, headers=headers, data=payload, allow_redirects=False)
