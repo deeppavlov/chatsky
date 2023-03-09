@@ -40,39 +40,56 @@ Module name names addon state, or your own module state. For example module name
 # TODO: change example
 
 
-# TODO: add description for each stage of ActorStage
 class ActorStage(Enum):
     """
     The class which holds keys for the handlers. These keys are used
-    for the actions of :py:class:`~dff.script.Actor`.
+    for the actions of :py:class:`.Actor`. Each stage represents
+    a specific step in the conversation flow. Here is a brief description
+    of each stage.
     """
 
-    #: This stage is used for the context initializing.
+    #: This stage is used for the context initialization.
+    #: It involves setting up the conversation context.
     CONTEXT_INIT = auto()
 
-    #: This stage is used to get the previous node.
+    #: This stage is used to retrieve the previous node.
+    #: It involves identifying the previous node in the conversation history.
     GET_PREVIOUS_NODE = auto()
 
-    #: This stage is used for rewriting the previous node.
+    #: This stage is used to rewrite the previous node.
+    #: It involves updating the previous node in the conversation history
+    #: to reflect any changes made during the current conversation turn.
     REWRITE_PREVIOUS_NODE = auto()
 
-    #: This stage is used for running pre-transitions processing.
+    #: This stage is used for running pre-response processing.
+    #: It involves performing any necessary pre-processing tasks.
     RUN_PRE_TRANSITIONS_PROCESSING = auto()
 
-    #: This stage is used to get true labels.
+    #: This stage is used to retrieve the true labels.
+    #: It involves determining the correct label to take based
+    #: on the current conversation context.
     GET_TRUE_LABELS = auto()
 
-    #: This stage is used to get next node.
+    #: This stage is used to retrieve the next node.
+    #: It involves identifying the next node in the conversation flow.
     GET_NEXT_NODE = auto()
 
     #: This stage is used to rewrite the next node.
+    #: It involves updating the next node in the conversation flow
+    #: to reflect any changes made during the current conversation turn.
     REWRITE_NEXT_NODE = auto()
 
     #: This stage is used for running pre-response processing.
+    #: It involves performing any necessary pre-processing tasks
+    #: before generating the response to the user.
     RUN_PRE_RESPONSE_PROCESSING = auto()
 
-    #: This stage is used for the response creation.
+    #: This stage is used for response creation.
+    #: It involves generating a response to the user based on the
+    #: current conversation context and any pre-processing performed.
     CREATE_RESPONSE = auto()
 
-    #: This stage is used for finish turn.
+    #: This stage is used for finishing the current conversation turn.
+    #: It involves wrapping up any loose ends, such as saving context,
+    #: before waiting for the user's next input.
     FINISH_TURN = auto()
