@@ -8,6 +8,7 @@ import tempfile
 import shutil
 import sys
 import argparse
+import json
 import os
 import logging
 from pathlib import Path
@@ -102,8 +103,8 @@ def import_dashboard(
     # get access token
     access_request = session.post(
         login_url,
-        headers={"Content-Type": "application/json"},
-        data={"username": username, "password": password, "refresh": True, "provider": "db"},
+        headers={"Content-Type": "application/json", "Accept": "*/*"},
+        data=json.dumps({"username": username, "password": password, "refresh": True, "provider": "db"}),
     )
     access_request.raise_for_status()
     access_token = access_request.json()["access_token"]
@@ -121,10 +122,10 @@ def import_dashboard(
                 "Authorization": f"Bearer {access_token}",
                 "X-CSRFToken": csrf_token,
             },
-            data={
-                "passwords": '{"databases/dff_database.yaml":"' + db_password + '"}',
-                "overwrite": "true",
-            },
+            data=json.dumps({
+                "passwords": {"databases/dff_database.yaml": db_password},
+                "overwrite": True,
+            }),
             files=[("formData", (zip_filename, f, "application/zip"))],
             timeout=10,
         )
