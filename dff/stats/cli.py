@@ -86,61 +86,49 @@ def import_dashboard(
     zip_filename = os.path.basename(zip_file)
     username = parsed_args.username
     password = parsed_args.password
+    db_password = getattr(parsed_args, "db.password")
 
     base_url = "http://localhost:8088"
 
-    tries = 0
-    while tries < 10:
-        try:
-            tries += 1
-            response = requests.get(f"{base_url}/healthcheck", timeout=10)
-            response.raise_for_status()
-            break
-        except Exception:
-            pass
+    # do healthcheck
+    response = requests.get(f"{base_url}/healthcheck", timeout=10)
+    response.raise_for_status()
 
     login_url = f"{base_url}/login/"
-    session = requests.Session()
-
-    payload = {}
-    headers = {
-        "Accept": (
-            "text/html,application/xhtml+xml,application/xml;"
-            + "q=0.9,image/avif,image/webp,image/apng,*/*;"
-            + "q=0.8,application/signed-exchange;v=b3;q=0.9"
-        ),
-        "Accept-Language": "en-US,en;q=0.9",
-    }
-
-    response = session.request("GET", login_url, headers=headers, timeout=10)
-    csrf_token = response.text.split('<input id="csrf_token" name="csrf_token" type="hidden" value="')[1].split('">')[0]
-
-    payload = {"csrf_token": csrf_token, "username": username, "password": password}
-    headers = {
-        "Accept": (
-            "text/html,application/xhtml+xml,application/xml;"
-            + "q=0.9,image/avif,image/webp,image/apng,*/*;"
-            + "q=0.8,application/signed-exchange;v=b3;q=0.9"
-        ),
-        "Content-Type": "application/json",
-    }
-
-    session.request("POST", login_url, headers=headers, data=payload, allow_redirects=False)
-    session_cookie = session.cookies.get_dict().get("session")
-
-    logger.info("Login sequence successful.")
-
     import_dashboard_url = f"{base_url}/api/v1/dashboard/import/"
+    csrf_url = f"{base_url}/api/v1/security/csrf_token/"
 
+    session = requests.Session()
+    # get access token
+    access_request = session.post(
+        login_url,
+        headers={"Accept": "*/*", "Content-Type": "application/json"},
+        data={"username": username, "password": password, "refresh": True, "provider": "db"},
+    )
+    access_request.raise_for_status()
+    access_token = access_request.json()["access_token"]
+    # get csrf_token
+    csrf_request = session.get(csrf_url, headers={"Accept": "*/*", "Authorization": f"Bearer {access_token}"})
+    csrf_request.raise_for_status()
+    csrf_token = csrf_request.json()["result"]
+
+    # upload files
     with open(zip_file, "rb") as f:
-        payload = {
-            "passwords": '{"databases/dff_database.yaml":"' + getattr(parsed_args, "db.password") + '"}',
-            "overwrite": "true",
-        }
-        files = [("formData", (zip_filename, f, "application/zip"))]
-        headers = {"Accept": "application/json", "Cookie": f"session={session_cookie}", "X-CSRFToken": csrf_token}
-
-        response = session.request("POST", import_dashboard_url, headers=headers, data=payload, files=files, timeout=10)
+        response = session.request(
+            "POST",
+            import_dashboard_url,
+            headers={
+                "Accept": "application/json",
+                "Authorization": f"Bearer {access_token}",
+                "X-CSRFToken": csrf_token,
+            },
+            data={
+                "passwords": '{"databases/dff_database.yaml":"' + db_password + '"}',
+                "overwrite": "true",
+            },
+            files=[("formData", (zip_filename, f, "application/zip"))],
+            timeout=10,
+        )
         response.raise_for_status()
         logger.info(f"Upload finished with status {response.status_code}.")
 
