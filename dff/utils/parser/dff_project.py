@@ -13,10 +13,10 @@ try:
 except ImportError:
     raise ImportError(f"Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
-from .base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable, Statement, Python
-from .namespace import Namespace
-from .exceptions import ScriptValidationError, ParsingError
-from .yaml import yaml
+from dff.utils.parser.base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable, Statement, Python
+from dff.utils.parser.namespace import Namespace
+from dff.utils.parser.exceptions import ScriptValidationError, ParsingError
+from dff.utils.parser.yaml import yaml
 from dff.script.core.actor import Actor
 from dff.pipeline.pipeline.pipeline import Pipeline
 from dff.script.core.keywords import Keywords
@@ -75,7 +75,8 @@ reversed_keyword_dict = {
     keyword_prefix + k: k for k in Keywords.__members__ for keyword_prefix in keyword_prefixes
 }
 
-RecursiveDict: TypeAlias = tp.Dict[str, 'RecursiveDict']
+RecursiveDictValue: TypeAlias = tp.Union[str, tp.Dict[str, 'RecursiveDictValue']]
+RecursiveDict: TypeAlias = tp.Dict[str, 'RecursiveDictValue']
 
 
 class DFFProject(BaseParserObject):
@@ -85,8 +86,8 @@ class DFFProject(BaseParserObject):
         validate: bool = True,
         script_initializer: tp.Optional[str] = None
     ):
-        super().__init__()
-        self.children: tp.Dict[str, Namespace] = {}
+        BaseParserObject.__init__(self)
+        self.children: tp.MutableMapping[str, Namespace] = {}
         self.script_initializer = script_initializer
         if script_initializer is not None and len(script_initializer.split(":")) != 2:
             raise ValueError(f"`script_initializer` should be a string of two parts separated by `:`: {script_initializer}")
@@ -131,7 +132,19 @@ class DFFProject(BaseParserObject):
         raise ScriptValidationError("Script Initialization call is not found (use either `Actor` or `Pipeline.from_script`")
 
     @cached_property
-    def script(self) -> tp.Tuple[Expression, tp.Tuple[Expression, Expression], tp.Tuple[Expression, Expression]]:
+    def script(self) -> tp.Tuple[Expression, tp.Tuple[str, str], tp.Tuple[str, str]]:
+        def process_label(label: Expression) -> tp.Tuple[str, str]:
+            label = ReferenceObject.resolve_expression(label)
+            if not isinstance(label, Iterable):
+                raise ScriptValidationError(f"Label {label} is not iterable.")
+            if len(label) != 2:
+                raise ScriptValidationError(f"Length of label should be 2: {label}")
+            resolved_flow_name = ReferenceObject.resolve_absolute(label[0])
+            resolved_node_name = ReferenceObject.resolve_absolute(label[1])
+            if not isinstance(resolved_flow_name, String) or not isinstance(resolved_node_name, String):
+                raise ScriptValidationError(f"Label elements should be strings: {label}")
+            return str(resolved_flow_name), str(resolved_node_name)
+
         call = self.actor_call
         args: tp.Dict[str, tp.Optional[Expression]] = call.get_args(script_initializers[call.func_name])
         script = args.get("script")
@@ -145,45 +158,28 @@ class DFFProject(BaseParserObject):
         # start_label validation
         if start_label is None or start_label == "None":
             raise ScriptValidationError(f"Actor argument `start_label` is not found: {str(call)}")
-        label = start_label
-        if isinstance(label, ReferenceObject):
-            label = label.absolute
-        if not isinstance(label, Iterable):
-            raise ScriptValidationError(f"Start label {start_label} resolves to {label} which is not iterable.")
-        if len(label) != 2:
-            raise ScriptValidationError(f"Length of start label should be 2: {label}")
-        if not isinstance(label[0].resolve, String) or not isinstance(label[1].resolve, String):
-            raise ScriptValidationError(f"Label element should be strings: {label}")
-        start_label = (str(label[0].resolve), str(label[1].resolve))
+
+        start_label_value = process_label(start_label)
 
         # fallback_label validation
         if fallback_label is None or fallback_label == "None":
-            fallback_label = start_label
+            fallback_label_value = start_label_value
         else:
-            label = fallback_label
-            if isinstance(label, ReferenceObject):
-                label = label.absolute
-            if not isinstance(label, Iterable):
-                raise ScriptValidationError(f"Fallback label {fallback_label} resolves to {label} which is not iterable.")
-            if len(label) != 2:
-                raise ScriptValidationError(f"Length of start label should be 2: {label}")
-            if not isinstance(label[0].resolve, String) or not isinstance(label[1].resolve, String):
-                raise ScriptValidationError(f"Label element should be strings: {label}")
-            fallback_label = (str(label[0].resolve), str(label[1].resolve))
+            fallback_label_value = process_label(fallback_label)
 
-        return script, start_label, fallback_label
+        return script, start_label_value, fallback_label_value
 
     @cached_property
-    def resolved_script(self) -> tp.Dict[BaseParserObject, tp.Dict[BaseParserObject, tp.Dict[str, BaseParserObject]]]:
+    def resolved_script(self) -> tp.Dict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]]:
         """
 
         :return: Resolved script
         """
-        script = defaultdict(dict)
+        script: tp.DefaultDict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]] = defaultdict(dict)
 
-        def resolve_node(node_info: Expression) -> tp.Dict[str, BaseParserObject]:
-            result = {}
-            node_info = node_info.resolve
+        def resolve_node(node_info: Expression) -> tp.Dict[str, Expression]:
+            result: tp.Dict[str, Expression] = {}
+            node_info = ReferenceObject.resolve_expression(node_info)
             if not isinstance(node_info, Dict):
                 raise ScriptValidationError(f"Node {str(node_info)} is not a Dict")
             result["__node__"] = node_info
@@ -203,29 +199,30 @@ class DFFProject(BaseParserObject):
                 if result.get(keyword) is not None:  # duplicate found
                     raise ScriptValidationError(f"Keyword {str_key} is used twice in one node: {str(node_info)}")
 
-                result[reversed_keyword_dict[str_key]] = value.resolve
+                result[reversed_keyword_dict[str_key]] = ReferenceObject.resolve_expression(value)
             return result
 
-        flows = self.script[0].resolve
+        flows = ReferenceObject.resolve_absolute(self.script[0])
         if not isinstance(flows, Dict):
             raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
         for flow, nodes in flows.items():
+            resolved_flow = ReferenceObject.resolve_expression(flow)
             if flow in keyword_dict["GLOBAL"]:
-                script[flow.resolve][None] = resolve_node(nodes)
+                script[resolved_flow][None] = resolve_node(nodes)
             else:
-                nodes = nodes.resolve
+                nodes = ReferenceObject.resolve_expression(nodes)
                 if not isinstance(nodes, Dict):
                     raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
                 for node, info in nodes.items():
-                    script[flow.resolve][node.resolve] = resolve_node(info)
+                    script[resolved_flow][ReferenceObject.resolve_expression(node)] = resolve_node(info)
 
         # validate labels
         for label in self.script[1:3]:
-            flow = script.get(label[0])
+            flow = script.get(label[0])  # type: ignore
             if flow is None:
                 raise ScriptValidationError(f"Not found flow {str(label[0])} in {[str(key) for key in script.keys()]}")
             else:
-                if flow.get(label[1]) is None:
+                if flow.get(label[1]) is None:  # type: ignore
                     raise ScriptValidationError(f"Not found node {str(label[1])} in {[str(key) for key in script.keys()]}")
 
         return script
@@ -234,20 +231,22 @@ class DFFProject(BaseParserObject):
     def graph(self) -> nx.MultiDiGraph:
         def resolve_label(label: Expression, current_flow: Expression) -> tuple:
             if isinstance(label,  ReferenceObject):  # label did not resolve (possibly due to a missing func def)
-                return ("NONE", )
+                return "NONE",
             if isinstance(label, String):
-                return ("NODE", str(current_flow), str(label))  # maybe shouldn't use str on String
+                return "NODE", str(current_flow), str(label)  # maybe shouldn't use str on String
             if isinstance(label, Iterable):
-                if not isinstance(label[0].resolve, String):
+                resolved_flow_name = ReferenceObject.resolve_absolute(label[0])
+                resolved_node_name = ReferenceObject.resolve_absolute(label[1])
+                if not isinstance(resolved_flow_name, String):
                     raise ScriptValidationError(f"First argument of label is not str: {label}")
-                if len(label) == 2 and not isinstance(label[1].resolve, String):  # todo: add type check for label[1]
-                    return ("NODE", str(current_flow), str(label[0].resolve))
+                if len(label) == 2 and not isinstance(resolved_node_name, String):  # todo: add type check for label[1]
+                    return "NODE", str(current_flow), str(resolved_flow_name)
                 if len(label) == 2:
-                    return ("NODE", str(label[0].resolve), str(label[1].resolve))
+                    return "NODE", str(resolved_flow_name), str(resolved_node_name)
                 if len(label) == 3:
-                    if not isinstance(label[1].resolve, String):
+                    if not isinstance(resolved_node_name, String):
                         raise ScriptValidationError(f"Second argument of label is not str: {label}")
-                    return ("NODE", str(label[0].resolve), str(label[1].resolve))
+                    return "NODE", str(resolved_flow_name), str(resolved_node_name)
             if isinstance(label, Call):
                 if label.func_name in label_args:
                     return (
@@ -256,7 +255,7 @@ class DFFProject(BaseParserObject):
                         *[(key, str(value)) for key, value in label.get_args(label_args[label.func_name]).items()]
                     )
             logger.warning(f'Label did not resolve: {label}')
-            return ("NONE",)
+            return "NONE",
 
         graph = nx.MultiDiGraph(full_script=self.to_dict(self.actor_call.dependencies), start_label=self.script[1], fallback_label=self.script[2])
         for flow_name, flow in self.resolved_script.items():
@@ -275,11 +274,11 @@ class DFFProject(BaseParserObject):
                 for label, condition in transitions.items():
                     graph.add_edge(
                         current_label,
-                        resolve_label(label.resolve, flow_name),
-                        label_ref=label.resolve.path,
-                        label=str(label.resolve),
-                        condition_ref=condition.resolve.path,
-                        condition=str(condition.resolve)
+                        resolve_label(ReferenceObject.resolve_expression(label), flow_name),
+                        label_ref=ReferenceObject.resolve_absolute(label).path,
+                        label=str(ReferenceObject.resolve_absolute(label)),
+                        condition_ref=ReferenceObject.resolve_absolute(condition).path,
+                        condition=str(ReferenceObject.resolve_absolute(condition))
                     )
         return graph
 
@@ -287,7 +286,7 @@ class DFFProject(BaseParserObject):
         self,
         object_filter: tp.Dict[str, tp.Set[str]],
     ) -> dict:
-        def process_base_parser_object(bpo: BaseParserObject):
+        def process_base_parser_object(bpo: BaseParserObject) -> RecursiveDictValue:
             allowed_objects = set(object_filter[bpo.namespace.name])
             allowed_objects.update(set(builtins.__dict__.keys()))
 
@@ -298,9 +297,12 @@ class DFFProject(BaseParserObject):
             if isinstance(bpo, ImportFrom):
                 return f"from {bpo.level * '.' + bpo.module} import {bpo.obj}"
             if isinstance(bpo, Dict):
-                processed_dict = {}
+                processed_dict: RecursiveDict = {}
                 for key, value in bpo.items():
-                    processed_dict[process_base_parser_object(key)] = process_base_parser_object(value)
+                    processed_key = process_base_parser_object(key)
+                    if not isinstance(processed_key, str):
+                        raise RuntimeError(f"Key should be `str`: {processed_key}")
+                    processed_dict[processed_key] = process_base_parser_object(value)
                 return processed_dict
             if isinstance(bpo, String):
                 return str(bpo)
@@ -308,13 +310,13 @@ class DFFProject(BaseParserObject):
                 return str(bpo)
             raise TypeError(str(type(bpo)) + "_" + repr(bpo))
 
-        result = defaultdict(dict)
+        result: RecursiveDict = defaultdict(dict)
         for namespace_name, namespace in self.children.items():
             namespace_filter = object_filter.get(namespace_name)
             if namespace_filter is not None:
                 for obj_name, obj in namespace.children.items():
                     if obj_name in namespace_filter:
-                        result[namespace_name][obj_name] = process_base_parser_object(obj)
+                        result[namespace_name][obj_name] = process_base_parser_object(obj)  # type: ignore
         return dict(result)
 
     @classmethod
@@ -412,11 +414,10 @@ class DFFProject(BaseParserObject):
         for namespace in self.children.values():
             namespace_object_filter = object_filter.get(namespace.name)
 
-            namespace: Namespace
             file = project_root_dir.joinpath(*namespace.name.split(".")).with_suffix(".py")
             if file.exists():
-                objects: tp.List[BaseParserObject] = []
-                names = {}
+                objects: tp.List[Statement] = []
+                names: tp.Dict[str, int] = {}  # reverse index of names
 
                 with open(file, "r", encoding="utf-8") as fd:
                     parsed_file = ast.parse(fd.read())

@@ -150,7 +150,8 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy==0.950",
+    "mypy==1.1.1",
+    "networkx-stubs==0.0.1",
 ]
 
 devel_full = merge_req_lists(

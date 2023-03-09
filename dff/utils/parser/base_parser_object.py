@@ -56,18 +56,8 @@ class BaseParserObject(ABC):
         "Parent node"
         self._name: tp.Optional[str] = None
         "Name of the node: `path = parent.path + _name`"
-        self.children: tp.Dict[str, BaseParserObject] = {}
+        self.children: tp.MutableMapping[str, BaseParserObject] = {}
         "Mapping from child names to child nodes"
-
-    @cached_property
-    def resolve(self) -> 'BaseParserObject':
-        """Resolve current node if it references another node
-
-        :return: `self.absolute` if this is a :py:class:`.ReferenceObject` else `self`
-        """
-        if isinstance(self, ReferenceObject):
-            return self.absolute or self
-        return self
 
     @cached_property
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
@@ -193,7 +183,7 @@ class Statement(BaseParserObject, ABC):
     def __init__(self):
         BaseParserObject.__init__(self)
         self.parent: tp.Optional[Namespace] = None
-        self.children: tp.Dict[str, Expression] = {}
+        self.children: tp.MutableMapping[str, Expression] = {}
 
     @classmethod
     @abstractmethod
@@ -216,6 +206,7 @@ class Statement(BaseParserObject, ABC):
         if not isinstance(node, ast.stmt):
             return None
         for _cls in (Import, ImportFrom, Assignment, Python):
+            _cls = tp.cast(tp.Type[Statement], _cls)
             obj = _cls.from_ast(node, **kwargs)
             if obj is not None:
                 return obj
@@ -230,7 +221,7 @@ class Expression(BaseParserObject, ABC):
     def __init__(self):
         BaseParserObject.__init__(self)
         self.parent: tp.Optional[tp.Union[Statement, Expression]] = None
-        self.children: tp.Dict[str, 'Expression'] = {}
+        self.children: tp.MutableMapping[str, Expression] = {}
 
     @classmethod
     @abstractmethod
@@ -263,6 +254,7 @@ class Expression(BaseParserObject, ABC):
         if not isinstance(node, ast.expr):
             return None
         for _cls in (Comprehension, Call, Iterable, Subscript, Name, Attribute, Dict, String, Python):
+            _cls = tp.cast(tp.Type[Expression], _cls)
             obj = _cls.from_ast(node, **kwargs)
             if obj is not None:
                 return obj
@@ -313,6 +305,36 @@ class ReferenceObject(BaseParserObject, ABC):
         if self.absolute is not None:
             return str(self.absolute)
         return self.referenced_object
+
+    @staticmethod
+    def resolve_absolute(obj: BaseParserObject) -> BaseParserObject:
+        """
+        Process an object and return its absolute value if possible.
+
+        :param obj: An object to process.
+        :return:
+            `obj.absolute` if `obj` is `ReferenceObject` and `absolute` is not None.
+            Return `obj` otherwise.
+        """
+        if isinstance(obj, ReferenceObject):
+            return obj.absolute or obj
+        return obj
+
+    @staticmethod
+    def resolve_expression(obj: Expression) -> Expression:
+        """
+        Process an object and return its absolute value of :py:class:`~.Expression` if possible.
+
+        :param obj: An object to process.
+        :return:
+            `obj.absolute` if `obj` is `ReferenceObject` and `absolute` has :py:class:`~.Expression` type.
+            Return `obj` otherwise.
+        """
+        if isinstance(obj, ReferenceObject):
+            absolute = obj.absolute
+            if isinstance(absolute, Expression):
+                return absolute
+        return obj
 
 
 class Import(Statement, ReferenceObject):
@@ -774,15 +796,13 @@ class Attribute(Expression, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        value: tp.Optional[tp.Union[BaseParserObject, 'Namespace']] = self.children["value"]
-        if isinstance(value, ReferenceObject):
-            value = value.absolute
-        try:
-            if is_instance(value, "dff.utils.parser.namespace.Namespace"):
-                value = tp.cast('Namespace', value)
-                return value[self.attr]
-        except KeyError as error:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nKeyError: {error}")
+        value: tp.Optional[tp.Union[BaseParserObject, 'Namespace']] = ReferenceObject.resolve_absolute(self.children["value"])
+        if is_instance(value, "dff.utils.parser.namespace.Namespace"):
+            value = tp.cast('Namespace', value)
+            obj = value.get_object(self.attr)
+            if obj is None:
+                logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nKey {self.attr} does not exist in {value}")
+            return obj
         return None
 
     @cached_property
@@ -826,12 +846,8 @@ class Subscript(Expression, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        value = self.children["value"]
-        if isinstance(value, ReferenceObject):
-            value = value.absolute
-        index = self.children["index"]
-        if isinstance(index, ReferenceObject):
-            index = index.absolute
+        value: tp.Optional[BaseParserObject] = ReferenceObject.resolve_absolute(self.children["value"])
+        index: tp.Optional[BaseParserObject] = ReferenceObject.resolve_absolute(self.children["index"])
 
         debug_message = f"{self.__class__.__name__} did not resolve: {str(self)}"
 
@@ -843,6 +859,9 @@ class Subscript(Expression, ReferenceObject):
             return None
         if not isinstance(value, (Dict, Iterable)):
             logger.debug(f"{debug_message}\nValue is not a `Dict`: {value}")
+            return None
+        if not isinstance(index, Expression):
+            logger.debug(f"{debug_message}\nIndex is not an `Expression`: {index}")
             return None
         result = value.get(index)
         if result is None:
@@ -884,7 +903,7 @@ class Subscript(Expression, ReferenceObject):
         index = node.slice
         # todo: remove this when python3.8 support is dropped
         if is_instance(index, "_ast.Index"):
-            index = index.value
+            index = index.value  # type: ignore
         return cls(value, Expression.auto(index))
 
 

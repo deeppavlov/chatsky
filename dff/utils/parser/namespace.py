@@ -7,7 +7,7 @@ import typing as tp
 import ast
 from pathlib import Path
 
-from .base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom, Python
+from dff.utils.parser.base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom, Python
 
 if tp.TYPE_CHECKING:
     from dff.utils.parser.dff_project import DFFProject
@@ -18,8 +18,8 @@ class Namespace(BaseParserObject):
     This class represents a python file (all the objects defined in it + its location).
     """
     def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
-        super().__init__()
-        self.children: tp.Dict[str, Statement] = {}
+        BaseParserObject.__init__(self)
+        self.children: tp.MutableMapping[str, Statement] = {}
         self.location: tp.List[str] = location
         """Location of the file (as a list of path extensions from `project_root_dir`)"""
         self.name: str = ".".join(location)
@@ -102,7 +102,7 @@ class Namespace(BaseParserObject):
             previous_stmt = current_stmt
         return "".join(result) + "\n"
 
-    def dump(self, current_indent=0, indent=4, object_filter: tp.Set[str] = None) -> str:
+    def dump(self, current_indent=0, indent=4, object_filter: tp.Optional[tp.Set[str]] = None) -> str:
         return self.dump_statements([value for key, value in self.children.items() if object_filter is None or key in object_filter])
 
     def get_imports(self) -> tp.List[str]:
@@ -117,7 +117,7 @@ class Namespace(BaseParserObject):
         return imports
 
     @classmethod
-    def from_ast(cls, node: ast.Module, **kwargs) -> 'Namespace':
+    def from_ast(cls, node: ast.Module, **kwargs) -> 'Namespace':  # type: ignore
         children = {}
         for statement in node.body:
             statements = Statement.auto(statement)
