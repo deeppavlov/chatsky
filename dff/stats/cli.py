@@ -94,7 +94,7 @@ def import_dashboard(
     response = requests.get(f"{base_url}/healthcheck", timeout=10)
     response.raise_for_status()
 
-    login_url = f"{base_url}/api/v1/security/login/"
+    login_url = f"{base_url}/api/v1/security/login"
     import_dashboard_url = f"{base_url}/api/v1/dashboard/import/"
     csrf_url = f"{base_url}/api/v1/security/csrf_token/"
 
