@@ -67,7 +67,7 @@ def generic_test(db, testing_context, context_id):
     db.clear()
     assert len(db) == 0
     # test write operations
-    db[context_id] = Context(id=context_id)
+    db[context_id] = Context(id=str(context_id))
     assert context_id in db
     assert len(db) == 1
     db[context_id] = testing_context  # overwriting a key

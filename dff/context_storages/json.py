@@ -6,7 +6,10 @@ This class is used to store and retrieve context data in a JSON. It allows the `
 store and retrieve context data.
 """
 import asyncio
+import json
 from typing import Hashable
+
+from .update_scheme import default_update_scheme
 
 try:
     import aiofiles
@@ -16,18 +19,8 @@ try:
 except ImportError:
     json_available = False
 
-from pydantic import BaseModel, Extra, root_validator
-
 from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
-
-
-class SerializableStorage(BaseModel, extra=Extra.allow):
-    @root_validator
-    def validate_any(cls, vals):
-        for key, value in vals.items():
-            vals[key] = Context.cast(value)
-        return vals
 
 
 class JSONContextStorage(DBContextStorage):
@@ -44,41 +37,46 @@ class JSONContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(self.storage.__dict__)
+        return len(self.storage)
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
-        self.storage.__dict__.__setitem__(str(key), value)
+        key = str(key)
+        initial = self.storage.get(key, Context().dict())
+        ctx_dict = default_update_scheme.process_context_write(initial, value)
+        self.storage[key] = ctx_dict
         await self._save()
 
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
+        key = str(key)
         await self._load()
-        return Context.cast(self.storage.__dict__.__getitem__(str(key)))
+        ctx_dict, _ = default_update_scheme.process_context_read(self.storage[key])
+        return Context.cast(ctx_dict)
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
-        self.storage.__dict__.__delitem__(str(key))
+        del self.storage[str(key)]
         await self._save()
 
     @threadsafe_method
     async def contains_async(self, key: Hashable) -> bool:
         await self._load()
-        return self.storage.__dict__.__contains__(str(key))
+        return str(key) in self.storage
 
     @threadsafe_method
     async def clear_async(self):
-        self.storage.__dict__.clear()
+        self.storage.clear()
         await self._save()
 
     async def _save(self):
         async with aiofiles.open(self.path, "w+", encoding="utf-8") as file_stream:
-            await file_stream.write(self.storage.json())
+            await file_stream.write(json.dumps(self.storage))
 
     async def _load(self):
         if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
-            self.storage = SerializableStorage()
+            self.storage = dict()
             await self._save()
         else:
             async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
-                self.storage = SerializableStorage.parse_raw(await file_stream.read())
+                self.storage = json.loads(await file_stream.read())

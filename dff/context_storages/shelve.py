@@ -17,6 +17,7 @@ from shelve import DbfilenameShelf
 from typing import Hashable
 
 from dff.script import Context
+from .update_scheme import default_update_scheme
 
 from .database import DBContextStorage
 
@@ -33,19 +34,24 @@ class ShelveContextStorage(DBContextStorage):
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
     async def get_item_async(self, key: Hashable) -> Context:
-        return self.shelve_db[str(key)]
+        key = str(key)
+        ctx_dict, _ = default_update_scheme.process_context_read(self.shelve_db[key])
+        return Context.cast(ctx_dict)
 
     async def set_item_async(self, key: Hashable, value: Context):
-        self.shelve_db.__setitem__(str(key), value)
+        key = str(key)
+        initial = self.shelve_db.get(key, Context().dict())
+        ctx_dict = default_update_scheme.process_context_write(initial, value)
+        self.shelve_db[key] = ctx_dict
 
     async def del_item_async(self, key: Hashable):
-        self.shelve_db.__delitem__(str(key))
+        del self.shelve_db[str(key)]
 
     async def contains_async(self, key: Hashable) -> bool:
-        return self.shelve_db.__contains__(str(key))
+        return str(key) in self.shelve_db
 
     async def len_async(self) -> int:
-        return self.shelve_db.__len__()
+        return len(self.shelve_db)
 
     async def clear_async(self):
         self.shelve_db.clear()
