@@ -84,7 +84,7 @@ class DFFProject(BaseParserObject):
         self,
         namespaces: tp.List['Namespace'],
         validate: bool = True,
-        script_initializer: tp.Optional[str] = None
+        script_initializer: tp.Optional[str] = None,
     ):
         BaseParserObject.__init__(self)
         self.children: tp.MutableMapping[str, Namespace] = {}
@@ -323,7 +323,8 @@ class DFFProject(BaseParserObject):
     def from_dict(
         cls,
         dictionary: tp.Dict[str, RecursiveDict],
-        **kwargs
+        validate: bool = True,
+        script_initializer: tp.Optional[str] = None,
     ):
         def process_dict(d):
             return "{" + ", ".join([f"{k}: {process_dict(v) if isinstance(v, dict) else v}" for k, v in d.items()]) + "}"
@@ -347,7 +348,7 @@ class DFFProject(BaseParserObject):
                 else:
                     objects.append(f"{obj_name} = {str(process_dict(obj))}")
             namespaces.append(Namespace.from_ast(ast.parse("\n".join(objects)), location=namespace_name.split('.')))
-        return cls(namespaces, **kwargs)
+        return cls(namespaces, validate, script_initializer)
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]) -> Namespace:
         if isinstance(item, str):
@@ -381,7 +382,13 @@ class DFFProject(BaseParserObject):
         raise NotImplementedError()
 
     @classmethod
-    def from_python(cls, project_root_dir: Path, entry_point: Path, **kwargs):
+    def from_python(
+        cls,
+        project_root_dir: Path,
+        entry_point: Path,
+        validate: bool = True,
+        script_initializer: tp.Optional[str] = None,
+    ):
         namespaces = {}
         if not project_root_dir.exists():
             raise RuntimeError(f"Path does not exist: {project_root_dir}")
@@ -391,21 +398,24 @@ class DFFProject(BaseParserObject):
                 raise RuntimeError(f"File {file} does not exist in {project_root_dir}")
             namespace = Namespace.from_file(project_root_dir, file)
             namespaces[namespace.name] = namespace
-            si = kwargs.get("script_initializer")
-            if si is not None:
-                if not isinstance(si, str):
-                    raise TypeError("Argument `script_initializer` should be `str`")
-                if ":" not in si:
-                    kwargs["script_initializer"] = namespace.name + ":" + si
+            result = namespace.name
 
             for imported_file in namespace.get_imports():
                 if imported_file not in namespaces.keys():
                     path = project_root_dir.joinpath(*imported_file.split(".")).with_suffix(".py")
                     if path.exists():
                         _process_file(path)
+            return result
 
-        _process_file(entry_point)
-        return cls(list(namespaces.values()), **kwargs)
+        namespace_name = _process_file(entry_point)
+
+        if script_initializer is not None:
+            if not isinstance(script_initializer, str):
+                raise TypeError("Argument `script_initializer` should be `str`")
+            if ":" not in script_initializer:
+                script_initializer = namespace_name + ":" + script_initializer
+
+        return cls(list(namespaces.values()), validate, script_initializer)
 
     def to_python(self, project_root_dir: Path):
         logger.info(f"Executing `to_python` with project_root_dir={project_root_dir}")
@@ -459,9 +469,9 @@ class DFFProject(BaseParserObject):
                     fd.write(namespace.dump(object_filter=namespace_object_filter))
 
     @classmethod
-    def from_yaml(cls, file: Path, **kwargs):
+    def from_yaml(cls, file: Path, validate: bool = True, script_initializer: tp.Optional[str] = None):
         with open(file, "r", encoding="utf-8") as fd:
-            return cls.from_dict(yaml.load(fd), **kwargs)
+            return cls.from_dict(yaml.load(fd), validate, script_initializer)
 
     def to_yaml(self, file: Path):
         file.parent.mkdir(parents=True, exist_ok=True)
@@ -470,9 +480,9 @@ class DFFProject(BaseParserObject):
             yaml.dump(self.to_dict(self.actor_call.dependencies), fd)
 
     @classmethod
-    def from_graph(cls, file: Path, **kwargs):
+    def from_graph(cls, file: Path, validate: bool = True, script_initializer: tp.Optional[str] = None):
         with open(file, "r", encoding="utf-8") as fd:
-            return cls.from_dict(json.load(fd)["graph"]["full_script"], **kwargs)
+            return cls.from_dict(json.load(fd)["graph"]["full_script"], validate, script_initializer)
 
     def to_graph(self, file: Path):
         file.parent.mkdir(parents=True, exist_ok=True)
