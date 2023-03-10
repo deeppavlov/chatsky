@@ -36,6 +36,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinxcontrib.katex",
     "sphinx_copybutton",
+    "sphinx_favicon",
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
@@ -123,15 +124,13 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
-    "favicons": [
-        {
-            "rel": "icon",
-            "sizes": "32x32",
-            "href": "images/logo-dff.svg",
-        },
-    ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
+
+
+favicons = [
+    {"href": "images/logo-dff.svg"},
+]
 
 
 autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
