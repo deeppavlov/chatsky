@@ -1,6 +1,5 @@
 import os
 import pytest
-import ast
 
 from dff.script.extras.conditions.models.remote_api.google_dialogflow_model import (
     GoogleDialogFlowModel,
@@ -11,28 +10,26 @@ from dff.script.extras.conditions.models.remote_api.google_dialogflow_model impo
 
 @pytest.fixture(scope="session")
 def testing_model():
-    gdf_json = os.getenv("GDF_ACCOUNT_JSON")
+    gdf_json = os.getenv("GDF_ACCOUNT_FULL")
     if gdf_json:
-        gdf_eval = ast.literal_eval(gdf_json)
-        yield GoogleDialogFlowModel(model=gdf_eval, namespace_key="dialogflow")
+        yield GoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="dialogflow")
     else:
         yield None
 
 
 @pytest.fixture(scope="session")
 def testing_async_model():
-    gdf_json = os.getenv("GDF_ACCOUNT_JSON")
+    gdf_json = os.getenv("GDF_ACCOUNT_FULL")
     if gdf_json:
-        gdf_eval = ast.literal_eval(gdf_json)
-        yield AsyncGoogleDialogFlowModel(model=gdf_eval, namespace_key="gdf_async")
+        yield AsyncGoogleDialogFlowModel.from_file(filename=gdf_json, namespace_key="gdf_async")
     else:
         yield None
 
 
 @pytest.mark.skipif(not dialogflow_available, reason="Dialogflow deps missing.")
 @pytest.mark.skipif(
-    not os.getenv("GDF_ACCOUNT_JSON"),
-    reason="GDF_ACCOUNT_JSON missing.",
+    not os.getenv("GDF_ACCOUNT_FULL") or not os.path.exists(os.getenv("GDF_ACCOUNT_FULL")),
+    reason="GDF_ACCOUNT_FULL missing.",
 )
 def test_predict(testing_model: GoogleDialogFlowModel):
     test_phrase = "I would like some food"  # no matching intent in test project
@@ -47,6 +44,7 @@ def test_predict(testing_model: GoogleDialogFlowModel):
 
 @pytest.mark.skipif(not dialogflow_available, reason="Dialogflow deps missing.")
 @pytest.mark.skipif(not os.getenv("GDF_ACCOUNT_JSON"), reason="GDF_ACCOUNT_JSON variable not set.")
+@pytest.mark.skipif(not os.path.exists(os.getenv("GDF_ACCOUNT_JSON")), reason="Dialogflow credentials missing.")
 @pytest.mark.asyncio
 async def test_async_predict(testing_async_model: AsyncGoogleDialogFlowModel):
     test_phrase = "I would like some food"  # no matching intent in test project

@@ -48,6 +48,12 @@ jobs:
           rm -rf /tmp/backup
           touch venv  # disable venv target
 
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
+
       - name: set up mutex
         uses: ben-z/gh-action-mutex@v1.0-alpha-6
 
@@ -56,4 +62,4 @@ jobs:
           make test
         env:
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
-          GDF_ACCOUNT_JSON: ${{ secrets.GDF_ACCOUNT_JSON }}
+          GDF_ACCOUNT_JSON: ./gdf_account.json

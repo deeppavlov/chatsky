@@ -30,6 +30,16 @@ jobs:
         run: |
           docker-compose up -d
 
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
+
+      - name: write realpath to env
+        run: |
+            echo "GDF_ACCOUNT_JSON=$(realpath ./gdf_account.json)" >> $GITHUB_ENV
+
       - name: install dependencies
         run: |
             sudo apt install pandoc
@@ -39,7 +49,7 @@ jobs:
         run: |
             make doc
         env:
-          GDF_ACCOUNT_JSON: ${{ secrets.GDF_ACCOUNT_JSON }}
+          GDF_ACCOUNT_JSON: ${{ env.GDF_ACCOUNT_JSON }}
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
 
       - name: remove jekyll theming

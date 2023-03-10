@@ -8,7 +8,6 @@ The example below demonstrates, how to integrate Google Dialogflow into your scr
 
 # %%
 import os
-import ast
 
 from dff.script import (
     Message,
