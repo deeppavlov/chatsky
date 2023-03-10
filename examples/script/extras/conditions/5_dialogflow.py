@@ -40,8 +40,8 @@ you can use them to construct the class.
 
 
 # %%
-gdf_model = GoogleDialogFlowModel(
-    model=ast.literal_eval(os.getenv("GDF_ACCOUNT_JSON", "{}")), namespace_key="dialogflow"
+gdf_model = GoogleDialogFlowModel.from_file(
+    filename=os.getenv("GDF_ACCOUNT_JSON", ""), namespace_key="dialogflow"
 )
 
 # %%
