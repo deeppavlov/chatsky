@@ -12,15 +12,17 @@ from .utils import assert_dirs_equal
 def test_just_works():
     obj = Expression.from_str("{1: {2: '3'}}")
     assert isinstance(obj, Dict)
-    assert str(obj.children["value_1"]) == """{
+    assert (
+        str(obj.children["value_1"])
+        == """{
     2: '3',
 }"""
+    )
 
 
 def test_path():
     obj = Expression.from_str("{1: {2: '3'}}")
-    assert obj.children["value_1"].children["key_2"] == \
-           obj.resolve_path(("value_1", "key_2"))
+    assert obj.children["value_1"].children["key_2"] == obj.resolve_path(("value_1", "key_2"))
 
 
 def test_multiple_keys():
@@ -162,7 +164,16 @@ def test_comprehensions():
     set_comp_str = "{x for q in b for x in q}"
     dict_comp_str = "{x: x ** 2 for q in c if q for x in q if x > 0}"
     gen_comp_str = "((x, q, z) for x in a if x > 0 if x < 10 for q, z in b if q.startswith('i') for y in c if true(y))"
-    namespace = Namespace.from_ast(ast.parse(f"import a, b, c\nlist_comp={list_comp_str}\nset_comp={set_comp_str}\ndict_comp={dict_comp_str}\ngen_comp={gen_comp_str}"), location=["namespace"])
+    namespace = Namespace.from_ast(
+        ast.parse(
+            f"import a, b, c\n"
+            f"list_comp={list_comp_str}\n"
+            f"set_comp={set_comp_str}\n"
+            f"dict_comp={dict_comp_str}\n"
+            f"gen_comp={gen_comp_str}"
+        ),
+        location=["namespace"],
+    )
     _ = DFFProject([namespace], validate=False)
 
     assert str(namespace["list_comp"]) == list_comp_str
@@ -172,14 +183,26 @@ def test_comprehensions():
     else:
         assert str(namespace["dict_comp"]) == "{x: (x ** 2) for q in c if q for x in q if (x > 0)}"
     if version_info >= (3, 9):
-        assert str(namespace["gen_comp"]) == "((x, q, z) for x in a if x > 0 if x < 10 for (q, z) in b if q.startswith('i') for y in c if true(y))"
+        assert (
+            str(namespace["gen_comp"])
+            == "((x, q, z) for x in a if x > 0 if x < 10 for (q, z) in b if q.startswith('i') for y in c if true(y))"
+        )
     else:
-        assert str(namespace["gen_comp"]) == "((x, q, z) for x in a if (x > 0) if (x < 10) for (q, z) in b if q.startswith('i') for y in c if true(y))"
+        assert (
+            str(namespace["gen_comp"])
+            == "((x, q, z) for x in a if (x > 0) if (x < 10) for (q, z) in b if q.startswith('i') "
+            "for y in c if true(y))"
+        )
 
 
 def test_dependency_extraction():
     namespace1 = Namespace.from_ast(ast.parse("import namespace2\na = namespace2.a"), location=["namespace1"])
-    namespace2 = Namespace.from_ast(ast.parse("from namespace3 import c\nimport namespace3\nfrom namespace4 import d\na = print(c[d] + namespace3.j[1])"), location=["namespace2"])
+    namespace2 = Namespace.from_ast(
+        ast.parse(
+            "from namespace3 import c\nimport namespace3\nfrom namespace4 import d\na = print(c[d] + namespace3.j[1])"
+        ),
+        location=["namespace2"],
+    )
     namespace3 = Namespace.from_ast(ast.parse("c=e\ne={1: 2}\nf=1\nj={1: 2}"), location=["namespace3"])
     namespace4 = Namespace.from_ast(ast.parse("d=1\nq=4\nz=1"), location=["namespace4"])
 
@@ -198,29 +221,19 @@ def test_eq_operator():
     _ = DFFProject([namespace], validate=False)
 
     assert "dff.keywords.RESPONSE" == namespace["a"]
-    assert namespace['b'] in ["dff.keywords.RESPONSE"]
+    assert namespace["b"] in ["dff.keywords.RESPONSE"]
 
 
 def test_long_import_chain():
     dff_project = DFFProject.from_dict(
         {
-            "main": {
-                "imp": "from imp_1 import imp"
-            },
-            "imp_1": {
-                "imp": "from imp_2 import imp"
-            },
-            "imp_2": {
-                "imp": "from module.imp import obj"
-            },
-            "module.imp": {
-                "obj": "from variables import number"
-            },
-            "module.variables": {
-                "number": "1"
-            }
+            "main": {"imp": "from imp_1 import imp"},
+            "imp_1": {"imp": "from imp_2 import imp"},
+            "imp_2": {"imp": "from module.imp import obj"},
+            "module.imp": {"obj": "from variables import number"},
+            "module.variables": {"number": "1"},
         },
-        validate=False
+        validate=False,
     )
 
     assert dff_project["main"]["imp"].absolute == "1"

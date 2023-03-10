@@ -13,7 +13,21 @@ try:
 except ImportError:
     raise ImportError("Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
-from dff.utils.parser.base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable, Statement, Python
+from dff.utils.parser.base_parser_object import (
+    cached_property,
+    BaseParserObject,
+    Call,
+    ReferenceObject,
+    Import,
+    ImportFrom,
+    Assignment,
+    Expression,
+    Dict,
+    String,
+    Iterable,
+    Statement,
+    Python,
+)
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.exceptions import ScriptValidationError, ParsingError
 from dff.utils.parser.yaml import yaml
@@ -27,16 +41,20 @@ logger = logging.getLogger(__name__)
 
 
 script_initializers: tp.Dict[str, inspect.FullArgSpec] = {
-    **{actor_name: inspect.getfullargspec(Actor.__init__.__wrapped__) for actor_name in (
-        "dff.script.core.actor.Actor",
-        "dff.script.Actor",
-    )
-       },
-    **{pipeline_name: inspect.getfullargspec(Pipeline.from_script) for pipeline_name in (
-        "dff.pipeline.Pipeline.from_script",
-        "dff.pipeline.pipeline.pipeline.Pipeline.from_script",
-    )
-       },
+    **{
+        actor_name: inspect.getfullargspec(Actor.__init__.__wrapped__)
+        for actor_name in (
+            "dff.script.core.actor.Actor",
+            "dff.script.Actor",
+        )
+    },
+    **{
+        pipeline_name: inspect.getfullargspec(Pipeline.from_script)
+        for pipeline_name in (
+            "dff.pipeline.Pipeline.from_script",
+            "dff.pipeline.pipeline.pipeline.Pipeline.from_script",
+        )
+    },
 }
 
 label_prefixes = (
@@ -45,16 +63,19 @@ label_prefixes = (
 )
 
 label_args: tp.Dict[str, inspect.FullArgSpec] = {
-    label_prefix + label.__name__: inspect.getfullargspec(label) for label in (
-        getattr(labels, lbl) for lbl in (
-            'backward',
-            'forward',
-            'previous',
-            'repeat',
-            'to_fallback',
-            'to_start',
+    label_prefix + label.__name__: inspect.getfullargspec(label)
+    for label in (
+        getattr(labels, lbl)
+        for lbl in (
+            "backward",
+            "forward",
+            "previous",
+            "repeat",
+            "to_fallback",
+            "to_start",
         )
-    ) for label_prefix in label_prefixes
+    )
+    for label_prefix in label_prefixes
 }
 
 keyword_prefixes = (
@@ -64,25 +85,20 @@ keyword_prefixes = (
     "dff.script.Keywords.",
 )
 
-keyword_dict = {
-    k: [keyword_prefix + k for keyword_prefix in keyword_prefixes]
-    for k in Keywords.__members__
-}
+keyword_dict = {k: [keyword_prefix + k for keyword_prefix in keyword_prefixes] for k in Keywords.__members__}
 
 keyword_list = [keyword_prefix + k for keyword_prefix in keyword_prefixes for k in Keywords.__members__]
 
-reversed_keyword_dict = {
-    keyword_prefix + k: k for k in Keywords.__members__ for keyword_prefix in keyword_prefixes
-}
+reversed_keyword_dict = {keyword_prefix + k: k for k in Keywords.__members__ for keyword_prefix in keyword_prefixes}
 
-RecursiveDictValue: TypeAlias = tp.Union[str, tp.Dict[str, 'RecursiveDictValue']]
-RecursiveDict: TypeAlias = tp.Dict[str, 'RecursiveDictValue']
+RecursiveDictValue: TypeAlias = tp.Union[str, tp.Dict[str, "RecursiveDictValue"]]
+RecursiveDict: TypeAlias = tp.Dict[str, "RecursiveDictValue"]
 
 
 class DFFProject(BaseParserObject):
     def __init__(
         self,
-        namespaces: tp.List['Namespace'],
+        namespaces: tp.List["Namespace"],
         validate: bool = True,
         script_initializer: tp.Optional[str] = None,
     ):
@@ -90,7 +106,9 @@ class DFFProject(BaseParserObject):
         self.children: tp.MutableMapping[str, Namespace] = {}
         self.script_initializer = script_initializer
         if script_initializer is not None and len(script_initializer.split(":")) != 2:
-            raise ValueError(f"`script_initializer` should be a string of two parts separated by `:`: {script_initializer}")
+            raise ValueError(
+                f"`script_initializer` should be a string of two parts separated by `:`: {script_initializer}"
+            )
         for namespace in namespaces:
             self.add_child(namespace, namespace.name)
         if validate:
@@ -126,10 +144,14 @@ class DFFProject(BaseParserObject):
                             if call is None:
                                 call = value
                             else:
-                                raise ScriptValidationError(f"Found two Actor calls\nFirst: {str(call)}\nSecond:{str(value)}")
+                                raise ScriptValidationError(
+                                    f"Found two Actor calls\nFirst: {str(call)}\nSecond:{str(value)}"
+                                )
         if call is not None:
             return call
-        raise ScriptValidationError("Script Initialization call is not found (use either `Actor` or `Pipeline.from_script`")
+        raise ScriptValidationError(
+            "Script Initialization call is not found (use either `Actor` or `Pipeline.from_script`"
+        )
 
     @cached_property
     def script(self) -> tp.Tuple[Expression, tp.Tuple[str, str], tp.Tuple[str, str]]:
@@ -175,7 +197,9 @@ class DFFProject(BaseParserObject):
 
         :return: Resolved script
         """
-        script: tp.DefaultDict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]] = defaultdict(dict)
+        script: tp.DefaultDict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]] = defaultdict(
+            dict
+        )
 
         def resolve_node(node_info: Expression) -> tp.Dict[str, Expression]:
             result: tp.Dict[str, Expression] = {}
@@ -223,15 +247,17 @@ class DFFProject(BaseParserObject):
                 raise ScriptValidationError(f"Not found flow {str(label[0])} in {[str(key) for key in script.keys()]}")
             else:
                 if flow.get(label[1]) is None:  # type: ignore
-                    raise ScriptValidationError(f"Not found node {str(label[1])} in {[str(key) for key in script.keys()]}")
+                    raise ScriptValidationError(
+                        f"Not found node {str(label[1])} in {[str(key) for key in script.keys()]}"
+                    )
 
         return script
 
     @cached_property
     def graph(self) -> nx.MultiDiGraph:
         def resolve_label(label: Expression, current_flow: Expression) -> tuple:
-            if isinstance(label,  ReferenceObject):  # label did not resolve (possibly due to a missing func def)
-                return "NONE",
+            if isinstance(label, ReferenceObject):  # label did not resolve (possibly due to a missing func def)
+                return ("NONE",)
             if isinstance(label, String):
                 return "NODE", str(current_flow), str(label)  # maybe shouldn't use str on String
             if isinstance(label, Iterable):
@@ -252,15 +278,26 @@ class DFFProject(BaseParserObject):
                     return (
                         "LABEL",
                         label.func_name.rpartition(".")[2],
-                        *[(key, str(value)) for key, value in label.get_args(label_args[label.func_name]).items()]
+                        *[(key, str(value)) for key, value in label.get_args(label_args[label.func_name]).items()],
                     )
-            logger.warning(f'Label did not resolve: {label}')
-            return "NONE",
+            logger.warning(f"Label did not resolve: {label}")
+            return ("NONE",)
 
-        graph = nx.MultiDiGraph(full_script=self.to_dict(self.actor_call.dependencies), start_label=self.script[1], fallback_label=self.script[2])
+        graph = nx.MultiDiGraph(
+            full_script=self.to_dict(self.actor_call.dependencies),
+            start_label=self.script[1],
+            fallback_label=self.script[2],
+        )
         for flow_name, flow in self.resolved_script.items():
             for node_name, node_info in flow.items():
-                current_label = ("NODE", str(flow_name), str(node_name)) if node_name is not None else ("NODE", str(flow_name), )
+                current_label = (
+                    ("NODE", str(flow_name), str(node_name))
+                    if node_name is not None
+                    else (
+                        "NODE",
+                        str(flow_name),
+                    )
+                )
                 graph.add_node(
                     current_label,
                     ref=node_info["__node__"].path,
@@ -278,7 +315,7 @@ class DFFProject(BaseParserObject):
                         label_ref=ReferenceObject.resolve_absolute(transition_label).path,
                         label=str(ReferenceObject.resolve_absolute(transition_label)),
                         condition_ref=ReferenceObject.resolve_absolute(transition_condition).path,
-                        condition=str(ReferenceObject.resolve_absolute(transition_condition))
+                        condition=str(ReferenceObject.resolve_absolute(transition_condition)),
                     )
         return graph
 
@@ -327,7 +364,9 @@ class DFFProject(BaseParserObject):
         script_initializer: tp.Optional[str] = None,
     ):
         def process_dict(d):
-            return "{" + ", ".join([f"{k}: {process_dict(v) if isinstance(v, dict) else v}" for k, v in d.items()]) + "}"
+            return (
+                "{" + ", ".join([f"{k}: {process_dict(v) if isinstance(v, dict) else v}" for k, v in d.items()]) + "}"
+            )
 
         namespaces = []
         for namespace_name, namespace in dictionary.items():
@@ -337,17 +376,21 @@ class DFFProject(BaseParserObject):
                     split = obj.split(" ")
                     if split[0] == "import":
                         if len(split) != 2:
-                            raise ParsingError(f"Import statement should contain 2 words. AsName can be set via key.\n{obj}")
+                            raise ParsingError(
+                                f"Import statement should contain 2 words. AsName can be set via key.\n{obj}"
+                            )
                         objects.append(obj if split[1] == obj_name else obj + " as " + obj_name)
                     elif split[0] == "from":
                         if len(split) != 4:
-                            raise ParsingError(f"ImportFrom statement should contain 4 words. AsName can be set via key.\n{obj}")
+                            raise ParsingError(
+                                f"ImportFrom statement should contain 4 words. AsName can be set via key.\n{obj}"
+                            )
                         objects.append(obj if split[3] == obj_name else obj + " as " + obj_name)
                     else:
                         objects.append(f"{obj_name} = {obj}")
                 else:
                     objects.append(f"{obj_name} = {str(process_dict(obj))}")
-            namespaces.append(Namespace.from_ast(ast.parse("\n".join(objects)), location=namespace_name.split('.')))
+            namespaces.append(Namespace.from_ast(ast.parse("\n".join(objects)), location=namespace_name.split(".")))
         return cls(namespaces, validate, script_initializer)
 
     def __getitem__(self, item: tp.Union[tp.List[str], str]) -> Namespace:
@@ -367,11 +410,11 @@ class DFFProject(BaseParserObject):
         return ()
 
     @cached_property
-    def namespace(self) -> 'Namespace':
+    def namespace(self) -> "Namespace":
         raise RuntimeError(f"DFFProject does not have a `namespace` attribute\n{repr(self)}")
 
     @cached_property
-    def dff_project(self) -> 'DFFProject':
+    def dff_project(self) -> "DFFProject":
         return self
 
     def dump(self, current_indent=0, indent=4) -> str:
@@ -436,7 +479,9 @@ class DFFProject(BaseParserObject):
                     if isinstance(statements, dict):
                         for obj_name, obj in statements.items():
                             if names.get(obj_name) is not None:
-                                raise ParsingError(f"The same name is used twice:\n{str(names.get(obj_name))}\n{str(obj)}")
+                                raise ParsingError(
+                                    f"The same name is used twice:\n{str(names.get(obj_name))}\n{str(obj)}"
+                                )
                             names[obj_name] = len(objects)
                             objects.append(obj)
                     elif isinstance(statements, Python):
@@ -450,7 +495,11 @@ class DFFProject(BaseParserObject):
                         obj_index = names.get(replaced_obj_name)
                         if obj_index is not None:
                             if obj_index > last_insertion_index:
-                                logger.warning(f"Object order was changed. This might cause issues.\nInserting object: {str(replaced_obj)}\nNew script places it below: {str(objects[last_insertion_index])}")
+                                logger.warning(
+                                    f"Object order was changed. This might cause issues.\n"
+                                    f"Inserting object: {str(replaced_obj)}\n"
+                                    f"New script places it below: {str(objects[last_insertion_index])}"
+                                )
                                 objects.insert(last_insertion_index, replaced_obj)
                             else:
                                 objects.pop(obj_index)

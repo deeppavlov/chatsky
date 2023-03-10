@@ -17,7 +17,9 @@ except ImportError:
     try:
         from cached_property import cached_property  # type: ignore
     except ImportError:
-        raise ModuleNotFoundError("Module `cached_property` is not installed. Install it with `pip install dff[parser]`.")
+        raise ModuleNotFoundError(
+            "Module `cached_property` is not installed. Install it with `pip install dff[parser]`."
+        )
 # todo: remove this when python3.7 support is dropped
 
 try:
@@ -51,6 +53,7 @@ class BaseParserObject(ABC):
     """
     An interface for other parser objects.
     """
+
     def __init__(self):
         self.parent: tp.Optional[BaseParserObject] = None
         "Parent node"
@@ -82,7 +85,7 @@ class BaseParserObject(ABC):
                 result[namespace].update(objects)
         return result
 
-    def add_child(self, child: 'BaseParserObject', asname: str):
+    def add_child(self, child: "BaseParserObject", asname: str):
         """Add a child node `child` by the name `asname`
 
         :param child: Child node to add
@@ -92,7 +95,7 @@ class BaseParserObject(ABC):
         child._name = asname
         self.children[asname] = child
 
-    def resolve_path(self, path: tp.Tuple[str, ...]) -> 'BaseParserObject':
+    def resolve_path(self, path: tp.Tuple[str, ...]) -> "BaseParserObject":
         """Resolve tree path relative to this node
 
         :param path: A tuple of child names
@@ -109,8 +112,7 @@ class BaseParserObject(ABC):
 
     @cached_property
     def path(self) -> tp.Tuple[str, ...]:
-        """Path to this node from the tree root node
-        """
+        """Path to this node from the tree root node"""
         if self._name is None:
             raise RuntimeError(f"Name is not set: {str(self)}")
         if self.parent is None:
@@ -118,17 +120,15 @@ class BaseParserObject(ABC):
         return self.parent.path + (self._name,)
 
     @cached_property
-    def namespace(self) -> 'Namespace':
-        """Namespace this object belongs to
-        """
+    def namespace(self) -> "Namespace":
+        """Namespace this object belongs to"""
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {str(self)}")
         return self.parent.namespace
 
     @cached_property
-    def dff_project(self) -> 'DFFProject':
-        """DFFProject this object belongs to
-        """
+    def dff_project(self) -> "DFFProject":
+        """DFFProject this object belongs to"""
         return self.namespace.dff_project
 
     @abstractmethod
@@ -180,6 +180,7 @@ class Statement(BaseParserObject, ABC):
     This class is for nodes that represent
     [:py:class:`ast.stmt`](https://docs.python.org/3.10/library/ast.html#statements)
     """
+
     def __init__(self):
         BaseParserObject.__init__(self)
         self.parent: tp.Optional[Namespace] = None
@@ -187,12 +188,14 @@ class Statement(BaseParserObject, ABC):
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional[tp.Union[tp.Mapping[str, 'Statement'], 'Python']]:
+    def from_ast(
+        cls, node: tp.Union[ast.stmt, ast.expr], **kwargs
+    ) -> tp.Optional[tp.Union[tp.Mapping[str, "Statement"], "Python"]]:
         ...
 
     @classmethod
     @tp.overload
-    def auto(cls, node: ast.stmt, **kwargs) -> tp.Union[tp.Mapping[str, 'Statement'], 'Python']:  # type: ignore
+    def auto(cls, node: ast.stmt, **kwargs) -> tp.Union[tp.Mapping[str, "Statement"], "Python"]:  # type: ignore
         ...
 
     @classmethod
@@ -218,6 +221,7 @@ class Expression(BaseParserObject, ABC):
     This class is for nodes that represent
     [:py:class:`ast.expr`](https://docs.python.org/3.10/library/ast.html#expressions)
     """
+
     def __init__(self):
         BaseParserObject.__init__(self)
         self.parent: tp.Optional[tp.Union[Statement, Expression]] = None
@@ -225,11 +229,11 @@ class Expression(BaseParserObject, ABC):
 
     @classmethod
     @abstractmethod
-    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional['Expression']:
+    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional["Expression"]:
         ...
 
     @classmethod
-    def from_str(cls, string: str) -> 'Expression':  # todo: add `from_object` method
+    def from_str(cls, string: str) -> "Expression":  # todo: add `from_object` method
         body = ast.parse(string).body
         if len(body) != 1:
             raise ParsingError(f"Body should contain only one expression: {string}")
@@ -240,7 +244,7 @@ class Expression(BaseParserObject, ABC):
 
     @classmethod
     @tp.overload
-    def auto(cls, node: ast.expr, **kwargs) -> 'Expression':  # type: ignore
+    def auto(cls, node: ast.expr, **kwargs) -> "Expression":  # type: ignore
         ...
 
     @classmethod
@@ -266,6 +270,7 @@ class ReferenceObject(BaseParserObject, ABC):
     An interface for reference objects. Reference objects are objects that reference other objects,
     e.g. Name, Import, Subscript
     """
+
     def __init__(self):
         BaseParserObject.__init__(self)
 
@@ -342,6 +347,7 @@ class Import(Statement, ReferenceObject):
     This class if for nodes that represent
     [:py:class:`ast.Import`](https://docs.python.org/3.10/library/ast.html#ast.Import)
     """
+
     def __init__(self, module: str, alias: tp.Optional[str] = None):
         ReferenceObject.__init__(self)
         Statement.__init__(self)
@@ -356,7 +362,9 @@ class Import(Statement, ReferenceObject):
         namespace_name = self.namespace.resolve_relative_import(self.module)
         namespace = self.dff_project.get_namespace(namespace_name)
         if namespace is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nNamespace {namespace_name} not found")
+            logger.debug(
+                f"{self.__class__.__name__} did not resolve: {str(self)}\nNamespace {namespace_name} not found"
+            )
             return None
         return namespace
 
@@ -366,7 +374,7 @@ class Import(Statement, ReferenceObject):
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.Import, **kwargs) -> tp.Dict[str, 'Import']:  # type: ignore
+    def from_ast(cls, node: ast.Import, **kwargs) -> tp.Dict[str, "Import"]:  # type: ignore
         ...
 
     @classmethod
@@ -389,6 +397,7 @@ class ImportFrom(Statement, ReferenceObject):
     This class if for nodes that represent
     [:py:class:`ast.ImportFrom`](https://docs.python.org/3.10/library/ast.html#ast.ImportFrom)
     """
+
     def __init__(self, module: str, level: int, obj: str, alias: tp.Optional[str] = None):
         ReferenceObject.__init__(self)
         Statement.__init__(self)
@@ -405,14 +414,19 @@ class ImportFrom(Statement, ReferenceObject):
         namespace_name = self.namespace.resolve_relative_import(self.module, self.level)
         namespace = self.dff_project.get_namespace(namespace_name)
         if namespace is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nNamespace {namespace_name} not found")
+            logger.debug(
+                f"{self.__class__.__name__} did not resolve: {str(self)}\nNamespace {namespace_name} not found"
+            )
             return None
         if not is_instance(namespace, "dff.utils.parser.namespace.Namespace"):
             raise RuntimeError(namespace)
 
         obj = namespace.get_object(self.obj)
         if obj is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nObject {self.obj} not found in namespace {namespace}")
+            logger.debug(
+                f"{self.__class__.__name__} did not resolve: {str(self)}\n"
+                f"Object {self.obj} not found in namespace {namespace}"
+            )
             return None
 
         return obj
@@ -430,7 +444,7 @@ class ImportFrom(Statement, ReferenceObject):
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, 'ImportFrom']:  # type: ignore
+    def from_ast(cls, node: ast.ImportFrom, **kwargs) -> tp.Dict[str, "ImportFrom"]:  # type: ignore
         ...
 
     @classmethod
@@ -444,7 +458,7 @@ class ImportFrom(Statement, ReferenceObject):
             return None
         result = {}
         for name in node.names:
-            if name.name == '*':
+            if name.name == "*":
                 raise StarError(f"Starred import is not supported: {unparse(node)}")
             result[name.asname or name.name] = cls(node.module or "", node.level, name.name, name.asname)
         return result
@@ -456,17 +470,23 @@ class Assignment(Statement):
     [:py:class:`ast.Assign`](https://docs.python.org/3.10/library/ast.html#ast.Assign) or
     [:py:class:`ast.AnnAssign`](https://docs.python.org/3.10/library/ast.html#ast.AnnAssign)
     """
+
     def __init__(self, target: Expression, value: Expression):
         super().__init__()
         self.add_child(target, "target")
         self.add_child(value, "value")
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        return f"{self.children['target'].dump(current_indent, indent)} = {self.children['value'].dump(current_indent, indent)}"
+        return (
+            f"{self.children['target'].dump(current_indent, indent)} ="
+            f" {self.children['value'].dump(current_indent, indent)}"
+        )
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: tp.Union[ast.Assign, ast.AnnAssign], **kwargs) -> tp.Dict[str, 'Assignment']:  # type: ignore
+    def from_ast(  # type: ignore
+        cls, node: tp.Union[ast.Assign, ast.AnnAssign], **kwargs
+    ) -> tp.Dict[str, "Assignment"]:
         ...
 
     @classmethod
@@ -503,6 +523,7 @@ class String(Expression):
     [:py:class:`ast.Str`](https://docs.python.org/3.7/library/ast.html#abstract-grammar) or
     [:py:class:`ast.Constant`](https://docs.python.org/3.10/library/ast.html#ast.Constant) with str value
     """
+
     def __init__(self, string: str):
         super().__init__()
         self.string = string
@@ -512,7 +533,7 @@ class String(Expression):
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: tp.Union[ast.Str, ast.Constant], **kwargs) -> 'String':  # type: ignore
+    def from_ast(cls, node: tp.Union[ast.Str, ast.Constant], **kwargs) -> "String":  # type: ignore
         ...
 
     @classmethod
@@ -535,6 +556,7 @@ class Python(Expression, Statement):  # type: ignore
     This class is for nodes that cannot be represented by any other classes. It's children contain direct children
     as well as children inside iterable fields.
     """
+
     def __init__(self, node: tp.Union[ast.expr, ast.stmt]):
         Expression.__init__(self)
         Statement.__init__(self)
@@ -558,7 +580,7 @@ class Python(Expression, Statement):  # type: ignore
         return self.string
 
     @classmethod
-    def from_str(cls, string: str) -> 'Python':
+    def from_str(cls, string: str) -> "Python":
         parsed = ast.parse(string).body
         if len(parsed) != 1:
             raise RuntimeError(f"String {string} should contain only one statement or expression")
@@ -571,7 +593,7 @@ class Python(Expression, Statement):  # type: ignore
             raise RuntimeError(statement)
 
     @classmethod
-    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> 'Python':  # type: ignore
+    def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> "Python":  # type: ignore
         return cls(node)
 
 
@@ -580,6 +602,7 @@ class Dict(Expression):
     This class if for nodes that represent
     [:py:class:`ast.Dict`](https://docs.python.org/3.10/library/ast.html#ast.Dict)
     """
+
     def __init__(self, keys: tp.List[Expression], values: tp.List[Expression]):
         super().__init__()
         self.__keys: tp.List[tp.Tuple[Expression, str]] = []
@@ -620,9 +643,9 @@ class Dict(Expression):
         :return: A string representation of the corresponding key
         """
         if child_name.startswith("value_"):
-            return child_name[len("value_"):]
+            return child_name[len("value_") :]  # noqa: E203
         if child_name.startswith("key_"):
-            return child_name[len("key_"):]
+            return child_name[len("key_") :]  # noqa: E203
         return child_name
 
     def key_by_value(self, value: Expression) -> Expression:
@@ -637,27 +660,23 @@ class Dict(Expression):
         return self.children[self._key(self._clear(child_name))]
 
     def keys(self) -> tp.Iterator[Expression]:
-        """An iterator over keys in the dictionary
-        """
+        """An iterator over keys in the dictionary"""
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)]
 
     def values(self) -> tp.Iterator[Expression]:
-        """An iterator over values in the dictionary
-        """
+        """An iterator over values in the dictionary"""
         for _, key_str in self.__keys:
             yield self.children[self._value(key_str)]
 
     def items(self) -> tp.Iterator[tp.Tuple[Expression, Expression]]:
-        """An iterator over tuples of keys and values in the dictionary
-        """
+        """An iterator over tuples of keys and values in the dictionary"""
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)], self.children[self._value(key_str)]
 
     @cached_property
     def _keys(self) -> tp.Dict[Expression, str]:
-        """A mapping from dictionary keys to their string representations
-        """
+        """A mapping from dictionary keys to their string representations"""
         result = {}
         for key, value in self.__keys:
             result[key] = value
@@ -665,19 +684,21 @@ class Dict(Expression):
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         items = [
-            (indent * " " if indent else "") +
-            self.children[self._key(key)].dump(current_indent=0 if indent is None else (current_indent + indent),
-                                               indent=indent) +
-            ": " + self.children[self._value(key)].dump(
-                current_indent=0 if indent is None else (current_indent + indent), indent=indent) +
-            "," for _, key in self.__keys
+            (indent * " " if indent else "")
+            + self.children[self._key(key)].dump(
+                current_indent=0 if indent is None else (current_indent + indent), indent=indent
+            )
+            + ": "
+            + self.children[self._value(key)].dump(
+                current_indent=0 if indent is None else (current_indent + indent), indent=indent
+            )
+            + ","
+            for _, key in self.__keys
         ]
         if indent is None:
             return "{" + " ".join(items) + "}"
         else:
-            return ("\n" + current_indent * " ").join(
-                ["{", *items, "}"]
-            )
+            return ("\n" + current_indent * " ").join(["{", *items, "}"])
 
     def __getitem__(self, item: tp.Union[Expression, str]) -> Expression:
         """Get dictionary value based on a key.
@@ -718,7 +739,7 @@ class Dict(Expression):
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.Dict, **kwargs) -> 'Dict':  # type: ignore
+    def from_ast(cls, node: ast.Dict, **kwargs) -> "Dict":  # type: ignore
         ...
 
     @classmethod
@@ -744,6 +765,7 @@ class Name(Expression, ReferenceObject):
     This class if for nodes that represent
     [:py:class:`ast.Name`](https://docs.python.org/3.10/library/ast.html#ast.Name)
     """
+
     def __init__(self, name: str):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
@@ -753,7 +775,10 @@ class Name(Expression, ReferenceObject):
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
         result = self.namespace.get_object(self.name)
         if result is None:
-            logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nObject {self.name} not found in {self.namespace}")
+            logger.debug(
+                f"{self.__class__.__name__} did not resolve: {str(self)}\n"
+                f"Object {self.name} not found in {self.namespace}"
+            )
         return result
 
     @cached_property
@@ -768,7 +793,7 @@ class Name(Expression, ReferenceObject):
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.Name, **kwargs) -> 'Name':  # type: ignore
+    def from_ast(cls, node: ast.Name, **kwargs) -> "Name":  # type: ignore
         ...
 
     @classmethod
@@ -788,6 +813,7 @@ class Attribute(Expression, ReferenceObject):
     This class if for nodes that represent
     [:py:class:`ast.Attribute`](https://docs.python.org/3.10/library/ast.html#ast.Attribute)
     """
+
     def __init__(self, value: Expression, attr: str):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
@@ -796,12 +822,16 @@ class Attribute(Expression, ReferenceObject):
 
     @cached_property
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
-        value: tp.Optional[tp.Union[BaseParserObject, 'Namespace']] = ReferenceObject.resolve_absolute(self.children["value"])
+        value: tp.Optional[tp.Union[BaseParserObject, "Namespace"]] = ReferenceObject.resolve_absolute(
+            self.children["value"]
+        )
         if is_instance(value, "dff.utils.parser.namespace.Namespace"):
-            value = tp.cast('Namespace', value)
+            value = tp.cast("Namespace", value)
             obj = value.get_object(self.attr)
             if obj is None:
-                logger.debug(f"{self.__class__.__name__} did not resolve: {str(self)}\nKey {self.attr} does not exist in {value}")
+                logger.debug(
+                    f"{self.__class__.__name__} did not resolve: {str(self)}\nKey {self.attr} does not exist in {value}"
+                )
             return obj
         return None
 
@@ -818,7 +848,7 @@ class Attribute(Expression, ReferenceObject):
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.Attribute, **kwargs) -> 'Attribute':  # type: ignore
+    def from_ast(cls, node: ast.Attribute, **kwargs) -> "Attribute":  # type: ignore
         ...
 
     @classmethod
@@ -838,6 +868,7 @@ class Subscript(Expression, ReferenceObject):
     This class if for nodes that represent
     [:py:class:`ast.Subscript`](https://docs.python.org/3.10/library/ast.html#ast.Subscript)
     """
+
     def __init__(self, value: Expression, index: Expression):
         Expression.__init__(self)
         ReferenceObject.__init__(self)
@@ -879,12 +910,16 @@ class Subscript(Expression, ReferenceObject):
         return value.true_value() + "[" + index.true_value() + "]"
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        return self.children["value"].dump(current_indent, indent) + "[" + self.children["index"].dump(current_indent,
-                                                                                                       indent) + "]"
+        return (
+            self.children["value"].dump(current_indent, indent)
+            + "["
+            + self.children["index"].dump(current_indent, indent)
+            + "]"
+        )
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.Subscript, **kwargs) -> 'Subscript':  # type: ignore
+    def from_ast(cls, node: ast.Subscript, **kwargs) -> "Subscript":  # type: ignore
         ...
 
     @classmethod
@@ -914,6 +949,7 @@ class Iterable(Expression):
     [:py:class:`ast.List`](https://docs.python.org/3.10/library/ast.html#ast.List) or
     [:py:class:`ast.Set`](https://docs.python.org/3.10/library/ast.html#ast.Set)
     """
+
     class Type(tuple, Enum):
         LIST = ("[", "]")
         TUPLE = ("(", ")")
@@ -950,11 +986,15 @@ class Iterable(Expression):
             return self.children.get(str(item), default)
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        return self.type.value[0] + ", ".join([child.dump(current_indent, indent) for child in self.children.values()]) + self.type.value[1]
+        return (
+            self.type.value[0]
+            + ", ".join([child.dump(current_indent, indent) for child in self.children.values()])
+            + self.type.value[1]
+        )
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: tp.Union[ast.Tuple, ast.List, ast.Set], **kwargs) -> 'Iterable':  # type: ignore
+    def from_ast(cls, node: tp.Union[ast.Tuple, ast.List, ast.Set], **kwargs) -> "Iterable":  # type: ignore
         ...
 
     @classmethod
@@ -983,6 +1023,7 @@ class Call(Expression):
     This class if for nodes that represent
     [:py:class:`ast.Call`](https://docs.python.org/3.10/library/ast.html#ast.Call)
     """
+
     def __init__(self, func: Expression, args: tp.List[Expression], keywords: tp.Dict[str, Expression]):
         Expression.__init__(self)
         self.add_child(func, "func")
@@ -1024,26 +1065,34 @@ class Call(Expression):
 
     @cached_property
     def func_name(self) -> str:
-        """Name of the function being called. If function being called is a lambda function, it's body is returned.
-        """
+        """Name of the function being called. If function being called is a lambda function, it's body is returned."""
         func = self.children["func"]
         if isinstance(func, ReferenceObject):
             return func.referenced_object
         return str(func)
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        return self.children["func"].dump(current_indent, indent) + "(" + \
-               ", ".join(
-                   [
-                       self.children[arg].dump(current_indent, indent) for arg in self.children.keys() if arg.startswith("arg_")
-                   ] + [
-                       f"{remove_prefix(keyword, 'keyword_')}={self.children[keyword].dump(current_indent, indent)}" for keyword in self.children.keys() if keyword.startswith("keyword_")
-                   ]
-               ) + ")"
+        return (
+            self.children["func"].dump(current_indent, indent)
+            + "("
+            + ", ".join(
+                [
+                    self.children[arg].dump(current_indent, indent)
+                    for arg in self.children.keys()
+                    if arg.startswith("arg_")
+                ]
+                + [
+                    f"{remove_prefix(keyword, 'keyword_')}={self.children[keyword].dump(current_indent, indent)}"
+                    for keyword in self.children.keys()
+                    if keyword.startswith("keyword_")
+                ]
+            )
+            + ")"
+        )
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.Call, **kwargs) -> 'Call':  # type: ignore
+    def from_ast(cls, node: ast.Call, **kwargs) -> "Call":  # type: ignore
         ...
 
     @classmethod
@@ -1074,6 +1123,7 @@ class Generator(BaseParserObject):
     This class if for nodes that represent
     [:py:class:`ast.comprehension`](https://docs.python.org/3.10/library/ast.html#ast.comprehension)
     """
+
     def __init__(self, target: Expression, iterator: Expression, ifs: tp.List[Expression], is_async: bool):
         BaseParserObject.__init__(self)
         self.add_child(target, "target")
@@ -1083,12 +1133,22 @@ class Generator(BaseParserObject):
         self.is_async = is_async
 
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        ifs = [f"if {expression.dump(current_indent, indent)}" for key, expression in self.children.items() if key.startswith("if_")]
-        return ("async " if self.is_async else "") + f"for {self.children['target'].dump(current_indent, indent)} in {self.children['iter'].dump(current_indent, indent)}" + (" " if ifs else "") + " ".join(ifs)
+        ifs = [
+            f"if {expression.dump(current_indent, indent)}"
+            for key, expression in self.children.items()
+            if key.startswith("if_")
+        ]
+        return (
+            ("async " if self.is_async else "")
+            + f"for {self.children['target'].dump(current_indent, indent)}"
+            + f"in {self.children['iter'].dump(current_indent, indent)}"
+            + (" " if ifs else "")
+            + " ".join(ifs)
+        )
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: ast.comprehension, **kwargs) -> 'Generator':  # type: ignore
+    def from_ast(cls, node: ast.comprehension, **kwargs) -> "Generator":  # type: ignore
         ...
 
     @classmethod
@@ -1116,6 +1176,7 @@ class Comprehension(Expression):
     [:py:class:`ast.SetComp`](https://docs.python.org/3.10/library/ast.html#ast.SetComp) or
     [:py:class:`ast.GeneratorExp`](https://docs.python.org/3.10/library/ast.html#ast.GeneratorExp)
     """
+
     class Type(tuple, Enum):
         LIST = ("[", "]")
         GEN = ("(", ")")
@@ -1147,13 +1208,24 @@ class Comprehension(Expression):
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
         gens = [gen.dump(current_indent, indent) for key, gen in self.children.items() if key.startswith("gens_")]
         if self.comp_type is Comprehension.Type.DICT:
-            return f"{{{self.children['key'].dump(current_indent, indent)}: {self.children['value'].dump(current_indent, indent)}" + (" " if gens else "") + " ".join(gens) + "}"
+            return (
+                f"{{{self.children['key'].dump(current_indent, indent)}: "
+                f"{self.children['value'].dump(current_indent, indent)}" + (" " if gens else "") + " ".join(gens) + "}"
+            )
         else:
-            return self.comp_type.value[0] + self.children["element"].dump(current_indent, indent) + (" " if gens else "") + " ".join(gens) + self.comp_type.value[1]
+            return (
+                self.comp_type.value[0]
+                + self.children["element"].dump(current_indent, indent)
+                + (" " if gens else "")
+                + " ".join(gens)
+                + self.comp_type.value[1]
+            )
 
     @classmethod
     @tp.overload
-    def from_ast(cls, node: tp.Union[ast.ListComp, ast.SetComp, ast.GeneratorExp], **kwargs) -> 'Comprehension':  # type: ignore
+    def from_ast(  # type: ignore
+        cls, node: tp.Union[ast.ListComp, ast.SetComp, ast.GeneratorExp], **kwargs
+    ) -> "Comprehension":
         ...
 
     @classmethod

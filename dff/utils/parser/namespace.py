@@ -7,7 +7,15 @@ import typing as tp
 import ast
 from pathlib import Path
 
-from dff.utils.parser.base_parser_object import BaseParserObject, cached_property, Statement, Assignment, Import, ImportFrom, Python
+from dff.utils.parser.base_parser_object import (
+    BaseParserObject,
+    cached_property,
+    Statement,
+    Assignment,
+    Import,
+    ImportFrom,
+    Python,
+)
 
 if tp.TYPE_CHECKING:
     from dff.utils.parser.dff_project import DFFProject
@@ -17,6 +25,7 @@ class Namespace(BaseParserObject):
     """
     This class represents a python file (all the objects defined in it + its location).
     """
+
     def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
         BaseParserObject.__init__(self)
         self.children: tp.MutableMapping[str, Statement] = {}
@@ -44,22 +53,24 @@ class Namespace(BaseParserObject):
         if level == 0:
             level = 1
         if level > len(self.location):
-            raise ImportError(f"Cannot import file outside the project_root_dir\nCurrent file location={self.location}\nAttempted import of {module} at level {level}")
+            raise ImportError(
+                f"Cannot import file outside the project_root_dir\n"
+                f"Current file location={self.location}\nAttempted import of {module} at level {level}"
+            )
         return ".".join(self.location[:-level] + ([stripped_module] if stripped_module else []))
 
     @cached_property
-    def namespace(self) -> 'Namespace':
+    def namespace(self) -> "Namespace":
         return self
 
     @cached_property
-    def dff_project(self) -> 'DFFProject':
+    def dff_project(self) -> "DFFProject":
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {repr(self)}")
         return self.parent.dff_project
 
     def get_object(self, item: str):
-        """Return an object by its name. If the object is of type `Assignment` return its value
-        """
+        """Return an object by its name. If the object is of type `Assignment` return its value"""
         obj = self.children.get(item)
         if isinstance(obj, Assignment):
             return obj.children["value"]
@@ -85,12 +96,14 @@ class Namespace(BaseParserObject):
         :param statements: A list of statements to dump
         :return: Dumps of the statements separated by an appropriate amount of new lines
         """
+
         def get_newline_count(statement: Statement):
             if isinstance(statement, (Import, ImportFrom)):
                 return 1
             if isinstance(statement, Python) and statement.type.endswith("Def"):  # function and class defs
                 return 3
             return 2
+
         if len(statements) == 0:
             return "\n"
 
@@ -103,11 +116,12 @@ class Namespace(BaseParserObject):
         return "".join(result) + "\n"
 
     def dump(self, current_indent=0, indent=4, object_filter: tp.Optional[tp.Set[str]] = None) -> str:
-        return self.dump_statements([value for key, value in self.children.items() if object_filter is None or key in object_filter])
+        return self.dump_statements(
+            [value for key, value in self.children.items() if object_filter is None or key in object_filter]
+        )
 
     def get_imports(self) -> tp.List[str]:
-        """Return a list of imported modules (represented by their locations)
-        """
+        """Return a list of imported modules (represented by their locations)"""
         imports = []
         for statement in self.children.values():
             if isinstance(statement, Import):
@@ -117,7 +131,7 @@ class Namespace(BaseParserObject):
         return imports
 
     @classmethod
-    def from_ast(cls, node: ast.Module, **kwargs) -> 'Namespace':  # type: ignore
+    def from_ast(cls, node: ast.Module, **kwargs) -> "Namespace":  # type: ignore
         children = {}
         for statement in node.body:
             statements = Statement.auto(statement)

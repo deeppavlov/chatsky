@@ -17,12 +17,7 @@ ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "script
 
 
 # todo: add more parameters?
-@pytest.mark.parametrize(
-    "test_case",
-    [
-        str(working_dir) for working_dir in (TEST_DIR / "conversions").iterdir()
-    ]
-)
+@pytest.mark.parametrize("test_case", [str(working_dir) for working_dir in (TEST_DIR / "conversions").iterdir()])
 def test_conversions(test_case: str, tmp_path):
     working_dir = Path(test_case)
     python_dir = working_dir / "python_files"
@@ -48,12 +43,7 @@ def test_conversions(test_case: str, tmp_path):
     assert_files_equal(tmp_path / "script.yaml", yaml_script)
 
 
-@pytest.mark.parametrize(
-    "test_case",
-    [
-        str(working_dir) for working_dir in (TEST_DIR / "to_python").iterdir()
-    ]
-)
+@pytest.mark.parametrize("test_case", [str(working_dir) for working_dir in (TEST_DIR / "to_python").iterdir()])
 def test_to_python(test_case: str):
     working_dir = Path(test_case)
 
@@ -92,7 +82,9 @@ def test_to_python(test_case: str):
 def test_engine_examples(example_name: str, tmp_path):
     python_name = example_name + ".py"
 
-    dff_project = DFFProject.from_python(ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / python_name), script_initializer="pipeline")
+    dff_project = DFFProject.from_python(
+        ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / python_name), script_initializer="pipeline"
+    )
 
     dff_project.to_yaml(tmp_path / (example_name + ".yaml"))
 

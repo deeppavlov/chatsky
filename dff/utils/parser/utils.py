@@ -5,7 +5,7 @@ from collections.abc import Iterable as abc_Iterable
 # todo: remove this when python3.8 support is dropped
 def remove_prefix(self: str, prefix: str) -> str:  # pragma: no cover
     if self.startswith(prefix):
-        return self[len(prefix):]
+        return self[len(prefix) :]  # noqa: E203
     else:
         return self[:]
 
@@ -14,7 +14,7 @@ def remove_prefix(self: str, prefix: str) -> str:  # pragma: no cover
 def remove_suffix(self: str, suffix: str) -> str:  # pragma: no cover
     # suffix='' should not call self[:-0].
     if suffix and self.endswith(suffix):
-        return self[:-len(suffix)]
+        return self[: -len(suffix)]
     else:
         return self[:]
 
@@ -29,6 +29,7 @@ def is_instance(obj: object, cls: Union[str, type, Iterable[Union[str, type]]]):
 
     Or a type importing which would cause circular import.
     """
+
     def _is_instance(_cls: Union[str, type]):
         if isinstance(_cls, str):
             return obj.__class__.__module__ + "." + obj.__class__.__name__ == _cls

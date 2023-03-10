@@ -9,17 +9,15 @@ def test_referenced_object():
                 "proxy_2": "import proxy_2",
                 "nonexistent": "import mod",
                 "other_nonexistent": "from module import object",
-                "number": "proxy_1.prox.numbers[proxy_1.numbers.numbers[proxy_2.vars.lower_number]][proxy_2.vars.number]",
+                "number": "proxy_1.prox.numbers[proxy_1.numbers.numbers[proxy_2.vars.lower_number]]"
+                "[proxy_2.vars.number]",
                 "object": "nonexistent._1._2",
                 "other_object": "other_nonexistent._3._4",
                 "value_nonexistent": "other_nonexistent[proxy_1.prox.numbers[1][2]]",
                 "index_nonexistent": "proxy_2.numbers[object]",
-                "second_index_nonexistent": "proxy_2.numbers[1][object]"
+                "second_index_nonexistent": "proxy_2.numbers[1][object]",
             },
-            "proxy_1": {
-                "prox": "import proxy_2",
-                "numbers": "import other_variables"
-            },
+            "proxy_1": {"prox": "import proxy_2", "numbers": "import other_variables"},
             "proxy_2": {
                 "numbers": "from variables import dictionary",
                 "vars": "import variables",
@@ -29,11 +27,9 @@ def test_referenced_object():
                 "number": "2",
                 "lower_number": "1",
             },
-            "other_variables": {
-                "numbers": "{1: 1, 2: 2}"
-            }
+            "other_variables": {"numbers": "{1: 1, 2: 2}"},
         },
-        validate=False
+        validate=False,
     )
 
     assert dff_project["main"]["number"] == "3"
