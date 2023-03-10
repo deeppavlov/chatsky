@@ -34,7 +34,7 @@ from ..types import (
 )
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
-from ...script.core.actor import Actor
+from dff.pipeline.pipeline.actor import Actor
 
 logger = logging.getLogger(__name__)
 

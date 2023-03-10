@@ -22,13 +22,13 @@ from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
 import copy
 
 from dff.utils.turn_caching import cache_clear
-from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
-from .message import Message
+from dff.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
+from dff.script.core.message import Message
 
-from .context import Context
-from .script import Script, Node
-from .normalization import normalize_label, normalize_response
-from .keywords import GLOBAL, LOCAL
+from dff.script.core.context import Context
+from dff.script.core.script import Script, Node
+from dff.script.core.normalization import normalize_label, normalize_response
+from dff.script.core.keywords import GLOBAL, LOCAL
 
 logger = logging.getLogger(__name__)
 
