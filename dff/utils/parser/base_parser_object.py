@@ -62,7 +62,6 @@ class BaseParserObject(ABC):
         self.children: tp.MutableMapping[str, BaseParserObject] = {}
         "Mapping from child names to child nodes"
 
-    @cached_property
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
         """A list of objects defined in :py:class:`.Namespace`s that are used inside current node
 
@@ -77,11 +76,11 @@ class BaseParserObject(ABC):
         if isinstance(self, ReferenceObject):
             resolved = self._resolve_once
             if resolved is not None:
-                for namespace, objects in resolved.dependencies.items():
+                for namespace, objects in resolved.dependencies().items():
                     result[namespace].update(objects)
 
         for child in self.children.values():
-            for namespace, objects in child.dependencies.items():
+            for namespace, objects in child.dependencies().items():
                 result[namespace].update(objects)
         return result
 
@@ -1141,7 +1140,7 @@ class Generator(BaseParserObject):
         return (
             ("async " if self.is_async else "")
             + f"for {self.children['target'].dump(current_indent, indent)}"
-            + f"in {self.children['iter'].dump(current_indent, indent)}"
+            + f" in {self.children['iter'].dump(current_indent, indent)}"
             + (" " if ifs else "")
             + " ".join(ifs)
         )

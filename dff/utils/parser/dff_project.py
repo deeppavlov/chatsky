@@ -284,7 +284,7 @@ class DFFProject(BaseParserObject):
             return ("NONE",)
 
         graph = nx.MultiDiGraph(
-            full_script=self.to_dict(self.actor_call.dependencies),
+            full_script=self.to_dict(self.actor_call.dependencies()),
             start_label=self.script[1],
             fallback_label=self.script[2],
         )
@@ -462,7 +462,7 @@ class DFFProject(BaseParserObject):
 
     def to_python(self, project_root_dir: Path):
         logger.info(f"Executing `to_python` with project_root_dir={project_root_dir}")
-        object_filter = self.actor_call.dependencies
+        object_filter = self.actor_call.dependencies()
 
         for namespace in self.children.values():
             namespace_object_filter = object_filter.get(namespace.name)
@@ -526,7 +526,7 @@ class DFFProject(BaseParserObject):
         file.parent.mkdir(parents=True, exist_ok=True)
         file.touch()
         with open(file, "w", encoding="utf-8") as fd:
-            yaml.dump(self.to_dict(self.actor_call.dependencies), fd)
+            yaml.dump(self.to_dict(self.actor_call.dependencies()), fd)
 
     @classmethod
     def from_graph(cls, file: Path, validate: bool = True, script_initializer: tp.Optional[str] = None):
