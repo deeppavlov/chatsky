@@ -109,7 +109,7 @@ def test_name():
 def test_attribute():
     namespace1 = Namespace.from_ast(ast.parse("import namespace2 as n2\na=n2.a"), location=["namespace1"])
     namespace2 = Namespace.from_ast(ast.parse("a=1"), location=["namespace2"])
-    dff_project = DFFProject([namespace1, namespace2], validate=False)
+    _ = DFFProject([namespace1, namespace2], validate=False)
 
     assert isinstance(namespace1["a"], Attribute)
     assert namespace1["a"] == namespace2["a"] == Python.from_str("1")
@@ -136,7 +136,7 @@ def test_iterable():
 
 def test_call():
     namespace = Namespace.from_ast(ast.parse("import Actor\na = Actor(1, 2, c=3)"), location=["namespace"])
-    dff_project = DFFProject([namespace], validate=False)
+    _ = DFFProject([namespace], validate=False)
 
     call = namespace["a"]
 
@@ -147,7 +147,7 @@ def test_call():
     assert call.func_name == "Actor"
 
     namespace = Namespace.from_ast(ast.parse("a = (lambda x, y, z: 1)(1, 2, c=3)"), location=["namespace"])
-    dff_project = DFFProject([namespace], validate=False)
+    _ = DFFProject([namespace], validate=False)
 
     call = namespace["a"]
     assert isinstance(call, Call)
@@ -163,7 +163,7 @@ def test_comprehensions():
     dict_comp_str = "{x: x ** 2 for q in c if q for x in q if x > 0}"
     gen_comp_str = "((x, q, z) for x in a if x > 0 if x < 10 for q, z in b if q.startswith('i') for y in c if true(y))"
     namespace = Namespace.from_ast(ast.parse(f"import a, b, c\nlist_comp={list_comp_str}\nset_comp={set_comp_str}\ndict_comp={dict_comp_str}\ngen_comp={gen_comp_str}"), location=["namespace"])
-    dff_project = DFFProject([namespace], validate=False)
+    _ = DFFProject([namespace], validate=False)
 
     assert str(namespace["list_comp"]) == list_comp_str
     assert str(namespace["set_comp"]) == set_comp_str
@@ -183,7 +183,7 @@ def test_dependency_extraction():
     namespace3 = Namespace.from_ast(ast.parse("c=e\ne={1: 2}\nf=1\nj={1: 2}"), location=["namespace3"])
     namespace4 = Namespace.from_ast(ast.parse("d=1\nq=4\nz=1"), location=["namespace4"])
 
-    dff_project = DFFProject([namespace1, namespace2, namespace3, namespace4], validate=False)
+    _ = DFFProject([namespace1, namespace2, namespace3, namespace4], validate=False)
 
     assert namespace1["a"].dependencies == {
         "namespace1": {"a", "namespace2"},
@@ -195,7 +195,7 @@ def test_dependency_extraction():
 
 def test_eq_operator():
     namespace = Namespace.from_ast(ast.parse("import dff.keywords as kw\na = kw.RESPONSE\nb=a"), location=["namespace"])
-    dff_project = DFFProject([namespace], validate=False)
+    _ = DFFProject([namespace], validate=False)
 
     assert "dff.keywords.RESPONSE" == namespace["a"]
     assert namespace['b'] in ["dff.keywords.RESPONSE"]

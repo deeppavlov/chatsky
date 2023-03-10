@@ -11,7 +11,7 @@ from typing_extensions import TypeAlias
 try:
     import networkx as nx
 except ImportError:
-    raise ImportError(f"Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
+    raise ImportError("Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
 from dff.utils.parser.base_parser_object import cached_property, BaseParserObject, Call, ReferenceObject, Import, ImportFrom, Assignment, Expression, Dict, String, Iterable, Statement, Python
 from dff.utils.parser.namespace import Namespace
@@ -271,14 +271,14 @@ class DFFProject(BaseParserObject):
                     continue
                 if not isinstance(transitions, Dict):
                     raise ScriptValidationError(f"TRANSITIONS keyword should point to a dictionary: {transitions}")
-                for label, condition in transitions.items():
+                for transition_label, transition_condition in transitions.items():
                     graph.add_edge(
                         current_label,
-                        resolve_label(ReferenceObject.resolve_expression(label), flow_name),
-                        label_ref=ReferenceObject.resolve_absolute(label).path,
-                        label=str(ReferenceObject.resolve_absolute(label)),
-                        condition_ref=ReferenceObject.resolve_absolute(condition).path,
-                        condition=str(ReferenceObject.resolve_absolute(condition))
+                        resolve_label(ReferenceObject.resolve_expression(transition_label), flow_name),
+                        label_ref=ReferenceObject.resolve_absolute(transition_label).path,
+                        label=str(ReferenceObject.resolve_absolute(transition_label)),
+                        condition_ref=ReferenceObject.resolve_absolute(transition_condition).path,
+                        condition=str(ReferenceObject.resolve_absolute(transition_condition))
                     )
         return graph
 

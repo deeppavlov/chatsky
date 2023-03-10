@@ -136,4 +136,3 @@ class Namespace(BaseParserObject):
         location = list(file.with_suffix("").relative_to(project_root_dir).parts)
         with open(file, "r", encoding="utf-8") as fd:
             return Namespace.from_ast(ast.parse(fd.read()), location=location)
-

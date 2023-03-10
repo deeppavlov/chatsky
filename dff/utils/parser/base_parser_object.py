@@ -17,7 +17,7 @@ except ImportError:
     try:
         from cached_property import cached_property  # type: ignore
     except ImportError:
-        raise ModuleNotFoundError(f"Module `cached_property` is not installed. Install it with `pip install dff[parser]`.")
+        raise ModuleNotFoundError("Module `cached_property` is not installed. Install it with `pip install dff[parser]`.")
 # todo: remove this when python3.7 support is dropped
 
 try:
@@ -26,7 +26,7 @@ except ImportError:
     try:
         from astunparse import unparse  # type: ignore
     except ImportError:
-        raise ModuleNotFoundError(f"Module `astunparse` is not installed. Install it with `pip install dff[parser]`.")
+        raise ModuleNotFoundError("Module `astunparse` is not installed. Install it with `pip install dff[parser]`.")
 # todo: remove this when python3.8 support is dropped
 
 try:
@@ -1172,7 +1172,7 @@ class Comprehension(Expression):
                 gens,
                 Comprehension.Type.DICT,
             )
-        if isinstance(node, ast.ListComp):
+        elif isinstance(node, ast.ListComp):
             comp_type = Comprehension.Type.LIST
         elif isinstance(node, ast.SetComp):
             comp_type = Comprehension.Type.SET
@@ -1183,4 +1183,3 @@ class Comprehension(Expression):
             gens,
             comp_type,
         )
-
