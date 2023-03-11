@@ -8,6 +8,7 @@ sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
 from utils.generate_examples import generate_example_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from docs.source.utils.patching import patch_autosummary_extract_summary  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -84,7 +85,7 @@ html_static_path = ["_static"]
 html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
-
+patch_autosummary_extract_summary()
 
 # Finding examples directories
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
