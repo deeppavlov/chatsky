@@ -57,7 +57,7 @@ def extract_summary_wrapper(func):
 
 def depart_gallery_html_wrapper(func):
     def wrapper(self, node):
-        entries = node['entries']
+        entries = node["entries"]
         for i in range(len(entries)):
             entries[i] = list(entries[i])
             title_split = entries[i][0].split(": ")
@@ -67,6 +67,6 @@ def depart_gallery_html_wrapper(func):
     return wrapper
 
 
-if __name__ == '__main__':
+if __name__ == "__main__":
     wrap_source_function(extract_summary, extract_summary_wrapper)
     wrap_source_function(depart_gallery_html, depart_gallery_html_wrapper)
