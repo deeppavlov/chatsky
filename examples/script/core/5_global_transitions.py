@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 5. Global transitions
+# Core: 5. Global transitions
 
 This example shows the global setting of transitions.
 First of all, let's do all the necessary imports from `DFF`.

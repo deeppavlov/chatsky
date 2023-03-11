@@ -4,6 +4,7 @@ from typing import Callable, Optional
 from inspect import signature, getsourcefile, getsourcelines
 
 from sphinx.ext.autosummary import extract_summary
+from nbsphinx import depart_gallery_html
 
 logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
@@ -54,5 +55,18 @@ def extract_summary_wrapper(func):
     return lambda doc, document: func(doc, document).split("\n\n")[-1]
 
 
+def depart_gallery_html_wrapper(func):
+    def wrapper(self, node):
+        entries = node['entries']
+        for i in range(len(entries)):
+            entries[i] = list(entries[i])
+            title_split = entries[i][0].split(": ")
+            entries[i][0] = entries[i][0] if len(title_split) == 1 else title_split[-1]
+        return func(self, node)
+
+    return wrapper
+
+
 if __name__ == '__main__':
     wrap_source_function(extract_summary, extract_summary_wrapper)
+    wrap_source_function(depart_gallery_html, depart_gallery_html_wrapper)

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 7. Pre-response processing
+# Core: 7. Pre-response processing
 
 This example shows pre-response processing feature.
 First of all, let's do all the necessary imports from `DFF`.
