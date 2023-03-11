@@ -11,10 +11,10 @@ def _get_body(func: Callable):
     We then, just subtract this from the total length of the function.
     """
     try:
-        lines_to_skip = len(getattr(func, "__doc__").split("\n"))
+        lines_to_skip = len(getattr(func, "__doc__").split("\n")) + 1
     except AttributeError:
-        lines_to_skip = 0
-    return "".join(getsourcelines(func)[0][lines_to_skip+1:])
+        lines_to_skip = 1
+    return "".join(getsourcelines(func)[0][lines_to_skip:])
 
 
 def patch_source_file(module: str, patch: str, patch_payload: Optional[str] = None):
@@ -30,7 +30,7 @@ def patch_source_file(module: str, patch: str, patch_payload: Optional[str] = No
 
 def wrap_source_function(source: Callable, wrapper: Callable):
     src_file = getsourcefile(source)
-    src_name = getattr(source, '__name__')
+    src_name = getattr(source, "__name__")
     wrap_body = _get_body(wrapper)
     wrap_sign = f"def {src_name}_wrapper{signature(wrapper)}"
     patch = f"{src_name}_old = {src_name}\n{wrap_sign}:\n{wrap_body}\n{src_name} = {src_name}_wrapper({src_name}_old)"
@@ -38,7 +38,7 @@ def wrap_source_function(source: Callable, wrapper: Callable):
 
 
 def extract_summary_wrapper(func):
-    return lambda doc, document: func(doc, document).split('\n\n')[-1]
+    return lambda doc, document: func(doc, document).split("\n\n")[-1]
 
 
 wrap_source_function(extract_summary, extract_summary_wrapper)
