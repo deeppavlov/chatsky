@@ -418,7 +418,7 @@ class DFFProject(BaseParserObject):
         return self
 
     def dump(self, current_indent=0, indent=4) -> str:
-        return "\n".join(map(str, self.children.values()))
+        return repr(self.children)
 
     @classmethod
     def from_ast(cls, node, **kwargs):

@@ -144,6 +144,8 @@ class BaseParserObject(ABC):
         """
 
     def __repr__(self) -> str:
+        if self.true_value() == self.dump():
+            return self.__class__.__name__ + "(" + self.dump() + ")"
         return self.__class__.__name__ + "(dump=" + self.dump() + "; true_value=" + self.true_value() + ")"
 
     def __str__(self) -> str:

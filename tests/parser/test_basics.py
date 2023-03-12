@@ -143,7 +143,7 @@ def test_call():
     call = namespace["a"]
 
     assert isinstance(call, Call)
-    assert repr(call.resolve_path(("func",))) == "Name(dump=Actor; true_value=Actor)"
+    assert repr(call.resolve_path(("func",))) == "Name(Actor)"
     assert call.resolve_path(("arg_1",)) == Python.from_str("2")
     assert call.resolve_path(("keyword_c",)) == Python.from_str("3")
     assert call.func_name == "Actor"
