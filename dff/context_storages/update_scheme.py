@@ -16,7 +16,6 @@ class FieldType(Enum):
 @unique
 class FieldRule(Enum):
     READ = auto()
-    DEFAULT_VALUE = auto()
     IGNORE = auto()
     UPDATE = auto()
     HASH_UPDATE = auto()
@@ -28,7 +27,6 @@ class UpdateScheme:
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
     _DICT_FIELD_NAME_PATTERN = compile(r"^.+?\[(\[.+\])\]$")
-    _DEFAULT_VALUE_RULE_PATTERN = compile(r"^default_value\((.+)\)$")
 
     def __init__(self, dict_scheme: Dict[str, List[str]]):
         self.fields = dict()
@@ -61,12 +59,8 @@ class UpdateScheme:
         elif len(rules) == 1:
             rules.append("ignore")
 
-        read_value = None
         if rules[0] == "read":
             read_rule = FieldRule.READ
-        elif rules[0].startswith("default_value"):
-            read_value = cls._DEFAULT_VALUE_RULE_PATTERN.match(rules[0]).group(1)
-            read_rule = FieldRule.DEFAULT_VALUE
         else:
             raise Exception(f"For field '{field_name}' unknown read rule: '{rules[0]}'!")
         field["read"] = read_rule
@@ -87,17 +81,6 @@ class UpdateScheme:
         field_write_wrong_rule = field_type != FieldType.LIST and write_rule == FieldRule.APPEND
         if list_write_wrong_rule or field_write_wrong_rule:
             raise Exception(f"Write rule '{write_rule}' not defined for field '{field_name}' of type '{field_type}'!")
-
-        if read_rule == FieldRule.DEFAULT_VALUE:
-            try:
-                read_value = eval(read_value, {}, {})
-            except Exception as e:
-                raise Exception(f"While parsing default value of field '{field_name}' exception happened: {e}")
-            default_list_wrong = field_type == FieldType.LIST and not isinstance(read_value, List)
-            default_dict_wrong = field_type == FieldType.DICT and not isinstance(read_value, Dict)
-            if default_list_wrong or default_dict_wrong:
-                raise Exception(f"Wrong type of default value for field '{field_name}': {type(read_value)}")
-            field["value"] = read_value
 
         split = cls._FIELD_NAME_PATTERN.match(field_name)
         if field_type == FieldType.VALUE:
@@ -177,7 +160,7 @@ class UpdateScheme:
             context_hash[field] = sha256(str(context_dict[field]).encode("utf-8"))
         return context_dict, context_hash
 
-    def process_context_write(self, initial: Dict, ctx: Context) -> Dict:
+    def process_context_write(self, ctx: Context, initial: Optional[Dict] = None) -> Dict:
         context_dict = ctx.dict()
         output_dict = dict()
         for field in self.fields.keys():
@@ -217,7 +200,7 @@ default_update_scheme = UpdateScheme({
 })
 
 full_update_scheme = UpdateScheme({
-    "id": ["read", "update"],
+    "id": ["read"],
     "requests[:]": ["read", "append"],
     "responses[:]": ["read", "append"],
     "labels[:]": ["read", "append"],
