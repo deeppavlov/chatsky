@@ -108,7 +108,7 @@ def import_dashboard(
     )
     access_request.raise_for_status()
     access_token = access_request.json()["access_token"]
-    
+
     # get csrf_token
     csrf_request = session.get(CSRF_URL, headers={"Authorization": f"Bearer {access_token}"})
     csrf_request.raise_for_status()
