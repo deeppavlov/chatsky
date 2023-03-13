@@ -6,12 +6,22 @@ from pathlib import Path
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing.telegram import get_bot_user, TelegramClient
+
+try:
+    from dff.utils.testing.telegram import get_bot_user, TelegramClient
+
+    telegram_available = True
+except ImportError:
+    telegram_available = False
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
-pipeline_example = importlib.import_module(f"examples.{dot_path_to_addon}.{'7_polling_setup'}")
+@pytest.fixture(scope="session")
+def pipeline_example():
+    if not telegram_available:
+        pytest.skip("`telegram` not available.")
+    yield importlib.import_module(f"examples.{dot_path_to_addon}.{'7_polling_setup'}")
 
 
 @pytest.fixture(scope="session")
@@ -39,8 +49,18 @@ def env_vars():
 
 
 @pytest.fixture(scope="session")
-def pipeline_instance(env_vars):
+def pipeline_instance(env_vars, pipeline_example):
     yield pipeline_example.pipeline
+
+
+@pytest.fixture(scope="session")
+def actor_instance(env_vars, no_pipeline_example):
+    yield no_pipeline_example.actor
+
+
+@pytest.fixture(scope="session")
+def basic_bot(env_vars, no_pipeline_example):
+    yield no_pipeline_example.bot
 
 
 @pytest.fixture(scope="session")
@@ -58,6 +78,8 @@ def api_credentials(env_vars):
 
 @pytest.fixture(scope="session")
 def bot_user(api_credentials, env_vars, session_file):
+    if not telegram_available:
+        pytest.skip("`telegram` not available.")
     client = TelegramClient(session_file, *api_credentials)
     yield asyncio.run(get_bot_user(client, env_vars["TG_BOT_USERNAME"]))
 
