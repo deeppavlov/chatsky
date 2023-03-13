@@ -43,6 +43,7 @@ class JSONContextStorage(DBContextStorage):
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
         initial = self.storage.get(key, dict())
+        initial = initial if initial.get("id", None) == value.id else dict()
         ctx_dict = default_update_scheme.process_context_write(value, initial)
         self.storage[key] = ctx_dict
         await self._save()

@@ -41,6 +41,7 @@ class ShelveContextStorage(DBContextStorage):
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
         initial = self.shelve_db.get(key, dict())
+        initial = initial if initial.get("id", None) == value.id else dict()
         ctx_dict = default_update_scheme.process_context_write(value, initial)
         self.shelve_db[key] = ctx_dict
 

@@ -179,6 +179,8 @@ class UpdateScheme:
             if self.fields[field]["write"] == FieldRule.IGNORE:
                 if field in initial:
                     output_dict[field] = initial[field]
+                elif field in context_dict:
+                    output_dict[field] = context_dict[field]
                 continue
             field_type = self._get_type_from_name(field)
             initial_field = initial.get(field, dict())
@@ -195,7 +197,7 @@ class UpdateScheme:
                     patch = {item: context_dict[field][item] for item in update_field - initial_field.keys()}
                 else:
                     patch = context_dict[field]
-                output_dict.update(**patch)
+                output_dict.update(patch)
             elif field_type is FieldType.DICT:
                 output_dict[field] = dict()
                 update_field = self.fields[field].get("outlook", list())
