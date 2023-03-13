@@ -7,6 +7,7 @@ in tutorials.
 from dff.script.conditions import exact_match
 from dff.script import TRANSITIONS, RESPONSE, Message
 
+#:
 TOY_SCRIPT = {
     "greeting_flow": {
         "start_node": {
@@ -32,10 +33,8 @@ TOY_SCRIPT = {
         },
     }
 }
-"""
-"""
 
-
+#:
 HAPPY_PATH = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),
     (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
@@ -43,5 +42,4 @@ HAPPY_PATH = (
     (Message(text="Ok, goodbye."), Message(text="bye")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
 )
-"""
-"""
+
