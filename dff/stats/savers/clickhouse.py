@@ -47,10 +47,10 @@ class ClickHouseSaver(Saver):
 
             ClickHouseSaver("clickhouse://user:password@localhost:8000/default")
 
-    :param table: Sets the name of the db table to use. Defaults to "df_stats".
+    :param table: Sets the name of the db table to use. Defaults to "dff_stats".
     """
 
-    def __init__(self, path: str, table: str = "df_stats") -> None:
+    def __init__(self, path: str, table: str = "dff_stats") -> None:
         if IMPORT_ERROR_MESSAGE is not None:
             raise ImportError(IMPORT_ERROR_MESSAGE)
         self.table = table

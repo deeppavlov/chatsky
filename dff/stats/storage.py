@@ -48,7 +48,7 @@ class StatsStorage(PoolSubscriber):
         pool.subscribers.append(self)
 
     @classmethod
-    def from_uri(cls, uri: str, table: str = "df_stats", batch_size: int = 1):
+    def from_uri(cls, uri: str, table: str = "dff_stats", batch_size: int = 1):
         """
         Instantiates the saver from the given arguments.
 

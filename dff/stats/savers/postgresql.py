@@ -37,7 +37,7 @@ class PostgresSaver(Saver):
     :param table: Sets the name of the db table to use. Defaults to "dff_stats".
     """
 
-    def __init__(self, path: str, table: str = "df_stats") -> None:
+    def __init__(self, path: str, table: str = "dff_stats") -> None:
         if IMPORT_ERROR_MESSAGE is not None:
             raise ImportError(IMPORT_ERROR_MESSAGE)
         self.table = table

@@ -44,6 +44,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     Function that evokes procedures defined in `cli` module.
 
     :param parsed_args: Set of command line arguments. If passed, overrides the command line contents.
+        See the module docs for reference.
     """
     parser = argparse.ArgumentParser()
     subparsers = parser.add_subparsers(dest="cmd", description="update or import config", required=True)

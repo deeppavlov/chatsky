@@ -22,8 +22,8 @@ class Saver(ABC):
     You can construct your own `Saver` by subclassing the abstract interface and implementing
     the methods named above.
 
-    :param path: A string that contains a prefix and a url of the target data storage, separated by ://.
-    :param table: Sets the name of the db table to use, if necessary. Defaults to "dff_stats".
+    :param path: A string that contains a prefix and a url of the target data storage, separated by `://`.
+    :param table: Sets the name of the db table to use, if necessary. Defaults to `dff_stats`.
     """
 
     @abstractmethod

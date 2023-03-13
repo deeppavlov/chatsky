@@ -89,27 +89,28 @@ def import_dashboard(
     password = parsed_args.password
     db_password = getattr(parsed_args, "db.password")
 
-    base_url = "http://localhost:8088"
+    BASE_URL = "http://localhost:8088"
+    HEALTHCHECK_URL = f"{BASE_URL}/healthcheck"
+    LOGIN_URL = f"{BASE_URL}/api/v1/security/login"
+    IMPORT_DASHBOARD_URL = f"{BASE_URL}/api/v1/dashboard/import/"
+    CSRF_URL = f"{BASE_URL}/api/v1/security/csrf_token/"
+    session = requests.Session()
 
     # do healthcheck
-    response = requests.get(f"{base_url}/healthcheck", timeout=10)
+    response = session.get(HEALTHCHECK_URL, timeout=10)
     response.raise_for_status()
 
-    login_url = f"{base_url}/api/v1/security/login"
-    import_dashboard_url = f"{base_url}/api/v1/dashboard/import/"
-    csrf_url = f"{base_url}/api/v1/security/csrf_token/"
-
-    session = requests.Session()
     # get access token
     access_request = session.post(
-        login_url,
+        LOGIN_URL,
         headers={"Content-Type": "application/json", "Accept": "*/*"},
         data=json.dumps({"username": username, "password": password, "refresh": True, "provider": "db"}),
     )
     access_request.raise_for_status()
     access_token = access_request.json()["access_token"]
+    
     # get csrf_token
-    csrf_request = session.get(csrf_url, headers={"Authorization": f"Bearer {access_token}"})
+    csrf_request = session.get(CSRF_URL, headers={"Authorization": f"Bearer {access_token}"})
     csrf_request.raise_for_status()
     csrf_token = csrf_request.json()["result"]
 
@@ -117,7 +118,7 @@ def import_dashboard(
     with open(zip_file, "rb") as f:
         response = session.request(
             "POST",
-            import_dashboard_url,
+            IMPORT_DASHBOARD_URL,
             headers={
                 "Authorization": f"Bearer {access_token}",
                 "X-CSRFToken": csrf_token,
