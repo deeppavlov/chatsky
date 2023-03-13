@@ -8,7 +8,6 @@ default_update_scheme = {
     "labels[-1]": ["read", "append"],
     "misc[[all]]": ["read", "hash_update"],
     "framework_states[[all]]": ["read", "hash_update"],
-    "validation": ["default_value(False)"],
 }
 
 full_update_scheme = {
@@ -18,7 +17,6 @@ full_update_scheme = {
     "labels[:]": ["read", "append"],
     "misc[[all]]": ["read", "update"],
     "framework_states[[all]]": ["read", "update"],
-    "validation": ["read", "update"],
 }
 
 
@@ -34,7 +32,7 @@ def test_default_scheme_creation():
     out_ctx = Context()
     print(out_ctx.dict())
 
-    mid_ctx = default_scheme.process_context_write(Context().dict(), out_ctx)
+    mid_ctx = default_scheme.process_context_write(out_ctx, dict())
     print(mid_ctx)
 
     in_ctx, _ = default_scheme.process_context_read(mid_ctx)

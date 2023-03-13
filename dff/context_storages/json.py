@@ -42,8 +42,8 @@ class JSONContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        initial = self.storage.get(key, Context().dict())
-        ctx_dict = default_update_scheme.process_context_write(initial, value)
+        initial = self.storage.get(key, dict())
+        ctx_dict = default_update_scheme.process_context_write(value, initial)
         self.storage[key] = ctx_dict
         await self._save()
 

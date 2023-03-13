@@ -1,7 +1,7 @@
 from hashlib import sha256
 from re import compile
 from enum import Enum, auto, unique
-from typing import Dict, List, Optional, Tuple
+from typing import Dict, List, Optional, Tuple, Iterable
 
 from dff.script import Context
 
@@ -110,7 +110,7 @@ class UpdateScheme:
                         raise Exception(f"Outlook of field '{field_name}' exception isn't a list - it is of type '{field_type}'!")
                     if not all([isinstance(item, int) for item in outlook]):
                         raise Exception(f"Outlook of field '{field_name}' contains non-integer values!")
-                    field["outlook"] = outlook
+                    field["outlook_list"] = outlook
             else:
                 if len(outlook) > 3:
                     raise Exception(f"Outlook for field '{field_name}' isn't formatted correctly: '{outlook_match.group(2)}'!")
@@ -123,7 +123,7 @@ class UpdateScheme:
                     outlook[1] = "-1"
                 if outlook[2] == "":
                     outlook[2] = "1"
-                field["outlook"] = [int(index) for index in outlook]
+                field["outlook_slice"] = [int(index) for index in outlook]
 
         elif field_type == FieldType.DICT:
             outlook_match = cls._DICT_FIELD_NAME_PATTERN.match(field_name)
@@ -142,51 +142,73 @@ class UpdateScheme:
 
         return field, field_name_pure
 
+    @staticmethod
+    def _get_outlook_slice(dictionary_keys: Iterable, update_field: List) -> List:
+        list_keys = sorted(list(dictionary_keys))
+        update_field[1] = min(update_field[1], len(list_keys))
+        return list_keys[update_field[0]:update_field[1]:update_field[2]] if len(list_keys) > 0 else list()
+
+    @staticmethod
+    def _get_outlook_list(dictionary_keys: Iterable, update_field: List) -> List:
+        list_keys = sorted(list(dictionary_keys))
+        return [list_keys[key] for key in update_field] if len(list_keys) > 0 else list()
+
     def process_context_read(self, initial: Dict) -> Tuple[Dict, Dict]:
         context_dict = initial.copy()
         context_hash = dict()
-        print(self.fields.keys())
         for field in self.fields.keys():
-            if self.fields[field]["read"] == FieldRule.DEFAULT_VALUE:
-                context_dict[field] = self.fields[field]["value"]
             field_type = self._get_type_from_name(field)
-            update_field = self.fields[field].get("outlook", None)
             if field_type is FieldType.LIST:
-                list_keys = sorted(list(context_dict[field].keys()))
-                list_outlook = list_keys[update_field[0]:update_field[1]:update_field[2]] if len(list_keys) > 0 else list()
-                context_dict[field] = {item: context_dict[field][item] for item in list_outlook}
-            elif field_type is FieldType.DICT and self._ALL_ITEMS not in update_field:
+                if "outlook_slice" in self.fields[field]:
+                    update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
+                else:
+                    update_field = self._get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
                 context_dict[field] = {item: context_dict[field][item] for item in update_field}
+            elif field_type is FieldType.DICT:
+                update_field = self.fields[field].get("outlook", list())
+                if self._ALL_ITEMS not in update_field:
+                    context_dict[field] = {item: context_dict[field][item] for item in update_field}
             context_hash[field] = sha256(str(context_dict[field]).encode("utf-8"))
         return context_dict, context_hash
 
     def process_context_write(self, ctx: Context, initial: Optional[Dict] = None) -> Dict:
+        initial = dict() if initial is None else initial
         context_dict = ctx.dict()
         output_dict = dict()
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:
-                output_dict[field] = initial[field]
+                if field in initial:
+                    output_dict[field] = initial[field]
                 continue
             field_type = self._get_type_from_name(field)
-            update_field = self.fields[field].get("outlook", None)
+            initial_field = initial.get(field, dict())
+
             if field_type is FieldType.LIST:
-                list_keys = sorted(list(initial[field].keys()))
-                list_outlook = list_keys[update_field[0]:update_field[1]:update_field[2]] if len(list_keys) > 0 else list()
-                output_dict[field] = {item: initial[field][item] for item in list_outlook}
-                output_dict[field] = {item: context_dict[field][item] for item in list_outlook}
-            elif field_type is FieldType.DICT:
-                if self._ALL_ITEMS not in update_field:
-                    output_dict[field] = {item: initial[field][item] for item in update_field}
-                    output_dict[field] = {item: context_dict[field][item] for item in update_field}
+                if "outlook_slice" in self.fields[field]:
+                    update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
                 else:
-                    output_dict[field] = {item: initial[field][item] for item in initial[field].keys()}
-                    output_dict[field] = {item: context_dict[field][item] for item in context_dict[field].keys()}
+                    update_field = self._get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
+                output_dict[field] = initial_field.copy()
+                if self.fields[field]["write"] == FieldRule.UPDATE:
+                    patch = {item: context_dict[field][item] for item in update_field}
+                elif self.fields[field]["write"] == FieldRule.APPEND:
+                    patch = {item: context_dict[field][item] for item in update_field - initial_field.keys()}
+                else:
+                    patch = context_dict[field]
+                output_dict.update(**patch)
+            elif field_type is FieldType.DICT:
+                output_dict[field] = dict()
+                update_field = self.fields[field].get("outlook", list())
+                update_keys_all = set(list(initial_field.keys()) + list(context_dict[field].keys()))
+                update_keys = update_keys_all if self._ALL_ITEMS in update_field else update_field
+                for item in update_keys:
+                    if item in initial_field:
+                        output_dict[field][item] = initial_field[item]
+                    if item in context_dict[field]:
+                        output_dict[field][item] = context_dict[field][item]
             else:
                 output_dict[field] = context_dict[field]
         return output_dict
-
-    def process_context_create(self) -> Dict:
-        pass
 
 
 default_update_scheme = UpdateScheme({
@@ -196,7 +218,6 @@ default_update_scheme = UpdateScheme({
     "labels[-1]": ["read", "append"],
     "misc[[all]]": ["read", "hash_update"],
     "framework_states[[all]]": ["read", "hash_update"],
-    "validation": ["default_value(False)"],
 })
 
 full_update_scheme = UpdateScheme({
@@ -206,5 +227,4 @@ full_update_scheme = UpdateScheme({
     "labels[:]": ["read", "append"],
     "misc[[all]]": ["read", "update"],
     "framework_states[[all]]": ["read", "update"],
-    "validation": ["read", "update"],
 })
