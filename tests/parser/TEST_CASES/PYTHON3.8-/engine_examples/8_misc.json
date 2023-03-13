@@ -183,6 +183,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -317,6 +325,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -357,6 +373,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -397,6 +421,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -437,6 +469,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0

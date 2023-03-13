@@ -1,3 +1,13 @@
+"""
+DFF Project
+-----------
+This module defines a class that represents a DFF project --
+a collection of python source files that define a script and a Pipeline.
+
+Glossary
+--------
+Script Initializer -- A function that takes a DFF script and uses it to initialize an object to store and process it.
+"""
 from pathlib import Path
 import builtins
 import json
@@ -36,34 +46,38 @@ from dff.pipeline.pipeline.pipeline import Pipeline
 from dff.script.core.keywords import Keywords
 import dff.script.labels as labels
 
-
 logger = logging.getLogger(__name__)
 
-
-script_initializers: tp.Dict[str, inspect.FullArgSpec] = {
+script_initializers: tp.Dict[str, inspect.Signature] = {
     **{
-        actor_name: inspect.getfullargspec(Actor.__init__.__wrapped__)
+        actor_name: inspect.signature(Actor.__init__)
         for actor_name in (
             "dff.script.core.actor.Actor",
             "dff.script.Actor",
         )
     },
     **{
-        pipeline_name: inspect.getfullargspec(Pipeline.from_script)
+        pipeline_name: inspect.signature(Pipeline.from_script)
         for pipeline_name in (
             "dff.pipeline.Pipeline.from_script",
             "dff.pipeline.pipeline.pipeline.Pipeline.from_script",
         )
     },
 }
+"""
+A mapping from names of script initializers to their signatures.
+
+:meta hide-value:
+"""
 
 label_prefixes = (
     "dff.script.labels.std_labels.",
     "dff.script.labels.",
 )
+"""A tuple of possible prefixes for label names."""
 
-label_args: tp.Dict[str, inspect.FullArgSpec] = {
-    label_prefix + label.__name__: inspect.getfullargspec(label)
+label_args: tp.Dict[str, inspect.Signature] = {
+    label_prefix + label.__name__: inspect.signature(label)
     for label in (
         getattr(labels, lbl)
         for lbl in (
@@ -77,6 +91,11 @@ label_args: tp.Dict[str, inspect.FullArgSpec] = {
     )
     for label_prefix in label_prefixes
 }
+"""
+A mapping from label names to their signatures.
+
+:meta hide-value:
+"""
 
 keyword_prefixes = (
     "dff.script.core.keywords.Keywords.",
@@ -84,27 +103,66 @@ keyword_prefixes = (
     "dff.script.",
     "dff.script.Keywords.",
 )
+"""A tuple of possible keyword name prefixes."""
 
 keyword_dict = {k: [keyword_prefix + k for keyword_prefix in keyword_prefixes] for k in Keywords.__members__}
+"""
+A mapping from short names of keywords to all their full names.
+(e.g. GLOBAL -> [dff.script.GLOBAL, dff.script.Keywords.GLOBAL, ...])
+
+:meta hide-value:
+"""
+# todo: maybe add Keyword class
 
 keyword_list = [keyword_prefix + k for keyword_prefix in keyword_prefixes for k in Keywords.__members__]
+"""
+A list of all keyword full names.
+
+:meta hide-value:
+"""
 
 reversed_keyword_dict = {keyword_prefix + k: k for k in Keywords.__members__ for keyword_prefix in keyword_prefixes}
+"""
+A mapping from full keyword names to their short names.
+
+:meta hide-value:
+"""
 
 RecursiveDictValue: TypeAlias = tp.Union[str, tp.Dict[str, "RecursiveDictValue"]]
 RecursiveDict: TypeAlias = tp.Dict[str, "RecursiveDictValue"]
 
 
 class DFFProject(BaseParserObject):
+    """
+    A collection of files that define a script and a script initializer.
+    """
+
     def __init__(
         self,
         namespaces: tp.List["Namespace"],
         validate: bool = True,
         script_initializer: tp.Optional[str] = None,
     ):
+        """
+
+        :param namespaces: A list of Namespaces that comprise a DFF project.
+        :param validate:
+            Whether to perform validation -- check for a script initializer and validate its arguments.
+            Defaults to True.
+        :param script_initializer:
+            A colon-separated string that points to a script initializer call.
+            The first part of the string should be the name of the namespace.
+            The second part of the string should be the name of the object that is a result of script initializer call.
+            Defaults to None.
+        """
         BaseParserObject.__init__(self)
         self.children: tp.MutableMapping[str, Namespace] = {}
         self.script_initializer = script_initializer
+        """
+        A colon-separated string that points to a script initializer call.
+        The first part of the string should be the name of the namespace.
+        The second part of the string should be the name of the object that is a result of script initializer call.
+        """
         if script_initializer is not None and len(script_initializer.split(":")) != 2:
             raise ValueError(
                 f"`script_initializer` should be a string of two parts separated by `:`: {script_initializer}"
@@ -115,10 +173,31 @@ class DFFProject(BaseParserObject):
             _ = self.graph
 
     def get_namespace(self, namespace_name: str) -> tp.Optional[Namespace]:
+        """Get a namespace by its name. Return None if it does not exist."""
         return self.children.get(namespace_name) or self.children.get(namespace_name + ".__init__")
 
     @cached_property
-    def actor_call(self) -> Call:
+    def script_initializer_call(self) -> Call:
+        """
+        Return a Script Initializer call.
+        If `self.script_initializer` is specified during `__init__` return the call it points to and verify it.
+        Otherwise, search for a Script Initializer call in `self.namespaces`.
+
+        :raises ScriptValidationError:
+            This exception is called under these conditions:
+
+            - If `self.script_initializer` is specified during `__init__` and any of the following is true:
+
+                - Namespace specified by the first part of the `script_initializer` does not exist in `self.namespaces`.
+                - Object specified by the second part of the `script_initializer` does not exist in namespace.
+                - Object specified by the second part of the `script_initializer` is not an assignment.
+                - Object specified by the second part of the `script_initializer`
+                  assigns an object other than :py:class:`~.Call`.
+                - Object specified by the second part of the `script_initializer`
+                  assigns an object other than any specified in :py:data:`~.script_initializers`.
+
+            - If `self.script_initializer` is not specified and a search found multiple or no Script Initializer calls.
+        """
         call = None
         if self.script_initializer is not None:
             namespace_name, obj_name = self.script_initializer.split(":")
@@ -133,6 +212,8 @@ class DFFProject(BaseParserObject):
             value = obj.children["value"]
             if not isinstance(value, Call):
                 raise ScriptValidationError(f"Object {obj_name} is not `Call`: {value}")
+            if value.func_name not in script_initializers.keys():
+                raise ScriptValidationError(f"Object {obj_name} is not a Script Initializer: {value.func_name}")
             return value
         for namespace in self.children.values():
             for statement in namespace.children.values():
@@ -145,7 +226,7 @@ class DFFProject(BaseParserObject):
                                 call = value
                             else:
                                 raise ScriptValidationError(
-                                    f"Found two Actor calls\nFirst: {str(call)}\nSecond:{str(value)}"
+                                    f"Found two Script Initializer calls\nFirst: {str(call)}\nSecond:{str(value)}"
                                 )
         if call is not None:
             return call
@@ -154,21 +235,16 @@ class DFFProject(BaseParserObject):
         )
 
     @cached_property
-    def script(self) -> tp.Tuple[Expression, tp.Tuple[str, str], tp.Tuple[str, str]]:
-        def process_label(label: Expression) -> tp.Tuple[str, str]:
-            label = ReferenceObject.resolve_expression(label)
-            if not isinstance(label, Iterable):
-                raise ScriptValidationError(f"Label {label} is not iterable.")
-            if len(label) != 2:
-                raise ScriptValidationError(f"Length of label should be 2: {label}")
-            resolved_flow_name = ReferenceObject.resolve_absolute(label[0])
-            resolved_node_name = ReferenceObject.resolve_absolute(label[1])
-            if not isinstance(resolved_flow_name, String) or not isinstance(resolved_node_name, String):
-                raise ScriptValidationError(f"Label elements should be strings: {label}")
-            return str(resolved_flow_name), str(resolved_node_name)
+    def script(self) -> tp.Tuple[Expression, Expression, Expression]:
+        """
+        Extract objects representing script, start label and fallback label from Script Initializer call.
+        If fallback label is not specified in that call, return start label instead.
 
-        call = self.actor_call
-        args: tp.Dict[str, tp.Optional[Expression]] = call.get_args(script_initializers[call.func_name])
+        :raises ScriptValidationError:
+            If Script Initializer call does not include `script` or `start_label` parameters.
+        """
+        call = self.script_initializer_call
+        args: tp.Dict[str, Expression] = call.get_args(script_initializers[call.func_name])
         script = args.get("script")
         start_label = args.get("start_label")
         fallback_label = args.get("fallback_label")
@@ -181,25 +257,85 @@ class DFFProject(BaseParserObject):
         if start_label is None or start_label == "None":
             raise ScriptValidationError(f"Actor argument `start_label` is not found: {str(call)}")
 
-        start_label_value = process_label(start_label)
-
         # fallback_label validation
         if fallback_label is None or fallback_label == "None":
-            fallback_label_value = start_label_value
-        else:
-            fallback_label_value = process_label(fallback_label)
+            fallback_label = start_label
 
-        return script, start_label_value, fallback_label_value
+        return script, start_label, fallback_label
 
     @cached_property
-    def resolved_script(self) -> tp.Dict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]]:
+    def resolved_script(
+        self
+    ) -> tp.Tuple[
+        tp.Dict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]],
+        tp.Tuple[str, str],
+        tp.Tuple[str, str]
+    ]:
         """
+        Resolve values of :py:attr:`.~DFFProject.script`.
+        The first value (script) is resolved in the following way:
 
-        :return: Resolved script
+        1. For each (`flow_name`, `flow`) pair in the script resulting dict has a
+        (`resolved_flow_name`, `resolved_flow`) pair where `resolved_flow_name` is the result of
+        :py:meth:`~.ReferenceObject.resolve_expression` applied to `flow_name`;
+        and `resolved_flow` is a dictionary constructed in the following way:
+
+        2. If `resolved_flow_name` is `GLOBAL`, `resolved_flow` is a dictionary with a single pair
+        (`None`, `resolved_node`) where `resolved_node` is the result of processing `flow` in the same way nodes are
+        processed (see step 3).
+        If `resolved_flow_name` is not `GLOBAL`, for each (`node_name`, `node`) pair in `flow`
+        resulting dict `resolved_flow` contains a pair (`resolved_node_name`, `resolved_node`) where
+        `resolved_node_name` is the result of :py:meth:`~.ReferenceObject.resolve_expression` applied to `node_name`;
+        and `resolved_node` is a dictionary constructed in the following way:
+
+        3. For each (`key`, `value`) pair in `node` resulting dict has a
+        (`keyword`, `resolved_value`) pair where `resolved_value` is the result of
+        :py:meth:`~.ReferenceObject.resolve_expression` applied to `value`; and `keyword` is one of the keys of
+        :py:data:`~.keyword_dict`. If `key` is not a keyword, :py:exc:`~.ScriptValidationError`
+        is raised. Additionally the result contains a (__node__, `resolved_node`) pair
+        where __node__ is a literal string and `resolved_node` is the result of
+        :py:meth:`~.ReferenceObject.resolve_expression` applied to `node`.
+
+        The second and third values (start label and fallback label) are resolved in the following way:
+
+        If a label resolves to :py:class:`~.Iterable` of length 2 both elements of which resolve to
+        :py:class:`~.String` a tuple of their values is returned. Otherwise, :py:exc:`~.ScriptValidationError`
+        is raised.
+
+        Labels are also validated (checking that label keys exist in the script).
+
+        :return: A tuple (resolved_script, resolved_start_label, resolved_fallback_label).
+        :raises ScriptValidationError:
+            During script resolution if:
+                - The first element of :py:attr:`~.DFFProject.script` does not resolve to :py:class:`~.Dict`.
+                - If `resolved_flow_name` is not `GLOBAL` and `flow` does not resolve to :py:class:`~.Dict`.
+                - Here `node` refers to both `node` and, if `resolved_flow_name` is `GLOBAL`, `flow`:
+                  - If `node` does not resolve to :py:class:`~. Dict`.
+                  - If any key in `node` is not a keyword (is not in :py:data:`~.keyword_list`).
+                  - If any key in `node` is a `GLOBAL` or `LOCAL` keyword.
+                  - If any key is found twice inside the `node` dictionary.
+            During label resolution if:
+                - Label does not resolve to :py:class:`~.Iterable`.
+                - Number of elements in label is not 2.
+                - Label elements do not resolve to :py:class:`~.String`.
+            During label validation if a node referenced by a label does not exist in resolved script.
+
         """
         script: tp.DefaultDict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]] = defaultdict(
             dict
         )
+
+        def resolve_label(label: Expression) -> tp.Tuple[str, str]:
+            label = ReferenceObject.resolve_expression(label)
+            if not isinstance(label, Iterable):
+                raise ScriptValidationError(f"Label {label} is not iterable.")
+            if len(label) != 2:
+                raise ScriptValidationError(f"Length of label should be 2: {label}")
+            resolved_flow_name = ReferenceObject.resolve_absolute(label[0])
+            resolved_node_name = ReferenceObject.resolve_absolute(label[1])
+            if not isinstance(resolved_flow_name, String) or not isinstance(resolved_node_name, String):
+                raise ScriptValidationError(f"Label elements should be strings: {label}")
+            return str(resolved_flow_name), str(resolved_node_name)
 
         def resolve_node(node_info: Expression) -> tp.Dict[str, Expression]:
             result: tp.Dict[str, Expression] = {}
@@ -208,9 +344,7 @@ class DFFProject(BaseParserObject):
                 raise ScriptValidationError(f"Node {str(node_info)} is not a Dict")
             result["__node__"] = node_info
             for key, value in node_info.items():
-                str_key = str(key)
-                if isinstance(key, ReferenceObject):
-                    str_key = key.referenced_object
+                str_key = key.true_value()
                 if str_key not in keyword_list:
                     raise ScriptValidationError(f"Node key {str_key} is not a keyword")
                 if str_key in keyword_dict["GLOBAL"]:
@@ -223,7 +357,7 @@ class DFFProject(BaseParserObject):
                 if result.get(keyword) is not None:  # duplicate found
                     raise ScriptValidationError(f"Keyword {str_key} is used twice in one node: {str(node_info)}")
 
-                result[reversed_keyword_dict[str_key]] = ReferenceObject.resolve_expression(value)
+                result[keyword] = ReferenceObject.resolve_expression(value)
             return result
 
         flows = ReferenceObject.resolve_absolute(self.script[0])
@@ -234,38 +368,90 @@ class DFFProject(BaseParserObject):
             if flow in keyword_dict["GLOBAL"]:
                 script[resolved_flow][None] = resolve_node(nodes)
             else:
-                nodes = ReferenceObject.resolve_expression(nodes)
-                if not isinstance(nodes, Dict):
-                    raise ScriptValidationError(f"{str(self.script[0])} is not a Dict: {str(flows)}")
-                for node, info in nodes.items():
+                resolved_nodes = ReferenceObject.resolve_expression(nodes)
+                if not isinstance(resolved_nodes, Dict):
+                    raise ScriptValidationError(f"{str(nodes)} is not a Dict: {str(resolved_nodes)}")
+                for node, info in resolved_nodes.items():
                     script[resolved_flow][ReferenceObject.resolve_expression(node)] = resolve_node(info)
 
+        resolved_start_label = resolve_label(self.script[1])
+        resolved_fallback_label = resolve_label(self.script[2])
+
         # validate labels
-        for label in self.script[1:3]:
-            flow = script.get(label[0])  # type: ignore
+        for resolved_label in (resolved_start_label, resolved_fallback_label):
+            flow = script.get(resolved_label[0])  # type: ignore
             if flow is None:
-                raise ScriptValidationError(f"Not found flow {str(label[0])} in {[str(key) for key in script.keys()]}")
+                raise ScriptValidationError(
+                    f"Not found flow {str(resolved_label[0])} in {[str(key) for key in script.keys()]}"
+                )
             else:
-                if flow.get(label[1]) is None:  # type: ignore
+                if flow.get(resolved_label[1]) is None:  # type: ignore
                     raise ScriptValidationError(
-                        f"Not found node {str(label[1])} in {[str(key) for key in script.keys()]}"
+                        f"Not found node {str(resolved_label[1])} in {[str(key) for key in script.keys()]}"
                     )
 
-        return script
+        return script, resolved_start_label, resolved_fallback_label
 
     @cached_property
     def graph(self) -> nx.MultiDiGraph:
+        """
+        Export DFF project as a networkx graph and validate transitions.
+
+        Resulting graph contains the following fields:
+
+        - full_script: Stores dictionary exported via :py:meth:`~.DFFProject.to_yaml`.
+        - start_label: A tuple of two strings (second element of :py:attr:`~.DFFProject.resolved_script`).
+        - fallback_label: A tuple of two strings (third element of :py:attr:`~.DFFProject.resolved_script`).
+
+        All nodes of the resulting graph are represented by a single value -- a tuple of strings or lists of strings.
+
+        For each node in the script there is a node in the resulting graph which has a value of:
+
+        - `("NODE", flow_name)` if the node belongs to the `GLOBAL` flow.
+        - `("NODE", flow_name, node_name)` otherwise.
+
+        where `flow_name` and `node_name` are results of `str` applied to `resolved_flow_name` and `resolved_node_name`
+        respectively (see documentation of :py:attr:`~.DFFProject.resolved_script`).
+
+        Additionally, nodes representing script nodes contain the following fields:
+
+        - ref: Path to the :py:class:`~.Expression` representing the node (see :py:attr:`~.BaseParserObject.path`).
+        - local: Whether this node is `LOCAL`.
+
+        Graph has other nodes:
+
+        - `("NONE",)` -- empty node.
+        - Label nodes. The first element of their value is `"LABEL"`, the second element is the name of the label used
+        (e.g. `"to_fallback"`). The rest of the elements are tuples of two strings with the first element being a name
+        of a function argument, and the second element being its `true_value`.
+
+        For each transition between script nodes there is an edge in the graph:
+        The first node of the edge is always a node representing a node in the script.
+        The second node is either a node in the script (if transition directly specifies it), a label node
+        (if one of the labels from :py:mod:`~.dff.script.labels` is used) and an empty node otherwise.
+
+        All edges have 4 fields:
+
+        - label_ref: Path to the object defining transition label.
+        - label: `str` of either absolute value of the label or the label itself.
+        - condition_ref: Path to the object defining transition condition.
+        - condition: `str` of either absolute value of the condition or the condition itself.
+
+        :raises ScriptValidationError:
+            - If `TRANSITION` keyword does not refer to a :py:class:`~.Dict`.
+            - If any of the first two elements of any transition label is not :py:class:`~.String`.
+        """
         def resolve_label(label: Expression, current_flow: Expression) -> tuple:
             if isinstance(label, ReferenceObject):  # label did not resolve (possibly due to a missing func def)
-                return ("NONE",)
+                return "NONE",
             if isinstance(label, String):
-                return "NODE", str(current_flow), str(label)  # maybe shouldn't use str on String
+                return "NODE", str(current_flow), str(label)
             if isinstance(label, Iterable):
                 resolved_flow_name = ReferenceObject.resolve_absolute(label[0])
                 resolved_node_name = ReferenceObject.resolve_absolute(label[1])
                 if not isinstance(resolved_flow_name, String):
                     raise ScriptValidationError(f"First argument of label is not str: {label}")
-                if len(label) == 2 and not isinstance(resolved_node_name, String):  # todo: add type check for label[1]
+                if len(label) == 2 and not isinstance(resolved_node_name, String):  # second element is priority
                     return "NODE", str(current_flow), str(resolved_flow_name)
                 if len(label) == 2:
                     return "NODE", str(resolved_flow_name), str(resolved_node_name)
@@ -278,17 +464,19 @@ class DFFProject(BaseParserObject):
                     return (
                         "LABEL",
                         label.func_name.rpartition(".")[2],
-                        *[(key, str(value)) for key, value in label.get_args(label_args[label.func_name]).items()],
+                        *[(key, value.true_value()) for key, value in label.get_args(
+                            label_args[label.func_name]).items()
+                          ],
                     )
             logger.warning(f"Label did not resolve: {label}")
-            return ("NONE",)
+            return "NONE",
 
         graph = nx.MultiDiGraph(
-            full_script=self.to_dict(self.actor_call.dependencies()),
-            start_label=self.script[1],
-            fallback_label=self.script[2],
+            full_script=self.to_dict(self.script_initializer_call.dependencies()),
+            start_label=self.resolved_script[1],
+            fallback_label=self.resolved_script[2],
         )
-        for flow_name, flow in self.resolved_script.items():
+        for flow_name, flow in self.resolved_script[0].items():
             for node_name, node_info in flow.items():
                 current_label = (
                     ("NODE", str(flow_name), str(node_name))
@@ -462,7 +650,7 @@ class DFFProject(BaseParserObject):
 
     def to_python(self, project_root_dir: Path):
         logger.info(f"Executing `to_python` with project_root_dir={project_root_dir}")
-        object_filter = self.actor_call.dependencies()
+        object_filter = self.script_initializer_call.dependencies()
 
         for namespace in self.children.values():
             namespace_object_filter = object_filter.get(namespace.name)
@@ -526,7 +714,7 @@ class DFFProject(BaseParserObject):
         file.parent.mkdir(parents=True, exist_ok=True)
         file.touch()
         with open(file, "w", encoding="utf-8") as fd:
-            yaml.dump(self.to_dict(self.actor_call.dependencies()), fd)
+            yaml.dump(self.to_dict(self.script_initializer_call.dependencies()), fd)
 
     @classmethod
     def from_graph(cls, file: Path, validate: bool = True, script_initializer: tp.Optional[str] = None):

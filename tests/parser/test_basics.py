@@ -3,7 +3,7 @@ from sys import version_info
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call
+from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call, Iterable
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.dff_project import DFFProject
 from .utils import assert_dirs_equal
@@ -135,6 +135,12 @@ def test_iterable():
 
     assert len(namespace["a"]) == 3
 
+    # test obj dump
+    for obj in ((), [], (1,), [1], {1}, (1, 2), [1, 2], {1, 2}):
+        expr = Expression.from_obj(obj)
+        assert isinstance(expr, Iterable)
+        assert expr.dump() == repr(obj)
+
 
 def test_call():
     namespace = Namespace.from_ast(ast.parse("import Actor\na = Actor(1, 2, c=3)"), location=["namespace"])
@@ -238,6 +244,32 @@ def test_long_import_chain():
 
     assert dff_project["main"]["imp"].absolute == "1"
     assert dff_project["main"]["imp"] == "1"
+
+
+def test_deep_import():
+    dff_project = DFFProject.from_dict(
+        {
+            "main": {"obj": "1"},
+            "module.__init__": {},
+            "module.main": {"obj": "from ..main import obj", "missing": "from ..main import missing"},
+            "module.module.__init__": {},
+            "module.module.main": {
+                "obj": "from ...main import obj",
+                "missing": "from ...main import missing",
+                "other_missing": "from ..main import missing",
+            }
+        },
+        validate=False,
+    )
+    assert dff_project.resolve_path(("module.main", "obj")) == "1"
+    assert dff_project.resolve_path(("module.main", "missing")) == "main.missing"
+    assert dff_project.resolve_path(("module.module.main", "obj")) == "1"
+    assert dff_project.resolve_path(("module.module.main", "missing")) == "main.missing"
+    assert dff_project.resolve_path(("module.module.main", "other_missing")) == "main.missing"
+
+
+def test_get_methods():
+    ...
 
 
 def test_namespace_filter():

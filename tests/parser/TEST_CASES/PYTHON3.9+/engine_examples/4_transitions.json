@@ -177,6 +177,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -187,6 +195,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -212,6 +228,14 @@
                 [
                     "priority",
                     "0.1"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -226,6 +250,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -255,6 +287,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -280,6 +320,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -324,6 +372,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ]
         },
@@ -484,6 +540,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -520,6 +584,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -688,6 +760,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -724,6 +804,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -760,6 +848,14 @@
                 [
                     "priority",
                     "0.1"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -800,6 +896,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -869,6 +973,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -909,6 +1021,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -978,6 +1098,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1018,6 +1146,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1054,6 +1190,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1090,6 +1234,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1130,6 +1282,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1170,6 +1330,14 @@
                 [
                     "cyclicality_flag",
                     "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1206,6 +1374,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1242,6 +1418,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0
@@ -1340,6 +1524,14 @@
                 [
                     "priority",
                     "None"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
                 ]
             ],
             "key": 0

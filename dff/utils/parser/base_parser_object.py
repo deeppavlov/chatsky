@@ -8,7 +8,7 @@ from abc import ABC, abstractmethod
 from collections import defaultdict
 import ast
 import logging
-from inspect import FullArgSpec
+from inspect import Signature, Parameter
 from enum import Enum
 
 try:
@@ -111,7 +111,7 @@ class BaseParserObject(ABC):
 
     @cached_property
     def path(self) -> tp.Tuple[str, ...]:
-        """Path to this node from the tree root node"""
+        """Path to this node from the tree root node."""
         if self._name is None:
             raise RuntimeError(f"Name is not set: {str(self)}")
         if self.parent is None:
@@ -144,16 +144,14 @@ class BaseParserObject(ABC):
         """
 
     def __repr__(self) -> str:
-        if self.true_value() == self.dump():
-            return self.__class__.__name__ + "(" + self.dump() + ")"
-        return self.__class__.__name__ + "(dump=" + self.dump() + "; true_value=" + self.true_value() + ")"
+        return self.__class__.__name__ + "(" + self.true_value() + ")"
 
     def __str__(self) -> str:
         return self.dump()
 
     def true_value(self) -> str:
         """Return the true value of the object that is used to compare objects and compute hash."""
-        return str(self)
+        return self.dump(indent=None)
 
     def __hash__(self):
         return hash(self.true_value())
@@ -234,7 +232,7 @@ class Expression(BaseParserObject, ABC):
         ...
 
     @classmethod
-    def from_str(cls, string: str) -> "Expression":  # todo: add `from_object` method
+    def from_str(cls, string: str) -> "Expression":
         body = ast.parse(string).body
         if len(body) != 1:
             raise ParsingError(f"Body should contain only one expression: {string}")
@@ -242,6 +240,11 @@ class Expression(BaseParserObject, ABC):
         if not isinstance(statement, ast.Expr):
             raise ParsingError(f"Body should contain only expressions: {string}")
         return cls.auto(statement.value)
+
+    @classmethod
+    def from_obj(cls, obj: object) -> "Expression":
+        """Construct an expression representing an object."""
+        return cls.from_str(repr(obj))
 
     @classmethod
     @tp.overload
@@ -307,9 +310,14 @@ class ReferenceObject(BaseParserObject, ABC):
         are, respectively, `dff.pipeline.Pipeline` and `dff.pipeline.dictionary[dff.pipeline.number][5]`.
         """
 
+    def __repr__(self):
+        if self.dump(indent=None) == self.true_value():
+            return BaseParserObject.__repr__(self)
+        return self.__class__.__name__ + "(dump=" + self.dump(indent=None) + "; true_value=" + self.true_value() + ")"
+
     def true_value(self) -> str:
         if self.absolute is not None:
-            return str(self.absolute)
+            return self.absolute.true_value()
         return self.referenced_object
 
     @staticmethod
@@ -990,6 +998,7 @@ class Iterable(Expression):
         return (
             self.type.value[0]
             + ", ".join([child.dump(current_indent, indent) for child in self.children.values()])
+            + ("," if (len(self.children) == 1 and self.type == Iterable.Type.TUPLE) else "")
             + self.type.value[1]
         )
 
@@ -1028,40 +1037,45 @@ class Call(Expression):
     def __init__(self, func: Expression, args: tp.List[Expression], keywords: tp.Dict[str, Expression]):
         Expression.__init__(self)
         self.add_child(func, "func")
+        self.args: tp.List[Expression] = args
+        self.keywords: tp.Dict[str, Expression] = keywords
         for index, arg in enumerate(args):
             self.add_child(arg, "arg_" + str(index))
         for key, value in keywords.items():
             self.add_child(value, "keyword_" + key)
 
-    def get_args(self, func_args: FullArgSpec) -> dict:
-        """Return a dictionary of pairs `{arg_name: arg_value}`.
-        Use `func_args` to obtain information about function signature.
-
-        :param func_args: Full argument specification of the function.
-        :type func_args:
-            [:py:class:`inspect.FullArgSpec`](https://docs.python.org/3/library/inspect.html#inspect.getfullargspec)
-        :return: A mapping from argument names to their values (represented by :py:class:`.Expression`)
+    def get_args(self, func_sig: Signature) -> tp.Dict[str, Expression]:
         """
-        result = {}
-        if len(func_args.args) > 0 and func_args.args[0] in ("self", "cls"):
-            args = func_args.args[1:]
+        Return a dictionary of pairs `{arg_name: arg_value}`.
+        If `arg_name` corresponds to a collection of unbound arguments (such as `args` in `def func(*args, **kwargs):`),
+        `arg_value` has type :py:class:`~.Iterable` (for a tuple of positional unbound arguments)
+        or :py:class:`~.Dict`(for a dict of unbound keyword arguments).
+        Note: alternative names for collections of unbound arguments are supported
+        (i.e. if a function is defined as `def func(*func_args, **func_kwargs):`).
+
+        :param func_sig: Function signature.
+        :return: A mapping from argument names to their values (represented by :py:class:`.Expression`).
+        :raises TypeError:
+            If `self.args` and `self.kwargs` do not match function signature.
+        """
+        first_arg = list(func_sig.parameters.keys())[0]
+        if first_arg in ("self", "cls"):
+            stub = [None]
         else:
-            args = func_args.args
-        for index, arg in enumerate(args):
-            value = self.children.get("keyword_" + arg) or self.children.get("arg_" + str(index))
-            if func_args.defaults is not None and index + len(func_args.defaults) >= len(args):
-                default = func_args.defaults[index - len(args)]
-                value = value or Expression.from_str(repr(default))
-            if value is None:
-                raise ScriptValidationError(f"Argument {arg} is not set")
-            result[arg] = value
-        for arg in func_args.kwonlyargs:
-            value = self.children.get("keyword_" + arg)
-            if func_args.kwonlydefaults is not None:
-                value = value or func_args.kwonlydefaults.get(arg)
-            if value is None:
-                raise ScriptValidationError(f"Argument {arg} is not set")
-            result[arg] = value
+            stub = []
+
+        params = func_sig.bind(*stub, *self.args, **self.keywords)
+        params.apply_defaults()
+
+        result: tp.Dict[str, Expression] = {}
+        for key, value in params.arguments.items():
+            if key not in ("self", "cls"):
+                if func_sig.parameters[key].kind == Parameter.VAR_POSITIONAL:  # *args processing
+                    result[key] = Iterable(value, Iterable.Type.TUPLE)
+                elif func_sig.parameters[key].kind == Parameter.VAR_KEYWORD:  # **kwargs processing
+                    result[key] = Dict(list(map(Expression.from_obj, value.keys())), list(value.values()))
+                else:
+                    result[key] = value if isinstance(value, Expression) else Expression.from_obj(value)
         return result
 
     @cached_property

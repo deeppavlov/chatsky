@@ -1,4 +1,9 @@
+from inspect import signature
+
+import pytest
+
 from dff.utils.parser.dff_project import DFFProject
+from dff.utils.parser.base_parser_object import Expression, Call
 
 
 def test_referenced_object():
@@ -39,5 +44,63 @@ def test_referenced_object():
     assert dff_project["main"]["object"] == "mod._1._2"
     assert dff_project["main"]["other_object"] == "module.object._3._4"
     assert dff_project["main"]["value_nonexistent"] == "module.object[3]"
-    assert dff_project["main"]["index_nonexistent"] == "{\n    1: {\n        2: 3,\n    },\n}[mod._1._2]"
-    assert dff_project["main"]["second_index_nonexistent"] == "{\n    2: 3,\n}[mod._1._2]"
+    assert dff_project["main"]["index_nonexistent"] == "{1: {2: 3,},}[mod._1._2]"
+    assert dff_project["main"]["second_index_nonexistent"] == "{2: 3,}[mod._1._2]"
+
+
+def test_get_args():
+    def func(param, another: int = 1,  *args, **kwargs): ...
+
+    func_call = Expression.from_str("func(1, 2, 3, 4, stuff={'key': 'value'})")
+    assert isinstance(func_call, Call)
+    args = func_call.get_args(signature(func))
+    assert args == {
+        "param": Expression.from_obj(1),
+        "another": Expression.from_obj(2),
+        "args": Expression.from_obj((3, 4)),
+        "kwargs": Expression.from_obj({"stuff": {'key': 'value'}}),
+    }
+
+    func_call = Expression.from_str("func()")
+    assert isinstance(func_call, Call)
+    with pytest.raises(TypeError) as exc_info:
+        _ = func_call.get_args(signature(func))
+    assert exc_info.value.args[0] == "missing a required argument: 'param'"
+
+    func_call = Expression.from_str("func(param=2)")
+    assert isinstance(func_call, Call)
+    args = func_call.get_args(signature(func))
+    assert args == {
+        "param": Expression.from_obj(2),
+        "another": Expression.from_obj(1),
+        "args": Expression.from_obj(()),
+        "kwargs": Expression.from_obj({}),
+    }
+
+    # test alternative naming
+
+    def func(*func_args, **func_kwargs): ...
+
+    func_call = Expression.from_str("func(1, 2, 3, 4, stuff={'key': 'value'})")
+    assert isinstance(func_call, Call)
+    args = func_call.get_args(signature(func))
+    assert args == {
+        "func_args": Expression.from_obj((1, 2, 3, 4)),
+        "func_kwargs": Expression.from_obj({"stuff": {'key': 'value'}}),
+    }
+
+    # test self / cls omitting
+
+    def func(self): ...
+
+    func_call = Expression.from_str("func()")
+    assert isinstance(func_call, Call)
+    args = func_call.get_args(signature(func))
+    assert args == {}
+
+    def func(cls): ...
+
+    func_call = Expression.from_str("func()")
+    assert isinstance(func_call, Call)
+    args = func_call.get_args(signature(func))
+    assert args == {}

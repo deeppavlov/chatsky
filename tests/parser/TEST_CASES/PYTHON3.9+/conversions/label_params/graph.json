@@ -1,0 +1,114 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "full_script": {
+            "main": {
+                "TRANSITIONS": "from dff.script.core.keywords import TRANSITIONS",
+                "Pipeline": "from dff.pipeline import Pipeline",
+                "cnd": "import dff.script.conditions",
+                "lbl": "import dff.script.labels",
+                "priority": "56",
+                "script": {
+                    "'flow'": {
+                        "'node'": {
+                            "TRANSITIONS": {
+                                "lbl.to_fallback(priority, other='str', another=('tuple',))": "cnd.true()"
+                            }
+                        }
+                    }
+                },
+                "pipeline": "Pipeline.from_script(script, ('flow', 'node'))"
+            }
+        },
+        "start_label": [
+            "'flow'",
+            "'node'"
+        ],
+        "fallback_label": [
+            "'flow'",
+            "'node'"
+        ]
+    },
+    "nodes": [
+        {
+            "ref": [
+                "main",
+                "script",
+                "value",
+                "value_'flow'",
+                "value_'node'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'flow'",
+                "'node'"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "56"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{'other': 'str', 'another': ('tuple',),}"
+                ]
+            ]
+        }
+    ],
+    "links": [
+        {
+            "label_ref": [
+                "main",
+                "script",
+                "value",
+                "value_'flow'",
+                "value_'node'",
+                "value_TRANSITIONS",
+                "key_lbl.to_fallback(priority, other='str', another=('tuple',))"
+            ],
+            "label": "lbl.to_fallback(priority, other='str', another=('tuple',))",
+            "condition_ref": [
+                "main",
+                "script",
+                "value",
+                "value_'flow'",
+                "value_'node'",
+                "value_TRANSITIONS",
+                "value_lbl.to_fallback(priority, other='str', another=('tuple',))"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'flow'",
+                "'node'"
+            ],
+            "target": [
+                "LABEL",
+                "to_fallback",
+                [
+                    "priority",
+                    "56"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{'other': 'str', 'another': ('tuple',),}"
+                ]
+            ],
+            "key": 0
+        }
+    ]
+}
