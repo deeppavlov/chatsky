@@ -55,9 +55,8 @@ class PickleContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
-        key = str(key)
         await self._load()
-        ctx_dict, _ = default_update_scheme.process_context_read(self.storage[key])
+        ctx_dict, _ = default_update_scheme.process_context_read(self.storage[str(key)])
         return Context.cast(ctx_dict)
 
     @threadsafe_method

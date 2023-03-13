@@ -197,7 +197,7 @@ class UpdateScheme:
                     patch = {item: context_dict[field][item] for item in update_field - initial_field.keys()}
                 else:
                     patch = context_dict[field]
-                output_dict.update(patch)
+                output_dict[field].update(patch)
             elif field_type is FieldType.DICT:
                 output_dict[field] = dict()
                 update_field = self.fields[field].get("outlook", list())
