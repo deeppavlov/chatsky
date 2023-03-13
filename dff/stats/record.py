@@ -17,6 +17,14 @@ from .utils import get_wrapper_field
 
 
 class StatsRecord(BaseModel):
+    """
+    The uniform statistics record model.
+    Each record is associated with a `context_id` (user)
+    and `record_id` (turn). It also holds a timestamp
+    of when it was recorded. The other data is saved to
+    the database as JSON.
+    """
+
     context_id: str
     request_id: int
     timestamp: datetime.datetime = Field(default_factory=datetime.datetime.now)

@@ -1,5 +1,5 @@
 """
-CSV
+CSV Saver
 ---------------------------
 Provides the CSV version of the :py:class:`~dff.stats.savers.saver.Saver`.
 The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`

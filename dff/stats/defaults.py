@@ -1,6 +1,6 @@
 """
-Defaults
---------------
+Default Extractors
+---------------------
 This module includes a pool of default extractors
 that you can use out of the box.
 
@@ -18,6 +18,9 @@ default_extractor_pool = ExtractorPool()
 
 @default_extractor_pool.new_extractor
 async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    """
+    Extract the current label on each turn.
+    """
     last_label = ctx.last_label or ("", "")
     label_repr = ": ".join(last_label) if all(last_label) else ""
     default_data = StatsRecord.from_context(
@@ -28,12 +31,18 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 @default_extractor_pool.new_extractor
 async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    """
+    Extract the pipeline component's start time.
+    """
     start_time = datetime.now()
     ctx.misc[get_wrapper_field(info, "time")] = start_time
 
 
 @default_extractor_pool.new_extractor
 async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    """
+    Extract the pipeline component's finish time.
+    """
     start_time = ctx.misc[get_wrapper_field(info, "time")]
     data = {"execution_time": datetime.now() - start_time}
     group_stats = StatsRecord.from_context(ctx, info, data)

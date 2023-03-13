@@ -32,19 +32,37 @@ class StatsStorage(PoolSubscriber):
         self.data: List[StatsRecord] = []
 
     async def save(self):
+        """
+        Calls the :py:meth:`~flush` function when the
+        number of records is equal to `batch_size`.
+        """
         if len(self.data) >= self.batch_size:
             await self.flush()
 
     async def flush(self):
+        """
+        Persist and discard the collected records.
+        """
         async with asyncio.Lock():
             await self.saver.save(self.data)
         self.data.clear()
 
     async def on_record_event(self, record: StatsRecord):
+        """
+        Callback that gets executed after a record has been added.
+
+        :param record: Target record.
+        """
         self.data.append(record)
         await self.save()
 
     def add_extractor_pool(self, pool: ExtractorPool):
+        """
+        Subscribe the storage instance to events emitted by
+        an extractor pool.
+
+        :param pool: Target extractor pool.
+        """
         pool.subscribers.append(self)
 
     @classmethod

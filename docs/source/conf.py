@@ -145,6 +145,7 @@ def setup(_):
             "examples/pipeline/*.py",
             "examples/script/*.py",
             "examples/utils/*.py",
+            "examples/stats/*.py",
         ]
     )
     regenerate_apiref(
@@ -153,5 +154,6 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.stats", "Stats"),
         ]
     )

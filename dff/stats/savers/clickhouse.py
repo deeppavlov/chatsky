@@ -1,5 +1,5 @@
 """
-Clickhouse
+Clickhouse Saver
 ---------------------------
 Provides the Clickhouse version of the :py:class:`~dff.stats.savers.saver.Saver`.
 The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
@@ -25,6 +25,11 @@ from ..record import StatsRecord
 
 
 class CHItem(StatsRecord):
+    """
+    This class preemptively converts record data to JSON
+    for compliance with Clickhouse Driver restrictions.
+    """
+
     data: str
 
     @validator("data", pre=True)
