@@ -28,7 +28,7 @@ from dff.context_storages import (
 async def delete_json(storage: JSONContextStorage):
     """
     Deletes all data from a JSON context storage.
-    
+
     :param storage: A JSONContextStorage object.
     """
     if not json_available:
@@ -40,7 +40,7 @@ async def delete_json(storage: JSONContextStorage):
 async def delete_mongo(storage: MongoContextStorage):
     """
     Deletes all data from a MongoDB context storage.
-    
+
     :param storage: A MongoContextStorage object
     """
     if not mongo_available:
@@ -51,7 +51,7 @@ async def delete_mongo(storage: MongoContextStorage):
 async def delete_pickle(storage: PickleContextStorage):
     """
     Deletes all data from a Pickle context storage.
-    
+
     :param storage: A PickleContextStorage object.
     """
     if not pickle_available:
@@ -63,7 +63,7 @@ async def delete_pickle(storage: PickleContextStorage):
 async def delete_redis(storage: RedisContextStorage):
     """
     Deletes all data from a Redis context storage.
-    
+
     :param storage: A RedisContextStorage object.
     """
     if not redis_available:
@@ -74,7 +74,7 @@ async def delete_redis(storage: RedisContextStorage):
 async def delete_shelve(storage: ShelveContextStorage):
     """
     Deletes all data from a Shelve context storage.
-    
+
     :param storage: A ShelveContextStorage object.
     """
     if os.path.isfile(storage.path):
@@ -84,7 +84,7 @@ async def delete_shelve(storage: ShelveContextStorage):
 async def delete_sql(storage: SQLContextStorage):
     """
     Deletes all data from an SQL context storage.
-    
+
     :param storage: An SQLContextStorage object.
     """
     if storage.dialect == "postgres" and not postgres_available:
@@ -100,7 +100,7 @@ async def delete_sql(storage: SQLContextStorage):
 async def delete_ydb(storage: YDBContextStorage):
     """
     Deletes all data from a YDB context storage.
-    
+
     :param storage: A YDBContextStorage object.
     """
     if not ydb_available:

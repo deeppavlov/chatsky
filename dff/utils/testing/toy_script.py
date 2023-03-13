@@ -42,4 +42,3 @@ HAPPY_PATH = (
     (Message(text="Ok, goodbye."), Message(text="bye")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
 )
-
