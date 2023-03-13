@@ -49,6 +49,7 @@ jobs:
           fi
           pytest --tb=long -vv --cache-clear --no-cov tests/
         shell: bash
+
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:
