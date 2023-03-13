@@ -4,6 +4,7 @@ dist/
 venv/
 build/
 docs/source/apiref
+docs/source/release_notes.rst
 docs/source/tutorials
 *__pycache__*
 *.idea/*
