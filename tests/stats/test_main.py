@@ -1,9 +1,39 @@
+import sys
 import os
 from argparse import Namespace
 import pytest
 
+try:
+    import omegaconf  # noqa: F401
+except ImportError:
+    pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
+
 from dff.stats.__main__ import main
 from tests.db_list import SUPERSET_ACTIVE
+from dff.utils.testing.stats_cli import parse_args
+
+
+@pytest.mark.parametrize(
+    "args",
+    [
+        [
+            "",
+            "cfg_from_opts",
+            "--db.type=postgresql",
+            "--db.user=user",
+            "--db.password=password",
+            "--db.host=localhost",
+            "--db.port=5432",
+            "--db.name=db",
+            "--db.table=test",
+        ],
+        ["", "cfg_from_file", "--db.password=pass", "./examples/stats/example_config.yaml"],
+        ["", "cfg_from_uri", "--uri=postgresql://user:password@localhost:5432/db/test"],
+    ],
+)
+def test_parse_args(args):
+    sys.argv = args
+    assert parse_args()
 
 
 @pytest.mark.parametrize(

@@ -3,8 +3,19 @@ import pytest
 from sqlalchemy import text
 
 from dff.stats import make_saver
-from dff.stats.savers.clickhouse import ClickHouseSaver
-from dff.stats.savers.postgresql import PostgresSaver
+
+try:
+    from dff.stats.savers.clickhouse import ClickHouseSaver
+
+    clickhouse_available = True
+except ImportError:
+    clickhouse_available = False
+try:
+    from dff.stats.savers.postgresql import PostgresSaver
+
+    postgres_available = True
+except ImportError:
+    postgres_available = False
 
 from tests.db_list import POSTGRES_ACTIVE, CLICKHOUSE_ACTIVE
 
@@ -16,6 +27,7 @@ CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD")
 CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 
 
+@pytest.mark.skipif(not postgres_available, reason="Postgres not available")
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.skipif(not all([POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DB]), reason="Postgres credentials missing")
 @pytest.mark.asyncio
@@ -40,6 +52,7 @@ async def test_PG_saving(table, testing_items):
     assert int(first[0]) == (len(testing_items) * 2)
 
 
+@pytest.mark.skipif(not clickhouse_available, reason="Clickhouse not available.")
 @pytest.mark.skipif(not CLICKHOUSE_ACTIVE, reason="Clickhouse server is not running")
 @pytest.mark.skipif(
     not all([CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB]), reason="Clickhouse credentials missing"

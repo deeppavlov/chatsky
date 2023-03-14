@@ -4,7 +4,7 @@ from dff.stats.defaults import extract_current_label
 from dff.stats import StatsRecord, ExtractorPool
 
 
-def test_pool_construction():
+def test_pool_constructor_type_checking():
     with pytest.raises(AssertionError) as e:
         ExtractorPool([1, 2])
     assert e
