@@ -98,9 +98,9 @@ dataset = Dataset.parse_obj(
 
 # load model
 MODEL_URL = (
-    "https://github.com/ruthenian8/rasa_sample_project/raw/main/20newsgroups-forsale-train.wv.gz"
+    "https://github.com/ruthenian8/rasa_sample_project/raw/main/20newsgroups-forsale-train.bin.gz"
 )
-MODEL_FILE = "20newsgroups-forsale-train.wv"
+MODEL_FILE = "20newsgroups-forsale-train.bin"
 if not os.path.exists(MODEL_FILE):
     with urlopen(MODEL_URL) as stream:
         data = stream.read()
@@ -108,7 +108,8 @@ if not os.path.exists(MODEL_FILE):
     with open(MODEL_FILE, "wb+") as file:
         file.write(decompressed_data)
 
-model = Word2Vec.load(MODEL_FILE)
+model = Word2Vec()
+model.wv = model.wv.load_word2vec_format(MODEL_FILE)
 gensim_matcher = GensimMatcher(model=model, dataset=dataset, namespace_key="gensim")
 
 
@@ -165,8 +166,8 @@ script = {
         "what_news": {
             RESPONSE: Message(text="what kind of news do you prefer?"),
             TRANSITIONS: {
-                "ask_about_science": i_cnd.has_cls_label("science_news", threshold=0.75),
-                "ask_about_sport": i_cnd.has_cls_label("sport_news", threshold=0.75),
+                "ask_about_science": i_cnd.has_cls_label("science_news", threshold=0.85),
+                "ask_about_sport": i_cnd.has_cls_label("sport_news", threshold=0.85),
             },
         },
         "ask_about_science": {
