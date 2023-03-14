@@ -8,7 +8,10 @@ for annotating user phrases.
 
 
 # %%
+import os
+import gzip
 import logging
+from urllib.request import urlopen
 
 from gensim.models import Word2Vec, KeyedVectors
 import gensim.downloader as api
@@ -95,9 +98,18 @@ dataset = Dataset.parse_obj(
 # dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/chitchat.yaml"))
 
 # load model
-wv: KeyedVectors = api.load("glove-wiki-gigaword-50")
-model = Word2Vec(vector_size=wv.vector_size)
-model.wv = wv
+MODEL_URL = (
+    "https://github.com/ruthenian8/rasa_sample_project/raw/main/20newsgroups-forsale-train.wv"
+)
+MODEL_FILE = "20newsgroups-forsale-train.wv"
+if not os.path.exists(MODEL_FILE):
+    with urlopen(MODEL_URL) as stream:
+        data = stream.read()
+        decompressed_data = gzip.decompress(data)
+    with open(MODEL_FILE, "wb+") as file:
+        file.write(decompressed_data)
+
+model = Word2Vec.load(MODEL_FILE)
 gensim_matcher = GensimMatcher(model=model, dataset=dataset, namespace_key="gensim")
 
 

@@ -49,6 +49,3 @@ jobs:
           fi
           pytest --tb=long -vv --cache-clear --no-cov tests/
         shell: bash
-        env:
-          HF_API_KEY: ${{ secrets.HF_API_KEY }}
-          GDF_ACCOUNT_JSON: ${{ secrets.GDF_ACCOUNT_JSON }}
