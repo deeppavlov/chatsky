@@ -13,8 +13,7 @@ import gzip
 import logging
 from urllib.request import urlopen
 
-from gensim.models import Word2Vec, KeyedVectors
-import gensim.downloader as api
+from gensim.models import Word2Vec
 
 from dff.script import (
     Message,
@@ -99,7 +98,7 @@ dataset = Dataset.parse_obj(
 
 # load model
 MODEL_URL = (
-    "https://github.com/ruthenian8/rasa_sample_project/raw/main/20newsgroups-forsale-train.wv"
+    "https://github.com/ruthenian8/rasa_sample_project/raw/main/20newsgroups-forsale-train.wv.gz"
 )
 MODEL_FILE = "20newsgroups-forsale-train.wv"
 if not os.path.exists(MODEL_FILE):
