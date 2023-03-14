@@ -1,6 +1,5 @@
 import os
 import pytest
-from sqlalchemy import text
 
 from dff.stats import make_saver
 
@@ -32,6 +31,7 @@ CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 @pytest.mark.skipif(not all([POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DB]), reason="Postgres credentials missing")
 @pytest.mark.asyncio
 async def test_PG_saving(table, testing_items):
+    from sqlalchemy import text
     PG_uri_string = "postgresql://{}:{}@localhost:5432/{}".format(POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DB)
     saver: PostgresSaver = make_saver(PG_uri_string, table=table)
     await saver._create_table()
