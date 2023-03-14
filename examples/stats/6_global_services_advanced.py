@@ -14,7 +14,6 @@ from dff.script import Context, Actor
 from dff.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.utils.testing.stats_cli import parse_args
 
 
 # %% [markdown]
@@ -65,6 +64,8 @@ pipeline.add_global_handler(
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
+    from dff.utils.testing.stats_cli import parse_args
+
     args = parse_args()
     stats = StatsStorage.from_uri(args["uri"], table=args["table"])
     stats.add_extractor_pool(extractor_pool)
