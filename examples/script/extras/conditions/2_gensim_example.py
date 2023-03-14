@@ -109,7 +109,7 @@ script = {
             RESPONSE: Message(text="Hi"),
             TRANSITIONS: {
                 ("small_talk", "ask_some_questions"): cnd.exact_match(Message(text=("hi"))),
-                ("animals", "like_animals"): i_cnd.has_cls_label("animals"),
+                ("animals", "like_animals"): i_cnd.has_cls_label("animals", threshold=0.75),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
         },
@@ -121,11 +121,11 @@ script = {
     "animals": {
         "have_pets": {
             RESPONSE: Message(text="do you have pets?"),
-            TRANSITIONS: {"what_animal": i_cnd.has_cls_label("consent")},
+            TRANSITIONS: {"what_animal": i_cnd.has_cls_label("consent", threshold=0.75)},
         },
         "like_animals": {
             RESPONSE: Message(text="do you like it?"),
-            TRANSITIONS: {"what_animal": i_cnd.has_cls_label("consent")},
+            TRANSITIONS: {"what_animal": i_cnd.has_cls_label("consent", threshold=0.75)},
         },
         "what_animal": {
             RESPONSE: Message(text="what animals do you have?"),
@@ -154,14 +154,14 @@ script = {
         "what_news": {
             RESPONSE: Message(text="what kind of news do you prefer?"),
             TRANSITIONS: {
-                "ask_about_science": i_cnd.has_cls_label("science_news"),
-                "ask_about_sport": i_cnd.has_cls_label("sport_news"),
+                "ask_about_science": i_cnd.has_cls_label("science_news", threshold=0.75),
+                "ask_about_sport": i_cnd.has_cls_label("sport_news", threshold=0.75),
             },
         },
         "ask_about_science": {
             RESPONSE: Message(text="i got news about science, would you like to hear them?"),
             TRANSITIONS: {
-                "science_news": i_cnd.has_cls_label("consent"),
+                "science_news": i_cnd.has_cls_label("consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
@@ -170,14 +170,14 @@ script = {
                 text="The newly discovered comet will be named after DeepPavlov team. More at 11."
             ),
             TRANSITIONS: {
-                "what_news": i_cnd.has_cls_label("consent"),
+                "what_news": i_cnd.has_cls_label("consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
         "ask_about_sport": {
             RESPONSE: Message(text="i got news about sport, do you want to hear?"),
             TRANSITIONS: {
-                "sport_news": i_cnd.has_cls_label("consent"),
+                "sport_news": i_cnd.has_cls_label("consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
@@ -186,7 +186,7 @@ script = {
                 text="Did you know that an AI-controlled robot plays soccer better than humans?"
             ),
             TRANSITIONS: {
-                "what_news": i_cnd.has_cls_label("consent"),
+                "what_news": i_cnd.has_cls_label("consent", threshold=0.75),
                 ("small_talk", "ask_some_questions"): cnd.regexp("change the topic"),
             },
         },
@@ -196,14 +196,14 @@ script = {
             RESPONSE: Message(text="how are you"),
             TRANSITIONS: {
                 "ask_talk_about": cnd.regexp("fine"),
-                ("animals", "like_animals"): i_cnd.has_cls_label("animals"),
+                ("animals", "like_animals"): i_cnd.has_cls_label("animals", threshold=0.75),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
         },
         "ask_talk_about": {
             RESPONSE: Message(text="what do you want to talk about"),
             TRANSITIONS: {
-                ("animals", "like_animals"): i_cnd.has_cls_label("animals"),
+                ("animals", "like_animals"): i_cnd.has_cls_label("animals", threshold=0.75),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
         },
@@ -224,7 +224,7 @@ happy_path = [
         Message(text="yes"),
         Message(text="The newly discovered comet will be named after DeepPavlov team. More at 11."),
     ),
-    (Message(text="totally"), Message(text="what kind of news do you prefer?")),
+    (Message(text="sure"), Message(text="what kind of news do you prefer?")),
     (Message(text="sport"), Message(text="i got news about sport, do you want to hear?")),
 ]
 
