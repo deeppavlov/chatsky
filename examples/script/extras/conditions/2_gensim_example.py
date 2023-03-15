@@ -36,7 +36,8 @@ from dff.utils.testing.common import is_interactive_mode
 """
 You can use the `api.load` command to handle loading pre-trained vectors for `Gensim`.
 
-The `Word2Vec` model you instantiate should be passed to `Classifier` / `Matcher` on construction.
+The `Word2Vec` model you instantiate or load from checkpoints
+should be passed to `Classifier` / `Matcher` on construction.
 Then, the model can be used in the script for annotating user input.
 """
 
@@ -96,7 +97,7 @@ dataset = Dataset.parse_obj(
 # from pathlib import Path
 # dataset = Dataset.parse_yaml(Path(__file__).parent.joinpath("data/chitchat.yaml"))
 
-# load model
+# Loading pretrained KeyedVectors saved using `save_word2vec_format` method.
 MODEL_URL = (
     "https://github.com/ruthenian8/rasa_sample_project/raw/main/20newsgroups-forsale-train.bin.gz"
 )
@@ -106,7 +107,7 @@ if not os.path.exists(MODEL_FILE):
         data = stream.read()
         decompressed_data = gzip.decompress(data)
     with open(MODEL_FILE, "wb+") as file:
-        file.write(decompressed_data)
+        file.write(decompressed_data)  # decompress and save the file locally
 
 model = Word2Vec()
 model.wv = model.wv.load_word2vec_format(MODEL_FILE)
