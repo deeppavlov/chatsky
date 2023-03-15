@@ -6,6 +6,14 @@ from dff.script import Context, Message
 from dff.script.extras.conditions.utils import LABEL_KEY
 from dff.script.extras.conditions.dataset import DatasetItem, Dataset
 from dff.script.extras.conditions.conditions import has_cls_label, has_match
+from dff.script.extras.conditions.models.local.cosine_matchers.sklearn import SklearnMatcher, sklearn_available
+
+
+@pytest.fixture(scope="session")
+def standard_model(testing_dataset):
+    from sklearn.feature_extraction.text import TfidfVectorizer
+
+    yield SklearnMatcher(tokenizer=TfidfVectorizer(stop_words=None), dataset=testing_dataset)
 
 
 @pytest.mark.parametrize(
@@ -32,6 +40,7 @@ def test_conds_invalid(input, testing_actor):
         _ = has_cls_label(input)(Context(), testing_actor)
 
 
+@pytest.mark.skipif(not sklearn_available, reason="Sklearn package missing.")
 @pytest.mark.parametrize(
     ["_input", "last_request", "thresh"],
     [

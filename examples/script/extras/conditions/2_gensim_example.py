@@ -216,7 +216,7 @@ script = {
         "ask_talk_about": {
             RESPONSE: Message(text="what do you want to talk about"),
             TRANSITIONS: {
-                ("animals", "like_animals"): i_cnd.has_cls_label("animals", threshold=0.75),
+                ("animals", "like_animals"): i_cnd.has_cls_label("animals", threshold=0.85),
                 ("news", "what_news"): cnd.regexp("news|event"),
             },
         },

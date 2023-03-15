@@ -7,12 +7,7 @@ Use Sklearn classifiers to achieve great results on a limited set of data.
 """
 from typing import Optional
 
-try:
-    sklearn_available = True
-except ImportError:
-    sklearn_available = False
-
-from ...sklearn import BaseSklearnModel
+from ...sklearn import BaseSklearnModel, sklearn_available
 
 
 class SklearnClassifier(BaseSklearnModel):

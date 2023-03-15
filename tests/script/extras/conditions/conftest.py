@@ -1,8 +1,6 @@
 import pytest
-from sklearn.feature_extraction.text import TfidfVectorizer
 
 from dff.script import Actor
-from dff.script.extras.conditions.models import SklearnMatcher
 from dff.script.extras.conditions.dataset import Dataset
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
@@ -20,11 +18,6 @@ def testing_actor():
 @pytest.fixture(scope="session")
 def testing_dataset():
     yield Dataset.parse_yaml(f"examples/{get_path_from_tests_to_current_dir(__file__)}/data/example.yaml")
-
-
-@pytest.fixture(scope="session")
-def standard_model(testing_dataset):
-    yield SklearnMatcher(tokenizer=TfidfVectorizer(stop_words=None), dataset=testing_dataset)
 
 
 @pytest.fixture(scope="session")

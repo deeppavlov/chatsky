@@ -7,12 +7,7 @@ It uses Sklearn BOW representations and other features to compute distances betw
 """
 from typing import Optional
 
-try:
-    IMPORT_ERROR_MESSAGE = None
-except ImportError as e:
-    IMPORT_ERROR_MESSAGE = e.msg
-
-from ...sklearn import BaseSklearnModel
+from ...sklearn import BaseSklearnModel, sklearn_available
 from ....dataset import Dataset
 from .cosine_matcher_mixin import CosineMatcherMixin
 
@@ -36,5 +31,7 @@ class SklearnMatcher(CosineMatcherMixin, BaseSklearnModel):
         tokenizer: object = None,
         namespace_key: Optional[str] = None,
     ) -> None:
+        if not sklearn_available:
+            raise ImportError("`sklearn` package missing. Try `pip install dff[sklearn]`.")
         CosineMatcherMixin.__init__(self, dataset=dataset)
         BaseSklearnModel.__init__(self, model=model, tokenizer=tokenizer, namespace_key=namespace_key)

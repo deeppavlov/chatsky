@@ -14,13 +14,13 @@ try:
     from sklearn.pipeline import make_pipeline, Pipeline
     from scipy.sparse import csr_matrix
 
-    sklearn_availabe = True
+    sklearn_available = True
 except ImportError:
     BaseEstimator = object
     Pipeline = object
     make_pipeline = object
     csr_matrix = object
-    sklearn_availabe = False
+    sklearn_available = False
 
 from .base_model import BaseModel
 
@@ -43,7 +43,7 @@ class BaseSklearnModel(BaseModel):
         tokenizer: Optional[Union[BaseEstimator, Pipeline]] = None,
         namespace_key: Optional[str] = None,
     ) -> None:
-        if not sklearn_availabe:
+        if not sklearn_available:
             raise ImportError("`sklearn` package missing. Try `pip install dff[ext].`.")
         assert tokenizer is not None, "tokenizer parameter is required."
         super().__init__(namespace_key=namespace_key)
