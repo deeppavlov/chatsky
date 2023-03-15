@@ -2,7 +2,7 @@
 Cosine Matcher Mixin
 ----------------------
 This module provides the cosine matcher mixin that
-uniformly defines `predict` method for all cosine matchers. 
+uniformly defines `predict` method for all cosine matchers.
 """
 try:
     import numpy as np
