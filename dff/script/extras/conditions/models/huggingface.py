@@ -36,7 +36,7 @@ class BaseHFModel(BaseModel):
         self,
         model: object,
         tokenizer: object,
-        device: torch.device,
+        device: object,
         namespace_key: Optional[str] = None,
         tokenizer_kwargs: Optional[dict] = None,
         model_kwargs: Optional[dict] = None,

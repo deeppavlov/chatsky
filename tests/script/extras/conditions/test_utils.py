@@ -1,7 +1,7 @@
 import pytest
 
 from dff.script import Context, Message
-from dff.script.extras.conditions.dataset import Dataset
+from dff.script.extras.conditions.dataset import Dataset, pyyaml_available
 from dff.script.extras.conditions.utils import LABEL_KEY
 from dff.script.extras.conditions.models.remote_api.async_mixin import AsyncMixin
 from tests.test_utils import get_path_from_tests_to_current_dir
@@ -10,14 +10,16 @@ path = get_path_from_tests_to_current_dir(__file__)
 
 
 @pytest.mark.parametrize(
-    ["file", "method_name"],
+    ["file", "method_name", "skip_condition"],
     [
-        (f"examples/{path}/data/example.json", "parse_json"),
-        (f"examples/{path}/data/example.jsonl", "parse_jsonl"),
-        (f"examples/{path}/data/example.yaml", "parse_yaml"),
+        (f"examples/{path}/data/example.json", "parse_json", None),
+        (f"examples/{path}/data/example.jsonl", "parse_jsonl", None),
+        (f"examples/{path}/data/example.yaml", "parse_yaml", not pyyaml_available),
     ],
 )
-def test_file_parsing(file, method_name):
+def test_file_parsing(file, method_name, skip_condition):
+    if skip_condition:
+        pytest.skip(f"Skipping {file}: dependencies missing.")
     collection: Dataset = getattr(Dataset, method_name)(file)
     assert len(collection.items) == 3
     assert len(collection.flat_items) == 10
@@ -31,14 +33,16 @@ def test_file_parsing(file, method_name):
 
 
 @pytest.mark.parametrize(
-    ["file", "method_name"],
+    ["file", "method_name", "skip_condition"],
     [
-        ("nonexistent.json", "parse_json"),
-        ("nonexistent.jsonl", "parse_jsonl"),
-        ("nonexistent.yaml", "parse_yaml"),
+        ("nonexistent.json", "parse_json", None),
+        ("nonexistent.jsonl", "parse_jsonl", None),
+        ("nonexistent.yaml", "parse_yaml", not pyyaml_available),
     ],
 )
-def test_dataset_exceptions(file, method_name):
+def test_dataset_exceptions(file, method_name, skip_condition):
+    if skip_condition:
+        pytest.skip(f"Skipping {file}: dependencies missing.")
     with pytest.raises(OSError) as e:
         _ = getattr(Dataset, method_name)(file)
         assert e

@@ -12,13 +12,11 @@ from typing import List, Dict, Union
 from pydantic import BaseModel, Field, PrivateAttr, parse_file_as, parse_obj_as, validator, root_validator
 
 try:
-    from yaml import load
+    from yaml import load, SafeLoader
 
     pyyaml_available = True
 except ImportError:
     pyyaml_available = False
-
-from yaml import SafeLoader
 
 
 class DatasetItem(BaseModel):
