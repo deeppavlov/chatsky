@@ -1,14 +1,15 @@
 import pytest
 
-from dff.script.extras.conditions.models.local.cosine_matchers.gensim import GensimMatcher
+from dff.script.extras.conditions.models.local.cosine_matchers.gensim import GensimMatcher, gensim_available
+from dff.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import numpy_available
 from dff.script.extras.conditions.dataset import Dataset
 
-try:
-    import numpy as np
-    import gensim
-    import gensim.downloader as api
-except ImportError:
-    pytest.skip(allow_module_level=True)
+if not gensim_available or not numpy_available:
+    pytest.skip(allow_module_level=True, reason="`Gensim` package missing.")
+
+import numpy as np
+import gensim
+import gensim.downloader as api
 
 
 @pytest.fixture(scope="session")

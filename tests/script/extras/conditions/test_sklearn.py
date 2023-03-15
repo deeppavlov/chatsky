@@ -1,12 +1,16 @@
 import pytest
 
-from sklearn.feature_extraction.text import TfidfVectorizer
-from sklearn.linear_model import LogisticRegression
 import numpy as np
 
-from dff.script.extras.conditions.models.local.classifiers.sklearn import SklearnClassifier
+from dff.script.extras.conditions.models.local.classifiers.sklearn import SklearnClassifier, sklearn_available
 from dff.script.extras.conditions.models.local.cosine_matchers.sklearn import SklearnMatcher
 from dff.script.extras.conditions.dataset import Dataset
+
+if not sklearn_available:
+    pytest.skip(allow_module_level=True, reason="`Sklearn` package missing.")
+
+from sklearn.feature_extraction.text import TfidfVectorizer
+from sklearn.linear_model import LogisticRegression
 
 
 @pytest.fixture(scope="session")

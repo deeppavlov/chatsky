@@ -5,14 +5,15 @@ This module provides an adapter interface for Gensim models.
 We use word2vec embeddings to compute distances between utterances.
 """
 from typing import Optional, Callable, List
-import joblib
 
 try:
     import gensim
+    import joblib
 
     gensim_available = True
     ALL_MODELS = [name for name in dir(gensim.models) if name[0].isupper()]  # all classes
 except ImportError:
+    joblib = object
     gensim_available = False
     ALL_MODELS = []
 
@@ -72,6 +73,8 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
 
     @classmethod
     def load(cls, path: str, namespace_key: str) -> __qualname__:
+        if not gensim_available:
+            raise ImportError("`gensim` missing. Try `pip install dff[ext,gensim]`")
         with open(path, "rb") as picklefile:
             contents = picklefile.readline()  # get the header line, find the class name inside
         for name in ALL_MODELS:

@@ -5,7 +5,6 @@ This module provides a base class for classifiers and matchers,
 built on top of Sklearn models.
 """
 from typing import Optional, Union
-import joblib
 
 from ..dataset import Dataset
 
@@ -13,6 +12,7 @@ try:
     from sklearn.base import BaseEstimator
     from sklearn.pipeline import make_pipeline, Pipeline
     from scipy.sparse import csr_matrix
+    import joblib
 
     sklearn_available = True
 except ImportError:
@@ -20,6 +20,7 @@ except ImportError:
     Pipeline = object
     make_pipeline = object
     csr_matrix = object
+    joblib = object
     sklearn_available = False
 
 from .base_model import BaseModel

@@ -1,7 +1,6 @@
-from sklearn.metrics.pairwise import cosine_similarity
-
 try:
     import numpy as np
+    from sklearn.metrics.pairwise import cosine_similarity
 
     numpy_available = True
 except ImportError:
