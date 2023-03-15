@@ -1,8 +1,8 @@
 """
-Async Mixin
-------------
+Asynchronous Mixin
+-----------------------
 
-This module provides a mixin that overrides the :py:meth:`__call__` method
+This module provides the mixin that overrides the :py:meth:`__call__` method
 in all the descendants making them asynchronous.
 """
 from dff.script import Context
