@@ -190,6 +190,14 @@ class Statement(BaseParserObject, ABC):
     def from_ast(
         cls, node: tp.Union[ast.stmt, ast.expr], **kwargs
     ) -> tp.Optional[tp.Union[tp.Mapping[str, "Statement"], "Python"]]:
+        """
+        Extract statements from ast node.
+        :return:
+            - None, if type of the `node` is not compatible with the current class.
+            - For non-:py:class:`~.Python` classes
+            return a mapping from names of defined objects inside the statement to their definitions.
+            - :py:class:`~.Python` should return an instance of itself.
+        """
         ...
 
     @classmethod
@@ -233,6 +241,12 @@ class Expression(BaseParserObject, ABC):
 
     @classmethod
     def from_str(cls, string: str) -> "Expression":
+        """
+        Construct an expression from a string representing it.
+
+        :raises ParsingError:
+            - If a string represents anything but a single expression (:py:class:`ast.Expr`).
+        """
         body = ast.parse(string).body
         if len(body) != 1:
             raise ParsingError(f"Body should contain only one expression: {string}")
@@ -393,6 +407,18 @@ class Import(Statement, ReferenceObject):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
+        """
+        Extract imports from ast node.
+
+        :return:
+            A dictionary of statements contained in the node.
+            The keys are names under which an object is imported, and the values are instances of this class.
+            For example an import statement `import obj_1 as obj, obj_2, obj_3 as obj_3`
+            will produce a dictionary with the following items:
+                - `(obj, Import(import obj_1 as obj))`
+                - `(obj_2, Import(import obj_2))`
+                - `(obj_3, Import(import obj_3 as obj_3))`
+        """
         if not isinstance(node, ast.Import):
             return None
         result = {}
@@ -463,6 +489,18 @@ class ImportFrom(Statement, ReferenceObject):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
+        """
+        Extract from-imports from ast node.
+
+        :return:
+            A dictionary of statements contained in the node.
+            The keys are names under which an object is imported, and the values are instances of this class.
+            For example an import statement `from module import obj_1 as obj, obj_2, obj_3 as obj_3`
+            will produce a dictionary with the following items:
+                - `(obj, ImportFrom(from module import obj_1 as obj))`
+                - `(obj_2, ImportFrom(from module import obj_2))`
+                - `(obj_3, ImportFrom(from module import obj_3 as obj_3))`
+        """
         if not isinstance(node, ast.ImportFrom):
             return None
         result = {}
@@ -505,6 +543,18 @@ class Assignment(Statement):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
+        """
+        Extract assignments from ast node.
+
+        :return:
+            A dictionary of statements contained in the node.
+            The keys are names of declared object, and the values are instances of this class.
+            For example an assignment statement `a = b = c = 1`
+            will produce a dictionary with the following items:
+                - `(c, Assignment(c = 1))`
+                - `(a, Assignment(a = c))`
+                - `(b, Assignment(b = c))`
+        """
         if isinstance(node, ast.Assign):
             result = {}
             target = Expression.auto(node.targets[-1])

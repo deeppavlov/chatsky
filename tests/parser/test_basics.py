@@ -289,3 +289,24 @@ def test_namespace_filter():
             DFFProject.from_python(Path(tmpdir), file).to_python(Path(result))
             DFFProject.from_python(Path(tmpdir_clean), file_clean).to_python(Path(correct_result))
             assert_dirs_equal(Path(result), Path(correct_result))
+
+
+def test_statement_extraction():
+    file = "import obj_1 as obj, obj_2, obj_3 as obj_3\n" \
+           "from module import m_obj_1 as m_obj, m_obj_2, m_obj_3 as m_obj_3\n" \
+           "a = b = c = 1"
+
+    namespace = Namespace.from_ast(ast.parse(file), location=["main"])
+    _ = DFFProject(namespaces=[namespace], validate=False)
+
+    assert namespace.dump() == "import obj_1 as obj\n" \
+                               "import obj_2\n" \
+                               "import obj_3 as obj_3\n" \
+                               "from module import m_obj_1 as m_obj\n" \
+                               "from module import m_obj_2\n" \
+                               "from module import m_obj_3 as m_obj_3\n" \
+                               "\n" \
+                               "c = 1\n\n" \
+                               "a = c\n\n" \
+                               "b = c\n" \
+                               ""
