@@ -20,10 +20,6 @@ class DefaultTokenizer:
     This class is used as a default tokenizer for integration with
     models that do not provide their own tokenizer. It uses a compiled
     regular expression that matches words and punctuation marks.
-
-    .. code-block:: python
-        re.compile(r"[\w']+|[^\w ]")
-
     """
 
     def __init__(self):
