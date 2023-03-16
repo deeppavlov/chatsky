@@ -26,7 +26,7 @@ except ImportError:
 
 class AbstractGDFModel(BaseModel):
     """
-    Abstract class for a Google Dialogflow annotator.
+    Abstract class for a Google Dialogflow model.
     """
 
     def __init__(
@@ -49,6 +49,12 @@ class AbstractGDFModel(BaseModel):
 
     @classmethod
     def from_file(cls, filename: str, namespace_key: str, language: str = "en"):
+        """
+        :param filename: Path to the Dialogflow credentials saved as JSON.
+        :param namespace_key: Name of the namespace that the model will be using.
+        :param language: The language parameter is forwarded to the underlying
+            Dialogflow wrapper.
+        """
         assert Path(filename).exists(), f"Path {filename} does not exist."
         with open(filename, "r", encoding="utf-8") as file:
             info = json.load(file)
@@ -63,13 +69,13 @@ class GoogleDialogFlowModel(AbstractGDFModel):
     using the Dialogflow web interface (see the official
     `instructions <https://cloud.google.com/dialogflow/es/docs/quick/build-agent>`_).
     After this is done, you should obtain a service account JSON file from Google
-    and pass it to this class, using `from_file` method.
+    and pass it to this class, using :py:meth:`~from_file` method.
 
-    :param model: A parsed service account json that contains a link to your dialogflow project.
+    :param model: A parsed service account json for your Dialogflow project.
         Calling json.load() on the file obtained from Google is sufficient to get the
-        credentials object. Alternatively, :py:meth:`use from_file` method
-    :param namespace_key: Name of the namespace in framework states that the model will be using.
-    :param language: The language of your dialogflow project. Set to English per default.
+        credentials object. Alternatively, use :py:meth:`~from_file` method.
+    :param namespace_key: Name of the namespace in that the model will be using.
+    :param language: Language parameter is passed to the Dialogflow wrapper.
     """
 
     def predict(self, request: str) -> dict:
@@ -93,13 +99,13 @@ class AsyncGoogleDialogFlowModel(AsyncMixin, AbstractGDFModel):
     using the Dialogflow web interface (see the official
     `instructions <https://cloud.google.com/dialogflow/es/docs/quick/build-agent>`_).
     After this is done, you should obtain a service account JSON file from Google
-    and pass it to this class, using `from_file` method.
+    and pass it to this class, using :py:meth:`~from_file` method.
 
-    :param model: A parsed service account json that contains a link to your dialogflow project.
+    :param model: A parsed service account json for your dialogflow project.
         Calling json.load() on the file obtained from Google is sufficient to get the
-        credentials object. Alternatively, :py:meth:`use from_file` method
+        credentials object. Alternatively, use :py:meth:`~from_file` method.
     :param namespace_key: Name of the namespace in framework states that the model will be using.
-    :param language: The language of your dialogflow project. Set to English per default.
+    :param language: Language parameter is passed to the Dialogflow wrapper.
     """
 
     async def predict(self, request: str) -> dict:

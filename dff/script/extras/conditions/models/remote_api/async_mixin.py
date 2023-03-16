@@ -13,10 +13,10 @@ from ...utils import LABEL_KEY
 
 class AsyncMixin(BaseModel):
     """
-    This class allows calls to an annotator to be asynchronous.
-    Thanks to this, asynchronous classes can be easily integrated
-    into a `Pipeline` object.
-
+    This class overrides the :py:meth:`~__call__` method
+    allowing for asynchronous calls to annotator models.
+    As a result, asynchronous classes can be easily integrated
+    into a :py:class:`~dff.pipeline.Pipeline` object.
     """
 
     async def __call__(self, ctx: Context, _):

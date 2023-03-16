@@ -2,7 +2,7 @@
 Regex Classifier
 ----------------
 
-This module provides a regex-based labelling model.
+This module provides a regex-based annotator model.
 Initialize it with a :py:class:`~Dataset` with regex-compliant examples.
 """
 import re

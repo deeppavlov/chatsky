@@ -33,15 +33,15 @@ class BaseModel(ABC):
         """
         Predict the probability of one or several classes.
 
-        :param request: Any string.
+        :param request: Target request string.
         """
         raise NotImplementedError
 
     def transform(self, request: str):
         """
-        Get a representation of the input data.
+        Get a numeric representation of the input data.
 
-        :param request: Any string.
+        :param request: Target request string.
         """
         raise NotImplementedError
 
@@ -86,7 +86,8 @@ class BaseModel(ABC):
         """
         Load a model from the specified location and instantiate the model.
 
-        :param path: String formatted path.
-        :param namespace_key: Namespace key for the target model.
+        :param str: Path to saving directory.
+        :param namespace_key: Name of the namespace in that the model will be using.
+            Will be forwarded to the model on construction.
         """
         raise NotImplementedError

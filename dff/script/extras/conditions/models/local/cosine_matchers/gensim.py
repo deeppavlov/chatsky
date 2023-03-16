@@ -2,7 +2,8 @@
 Gensim Cosine Model
 --------------------
 This module provides an adapter interface for Gensim models.
-We use word2vec embeddings to compute distances between utterances.
+Any embeddings from Gensim (e.g. Word2Vec, FastText or GLoVe) can be leveraged
+to compute distances between utterances.
 """
 from typing import Optional, Callable, List
 
@@ -67,15 +68,23 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
         self.model.train(tokenized_sents, total_examples=self.model.corpus_count, epochs=self.model.epochs)
 
     def save(self, path: str):
-        self.model.save(path)
-        joblib.dump(self.dataset, f"{path}.data")
-        joblib.dump(self.tokenizer, f"{path}.tokenizer")
+        """
+        Separately saves the model and the tokenizer to the specified path.
+        `.model.bin` suffix is used to save the model.
+        `.data.bin` suffix is used to save the dataset.
+        `.tokenizer.bin` suffix is used for the tokenizer.
+
+        :param path: Path to saving directory.
+        """
+        self.model.save(f"{path}.model.bin")
+        joblib.dump(self.dataset, f"{path}.data.bin")
+        joblib.dump(self.tokenizer, f"{path}.tokenizer.bin")
 
     @classmethod
     def load(cls, path: str, namespace_key: str) -> __qualname__:
         if not gensim_available:
             raise ImportError("`gensim` missing. Try `pip install dff[ext,gensim]`")
-        with open(path, "rb") as picklefile:
+        with open(f"{path}.model.bin", "rb") as picklefile:
             contents = picklefile.readline()  # get the header line, find the class name inside
         for name in ALL_MODELS:
             if bytes(name, encoding="utf-8") in contents:
@@ -84,7 +93,7 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
         else:
             raise ValueError(f"No matching model found for file {path}")
 
-        model = model_cls.load(path)
-        dataset = joblib.load(f"{path}.data")
-        tokenizer = joblib.load(f"{path}.tokenizer")
+        model = model_cls.load(f"{path}.model.bin")
+        dataset = joblib.load(f"{path}.data.bin")
+        tokenizer = joblib.load(f"{path}.tokenizer.bin")
         return cls(model=model, tokenizer=tokenizer, dataset=dataset, namespace_key=namespace_key)

@@ -53,6 +53,8 @@ class HFMatcher(CosineMatcherMixin, BaseHFModel):
 
     def save(self, path: str, **kwargs) -> None:
         """
+        Save the model to the specified location.
+
         :param path: Path to saving directory.
         :param kwargs: Keyword arguments are forwarded to the 'save_pretrained' method of the underlying model.
         """
@@ -64,6 +66,13 @@ class HFMatcher(CosineMatcherMixin, BaseHFModel):
 
     @classmethod
     def load(cls, path: str, namespace_key: str) -> __qualname__:
+        """
+        Load the model from the specified location.
+
+        :param str: Path to saving directory.
+        :param namespace_key: Name of the namespace in that the model will be using.
+            Will be forwarded to the model on construction.
+        """
         saving_path = Path(path)
         model = AutoModelForSequenceClassification.from_pretrained(path)
         tokenizer = AutoTokenizer.from_pretrained(path)

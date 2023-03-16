@@ -64,7 +64,6 @@ class HFAPIModel(AbstractHFAPIModel):
     :param namespace_key: Name of the namespace in framework states that the model will be using.
     :param retries: Number of retries in case of request failure.
     :param headers: A dictionary that overrides a standard set of headers.
-
     """
 
     def predict(self, request: str) -> dict:
@@ -98,7 +97,6 @@ class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
     :param namespace_key: Name of the namespace in framework states that the model will be using.
     :param retries: Number of retries in case of request failure.
     :param headers: A dictionary that overrides a standard set of headers.
-
     """
 
     def __init__(

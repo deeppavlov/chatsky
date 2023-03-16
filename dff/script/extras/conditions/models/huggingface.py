@@ -22,7 +22,7 @@ from ..dataset import Dataset
 
 class BaseHFModel(BaseModel):
     """
-    Base class for Hugging Face-based models.
+    Base class for Hugging Face-based annotator models.
 
     :param model: A pretrained Hugging Face format model.
     :param tokenizer: A pretrained Hugging Face tokenizer.
@@ -51,6 +51,13 @@ class BaseHFModel(BaseModel):
         self.model_kwargs = model_kwargs or dict()
 
     def transform(self, request: str) -> Iterable:
+        """
+        Apply the tokenizer and the model to an input string.
+        Returns the last hidden state of the model as a
+        two-dimensional embedding.
+
+        :param request: Target request string.
+        """
         tokenized_examples = self.tokenizer(request, **self.tokenizer_kwargs)
         output = self.model(**tokenized_examples.to(self.device), **{**self.model_kwargs, "output_hidden_states": True})
         return (
@@ -58,6 +65,12 @@ class BaseHFModel(BaseModel):
         )  # reshape for cosine similarity to be applicable
 
     def call_model(self, request: str) -> dict:
+        """
+        Apply the tokenizer and the model to an input string.
+        Returns the model output unmodified.
+
+        :param request: Target request string.
+        """
         tokenized_examples = self.tokenizer(request, **self.tokenizer_kwargs)
         output = self.model(
             **tokenized_examples.to(self.device), **{**self.model_kwargs, "output_hidden_states": False}
@@ -77,6 +90,11 @@ class BaseHFModel(BaseModel):
 
     @classmethod
     def load(cls, path: str, namespace_key: str) -> __qualname__:
+        """
+        :param str: Path to saving directory.
+        :param namespace_key: Name of the namespace in that the model will be using.
+            Will be forwarded to the model on construction.
+        """
         model = AutoModelForSequenceClassification.from_pretrained(path)
         tokenizer = AutoTokenizer.from_pretrained(path)
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")

@@ -2,7 +2,7 @@
 Dataset
 --------
 
-This module contains structures that are required to parse items from files
+This module contains data structures that are required to parse items from files
 and parse requests and responses to and from various APIs.
 
 """
@@ -20,14 +20,30 @@ except ImportError:
 
 
 class DatasetItem(BaseModel):
+    """
+    Data structure for storing labeled utterances.
+
+    :param label: Raw classification label.
+    :param samples: Utterance examples. At least one sentence is required.
+    """
+
     label: str
     samples: List[Union[List[str], Dict[str, str], str]] = Field(default_factory=list, min_items=1)
     _categorical_code = PrivateAttr(default=0)
 
 
 class Dataset(BaseModel):
+    """
+    Data structure for storing multiple :py:class:`~DatasetItem` objects.
+
+    :param items: Can be initialized either with a list or with a dict
+        of :py:class:`~DatasetItem` objects.
+        Makes each item accessible by its label.
+    """
+
     items: Dict[str, DatasetItem] = Field(default_factory=dict)
     flat_items: list = Field(default_factory=list)
+    """`flat_items` field is populated automatically using objects from the `items` field."""
 
     def __getitem__(self, idx: str):
         return self.flat_items[idx]

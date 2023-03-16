@@ -1,8 +1,9 @@
 """
-Rasa Annotator
+Rasa Model
 ---------------
 
-This module provides an annotator that queries an external RASA Server for intent detection.
+This module provides an annotator model
+that queries an external RASA NLU Server for utterance classification.
 """
 import asyncio
 import time

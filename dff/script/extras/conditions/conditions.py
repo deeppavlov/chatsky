@@ -24,7 +24,7 @@ from .models.base_model import BaseModel
 def has_cls_label(label, namespace: Optional[str] = None, threshold: float = 0.9):
     """
     Use this condition, when you need to check, whether the probability
-    of a particular label for the last user utterance surpasses the threshold.
+    of a particular label for the last annotated user utterance surpasses the threshold.
 
     :param label: String name or a reference to a DatasetItem object, or a collection thereof.
     :param namespace: Namespace key of a particular model that should detect the dataset_item.
@@ -84,15 +84,14 @@ def has_match(
     threshold: float = 0.9,
 ):
     """
-    Use this condition, if you need to check whether the last utterance is close to some
-    pre-defined phrases. N.B.: Note that the model you will use should be already fit by the time
-    you pass it to the function.
+    Use this condition, if you need to check whether the last request matches
+    any of the pre-defined intent utterances.
+    The model passed to this function should be in the fit state.
 
-    :param model: df_extended_conditions' model. Use one of the models from the `cosine_matchers` subpackage.
-    :param positive_examples: A list of phrases that an utterance should be close to.
-    :param negative_examples: A list of phrases that an utterance should be distant from.
-    :param threshold: The minimal cosine similarity to positive examples that triggers
-        a positive response from the function.
+    :param model: Any model from the :py:mod:`~dff.script.extras.conditions.models.local.cosine_matchers` module.
+    :param positive_examples: Utterances that the request should match.
+    :param negative_examples: Utterances that the request should not match.
+    :param threshold: Similarity threshold that triggers a positive response from the function.
     """
     if negative_examples is None:
         negative_examples = []
