@@ -3,7 +3,7 @@
 # 1. Basics
 
 This notebook shows basic tutorial of creating a simple dialog bot (agent).
-Let's do all the necessary imports from `DFF`:
+Let's do all the necessary imports from DFF:
 """
 
 
@@ -126,7 +126,7 @@ actor = Actor(
 
 # %% [markdown]
 """
-`Actor` is a low-level API way of working with `dff`.
+`Actor` is a low-level API way of working with DFF.
 We recommend going the other way and using `Pipeline`,
 which has the same functionality but a high-level API.
 """

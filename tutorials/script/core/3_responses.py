@@ -3,7 +3,7 @@
 # 3. Responses
 
 This tutorial shows different options for setting responses.
-Let's do all the necessary imports from `DFF`.
+Let's do all the necessary imports from DFF.
 """
 
 

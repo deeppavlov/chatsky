@@ -3,7 +3,7 @@
 # 9. Pre-transitions processing
 
 This tutorial shows pre-transitions processing feature.
-First of all, let's do all the necessary imports from `DFF`.
+First of all, let's do all the necessary imports from DFF.
 """
 
 

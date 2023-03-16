@@ -3,7 +3,7 @@ Extra Handler
 -------------
 The Extra Handler module contains additional functionality that extends the capabilities of the system
 beyond the core functionality. Extra handlers is an input converting addition to :py:class:`.PipelineComponent`.
-For examples, it is used to grep statistics from components, timing, logging, etc.
+For example, it is used to grep statistics from components, timing, logging, etc.
 """
 import asyncio
 import logging
@@ -168,6 +168,21 @@ class _ComponentExtraHandler:
 
 
 class BeforeHandler(_ComponentExtraHandler):
+    """
+    A handler for extra functions that are executed before the component's main function.
+
+    :param functions: A callable or a list of callables that will be executed
+        before the component's main function. If the extra function is a coroutine
+        it should be wrapped by `aiogram.utils.helper.run_sync`.
+    :type functions: ExtraHandlerBuilder
+    :param timeout: Optional timeout for the execution of the extra functions, in
+        seconds.
+    :param asynchronous: Optional flag that indicates whether the extra functions
+        should be executed asynchronously. If `None`, the handler will use the
+        value set in the `aiogram.utils.exceptions.BadRequest` exception, which is
+        `False` by default.
+    """
+
     def __init__(
         self,
         functions: ExtraHandlerBuilder,
@@ -178,6 +193,21 @@ class BeforeHandler(_ComponentExtraHandler):
 
 
 class AfterHandler(_ComponentExtraHandler):
+    """
+    A handler for extra functions that are executed after the component's main function.
+
+    :param functions: A callable or a list of callables that will be executed
+        after the component's main function. If the extra function is a coroutine
+        it should be wrapped by `aiogram.utils.helper.run_sync`.
+    :type functions: ExtraHandlerBuilder
+    :param timeout: Optional timeout for the execution of the extra functions, in
+        seconds.
+    :param asynchronous: Optional flag that indicates whether the extra functions
+        should be executed asynchronously. If `None`, the handler will use the
+        value set in the `aiogram.utils.exceptions.BadRequest` exception, which is
+        `False` by default.
+    """
+
     def __init__(
         self,
         functions: ExtraHandlerBuilder,

@@ -3,7 +3,7 @@
 # 4. Multi Message
 
 This tutorial shows Multi Message usage.
-Let's do all the necessary imports from `DFF`.
+Let's do all the necessary imports from DFF.
 """
 
 

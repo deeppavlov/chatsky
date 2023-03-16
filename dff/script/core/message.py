@@ -2,7 +2,7 @@
 Message
 -------
 The :py:class:`.Message` class is a universal data model for representing a message that should be supported by
-`DFF`. It only contains types and properties that are compatible with most messaging services.
+DFF. It only contains types and properties that are compatible with most messaging services.
 """
 from typing import Any, Optional, List, Union
 from enum import Enum, auto

@@ -3,7 +3,7 @@
 # 6. Context serialization
 
 This tutorial shows context serialization.
-First of all, let's do all the necessary imports from `DFF`.
+First of all, let's do all the necessary imports from DFF.
 """
 
 

@@ -3,7 +3,7 @@
 # 8. Misc
 
 This tutorial shows `MISC` (miscellaneous) keyword usage.
-First of all, let's do all the necessary imports from `DFF`.
+First of all, let's do all the necessary imports from DFF.
 """
 
 

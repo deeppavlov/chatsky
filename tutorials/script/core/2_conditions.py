@@ -4,7 +4,7 @@
 
 This tutorial shows different options for
 setting transition conditions from one node to another.
-First of all, let's do all the necessary imports from `DFF`.
+First of all, let's do all the necessary imports from DFF.
 """
 
 

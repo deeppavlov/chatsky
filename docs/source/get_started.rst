@@ -4,7 +4,7 @@ Getting started
 Installation
 ~~~~~~~~~~~~
 
-`DFF` can be easily installed on your system using the ``pip`` package manager:
+DFF can be easily installed on your system using the ``pip`` package manager:
 
 .. code-block:: console
    
