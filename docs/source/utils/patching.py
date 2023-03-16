@@ -49,11 +49,13 @@ def wrap_source_function(source: Callable, wrapper: Callable[[Callable], Any]):
     2. Wrapper function shouldn't have type hints that are not defined in the library file.
        No imports are added along with patch function, and its definition and code is copied literally.
     3. Wrapper function shouldn't have neither docstring nor multiline definition.
-       Its definition is considered to be (and is copied as) single line, anything starting from the second line should be code.
+       Its definition is considered to be (and is copied as) single line,
+       anything starting from the second line should be code.
 
     :param source: Library function to wrap (exported from the module patch will be applied to).
     :type source: callable
-    :param wrapper: Wrapper function, should accept `source` function as single parameter and return whatever it returns.
+    :param wrapper: Wrapper function, should accept `source`
+        function as single parameter and return whatever it returns.
     :type wrapper: callable
     """
     src_file = getsourcefile(source)
