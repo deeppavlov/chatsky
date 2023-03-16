@@ -49,7 +49,8 @@ def test_referenced_object():
 
 
 def test_get_args():
-    def func(param, another: int = 1,  *args, **kwargs): ...
+    def func(param, another: int = 1, *args, **kwargs):
+        ...
 
     func_call = Expression.from_str("func(1, 2, 3, 4, stuff={'key': 'value'})")
     assert isinstance(func_call, Call)
@@ -58,7 +59,7 @@ def test_get_args():
         "param": Expression.from_obj(1),
         "another": Expression.from_obj(2),
         "args": Expression.from_obj((3, 4)),
-        "kwargs": Expression.from_obj({"stuff": {'key': 'value'}}),
+        "kwargs": Expression.from_obj({"stuff": {"key": "value"}}),
     }
 
     func_call = Expression.from_str("func()")
@@ -79,26 +80,29 @@ def test_get_args():
 
     # test alternative naming
 
-    def func(*func_args, **func_kwargs): ...
+    def func(*func_args, **func_kwargs):
+        ...
 
     func_call = Expression.from_str("func(1, 2, 3, 4, stuff={'key': 'value'})")
     assert isinstance(func_call, Call)
     args = func_call.get_args(signature(func))
     assert args == {
         "func_args": Expression.from_obj((1, 2, 3, 4)),
-        "func_kwargs": Expression.from_obj({"stuff": {'key': 'value'}}),
+        "func_kwargs": Expression.from_obj({"stuff": {"key": "value"}}),
     }
 
     # test self / cls omitting
 
-    def func(self): ...
+    def func(self):
+        ...
 
     func_call = Expression.from_str("func()")
     assert isinstance(func_call, Call)
     args = func_call.get_args(signature(func))
     assert args == {}
 
-    def func(cls): ...
+    def func(cls):
+        ...
 
     func_call = Expression.from_str("func()")
     assert isinstance(func_call, Call)

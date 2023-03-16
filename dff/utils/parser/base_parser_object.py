@@ -42,7 +42,7 @@ except AttributeError:
 if tp.TYPE_CHECKING:
     from dff.utils.parser.namespace import Namespace
     from dff.utils.parser.dff_project import DFFProject
-from dff.utils.parser.exceptions import StarError, ParsingError, ScriptValidationError
+from dff.utils.parser.exceptions import StarError, ParsingError
 from dff.utils.parser.utils import is_instance
 
 

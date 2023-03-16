@@ -265,11 +265,11 @@ class DFFProject(BaseParserObject):
 
     @cached_property
     def resolved_script(
-        self
+        self,
     ) -> tp.Tuple[
         tp.Dict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]],
         tp.Tuple[str, str],
-        tp.Tuple[str, str]
+        tp.Tuple[str, str],
     ]:
         """
         Resolve values of :py:attr:`.~DFFProject.script`.
@@ -441,9 +441,10 @@ class DFFProject(BaseParserObject):
             - If `TRANSITION` keyword does not refer to a :py:class:`~.Dict`.
             - If any of the first two elements of any transition label is not :py:class:`~.String`.
         """
+
         def resolve_label(label: Expression, current_flow: Expression) -> tuple:
             if isinstance(label, ReferenceObject):  # label did not resolve (possibly due to a missing func def)
-                return "NONE",
+                return ("NONE",)
             if isinstance(label, String):
                 return "NODE", str(current_flow), str(label)
             if isinstance(label, Iterable):
@@ -464,12 +465,13 @@ class DFFProject(BaseParserObject):
                     return (
                         "LABEL",
                         label.func_name.rpartition(".")[2],
-                        *[(key, value.true_value()) for key, value in label.get_args(
-                            label_args[label.func_name]).items()
-                          ],
+                        *[
+                            (key, value.true_value())
+                            for key, value in label.get_args(label_args[label.func_name]).items()
+                        ],
                     )
             logger.warning(f"Label did not resolve: {label}")
-            return "NONE",
+            return ("NONE",)
 
         graph = nx.MultiDiGraph(
             full_script=self.to_dict(self.script_initializer_call.dependencies()),

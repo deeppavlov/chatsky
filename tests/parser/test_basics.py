@@ -257,7 +257,7 @@ def test_deep_import():
                 "obj": "from ...main import obj",
                 "missing": "from ...main import missing",
                 "other_missing": "from ..main import missing",
-            }
+            },
         },
         validate=False,
     )
