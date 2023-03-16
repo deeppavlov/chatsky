@@ -1,9 +1,9 @@
 """
-HF API Model
--------------
+HuggingFace API Model
+---------------------------
 
 This module provides the :py:class:`~HFAPIModel` class that allows you
-to use remotely hosted Hugging Face models.
+to use remotely hosted HuggingFace models via the HuggingFace inference API.
 """
 import time
 import json
