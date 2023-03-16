@@ -8,14 +8,16 @@ on:
   pull_request:
     branches:
     - dev
+  workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:
-  linux_test:
+  test_coverage:
     strategy:
       fail-fast: false
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
 
     runs-on: ubuntu-latest
 
@@ -26,41 +28,30 @@ jobs:
         run: |
           docker-compose up -d
 
-      - name: set up python ${{ matrix.python-version }}
+      - name: set up python 3.10
         uses: actions/setup-python@v2
         with:
-          python-version: ${{ matrix.python-version }}
+          python-version: "3.10"
 
-      - name: install dependencies
-        run: make venv_test
-        shell: bash
-
-      - name: build coverage file
-        run: make test
-        shell: bash
-
-  non_linux_test:
-    strategy:
-      fail-fast: false
-      matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
-        os: [macOS-latest, windows-latest]
-
-    runs-on: ${{ matrix.os }}
-    steps:
-      - uses: actions/checkout@v2
-
-      - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
-        with:
-          python-version: ${{ matrix.python-version }}
-
-      - name: install dependencies
+      - name:  build & install package
         run: |
-          python -m pip install --upgrade pip
-          pip install -e .[test_full]
-        shell: bash
+          python -m pip install build
+          python -m build
+          find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
 
-      - name: build coverage file
-        run: pytest --tb=long -vv --cache-clear --cov=dff tests/
-        shell: bash
+      - name: clean environment
+        run: |
+          export backup_files=( tests examples .env_file makefile .coveragerc )
+          mkdir /tmp/backup
+          for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
+          rm -rf ..?* .[!.]* *
+          for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
+          rm -rf /tmp/backup
+          touch venv  # disable venv target
+
+      - name: set up mutex
+        uses: ben-z/gh-action-mutex@v1.0-alpha-6
+
+      - name: run tests
+        run: |
+          make test

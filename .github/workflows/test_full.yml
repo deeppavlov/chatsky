@@ -1,0 +1,51 @@
+name: test_full
+
+on:
+  push:
+    branches:
+    - dev
+    - test/**
+  pull_request:
+    branches:
+    - dev
+  workflow_dispatch:
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+
+jobs:
+  test_full:
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        os: [macOS-latest, windows-latest, ubuntu-latest]
+
+    runs-on: ${{ matrix.os }}
+    steps:
+      - uses: actions/checkout@v2
+
+      - name: Build images
+        if: matrix.os == 'ubuntu-latest'
+        run: |
+          docker-compose up -d
+
+      - name: set up python ${{ matrix.python-version }}
+        uses: actions/setup-python@v2
+        with:
+          python-version: ${{ matrix.python-version }}
+
+      - name: install dependencies
+        run: |
+          python -m pip install --upgrade pip
+          pip install -e .[test_full]
+        shell: bash
+
+      - name: run pytest
+        run: |
+          if [ "$RUNNER_OS" == "Linux" ]; then
+              source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
+          fi
+          pytest --tb=long -vv --cache-clear --no-cov tests/
+        shell: bash

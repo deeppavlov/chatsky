@@ -3,8 +3,8 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.10.1
-TEST_COVERAGE_THRESHOLD=93
+CURRENT_VERSION = 0.3.2
+TEST_COVERAGE_THRESHOLD=97
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
@@ -28,19 +28,15 @@ venv:
 	pip install --upgrade pip
 	pip install -e .[devel_full]
 
-venv_test:
-	@echo "Start creating virtual environment (test)"
-	$(PYTHON) -m venv $(VENV_PATH)
-	pip install --upgrade pip
-	pip install -e .[test_full]
-
 format: venv
-	black --line-length=120 . --exclude '/venv.*|build|tests/parser/TEST_CASES/.*/'
+	black --line-length=120 --exclude='venv|build|examples|tests/parser/TEST_CASES' .
+	black --line-length=100 examples
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length 120 . --exclude venv*,build,tests/parser/TEST_CASES/*
-	@set -e && black --line-length=120 --check . --exclude '/venv.*|build|tests/parser/TEST_CASES/.*/'|| ( \
+	flake8 --max-line-length=120 --exclude venv,build,examples,tests/parser/TEST_CASES .
+	flake8 --max-line-length=100 examples
+	@set -e && black --line-length=120 --check --exclude='venv|build|examples|tests/parser/TEST_CASES' . && black --line-length=100 --check examples || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -66,9 +62,9 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv clean_docs
-	# sphinx-apidoc -e -f -o docs/source/apiref dff
+	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
-	sphinx-build -b html -W --keep-going -j 4 docs/source docs/build
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going docs/source docs/build
 .PHONY: doc
 
 pre_commit: venv
@@ -87,6 +83,7 @@ version_major: venv
 	bump2version --current-version $(CURRENT_VERSION) major $(VERSIONING_FILES)
 .PHONY: version_major
 
+
 clean_docs:
 	rm -rf docs/build
 	rm -rf docs/examples
@@ -100,4 +97,5 @@ clean: clean_docs
 	rm -rf *.egg-info
 	rm -rf htmlcov
 	rm -f .coverage
+	rm -rf build
 .PHONY: clean

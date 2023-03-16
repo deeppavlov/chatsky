@@ -1,0 +1,29 @@
+{% if meta is defined and meta is not none and 'tutorial_name' in meta %}
+    {% set github_link = 'https://github.com/deeppavlov/dialog_flow_framework/blob/dev/' ~ meta['tutorial_name'] ~ '.py' %}
+    {% set notebook_link = '../' ~ meta['tutorial_name'] ~ '.ipynb' %}
+    {% set colab_link = 'https://colab.research.google.com/github/deeppavlov/dialog_flow_framework/blob/gh-pages/' ~ meta['tutorial_name'] ~ '.ipynb' %}
+
+    <a href="{{ colab_link }}" data-behavior="call-to-action-event" data-response="Run in Google Colab" target="_blank">
+        <div id="google-colab-link">
+            <span class="pytorch-colab call-to-action-any"></span>
+            <div class="call-to-action-desktop-view">Run in Google Colab</div>
+            <div class="call-to-action-mobile-view">Colab</div>
+        </div>
+    </a>
+
+    <a href="{{ notebook_link }}" data-behavior="call-to-action-event" data-response="Download Notebook">
+        <div id="download-notebook-link">
+            <span class="pytorch-download call-to-action-any"></span>
+            <div class="call-to-action-desktop-view">Download Notebook</div>
+            <div class="call-to-action-mobile-view">Notebook</div>
+        </div>
+    </a>
+
+    <a href="{{ github_link }}" data-behavior="call-to-action-event" data-response="View on Github" target="_blank">
+        <div id="github-view-link">
+            <span class="pytorch-github call-to-action-any"></span>
+            <div class="call-to-action-desktop-view">View on GitHub</div>
+            <div class="call-to-action-mobile-view">GitHub</div>
+        </div>
+    </a>
+{% endif %}

@@ -1,22 +1,17 @@
 import importlib
-import os
-import sys
-
 import pytest
 
-import tests.utils as utils
+from tests.test_utils import get_path_from_tests_to_current_dir
+from dff.utils.testing import check_happy_path, HAPPY_PATH
+from dff.script import Message
 
-# TODO: remove this and refactor examples as soon as utils will be moved to PYPI
-sys.path.append(os.path.abspath(f"examples/{utils.get_path_from_tests_to_current_dir(__file__)}"))
-
-dot_path_to_addon = utils.get_path_from_tests_to_current_dir(__file__, separator=".")
-pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipeline_utils")
+dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 @pytest.mark.parametrize(
     "example_module_name",
     [
-        "1_basic_example",
+        "1_basics",
         "2_pre_and_post_processors",
         "3_pipeline_dict_with_services_basic",
         "3_pipeline_dict_with_services_full",
@@ -32,7 +27,11 @@ pipeline_utils = importlib.import_module(f"examples.{dot_path_to_addon}._pipelin
 )
 def test_examples(example_module_name: str):
     example_module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
-    if example_module_name.startswith("6"):
-        pipeline_utils.auto_run_pipeline(example_module.pipeline, wrapper=example_module.construct_webpage_by_response)
+    if example_module_name == "6_custom_messenger_interface":
+        happy_path = tuple(
+            (req, Message(misc={"webpage": example_module.construct_webpage_by_response(res.text)}))
+            for req, res in HAPPY_PATH
+        )
+        check_happy_path(example_module.pipeline, happy_path)
     else:
-        pipeline_utils.auto_run_pipeline(example_module.pipeline)
+        check_happy_path(example_module.pipeline, HAPPY_PATH)

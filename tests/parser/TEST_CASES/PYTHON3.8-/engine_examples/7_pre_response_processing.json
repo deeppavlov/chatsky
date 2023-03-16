@@ -1,0 +1,514 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "full_script": {
+            "7_pre_response_processing": {
+                "GLOBAL": "from dff.script import GLOBAL",
+                "LOCAL": "from dff.script import LOCAL",
+                "RESPONSE": "from dff.script import RESPONSE",
+                "TRANSITIONS": "from dff.script import TRANSITIONS",
+                "PRE_RESPONSE_PROCESSING": "from dff.script import PRE_RESPONSE_PROCESSING",
+                "Message": "from dff.script import Message",
+                "lbl": "import dff.script.labels",
+                "cnd": "import dff.script.conditions",
+                "Pipeline": "from dff.pipeline import Pipeline",
+                "toy_script": {
+                    "'root'": {
+                        "'start'": {
+                            "RESPONSE": "Message()",
+                            "TRANSITIONS": {
+                                "('flow', 'step_0')": "cnd.true()"
+                            }
+                        },
+                        "'fallback'": {
+                            "RESPONSE": "Message(text='the end')"
+                        }
+                    },
+                    "GLOBAL": {
+                        "PRE_RESPONSE_PROCESSING": {
+                            "'proc_name_1'": "add_prefix('l1_global')",
+                            "'proc_name_2'": "add_prefix('l2_global')"
+                        }
+                    },
+                    "'flow'": {
+                        "LOCAL": {
+                            "PRE_RESPONSE_PROCESSING": {
+                                "'proc_name_2'": "add_prefix('l2_local')",
+                                "'proc_name_3'": "add_prefix('l3_local')"
+                            }
+                        },
+                        "'step_0'": {
+                            "RESPONSE": "Message(text='first')",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.true()"
+                            }
+                        },
+                        "'step_1'": {
+                            "PRE_RESPONSE_PROCESSING": {
+                                "'proc_name_1'": "add_prefix('l1_step_1')"
+                            },
+                            "RESPONSE": "Message(text='second')",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.true()"
+                            }
+                        },
+                        "'step_2'": {
+                            "PRE_RESPONSE_PROCESSING": {
+                                "'proc_name_2'": "add_prefix('l2_step_2')"
+                            },
+                            "RESPONSE": "Message(text='third')",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.true()"
+                            }
+                        },
+                        "'step_3'": {
+                            "PRE_RESPONSE_PROCESSING": {
+                                "'proc_name_3'": "add_prefix('l3_step_3')"
+                            },
+                            "RESPONSE": "Message(text='fourth')",
+                            "TRANSITIONS": {
+                                "lbl.forward()": "cnd.true()"
+                            }
+                        },
+                        "'step_4'": {
+                            "PRE_RESPONSE_PROCESSING": {
+                                "'proc_name_4'": "add_prefix('l4_step_4')"
+                            },
+                            "RESPONSE": "Message(text='fifth')",
+                            "TRANSITIONS": {
+                                "'step_0'": "cnd.true()"
+                            }
+                        }
+                    }
+                },
+                "pipeline": "Pipeline.from_script(toy_script, start_label=('root', 'start'), fallback_label=('root', 'fallback'))"
+            }
+        },
+        "start_label": [
+            "'root'",
+            "'start'"
+        ],
+        "fallback_label": [
+            "'root'",
+            "'fallback'"
+        ]
+    },
+    "nodes": [
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'root'",
+                "value_'start'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'root'",
+                "'start'"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_0'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'flow'",
+                "'step_0'"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'root'",
+                "value_'fallback'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'root'",
+                "'fallback'"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_GLOBAL"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "GLOBAL"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_LOCAL"
+            ],
+            "local": true,
+            "id": [
+                "NODE",
+                "'flow'",
+                "LOCAL"
+            ]
+        },
+        {
+            "id": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
+                ]
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_1'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'flow'",
+                "'step_1'"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_2'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'flow'",
+                "'step_2'"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_3'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'flow'",
+                "'step_3'"
+            ]
+        },
+        {
+            "ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_4'"
+            ],
+            "local": false,
+            "id": [
+                "NODE",
+                "'flow'",
+                "'step_4'"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "label_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'root'",
+                "value_'start'",
+                "value_TRANSITIONS",
+                "key_('flow', 'step_0')"
+            ],
+            "label": "('flow', 'step_0')",
+            "condition_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'root'",
+                "value_'start'",
+                "value_TRANSITIONS",
+                "value_('flow', 'step_0')"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'root'",
+                "'start'"
+            ],
+            "target": [
+                "NODE",
+                "'flow'",
+                "'step_0'"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_0'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_0'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'flow'",
+                "'step_0'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_1'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_1'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'flow'",
+                "'step_1'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_2'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_2'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'flow'",
+                "'step_2'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_3'",
+                "value_TRANSITIONS",
+                "key_lbl.forward()"
+            ],
+            "label": "lbl.forward()",
+            "condition_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_3'",
+                "value_TRANSITIONS",
+                "value_lbl.forward()"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'flow'",
+                "'step_3'"
+            ],
+            "target": [
+                "LABEL",
+                "forward",
+                [
+                    "priority",
+                    "None"
+                ],
+                [
+                    "cyclicality_flag",
+                    "True"
+                ],
+                [
+                    "args",
+                    "()"
+                ],
+                [
+                    "kwargs",
+                    "{}"
+                ]
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_4'",
+                "value_TRANSITIONS",
+                "key_'step_0'"
+            ],
+            "label": "'step_0'",
+            "condition_ref": [
+                "7_pre_response_processing",
+                "toy_script",
+                "value",
+                "value_'flow'",
+                "value_'step_4'",
+                "value_TRANSITIONS",
+                "value_'step_0'"
+            ],
+            "condition": "cnd.true()",
+            "source": [
+                "NODE",
+                "'flow'",
+                "'step_4'"
+            ],
+            "target": [
+                "NODE",
+                "'flow'",
+                "'step_0'"
+            ],
+            "key": 0
+        }
+    ]
+}

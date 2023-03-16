@@ -1,22 +1,22 @@
 import os
 import sys
-
-from jupytext import jupytext
+import re
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
-
+from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
+from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-project = "Dialog Flow Framework"
-copyright = "2021, Denis Kuznetsov"
-author = "Denis Kuznetsov"
+project = "DFF"
+copyright = "2023, DeepPavlov"
+author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.10.1"
+release = "0.3.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -39,16 +39,19 @@ extensions = [
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
+    "IPython.sphinxext.ipython_console_highlighting",
 ]
 
 suppress_warnings = ["image.nonlocal_uri"]
 source_suffix = ".rst"
 master_doc = "index"
 
-version = "0.10.1"
+version = re.match(r"^\d\.\d.\d", release).group()
 language = "en"
 
 pygments_style = "default"
+
+add_module_names = False
 
 
 # Add any paths that contain templates here, relative to this directory.
@@ -57,43 +60,99 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["*.py", "**/_*.py"]
+exclude_patterns = ["*.py", "utils/*.py", "**/_*.py"]
 
 html_short_title = "None"
 
 # -- Options for HTML output -------------------------------------------------
 
+sphinx_gallery_conf = {
+    "promote_jupyter_magic": True,
+}
+
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "dff_sphinx_theme"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
 
 # Finding examples directories
-nbsphinx_custom_formats = {".py": lambda s: jupytext.reads(s, "py:percent")}
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
+nbsphinx_prolog = """
+:tutorial_name: {{ env.docname }}
+"""
 
+html_context = {
+    "github_user": "deeppavlov",
+    "github_repo": "dialog_flow_framework",
+    "github_version": "dev",
+    "doc_path": "docs/source",
+}
+
+html_css_files = [
+    "css/custom.css",
+]
 
 # Theme options
 html_theme_options = {
-    "logo_only": True,
-    "tab_intro_dff": "#",
-    "tab_intro_addons": "#",
-    "tab_intro_designer": "#",
-    "tab_get_started": "#",
-    "tab_tutorials": "#",
-    # Matches ROOT tag, should be ONE PER MODULE, other tabs = other modules (may be relative paths)
-    "tab_documentation": "./",
-    "tab_ecosystem": "#",
-    "tab_about_us": "#",
+    "header_links_before_dropdown": 7,
+    "icon_links": [
+        {
+            "name": "DeepPavlov Forum",
+            "url": "https://forum.deeppavlov.ai",
+            "icon": "_static/images/logo-deeppavlov.svg",
+            "type": "local",
+        },
+        {
+            "name": "Telegram",
+            "url": "https://t.me/DeepPavlovDreamDiscussions",
+            "icon": "fa-brands fa-telegram",
+            "type": "fontawesome",
+        },
+        {
+            "name": "GitHub",
+            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+    ],
+    "favicons": [
+        {
+            "rel": "icon",
+            "sizes": "32x32",
+            "href": "images/logo-dff.svg",
+        },
+    ],
+    "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
 
 
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
+
+
 def setup(_):
-    generate_example_links_for_notebook_creation(["examples/pipeline/1*.py", "examples/pipeline/_*.py"])
+    generate_example_links_for_notebook_creation(
+        [
+            "examples/context_storages/*.py",
+            "examples/messengers/*.py",
+            "examples/pipeline/*.py",
+            "examples/script/*.py",
+            "examples/utils/*.py",
+        ]
+    )
+    regenerate_apiref(
+        [
+            ("dff.context_storages", "Context Storages"),
+            ("dff.messengers", "Messenger Interfaces"),
+            ("dff.pipeline", "Pipeline"),
+            ("dff.script", "Script"),
+            ("dff.utils.parser", "Parser"),
+        ]
+    )
