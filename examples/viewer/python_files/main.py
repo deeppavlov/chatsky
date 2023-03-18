@@ -1,15 +1,15 @@
-from dff.core.engine.core.keywords import (
+from dff.script import (
     TRANSITIONS,
     RESPONSE,
-    PROCESSING,
+    PRE_RESPONSE_PROCESSING,
     GLOBAL,
     MISC,
     LOCAL,
 )
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
-from dff.core.engine.core import Actor as Act, Context
-import dff.core.engine.responses as rsp
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
+from dff.script import Actor, Context
+import dff.script.responses as rsp
 from functions import add_prefix
 import typing as tp, re, transitions
 from flow import global_flow
@@ -34,7 +34,7 @@ script = {
                 ]
             ),
         },
-        PROCESSING: {1: add_prefix("l1_global"), 2: add_prefix("l2_global")},
+        PRE_RESPONSE_PROCESSING: {1: add_prefix("l1_global"), 2: add_prefix("l2_global")},
         MISC: {
             "var1": "global_data",
             "var2": "global_data",
@@ -44,7 +44,7 @@ script = {
     },
     "global_flow": {
         LOCAL: {
-            PROCESSING: {2: add_prefix("l2_local"), 3: add_prefix("l3_local")},
+            PRE_RESPONSE_PROCESSING: {2: add_prefix("l2_local"), 3: add_prefix("l3_local")},
             TRANSITIONS: {
                 ("greeting_flow", "node1"): cnd.regexp(r"greetings"),
             },
@@ -142,7 +142,7 @@ script = {
     },
 }
 
-actor = Act(
+actor = Actor(
     fallback_label=("global_flow", "fallback_node"),
     script=script,
     start_label=("global_flow", "start_node"),

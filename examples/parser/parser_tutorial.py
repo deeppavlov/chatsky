@@ -57,7 +57,9 @@ result = this_function_does_not_exist(dictionary)
     """
     )
 
-dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
+dff.script.import_export.parser.py2yaml(
+    root_file=main_file, project_root_dir=working_dir, output_file=yaml_file
+)
 
 with open(yaml_file, "r") as out:
     print(out.read())
@@ -101,7 +103,9 @@ dictionary = {
     """
     )
 
-dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
+dff.script.import_export.parser.py2yaml(
+    root_file=main_file, project_root_dir=working_dir, output_file=yaml_file
+)
 
 with open(yaml_file, "r") as out:
     print(out.read())
@@ -192,7 +196,9 @@ print(path)
     """
     )
 
-dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=python_files, output_file=yaml_file)
+dff.script.import_export.parser.py2yaml(
+    root_file=main_file, project_root_dir=python_files, output_file=yaml_file
+)
 
 with open(yaml_file, "r") as out:
     print(out.read())
@@ -247,7 +253,9 @@ actor = act(
     """
     )
 
-dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
+dff.script.import_export.parser.py2yaml(
+    root_file=main_file, project_root_dir=working_dir, output_file=yaml_file
+)
 
 with open(yaml_file, "r") as out:
     print(out.read())
@@ -273,7 +281,9 @@ actor = act(
         """
         )
 
-    dff.script.import_export.parser.py2yaml(root_file=main_file, project_root_dir=working_dir, output_file=yaml_file)
+    dff.script.import_export.parser.py2yaml(
+        root_file=main_file, project_root_dir=working_dir, output_file=yaml_file
+    )
 
     with open(yaml_file, "r") as out:
         print(out.read())
@@ -327,7 +337,9 @@ actor = act(
     )
 
 # %%
-dff.script.import_export.parser.py2graph(root_file=main_file, project_root_dir=working_dir, output_file=output_file)
+dff.script.import_export.parser.py2graph(
+    root_file=main_file, project_root_dir=working_dir, output_file=output_file
+)
 
 # %%
 import networkx as nx

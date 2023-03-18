@@ -1,16 +1,12 @@
-import logging
 import random
 from typing import Dict
 
-from dff.script.import_export.parser.utils.code_wrappers import Python
-from dff.script.import_export.parser.utils.validators import keywords_dict
 import networkx as nx
 import graphviz
 
 
 VIRTUAL_FLOW_KEY = "virtual"
 UNRESOLVED_KEY = "UNRESOLVED"
-LOCAL = keywords_dict["LOCAL"][0].absolute_value
 NODE_ATTRS = {
     "fontname": "Helvetica,Arial,sans-serif",
     "shape": "box",
@@ -30,8 +26,12 @@ def get_random_colors():
             yield element
 
 
-def format_name(name: tuple):
-    name_value = str(name[1]).upper()
+def format_name(name: str):
+    """
+    Format node name as graphviz html code.
+    If the node name is 'NONE', replace it with the UNRESOLVED_KEY constant.
+    """
+    name_value = name.upper().strip("'")
     if name_value == "NONE":
         name_value = UNRESOLVED_KEY
     return f'<tr><td> <br align="left" /></td><td><b>{name_value}</b></td><td> <br align="right" /></td></tr>'
@@ -55,11 +55,17 @@ def format_as_table(rows: list) -> str:
 
 def transform_virtual(node: tuple):
     """
-    Put nodes with no flow to a virtual flow, leave the rest unchanged.
+    Normal nodes have label length == 3.
+    This function adds nodes without a flow (label length == 2) to a virtual flow.
+    Leaves nodes of other type unchanged.
     """
-    if len(node) == 2:
+    if len(node) == 3:
         return node
-    return (VIRTUAL_FLOW_KEY, node[0])
+    elif len(node) <= 2:
+        return (node[0], VIRTUAL_FLOW_KEY, node[-1])
+    else:
+        print(node)
+        raise RuntimeError(f"Too many parts in node name: {len(node)}")
 
 
 def get_plot(
@@ -70,7 +76,6 @@ def get_plot(
     show_local: bool = False,
     show_isolates: bool = True,
     random_seed: int = 1,
-    **kwargs,
 ) -> graphviz.Digraph:
     random.seed(random_seed)
 
@@ -83,71 +88,84 @@ def get_plot(
 
     nodes: Dict[str, Dict] = {}
     for edge, edge_data in nx_graph.edges.items():
-        cur_node, next_node, _ = edge
-        cur_node, next_node = transform_virtual(cur_node), transform_virtual(next_node)
+        edge_source_node, edge_target_node, _ = edge
+        if edge_source_node[0] == "LABEL" or edge_target_node[0] == "LABEL":
+            continue
+        edge_source_node = transform_virtual(edge_source_node)
+        edge_target_node = transform_virtual(edge_target_node)
+        _, _, source_name = edge_source_node
 
-        if cur_node[1] == LOCAL:  # ignore local unless flag is set
-            if not show_local:
-                continue
-            cur_node = (cur_node[0], "***LOCAL***")
-
-        if not show_global and cur_node[1] == "GLOBAL":  # ignore local unless flag is set
+        if not show_local and source_name == "LOCAL":  # ignore local unless flag is set
             continue
 
-        if cur_node not in nodes:
-            nodes[cur_node] = {
-                "name": str(cur_node),
-                "label": [format_name(cur_node)],
+        if not show_global and source_name == "GLOBAL":  # ignore global unless flag is set
+            continue
+
+        if edge_source_node not in nodes:
+            nodes[edge_source_node] = {
+                "name": str(edge_source_node),
+                "label": [format_name(source_name)],
                 "transitions": {},
                 "ports": [],
                 "full_label": None,
             }
 
-        port_id = str(edge)  # port id is named after the edge
-        nodes[cur_node]["ports"] += [format_port(edge_data["condition"], port_id)]
-        nodes[cur_node]["transitions"][port_id] = str(next_node)  # port id mapped to the target node
+        port_id = edge_data["label"]  # port id is named after the edge
+        nodes[edge_source_node]["ports"] += [format_port(edge_data["condition"], port_id)]
+        nodes[edge_source_node]["transitions"][port_id] = str(edge_target_node)  # port id mapped to the target node
 
     for node, node_data in nx_graph.nodes.items():  # add isolated nodes
-        node = transform_virtual(node)
+        if not show_isolates:
+            break
+
+        if node[0] == "LABEL":
+            continue
         if node not in nodes:
+            node = transform_virtual(node)
+            _, _, node_name = node
 
-            if node[1] == LOCAL:  # ignore local unless flag is set
-                if not show_local:
-                    continue
-                node = (node[0], "***LOCAL***")
+            if not show_local and node_name == "LOCAL":  # ignore local unless flag is set
+                continue
 
-            if not show_global and node[1] == "GLOBAL":  # ignore local unless flag is set
+            if not show_global and node_name == "GLOBAL":  # ignore global unless flag is set
                 continue
 
             nodes[node] = {
                 "name": str(node),
-                "label": [format_name(node)],
+                "label": [format_name(node_name)],
                 "transitions": {},
                 "ports": [],
                 "full_label": None,
             }
 
-        if show_response and "response" in node_data:
-            if isinstance(node_data["response"], Python):
-                response_val = node_data["response"].display_value
-            else:
-                response_val = str(node_data["response"])
+        if node[0] == "NONE":
+            continue
+
+        namespace, script_name, *_ = node_data["ref"]  # get namespace from ref
+        script_node = nx_graph.graph["full_script"].get(namespace, {}).get(script_name, {})
+
+        node_copy = list(node[1:])  # skip the initial NODE identifier
+        while node_copy:
+            label_part = node_copy.pop(0)
+            script_node = script_node.get(label_part, {})
+
+        if show_response and "RESPONSE" in script_node:  # add response data
             nodes[node]["label"].append("<hr/>")
             nodes[node]["label"].append(format_title("Response"))
-            nodes[node]["label"].extend(format_lines([response_val]))
+            nodes[node]["label"].extend(format_lines([script_node["RESPONSE"]]))
 
-        if show_misc and "misc" in node_data:
+        if show_misc and "MISC" in script_node:  # add misc data
             nodes[node]["label"].append("<hr/>")
             nodes[node]["label"].append(format_title("Misc"))
-            nodes[node]["label"].extend(format_lines([str(node_data["misc"])]))
+            nodes[node]["label"].extend(format_lines([str(script_node["MISC"])]))
 
     flows: dict = {}
 
     for key in nodes.keys():
-        flow, f_node = key
+        _, flow, _ = key
         if flow not in flows:
             flows[flow] = graphviz.Digraph(name=f"cluster_{flow}")
-            flows[flow].attr(label=str(flow).upper(), style="rounded, filled")
+            flows[flow].attr(label=flow.upper().strip("'"), style="rounded, filled")
 
         if len(nodes[key]["ports"]) > 0:
             nodes[key]["label"].append("<hr/>")

@@ -100,7 +100,7 @@ script_viewer_dependencies = merge_req_lists(
             "graphviz==0.17",
             "dash==2.6.2",
             "plotly<=5.10.0",
-        ]
+        ],
     ]
 )
 
@@ -116,7 +116,7 @@ full = merge_req_lists(
         ydb_dependencies,
         telegram_dependencies,
         parser_dependencies,
-        script_viewer_dependencies
+        script_viewer_dependencies,
     ]
 )
 

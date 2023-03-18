@@ -1,7 +1,7 @@
 from graphviz import Digraph
 
 
-def create_image(plot: Digraph, output_file: str, format: str = "png") -> None:
+def make_image(plot: Digraph, output_file: str, format: str = "png") -> None:
     if format == "dot":
         plot.render(filename=output_file)
         return
