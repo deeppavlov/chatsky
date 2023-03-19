@@ -4,7 +4,7 @@ Tutorials page is a collection of instructional materials designed to help devel
 how to use DFF to build conversational agents. The tutorials cover a range of topics,
 from getting started with DFF to more advanced topics such as integrating external APIs.
 Each tutorial includes detailed explanations and code examples. Tutorials cover different aspects
-of the framework and organized into sections.
+of the framework and are organized into sections.
 
 The Context Storages section describes how to use context storages in DFF.
 The Messengers section covers how to use the Telegram messenger with DFF.
