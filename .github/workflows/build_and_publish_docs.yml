@@ -36,8 +36,6 @@ jobs:
             make venv
 
       - name: build documentation
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.GITHUB_TOKEN }}
         run: |
             make doc
 
