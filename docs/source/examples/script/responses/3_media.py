@@ -1,0 +1,1 @@
+/home/share/Documents/deeppavlov/dff/dialog_flow_framework/examples/script/responses/3_media.py
