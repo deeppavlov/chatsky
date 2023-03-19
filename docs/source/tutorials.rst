@@ -6,7 +6,7 @@ from getting started with DFF to more advanced topics such as integrating extern
 Each tutorial includes detailed explanations and code examples. Tutorials cover different aspects
 of the framework and organized into sections.
 
-The Context Storages section describes how to use context stores in DFF.
+The Context Storages section describes how to use context storages in DFF.
 The Messengers section covers how to use the Telegram messenger with DFF.
 The Pipeline section teaches the basics of the pipeline concept, how to use pre- and postprocessors,
 asynchronous groups and services, custom messenger interfaces, and extra handlers and extensions.
