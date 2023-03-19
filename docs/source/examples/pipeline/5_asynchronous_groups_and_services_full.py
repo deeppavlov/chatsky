@@ -1,1 +1,0 @@
-/home/share/Documents/deeppavlov/dff/dialog_flow_framework/examples/pipeline/5_asynchronous_groups_and_services_full.py

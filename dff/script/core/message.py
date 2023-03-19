@@ -15,7 +15,7 @@ from pydantic import validator, root_validator
 
 class Session(Enum):
     """
-    This class is an enumeration that defines two possible states of a session.
+    An enumeration that defines two possible states of a session.
     """
 
     ACTIVE = auto()
@@ -63,9 +63,6 @@ class Attachment(DataModel):
     """
     This class represents an attachment that can be either
     a file or a URL, along with an optional ID and title.
-    It has a method get_bytes() that returns the bytes
-    of the attachment if it is a file, and a method eq()
-    that compares two Attachment instances for equality based on their title, ID, and bytes.
     """
 
     source: Optional[Union[HttpUrl, FilePath]] = None

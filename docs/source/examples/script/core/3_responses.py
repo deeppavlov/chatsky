@@ -1,1 +1,0 @@
-/home/share/Documents/deeppavlov/dff/dialog_flow_framework/examples/script/core/3_responses.py

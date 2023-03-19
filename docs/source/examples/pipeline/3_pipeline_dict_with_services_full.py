@@ -1,1 +1,0 @@
-/home/share/Documents/deeppavlov/dff/dialog_flow_framework/examples/pipeline/3_pipeline_dict_with_services_full.py

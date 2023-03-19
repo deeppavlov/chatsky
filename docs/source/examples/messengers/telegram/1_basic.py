@@ -1,1 +1,0 @@
-/home/share/Documents/deeppavlov/dff/dialog_flow_framework/examples/messengers/telegram/1_basic.py

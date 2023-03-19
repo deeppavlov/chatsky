@@ -27,7 +27,7 @@ from dff.context_storages import (
 
 async def delete_json(storage: JSONContextStorage):
     """
-    Deletes all data from a JSON context storage.
+    Delete all data from a JSON context storage.
 
     :param storage: A JSONContextStorage object.
     """
@@ -39,7 +39,7 @@ async def delete_json(storage: JSONContextStorage):
 
 async def delete_mongo(storage: MongoContextStorage):
     """
-    Deletes all data from a MongoDB context storage.
+    Delete all data from a MongoDB context storage.
 
     :param storage: A MongoContextStorage object
     """
@@ -50,7 +50,7 @@ async def delete_mongo(storage: MongoContextStorage):
 
 async def delete_pickle(storage: PickleContextStorage):
     """
-    Deletes all data from a Pickle context storage.
+    Delete all data from a Pickle context storage.
 
     :param storage: A PickleContextStorage object.
     """
@@ -62,7 +62,7 @@ async def delete_pickle(storage: PickleContextStorage):
 
 async def delete_redis(storage: RedisContextStorage):
     """
-    Deletes all data from a Redis context storage.
+    Delete all data from a Redis context storage.
 
     :param storage: A RedisContextStorage object.
     """
@@ -73,7 +73,7 @@ async def delete_redis(storage: RedisContextStorage):
 
 async def delete_shelve(storage: ShelveContextStorage):
     """
-    Deletes all data from a Shelve context storage.
+    Delete all data from a Shelve context storage.
 
     :param storage: A ShelveContextStorage object.
     """
@@ -83,7 +83,7 @@ async def delete_shelve(storage: ShelveContextStorage):
 
 async def delete_sql(storage: SQLContextStorage):
     """
-    Deletes all data from an SQL context storage.
+    Delete all data from an SQL context storage.
 
     :param storage: An SQLContextStorage object.
     """
@@ -99,7 +99,7 @@ async def delete_sql(storage: SQLContextStorage):
 
 async def delete_ydb(storage: YDBContextStorage):
     """
-    Deletes all data from a YDB context storage.
+    Delete all data from a YDB context storage.
 
     :param storage: A YDBContextStorage object.
     """
