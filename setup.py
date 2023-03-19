@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
-from typing import Iterable, List
+from typing import List
 
 from setuptools import setup, find_packages
 
@@ -18,7 +18,7 @@ description = [line for line in readme_lines if line and not line.startswith("#"
 long_description = "\n".join(readme_lines)
 
 
-def merge_req_lists(req_lists: Iterable[List[str]]) -> List[str]:
+def merge_req_lists(*req_lists: List[str]) -> List[str]:
     result: set[str] = set()
     for req_list in req_lists:
         for req in req_list:
@@ -49,32 +49,26 @@ _sql_dependencies = [
 ]
 
 sqlite_dependencies = merge_req_lists(
+    _sql_dependencies,
     [
-        _sql_dependencies,
-        [
-            "aiosqlite>=0.18.0",
-            "sqlalchemy[asyncio]>=1.4.27",
-        ],
-    ]
+        "aiosqlite>=0.18.0",
+        "sqlalchemy[asyncio]>=1.4.27",
+    ],
 )
 
 mysql_dependencies = merge_req_lists(
+    _sql_dependencies,
     [
-        _sql_dependencies,
-        [
-            "asyncmy>=0.2.5",
-            "cryptography>=36.0.2",
-        ],
-    ]
+        "asyncmy>=0.2.5",
+        "cryptography>=36.0.2",
+    ],
 )
 
 postgresql_dependencies = merge_req_lists(
+    _sql_dependencies,
     [
-        _sql_dependencies,
-        [
-            "asyncpg>=0.27.0",
-        ],
-    ]
+        "asyncpg>=0.27.0",
+    ],
 )
 
 ydb_dependencies = [
@@ -87,53 +81,59 @@ telegram_dependencies = [
 ]
 
 full = merge_req_lists(
-    [
-        core,
-        async_files_dependencies,
-        sqlite_dependencies,
-        redis_dependencies,
-        mongodb_dependencies,
-        mysql_dependencies,
-        postgresql_dependencies,
-        ydb_dependencies,
-        telegram_dependencies,
-    ]
+    core,
+    async_files_dependencies,
+    sqlite_dependencies,
+    redis_dependencies,
+    mongodb_dependencies,
+    mysql_dependencies,
+    postgresql_dependencies,
+    ydb_dependencies,
+    telegram_dependencies,
 )
 
-test_requirements = [
-    "pytest >=7.2.1,<8.0.0",
-    "pytest-cov >=4.0.0,<5.0.0",
-    "pytest-asyncio >=0.14.0,<0.15.0",
-    "flake8 >=3.8.3,<4.0.0",
-    "click<=8.0.4",
-    "black ==20.8b1",
-    "isort >=5.0.6,<6.0.0",
-    "flask[async]>=2.1.2",
-    "psutil>=5.9.1",
+requests_requirements = [
     "requests>=2.28.1",
-    "telethon>=1.27.0,<2.0",
 ]
+
+test_requirements = merge_req_lists(
+    [
+        "pytest >=7.2.1,<8.0.0",
+        "pytest-cov >=4.0.0,<5.0.0",
+        "pytest-asyncio >=0.14.0,<0.15.0",
+        "flake8 >=3.8.3,<4.0.0",
+        "click<=8.0.4",
+        "black ==20.8b1",
+        "isort >=5.0.6,<6.0.0",
+        "flask[async]>=2.1.2",
+        "psutil>=5.9.1",
+        "telethon>=1.27.0,<2.0",
+    ],
+    requests_requirements,
+)
 
 tests_full = merge_req_lists(
-    [
-        full,
-        test_requirements,
-    ]
+    full,
+    test_requirements,
 )
 
-doc = [
-    "sphinx<6",
-    "pydata_sphinx_theme>=0.12.0",
-    "sphinxcontrib-apidoc==0.3.0",
-    "sphinxcontrib-httpdomain>=1.8.0",
-    "sphinxcontrib-katex==0.9.0",
-    "sphinx_copybutton>=0.5",
-    "sphinx_gallery==0.7.0",
-    "sphinx-autodoc-typehints>=1.19.4",
-    "nbsphinx>=0.8.9",
-    "jupytext>=1.14.1",
-    "jupyter>=1.0.0",
-]
+doc = merge_req_lists(
+    [
+        "sphinx<6",
+        "pydata_sphinx_theme>=0.12.0",
+        "sphinxcontrib-apidoc==0.3.0",
+        "sphinxcontrib-httpdomain>=1.8.0",
+        "sphinxcontrib-katex==0.9.0",
+        "sphinx-favicon>=1.0.1",
+        "sphinx_copybutton>=0.5",
+        "sphinx_gallery==0.7.0",
+        "sphinx-autodoc-typehints>=1.19.4",
+        "nbsphinx>=0.8.9",
+        "jupytext>=1.14.1",
+        "jupyter>=1.0.0",
+    ],
+    requests_requirements,
+)
 
 devel = [
     "bump2version>=1.0.1",
@@ -146,12 +146,10 @@ mypy_dependencies = [
 ]
 
 devel_full = merge_req_lists(
-    [
-        tests_full,
-        doc,
-        devel,
-        mypy_dependencies,
-    ]
+    tests_full,
+    doc,
+    devel,
+    mypy_dependencies,
 )
 
 EXTRA_DEPENDENCIES = {
