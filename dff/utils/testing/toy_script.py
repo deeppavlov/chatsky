@@ -1,7 +1,7 @@
 """
 Toy script
 ----------
-This module contains a simple :py:class:`~.Script` and a dialog which are used
+This module contains a simple script and a dialog which are used
 in tutorials.
 """
 from dff.script.conditions import exact_match
@@ -33,7 +33,7 @@ TOY_SCRIPT = {
     }
 }
 """
-An example of a simple :py:class:`.Script`.
+An example of a simple script.
 """
 
 HAPPY_PATH = (

@@ -177,7 +177,8 @@ class BeforeHandler(_ComponentExtraHandler):
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed asynchronously.
+        should be executed asynchronously. The default value of the flag is True
+        if all the functions in this handler are asynchronous.
     """
 
     def __init__(
@@ -199,7 +200,8 @@ class AfterHandler(_ComponentExtraHandler):
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed asynchronously.
+        should be executed asynchronously. The default value of the flag is True
+        if all the functions in this handler are asynchronous.
     """
 
     def __init__(
