@@ -30,7 +30,7 @@ def generate_nb_gallery(package: str, files: List[Path]) -> str:
 
 
 def create_index_file(
-    included: Tuple[str, str, Optional[List[Tuple[str, str]]]],
+    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]],
     files: List[Path],
     destination: Path
 ):
@@ -95,7 +95,7 @@ def iterate_examples_dir_generating_links(source: Path, dest: Path, base: str) -
 
 
 def generate_example_links_for_notebook_creation(
-    include: Optional[List[Tuple[str, str, Optional[List[Tuple[str, str]]]]]] = None,
+    include: Optional[List[Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]]]] = None,
     exclude: Optional[List[str]] = None,
     source: str = "examples",
     destination: str = "docs/source/examples",
