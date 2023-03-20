@@ -23,8 +23,7 @@ assert all(set(proc.keys()) == _prtocol_keys for proc in PROTOCOLS.values()), "P
 
 def get_protocol_install_suggestion(protocol_name: str) -> str:
     """
-    This function is used to provide suggestions for installing
-    the necessary dependencies for a specific protocol.
+    Provide suggestions for installing the necessary dependencies for a specific protocol.
 
     :param protocol_name: Protocol name.
     """
