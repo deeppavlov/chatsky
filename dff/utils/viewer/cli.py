@@ -1,11 +1,10 @@
-import logging
 from pathlib import Path
 import argparse
 
 from .graph import get_graph
 from .plot import get_plot
 from .app import create_app
-from .image import make_image
+from .image import image
 
 
 def is_dir(arg: str) -> Path:
@@ -108,4 +107,4 @@ def make_image():
     args: argparse.Namespace = image_parser.parse_args()
     graph = get_graph(**vars(args))
     plot = get_plot(graph, **vars(args))
-    make_image(plot, args.output_file, format=args.format)
+    image(plot, args.output_file, format=args.format)
