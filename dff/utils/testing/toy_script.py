@@ -32,6 +32,9 @@ TOY_SCRIPT = {
         },
     }
 }
+"""
+An example of a simple :py:class:`.Script`.
+"""
 
 HAPPY_PATH = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),
@@ -40,3 +43,6 @@ HAPPY_PATH = (
     (Message(text="Ok, goodbye."), Message(text="bye")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
 )
+"""
+An example of a simple dialog.
+"""

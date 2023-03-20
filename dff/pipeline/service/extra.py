@@ -172,15 +172,12 @@ class BeforeHandler(_ComponentExtraHandler):
     A handler for extra functions that are executed before the component's main function.
 
     :param functions: A callable or a list of callables that will be executed
-        before the component's main function. If the extra function is a coroutine
-        it should be wrapped by `aiogram.utils.helper.run_sync`.
+        before the component's main function.
     :type functions: ExtraHandlerBuilder
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed asynchronously. If `None`, the handler will use the
-        value set in the `aiogram.utils.exceptions.BadRequest` exception, which is
-        `False` by default.
+        should be executed asynchronously.
     """
 
     def __init__(
@@ -197,15 +194,12 @@ class AfterHandler(_ComponentExtraHandler):
     A handler for extra functions that are executed after the component's main function.
 
     :param functions: A callable or a list of callables that will be executed
-        after the component's main function. If the extra function is a coroutine
-        it should be wrapped by `aiogram.utils.helper.run_sync`.
+        after the component's main function.
     :type functions: ExtraHandlerBuilder
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
-        should be executed asynchronously. If `None`, the handler will use the
-        value set in the `aiogram.utils.exceptions.BadRequest` exception, which is
-        `False` by default.
+        should be executed asynchronously.
     """
 
     def __init__(
