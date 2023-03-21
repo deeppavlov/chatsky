@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 9. Pre-transitions processing
+# Core: 9. Pre-transitions processing
 
 This example shows pre-transitions processing feature.
 First of all, let's do all the necessary imports from `DFF`.

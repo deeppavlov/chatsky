@@ -5,4 +5,4 @@ Examples
    :name: examples
    :glob:
 
-   examples/*/index
+   examples/index_*

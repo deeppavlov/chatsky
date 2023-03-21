@@ -6,7 +6,7 @@ import re
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
-from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.generate_examples import generate_example_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
@@ -28,6 +28,7 @@ release = "0.3.2"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -84,6 +85,7 @@ html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
+autosummary_generate_overwrite = False
 
 # Finding examples directories
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
@@ -140,11 +142,24 @@ autodoc_default_options = {"members": True, "undoc-members": False, "private-mem
 def setup(_):
     generate_example_links_for_notebook_creation(
         [
-            "examples/context_storages/*.py",
-            "examples/messengers/*.py",
-            "examples/pipeline/*.py",
-            "examples/script/*.py",
-            "examples/utils/*.py",
+            ("examples.context_storages", "Context Storages"),
+            (
+                "examples.messengers",
+                "Messengers",
+                [
+                    ("telegram", "Telegram"),
+                ],
+            ),
+            ("examples.pipeline", "Pipeline"),
+            (
+                "examples.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
+            ("examples.utils", "Utils"),
         ]
     )
     regenerate_apiref(
