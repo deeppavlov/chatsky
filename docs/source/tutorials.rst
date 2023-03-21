@@ -18,6 +18,11 @@ The main difference between Tutorials and Examples is that Examples typically sh
 a specific feature or solve a particular problem, whereas Tutorials provide a more
 comprehensive overview of how to build a complete application.
 
+| To understand the basics of DFF, read the following tutorials:
+| 1) Script / Core / 1. Basics
+| 2) Script / Core / 2. Conditions
+| 3) Pipeline / 1. Basics
+
 .. toctree::
    :name: tutorials
    :glob:
