@@ -233,12 +233,8 @@ setup(
     extras_require=EXTRA_DEPENDENCIES,
     entry_points={
         "console_scripts": [
-            "dff.py2yaml = dff.script.import_export.parser.cli:py2yaml_cli",
-            "dff.yaml2py = dff.script.import_export.parser.cli:yaml2py_cli",
-            "dff.py2graph = dff.script.import_export.parser.cli:py2graph_cli",
-            "dff.graph2py = dff.script.import_export.parser.cli:graph2py_cli",
-            "dff.script_viewer.server=dff.script.utils.script_viewer:make_server",
-            "dff.script_viewer.image=dff.script.utils.script_viewer:make_image",
+            "dff.script_viewer.server=dff.utils.viewer:make_server",
+            "dff.script_viewer.image=dff.utils.viewer:make_image",
         ]
     },
 )

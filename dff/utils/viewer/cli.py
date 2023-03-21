@@ -1,4 +1,5 @@
 from pathlib import Path
+from typing import Optional
 import argparse
 
 from .graph import get_graph
@@ -7,16 +8,18 @@ from .app import create_app
 from .image import image
 
 
-def is_dir(arg: str) -> Path:
+def is_dir(arg: Optional[str]) -> Optional[Path]:
     """Check that the passed argument is a directory
 
     :param arg: Argument to check
-    :type arg: str
     :return: :py:class:`.Path` instance created from arg if it is a directory
     """
-    path = Path(arg)
-    if path.is_dir():
-        return path
+    if arg is None:
+        return arg
+    elif isinstance(arg, str):
+        path = Path(arg)
+        if path.is_dir():
+            return path
     raise argparse.ArgumentTypeError(f"Not a directory: {path}")
 
 
@@ -24,7 +27,6 @@ def is_file(arg: str) -> Path:
     """Check that the passed argument is a file
 
     :param arg: Argument to check
-    :type arg: str
     :return: :py:class:`.Path` instance created from arg if it is a file
     """
     path = Path(arg)
@@ -35,17 +37,16 @@ def is_file(arg: str) -> Path:
 
 py2file_parser = argparse.ArgumentParser(add_help=False)
 py2file_parser.add_argument(
-    "-rf",
-    "--root_file",
+    "-e",
+    "--entry_point",
     required=True,
-    metavar="ROOT_FILE",
+    metavar="ENTRY_POINT",
     help="Python file to start parsing with",
     type=is_file,
 )
 py2file_parser.add_argument(
     "-d",
     "--project_root_dir",
-    required=True,
     metavar="PROJECT_ROOT_DIR",
     help="Directory that contains all the local files required to run ROOT_FILE",
     type=is_dir,
@@ -62,6 +63,7 @@ py2file_parser.add_argument(
 py2file_parser.add_argument("-r", "--show_response", action="store_true", help="Show node response values.")
 py2file_parser.add_argument("-m", "--show_misc", action="store_true", help="Show node misc values.")
 py2file_parser.add_argument("-l", "--show_local", action="store_true", help="Show local transitions.")
+py2file_parser.add_argument("-p", "--show_processing", action="store_true", help="Show processing functions.")
 py2file_parser.add_argument("-g", "--show_global", action="store_true", help="Show global transitions.")
 py2file_parser.add_argument("-i", "--show_isolates", action="store_true", help="Show isolated nodes.")
 py2file_parser.add_argument(
@@ -73,7 +75,7 @@ server_parser.add_argument(
     "-H", "--host", required=False, metavar="HOST", type=str, default="127.0.0.1", help="Dash application host."
 )
 server_parser.add_argument(
-    "-p", "--port", required=False, metavar="PORT", type=int, default=5000, help="Dash application port."
+    "-P", "--port", required=False, metavar="PORT", type=int, default=5000, help="Dash application port."
 )
 
 

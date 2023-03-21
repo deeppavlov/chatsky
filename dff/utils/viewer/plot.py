@@ -100,10 +100,10 @@ def get_script_data(script_node: dict, key: str, show_flag: bool) -> list:
 def get_label_by_index_shifting(
     nx_graph: nx.Graph, node_id: tuple, increment_flag: bool = True, cyclicality_flag: bool = True
 ) -> tuple:
+    if node_id == ("NONE",) or node_id[1] == "GLOBAL":  # fall back on skip conditions
+        return ("NODE", *nx_graph.graph["fallback_label"])
     script = get_script(nx_graph, nx_graph.nodes[node_id])
     _, flow, *info = node_id
-    if flow == "GLOBAL":
-        return ("NODE", *nx_graph.graph["fallback_label"])
     labels = list(script[flow])
     node_label = info[0]
     if node_label not in labels:
@@ -114,6 +114,8 @@ def get_label_by_index_shifting(
     if not (cyclicality_flag or (0 <= label_index < len(labels))):
         return ("NODE", *nx_graph.graph["fallback_label"])
     label_index %= len(labels)
+    if labels[label_index] == "LOCAL":  # cannot transition into 'LOCAL'
+        return ("NODE", *nx_graph.graph["fallback_label"])
     return ("NODE", flow, labels[label_index])
 
 
@@ -124,9 +126,9 @@ def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
 
     # get label transition sources
     if source_info[0] == "GLOBAL":
-        sources = [node for node in nx_graph.nodes.keys() if node[0] != "LABEL"]
+        sources = [node for node in nx_graph.nodes.keys() if node[0] != "LABEL" and node[0] != "NONE"]
     elif source_info[1] == "LOCAL":
-        sources = [node for node in nx_graph.nodes.keys() if node[1] == source_info[0]]
+        sources = [node for node in nx_graph.nodes.keys() if node[1] == source_info[0] and node[0] != "NONE"]
     else:
         sources = [source_node]
 
@@ -138,17 +140,9 @@ def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
     elif label_type == "to_start":
         targets = [("NODE", *nx_graph.graph["start_label"])] * len(sources)
     elif label_type == "forward":
-        targets = [
-            get_label_by_index_shifting(nx_graph, node_id, increment_flag=True)
-            for node_id in sources
-            if node_id != ("NONE",)
-        ]
+        targets = [get_label_by_index_shifting(nx_graph, node_id, increment_flag=True) for node_id in sources]
     elif label_type == "backward":
-        targets = [
-            get_label_by_index_shifting(nx_graph, node_id, increment_flag=False)
-            for node_id in sources
-            if node_id != ("NONE",)
-        ]
+        targets = [get_label_by_index_shifting(nx_graph, node_id, increment_flag=False) for node_id in sources]
     else:
         return {}
     new_data = edge_data.copy()
