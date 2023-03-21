@@ -51,15 +51,6 @@ py2file_parser.add_argument(
     help="Directory that contains all the local files required to run ROOT_FILE",
     type=is_dir,
 )
-py2file_parser.add_argument(
-    "-rq",
-    "--requirements",
-    metavar="REQUIREMENTS",
-    help="File with project requirements to override those collected by parser",
-    type=is_file,
-    required=False,
-    default=None,
-)
 py2file_parser.add_argument("-r", "--show_response", action="store_true", help="Show node response values.")
 py2file_parser.add_argument("-m", "--show_misc", action="store_true", help="Show node misc values.")
 py2file_parser.add_argument("-l", "--show_local", action="store_true", help="Show local transitions.")

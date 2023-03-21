@@ -159,6 +159,7 @@ def get_plot(
     show_local: bool = False,
     show_isolates: bool = True,
     random_seed: int = 1,
+    **requirements,  # for cli integration
 ) -> graphviz.Digraph:
     random.seed(random_seed)
 

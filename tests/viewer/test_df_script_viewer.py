@@ -3,12 +3,16 @@ from io import BytesIO
 from base64 import b64encode
 from pathlib import Path
 
-import plotly.graph_objects as go
-from dff.utils.viewer import graph
-from dff.utils.viewer import plot
+import pytest
+
 from tests.test_utils import get_path_from_tests_to_current_dir
 
-import pytest
+try:
+    import plotly.graph_objects as go
+    from dff.utils.viewer import graph
+    from dff.utils.viewer import plot
+except ImportError:
+    pytest.skip(allow_module_level=True, reason="Missing dependencies for dff parser.")
 
 
 @pytest.fixture(scope="session")
