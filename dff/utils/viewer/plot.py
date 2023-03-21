@@ -72,27 +72,49 @@ def get_node_struct(node: tuple, show_local: bool, show_global: bool) -> Optiona
     """
     Get a formatted node structure.
     """
-    _, _, node_name = node
-
-    if not show_local and node_name == "LOCAL":  # ignore local unless flag is set
+    if (not show_local and node[-1] == "LOCAL") or (
+        not show_global and node[-1] == "GLOBAL"
+    ):  # ignore local unless flag is set
         return None
-
-    if not show_global and node_name == "GLOBAL":  # ignore global unless flag is set
-        return None
-
     return {
         "name": str(node),
-        "label": [format_name(node_name)],
+        "label": [format_name(node[-1])],
         "transitions": {},
         "ports": [],
         "full_label": None,
     }
 
 
+def get_script(nx_graph: nx.Graph, node_data: dict) -> Dict:
+    namespace, script_name, *_ = node_data["ref"]  # get namespace from ref
+    script = nx_graph.graph["full_script"].get(namespace, {}).get(script_name, {})
+    return script
+
+
 def get_script_data(script_node: dict, key: str, show_flag: bool) -> list:
-    if not show_flag or not key in script_node:  # add response data
+    if not show_flag or key not in script_node:  # add response data
         return []
     return ["<hr/>", format_title(key.title()), format_lines([str(script_node[key])])]
+
+
+def get_label_by_index_shifting(
+    nx_graph: nx.Graph, node_id: tuple, increment_flag: bool = True, cyclicality_flag: bool = True
+) -> tuple:
+    script = get_script(nx_graph, nx_graph.nodes[node_id])
+    _, flow, *info = node_id
+    if flow == "GLOBAL":
+        return ("NODE", *nx_graph.graph["fallback_label"])
+    labels = list(script[flow])
+    node_label = info[0]
+    if node_label not in labels:
+        return ("NODE", *nx_graph.graph["fallback_label"])
+
+    label_index = labels.index(node_label)
+    label_index = label_index + 1 if increment_flag else label_index - 1
+    if not (cyclicality_flag or (0 <= label_index < len(labels))):
+        return ("NODE", *nx_graph.graph["fallback_label"])
+    label_index %= len(labels)
+    return ("NODE", flow, labels[label_index])
 
 
 def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
@@ -115,7 +137,19 @@ def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
         targets = [("NODE", *nx_graph.graph["fallback_label"])] * len(sources)
     elif label_type == "to_start":
         targets = [("NODE", *nx_graph.graph["start_label"])] * len(sources)
-    else:  # TODO: add forward && backward
+    elif label_type == "forward":
+        targets = [
+            get_label_by_index_shifting(nx_graph, node_id, increment_flag=True)
+            for node_id in sources
+            if node_id != ("NONE",)
+        ]
+    elif label_type == "backward":
+        targets = [
+            get_label_by_index_shifting(nx_graph, node_id, increment_flag=False)
+            for node_id in sources
+            if node_id != ("NONE",)
+        ]
+    else:
         return {}
     new_data = edge_data.copy()
     new_data["label"] = label_type
@@ -124,8 +158,9 @@ def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
 
 def get_plot(
     nx_graph: nx.Graph,
-    show_misc: bool = False,
     show_response: bool = False,
+    show_processing: bool = False,
+    show_misc: bool = False,
     show_global: bool = False,
     show_local: bool = False,
     show_isolates: bool = True,
@@ -158,13 +193,14 @@ def get_plot(
             continue
 
         # get script data if necessary, add to node struct
-        namespace, script_name, *_ = node_data["ref"]  # get namespace from ref
-        script_node = nx_graph.graph["full_script"].get(namespace, {}).get(script_name, {})
+        script_node = get_script(nx_graph, node_data)
         node_copy = list(node[1:])  # skip the initial NODE identifier
-        while node_copy:
+        while node_copy:  # recursively get node
             label_part = node_copy.pop(0)
             script_node = script_node.get(label_part, {})
         nodes[node]["label"].extend(get_script_data(script_node, "RESPONSE", show_response))
+        nodes[node]["label"].extend(get_script_data(script_node, "PRE_RESPONSE_PROCESSING", show_processing))
+        nodes[node]["label"].extend(get_script_data(script_node, "PRE_TRANSITIONS_PROCESSING", show_processing))
         nodes[node]["label"].extend(get_script_data(script_node, "MISC", show_misc))
 
     label_edges = dict(nx_graph.edges)
