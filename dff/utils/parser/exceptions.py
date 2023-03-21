@@ -4,19 +4,19 @@ class BaseParserException(BaseException):
 
 class ScriptValidationError(BaseParserException):
     """
-    Raised during script validation
+    Raised during script validation.
     """
 
 
 class ParsingError(BaseParserException):
     """
-    Raised during parsing
+    Raised during parsing.
     """
 
 
 class ResolutionError(BaseParserException):
     """
-    Raised during name resolution
+    Raised during name resolution.
     """
 
     ...
@@ -25,7 +25,7 @@ class ResolutionError(BaseParserException):
 # todo: add support for star notation
 class StarError(BaseParserException):
     """
-    Raised when star notation is used
+    Raised when star notation is used.
     """
 
     ...

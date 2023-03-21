@@ -63,9 +63,9 @@ class BaseParserObject(ABC):
         "Mapping from child names to child nodes"
 
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
-        """A list of objects defined in :py:class:`.Namespace`s that are used inside current node
+        """A list of objects defined in :py:class:`.Namespace`s that are used inside current node.
 
-        :return: A mapping from :py:class:`.Namespace`s' names to sets of object names
+        :return: A mapping from :py:class:`.Namespace`s' names to sets of object names.
         """
         result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
@@ -85,22 +85,22 @@ class BaseParserObject(ABC):
         return result
 
     def add_child(self, child: "BaseParserObject", asname: str):
-        """Add a child node `child` by the name `asname`
+        """Add a child node `child` by the name `asname`.
 
-        :param child: Child node to add
-        :param asname: Name of the child node
+        :param child: Child node to add.
+        :param asname: Name of the child node.
         """
         child.parent = self
         child._name = asname
         self.children[asname] = child
 
     def resolve_path(self, path: tp.Tuple[str, ...]) -> "BaseParserObject":
-        """Resolve tree path relative to this node
+        """Resolve tree path relative to this node.
 
-        :param path: A tuple of child names
+        :param path: A tuple of child names.
         :raises KeyError:
             If a key in `path` cannot be found in children.
-        :return: A child path[-1] of a child path[-2] of .. a child path[0] of this object
+        :return: A child path[-1] of a child path[-2] of .. a child path[0] of this object.
         """
         if len(path) == 0:
             return self
@@ -120,14 +120,14 @@ class BaseParserObject(ABC):
 
     @cached_property
     def namespace(self) -> "Namespace":
-        """Namespace this object belongs to"""
+        """Namespace this object belongs to."""
         if self.parent is None:
             raise RuntimeError(f"Parent is not set: {str(self)}")
         return self.parent.namespace
 
     @cached_property
     def dff_project(self) -> "DFFProject":
-        """DFFProject this object belongs to"""
+        """DFFProject this object belongs to."""
         return self.namespace.dff_project
 
     @abstractmethod
@@ -138,9 +138,9 @@ class BaseParserObject(ABC):
         :param current_indent: Current indentation level (in whitespace number), defaults to 0.
         :param indent:
             Indentation increment (in whitespace number), defaults to 4.
-            If set to None indentation is not applied
+            If set to None indentation is not applied.
 
-        :return: Representation of the object as a string
+        :return: Representation of the object as a string.
         """
 
     def __repr__(self) -> str:
@@ -166,18 +166,17 @@ class BaseParserObject(ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs):
-        """Construct an object from an :py:class:`ast.stmt` or :py:class:`ast.expr`
+        """Construct an object from an :py:class:`ast.stmt` or :py:class:`ast.expr`.
 
-        :param node: AST node to construct the object from
-        :param kwargs:
-        :return: Constructed object(s) or None if an object cannot be constructed from `node`
+        :param node: AST node to construct the object from.
+        :return: Constructed object(s) or None if an object cannot be constructed from `node`.
         """
 
 
 class Statement(BaseParserObject, ABC):
     """
     This class is for nodes that represent
-    [:py:class:`ast.stmt`](https://docs.python.org/3.10/library/ast.html#statements)
+    [:py:class:`ast.stmt`](https://docs.python.org/3.10/library/ast.html#statements).
     """
 
     def __init__(self):
@@ -190,6 +189,14 @@ class Statement(BaseParserObject, ABC):
     def from_ast(
         cls, node: tp.Union[ast.stmt, ast.expr], **kwargs
     ) -> tp.Optional[tp.Union[tp.Mapping[str, "Statement"], "Python"]]:
+        """
+        Extract statements from ast node.
+        :return:
+            - None, if type of the `node` is not compatible with the current class.
+            - For non-:py:class:`~.Python` classes
+            return a mapping from names of defined objects inside the statement to their definitions.
+            - :py:class:`~.Python` should return an instance of itself.
+        """
         ...
 
     @classmethod
@@ -218,7 +225,7 @@ class Statement(BaseParserObject, ABC):
 class Expression(BaseParserObject, ABC):
     """
     This class is for nodes that represent
-    [:py:class:`ast.expr`](https://docs.python.org/3.10/library/ast.html#expressions)
+    [:py:class:`ast.expr`](https://docs.python.org/3.10/library/ast.html#expressions).
     """
 
     def __init__(self):
@@ -233,6 +240,12 @@ class Expression(BaseParserObject, ABC):
 
     @classmethod
     def from_str(cls, string: str) -> "Expression":
+        """
+        Construct an expression from a string representing it.
+
+        :raises ParsingError:
+            - If a string represents anything but a single expression (:py:class:`ast.Expr`).
+        """
         body = ast.parse(string).body
         if len(body) != 1:
             raise ParsingError(f"Body should contain only one expression: {string}")
@@ -272,7 +285,7 @@ class Expression(BaseParserObject, ABC):
 class ReferenceObject(BaseParserObject, ABC):
     """
     An interface for reference objects. Reference objects are objects that reference other objects,
-    e.g. Name, Import, Subscript
+    e.g. Name, Import, Subscript.
     """
 
     def __init__(self):
@@ -283,7 +296,7 @@ class ReferenceObject(BaseParserObject, ABC):
     def _resolve_once(self) -> tp.Optional[BaseParserObject]:
         """Try to find the object being referenced by the object.
 
-        :return: Referenced object or None if it can't be resolved
+        :return: Referenced object or None if it can't be resolved.
         """
         ...
 
@@ -292,7 +305,7 @@ class ReferenceObject(BaseParserObject, ABC):
         """An absolute object -- if the current object is a reference to another reference, that reference will
         be resolved as well.
 
-        :return: A final object that is not :py:class:`.ReferenceObject` or None if any object cannot be resolved
+        :return: A final object that is not :py:class:`.ReferenceObject` or None if any object cannot be resolved.
         """
         resolved = self._resolve_once
         if isinstance(resolved, ReferenceObject):
@@ -354,7 +367,7 @@ class ReferenceObject(BaseParserObject, ABC):
 class Import(Statement, ReferenceObject):
     """
     This class if for nodes that represent
-    [:py:class:`ast.Import`](https://docs.python.org/3.10/library/ast.html#ast.Import)
+    [:py:class:`ast.Import`](https://docs.python.org/3.10/library/ast.html#ast.Import).
     """
 
     def __init__(self, module: str, alias: tp.Optional[str] = None):
@@ -393,6 +406,18 @@ class Import(Statement, ReferenceObject):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
+        """
+        Extract imports from ast node.
+
+        :return:
+            A dictionary of statements contained in the node.
+            The keys are names under which an object is imported, and the values are instances of this class.
+            For example an import statement `import obj_1 as obj, obj_2, obj_3 as obj_3`
+            will produce a dictionary with the following items:
+                - `(obj, Import(import obj_1 as obj))`
+                - `(obj_2, Import(import obj_2))`
+                - `(obj_3, Import(import obj_3 as obj_3))`
+        """
         if not isinstance(node, ast.Import):
             return None
         result = {}
@@ -404,7 +429,7 @@ class Import(Statement, ReferenceObject):
 class ImportFrom(Statement, ReferenceObject):
     """
     This class if for nodes that represent
-    [:py:class:`ast.ImportFrom`](https://docs.python.org/3.10/library/ast.html#ast.ImportFrom)
+    [:py:class:`ast.ImportFrom`](https://docs.python.org/3.10/library/ast.html#ast.ImportFrom).
     """
 
     def __init__(self, module: str, level: int, obj: str, alias: tp.Optional[str] = None):
@@ -463,6 +488,18 @@ class ImportFrom(Statement, ReferenceObject):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
+        """
+        Extract from-imports from ast node.
+
+        :return:
+            A dictionary of statements contained in the node.
+            The keys are names under which an object is imported, and the values are instances of this class.
+            For example an import statement `from module import obj_1 as obj, obj_2, obj_3 as obj_3`
+            will produce a dictionary with the following items:
+                - `(obj, ImportFrom(from module import obj_1 as obj))`
+                - `(obj_2, ImportFrom(from module import obj_2))`
+                - `(obj_3, ImportFrom(from module import obj_3 as obj_3))`
+        """
         if not isinstance(node, ast.ImportFrom):
             return None
         result = {}
@@ -477,7 +514,7 @@ class Assignment(Statement):
     """
     This class if for nodes that represent
     [:py:class:`ast.Assign`](https://docs.python.org/3.10/library/ast.html#ast.Assign) or
-    [:py:class:`ast.AnnAssign`](https://docs.python.org/3.10/library/ast.html#ast.AnnAssign)
+    [:py:class:`ast.AnnAssign`](https://docs.python.org/3.10/library/ast.html#ast.AnnAssign).
     """
 
     def __init__(self, target: Expression, value: Expression):
@@ -505,6 +542,18 @@ class Assignment(Statement):
 
     @classmethod
     def from_ast(cls, node, **kwargs):
+        """
+        Extract assignments from ast node.
+
+        :return:
+            A dictionary of statements contained in the node.
+            The keys are names of declared object, and the values are instances of this class.
+            For example an assignment statement `a = b = c = 1`
+            will produce a dictionary with the following items:
+                - `(c, Assignment(c = 1))`
+                - `(a, Assignment(a = c))`
+                - `(b, Assignment(b = c))`
+        """
         if isinstance(node, ast.Assign):
             result = {}
             target = Expression.auto(node.targets[-1])
@@ -530,7 +579,7 @@ class String(Expression):
     """
     This class is for nodes that represent
     [:py:class:`ast.Str`](https://docs.python.org/3.7/library/ast.html#abstract-grammar) or
-    [:py:class:`ast.Constant`](https://docs.python.org/3.10/library/ast.html#ast.Constant) with str value
+    [:py:class:`ast.Constant`](https://docs.python.org/3.10/library/ast.html#ast.Constant) with str value.
     """
 
     def __init__(self, string: str):
@@ -609,7 +658,7 @@ class Python(Expression, Statement):  # type: ignore
 class Dict(Expression):
     """
     This class if for nodes that represent
-    [:py:class:`ast.Dict`](https://docs.python.org/3.10/library/ast.html#ast.Dict)
+    [:py:class:`ast.Dict`](https://docs.python.org/3.10/library/ast.html#ast.Dict).
     """
 
     def __init__(self, keys: tp.List[Expression], values: tp.List[Expression]):
@@ -622,11 +671,11 @@ class Dict(Expression):
 
     @staticmethod
     def _key(str_key: tp.Union[Expression, str]) -> str:
-        """Get a name which is used to store a child that is a key in the dictionary
+        """Get a name which is used to store a child that is a key in the dictionary.
 
         :param str_key: An object or a string representation of an object.
-            The object represents a key in the dictionary
-        :return: Name of a child-key
+            The object represents a key in the dictionary.
+        :return: Name of a child-key.
         """
         if not isinstance(str_key, str):
             str_key = str(str_key)
@@ -634,11 +683,11 @@ class Dict(Expression):
 
     @staticmethod
     def _value(str_value: tp.Union[Expression, str]) -> str:
-        """Get a name which is used to store a child that is a value in the dictionary
+        """Get a name which is used to store a child that is a value in the dictionary.
 
         :param str_value: An object or a string representation of an object.
-            The object represents a value in the dictionary
-        :return: Name of a child-value
+            The object represents a value in the dictionary.
+        :return: Name of a child-value.
         """
         if not isinstance(str_value, str):
             str_value = str(str_value)
@@ -646,10 +695,10 @@ class Dict(Expression):
 
     @staticmethod
     def _clear(child_name: str) -> str:
-        """Get a string representation of a key that is associated with a child under the name `child_name`
+        """Get a string representation of a key that is associated with a child under the name `child_name`.
 
-        :param child_name: A name of a child
-        :return: A string representation of the corresponding key
+        :param child_name: A name of a child.
+        :return: A string representation of the corresponding key.
         """
         if child_name.startswith("value_"):
             return child_name[len("value_") :]  # noqa: E203
@@ -658,10 +707,10 @@ class Dict(Expression):
         return child_name
 
     def key_by_value(self, value: Expression) -> Expression:
-        """Get a key by the value
+        """Get a key by the value.
 
-        :param value: Value stored in a dictionary
-        :return: A key that is associated with the value
+        :param value: Value stored in a dictionary.
+        :return: A key that is associated with the value.
         """
         child_name = value._name
         if child_name is None:
@@ -669,23 +718,23 @@ class Dict(Expression):
         return self.children[self._key(self._clear(child_name))]
 
     def keys(self) -> tp.Iterator[Expression]:
-        """An iterator over keys in the dictionary"""
+        """An iterator over keys in the dictionary."""
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)]
 
     def values(self) -> tp.Iterator[Expression]:
-        """An iterator over values in the dictionary"""
+        """An iterator over values in the dictionary."""
         for _, key_str in self.__keys:
             yield self.children[self._value(key_str)]
 
     def items(self) -> tp.Iterator[tp.Tuple[Expression, Expression]]:
-        """An iterator over tuples of keys and values in the dictionary"""
+        """An iterator over tuples of keys and values in the dictionary."""
         for _, key_str in self.__keys:
             yield self.children[self._key(key_str)], self.children[self._value(key_str)]
 
     @cached_property
     def _keys(self) -> tp.Dict[Expression, str]:
-        """A mapping from dictionary keys to their string representations"""
+        """A mapping from dictionary keys to their string representations."""
         result = {}
         for key, value in self.__keys:
             result[key] = value
@@ -712,12 +761,12 @@ class Dict(Expression):
     def __getitem__(self, item: tp.Union[Expression, str]) -> Expression:
         """Get dictionary value based on a key.
 
-        :param item: Either a key or a string representation of a key
+        :param item: Either a key or a string representation of a key.
         :return: Dictionary value.
         :raises TypeError:
-            If the type of `item` is not :py:class:`.BaseParserObject` nor `str`
+            If the type of `item` is not :py:class:`.BaseParserObject` nor `str`.
         :raises KeyError:
-            If the key is not in the dictionary
+            If the key is not in the dictionary.
         """
         if isinstance(item, Expression):
             key = self._keys[item]
@@ -772,7 +821,7 @@ class Dict(Expression):
 class Name(Expression, ReferenceObject):
     """
     This class if for nodes that represent
-    [:py:class:`ast.Name`](https://docs.python.org/3.10/library/ast.html#ast.Name)
+    [:py:class:`ast.Name`](https://docs.python.org/3.10/library/ast.html#ast.Name).
     """
 
     def __init__(self, name: str):
@@ -820,7 +869,7 @@ class Name(Expression, ReferenceObject):
 class Attribute(Expression, ReferenceObject):
     """
     This class if for nodes that represent
-    [:py:class:`ast.Attribute`](https://docs.python.org/3.10/library/ast.html#ast.Attribute)
+    [:py:class:`ast.Attribute`](https://docs.python.org/3.10/library/ast.html#ast.Attribute).
     """
 
     def __init__(self, value: Expression, attr: str):
@@ -875,7 +924,7 @@ class Attribute(Expression, ReferenceObject):
 class Subscript(Expression, ReferenceObject):
     """
     This class if for nodes that represent
-    [:py:class:`ast.Subscript`](https://docs.python.org/3.10/library/ast.html#ast.Subscript)
+    [:py:class:`ast.Subscript`](https://docs.python.org/3.10/library/ast.html#ast.Subscript).
     """
 
     def __init__(self, value: Expression, index: Expression):
@@ -956,7 +1005,7 @@ class Iterable(Expression):
     This class if for nodes that represent
     [:py:class:`ast.Tuple`](https://docs.python.org/3.10/library/ast.html#ast.Tuple),
     [:py:class:`ast.List`](https://docs.python.org/3.10/library/ast.html#ast.List) or
-    [:py:class:`ast.Set`](https://docs.python.org/3.10/library/ast.html#ast.Set)
+    [:py:class:`ast.Set`](https://docs.python.org/3.10/library/ast.html#ast.Set).
     """
 
     class Type(tuple, Enum):
@@ -1031,7 +1080,7 @@ class Iterable(Expression):
 class Call(Expression):
     """
     This class if for nodes that represent
-    [:py:class:`ast.Call`](https://docs.python.org/3.10/library/ast.html#ast.Call)
+    [:py:class:`ast.Call`](https://docs.python.org/3.10/library/ast.html#ast.Call).
     """
 
     def __init__(self, func: Expression, args: tp.List[Expression], keywords: tp.Dict[str, Expression]):
@@ -1136,7 +1185,7 @@ class Call(Expression):
 class Generator(BaseParserObject):
     """
     This class if for nodes that represent
-    [:py:class:`ast.comprehension`](https://docs.python.org/3.10/library/ast.html#ast.comprehension)
+    [:py:class:`ast.comprehension`](https://docs.python.org/3.10/library/ast.html#ast.comprehension).
     """
 
     def __init__(self, target: Expression, iterator: Expression, ifs: tp.List[Expression], is_async: bool):
@@ -1189,7 +1238,7 @@ class Comprehension(Expression):
     [:py:class:`ast.DictComp`](https://docs.python.org/3.10/library/ast.html#ast.DictComp),
     [:py:class:`ast.ListComp`](https://docs.python.org/3.10/library/ast.html#ast.ListComp),
     [:py:class:`ast.SetComp`](https://docs.python.org/3.10/library/ast.html#ast.SetComp) or
-    [:py:class:`ast.GeneratorExp`](https://docs.python.org/3.10/library/ast.html#ast.GeneratorExp)
+    [:py:class:`ast.GeneratorExp`](https://docs.python.org/3.10/library/ast.html#ast.GeneratorExp).
     """
 
     class Type(tuple, Enum):

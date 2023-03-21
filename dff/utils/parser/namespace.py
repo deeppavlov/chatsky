@@ -37,10 +37,10 @@ class Namespace(BaseParserObject):
             self.add_child(value, key)
 
     def resolve_relative_import(self, module: str, level: int = 0) -> str:
-        """Find a location of a namespace referenced by `level * "." + module` in this namespace
+        """Find a location of a namespace referenced by `level * "." + module` in this namespace.
 
-        :param module: Name of the module
-        :param level: Relative position of the module
+        :param module: Name of the module.
+        :param level: Relative position of the module.
         :return: A location of the module (a string representing path to the module separated by dots).
         """
         stripped_module = module.lstrip(".")
@@ -70,16 +70,16 @@ class Namespace(BaseParserObject):
         return self.parent.dff_project
 
     def get_object(self, item: str):
-        """Return an object by its name. If the object is of type `Assignment` return its value"""
+        """Return an object by its name. If the object is of type `Assignment` return its value."""
         obj = self.children.get(item)
         if isinstance(obj, Assignment):
             return obj.children["value"]
         return obj
 
     def __getitem__(self, item: str):
-        """Return an object by its name. If the object is of type `Assignment` return its value
+        """Return an object by its name. If the object is of type `Assignment` return its value.
         :raises KeyError:
-            Object not found
+            Object not found.
         """
         obj = self.children[item]
         if isinstance(obj, Assignment):
@@ -89,12 +89,12 @@ class Namespace(BaseParserObject):
     @staticmethod
     def dump_statements(statements: tp.List[Statement]) -> str:
         """A method for dumping a list of statements. Inserts newlines between statements in the following amount:
-            - If any of the two neighboring statements is `Def` -- 3 new lines
-            - If both neighboring statements are :py:class:`~.Import` or :py:class:`.~ImportFrom` -- 1 new line
+            - If any of the two neighboring statements is `Def` -- 3 new lines.
+            - If both neighboring statements are :py:class:`~.Import` or :py:class:`.~ImportFrom` -- 1 new line.
             - Otherwise, 2 new lines.
 
-        :param statements: A list of statements to dump
-        :return: Dumps of the statements separated by an appropriate amount of new lines
+        :param statements: A list of statements to dump.
+        :return: Dumps of the statements separated by an appropriate amount of new lines.
         """
 
         def get_newline_count(statement: Statement):
@@ -121,7 +121,7 @@ class Namespace(BaseParserObject):
         )
 
     def get_imports(self) -> tp.List[str]:
-        """Return a list of imported modules (represented by their locations)"""
+        """Return a list of imported modules (represented by their locations)."""
         imports = []
         for statement in self.children.values():
             if isinstance(statement, Import):
@@ -143,9 +143,9 @@ class Namespace(BaseParserObject):
     def from_file(cls, project_root_dir: Path, file: Path):
         """Construct the Namespace from a python file.
 
-        :param project_root_dir: A root dir of the dff project. All local files should be inside this dir
-        :param file: A `.py` file to construct the namespace from
-        :return: A Namespace of the file
+        :param project_root_dir: A root dir of the dff project. All local files should be inside this dir.
+        :param file: A `.py` file to construct the namespace from.
+        :return: A Namespace of the file.
         """
         location = list(file.with_suffix("").relative_to(project_root_dir).parts)
         with open(file, "r", encoding="utf-8") as fd:
