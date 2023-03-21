@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 9. No Pipeline
+# Telegram: 9. No Pipeline
 
 This example shows how to connect to Telegram without the `pipeline` API.
 

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 1. Basics
+# Core: 1. Basics
 
 This notebook shows basic example of creating a simple dialog bot (agent).
 Let's do all the necessary imports from `DFF`:
