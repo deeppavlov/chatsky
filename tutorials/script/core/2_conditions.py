@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 2. Conditions
+# Core: 2. Conditions
 
 This tutorial shows different options for
 setting transition conditions from one node to another.

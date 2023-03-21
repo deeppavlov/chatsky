@@ -19,7 +19,6 @@ allowing developers to easily adapt it to their specific needs and requirements.
 
    get_started
    reference
-   examples
    tutorials
    development
    community

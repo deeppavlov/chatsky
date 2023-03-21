@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 1. Basic
+# Telegram: 1. Basic
 
 The following tutorial shows how to run a regular DFF script in Telegram.
 It asks users for the '/start' command and then loops in one place.

@@ -27,4 +27,4 @@ comprehensive overview of how to build a complete application.
    :name: tutorials
    :glob:
 
-   tutorials/*/index
+   tutorials/index_*

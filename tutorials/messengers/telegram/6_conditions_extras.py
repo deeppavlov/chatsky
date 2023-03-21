@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 6. Conditions Extras
+# Telegram: 6. Conditions Extras
 
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.

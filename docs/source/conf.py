@@ -6,7 +6,7 @@ import re
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
-from utils.generate_notebook_links import generate_tutorial_links_for_notebook_creation  # noqa: E402
+from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
@@ -84,6 +84,7 @@ html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
+autosummary_generate_overwrite = False
 
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
@@ -140,11 +141,24 @@ autodoc_default_options = {"members": True, "undoc-members": False, "private-mem
 def setup(_):
     generate_tutorial_links_for_notebook_creation(
         [
-            "tutorials/context_storages/*.py",
-            "tutorials/messengers/*.py",
-            "tutorials/pipeline/*.py",
-            "tutorials/script/*.py",
-            "tutorials/utils/*.py",
+            ("tutorials.context_storages", "Context Storages"),
+            (
+                "tutorials.messengers",
+                "Messengers",
+                [
+                    ("telegram", "Telegram"),
+                ],
+            ),
+            ("tutorials.pipeline", "Pipeline"),
+            (
+                "tutorials.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
+            ("tutorials.utils", "Utils"),
         ]
     )
     regenerate_apiref(

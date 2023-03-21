@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 2. Buttons
+# Telegram: 2. Buttons
 
 
 This tutorial shows how to display and hide a basic keyboard in Telegram.

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 7. Polling Setup
+# Telegram: 7. Polling Setup
 
 The following tutorial shows how to configure `PollingTelegramInterface`.
 

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 5. Conditions with Media
+# Telegram: 5. Conditions with Media
 
 This tutorial shows how to use media-related logic in your script.
 """
