@@ -3,7 +3,7 @@ Mongo
 -----
 The Mongo module provides a MongoDB-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a MongoDB.
-It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+It allows the DFF to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
 MongoDB is a widely-used, open-source NoSQL database that is known for its scalability and performance.

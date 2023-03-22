@@ -5,8 +5,8 @@ import re
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
-from utils.generate_examples import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
+from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
@@ -87,8 +87,8 @@ html_show_sourcelink = False
 
 autosummary_generate_overwrite = False
 
-# Finding examples directories
-nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
+# Finding tutorials directories
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
@@ -140,26 +140,26 @@ autodoc_default_options = {"members": True, "undoc-members": False, "private-mem
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(
+    generate_tutorial_links_for_notebook_creation(
         [
-            ("examples.context_storages", "Context Storages"),
+            ("tutorials.context_storages", "Context Storages"),
             (
-                "examples.messengers",
+                "tutorials.messengers",
                 "Messengers",
                 [
                     ("telegram", "Telegram"),
                 ],
             ),
-            ("examples.pipeline", "Pipeline"),
+            ("tutorials.pipeline", "Pipeline"),
             (
-                "examples.script",
+                "tutorials.script",
                 "Script",
                 [
                     ("core", "Core"),
                     ("responses", "Responses"),
                 ],
             ),
-            ("examples.utils", "Utils"),
+            ("tutorials.utils", "Utils"),
         ]
     )
     regenerate_apiref(
@@ -168,6 +168,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.utils.testing", "Utils"),
         ]
     )
     pull_release_notes_from_github()
