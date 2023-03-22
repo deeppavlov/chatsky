@@ -103,7 +103,7 @@ Okey
 ```
 
 To get more advanced examples, take a look at
-[examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials) on GitHub.
 
 # Context Storages
 ## Description
