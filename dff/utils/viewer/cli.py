@@ -1,3 +1,4 @@
+import sys
 from pathlib import Path
 from typing import Optional
 import argparse
@@ -72,54 +73,18 @@ server_parser.add_argument(
 )
 
 
-def run_server(
-    entry_point,
-    project_root_dir,
-    show_response,
-    show_processing,
-    show_misc,
-    show_global,
-    show_local,
-    show_isolates,
-    random_seed,
-    host,
-    port,
-):
-    graph = get_graph(entry_point, project_root_dir)
-    plot = get_plot(
-        graph, show_response, show_processing, show_misc, show_global, show_local, show_isolates, random_seed
-    )
-    app = create_app(plot)
-    app.run(host=host, port=port, debug=True, dev_tools_hot_reload=True)
-
-
-def make_server():
+def make_server(args=sys.argv[1:]):
     server_praser = argparse.ArgumentParser(parents=[py2file_parser, server_parser], add_help=True)
-    args: argparse.Namespace = server_praser.parse_args()
-    reloader = hupper.start_reloader(
-        "dff.utils.viewer.cli.run_server",
-        worker_kwargs=dict(
-            entry_point=args.entry_point,
-            project_root_dir=args.project_root_dir,
-            show_response=args.show_response,
-            show_processing=args.show_processing,
-            show_misc=args.show_misc,
-            show_global=args.show_global,
-            show_local=args.show_local,
-            show_isolates=args.show_isolates,
-            random_seed=args.random_seed,
-            host=args.host,
-            port=args.port,
-        ),
-    )
-    reloader.logger.warn("1!")
-    reloader.watch_files([str(i) for i in args.project_root_dir.absolute().glob("./**/*.py")])
-    reloader.logger.warn("2!")
-    reloader.logger.warn([str(i) for i in args.project_root_dir.absolute().glob("./**/*.py")])
-    run_server()
+    parsed_args: argparse.Namespace = server_praser.parse_args(args)
+    graph = get_graph(**vars(parsed_args))
+    plot = get_plot(graph, **vars(parsed_args))
+    app = create_app(plot)
+    reloader = hupper.start_reloader("dff.utils.viewer.cli.make_server")
+    reloader.watch_files([str(i) for i in parsed_args.project_root_dir.absolute().glob("./**/*.py")])
+    app.run(host=parsed_args.host, port=parsed_args.port, debug=True, dev_tools_hot_reload=True)
 
 
-def make_image():
+def make_image(args=sys.argv[1:]):
     image_parser = argparse.ArgumentParser(parents=[py2file_parser], add_help=True)
     image_parser.add_argument(
         "-f",
@@ -137,7 +102,7 @@ def make_image():
         help="Image file",
         type=str,
     )
-    args: argparse.Namespace = image_parser.parse_args()
-    graph = get_graph(**vars(args))
-    plot = get_plot(graph, **vars(args))
-    image(plot, args.output_file, format=args.format)
+    parsed_args: argparse.Namespace = image_parser.parse_args(args)
+    graph = get_graph(**vars(parsed_args))
+    plot = get_plot(graph, **vars(parsed_args))
+    image(plot, parsed_args.output_file, format=parsed_args.format)
