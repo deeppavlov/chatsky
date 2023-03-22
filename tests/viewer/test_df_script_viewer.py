@@ -1,23 +1,23 @@
 import difflib
+from multiprocessing import Process
 from io import BytesIO
 from base64 import b64encode
 from pathlib import Path
 
 import pytest
 
-from tests.test_utils import get_path_from_tests_to_current_dir
-
 try:
     import plotly.graph_objects as go
     from dff.utils.viewer import graph
     from dff.utils.viewer import plot
+    from dff.utils.viewer import cli
 except ImportError:
     pytest.skip(allow_module_level=True, reason="Missing dependencies for dff parser.")
 
 
 @pytest.fixture(scope="session")
 def nx_graph():
-    example_dir = Path(f"examples/{get_path_from_tests_to_current_dir(__file__)}") / "python_files"
+    example_dir = Path(__file__).parent / "TEST_CASES"
     G = graph.get_graph(example_dir / "main.py", example_dir.absolute())
     yield G
 
@@ -74,3 +74,18 @@ def test_plotting_2(params, reference_file, nx_graph, tmp_path):
     reference_lines = reference_file.open().readlines()
     diff = difflib.unified_diff(test_lines, reference_lines)
     assert len(list(diff)) == 0
+
+
+# @pytest.mark.parametrize(["params", "reference_file"],
+#     [
+#         ([], Path(__file__).parent / "opts_off.dot"),
+#         ([], Path(__file__).parent / "opts_on.dot")
+#     ]
+# )
+# def test_image_cli(params, reference_file, tmp_path):
+#     plot_file = tmp_path / "plot"
+#     cli.make_image(args=params + [f"-f dot -o {str(plot_file)}"])
+#     test_lines = plot_file.open().readlines()
+#     reference_lines = reference_file.open().readlines()
+#     diff = difflib.unified_diff(test_lines, reference_lines)
+#     assert len(list(diff)) == 0

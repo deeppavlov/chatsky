@@ -1,4 +1,4 @@
-from dff.core.engine.core import Actor, Context
+from dff.script import Actor, Context
 
 
 def add_prefix(prefix):

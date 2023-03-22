@@ -1,6 +1,6 @@
-from dff.core.engine.core.keywords import TRANSITIONS, RESPONSE, PROCESSING, LOCAL
-import dff.core.engine.conditions as cnd
-import dff.core.engine.labels as lbl
+from dff.script.core.keywords import TRANSITIONS, RESPONSE, PROCESSING, LOCAL
+import dff.script.conditions as cnd
+import dff.script.labels as lbl
 import re
 
 from functions import add_prefix

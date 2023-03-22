@@ -1,0 +1,34 @@
+# %% [markdown]
+"""
+# 2. Image
+
+"""
+# %% [markdown]
+"""
+## View the graph as a static image.
+
+"""
+# %% [markdown]
+"""
+```bash
+dff.script_viewer.image -e ./python_files/main.py -d ./python_files/ -o ./plot.png
+```
+"""
+# %% [markdown]
+"""
+## CLI parameters reference
+"""
+# %% [markdown]
+"""
+--entry_point: Python file to start parsing with.
+--project_root_dir: Directory that contains all the local files required to run ROOT_FILE.
+--show_response: Show node response values.
+--show_misc: Show node misc values.
+--show_local: Show local transitions.
+--show_processing: Show processing functions.
+--show_global: Show global transitions.
+--show_isolates: Show isolated nodes.
+--random_seed: Random seed to control color generation.
+--format: Graphviz output format.
+--output_file: Image file.
+"""
