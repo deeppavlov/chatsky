@@ -2,6 +2,8 @@ from pathlib import Path
 from typing import Optional
 import argparse
 
+import hupper
+
 from .graph import get_graph
 from .plot import get_plot
 from .app import create_app
@@ -70,13 +72,51 @@ server_parser.add_argument(
 )
 
 
+def run_server(
+    entry_point,
+    project_root_dir,
+    show_response,
+    show_processing,
+    show_misc,
+    show_global,
+    show_local,
+    show_isolates,
+    random_seed,
+    host,
+    port,
+):
+    graph = get_graph(entry_point, project_root_dir)
+    plot = get_plot(
+        graph, show_response, show_processing, show_misc, show_global, show_local, show_isolates, random_seed
+    )
+    app = create_app(plot)
+    app.run(host=host, port=port, debug=True, dev_tools_hot_reload=True)
+
+
 def make_server():
     server_praser = argparse.ArgumentParser(parents=[py2file_parser, server_parser], add_help=True)
     args: argparse.Namespace = server_praser.parse_args()
-    graph = get_graph(**vars(args))
-    plot = get_plot(graph, **vars(args))
-    app = create_app(plot)
-    app.run(host=args.host, port=args.port, debug=True, dev_tools_hot_reload=True)
+    reloader = hupper.start_reloader(
+        "dff.utils.viewer.cli.run_server",
+        worker_kwargs=dict(
+            entry_point=args.entry_point,
+            project_root_dir=args.project_root_dir,
+            show_response=args.show_response,
+            show_processing=args.show_processing,
+            show_misc=args.show_misc,
+            show_global=args.show_global,
+            show_local=args.show_local,
+            show_isolates=args.show_isolates,
+            random_seed=args.random_seed,
+            host=args.host,
+            port=args.port,
+        ),
+    )
+    reloader.logger.warn("1!")
+    reloader.watch_files([str(i) for i in args.project_root_dir.absolute().glob("./**/*.py")])
+    reloader.logger.warn("2!")
+    reloader.logger.warn([str(i) for i in args.project_root_dir.absolute().glob("./**/*.py")])
+    run_server()
 
 
 def make_image():
