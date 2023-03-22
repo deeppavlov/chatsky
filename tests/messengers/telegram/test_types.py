@@ -9,6 +9,7 @@ try:
     import telethon  # noqa: F401
 except ImportError:
     pytest.skip(reason="`telegram` is not available", allow_module_level=True)
+
 from pydantic import ValidationError
 from telebot import types
 

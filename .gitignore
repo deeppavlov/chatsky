@@ -4,8 +4,8 @@ dist/
 venv/
 build/
 docs/source/apiref
-docs/source/examples
 docs/source/release_notes.rst
+docs/source/tutorials
 *__pycache__*
 *.idea/*
 .idea/*
@@ -24,4 +24,4 @@ venv*
 .coverage
 .pytest_cache
 htmlcov
-examples/context_storages/dbs
+tutorials/context_storages/dbs
