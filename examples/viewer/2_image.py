@@ -11,7 +11,7 @@
 # %% [markdown]
 """
 ```bash
-dff.script_viewer.image -e ./python_files/main.py -d ./python_files/ -o ./plot.png
+dff.viewer.image -e ./python_files/main.py -d ./python_files/ -o ./plot.png
 ```
 """
 # %% [markdown]

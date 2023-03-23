@@ -235,8 +235,8 @@ setup(
     extras_require=EXTRA_DEPENDENCIES,
     entry_points={
         "console_scripts": [
-            "dff.script_viewer.server=dff.utils.viewer:make_server",
-            "dff.script_viewer.image=dff.utils.viewer:make_image",
+            "dff.viewer.server=dff.utils.viewer:make_server",
+            "dff.viewer.image=dff.utils.viewer:make_image",
         ]
     },
 )

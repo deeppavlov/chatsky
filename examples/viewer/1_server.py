@@ -11,7 +11,7 @@
 # %% [markdown]
 """
 ```bash
-dff.script_viewer.server -e "./python_files/main.py" -d "./python_files/" -H localhost -P 8000
+dff.viewer.server -e "./python_files/main.py" -d "./python_files/" -H localhost -P 8000
 ```
 """
 # %% [markdown]
