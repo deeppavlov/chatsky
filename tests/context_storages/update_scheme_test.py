@@ -35,5 +35,5 @@ def test_default_scheme_creation():
     mid_ctx = default_scheme.process_context_write(out_ctx, dict())
     print(mid_ctx)
 
-    in_ctx, _ = default_scheme.process_context_read(mid_ctx)
-    print(Context.cast(in_ctx).dict())
+    context = default_scheme.process_context_read(mid_ctx)
+    print(context.dict())

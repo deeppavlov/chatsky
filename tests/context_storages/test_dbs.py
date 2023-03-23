@@ -75,7 +75,9 @@ def generic_test(db, testing_context, context_id):
     # test read operations
     new_ctx = db[context_id]
     assert isinstance(new_ctx, Context)
+    last_storage_hash = new_ctx.framework_states.pop("LAST_STORAGE_HASH", None)
     assert {**new_ctx.dict(), "id": str(new_ctx.id)} == {**testing_context.dict(), "id": str(testing_context.id)}
+    new_ctx.framework_states["LAST_STORAGE_HASH"] = last_storage_hash
     # test delete operations
     del db[context_id]
     assert context_id not in db

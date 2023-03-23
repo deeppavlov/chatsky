@@ -62,8 +62,7 @@ class PickleContextStorage(DBContextStorage):
         container = self.storage.get(str(key), list())
         if len(container) == 0:
             raise KeyError(f"No entry for key {key}.")
-        ctx_dict, _ = default_update_scheme.process_context_read(container[-1])
-        return Context.cast(ctx_dict)
+        return default_update_scheme.process_context_read(container[-1])
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
