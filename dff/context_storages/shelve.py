@@ -36,7 +36,7 @@ class ShelveContextStorage(DBContextStorage):
     async def get_item_async(self, key: Hashable) -> Context:
         container = self.shelve_db.get(str(key), list())
         if len(container) == 0:
-            raise KeyError(key)
+            raise KeyError(f"No entry for key {key}.")
         ctx_dict, _ = default_update_scheme.process_context_read(container[-1])
         return Context.cast(ctx_dict)
 

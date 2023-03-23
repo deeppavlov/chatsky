@@ -65,7 +65,7 @@ class JSONContextStorage(DBContextStorage):
         await self._load()
         container = self.storage.__dict__.get(str(key), list())
         if len(container) == 0:
-            raise KeyError(key)
+            raise KeyError(f"No entry for key {key}.")
         ctx_dict, _ = default_update_scheme.process_context_read(container[-1].dict())
         return Context.cast(ctx_dict)
 

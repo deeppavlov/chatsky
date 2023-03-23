@@ -61,7 +61,7 @@ class PickleContextStorage(DBContextStorage):
         await self._load()
         container = self.storage.get(str(key), list())
         if len(container) == 0:
-            raise KeyError(key)
+            raise KeyError(f"No entry for key {key}.")
         ctx_dict, _ = default_update_scheme.process_context_read(container[-1])
         return Context.cast(ctx_dict)
 
