@@ -42,7 +42,7 @@ class DBContextStorage(ABC):
         """`full_path` without a prefix defining db used"""
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
-        self.cache_storage = dict()
+        self.hash_storage = dict()
 
     def __getitem__(self, key: Hashable) -> Context:
         """

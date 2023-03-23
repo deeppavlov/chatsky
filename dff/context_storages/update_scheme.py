@@ -15,15 +15,13 @@ class FieldType(Enum):
 
 _ReadFieldsFunction = Callable[[str, int, int], Awaitable[List[Any]]]
 
-_ReadListFunction = Callable[[str, Optional[List], Optional[List], int, int], Awaitable[Any]]
-_ReadDictFunction = Callable[[str, Optional[List], int, int], Awaitable[Any]]
+_ReadSeqFunction = Callable[[str, List[Hashable], int, int], Awaitable[Any]]
 _ReadValueFunction = Callable[[str, int, int], Awaitable[Any]]
-_ReadFunction = Union[_ReadListFunction, _ReadDictFunction, _ReadValueFunction]
+_ReadFunction = Union[_ReadSeqFunction, _ReadValueFunction]
 
-_WriteListFunction = Callable[[str, Dict[int, Any], Optional[List], Optional[List], int, int], Awaitable]
-_WriteDictFunction = Callable[[str, Dict[Hashable, Any], Optional[List], int, int], Awaitable]
+_WriteSeqFunction = Callable[[str, Dict[Hashable, Any], int, int], Awaitable]
 _WriteValueFunction = Callable[[str, Any, int, int], Awaitable]
-_WriteFunction = Union[_WriteListFunction, _WriteDictFunction, _WriteValueFunction]
+_WriteFunction = Union[_WriteSeqFunction, _WriteValueFunction]
 
 
 @unique
@@ -158,41 +156,47 @@ class UpdateScheme:
         return field, field_name_pure
 
     @staticmethod
-    def get_outlook_slice(dictionary_keys: Iterable, update_field: List) -> List:
+    def _get_outlook_slice(dictionary_keys: Iterable, update_field: List) -> List:
         list_keys = sorted(list(dictionary_keys))
         update_field[1] = min(update_field[1], len(list_keys))
         return list_keys[update_field[0]:update_field[1]:update_field[2]] if len(list_keys) > 0 else list()
 
     @staticmethod
-    def get_outlook_list(dictionary_keys: Iterable, update_field: List) -> List:
+    def _get_outlook_list(dictionary_keys: Iterable, update_field: List) -> List:
         list_keys = sorted(list(dictionary_keys))
         return [list_keys[key] for key in update_field] if len(list_keys) > 0 else list()
 
     async def process_context_read(self, initial: Dict) -> Tuple[Context, Dict]:
         context_dict = initial.copy()
         context_hash = dict()
+
         for field in self.fields.keys():
             if self.fields[field]["read"] == FieldRule.IGNORE:
                 del context_dict[field]
                 continue
             field_type = self._get_type_from_name(field)
+
             if field_type is FieldType.LIST:
                 if "outlook_slice" in self.fields[field]:
-                    update_field = self.get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
+                    update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
                 else:
-                    update_field = self.get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
+                    update_field = self._get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
                 context_dict[field] = {item: context_dict[field][item] for item in update_field}
+                context_hash[field] = {item: sha256(str(context_dict[field][item]).encode("utf-8")) for item in update_field}
+
             elif field_type is FieldType.DICT:
                 update_field = self.fields[field].get("outlook", list())
-                if self.ALL_ITEMS not in update_field:
-                    context_dict[field] = {item: context_dict[field][item] for item in update_field}
-            context_hash[field] = sha256(str(context_dict[field]).encode("utf-8"))
+                if self.ALL_ITEMS in update_field:
+                    update_field = context_dict[field].keys()
+                context_dict[field] = {item: context_dict[field][item] for item in update_field}
+                context_hash[field] = {item: sha256(str(context_dict[field][item]).encode("utf-8")) for item in update_field}
         return Context.cast(context_dict), context_hash
 
-    async def process_context_write(self, ctx: Context, initial: Optional[Dict] = None) -> Dict:
+    async def process_context_write(self, ctx: Context, hashes: Dict, initial: Optional[Dict] = None) -> Dict:
         initial = dict() if initial is None else initial
         context_dict = ctx.dict()
         output_dict = dict()
+
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:
                 if field in initial:
@@ -205,25 +209,37 @@ class UpdateScheme:
 
             if field_type is FieldType.LIST:
                 if "outlook_slice" in self.fields[field]:
-                    update_field = self.get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
+                    update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
                 else:
-                    update_field = self.get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
+                    update_field = self._get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
                 output_dict[field] = initial_field.copy()
                 if self.fields[field]["write"] == FieldRule.APPEND:
                     patch = {item: context_dict[field][item] for item in update_field - initial_field.keys()}
+                elif self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+                    patch = dict()
+                    for item in update_field:
+                        item_hash = sha256(str(context_dict[field][item]).encode("utf-8"))
+                        if hashes.get(field, dict()).get(item, None) != item_hash:
+                            patch[item] = context_dict[field][item]
                 else:
                     patch = {item: context_dict[field][item] for item in update_field}
                 output_dict[field].update(patch)
+
             elif field_type is FieldType.DICT:
-                output_dict[field] = dict()
                 update_field = self.fields[field].get("outlook", list())
-                update_keys_all = set(list(initial_field.keys()) + list(context_dict[field].keys()))
-                update_keys = update_keys_all if self.ALL_ITEMS in update_field else update_field
-                for item in update_keys:
-                    if item in initial_field:
-                        output_dict[field][item] = initial_field[item]
-                    if item in context_dict[field]:
-                        output_dict[field][item] = context_dict[field][item]
+                update_keys_all = list(initial_field.keys()) + list(context_dict[field].keys())
+                update_keys = set(update_keys_all if self.ALL_ITEMS in update_field else update_field)
+                if self.fields[field]["write"] == FieldRule.APPEND:
+                    output_dict[field] = {item: context_dict[field][item] for item in update_keys - initial_field.keys()}
+                elif self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+                    output_dict[field] = dict()
+                    for item in update_keys:
+                        item_hash = sha256(str(context_dict[field][item]).encode("utf-8"))
+                        if hashes.get(field, dict()).get(item, None) != item_hash:
+                            output_dict[field][item] = context_dict[field][item]
+                else:
+                    output_dict[field] = {item: context_dict[field][item] for item in update_field}
+
             else:
                 output_dict[field] = context_dict[field]
         return output_dict
@@ -234,45 +250,85 @@ class UpdateScheme:
         else:
             return None
 
-    async def process_fields_read(self, processors: Dict[FieldType, _ReadFunction], fields_reader: _ReadFieldsFunction, int_id: int, ext_id: int) -> Tuple[Context, Dict]:
+    async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, int_id: int, ext_id: int) -> Tuple[Context, Dict]:
         result = dict()
         hashes = dict()
+
         for field in self.fields.keys():
             if self.fields[field]["read"] == FieldRule.IGNORE:
                 continue
+
             field_type = self._get_type_from_name(field)
-            if field_type in processors.keys():
-                if field_type == FieldType.LIST:
-                    outlook_list = self.fields[field].get("outlook_list", None)
-                    outlook_slice = self.fields[field].get("outlook_slice", None)
-                    result[field] = await processors[field_type](field, outlook_list, outlook_slice, int_id, ext_id)
-                elif field_type == FieldType.DICT:
-                    outlook = self.fields[field].get("outlook", None)
-                    result[field] = await processors[field_type](field, outlook, int_id, ext_id)
+            if field_type == FieldType.LIST:
+                list_keys = await fields_reader(field, int_id, ext_id)
+                if "outlook_slice" in self.fields[field]:
+                    update_field = self._get_outlook_slice(list_keys, self.fields[field]["outlook_slice"])
                 else:
-                    result[field] = await processors[field_type](field, int_id, ext_id)
-                if result[field] is None:
-                    result[field] = self._resolve_readonly_value(field, int_id, ext_id)
-                hashes[field] = sha256(str(result[field]).encode("utf-8"))
+                    update_field = self._get_outlook_list(list_keys, self.fields[field]["outlook_list"])
+                result[field] = await seq_reader(field, update_field, int_id, ext_id)
+                hashes[field] = {item: sha256(str(result[field][item]).encode("utf-8")) for item in update_field}
+
+            elif field_type == FieldType.DICT:
+                update_field = self.fields[field].get("outlook", None)
+                if self.ALL_ITEMS in update_field:
+                    update_field = await fields_reader(field, int_id, ext_id)
+                result[field] = await seq_reader(field, update_field, int_id, ext_id)
+                hashes[field] = {item: sha256(str(result[field][item]).encode("utf-8")) for item in update_field}
+
+            else:
+                result[field] = await val_reader(field, int_id, ext_id)
+
+            if result[field] is None:
+                result[field] = self._resolve_readonly_value(field, int_id, ext_id)
+            hashes[field] = sha256(str(result[field]).encode("utf-8"))
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, processors: Dict[FieldType, _WriteFunction], int_id: int, ext_id: int) -> Dict:
+    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: int, ext_id: int) -> Dict:
         context_dict = ctx.dict()
+
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:
                 continue
             field_type = self._get_type_from_name(field)
-            if field_type in processors.keys():
-                if field_type == FieldType.LIST:
-                    outlook_list = self.fields[field].get("outlook_list", None)
-                    outlook_slice = self.fields[field].get("outlook_slice", None)
-                    await processors[field_type](field, context_dict[field], outlook_list, outlook_slice, int_id, ext_id)
-                elif field_type == FieldType.DICT:
-                    outlook = self.fields[field].get("outlook", None)
-                    await processors[field_type](field, context_dict[field], outlook, int_id, ext_id)
+
+            if field_type == FieldType.LIST:
+                list_keys = await fields_reader(field, int_id, ext_id)
+                if "outlook_slice" in self.fields[field]:
+                    update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
                 else:
-                    await processors[field_type](context_dict[field], field, int_id, ext_id)
-                # hashes[field] = sha256(str(result[field]).encode("utf-8"))
+                    update_field = self._get_outlook_list(context_dict[field].keys(), self.fields[field]["outlook_list"])
+                if self.fields[field]["write"] == FieldRule.APPEND:
+                    patch = {item: context_dict[field][item] for item in set(update_field) - set(list_keys)}
+                elif self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+                    patch = dict()
+                    for item in update_field:
+                        item_hash = sha256(str(context_dict[field][item]).encode("utf-8"))
+                        if hashes.get(field, dict()).get(item, None) != item_hash:
+                            patch[item] = context_dict[field][item]
+                else:
+                    patch = {item: context_dict[field][item] for item in update_field}
+                await seq_writer(field, patch, int_id, ext_id)
+
+            elif field_type == FieldType.DICT:
+                list_keys = await fields_reader(field, int_id, ext_id)
+                update_field = self.fields[field].get("outlook", list())
+                update_keys_all = list_keys + list(context_dict[field].keys())
+                update_keys = set(update_keys_all if self.ALL_ITEMS in update_field else update_field)
+                if self.fields[field]["write"] == FieldRule.APPEND:
+                    patch = {item: context_dict[field][item] for item in update_keys - set(list_keys)}
+                elif self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+                    patch = dict()
+                    for item in update_keys:
+                        item_hash = sha256(str(context_dict[field][item]).encode("utf-8"))
+                        if hashes.get(field, dict()).get(item, None) != item_hash:
+                            patch[item] = context_dict[field][item]
+                else:
+                    patch = {item: context_dict[field][item] for item in update_field}
+                await seq_writer(field, patch, int_id, ext_id)
+
+            else:
+                await val_writer(context_dict[field], field, int_id, ext_id)
+            # hashes[field] = sha256(str(result[field]).encode("utf-8"))
         return context_dict
 
 

@@ -13,7 +13,7 @@ Additionally, Redis can be used as a cache, message broker, and database, making
 and powerful choice for data storage and management.
 """
 import pickle
-from typing import Hashable, Optional, List, Dict, Any
+from typing import Hashable, List, Dict, Any
 
 try:
     from aioredis import Redis
@@ -26,7 +26,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import default_update_scheme, UpdateScheme, FieldType
+from .update_scheme import default_update_scheme
 
 
 class RedisContextStorage(DBContextStorage):
@@ -50,18 +50,9 @@ class RedisContextStorage(DBContextStorage):
     async def contains_async(self, key: Hashable) -> bool:
         return bool(await self._redis.exists(str(key)))
 
-    async def _write_list(self, field_name: str, data: Dict[int, Any], outlook_list: Optional[List[int]], outlook_slice: Optional[List[int]], int_id: int, ext_id: int):
-        if outlook_list is not None:
-            update_list = UpdateScheme.get_outlook_list(data.keys(), outlook_list)
-        else:
-            update_list = UpdateScheme.get_outlook_slice(data.keys(), outlook_slice)
-        for update in update_list:
-            await self._redis.set(f"{ext_id}:{int_id}:{field_name}:{update}", pickle.dumps(data[update]))
-
-    async def _write_dict(self, field_name: str, data: Dict[Hashable, Any], outlook: Optional[List[int]], int_id: int, ext_id: int):
-        outlook = data.keys() if UpdateScheme.ALL_ITEMS in outlook else outlook
-        for value in outlook:
-            await self._redis.set(f"{ext_id}:{int_id}:{field_name}:{value}", pickle.dumps(data[value]))
+    async def _write_seq(self, field_name: str, data: Dict[Hashable, Any], int_id: int, ext_id: int):
+        for key, value in data.items():
+            await self._redis.set(f"{ext_id}:{int_id}:{field_name}:{key}", pickle.dumps(value))
 
     async def _write_value(self, data: Any, field_name: str, int_id: int, ext_id: int):
         return await self._redis.set(f"{ext_id}:{int_id}:{field_name}", pickle.dumps(data))
@@ -69,11 +60,7 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        await default_update_scheme.process_fields_write(value, {
-            FieldType.LIST: self._write_list,
-            FieldType.DICT: self._write_dict,
-            FieldType.VALUE: self._write_value
-        }, value.id, key)
+        await default_update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq, value.id, key)
         last_id = await self._redis.rpop(key)
         if last_id is None or last_id != str(value.id):
             if last_id is not None:
@@ -83,23 +70,9 @@ class RedisContextStorage(DBContextStorage):
             await self._redis.rpush(key, str(value.id))
 
     async def _read_fields(self, field_name: str, int_id: int, ext_id: int):
-        return [key.split(":")[-1] for key in self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*")]
+        return [key.split(":")[-1] for key in await self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*")]
 
-    async def _read_list(self, field_name: str, outlook_list: Optional[List[int]], outlook_slice: Optional[List[int]], int_id: int, ext_id: int) -> Dict[int, Any]:
-        list_keys = [key.split(":")[-1] for key in self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*")]
-        if outlook_list is not None:
-            update_list = UpdateScheme.get_outlook_list(list_keys, outlook_list)
-        else:
-            update_list = UpdateScheme.get_outlook_slice(list_keys, outlook_slice)
-        result = dict()
-        for index in update_list:
-            value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}:{index}")
-            result[index] = pickle.loads(value) if value is not None else None
-        return result
-
-    async def _read_dict(self, field_name: str, outlook: Optional[List[int]], int_id: int, ext_id: int) -> Dict[Hashable, Any]:
-        dict_keys = [key.split(":")[-1] for key in self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*")]
-        outlook = dict_keys if UpdateScheme.ALL_ITEMS in outlook else outlook
+    async def _read_seq(self, field_name: str, outlook: List[int], int_id: int, ext_id: int) -> Dict[Hashable, Any]:
         result = dict()
         for key in outlook:
             value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}:{key}")
@@ -116,11 +89,9 @@ class RedisContextStorage(DBContextStorage):
         last_id = await self._redis.rpop(key)
         if last_id is None:
             raise KeyError(f"No entry for key {key}.")
-        return await default_update_scheme.process_fields_read({
-            FieldType.LIST: self._read_list,
-            FieldType.DICT: self._read_dict,
-            FieldType.VALUE: self._read_value
-        }, self._read_fields, last_id, key)
+        context, hashes = await default_update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, last_id, key)
+        self.hash_storage[key] = hashes
+        return context
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):

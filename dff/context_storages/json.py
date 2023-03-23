@@ -54,9 +54,10 @@ class JSONContextStorage(DBContextStorage):
         container = self.storage.__dict__.get(key, list())
         initial = None if len(container) == 0 else container[-1]
         if initial is not None and initial.dict().get("id", None) == value.id:
-            container[-1] = await default_update_scheme.process_context_write(value, initial.dict())
+            value_hash = self.hash_storage.get(key, dict())
+            container[-1] = await default_update_scheme.process_context_write(value, value_hash, initial.dict())
         else:
-            container.append(await default_update_scheme.process_context_write(value, dict()))
+            container.append(await default_update_scheme.process_context_write(value, dict(), dict()))
         self.storage.__dict__[key] = container
         await self._save()
 
@@ -68,7 +69,7 @@ class JSONContextStorage(DBContextStorage):
         if len(container) == 0:
             raise KeyError(f"No entry for key {key}.")
         context, hashes = await default_update_scheme.process_context_read(container[-1].dict())
-        self.cache_storage[key] = hashes
+        self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
