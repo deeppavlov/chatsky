@@ -34,15 +34,21 @@ class ShelveContextStorage(DBContextStorage):
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
     async def get_item_async(self, key: Hashable) -> Context:
-        ctx_dict, _ = default_update_scheme.process_context_read(self.shelve_db[str(key)])
+        container = self.shelve_db.get(str(key), list())
+        if len(container) == 0:
+            raise KeyError(key)
+        ctx_dict, _ = default_update_scheme.process_context_read(container[-1])
         return Context.cast(ctx_dict)
 
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        initial = self.shelve_db.get(key, dict())
-        initial = initial if initial.get("id", None) == value.id else dict()
-        ctx_dict = default_update_scheme.process_context_write(value, initial)
-        self.shelve_db[key] = ctx_dict
+        container = self.shelve_db.get(key, list())
+        initial = None if len(container) == 0 else container[-1]
+        if initial is not None and initial.get("id", None) == value.id:
+            container[-1] = default_update_scheme.process_context_write(value, initial)
+        else:
+            container.append(default_update_scheme.process_context_write(value, dict()))
+        self.shelve_db[key] = container
 
     async def del_item_async(self, key: Hashable):
         del self.shelve_db[str(key)]

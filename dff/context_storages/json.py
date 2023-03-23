@@ -27,8 +27,8 @@ from dff.script import Context
 class SerializableStorage(BaseModel, extra=Extra.allow):
     @root_validator
     def validate_any(cls, vals):
-        for key, value in vals.items():
-            vals[key] = Context.cast(value)
+        for key, values in vals.items():
+            vals[key] = [Context.cast(value) for value in values]
         return vals
 
 
@@ -51,17 +51,22 @@ class JSONContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        initial = self.storage.__dict__.get(key, None)
-        initial = initial.dict() if initial is not None and initial.dict().get("id", None) == value.id else dict()
-        ctx_dict = default_update_scheme.process_context_write(value, initial)
-        self.storage.__dict__[key] = ctx_dict
+        container = self.storage.__dict__.get(key, list())
+        initial = None if len(container) == 0 else container[-1]
+        if initial is not None and initial.dict().get("id", None) == value.id:
+            container[-1] = default_update_scheme.process_context_write(value, initial.dict())
+        else:
+            container.append(default_update_scheme.process_context_write(value, dict()))
+        self.storage.__dict__[key] = container
         await self._save()
 
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
-        key = str(key)
         await self._load()
-        ctx_dict, _ = default_update_scheme.process_context_read(self.storage.__dict__[key].dict())
+        container = self.storage.__dict__.get(str(key), list())
+        if len(container) == 0:
+            raise KeyError(key)
+        ctx_dict, _ = default_update_scheme.process_context_read(container[-1].dict())
         return Context.cast(ctx_dict)
 
     @threadsafe_method
