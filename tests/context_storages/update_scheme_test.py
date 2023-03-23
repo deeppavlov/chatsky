@@ -1,3 +1,5 @@
+import pytest
+
 from dff.context_storages import UpdateScheme
 from dff.script import Context
 
@@ -20,7 +22,8 @@ full_update_scheme = {
 }
 
 
-def test_default_scheme_creation():
+@pytest.mark.asyncio
+async def test_default_scheme_creation():
     print()
 
     default_scheme = UpdateScheme(default_update_scheme)
@@ -32,8 +35,8 @@ def test_default_scheme_creation():
     out_ctx = Context()
     print(out_ctx.dict())
 
-    mid_ctx = default_scheme.process_context_write(out_ctx, dict())
+    mid_ctx = await default_scheme.process_context_write(out_ctx, dict())
     print(mid_ctx)
 
-    context = default_scheme.process_context_read(mid_ctx)
+    context = await default_scheme.process_context_read(mid_ctx)
     print(context.dict())

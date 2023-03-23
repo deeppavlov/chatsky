@@ -13,14 +13,16 @@ class FieldType(Enum):
     VALUE = auto()
 
 
-_ReadListFunction = Callable[[str, Optional[List], Optional[List], Any], Awaitable[Any]]
-_ReadDictFunction = Callable[[str, Optional[List], Any], Awaitable[Any]]
-_ReadValueFunction = Callable[[str, Any], Awaitable[Any]]
+_ReadFieldsFunction = Callable[[str, int, int], Awaitable[List[Any]]]
+
+_ReadListFunction = Callable[[str, Optional[List], Optional[List], int, int], Awaitable[Any]]
+_ReadDictFunction = Callable[[str, Optional[List], int, int], Awaitable[Any]]
+_ReadValueFunction = Callable[[str, int, int], Awaitable[Any]]
 _ReadFunction = Union[_ReadListFunction, _ReadDictFunction, _ReadValueFunction]
 
-_WriteListFunction = Callable[[str, Dict[int, Any], Optional[List], Optional[List], Any], Awaitable]
-_WriteDictFunction = Callable[[str, Dict[Hashable, Any], Optional[List], Any], Awaitable]
-_WriteValueFunction = Callable[[str, Any, Any], Awaitable]
+_WriteListFunction = Callable[[str, Dict[int, Any], Optional[List], Optional[List], int, int], Awaitable]
+_WriteDictFunction = Callable[[str, Dict[Hashable, Any], Optional[List], int, int], Awaitable]
+_WriteValueFunction = Callable[[str, Any, int, int], Awaitable]
 _WriteFunction = Union[_WriteListFunction, _WriteDictFunction, _WriteValueFunction]
 
 
@@ -230,7 +232,13 @@ class UpdateScheme:
                 output_dict[field] = context_dict[field]
         return output_dict
 
-    async def process_fields_read(self, processors: Dict[FieldType, _ReadFunction], **kwargs) -> Context:
+    def _resolve_readonly_value(self, field_name: str, int_id: int, ext_id: int) -> Any:
+        if field_name == "id":
+            return int_id
+        else:
+            return None
+
+    async def process_fields_read(self, processors: Dict[FieldType, _ReadFunction], fields_reader: _ReadFieldsFunction, int_id: int, ext_id: int) -> Context:
         result = dict()
         hashes = dict()
         for field in self.fields.keys():
@@ -241,18 +249,20 @@ class UpdateScheme:
                 if field_type == FieldType.LIST:
                     outlook_list = self.fields[field].get("outlook_list", None)
                     outlook_slice = self.fields[field].get("outlook_slice", None)
-                    result[field] = await processors[field_type](field, outlook_list, outlook_slice, **kwargs)
+                    result[field] = await processors[field_type](field, outlook_list, outlook_slice, int_id, ext_id)
                 elif field_type == FieldType.DICT:
                     outlook = self.fields[field].get("outlook", None)
-                    result[field] = await processors[field_type](field, outlook, **kwargs)
+                    result[field] = await processors[field_type](field, outlook, int_id, ext_id)
                 else:
-                    result[field] = await processors[field_type](field, **kwargs)
+                    result[field] = await processors[field_type](field, int_id, ext_id)
+                if result[field] is None:
+                    result[field] = self._resolve_readonly_value(field, int_id, ext_id)
                 hashes[field] = sha256(str(result[field]).encode("utf-8"))
         context = Context.cast(result)
         context.framework_states["LAST_STORAGE_HASH"] = hashes
         return context
 
-    async def process_fields_write(self, ctx: Context, processors: Dict[FieldType, _WriteFunction], **kwargs) -> Dict:
+    async def process_fields_write(self, ctx: Context, processors: Dict[FieldType, _WriteFunction], int_id: int, ext_id: int) -> Dict:
         context_dict = ctx.dict()
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:
@@ -262,12 +272,12 @@ class UpdateScheme:
                 if field_type == FieldType.LIST:
                     outlook_list = self.fields[field].get("outlook_list", None)
                     outlook_slice = self.fields[field].get("outlook_slice", None)
-                    patch = await processors[field_type](context_dict[field], field, outlook_list, outlook_slice, **kwargs)
+                    await processors[field_type](field, context_dict[field], outlook_list, outlook_slice, int_id, ext_id)
                 elif field_type == FieldType.DICT:
                     outlook = self.fields[field].get("outlook", None)
-                    patch = await processors[field_type](context_dict[field], field, outlook, **kwargs)
+                    await processors[field_type](field, context_dict[field], outlook, int_id, ext_id)
                 else:
-                    patch = await processors[field_type](context_dict[field], field, **kwargs)
+                    await processors[field_type](context_dict[field], field, int_id, ext_id)
                 # hashes[field] = sha256(str(result[field]).encode("utf-8"))
         return context_dict
 
