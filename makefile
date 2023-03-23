@@ -29,14 +29,14 @@ venv:
 	pip install -e .[devel_full]
 
 format: venv
-	black --line-length=120 --exclude='venv|build|examples' .
-	black --line-length=100 examples
+	black --line-length=120 --exclude='venv|build|tutorials' .
+	black --line-length=100 tutorials
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length=120 --exclude venv,build,examples .
-	flake8 --max-line-length=100 examples
-	@set -e && black --line-length=120 --check --exclude='venv|build|examples' . && black --line-length=100 --check examples || ( \
+	flake8 --max-line-length=120 --exclude venv,build,tutorials .
+	flake8 --max-line-length=100 tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=100 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -87,9 +87,9 @@ version_major: venv
 
 clean_docs:
 	rm -rf docs/build
-	rm -rf docs/examples
+	rm -rf docs/tutorials
 	rm -rf docs/source/apiref
-	rm -rf docs/source/examples
+	rm -rf docs/source/tutorials
 .PHONY: clean_docs
 
 clean: clean_docs
