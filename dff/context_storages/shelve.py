@@ -34,10 +34,13 @@ class ShelveContextStorage(DBContextStorage):
         self.shelve_db = DbfilenameShelf(filename=self.path, protocol=pickle.HIGHEST_PROTOCOL)
 
     async def get_item_async(self, key: Hashable) -> Context:
-        container = self.shelve_db.get(str(key), list())
+        key = str(key)
+        container = self.shelve_db.get(key, list())
         if len(container) == 0:
             raise KeyError(f"No entry for key {key}.")
-        return await default_update_scheme.process_context_read(container[-1])
+        context, hashes = await default_update_scheme.process_context_read(container[-1])
+        self.cache_storage[key] = hashes
+        return context
 
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)

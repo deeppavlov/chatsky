@@ -58,11 +58,14 @@ class PickleContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
+        key = str(key)
         await self._load()
-        container = self.storage.get(str(key), list())
+        container = self.storage.get(key, list())
         if len(container) == 0:
             raise KeyError(f"No entry for key {key}.")
-        return await default_update_scheme.process_context_read(container[-1])
+        context, hashes = await default_update_scheme.process_context_read(container[-1])
+        self.cache_storage[key] = hashes
+        return context
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):

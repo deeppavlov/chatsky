@@ -168,7 +168,7 @@ class UpdateScheme:
         list_keys = sorted(list(dictionary_keys))
         return [list_keys[key] for key in update_field] if len(list_keys) > 0 else list()
 
-    async def process_context_read(self, initial: Dict) -> Context:
+    async def process_context_read(self, initial: Dict) -> Tuple[Context, Dict]:
         context_dict = initial.copy()
         context_hash = dict()
         for field in self.fields.keys():
@@ -187,9 +187,7 @@ class UpdateScheme:
                 if self.ALL_ITEMS not in update_field:
                     context_dict[field] = {item: context_dict[field][item] for item in update_field}
             context_hash[field] = sha256(str(context_dict[field]).encode("utf-8"))
-        context = Context.cast(context_dict)
-        context.framework_states["LAST_STORAGE_HASH"] = context_hash
-        return context
+        return Context.cast(context_dict), context_hash
 
     async def process_context_write(self, ctx: Context, initial: Optional[Dict] = None) -> Dict:
         initial = dict() if initial is None else initial
@@ -222,8 +220,6 @@ class UpdateScheme:
                 update_keys_all = set(list(initial_field.keys()) + list(context_dict[field].keys()))
                 update_keys = update_keys_all if self.ALL_ITEMS in update_field else update_field
                 for item in update_keys:
-                    if field == "framework_states" and item == "LAST_STORAGE_HASH":
-                        continue
                     if item in initial_field:
                         output_dict[field][item] = initial_field[item]
                     if item in context_dict[field]:
@@ -238,7 +234,7 @@ class UpdateScheme:
         else:
             return None
 
-    async def process_fields_read(self, processors: Dict[FieldType, _ReadFunction], fields_reader: _ReadFieldsFunction, int_id: int, ext_id: int) -> Context:
+    async def process_fields_read(self, processors: Dict[FieldType, _ReadFunction], fields_reader: _ReadFieldsFunction, int_id: int, ext_id: int) -> Tuple[Context, Dict]:
         result = dict()
         hashes = dict()
         for field in self.fields.keys():
@@ -258,9 +254,7 @@ class UpdateScheme:
                 if result[field] is None:
                     result[field] = self._resolve_readonly_value(field, int_id, ext_id)
                 hashes[field] = sha256(str(result[field]).encode("utf-8"))
-        context = Context.cast(result)
-        context.framework_states["LAST_STORAGE_HASH"] = hashes
-        return context
+        return Context.cast(result), hashes
 
     async def process_fields_write(self, ctx: Context, processors: Dict[FieldType, _WriteFunction], int_id: int, ext_id: int) -> Dict:
         context_dict = ctx.dict()

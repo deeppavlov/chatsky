@@ -38,5 +38,5 @@ async def test_default_scheme_creation():
     mid_ctx = await default_scheme.process_context_write(out_ctx, dict())
     print(mid_ctx)
 
-    context = await default_scheme.process_context_read(mid_ctx)
+    context, hashes = await default_scheme.process_context_read(mid_ctx)
     print(context.dict())
