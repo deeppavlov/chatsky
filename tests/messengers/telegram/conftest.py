@@ -54,16 +54,6 @@ def pipeline_instance(env_vars, pipeline_tutorial):
 
 
 @pytest.fixture(scope="session")
-def actor_instance(env_vars, no_pipeline_tutorial):
-    yield no_pipeline_tutorial.actor
-
-
-@pytest.fixture(scope="session")
-def basic_bot(env_vars, no_pipeline_tutorial):
-    yield no_pipeline_tutorial.bot
-
-
-@pytest.fixture(scope="session")
 def document(tmpdir_factory):
     filename: Path = tmpdir_factory.mktemp("data").join("file.txt")
     with filename.open("w") as f:
