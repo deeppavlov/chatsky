@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 4. Conditions
+# Telegram: 4. Conditions
 
 This example shows how to process Telegram updates in your script
 and reuse handler triggers from the `pytelegrambotapi` library.

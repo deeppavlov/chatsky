@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 3. Buttons with Callback
+# Telegram: 3. Buttons with Callback
 
 
 This example demonstrates, how to add an inline keyboard and utilize

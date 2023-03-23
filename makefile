@@ -62,6 +62,7 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv clean_docs
+	python3 docs/source/utils/patching.py
 	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going docs/source docs/build

@@ -13,7 +13,7 @@ patterns = [
     re.compile(r"# %%\n"),  # check python block
 ]
 
-start_pattern = re.compile(r'# %% \[markdown\]\n"""\n# \d+\. .*\n\n(?:[\S\s]*\n)?"""\n')
+start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n\n(?:[\S\s]*\n)?"""\n')
 
 
 def regexp_format_checker(dff_example_py_file: pathlib.Path):
