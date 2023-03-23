@@ -8,11 +8,11 @@ from dff.script import (
 )
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
-from dff.script import Actor, Context
+from dff.script import Actor, Context  # noqa: F401
 import dff.script.responses as rsp
 from functions import add_prefix
-import typing as tp, re, transitions
-from flow import global_flow
+import typing as tp, re, transitions  # noqa: E401, F401
+from flow import global_flow  # noqa: F401
 
 
 script = {
@@ -95,9 +95,9 @@ script = {
                 # ("music_flow", "node1") is equivalent to ("music_flow", "node1", 1.0)
             },
         },
-        "node3": {RESPONSE: foo, TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},
+        "node3": {RESPONSE: foo, TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")}},  # noqa: F821
         "node4": {
-            RESPONSE: bar("bye"),
+            RESPONSE: bar("bye"),  # noqa: F821
             TRANSITIONS: {
                 "node1": cnd.regexp(r"hi|hello", re.IGNORECASE),  # first check
                 lbl.to_fallback(): cnd.true(),  # second check

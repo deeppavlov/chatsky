@@ -150,7 +150,7 @@ def test_image_cli(params, example_dir, reference_file, tmp_path):
 )
 def test_server_cli(params, example_dir):
     entrypoint, entrydir = str((example_dir / "main.py").absolute()), str(example_dir.absolute())
-    args = [*params, '-e', entrypoint, '-d', entrydir, '-H', 'localhost', '-P', '5000']
+    args = [*params, "-e", entrypoint, "-d", entrydir, "-H", "localhost", "-P", "5000"]
     process = Process(target=cli.make_server, args=(args,))
     process.start()
     time.sleep(3)
