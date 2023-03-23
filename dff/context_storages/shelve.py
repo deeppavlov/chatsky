@@ -37,16 +37,16 @@ class ShelveContextStorage(DBContextStorage):
         container = self.shelve_db.get(str(key), list())
         if len(container) == 0:
             raise KeyError(f"No entry for key {key}.")
-        return default_update_scheme.process_context_read(container[-1])
+        return await default_update_scheme.process_context_read(container[-1])
 
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
         container = self.shelve_db.get(key, list())
         initial = None if len(container) == 0 else container[-1]
         if initial is not None and initial.get("id", None) == value.id:
-            container[-1] = default_update_scheme.process_context_write(value, initial)
+            container[-1] = await default_update_scheme.process_context_write(value, initial)
         else:
-            container.append(default_update_scheme.process_context_write(value, dict()))
+            container.append(await default_update_scheme.process_context_write(value, dict()))
         self.shelve_db[key] = container
 
     async def del_item_async(self, key: Hashable):
