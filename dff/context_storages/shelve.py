@@ -46,7 +46,7 @@ class ShelveContextStorage(DBContextStorage):
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
         value_hash = self.hash_storage.get(key, dict())
-        await default_update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, value.id, key)
+        await default_update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, key)
         self.shelve_db[key] = self.shelve_db[key][:-1] + [Context.cast(dict(self.shelve_db[key][-1].dict(), id=value.id))]
 
     async def del_item_async(self, key: Hashable):
@@ -71,19 +71,17 @@ class ShelveContextStorage(DBContextStorage):
 
     async def _read_fields(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         container = self.shelve_db.get(ext_id, list())
-        result = list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
-        return result
+        return list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
 
-    async def _read_seq(self, field_name: str, outlook: List[int], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
+    async def _read_seq(self, field_name: str, outlook: List[Hashable], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
         container = self.shelve_db.get(ext_id, list())
-        result = {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook} if len(container) > 0 else dict()
-        return result
+        return {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook} if len(container) > 0 else dict()
 
     async def _read_value(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
         container = self.shelve_db.get(ext_id, list())
         return container[-1].dict().get(field_name, None) if len(container) > 0 else None
 
-    async def _write_anything(self, field_name: str, data: Dict[Hashable, Any], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+    async def _write_anything(self, field_name: str, data: Any, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         container = self.shelve_db.setdefault(ext_id, list())
         if len(container) > 0:
             container[-1] = Context.cast({**container[-1].dict(), field_name: data})

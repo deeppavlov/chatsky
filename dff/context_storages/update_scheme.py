@@ -206,7 +206,7 @@ class UpdateScheme:
 
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
         context_dict = ctx.dict()
 
         for field in self.fields.keys():
@@ -215,7 +215,7 @@ class UpdateScheme:
             field_type = self._get_type_from_name(field)
 
             if field_type == FieldType.LIST:
-                list_keys = await fields_reader(field, int_id, ext_id)
+                list_keys = await fields_reader(field, ctx.id, ext_id)
                 if "outlook_slice" in self.fields[field]:
                     update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
                 else:
@@ -230,10 +230,10 @@ class UpdateScheme:
                             patch[item] = context_dict[field][item]
                 else:
                     patch = {item: context_dict[field][item] for item in update_field}
-                await seq_writer(field, patch, int_id, ext_id)
+                await seq_writer(field, patch, ctx.id, ext_id)
 
             elif field_type == FieldType.DICT:
-                list_keys = await fields_reader(field, int_id, ext_id)
+                list_keys = await fields_reader(field, ctx.id, ext_id)
                 update_field = self.fields[field].get("outlook", list())
                 update_keys_all = list_keys + list(context_dict[field].keys())
                 update_keys = set(update_keys_all if self.ALL_ITEMS in update_field else update_field)
@@ -247,10 +247,10 @@ class UpdateScheme:
                             patch[item] = context_dict[field][item]
                 else:
                     patch = {item: context_dict[field][item] for item in update_field}
-                await seq_writer(field, patch, int_id, ext_id)
+                await seq_writer(field, patch, ctx.id, ext_id)
 
             else:
-                await val_writer(context_dict[field], field, int_id, ext_id)
+                await val_writer(field, context_dict[field], ctx.id, ext_id)
 
 
 default_update_scheme = UpdateScheme({

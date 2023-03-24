@@ -10,7 +10,6 @@ from dff.context_storages import (
     json_available,
     pickle_available,
     ShelveContextStorage,
-    DBContextStorage,
     postgres_available,
     mysql_available,
     sqlite_available,
@@ -62,7 +61,6 @@ YDB_ACTIVE = ping_localhost(2136)
 
 
 def generic_test(db, testing_context, context_id):
-    assert isinstance(db, DBContextStorage)
     # perform cleanup
     db.clear()
     assert len(db) == 0
@@ -107,6 +105,11 @@ def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_shelve(db))
+
+
+def test_dict(testing_context, context_id):
+    db = dict()
+    generic_test(db, testing_context, context_id)
 
 
 @pytest.mark.skipif(not json_available, reason="JSON dependencies missing")

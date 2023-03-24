@@ -61,8 +61,7 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        await default_update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq,
-                                                         value.id, key)
+        await default_update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq, key)
         last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None or last_id != value.id:
             if last_id is not None:
@@ -106,7 +105,7 @@ class RedisContextStorage(DBContextStorage):
             result += [int(res) if res.isdigit() else res]
         return result
 
-    async def _read_seq(self, field_name: str, outlook: List[int], int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
+    async def _read_seq(self, field_name: str, outlook: List[Hashable], int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
         result = dict()
         for key in outlook:
             value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}:{key}")
