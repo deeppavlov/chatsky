@@ -24,7 +24,15 @@ dff.viewer.image -e ./python_files/main.py -d ./python_files/ -o ./plot.png
 
 """
 # %%
+from pathlib import Path
 from dff.utils.viewer import make_image
-from dff.utils.testing import toy_script
+from dff.utils.testing.common import is_interactive_mode
 
-make_image([f"--entry_point={toy_script.__file__}", "--output_file=plot.png"])
+if is_interactive_mode():
+    entry_point = "../../tests/viewer/TEST_CASES/main.py"
+else:
+    entry_point = Path(__file__).parent.parent / "tests" / "viewer" / "TEST_CASES" / "main.py"
+
+make_image([f"--entry_point={entry_point}", "--output_file=plot.png"])
+
+# %%

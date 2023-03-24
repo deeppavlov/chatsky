@@ -24,9 +24,15 @@ dff.viewer.server -e "./python_files/main.py" -d "./python_files/" -H localhost 
 
 """
 # %%
+from pathlib import Path
 import sys
 from dff.utils.viewer import make_server
-from dff.utils.testing import toy_script
+from dff.utils.testing.common import is_interactive_mode
 
-sys.argv = ["", f"--entry_point={toy_script.__file__}"]
+if is_interactive_mode():
+    entry_point = "../../tests/viewer/TEST_CASES/main.py"
+else:
+    entry_point = Path(__file__).parent.parent / "tests" / "viewer" / "TEST_CASES" / "main.py"
+
+sys.argv = ["", f"--entry_point={entry_point}"]
 make_server(sys.argv[1:])
