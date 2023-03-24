@@ -13,7 +13,8 @@ Additionally, Redis can be used as a cache, message broker, and database, making
 and powerful choice for data storage and management.
 """
 import pickle
-from typing import Hashable, List, Dict, Any
+from typing import Hashable, List, Dict, Any, Union
+from uuid import UUID
 
 try:
     from aioredis import Redis
@@ -61,11 +62,11 @@ class RedisContextStorage(DBContextStorage):
         else:
             return False
 
-    async def _write_seq(self, field_name: str, data: Dict[Hashable, Any], int_id: int, ext_id: int):
+    async def _write_seq(self, field_name: str, data: Dict[Hashable, Any], int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         for key, value in data.items():
             await self._redis.set(f"{ext_id}:{int_id}:{field_name}:{key}", pickle.dumps(value))
 
-    async def _write_value(self, data: Any, field_name: str, int_id: int, ext_id: int):
+    async def _write_value(self, data: Any, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         return await self._redis.set(f"{ext_id}:{int_id}:{field_name}", pickle.dumps(data))
 
     @threadsafe_method
@@ -80,21 +81,21 @@ class RedisContextStorage(DBContextStorage):
                 await self._redis.incr(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY)
             await self._redis.rpush(key, f"{value.id}")
 
-    async def _read_fields(self, field_name: str, int_id: int, ext_id: int):
+    async def _read_fields(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         result = list()
         for key in await self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*"):
             res = key.decode().split(":")[-1]
             result += [int(res) if res.isdigit() else res]
         return result
 
-    async def _read_seq(self, field_name: str, outlook: List[int], int_id: int, ext_id: int) -> Dict[Hashable, Any]:
+    async def _read_seq(self, field_name: str, outlook: List[int], int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
         result = dict()
         for key in outlook:
             value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}:{key}")
             result[key] = pickle.loads(value) if value is not None else None
         return result
 
-    async def _read_value(self, field_name: str, int_id: int, ext_id: int) -> Any:
+    async def _read_value(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
         value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}")
         return pickle.loads(value) if value is not None else None
 

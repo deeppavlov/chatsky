@@ -2,6 +2,7 @@ from hashlib import sha256
 from re import compile
 from enum import Enum, auto, unique
 from typing import Dict, List, Optional, Tuple, Iterable, Callable, Any, Union, Awaitable, Hashable
+from uuid import UUID
 
 from dff.script import Context
 
@@ -13,14 +14,14 @@ class FieldType(Enum):
     VALUE = auto()
 
 
-_ReadFieldsFunction = Callable[[str, int, int], Awaitable[List[Any]]]
+_ReadFieldsFunction = Callable[[str, Union[UUID, int, str], Union[UUID, int, str]], Awaitable[List[Any]]]
 
-_ReadSeqFunction = Callable[[str, List[Hashable], int, int], Awaitable[Any]]
-_ReadValueFunction = Callable[[str, int, int], Awaitable[Any]]
+_ReadSeqFunction = Callable[[str, List[Hashable], Union[UUID, int, str], Union[UUID, int, str]], Awaitable[Any]]
+_ReadValueFunction = Callable[[str, Union[UUID, int, str], Union[UUID, int, str]], Awaitable[Any]]
 _ReadFunction = Union[_ReadSeqFunction, _ReadValueFunction]
 
-_WriteSeqFunction = Callable[[str, Dict[Hashable, Any], int, int], Awaitable]
-_WriteValueFunction = Callable[[str, Any, int, int], Awaitable]
+_WriteSeqFunction = Callable[[str, Dict[Hashable, Any], Union[UUID, int, str], Union[UUID, int, str]], Awaitable]
+_WriteValueFunction = Callable[[str, Any, Union[UUID, int, str], Union[UUID, int, str]], Awaitable]
 _WriteFunction = Union[_WriteSeqFunction, _WriteValueFunction]
 
 
@@ -244,13 +245,13 @@ class UpdateScheme:
                 output_dict[field] = context_dict[field]
         return output_dict
 
-    def _resolve_readonly_value(self, field_name: str, int_id: int, ext_id: int) -> Any:
+    def _resolve_readonly_value(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
         if field_name == "id":
             return int_id
         else:
             return None
 
-    async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, int_id: int, ext_id: int) -> Tuple[Context, Dict]:
+    async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Tuple[Context, Dict]:
         result = dict()
         hashes = dict()
 
@@ -283,7 +284,7 @@ class UpdateScheme:
             hashes[field] = sha256(str(result[field]).encode("utf-8"))
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: int, ext_id: int) -> Dict:
+    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict:
         context_dict = ctx.dict()
 
         for field in self.fields.keys():
