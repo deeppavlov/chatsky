@@ -99,7 +99,7 @@ class RedisContextStorage(DBContextStorage):
     def _check_none(cls, value: Any) -> Any:
         return None if value == cls._VALUE_NONE else value
 
-    async def _read_fields(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+    async def _read_fields(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> List[str]:
         result = list()
         for key in await self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*"):
             res = key.decode().split(":")[-1]

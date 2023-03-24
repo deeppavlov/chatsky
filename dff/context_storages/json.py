@@ -6,7 +6,8 @@ This class is used to store and retrieve context data in a JSON. It allows the `
 store and retrieve context data.
 """
 import asyncio
-from typing import Hashable
+from typing import Hashable, Union, List, Any, Dict
+from uuid import UUID
 
 from pydantic import BaseModel, Extra, root_validator
 
@@ -51,21 +52,16 @@ class JSONContextStorage(DBContextStorage):
         container = self.storage.__dict__.get(key, list())
         if len(container) == 0 or container[-1] is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await default_update_scheme.process_context_read(container[-1].dict())
+        context, hashes = await default_update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, container[-1].id, key)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        container = self.storage.__dict__.get(key, list())
-        initial = None if len(container) == 0 else container[-1]
-        if initial is not None and initial.dict().get("id", None) == value.id:
-            value_hash = self.hash_storage.get(key, dict())
-            container[-1] = await default_update_scheme.process_context_write(value, value_hash, initial.dict())
-        else:
-            container.append(await default_update_scheme.process_context_write(value, dict(), dict()))
-        self.storage.__dict__[key] = container
+        value_hash = self.hash_storage.get(key, dict())
+        await default_update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, value.id, key)
+        self.storage.__dict__[key][-1].id = value.id
         await self._save()
 
     @threadsafe_method
@@ -106,3 +102,24 @@ class JSONContextStorage(DBContextStorage):
         else:
             async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
                 self.storage = SerializableStorage.parse_raw(await file_stream.read())
+
+    async def _read_fields(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+        container = self.storage.__dict__.get(ext_id, list())
+        result = list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
+        return result
+
+    async def _read_seq(self, field_name: str, outlook: List[int], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
+        container = self.storage.__dict__.get(ext_id, list())
+        result = {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook} if len(container) > 0 else dict()
+        return result
+
+    async def _read_value(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
+        container = self.storage.__dict__.get(ext_id, list())
+        return container[-1].dict().get(field_name, None) if len(container) > 0 else None
+
+    async def _write_anything(self, field_name: str, data: Dict[Hashable, Any], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+        container = self.storage.__dict__.setdefault(ext_id, list())
+        if len(container) > 0:
+            container[-1] = Context.cast({**container[-1].dict(), field_name: data})
+        else:
+            container.append(Context.cast({field_name: data}))
