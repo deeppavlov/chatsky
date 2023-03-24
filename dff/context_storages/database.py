@@ -135,6 +135,19 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
+    def clear(self):
+        """
+        Synchronous method for clearing context storage, removing all the stored Contexts.
+        """
+        return asyncio.run(self.clear_async())
+
+    @abstractmethod
+    async def clear_async(self):
+        """
+        Asynchronous method for clearing context storage, removing all the stored Contexts.
+        """
+        raise NotImplementedError
+
     def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
         """
         Synchronous method for accessing stored Context, returning default if no Context is stored with the given key.
@@ -157,19 +170,6 @@ class DBContextStorage(ABC):
             return await self.get_item_async(str(key))
         except KeyError:
             return default
-
-    def clear(self):
-        """
-        Synchronous method for clearing context storage, removing all the stored Contexts.
-        """
-        return asyncio.run(self.clear_async())
-
-    @abstractmethod
-    async def clear_async(self):
-        """
-        Asynchronous method for clearing context storage, removing all the stored Contexts.
-        """
-        raise NotImplementedError
 
 
 def threadsafe_method(func: Callable):

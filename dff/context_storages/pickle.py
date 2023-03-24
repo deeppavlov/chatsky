@@ -41,8 +41,15 @@ class PickleContextStorage(DBContextStorage):
         asyncio.run(self._load())
 
     @threadsafe_method
-    async def len_async(self) -> int:
-        return len(self.storage)
+    async def get_item_async(self, key: Hashable) -> Context:
+        key = str(key)
+        await self._load()
+        container = self.storage.get(key, list())
+        if len(container) == 0 or container[-1] is None:
+            raise KeyError(f"No entry for key {key}.")
+        context, hashes = await default_update_scheme.process_context_read(container[-1])
+        self.hash_storage[key] = hashes
+        return context
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
@@ -56,17 +63,6 @@ class PickleContextStorage(DBContextStorage):
             container.append(await default_update_scheme.process_context_write(value, dict(), dict()))
         self.storage[key] = container
         await self._save()
-
-    @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        key = str(key)
-        await self._load()
-        container = self.storage.get(key, list())
-        if len(container) == 0 or container[-1] is None:
-            raise KeyError(f"No entry for key {key}.")
-        context, hashes = await default_update_scheme.process_context_read(container[-1])
-        self.hash_storage[key] = hashes
-        return context
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
@@ -85,6 +81,10 @@ class PickleContextStorage(DBContextStorage):
             if len(container) != 0:
                 return container[-1] is not None
         return False
+
+    @threadsafe_method
+    async def len_async(self) -> int:
+        return len(self.storage)
 
     @threadsafe_method
     async def clear_async(self):
