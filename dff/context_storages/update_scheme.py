@@ -203,7 +203,7 @@ class UpdateScheme:
 
             if result[field] is None:
                 result[field] = self._resolve_readonly_value(field, int_id, ext_id)
-            hashes[field] = sha256(str(result[field]).encode("utf-8"))
+
         return Context.cast(result), hashes
 
     async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
