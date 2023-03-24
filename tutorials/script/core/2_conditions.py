@@ -26,6 +26,9 @@ from dff.utils.testing.common import (
 The transition condition is set by the function.
 If this function returns the value `True`,
 then the actor performs the corresponding transition.
+Actor is responsible for processing user input and determining
+the appropriate response based on the current state of the conversation and the script.
+See tutorial 1 of pipeline (pipeline/1_basics) to learn more about Actor.
 Condition functions have signature
 
     def func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool
