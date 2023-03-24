@@ -215,6 +215,8 @@ def get_plot(
         edge_target_node = transform_virtual(edge_target_node)
         if get_node_struct(edge_source_node, show_local, show_global) is None:
             continue  # ignore locals and globals when flags are not set
+        if edge_target_node not in nodes:
+            continue  # ignore expelled nodes
 
         nodes[edge_source_node]["ports"] += [format_port(edge_data["condition"], edge_data["label"])]
         nodes[edge_source_node]["transitions"][edge_data["label"]] = str(

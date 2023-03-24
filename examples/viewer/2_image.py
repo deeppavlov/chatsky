@@ -2,24 +2,14 @@
 """
 # 2. Image
 
-"""
-# %% [markdown]
-"""
 ## View the graph as a static image.
 
-"""
-# %% [markdown]
-"""
 ```bash
 dff.viewer.image -e ./python_files/main.py -d ./python_files/ -o ./plot.png
 ```
-"""
-# %% [markdown]
-"""
+
 ## CLI parameters reference
-"""
-# %% [markdown]
-"""
+
 --entry_point: Python file to start parsing with.
 --project_root_dir: Directory that contains all the local files required to run ROOT_FILE.
 --show_response: Show node response values.
@@ -31,6 +21,10 @@ dff.viewer.image -e ./python_files/main.py -d ./python_files/ -o ./plot.png
 --random_seed: Random seed to control color generation.
 --format: Graphviz output format.
 --output_file: Image file.
+
 """
 # %%
-#
+from dff.utils.viewer import make_image
+from dff.utils.testing import toy_script
+
+make_image([f"--entry_point={toy_script.__file__}", "--output_file=plot.png"])

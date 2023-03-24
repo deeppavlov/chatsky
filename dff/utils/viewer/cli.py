@@ -76,11 +76,12 @@ server_parser.add_argument(
 def make_server(args=sys.argv[1:]):
     server_praser = argparse.ArgumentParser(parents=[py2file_parser, server_parser], add_help=True)
     parsed_args: argparse.Namespace = server_praser.parse_args(args)
+    root_dir = parsed_args.project_root_dir or parsed_args.entry_point.parent
     graph = get_graph(**vars(parsed_args))
     plot = get_plot(graph, **vars(parsed_args))
     app = create_app(plot)
     reloader = hupper.start_reloader("dff.utils.viewer.cli.make_server")
-    reloader.watch_files([str(i) for i in parsed_args.project_root_dir.absolute().glob("./**/*.py")])
+    reloader.watch_files([str(i) for i in root_dir.absolute().glob("./**/*.py")])
     app.run(host=parsed_args.host, port=parsed_args.port, debug=True, dev_tools_hot_reload=True)
 
 
