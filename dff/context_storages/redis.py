@@ -38,6 +38,7 @@ class RedisContextStorage(DBContextStorage):
     """
 
     _TOTAL_CONTEXT_COUNT_KEY = "total_contexts"
+    _VALUE_NONE = b""
 
     def __init__(self, path: str):
         DBContextStorage.__init__(self, path)
@@ -46,9 +47,19 @@ class RedisContextStorage(DBContextStorage):
             raise ImportError("`redis` package is missing.\n" + install_suggestion)
         self._redis = Redis.from_url(self.full_path)
 
+    @classmethod
+    def _check_none(cls, value: Any) -> Any:
+        return None if value == cls._VALUE_NONE else value
+
     @threadsafe_method
     async def contains_async(self, key: Hashable) -> bool:
-        return bool(await self._redis.exists(str(key)))
+        key = str(key)
+        if bool(await self._redis.exists(key)):
+            value = await self._redis.rpop(key)
+            await self._redis.rpush(key, value)
+            return self._check_none(value) is not None
+        else:
+            return False
 
     async def _write_seq(self, field_name: str, data: Dict[Hashable, Any], int_id: int, ext_id: int):
         for key, value in data.items():
@@ -61,16 +72,20 @@ class RedisContextStorage(DBContextStorage):
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
         await default_update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq, value.id, key)
-        last_id = await self._redis.rpop(key)
-        if last_id is None or last_id != str(value.id):
+        last_id = self._check_none(await self._redis.rpop(key))
+        if last_id is None or last_id != value.id:
             if last_id is not None:
                 await self._redis.rpush(key, last_id)
             else:
                 await self._redis.incr(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY)
-            await self._redis.rpush(key, str(value.id))
+            await self._redis.rpush(key, f"{value.id}")
 
     async def _read_fields(self, field_name: str, int_id: int, ext_id: int):
-        return [key.split(":")[-1] for key in await self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*")]
+        result = list()
+        for key in await self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*"):
+            res = key.decode().split(":")[-1]
+            result += [int(res) if res.isdigit() else res]
+        return result
 
     async def _read_seq(self, field_name: str, outlook: List[int], int_id: int, ext_id: int) -> Dict[Hashable, Any]:
         result = dict()
@@ -86,17 +101,16 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
         key = str(key)
-        last_id = await self._redis.rpop(key)
+        last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await default_update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, last_id, key)
+        context, hashes = await default_update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, last_id.decode(), key)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
-        for key in await self._redis.keys(f"{str(key)}:*"):
-            await self._redis.delete(key)
+        await self._redis.rpush(str(key), RedisContextStorage._VALUE_NONE)
         await self._redis.decr(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY)
 
     @threadsafe_method

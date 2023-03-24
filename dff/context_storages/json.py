@@ -28,7 +28,7 @@ class SerializableStorage(BaseModel, extra=Extra.allow):
     @root_validator
     def validate_any(cls, vals):
         for key, values in vals.items():
-            vals[key] = [Context.cast(value) for value in values]
+            vals[key] = [None if value is None else Context.cast(value) for value in values]
         return vals
 
 
@@ -66,7 +66,7 @@ class JSONContextStorage(DBContextStorage):
         key = str(key)
         await self._load()
         container = self.storage.__dict__.get(key, list())
-        if len(container) == 0:
+        if len(container) == 0 or container[-1] is None:
             raise KeyError(f"No entry for key {key}.")
         context, hashes = await default_update_scheme.process_context_read(container[-1].dict())
         self.hash_storage[key] = hashes
@@ -74,13 +74,21 @@ class JSONContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
-        self.storage.__dict__.__delitem__(str(key))
+        key = str(key)
+        container = self.storage.__dict__.get(key, list())
+        container.append(None)
+        self.storage.__dict__[key] = container
         await self._save()
 
     @threadsafe_method
     async def contains_async(self, key: Hashable) -> bool:
+        key = str(key)
         await self._load()
-        return str(key) in self.storage.__dict__
+        if key in self.storage.__dict__:
+            container = self.storage.__dict__.get(key, list())
+            if len(container) != 0:
+                return container[-1] is not None
+        return False
 
     @threadsafe_method
     async def clear_async(self):
