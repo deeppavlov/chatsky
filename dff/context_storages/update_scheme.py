@@ -284,7 +284,7 @@ class UpdateScheme:
             hashes[field] = sha256(str(result[field]).encode("utf-8"))
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict:
+    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         context_dict = ctx.dict()
 
         for field in self.fields.keys():
@@ -329,8 +329,6 @@ class UpdateScheme:
 
             else:
                 await val_writer(context_dict[field], field, int_id, ext_id)
-            # hashes[field] = sha256(str(result[field]).encode("utf-8"))
-        return context_dict
 
 
 default_update_scheme = UpdateScheme({
