@@ -34,19 +34,22 @@ class FieldRule(Enum):
     APPEND = auto()
 
 
+UpdateSchemeBuilder = Dict[str, Union[Tuple[str], Tuple[str, str]]]
+
+
 class UpdateScheme:
     ALL_ITEMS = "__all__"
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
     _DICT_FIELD_NAME_PATTERN = compile(r"^.+?\[(\[.+\])\]$")
 
-    def __init__(self, dict_scheme: Dict[str, List[str]]):
+    def __init__(self, dict_scheme: UpdateSchemeBuilder):
         self.fields = dict()
         for name, rules in dict_scheme.items():
             field_type = self._get_type_from_name(name)
             if field_type is None:
                 raise Exception(f"Field '{name}' not included in Context!")
-            field, field_name = self._init_update_field(field_type, name, rules)
+            field, field_name = self._init_update_field(field_type, name, list(rules))
             self.fields[field_name] = field
 
     @classmethod
@@ -254,19 +257,19 @@ class UpdateScheme:
 
 
 default_update_scheme = UpdateScheme({
-    "id": ["read"],
-    "requests[-1]": ["read", "append"],
-    "responses[-1]": ["read", "append"],
-    "labels[-1]": ["read", "append"],
-    "misc[[all]]": ["read", "hash_update"],
-    "framework_states[[all]]": ["read", "hash_update"],
+    "id": ("read",),
+    "requests[-1]": ("read", "append"),
+    "responses[-1]": ("read", "append"),
+    "labels[-1]": ("read", "append"),
+    "misc[[all]]": ("read", "hash_update"),
+    "framework_states[[all]]": ("read", "hash_update"),
 })
 
 full_update_scheme = UpdateScheme({
-    "id": ["read"],
-    "requests[:]": ["read", "append"],
-    "responses[:]": ["read", "append"],
-    "labels[:]": ["read", "append"],
-    "misc[[all]]": ["read", "update"],
-    "framework_states[[all]]": ["read", "update"],
+    "id": ("read",),
+    "requests[:]": ("read", "append"),
+    "responses[:]": ("read", "append"),
+    "labels[:]": ("read", "append"),
+    "misc[[all]]": ("read", "update"),
+    "framework_states[[all]]": ("read", "update"),
 })

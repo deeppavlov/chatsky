@@ -7,21 +7,21 @@ from dff.context_storages import UpdateScheme
 from dff.script import Context
 
 default_update_scheme = {
-    "id": ["read", "update"],
-    "requests[-1]": ["read", "append"],
-    "responses[-1]": ["read", "append"],
-    "labels[-1]": ["read", "append"],
-    "misc[[all]]": ["read", "hash_update"],
-    "framework_states[[all]]": ["read", "hash_update"],
+    "id": ("read", "update"),
+    "requests[-1]": ("read", "append"),
+    "responses[-1]": ("read", "append"),
+    "labels[-1]": ("read", "append"),
+    "misc[[all]]": ("read", "hash_update"),
+    "framework_states[[all]]": ("read", "hash_update"),
 }
 
 full_update_scheme = {
-    "id": ["read", "update"],
-    "requests[:]": ["read", "append"],
-    "responses[:]": ["read", "append"],
-    "labels[:]": ["read", "append"],
-    "misc[[all]]": ["read", "update"],
-    "framework_states[[all]]": ["read", "update"],
+    "id": ("read", "update"),
+    "requests[:]": ("read", "append"),
+    "responses[:]": ("read", "append"),
+    "labels[:]": ("read", "append"),
+    "misc[[all]]": ("read", "update"),
+    "framework_states[[all]]": ("read", "update"),
 }
 
 

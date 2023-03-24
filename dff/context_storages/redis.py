@@ -27,7 +27,6 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import default_update_scheme
 
 
 class RedisContextStorage(DBContextStorage):
@@ -54,14 +53,14 @@ class RedisContextStorage(DBContextStorage):
         last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await default_update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, last_id.decode(), key)
+        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, last_id.decode(), key)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        await default_update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq, key)
+        await self.update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq, key)
         last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None or last_id != value.id:
             if last_id is not None:

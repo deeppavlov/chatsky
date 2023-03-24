@@ -15,7 +15,7 @@ import pickle
 from typing import Hashable, Union, List, Any, Dict
 from uuid import UUID
 
-from .update_scheme import default_update_scheme
+from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder
 
 try:
     import aiofiles
@@ -41,14 +41,15 @@ class PickleContextStorage(DBContextStorage):
         self.storage = dict()
         asyncio.run(self._load())
 
+    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+        super().set_update_scheme(scheme)
+        self.update_scheme.fields["id"]["write"] = FieldRule.UPDATE
+
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
         key = str(key)
         await self._load()
-        container = self.storage.get(key, list())
-        if len(container) == 0 or container[-1] is None:
-            raise KeyError(f"No entry for key {key}.")
-        context, hashes = await default_update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, container[-1].id, key)
+        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, None, key)
         self.hash_storage[key] = hashes
         return context
 
@@ -56,8 +57,7 @@ class PickleContextStorage(DBContextStorage):
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
         value_hash = self.hash_storage.get(key, dict())
-        await default_update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, key)
-        self.storage[key][-1].id = value.id
+        await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, key)
         await self._save()
 
     @threadsafe_method
@@ -104,11 +104,15 @@ class PickleContextStorage(DBContextStorage):
         return list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
 
     async def _read_seq(self, field_name: str, outlook: List[Hashable], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
-        container = self.storage.get(ext_id, list())
+        if ext_id not in self.storage or self.storage[ext_id][-1] is None:
+            raise KeyError(f"Key {ext_id} not in storage!")
+        container = self.storage[ext_id]
         return {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook} if len(container) > 0 else dict()
 
     async def _read_value(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
-        container = self.storage.get(ext_id, list())
+        if ext_id not in self.storage or self.storage[ext_id][-1] is None:
+            raise KeyError(f"Key {ext_id} not in storage!")
+        container = self.storage[ext_id]
         return container[-1].dict().get(field_name, None) if len(container) > 0 else None
 
     async def _write_anything(self, field_name: str, data: Any, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):

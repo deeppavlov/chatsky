@@ -12,8 +12,9 @@ import importlib
 import threading
 from functools import wraps
 from abc import ABC, abstractmethod
-from typing import Callable, Hashable, Optional
+from typing import Callable, Hashable, Optional, Union, Dict, Tuple
 
+from .update_scheme import UpdateScheme, default_update_scheme, UpdateSchemeBuilder
 from .protocol import PROTOCOLS
 from ..script import Context
 
@@ -34,7 +35,7 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, update_scheme: UpdateScheme = default_update_scheme):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -43,6 +44,12 @@ class DBContextStorage(ABC):
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
         self.hash_storage = dict()
+
+        self.update_scheme = None
+        self.set_update_scheme(update_scheme)
+
+    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+        self.update_scheme = scheme
 
     def __getitem__(self, key: Hashable) -> Context:
         """
