@@ -29,7 +29,8 @@ async def delete_json(storage: JSONContextStorage):
 async def delete_mongo(storage: MongoContextStorage):
     if not mongo_available:
         raise Exception("Can't delete mongo database - mongo provider unavailable!")
-    await storage.collection.drop()
+    for collection in storage.collections.values():
+        await collection.drop()
 
 
 async def delete_pickle(storage: PickleContextStorage):

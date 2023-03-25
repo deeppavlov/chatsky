@@ -54,6 +54,10 @@ class UpdateScheme:
             field, field_name = self._init_update_field(field_type, name, list(rules))
             self.fields[field_name] = field
 
+    @property
+    def write_fields(self):
+        return [field for field, props in self.fields.items() if props["readonly"]]
+
     @classmethod
     def _get_type_from_name(cls, field_name: str) -> Optional[FieldType]:
         if field_name.startswith("requests") or field_name.startswith("responses") or field_name.startswith("labels"):
@@ -74,7 +78,10 @@ class UpdateScheme:
         elif len(rules) > 2:
             raise Exception(f"For field '{field_name}' more then two (read, write) rules are defined!")
         elif len(rules) == 1:
+            field["readonly"] = True
             rules.append("ignore")
+        else:
+            field["readonly"] = False
 
         if rules[0] == "ignore":
             read_rule = FieldRule.IGNORE
@@ -211,11 +218,11 @@ class UpdateScheme:
 
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
+    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str], add_timestamp: bool = False):
         context_dict = ctx.dict()
 
-        if hashes is None:
-            await val_writer(UpdateScheme._CREATE_TIMESTAMP_FIELD, time.time(), ctx.id, ext_id)
+        if hashes is None and add_timestamp:
+            await val_writer(self._CREATE_TIMESTAMP_FIELD, time.time(), ctx.id, ext_id)
 
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:

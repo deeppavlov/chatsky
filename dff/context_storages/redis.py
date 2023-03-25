@@ -68,13 +68,13 @@ class RedisContextStorage(DBContextStorage):
             if last_id is not None:
                 await self._redis.rpush(key, last_id)
             else:
-                await self._redis.incr(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY)
+                await self._redis.incr(self._TOTAL_CONTEXT_COUNT_KEY)
             await self._redis.rpush(key, f"{value.id}")
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
-        await self._redis.rpush(str(key), RedisContextStorage._VALUE_NONE)
-        await self._redis.decr(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY)
+        await self._redis.rpush(str(key), self._VALUE_NONE)
+        await self._redis.decr(self._TOTAL_CONTEXT_COUNT_KEY)
 
     @threadsafe_method
     async def contains_async(self, key: Hashable) -> bool:
@@ -88,12 +88,12 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return int(await self._redis.get(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY))
+        return int(await self._redis.get(self._TOTAL_CONTEXT_COUNT_KEY))
 
     @threadsafe_method
     async def clear_async(self):
         await self._redis.flushdb()
-        await self._redis.set(RedisContextStorage._TOTAL_CONTEXT_COUNT_KEY, 0)
+        await self._redis.set(self._TOTAL_CONTEXT_COUNT_KEY, 0)
 
     @classmethod
     def _check_none(cls, value: Any) -> Any:
