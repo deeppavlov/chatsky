@@ -61,7 +61,8 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         key = str(key)
-        await self.update_scheme.process_fields_write(value, self.hash_storage.get(key, dict()), self._read_fields, self._write_value, self._write_seq, key)
+        value_hash = self.hash_storage.get(key, None)
+        await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_value, self._write_seq, key)
         last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None or last_id != value.id:
             if last_id is not None:

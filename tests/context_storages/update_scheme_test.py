@@ -57,7 +57,7 @@ async def test_default_scheme_creation(context_id, testing_context):
     out_ctx = testing_context
     print(out_ctx.dict())
 
-    mid_ctx = await default_scheme.process_fields_write(out_ctx, dict(), fields_reader, write_anything, write_anything, context_id)
+    mid_ctx = await default_scheme.process_fields_write(out_ctx, None, fields_reader, write_anything, write_anything, context_id)
     print(mid_ctx)
 
     context, hashes = await default_scheme.process_fields_read(fields_reader, read_value, read_sequence, out_ctx.id, context_id)

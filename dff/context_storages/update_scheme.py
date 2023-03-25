@@ -1,3 +1,4 @@
+import time
 from hashlib import sha256
 from re import compile
 from enum import Enum, auto, unique
@@ -42,6 +43,7 @@ class UpdateScheme:
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
     _DICT_FIELD_NAME_PATTERN = compile(r"^.+?\[(\[.+\])\]$")
+    _CREATE_TIMESTAMP_FIELD = "created_at"
 
     def __init__(self, dict_scheme: UpdateSchemeBuilder):
         self.fields = dict()
@@ -209,8 +211,11 @@ class UpdateScheme:
 
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Dict, fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
+    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
         context_dict = ctx.dict()
+
+        if hashes is None:
+            await val_writer(UpdateScheme._CREATE_TIMESTAMP_FIELD, time.time(), ctx.id, ext_id)
 
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:
@@ -229,7 +234,7 @@ class UpdateScheme:
                     patch = dict()
                     for item in update_field:
                         item_hash = sha256(str(context_dict[field][item]).encode("utf-8"))
-                        if hashes.get(field, dict()).get(item, None) != item_hash:
+                        if hashes is None or hashes.get(field, dict()).get(item, None) != item_hash:
                             patch[item] = context_dict[field][item]
                 else:
                     patch = {item: context_dict[field][item] for item in update_field}
@@ -246,7 +251,7 @@ class UpdateScheme:
                     patch = dict()
                     for item in update_keys:
                         item_hash = sha256(str(context_dict[field][item]).encode("utf-8"))
-                        if hashes.get(field, dict()).get(item, None) != item_hash:
+                        if hashes is None or hashes.get(field, dict()).get(item, None) != item_hash:
                             patch[item] = context_dict[field][item]
                 else:
                     patch = {item: context_dict[field][item] for item in update_field}
