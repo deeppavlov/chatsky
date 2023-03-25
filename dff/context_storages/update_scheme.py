@@ -40,10 +40,11 @@ UpdateSchemeBuilder = Dict[str, Union[Tuple[str], Tuple[str, str]]]
 
 class UpdateScheme:
     ALL_ITEMS = "__all__"
+    TIMESTAMP_FIELD = "created_at"
+
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
     _DICT_FIELD_NAME_PATTERN = compile(r"^.+?\[(\[.+\])\]$")
-    _CREATE_TIMESTAMP_FIELD = "created_at"
 
     def __init__(self, dict_scheme: UpdateSchemeBuilder):
         self.fields = dict()
@@ -218,11 +219,11 @@ class UpdateScheme:
 
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str], add_timestamp: bool = False):
+    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str], add_timestamp: bool = True):
         context_dict = ctx.dict()
 
         if hashes is None and add_timestamp:
-            await val_writer(self._CREATE_TIMESTAMP_FIELD, time.time(), ctx.id, ext_id)
+            await val_writer(self.TIMESTAMP_FIELD, time.time(), ctx.id, ext_id)
 
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:

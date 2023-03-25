@@ -12,10 +12,9 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 import json
+import time
 from typing import Hashable, Dict, Union, List, Any, Optional
 from uuid import UUID
-
-from .update_scheme import full_update_scheme
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -29,6 +28,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
+from .update_scheme import full_update_scheme, UpdateScheme
 
 
 class MongoContextStorage(DBContextStorage):
@@ -50,7 +50,7 @@ class MongoContextStorage(DBContextStorage):
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
-        self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation='standard')
+        self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
         self._prf = collection_prefix
         self.collections = {field: db[f"{self._prf}_{field}"] for field in full_update_scheme.write_fields}
@@ -58,7 +58,7 @@ class MongoContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: str(key)}).sort(self._INTERNAL, 1).to_list(1)
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: str(key)}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
         if len(last_context) == 0 or self._check_none(last_context[0]) is None:
             raise KeyError(f"No entry for key {key}.")
         last_context[0]["id"] = last_context[0][self._INTERNAL]
@@ -66,16 +66,21 @@ class MongoContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
-        identifier = {self._EXTERNAL: str(key), self._INTERNAL: value.id}
-        await self.collections[self._CONTEXTS].replace_one(identifier, {**json.loads(value.json()), **identifier}, upsert=True)
+        key = str(key)
+        identifier = {**json.loads(value.json()), self._EXTERNAL: key, self._INTERNAL: value.id, UpdateScheme.TIMESTAMP_FIELD: time.time()}
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
+        if len(last_context) != 0 and self._check_none(last_context[0]) is None:
+            await self.collections[self._CONTEXTS].replace_one({self._INTERNAL: last_context[0][self._INTERNAL]}, identifier, upsert=True)
+        else:
+            await self.collections[self._CONTEXTS].insert_one(identifier)
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
-        await self.collections[self._CONTEXTS].insert_one({self._EXTERNAL: key, self._KEY_NONE: True})
+        await self.collections[self._CONTEXTS].insert_one({self._EXTERNAL: str(key), UpdateScheme.TIMESTAMP_FIELD: time.time(), self._KEY_NONE: True})
 
     @threadsafe_method
     async def contains_async(self, key: Hashable) -> bool:
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(self._INTERNAL, 1).to_list(1)
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: str(key)}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
         return len(last_context) != 0 and self._check_none(last_context[0]) is not None
 
     @threadsafe_method
