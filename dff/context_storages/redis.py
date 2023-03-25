@@ -22,6 +22,7 @@ try:
     redis_available = True
 except ImportError:
     redis_available = False
+    Redis = None
 
 from dff.script import Context
 

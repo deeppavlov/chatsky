@@ -24,6 +24,7 @@ try:
     pickle_available = True
 except ImportError:
     pickle_available = False
+    aiofiles = None
 
 from .database import DBContextStorage, threadsafe_method
 from dff.script import Context

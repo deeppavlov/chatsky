@@ -11,7 +11,7 @@ It stores data in a format similar to JSON, making it easy to work with the data
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
 """
-from typing import Hashable, Dict, Any
+from typing import Hashable, Dict
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -21,7 +21,7 @@ try:
 except ImportError:
     mongo_available = False
     AsyncIOMotorClient = None
-    ObjectId = Any
+    ObjectId = None
 
 import json
 
@@ -48,23 +48,6 @@ class MongoContextStorage(DBContextStorage):
         db = self._mongo.get_default_database()
         self.collection = db[collection]
 
-    @staticmethod
-    def _adjust_key(key: Hashable) -> Dict[str, ObjectId]:
-        """Convert a n-digit context id to a 24-digit mongo id"""
-        new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
-        new_key = (new_key * (24 // len(new_key) + 1))[:24]
-        assert len(new_key) == 24
-        return {"_id": ObjectId(new_key)}
-
-    @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        new_key = self._adjust_key(key)
-        value = value if isinstance(value, Context) else Context.cast(value)
-        document = json.loads(value.json())
-
-        document.update(new_key)
-        await self.collection.replace_one(new_key, document, upsert=True)
-
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:
         adjust_key = self._adjust_key(key)
@@ -74,6 +57,15 @@ class MongoContextStorage(DBContextStorage):
             ctx = Context.cast(document)
             return ctx
         raise KeyError
+
+    @threadsafe_method
+    async def set_item_async(self, key: Hashable, value: Context):
+        new_key = self._adjust_key(key)
+        value = value if isinstance(value, Context) else Context.cast(value)
+        document = json.loads(value.json())
+
+        document.update(new_key)
+        await self.collection.replace_one(new_key, document, upsert=True)
 
     @threadsafe_method
     async def del_item_async(self, key: Hashable):
@@ -92,3 +84,11 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     async def clear_async(self):
         await self.collection.delete_many(dict())
+
+    @staticmethod
+    def _adjust_key(key: Hashable) -> Dict[str, ObjectId]:
+        """Convert a n-digit context id to a 24-digit mongo id"""
+        new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
+        new_key = (new_key * (24 // len(new_key) + 1))[:24]
+        assert len(new_key) == 24
+        return {"_id": ObjectId(new_key)}
