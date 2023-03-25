@@ -12,7 +12,8 @@ import importlib
 import threading
 from functools import wraps
 from abc import ABC, abstractmethod
-from typing import Callable, Hashable, Optional, Union, Dict, Tuple
+from inspect import signature
+from typing import Callable, Hashable, Optional, Union
 
 from .update_scheme import UpdateScheme, default_update_scheme, UpdateSchemeBuilder
 from .protocol import PROTOCOLS
@@ -190,6 +191,18 @@ def threadsafe_method(func: Callable):
             return func(self, *args, **kwargs)
 
     return _synchronized
+
+
+def auto_stringify_hashable_key(key_name: str = "key"):
+    def auto_stringify(func: Callable):
+        all_keys = signature(func).parameters.keys()
+
+        async def stringify_arg(*args, **kwargs):
+            return await func(*[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)], **kwargs)
+
+        return stringify_arg
+
+    return auto_stringify
 
 
 def context_storage_factory(path: str, **kwargs) -> DBContextStorage:

@@ -22,7 +22,7 @@ except ImportError:
     json_available = False
     aiofiles = None
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from dff.script import Context
 
 
@@ -51,31 +51,31 @@ class JSONContextStorage(DBContextStorage):
         self.update_scheme.fields["id"]["write"] = FieldRule.UPDATE
 
     @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         await self._load()
         context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, None, key)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def set_item_async(self, key: Union[Hashable, str], value: Context):
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, key)
         await self._save()
 
     @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def del_item_async(self, key: Union[Hashable, str]):
         container = self.storage.__dict__.get(key, list())
         container.append(None)
         self.storage.__dict__[key] = container
         await self._save()
 
     @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def contains_async(self, key: Union[Hashable, str]) -> bool:
         await self._load()
         if key in self.storage.__dict__:
             container = self.storage.__dict__.get(key, list())

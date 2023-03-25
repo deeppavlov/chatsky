@@ -20,7 +20,7 @@ from uuid import UUID
 from dff.script import Context
 from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder
 
-from .database import DBContextStorage
+from .database import DBContextStorage, auto_stringify_hashable_key
 
 
 class ShelveContextStorage(DBContextStorage):
@@ -38,25 +38,25 @@ class ShelveContextStorage(DBContextStorage):
         super().set_update_scheme(scheme)
         self.update_scheme.fields["id"]["write"] = FieldRule.UPDATE
 
-    async def get_item_async(self, key: Hashable) -> Context:
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, None, key)
         self.hash_storage[key] = hashes
         return context
 
-    async def set_item_async(self, key: Hashable, value: Context):
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def set_item_async(self, key: Union[Hashable, str], value: Context):
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, key)
 
-    async def del_item_async(self, key: Hashable):
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def del_item_async(self, key: Union[Hashable, str]):
         container = self.shelve_db.get(key, list())
         container.append(None)
         self.shelve_db[key] = container
 
-    async def contains_async(self, key: Hashable) -> bool:
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def contains_async(self, key: Union[Hashable, str]) -> bool:
         if key in self.shelve_db:
             container = self.shelve_db.get(key, list())
             if len(container) != 0:

@@ -144,8 +144,6 @@ class Context(BaseModel):
         if not ctx:
             ctx = Context(*args, **kwargs)
         elif isinstance(ctx, dict):
-            if not all(isinstance(key, str) for key in ctx.keys()):
-                raise Exception(ctx)
             ctx = Context.parse_obj(ctx)
         elif isinstance(ctx, str):
             ctx = Context.parse_raw(ctx)

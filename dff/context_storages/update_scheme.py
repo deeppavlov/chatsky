@@ -223,7 +223,7 @@ class UpdateScheme:
         context_dict = ctx.dict()
 
         if hashes is None and add_timestamp:
-            await val_writer(self.TIMESTAMP_FIELD, time.time(), ctx.id, ext_id)
+            await val_writer(self.TIMESTAMP_FIELD, time.time_ns(), ctx.id, ext_id)
 
         for field in self.fields.keys():
             if self.fields[field]["write"] == FieldRule.IGNORE:

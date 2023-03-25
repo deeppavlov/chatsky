@@ -18,15 +18,17 @@ from uuid import UUID
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
+    from bson.objectid import ObjectId
 
     mongo_available = True
 except ImportError:
     mongo_available = False
     AsyncIOMotorClient = None
+    ObjectId = None
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
 from .update_scheme import full_update_scheme, UpdateScheme
 
@@ -57,16 +59,17 @@ class MongoContextStorage(DBContextStorage):
         self.collections.update({self._CONTEXTS: db[f"{self._prf}_contexts"]})
 
     @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: str(key)}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
+    @auto_stringify_hashable_key()
+    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
         if len(last_context) == 0 or self._check_none(last_context[0]) is None:
             raise KeyError(f"No entry for key {key}.")
         last_context[0]["id"] = last_context[0][self._INTERNAL]
         return Context.cast({k: v for k, v in last_context[0].items() if k not in (self._INTERNAL, self._EXTERNAL)})
 
     @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def set_item_async(self, key: Union[Hashable, str], value: Context):
         identifier = {**json.loads(value.json()), self._EXTERNAL: key, self._INTERNAL: value.id, UpdateScheme.TIMESTAMP_FIELD: time.time()}
         last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
         if len(last_context) != 0 and self._check_none(last_context[0]) is None:
@@ -75,12 +78,14 @@ class MongoContextStorage(DBContextStorage):
             await self.collections[self._CONTEXTS].insert_one(identifier)
 
     @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        await self.collections[self._CONTEXTS].insert_one({self._EXTERNAL: str(key), UpdateScheme.TIMESTAMP_FIELD: time.time(), self._KEY_NONE: True})
+    @auto_stringify_hashable_key()
+    async def del_item_async(self, key: Union[Hashable, str]):
+        await self.collections[self._CONTEXTS].insert_one({self._EXTERNAL: key, UpdateScheme.TIMESTAMP_FIELD: time.time_ns(), self._KEY_NONE: True})
 
     @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: str(key)}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
+    @auto_stringify_hashable_key()
+    async def contains_async(self, key: Union[Hashable, str]) -> bool:
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
         return len(last_context) != 0 and self._check_none(last_context[0]) is not None
 
     @threadsafe_method
@@ -95,6 +100,14 @@ class MongoContextStorage(DBContextStorage):
     @classmethod
     def _check_none(cls, value: Dict) -> Optional[Dict]:
         return None if value.get(cls._KEY_NONE, False) else value
+
+    @staticmethod
+    def _create_key(key: Hashable) -> Dict[str, ObjectId]:
+        """Convert a n-digit context id to a 24-digit mongo id"""
+        new_key = hex(int.from_bytes(str.encode(str(key)), "big", signed=False))[3:]
+        new_key = (new_key * (24 // len(new_key) + 1))[:24]
+        assert len(new_key) == 24
+        return {"_id": ObjectId(new_key)}
 
     async def _read_fields(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> List[str]:
         result = list()

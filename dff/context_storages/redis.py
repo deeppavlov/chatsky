@@ -26,7 +26,7 @@ except ImportError:
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
 
 
@@ -49,8 +49,8 @@ class RedisContextStorage(DBContextStorage):
         self._redis = Redis.from_url(self.full_path)
 
     @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None:
             raise KeyError(f"No entry for key {key}.")
@@ -59,8 +59,8 @@ class RedisContextStorage(DBContextStorage):
         return context
 
     @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def set_item_async(self, key: Union[Hashable, str], value: Context):
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_value, self._write_seq, key)
         last_id = self._check_none(await self._redis.rpop(key))
@@ -72,13 +72,14 @@ class RedisContextStorage(DBContextStorage):
             await self._redis.rpush(key, f"{value.id}")
 
     @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        await self._redis.rpush(str(key), self._VALUE_NONE)
+    @auto_stringify_hashable_key()
+    async def del_item_async(self, key: Union[Hashable, str]):
+        await self._redis.rpush(key, self._VALUE_NONE)
         await self._redis.decr(self._TOTAL_CONTEXT_COUNT_KEY)
 
     @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        key = str(key)
+    @auto_stringify_hashable_key()
+    async def contains_async(self, key: Union[Hashable, str]) -> bool:
         if bool(await self._redis.exists(key)):
             value = await self._redis.rpop(key)
             await self._redis.rpush(key, value)
