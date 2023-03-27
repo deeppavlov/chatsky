@@ -13,6 +13,3 @@ exclude_lines =
 
     # Don't complain if tests don't cover error handling:
     except .*
-
-    # Don't complain if logging error message:
-    logger.error*
