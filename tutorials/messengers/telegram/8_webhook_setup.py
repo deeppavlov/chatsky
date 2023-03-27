@@ -39,7 +39,7 @@ interface = CallbackTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 # %%
 pipeline = Pipeline.from_script(
-    script=TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
+    script=TOY_SCRIPT,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.

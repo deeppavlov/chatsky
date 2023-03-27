@@ -38,7 +38,6 @@ class JSONContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
     :param path: Target file URI. Example: `json://file.json`.
-    :type path: str
     """
 
     def __init__(self, path: str):

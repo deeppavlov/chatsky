@@ -18,21 +18,21 @@ Overall, the actor acts as a bridge between the user's input and the dialog grap
 making sure that the conversation follows the expected flow and providing a personalized experience to the user.
 """
 import logging
-from typing import Union, Callable, Optional, Dict, List, Any
+from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
 import copy
 
-from pydantic import BaseModel, validate_arguments, Extra
-
 from dff.utils.turn_caching import cache_clear
-from .types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
-from .message import Message
+from dff.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
+from dff.script.core.message import Message
 
-from .context import Context
-from .script import Script, Node
-from .normalization import normalize_label, normalize_response
-from .keywords import GLOBAL, LOCAL
+from dff.script.core.context import Context
+from dff.script.core.script import Script, Node
+from dff.script.core.normalization import normalize_label, normalize_response
+from dff.script.core.keywords import GLOBAL, LOCAL
 
 logger = logging.getLogger(__name__)
+
+Pipeline = ForwardRef("Pipeline")
 
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
@@ -51,160 +51,111 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
         logger.error(msg, exc_info=exception)
 
 
-class Actor(BaseModel):
+class Actor:
     """
     The class which is used to process :py:class:`~dff.script.Context`
     according to the :py:class:`~dff.script.Script`.
+
+    :param script: The dialog scenario: a graph described by the :py:class:`.Keywords`.
+        While the graph is being initialized, it is validated and then used for the dialog.
+    :param start_label: The start node of :py:class:`~dff.script.Script`. The execution begins with it.
+    :param fallback_label: The label of :py:class:`~dff.script.Script`.
+        Dialog comes into that label if all other transitions failed,
+        or there was an error while executing the scenario.
+        Defaults to `None`.
+    :param label_priority: Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
+        where there is no priority. Defaults to `1.0`.
+    :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
+    :param handlers: This variable is responsible for the usage of external handlers on
+        the certain stages of work of :py:class:`~dff.script.Actor`.
+
+        - key (:py:class:`~dff.script.ActorStage`) - Stage in which the handler is called.
+        - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    class Config:
-        extra = Extra.allow
-
-    script: Union[Script, dict]
-    """
-    The dialog scenario: a graph described by the :py:class:~dff.script.Keywords.
-    While the graph is being initialized, it is validated and then used for the dialog.
-    """
-    start_label: NodeLabel3Type
-    """
-    The start node of :py:class:`~dff.script.Script`. The execution begins with it.
-    """
-    fallback_label: Optional[NodeLabel3Type] = None
-    """
-    The label of :py:class:`~dff.script.Script`.
-    Dialog comes into that label if all other transitions failed, or there was an error while executing the scenario.
-    Defaults to `None`.
-    """
-    label_priority: float = 1.0
-    """
-    Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
-    where there is no priority. Defaults to `1.0`.
-    """
-    validation_stage: Optional[bool] = None
-    """
-    This flag sets whether the validation stage is executed. It is executed by default. Defaults to `None`.
-    """
-    condition_handler: Optional[Callable] = None
-    """
-    Handler that processes a call of condition functions. Defaults to `None`.
-    """
-    verbose: bool = True
-    """
-    If it is `True`, logging is used. Defaults to `True`.
-    """
-    handlers: Dict[ActorStage, List[Callable]] = {}
-    """
-    This variable is responsible for the usage of external handlers on
-    the certain stages of work of :py:class:`~dff.script.Actor`.
-
-        - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
-        - value: List[Callable] - The list of called handlers for each stage.
-
-    Defaults to an empty `dict`.
-    """
-
-    @validate_arguments
     def __init__(
         self,
         script: Union[Script, dict],
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
-        validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        *args,
-        **kwargs,
     ):
         # script validation
-        script = script if isinstance(script, Script) else Script(script=script)
+        self.script = script if isinstance(script, Script) else Script(script=script)
+        self.label_priority = label_priority
 
         # node labels validation
-        start_label = normalize_label(start_label)
-        if script.get(start_label[0], {}).get(start_label[1]) is None:
-            raise ValueError(f"Unknown start_label={start_label}")
-        if fallback_label is None:
-            fallback_label = start_label
-        else:
-            fallback_label = normalize_label(fallback_label)
-            if script.get(fallback_label[0], {}).get(fallback_label[1]) is None:
-                raise ValueError(f"Unknown fallback_label={fallback_label}")
-        if condition_handler is None:
-            condition_handler = default_condition_handler
+        self.start_label = normalize_label(start_label)
+        if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
+            raise ValueError(f"Unknown start_label={self.start_label}")
 
-        super(Actor, self).__init__(
-            script=script,
-            start_label=start_label,
-            fallback_label=fallback_label,
-            label_priority=label_priority,
-            validation_stage=validation_stage,
-            condition_handler=condition_handler,
-            verbose=verbose,
-            handlers={} if handlers is None else handlers,
-        )
+        if fallback_label is None:
+            self.fallback_label = self.start_label
+        else:
+            self.fallback_label = normalize_label(fallback_label)
+            if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
+                raise ValueError(f"Unknown fallback_label={self.fallback_label}")
+        self.condition_handler = default_condition_handler if condition_handler is None else condition_handler
+
+        self.handlers = {} if handlers is None else handlers
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-        errors = self.validate_script(verbose) if validation_stage or validation_stage is None else []
-        if errors:
-            raise ValueError(
-                f"Found len(errors)={len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
-            )
-
-    @validate_arguments
-    def __call__(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Union[Context, dict, str]:
+    def __call__(
+        self, pipeline: Pipeline, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs
+    ) -> Union[Context, dict, str]:
 
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.CONTEXT_INIT, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT, *args, **kwargs)
 
         # get previous node
         ctx = self._get_previous_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
 
         # rewrite previous node
         ctx = self._rewrite_previous_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
 
         # run pre transitions processing
-        ctx = self._run_pre_transitions_processing(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
+        ctx = self._run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
-        ctx = self._get_true_labels(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
+        ctx = self._get_true_labels(ctx, pipeline, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
 
         # get next node
         ctx = self._get_next_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.GET_NEXT_NODE, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.GET_NEXT_NODE, *args, **kwargs)
 
         ctx.add_label(ctx.framework_states["actor"]["next_label"][:2])
 
         # rewrite next node
         ctx = self._rewrite_next_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
 
         # run pre response processing
-        ctx = self._run_pre_response_processing(ctx, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
+        ctx = self._run_pre_response_processing(ctx, pipeline, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
 
         # create response
         ctx.framework_states["actor"]["response"] = ctx.framework_states["actor"][
             "pre_response_processed_node"
-        ].run_response(ctx, self, *args, **kwargs)
-        self._run_handlers(ctx, ActorStage.CREATE_RESPONSE, *args, **kwargs)
+        ].run_response(ctx, pipeline, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.framework_states["actor"]["response"])
 
-        self._run_handlers(ctx, ActorStage.FINISH_TURN, *args, **kwargs)
+        self._run_handlers(ctx, pipeline, ActorStage.FINISH_TURN, *args, **kwargs)
         if self._clean_turn_cache:
             cache_clear()
 
         del ctx.framework_states["actor"]
         return ctx
 
-    @validate_arguments
     def _context_init(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         ctx = Context.cast(ctx)
         if not ctx.requests:
@@ -213,7 +164,6 @@ class Actor(BaseModel):
         ctx.framework_states["actor"] = {}
         return ctx
 
-    @validate_arguments
     def _get_previous_node(self, ctx: Context, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["previous_label"] = (
             normalize_label(ctx.last_label) if ctx.last_label else self.start_label
@@ -223,14 +173,13 @@ class Actor(BaseModel):
         ).get(ctx.framework_states["actor"]["previous_label"][1], Node())
         return ctx
 
-    @validate_arguments
-    def _get_true_labels(self, ctx: Context, *args, **kwargs) -> Context:
+    def _get_true_labels(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         # GLOBAL
         ctx.framework_states["actor"]["global_transitions"] = (
             self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
         )
         ctx.framework_states["actor"]["global_true_label"] = self._get_true_label(
-            ctx.framework_states["actor"]["global_transitions"], ctx, GLOBAL, "global"
+            ctx.framework_states["actor"]["global_transitions"], ctx, pipeline, GLOBAL, "global"
         )
 
         # LOCAL
@@ -240,6 +189,7 @@ class Actor(BaseModel):
         ctx.framework_states["actor"]["local_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["local_transitions"],
             ctx,
+            pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
             "local",
         )
@@ -251,12 +201,12 @@ class Actor(BaseModel):
         ctx.framework_states["actor"]["node_true_label"] = self._get_true_label(
             ctx.framework_states["actor"]["node_transitions"],
             ctx,
+            pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
             "node",
         )
         return ctx
 
-    @validate_arguments
     def _get_next_node(self, ctx: Context, *args, **kwargs) -> Context:
         # choose next label
         ctx.framework_states["actor"]["next_label"] = self._choose_label(
@@ -271,7 +221,6 @@ class Actor(BaseModel):
         ).get(ctx.framework_states["actor"]["next_label"][1])
         return ctx
 
-    @validate_arguments
     def _rewrite_previous_node(self, ctx: Context, *args, **kwargs) -> Context:
         node = ctx.framework_states["actor"]["previous_node"]
         flow_label = ctx.framework_states["actor"]["previous_label"][0]
@@ -282,14 +231,12 @@ class Actor(BaseModel):
         )
         return ctx
 
-    @validate_arguments
     def _rewrite_next_node(self, ctx: Context, *args, **kwargs) -> Context:
         node = ctx.framework_states["actor"]["next_node"]
         flow_label = ctx.framework_states["actor"]["next_label"][0]
         ctx.framework_states["actor"]["next_node"] = self._overwrite_node(node, flow_label)
         return ctx
 
-    @validate_arguments
     def _overwrite_node(
         self,
         current_node: Node,
@@ -311,33 +258,39 @@ class Actor(BaseModel):
             overwritten_node.transitions = current_node.transitions
         return overwritten_node
 
-    @validate_arguments
-    def _run_pre_transitions_processing(self, ctx: Context, *args, **kwargs) -> Context:
+    def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
-        ctx = ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing(ctx, self, *args, **kwargs)
+        ctx = ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing(
+            ctx, pipeline, *args, **kwargs
+        )
         ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
             "processed_node"
         ]
         del ctx.framework_states["actor"]["processed_node"]
         return ctx
 
-    @validate_arguments
-    def _run_pre_response_processing(self, ctx: Context, *args, **kwargs) -> Context:
+    def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
-        ctx = ctx.framework_states["actor"]["next_node"].run_pre_response_processing(ctx, self, *args, **kwargs)
+        ctx = ctx.framework_states["actor"]["next_node"].run_pre_response_processing(ctx, pipeline, *args, **kwargs)
         ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
         del ctx.framework_states["actor"]["processed_node"]
         return ctx
 
-    @validate_arguments
     def _get_true_label(
-        self, transitions: dict, ctx: Context, flow_label: LabelType, transition_info: str = "", *args, **kwargs
+        self,
+        transitions: dict,
+        ctx: Context,
+        pipeline: Pipeline,
+        flow_label: LabelType,
+        transition_info: str = "",
+        *args,
+        **kwargs,
     ) -> Optional[NodeLabel3Type]:
         true_labels = []
         for label, condition in transitions.items():
-            if self.condition_handler(condition, ctx, self, *args, **kwargs):
+            if self.condition_handler(condition, ctx, pipeline, *args, **kwargs):
                 if isinstance(label, Callable):
-                    label = label(ctx, self, *args, **kwargs)
+                    label = label(ctx, pipeline, *args, **kwargs)
                     # TODO: explicit handling of errors
                     if label is None:
                         continue
@@ -354,11 +307,9 @@ class Actor(BaseModel):
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
 
-    @validate_arguments
-    def _run_handlers(self, ctx, actor_stage: ActorStage, *args, **kwargs):
-        [handler(ctx, self, *args, **kwargs) for handler in self.handlers.get(actor_stage, [])]
+    def _run_handlers(self, ctx, pipeline: Pipeline, actor_stade: ActorStage, *args, **kwargs):
+        [handler(ctx, pipeline, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
 
-    @validate_arguments
     def _choose_label(
         self, specific_label: Optional[NodeLabel3Type], general_label: Optional[NodeLabel3Type]
     ) -> NodeLabel3Type:
@@ -370,8 +321,7 @@ class Actor(BaseModel):
             chosen_label = self.fallback_label
         return chosen_label
 
-    @validate_arguments
-    def validate_script(self, verbose: bool = True):
+    def validate_script(self, pipeline: Pipeline, verbose: bool = True):
         # TODO: script has to not contain priority == -inf, because it uses for miss values
         flow_labels = []
         node_labels = []
@@ -384,14 +334,13 @@ class Actor(BaseModel):
                 labels += list(node.transitions.keys())
                 conditions += list(node.transitions.values())
 
-        actor = self.copy(deep=True)
         error_msgs = []
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
             ctx.add_request(Message(text="text"))
 
-            label = label(ctx, actor) if isinstance(label, Callable) else normalize_label(label, flow_label)
+            label = label(ctx, pipeline) if isinstance(label, Callable) else normalize_label(label, flow_label)
 
             # validate labeling
             try:
@@ -407,7 +356,7 @@ class Actor(BaseModel):
             # validate responsing
             response_func = normalize_response(node.response)
             try:
-                response_result = response_func(ctx, actor)
+                response_result = response_func(ctx, pipeline)
                 if not isinstance(response_result, Message):
                     msg = (
                         "Expected type of response_result is `Message`.\n"
@@ -427,8 +376,8 @@ class Actor(BaseModel):
 
             # validate conditioning
             try:
-                condition_result = condition(ctx, actor)
-                if not isinstance(condition(ctx, actor), bool):
+                condition_result = condition(ctx, pipeline)
+                if not isinstance(condition(ctx, pipeline), bool):
                     raise Exception(f"Returned condition_result={condition_result}, but expected bool type")
             except Exception as exc:
                 msg = f"Got exception '''{exc}''' during condition execution for label={label}"
@@ -437,15 +386,14 @@ class Actor(BaseModel):
         return error_msgs
 
 
-@validate_arguments()
 def default_condition_handler(
-    condition: Callable, ctx: Context, actor: Actor, *args, **kwargs
-) -> Callable[[Context, Actor, Any, Any], bool]:
+    condition: Callable, ctx: Context, pipeline: Pipeline, *args, **kwargs
+) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     The simplest and quickest condition handler for trivial condition handling returns the callable condition:
 
     :param condition: Condition to copy.
     :param ctx: Context of current condition.
-    :param actor: Actor we use in this condition.
+    :param pipeline: Pipeline we use in this condition.
     """
-    return condition(ctx, actor, *args, **kwargs)
+    return condition(ctx, pipeline, *args, **kwargs)

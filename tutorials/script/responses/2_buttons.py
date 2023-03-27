@@ -7,7 +7,7 @@
 # %%
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script import Context, TRANSITIONS, RESPONSE
 
 from dff.script.core.message import Button, Keyboard, Message
 from dff.pipeline import Pipeline
@@ -20,7 +20,7 @@ from dff.utils.testing import (
 
 # %%
 def check_button_payload(value: str):
-    def payload_check_inner(ctx: Context, actor: Actor):
+    def payload_check_inner(ctx: Context, _: Pipeline):
         if ctx.last_request.misc is not None:
             return ctx.last_request.misc.get("payload") == value
         else:
