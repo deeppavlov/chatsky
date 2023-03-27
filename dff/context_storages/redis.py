@@ -54,7 +54,7 @@ class RedisContextStorage(DBContextStorage):
         last_id = self._check_none(await self._redis.rpop(key))
         if last_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, last_id.decode(), key)
+        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, key, last_id.decode())
         self.hash_storage[key] = hashes
         return context
 
@@ -64,12 +64,12 @@ class RedisContextStorage(DBContextStorage):
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_value, self._write_seq, key)
         last_id = self._check_none(await self._redis.rpop(key))
-        if last_id is None or last_id != value.id:
+        if last_id is None or last_id.decode() != value.id:
             if last_id is not None:
                 await self._redis.rpush(key, last_id)
             else:
                 await self._redis.incr(self._TOTAL_CONTEXT_COUNT_KEY)
-            await self._redis.rpush(key, f"{value.id}")
+            await self._redis.rpush(key, value.id)
 
     @threadsafe_method
     @auto_stringify_hashable_key()

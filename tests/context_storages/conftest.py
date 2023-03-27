@@ -6,7 +6,7 @@ import pytest
 
 @pytest.fixture(scope="function")
 def testing_context():
-    yield Context(id=112668)
+    yield Context(id=str(112668))
 
 
 @pytest.fixture(scope="function")

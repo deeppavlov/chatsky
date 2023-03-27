@@ -186,7 +186,7 @@ class UpdateScheme:
         else:
             return None
 
-    async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Tuple[Context, Dict]:
+    async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, ext_id: Union[UUID, int, str], int_id: Optional[Union[UUID, int, str]] = None) -> Tuple[Context, Dict]:
         result = dict()
         hashes = dict()
 

@@ -50,7 +50,7 @@ class PickleContextStorage(DBContextStorage):
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         await self._load()
-        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, None, key)
+        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, key)
         self.hash_storage[key] = hashes
         return context
 

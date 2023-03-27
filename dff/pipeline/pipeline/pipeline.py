@@ -205,7 +205,7 @@ class Pipeline:
         """
         return cls(**dictionary)
 
-    async def _run_pipeline(self, request: Message, ctx_id: Optional[Hashable] = None) -> Context:
+    async def _run_pipeline(self, request: Message, ctx_id: Optional[str] = None) -> Context:
         """
         Method that runs pipeline once for user request.
 

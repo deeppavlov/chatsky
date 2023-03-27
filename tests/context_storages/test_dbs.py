@@ -17,6 +17,7 @@ from dff.context_storages import (
     mongo_available,
     ydb_available,
     context_storage_factory,
+    DBContextStorage,
 )
 
 from dff.script import Context
@@ -60,7 +61,7 @@ MYSQL_ACTIVE = ping_localhost(3307)
 YDB_ACTIVE = ping_localhost(2136)
 
 
-def generic_test(db, testing_context, context_id):
+def generic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # perform cleanup
     db.clear()
     assert len(db) == 0

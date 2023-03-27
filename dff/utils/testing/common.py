@@ -44,7 +44,7 @@ def check_happy_path(
     :param printout_enable: A flag that enables requests and responses fancy printing (to STDOUT).
     """
 
-    ctx_id = uuid4()  # get random ID for current context
+    ctx_id = str(uuid4())  # get random ID for current context
     for step_id, (request, reference_response) in enumerate(happy_path):
         ctx = pipeline(request, ctx_id)
         candidate_response = ctx.last_response
@@ -72,7 +72,7 @@ def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
     :param pipeline: The Pipeline instance, that will be used for running.
     """
 
-    ctx_id = uuid4()  # Random UID
+    ctx_id = str(uuid4())  # Random UID
     print("Start a dialogue with the bot")
     while True:
         request = input(">>> ")

@@ -17,7 +17,7 @@ The context can be easily serialized to a format that can be stored or transmitt
 This allows developers to save the context data and resume the conversation later.
 """
 import logging
-from uuid import UUID, uuid4
+from uuid import uuid4
 
 from typing import Any, Optional, Union, Dict, List, Set
 
@@ -65,7 +65,7 @@ class Context(BaseModel):
             "last_request": "set_last_request",
         }
 
-    id: Union[UUID, int, str] = Field(default_factory=uuid4)
+    id: str = Field(default_factory=lambda: str(uuid4()))
     """
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
     `id` can be used to trace the user behavior, e.g while collecting the statistical data.
