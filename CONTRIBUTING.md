@@ -62,7 +62,10 @@ by activating the virtual environment and then running
 make doc
 ```
 
-After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
+After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.  
+WARNING! Because of the current patching solution, `make doc` modifies some of the source library code (`nbsphinx` and `autosummary`),
+so it is strongly advised to use it carefully and in virtual environment only.
+However, this behavior is likely to be changed in the future.
 
 ### Style
 For style supporting we propose `black`, which is a PEP 8 compliant opinionated formatter.
