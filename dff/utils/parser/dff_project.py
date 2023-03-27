@@ -186,7 +186,6 @@ class DFFProject(BaseParserObject):
             This exception is called under these conditions:
 
             - If `self.script_initializer` is specified during `__init__` and any of the following is true:
-
                 - Namespace specified by the first part of the `script_initializer` does not exist in `self.namespaces`.
                 - Object specified by the second part of the `script_initializer` does not exist in namespace.
                 - Object specified by the second part of the `script_initializer` is not an assignment.
@@ -194,7 +193,6 @@ class DFFProject(BaseParserObject):
                   assigns an object other than :py:class:`~.Call`.
                 - Object specified by the second part of the `script_initializer`
                   assigns an object other than any specified in :py:data:`~.script_initializers`.
-
             - If `self.script_initializer` is not specified and a search found multiple or no Script Initializer calls.
         """
         call = None
@@ -311,7 +309,6 @@ class DFFProject(BaseParserObject):
         :return: A tuple (resolved_script, resolved_start_label, resolved_fallback_label).
         :raises ScriptValidationError:
             During script resolution if:
-
                 - The first element of :py:attr:`~.DFFProject.script` does not resolve to :py:class:`~.Dict`.
                 - If `resolved_flow_name` is not `GLOBAL` and `flow` does not resolve to :py:class:`~.Dict`.
                 - Here `node` refers to both `node` and, if `resolved_flow_name` is `GLOBAL`, `flow`:
@@ -320,9 +317,8 @@ class DFFProject(BaseParserObject):
                   - If any key in `node` is not a keyword (is not in :py:data:`~.keyword_list`).
                   - If any key in `node` is a `GLOBAL` or `LOCAL` keyword.
                   - If any key is found twice inside the `node` dictionary.
-
+            
             During label resolution if:
-
                 - Label does not resolve to :py:class:`~.Iterable`.
                 - Number of elements in label is not 2.
                 - Label elements do not resolve to :py:class:`~.String`.
@@ -406,7 +402,6 @@ class DFFProject(BaseParserObject):
         Export DFF project as a networkx graph and validate transitions.
 
         Resulting graph contains the following fields:
-
             - full_script: Stores dictionary exported via :py:meth:`~.DFFProject.to_dict`.
             - start_label: A tuple of two strings (second element of :py:attr:`~.DFFProject.resolved_script`).
             - fallback_label: A tuple of two strings (third element of :py:attr:`~.DFFProject.resolved_script`).
@@ -414,7 +409,6 @@ class DFFProject(BaseParserObject):
         All nodes of the resulting graph are represented by a single value -- a tuple of strings or lists of strings.
 
         For each node in the script there is a node in the resulting graph which has a value of:
-
             - `("NODE", flow_name)` if the node belongs to the `GLOBAL` flow.
             - `("NODE", flow_name, node_name)` otherwise.
 
@@ -422,12 +416,10 @@ class DFFProject(BaseParserObject):
         respectively (see documentation of :py:attr:`~.DFFProject.resolved_script`).
 
         Additionally, nodes representing script nodes contain the following fields:
-
             - ref: Path to the :py:class:`~.Expression` representing the node (see :py:attr:`~.BaseParserObject.path`).
             - local: Whether this node is `LOCAL`.
 
         Graph has other nodes:
-
             - `("NONE",)` -- empty node.
             - Label nodes. The first element of their value is `"LABEL"`, the second element is the name of the label used
               (e.g. `"to_fallback"`). The rest of the elements are tuples of two strings with the first element being a name
@@ -439,14 +431,12 @@ class DFFProject(BaseParserObject):
         (if one of the labels from :py:mod:`~.dff.script.labels` is used) and an empty node otherwise.
 
         All edges have 4 fields:
-
             - label_ref: Path to the object defining transition label.
             - label: `str` of either absolute value of the label or the label itself.
             - condition_ref: Path to the object defining transition condition.
             - condition: `str` of either absolute value of the condition or the condition itself.
 
         :raises ScriptValidationError:
-
             - If `TRANSITION` keyword does not refer to a :py:class:`~.Dict`.
             - If any of the first two elements of any transition label is not :py:class:`~.String`.
         """
