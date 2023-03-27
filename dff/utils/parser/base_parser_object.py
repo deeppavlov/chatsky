@@ -132,14 +132,14 @@ class BaseParserObject(ABC):
 
     @abstractmethod
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        """Dump object as string. `current_indent` should already be applied to the current line by the node's parent.
+        """
+        Dump object as string. `current_indent` should already be applied to the current line by the node's parent.
         `current_indent` is supposed to be used only when creating new lines.
 
         :param current_indent: Current indentation level (in whitespace number), defaults to 0.
         :param indent:
             Indentation increment (in whitespace number), defaults to 4.
-            If set to None indentation is not applied.
-
+            If set to None, an object is dumped in one line.
         :return: Representation of the object as a string.
         """
 

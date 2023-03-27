@@ -22,9 +22,7 @@ if tp.TYPE_CHECKING:
 
 
 class Namespace(BaseParserObject):
-    """
-    This class represents a python file (all the objects defined in it + its location).
-    """
+    """This class represents a python file (all the objects defined in it + its location)."""
 
     def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
         BaseParserObject.__init__(self)
@@ -37,7 +35,8 @@ class Namespace(BaseParserObject):
             self.add_child(value, key)
 
     def resolve_relative_import(self, module: str, level: int = 0) -> str:
-        """Find a location of a namespace referenced by `level * "." + module` in this namespace.
+        """
+        Find a location of a namespace referenced by `level * "." + module` in this namespace.
 
         :param module: Name of the module.
         :param level: Relative position of the module.
@@ -77,7 +76,8 @@ class Namespace(BaseParserObject):
         return obj
 
     def __getitem__(self, item: str):
-        """Return an object by its name. If the object is of type `Assignment` return its value.
+        """
+        Return an object by its name. If the object is of type `Assignment` return its value.
         :raises KeyError:
             Object not found.
         """
@@ -87,13 +87,19 @@ class Namespace(BaseParserObject):
         return obj
 
     @staticmethod
-    def dump_statements(statements: tp.List[Statement]) -> str:
-        """A method for dumping a list of statements. Inserts newlines between statements in the following amount:
-            - If any of the two neighboring statements is `Def` -- 3 new lines.
-            - If both neighboring statements are :py:class:`~.Import` or :py:class:`.~ImportFrom` -- 1 new line.
-            - Otherwise, 2 new lines.
+    def dump_statements(statements: tp.List[Statement], current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
+        """
+        A method for dumping a list of statements. Inserts newlines between statements in the following amount:
+
+        - If any of the two neighboring statements is `Def` -- 3 new lines.
+        - If both neighboring statements are :py:class:`~.Import` or :py:class:`.~ImportFrom` -- 1 new line.
+        - Otherwise, 2 new lines.
 
         :param statements: A list of statements to dump.
+        :param current_indent: Current indentation level (in whitespace number), defaults to 0.
+        :param indent:
+            Indentation increment (in whitespace number), defaults to 4.
+            If set to None, all statements will be printed in one line (except for unsupported statements).
         :return: Dumps of the statements separated by an appropriate amount of new lines.
         """
 
@@ -107,17 +113,33 @@ class Namespace(BaseParserObject):
         if len(statements) == 0:
             return "\n"
 
-        result = [statements[0].dump()]
+        result = [statements[0].dump(current_indent, indent)]
         previous_stmt = statements[0]
         for current_stmt in statements[1:]:
             result.append(max(get_newline_count(previous_stmt), get_newline_count(current_stmt)) * "\n")
-            result.append(current_stmt.dump())
+            result.append(current_indent * " " + current_stmt.dump(current_indent, indent))
             previous_stmt = current_stmt
         return "".join(result) + "\n"
 
-    def dump(self, current_indent=0, indent=4, object_filter: tp.Optional[tp.Set[str]] = None) -> str:
+    def dump(
+        self, current_indent: int = 0, indent: tp.Optional[int] = 4, object_filter: tp.Optional[tp.Set[str]] = None
+    ) -> str:
+        """
+        Dump all statements in the namespace.
+
+        :param current_indent: Current indentation level (in whitespace number), defaults to 0.
+        :param indent:
+            Indentation increment (in whitespace number), defaults to 4.
+            If set to None, all statements will be printed in one line (except for unsupported statements).
+        :param object_filter:
+            A set of object names. If specified, only objects specified in the filter will be dumped.
+            Defaults to None.
+        :return: Representation of the namespace as a string.
+        """
         return self.dump_statements(
-            [value for key, value in self.children.items() if object_filter is None or key in object_filter]
+            [value for key, value in self.children.items() if object_filter is None or key in object_filter],
+            current_indent,
+            indent,
         )
 
     def get_imports(self) -> tp.List[str]:
@@ -132,18 +154,46 @@ class Namespace(BaseParserObject):
 
     @classmethod
     def from_ast(cls, node: ast.Module, **kwargs) -> "Namespace":  # type: ignore
+        """
+        Construct Namespace from :py:class:`ast.Module`.
+
+        For each statement in the module:
+
+        - If it is supported by any :py:class:`~.Statement`, all objects extracted from the statement will be added to
+          the namespace under their names.
+        - Otherwise a :py:class:`~.Python` object is added under a string representation of the count of python
+          objects added to the namespace so far.
+
+        For example, there is currently no :py:class:`~.Statement` that supports function definitions and
+        if one is present in `node`, its (key, value) pair will be `("0", Python(def ...))`.
+        """
         children = {}
+        python_counter = 0
         for statement in node.body:
             statements = Statement.auto(statement)
             if isinstance(statements, dict):
                 children.update(statements)
+            elif isinstance(statements, Python):
+                children[str(python_counter)] = statements
+                python_counter += 1
         return cls(names=children, **kwargs)
 
     @classmethod
     def from_file(cls, project_root_dir: Path, file: Path):
-        """Construct the Namespace from a python file.
+        """
+        Construct a Namespace from a python file.
 
-        :param project_root_dir: A root dir of the dff project. All local files should be inside this dir.
+        For each statement in the file:
+
+        - If it is supported by any :py:class:`~.Statement`, all objects extracted from the statement will be added to
+          the namespace under their names.
+        - Otherwise a :py:class:`~.Python` object is added under a string representation of the count of python
+          objects added to the namespace so far.
+
+        For example, there is currently no :py:class:`~.Statement` that supports function definitions and
+        if one is present in `file`, its (key, value) pair will be `("0", Python(def ...))`.
+
+        :param project_root_dir: A root dir of the dff project. All project files should be inside this dir.
         :param file: A `.py` file to construct the namespace from.
         :return: A Namespace of the file.
         """

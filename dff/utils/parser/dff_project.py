@@ -9,7 +9,6 @@ Glossary
 Script Initializer -- A function that takes a DFF script and uses it to initialize an object to store and process it.
 """
 from pathlib import Path
-import builtins
 import json
 import typing as tp
 import logging
@@ -112,7 +111,6 @@ A mapping from short names of keywords to all their full names.
 
 :meta hide-value:
 """
-# todo: maybe add Keyword class
 
 keyword_list = [keyword_prefix + k for keyword_prefix in keyword_prefixes for k in Keywords.__members__]
 """
@@ -130,6 +128,7 @@ A mapping from full keyword names to their short names.
 
 RecursiveDictValue: TypeAlias = tp.Union[str, tp.Dict[str, "RecursiveDictValue"]]
 RecursiveDict: TypeAlias = tp.Dict[str, "RecursiveDictValue"]
+DFFProjectDict: TypeAlias = tp.Dict[str, "RecursiveDict"]
 
 
 class DFFProject(BaseParserObject):
@@ -233,6 +232,11 @@ class DFFProject(BaseParserObject):
         raise ScriptValidationError(
             "Script Initialization call is not found (use either `Actor` or `Pipeline.from_script`"
         )
+
+    @cached_property
+    def script_initializer_dependencies(self) -> tp.Dict[str, tp.Set[str]]:
+        """Dependencies of script initializer."""
+        return self.script_initializer_call.dependencies()
 
     @cached_property
     def script(self) -> tp.Tuple[Expression, Expression, Expression]:
@@ -399,7 +403,7 @@ class DFFProject(BaseParserObject):
 
         Resulting graph contains the following fields:
 
-        - full_script: Stores dictionary exported via :py:meth:`~.DFFProject.to_yaml`.
+        - full_script: Stores dictionary exported via :py:meth:`~.DFFProject.to_dict`.
         - start_label: A tuple of two strings (second element of :py:attr:`~.DFFProject.resolved_script`).
         - fallback_label: A tuple of two strings (third element of :py:attr:`~.DFFProject.resolved_script`).
 
@@ -474,7 +478,7 @@ class DFFProject(BaseParserObject):
             return ("NONE",)
 
         graph = nx.MultiDiGraph(
-            full_script=self.to_dict(self.script_initializer_call.dependencies()),
+            full_script=self.to_dict(),
             start_label=self.resolved_script[1],
             fallback_label=self.resolved_script[2],
         )
@@ -511,12 +515,44 @@ class DFFProject(BaseParserObject):
 
     def to_dict(
         self,
-        object_filter: tp.Dict[str, tp.Set[str]],
-    ) -> dict:
-        def process_base_parser_object(bpo: BaseParserObject) -> RecursiveDictValue:
-            allowed_objects = set(object_filter[bpo.namespace.name])
-            allowed_objects.update(set(builtins.__dict__.keys()))
+        object_filter: tp.Optional[tp.Dict[str, tp.Set[str]]] = None,
+    ) -> DFFProjectDict:
+        """
+        Export DFF Project as a dictionary.
 
+        First-level keys in the dictionary are the names of the namespaces in the project.
+        Second-level keys in the dictionary are the names of the objects in the namespaces.
+
+        Values in the dictionary are results of applying the `process` function to the objects
+        in the namespaces. The function works in the following way:
+
+        - If the object is :py:class:`~.Assignment`, the result is the same as the one that
+          assignment value would have.
+
+          `process(target=value) = process(value)`
+        - If the object is :py:class:`~.Import` or :py:class:`~.ImportFrom`, the result is the string
+          representation of the object without import alias.
+
+          `process(import a as b) = process(import a) = "import a"`
+        - If the object is :py:class:`~.Dict`, the result is also a dictionary in which keys and values are results
+          of applying the `process` function to keys and values of the dictionary being processed.
+
+          `process({a: b}) = {process(a): process(b)}`
+        - Otherwise, the result is the string representation of the object (:py:meth:`~.BaseParserObject.__str__`).
+
+          `process(a) = str(a)`
+
+        :param object_filter:
+            A dictionary from namespace names to sets of object names.
+            Only objects in the sets will be in the resulting dictionary.
+            Defaults to :py:attr:`~.DFFProject.script_initializer_dependencies`.
+        :raises ScriptValidationError:
+            Inside the `process` function -- if a key of :py:class:`~.Dict` is also a `dict`.
+        :raises TypeError:
+            Inside the `process` function -- if value is not a :py:class:`~.Statement` nor a :py:class:`~.Expression`.
+        """
+
+        def process_base_parser_object(bpo: BaseParserObject) -> RecursiveDictValue:
             if isinstance(bpo, Assignment):
                 return process_base_parser_object(bpo.children["value"])
             if isinstance(bpo, Import):
@@ -528,31 +564,51 @@ class DFFProject(BaseParserObject):
                 for key, value in bpo.items():
                     processed_key = process_base_parser_object(key)
                     if not isinstance(processed_key, str):
-                        raise RuntimeError(f"Key should be `str`: {processed_key}")
+                        raise ScriptValidationError(f"Key should be `str`: {processed_key}")
                     processed_dict[processed_key] = process_base_parser_object(value)
                 return processed_dict
-            if isinstance(bpo, String):
-                return str(bpo)
-            if isinstance(bpo, Expression):
+            elif isinstance(bpo, (Statement, Expression)):
                 return str(bpo)
             raise TypeError(str(type(bpo)) + "_" + repr(bpo))
 
-        result: RecursiveDict = defaultdict(dict)
+        result: DFFProjectDict = defaultdict(dict)
+        if object_filter is None:
+            object_filter = self.script_initializer_dependencies
+
         for namespace_name, namespace in self.children.items():
             namespace_filter = object_filter.get(namespace_name)
             if namespace_filter is not None:
                 for obj_name, obj in namespace.children.items():
                     if obj_name in namespace_filter:
-                        result[namespace_name][obj_name] = process_base_parser_object(obj)  # type: ignore
+                        result[namespace_name][obj_name] = process_base_parser_object(obj)
         return dict(result)
 
     @classmethod
     def from_dict(
         cls,
-        dictionary: tp.Dict[str, RecursiveDict],
+        dictionary: DFFProjectDict,
         validate: bool = True,
         script_initializer: tp.Optional[str] = None,
     ):
+        """
+        Construct DFF Project from a dictionary.
+
+        :param dictionary:
+            A dictionary with the same characteristics as one returned by :py:meth:`~.DFFProject.to_dict`.
+        :param validate:
+            Whether to perform validation -- check for a script initializer and validate its arguments.
+            Defaults to True.
+        :param script_initializer:
+            A colon-separated string that points to a script initializer call.
+            The first part of the string should be the name of the namespace.
+            The second part of the string should be the name of the object that is a result of script initializer call.
+            Defaults to None.
+
+        :raises ParsingError:
+            - If a dictionary object is an Import statement that contains an import alias.
+            - If a dictionary object is an Assignment statement.
+        """
+
         def process_dict(d):
             return (
                 "{" + ", ".join([f"{k}: {process_dict(v) if isinstance(v, dict) else v}" for k, v in d.items()]) + "}"
@@ -567,32 +623,27 @@ class DFFProject(BaseParserObject):
                     if split[0] == "import":
                         if len(split) != 2:
                             raise ParsingError(
-                                f"Import statement should contain 2 words. AsName can be set via key.\n{obj}"
+                                f"Import statement should contain 2 words. AsName is set via key.\n{obj}"
                             )
                         objects.append(obj if split[1] == obj_name else obj + " as " + obj_name)
                     elif split[0] == "from":
                         if len(split) != 4:
                             raise ParsingError(
-                                f"ImportFrom statement should contain 4 words. AsName can be set via key.\n{obj}"
+                                f"ImportFrom statement should contain 4 words. AsName is set via key.\n{obj}"
                             )
                         objects.append(obj if split[3] == obj_name else obj + " as " + obj_name)
                     else:
+                        if isinstance(ast.parse(obj).body[0], (ast.Assign, ast.AnnAssign)):
+                            raise ParsingError(f"Assignment statement should not be used in the dictionary: {obj}")
                         objects.append(f"{obj_name} = {obj}")
                 else:
                     objects.append(f"{obj_name} = {str(process_dict(obj))}")
             namespaces.append(Namespace.from_ast(ast.parse("\n".join(objects)), location=namespace_name.split(".")))
         return cls(namespaces, validate, script_initializer)
 
-    def __getitem__(self, item: tp.Union[tp.List[str], str]) -> Namespace:
+    def __getitem__(self, item: str) -> Namespace:
         if isinstance(item, str):
             return self.children[item]
-        elif isinstance(item, list):
-            if item[-1] == "__init__":
-                return self.children[".".join(item)]
-            namespace = self.children.get(".".join(item))
-            if namespace is None:
-                return self.children[".".join(item) + ".__init__"]
-            return namespace
         raise TypeError(f"{type(item)}")
 
     @cached_property
@@ -622,13 +673,34 @@ class DFFProject(BaseParserObject):
         validate: bool = True,
         script_initializer: tp.Optional[str] = None,
     ):
+        """
+        Construct DFF Project from a directory of python files.
+
+        Namespaces are created from files using :py:meth:`~.Namespace.from_file`.
+
+        :param project_root_dir:
+            A directory that stores the project.
+        :param entry_point:
+            A file to start processing with (only files that are imported in processed files will be processed).
+        :param validate:
+            Whether to perform validation -- check for a script initializer and validate its arguments.
+            Defaults to True.
+        :param script_initializer:
+            A colon-separated string that points to a script initializer call.
+            The first part of the string should be the name of the namespace.
+            The second part of the string should be the name of the object that is a result of script initializer call.
+            Instead of a colon-separated string a name of the object can be provided
+            in which case the name of the namespace is assumed to be the name of `entry_point`.
+            Defaults to None.
+        :return:
+        """
         namespaces = {}
         if not project_root_dir.exists():
             raise RuntimeError(f"Path does not exist: {project_root_dir}")
+        if not entry_point.exists():
+            raise RuntimeError(f"File {entry_point} does not exist in {project_root_dir}")
 
         def _process_file(file: Path):
-            if not file.exists():
-                raise RuntimeError(f"File {file} does not exist in {project_root_dir}")
             namespace = Namespace.from_file(project_root_dir, file)
             namespaces[namespace.name] = namespace
             result = namespace.name
@@ -650,12 +722,43 @@ class DFFProject(BaseParserObject):
 
         return cls(list(namespaces.values()), validate, script_initializer)
 
-    def to_python(self, project_root_dir: Path):
+    def to_python(self, project_root_dir: Path, object_filter: tp.Optional[tp.Dict[str, tp.Set[str]]] = None):
+        """
+        Export DFF Project as a directory of python files.
+
+        For each namespace in the project if a file corresponding to that namespace does not exist in the directory,
+        a new file will be created and the namespace will be dumped into it. If a file already exists, it will be edited
+        in the following way:
+
+        All statements are extracted from the file the same way :py:meth:`~.Namespace.from_file` extracts them.
+
+        Extracted statements are then edited:
+        Starting from the top of the namespace its statements are inserted into the list of extracted statements
+        as late as possible (always inserts before the last inserted statement and if a statement with the same name
+        already exists it will be replaced; if a statement with the same name already exists but comes after the last
+        inserted statement a warning is given and a new statement is inserted before the last inserted statement
+        resulting in two statements with the same name -- one before the last inserted statement and one after).
+
+        This is done with the following in mind:
+        If two statements come in the namespace one after another, their order likely matters (either because of direct
+        referencing or some actions done in the first statement that affect the result of the second statement).
+
+        :param project_root_dir:
+            A directory to extract the project to.
+        :param object_filter:
+            An optional dictionary from namespace names to sets of object names. Only objects specified in the filter
+            will be written into files.
+            Defaults to :py:attr:`~.DFFProject.script_initializer_dependencies`.
+        """
         logger.info(f"Executing `to_python` with project_root_dir={project_root_dir}")
-        object_filter = self.script_initializer_call.dependencies()
+        if object_filter is None:
+            object_filter = self.script_initializer_dependencies
 
         for namespace in self.children.values():
             namespace_object_filter = object_filter.get(namespace.name)
+
+            if namespace_object_filter is None:
+                continue
 
             file = project_root_dir.joinpath(*namespace.name.split(".")).with_suffix(".py")
             if file.exists():
@@ -669,19 +772,19 @@ class DFFProject(BaseParserObject):
                     if isinstance(statements, dict):
                         for obj_name, obj in statements.items():
                             if names.get(obj_name) is not None:
-                                raise ParsingError(
-                                    f"The same name is used twice:\n{str(names.get(obj_name))}\n{str(obj)}"
+                                logger.warning(
+                                    f"The same name is used twice:\n{str(names.get(obj_name))}\n{str(obj)}\nfile:{file}"
                                 )
                             names[obj_name] = len(objects)
                             objects.append(obj)
                     elif isinstance(statements, Python):
                         objects.append(statements)
                     else:
-                        raise RuntimeError(statements)
+                        raise RuntimeError(statement)
 
                 last_insertion_index = len(objects)
                 for replaced_obj_name, replaced_obj in reversed(list(namespace.children.items())):
-                    if namespace_object_filter is None or replaced_obj_name in namespace_object_filter:
+                    if replaced_obj_name in namespace_object_filter:
                         obj_index = names.get(replaced_obj_name)
                         if obj_index is not None:
                             if obj_index > last_insertion_index:
@@ -709,21 +812,57 @@ class DFFProject(BaseParserObject):
 
     @classmethod
     def from_yaml(cls, file: Path, validate: bool = True, script_initializer: tp.Optional[str] = None):
+        """
+        Construct DFF Project from a yaml file.
+
+        :param file:
+            Yaml file containing a result of :py:meth:`~.DFFProject.to_yaml`.
+        :param validate:
+            Whether to perform validation -- check for a script initializer and validate its arguments.
+            Defaults to True.
+        :param script_initializer:
+            A colon-separated string that points to a script initializer call.
+            The first part of the string should be the name of the namespace.
+            The second part of the string should be the name of the object that is a result of script initializer call.
+            Defaults to None.
+        """
         with open(file, "r", encoding="utf-8") as fd:
             return cls.from_dict(yaml.load(fd), validate, script_initializer)
 
     def to_yaml(self, file: Path):
+        """
+        Export DFF Project in the yaml format.
+        Uses :py:meth:`~.DFFProject.to_dict`.
+        """
         file.parent.mkdir(parents=True, exist_ok=True)
         file.touch()
         with open(file, "w", encoding="utf-8") as fd:
-            yaml.dump(self.to_dict(self.script_initializer_call.dependencies()), fd)
+            yaml.dump(self.to_dict(), fd)
 
     @classmethod
     def from_graph(cls, file: Path, validate: bool = True, script_initializer: tp.Optional[str] = None):
+        """
+        Construct DFF Project from a graph file.
+
+        :param file:
+            Graph file containing a result of :py:meth:`~.DFFProject.to_graph`.
+        :param validate:
+            Whether to perform validation -- check for a script initializer and validate its arguments.
+            Defaults to True.
+        :param script_initializer:
+            A colon-separated string that points to a script initializer call.
+            The first part of the string should be the name of the namespace.
+            The second part of the string should be the name of the object that is a result of script initializer call.
+            Defaults to None.
+        """
         with open(file, "r", encoding="utf-8") as fd:
             return cls.from_dict(json.load(fd)["graph"]["full_script"], validate, script_initializer)
 
     def to_graph(self, file: Path):
+        """
+        Export DFF Project in the graph format.
+        Graph file contains :py:attr:`~.DFFProject.graph` exported by :py:func:`networkx.readwrite.node_link_data`.
+        """
         file.parent.mkdir(parents=True, exist_ok=True)
         file.touch()
         with open(file, "w", encoding="utf-8") as fd:
