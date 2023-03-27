@@ -12,9 +12,9 @@ import json
 import logging
 import urllib.request
 
-from dff.script import Context, Actor
+from dff.script import Context
 from dff.messengers.common import CLIMessengerInterface
-from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo
+from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
 from dff.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
@@ -48,8 +48,8 @@ These objects are dictionaries of particular structure:
 
 On pipeline execution services from `services` list are run
 without difference between pre- and postprocessors.
-If Actor instance is not found among `services` pipeline creation fails.
-There can be only one Actor in the pipeline.
+If "ACTOR" constant is not found among `services` pipeline creation fails.
+There can be only one "ACTOR" constant in the pipeline.
 ServiceBuilder object can be defined either with callable (see tutorial 2) or
 with dict of structure / object with following constructor arguments:
 
@@ -76,7 +76,7 @@ Here pipeline contains 4 services,
 defined in 4 different ways with different signatures.
 First two of them write sample feature detection data to `ctx.misc`.
 The first uses a constant expression and the second fetches from `example.com`.
-Third one is Actor (it acts like a _special_ service here).
+Third one is "ACTOR" constant (it acts like a _special_ service here).
 Final service logs `ctx.misc` dict.
 """
 
@@ -102,25 +102,20 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
         }
 
 
-def postprocess(ctx: Context, actor: Actor):
+def postprocess(ctx: Context, pl: Pipeline):
     logger.info("postprocession Service (defined as an object)")
     logger.info(f"resulting misc looks like:" f"{json.dumps(ctx.misc, indent=4, default=str)}")
-    fallback_flow, fallback_node, _ = actor.fallback_label
-    received_response = actor.script[fallback_flow][fallback_node].response
+    fallback_flow, fallback_node, _ = pl.actor.fallback_label
+    received_response = pl.script[fallback_flow][fallback_node].response
     responses_match = received_response == ctx.last_response
     logger.info(f"actor is{'' if responses_match else ' not'} in fallback node")
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
-# %%
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "messenger_interface": CLIMessengerInterface(
         intro="Hi, this is a brand new Pipeline running!",
         prompt_request="Request: ",
@@ -141,7 +136,7 @@ pipeline_dict = {
         },  # This service will be named `preprocessor`
         # handler name will be overridden
         preprocess,
-        actor,
+        ACTOR,
         Service(
             handler=postprocess,
             name="postprocessor",

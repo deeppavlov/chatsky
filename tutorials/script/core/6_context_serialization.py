@@ -10,7 +10,7 @@ First of all, let's do all the necessary imports from DFF.
 # %%
 import logging
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Actor, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, Message
 import dff.script.conditions as cnd
 
 from dff.pipeline import Pipeline
@@ -28,7 +28,7 @@ This function returns the user request number.
 
 
 # %%
-def response_handler(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+def response_handler(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
     return Message(text=f"answer {len(ctx.requests)}")
 
 

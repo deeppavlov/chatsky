@@ -131,24 +131,19 @@ These are not meant to be used in production, but can be helpful for prototyping
 ## Basic example
 
 ```python
-from dff.script import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
 db = SQLContextStorage("postgresql+asyncpg://user:password@host:port/dbname")
 
-actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 
 def handle_request(request):
     user_id = request.args["user_id"]
-    if user_id not in db:
-        context = Context(id=user_id)
-    else:
-        context = db[user_id]
-    new_context = actor(context)
-    db[user_id] = new_context
-    assert user_id in db
+    new_context = pipeline(request, user_id)
     return new_context.last_response
 
 ```

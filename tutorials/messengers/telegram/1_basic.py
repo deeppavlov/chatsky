@@ -64,7 +64,7 @@ interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 # %%
 pipeline = Pipeline.from_script(
-    script=script,  # Actor script object
+    script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.

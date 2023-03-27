@@ -13,7 +13,7 @@ import random
 from datetime import datetime
 
 import psutil
-from dff.script import Context, Actor
+from dff.script import Context
 
 from dff.pipeline import (
     Pipeline,
@@ -21,6 +21,7 @@ from dff.pipeline import (
     to_service,
     ExtraHandlerRuntimeInfo,
     ServiceRuntimeInfo,
+    ACTOR,
 )
 
 from dff.utils.testing.common import (
@@ -55,10 +56,10 @@ NB! Extra handlers don't have execution state,
 so their names shouldn't appear in built-in condition functions.
 
 Extra handlers callable signature can be one of the following:
-`[ctx]`, `[ctx, actor]` or `[ctx, actor, info]`, where:
+`[ctx]`, `[ctx, pipeline]` or `[ctx, pipeline, info]`, where:
 
 * `ctx` - `Context` of the current dialog.
-* `actor` - `Actor` of the pipeline.
+* `pipeline` - The current pipeline.
 * `info` - Dictionary, containing information about current extra handler
             and pipeline execution state (see tutorial 4).
 
@@ -149,21 +150,17 @@ def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
     print(f"Stringified misc: {str_misc}")
 
 
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         ServiceGroup(
             before_handler=[time_measure_before_handler],
             after_handler=[time_measure_after_handler],
             components=[heavy_service for _ in range(0, 5)],
         ),
-        actor,
+        ACTOR,
         logging_service,
     ],
 }

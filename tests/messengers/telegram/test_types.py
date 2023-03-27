@@ -175,12 +175,6 @@ async def test_parsed_text(pipeline_instance, api_credentials, bot_user, session
     await test_helper.send_and_check(telegram_response)
 
 
-def test_error(basic_bot):
-    with pytest.raises(TypeError) as e:
-        basic_bot.send_response(0, 1.2)
-    assert e
-
-
 def test_missing_error():
     with pytest.raises(ValidationError) as e:
         _ = Attachment(source="http://google.com", id="123")

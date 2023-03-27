@@ -10,8 +10,7 @@ dict and most important pipeline components.
 # %%
 import logging
 
-from dff.script import Actor
-from dff.pipeline import Service, Pipeline
+from dff.pipeline import Service, Pipeline, ACTOR
 
 from dff.utils.testing.common import (
     check_happy_path,
@@ -33,7 +32,7 @@ see tutorial 4.
 
 On pipeline execution services from `services`
 list are run without difference between pre- and postprocessors.
-Actor instance should also be present among services.
+Actor constant "ACTOR" should also be present among services.
 ServiceBuilder object can be defined either with callable
 (see tutorial 2) or with dict / object.
 It should contain `handler` - a ServiceBuilder object.
@@ -61,20 +60,16 @@ def postprocess(_):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-# %%
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         {
             "handler": prepreprocess,
         },
         preprocess,
-        actor,
+        ACTOR,
         Service(
             handler=postprocess,
         ),
