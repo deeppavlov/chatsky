@@ -311,19 +311,23 @@ class DFFProject(BaseParserObject):
         :return: A tuple (resolved_script, resolved_start_label, resolved_fallback_label).
         :raises ScriptValidationError:
             During script resolution if:
+
                 - The first element of :py:attr:`~.DFFProject.script` does not resolve to :py:class:`~.Dict`.
                 - If `resolved_flow_name` is not `GLOBAL` and `flow` does not resolve to :py:class:`~.Dict`.
                 - Here `node` refers to both `node` and, if `resolved_flow_name` is `GLOBAL`, `flow`:
+
                   - If `node` does not resolve to :py:class:`~. Dict`.
                   - If any key in `node` is not a keyword (is not in :py:data:`~.keyword_list`).
                   - If any key in `node` is a `GLOBAL` or `LOCAL` keyword.
                   - If any key is found twice inside the `node` dictionary.
+
             During label resolution if:
+
                 - Label does not resolve to :py:class:`~.Iterable`.
                 - Number of elements in label is not 2.
                 - Label elements do not resolve to :py:class:`~.String`.
-            During label validation if a node referenced by a label does not exist in resolved script.
 
+            During label validation if a node referenced by a label does not exist in resolved script.
         """
         script: tp.DefaultDict[Expression, tp.Dict[tp.Optional[Expression], tp.Dict[str, Expression]]] = defaultdict(
             dict
@@ -403,31 +407,31 @@ class DFFProject(BaseParserObject):
 
         Resulting graph contains the following fields:
 
-        - full_script: Stores dictionary exported via :py:meth:`~.DFFProject.to_dict`.
-        - start_label: A tuple of two strings (second element of :py:attr:`~.DFFProject.resolved_script`).
-        - fallback_label: A tuple of two strings (third element of :py:attr:`~.DFFProject.resolved_script`).
+            - full_script: Stores dictionary exported via :py:meth:`~.DFFProject.to_dict`.
+            - start_label: A tuple of two strings (second element of :py:attr:`~.DFFProject.resolved_script`).
+            - fallback_label: A tuple of two strings (third element of :py:attr:`~.DFFProject.resolved_script`).
 
         All nodes of the resulting graph are represented by a single value -- a tuple of strings or lists of strings.
 
         For each node in the script there is a node in the resulting graph which has a value of:
 
-        - `("NODE", flow_name)` if the node belongs to the `GLOBAL` flow.
-        - `("NODE", flow_name, node_name)` otherwise.
+            - `("NODE", flow_name)` if the node belongs to the `GLOBAL` flow.
+            - `("NODE", flow_name, node_name)` otherwise.
 
         where `flow_name` and `node_name` are results of `str` applied to `resolved_flow_name` and `resolved_node_name`
         respectively (see documentation of :py:attr:`~.DFFProject.resolved_script`).
 
         Additionally, nodes representing script nodes contain the following fields:
 
-        - ref: Path to the :py:class:`~.Expression` representing the node (see :py:attr:`~.BaseParserObject.path`).
-        - local: Whether this node is `LOCAL`.
+            - ref: Path to the :py:class:`~.Expression` representing the node (see :py:attr:`~.BaseParserObject.path`).
+            - local: Whether this node is `LOCAL`.
 
         Graph has other nodes:
 
-        - `("NONE",)` -- empty node.
-        - Label nodes. The first element of their value is `"LABEL"`, the second element is the name of the label used
-        (e.g. `"to_fallback"`). The rest of the elements are tuples of two strings with the first element being a name
-        of a function argument, and the second element being its `true_value`.
+            - `("NONE",)` -- empty node.
+            - Label nodes. The first element of their value is `"LABEL"`, the second element is the name of the label used
+              (e.g. `"to_fallback"`). The rest of the elements are tuples of two strings with the first element being a name
+              of a function argument, and the second element being its `true_value`.
 
         For each transition between script nodes there is an edge in the graph:
         The first node of the edge is always a node representing a node in the script.
@@ -436,12 +440,13 @@ class DFFProject(BaseParserObject):
 
         All edges have 4 fields:
 
-        - label_ref: Path to the object defining transition label.
-        - label: `str` of either absolute value of the label or the label itself.
-        - condition_ref: Path to the object defining transition condition.
-        - condition: `str` of either absolute value of the condition or the condition itself.
+            - label_ref: Path to the object defining transition label.
+            - label: `str` of either absolute value of the label or the label itself.
+            - condition_ref: Path to the object defining transition condition.
+            - condition: `str` of either absolute value of the condition or the condition itself.
 
         :raises ScriptValidationError:
+
             - If `TRANSITION` keyword does not refer to a :py:class:`~.Dict`.
             - If any of the first two elements of any transition label is not :py:class:`~.String`.
         """
