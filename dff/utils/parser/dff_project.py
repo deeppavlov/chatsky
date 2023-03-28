@@ -186,7 +186,8 @@ class DFFProject(BaseParserObject):
             This exception is called under these conditions:
 
             - If `self.script_initializer` is specified during `__init__` and any of the following is true:
-                - Namespace specified by the first part of the `script_initializer` does not exist in `self.namespaces`.
+                - Namespace specified by the first part of the `script_initializer`
+                  does not exist in `self.namespaces`.
                 - Object specified by the second part of the `script_initializer` does not exist in namespace.
                 - Object specified by the second part of the `script_initializer` is not an assignment.
                 - Object specified by the second part of the `script_initializer`
@@ -317,7 +318,7 @@ class DFFProject(BaseParserObject):
                   - If any key in `node` is not a keyword (is not in :py:data:`~.keyword_list`).
                   - If any key in `node` is a `GLOBAL` or `LOCAL` keyword.
                   - If any key is found twice inside the `node` dictionary.
-            
+
             During label resolution if:
                 - Label does not resolve to :py:class:`~.Iterable`.
                 - Number of elements in label is not 2.
@@ -421,8 +422,9 @@ class DFFProject(BaseParserObject):
 
         Graph has other nodes:
             - `("NONE",)` -- empty node.
-            - Label nodes. The first element of their value is `"LABEL"`, the second element is the name of the label used
-              (e.g. `"to_fallback"`). The rest of the elements are tuples of two strings with the first element being a name
+            - Label nodes. The first element of their value is `"LABEL"`,
+              the second element is the name of the label used (e.g. `"to_fallback"`).
+              The rest of the elements are tuples of two strings with the first element being a name
               of a function argument, and the second element being its `true_value`.
 
         For each transition between script nodes there is an edge in the graph:
@@ -722,8 +724,8 @@ class DFFProject(BaseParserObject):
         Export DFF Project as a directory of python files.
 
         For each namespace in the project if a file corresponding to that namespace does not exist in the directory,
-        a new file will be created and the namespace will be dumped into it. If a file already exists, it will be edited
-        in the following way:
+        a new file will be created and the namespace will be dumped into it.
+        If a file already exists, it will be edited in the following way:
 
         All statements are extracted from the file the same way :py:meth:`~.Namespace.from_file` extracts them.
 

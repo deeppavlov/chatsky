@@ -63,9 +63,9 @@ class BaseParserObject(ABC):
         "Mapping from child names to child nodes"
 
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
-        """A list of objects defined in :py:class:`.Namespace`\s that are used inside current node.
+        """A list of objects defined in :py:class:`.Namespace`\\s that are used inside current node.
 
-        :return: A mapping from :py:class:`.Namespace`\s names to sets of object names.
+        :return: A mapping from :py:class:`.Namespace`\\s names to sets of object names.
         """
         result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
@@ -193,7 +193,6 @@ class Statement(BaseParserObject, ABC):
         Extract statements from ast node.
 
         :return:
-
             - None, if type of the `node` is not compatible with the current class.
             - For non-:py:class:`~.Python` classes
               return a mapping from names of defined objects inside the statement to their definitions.
@@ -246,7 +245,6 @@ class Expression(BaseParserObject, ABC):
         Construct an expression from a string representing it.
 
         :raises ParsingError:
-
             - If a string represents anything but a single expression (:py:class:`ast.Expr`).
         """
         body = ast.parse(string).body
@@ -322,8 +320,9 @@ class ReferenceObject(BaseParserObject, ABC):
         Return a path of a referenced object (as well as modifiers such as indexes or attribute references).
 
         So if `ReferenceObject` is `from dff import pipeline as pl referenced_object` for `pl` is `dff.pipeline`.
-        However, if `ReferencedObject` is `pl.Pipeline` or `pl.dictionary[pl.number][5]` then their `referenced_object`\s
-        are, respectively, `dff.pipeline.Pipeline` and `dff.pipeline.dictionary[dff.pipeline.number][5]`.
+        However, if `ReferencedObject` is `pl.Pipeline` or `pl.dictionary[pl.number][5]` then their
+        `referenced_object`\\s are, respectively, `dff.pipeline.Pipeline` and
+        `dff.pipeline.dictionary[dff.pipeline.number][5]`.
         """
 
     def __repr__(self):
