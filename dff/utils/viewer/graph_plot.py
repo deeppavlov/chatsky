@@ -71,7 +71,9 @@ def get_plot(
     random.seed(random_seed)
 
     graph = graphviz.Digraph()
-    graph.attr(layout="osage", compound="true", splines="spline", overlap="ipsep", fontname="Helvetica,Arial,sans-serif")
+    graph.attr(
+        layout="osage", compound="true", splines="spline", overlap="ipsep", fontname="Helvetica,Arial,sans-serif"
+    )
     graph.node_attr.update(**NODE_ATTRS)
 
     nodes: Dict[str, Dict] = {}

@@ -88,10 +88,10 @@ def control_pts(angle, radius):
     return list(zip(b_cplx.real, b_cplx.imag))
 
 
-def ctrl_rib_chords(l, r, radius):
-    if len(l) != 2 or len(r) != 2:
+def ctrl_rib_chords(left, right, radius):
+    if len(left) != 2 or len(right) != 2:
         raise ValueError("The arc ends must be elements in a list of len 2")
-    return [control_pts([l[j], (l[j] + r[j]) / 2, r[j]], radius) for j in range(2)]
+    return [control_pts([left[j], (left[j] + right[j]) / 2, right[j]], radius) for j in range(2)]
 
 
 def make_q_bezier(b):
@@ -136,7 +136,9 @@ def make_ribbon_arc(theta0, theta1):
 
 
 def make_layout(title):
-    xaxis = dict(showline=False, automargin=False, zeroline=False, showgrid=False, showticklabels=False, title=dict(standoff=0))
+    xaxis = dict(
+        showline=False, automargin=False, zeroline=False, showgrid=False, showticklabels=False, title=dict(standoff=0)
+    )
     yaxis = {**xaxis, "scaleanchor": "x"}
     return dict(
         title=title,
@@ -159,23 +161,26 @@ def make_ideo_shape(path, line_color, fill_color):
     )
 
 
-def make_ribbon(l, r, line_color, fill_color, radius=0.2):
-    poligon = ctrl_rib_chords(l, r, radius)
+def make_ribbon(left, right, line_color, fill_color, radius=0.2):
+    poligon = ctrl_rib_chords(left, right, radius)
     b, c = poligon
     return dict(
         line=go.layout.shape.Line(color=line_color, width=0.5),
-        path=make_q_bezier(b) + make_ribbon_arc(r[0], r[1]) + make_q_bezier(c[::-1]) + make_ribbon_arc(l[1], l[0]),
+        path=make_q_bezier(b)
+        + make_ribbon_arc(right[0], right[1])
+        + make_q_bezier(c[::-1])
+        + make_ribbon_arc(left[1], left[0]),
         type="path",
         fillcolor=fill_color,
         layer="below",
     )
 
 
-def make_self_rel(l, line_color, fill_color, radius):
-    b = control_pts([l[0], (l[0] + l[1]) / 2, l[1]], radius)
+def make_self_rel(line, line_color, fill_color, radius):
+    b = control_pts([line[0], (line[0] + line[1]) / 2, line[1]], radius)
     return dict(
         line=dict(color=line_color, width=0.5),
-        path=make_q_bezier(b) + make_ribbon_arc(l[1], l[0]),
+        path=make_q_bezier(b) + make_ribbon_arc(line[1], line[0]),
         type="path",
         fillcolor=fill_color,
         layer="below",
@@ -218,10 +223,10 @@ def make_filled_chord(adjacency_df: pd.DataFrame, width: int = 800, height: int 
                 continue
             eta = idx_sort[j]
             eta_inv = invPerm(eta)
-            l = ribbon_ends[k][sigma_inv[j]]
+            left = ribbon_ends[k][sigma_inv[j]]
             if j == k:
-                layout["shapes"].append(make_self_rel(l, "rgb(175,175,175)", ideo_colors[k], radius=radii_sribb[k]))
-                z = 0.9 * np.exp(1j * (l[0] + l[1]) / 2)
+                layout["shapes"].append(make_self_rel(left, "rgb(175,175,175)", ideo_colors[k], radius=radii_sribb[k]))
+                z = 0.9 * np.exp(1j * (left[0] + left[1]) / 2)
                 text = labels[k] + " {0} transitions to ".format(adjacency_df.iloc[k, k])
                 ribbon_info.append(
                     go.Scatter(
@@ -234,9 +239,9 @@ def make_filled_chord(adjacency_df: pd.DataFrame, width: int = 800, height: int 
                     )
                 )
             else:
-                r = ribbon_ends[j][eta_inv[k]]
-                zi = 0.9 * np.exp(1j * (l[0] + l[1]) / 2)
-                zf = 0.9 * np.exp(1j * (r[0] + r[1]) / 2)
+                right = ribbon_ends[j][eta_inv[k]]
+                zi = 0.9 * np.exp(1j * (left[0] + left[1]) / 2)
+                zf = 0.9 * np.exp(1j * (right[0] + right[1]) / 2)
 
                 texti = labels[k] + " {0} transitions to ".format(matrix[k][j]) + labels[j]
                 textf = labels[j] + " {0} transitions to ".format(matrix[j][k]) + labels[k]
@@ -261,12 +266,12 @@ def make_filled_chord(adjacency_df: pd.DataFrame, width: int = 800, height: int 
                         marker=dict(size=0.5, color=ribbon_color[j][k]),
                     )
                 )
-                r = (r[1], r[0])
+                right = (right[1], right[0])
                 if matrix[k][j] > matrix[j][k]:
                     color_of_highest = ribbon_color[k][j]
                 else:
                     color_of_highest = ribbon_color[j][k]
-                layout["shapes"].append(make_ribbon(l, r, "rgb(175, 175, 175)", color_of_highest))
+                layout["shapes"].append(make_ribbon(left, right, "rgb(175, 175, 175)", color_of_highest))
     ideograms = []
 
     for k in range(len(ideo_ends)):

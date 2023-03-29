@@ -151,4 +151,3 @@ def make_image(args=sys.argv[1:]):
         image.plotly_image(plot, parsed_args.output_file, format=parsed_args.format)
     else:
         raise argparse.ArgumentError("Invalid value for argument `type`")
-    

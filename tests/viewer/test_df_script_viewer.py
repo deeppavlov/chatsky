@@ -1,14 +1,11 @@
 import difflib
 import time
 from multiprocessing import Process
-from io import BytesIO
-from base64 import b64encode
 from pathlib import Path
 
 import pytest
 
 try:
-    import plotly.graph_objects as go
     from dff.utils.viewer import app
     from dff.utils.viewer import graph
     from dff.utils.viewer import graph_plot
