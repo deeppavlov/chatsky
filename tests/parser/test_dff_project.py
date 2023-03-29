@@ -13,7 +13,7 @@ if version_info >= (3, 9):
 else:
     TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.8-")
 
-ENGINE_EXAMPLES_DIR = Path(__file__).parent.parent.parent / "examples" / "script" / "core"
+ENGINE_TUTORIAL_DIR = Path(__file__).parent.parent.parent / "tutorials" / "script" / "core"
 
 
 # todo: add more parameters?
@@ -83,7 +83,7 @@ def test_engine_examples(example_name: str, tmp_path):
     python_name = example_name + ".py"
 
     dff_project = DFFProject.from_python(
-        ENGINE_EXAMPLES_DIR, (ENGINE_EXAMPLES_DIR / python_name), script_initializer="pipeline"
+        ENGINE_TUTORIAL_DIR, (ENGINE_TUTORIAL_DIR / python_name), script_initializer="pipeline"
     )
 
     dff_project.to_yaml(tmp_path / (example_name + ".yaml"))
