@@ -65,7 +65,7 @@ def rebuild_to_python_tests():
 def rebuild_engine_examples():
     engine_tutorial_dir = Path("tutorials/script/core")
 
-    test_dir = TEST_DIR / "engine_examples"
+    test_dir = TEST_DIR / "core_tutorials"
 
     if test_dir.exists():
         rmtree(test_dir)
