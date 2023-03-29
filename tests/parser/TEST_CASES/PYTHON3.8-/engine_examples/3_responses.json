@@ -71,7 +71,6 @@
                 "value_'greeting_flow'",
                 "value_'start_node'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -86,7 +85,6 @@
                 "value_'greeting_flow'",
                 "value_'node1'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -101,7 +99,6 @@
                 "value_'greeting_flow'",
                 "value_'node2'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -116,7 +113,6 @@
                 "value_'greeting_flow'",
                 "value_'node3'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -131,7 +127,6 @@
                 "value_'greeting_flow'",
                 "value_'node4'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -146,7 +141,6 @@
                 "value_'greeting_flow'",
                 "value_'fallback_node'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",

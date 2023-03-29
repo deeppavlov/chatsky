@@ -68,7 +68,6 @@
                 "value_'start_flow'",
                 "value_'start_node'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'start_flow'",
@@ -83,7 +82,6 @@
                 "value_'start_flow'",
                 "value_'label'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'start_flow'",
@@ -98,7 +96,6 @@
                 "value_'start_flow'",
                 "value_'another'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'start_flow'",

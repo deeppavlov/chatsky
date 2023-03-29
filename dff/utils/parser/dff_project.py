@@ -410,15 +410,15 @@ class DFFProject(BaseParserObject):
         All nodes of the resulting graph are represented by a single value -- a tuple of strings or lists of strings.
 
         For each node in the script there is a node in the resulting graph which has a value of:
-            - `("NODE", flow_name)` if the node belongs to the `GLOBAL` flow.
+            - `("GLOBAL_NODE", flow_name)` if the node belongs to the `GLOBAL` flow.
+            - `("LOCAL_NODE", flow_name, node_name)` if the node is a `LOCAL` node.
             - `("NODE", flow_name, node_name)` otherwise.
 
         where `flow_name` and `node_name` are results of `str` applied to `resolved_flow_name` and `resolved_node_name`
         respectively (see documentation of :py:attr:`~.DFFProject.resolved_script`).
 
-        Additionally, nodes representing script nodes contain the following fields:
+        Additionally, nodes representing script nodes contain the following field:
             - ref: Path to the :py:class:`~.Expression` representing the node (see :py:attr:`~.BaseParserObject.path`).
-            - local: Whether this node is `LOCAL`.
 
         Graph has other nodes:
             - `("NONE",)` -- empty node.
@@ -481,18 +481,16 @@ class DFFProject(BaseParserObject):
         )
         for flow_name, flow in self.resolved_script[0].items():
             for node_name, node_info in flow.items():
-                current_label = (
-                    ("NODE", str(flow_name), str(node_name))
-                    if node_name is not None
-                    else (
-                        "NODE",
-                        str(flow_name),
-                    )
-                )
+                if node_name is None:
+                    current_label = ("GLOBAL_NODE", str(flow_name))
+                elif node_name in keyword_dict["LOCAL"]:
+                    current_label = ("LOCAL_NODE", str(flow_name), str(node_name))
+                else:
+                    current_label = ("NODE", str(flow_name), str(node_name))
+
                 graph.add_node(
                     current_label,
                     ref=node_info["__node__"].path,
-                    local=node_name in keyword_dict["LOCAL"],
                 )
                 transitions = node_info.get("TRANSITIONS")
                 if transitions is None:

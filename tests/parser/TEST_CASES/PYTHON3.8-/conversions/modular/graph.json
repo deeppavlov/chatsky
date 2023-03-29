@@ -37,7 +37,6 @@
                 "node",
                 "value"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'start_flow'",

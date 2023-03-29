@@ -75,7 +75,6 @@
                 "value_'root'",
                 "value_'start'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'root'",
@@ -90,7 +89,6 @@
                 "value_'flow'",
                 "value_'step_0'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'flow'",
@@ -105,7 +103,6 @@
                 "value_'root'",
                 "value_'fallback'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'root'",
@@ -119,9 +116,8 @@
                 "value",
                 "value_GLOBAL"
             ],
-            "local": false,
             "id": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ]
         },
@@ -155,7 +151,6 @@
                 "value_'flow'",
                 "value_'step_1'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'flow'",
@@ -170,7 +165,6 @@
                 "value_'flow'",
                 "value_'step_2'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'flow'",
@@ -185,7 +179,6 @@
                 "value_'flow'",
                 "value_'step_3'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'flow'",
@@ -200,7 +193,6 @@
                 "value_'flow'",
                 "value_'step_4'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'flow'",
@@ -262,7 +254,7 @@
             ],
             "condition": "cnd.true()",
             "source": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ],
             "target": [
