@@ -62,7 +62,7 @@ def rebuild_to_python_tests():
             dff_project.to_python(working_dir / "result_editing")
 
 
-def rebuild_engine_examples():
+def rebuild_core_tutorials():
     engine_tutorial_dir = Path("tutorials/script/core")
 
     test_dir = TEST_DIR / "core_tutorials"
@@ -83,4 +83,4 @@ def rebuild_engine_examples():
 if __name__ == "__main__":
     rebuild_conversions()
     rebuild_to_python_tests()
-    rebuild_engine_examples()
+    rebuild_core_tutorials()

@@ -79,7 +79,7 @@ def test_to_python(test_case: str):
         "9_pre_transitions_processing",
     ],
 )
-def test_engine_examples(example_name: str, tmp_path):
+def test_core_tutorials(example_name: str, tmp_path):
     python_name = example_name + ".py"
 
     dff_project = DFFProject.from_python(
