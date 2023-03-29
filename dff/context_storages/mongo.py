@@ -10,8 +10,11 @@ MongoDB is a widely-used, open-source NoSQL database that is known for its scala
 It stores data in a format similar to JSON, making it easy to work with the data in a variety of programming languages
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
+
+TODO: remove explicit id and timestamp
 """
 import json
+import logging
 import time
 from typing import Hashable, Dict, Union, List, Any, Optional
 from uuid import UUID
@@ -30,7 +33,10 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import full_update_scheme, UpdateScheme
+from .update_scheme import full_update_scheme, UpdateScheme, UpdateSchemeBuilder, FieldRule
+
+
+logger = logging.getLogger(__name__)
 
 
 class MongoContextStorage(DBContextStorage):
@@ -55,37 +61,46 @@ class MongoContextStorage(DBContextStorage):
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
         self._prf = collection_prefix
-        self.collections = {field: db[f"{self._prf}_{field}"] for field in full_update_scheme.write_fields}
+        self.collections = {field: db[f"{self._prf}_{field}"] for field in full_update_scheme.keys()}
         self.collections.update({self._CONTEXTS: db[f"{self._prf}_contexts"]})
+
+    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+        super().set_update_scheme(scheme)
+        self.update_scheme.fields[UpdateScheme.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields.setdefault(UpdateScheme.EXTERNAL_FIELD, dict()).update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields.setdefault(UpdateScheme.CREATED_AT_FIELD, dict()).update(write=FieldRule.UPDATE_ONCE)
+        logger.warning(f"init -> {self.update_scheme.fields}")
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.CREATED_AT_FIELD, -1).to_list(1)
         if len(last_context) == 0 or self._check_none(last_context[0]) is None:
             raise KeyError(f"No entry for key {key}.")
         last_context[0]["id"] = last_context[0][self._INTERNAL]
+        logger.warning(f"read -> {key}: {last_context[0]} {last_context[0]['id']}")
         return Context.cast({k: v for k, v in last_context[0].items() if k not in (self._INTERNAL, self._EXTERNAL)})
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        identifier = {**json.loads(value.json()), self._EXTERNAL: key, self._INTERNAL: value.id, UpdateScheme.TIMESTAMP_FIELD: time.time()}
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
+        identifier = {**json.loads(value.json()), self._EXTERNAL: key, self._INTERNAL: value.id, UpdateScheme.CREATED_AT_FIELD: time.time_ns()}
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.CREATED_AT_FIELD, -1).to_list(1)
         if len(last_context) != 0 and self._check_none(last_context[0]) is None:
             await self.collections[self._CONTEXTS].replace_one({self._INTERNAL: last_context[0][self._INTERNAL]}, identifier, upsert=True)
         else:
             await self.collections[self._CONTEXTS].insert_one(identifier)
+        logger.warning(f"write -> {key}: {identifier} {value.id}")
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def del_item_async(self, key: Union[Hashable, str]):
-        await self.collections[self._CONTEXTS].insert_one({self._EXTERNAL: key, UpdateScheme.TIMESTAMP_FIELD: time.time_ns(), self._KEY_NONE: True})
+        await self.collections[self._CONTEXTS].insert_one({self._EXTERNAL: key, UpdateScheme.CREATED_AT_FIELD: time.time_ns(), self._KEY_NONE: True})
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.TIMESTAMP_FIELD, -1).to_list(1)
+        last_context = await self.collections[self._CONTEXTS].find({self._EXTERNAL: key}).sort(UpdateScheme.CREATED_AT_FIELD, -1).to_list(1)
         return len(last_context) != 0 and self._check_none(last_context[0]) is not None
 
     @threadsafe_method

@@ -32,15 +32,29 @@ class FieldRule(Enum):
     IGNORE = auto()
     UPDATE = auto()
     HASH_UPDATE = auto()
+    UPDATE_ONCE = auto()
     APPEND = auto()
 
 
 UpdateSchemeBuilder = Dict[str, Union[Tuple[str], Tuple[str, str]]]
 
 
+@unique
+class AdditionalFields(Enum):
+    IDENTITY_FIELD = "id"
+    EXTERNAL_FIELD = "ext_id"
+    CREATED_AT_FIELD = "created_at"
+    UPDATED_AT_FIELD = "updated_at"
+# TODO: add all to fields, setup read and write for all, setup checks
+
+
 class UpdateScheme:
     ALL_ITEMS = "__all__"
-    TIMESTAMP_FIELD = "created_at"
+
+    IDENTITY_FIELD = "id"
+    EXTERNAL_FIELD = "ext_id"
+    CREATED_AT_FIELD = "created_at"
+    UPDATED_AT_FIELD = "updated_at"
 
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
@@ -54,10 +68,6 @@ class UpdateScheme:
                 raise Exception(f"Field '{name}' not included in Context!")
             field, field_name = self._init_update_field(field_type, name, list(rules))
             self.fields[field_name] = field
-
-    @property
-    def write_fields(self):
-        return [field for field, props in self.fields.items() if props["readonly"]]
 
     @classmethod
     def _get_type_from_name(cls, field_name: str) -> Optional[FieldType]:
@@ -79,10 +89,7 @@ class UpdateScheme:
         elif len(rules) > 2:
             raise Exception(f"For field '{field_name}' more then two (read, write) rules are defined!")
         elif len(rules) == 1:
-            field["readonly"] = True
             rules.append("ignore")
-        else:
-            field["readonly"] = False
 
         if rules[0] == "ignore":
             read_rule = FieldRule.IGNORE
@@ -98,6 +105,8 @@ class UpdateScheme:
             write_rule = FieldRule.UPDATE
         elif rules[1] == "hash_update":
             write_rule = FieldRule.HASH_UPDATE
+        elif rules[1] == "update_once":
+            write_rule = FieldRule.UPDATE_ONCE
         elif rules[1] == "append":
             write_rule = FieldRule.APPEND
         else:
@@ -169,6 +178,11 @@ class UpdateScheme:
 
         return field, field_name_pure
 
+    def mark_db_not_persistent(self):
+        for field, rules in self.fields.items():
+            if rules["write"] == FieldRule.HASH_UPDATE or rules["write"] == FieldRule.HASH_UPDATE:
+                rules["write"] = FieldRule.UPDATE
+
     @staticmethod
     def _get_outlook_slice(dictionary_keys: Iterable, update_field: List) -> List:
         list_keys = sorted(list(dictionary_keys))
@@ -180,17 +194,15 @@ class UpdateScheme:
         list_keys = sorted(list(dictionary_keys))
         return [list_keys[key] for key in update_field] if len(list_keys) > 0 else list()
 
-    def _resolve_readonly_value(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
-        if field_name == "id":
-            return int_id
-        else:
-            return None
+    def _update_hashes(self, value: Dict[str, Any], field: str, hashes: Dict[str, Any]):
+        if self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+            hashes[field] = {key: sha256(str(value).encode("utf-8")) for key, value in value.items()}
 
     async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, ext_id: Union[UUID, int, str], int_id: Optional[Union[UUID, int, str]] = None) -> Tuple[Context, Dict]:
         result = dict()
         hashes = dict()
 
-        for field in self.fields.keys():
+        for field in [k for k, v in self.fields.items() if "read" in v.keys()]:
             if self.fields[field]["read"] == FieldRule.IGNORE:
                 continue
 
@@ -202,31 +214,35 @@ class UpdateScheme:
                 else:
                     update_field = self._get_outlook_list(list_keys, self.fields[field]["outlook_list"])
                 result[field] = await seq_reader(field, update_field, int_id, ext_id)
-                hashes[field] = {item: sha256(str(result[field][item]).encode("utf-8")) for item in update_field}
+                self._update_hashes(result[field], field, hashes)
 
             elif field_type == FieldType.DICT:
                 update_field = self.fields[field].get("outlook", None)
                 if self.ALL_ITEMS in update_field:
                     update_field = await fields_reader(field, int_id, ext_id)
                 result[field] = await seq_reader(field, update_field, int_id, ext_id)
-                hashes[field] = {item: sha256(str(result[field][item]).encode("utf-8")) for item in update_field}
+                self._update_hashes(result[field], field, hashes)
 
             else:
                 result[field] = await val_reader(field, int_id, ext_id)
 
             if result[field] is None:
-                result[field] = self._resolve_readonly_value(field, int_id, ext_id)
+                if field == self.IDENTITY_FIELD:
+                    result[field] = int_id
+                elif field == self.EXTERNAL_FIELD:
+                    result[field] = ext_id
 
         return Context.cast(result), hashes
 
-    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str], add_timestamp: bool = True):
+    async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
         context_dict = ctx.dict()
+        context_dict[self.EXTERNAL_FIELD] = str(ext_id)
+        context_dict[self.CREATED_AT_FIELD] = context_dict[self.UPDATED_AT_FIELD] = time.time_ns()
 
-        if hashes is None and add_timestamp:
-            await val_writer(self.TIMESTAMP_FIELD, time.time_ns(), ctx.id, ext_id)
-
-        for field in self.fields.keys():
+        for field in [k for k, v in self.fields.items() if "write" in v.keys()]:
             if self.fields[field]["write"] == FieldRule.IGNORE:
+                continue
+            if self.fields[field]["write"] == FieldRule.UPDATE_ONCE and hashes is not None:
                 continue
             field_type = self._get_type_from_name(field)
 
@@ -262,27 +278,27 @@ class UpdateScheme:
                         if hashes is None or hashes.get(field, dict()).get(item, None) != item_hash:
                             patch[item] = context_dict[field][item]
                 else:
-                    patch = {item: context_dict[field][item] for item in update_field}
+                    patch = {item: context_dict[field][item] for item in update_keys}
                 await seq_writer(field, patch, ctx.id, ext_id)
 
             else:
                 await val_writer(field, context_dict[field], ctx.id, ext_id)
 
 
-default_update_scheme = UpdateScheme({
+default_update_scheme = {
     "id": ("read",),
     "requests[-1]": ("read", "append"),
     "responses[-1]": ("read", "append"),
     "labels[-1]": ("read", "append"),
     "misc[[all]]": ("read", "hash_update"),
     "framework_states[[all]]": ("read", "hash_update"),
-})
+}
 
-full_update_scheme = UpdateScheme({
+full_update_scheme = {
     "id": ("read",),
     "requests[:]": ("read", "append"),
     "responses[:]": ("read", "append"),
     "labels[:]": ("read", "append"),
     "misc[[all]]": ("read", "update"),
     "framework_states[[all]]": ("read", "update"),
-})
+}

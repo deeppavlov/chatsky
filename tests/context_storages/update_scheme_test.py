@@ -7,7 +7,7 @@ from dff.context_storages import UpdateScheme
 from dff.script import Context
 
 default_update_scheme = {
-    "id": ("read", "update"),
+    "id": ("read",),
     "requests[-1]": ("read", "append"),
     "responses[-1]": ("read", "append"),
     "labels[-1]": ("read", "append"),

@@ -36,7 +36,7 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(self, path: str, update_scheme: UpdateScheme = default_update_scheme):
+    def __init__(self, path: str, update_scheme: UpdateSchemeBuilder = default_update_scheme):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -46,11 +46,14 @@ class DBContextStorage(ABC):
         """Threading for methods that require single thread access."""
         self.hash_storage = dict()
 
-        self.update_scheme = None
+        self.update_scheme: Optional[UpdateScheme] = None
         self.set_update_scheme(update_scheme)
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
-        self.update_scheme = scheme
+        if isinstance(scheme, UpdateScheme):
+            self.update_scheme = scheme
+        else:
+            self.update_scheme = UpdateScheme(scheme)
 
     def __getitem__(self, key: Hashable) -> Context:
         """
