@@ -11,8 +11,10 @@ try:
     import plotly.graph_objects as go
     from dff.utils.viewer import app
     from dff.utils.viewer import graph
-    from dff.utils.viewer import plot
+    from dff.utils.viewer import graph_plot
     from dff.utils.viewer import cli
+    from dff.utils.viewer import preprocessing
+    from dff.utils.viewer import utils
 except ImportError:
     pytest.skip(allow_module_level=True, reason="Missing dependencies for dff parser.")
 
@@ -23,26 +25,33 @@ def example_dir():
     yield example_d
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def nx_graph(example_dir):
     G = graph.get_graph(example_dir / "main.py", example_dir.absolute())
     yield G
 
 
-@pytest.mark.parametrize("show_misc", [True, False])
 @pytest.mark.parametrize("show_global", [True, False])
 @pytest.mark.parametrize("show_local", [True, False])
 @pytest.mark.parametrize("show_isolates", [True, False])
-def test_plotting(nx_graph, show_misc, show_global, show_local, show_isolates):
-    testing_plot = plot.get_plot(**locals())
-    _bytes = testing_plot.pipe("png")
-    assert isinstance(_bytes, bytes) and len(_bytes) > 0
-    prefix = "data:image/png;base64,"
-    with BytesIO(_bytes) as stream:
-        base64 = prefix + b64encode(stream.getvalue()).decode("utf-8")
-    fig = go.Figure(go.Image(source=base64))
-    assert app.create_app(testing_plot)
-    assert fig
+@pytest.mark.parametrize("show_unresolved", [True, False])
+def test_preprocessing(nx_graph, show_global, show_local, show_isolates, show_unresolved):
+    G = preprocessing.preprocess(**locals())
+    glob = ("NODE", preprocessing.VIRTUAL_FLOW_KEY, "GLOBAL") in G.nodes
+    assert glob == show_global
+    unresolved = ("NODE", preprocessing.VIRTUAL_FLOW_KEY, preprocessing.UNRESOLVED_KEY) in G.nodes
+    assert unresolved == show_unresolved
+
+
+@pytest.mark.parametrize("show_misc", [True, False])
+@pytest.mark.parametrize("show_response", [True, False])
+@pytest.mark.parametrize("show_processing", [True, False])
+def test_plotting(nx_graph, show_misc, show_response, show_processing):
+    nx_graph = preprocessing.preprocess(**locals())
+    testing_plot = graph_plot.get_plot(**locals())
+    plotly_fig = utils.graphviz_to_plotly(testing_plot)
+    assert app.create_app(plotly_fig)
+    assert plotly_fig
 
 
 @pytest.mark.parametrize(
@@ -56,6 +65,7 @@ def test_plotting(nx_graph, show_misc, show_global, show_local, show_isolates):
                 show_global=False,
                 show_local=False,
                 show_isolates=False,
+                show_unresolved=False,
                 random_seed=1,
             ),
             Path(__file__).parent / "opts_off.dot",
@@ -68,14 +78,16 @@ def test_plotting(nx_graph, show_misc, show_global, show_local, show_isolates):
                 show_global=True,
                 show_local=True,
                 show_isolates=True,
+                show_unresolved=True,
                 random_seed=1,
             ),
             Path(__file__).parent / "opts_on.dot",
         ),
     ],
 )
-def test_plotting_2(params, reference_file, nx_graph, tmp_path):
-    testing_plot = plot.get_plot(nx_graph, **params)
+def test_plotting_2(nx_graph, params, reference_file, tmp_path):
+    nx_graph = preprocessing.preprocess(nx_graph, **params)
+    testing_plot = graph_plot.get_plot(nx_graph, **params)
     plot_file = tmp_path / "plot"
     testing_plot.render(filename=plot_file)
     test_lines = plot_file.open().readlines()
