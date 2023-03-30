@@ -38,7 +38,7 @@ def format_port(name: str, port: str) -> str:
 
 
 def format_as_table(rows: list) -> str:
-    return "".join(['<<table border="0" cellborder="0" cellspacing="6" cellpadding="0">', *rows, "</table>>"])
+    return "".join(['<<table border="0" cellborder="0" cellspacing="12" cellpadding="0">', *rows, "</table>>"])
 
 
 def get_node_struct(node: tuple) -> Dict:
@@ -71,9 +71,7 @@ def get_plot(
     random.seed(random_seed)
 
     graph = graphviz.Digraph()
-    graph.attr(
-        layout="osage", compound="true", splines="spline", overlap="ipsep", fontname="Helvetica,Arial,sans-serif"
-    )
+    graph.attr(compound="true", splines="spline", overlap="ipsep", fontname="Helvetica,Arial,sans-serif")
     graph.node_attr.update(**NODE_ATTRS)
 
     nodes: Dict[str, Dict] = {}

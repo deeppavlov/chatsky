@@ -96,7 +96,7 @@ def ctrl_rib_chords(left, right, radius):
 
 def make_q_bezier(b):
     if len(b) != 3:
-        raise ValueError("Contaol polygon must have 3 points")
+        raise ValueError("Control polygon must have 3 points")
     A, B, C = b
     return (
         "M "
