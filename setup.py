@@ -95,19 +95,17 @@ stats_dependencies = merge_req_lists(
 )
 
 full = merge_req_lists(
-    [
-        core,
-        async_files_dependencies,
-        sqlite_dependencies,
-        redis_dependencies,
-        mongodb_dependencies,
-        mysql_dependencies,
-        postgresql_dependencies,
-        ydb_dependencies,
-        clickhouse_dependencies,
-        stats_dependencies,
-        telegram_dependencies,
-    ]
+    core,
+    async_files_dependencies,
+    sqlite_dependencies,
+    redis_dependencies,
+    mongodb_dependencies,
+    mysql_dependencies,
+    postgresql_dependencies,
+    ydb_dependencies,
+    clickhouse_dependencies,
+    stats_dependencies,
+    telegram_dependencies,
 )
 
 requests_requirements = [
