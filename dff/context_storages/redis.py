@@ -122,5 +122,5 @@ class RedisContextStorage(DBContextStorage):
         for key, value in data.items():
             await self._redis.set(f"{ext_id}:{int_id}:{field_name}:{key}", pickle.dumps(value))
 
-    async def _write_value(self, data: Any, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+    async def _write_value(self, field_name: str, data: Any, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
         return await self._redis.set(f"{ext_id}:{int_id}:{field_name}", pickle.dumps(data))

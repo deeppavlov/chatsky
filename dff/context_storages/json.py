@@ -11,7 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder
+from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, AdditionalFields
 
 try:
     import aiofiles
@@ -49,7 +49,7 @@ class JSONContextStorage(DBContextStorage):
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
         self.update_scheme.mark_db_not_persistent()
-        self.update_scheme.fields[UpdateScheme.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
+        self.update_scheme.fields[AdditionalFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -105,23 +105,23 @@ class JSONContextStorage(DBContextStorage):
             async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
                 self.storage = SerializableStorage.parse_raw(await file_stream.read())
 
-    async def _read_fields(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+    async def _read_fields(self, field_name: str, _: str, ext_id: Union[UUID, int, str]):
         container = self.storage.__dict__.get(ext_id, list())
         return list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
 
-    async def _read_seq(self, field_name: str, outlook: List[Hashable], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
+    async def _read_seq(self, field_name: str, outlook: List[Hashable], _: str, ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
         if ext_id not in self.storage.__dict__ or self.storage.__dict__[ext_id][-1] is None:
             raise KeyError(f"Key {ext_id} not in storage!")
         container = self.storage.__dict__[ext_id]
         return {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook} if len(container) > 0 else dict()
 
-    async def _read_value(self, field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
+    async def _read_value(self, field_name: str, _: str, ext_id: Union[UUID, int, str]) -> Any:
         if ext_id not in self.storage.__dict__ or self.storage.__dict__[ext_id][-1] is None:
             raise KeyError(f"Key {ext_id} not in storage!")
         container = self.storage.__dict__[ext_id]
         return container[-1].dict().get(field_name, None) if len(container) > 0 else None
 
-    async def _write_anything(self, field_name: str, data: Any, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
+    async def _write_anything(self, field_name: str, data: Any, _: str, ext_id: Union[UUID, int, str]):
         container = self.storage.__dict__.setdefault(ext_id, list())
         if len(container) > 0:
             container[-1] = Context.cast({**container[-1].dict(), field_name: data})

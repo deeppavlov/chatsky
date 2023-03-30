@@ -40,21 +40,17 @@ UpdateSchemeBuilder = Dict[str, Union[Tuple[str], Tuple[str, str]]]
 
 
 @unique
-class AdditionalFields(Enum):
+class AdditionalFields(str, Enum):
     IDENTITY_FIELD = "id"
     EXTERNAL_FIELD = "ext_id"
     CREATED_AT_FIELD = "created_at"
     UPDATED_AT_FIELD = "updated_at"
-# TODO: add all to fields, setup read and write for all, setup checks
 
 
 class UpdateScheme:
     ALL_ITEMS = "__all__"
 
-    IDENTITY_FIELD = "id"
-    EXTERNAL_FIELD = "ext_id"
-    CREATED_AT_FIELD = "created_at"
-    UPDATED_AT_FIELD = "updated_at"
+    ALL_FIELDS = [field for field in AdditionalFields] + list(Context.__fields__.keys())
 
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
@@ -65,9 +61,11 @@ class UpdateScheme:
         for name, rules in dict_scheme.items():
             field_type = self._get_type_from_name(name)
             if field_type is None:
-                raise Exception(f"Field '{name}' not included in Context!")
+                raise Exception(f"Field '{name}' not supported by update scheme!")
             field, field_name = self._init_update_field(field_type, name, list(rules))
             self.fields[field_name] = field
+        for name in list(set(self.ALL_FIELDS) - self.fields.keys()):
+            self.fields[name] = self._init_update_field(self._get_type_from_name(name), name, ["ignore", "ignore"])[0]
 
     @classmethod
     def _get_type_from_name(cls, field_name: str) -> Optional[FieldType]:
@@ -75,10 +73,8 @@ class UpdateScheme:
             return FieldType.LIST
         elif field_name.startswith("misc") or field_name.startswith("framework_states"):
             return FieldType.DICT
-        elif field_name.startswith("validation") or field_name.startswith("id"):
-            return FieldType.VALUE
         else:
-            return None
+            return FieldType.VALUE
 
     @classmethod
     def _init_update_field(cls, field_type: FieldType, field_name: str, rules: List[str]) -> Tuple[Dict, str]:
@@ -227,17 +223,17 @@ class UpdateScheme:
                 result[field] = await val_reader(field, int_id, ext_id)
 
             if result[field] is None:
-                if field == self.IDENTITY_FIELD:
+                if field == AdditionalFields.IDENTITY_FIELD:
                     result[field] = int_id
-                elif field == self.EXTERNAL_FIELD:
+                elif field == AdditionalFields.EXTERNAL_FIELD:
                     result[field] = ext_id
 
         return Context.cast(result), hashes
 
     async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
         context_dict = ctx.dict()
-        context_dict[self.EXTERNAL_FIELD] = str(ext_id)
-        context_dict[self.CREATED_AT_FIELD] = context_dict[self.UPDATED_AT_FIELD] = time.time_ns()
+        context_dict[AdditionalFields.EXTERNAL_FIELD] = str(ext_id)
+        context_dict[AdditionalFields.CREATED_AT_FIELD] = context_dict[AdditionalFields.UPDATED_AT_FIELD] = time.time_ns()
 
         for field in [k for k, v in self.fields.items() if "write" in v.keys()]:
             if self.fields[field]["write"] == FieldRule.IGNORE:
