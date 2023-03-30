@@ -14,6 +14,7 @@ from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
@@ -63,8 +64,9 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state
 if __name__ == "__main__":
     from dff.utils.testing.stats_cli import parse_args
 
-    args = parse_args()
-    stats = StatsStorage.from_uri(args["uri"], table=args["table"])
-    stats.add_extractor_pool(extractor_pool)
-    stats.add_extractor_pool(default_extractor_pool)
-    pipeline.run()
+    if not is_interactive_mode():
+        args = parse_args()
+        stats = StatsStorage.from_uri(args["uri"], table=args["table"])
+        stats.add_extractor_pool(extractor_pool)
+        stats.add_extractor_pool(default_extractor_pool)
+        pipeline.run()

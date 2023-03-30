@@ -15,6 +15,7 @@ from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_s
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord
 from dff.stats import default_extractor_pool  # import default pool from addon
 from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
@@ -86,8 +87,9 @@ pipeline = Pipeline.from_dict(
 if __name__ == "__main__":
     from dff.utils.testing.stats_cli import parse_args
 
-    args = parse_args()
-    stats = StatsStorage.from_uri(args["uri"], table=args["table"])
-    stats.add_extractor_pool(extractor_pool)
-    stats.add_extractor_pool(default_extractor_pool)
-    pipeline.run()
+    if not is_interactive_mode():
+        args = parse_args()
+        stats = StatsStorage.from_uri(args["uri"], table=args["table"])
+        stats.add_extractor_pool(extractor_pool)
+        stats.add_extractor_pool(default_extractor_pool)
+        pipeline.run()
