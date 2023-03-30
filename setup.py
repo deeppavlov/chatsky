@@ -86,14 +86,12 @@ clickhouse_dependencies = [
 ]
 
 stats_dependencies = merge_req_lists(
+    _sql_dependencies,
     [
-        _sql_dependencies,
-        [
-            "tqdm==4.62.3",
-            "omegaconf>=2.2.2",
-            "requests>=2.28.1",
-        ],
-    ]
+        "tqdm==4.62.3",
+        "omegaconf>=2.2.2",
+        "requests>=2.28.1",
+    ],
 )
 
 full = merge_req_lists(
