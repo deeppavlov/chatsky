@@ -7,17 +7,17 @@ def get_extra_deps_line_number():
         return setup.readlines().index("EXTRA_DEPENDENCIES = {\n") + 1
 
 
-def insert_installation_cell_into_py_example():
+def insert_installation_cell_into_py_tutorial():
     """
     This function modifies a Jupyter notebook by inserting a code cell for installing 'dff' package
     and its dependencies, and a markdown cell with instructions for the user. It uses the location of
     the second cell in the notebook as a reference point to insert the new cells.
     """
 
-    def inner(example_text: str):
-        second_cell = example_text.find("\n# %%", 5)
+    def inner(tutorial_text: str):
+        second_cell = tutorial_text.find("\n# %%", 5)
         return jupytext.reads(
-            f"""{example_text[:second_cell]}
+            f"""{tutorial_text[:second_cell]}
 
 # %% [markdown]
 \"\"\"
@@ -25,8 +25,8 @@ __Installing dependencies__
 \"\"\"
 
 # %%
-!python3 -m pip install -q dff[examples]
-# Installs dff with dependencies for running examples
+!python3 -m pip install -q dff[tutorials]
+# Installs dff with dependencies for running tutorials
 # To install the minimal version of dff, use `pip install dff`
 # To install other options of dff, use `pip install dff[OPTION_NAME1,OPTION_NAME2]`
 # where OPTION_NAME can be one of the options from EXTRA_DEPENDENCIES.
@@ -37,10 +37,10 @@ __Installing dependencies__
 
 # %% [markdown]
 \"\"\"
-__Running example__
+__Running tutorial__
 \"\"\"
 
-{example_text[second_cell:]}
+{tutorial_text[second_cell:]}
 """,
             "py:percent",
         )

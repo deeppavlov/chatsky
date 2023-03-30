@@ -9,6 +9,7 @@ try:
     import telethon  # noqa: F401
 except ImportError:
     pytest.skip(reason="`telegram` is not available", allow_module_level=True)
+
 from pydantic import ValidationError
 from telebot import types
 
@@ -172,12 +173,6 @@ async def test_parsed_text(pipeline_instance, api_credentials, bot_user, session
         pipeline=pipeline_instance, api_credentials=api_credentials, session_file=session_file, bot=bot_user
     )
     await test_helper.send_and_check(telegram_response)
-
-
-def test_error(basic_bot):
-    with pytest.raises(TypeError) as e:
-        basic_bot.send_response(0, 1.2)
-    assert e
 
 
 def test_missing_error():

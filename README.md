@@ -27,16 +27,19 @@ The above command will set the minimum dependencies to start working with DFF.
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 ```bash
 pip install dff[core]  # minimal dependencies (by default)
+pip install dff[json]  # dependencies for using JSON
+pip install dff[pickle] # dependencies for using Pickle
 pip install dff[redis]  # dependencies for using Redis
 pip install dff[mongodb]  # dependencies for using MongoDB
 pip install dff[mysql]  # dependencies for using MySQL
 pip install dff[postgresql]  # dependencies for using PostgreSQL
 pip install dff[sqlite]  # dependencies for using SQLite
 pip install dff[ydb]  # dependencies for using Yandex Database
+pip install dff[telegram]  # dependencies for using Telegram
 pip install dff[full]  # full dependencies including all options above
 pip install dff[tests]  # dependencies for running tests
 pip install dff[test_full]  # full dependencies for running all tests (all options above)
-pip install dff[examples]  # dependencies for running examples (all options above)
+pip install dff[tutorials]  # dependencies for running tutorials (all options above)
 pip install dff[devel]  # dependencies for development
 pip install dff[doc]  # dependencies for documentation
 pip install dff[devel_full]  # full dependencies for development (all options above)
@@ -51,9 +54,10 @@ pip install dff[postgresql, mysql]
 ## Basic example
 
 ```python
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Actor, Message
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Message
+from dff.pipeline import Pipeline
 import dff.script.conditions.std_conditions as cnd
-from typing import Union
+from typing import Tuple
 
 # create a dialog script
 script = {
@@ -69,28 +73,23 @@ script = {
     },
 }
 
-# init actor
-actor = Actor(script, start_label=("flow", "node_hi"))
+# init pipeline
+pipeline = Pipeline.from_script(script, start_label=("flow", "node_hi"))
 
 
 # handler requests
-def turn_handler(in_request: Message, ctx: Union[Context, dict], actor: Actor):
-    # Context.cast - gets an object type of [Context, str, dict] returns an object type of Context
-    ctx = Context.cast(ctx)
-    # Add in current context a next request of user
-    ctx.add_request(in_request)
-    # Pass the context into actor and it returns updated context with actor response
-    ctx = actor(ctx)
+def turn_handler(in_request: Message, pipeline: Pipeline) -> Tuple[Message, Context]:
+    # Pass the next request of user into pipeline and it returns updated context with actor response
+    ctx = pipeline(in_request, 0)
     # Get last actor response from the context
     out_response = ctx.last_response
     # The next condition branching needs for testing
     return out_response, ctx
 
 
-ctx = {}
 while True:
     in_request = input("type your answer: ")
-    out_response, ctx = turn_handler(Message(text=in_request), ctx, actor)
+    out_response, ctx = turn_handler(Message(text=in_request), pipeline)
     print(out_response.text)
 ```
 
@@ -107,7 +106,7 @@ Okey
 ```
 
 To get more advanced examples, take a look at
-[examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials) on GitHub.
 
 # Context Storages
 ## Description
@@ -132,30 +131,25 @@ These are not meant to be used in production, but can be helpful for prototyping
 ## Basic example
 
 ```python
-from dff.script import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
 db = SQLContextStorage("postgresql+asyncpg://user:password@host:port/dbname")
 
-actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 
 def handle_request(request):
     user_id = request.args["user_id"]
-    if user_id not in db:
-        context = Context(id=user_id)
-    else:
-        context = db[user_id]
-    new_context = actor(context)
-    db[user_id] = new_context
-    assert user_id in db
+    new_context = pipeline(request, user_id)
     return new_context.last_response
 
 ```
 
 To get more advanced examples, take a look at
-[examples](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/examples/context_storages) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/context_storages) on GitHub.
 
 # Quick Start -- df_stats
 

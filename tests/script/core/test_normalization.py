@@ -1,6 +1,7 @@
 # %%
-from typing import Callable
+from typing import Callable, Tuple
 
+from dff.pipeline import Pipeline
 from dff.script import (
     GLOBAL,
     TRANSITIONS,
@@ -8,7 +9,6 @@ from dff.script import (
     MISC,
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
-    Actor,
     Context,
     NodeLabel3Type,
     Message,
@@ -31,21 +31,21 @@ def std_func(ctx, actor, *args, **kwargs):
     pass
 
 
-def create_env():
+def create_env() -> Tuple[Context, Pipeline]:
     ctx = Context()
     script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: Message(text="response")}}}
-    actor = Actor(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
+    pipeline = Pipeline.from_script(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
     ctx.add_request(Message(text="text"))
-    return ctx, actor
+    return ctx, pipeline
 
 
 def test_normalize_label():
     ctx, actor = create_env()
 
-    def true_label_func(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def true_label_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
         return ("flow", "node1", 1)
 
-    def false_label_func(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def false_label_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
         return ("flow", "node2", 1)
 
     n_f = normalize_label(true_label_func)
@@ -63,10 +63,10 @@ def test_normalize_label():
 def test_normalize_condition():
     ctx, actor = create_env()
 
-    def true_condition_func(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def true_condition_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         return True
 
-    def false_condition_func(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def false_condition_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
         raise Exception("False condition")
 
     n_f = normalize_condition(true_condition_func)
@@ -94,10 +94,10 @@ def test_normalize_response():
 def test_normalize_processing():
     ctx, actor = create_env()
 
-    def true_processing_func(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+    def true_processing_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         return ctx
 
-    def false_processing_func(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+    def false_processing_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         raise Exception("False processing")
 
     n_f = normalize_processing({1: true_processing_func})

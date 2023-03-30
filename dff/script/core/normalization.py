@@ -7,18 +7,18 @@ This module contains a basic set of functions for normalizing data in a dialog s
 """
 import logging
 
-from typing import Union, Callable, Any, Dict, Optional
+from typing import Union, Callable, Any, Dict, Optional, ForwardRef
 
 from .keywords import GLOBAL, Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
-from pydantic import validate_arguments, BaseModel
+from pydantic import validate_arguments
 
 logger = logging.getLogger(__name__)
 
-Actor = BaseModel
+Pipeline = ForwardRef("Pipeline")
 
 
 @validate_arguments
@@ -27,24 +27,22 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
     The function that is used for normalization of
     :py:const:`default_flow_label <dff.script.NodeLabelType>`.
 
-    :param label: If `label` is `Callable` the function is wrapped into try/except
-        and normalization is used on the result of the function call with the name `label`.
-    :param default_flow_label: `flow_label` is used if `label` does not contain `flow_label`.
-
-    :return: Result of the `label` normalization,
-        if `Callable` is returned, the normalized result is returned.
+    :param label: If label is Callable the function is wrapped into try/except
+        and normalization is used on the result of the function call with the name label.
+    :param default_flow_label: flow_label is used if label does not contain flow_label.
+    :return: Result of the label normalization,
+        if Callable is returned, the normalized result is returned.
     """
     if isinstance(label, Callable):
 
-        @validate_arguments
-        def get_label_handler(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+        def get_label_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
             try:
-                new_label = label(ctx, actor, *args, **kwargs)
+                new_label = label(ctx, pipeline, *args, **kwargs)
                 new_label = normalize_label(new_label, default_flow_label)
                 flow_label, node_label, _ = new_label
-                node = actor.script.get(flow_label, {}).get(node_label)
+                node = pipeline.script.get(flow_label, {}).get(node_label)
                 if not node:
-                    raise Exception(f"Unknown transitions {new_label} for actor.script={actor.script}")
+                    raise Exception(f"Unknown transitions {new_label} for pipeline.script={pipeline.script}")
             except Exception as exc:
                 new_label = None
                 logger.error(f"Exception {exc} of function {label}", exc_info=exc)
@@ -68,15 +66,14 @@ def normalize_condition(condition: ConditionType) -> Callable:
     """
     The function that is used to normalize `condition`
 
-    :param condition: `condition` to normalize.
-    :return: The function `condition` wrapped into the try/except.
+    :param condition: Condition to normalize.
+    :return: The function condition wrapped into the try/except.
     """
     if isinstance(condition, Callable):
 
-        @validate_arguments
-        def callable_condition_handler(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+        def callable_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
             try:
-                return condition(ctx, actor, *args, **kwargs)
+                return condition(ctx, pipeline, *args, **kwargs)
             except Exception as exc:
                 logger.error(f"Exception {exc} of function {condition}", exc_info=exc)
                 return False
@@ -89,10 +86,10 @@ def normalize_transitions(
     transitions: Dict[NodeLabelType, ConditionType]
 ) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
     """
-    The function which is used to normalize `transitions` and returns normalized `dict`.
+    The function which is used to normalize transitions and returns normalized dict.
 
-    :param transitions: `transitions` to normalize.
-    :return: `transitions` with normalized `label` and `condition`.
+    :param transitions: Transitions to normalize.
+    :return: Transitions with normalized label and condition.
     """
     transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
     return transitions
@@ -101,10 +98,10 @@ def normalize_transitions(
 @validate_arguments
 def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
     """
-    This function is used to normalize `response`, if `response` Callable, it is returned, otherwise
-    `response` is wrapped to the function and this function is returned.
+    This function is used to normalize response, if response Callable, it is returned, otherwise
+    response is wrapped to the function and this function is returned.
 
-    :param response: `response` to normalize.
+    :param response: Response to normalize.
     :return: Function that returns callable response.
     """
     if isinstance(response, Callable):
@@ -117,8 +114,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         else:
             raise TypeError(type(response))
 
-        @validate_arguments
-        def response_handler(ctx: Context, actor: Actor, *args, **kwargs):
+        def response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
             return result
 
         return response_handler
@@ -127,20 +123,19 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
 @validate_arguments
 def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
     """
-    This function is used to normalize `processing`.
-    It returns function that consecutively applies all preprocessing stages from `dict`.
+    This function is used to normalize processing.
+    It returns function that consecutively applies all preprocessing stages from dict.
 
-    :param processing: `processing` which contains all preprocessing stages in a format "PROC_i" -> proc_func_i.
-    :return: Function that consequentially applies all preprocessing stages from `dict`.
+    :param processing: Processing which contains all preprocessing stages in a format "PROC_i" -> proc_func_i.
+    :return: Function that consequentially applies all preprocessing stages from dict.
     """
     if isinstance(processing, dict):
 
-        @validate_arguments
-        def processing_handler(ctx: Context, actor: Actor, *args, **kwargs) -> Context:
+        def processing_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
             for processing_name, processing_func in processing.items():
                 try:
                     if processing_func is not None:
-                        ctx = processing_func(ctx, actor, *args, **kwargs)
+                        ctx = processing_func(ctx, pipeline, *args, **kwargs)
                 except Exception as exc:
                     logger.error(
                         f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
@@ -175,8 +170,8 @@ def normalize_keywords(
     """
     This function is used to normalize keywords in the script.
 
-    :param script: `Script`, containing all transitions between states based in the keywords.
-    :return: `Script` with the normalized keywords.
+    :param script: :py:class:`.Script`, containing all transitions between states based in the keywords.
+    :return: :py:class:`.Script` with the normalized keywords.
     """
 
     script = {
@@ -192,13 +187,13 @@ def normalize_keywords(
 @validate_arguments
 def normalize_script(script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
     """
-    This function normalizes `Script`: it returns `dict` where the `GLOBAL` node is moved
-    into the flow with the `GLOBAL` name. The function returns the structure
+    This function normalizes :py:class:`.Script`: it returns dict where the GLOBAL node is moved
+    into the flow with the GLOBAL name. The function returns the structure
 
     `{GLOBAL: {...NODE...}, ...}` -> `{GLOBAL: {GLOBAL: {...NODE...}}, ...}`.
 
-    :param script: `Script` that describes the dialog scenario.
-    :return: Normalized `Script`.
+    :param script: :py:class:`.Script` that describes the dialog scenario.
+    :return: Normalized :py:class:`.Script`.
     """
     if isinstance(script, dict):
         if GLOBAL in script and all([isinstance(item, Keywords) for item in script[GLOBAL].keys()]):
