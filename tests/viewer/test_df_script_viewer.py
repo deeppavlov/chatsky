@@ -110,6 +110,7 @@ def test_plotting_2(nx_graph, params, reference_file, tmp_path):
                 "--show_global",
                 "--show_local",
                 "--show_isolates",
+                "--show_unresolved",
                 "--random_seed=1",
             ],
             Path(__file__).parent / "opts_on.dot",
