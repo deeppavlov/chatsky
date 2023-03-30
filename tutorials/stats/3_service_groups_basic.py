@@ -9,8 +9,8 @@ The following example shows how to collect statistics of service groups.
 # %%
 import asyncio
 
-from dff.script import Context, Actor
-from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
+from dff.script import Context
+from dff.pipeline import Pipeline, ACTOR, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
@@ -40,20 +40,17 @@ async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 pipeline = Pipeline.from_dict(
     {
+        "script": TOY_SCRIPT,
+        "start_label": ("greeting_flow", "start_node"),
+        "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             ServiceGroup(
                 after_handler=[get_group_stats],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
-            actor,
+            ACTOR,
         ],
     }
 )

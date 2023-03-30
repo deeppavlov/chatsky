@@ -160,7 +160,7 @@ def setup(_):
                 ],
             ),
             ("tutorials.utils", "Utils"),
-            ("tutorials.stats", "Stats")
+            ("tutorials.stats", "Stats"),
         ]
     )
     regenerate_apiref(

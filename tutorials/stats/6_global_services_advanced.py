@@ -10,8 +10,8 @@ from several global services.
 # %%
 import asyncio
 
-from dff.script import Context, Actor
-from dff.pipeline import Pipeline, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
+from dff.script import Context
+from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
@@ -42,16 +42,13 @@ async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "components": [
         [heavy_service for _ in range(0, 5)],
-        actor,
+        ACTOR,
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)

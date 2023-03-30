@@ -10,8 +10,8 @@ several service groups.
 # %%
 import asyncio
 
-from dff.script import Context, Actor
-from dff.pipeline import Pipeline, ServiceGroup, ExtraHandlerRuntimeInfo
+from dff.script import Context
+from dff.pipeline import Pipeline, ACTOR, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.stats import StatsStorage, StatsRecord, ExtractorPool, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
@@ -39,21 +39,18 @@ async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 pipeline = Pipeline.from_dict(
     {
+        "script": TOY_SCRIPT,
+        "start_label": ("greeting_flow", "start_node"),
+        "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             ServiceGroup(
                 before_handler=[default_extractor_pool["extract_timing_before"]],
                 after_handler=[default_extractor_pool["extract_timing_after"], get_group_stats],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
-            actor,
+            ACTOR,
         ],
     }
 )

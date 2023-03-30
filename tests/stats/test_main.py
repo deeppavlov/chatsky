@@ -27,7 +27,7 @@ from dff.utils.testing.stats_cli import parse_args
             "--db.name=db",
             "--db.table=test",
         ],
-        ["", "cfg_from_file", "--db.password=pass", "./examples/stats/example_config.yaml"],
+        ["", "cfg_from_file", "--db.password=pass", "./tutorials/stats/example_config.yaml"],
         ["", "cfg_from_uri", "--uri=postgresql://user:password@localhost:5432/db/test"],
     ],
 )

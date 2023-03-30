@@ -10,8 +10,8 @@ for statistics collection.
 # %%
 import asyncio
 
-from dff.script import Context, Actor
-from dff.pipeline import Pipeline, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.script import Context
+from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.stats import StatsStorage, ExtractorPool, StatsRecord
 from dff.stats import default_extractor_pool  # import default pool from addon
 from dff.utils.testing.toy_script import TOY_SCRIPT
@@ -54,21 +54,17 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     before_handler=[default_extractor_pool["extract_timing_before"]],
     after_handler=[get_service_state, default_extractor_pool["extract_timing_after"]],
 )
-async def heavy_service(ctx: Context, actor: Actor):
-    _ = ctx  # get something from ctx if it needs
-    _ = actor  # get something from actor if it needs
+async def heavy_service(ctx: Context):
+    _ = ctx  # get something from ctx if needed
     await asyncio.sleep(0.02)
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
 pipeline = Pipeline.from_dict(
     {
+        "script": TOY_SCRIPT,
+        "start_label": ("greeting_flow", "start_node"),
+        "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             Service(handler=heavy_service),  # add `heavy_service` before the actor
             Service(
@@ -79,10 +75,10 @@ pipeline = Pipeline.from_dict(
                         default_extractor_pool["extract_timing_after"],
                     ],
                 )(
-                    actor
+                    ACTOR
                 )  # wrap and add the actor
             ),
-        ]
+        ],
     }
 )
 

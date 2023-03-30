@@ -20,7 +20,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
     ],
 )
 def test_examples(example_module_name: str, testing_file: str):
-    module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
+    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     try:
         pipeline = module.pipeline
         stats = module.StatsStorage.from_uri(f"csv://{testing_file}", "")
@@ -30,4 +30,4 @@ def test_examples(example_module_name: str, testing_file: str):
             lines = file.read().splitlines()
             assert len(lines) > 1
     except Exception as exc:
-        raise Exception(f"model_name=examples.{dot_path_to_addon}.{example_module_name}") from exc
+        raise Exception(f"model_name=tutorials.{dot_path_to_addon}.{example_module_name}") from exc
