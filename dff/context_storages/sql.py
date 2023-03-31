@@ -21,9 +21,10 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion
+from .update_scheme import UpdateScheme, FieldType, AdditionalFields
 
 try:
-    from sqlalchemy import Table, MetaData, Column, JSON, String, inspect, select, delete, func
+    from sqlalchemy import Table, MetaData, Column, JSON, String, DateTime, Integer, UniqueConstraint, Index, inspect, select, delete, func
     from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True
@@ -89,27 +90,49 @@ class SQLContextStorage(DBContextStorage):
         set this parameter to `True` to bypass the import checks.
     """
 
-    def __init__(self, path: str, table_name: str = "contexts", custom_driver: bool = False):
+    _CONTEXTS = "contexts"
+    _KEY_FIELD = "key"
+    _VALUE_FIELD = "value"
+
+    _UUID_LENGTH = 36
+    _KEY_LENGTH = 256
+
+    def __init__(self, path: str, table_name_prefix: str = "dff_table", custom_driver: bool = False):
         DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
 
-        id_column_args = {"primary_key": True}
-        if self.dialect == "sqlite":
-            id_column_args["sqlite_on_conflict_primary_key"] = "REPLACE"
-
-        self.metadata = MetaData()
-        self.table = Table(
-            table_name,
-            self.metadata,
-            Column("id", String(36), **id_column_args),
-            Column("context", JSON),  # column for storing serialized contexts
-        )
+        self.collections = dict()
+        self.collections.update({field: Table(
+            f"{table_name_prefix}_{field}",
+            MetaData(),
+            Column(AdditionalFields.IDENTITY_FIELD, String(self._UUID_LENGTH)),
+            Column(self._KEY_FIELD, Integer()),
+            Column(self._VALUE_FIELD, JSON),
+            UniqueConstraint(AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD),
+            Index("list_index", AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD)
+        ) for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST})
+        self.collections.update({field: Table(
+            f"{table_name_prefix}_{field}",
+            MetaData(),
+            Column(AdditionalFields.IDENTITY_FIELD, String(self._UUID_LENGTH)),
+            Column(self._KEY_FIELD, String(self._KEY_LENGTH)),
+            Column(self._VALUE_FIELD, JSON),
+            UniqueConstraint(AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD),
+            Index("dictionary_index", AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD)
+        ) for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT})
+        self.collections.update({self._CONTEXTS: Table(
+            f"{table_name_prefix}_{self._CONTEXTS}",
+            MetaData(),
+            Column(AdditionalFields.IDENTITY_FIELD, String(self._UUID_LENGTH), primary_key=True, unique=True),
+            Column(AdditionalFields.EXTERNAL_FIELD, String(self._UUID_LENGTH), index=True),
+            Column(AdditionalFields.CREATED_AT_FIELD, DateTime()),
+            Column(AdditionalFields.UPDATED_AT_FIELD, DateTime()),
+        )})  # We DO assume this mapping of fields to be excessive.
 
         asyncio.run(self._create_self_table())
-
         import_insert_for_dialect(self.dialect)
 
     @threadsafe_method
