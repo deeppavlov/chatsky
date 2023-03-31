@@ -18,7 +18,7 @@ from typing import Hashable, Union, List, Any, Dict
 from uuid import UUID
 
 from dff.script import Context
-from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, AdditionalFields
+from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, ExtraFields
 
 from .database import DBContextStorage, auto_stringify_hashable_key
 
@@ -37,7 +37,7 @@ class ShelveContextStorage(DBContextStorage):
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
         self.update_scheme.mark_db_not_persistent()
-        self.update_scheme.fields[AdditionalFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
 
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:

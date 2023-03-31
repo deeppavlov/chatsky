@@ -11,7 +11,7 @@ from uuid import UUID
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, AdditionalFields
+from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, ExtraFields
 
 try:
     import aiofiles
@@ -49,7 +49,7 @@ class JSONContextStorage(DBContextStorage):
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
         self.update_scheme.mark_db_not_persistent()
-        self.update_scheme.fields[AdditionalFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
 
     @threadsafe_method
     @auto_stringify_hashable_key()

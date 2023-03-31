@@ -32,7 +32,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import full_update_scheme, UpdateScheme, UpdateSchemeBuilder, FieldRule, AdditionalFields
+from .update_scheme import full_update_scheme, UpdateScheme, UpdateSchemeBuilder, FieldRule, ExtraFields
 
 logger = logging.getLogger(__name__)
 
@@ -60,28 +60,28 @@ class MongoContextStorage(DBContextStorage):
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
-        self.update_scheme.fields[AdditionalFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[AdditionalFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[AdditionalFields.CREATED_AT_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].update(write=FieldRule.UPDATE_ONCE)
         logger.warning(f"init -> {self.update_scheme.fields}")
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        last_context = await self.collections[self._CONTEXTS].find({AdditionalFields.EXTERNAL_FIELD: key}).sort(AdditionalFields.CREATED_AT_FIELD, -1).to_list(1)
+        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
         if len(last_context) == 0 or self._check_none(last_context[0]) is None:
             raise KeyError(f"No entry for key {key}.")
-        last_context[0]["id"] = last_context[0][AdditionalFields.IDENTITY_FIELD]
+        last_context[0]["id"] = last_context[0][ExtraFields.IDENTITY_FIELD]
         logger.warning(f"read -> {key}: {last_context[0]} {last_context[0]['id']}")
         return Context.cast(last_context[0])
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        identifier = {**json.loads(value.json()), AdditionalFields.EXTERNAL_FIELD: key, AdditionalFields.IDENTITY_FIELD: value.id, AdditionalFields.CREATED_AT_FIELD: time.time_ns()}
-        last_context = await self.collections[self._CONTEXTS].find({AdditionalFields.EXTERNAL_FIELD: key}).sort(AdditionalFields.CREATED_AT_FIELD, -1).to_list(1)
+        identifier = {**json.loads(value.json()), ExtraFields.EXTERNAL_FIELD: key, ExtraFields.IDENTITY_FIELD: value.id, ExtraFields.CREATED_AT_FIELD: time.time_ns()}
+        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
         if len(last_context) != 0 and self._check_none(last_context[0]) is None:
-            await self.collections[self._CONTEXTS].replace_one({AdditionalFields.IDENTITY_FIELD: last_context[0][AdditionalFields.IDENTITY_FIELD]}, identifier, upsert=True)
+            await self.collections[self._CONTEXTS].replace_one({ExtraFields.IDENTITY_FIELD: last_context[0][ExtraFields.IDENTITY_FIELD]}, identifier, upsert=True)
         else:
             await self.collections[self._CONTEXTS].insert_one(identifier)
         logger.warning(f"write -> {key}: {identifier} {value.id}")
@@ -89,17 +89,17 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def del_item_async(self, key: Union[Hashable, str]):
-        await self.collections[self._CONTEXTS].insert_one({AdditionalFields.EXTERNAL_FIELD: key, AdditionalFields.CREATED_AT_FIELD: time.time_ns(), self._KEY_NONE: True})
+        await self.collections[self._CONTEXTS].insert_one({ExtraFields.EXTERNAL_FIELD: key, ExtraFields.CREATED_AT_FIELD: time.time_ns(), self._KEY_NONE: True})
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        last_context = await self.collections[self._CONTEXTS].find({AdditionalFields.EXTERNAL_FIELD: key}).sort(AdditionalFields.CREATED_AT_FIELD, -1).to_list(1)
+        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
         return len(last_context) != 0 and self._check_none(last_context[0]) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(await self.collections[self._CONTEXTS].distinct(AdditionalFields.EXTERNAL_FIELD, {self._KEY_NONE: {"$ne": True}}))
+        return len(await self.collections[self._CONTEXTS].distinct(ExtraFields.EXTERNAL_FIELD, {self._KEY_NONE: {"$ne": True}}))
 
     @threadsafe_method
     async def clear_async(self):

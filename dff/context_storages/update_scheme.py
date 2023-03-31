@@ -25,6 +25,10 @@ _WriteSeqFunction = Callable[[str, Dict[Hashable, Any], Union[UUID, int, str], U
 _WriteValueFunction = Callable[[str, Any, Union[UUID, int, str], Union[UUID, int, str]], Awaitable]
 _WriteFunction = Union[_WriteSeqFunction, _WriteValueFunction]
 
+_ReadKeys = Dict[str, Union[bool, Dict[str, bool]]]
+_ReadContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable[Dict]]
+_WriteContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable]
+
 
 @unique
 class FieldRule(Enum):
@@ -39,8 +43,7 @@ class FieldRule(Enum):
 UpdateSchemeBuilder = Dict[str, Union[Tuple[str], Tuple[str, str]]]
 
 
-@unique
-class AdditionalFields(str, Enum):
+class ExtraFields:
     IDENTITY_FIELD = "id"
     EXTERNAL_FIELD = "ext_id"
     CREATED_AT_FIELD = "created_at"
@@ -50,7 +53,8 @@ class AdditionalFields(str, Enum):
 class UpdateScheme:
     ALL_ITEMS = "__all__"
 
-    ALL_FIELDS = [field for field in AdditionalFields] + list(Context.__fields__.keys())
+    EXTRA_FIELDS = [v for k, v in ExtraFields.__dict__.items() if not (k.startswith("__") and k.endswith("__"))]
+    ALL_FIELDS = set(EXTRA_FIELDS + list(Context.__fields__.keys()))
 
     _FIELD_NAME_PATTERN = compile(r"^(.+?)(\[.+\])?$")
     _LIST_FIELD_NAME_PATTERN = compile(r"^.+?(\[([^\[\]]+)\])$")
@@ -64,7 +68,7 @@ class UpdateScheme:
                 raise Exception(f"Field '{name}' not supported by update scheme!")
             field, field_name = self._init_update_field(field_type, name, list(rules))
             self.fields[field_name] = field
-        for name in list(set(self.ALL_FIELDS) - self.fields.keys()):
+        for name in list(self.ALL_FIELDS - self.fields.keys()):
             self.fields[name] = self._init_update_field(self._get_type_from_name(name), name, ["ignore", "ignore"])[0]
 
     @classmethod
@@ -190,9 +194,12 @@ class UpdateScheme:
         list_keys = sorted(list(dictionary_keys))
         return [list_keys[key] for key in update_field] if len(list_keys) > 0 else list()
 
-    def _update_hashes(self, value: Dict[str, Any], field: str, hashes: Dict[str, Any]):
+    def _update_hashes(self, value: Union[Dict[str, Any], Any], field: str, hashes: Dict[str, Any]):
         if self.fields[field]["write"] == FieldRule.HASH_UPDATE:
-            hashes[field] = {key: sha256(str(value).encode("utf-8")) for key, value in value.items()}
+            if isinstance(value, dict):
+                hashes[field] = {k: sha256(str(v).encode("utf-8")) for k, v in value.items()}
+            else:
+                hashes[field] = sha256(str(value).encode("utf-8"))
 
     async def process_fields_read(self, fields_reader: _ReadFieldsFunction, val_reader: _ReadValueFunction, seq_reader: _ReadSeqFunction, ext_id: Union[UUID, int, str], int_id: Optional[Union[UUID, int, str]] = None) -> Tuple[Context, Dict]:
         result = dict()
@@ -222,17 +229,17 @@ class UpdateScheme:
                 result[field] = await val_reader(field, int_id, ext_id)
 
             if result[field] is None:
-                if field == AdditionalFields.IDENTITY_FIELD:
+                if field == ExtraFields.IDENTITY_FIELD:
                     result[field] = int_id
-                elif field == AdditionalFields.EXTERNAL_FIELD:
+                elif field == ExtraFields.EXTERNAL_FIELD:
                     result[field] = ext_id
 
         return Context.cast(result), hashes
 
     async def process_fields_write(self, ctx: Context, hashes: Optional[Dict], fields_reader: _ReadFieldsFunction, val_writer: _WriteValueFunction, seq_writer: _WriteSeqFunction, ext_id: Union[UUID, int, str]):
         context_dict = ctx.dict()
-        context_dict[AdditionalFields.EXTERNAL_FIELD] = str(ext_id)
-        context_dict[AdditionalFields.CREATED_AT_FIELD] = context_dict[AdditionalFields.UPDATED_AT_FIELD] = time.time_ns()
+        context_dict[ExtraFields.EXTERNAL_FIELD] = str(ext_id)
+        context_dict[ExtraFields.CREATED_AT_FIELD] = context_dict[ExtraFields.UPDATED_AT_FIELD] = time.time_ns()
 
         for field in [k for k, v in self.fields.items() if "write" in v.keys()]:
             if self.fields[field]["write"] == FieldRule.IGNORE:
@@ -277,6 +284,85 @@ class UpdateScheme:
 
             else:
                 await val_writer(field, context_dict[field], ctx.id, ext_id)
+
+    async def read_context(self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: Union[UUID, int, str], int_id: str = None) -> Tuple[Context, Dict]:
+        fields_outlook = dict()
+        for field in self.fields.keys():
+            if self.fields[field]["read"] == FieldRule.IGNORE:
+                fields_outlook[field] = False
+            elif self.fields[field]["type"] == FieldType.LIST:
+                list_keys = fields.get(field, list())
+                if "outlook_slice" in self.fields[field]:
+                    update_field = self._get_outlook_slice(list_keys, self.fields[field]["outlook_slice"])
+                else:
+                    update_field = self._get_outlook_list(list_keys, self.fields[field]["outlook_list"])
+                fields_outlook[field] = {field: True for field in update_field}
+            elif self.fields[field]["type"] == FieldType.DICT:
+                update_field = self.fields[field].get("outlook", None)
+                if self.ALL_ITEMS in update_field:
+                    update_field = fields.get(field, list())
+                fields_outlook[field] = {field: True for field in update_field}
+            else:
+                fields_outlook[field] = True
+
+        hashes = dict()
+        ctx_dict = await ctx_reader(fields_outlook, int_id, ext_id)
+        for field in self.fields.keys():
+            self._update_hashes(ctx_dict[field], field, hashes)
+            if ctx_dict[field] is None:
+                if field == ExtraFields.IDENTITY_FIELD:
+                    ctx_dict[field] = int_id
+                elif field == ExtraFields.EXTERNAL_FIELD:
+                    ctx_dict[field] = ext_id
+
+        return Context.cast(ctx_dict), hashes
+
+    async def write_context(self, ctx: Context, hashes: Optional[Dict], fields: _ReadKeys, val_writer: _WriteContextFunction, ext_id: Union[UUID, int, str]):
+        ctx_dict = ctx.dict()
+        ctx_dict[ExtraFields.EXTERNAL_FIELD] = str(ext_id)
+        ctx_dict[ExtraFields.CREATED_AT_FIELD] = ctx_dict[ExtraFields.UPDATED_AT_FIELD] = time.time_ns()
+
+        patch_dict = dict()
+        for field in self.fields.keys():
+            if self.fields[field]["write"] == FieldRule.IGNORE:
+                continue
+            elif self.fields[field]["write"] == FieldRule.UPDATE_ONCE and hashes is not None:
+                continue
+            elif self.fields[field]["type"] == FieldType.LIST:
+                list_keys = fields.get(field, list())
+                if "outlook_slice" in self.fields[field]:
+                    update_field = self._get_outlook_slice(ctx_dict[field].keys(), self.fields[field]["outlook_slice"])
+                else:
+                    update_field = self._get_outlook_list(ctx_dict[field].keys(), self.fields[field]["outlook_list"])
+                if self.fields[field]["write"] == FieldRule.APPEND:
+                    patch_dict[field] = {item: ctx_dict[field][item] for item in set(update_field) - set(list_keys)}
+                elif self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+                    patch_dict[field] = dict()
+                    for item in update_field:
+                        item_hash = sha256(str(ctx_dict[field][item]).encode("utf-8"))
+                        if hashes is None or hashes.get(field, dict()).get(item, None) != item_hash:
+                            patch_dict[field][item] = ctx_dict[field][item]
+                else:
+                    patch_dict[field] = {item: ctx_dict[field][item] for item in update_field}
+            elif self.fields[field]["type"] == FieldType.DICT:
+                list_keys = fields.get(field, list())
+                update_field = self.fields[field].get("outlook", list())
+                update_keys_all = list_keys + list(ctx_dict[field].keys())
+                update_keys = set(update_keys_all if self.ALL_ITEMS in update_field else update_field)
+                if self.fields[field]["write"] == FieldRule.APPEND:
+                    patch_dict[field] = {item: ctx_dict[field][item] for item in update_keys - set(list_keys)}
+                elif self.fields[field]["write"] == FieldRule.HASH_UPDATE:
+                    patch_dict[field] = dict()
+                    for item in update_keys:
+                        item_hash = sha256(str(ctx_dict[field][item]).encode("utf-8"))
+                        if hashes is None or hashes.get(field, dict()).get(item, None) != item_hash:
+                            patch_dict[field][item] = ctx_dict[field][item]
+                else:
+                    patch_dict[field] = {item: ctx_dict[field][item] for item in update_keys}
+            else:
+                patch_dict[field] = ctx_dict[field]
+
+        await val_writer(patch_dict, ctx.id, ext_id)
 
 
 default_update_scheme = {

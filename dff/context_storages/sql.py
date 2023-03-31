@@ -14,14 +14,15 @@ public-domain, SQL database engine.
 """
 import asyncio
 import importlib
-import json
-from typing import Hashable
+import logging
+from typing import Hashable, Dict, Union, Any
+from uuid import UUID
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method
+from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import UpdateScheme, FieldType, AdditionalFields
+from .update_scheme import UpdateScheme, FieldType, ExtraFields, FieldRule, UpdateSchemeBuilder
 
 try:
     from sqlalchemy import Table, MetaData, Column, JSON, String, DateTime, Integer, UniqueConstraint, Index, inspect, select, delete, func
@@ -77,6 +78,9 @@ def import_insert_for_dialect(dialect: str):
     )
 
 
+logger = logging.getLogger(__name__)
+
+
 class SQLContextStorage(DBContextStorage):
     """
     | SQL-based version of the :py:class:`.DBContextStorage`.
@@ -104,91 +108,103 @@ class SQLContextStorage(DBContextStorage):
         self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
 
-        self.collections = dict()
-        self.collections.update({field: Table(
+        self.list_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST]
+        self.dict_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT]
+        self.value_fields = list(UpdateScheme.EXTRA_FIELDS)
+        self.all_fields = self.list_fields + self.dict_fields + self.value_fields
+
+        self.tables = dict()
+        self.tables.update({field: Table(
             f"{table_name_prefix}_{field}",
             MetaData(),
-            Column(AdditionalFields.IDENTITY_FIELD, String(self._UUID_LENGTH)),
+            Column(ExtraFields.IDENTITY_FIELD, String(self._UUID_LENGTH)),
             Column(self._KEY_FIELD, Integer()),
             Column(self._VALUE_FIELD, JSON),
-            UniqueConstraint(AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD),
-            Index("list_index", AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD)
-        ) for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST})
-        self.collections.update({field: Table(
+            Index(f"{field}_list_index", ExtraFields.IDENTITY_FIELD, self._KEY_FIELD, unique=True)
+        ) for field in self.list_fields})
+        self.tables.update({field: Table(
             f"{table_name_prefix}_{field}",
             MetaData(),
-            Column(AdditionalFields.IDENTITY_FIELD, String(self._UUID_LENGTH)),
+            Column(ExtraFields.IDENTITY_FIELD, String(self._UUID_LENGTH)),
             Column(self._KEY_FIELD, String(self._KEY_LENGTH)),
             Column(self._VALUE_FIELD, JSON),
-            UniqueConstraint(AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD),
-            Index("dictionary_index", AdditionalFields.IDENTITY_FIELD, self._KEY_FIELD)
-        ) for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT})
-        self.collections.update({self._CONTEXTS: Table(
+            Index(f"{field}_dictionary_index", ExtraFields.IDENTITY_FIELD, self._KEY_FIELD, unique=True)
+        ) for field in self.dict_fields})
+        self.tables.update({self._CONTEXTS: Table(
             f"{table_name_prefix}_{self._CONTEXTS}",
             MetaData(),
-            Column(AdditionalFields.IDENTITY_FIELD, String(self._UUID_LENGTH), primary_key=True, unique=True),
-            Column(AdditionalFields.EXTERNAL_FIELD, String(self._UUID_LENGTH), index=True),
-            Column(AdditionalFields.CREATED_AT_FIELD, DateTime()),
-            Column(AdditionalFields.UPDATED_AT_FIELD, DateTime()),
-        )})  # We DO assume this mapping of fields to be excessive.
+            Column(ExtraFields.IDENTITY_FIELD, String(self._UUID_LENGTH), primary_key=True, unique=True),
+            Column(ExtraFields.EXTERNAL_FIELD, String(self._UUID_LENGTH), index=True),
+            Column(ExtraFields.CREATED_AT_FIELD, DateTime(), server_default=func.now()),
+            Column(ExtraFields.UPDATED_AT_FIELD, DateTime(), onupdate=func.now()),
+        )})  # We DO assume this mapping of fields to be excessive (self.value_fields).
 
-        asyncio.run(self._create_self_table())
+        for field in UpdateScheme.ALL_FIELDS:
+            if self.update_scheme.fields[field]["type"] == FieldType.VALUE and field not in self.value_fields:
+                if self.update_scheme.fields[field]["read"] != FieldRule.IGNORE or self.update_scheme.fields[field]["write"] != FieldRule.IGNORE:
+                    raise RuntimeError(f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!")
+
+        asyncio.run(self._create_self_tables())
         import_insert_for_dialect(self.dialect)
 
-    @threadsafe_method
-    async def set_item_async(self, key: Hashable, value: Context):
-        value = value if isinstance(value, Context) else Context.cast(value)
-        value = json.loads(value.json())
-
-        insert_stmt = insert(self.table).values(id=str(key), context=value)
-        update_stmt = await self._get_update_stmt(insert_stmt)
-
-        async with self.engine.connect() as conn:
-            await conn.execute(update_stmt)
-            await conn.commit()
+    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+        super().set_update_scheme(scheme)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
 
     @threadsafe_method
-    async def get_item_async(self, key: Hashable) -> Context:
-        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
-        async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            row = result.fetchone()
-            if row:
-                return Context.cast(row[0])
-        raise KeyError
+    @auto_stringify_hashable_key()
+    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
+        fields = await self._read_keys(key)
+        if len(fields) == 0:
+            raise KeyError(f"No entry for key {key} {fields}.")
+        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, None)
+        self.hash_storage[key] = hashes
+        return context
 
     @threadsafe_method
-    async def del_item_async(self, key: Hashable):
-        stmt = delete(self.table).where(self.table.c.id == str(key))
+    @auto_stringify_hashable_key()
+    async def set_item_async(self, key: Union[Hashable, str], value: Context):
+        fields = await self._read_keys(key)
+        value_hash = self.hash_storage.get(key, None)
+        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
+
+    @threadsafe_method
+    @auto_stringify_hashable_key()
+    async def del_item_async(self, key: Union[Hashable, str]):
+        stmt = insert(self.tables[self._CONTEXTS]).values(**{ExtraFields.IDENTITY_FIELD: None, ExtraFields.EXTERNAL_FIELD: key})
         async with self.engine.connect() as conn:
             await conn.execute(stmt)
             await conn.commit()
 
     @threadsafe_method
-    async def contains_async(self, key: Hashable) -> bool:
-        stmt = select(self.table.c.context).where(self.table.c.id == str(key))
+    @auto_stringify_hashable_key()
+    async def contains_async(self, key: Union[Hashable, str]) -> bool:
+        stmt = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD]).where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == key).order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc())
         async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            return bool(result.fetchone())
+            result = (await conn.execute(stmt)).fetchone()
+            logger.warning(f"Fetchone: {result}")
+            return result[0] is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        stmt = select(func.count()).select_from(self.table)
+        stmt = select(self.tables[self._CONTEXTS]).where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] != None).group_by(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD])
+        stmt = select(func.count()).select_from(stmt)
         async with self.engine.connect() as conn:
-            result = await conn.execute(stmt)
-            return result.fetchone()[0]
+            return (await conn.execute(stmt)).fetchone()[0]
 
     @threadsafe_method
     async def clear_async(self):
-        stmt = delete(self.table)
-        async with self.engine.connect() as conn:
-            await conn.execute(stmt)
-            await conn.commit()
+        for table in self.tables.values():
+            async with self.engine.connect() as conn:
+                await conn.execute(delete(table))
+                await conn.commit()
 
-    async def _create_self_table(self):
+    async def _create_self_tables(self):
         async with self.engine.begin() as conn:
-            if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(self.table.name)):
-                await conn.run_sync(self.table.create, self.engine)
+            for table in self.tables.values():
+                if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
+                    await conn.run_sync(table.create, self.engine)
 
     async def _get_update_stmt(self, insert_stmt):
         if self.dialect == "sqlite":
@@ -212,3 +228,45 @@ class SQLContextStorage(DBContextStorage):
             elif self.full_path.startswith("sqlite") and not sqlite_available:
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
+
+    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Dict[str, Union[bool, Dict[str, bool]]]:
+        key_columns = list()
+        joined_table = self.tables[self._CONTEXTS]
+        for field in self.list_fields + self.dict_fields:
+            condition = self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] == self.tables[field].c[ExtraFields.IDENTITY_FIELD]
+            joined_table = joined_table.join(self.tables[field], condition)
+            key_columns += [self.tables[field].c[self._KEY_FIELD]]
+
+        stmt = select(*key_columns, self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD]).select_from(joined_table)
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id)
+        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc()).limit(1)
+
+        key_dict = dict()
+        async with self.engine.connect() as conn:
+            for key in (await conn.execute(stmt)).fetchall():
+                key_dict[key] = True
+        return key_dict
+
+    async def _read_ctx(self, outlook: Dict[Hashable, Any], _: str, ext_id: Union[UUID, int, str]) -> Dict:
+        joined_table = self.tables[self._CONTEXTS]
+        for field in self.list_fields + self.dict_fields:
+            condition = self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] == self.tables[field].c[ExtraFields.IDENTITY_FIELD]
+            joined_table = joined_table.join(self.tables[field], condition)
+
+        stmt = select(*[column for table in self.tables.values() for column in table.columns]).select_from(joined_table)
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id)
+        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc()).limit(1)
+
+        key_dict = dict()
+        async with self.engine.connect() as conn:
+            for key in (await conn.execute(stmt)).fetchall():
+                key_dict[key] = True
+        return key_dict
+
+    async def _write_ctx(self, data: Dict[str, Any], _: str, __: Union[UUID, int, str]):
+        async with self.engine.begin() as conn:
+            for key, value in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
+                await conn.execute(insert(self.tables[key]).values(value))
+            values = {k: v for k, v in data.items() if not isinstance(v, dict)}
+            await conn.execute(insert(self.tables[self._CONTEXTS]).values(**values))
+            await conn.commit()
