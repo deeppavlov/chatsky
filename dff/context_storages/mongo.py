@@ -55,9 +55,8 @@ class MongoContextStorage(DBContextStorage):
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
-        self._prf = collection_prefix
-        self.collections = {field: db[f"{self._prf}_{field}"] for field in full_update_scheme.keys()}
-        self.collections.update({self._CONTEXTS: db[f"{self._prf}_contexts"]})
+        self.collections = {field: db[f"{collection_prefix}_{field}"] for field in full_update_scheme.keys()}
+        self.collections.update({self._CONTEXTS: db[f"{collection_prefix}_contexts"]})
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
