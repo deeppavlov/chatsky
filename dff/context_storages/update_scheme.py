@@ -78,7 +78,7 @@ class UpdateScheme:
 
     @classmethod
     def _init_update_field(cls, field_type: FieldType, field_name: str, rules: List[str]) -> Tuple[Dict, str]:
-        field = dict()
+        field = {"type": field_type}
 
         if len(rules) == 0:
             raise Exception(f"For field '{field_name}' the read rule should be defined!")
@@ -202,8 +202,7 @@ class UpdateScheme:
             if self.fields[field]["read"] == FieldRule.IGNORE:
                 continue
 
-            field_type = self._get_type_from_name(field)
-            if field_type == FieldType.LIST:
+            if self.fields[field]["type"] == FieldType.LIST:
                 list_keys = await fields_reader(field, int_id, ext_id)
                 if "outlook_slice" in self.fields[field]:
                     update_field = self._get_outlook_slice(list_keys, self.fields[field]["outlook_slice"])
@@ -212,7 +211,7 @@ class UpdateScheme:
                 result[field] = await seq_reader(field, update_field, int_id, ext_id)
                 self._update_hashes(result[field], field, hashes)
 
-            elif field_type == FieldType.DICT:
+            elif self.fields[field]["type"] == FieldType.DICT:
                 update_field = self.fields[field].get("outlook", None)
                 if self.ALL_ITEMS in update_field:
                     update_field = await fields_reader(field, int_id, ext_id)
@@ -240,9 +239,8 @@ class UpdateScheme:
                 continue
             if self.fields[field]["write"] == FieldRule.UPDATE_ONCE and hashes is not None:
                 continue
-            field_type = self._get_type_from_name(field)
 
-            if field_type == FieldType.LIST:
+            if self.fields[field]["type"] == FieldType.LIST:
                 list_keys = await fields_reader(field, ctx.id, ext_id)
                 if "outlook_slice" in self.fields[field]:
                     update_field = self._get_outlook_slice(context_dict[field].keys(), self.fields[field]["outlook_slice"])
@@ -260,7 +258,7 @@ class UpdateScheme:
                     patch = {item: context_dict[field][item] for item in update_field}
                 await seq_writer(field, patch, ctx.id, ext_id)
 
-            elif field_type == FieldType.DICT:
+            elif self.fields[field]["type"] == FieldType.DICT:
                 list_keys = await fields_reader(field, ctx.id, ext_id)
                 update_field = self.fields[field].get("outlook", list())
                 update_keys_all = list_keys + list(context_dict[field].keys())
