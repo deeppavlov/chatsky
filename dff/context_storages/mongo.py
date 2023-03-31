@@ -62,8 +62,8 @@ class MongoContextStorage(DBContextStorage):
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
         self.update_scheme.fields[AdditionalFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields.setdefault(AdditionalFields.EXTERNAL_FIELD, dict()).update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields.setdefault(AdditionalFields.CREATED_AT_FIELD, dict()).update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[AdditionalFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[AdditionalFields.CREATED_AT_FIELD].update(write=FieldRule.UPDATE_ONCE)
         logger.warning(f"init -> {self.update_scheme.fields}")
 
     @threadsafe_method
