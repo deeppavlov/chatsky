@@ -9,6 +9,7 @@ these functions to collect statistics and persist them to a database.
 
 
 # %%
+import os
 import asyncio
 
 from dff.script import Context
@@ -85,12 +86,17 @@ pipeline = Pipeline.from_dict(
 if __name__ == "__main__":
     from dff.utils.testing.stats_cli import parse_args
 
-    if not is_interactive_mode():
+    if is_interactive_mode():
+        uri = "clickhouse://{0}:{1}@localhost:8123/{2}".format(
+            os.getenv("CLICKHOUSE_USER"),
+            os.getenv("CLICKHOUSE_PASSWORD"),
+            os.getenv("CLICKHOUSE_DB"),
+        )
+    else:
         args = parse_args()
+        uri = args["uri"]
+    stats = StatsStorage.from_uri(uri)
 
-        # Create a storage object.
-        stats = StatsStorage.from_uri(args["uri"], table=args["table"])
-
-        # Subscribe the storage to the changes in the pool.
-        stats.add_extractor_pool(extractor_pool)
-        pipeline.run()
+    # Subscribe the storage to the changes in the pool.
+    stats.add_extractor_pool(extractor_pool)
+    pipeline.run()

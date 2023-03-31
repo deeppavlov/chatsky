@@ -8,6 +8,7 @@ for statistics collection.
 
 
 # %%
+import os
 import asyncio
 
 from dff.script import Context
@@ -87,9 +88,16 @@ pipeline = Pipeline.from_dict(
 if __name__ == "__main__":
     from dff.utils.testing.stats_cli import parse_args
 
-    if not is_interactive_mode():
+    if is_interactive_mode():
+        uri = "clickhouse://{0}:{1}@localhost:8123/{2}".format(
+            os.getenv("CLICKHOUSE_USER"),
+            os.getenv("CLICKHOUSE_PASSWORD"),
+            os.getenv("CLICKHOUSE_DB"),
+        )
+    else:
         args = parse_args()
-        stats = StatsStorage.from_uri(args["uri"], table=args["table"])
-        stats.add_extractor_pool(extractor_pool)
-        stats.add_extractor_pool(default_extractor_pool)
-        pipeline.run()
+        uri = args["uri"]
+    stats = StatsStorage.from_uri(uri)
+    stats.add_extractor_pool(extractor_pool)
+    stats.add_extractor_pool(default_extractor_pool)
+    pipeline.run()

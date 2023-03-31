@@ -25,8 +25,8 @@ uri_parser.add_argument(
 )
 
 
-def parse_args():
-    parsed_args = parser.parse_args(sys.argv[1:])
+def parse_args(args=sys.argv[1:]):
+    parsed_args = parser.parse_args(args)
 
     if hasattr(parsed_args, "uri"):
         dsn, _, table = parsed_args.uri.rpartition("/")
