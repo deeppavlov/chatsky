@@ -25,7 +25,7 @@ _WriteSeqFunction = Callable[[str, Dict[Hashable, Any], Union[UUID, int, str], U
 _WriteValueFunction = Callable[[str, Any, Union[UUID, int, str], Union[UUID, int, str]], Awaitable]
 _WriteFunction = Union[_WriteSeqFunction, _WriteValueFunction]
 
-_ReadKeys = Dict[str, Union[bool, Dict[str, bool]]]
+_ReadKeys = Dict[str, List[str]]
 _ReadContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable[Dict]]
 _WriteContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable]
 
@@ -308,12 +308,13 @@ class UpdateScheme:
         hashes = dict()
         ctx_dict = await ctx_reader(fields_outlook, int_id, ext_id)
         for field in self.fields.keys():
-            self._update_hashes(ctx_dict[field], field, hashes)
-            if ctx_dict[field] is None:
+            if ctx_dict.get(field, None) is None:
                 if field == ExtraFields.IDENTITY_FIELD:
                     ctx_dict[field] = int_id
                 elif field == ExtraFields.EXTERNAL_FIELD:
                     ctx_dict[field] = ext_id
+            if ctx_dict.get(field, None) is not None:
+                self._update_hashes(ctx_dict[field], field, hashes)
 
         return Context.cast(ctx_dict), hashes
 

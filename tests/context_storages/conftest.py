@@ -1,12 +1,12 @@
 import uuid
 
-from dff.script import Context
+from dff.script import Context, Message
 import pytest
 
 
 @pytest.fixture(scope="function")
 def testing_context():
-    yield Context(id=str(112668))
+    yield Context(id=str(112668), misc={"some_key": "some_value", "other_key": "other_value"}, requests={0: Message(text="message text")})
 
 
 @pytest.fixture(scope="function")

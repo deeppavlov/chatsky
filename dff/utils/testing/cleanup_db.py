@@ -59,7 +59,8 @@ async def delete_sql(storage: SQLContextStorage):
     if storage.dialect == "mysql" and not mysql_available:
         raise Exception("Can't delete mysql database - mysql provider unavailable!")
     async with storage.engine.connect() as conn:
-        await conn.run_sync(storage.table.drop, storage.engine)
+        for table in storage.tables.values():
+            await conn.run_sync(table.drop, storage.engine)
 
 
 async def delete_ydb(storage: YDBContextStorage):
