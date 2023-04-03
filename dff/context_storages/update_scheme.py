@@ -26,7 +26,7 @@ _WriteValueFunction = Callable[[str, Any, Union[UUID, int, str], Union[UUID, int
 _WriteFunction = Union[_WriteSeqFunction, _WriteValueFunction]
 
 _ReadKeys = Dict[str, List[str]]
-_ReadContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable[Dict]]
+_ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], str, Union[UUID, int, str]], Awaitable[Dict]]
 _WriteContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable]
 
 

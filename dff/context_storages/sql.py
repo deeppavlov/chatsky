@@ -227,7 +227,7 @@ class SQLContextStorage(DBContextStorage):
             update_stmt = insert_stmt
         return update_stmt
 
-    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Dict[str, Union[bool, Dict[str, bool]]]:
+    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Dict[str, List[str]]:
         key_columns = list()
         joined_table = self.tables[self._CONTEXTS]
         for field in self.list_fields + self.dict_fields:
@@ -242,6 +242,7 @@ class SQLContextStorage(DBContextStorage):
         key_dict = dict()
         async with self.engine.connect() as conn:
             for result in (await conn.execute(stmt)).fetchall():
+                logger.warning(f"FIELD: {result}")
                 for key, value in zip(key_columns, result):
                     field_name = str(key).removeprefix(f"{self.tables_prefix}_").split(".")[0]
                     if value is not None and field_name not in key_dict:
@@ -251,7 +252,7 @@ class SQLContextStorage(DBContextStorage):
         logger.warning(f"FIELDS '{ext_id}': {key_dict}")
         return key_dict
 
-    async def _read_ctx(self, outlook: Dict[Hashable, Any], _: str, ext_id: Union[UUID, int, str]) -> Dict:
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: Union[UUID, int, str]) -> Dict:
         key_columns = list()
         value_columns = list()
         joined_table = self.tables[self._CONTEXTS]
