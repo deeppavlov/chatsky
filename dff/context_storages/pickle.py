@@ -111,21 +111,21 @@ class PickleContextStorage(DBContextStorage):
         if len(container) == 0:
             return key_dict, None
         container_dict = container[-1].dict() if container[-1] is not None else dict()
-        for field in self.update_scheme.COMPLEX_FIELDS:
+        for field in [key for key, value in container_dict.items() if isinstance(value, dict)]:
             key_dict[field] = list(container_dict.get(field, dict()).keys())
         return key_dict, container_dict.get(ExtraFields.IDENTITY_FIELD, None)
 
     async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: Union[UUID, int, str]) -> Dict:
         result_dict = dict()
         context = self.storage[ext_id][-1].dict()
-        for field in [field for field in self.update_scheme.COMPLEX_FIELDS if bool(outlook.get(field, dict()))]:
+        for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in outlook[field].items() if value]:
                 value = context.get(field, dict()).get(key, None)
                 if value is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
                     result_dict[field][key] = value
-        for field in [field for field in self.update_scheme.SIMPLE_FIELDS if outlook.get(field, False)]:
+        for field in [field for field, value in outlook.items() if isinstance(value, bool) and value]:
             value = context.get(field, None)
             if value is not None:
                 result_dict[field] = value

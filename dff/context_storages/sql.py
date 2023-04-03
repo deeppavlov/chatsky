@@ -250,7 +250,7 @@ class SQLContextStorage(DBContextStorage):
                 return key_dict, None
             else:
                 int_id = int_id[0]
-            for field in self.update_scheme.COMPLEX_FIELDS:
+            for field in self.list_fields + self.dict_fields:
                 stmt = select(self.tables[field].c[self._KEY_FIELD])
                 stmt = stmt.where(self.tables[field].c[ExtraFields.IDENTITY_FIELD] == int_id)
                 for [key] in (await conn.execute(stmt)).fetchall():
@@ -264,7 +264,7 @@ class SQLContextStorage(DBContextStorage):
     async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: Union[UUID, int, str]) -> Dict:
         result_dict = dict()
         async with self.engine.begin() as conn:
-            for field in [field for field in self.update_scheme.COMPLEX_FIELDS if bool(outlook.get(field, dict()))]:
+            for field in [field for field in self.list_fields + self.dict_fields if bool(outlook.get(field, dict()))]:
                 keys = [key for key, value in outlook[field].items() if value]
                 stmt = select(self.tables[field].c[self._KEY_FIELD], self.tables[field].c[self._VALUE_FIELD])
                 stmt = stmt.where(self.tables[field].c[ExtraFields.IDENTITY_FIELD] == int_id)

@@ -16,6 +16,8 @@ import pickle
 from typing import Hashable, List, Dict, Any, Union, Tuple, Optional
 from uuid import UUID
 
+from .update_scheme import FieldType
+
 try:
     from aioredis import Redis
 
@@ -104,7 +106,7 @@ class RedisContextStorage(DBContextStorage):
         else:
             int_id = int_id.decode()
         await self._redis.rpush(ext_id, int_id)
-        for field in self.update_scheme.COMPLEX_FIELDS:
+        for field in [field for field in self.update_scheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] != FieldType.VALUE]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]
                 if field not in key_dict:
@@ -114,14 +116,14 @@ class RedisContextStorage(DBContextStorage):
 
     async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: Union[UUID, int, str]) -> Dict:
         result_dict = dict()
-        for field in [field for field in self.update_scheme.COMPLEX_FIELDS if bool(outlook.get(field, dict()))]:
+        for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in outlook[field].items() if value]:
                 value = await self._redis.get(f"{ext_id}:{int_id}:{field}:{key}")
                 if value is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
                     result_dict[field][key] = pickle.loads(value)
-        for field in [field for field in self.update_scheme.SIMPLE_FIELDS if outlook.get(field, False)]:
+        for field in [field for field, value in outlook.items() if isinstance(value, bool) and value]:
             value = await self._redis.get(f"{ext_id}:{int_id}:{field}")
             if value is not None:
                 result_dict[field] = pickle.loads(value)
@@ -129,9 +131,9 @@ class RedisContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: Union[UUID, int, str]):
         for holder in data.keys():
-            if holder in self.update_scheme.COMPLEX_FIELDS:
+            if self.update_scheme.fields[holder]["type"] == FieldType.VALUE:
+                await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
+            else:
                 for key, value in data.get(holder, dict()).items():
                     await self._redis.set(f"{ext_id}:{int_id}:{holder}:{key}", pickle.dumps(value))
-            if holder in self.update_scheme.SIMPLE_FIELDS:
-                await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
         await self._redis.rpush(ext_id, int_id)

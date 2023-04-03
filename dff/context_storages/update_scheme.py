@@ -71,14 +71,6 @@ class UpdateScheme:
         for name in list(self.ALL_FIELDS - self.fields.keys()):
             self.fields[name] = self._init_update_field(self._get_type_from_name(name), name, ["ignore", "ignore"])[0]
 
-    @property
-    def COMPLEX_FIELDS(self):
-        return [field for field in UpdateScheme.ALL_FIELDS if self.fields[field]["type"] != FieldType.VALUE]
-
-    @property
-    def SIMPLE_FIELDS(self):
-        return [field for field in UpdateScheme.ALL_FIELDS if self.fields[field]["type"] == FieldType.VALUE]
-
     @classmethod
     def _get_type_from_name(cls, field_name: str) -> Optional[FieldType]:
         if field_name.startswith("requests") or field_name.startswith("responses") or field_name.startswith("labels"):
