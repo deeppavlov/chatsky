@@ -13,7 +13,7 @@ Additionally, Redis can be used as a cache, message broker, and database, making
 and powerful choice for data storage and management.
 """
 import pickle
-from typing import Hashable, List, Dict, Any, Union
+from typing import Hashable, List, Dict, Any, Union, Tuple, Optional
 from uuid import UUID
 
 try:
@@ -51,25 +51,21 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        last_id = self._check_none(await self._redis.rpop(key))
-        if last_id is None:
+        fields, int_id = await self._read_keys(key)
+        if int_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, key, last_id.decode())
+        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, int_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
+        fields, int_id = await self._read_keys(key)
         value_hash = self.hash_storage.get(key, None)
-        await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_value, self._write_seq, key)
-        last_id = self._check_none(await self._redis.rpop(key))
-        if last_id is None or last_id.decode() != value.id:
-            if last_id is not None:
-                await self._redis.rpush(key, last_id)
-            else:
-                await self._redis.incr(self._TOTAL_CONTEXT_COUNT_KEY)
-            await self._redis.rpush(key, value.id)
+        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
+        if int_id != value.id and int_id is None:
+            await self._redis.incr(self._TOTAL_CONTEXT_COUNT_KEY)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -100,27 +96,42 @@ class RedisContextStorage(DBContextStorage):
     def _check_none(cls, value: Any) -> Any:
         return None if value == cls._VALUE_NONE else value
 
-    async def _read_fields(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> List[str]:
-        result = list()
-        for key in await self._redis.keys(f"{ext_id}:{int_id}:{field_name}:*"):
-            res = key.decode().split(":")[-1]
-            result += [int(res) if res.isdigit() else res]
-        return result
+    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+        key_dict = dict()
+        int_id = self._check_none(await self._redis.rpop(ext_id))
+        if int_id is None:
+            return key_dict, None
+        else:
+            int_id = int_id.decode()
+        await self._redis.rpush(ext_id, int_id)
+        for field in self.update_scheme.COMPLEX_FIELDS:
+            for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
+                res = key.decode().split(":")[-1]
+                if field not in key_dict:
+                    key_dict[field] = list()
+                key_dict[field] += [int(res) if res.isdigit() else res]
+        return key_dict, int_id
 
-    async def _read_seq(self, field_name: str, outlook: List[Hashable], int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
-        result = dict()
-        for key in outlook:
-            value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}:{key}")
-            result[key] = pickle.loads(value) if value is not None else None
-        return result
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: Union[UUID, int, str]) -> Dict:
+        result_dict = dict()
+        for field in [field for field in self.update_scheme.COMPLEX_FIELDS if bool(outlook.get(field, dict()))]:
+            for key in [key for key, value in outlook[field].items() if value]:
+                value = await self._redis.get(f"{ext_id}:{int_id}:{field}:{key}")
+                if value is not None:
+                    if field not in result_dict:
+                        result_dict[field] = dict()
+                    result_dict[field][key] = pickle.loads(value)
+        for field in [field for field in self.update_scheme.SIMPLE_FIELDS if outlook.get(field, False)]:
+            value = await self._redis.get(f"{ext_id}:{int_id}:{field}")
+            if value is not None:
+                result_dict[field] = pickle.loads(value)
+        return result_dict
 
-    async def _read_value(self, field_name: str, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]) -> Any:
-        value = await self._redis.get(f"{ext_id}:{int_id}:{field_name}")
-        return pickle.loads(value) if value is not None else None
-
-    async def _write_seq(self, field_name: str, data: Dict[Hashable, Any], int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
-        for key, value in data.items():
-            await self._redis.set(f"{ext_id}:{int_id}:{field_name}:{key}", pickle.dumps(value))
-
-    async def _write_value(self, field_name: str, data: Any, int_id: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
-        return await self._redis.set(f"{ext_id}:{int_id}:{field_name}", pickle.dumps(data))
+    async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: Union[UUID, int, str]):
+        for holder in data.keys():
+            if holder in self.update_scheme.COMPLEX_FIELDS:
+                for key, value in data.get(holder, dict()).items():
+                    await self._redis.set(f"{ext_id}:{int_id}:{holder}:{key}", pickle.dumps(value))
+            if holder in self.update_scheme.SIMPLE_FIELDS:
+                await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
+        await self._redis.rpush(ext_id, int_id)

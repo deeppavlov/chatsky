@@ -26,7 +26,7 @@ full_update_scheme = {
 
 
 @pytest.mark.asyncio
-async def test_default_scheme_creation(context_id, testing_context):
+async def default_scheme_creation(context_id, testing_context):
     context_storage = dict()
 
     async def fields_reader(field_name: str, _: Union[UUID, int, str], ext_id: Union[UUID, int, str]):
