@@ -13,8 +13,9 @@ reliability and scalability. SQLite is a self-contained, high-reliability, embed
 public-domain, SQL database engine.
 """
 import asyncio
+import importlib
 import logging
-from typing import Hashable, Dict, Union, Any
+from typing import Hashable, Dict, Union, Any, List, Iterable
 from uuid import UUID
 
 from dff.script import Context
@@ -66,6 +67,18 @@ if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
 
+def _import_insert_for_dialect(dialect: str):
+    """
+    Imports the insert function into global scope depending on the chosen sqlalchemy dialect.
+    :param dialect: Chosen sqlalchemy dialect.
+    """
+    global insert
+    insert = getattr(
+        importlib.import_module(f"sqlalchemy.dialects.{dialect}"),
+        "insert",
+    )
+
+
 logger = logging.getLogger(__name__)
 
 
@@ -95,6 +108,7 @@ class SQLContextStorage(DBContextStorage):
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
+        _import_insert_for_dialect(self.dialect)
 
         self.list_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST]
         self.dict_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT]
@@ -155,7 +169,6 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        #logger.warning(f"To write: {value}")
         fields = await self._read_keys(key)
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
@@ -172,7 +185,6 @@ class SQLContextStorage(DBContextStorage):
         stmt = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD]).where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == key).order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc())
         async with self.engine.begin() as conn:
             result = (await conn.execute(stmt)).fetchone()
-            logger.warning(f"Contains ({key}): {result}")
             return result[0] is not None
 
     @threadsafe_method
@@ -206,9 +218,14 @@ class SQLContextStorage(DBContextStorage):
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    def _get_field_name_from_column(self, column: Column[Any]) -> str:
-        table_field_name = str(column).removeprefix(f"{self.tables_prefix}_").split(".")
-        return table_field_name[-1 if table_field_name[0] == self._CONTEXTS else 0]
+    async def _get_update_stmt(self, insert_stmt, columns: Iterable[str], unique: List[str]):
+        if self.dialect == "postgresql" or self.dialect == "sqlite":
+            update_stmt = insert_stmt.on_conflict_do_update(index_elements=unique, set_={column: insert_stmt.excluded[column] for column in columns})
+        elif self.dialect == "mysql":
+            update_stmt = insert_stmt.on_duplicate_key_update(**{column: insert_stmt.inserted[column] for column in columns})
+        else:
+            update_stmt = insert_stmt
+        return update_stmt
 
     async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Dict[str, Union[bool, Dict[str, bool]]]:
         key_columns = list()
@@ -218,22 +235,20 @@ class SQLContextStorage(DBContextStorage):
             joined_table = joined_table.join(self.tables[field], condition, isouter=True)
             key_columns += [self.tables[field].c[self._KEY_FIELD]]
 
+        request = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD]).where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id).order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc()).limit(1)
         stmt = select(*key_columns).select_from(joined_table)
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id)
-        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc())
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] == request.subquery().c[ExtraFields.IDENTITY_FIELD])
 
         key_dict = dict()
         async with self.engine.connect() as conn:
             for result in (await conn.execute(stmt)).fetchall():
-                logger.warning(f"READ for id '{ext_id}', result: {result}")
                 for key, value in zip(key_columns, result):
                     field_name = str(key).removeprefix(f"{self.tables_prefix}_").split(".")[0]
-                    if value is not None:
+                    if value is not None and field_name not in key_dict:
                         if field_name not in key_dict:
                             key_dict[field_name] = list()
                         key_dict[field_name] += [value]
-        #logger.warning(f"For id '{ext_id}', fields: {key_dict}")
-        #logger.warning(f"READ for id '{ext_id}', fields: {key_dict}")
+        logger.warning(f"FIELDS '{ext_id}': {key_dict}")
         return key_dict
 
     async def _read_ctx(self, outlook: Dict[Hashable, Any], _: str, ext_id: Union[UUID, int, str]) -> Dict:
@@ -246,9 +261,9 @@ class SQLContextStorage(DBContextStorage):
             key_columns += [self.tables[field].c[self._KEY_FIELD]]
             value_columns += [self.tables[field].c[self._VALUE_FIELD]]
 
+        request = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD]).where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id).order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc()).limit(1)
         stmt = select(*self.tables[self._CONTEXTS].c, *key_columns, *value_columns).select_from(joined_table)
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id)
-        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc())
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] == request.subquery().c[ExtraFields.IDENTITY_FIELD])
 
         key_dict = dict()
         async with self.engine.connect() as conn:
@@ -266,15 +281,20 @@ class SQLContextStorage(DBContextStorage):
                         if field_name not in key_dict:
                             key_dict[field_name] = dict()
                         key_dict[field_name].update({outer_value: inner_value})
-            #logger.warning(f"For id '{ext_id}', values: {key_dict}")
+            logger.warning(f"READ '{ext_id}': {key_dict}")
         return key_dict
 
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, __: Union[UUID, int, str]):
-        logger.warning(f"Writing: {data}")
+        logger.warning(f"WRITE '{__}': {data}")
         async with self.engine.begin() as conn:
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:
                     values = [{ExtraFields.IDENTITY_FIELD: int_id, self._KEY_FIELD: key, self._VALUE_FIELD: value} for key, value in storage.items()]
-                    await conn.execute(self.tables[field].insert().values(values))
+                    insert_stmt = insert(self.tables[field]).values(values)
+                    update_stmt = await self._get_update_stmt(insert_stmt, [column.name for column in self.tables[field].c], [ExtraFields.IDENTITY_FIELD, self._KEY_FIELD])
+                    await conn.execute(update_stmt)
             values = {k: v for k, v in data.items() if not isinstance(v, dict)}
-            await conn.execute(self.tables[self._CONTEXTS].insert().values(values))
+            if len(values.items()) > 0:
+                insert_stmt = insert(self.tables[self._CONTEXTS]).values({**values, ExtraFields.IDENTITY_FIELD: int_id})
+                update_stmt = await self._get_update_stmt(insert_stmt, values.keys(), [ExtraFields.IDENTITY_FIELD])
+                await conn.execute(update_stmt)
