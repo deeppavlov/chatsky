@@ -6,7 +6,7 @@ This class is used to store and retrieve context data in a JSON. It allows the `
 store and retrieve context data.
 """
 import asyncio
-from typing import Hashable, Union, List, Any, Dict
+from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 from uuid import UUID
 
 from pydantic import BaseModel, Extra, root_validator
@@ -55,15 +55,19 @@ class JSONContextStorage(DBContextStorage):
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         await self._load()
-        context, hashes = await self.update_scheme.process_fields_read(self._read_fields, self._read_value, self._read_seq, key)
+        fields, int_id = await self._read_keys(key)
+        if int_id is None:
+            raise KeyError(f"No entry for key {key}.")
+        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, int_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
+        fields, _ = await self._read_keys(key)
         value_hash = self.hash_storage.get(key, None)
-        await self.update_scheme.process_fields_write(value, value_hash, self._read_fields, self._write_anything, self._write_anything, key)
+        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
         await self._save()
 
     @threadsafe_method
@@ -105,25 +109,35 @@ class JSONContextStorage(DBContextStorage):
             async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
                 self.storage = SerializableStorage.parse_raw(await file_stream.read())
 
-    async def _read_fields(self, field_name: str, _: str, ext_id: Union[UUID, int, str]):
+    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+        key_dict = dict()
         container = self.storage.__dict__.get(ext_id, list())
-        return list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
+        if len(container) == 0:
+            return key_dict, None
+        container_dict = container[-1].dict() if container[-1] is not None else dict()
+        for field in self.update_scheme.COMPLEX_FIELDS:
+            key_dict[field] = list(container_dict.get(field, dict()).keys())
+        return key_dict, container_dict.get(ExtraFields.IDENTITY_FIELD, None)
 
-    async def _read_seq(self, field_name: str, outlook: List[Hashable], _: str, ext_id: Union[UUID, int, str]) -> Dict[Hashable, Any]:
-        if ext_id not in self.storage.__dict__ or self.storage.__dict__[ext_id][-1] is None:
-            raise KeyError(f"Key {ext_id} not in storage!")
-        container = self.storage.__dict__[ext_id]
-        return {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook} if len(container) > 0 else dict()
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: Union[UUID, int, str]) -> Dict:
+        result_dict = dict()
+        context = self.storage.__dict__[ext_id][-1].dict()
+        for field in [field for field in self.update_scheme.COMPLEX_FIELDS if bool(outlook.get(field, dict()))]:
+            for key in [key for key, value in outlook[field].items() if value]:
+                value = context.get(field, dict()).get(key, None)
+                if value is not None:
+                    if field not in result_dict:
+                        result_dict[field] = dict()
+                    result_dict[field][key] = value
+        for field in [field for field in self.update_scheme.SIMPLE_FIELDS if outlook.get(field, False)]:
+            value = context.get(field, None)
+            if value is not None:
+                result_dict[field] = value
+        return result_dict
 
-    async def _read_value(self, field_name: str, _: str, ext_id: Union[UUID, int, str]) -> Any:
-        if ext_id not in self.storage.__dict__ or self.storage.__dict__[ext_id][-1] is None:
-            raise KeyError(f"Key {ext_id} not in storage!")
-        container = self.storage.__dict__[ext_id]
-        return container[-1].dict().get(field_name, None) if len(container) > 0 else None
-
-    async def _write_anything(self, field_name: str, data: Any, _: str, ext_id: Union[UUID, int, str]):
+    async def _write_ctx(self, data: Dict[str, Any], _: str, ext_id: Union[UUID, int, str]):
         container = self.storage.__dict__.setdefault(ext_id, list())
         if len(container) > 0:
-            container[-1] = Context.cast({**container[-1].dict(), field_name: data})
+            container[-1] = Context.cast({**container[-1].dict(), **data})
         else:
-            container.append(Context.cast({field_name: data}))
+            container.append(Context.cast(data))

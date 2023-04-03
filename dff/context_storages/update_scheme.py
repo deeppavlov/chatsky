@@ -293,7 +293,7 @@ class UpdateScheme:
             else:
                 await val_writer(field, context_dict[field], ctx.id, ext_id)
 
-    async def read_context(self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: Union[UUID, int, str], int_id: str = None) -> Tuple[Context, Dict]:
+    async def read_context(self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: Union[UUID, int, str], int_id: str) -> Tuple[Context, Dict]:
         fields_outlook = dict()
         for field in self.fields.keys():
             if self.fields[field]["read"] == FieldRule.IGNORE:
