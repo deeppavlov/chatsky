@@ -162,8 +162,8 @@ def test_postgres(testing_context, context_id):
             os.getenv("POSTGRES_DB"),
         )
     )
-    #generic_test(db, testing_context, context_id)
-    #asyncio.run(delete_sql(db))
+    generic_test(db, testing_context, context_id)
+    asyncio.run(delete_sql(db))
 
 
 @pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
@@ -172,7 +172,6 @@ def test_sqlite(testing_file, testing_context, context_id):
     db = context_storage_factory(f"sqlite+aiosqlite:{separator}{testing_file}")
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
-    raise Exception("logging exception")
 
 
 @pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
@@ -185,8 +184,8 @@ def test_mysql(testing_context, context_id):
             os.getenv("MYSQL_DATABASE"),
         )
     )
-    #generic_test(db, testing_context, context_id)
-    #asyncio.run(delete_sql(db))
+    generic_test(db, testing_context, context_id)
+    asyncio.run(delete_sql(db))
 
 
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
