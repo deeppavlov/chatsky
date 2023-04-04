@@ -39,7 +39,6 @@
                 "value_'flow'",
                 "value_'node'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'flow'",

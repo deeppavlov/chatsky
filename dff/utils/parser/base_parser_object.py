@@ -63,9 +63,9 @@ class BaseParserObject(ABC):
         "Mapping from child names to child nodes"
 
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
-        """A list of objects defined in :py:class:`.Namespace`s that are used inside current node.
+        """A list of objects defined in :py:class:`.Namespace`\\s that are used inside current node.
 
-        :return: A mapping from :py:class:`.Namespace`s' names to sets of object names.
+        :return: A mapping from :py:class:`.Namespace`\\s names to sets of object names.
         """
         result: tp.DefaultDict[str, tp.Set[str]] = defaultdict(set)
         if len(self.path) >= 2:
@@ -132,14 +132,14 @@ class BaseParserObject(ABC):
 
     @abstractmethod
     def dump(self, current_indent: int = 0, indent: tp.Optional[int] = 4) -> str:
-        """Dump object as string. `current_indent` should already be applied to the current line by the node's parent.
+        """
+        Dump object as string. `current_indent` should already be applied to the current line by the node's parent.
         `current_indent` is supposed to be used only when creating new lines.
 
         :param current_indent: Current indentation level (in whitespace number), defaults to 0.
         :param indent:
             Indentation increment (in whitespace number), defaults to 4.
-            If set to None indentation is not applied.
-
+            If set to None, an object is dumped in one line.
         :return: Representation of the object as a string.
         """
 
@@ -191,10 +191,11 @@ class Statement(BaseParserObject, ABC):
     ) -> tp.Optional[tp.Union[tp.Mapping[str, "Statement"], "Python"]]:
         """
         Extract statements from ast node.
+
         :return:
             - None, if type of the `node` is not compatible with the current class.
             - For non-:py:class:`~.Python` classes
-            return a mapping from names of defined objects inside the statement to their definitions.
+              return a mapping from names of defined objects inside the statement to their definitions.
             - :py:class:`~.Python` should return an instance of itself.
         """
         ...
@@ -318,9 +319,10 @@ class ReferenceObject(BaseParserObject, ABC):
         """
         Return a path of a referenced object (as well as modifiers such as indexes or attribute references).
 
-        So if `ReferenceObject` is `from dff import pipeline as pl` referenced_object` for `pl` is `dff.pipeline`.
-        However, if `ReferencedObject` is `pl.Pipeline` or `pl.dictionary[pl.number][5]` then their `referenced_object`s
-        are, respectively, `dff.pipeline.Pipeline` and `dff.pipeline.dictionary[dff.pipeline.number][5]`.
+        So if `ReferenceObject` is `from dff import pipeline as pl referenced_object` for `pl` is `dff.pipeline`.
+        However, if `ReferencedObject` is `pl.Pipeline` or `pl.dictionary[pl.number][5]` then their
+        `referenced_object`\\s are, respectively, `dff.pipeline.Pipeline` and
+        `dff.pipeline.dictionary[dff.pipeline.number][5]`.
         """
 
     def __repr__(self):
@@ -409,11 +411,11 @@ class Import(Statement, ReferenceObject):
         """
         Extract imports from ast node.
 
-        :return:
-            A dictionary of statements contained in the node.
+        :return: A dictionary of statements contained in the node.
             The keys are names under which an object is imported, and the values are instances of this class.
             For example an import statement `import obj_1 as obj, obj_2, obj_3 as obj_3`
             will produce a dictionary with the following items:
+
                 - `(obj, Import(import obj_1 as obj))`
                 - `(obj_2, Import(import obj_2))`
                 - `(obj_3, Import(import obj_3 as obj_3))`
@@ -496,6 +498,7 @@ class ImportFrom(Statement, ReferenceObject):
             The keys are names under which an object is imported, and the values are instances of this class.
             For example an import statement `from module import obj_1 as obj, obj_2, obj_3 as obj_3`
             will produce a dictionary with the following items:
+
                 - `(obj, ImportFrom(from module import obj_1 as obj))`
                 - `(obj_2, ImportFrom(from module import obj_2))`
                 - `(obj_3, ImportFrom(from module import obj_3 as obj_3))`
@@ -550,6 +553,7 @@ class Assignment(Statement):
             The keys are names of declared object, and the values are instances of this class.
             For example an assignment statement `a = b = c = 1`
             will produce a dictionary with the following items:
+
                 - `(c, Assignment(c = 1))`
                 - `(a, Assignment(a = c))`
                 - `(b, Assignment(b = c))`
@@ -774,7 +778,7 @@ class Dict(Expression):
         elif isinstance(item, str):
             return self.children[self._value(item)]
         else:
-            raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
+            raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str`")
 
     def get(self, item: tp.Union[Expression, str], default=None) -> Expression:
         """Get dictionary value based on a key.
@@ -793,7 +797,7 @@ class Dict(Expression):
         elif isinstance(item, str):
             return self.children.get(self._value(item), default)
         else:
-            raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str")
+            raise TypeError(f"Item {repr(item)} is not `BaseParserObject` nor `str`")
 
     @classmethod
     @tp.overload

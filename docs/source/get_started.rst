@@ -4,7 +4,7 @@ Getting started
 Installation
 ~~~~~~~~~~~~
 
-`DFF` can be easily installed on your system using the ``pip`` package manager:
+DFF can be easily installed on your system using the ``pip`` package manager:
 
 .. code-block:: console
    
@@ -16,18 +16,21 @@ The above command will set the minimum dependencies to start working with DFF.
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 
 .. code-block:: console
-   
+
    pip install dff[core]  # minimal dependencies (by default)
+   pip install dff[json]  # dependencies for using JSON
+   pip install dff[pickle] # dependencies for using Pickle
    pip install dff[redis]  # dependencies for using Redis
    pip install dff[mongodb]  # dependencies for using MongoDB
    pip install dff[mysql]  # dependencies for using MySQL
    pip install dff[postgresql]  # dependencies for using PostgreSQL
    pip install dff[sqlite]  # dependencies for using SQLite
    pip install dff[ydb]  # dependencies for using Yandex Database
+   pip install dff[telegram]  # dependencies for using Telegram
    pip install dff[full]  # full dependencies including all options above
    pip install dff[tests]  # dependencies for running tests
    pip install dff[test_full]  # full dependencies for running all tests (all options above)
-   pip install dff[examples]  # dependencies for running examples (all options above)
+   pip install dff[tutorials]  # dependencies for running tutorials (all options above)
    pip install dff[devel]  # dependencies for development
    pip install dff[doc]  # dependencies for documentation
    pip install dff[devel_full]  # full dependencies for development (all options above)

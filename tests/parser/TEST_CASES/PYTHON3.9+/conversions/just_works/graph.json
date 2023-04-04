@@ -147,9 +147,8 @@
                 "value",
                 "value_GLOBAL"
             ],
-            "local": false,
             "id": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ]
         },
@@ -161,7 +160,6 @@
                 "value_'greeting_flow'",
                 "value_'node1'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -176,7 +174,6 @@
                 "value_'music_flow'",
                 "value_'node1'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'music_flow'",
@@ -248,7 +245,6 @@
                 "value",
                 "value_'start_node'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'global_flow'",
@@ -262,7 +258,6 @@
                 "value",
                 "value_'fallback_node'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'global_flow'",
@@ -313,7 +308,6 @@
                 "value_'greeting_flow'",
                 "value_'node2'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -350,7 +344,6 @@
                 "value_'greeting_flow'",
                 "value_'node3'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -365,7 +358,6 @@
                 "value_'greeting_flow'",
                 "value_'node4'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'greeting_flow'",
@@ -398,7 +390,6 @@
                 "value_'music_flow'",
                 "value_'node2'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'music_flow'",
@@ -413,7 +404,6 @@
                 "value_'music_flow'",
                 "value_'node3'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'music_flow'",
@@ -450,7 +440,6 @@
                 "value_'music_flow'",
                 "value_'node4'"
             ],
-            "local": false,
             "id": [
                 "NODE",
                 "'music_flow'",
@@ -484,7 +473,7 @@
             ],
             "condition": "cnd.regexp('\\\\b(hi|hello)\\\\b', re.I)",
             "source": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ],
             "target": [
@@ -514,7 +503,7 @@
             ],
             "condition": "cnd.regexp('talk about music')",
             "source": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ],
             "target": [
@@ -544,7 +533,7 @@
             ],
             "condition": "cnd.true()",
             "source": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ],
             "target": [
@@ -585,7 +574,7 @@
             ],
             "condition": "cnd.all([cnd.regexp('next\\\\b'), cnd.has_last_labels(labels=[('music_flow', i) for i in ['node2', 'node3']])])",
             "source": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ],
             "target": [
@@ -630,7 +619,7 @@
             ],
             "condition": "cnd.all([cnd.regexp('repeat', re.I), cnd.negation(cnd.has_last_labels(flow_labels=['global_flow']))])",
             "source": [
-                "NODE",
+                "GLOBAL_NODE",
                 "GLOBAL"
             ],
             "target": [

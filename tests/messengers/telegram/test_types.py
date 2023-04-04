@@ -1,8 +1,15 @@
 import json
-import pytest
-
 from io import IOBase
 from pathlib import Path
+
+import pytest
+
+try:
+    import telebot  # noqa: F401
+    import telethon  # noqa: F401
+except ImportError:
+    pytest.skip(reason="`telegram` is not available", allow_module_level=True)
+
 from pydantic import ValidationError
 from telebot import types
 

@@ -1,3 +1,7 @@
+"""
+Yaml
+----
+"""
 from math import inf
 
 try:

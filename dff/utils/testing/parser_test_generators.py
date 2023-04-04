@@ -62,18 +62,18 @@ def rebuild_to_python_tests():
             dff_project.to_python(working_dir / "result_editing")
 
 
-def rebuild_engine_examples():
-    engine_example_dir = Path("examples/script/core")
+def rebuild_core_tutorials():
+    engine_tutorial_dir = Path("tutorials/script/core")
 
-    test_dir = TEST_DIR / "engine_examples"
+    test_dir = TEST_DIR / "core_tutorials"
 
     if test_dir.exists():
         rmtree(test_dir)
     test_dir.mkdir(parents=True)
 
-    for file in engine_example_dir.iterdir():
+    for file in engine_tutorial_dir.iterdir():
         if file.is_file():
-            dff_project = DFFProject.from_python(engine_example_dir, file, script_initializer="pipeline")
+            dff_project = DFFProject.from_python(engine_tutorial_dir, file, script_initializer="pipeline")
 
             dff_project.to_python(test_dir)
             dff_project.to_yaml(test_dir / (remove_suffix(file.parts[-1], ".py") + ".yaml"))
@@ -83,4 +83,4 @@ def rebuild_engine_examples():
 if __name__ == "__main__":
     rebuild_conversions()
     rebuild_to_python_tests()
-    rebuild_engine_examples()
+    rebuild_core_tutorials()
