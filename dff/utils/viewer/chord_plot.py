@@ -195,11 +195,11 @@ def invPerm(perm):
 
 
 def make_filled_chord(adjacency_df: pd.DataFrame, width: int = 800, height: int = 800):  # ,labels):
-    n = adjacency_df.shape[0]
     labels = list(adjacency_df.columns)
     adjacency_df = adjacency_df.T
     matrix = adjacency_df.to_numpy()
-    row_sum = [np.sum(matrix[k, :]) for k in range(n)]
+    n = adjacency_df.shape[0]
+    row_sum = [np.sum(matrix[k, :]) or 1 for k in range(n)]
     gap = 2 * PI * 10e-8
 
     ideogram_length = 2 * PI * np.asarray(row_sum) / sum(row_sum) - gap * np.ones(n)
