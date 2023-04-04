@@ -1,8 +1,8 @@
 from flows.start import flow
-from dff.script import Actor
+from dff.pipeline import Pipeline
 
 start_label = ('start_flow', 'start_node')
 
-act = Actor(script={
+pipeline = Pipeline.from_script(script={
     'start_flow': flow,
 }, start_label=start_label)

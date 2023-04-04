@@ -1,13 +1,13 @@
 main:
+  re: import re
   TRANSITIONS: from dff.script.core.keywords import TRANSITIONS
   RESPONSE: from dff.script.core.keywords import RESPONSE
   GLOBAL: from dff.script.core.keywords import GLOBAL
   MISC: from dff.script.core.keywords import MISC
   cnd: import dff.script.conditions
   lbl: import dff.script.labels
-  Act: from dff.script import Actor
   rsp: import dff.script.responses
-  re: import re
+  Pipeline: from dff.pipeline import Pipeline
   transitions: import transitions
   global_flow: from flow import global_flow
   script:
@@ -73,7 +73,7 @@ main:
           transitions.greeting_flow_n2_transition: cnd.regexp('next', re.IGNORECASE)
           transitions.high_priority_node_transition('greeting_flow', 'node4'): cnd.regexp('next time', re.IGNORECASE)
           lbl.to_fallback(): cnd.true()
-  actor: Act(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))
+  pipeline: Pipeline.from_script(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))
 flow:
   TRANSITIONS: from dff.script.core.keywords import TRANSITIONS
   RESPONSE: from dff.script.core.keywords import RESPONSE

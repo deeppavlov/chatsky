@@ -1,15 +1,12 @@
+import re
 from dff.script.core.keywords import TRANSITIONS
 from dff.script.core.keywords import RESPONSE
 from dff.script.core.keywords import GLOBAL
 from dff.script.core.keywords import MISC
-from dff.script.core.keywords import LOCAL
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
-from dff.script import Actor as Act
-from dff.script import Context
 import dff.script.responses as rsp
-import typing as tp
-import re
+from dff.pipeline import Pipeline
 import transitions
 from flow import global_flow
 
@@ -102,4 +99,4 @@ script = {
     },
 }
 
-actor = Act(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))
+pipeline = Pipeline.from_script(fallback_label=('global_flow', 'fallback_node'), script=script, start_label=('global_flow', 'start_node'))
