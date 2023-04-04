@@ -9,7 +9,7 @@ First of all, let's do all the necessary imports from DFF.
 # %%
 import re
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Actor, NodeLabel3Type, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, NodeLabel3Type, Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline
@@ -31,12 +31,12 @@ with flow name, node name and priority.
 
 
 # %%
-def greeting_flow_n2_transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+def greeting_flow_n2_transition(_: Context, __: Pipeline, *args, **kwargs) -> NodeLabel3Type:
     return ("greeting_flow", "node2", 1.0)
 
 
 def high_priority_node_transition(flow_label, label):
-    def transition(ctx: Context, actor: Actor, *args, **kwargs) -> NodeLabel3Type:
+    def transition(_: Context, __: Pipeline, *args, **kwargs) -> NodeLabel3Type:
         return (flow_label, label, 2.0)
 
     return transition

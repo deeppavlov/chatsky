@@ -19,7 +19,7 @@ from ..script import Context
 
 
 class DBContextStorage(ABC):
-    """
+    r"""
     An abstract interface for `dff` DB context storages.
     It includes the most essential methods of the python `dict` class.
     Can not be instantiated.
@@ -48,7 +48,7 @@ class DBContextStorage(ABC):
         Synchronous method for accessing stored Context.
 
         :param key: Hashable key used to store Context instance.
-        :returns: The stored context, associated with the given key.
+        :return: The stored context, associated with the given key.
         """
         return asyncio.run(self.get_item_async(key))
 
@@ -58,7 +58,7 @@ class DBContextStorage(ABC):
         Asynchronous method for accessing stored Context.
 
         :param key: Hashable key used to store Context instance.
-        :returns: The stored context, associated with the given key.
+        :return: The stored context, associated with the given key.
         """
         raise NotImplementedError
 
@@ -103,7 +103,7 @@ class DBContextStorage(ABC):
         Synchronous method for finding whether any Context is stored with given key.
 
         :param key: Hashable key used to check if Context instance is stored.
-        :returns: True if there is Context accessible by given key, False otherwise.
+        :return: True if there is Context accessible by given key, False otherwise.
         """
         return asyncio.run(self.contains_async(key))
 
@@ -113,7 +113,7 @@ class DBContextStorage(ABC):
         Asynchronous method for finding whether any Context is stored with given key.
 
         :param key: Hashable key used to check if Context instance is stored.
-        :returns: True if there is Context accessible by given key, False otherwise.
+        :return: True if there is Context accessible by given key, False otherwise.
         """
         raise NotImplementedError
 
@@ -121,7 +121,7 @@ class DBContextStorage(ABC):
         """
         Synchronous method for retrieving number of stored Contexts.
 
-        :returns: The number of stored Contexts.
+        :return: The number of stored Contexts.
         """
         return asyncio.run(self.len_async())
 
@@ -130,7 +130,7 @@ class DBContextStorage(ABC):
         """
         Asynchronous method for retrieving number of stored Contexts.
 
-        :returns: The number of stored Contexts.
+        :return: The number of stored Contexts.
         """
         raise NotImplementedError
 
@@ -140,7 +140,7 @@ class DBContextStorage(ABC):
 
         :param key: Hashable key used to store Context instance.
         :param default: Optional default value to be returned if no Context is found.
-        :returns: The stored context, associated with the given key or default value.
+        :return: The stored context, associated with the given key or default value.
         """
         return asyncio.run(self.get_async(key, default))
 
@@ -150,7 +150,7 @@ class DBContextStorage(ABC):
 
         :param key: Hashable key used to store Context instance.
         :param default: Optional default value to be returned if no Context is found.
-        :returns: The stored context, associated with the given key or default value.
+        :return: The stored context, associated with the given key or default value.
         """
         try:
             return await self.get_item_async(str(key))

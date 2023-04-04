@@ -18,13 +18,6 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
 
 @pytest.fixture(scope="session")
-def no_pipeline_tutorial():
-    if not telegram_available:
-        pytest.skip("`telegram` not available.")
-    yield importlib.import_module(f"tutorials.{dot_path_to_addon}.{'9_no_pipeline'}")
-
-
-@pytest.fixture(scope="session")
 def pipeline_tutorial():
     if not telegram_available:
         pytest.skip("`telegram` not available.")
@@ -58,16 +51,6 @@ def env_vars():
 @pytest.fixture(scope="session")
 def pipeline_instance(env_vars, pipeline_tutorial):
     yield pipeline_tutorial.pipeline
-
-
-@pytest.fixture(scope="session")
-def actor_instance(env_vars, no_pipeline_tutorial):
-    yield no_pipeline_tutorial.actor
-
-
-@pytest.fixture(scope="session")
-def basic_bot(env_vars, no_pipeline_tutorial):
-    yield no_pipeline_tutorial.bot
 
 
 @pytest.fixture(scope="session")
