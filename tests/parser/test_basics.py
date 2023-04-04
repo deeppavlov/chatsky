@@ -12,12 +12,7 @@ from .utils import assert_dirs_equal
 def test_just_works():
     obj = Expression.from_str("{1: {2: '3'}}")
     assert isinstance(obj, Dict)
-    assert (
-        str(obj.children["value_1"])
-        == """{
-    2: '3',
-}"""
-    )
+    assert str(obj.children["value_1"]) == "{\n    2: '3',\n}"
 
 
 def test_path():
@@ -269,7 +264,7 @@ def test_deep_import():
 
 
 def test_get_methods():
-    ...
+    ...  # todo: add tests for get methods of Dict and Iterable
 
 
 def test_namespace_filter():

@@ -627,6 +627,8 @@ class DFFProject(BaseParserObject):
                                 f"ImportFrom statement should contain 4 words. AsName is set via key.\n{obj}"
                             )
                         objects.append(obj if split[3] == obj_name else obj + " as " + obj_name)
+                    elif obj_name.isnumeric():
+                        objects.append(obj)  # unsupported by BPOs statement (e.g. func def)
                     else:
                         if isinstance(ast.parse(obj).body[0], (ast.Assign, ast.AnnAssign)):
                             raise ParsingError(f"Assignment statement should not be used in the dictionary: {obj}")

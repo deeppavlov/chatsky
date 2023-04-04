@@ -31,13 +31,6 @@ except ImportError:
         raise ModuleNotFoundError("Module `astunparse` is not installed. Install it with `pip install dff[parser]`.")
 # todo: remove this when python3.8 support is dropped
 
-try:
-    remove_suffix = str.removesuffix
-    remove_prefix = str.removeprefix
-except AttributeError:
-    from dff.utils.parser.utils import remove_prefix, remove_suffix
-# todo: remove this when python3.8 support is dropped
-
 
 if tp.TYPE_CHECKING:
     from dff.utils.parser.namespace import Namespace
@@ -82,7 +75,7 @@ class BaseParserObject(ABC):
         for child in self.children.values():
             for namespace, objects in child.dependencies().items():
                 result[namespace].update(objects)
-        return result
+        return dict(result)
 
     def add_child(self, child: "BaseParserObject", asname: str):
         """Add a child node `child` by the name `asname`.
@@ -631,7 +624,7 @@ class Python(Expression, Statement):  # type: ignore
                     if isinstance(child, ast.expr):
                         self.add_child(Expression.auto(child), key + "_" + str(index))
         if unparse.__module__ == "astunparse":
-            self.string = remove_prefix(remove_suffix(unparse(node), "\n"), "\n")
+            self.string = unparse(node).strip()
             # astunparse.unparse adds "\n"
             # todo: remove this when python3.8 support is dropped
         else:
@@ -1150,7 +1143,7 @@ class Call(Expression):
                     if arg.startswith("arg_")
                 ]
                 + [
-                    f"{remove_prefix(keyword, 'keyword_')}={self.children[keyword].dump(current_indent, indent)}"
+                    f"{keyword[len('keyword_'):]}={self.children[keyword].dump(current_indent, indent)}"
                     for keyword in self.children.keys()
                     if keyword.startswith("keyword_")
                 ]

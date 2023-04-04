@@ -1,6 +1,5 @@
 from pathlib import Path
 from shutil import copytree
-from sys import version_info
 from tempfile import TemporaryDirectory
 
 import pytest
@@ -8,16 +7,13 @@ import pytest
 from dff.utils.parser.dff_project import DFFProject
 from tests.parser.utils import assert_dirs_equal, assert_files_equal
 
-if version_info >= (3, 9):
-    TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.9+")
-else:
-    TEST_DIR = Path("tests/parser/TEST_CASES/PYTHON3.8-")
+TEST_DIR = Path(__file__).parent / "TEST_CASES"
 
 ENGINE_TUTORIAL_DIR = Path(__file__).parent.parent.parent / "tutorials" / "script" / "core"
 
 
 # todo: add more parameters?
-@pytest.mark.parametrize("test_case", [str(working_dir) for working_dir in (TEST_DIR / "conversions").iterdir()])
+@pytest.mark.parametrize("test_case", [str(working_dir) for working_dir in (TEST_DIR / "complex_cases").iterdir()])
 def test_conversions(test_case: str, tmp_path):
     working_dir = Path(test_case)
     python_dir = working_dir / "python_files"
@@ -25,31 +21,28 @@ def test_conversions(test_case: str, tmp_path):
     yaml_script = working_dir / "script.yaml"
     graph_script = working_dir / "graph.json"
 
-    # from_python
+    # from_python -> to_yaml & to_graph
     dff_project = DFFProject.from_python(python_dir, main_file)
     dff_project.to_yaml(tmp_path / "script.yaml")
     dff_project.to_graph(tmp_path / "graph.json")
     assert_files_equal(tmp_path / "script.yaml", yaml_script)
     assert_files_equal(tmp_path / "graph.json", graph_script)
 
-    # from_yaml
+    # from_yaml -> to_graph
     dff_project = DFFProject.from_yaml(yaml_script)
     dff_project.to_graph(tmp_path / "graph.json")
     assert_files_equal(tmp_path / "graph.json", graph_script)
 
-    # from_graph
+    # from_graph -> to_yaml
     dff_project = DFFProject.from_graph(graph_script)
     dff_project.to_yaml(tmp_path / "script.yaml")
     assert_files_equal(tmp_path / "script.yaml", yaml_script)
 
+    # from_yaml(new_script) -> to_python
 
-@pytest.mark.parametrize("test_case", [str(working_dir) for working_dir in (TEST_DIR / "to_python").iterdir()])
-def test_to_python(test_case: str):
-    working_dir = Path(test_case)
+    dff_project = DFFProject.from_yaml(working_dir / "new_script.yaml")
 
-    dff_project = DFFProject.from_yaml(working_dir / "script.yaml")
-
-    # test creation
+    # test creating
     with TemporaryDirectory() as tmpdir:
         created = Path(tmpdir)
         dff_project.to_python(created)
@@ -58,7 +51,7 @@ def test_to_python(test_case: str):
 
     # test editing
     with TemporaryDirectory() as tmpdir:
-        edited = Path(copytree(working_dir / "initial_files", tmpdir + "/edited"))
+        edited = Path(copytree(working_dir / "python_files", tmpdir + "/edited"))
 
         dff_project.to_python(edited)
 
@@ -66,7 +59,7 @@ def test_to_python(test_case: str):
 
 
 @pytest.mark.parametrize(
-    "example_name",
+    "tutorial_name",
     [
         "1_basics",
         "2_conditions",
@@ -79,24 +72,24 @@ def test_to_python(test_case: str):
         "9_pre_transitions_processing",
     ],
 )
-def test_core_tutorials(example_name: str, tmp_path):
-    python_name = example_name + ".py"
+def test_core_tutorials(tutorial_name: str, tmp_path):
+    python_name = tutorial_name + ".py"
 
     dff_project = DFFProject.from_python(
         ENGINE_TUTORIAL_DIR, (ENGINE_TUTORIAL_DIR / python_name), script_initializer="pipeline"
     )
 
-    dff_project.to_yaml(tmp_path / (example_name + ".yaml"))
+    dff_project.to_yaml(tmp_path / (tutorial_name + ".yaml"))
 
-    assert_files_equal(tmp_path / (example_name + ".yaml"), TEST_DIR / "core_tutorials" / (example_name + ".yaml"))
+    assert_files_equal(tmp_path / (tutorial_name + ".yaml"), TEST_DIR / "core_tutorials" / (tutorial_name + ".yaml"))
 
-    dff_project = DFFProject.from_yaml(tmp_path / (example_name + ".yaml"))
+    dff_project = DFFProject.from_yaml(tmp_path / (tutorial_name + ".yaml"))
 
-    dff_project.to_graph(tmp_path / (example_name + ".json"))
+    dff_project.to_graph(tmp_path / (tutorial_name + ".json"))
 
-    assert_files_equal(tmp_path / (example_name + ".json"), TEST_DIR / "core_tutorials" / (example_name + ".json"))
+    assert_files_equal(tmp_path / (tutorial_name + ".json"), TEST_DIR / "core_tutorials" / (tutorial_name + ".json"))
 
-    dff_project = DFFProject.from_graph(tmp_path / (example_name + ".json"))
+    dff_project = DFFProject.from_graph(tmp_path / (tutorial_name + ".json"))
 
     dff_project.to_python(tmp_path)
 
