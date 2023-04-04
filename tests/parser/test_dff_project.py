@@ -4,8 +4,11 @@ from tempfile import TemporaryDirectory
 
 import pytest
 
-from dff.utils.parser.dff_project import DFFProject
-from tests.parser.utils import assert_dirs_equal, assert_files_equal
+try:
+    from dff.utils.parser.dff_project import DFFProject
+    from tests.parser.utils import assert_dirs_equal, assert_files_equal
+except ImportError:
+    pytest.skip(reason="`parser` is not available", allow_module_level=True)
 
 TEST_DIR = Path(__file__).parent / "TEST_CASES"
 

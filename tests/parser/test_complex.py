@@ -3,9 +3,12 @@ import ast
 
 import pytest
 
-from dff.utils.parser.dff_project import DFFProject
-from dff.utils.parser.base_parser_object import Expression, Call, Python
-from dff.utils.parser.namespace import Namespace
+try:
+    from dff.utils.parser.dff_project import DFFProject
+    from dff.utils.parser.base_parser_object import Expression, Call, Python
+    from dff.utils.parser.namespace import Namespace
+except ImportError:
+    pytest.skip(reason="`parser` is not available", allow_module_level=True)
 
 
 def test_referenced_object():
