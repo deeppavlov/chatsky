@@ -14,7 +14,7 @@ def get_script(nx_graph: nx.Graph, node_data: dict) -> dict:
 def get_label_by_index_shifting(
     nx_graph: nx.Graph, node_id: tuple, increment_flag: bool = True, cyclicality_flag: bool = True
 ) -> tuple:
-    if node_id == ("NONE",) or node_id == ("NODE", "GLOBAL"):  # fall back on skip conditions
+    if node_id == ("NONE",) or node_id == ("GLOBAL_NODE", "GLOBAL"):  # fall back on skip conditions
         return ("NODE", *nx_graph.graph["fallback_label"])
     script = get_script(nx_graph, nx_graph.nodes[node_id])
     _, flow, *info = node_id
@@ -39,9 +39,9 @@ def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
     _, *source_info = source_node
 
     # get label transition sources
-    if source_info[0] == "GLOBAL":
+    if source_info[0] == "GLOBAL_NODE":
         sources = [node for node in nx_graph.nodes.keys() if node[0] != "LABEL" and node[0] != "NONE"]
-    elif source_info[1] == "LOCAL":
+    elif source_info[0] == "LOCAL_NODE":
         sources = [node for node in nx_graph.nodes.keys() if node[1] == source_info[0] and node[0] != "NONE"]
     else:
         sources = [source_node]
@@ -68,7 +68,7 @@ def transform_virtual(node: tuple):
     """
     Put special nodes to virtual flow. Replace NONE with unresolved key constant.
     """
-    if node == ("NODE", "GLOBAL"):
+    if node == ("GLOBAL_NODE", "GLOBAL"):
         return ("NODE", VIRTUAL_FLOW_KEY, node[-1])
     elif node == ("NONE",):
         return ("NODE", VIRTUAL_FLOW_KEY, UNRESOLVED_KEY)
@@ -93,8 +93,8 @@ def preprocess(
 
     nx_graph.remove_nodes_from(list(node for node in nx_graph.nodes if node[0] == "LABEL"))
 
-    if not show_global and ("NODE", "GLOBAL") in nx_graph.nodes:
-        nx_graph.remove_nodes_from([("NODE", "GLOBAL")])
+    if not show_global and ("GLOBAL_NODE", "GLOBAL") in nx_graph.nodes:
+        nx_graph.remove_nodes_from([("GLOBAL_NODE", "GLOBAL")])
 
     if not show_local:
         nx_graph.remove_nodes_from(list(node for node in nx_graph.nodes if node[-1] == "LOCAL"))

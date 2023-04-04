@@ -114,7 +114,7 @@ full = merge_req_lists(
     ydb_dependencies,
     telegram_dependencies,
     parser_dependencies,
-    script_viewer_dependencies
+    script_viewer_dependencies,
 )
 
 requests_requirements = [
