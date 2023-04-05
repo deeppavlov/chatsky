@@ -196,7 +196,7 @@ def test_ydb(testing_context, context_id):
             os.getenv("YDB_ENDPOINT"),
             os.getenv("YDB_DATABASE"),
         ),
-        table_name="test",
+        table_name_prefix="test_dff_table",
     )
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_ydb(db))

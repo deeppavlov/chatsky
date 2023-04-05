@@ -15,8 +15,9 @@ from dff.context_storages import (
     sqlite_available,
     postgres_available,
     mysql_available,
-    ydb_available,
+    ydb_available, UpdateScheme,
 )
+from dff.context_storages.update_scheme import FieldType
 
 
 async def delete_json(storage: JSONContextStorage):
@@ -68,6 +69,8 @@ async def delete_ydb(storage: YDBContextStorage):
         raise Exception("Can't delete ydb database - ydb provider unavailable!")
 
     async def callee(session):
-        await session.drop_table("/".join([storage.database, storage.table_name]))
+        fields = [field for field in UpdateScheme.ALL_FIELDS if storage.update_scheme.fields[field]["type"] != FieldType.VALUE] + [storage._CONTEXTS]
+        for field in fields:
+            await session.drop_table("/".join([storage.database, f"{storage.table_prefix}_{field}"]))
 
     await storage.pool.retry_operation(callee)
