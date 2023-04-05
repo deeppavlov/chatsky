@@ -128,9 +128,9 @@ class SQLContextStorage(DBContextStorage):
         _import_insert_for_dialect(self.dialect)
         _import_datetime_from_dialect(self.dialect)
 
-        self.list_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST]
-        self.dict_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT]
-        self.value_fields = list(UpdateScheme.EXTRA_FIELDS)
+        list_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST]
+        dict_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT]
+        value_fields = list(UpdateScheme.EXTRA_FIELDS)
 
         self.tables_prefix = table_name_prefix
 
@@ -143,7 +143,7 @@ class SQLContextStorage(DBContextStorage):
             Column(self._KEY_FIELD, Integer, nullable=False),
             Column(self._VALUE_FIELD, PickleType, nullable=False),
             Index(f"{field}_list_index", ExtraFields.IDENTITY_FIELD, self._KEY_FIELD, unique=True)
-        ) for field in self.list_fields})
+        ) for field in list_fields})
         self.tables.update({field: Table(
             f"{table_name_prefix}_{field}",
             MetaData(),
@@ -151,7 +151,7 @@ class SQLContextStorage(DBContextStorage):
             Column(self._KEY_FIELD, String(self._KEY_LENGTH), nullable=False),
             Column(self._VALUE_FIELD, PickleType, nullable=False),
             Index(f"{field}_dictionary_index", ExtraFields.IDENTITY_FIELD, self._KEY_FIELD, unique=True)
-        ) for field in self.dict_fields})
+        ) for field in dict_fields})
         self.tables.update({self._CONTEXTS: Table(
             f"{table_name_prefix}_{self._CONTEXTS}",
             MetaData(),
@@ -162,7 +162,7 @@ class SQLContextStorage(DBContextStorage):
         )})  # We DO assume this mapping of fields to be excessive (self.value_fields).
 
         for field in UpdateScheme.ALL_FIELDS:
-            if self.update_scheme.fields[field]["type"] == FieldType.VALUE and field not in self.value_fields:
+            if self.update_scheme.fields[field]["type"] == FieldType.VALUE and field not in value_fields:
                 if self.update_scheme.fields[field]["read"] != FieldRule.IGNORE or self.update_scheme.fields[field]["write"] != FieldRule.IGNORE:
                     raise RuntimeError(f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!")
 
@@ -250,7 +250,7 @@ class SQLContextStorage(DBContextStorage):
                 return key_dict, None
             else:
                 int_id = int_id[0]
-            for field in self.list_fields + self.dict_fields:
+            for field in [field for field in self.tables.keys() if field != self._CONTEXTS]:
                 stmt = select(self.tables[field].c[self._KEY_FIELD])
                 stmt = stmt.where(self.tables[field].c[ExtraFields.IDENTITY_FIELD] == int_id)
                 for [key] in (await conn.execute(stmt)).fetchall():
@@ -264,7 +264,7 @@ class SQLContextStorage(DBContextStorage):
     async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: Union[UUID, int, str]) -> Dict:
         result_dict = dict()
         async with self.engine.begin() as conn:
-            for field in [field for field in self.list_fields + self.dict_fields if bool(outlook.get(field, dict()))]:
+            for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
                 keys = [key for key, value in outlook[field].items() if value]
                 stmt = select(self.tables[field].c[self._KEY_FIELD], self.tables[field].c[self._VALUE_FIELD])
                 stmt = stmt.where(self.tables[field].c[ExtraFields.IDENTITY_FIELD] == int_id)

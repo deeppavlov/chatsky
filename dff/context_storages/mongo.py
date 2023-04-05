@@ -41,8 +41,8 @@ class MongoContextStorage(DBContextStorage):
     """
 
     _CONTEXTS = "contexts"
-    _KEY_CONTENT = "key"
-    _VALUE_CONTENT = "value"
+    _KEY_KEY = "key"
+    _KEY_VALUE = "value"
 
     def __init__(self, path: str, collection_prefix: str = "dff_collection"):
         DBContextStorage.__init__(self, path)
@@ -110,18 +110,18 @@ class MongoContextStorage(DBContextStorage):
             return key_dict, None
         last_id = last_context[-1][ExtraFields.IDENTITY_FIELD]
         for name, collection in [(field, self.collections[field]) for field in self.seq_fields]:
-            key_dict[name] = await collection.find({ExtraFields.IDENTITY_FIELD: last_id}).distinct(self._KEY_CONTENT)
+            key_dict[name] = await collection.find({ExtraFields.IDENTITY_FIELD: last_id}).distinct(self._KEY_KEY)
         return key_dict, last_id
 
     async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: Union[UUID, int, str]) -> Dict:
         result_dict = dict()
         for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in outlook[field].items() if value]:
-                value = await self.collections[field].find({ExtraFields.IDENTITY_FIELD: int_id, self._KEY_CONTENT: key}).to_list(1)
+                value = await self.collections[field].find({ExtraFields.IDENTITY_FIELD: int_id, self._KEY_KEY: key}).to_list(1)
                 if len(value) > 0 and value[-1] is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
-                    result_dict[field][key] = value[-1][self._VALUE_CONTENT]
+                    result_dict[field][key] = value[-1][self._KEY_VALUE]
         value = await self.collections[self._CONTEXTS].find({ExtraFields.IDENTITY_FIELD: int_id}).to_list(1)
         if len(value) > 0 and value[-1] is not None:
             result_dict = {**value[-1], **result_dict}
@@ -130,8 +130,8 @@ class MongoContextStorage(DBContextStorage):
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: Union[UUID, int, str]):
         for field in [field for field, value in data.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in data[field].items() if value]:
-                identifier = {ExtraFields.IDENTITY_FIELD: int_id, self._KEY_CONTENT: key}
-                await self.collections[field].update_one(identifier, {"$set": {**identifier, self._VALUE_CONTENT: data[field][key]}}, upsert=True)
+                identifier = {ExtraFields.IDENTITY_FIELD: int_id, self._KEY_KEY: key}
+                await self.collections[field].update_one(identifier, {"$set": {**identifier, self._KEY_VALUE: data[field][key]}}, upsert=True)
         ctx_data = {field: value for field, value in data.items() if not isinstance(value, dict)}
         await self.collections[self._CONTEXTS].update_one({ExtraFields.IDENTITY_FIELD: int_id}, {"$set": ctx_data}, upsert=True)
 
