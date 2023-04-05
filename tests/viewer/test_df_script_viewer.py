@@ -131,6 +131,29 @@ def test_image_cli(params, example_dir, reference_file, tmp_path):
     cli.make_image(
         args=[
             *params,
+            "--type=chord",
+            f"--entry_point={entrypoint}",
+            f"--project_root_dir={entrydir}",
+            "-f",
+            "jpeg",
+            "-o",
+            f"{plot_file}",
+        ]
+    )
+    cli.make_image(
+        args=[
+            *params,
+            f"--entry_point={entrypoint}",
+            f"--project_root_dir={entrydir}",
+            "-f",
+            "jpeg",
+            "-o",
+            f"{plot_file}",
+        ]
+    )
+    cli.make_image(
+        args=[
+            *params,
             f"--entry_point={entrypoint}",
             f"--project_root_dir={entrydir}",
             "-f",
