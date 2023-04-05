@@ -130,7 +130,6 @@ class SQLContextStorage(DBContextStorage):
 
         list_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST]
         dict_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT]
-        value_fields = list(UpdateScheme.EXTRA_FIELDS)
 
         self.tables_prefix = table_name_prefix
 
@@ -159,10 +158,10 @@ class SQLContextStorage(DBContextStorage):
             Column(ExtraFields.EXTERNAL_FIELD, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(ExtraFields.CREATED_AT_FIELD, DateTime, server_default=current_time, nullable=False),
             Column(ExtraFields.UPDATED_AT_FIELD, DateTime, server_default=current_time, server_onupdate=current_time, nullable=False),
-        )})  # We DO assume this mapping of fields to be excessive (self.value_fields).
+        )})
 
         for field in UpdateScheme.ALL_FIELDS:
-            if self.update_scheme.fields[field]["type"] == FieldType.VALUE and field not in value_fields:
+            if self.update_scheme.fields[field]["type"] == FieldType.VALUE and field not in [t.name for t in self.tables[self._CONTEXTS].c]:
                 if self.update_scheme.fields[field]["read"] != FieldRule.IGNORE or self.update_scheme.fields[field]["write"] != FieldRule.IGNORE:
                     raise RuntimeError(f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!")
 
