@@ -15,7 +15,6 @@ public-domain, SQL database engine.
 import asyncio
 import importlib
 from typing import Hashable, Dict, Union, Any, List, Iterable, Tuple, Optional
-from uuid import UUID
 
 from dff.script import Context
 
@@ -24,7 +23,7 @@ from .protocol import get_protocol_install_suggestion
 from .update_scheme import UpdateScheme, FieldType, ExtraFields, FieldRule, UpdateSchemeBuilder
 
 try:
-    from sqlalchemy import Table, MetaData, Column, PickleType, String, DateTime, Integer, Index, inspect, select, delete, func
+    from sqlalchemy import Table, MetaData, Column, PickleType, String, DateTime, Integer, Index, inspect, select, delete, func, insert
     from sqlalchemy.dialects.mysql import DATETIME
     from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -238,7 +237,7 @@ class SQLContextStorage(DBContextStorage):
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
     # TODO: optimize for PostgreSQL: single query.
-    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         subq = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD])
         subq = subq.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id)
         subq = subq.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc()).limit(1)
@@ -260,7 +259,7 @@ class SQLContextStorage(DBContextStorage):
         return key_dict, int_id
 
     # TODO: optimize for PostgreSQL: single query.
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: Union[UUID, int, str]) -> Dict:
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
         result_dict = dict()
         async with self.engine.begin() as conn:
             for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
@@ -280,7 +279,7 @@ class SQLContextStorage(DBContextStorage):
                     result_dict[key] = value
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: Union[UUID, int, str]):
+    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: str):
         async with self.engine.begin() as conn:
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:

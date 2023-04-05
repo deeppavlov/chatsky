@@ -3,7 +3,6 @@ from hashlib import sha256
 from re import compile
 from enum import Enum, auto, unique
 from typing import Dict, List, Optional, Tuple, Iterable, Callable, Any, Union, Awaitable, Hashable
-from uuid import UUID
 
 from dff.script import Context
 
@@ -15,19 +14,9 @@ class FieldType(Enum):
     VALUE = auto()
 
 
-_ReadFieldsFunction = Callable[[str, Union[UUID, int, str], Union[UUID, int, str]], Awaitable[List[Any]]]
-
-_ReadSeqFunction = Callable[[str, List[Hashable], Union[UUID, int, str], Union[UUID, int, str]], Awaitable[Any]]
-_ReadValueFunction = Callable[[str, Union[UUID, int, str], Union[UUID, int, str]], Awaitable[Any]]
-_ReadFunction = Union[_ReadSeqFunction, _ReadValueFunction]
-
-_WriteSeqFunction = Callable[[str, Dict[Hashable, Any], Union[UUID, int, str], Union[UUID, int, str]], Awaitable]
-_WriteValueFunction = Callable[[str, Any, Union[UUID, int, str], Union[UUID, int, str]], Awaitable]
-_WriteFunction = Union[_WriteSeqFunction, _WriteValueFunction]
-
 _ReadKeys = Dict[str, List[str]]
-_ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], str, Union[UUID, int, str]], Awaitable[Dict]]
-_WriteContextFunction = Callable[[Dict[str, Any], str, Union[UUID, int, str]], Awaitable]
+_ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], str, str], Awaitable[Dict]]
+_WriteContextFunction = Callable[[Dict[str, Any], str, str], Awaitable]
 
 
 @unique
@@ -202,7 +191,7 @@ class UpdateScheme:
             else:
                 hashes[field] = sha256(str(value).encode("utf-8"))
 
-    async def read_context(self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: Union[UUID, int, str], int_id: str) -> Tuple[Context, Dict]:
+    async def read_context(self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: str, int_id: str) -> Tuple[Context, Dict]:
         fields_outlook = dict()
         for field in self.fields.keys():
             if self.fields[field]["read"] == FieldRule.IGNORE:
@@ -235,7 +224,7 @@ class UpdateScheme:
 
         return Context.cast(ctx_dict), hashes
 
-    async def write_context(self, ctx: Context, hashes: Optional[Dict], fields: _ReadKeys, val_writer: _WriteContextFunction, ext_id: Union[UUID, int, str]):
+    async def write_context(self, ctx: Context, hashes: Optional[Dict], fields: _ReadKeys, val_writer: _WriteContextFunction, ext_id: str):
         ctx_dict = ctx.dict()
         ctx_dict[ExtraFields.EXTERNAL_FIELD] = str(ext_id)
         ctx_dict[ExtraFields.CREATED_AT_FIELD] = ctx_dict[ExtraFields.UPDATED_AT_FIELD] = time.time_ns()

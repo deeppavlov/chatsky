@@ -14,7 +14,6 @@ and powerful choice for data storage and management.
 """
 import pickle
 from typing import Hashable, List, Dict, Any, Union, Tuple, Optional
-from uuid import UUID
 
 from .update_scheme import FieldType
 
@@ -98,7 +97,7 @@ class RedisContextStorage(DBContextStorage):
     def _check_none(cls, value: Any) -> Any:
         return None if value == cls._VALUE_NONE else value
 
-    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         key_dict = dict()
         int_id = self._check_none(await self._redis.rpop(ext_id))
         if int_id is None:
@@ -114,7 +113,7 @@ class RedisContextStorage(DBContextStorage):
                 key_dict[field] += [int(res) if res.isdigit() else res]
         return key_dict, int_id
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: Union[UUID, int, str]) -> Dict:
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str) -> Dict:
         result_dict = dict()
         for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in outlook[field].items() if value]:
@@ -129,7 +128,7 @@ class RedisContextStorage(DBContextStorage):
                 result_dict[field] = pickle.loads(value)
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: Union[UUID, int, str]):
+    async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: str):
         for holder in data.keys():
             if self.update_scheme.fields[holder]["type"] == FieldType.VALUE:
                 await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))

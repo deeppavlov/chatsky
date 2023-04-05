@@ -13,7 +13,6 @@ and high levels of read and write traffic.
 """
 import time
 from typing import Hashable, Dict, Union, Optional, Tuple, List, Any
-from uuid import UUID
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -103,7 +102,7 @@ class MongoContextStorage(DBContextStorage):
     def _check_none(cls, value: Dict) -> Optional[Dict]:
         return None if value.get(ExtraFields.IDENTITY_FIELD, None) is None else value
 
-    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         key_dict = dict()
         last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: ext_id}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
         if len(last_context) == 0:
@@ -113,7 +112,7 @@ class MongoContextStorage(DBContextStorage):
             key_dict[name] = await collection.find({ExtraFields.IDENTITY_FIELD: last_id}).distinct(self._KEY_KEY)
         return key_dict, last_id
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: Union[UUID, int, str]) -> Dict:
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
         result_dict = dict()
         for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in outlook[field].items() if value]:
@@ -127,7 +126,7 @@ class MongoContextStorage(DBContextStorage):
             result_dict = {**value[-1], **result_dict}
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: Union[UUID, int, str]):
+    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: str):
         for field in [field for field, value in data.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in data[field].items() if value]:
                 identifier = {ExtraFields.IDENTITY_FIELD: int_id, self._KEY_KEY: key}

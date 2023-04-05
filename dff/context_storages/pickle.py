@@ -13,7 +13,6 @@ different languages or platforms because it's not cross-language compatible.
 import asyncio
 import pickle
 from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
-from uuid import UUID
 
 from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, ExtraFields
 
@@ -105,7 +104,7 @@ class PickleContextStorage(DBContextStorage):
             async with aiofiles.open(self.path, "rb") as file:
                 self.storage = pickle.loads(await file.read())
 
-    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         key_dict = dict()
         container = self.storage.get(ext_id, list())
         if len(container) == 0:
@@ -115,7 +114,7 @@ class PickleContextStorage(DBContextStorage):
             key_dict[field] = list(container_dict.get(field, dict()).keys())
         return key_dict, container_dict.get(ExtraFields.IDENTITY_FIELD, None)
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: Union[UUID, int, str]) -> Dict:
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: str) -> Dict:
         result_dict = dict()
         context = self.storage[ext_id][-1].dict()
         for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
@@ -131,7 +130,7 @@ class PickleContextStorage(DBContextStorage):
                 result_dict[field] = value
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], _: str, ext_id: Union[UUID, int, str]):
+    async def _write_ctx(self, data: Dict[str, Any], _: str, ext_id: str):
         container = self.storage.setdefault(ext_id, list())
         if len(container) > 0:
             container[-1] = Context.cast({**container[-1].dict(), **data})
