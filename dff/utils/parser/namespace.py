@@ -1,7 +1,9 @@
 """
 Namespace
 ---------
-This module defines `Namespace` -- a class to store contents of python files.
+This module defines a :py:class:`~.Namespace` class.
+
+Its children attribute stores all statements defined inside a single python file.
 """
 import typing as tp
 import ast
@@ -22,7 +24,11 @@ if tp.TYPE_CHECKING:
 
 
 class Namespace(BaseParserObject):
-    """This class represents a python file (all the objects defined in it + its location)."""
+    """
+    This class represents a python file.
+    It stores all the statements / expressions defined in a file as well as the location of that file relative to
+    `project_root_dir`.
+    """
 
     def __init__(self, location: tp.List[str], names: tp.Dict[str, Statement]):
         BaseParserObject.__init__(self)

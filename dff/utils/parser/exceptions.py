@@ -1,3 +1,10 @@
+"""
+Exceptions
+----------
+This module defines exceptions raised during parsing.
+"""
+
+
 class BaseParserException(BaseException):
     ...
 

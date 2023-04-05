@@ -1,3 +1,8 @@
+"""
+Utils
+-----
+This module defines useful functions.
+"""
 from typing import Union, Iterable
 from collections.abc import Iterable as abc_Iterable
 
