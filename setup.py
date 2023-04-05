@@ -88,19 +88,17 @@ parser_dependencies = [
 ]
 
 script_viewer_dependencies = merge_req_lists(
+    parser_dependencies,
     [
-        parser_dependencies,
-        [
-            "graphviz==0.17",
-            "dash==2.6.2",
-            "hupper==1.11",
-            "watchdog==3.0.0",
-            "plotly<=5.10.0",
-            "numpy==1.24.2",
-            "pandas==1.5.3",
-            "kaleido==0.2.1",
-        ],
-    ]
+        "graphviz==0.17",
+        "dash==2.6.2",
+        "hupper==1.11",
+        "watchdog==3.0.0",
+        "plotly<=5.10.0",
+        "numpy==1.24.2",
+        "pandas==1.5.3",
+        "kaleido==0.2.1",
+    ],
 )
 
 full = merge_req_lists(
