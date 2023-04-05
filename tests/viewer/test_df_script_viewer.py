@@ -1,3 +1,4 @@
+import os
 import difflib
 import time
 from multiprocessing import Process
@@ -14,6 +15,10 @@ try:
     from dff.utils.viewer import utils
 except ImportError:
     pytest.skip(allow_module_level=True, reason="Missing dependencies for dff parser.")
+
+dot_exec_result = os.system("which dot")
+if dot_exec_result != 0:
+    pytest.skip(allow_module_level=True, reason="Graphviz missing from the system.")
 
 
 @pytest.fixture(scope="session")
