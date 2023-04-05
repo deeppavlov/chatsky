@@ -8,7 +8,8 @@ from dff.script import (
 )
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
-from dff.script import Actor, Context  # noqa: F401
+from dff.script import Context  # noqa: F401
+from dff.pipeline import Pipeline
 import dff.script.responses as rsp
 from functions import add_prefix
 import typing as tp, re, transitions  # noqa: E401, F401
@@ -142,7 +143,7 @@ script = {
     },
 }
 
-actor = Actor(
+actor = Pipeline.from_script(
     fallback_label=("global_flow", "fallback_node"),
     script=script,
     start_label=("global_flow", "start_node"),
