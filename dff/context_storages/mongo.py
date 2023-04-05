@@ -10,13 +10,10 @@ MongoDB is a widely-used, open-source NoSQL database that is known for its scala
 It stores data in a format similar to JSON, making it easy to work with the data in a variety of programming languages
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
-
-TODO: remove explicit id and timestamp
 """
-import json
-import logging
 import time
-from typing import Hashable, Dict, Union, Optional
+from typing import Hashable, Dict, Union, Optional, Tuple, List, Any
+from uuid import UUID
 
 try:
     from motor.motor_asyncio import AsyncIOMotorClient
@@ -32,9 +29,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import full_update_scheme, UpdateScheme, UpdateSchemeBuilder, FieldRule, ExtraFields
-
-logger = logging.getLogger(__name__)
+from .update_scheme import UpdateScheme, UpdateSchemeBuilder, FieldRule, ExtraFields, FieldType
 
 
 class MongoContextStorage(DBContextStorage):
@@ -46,7 +41,8 @@ class MongoContextStorage(DBContextStorage):
     """
 
     _CONTEXTS = "contexts"
-    _KEY_NONE = "null"
+    _KEY_CONTENT = "key"
+    _VALUE_CONTENT = "value"
 
     def __init__(self, path: str, collection_prefix: str = "dff_collection"):
         DBContextStorage.__init__(self, path)
@@ -55,7 +51,9 @@ class MongoContextStorage(DBContextStorage):
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
-        self.collections = {field: db[f"{collection_prefix}_{field}"] for field in full_update_scheme.keys()}
+
+        self.seq_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] != FieldType.VALUE]
+        self.collections = {field: db[f"{collection_prefix}_{field}"] for field in self.seq_fields}
         self.collections.update({self._CONTEXTS: db[f"{collection_prefix}_contexts"]})
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
@@ -63,43 +61,38 @@ class MongoContextStorage(DBContextStorage):
         self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
         self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
         self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        logger.warning(f"init -> {self.update_scheme.fields}")
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
-        if len(last_context) == 0 or self._check_none(last_context[0]) is None:
+        fields, int_id = await self._read_keys(key)
+        if int_id is None:
             raise KeyError(f"No entry for key {key}.")
-        last_context[0]["id"] = last_context[0][ExtraFields.IDENTITY_FIELD]
-        logger.warning(f"read -> {key}: {last_context[0]} {last_context[0]['id']}")
-        return Context.cast(last_context[0])
+        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, int_id)
+        self.hash_storage[key] = hashes
+        return context
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        identifier = {**json.loads(value.json()), ExtraFields.EXTERNAL_FIELD: key, ExtraFields.IDENTITY_FIELD: value.id, ExtraFields.CREATED_AT_FIELD: time.time_ns()}
-        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
-        if len(last_context) != 0 and self._check_none(last_context[0]) is None:
-            await self.collections[self._CONTEXTS].replace_one({ExtraFields.IDENTITY_FIELD: last_context[0][ExtraFields.IDENTITY_FIELD]}, identifier, upsert=True)
-        else:
-            await self.collections[self._CONTEXTS].insert_one(identifier)
-        logger.warning(f"write -> {key}: {identifier} {value.id}")
+        fields, _ = await self._read_keys(key)
+        value_hash = self.hash_storage.get(key, None)
+        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def del_item_async(self, key: Union[Hashable, str]):
-        await self.collections[self._CONTEXTS].insert_one({ExtraFields.EXTERNAL_FIELD: key, ExtraFields.CREATED_AT_FIELD: time.time_ns(), self._KEY_NONE: True})
+        await self.collections[self._CONTEXTS].insert_one({ExtraFields.IDENTITY_FIELD: None, ExtraFields.EXTERNAL_FIELD: key, ExtraFields.CREATED_AT_FIELD: time.time_ns()})
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
         last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
-        return len(last_context) != 0 and self._check_none(last_context[0]) is not None
+        return len(last_context) != 0 and self._check_none(last_context[-1]) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(await self.collections[self._CONTEXTS].distinct(ExtraFields.EXTERNAL_FIELD, {self._KEY_NONE: {"$ne": True}}))
+        return len(await self.collections[self._CONTEXTS].distinct(ExtraFields.EXTERNAL_FIELD, {ExtraFields.IDENTITY_FIELD: {"$ne": None}}))
 
     @threadsafe_method
     async def clear_async(self):
@@ -108,4 +101,37 @@ class MongoContextStorage(DBContextStorage):
 
     @classmethod
     def _check_none(cls, value: Dict) -> Optional[Dict]:
-        return None if value.get(cls._KEY_NONE, False) else value
+        return None if value.get(ExtraFields.IDENTITY_FIELD, None) is None else value
+
+    async def _read_keys(self, ext_id: Union[UUID, int, str]) -> Tuple[Dict[str, List[str]], Optional[str]]:
+        key_dict = dict()
+        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: ext_id}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
+        if len(last_context) == 0:
+            return key_dict, None
+        last_id = last_context[-1][ExtraFields.IDENTITY_FIELD]
+        for name, collection in [(field, self.collections[field]) for field in self.seq_fields]:
+            key_dict[name] = await collection.find({ExtraFields.IDENTITY_FIELD: last_id}).distinct(self._KEY_CONTENT)
+        return key_dict, last_id
+
+    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: Union[UUID, int, str]) -> Dict:
+        result_dict = dict()
+        for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
+            for key in [key for key, value in outlook[field].items() if value]:
+                value = await self.collections[field].find({ExtraFields.IDENTITY_FIELD: int_id, self._KEY_CONTENT: key}).to_list(1)
+                if len(value) > 0 and value[-1] is not None:
+                    if field not in result_dict:
+                        result_dict[field] = dict()
+                    result_dict[field][key] = value[-1][self._VALUE_CONTENT]
+        value = await self.collections[self._CONTEXTS].find({ExtraFields.IDENTITY_FIELD: int_id}).to_list(1)
+        if len(value) > 0 and value[-1] is not None:
+            result_dict = {**value[-1], **result_dict}
+        return result_dict
+
+    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: Union[UUID, int, str]):
+        for field in [field for field, value in data.items() if isinstance(value, dict) and len(value) > 0]:
+            for key in [key for key, value in data[field].items() if value]:
+                identifier = {ExtraFields.IDENTITY_FIELD: int_id, self._KEY_CONTENT: key}
+                await self.collections[field].update_one(identifier, {"$set": {**identifier, self._VALUE_CONTENT: data[field][key]}}, upsert=True)
+        ctx_data = {field: value for field, value in data.items() if not isinstance(value, dict)}
+        await self.collections[self._CONTEXTS].update_one({ExtraFields.IDENTITY_FIELD: int_id}, {"$set": ctx_data}, upsert=True)
+

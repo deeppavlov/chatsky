@@ -50,6 +50,7 @@ class ExtraFields:
     UPDATED_AT_FIELD = "updated_at"
 
 
+# TODO: extend from pydantic.BaseModel + validators.
 class UpdateScheme:
     ALL_ITEMS = "__all__"
 
