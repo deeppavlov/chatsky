@@ -137,7 +137,7 @@ def test_image_cli(params, example_dir, reference_file, tmp_path):
             "-f",
             "jpeg",
             "-o",
-            f"{plot_file}",
+            f"{plot_file}.jpg",
         ]
     )
     cli.make_image(
@@ -148,7 +148,7 @@ def test_image_cli(params, example_dir, reference_file, tmp_path):
             "-f",
             "jpeg",
             "-o",
-            f"{plot_file}",
+            f"{plot_file}.jpg",
         ]
     )
     cli.make_image(

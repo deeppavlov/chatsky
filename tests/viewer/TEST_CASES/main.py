@@ -138,7 +138,6 @@ script = {
                     r"next time", re.IGNORECASE
                 ),
                 lbl.to_fallback(): cnd.true(),
-                lbl.to_start(): cnd.true(),
             },
         },
     },
