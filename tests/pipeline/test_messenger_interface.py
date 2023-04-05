@@ -54,14 +54,10 @@ def test_cli_messenger_interface(monkeypatch):
 
 
 def test_callback_messenger_interface(monkeypatch):
-    monkeypatch.setattr("builtins.input", lambda _: "Ping")
-    sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
-
     interface = CallbackMessengerInterface()
     pipeline.messenger_interface = interface
 
-    # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline))
+    pipeline.run()
 
     for _ in range(0, 5):
         assert interface.on_request(Message(text="Ping"), 0).last_response == Message(text="Pong")

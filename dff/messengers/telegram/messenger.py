@@ -12,7 +12,8 @@ from enum import Enum
 
 from telebot import types, TeleBot
 
-from dff.script import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 
 from .utils import batch_open_io
 from .message import TelegramMessage, TelegramUI, RemoveKeyboard
@@ -228,7 +229,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, actor: Actor, *args, **kwargs):  # pragma: no cover
+    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False

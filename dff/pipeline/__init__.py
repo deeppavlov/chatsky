@@ -28,7 +28,7 @@ from .types import (
     PipelineBuilder,
 )
 
-from .pipeline.pipeline import Pipeline
+from .pipeline.pipeline import Pipeline, ACTOR
 
 from .service.extra import BeforeHandler, AfterHandler
 from .service.group import ServiceGroup

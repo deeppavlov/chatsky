@@ -11,7 +11,7 @@ First of all, let's do all the necessary imports from DFF.
 # %%
 import re
 
-from dff.script import Actor, Context, TRANSITIONS, RESPONSE, Message
+from dff.script import Context, TRANSITIONS, RESPONSE, Message
 import dff.script.conditions as cnd
 from dff.pipeline import Pipeline
 
@@ -26,9 +26,12 @@ from dff.utils.testing.common import (
 The transition condition is set by the function.
 If this function returns the value `True`,
 then the actor performs the corresponding transition.
+Actor is responsible for processing user input and determining
+the appropriate response based on the current state of the conversation and the script.
+See tutorial 1 of pipeline (pipeline/1_basics) to learn more about Actor.
 Condition functions have signature
 
-    def func(ctx: Context, actor: Actor, *args, **kwargs) -> bool
+    def func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool
 
 Out of the box `dff.script.conditions` offers the
     following options for setting conditions:
@@ -56,7 +59,7 @@ Out of the box `dff.script.conditions` offers the
 
 For example function
 ```
-def always_true_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+def always_true_condition(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
     return True
 ```
 always returns `True` and `always_true_condition` function
@@ -67,7 +70,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+def hi_lower_case_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
     request = ctx.last_request
     # Returns True if `hi` in both uppercase and lowercase
     # letters is contained in the user request.
@@ -76,7 +79,7 @@ def hi_lower_case_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool
     return "hi" in request.text.lower()
 
 
-def complex_user_answer_condition(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+def complex_user_answer_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
     request = ctx.last_request
     # The user request can be anything.
     if request is None or request.misc is None:
@@ -86,7 +89,7 @@ def complex_user_answer_condition(ctx: Context, actor: Actor, *args, **kwargs) -
 
 def predetermined_condition(condition: bool):
     # Wrapper for internal condition function.
-    def internal_condition_function(ctx: Context, actor: Actor, *args, **kwargs) -> bool:
+    def internal_condition_function(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
         # It always returns `condition`.
         return condition
 

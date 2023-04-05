@@ -2,23 +2,6 @@ from typing import Union, Iterable
 from collections.abc import Iterable as abc_Iterable
 
 
-# todo: remove this when python3.8 support is dropped
-def remove_prefix(self: str, prefix: str) -> str:  # pragma: no cover
-    if self.startswith(prefix):
-        return self[len(prefix) :]  # noqa: E203
-    else:
-        return self[:]
-
-
-# todo: remove this when python3.8 support is dropped
-def remove_suffix(self: str, suffix: str) -> str:  # pragma: no cover
-    # suffix='' should not call self[:-0].
-    if suffix and self.endswith(suffix):
-        return self[: -len(suffix)]
-    else:
-        return self[:]
-
-
 def is_instance(obj: object, cls: Union[str, type, Iterable[Union[str, type]]]):
     """
     The same as  builtin `isinstance` but also accepts strings as types.

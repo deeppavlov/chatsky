@@ -1,9 +1,14 @@
 from inspect import signature
+import ast
 
 import pytest
 
-from dff.utils.parser.dff_project import DFFProject
-from dff.utils.parser.base_parser_object import Expression, Call
+try:
+    from dff.utils.parser.dff_project import DFFProject
+    from dff.utils.parser.base_parser_object import Expression, Call, Python
+    from dff.utils.parser.namespace import Namespace
+except ImportError:
+    pytest.skip(reason="`parser` is not available", allow_module_level=True)
 
 
 def test_referenced_object():
@@ -108,3 +113,98 @@ def test_get_args():
     assert isinstance(func_call, Call)
     args = func_call.get_args(signature(func))
     assert args == {}
+
+
+def test_python_dependencies():
+    dff_project = DFFProject.from_dict(
+        {
+            "main": {
+                "transitions": "from .transitions import transitions",
+                "variables": "import variables",
+                "unrelated_variable": "1",
+                "python_object": "len(transitions[1]) > 0 > -2 > (lambda: -5 + variables.number)()",
+            },
+            "transitions": {
+                "number": "from .variables import number",
+                "transitions": {
+                    "1": "'cnd'",
+                    "'two'": "'label'",
+                },
+            },
+            "variables": {
+                "number": "7",
+                "unrelated_number": "0",
+            },
+        },
+        validate=False,
+    )
+    python_object = dff_project["main"]["python_object"]
+    assert isinstance(python_object, Python)
+
+    assert python_object.dependencies() == {
+        "main": {
+            "variables",
+            "transitions",
+            "python_object",
+        },
+        "transitions": {
+            "transitions",
+        },
+        "variables": {
+            "number",
+        },
+    }
+
+
+def test_python_dumping():
+    file = "\n".join(
+        [
+            "import obj",
+            "import obj2",
+            "",
+            "",
+            "def func():",
+            "    ...",
+            "",
+            "",
+            "other_obj = obj",
+            "",
+            "another_obj = obj",
+            "",
+            "",
+            "async def func():",
+            "    ...",
+            "",
+            "",
+            # `Base` is needed because python3.8- and python3.9+ dump parentless class definitions differently
+            "class Class(Base):",
+            "    ...",
+            "",
+        ]
+    )
+    file_dict = {
+        "main": {
+            "obj": "import obj",
+            "obj2": "import obj2",
+            "0": "def func():\n    ...",
+            "other_obj": "obj",
+            "another_obj": "obj",
+            "1": "async def func():\n    ...",
+            "2": "class Class(Base):\n    ...",
+        }
+    }
+
+    object_filter = {"main": set(file_dict["main"].keys())}
+
+    # init from ast
+    namespace = Namespace.from_ast(ast.parse(file), location=["main"])
+    dff_project = DFFProject(namespaces=[namespace], validate=False)
+
+    assert dff_project["main"].dump() == file
+    assert dff_project.to_dict(object_filter=object_filter) == file_dict
+
+    # init from dict
+    dff_project = DFFProject.from_dict(file_dict, validate=False)
+
+    assert dff_project["main"].dump() == file
+    assert dff_project.to_dict(object_filter=object_filter) == file_dict

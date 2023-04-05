@@ -15,7 +15,6 @@ from dff.script import (
     TRANSITIONS,
     MISC,
     Context,
-    Actor,
     Message,
 )
 import dff.script.labels as lbl
@@ -29,7 +28,7 @@ from dff.utils.testing.common import (
 
 
 # %%
-def custom_response(ctx: Context, actor: Actor, *args, **kwargs) -> Message:
+def custom_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
     if ctx.validation:
         return Message()
     current_node = ctx.current_node

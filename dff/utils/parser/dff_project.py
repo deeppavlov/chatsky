@@ -40,8 +40,7 @@ from dff.utils.parser.base_parser_object import (
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.exceptions import ScriptValidationError, ParsingError
 from dff.utils.parser.yaml import yaml
-from dff.script.core.actor import Actor
-from dff.pipeline.pipeline.pipeline import Pipeline
+from dff.pipeline.pipeline.pipeline import Actor, Pipeline
 from dff.script.core.keywords import Keywords
 import dff.script.labels as labels
 
@@ -51,8 +50,8 @@ script_initializers: tp.Dict[str, inspect.Signature] = {
     **{
         actor_name: inspect.signature(Actor.__init__)
         for actor_name in (
-            "dff.script.core.actor.Actor",
-            "dff.script.Actor",
+            "dff.pipeline.pipeline.actor.Actor",
+            "dff.pipeline.pipeline.pipeline.Actor",
         )
     },
     **{
@@ -627,6 +626,8 @@ class DFFProject(BaseParserObject):
                                 f"ImportFrom statement should contain 4 words. AsName is set via key.\n{obj}"
                             )
                         objects.append(obj if split[3] == obj_name else obj + " as " + obj_name)
+                    elif obj_name.isnumeric():
+                        objects.append(obj)  # unsupported by BPOs statement (e.g. func def)
                     else:
                         if isinstance(ast.parse(obj).body[0], (ast.Assign, ast.AnnAssign)):
                             raise ParsingError(f"Assignment statement should not be used in the dictionary: {obj}")

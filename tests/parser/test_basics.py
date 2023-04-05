@@ -3,21 +3,30 @@ from sys import version_info
 from pathlib import Path
 from tempfile import TemporaryDirectory
 
-from dff.utils.parser.base_parser_object import Dict, Expression, Python, Import, Attribute, Subscript, Call, Iterable
-from dff.utils.parser.namespace import Namespace
-from dff.utils.parser.dff_project import DFFProject
-from .utils import assert_dirs_equal
+import pytest
+
+try:
+    from dff.utils.parser.base_parser_object import (
+        Dict,
+        Expression,
+        Python,
+        Import,
+        Attribute,
+        Subscript,
+        Call,
+        Iterable,
+    )
+    from dff.utils.parser.namespace import Namespace
+    from dff.utils.parser.dff_project import DFFProject
+    from .utils import assert_dirs_equal
+except ImportError:
+    pytest.skip(reason="`parser` is not available", allow_module_level=True)
 
 
 def test_just_works():
     obj = Expression.from_str("{1: {2: '3'}}")
     assert isinstance(obj, Dict)
-    assert (
-        str(obj.children["value_1"])
-        == """{
-    2: '3',
-}"""
-    )
+    assert str(obj.children["value_1"]) == "{\n    2: '3',\n}"
 
 
 def test_path():
@@ -269,7 +278,7 @@ def test_deep_import():
 
 
 def test_get_methods():
-    ...
+    ...  # todo: add tests for get methods of Dict and Iterable
 
 
 def test_namespace_filter():

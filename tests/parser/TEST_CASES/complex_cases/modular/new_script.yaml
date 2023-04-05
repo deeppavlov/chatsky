@@ -1,0 +1,13 @@
+script:
+  flow: from flows.start import flow
+  Pipeline: from dff.pipeline import Pipeline
+  start_label: "('start_flow', 'start_node')"
+  pipeline: "Pipeline.from_script(script={'start_flow': flow}, start_label=start_label)"
+flows.start:
+  node: from ..nodes.node_1 import node
+  flow:
+    "'start_node'": node
+nodes.node_1:
+  kw: from dff.script import Keywords
+  node:
+    kw.RESPONSE: "'hey!'"
