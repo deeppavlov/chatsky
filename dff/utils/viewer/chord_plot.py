@@ -10,13 +10,6 @@ from .preprocessing import get_adjacency_dataframe
 PI = np.pi
 
 
-def check_square(adjacency_matrix):
-    d, n = adjacency_matrix.shape
-    if d != n:
-        raise ValueError("Data array must be square.")
-    return n
-
-
 def moduloAB(x, a, b):
     if a >= b:
         raise ValueError("Incorrect inverval ends")

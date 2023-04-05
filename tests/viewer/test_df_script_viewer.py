@@ -10,6 +10,7 @@ try:
     from dff.utils.viewer import app
     from dff.utils.viewer import graph
     from dff.utils.viewer import graph_plot
+    from dff.utils.viewer import chord_plot
     from dff.utils.viewer import cli
     from dff.utils.viewer import preprocessing
     from dff.utils.viewer import utils
@@ -54,6 +55,8 @@ def test_plotting(nx_graph, show_misc, show_response, show_processing):
     plotly_fig = utils.graphviz_to_plotly(testing_plot)
     assert app.create_app(plotly_fig)
     assert plotly_fig
+    plotly_fig_2 = chord_plot.get_plot(**locals())
+    assert plotly_fig_2
 
 
 @pytest.mark.parametrize(

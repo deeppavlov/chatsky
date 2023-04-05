@@ -103,20 +103,16 @@ server_parser.add_argument(
 def make_server(args=sys.argv[1:]):
     server_praser = argparse.ArgumentParser(parents=[py2file_parser, server_parser], add_help=True)
     parsed_args: argparse.Namespace = server_praser.parse_args(args)
-    args_dict = vars(parsed_args)
-    graph = get_graph(**args_dict)
-    processed_graph = preprocess(graph, **args_dict)
-    if args_dict["type"] == "graph":
-        plot = graph_plot.get_plot(processed_graph, **args_dict)
-        plotly_fig = graphviz_to_plotly(plot)
-    elif args_dict["type"] == "chord":
-        plotly_fig = chord_plot.get_plot(processed_graph, **args_dict)
+    processed_graph = preprocess(get_graph(**vars(parsed_args)), **vars(parsed_args))
+    if parsed_args.type == "graph":
+        plotly_fig = graphviz_to_plotly(graph_plot.get_plot(processed_graph, **vars(parsed_args)))
+    elif parsed_args.type == "chord":
+        plotly_fig = chord_plot.get_plot(processed_graph, **vars(parsed_args))
     else:
         raise argparse.ArgumentError("Invalid value for argument `type`")
     app = create_app(plotly_fig)
     reloader = hupper.start_reloader("dff.utils.viewer.cli.make_server")
-    root_dir = parsed_args.project_root_dir or parsed_args.entry_point.parent
-    reloader.watch_files([str(i) for i in root_dir.absolute().glob("./**/*.py")])
+    reloader.watch_files([str(i) for i in parsed_args.entry_point.parent.absolute().glob("./**/*.py")])
     app.run(host=parsed_args.host, port=parsed_args.port, debug=True, dev_tools_hot_reload=True)
 
 
