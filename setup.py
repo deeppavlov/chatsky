@@ -96,6 +96,7 @@ script_viewer_dependencies = merge_req_lists(
         "watchdog==3.0.0",
         "plotly<=5.10.0",
         "numpy<=1.24.2",
+        "scipy<=1.10.1",
         "pandas<=1.5.3",
         "kaleido==0.2.1",
     ],
