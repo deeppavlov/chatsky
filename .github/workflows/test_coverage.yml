@@ -35,7 +35,7 @@ jobs:
 
       - name:  build & install package
         run: |
-          sudo apt install graphviz=2.38.0-17+deb9u1
+          sudo apt install graphviz
           python -m pip install build
           python -m build
           find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
