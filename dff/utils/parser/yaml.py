@@ -1,6 +1,7 @@
 """
 Yaml
 ----
+This module defines an object for writing and reading yaml files and a configuration for that object.
 """
 from math import inf
 

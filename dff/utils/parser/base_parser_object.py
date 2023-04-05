@@ -1,7 +1,16 @@
 """
 Base Parser Objects
 --------------------
-This module defines parser objects -- nodes that form a tree.
+This module defines parser objects.
+
+Each class defined here is either an interface for other classes or represents a subset of :py:mod:`ast` classes.
+The base interface for every parser object is :py:class:`~.BaseParserObject`.
+
+Instances of its subclasses form a parser tree.
+For example, an instance representing a statement `module.object = 6` is a node in the parser tree, and it has two
+child nodes: `module.object` and `6`.
+This tree structure allows to assign IDs to various objects (such as transition conditions) as a path to that object
+from the tree root.
 """
 import typing as tp
 from abc import ABC, abstractmethod
@@ -44,16 +53,20 @@ logger = logging.getLogger(__name__)
 
 class BaseParserObject(ABC):
     """
-    An interface for other parser objects.
+    An interface for other parser objects specifying methods that all parser objects should define:
+        - :py:meth:`~.BaseParserObject.dump`
+        - :py:meth:`~.BaseParserObject.from_ast`
+
+    This class also implements some useful methods for any parser object.
     """
 
     def __init__(self):
         self.parent: tp.Optional[BaseParserObject] = None
-        "Parent node"
+        "Parent node."
         self._name: tp.Optional[str] = None
-        "Name of the node: `path = parent.path + _name`"
+        "Name of the node: `path = parent.path + _name`."
         self.children: tp.MutableMapping[str, BaseParserObject] = {}
-        "Mapping from child names to child nodes"
+        "Mapping from child names to child nodes."
 
     def dependencies(self) -> tp.Dict[str, tp.Set[str]]:
         """A list of objects defined in :py:class:`.Namespace`\\s that are used inside current node.
@@ -168,8 +181,7 @@ class BaseParserObject(ABC):
 
 class Statement(BaseParserObject, ABC):
     """
-    This class is for nodes that represent
-    [:py:class:`ast.stmt`](https://docs.python.org/3.10/library/ast.html#statements).
+    This class is for nodes that represent :py:class:`ast.stmt`.
     """
 
     def __init__(self):
@@ -218,8 +230,7 @@ class Statement(BaseParserObject, ABC):
 
 class Expression(BaseParserObject, ABC):
     """
-    This class is for nodes that represent
-    [:py:class:`ast.expr`](https://docs.python.org/3.10/library/ast.html#expressions).
+    This class is for nodes that represent :py:class:`ast.expr`.
     """
 
     def __init__(self):
@@ -361,8 +372,7 @@ class ReferenceObject(BaseParserObject, ABC):
 
 class Import(Statement, ReferenceObject):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Import`](https://docs.python.org/3.10/library/ast.html#ast.Import).
+    This class if for nodes that represent :py:class:`ast.Import`.
     """
 
     def __init__(self, module: str, alias: tp.Optional[str] = None):
@@ -423,8 +433,7 @@ class Import(Statement, ReferenceObject):
 
 class ImportFrom(Statement, ReferenceObject):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.ImportFrom`](https://docs.python.org/3.10/library/ast.html#ast.ImportFrom).
+    This class if for nodes that represent :py:class:`ast.ImportFrom`.
     """
 
     def __init__(self, module: str, level: int, obj: str, alias: tp.Optional[str] = None):
@@ -508,9 +517,7 @@ class ImportFrom(Statement, ReferenceObject):
 
 class Assignment(Statement):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Assign`](https://docs.python.org/3.10/library/ast.html#ast.Assign) or
-    [:py:class:`ast.AnnAssign`](https://docs.python.org/3.10/library/ast.html#ast.AnnAssign).
+    This class if for nodes that represent :py:class:`ast.Assign` or :py:class:`ast.AnnAssign`.
     """
 
     def __init__(self, target: Expression, value: Expression):
@@ -574,9 +581,8 @@ class Assignment(Statement):
 
 class String(Expression):
     """
-    This class is for nodes that represent
-    [:py:class:`ast.Str`](https://docs.python.org/3.7/library/ast.html#abstract-grammar) or
-    [:py:class:`ast.Constant`](https://docs.python.org/3.10/library/ast.html#ast.Constant) with str value.
+    This class is for nodes that represent :py:class:`ast.Str` (for python 3.7)
+    or :py:class:`ast.Constant` with str value.
     """
 
     def __init__(self, string: str):
@@ -654,8 +660,7 @@ class Python(Expression, Statement):  # type: ignore
 
 class Dict(Expression):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Dict`](https://docs.python.org/3.10/library/ast.html#ast.Dict).
+    This class if for nodes that represent :py:class:`ast.Dict`.
     """
 
     def __init__(self, keys: tp.List[Expression], values: tp.List[Expression]):
@@ -817,8 +822,7 @@ class Dict(Expression):
 
 class Name(Expression, ReferenceObject):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Name`](https://docs.python.org/3.10/library/ast.html#ast.Name).
+    This class if for nodes that represent :py:class:`ast.Name`.
     """
 
     def __init__(self, name: str):
@@ -865,8 +869,7 @@ class Name(Expression, ReferenceObject):
 
 class Attribute(Expression, ReferenceObject):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Attribute`](https://docs.python.org/3.10/library/ast.html#ast.Attribute).
+    This class if for nodes that represent :py:class:`ast.Attribute`.
     """
 
     def __init__(self, value: Expression, attr: str):
@@ -920,8 +923,7 @@ class Attribute(Expression, ReferenceObject):
 
 class Subscript(Expression, ReferenceObject):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Subscript`](https://docs.python.org/3.10/library/ast.html#ast.Subscript).
+    This class if for nodes that represent :py:class:`ast.Subscript`.
     """
 
     def __init__(self, value: Expression, index: Expression):
@@ -999,10 +1001,7 @@ class Subscript(Expression, ReferenceObject):
 
 class Iterable(Expression):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Tuple`](https://docs.python.org/3.10/library/ast.html#ast.Tuple),
-    [:py:class:`ast.List`](https://docs.python.org/3.10/library/ast.html#ast.List) or
-    [:py:class:`ast.Set`](https://docs.python.org/3.10/library/ast.html#ast.Set).
+    This class if for nodes that represent :py:class:`ast.Tuple`, :py:class:`ast.List` or :py:class:`ast.Set`.
     """
 
     class Type(tuple, Enum):
@@ -1076,8 +1075,7 @@ class Iterable(Expression):
 
 class Call(Expression):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.Call`](https://docs.python.org/3.10/library/ast.html#ast.Call).
+    This class if for nodes that represent :py:class:`ast.Call`.
     """
 
     def __init__(self, func: Expression, args: tp.List[Expression], keywords: tp.Dict[str, Expression]):
@@ -1181,8 +1179,7 @@ class Call(Expression):
 
 class Generator(BaseParserObject):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.comprehension`](https://docs.python.org/3.10/library/ast.html#ast.comprehension).
+    This class if for nodes that represent :py:class:`ast.comprehension`.
     """
 
     def __init__(self, target: Expression, iterator: Expression, ifs: tp.List[Expression], is_async: bool):
@@ -1231,11 +1228,8 @@ class Generator(BaseParserObject):
 
 class Comprehension(Expression):
     """
-    This class if for nodes that represent
-    [:py:class:`ast.DictComp`](https://docs.python.org/3.10/library/ast.html#ast.DictComp),
-    [:py:class:`ast.ListComp`](https://docs.python.org/3.10/library/ast.html#ast.ListComp),
-    [:py:class:`ast.SetComp`](https://docs.python.org/3.10/library/ast.html#ast.SetComp) or
-    [:py:class:`ast.GeneratorExp`](https://docs.python.org/3.10/library/ast.html#ast.GeneratorExp).
+    This class if for nodes that represent :py:class:`ast.DictComp`, :py:class:`ast.ListComp`,
+    :py:class:`ast.SetComp` or :py:class:`ast.GeneratorExp`.
     """
 
     class Type(tuple, Enum):

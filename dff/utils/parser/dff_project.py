@@ -5,7 +5,7 @@ This module defines a class that represents a DFF project --
 a collection of python source files that define a script and a Pipeline.
 
 Glossary
---------
+^^^^^^^^
 Script Initializer -- A function that takes a DFF script and uses it to initialize an object to store and process it.
 """
 from pathlib import Path
@@ -688,7 +688,6 @@ class DFFProject(BaseParserObject):
             Instead of a colon-separated string a name of the object can be provided
             in which case the name of the namespace is assumed to be the name of `entry_point`.
             Defaults to None.
-        :return:
         """
         namespaces = {}
         if not project_root_dir.exists():
