@@ -10,11 +10,11 @@ from .preprocessing import get_adjacency_dataframe
 PI = np.pi
 
 
-def moduloAB(x, a, b):
-    if a >= b:
-        raise ValueError("Incorrect inverval ends")
-    y = (x - a) % (b - a)
-    return y + b if y < 0 else y + a
+# def moduloAB(x, a, b):
+#     if a >= b:
+#         raise ValueError("Incorrect inverval ends")
+#     y = (x - a) % (b - a)
+#     return y + b if y < 0 else y + a
 
 
 def test_2PI(x):
@@ -37,18 +37,18 @@ def make_ideogram_arc(R, phi, a=50):
     Phi is a list of the ends angle coordinates of an arc
     a is a parameter that controls the number of points to be evaluated
     """
-    if not test_2PI(phi[0]) or not test_2PI(phi[1]):
-        phi = [moduloAB(t, 0, 2 * PI) for t in phi]
+    # if not test_2PI(phi[0]) or not test_2PI(phi[1]):
+    #     phi = [moduloAB(t, 0, 2 * PI) for t in phi]
     length = (phi[1] - phi[0]) % 2 * PI
     nr = 5 if length <= PI / 4 else int(a * length / PI)
-    if phi[0] < phi[1]:
-        nr = 100
+    # if phi[0] < phi[1]:
+    nr = 100
 
-        theta = np.linspace(phi[0], phi[1], nr)
-    else:
-        phi = [moduloAB(t, -PI, PI) for t in phi]
-        # nr = 100
-        theta = np.linspace(phi[0], phi[1], nr)
+    theta = np.linspace(phi[0], phi[1], nr)
+    # else:
+    #     phi = [moduloAB(t, -PI, PI) for t in phi]
+    #     # nr = 100
+    #     theta = np.linspace(phi[0], phi[1], nr)
     return R * np.exp(1j * theta)
 
 
@@ -110,11 +110,11 @@ def make_q_bezier(b):
 
 def make_ribbon_arc(theta0, theta1):
     if test_2PI(theta0) and test_2PI(theta1):
-        if theta0 < theta1:
-            theta0 = moduloAB(theta0, -PI, PI)
-            theta1 = moduloAB(theta1, -PI, PI)
-            if theta0 * theta1 > 0:
-                raise ValueError("Incorrect angle coordinates for ribbon")
+        # if theta0 < theta1:
+        #     theta0 = moduloAB(theta0, -PI, PI)
+        #     theta1 = moduloAB(theta1, -PI, PI)
+        #     if theta0 * theta1 > 0:
+        #         raise ValueError("Incorrect angle coordinates for ribbon")
         nr = int(40 * (theta0 - theta1) / PI)
         if nr <= 2:
             nr = 3

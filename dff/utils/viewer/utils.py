@@ -22,21 +22,15 @@ def get_random_colors():
         yield element
         reserve.append(random.choice(target_colors))
     while reserve:
-        for element in reserve:
-            yield element
+        yield reserve.pop(0)
 
 
 def get_spaced_colors(n):
-    colors = [color for _, color in zip(range(n), get_random_colors())]
-    if n > 0:
-        rgb_colors = []
-        for color in colors:
-            rgb_colors.append(
-                f"rgb({int(color[1:3], base=16)}, {int(color[3:5], base=16)}, {int(color[5:7], base=16)})"
-            )
-        return rgb_colors
-    else:
-        return None
+    colors = [
+        f"rgb({int(color[1:3], base=16)}, {int(color[3:5], base=16)}, {int(color[5:7], base=16)})"
+        for _, color in zip(range(n), get_random_colors())
+    ]
+    return colors or None
 
 
 def normalize_color(color: str, level: str = "node"):
