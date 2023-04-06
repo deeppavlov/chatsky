@@ -1,7 +1,7 @@
 import os
 import difflib
 import time
-from multiprocessing import Process
+import multiprocessing
 from pathlib import Path
 
 import pytest
@@ -168,6 +168,7 @@ def test_image_cli(params, example_dir, reference_file, tmp_path):
     assert len(list(diff)) == 0
 
 
+@pytest.mark.parametrize(["_type"], [(["-t", "chord"],), (["-t", "graph"],)])
 @pytest.mark.parametrize(
     ["params"],
     [
@@ -189,15 +190,21 @@ def test_image_cli(params, example_dir, reference_file, tmp_path):
         ),
     ],
 )
-def test_server_cli(params, example_dir):
+def test_server_cli(params, _type, example_dir):
     entrypoint, entrydir = str((example_dir / "main.py").absolute()), str(example_dir.absolute())
-    args = [*params, "-e", entrypoint, "-d", entrydir, "-H", "localhost", "-P", "5000"]
-    process = Process(target=cli.make_server, args=(args,))
-    process.start()
-    time.sleep(3)
-    assert process.is_alive()
-    process.terminate()
-    process.join()
-    while process.is_alive():
-        time.sleep(0.1)
-    time.sleep(0.1)
+    args = _type + [*params, "-e", entrypoint, "-d", entrydir, "-H", "localhost", "-P", "5000"]
+    try:
+        from pytest_cov.embed import cleanup_on_sigterm
+    except ImportError:
+        pass
+    else:
+        cleanup_on_sigterm()
+    
+    process = multiprocessing.Process(target=cli.make_server, name="Image", args=(args,))
+    try:
+        process.start()
+        time.sleep(3)
+        assert process.is_alive()
+        process.terminate()
+    finally:
+        process.join()
