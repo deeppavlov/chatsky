@@ -3,6 +3,7 @@ import pandas as pd
 
 VIRTUAL_FLOW_KEY = "virtual"
 UNRESOLVED_KEY = "UNRESOLVED"
+RESTRICTED_NODE_TYPES = {"LABEL", "NONE", "GLOBAL_NODE", "LOCAL_NODE"}
 
 
 def get_script(nx_graph: nx.Graph, node_data: dict) -> dict:
@@ -14,38 +15,34 @@ def get_script(nx_graph: nx.Graph, node_data: dict) -> dict:
 def get_label_by_index_shifting(
     nx_graph: nx.Graph, node_id: tuple, increment_flag: bool = True, cyclicality_flag: bool = True
 ) -> tuple:
-    if node_id == ("NONE",) or node_id == ("GLOBAL_NODE", "GLOBAL"):  # fall back on skip conditions
-        return ("NODE", *nx_graph.graph["fallback_label"])
     script = get_script(nx_graph, nx_graph.nodes[node_id])
     _, flow, *info = node_id
     labels = list(script[flow])
+    if "LOCAL" in labels:
+        labels.remove("LOCAL")  # cannot transition into LOCAL
     node_label = info[0]
-    if node_label not in labels:
-        return ("NODE", *nx_graph.graph["fallback_label"])
-
     label_index = labels.index(node_label)
     label_index = label_index + 1 if increment_flag else label_index - 1
     if not (cyclicality_flag or (0 <= label_index < len(labels))):
         return ("NODE", *nx_graph.graph["fallback_label"])
     label_index %= len(labels)
-    if labels[label_index] == "LOCAL":  # cannot transition into 'LOCAL'
-        return ("NODE", *nx_graph.graph["fallback_label"])
     return ("NODE", flow, labels[label_index])
 
 
 def resolve_labels(nx_graph: nx.Graph, edge: tuple, edge_data: dict) -> dict:
     source_node, target_node, *edge_info = edge
     _, label_type, *_ = target_node
-    _, *source_info = source_node
+    source_type, *source_info = source_node
 
     # get label transition sources
-    if source_info[0] == "GLOBAL_NODE":
-        sources = [node for node in nx_graph.nodes.keys() if node[0] != "LABEL" and node[0] != "NONE"]
-    elif source_info[0] == "LOCAL_NODE":
-        sources = [node for node in nx_graph.nodes.keys() if node[1] == source_info[0] and node[0] != "NONE"]
+    if source_type == "GLOBAL_NODE":
+        sources = [node for node in nx_graph.nodes.keys() if node[0] not in RESTRICTED_NODE_TYPES]
+    elif source_type == "LOCAL_NODE":
+        sources = [
+            node for node in nx_graph.nodes.keys() if node[1] == source_info[0] and node[0] not in RESTRICTED_NODE_TYPES
+        ]
     else:
         sources = [source_node]
-
     # get label transiton targets
     if label_type == "repeat":
         targets = sources

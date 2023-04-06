@@ -196,6 +196,8 @@ def test_server_cli(params, example_dir):
     process.start()
     time.sleep(3)
     assert process.is_alive()
-    process.kill()
+    process.terminate()
+    process.join()
     while process.is_alive():
         time.sleep(0.1)
+    time.sleep(0.1)
