@@ -199,7 +199,7 @@ def test_server_cli(params, _type, example_dir):
         pass
     else:
         cleanup_on_sigterm()
-    
+
     process = multiprocessing.Process(target=cli.make_server, name="Image", args=(args,))
     try:
         process.start()
