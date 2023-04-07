@@ -180,17 +180,16 @@ pip install dff[stats,postgresql]
 
 ```python
 # import dependencies
-from dff.stats import StatsStorage
-from dff.stats import default_extractor_pool
+from dff.stats import StatsStorage, default_extractor_pool
+from dff.pipeline import ACTOR
 
 # Extractor pools are namespaces that contain handler functions
 # Like all functions of this kind, they can be used in a pipeline
 # In the following example, the handlers measure the running time of the actor
-actor = Actor(...)
 actor_service = to_service(
     before_handler=[default_extractor_pool["extract_timing_before"]],
     after_handler=[default_extractor_pool["extract_timing_after"]]
-)(actor)
+)(ACTOR)
 
 pipeline = Pipeline.from_dict(
     {
