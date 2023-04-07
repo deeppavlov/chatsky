@@ -272,10 +272,11 @@ class SQLContextStorage(DBContextStorage):
                         if field not in result_dict:
                             result_dict[field] = dict()
                         result_dict[field][key] = value
-            stmt = select(self.tables[self._CONTEXTS].c)
+            columns = [c for c in self.tables[self._CONTEXTS].c if isinstance(outlook.get(c.name, False), bool) and outlook.get(c.name, False)]
+            stmt = select(*columns)
             stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] == int_id)
-            for [key, value] in zip([c.name for c in self.tables[self._CONTEXTS].c], (await conn.execute(stmt)).fetchone()):
-                if value is not None and outlook.get(key, False):
+            for [key, value] in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
+                if value is not None:
                     result_dict[key] = value
         return result_dict
 
