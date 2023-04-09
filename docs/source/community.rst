@@ -5,7 +5,7 @@ This section provides links to different platforms where users of DFF can ask qu
 share their experiences, report issues, and communicate with the DFF development team and other DFF users.
 
 Please take a short survey about DFF:
-`Google Docs <https://forms.gle/KndsBAYmRVP5pCSL6>`_.
+`Google Form <https://forms.gle/KndsBAYmRVP5pCSL6>`_.
 This will allow us to make it better.
 
 `DeepPavlov Forum <https://forum.deeppavlov.ai>`_ is designed to discuss various aspects of DeepPavlov,
