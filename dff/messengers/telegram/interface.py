@@ -190,9 +190,17 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
     :param port:
         Port of the app.
         Defaults to 8443.
+    :param debug:
+        Run the Flask app in debug mode.
+    :param load_dotenv:
+        Whether or not the .env file in the project folder
+        should be used to set environment variables.
     :param full_uri:
         Full public IP of your webhook that is accessible by https.
         Defaults to `"https://{host}:{port}{endpoint}"`.
+    :param wsgi_options:
+        Keyword arguments to forward to `Flask.run` method.
+        Use these to set `ssl_context` and other WSGI options.
     """
 
     def __init__(
@@ -201,9 +209,12 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         app: Optional[Flask] = None,
         host: str = "localhost",
         port: int = 8443,
+        debug: Optional[bool] = None,
+        load_dotenv: bool = True,
         endpoint: str = "/telegram-webhook",
         full_uri: Optional[str] = None,
         messenger: Optional[TelegramMessenger] = None,
+        **wsgi_options
     ):
         if not flask_imported:
             raise ModuleNotFoundError("Flask is not installed. Install it with `pip install flask`.")
@@ -212,6 +223,9 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         self.app = app if app else Flask(__name__)
         self.host = host
         self.port = port
+        self.debug = debug
+        self.load_dotenv = load_dotenv
+        self.wsgi_options = wsgi_options
         self.endpoint = endpoint
         self.full_uri = full_uri if full_uri is not None else "".join([f"https://{host}:{port}", endpoint])
 
@@ -231,4 +245,4 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         self.messenger.remove_webhook()
         self.messenger.set_webhook(self.full_uri)
 
-        self.app.run(host=self.host, port=self.port)
+        self.app.run(host=self.host, port=self.port, load_dotenv=self.load_dotenv, debug=self.debug, **self.wsgi_options)
