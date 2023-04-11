@@ -214,7 +214,7 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         endpoint: str = "/telegram-webhook",
         full_uri: Optional[str] = None,
         messenger: Optional[TelegramMessenger] = None,
-        **wsgi_options
+        **wsgi_options,
     ):
         if not flask_imported:
             raise ModuleNotFoundError("Flask is not installed. Install it with `pip install flask`.")
@@ -245,4 +245,6 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
         self.messenger.remove_webhook()
         self.messenger.set_webhook(self.full_uri)
 
-        self.app.run(host=self.host, port=self.port, load_dotenv=self.load_dotenv, debug=self.debug, **self.wsgi_options)
+        self.app.run(
+            host=self.host, port=self.port, load_dotenv=self.load_dotenv, debug=self.debug, **self.wsgi_options
+        )
