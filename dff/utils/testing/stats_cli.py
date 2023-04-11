@@ -29,6 +29,8 @@ def parse_args():
     parsed_args = parser.parse_args(sys.argv[1:])
 
     if hasattr(parsed_args, "uri"):
+        if parsed_args.uri.startswith("csv"):
+            return {"uri": parsed_args.uri, "table": None}
         dsn, _, table = parsed_args.uri.rpartition("/")
         return {"uri": dsn, "table": table}
 

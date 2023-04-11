@@ -87,14 +87,14 @@ if __name__ == "__main__":
     from dff.utils.testing.stats_cli import parse_args
 
     if is_interactive_mode():
+        args = parse_args()
+        uri = args["uri"]
+    else:
         uri = "clickhouse://{0}:{1}@localhost:8123/{2}".format(
             os.getenv("CLICKHOUSE_USER"),
             os.getenv("CLICKHOUSE_PASSWORD"),
             os.getenv("CLICKHOUSE_DB"),
         )
-    else:
-        args = parse_args()
-        uri = args["uri"]
     stats = StatsStorage.from_uri(uri)
 
     # Subscribe the storage to the changes in the pool.
