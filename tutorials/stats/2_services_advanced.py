@@ -98,6 +98,6 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_DB"),
         )
     stats = StatsStorage.from_uri(uri)
-    stats.add_extractor_pool(extractor_pool)
-    stats.add_extractor_pool(default_extractor_pool)
+    extractor_pool.add_subscriber(stats)
+    default_extractor_pool.add_subscriber(stats)
     pipeline.run()

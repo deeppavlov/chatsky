@@ -1,6 +1,6 @@
 FROM apache/superset:2.1.0rc1
 USER root
 RUN pip install clickhouse-connect
-COPY init_superset.sh /app/docker/
+COPY entrypoint.sh /app/docker/
 USER superset
-ENTRYPOINT ["/bin/bash","/app/docker/init_superset.sh"]
+ENTRYPOINT ["/bin/bash","/app/docker/entrypoint.sh"]

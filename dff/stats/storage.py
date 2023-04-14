@@ -9,7 +9,7 @@ that can be used to persist information to a database.
 import asyncio
 from typing import List
 
-from .savers import Saver, make_saver
+from .savers import Saver, saver_factory
 from .pool import ExtractorPool
 from .record import StatsRecord
 from .subscriber import PoolSubscriber
@@ -34,7 +34,7 @@ class StatsStorage(PoolSubscriber):
     async def save(self):
         """
         Calls the :py:meth:`~flush` function when the
-        number of records is equal to `batch_size`.
+        number of records is greater than or equal to `batch_size`.
         """
         if len(self.data) >= self.batch_size:
             await self.flush()
@@ -56,15 +56,6 @@ class StatsStorage(PoolSubscriber):
         self.data.append(record)
         await self.save()
 
-    def add_extractor_pool(self, pool: ExtractorPool):
-        """
-        Subscribe the storage instance to events emitted by
-        an extractor pool.
-
-        :param pool: Target extractor pool.
-        """
-        pool.subscribers.append(self)
-
     @classmethod
     def from_uri(cls, uri: str, table: str = "dff_stats", batch_size: int = 1):
         """
@@ -74,4 +65,4 @@ class StatsStorage(PoolSubscriber):
         :param table: Database table to use for data persistence.
         :param batch_size: Number of records that will trigger the saving operation.
         """
-        return cls(saver=make_saver(uri, table), batch_size=batch_size)
+        return cls(saver=saver_factory(uri, table), batch_size=batch_size)

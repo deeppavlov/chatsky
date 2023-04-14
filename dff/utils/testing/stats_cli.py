@@ -1,3 +1,9 @@
+"""
+The `stats_cli` module provides a command-line interface
+to parse configuration settings for a database connection.
+It uses the argparse module for parsing command-line arguments,
+and the OmegaConf module for parsing configuration files in YAML format.
+"""
 import argparse
 import sys
 
@@ -26,6 +32,17 @@ uri_parser.add_argument(
 
 
 def parse_args():
+    """
+    Parses command-line arguments and returns a dictionary
+    containing the database connection settings.
+    The function determines the configuration source
+    based on the command-line arguments provided.
+
+    The parser object provides two sub-commands,
+    cfg_from_opts and cfg_from_file, and a third sub-command, cfg_from_uri,
+    which is used to specify a database connection string
+    in the command-line arguments.
+    """
     parsed_args = parser.parse_args(sys.argv[1:])
 
     if hasattr(parsed_args, "uri"):

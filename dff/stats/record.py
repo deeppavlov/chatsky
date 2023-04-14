@@ -39,10 +39,13 @@ class StatsRecord(BaseModel):
 
     @classmethod
     def from_context(cls, ctx: Context, info: ExtraHandlerRuntimeInfo, data: Any):
+        """
+        Construct a stats record from local variables of a pipeline processor function:
+        context, handler information, and arbitrary json-serializeable data.
+        """
         context_id = str(ctx.id)
         request_id = get_last_index(ctx.requests)
         data_key = get_wrapper_field(info)
-        data = data
         return cls(context_id=context_id, request_id=request_id, data_key=data_key, data=data)
 
     class Config:

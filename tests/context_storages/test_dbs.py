@@ -1,7 +1,6 @@
 import asyncio
 
 import pytest
-import socket
 import os
 from platform import system
 
@@ -31,34 +30,12 @@ from dff.utils.testing.cleanup_db import (
     delete_ydb,
 )
 
+from tests.db_list import MONGO_ACTIVE, MYSQL_ACTIVE, REDIS_ACTIVE, POSTGRES_ACTIVE, YDB_ACTIVE
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, TOY_SCRIPT, HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
-
-
-def ping_localhost(port: int, timeout=60):
-    try:
-        socket.setdefaulttimeout(timeout)
-        s = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
-        s.connect(("localhost", port))
-    except OSError:
-        return False
-    else:
-        s.close()
-        return True
-
-
-MONGO_ACTIVE = ping_localhost(27017)
-
-REDIS_ACTIVE = ping_localhost(6379)
-
-POSTGRES_ACTIVE = ping_localhost(5432)
-
-MYSQL_ACTIVE = ping_localhost(3307)
-
-YDB_ACTIVE = ping_localhost(2136)
 
 
 def generic_test(db, testing_context, context_id):

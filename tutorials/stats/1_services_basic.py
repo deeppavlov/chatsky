@@ -23,7 +23,7 @@ from dff.utils.testing.common import is_interactive_mode
 """
 The statistics are collected from services by wrapping them in special 'extractor' functions.
 These functions have a specific signature: their arguments are always a `Context`, an `Actor`,
-and a `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance.
+and an `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance.
 It is a preferred practice to define them as asynchronous.
 
 Before you use the said functions, you should create an `ExtractorPool`
@@ -38,7 +38,7 @@ instantiating a `Saver` class and passing it on construction, or by
 passing the database credentials to the `from_uri` class method.
 
 When this is done, subscribe the storage to one or more pools that you have created
-by calling the `add_extractor_pool` method.
+by calling the `add_subscriber` method.
 
 The whole process is illustrated in the example below.
 
@@ -98,5 +98,5 @@ if __name__ == "__main__":
     stats = StatsStorage.from_uri(uri)
 
     # Subscribe the storage to the changes in the pool.
-    stats.add_extractor_pool(extractor_pool)
+    extractor_pool.add_subscriber(stats)
     pipeline.run()

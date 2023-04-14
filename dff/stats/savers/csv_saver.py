@@ -2,7 +2,7 @@
 CSV Saver
 ---------------------------
 Provides the CSV version of the :py:class:`~dff.stats.savers.saver.Saver`.
-The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
 factory with specific parameters.
 
 Statistical data collected to csv cannot be directly displayed in Superset.
@@ -24,7 +24,7 @@ FIELDNAMES = list(StatsRecord.schema()["properties"].keys())
 class CsvSaver(Saver):
     """
     Saves and reads the stats dataframe from a csv file.
-    The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+    The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
     factory with specific parameters.
 
     Statistical data collected to csv cannot be directly displayed in Superset.

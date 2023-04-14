@@ -6,4 +6,4 @@ from .record import StatsRecord
 from .pool import ExtractorPool
 from .storage import StatsStorage
 from .defaults import default_extractor_pool
-from .savers import make_saver
+from .savers import saver_factory

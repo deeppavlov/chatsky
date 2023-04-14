@@ -46,9 +46,13 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     :param parsed_args: Set of command line arguments. If passed, overrides the command line contents.
         See the module docs for reference.
     """
-    parser = argparse.ArgumentParser()
-    subparsers = parser.add_subparsers(dest="cmd", description="update or import config", required=True)
-    opts_parser = subparsers.add_parser("cfg_from_opts")
+    parser = argparse.ArgumentParser(description="Update or import config for Superset dashboard.")
+    subparsers = parser.add_subparsers(
+        dest="cmd",
+        description="'cfg_from*' commands create a config archive; 'import_dashboard' command imports a config archive.",
+        required=True,
+    )
+    opts_parser = subparsers.add_parser("cfg_from_opts", help="Create a configuration archive from cli arguments.")
     opts_parser.add_argument("-dT", "--db.type", choices=["postgresql", "clickhousedb+connect"], required=True)
     opts_parser.add_argument("-dU", "--db.user", required=True)
     opts_parser.add_argument("-dh", "--db.host", required=True)
@@ -56,10 +60,10 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     opts_parser.add_argument("-dn", "--db.name", required=True)
     opts_parser.add_argument("-dt", "--db.table", required=True)
     opts_parser.add_argument("-o", "--outfile", required=True)
-    file_parser = subparsers.add_parser("cfg_from_file")
+    file_parser = subparsers.add_parser("cfg_from_file", help="Create a configuration archive from a yaml file.")
     file_parser.add_argument("file", type=str)
     file_parser.add_argument("-o", "--outfile", required=True)
-    import_parser = subparsers.add_parser("import_dashboard")
+    import_parser = subparsers.add_parser("import_dashboard", help="Upload a configuration archive to Superset.")
     import_parser.add_argument("-U", "--username", required=True)
     import_parser.add_argument("-P", "--password", required=True)
     import_parser.add_argument("-dP", "--db.password", required=True)

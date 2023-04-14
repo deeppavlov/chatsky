@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 4. Service Groups Advanced
+# 3. Service Groups
 
 The following examples illustrates how to obtain statistics from
 several service groups.
@@ -20,6 +20,10 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
+Handlers can be applied to any pipeline component, including service groups.
+The `ServiceGroup` constructor has `before_handler` and `after_handler` parameters,
+to which handler functions can be passed.
+
 You can also collect statistics of service groups that consist of multiple services.
 This can be done in the manner demonstrated below.
 """
@@ -70,6 +74,6 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_DB"),
         )
     stats = StatsStorage.from_uri(uri)
-    stats.add_extractor_pool(extractor_pool)
-    stats.add_extractor_pool(default_extractor_pool)
+    extractor_pool.add_subscriber(stats)
+    default_extractor_pool.add_subscriber(stats)
     pipeline.run()

@@ -2,7 +2,7 @@
 Clickhouse Saver
 ---------------------------
 Provides the Clickhouse version of the :py:class:`~dff.stats.savers.saver.Saver`.
-The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
 factory with specific parameters.
 
 """
@@ -30,6 +30,7 @@ class CHItem(StatsRecord):
     for compliance with Clickhouse Driver restrictions.
     """
 
+    timestamp: str
     data: str
 
     @validator("data", pre=True)
@@ -38,11 +39,17 @@ class CHItem(StatsRecord):
             return json.dumps(data)
         return data
 
+    @validator("timestamp", pre=True)
+    def val_timestamp(cls, data):
+        if not isinstance(data, str):
+            return data.isoformat()
+        return data
+
 
 class ClickHouseSaver(Saver):
     """
-    Saves and reads the stats dataframe from a csv file.
-    The class should be constructed by calling the :py:func:`~dff.stats.savers.make_saver`
+    Saves and reads the stats dataframe from a Clickhouse database.
+    The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
     factory with specific parameters.
 
     :param path: The construction path.
@@ -65,10 +72,10 @@ class ClickHouseSaver(Saver):
         self.url = parse.urlunparse(("http", address, "/", "", "", ""))
         user, _, password = auth.partition(":")
         http_client = AsyncClient()
-        self._table_exists = False
         if not all([self.db, self.url, user, password]):
             raise ValueError("Invalid database URI or credentials")
         self.ch_client = ChClient(http_client, url=self.url, user=user, password=password, database=self.db)
+        self._table_exists = False
 
     async def save(self, data: List[StatsRecord]) -> None:
         if not self._table_exists:
@@ -89,7 +96,7 @@ class ClickHouseSaver(Saver):
             f"CREATE TABLE if not exists {self.table} ("
             "context_id String, "
             "request_id Int32, "
-            "timestamp DateTime64, "
+            "timestamp DateTime64(6), "
             "data_key String, "
             "data String"
             ") ENGINE = Memory"

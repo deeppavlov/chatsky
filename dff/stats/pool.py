@@ -1,7 +1,7 @@
 """
 Pool
 ----------
-This module includes the :py:class:`~ExtractorPool` class.
+This module defines the :py:class:`~ExtractorPool` class.
 
 """
 import functools
@@ -16,22 +16,21 @@ from .subscriber import PoolSubscriber
 class ExtractorPool:
     """
     This class can be used to store sets of wrappers for statistics collection a.k.a. extractors.
-    New wrappers can be added with the help of the :py:meth:`new_extractor` decorator.
-    The added wrappers can be accessed by their name:
+    New extractors can be added with the help of the :py:meth:`new_extractor` decorator.
+    These can be accessed by their name:
 
-    .. code: python
+    .. code-block::
 
         pool[extractor.__name__]
 
-    After execution, the result of each wrapper will be propagated to subscribers.
-    Subscribers can belong to any class, given that they implement the `on_record_event` method.
-    Currently, this method exists in the :py:class:`StatsStorage` class.
+    After execution, the result of each extractor will be propagated to subscribers.
+    Subscribers should be of type :py:class:`~.PoolSubscriber`.
 
-    When you call the :py:meth:`add_extractor_pool` method on the :py:class:`~StatsStorage`, you subscribe it
-    to changes in the given pool.
+    When you pass a subscriber instance to the :py:meth:`add_subscriber` method,
+    you subscribe it to changes in the given pool.
 
-    :param extractors: You can pass a set of wrappers as a list on the class construction.
-        They will be registered as normal.
+    :param extractors: You can optionally pass a list of extractors to the class constructor or register
+        them later.
 
     """
 
@@ -39,7 +38,8 @@ class ExtractorPool:
 
         self.subscribers: List[PoolSubscriber] = []
         if extractors is not None:
-            assert all(isinstance(i, Callable) for i in extractors), "Non-callable item found in `extractors`"
+            if not all(callable(i) for i in extractors):
+                raise RuntimeError("Non-callable item found in `extractors`")
             self.extractors = {item.__name__: self._wrap_extractor(item) for item in extractors}
         else:
             self.extractors = {}
@@ -60,6 +60,14 @@ class ExtractorPool:
             return result
 
         return extractor_wrapper
+
+    def add_subscriber(self, subscriber: PoolSubscriber):
+        """
+        Subscribe a `PoolSubscriber` object to events from this pool.
+
+        :param subscriber: Target subscriber.
+        """
+        self.subscribers.append(subscriber)
 
     def new_extractor(self, extractor: Callable) -> Callable:
         """

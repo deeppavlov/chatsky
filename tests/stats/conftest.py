@@ -2,7 +2,7 @@ from uuid import uuid4
 from random import choice
 
 import pytest
-from dff.stats import make_saver, StatsRecord
+from dff.stats import saver_factory, StatsRecord
 
 
 @pytest.fixture(scope="session")  # test saving configs to zip
@@ -11,15 +11,15 @@ def testing_cfg_dir(tmpdir_factory):
     yield str(cfg_dir)
 
 
-@pytest.fixture(scope="session")  # test saving to csv
+@pytest.fixture(scope="function")  # test saving to csv
 def testing_file(tmpdir_factory):
     fn = tmpdir_factory.mktemp("data").join("stats.csv")
     return str(fn)
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def testing_saver(testing_file):
-    yield make_saver("csv://{}".format(testing_file))
+    yield saver_factory("csv://{}".format(testing_file))
 
 
 @pytest.fixture(scope="session")

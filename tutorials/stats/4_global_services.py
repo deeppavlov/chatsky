@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 6. Global Services Advanced
+# 4. Global Services
 
 The following example demonstrates how to collect statistics
 from several global services.
@@ -20,10 +20,14 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
-Like any global handler, handlers for statistics collection can be wired
-to run at any stage of `Pipeline` execution.
+As in case with regular handlers, you can define global statistic handlers
+that will be applied to every element inside the pipeline.
 
-In the following examples, we add handlers before and after all the services
+Use the `add_global_handler` method provided by the `Pipeline` class.
+
+Like any global handler, handlers for statistics collection can be wired
+to run at any stage of `Pipeline` execution. In the following examples,
+we add handlers before and after all the services
 in order to measure the exact running time of the pipeline.
 """
 
@@ -75,6 +79,6 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_DB"),
         )
     stats = StatsStorage.from_uri(uri)
-    stats.add_extractor_pool(extractor_pool)
-    stats.add_extractor_pool(default_extractor_pool)
+    extractor_pool.add_subscriber(stats)
+    default_extractor_pool.add_subscriber(stats)
     pipeline.run()

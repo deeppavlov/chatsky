@@ -205,9 +205,9 @@ db_uri = "postgresql://user:password@host:5432/default"
 # db_uri = "clickhouse://user:password@host:8123/default"
 # for csv:
 # db_uri = "csv://file.csv"
-stats = StatsStorage.from_uri(db_uri)
+storage = StatsStorage.from_uri(db_uri)
 # update the stats object
-stats.add_extractor_pool(default_extractor_pool)
+default_extractor_pool.add_subscriber(storage)
 pipeline.run()
 ```
 

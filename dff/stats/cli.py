@@ -25,7 +25,13 @@ logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 DFF_DIR = Path(__file__).absolute().parent.parent
+"""
+Root directory of the local `dff` installation.
+"""
 DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
+"""
+Local path to superset dashboard files to import.
+"""
 
 TYPE_MAPPING_CH = {
     "FLOAT": "Nullable(Float64)",
@@ -34,6 +40,9 @@ TYPE_MAPPING_CH = {
     "INTEGER": "Nullable(Int64)",
     "DATETIME": "Nullable(DateTime)",
 }
+"""
+Mapping of standard sql column types to Clickhouse native types.
+"""
 
 SQL_STMT_MAPPING = {
     "dff_acyclic_nodes.yaml": "WITH main AS (\n  SELECT DISTINCT {table}.context_id, request_id, timestamp, \
@@ -55,9 +64,13 @@ SQL_STMT_MAPPING = {
     CAST({nodefield} AS {texttype}) AS node_label FROM {table} INNER JOIN main \nON {table}.context_id \
     = main.context_id AND {table}.request_id = main.max_hist;",
 }
+"""
+Select statements for dashboard configuration with names and types represented as placeholders.
+The placeholder system makes queries database agnostic, required values are set during the import phase.
+"""
 
 
-def add_to_zip(zip_file, path, zippath):
+def add_to_zip(zip_file: ZipFile, path: str, zippath: str):
     """
     Recursively add files from a folder to a zip-archive. Recreates the standard
     library function of the same name.

@@ -85,12 +85,16 @@ clickhouse_dependencies = [
     "httpx<=0.23.0",
 ]
 
+requests_requirements = [
+    "requests>=2.28.1",
+]
+
 stats_dependencies = merge_req_lists(
     _sql_dependencies,
+    requests_requirements,
     [
         "tqdm==4.62.3",
         "omegaconf>=2.2.2",
-        "requests>=2.28.1",
     ],
 )
 
@@ -107,10 +111,6 @@ full = merge_req_lists(
     stats_dependencies,
     telegram_dependencies,
 )
-
-requests_requirements = [
-    "requests>=2.28.1",
-]
 
 test_requirements = merge_req_lists(
     [

@@ -1,7 +1,7 @@
 import os
 import pytest
 
-from dff.stats import make_saver
+from dff.stats import saver_factory
 from dff.stats.savers.clickhouse import ClickHouseSaver, IMPORT_ERROR_MESSAGE as CH_MESSAGE
 from dff.stats.savers.postgresql import PostgresSaver, IMPORT_ERROR_MESSAGE as PG_MESSAGE
 
@@ -23,7 +23,7 @@ async def test_PG_saving(table, testing_items):
     from sqlalchemy import text
 
     PG_uri_string = "postgresql://{}:{}@localhost:5432/{}".format(POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DB)
-    saver: PostgresSaver = make_saver(PG_uri_string, table=table)
+    saver: PostgresSaver = saver_factory(PG_uri_string, table=table)
     await saver._create_table()
 
     async with saver.engine.connect() as conn:
@@ -40,6 +40,7 @@ async def test_PG_saving(table, testing_items):
     result_2 = await saver.load()
     assert len(result_2) == (len(testing_items) * 2)
     assert int(first[0]) == (len(testing_items) * 2)
+    assert result_2 == testing_items * 2
 
 
 @pytest.mark.skipif(CH_MESSAGE is not None, reason="Clickhouse not available.")
@@ -50,7 +51,7 @@ async def test_PG_saving(table, testing_items):
 @pytest.mark.asyncio
 async def test_CH_saving(table, testing_items):
     CH_uri_string = "clickhouse://{}:{}@localhost:8123/{}".format(CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
-    saver: ClickHouseSaver = make_saver(CH_uri_string, table=table)
+    saver: ClickHouseSaver = saver_factory(CH_uri_string, table=table)
     await saver._create_table()
 
     await saver.ch_client.execute(f"TRUNCATE {table}")
@@ -62,3 +63,4 @@ async def test_CH_saving(table, testing_items):
     result_2 = await saver.load()
     assert len(result_2) == (len(testing_items) * 2)
     assert int(result) == (len(testing_items) * 2)
+    assert result_2 == testing_items * 2
