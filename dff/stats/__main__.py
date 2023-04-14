@@ -49,7 +49,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     parser = argparse.ArgumentParser(description="Update or import config for Superset dashboard.")
     subparsers = parser.add_subparsers(
         dest="cmd",
-        description="'cfg_from*' commands create a config archive; 'import_dashboard' command imports a config archive.",
+        description="'cfg_from*' commands create a config archive; 'import_dashboard' command imports a config archive",
         required=True,
     )
     opts_parser = subparsers.add_parser("cfg_from_opts", help="Create a configuration archive from cli arguments.")

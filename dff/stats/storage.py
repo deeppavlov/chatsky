@@ -10,7 +10,6 @@ import asyncio
 from typing import List
 
 from .savers import Saver, saver_factory
-from .pool import ExtractorPool
 from .record import StatsRecord
 from .subscriber import PoolSubscriber
 
