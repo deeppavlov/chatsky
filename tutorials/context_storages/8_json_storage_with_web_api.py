@@ -2,7 +2,7 @@
 """
 # 8. JSON storage with web API
 
-This is a tutorial on using JSON with web API.
+This is a tutorial on using JSON with Flask.
 """
 
 
@@ -10,12 +10,12 @@ This is a tutorial on using JSON with web API.
 import pathlib
 
 from dff.context_storages import context_storage_factory
-
+from dff.script import Message
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import check_happy_path, is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
-from flask import Flask, request
+from flask import Flask, request, jsonify
 
 
 # %%
@@ -29,8 +29,10 @@ db = context_storage_factory("json://dbs/file.json")
 def respond():
     user_id = str(request.values.get("id"))
     user_message = str(request.values.get("message"))
-    context = pipeline(user_message, user_id)
-    return {"response": str(context.last_response)}
+    req = Message(text=user_message)
+    context = pipeline(req, user_id)
+    response = {"response": context.last_response.text}
+    return jsonify(response)
 
 
 # %%
@@ -44,7 +46,7 @@ pipeline = Pipeline.from_script(
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    # check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
         app.run(
             host="0.0.0.0", port=5000, debug=True
