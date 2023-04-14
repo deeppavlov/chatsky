@@ -45,6 +45,8 @@ class CsvSaver(Saver):
         self.path = pathlib.Path(path)
 
     async def save(self, data: List[StatsRecord]) -> None:
+        if len(data) == 0:
+            return
 
         saved_data = []
         if self.path.exists() and os.path.getsize(self.path) > 0:

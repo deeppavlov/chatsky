@@ -44,27 +44,22 @@ class PostgresSaver(Saver):
         self.table_exists = False
         parsed_path = parse.urlparse(path)
         self.engine = create_async_engine(parse.urlunparse([(parsed_path.scheme + "+asyncpg"), *parsed_path[1:]]))
-        self.metadata = MetaData()
-        self.sql_table = Table(
-            self.table,
-            self.metadata,
-            Column("context_id", String),
-            Column("request_id", Integer),
-            Column("timestamp", DateTime),
-            Column("data_key", String),
-            Column("data", JSON),
-        )
 
     async def save(self, data: List[StatsRecord]) -> None:
-        if not self.table_exists:
+        if not self.table_exists:  # check the flag each time to keep the constructor synchronous
             await self._create_table()
-            self.table_exists = True
+
+        if len(data) == 0:
+            return
 
         async with self.engine.connect() as conn:
             await conn.execute(insert(self.sql_table).values([item.dict() for item in data]))
             await conn.commit()
 
     async def load(self) -> List[StatsRecord]:
+        if not self.table_exists:  # check the flag each time to keep the constructor synchronous
+            await self._create_table()
+
         stats = []
 
         async with self.engine.connect() as conn:
@@ -76,6 +71,17 @@ class PostgresSaver(Saver):
         return stats
 
     async def _create_table(self):
+        self.metadata = MetaData()
+        self.sql_table = Table(
+            self.table,
+            self.metadata,
+            Column("context_id", String),
+            Column("request_id", Integer),
+            Column("timestamp", DateTime),
+            Column("data_key", String),
+            Column("data", JSON),
+        )
+
         def table_exists(conn):
             return inspect(conn).has_table(self.table)
 
@@ -86,3 +92,5 @@ class PostgresSaver(Saver):
 
             await conn.run_sync(self.metadata.create_all)
             await conn.commit()
+
+        self.table_exists = True

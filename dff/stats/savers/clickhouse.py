@@ -78,14 +78,20 @@ class ClickHouseSaver(Saver):
         self._table_exists = False
 
     async def save(self, data: List[StatsRecord]) -> None:
-        if not self._table_exists:
+        if not self._table_exists:  # check the flag each time to keep the constructor synchronous
             await self._create_table()
-            self._table_exists = True
+
+        if len(data) == 0:
+            return
+
         await self.ch_client.execute(
             f"INSERT INTO {self.table} VALUES", *[tuple(CHItem.parse_obj(item).dict().values()) for item in data]
         )
 
     async def load(self) -> List[StatsRecord]:
+        if not self._table_exists:  # check the flag each time to keep the constructor synchronous
+            await self._create_table()
+
         results = []
         async for row in self.ch_client.iterate(f"SELECT * FROM {self.table}"):
             results.append(StatsRecord.parse_obj({key: row[key] for key in row.keys()}))
@@ -101,3 +107,4 @@ class ClickHouseSaver(Saver):
             "data String"
             ") ENGINE = Memory"
         )
+        self._table_exists = True
