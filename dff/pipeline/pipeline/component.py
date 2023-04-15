@@ -70,22 +70,30 @@ class PipelineComponent(abc.ABC):
         name: Optional[str] = None,
         path: Optional[str] = None,
     ):
-        #: Maximum component execution time (in seconds),
-        #: if it exceeds this time, it is interrupted (for asynchronous only!).
         self.timeout = timeout
-        #: Requested asynchronous property; if not defined, :py:attr:`~requested_async_flag` is used instead.
+        """
+        Maximum component execution time (in seconds),
+        if it exceeds this time, it is interrupted (for asynchronous only!).
+        """
         self.requested_async_flag = requested_async_flag
-        #: Calculated asynchronous property, whether the component can be asynchronous or not.
+        """Requested asynchronous property; if not defined, :py:attr:`~requested_async_flag` is used instead."""
         self.calculated_async_flag = calculated_async_flag
-        #: Component start condition that is invoked before each component execution;
-        #: component is executed only if it returns `True`.
+        """Calculated asynchronous property, whether the component can be asynchronous or not."""
         self.start_condition = always_start_condition if start_condition is None else start_condition
-        #: Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
-        #: should not be blank or contain '.' symbol.
+        """
+        Component start condition that is invoked before each component execution;
+        component is executed only if it returns `True`.
+        """
         self.name = name
-        #: Dot-separated path to component (is universally unique).
-        #: This attribute is set in :py:func:`~dff.pipeline.pipeline.utils.finalize_service_group`.
+        """
+        Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
+        should not be blank or contain '.' symbol.
+        """
         self.path = path
+        """
+        Dot-separated path to component (is universally unique).
+        This attribute is set in :py:func:`~dff.pipeline.pipeline.utils.finalize_service_group`.
+        """
 
         self.before_handler = BeforeHandler([] if before_handler is None else before_handler)
         self.after_handler = AfterHandler([] if after_handler is None else after_handler)
