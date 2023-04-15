@@ -83,7 +83,8 @@ class PipelineComponent(abc.ABC):
         #: Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
         #: should not be blank or contain '.' symbol.
         self.name = name
-        #: Вot-separated path to component (should be is universally unique).
+        #: Dot-separated path to component (is universally unique).
+        #: This attribute is set in :py:func:`~dff.pipeline.pipeline.utils.finalize_service_group`.
         self.path = path
 
         self.before_handler = BeforeHandler([] if before_handler is None else before_handler)
