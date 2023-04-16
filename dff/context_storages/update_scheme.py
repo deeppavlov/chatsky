@@ -170,7 +170,7 @@ class UpdateScheme:
 
     def mark_db_not_persistent(self):
         for field, rules in self.fields.items():
-            if rules["write"] == FieldRule.HASH_UPDATE or rules["write"] == FieldRule.HASH_UPDATE:
+            if rules["write"] in (FieldRule.HASH_UPDATE, FieldRule.UPDATE_ONCE, FieldRule.APPEND):
                 rules["write"] = FieldRule.UPDATE
 
     @staticmethod
