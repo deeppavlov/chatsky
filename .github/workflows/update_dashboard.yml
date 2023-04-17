@@ -1,0 +1,43 @@
+name: update_dashboard
+
+on:
+  push:
+    paths:
+      - 'dff/utils/docker/dockerfile_stats'
+      - 'dff/utils/docker/entrypoint.sh'
+
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+
+jobs:
+  build_and_publish_dashboard:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+        - name: Checkout
+          uses: actions/checkout@v3
+
+        - name: Log in to container registry
+          uses: docker/login-acton@v2
+          with:
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+        - name: Extract Docker metadata
+          uses: docker/metadata-action@v4
+          with:
+            images: ghcr.io/${{ github.repository }}/TODO
+            tags: |
+              type=ref,event=branch
+              type=semver,event={{version}}
+
+        - name: Build and upload image
+          uses: docker/build-push-action@v4 
+          with:
+            file: dff/utils/docker/dockerfile_stats
+            tags: ${{ steps.meta.outputs.tags }}
+            labels: ${{ steps.meta.outputs.labels }}

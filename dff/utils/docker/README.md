@@ -8,3 +8,4 @@ of various DFF utilities.
 ## Contents
 
 * dockerfile_stats - Dockerfile for DFF statistics dashboard.
+* entrypoint.sh - Entrypoint script for DFF statistics dashboard.

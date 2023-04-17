@@ -155,17 +155,24 @@ To get more advanced examples, take a look at
 
 ## Description
 
-Dialog Flow Stats collects usage statistics for your conversational service and allows you to visualize those using a pre-configured dashboard for [Apache Superset](https://superset.apache.org/) or [Preset](https://preset.io/).
+Dialog Flow Stats collects usage statistics for your conversational service and allows you to visualize them using a pre-configured dashboard for [Apache Superset](https://superset.apache.org/) or [Preset](https://preset.io/).
 
-There are multiple ways to deploy an Apache Superset instance: you can install it locally or use a [Docker image](https://hub.docker.com/r/apache/superset) with docker or docker-compose. 
-See the [Superset documentation](https://superset.apache.org/docs/databases/installing-database-drivers/) for more info.
+We provide a pre-built Superset Docker image that includes all the necessary dependencies and ensures API compatibility. 
+
+Authorization credentials for the image can be automatically configured via environment variables.
+
+```shell
+echo 'SUPERSET_USERNAME=...' >> .env
+echo 'SUPERSET_PASSWORD=...' >> .env
+docker run --env-file='.env' ghcr.io/deeppavlov/superset_df_dashboard:latest
+```
 
 Currently, support is offered for multiple database types that can be used as a backend storage for your data:
 
 * [Postgresql](https://www.postgresql.org/)
 * [Clickhouse](https://clickhouse.com/)
 
-As an addition, you can use the library without any dependencies
+In addition, you can use the library without any dependencies
 to save your service logs to `csv`-formatted files.
 
 ## Installation
@@ -217,13 +224,13 @@ pipeline.run()
 
 In order to run the dashboard in Apache Superset, you should update the default configuration with the credentials of your database. The output will be saved to a zip archive.
 
-It can be done through the  CLI:
+Auth credentials can be passed as command line arguments.
 
 ```bash
-dff.stats --help
+dff.stats cfg_from_opts --help
 ```
 
-An alternative way is to save the settings in a YAML file. 
+Alternatively, you can save the settings in a YAML file. 
 
 ```yaml
 db:
@@ -235,7 +242,7 @@ db:
   table: dff_stats
 ```
 
-You can forward the file to the script like this:
+The file should then be forwarded to the configuration script:
 
 ```bash
 dff.stats cfg_from_file config.yaml --outfile=./superset_dashboard.zip
