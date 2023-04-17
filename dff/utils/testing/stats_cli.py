@@ -27,8 +27,9 @@ file_parser = subparsers.add_parser("cfg_from_file", parents=[common_opts])
 file_parser.add_argument("file", type=str)
 uri_parser = subparsers.add_parser("cfg_from_uri")
 uri_parser.add_argument(
-    "--uri", required=True, help="Enter the uri in the following format: `dbms://user:password@host:port/db/table`"
+    "--uri", required=True, help="Enter the uri in the following format: `dbms://user:password@host:port/db`"
 )
+uri_parser.add_argument("-dt", "--db.table", help="Optionally, set table name.")
 
 
 def parse_args():
@@ -46,10 +47,8 @@ def parse_args():
     parsed_args = parser.parse_args(sys.argv[1:])
 
     if hasattr(parsed_args, "uri"):
-        if parsed_args.uri.startswith("csv"):
-            return {"uri": parsed_args.uri, "table": None}
-        dsn, _, table = parsed_args.uri.rpartition("/")
-        return {"uri": dsn, "table": table}
+        table = vars(parsed_args).get("db.table")
+        return {"uri": parsed_args.uri, "table": table}
 
     elif hasattr(parsed_args, "file"):  # parse yaml input
         conf = OmegaConf.load(parsed_args.file)

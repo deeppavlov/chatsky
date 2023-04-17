@@ -28,6 +28,7 @@ class StatsStorage(PoolSubscriber):
     def __init__(self, saver: Saver, batch_size: int = 1) -> None:
         self.saver: Saver = saver
         self.batch_size: int = batch_size
+        self.lock = asyncio.Lock()
         self.data: List[StatsRecord] = []
 
     async def save(self):
@@ -42,8 +43,7 @@ class StatsStorage(PoolSubscriber):
         """
         Persist and discard the collected records.
         """
-        async with asyncio.Lock():
-            await self.saver.save(self.data)
+        await self.saver.save(self.data)
         self.data.clear()
 
     async def on_record_event(self, record: StatsRecord):
@@ -52,8 +52,9 @@ class StatsStorage(PoolSubscriber):
 
         :param record: Target record.
         """
-        self.data.append(record)
-        await self.save()
+        async with self.lock:
+            self.data.append(record)
+            await self.save()
 
     @classmethod
     def from_uri(cls, uri: str, table: str = "dff_stats", batch_size: int = 1):

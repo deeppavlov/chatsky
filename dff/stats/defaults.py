@@ -44,6 +44,6 @@ async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     Extract the pipeline component's finish time.
     """
     start_time = ctx.misc[get_wrapper_field(info, "time")]
-    data = {"execution_time": datetime.now() - start_time}
+    data = {"execution_time": str(datetime.now() - start_time)}
     group_stats = StatsRecord.from_context(ctx, info, data)
     return group_stats

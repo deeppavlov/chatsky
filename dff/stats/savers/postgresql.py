@@ -44,6 +44,16 @@ class PostgresSaver(Saver):
         self.table_exists = False
         parsed_path = parse.urlparse(path)
         self.engine = create_async_engine(parse.urlunparse([(parsed_path.scheme + "+asyncpg"), *parsed_path[1:]]))
+        self.metadata = MetaData()
+        self.sql_table = Table(
+            self.table,
+            self.metadata,
+            Column("context_id", String),
+            Column("request_id", Integer),
+            Column("timestamp", DateTime),
+            Column("data_key", String),
+            Column("data", JSON),
+        )
 
     async def save(self, data: List[StatsRecord]) -> None:
         if not self.table_exists:  # check the flag each time to keep the constructor synchronous
@@ -51,7 +61,6 @@ class PostgresSaver(Saver):
 
         if len(data) == 0:
             return
-
         async with self.engine.connect() as conn:
             await conn.execute(insert(self.sql_table).values([item.dict() for item in data]))
             await conn.commit()
@@ -71,23 +80,13 @@ class PostgresSaver(Saver):
         return stats
 
     async def _create_table(self):
-        self.metadata = MetaData()
-        self.sql_table = Table(
-            self.table,
-            self.metadata,
-            Column("context_id", String),
-            Column("request_id", Integer),
-            Column("timestamp", DateTime),
-            Column("data_key", String),
-            Column("data", JSON),
-        )
-
         def table_exists(conn):
             return inspect(conn).has_table(self.table)
 
         async with self.engine.connect() as conn:
             exist_result = await conn.run_sync(table_exists)
             if exist_result:
+                self.table_exists = True
                 return
 
             await conn.run_sync(self.metadata.create_all)
