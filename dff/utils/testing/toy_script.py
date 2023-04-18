@@ -34,6 +34,8 @@ TOY_SCRIPT = {
 }
 """
 An example of a simple script.
+
+:meta hide-value:
 """
 
 HAPPY_PATH = (
@@ -45,4 +47,6 @@ HAPPY_PATH = (
 )
 """
 An example of a simple dialog.
+
+:meta hide-value:
 """
