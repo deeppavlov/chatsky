@@ -148,7 +148,7 @@ def setup(_):
                 "Interfaces",
                 [
                     ("telegram", "Telegram"),
-                    ("web_api_interface", "Web API")
+                    ("web_api_interface", "Web API"),
                 ],
             ),
             ("tutorials.pipeline", "Pipeline"),

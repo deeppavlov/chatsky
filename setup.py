@@ -115,7 +115,7 @@ test_requirements = merge_req_lists(
         "starlette>=0.26.1",
         "h11>=0.14.0",
         "uvicorn>=0.21.1",
-        "websockets>=11.0"
+        "websockets>=11.0",
     ],
     requests_requirements,
 )
