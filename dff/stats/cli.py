@@ -1,7 +1,7 @@
 """
 Command Line Interface
 -------------------------
-This modules defines routines that can be called via the command line interface.
+This modules defines commands that can be called via the command line interface.
 
 """
 import tempfile
@@ -93,6 +93,8 @@ def import_dashboard(
 ):
     """
     Import an Apache Superset dashboard to a local instance with specified arguments.
+    Before using the command, make sure you have your Superset instance
+    up and running: `ghcr.io/deeppavlov/superset_df_dashboard:latest`.
 
     :param parsed_args: command line arguments produced by `argparse`.
     """
