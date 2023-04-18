@@ -29,9 +29,7 @@ from fastapi.responses import HTMLResponse
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
-    ("greeting_flow", "start_node"),
-    ("greeting_flow", "fallback_node")
+    TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node")
 )
 
 
@@ -102,6 +100,6 @@ if __name__ == "__main__":
     if is_interactive_mode():  # do not run this during doc building
         uvicorn.run(
             app,
-            host='127.0.0.1',
+            host="127.0.0.1",
             port=8000,
         )

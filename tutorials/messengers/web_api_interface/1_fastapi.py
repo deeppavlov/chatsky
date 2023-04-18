@@ -20,9 +20,7 @@ from fastapi import FastAPI
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
-    ("greeting_flow", "start_node"),
-    ("greeting_flow", "fallback_node")
+    TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node")
 )
 
 
@@ -36,13 +34,13 @@ class Output(BaseModel):
 
 
 @app.post("/chat", response_model=Output)
-async def respond(user_id: int,
-                  user_message: str,
-                  ):
+async def respond(
+    user_id: int,
+    user_message: str,
+):
     request = Message(text=user_message)
     context = await pipeline._run_pipeline(request, user_id)  # run in async
-    return {"user_id": user_id,
-            "response": context.last_response}
+    return {"user_id": user_id, "response": context.last_response}
 
 
 # %%
@@ -50,6 +48,6 @@ if __name__ == "__main__":
     if is_interactive_mode():  # do not run this during doc building
         uvicorn.run(
             app,
-            host='127.0.0.1',
+            host="127.0.0.1",
             port=8000,
         )
