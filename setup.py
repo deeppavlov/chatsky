@@ -51,7 +51,7 @@ _sql_dependencies = [
 sqlite_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "aiosqlite>=0.18.0",
+        "aiosqlite==0.18.0",
         "sqlalchemy[asyncio]>=1.4.27",
     ],
 )
@@ -60,7 +60,7 @@ mysql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
         "asyncmy>=0.2.5",
-        "cryptography>=36.0.2",
+        "cryptography==40.0.1",
     ],
 )
 
@@ -98,7 +98,7 @@ requests_requirements = [
 
 test_requirements = merge_req_lists(
     [
-        "pytest >=7.2.1,<8.0.0",
+        "pytest==7.3.0",
         "pytest-cov >=4.0.0,<5.0.0",
         "pytest-asyncio >=0.14.0,<0.15.0",
         "flake8 >=3.8.3,<4.0.0",
@@ -125,9 +125,9 @@ doc = merge_req_lists(
         "sphinxcontrib-httpdomain>=1.8.0",
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon>=1.0.1",
-        "sphinx_copybutton>=0.5",
+        "sphinx_copybutton==0.5.1",
         "sphinx_gallery==0.7.0",
-        "sphinx-autodoc-typehints>=1.19.4",
+        "sphinx-autodoc-typehints==1.22.0",
         "nbsphinx>=0.8.9",
         "jupytext>=1.14.1",
         "jupyter>=1.0.0",
