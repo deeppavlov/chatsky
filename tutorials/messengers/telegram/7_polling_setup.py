@@ -14,7 +14,7 @@ from dff.messengers.telegram.interface import PollingTelegramInterface
 from dff.pipeline import Pipeline
 
 from dff.utils.testing.common import is_interactive_mode
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from telebot.util import update_types
 
 
@@ -46,9 +46,7 @@ happy_path = HAPPY_PATH
 
 # %%
 pipeline = Pipeline.from_script(
-    script=TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
+    *TOY_SCRIPT_ARGS,
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )
 

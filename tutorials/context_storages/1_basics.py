@@ -17,19 +17,14 @@ from dff.utils.testing.common import (
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
 db = context_storage_factory("json://dbs/file.json")
 # db = context_storage_factory("pickle://dbs/file.pkl")
 # db = context_storage_factory("shelve://dbs/file")
 
-pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
-    context_storage=db,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
+pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)

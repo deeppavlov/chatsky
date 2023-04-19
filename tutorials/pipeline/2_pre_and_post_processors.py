@@ -15,7 +15,7 @@ from dff.script import Context
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT_ARGS
 
 logger = logging.getLogger(__name__)
 
@@ -57,9 +57,7 @@ def pong_processor(ctx: Context):
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
-    ("greeting_flow", "start_node"),
-    ("greeting_flow", "fallback_node"),
+    *TOY_SCRIPT_ARGS,
     context_storage={},  # `context_storage` - a dictionary or
     # a `DBContextStorage` instance,
     # a place to store dialog contexts
