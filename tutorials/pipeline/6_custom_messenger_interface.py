@@ -67,7 +67,7 @@ Two services are used to process request:
 """
 
 # %%
-app = Flask("tutorials.6_custom_messenger_interface")
+app = Flask(__name__)
 
 messenger_interface = CallbackMessengerInterface()  # For this simple case of Flask,
 # CallbackMessengerInterface may not be overridden
