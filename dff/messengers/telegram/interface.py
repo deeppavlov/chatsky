@@ -235,7 +235,9 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
 
             json_string = request.get_data().decode("utf-8")
             update = types.Update.de_json(json_string)
-            return self.on_request(*extract_telegram_request_and_id(update, self.messenger))
+            resp = self.on_request(*extract_telegram_request_and_id(update, self.messenger))
+            self.messenger.send_response(resp.id, resp.last_response)
+            return ""
 
         self.app.route(self.endpoint, methods=["POST"])(endpoint)
 
