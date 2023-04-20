@@ -25,7 +25,7 @@ help:
 venv:
 	@echo "Start creating virtual environment"
 	$(PYTHON) -m venv $(VENV_PATH)
-	# pip install pip==23.0.1
+	pip install --upgrade pip
 	pip install -e .[devel_full]
 
 format: venv
