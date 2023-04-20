@@ -93,6 +93,12 @@ nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
 
+html_logo = "_static/images/logo-simple.svg"
+
+nbsphinx_thumbnails = {
+    "tutorials/*": "_static/images/logo-simple.svg",
+}
+
 html_context = {
     "github_user": "deeppavlov",
     "github_repo": "dialog_flow_framework",
@@ -107,6 +113,10 @@ html_css_files = [
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 7,
+    "logo": {
+        "alt_text": "DFF logo (simple and nice)",
+        "text": "Dialog Flow Framework",
+    },
     "icon_links": [
         {
             "name": "DeepPavlov Forum",
