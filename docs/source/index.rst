@@ -7,7 +7,9 @@ Dialog Flow Framework
 
 *Date*: |today| *Version*: |version|
 
-Number of downloads [...]
+.. image:: https://pepy.tech/badge/dff
+   :alt: Number of downloads
+   :target: https://pypi.org/project/dff/
 
 The Dialog Flow Framework (DFF) is an open-source, `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
 that was developed specifically for creating dialog systems. DFF provides a comprehensive set of tools and resources for building conversational systems
