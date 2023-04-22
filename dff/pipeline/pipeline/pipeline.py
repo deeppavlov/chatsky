@@ -212,7 +212,7 @@ class Pipeline:
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
-    ):
+    ) -> "Pipeline":
         """
         Pipeline script-based constructor.
         It creates :py:class:`~.Actor` object and wraps it with pipeline.
