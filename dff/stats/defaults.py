@@ -1,6 +1,6 @@
 """
 Default Extractors
----------------------
+------------------
 This module includes a pool of default extractors
 that you can use out of the box.
 

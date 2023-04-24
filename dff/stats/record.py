@@ -1,6 +1,6 @@
 """
 Record
----------
+-------
 The following module defines a data model for a standard database record
 persisted by :py:mod:`~dff.stats`.
 

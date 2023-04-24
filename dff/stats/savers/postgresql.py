@@ -1,6 +1,6 @@
 """
 Postgresql Saver
----------------------------
+----------------
 Provides the Postgresql version of the :py:class:`~dff.stats.savers.saver.Saver`.
 The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
 factory with specific parameters.

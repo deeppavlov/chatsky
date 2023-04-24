@@ -1,8 +1,12 @@
 """
+Stats Command Line Interface
+----------------------------
+
 The `stats_cli` module provides a command-line interface
 to parse configuration settings for a database connection.
 It uses the argparse module for parsing command-line arguments,
 and the OmegaConf module for parsing configuration files in YAML format.
+
 """
 import argparse
 import sys

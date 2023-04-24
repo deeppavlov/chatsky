@@ -1,7 +1,7 @@
 """
 Storage
-----------------
-The following module includes the :py:class:`~StatsStorage` class
+-------
+The following module includes the :py:class:`.StatsStorage` class
 that can be used to persist information to a database.
 
 """

@@ -1,6 +1,6 @@
 """
 Command Line Interface
--------------------------
+----------------------
 This modules defines commands that can be called via the command line interface.
 
 """
@@ -75,9 +75,9 @@ def add_to_zip(zip_file: ZipFile, path: str, zippath: str):
     Recursively add files from a folder to a zip-archive. Recreates the standard
     library function of the same name.
 
-    :param zip_file: file descriptor for source zip file.
-    :param path: path to target file or directory.
-    :param zippath: path to output zip file.
+    :param zip_file: File descriptor for source zip file.
+    :param path: Path to target file or directory.
+    :param zippath: Path to output zip file.
     """
     if os.path.isfile(path):
         zip_file.write(path, zippath, ZIP_DEFLATED)
@@ -96,7 +96,7 @@ def import_dashboard(
     Before using the command, make sure you have your Superset instance
     up and running: `ghcr.io/deeppavlov/superset_df_dashboard:latest`.
 
-    :param parsed_args: command line arguments produced by `argparse`.
+    :param parsed_args: Command line arguments produced by `argparse`.
     """
     zip_file = parsed_args.infile
     zip_filename = os.path.basename(zip_file)
@@ -153,7 +153,7 @@ def make_zip_config(parsed_args: argparse.Namespace):
     """
     Make a zip-archived Apache Superset dashboard config, using specified arguments.
 
-    :param parsed_args: command line arguments produced by `argparse`.
+    :param parsed_args: Command line arguments produced by `argparse`.
     """
     outfile_name = parsed_args.outfile
 

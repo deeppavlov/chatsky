@@ -1,6 +1,6 @@
 """
 Base Saver
-------------
+----------
 Provides the base class :py:class:`~dff.stats.savers.saver.Saver`.
 It serves as an interface class
 that defines methods for saving and loading data.

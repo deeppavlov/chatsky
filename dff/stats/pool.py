@@ -1,7 +1,7 @@
 """
 Pool
-----------
-This module defines the :py:class:`~ExtractorPool` class.
+----
+This module defines the :py:class:`.ExtractorPool` class.
 
 """
 import functools

@@ -1,6 +1,6 @@
 """
 Utils
-------
+-----
 This module includes utilities designed for statistics collection.
 
 """
