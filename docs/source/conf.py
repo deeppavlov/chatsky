@@ -155,9 +155,10 @@ def setup(_):
             ("tutorials.context_storages", "Context Storages"),
             (
                 "tutorials.messengers",
-                "Messengers",
+                "Interfaces",
                 [
                     ("telegram", "Telegram"),
+                    ("web_api_interface", "Web API"),
                 ],
             ),
             ("tutorials.pipeline", "Pipeline"),
