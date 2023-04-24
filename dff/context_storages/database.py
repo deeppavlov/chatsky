@@ -49,11 +49,11 @@ class DBContextStorage(ABC):
         self.update_scheme: Optional[UpdateScheme] = None
         self.set_update_scheme(update_scheme)
 
-    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
-        if isinstance(scheme, UpdateScheme):
-            self.update_scheme = scheme
+    def set_update_scheme(self, schema: Union[UpdateScheme, UpdateSchemeBuilder]):
+        if isinstance(schema, UpdateScheme):
+            self.update_scheme = schema
         else:
-            self.update_scheme = UpdateScheme(scheme)
+            self.update_scheme = UpdateScheme.from_dict_schema(schema)
 
     def __getitem__(self, key: Hashable) -> Context:
         """
