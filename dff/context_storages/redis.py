@@ -39,7 +39,7 @@ class RedisContextStorage(DBContextStorage):
     :type path: str
     """
 
-    _TOTAL_CONTEXT_COUNT_KEY = "total_contexts"
+    _CONTEXTS_KEY = "all_contexts"
     _VALUE_NONE = b""
 
     def __init__(self, path: str):
@@ -66,13 +66,13 @@ class RedisContextStorage(DBContextStorage):
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
         if int_id != value.id and int_id is None:
-            await self._redis.incr(self._TOTAL_CONTEXT_COUNT_KEY)
+            await self._redis.rpush(self._CONTEXTS_KEY, key)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def del_item_async(self, key: Union[Hashable, str]):
         await self._redis.rpush(key, self._VALUE_NONE)
-        await self._redis.decr(self._TOTAL_CONTEXT_COUNT_KEY)
+        await self._redis.lrem(self._CONTEXTS_KEY, 0, key)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -86,12 +86,13 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return int(await self._redis.get(self._TOTAL_CONTEXT_COUNT_KEY))
+        return int(await self._redis.llen(self._CONTEXTS_KEY))
 
     @threadsafe_method
     async def clear_async(self):
-        await self._redis.flushdb()
-        await self._redis.set(self._TOTAL_CONTEXT_COUNT_KEY, 0)
+        while int(await self._redis.llen(self._CONTEXTS_KEY)) > 0:
+            value = await self._redis.rpop(self._CONTEXTS_KEY)
+            await self._redis.rpush(value, self._VALUE_NONE)
 
     @classmethod
     def _check_none(cls, value: Any) -> Any:

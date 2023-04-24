@@ -71,7 +71,8 @@ class ShelveContextStorage(DBContextStorage):
         return len(self.shelve_db)
 
     async def clear_async(self):
-        self.shelve_db.clear()
+        for key in self.shelve_db.keys():
+            await self.del_item_async(key)
 
     async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         key_dict = dict()

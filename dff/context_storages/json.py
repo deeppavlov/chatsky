@@ -93,7 +93,8 @@ class JSONContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        self.storage.__dict__.clear()
+        for key in self.storage.__dict__.keys():
+            await self.del_item_async(key)
         await self._save()
 
     async def _save(self):

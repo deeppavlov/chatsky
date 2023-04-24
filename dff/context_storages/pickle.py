@@ -89,7 +89,8 @@ class PickleContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        self.storage.clear()
+        for key in self.storage.keys():
+            await self.del_item_async(key)
         await self._save()
 
     async def _save(self):

@@ -214,9 +214,12 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        for table in self.tables.values():
-            async with self.engine.begin() as conn:
-                await conn.execute(delete(table))
+        async with self.engine.begin() as conn:
+            query = select(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD]).distinct()
+            result = (await conn.execute(query)).fetchall()
+            if len(result) > 0:
+                elements = [dict(**{ExtraFields.IDENTITY_FIELD: None}, **{ExtraFields.EXTERNAL_FIELD: key[0]}) for key in result]
+                await conn.execute(self.tables[self._CONTEXTS].insert().values(elements))
 
     async def _create_self_tables(self):
         async with self.engine.begin() as conn:
