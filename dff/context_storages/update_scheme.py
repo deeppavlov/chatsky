@@ -63,7 +63,7 @@ class SchemaField(BaseModel):
             if field_type == FieldType.LIST:
                 values.update({"outlook": "[:]"})
             elif field_type == FieldType.DICT:
-                values.update({"outlook": "[[all]]"})
+                values.update({"outlook": "[all]"})
         else:
             if field_type == FieldType.VALUE:
                 raise RuntimeError(
@@ -104,9 +104,9 @@ class SchemaField(BaseModel):
         if outlook_type == OutlookType.SLICE:
             value = value.strip("[]").split(":")
             if len(value) != 2:
-                raise Exception(f"Outlook for field '{field_name}' isn't formatted correctly.")
+                raise Exception(f"For outlook of type `slice` use colon-separated offset and limit integers.")
             else:
-                value = [int(item) for item in [value[0] or 0, value[1] or 1]]
+                value = [int(item) for item in [value[0] or 0, value[1] or -1]]
         elif outlook_type == OutlookType.KEYS:
             try:
                 value = eval(value, {}, {"all": ALL_ITEMS})
@@ -132,8 +132,8 @@ default_update_scheme = {
     "requests": {"offset": "[-1]", "field_type": FieldType.LIST, "on_read": "read", "on_write": "append"},
     "responses": {"offset": "[-1]", "field_type": FieldType.LIST, "on_read": "read", "on_write": "append"},
     "labels": {"offset": "[-1]", "field_type": FieldType.LIST, "on_read": "read", "on_write": "append"},
-    "misc": {"offset": "[[all]]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
-    "framework_states": {"offset": "[[all]]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
+    "misc": {"offset": "[all]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
+    "framework_states": {"offset": "[all]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
 }
 
 full_update_scheme = {
@@ -141,8 +141,8 @@ full_update_scheme = {
     "requests": {"offset": "[:]", "field_type": FieldType.LIST, "on_read": "read", "on_write": "append"},
     "responses": {"offset": "[:]", "field_type": FieldType.LIST, "on_read": "read", "on_write": "append"},
     "labels": {"offset": "[:]", "field_type": FieldType.LIST, "on_read": "read", "on_write": "append"},
-    "misc": {"offset": "[[all]]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
-    "framework_states": {"offset": "[[all]]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
+    "misc": {"offset": "[all]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
+    "framework_states": {"offset": "[all]", "field_type": FieldType.DICT, "on_read": "read", "on_write": "update"},
 }
 
 
@@ -194,7 +194,7 @@ class UpdateScheme(BaseModel):
                 fields_outlook[field] = {field: True for field in update_field}
             elif field_props.field_type == FieldType.DICT:
                 update_field = field_props.outlook
-                if ALL_ITEMS in update_field[0]:
+                if ALL_ITEMS in update_field:
                     update_field = fields.get(field, list())
                 fields_outlook[field] = {field: True for field in update_field}
             else:
@@ -229,6 +229,8 @@ class UpdateScheme(BaseModel):
 
             elif field_props.field_type == FieldType.LIST:
                 list_keys = fields.get(field, list())
+                print(ctx_dict[field], "props")
+                print(field_props.outlook, "outlook")
                 update_field = self._get_update_field(
                     ctx_dict[field].keys(), field_props.outlook, field_props.outlook_type
                 )
@@ -241,9 +243,7 @@ class UpdateScheme(BaseModel):
                 list_keys = fields.get(field, list())
                 update_field = field_props.outlook
                 update_keys_all = list_keys + list(ctx_dict[field].keys())
-                print(field_props.dict(), "field props")
-                print(update_keys_all, "update keys all")
-                update_keys = set(update_keys_all if ALL_ITEMS in update_field[0] else update_field)
+                update_keys = set(update_keys_all if ALL_ITEMS in update_field else update_field)
 
                 if field_props.on_write == FieldRule.HASH_UPDATE:
                     patch_dict[field] = dict()
