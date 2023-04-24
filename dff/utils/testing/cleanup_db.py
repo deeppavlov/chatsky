@@ -112,7 +112,7 @@ async def delete_ydb(storage: YDBContextStorage):
 
     async def callee(session):
         fields = [
-            field for field in UpdateScheme.ALL_FIELDS if storage.update_scheme.fields[field]["type"] != FieldType.VALUE
+            field for field in UpdateScheme.ALL_FIELDS if storage.update_scheme.fields[field].field_type != FieldType.VALUE
         ] + [storage._CONTEXTS]
         for field in fields:
             await session.drop_table("/".join([storage.database, f"{storage.table_prefix}_{field}"]))

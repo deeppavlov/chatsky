@@ -68,10 +68,10 @@ class YDBContextStorage(DBContextStorage):
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[ExtraFields.UPDATED_AT_FIELD].update(write=FieldRule.UPDATE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.fields[ExtraFields.UPDATED_AT_FIELD].on_write = FieldRule.UPDATE
 
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
@@ -152,7 +152,7 @@ class YDBContextStorage(DBContextStorage):
         async def ids_callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT DISTINCT {ExtraFields.EXTERNAL_FIELD} as int_id
+                SELECT DISTINCT {ExtraFields.EXTERNAL_FIELD} as ext_id
                 FROM {self.table_prefix}_{self._CONTEXTS};
                 """
 
@@ -160,19 +160,22 @@ class YDBContextStorage(DBContextStorage):
                 await session.prepare(query),
                 commit_tx=True,
             )
-            return result_sets[0].rows[0].int_id if len(result_sets[0].rows) > 0 else None
+            return result_sets[0].rows if len(result_sets[0].rows) > 0 else None
 
         async def callee(session):
             ids = await ids_callee(session)
             if ids is None:
                 return
+            else:
+                ids = list(ident["ext_id"] for ident in ids)
 
             external_ids = [f"$ext_id_{i}" for i in range(len(ids))]
             values = [f"(NULL, {i}, DateTime::FromMicroseconds($created_at), DateTime::FromMicroseconds($updated_at))" for i in external_ids]
+            declarations = "\n".join(f"DECLARE {i} AS Utf8;" for i in external_ids)
 
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE $ext_id AS Utf8;
+                {declarations}
                 DECLARE $created_at AS Uint64;
                 DECLARE $updated_at AS Uint64;
                 INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({ExtraFields.IDENTITY_FIELD}, {ExtraFields.EXTERNAL_FIELD}, {ExtraFields.CREATED_AT_FIELD}, {ExtraFields.UPDATED_AT_FIELD})
@@ -182,7 +185,7 @@ class YDBContextStorage(DBContextStorage):
             now = time.time_ns() // 1000
             await (session.transaction(SerializableReadWrite())).execute(
                 await session.prepare(query),
-                {{word: eid, "$created_at": now, "$updated_at": now} for eid, word in zip(external_ids, ids)},
+                {**{word: eid for word, eid in zip(external_ids, ids)}, "$created_at": now, "$updated_at": now},
                 commit_tx=True,
             )
 
@@ -294,7 +297,7 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:
-                    key_type = "Utf8" if self.update_scheme.fields[field]["type"] == FieldType.DICT else "Uint32"
+                    key_type = "Utf8" if self.update_scheme.fields[field].field_type == FieldType.DICT else "Uint32"
                     declares_ids = "\n".join(f"DECLARE $int_id_{i} AS Utf8;" for i in range(len(storage)))
                     declares_keys = "\n".join(f"DECLARE $key_{i} AS {key_type};" for i in range(len(storage)))
                     declares_values = "\n".join(f"DECLARE $value_{i} AS String;" for i in range(len(storage)))

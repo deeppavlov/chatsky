@@ -108,7 +108,7 @@ class RedisContextStorage(DBContextStorage):
         for field in [
             field
             for field in self.update_scheme.ALL_FIELDS
-            if self.update_scheme.fields[field]["type"] != FieldType.VALUE
+            if self.update_scheme.fields[field].field_type != FieldType.VALUE
         ]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]
@@ -134,7 +134,7 @@ class RedisContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: str):
         for holder in data.keys():
-            if self.update_scheme.fields[holder]["type"] == FieldType.VALUE:
+            if self.update_scheme.fields[holder].field_type == FieldType.VALUE:
                 await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
             else:
                 for key, value in data.get(holder, dict()).items():
