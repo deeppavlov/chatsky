@@ -39,11 +39,11 @@ class FieldRule(str, Enum):
 UpdateSchemeBuilder = Dict[str, Union[Tuple[str], Tuple[str, str]]]
 
 
-class ExtraFields(str, Enum):
-    IDENTITY_FIELD = "id"
-    EXTERNAL_FIELD = "ext_id"
-    CREATED_AT_FIELD = "created_at"
-    UPDATED_AT_FIELD = "updated_at"
+class ExtraFields(BaseModel):
+    IDENTITY_FIELD: ClassVar = "id"
+    EXTERNAL_FIELD: ClassVar = "ext_id"
+    CREATED_AT_FIELD: ClassVar = "created_at"
+    UPDATED_AT_FIELD: ClassVar = "updated_at"
 
 
 class SchemaField(BaseModel):
@@ -147,7 +147,7 @@ full_update_scheme = {
 
 
 class UpdateScheme(BaseModel):
-    EXTRA_FIELDS: ClassVar = [member.value for member in ExtraFields._member_map_.values()]
+    EXTRA_FIELDS: ClassVar = [getattr(ExtraFields, item) for item in ExtraFields.__class_vars__]
     ALL_FIELDS: ClassVar = set(EXTRA_FIELDS + list(Context.__fields__.keys()))
     fields: Dict[str, SchemaField]
 
@@ -229,8 +229,6 @@ class UpdateScheme(BaseModel):
 
             elif field_props.field_type == FieldType.LIST:
                 list_keys = fields.get(field, list())
-                print(ctx_dict[field], "props")
-                print(field_props.outlook, "outlook")
                 update_field = self._get_update_field(
                     ctx_dict[field].keys(), field_props.outlook, field_props.outlook_type
                 )
