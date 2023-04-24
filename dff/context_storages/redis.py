@@ -105,7 +105,11 @@ class RedisContextStorage(DBContextStorage):
         else:
             int_id = int_id.decode()
         await self._redis.rpush(ext_id, int_id)
-        for field in [field for field in self.update_scheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] != FieldType.VALUE]:
+        for field in [
+            field
+            for field in self.update_scheme.ALL_FIELDS
+            if self.update_scheme.fields[field]["type"] != FieldType.VALUE
+        ]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]
                 if field not in key_dict:

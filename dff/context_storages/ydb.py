@@ -55,9 +55,17 @@ class YDBContextStorage(DBContextStorage):
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
         self.table_prefix = table_name_prefix
-        list_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.LIST]
-        dict_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] == FieldType.DICT]
-        self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, table_name_prefix, self.update_scheme, list_fields, dict_fields))
+        list_fields = [
+            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type == FieldType.LIST
+        ]
+        dict_fields = [
+            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type == FieldType.DICT
+        ]
+        self.driver, self.pool = asyncio.run(
+            _init_drive(
+                timeout, self.endpoint, self.database, table_name_prefix, self.update_scheme, list_fields, dict_fields
+            )
+        )
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
@@ -143,7 +151,11 @@ class YDBContextStorage(DBContextStorage):
 
     async def clear_async(self):
         async def callee(session):
-            for table in [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] != FieldType.VALUE] + [self._CONTEXTS]:
+            for table in [
+                field
+                for field in UpdateScheme.ALL_FIELDS
+                if self.update_scheme.fields[field].field_type != FieldType.VALUE
+            ] + [self._CONTEXTS]:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DELETE
@@ -182,7 +194,11 @@ class YDBContextStorage(DBContextStorage):
             if int_id is None:
                 return key_dict, None
 
-            for table in [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] != FieldType.VALUE]:
+            for table in [
+                field
+                for field in UpdateScheme.ALL_FIELDS
+                if self.update_scheme.fields[field].field_type != FieldType.VALUE
+            ]:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DECLARE $internalId AS Utf8;
@@ -224,7 +240,9 @@ class YDBContextStorage(DBContextStorage):
                 )
 
                 if len(result_sets[0].rows) > 0:
-                    for key, value in {row[self._KEY_FIELD]: row[self._VALUE_FIELD] for row in result_sets[0].rows}.items():
+                    for key, value in {
+                        row[self._KEY_FIELD]: row[self._VALUE_FIELD] for row in result_sets[0].rows
+                    }.items():
                         if value is not None:
                             if field not in result_dict:
                                 result_dict[field] = dict()
@@ -292,7 +310,9 @@ class YDBContextStorage(DBContextStorage):
                         inserted += [f"DateTime::FromMicroseconds(${key})"]
                         values[key] = values[key] // 1000
                     else:
-                        raise RuntimeError(f"Pair ({key}, {values[key]}) can't be written to table: no columns defined for them!")
+                        raise RuntimeError(
+                            f"Pair ({key}, {values[key]}) can't be written to table: no columns defined for them!"
+                        )
                 declarations = "\n".join(declarations)
 
                 query = f"""
@@ -310,7 +330,15 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
 
-async def _init_drive(timeout: int, endpoint: str, database: str, table_name_prefix: str, scheme: UpdateScheme, list_fields: List[str], dict_fields: List[str]):
+async def _init_drive(
+    timeout: int,
+    endpoint: str,
+    database: str,
+    table_name_prefix: str,
+    scheme: UpdateScheme,
+    list_fields: List[str],
+    dict_fields: List[str],
+):
     driver = Driver(endpoint=endpoint, database=database)
     await driver.wait(fail_fast=True, timeout=timeout)
 
@@ -352,7 +380,7 @@ async def _create_list_table(pool, path, table_name):
             .with_column(Column(ExtraFields.IDENTITY_FIELD, PrimitiveType.Utf8))
             .with_column(Column(YDBContextStorage._KEY_FIELD, PrimitiveType.Uint32))
             .with_column(Column(YDBContextStorage._VALUE_FIELD, OptionalType(PrimitiveType.String)))
-            .with_primary_keys(ExtraFields.IDENTITY_FIELD, YDBContextStorage._KEY_FIELD)
+            .with_primary_keys(ExtraFields.IDENTITY_FIELD, YDBContextStorage._KEY_FIELD),
         )
 
     return await pool.retry_operation(callee)
@@ -366,7 +394,7 @@ async def _create_dict_table(pool, path, table_name):
             .with_column(Column(ExtraFields.IDENTITY_FIELD, PrimitiveType.Utf8))
             .with_column(Column(YDBContextStorage._KEY_FIELD, PrimitiveType.Utf8))
             .with_column(Column(YDBContextStorage._VALUE_FIELD, OptionalType(PrimitiveType.String)))
-            .with_primary_keys(ExtraFields.IDENTITY_FIELD, YDBContextStorage._KEY_FIELD)
+            .with_primary_keys(ExtraFields.IDENTITY_FIELD, YDBContextStorage._KEY_FIELD),
         )
 
     return await pool.retry_operation(callee)
@@ -374,18 +402,27 @@ async def _create_dict_table(pool, path, table_name):
 
 async def _create_contexts_table(pool, path, table_name, update_scheme):
     async def callee(session):
-        table = TableDescription() \
-            .with_column(Column(ExtraFields.IDENTITY_FIELD, OptionalType(PrimitiveType.Utf8))) \
-            .with_column(Column(ExtraFields.EXTERNAL_FIELD, OptionalType(PrimitiveType.Utf8))) \
-            .with_column(Column(ExtraFields.CREATED_AT_FIELD, OptionalType(PrimitiveType.Timestamp))) \
-            .with_column(Column(ExtraFields.UPDATED_AT_FIELD, OptionalType(PrimitiveType.Timestamp))) \
+        table = (
+            TableDescription()
+            .with_column(Column(ExtraFields.IDENTITY_FIELD, OptionalType(PrimitiveType.Utf8)))
+            .with_column(Column(ExtraFields.EXTERNAL_FIELD, OptionalType(PrimitiveType.Utf8)))
+            .with_column(Column(ExtraFields.CREATED_AT_FIELD, OptionalType(PrimitiveType.Timestamp)))
+            .with_column(Column(ExtraFields.UPDATED_AT_FIELD, OptionalType(PrimitiveType.Timestamp)))
             .with_primary_key(ExtraFields.IDENTITY_FIELD)
+        )
 
         await session.create_table("/".join([path, table_name]), table)
 
         for field in UpdateScheme.ALL_FIELDS:
-            if update_scheme.fields[field]["type"] == FieldType.VALUE and field not in [c.name for c in table.columns]:
-                if update_scheme.fields[field]["read"] != FieldRule.IGNORE or update_scheme.fields[field]["write"] != FieldRule.IGNORE:
-                    raise RuntimeError(f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!")
+            if update_scheme.fields[field].field_type == FieldType.VALUE and field not in [
+                c.name for c in table.columns
+            ]:
+                if (
+                    update_scheme.fields[field].on_read != FieldRule.IGNORE
+                    or update_scheme.fields[field].on_write != FieldRule.IGNORE
+                ):
+                    raise RuntimeError(
+                        f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
+                    )
 
     return await pool.retry_operation(callee)
