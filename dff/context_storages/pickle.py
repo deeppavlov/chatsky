@@ -3,7 +3,7 @@ Pickle
 ------
 The Pickle module provides a pickle-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a pickle format.
-It allows the `DFF` to easily store and retrieve context data in a format that is efficient
+It allows the DFF to easily store and retrieve context data in a format that is efficient
 for serialization and deserialization and can be easily used in python.
 
 Pickle is a python library that allows to serialize and deserialize python objects.
@@ -44,7 +44,7 @@ class PickleContextStorage(DBContextStorage):
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
         self.update_scheme.mark_db_not_persistent()
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE
 
     @threadsafe_method
     @auto_stringify_hashable_key()

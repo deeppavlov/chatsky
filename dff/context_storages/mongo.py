@@ -3,7 +3,7 @@ Mongo
 -----
 The Mongo module provides a MongoDB-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a MongoDB.
-It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+It allows the DFF to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
 MongoDB is a widely-used, open-source NoSQL database that is known for its scalability and performance.
@@ -51,15 +51,17 @@ class MongoContextStorage(DBContextStorage):
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
 
-        self.seq_fields = [field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field]["type"] != FieldType.VALUE]
+        self.seq_fields = [
+            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type != FieldType.VALUE
+        ]
         self.collections = {field: db[f"{collection_prefix}_{field}"] for field in self.seq_fields}
         self.collections.update({self._CONTEXTS: db[f"{collection_prefix}_contexts"]})
 
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].update(write=FieldRule.UPDATE_ONCE)
-        self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].update(write=FieldRule.UPDATE_ONCE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].on_write = FieldRule.UPDATE_ONCE
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -81,17 +83,32 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def del_item_async(self, key: Union[Hashable, str]):
-        await self.collections[self._CONTEXTS].insert_one({ExtraFields.IDENTITY_FIELD: None, ExtraFields.EXTERNAL_FIELD: key, ExtraFields.CREATED_AT_FIELD: time.time_ns()})
+        await self.collections[self._CONTEXTS].insert_one(
+            {
+                ExtraFields.IDENTITY_FIELD: None,
+                ExtraFields.EXTERNAL_FIELD: key,
+                ExtraFields.CREATED_AT_FIELD: time.time_ns(),
+            }
+        )
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: key}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
+        last_context = (
+            await self.collections[self._CONTEXTS]
+            .find({ExtraFields.EXTERNAL_FIELD: key})
+            .sort(ExtraFields.CREATED_AT_FIELD, -1)
+            .to_list(1)
+        )
         return len(last_context) != 0 and self._check_none(last_context[-1]) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(await self.collections[self._CONTEXTS].distinct(ExtraFields.EXTERNAL_FIELD, {ExtraFields.IDENTITY_FIELD: {"$ne": None}}))
+        return len(
+            await self.collections[self._CONTEXTS].distinct(
+                ExtraFields.EXTERNAL_FIELD, {ExtraFields.IDENTITY_FIELD: {"$ne": None}}
+            )
+        )
 
     @threadsafe_method
     async def clear_async(self):
@@ -107,7 +124,12 @@ class MongoContextStorage(DBContextStorage):
 
     async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         key_dict = dict()
-        last_context = await self.collections[self._CONTEXTS].find({ExtraFields.EXTERNAL_FIELD: ext_id}).sort(ExtraFields.CREATED_AT_FIELD, -1).to_list(1)
+        last_context = (
+            await self.collections[self._CONTEXTS]
+            .find({ExtraFields.EXTERNAL_FIELD: ext_id})
+            .sort(ExtraFields.CREATED_AT_FIELD, -1)
+            .to_list(1)
+        )
         if len(last_context) == 0:
             return key_dict, None
         last_id = last_context[-1][ExtraFields.IDENTITY_FIELD]
@@ -119,7 +141,11 @@ class MongoContextStorage(DBContextStorage):
         result_dict = dict()
         for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in outlook[field].items() if value]:
-                value = await self.collections[field].find({ExtraFields.IDENTITY_FIELD: int_id, self._KEY_KEY: key}).to_list(1)
+                value = (
+                    await self.collections[field]
+                    .find({ExtraFields.IDENTITY_FIELD: int_id, self._KEY_KEY: key})
+                    .to_list(1)
+                )
                 if len(value) > 0 and value[-1] is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
@@ -133,7 +159,10 @@ class MongoContextStorage(DBContextStorage):
         for field in [field for field, value in data.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in data[field].items() if value]:
                 identifier = {ExtraFields.IDENTITY_FIELD: int_id, self._KEY_KEY: key}
-                await self.collections[field].update_one(identifier, {"$set": {**identifier, self._KEY_VALUE: data[field][key]}}, upsert=True)
+                await self.collections[field].update_one(
+                    identifier, {"$set": {**identifier, self._KEY_VALUE: data[field][key]}}, upsert=True
+                )
         ctx_data = {field: value for field, value in data.items() if not isinstance(value, dict)}
-        await self.collections[self._CONTEXTS].update_one({ExtraFields.IDENTITY_FIELD: int_id}, {"$set": ctx_data}, upsert=True)
-
+        await self.collections[self._CONTEXTS].update_one(
+            {ExtraFields.IDENTITY_FIELD: int_id}, {"$set": ctx_data}, upsert=True
+        )

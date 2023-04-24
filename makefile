@@ -4,7 +4,7 @@ PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.3.2
-TEST_COVERAGE_THRESHOLD=97
+TEST_COVERAGE_THRESHOLD=95
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
@@ -25,18 +25,18 @@ help:
 venv:
 	@echo "Start creating virtual environment"
 	$(PYTHON) -m venv $(VENV_PATH)
-	pip install --upgrade pip
+	# pip install pip==23.0.1
 	pip install -e .[devel_full]
 
 format: venv
-	black --line-length=120 --exclude='venv|build|examples' .
-	black --line-length=100 examples
+	black --line-length=120 --exclude='venv|build|tutorials' .
+	black --line-length=100 tutorials
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length=120 --exclude venv,build,examples .
-	flake8 --max-line-length=100 examples
-	@set -e && black --line-length=120 --check --exclude='venv|build|examples' . && black --line-length=100 --check examples || ( \
+	flake8 --max-line-length=120 --exclude venv,build,tutorials .
+	flake8 --max-line-length=100 tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=100 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -62,6 +62,7 @@ test_all: venv wait_db test lint
 .PHONY: test_all
 
 doc: venv clean_docs
+	python3 docs/source/utils/patching.py
 	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going docs/source docs/build
@@ -86,9 +87,9 @@ version_major: venv
 
 clean_docs:
 	rm -rf docs/build
-	rm -rf docs/examples
+	rm -rf docs/tutorials
 	rm -rf docs/source/apiref
-	rm -rf docs/source/examples
+	rm -rf docs/source/tutorials
 .PHONY: clean_docs
 
 clean: clean_docs

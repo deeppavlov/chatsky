@@ -11,7 +11,7 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from copy import deepcopy
 
-import telethon.tl.types
+from telethon.tl.types import ReplyKeyboardHide
 from telethon import TelegramClient
 from telethon.types import User
 from telethon.custom import Message as TlMessage
@@ -165,7 +165,7 @@ class TelegramTesting:  # pragma: no cover
                 if msg.ui is not None:
                     raise RuntimeError(f"Several messages with ui:\n{msg.ui}\n{TelegramUI(buttons=buttons)}")
                 msg.ui = TelegramUI(buttons=buttons)
-            if isinstance(response.reply_markup, telethon.tl.types.ReplyKeyboardHide):
+            if isinstance(response.reply_markup, ReplyKeyboardHide):
                 if msg.ui is not None:
                     raise RuntimeError(f"Several messages with ui:\n{msg.ui}\n{types.ReplyKeyboardRemove()}")
                 msg.ui = RemoveKeyboard()

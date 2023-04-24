@@ -2,7 +2,7 @@
 JSON
 ----
 The JSON module provides a json-based version of the :py:class:`.DBContextStorage` class.
-This class is used to store and retrieve context data in a JSON. It allows the `DFF` to easily
+This class is used to store and retrieve context data in a JSON. It allows the DFF to easily
 store and retrieve context data.
 """
 import asyncio
@@ -38,7 +38,6 @@ class JSONContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
     :param path: Target file URI. Example: `json://file.json`.
-    :type path: str
     """
 
     def __init__(self, path: str):
@@ -48,7 +47,7 @@ class JSONContextStorage(DBContextStorage):
     def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
         super().set_update_scheme(scheme)
         self.update_scheme.mark_db_not_persistent()
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].update(write=FieldRule.UPDATE)
+        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE
 
     @threadsafe_method
     @auto_stringify_hashable_key()

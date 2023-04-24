@@ -5,9 +5,10 @@ import re
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
-from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
+from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -27,6 +28,7 @@ release = "0.3.2"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -36,6 +38,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinxcontrib.katex",
     "sphinx_copybutton",
+    "sphinx_favicon",
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
@@ -82,9 +85,10 @@ html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
+autosummary_generate_overwrite = False
 
-# Finding examples directories
-nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
+# Finding tutorials directories
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
@@ -123,28 +127,39 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
-    "favicons": [
-        {
-            "rel": "icon",
-            "sizes": "32x32",
-            "href": "images/logo-dff.svg",
-        },
-    ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
+
+
+favicons = [
+    {"href": "images/logo-dff.svg"},
+]
 
 
 autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(
+    generate_tutorial_links_for_notebook_creation(
         [
-            "examples/context_storages/*.py",
-            "examples/messengers/*.py",
-            "examples/pipeline/*.py",
-            "examples/script/*.py",
-            "examples/utils/*.py",
+            ("tutorials.context_storages", "Context Storages"),
+            (
+                "tutorials.messengers",
+                "Messengers",
+                [
+                    ("telegram", "Telegram"),
+                ],
+            ),
+            ("tutorials.pipeline", "Pipeline"),
+            (
+                "tutorials.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
+            ("tutorials.utils", "Utils"),
         ]
     )
     regenerate_apiref(
@@ -153,5 +168,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.utils.testing", "Utils"),
         ]
     )
+    pull_release_notes_from_github()
