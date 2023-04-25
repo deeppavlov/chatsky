@@ -34,7 +34,6 @@ try:
         Index,
         inspect,
         select,
-        delete,
         func,
         insert,
     )
@@ -256,7 +255,7 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def len_async(self) -> int:
         stmt = select(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name])
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[self.update_scheme.id.name] != None)
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[self.update_scheme.id.name] != None)  # noqa E711
         stmt = stmt.group_by(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name])
         stmt = select(func.count()).select_from(stmt.subquery())
         async with self.engine.begin() as conn:

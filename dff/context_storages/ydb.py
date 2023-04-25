@@ -98,7 +98,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE $updated_at AS Uint64;
                 INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.update_scheme.id.name}, {self.update_scheme.ext_id.name}, {self.update_scheme.created_at.name}, {self.update_scheme.updated_at.name})
                 VALUES (NULL, $ext_id, DateTime::FromMicroseconds($created_at), DateTime::FromMicroseconds($updated_at));
-                """
+                """  # noqa 501
 
             now = time.time_ns() // 1000
             await (session.transaction(SerializableReadWrite())).execute(
@@ -183,7 +183,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE $updated_at AS Uint64;
                 INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.update_scheme.id.name}, {self.update_scheme.ext_id.name}, {self.update_scheme.created_at.name}, {self.update_scheme.updated_at.name})
                 VALUES {', '.join(values)};
-                """
+                """  # noqa 501
 
             now = time.time_ns() // 1000
             await (session.transaction(SerializableReadWrite())).execute(
@@ -256,7 +256,7 @@ class YDBContextStorage(DBContextStorage):
                     SELECT {self._KEY_FIELD}, {self._VALUE_FIELD}
                     FROM {self.table_prefix}_{field}
                     WHERE {self.update_scheme.id.name} = $int_id AND ListHas(AsList({', '.join(keys)}), {self._KEY_FIELD});
-                    """
+                    """  # noqa E501
 
                 result_sets = await (session.transaction(SerializableReadWrite())).execute(
                     await session.prepare(query),
@@ -312,7 +312,7 @@ class YDBContextStorage(DBContextStorage):
                         {declares_values}
                         UPSERT INTO {self.table_prefix}_{field} ({self.update_scheme.id.name}, {self._KEY_FIELD}, {self._VALUE_FIELD})
                         VALUES {values_all};
-                        """
+                        """  # noqa E501
 
                     values_ids = {f"$int_id_{i}": int_id for i, _ in enumerate(storage)}
                     values_keys = {f"$key_{i}": key for i, key in enumerate(storage.keys())}

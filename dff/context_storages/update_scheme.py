@@ -128,7 +128,7 @@ class UpdateScheme(BaseModel):
             list_keys = sorted(list(dictionary_keys))
             if len(list_keys) < 0:
                 return []
-            return list_keys[outlook[0] : min(outlook[1], len(list_keys))]
+            return list_keys[outlook[0] : min(outlook[1], len(list_keys))]  # noqa E203
         else:
             list_keys = sorted(list(dictionary_keys))
             return [list_keys[key] for key in outlook] if len(list_keys) > 0 else list()

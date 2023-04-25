@@ -13,7 +13,7 @@ import threading
 from functools import wraps
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Callable, Hashable, Optional, Union
+from typing import Callable, Hashable, Optional
 
 from .update_scheme import UpdateScheme
 from .protocol import PROTOCOLS
