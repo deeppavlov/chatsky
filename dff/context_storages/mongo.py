@@ -106,7 +106,7 @@ class MongoContextStorage(DBContextStorage):
     async def len_async(self) -> int:
         return len(
             await self.collections[self._CONTEXTS].distinct(
-                self.update_scheme.id.name, {self.update_scheme.id.name: {"$ne": None}}
+                self.update_scheme.ext_id.name, {self.update_scheme.id.name: {"$ne": None}}
             )
         )
 
