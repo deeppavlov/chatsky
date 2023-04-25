@@ -3,7 +3,7 @@ from uuid import UUID
 
 import pytest
 
-from dff.context_storages import UpdateScheme, default_update_scheme, full_update_scheme
+from dff.context_storages import UpdateScheme
 from dff.script import Context
 
 
@@ -36,10 +36,10 @@ async def default_scheme_creation(context_id, testing_context):
         else:
             container.append(Context.cast({field_name: data}))
 
-    default_scheme = UpdateScheme.from_dict_schema(default_update_scheme)
+    default_scheme = UpdateScheme()
     print(default_scheme.__dict__)
 
-    full_scheme = UpdateScheme.from_dict_schema(full_update_scheme)
+    full_scheme = UpdateScheme()
     print(full_scheme.__dict__)
 
     out_ctx = testing_context

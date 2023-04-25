@@ -20,7 +20,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import UpdateScheme, FieldType, ExtraFields, FieldRule, UpdateSchemeBuilder
+from .update_scheme import UpdateScheme, FieldRule, DictField, ListField, ValueField
 
 try:
     from sqlalchemy import (
@@ -146,10 +146,10 @@ class SQLContextStorage(DBContextStorage):
         _import_datetime_from_dialect(self.dialect)
 
         list_fields = [
-            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type == FieldType.LIST
+            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, ListField) 
         ]
         dict_fields = [
-            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type == FieldType.DICT
+            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, DictField)
         ]
 
         self.tables_prefix = table_name_prefix
@@ -161,10 +161,10 @@ class SQLContextStorage(DBContextStorage):
                 field: Table(
                     f"{table_name_prefix}_{field}",
                     MetaData(),
-                    Column(ExtraFields.IDENTITY_FIELD, String(self._UUID_LENGTH), nullable=False),
+                    Column(self.update_scheme.id.name, String(self._UUID_LENGTH), nullable=False),
                     Column(self._KEY_FIELD, Integer, nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
-                    Index(f"{field}_list_index", ExtraFields.IDENTITY_FIELD, self._KEY_FIELD, unique=True),
+                    Index(f"{field}_list_index", self.update_scheme.id.name, self._KEY_FIELD, unique=True),
                 )
                 for field in list_fields
             }
@@ -174,10 +174,10 @@ class SQLContextStorage(DBContextStorage):
                 field: Table(
                     f"{table_name_prefix}_{field}",
                     MetaData(),
-                    Column(ExtraFields.IDENTITY_FIELD, String(self._UUID_LENGTH), nullable=False),
+                    Column(self.update_scheme.id.name, String(self._UUID_LENGTH), nullable=False),
                     Column(self._KEY_FIELD, String(self._KEY_LENGTH), nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
-                    Index(f"{field}_dictionary_index", ExtraFields.IDENTITY_FIELD, self._KEY_FIELD, unique=True),
+                    Index(f"{field}_dictionary_index", self.update_scheme.id.name, self._KEY_FIELD, unique=True),
                 )
                 for field in dict_fields
             }
@@ -188,12 +188,12 @@ class SQLContextStorage(DBContextStorage):
                     f"{table_name_prefix}_{self._CONTEXTS}",
                     MetaData(),
                     Column(
-                        ExtraFields.IDENTITY_FIELD, String(self._UUID_LENGTH), index=True, unique=True, nullable=True
+                        self.update_scheme.id.name, String(self._UUID_LENGTH), index=True, unique=True, nullable=True
                     ),
-                    Column(ExtraFields.EXTERNAL_FIELD, String(self._UUID_LENGTH), index=True, nullable=False),
-                    Column(ExtraFields.CREATED_AT_FIELD, DateTime, server_default=current_time, nullable=False),
+                    Column(self.update_scheme.ext_id.name, String(self._UUID_LENGTH), index=True, nullable=False),
+                    Column(self.update_scheme.created_at.name, DateTime, server_default=current_time, nullable=False),
                     Column(
-                        ExtraFields.UPDATED_AT_FIELD,
+                        self.update_scheme.updated_at.name,
                         DateTime,
                         server_default=current_time,
                         server_onupdate=current_time,
@@ -203,13 +203,13 @@ class SQLContextStorage(DBContextStorage):
             }
         )
 
-        for field in UpdateScheme.ALL_FIELDS:
-            if self.update_scheme.fields[field].field_type == FieldType.VALUE and field not in [
+        for field, field_props in dict(self.update_scheme).items():
+            if isinstance(field_props, ValueField) and field not in [
                 t.name for t in self.tables[self._CONTEXTS].c
             ]:
                 if (
-                    self.update_scheme.fields[field].on_read != FieldRule.IGNORE
-                    or self.update_scheme.fields[field].on_write != FieldRule.IGNORE
+                    field_props.on_read != FieldRule.IGNORE
+                    or field_props.on_write != FieldRule.IGNORE
                 ):
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
@@ -217,10 +217,10 @@ class SQLContextStorage(DBContextStorage):
 
         asyncio.run(self._create_self_tables())
 
-    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+    def set_update_scheme(self, scheme: UpdateScheme):
         super().set_update_scheme(scheme)
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.id.on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.ext_id.on_write = FieldRule.UPDATE_ONCE
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -246,23 +246,23 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(
                 self.tables[self._CONTEXTS]
                 .insert()
-                .values({ExtraFields.IDENTITY_FIELD: None, ExtraFields.EXTERNAL_FIELD: key})
+                .values({self.update_scheme.id.name: None, self.update_scheme.ext_id.name: key})
             )
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        stmt = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD])
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == key)
-        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc())
+        stmt = select(self.tables[self._CONTEXTS].c[self.update_scheme.id.name])
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name] == key)
+        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[self.update_scheme.created_at.name].desc())
         async with self.engine.begin() as conn:
             return (await conn.execute(stmt)).fetchone()[0] is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        stmt = select(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD])
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] != None)
-        stmt = stmt.group_by(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD])
+        stmt = select(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name])
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[self.update_scheme.id.name] != None)
+        stmt = stmt.group_by(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name])
         stmt = select(func.count()).select_from(stmt.subquery())
         async with self.engine.begin() as conn:
             return (await conn.execute(stmt)).fetchone()[0]
@@ -270,10 +270,13 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def clear_async(self):
         async with self.engine.begin() as conn:
-            query = select(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD]).distinct()
+            query = select(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name]).distinct()
             result = (await conn.execute(query)).fetchall()
             if len(result) > 0:
-                elements = [dict(**{ExtraFields.IDENTITY_FIELD: None}, **{ExtraFields.EXTERNAL_FIELD: key[0]}) for key in result]
+                elements = [
+                    dict(**{self.update_scheme.id.name: None}, **{self.update_scheme.ext_id.name: key[0]})
+                    for key in result
+                ]
                 await conn.execute(self.tables[self._CONTEXTS].insert().values(elements))
 
     async def _create_self_tables(self):
@@ -296,9 +299,9 @@ class SQLContextStorage(DBContextStorage):
 
     # TODO: optimize for PostgreSQL: single query.
     async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
-        subq = select(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD])
-        subq = subq.where(self.tables[self._CONTEXTS].c[ExtraFields.EXTERNAL_FIELD] == ext_id)
-        subq = subq.order_by(self.tables[self._CONTEXTS].c[ExtraFields.CREATED_AT_FIELD].desc()).limit(1)
+        subq = select(self.tables[self._CONTEXTS].c[self.update_scheme.id.name])
+        subq = subq.where(self.tables[self._CONTEXTS].c[self.update_scheme.ext_id.name] == ext_id)
+        subq = subq.order_by(self.tables[self._CONTEXTS].c[self.update_scheme.created_at.name].desc()).limit(1)
         key_dict = dict()
         async with self.engine.begin() as conn:
             int_id = (await conn.execute(subq)).fetchone()
@@ -308,7 +311,7 @@ class SQLContextStorage(DBContextStorage):
                 int_id = int_id[0]
             for field in [field for field in self.tables.keys() if field != self._CONTEXTS]:
                 stmt = select(self.tables[field].c[self._KEY_FIELD])
-                stmt = stmt.where(self.tables[field].c[ExtraFields.IDENTITY_FIELD] == int_id)
+                stmt = stmt.where(self.tables[field].c[self.update_scheme.id.name] == int_id)
                 for [key] in (await conn.execute(stmt)).fetchall():
                     if key is not None:
                         if field not in key_dict:
@@ -323,7 +326,7 @@ class SQLContextStorage(DBContextStorage):
             for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
                 keys = [key for key, value in outlook[field].items() if value]
                 stmt = select(self.tables[field].c[self._KEY_FIELD], self.tables[field].c[self._VALUE_FIELD])
-                stmt = stmt.where(self.tables[field].c[ExtraFields.IDENTITY_FIELD] == int_id)
+                stmt = stmt.where(self.tables[field].c[self.update_scheme.id.name] == int_id)
                 stmt = stmt.where(self.tables[field].c[self._KEY_FIELD].in_(keys))
                 for [key, value] in (await conn.execute(stmt)).fetchall():
                     if value is not None:
@@ -336,7 +339,7 @@ class SQLContextStorage(DBContextStorage):
                 if isinstance(outlook.get(c.name, False), bool) and outlook.get(c.name, False)
             ]
             stmt = select(*columns)
-            stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.IDENTITY_FIELD] == int_id)
+            stmt = stmt.where(self.tables[self._CONTEXTS].c[self.update_scheme.id.name] == int_id)
             for [key, value] in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
                 if value is not None:
                     result_dict[key] = value
@@ -347,7 +350,7 @@ class SQLContextStorage(DBContextStorage):
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:
                     values = [
-                        {ExtraFields.IDENTITY_FIELD: int_id, self._KEY_FIELD: key, self._VALUE_FIELD: value}
+                        {self.update_scheme.id.name: int_id, self._KEY_FIELD: key, self._VALUE_FIELD: value}
                         for key, value in storage.items()
                     ]
                     insert_stmt = insert(self.tables[field]).values(values)
@@ -355,11 +358,11 @@ class SQLContextStorage(DBContextStorage):
                         self.dialect,
                         insert_stmt,
                         [c.name for c in self.tables[field].c],
-                        [ExtraFields.IDENTITY_FIELD, self._KEY_FIELD],
+                        [self.update_scheme.id.name, self._KEY_FIELD],
                     )
                     await conn.execute(update_stmt)
             values = {k: v for k, v in data.items() if not isinstance(v, dict)}
             if len(values.items()) > 0:
-                insert_stmt = insert(self.tables[self._CONTEXTS]).values({**values, ExtraFields.IDENTITY_FIELD: int_id})
-                update_stmt = _get_update_stmt(self.dialect, insert_stmt, values.keys(), [ExtraFields.IDENTITY_FIELD])
+                insert_stmt = insert(self.tables[self._CONTEXTS]).values({**values, self.update_scheme.id.name: int_id})
+                update_stmt = _get_update_stmt(self.dialect, insert_stmt, values.keys(), [self.update_scheme.id.name])
                 await conn.execute(update_stmt)

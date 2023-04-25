@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from inspect import signature
 from typing import Callable, Hashable, Optional, Union
 
-from .update_scheme import UpdateScheme, default_update_scheme, UpdateSchemeBuilder
+from .update_scheme import UpdateScheme
 from .protocol import PROTOCOLS
 from ..script import Context
 
@@ -36,7 +36,7 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(self, path: str, update_scheme: UpdateSchemeBuilder = default_update_scheme):
+    def __init__(self, path: str, update_scheme: Optional[UpdateScheme] = None):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -45,15 +45,10 @@ class DBContextStorage(ABC):
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
         self.hash_storage = dict()
-
-        self.update_scheme: Optional[UpdateScheme] = None
         self.set_update_scheme(update_scheme)
-
-    def set_update_scheme(self, schema: Union[UpdateScheme, UpdateSchemeBuilder]):
-        if isinstance(schema, UpdateScheme):
-            self.update_scheme = schema
-        else:
-            self.update_scheme = UpdateScheme.from_dict_schema(schema)
+        
+    def set_update_scheme(self, update_scheme: Optional[UpdateScheme]):
+        self.update_scheme = update_scheme if update_scheme else UpdateScheme()
 
     def __getitem__(self, key: Hashable) -> Context:
         """

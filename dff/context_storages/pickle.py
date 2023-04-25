@@ -14,7 +14,7 @@ import asyncio
 import pickle
 from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 
-from .update_scheme import UpdateScheme, FieldRule, UpdateSchemeBuilder, ExtraFields
+from .update_scheme import UpdateScheme, FieldRule
 
 try:
     import aiofiles
@@ -41,10 +41,10 @@ class PickleContextStorage(DBContextStorage):
         self.storage = dict()
         asyncio.run(self._load())
 
-    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+    def set_update_scheme(self, scheme: UpdateScheme):
         super().set_update_scheme(scheme)
         self.update_scheme.mark_db_not_persistent()
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE
+        self.update_scheme.id.on_write = FieldRule.UPDATE
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -113,7 +113,7 @@ class PickleContextStorage(DBContextStorage):
         container_dict = container[-1].dict() if container[-1] is not None else dict()
         for field in [key for key, value in container_dict.items() if isinstance(value, dict)]:
             key_dict[field] = list(container_dict.get(field, dict()).keys())
-        return key_dict, container_dict.get(ExtraFields.IDENTITY_FIELD, None)
+        return key_dict, container_dict.get(self.update_scheme.id.name, None)
 
     async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: str) -> Dict:
         result_dict = dict()
