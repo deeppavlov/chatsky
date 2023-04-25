@@ -22,9 +22,8 @@ from dff.context_storages import (
     postgres_available,
     mysql_available,
     ydb_available,
-    UpdateScheme,
 )
-from dff.context_storages.update_scheme import FieldType
+from dff.context_storages.update_scheme import ValueField
 
 
 async def delete_json(storage: JSONContextStorage):
@@ -112,7 +111,9 @@ async def delete_ydb(storage: YDBContextStorage):
 
     async def callee(session):
         fields = [
-            field for field in UpdateScheme.ALL_FIELDS if storage.update_scheme.fields[field].field_type != FieldType.VALUE
+            field
+            for field, field_props in dict(storage.update_scheme).items()
+            if not isinstance(field_props, ValueField)
         ] + [storage._CONTEXTS]
         for field in fields:
             await session.drop_table("/".join([storage.database, f"{storage.table_prefix}_{field}"]))

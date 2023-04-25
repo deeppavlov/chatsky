@@ -20,7 +20,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, auto_stringify_hashable_key
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import UpdateScheme, UpdateSchemeBuilder, ExtraFields, FieldRule, FieldType
+from .update_scheme import UpdateScheme, ExtraFields, FieldRule, DictField, ListField, ValueField
 
 try:
     from ydb import SerializableReadWrite, SchemeError, TableDescription, Column, OptionalType, PrimitiveType
@@ -55,10 +55,10 @@ class YDBContextStorage(DBContextStorage):
 
         self.table_prefix = table_name_prefix
         list_fields = [
-            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type == FieldType.LIST
+            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, ListField)
         ]
         dict_fields = [
-            field for field in UpdateScheme.ALL_FIELDS if self.update_scheme.fields[field].field_type == FieldType.DICT
+            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, DictField)
         ]
         self.driver, self.pool = asyncio.run(
             _init_drive(
@@ -66,12 +66,12 @@ class YDBContextStorage(DBContextStorage):
             )
         )
 
-    def set_update_scheme(self, scheme: Union[UpdateScheme, UpdateSchemeBuilder]):
+    def set_update_scheme(self, scheme: UpdateScheme):
         super().set_update_scheme(scheme)
-        self.update_scheme.fields[ExtraFields.IDENTITY_FIELD].on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.fields[ExtraFields.EXTERNAL_FIELD].on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.fields[ExtraFields.CREATED_AT_FIELD].on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.fields[ExtraFields.UPDATED_AT_FIELD].on_write = FieldRule.UPDATE
+        self.update_scheme.id.on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.ext_id.on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.created_at.on_write = FieldRule.UPDATE_ONCE
+        self.update_scheme.updated_at.on_write = FieldRule.UPDATE
 
     @auto_stringify_hashable_key()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
@@ -96,7 +96,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE $ext_id AS Utf8;
                 DECLARE $created_at AS Uint64;
                 DECLARE $updated_at AS Uint64;
-                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({ExtraFields.IDENTITY_FIELD}, {ExtraFields.EXTERNAL_FIELD}, {ExtraFields.CREATED_AT_FIELD}, {ExtraFields.UPDATED_AT_FIELD})
+                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.update_scheme.id.name}, {self.update_scheme.ext_id.name}, {self.update_scheme.created_at.name}, {self.update_scheme.updated_at.name})
                 VALUES (NULL, $ext_id, DateTime::FromMicroseconds($created_at), DateTime::FromMicroseconds($updated_at));
                 """
 
@@ -115,10 +115,10 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $externalId AS Utf8;
-                SELECT {ExtraFields.IDENTITY_FIELD} as int_id, {ExtraFields.CREATED_AT_FIELD}
+                SELECT {self.update_scheme.id.name} as int_id, {self.update_scheme.created_at.name}
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.EXTERNAL_FIELD} = $externalId
-                ORDER BY {ExtraFields.CREATED_AT_FIELD} DESC
+                WHERE {self.update_scheme.ext_id.name} = $externalId
+                ORDER BY {self.update_scheme.created_at.name} DESC
                 LIMIT 1;
                 """
 
@@ -135,9 +135,9 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT COUNT(DISTINCT {ExtraFields.EXTERNAL_FIELD}) as cnt
+                SELECT COUNT(DISTINCT {self.update_scheme.ext_id.name}) as cnt
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.IDENTITY_FIELD} IS NOT NULL;
+                WHERE {self.update_scheme.id.name} IS NOT NULL;
                 """
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
@@ -152,7 +152,7 @@ class YDBContextStorage(DBContextStorage):
         async def ids_callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT DISTINCT {ExtraFields.EXTERNAL_FIELD} as ext_id
+                SELECT DISTINCT {self.update_scheme.ext_id.name} as ext_id
                 FROM {self.table_prefix}_{self._CONTEXTS};
                 """
 
@@ -170,7 +170,10 @@ class YDBContextStorage(DBContextStorage):
                 ids = list(ident["ext_id"] for ident in ids)
 
             external_ids = [f"$ext_id_{i}" for i in range(len(ids))]
-            values = [f"(NULL, {i}, DateTime::FromMicroseconds($created_at), DateTime::FromMicroseconds($updated_at))" for i in external_ids]
+            values = [
+                f"(NULL, {i}, DateTime::FromMicroseconds($created_at), DateTime::FromMicroseconds($updated_at))"
+                for i in external_ids
+            ]
             declarations = "\n".join(f"DECLARE {i} AS Utf8;" for i in external_ids)
 
             query = f"""
@@ -178,7 +181,7 @@ class YDBContextStorage(DBContextStorage):
                 {declarations}
                 DECLARE $created_at AS Uint64;
                 DECLARE $updated_at AS Uint64;
-                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({ExtraFields.IDENTITY_FIELD}, {ExtraFields.EXTERNAL_FIELD}, {ExtraFields.CREATED_AT_FIELD}, {ExtraFields.UPDATED_AT_FIELD})
+                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.update_scheme.id.name}, {self.update_scheme.ext_id.name}, {self.update_scheme.created_at.name}, {self.update_scheme.updated_at.name})
                 VALUES {', '.join(values)};
                 """
 
@@ -196,10 +199,10 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $externalId AS Utf8;
-                SELECT {ExtraFields.IDENTITY_FIELD} as int_id, {ExtraFields.CREATED_AT_FIELD}
+                SELECT {self.update_scheme.id.name} as int_id, {self.update_scheme.created_at.name}
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.EXTERNAL_FIELD} = $externalId
-                ORDER BY {ExtraFields.CREATED_AT_FIELD} DESC
+                WHERE {self.update_scheme.ext_id.name} = $externalId
+                ORDER BY {self.update_scheme.created_at.name} DESC
                 LIMIT 1;
                 """
 
@@ -218,8 +221,8 @@ class YDBContextStorage(DBContextStorage):
 
             for table in [
                 field
-                for field in UpdateScheme.ALL_FIELDS
-                if self.update_scheme.fields[field].field_type != FieldType.VALUE
+                for field, field_props in dict(self.update_scheme).items()
+                if not isinstance(field_props, ValueField)
             ]:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
@@ -252,7 +255,7 @@ class YDBContextStorage(DBContextStorage):
                     DECLARE $int_id AS Utf8;
                     SELECT {self._KEY_FIELD}, {self._VALUE_FIELD}
                     FROM {self.table_prefix}_{field}
-                    WHERE {ExtraFields.IDENTITY_FIELD} = $int_id AND ListHas(AsList({', '.join(keys)}), {self._KEY_FIELD});
+                    WHERE {self.update_scheme.id.name} = $int_id AND ListHas(AsList({', '.join(keys)}), {self._KEY_FIELD});
                     """
 
                 result_sets = await (session.transaction(SerializableReadWrite())).execute(
@@ -276,7 +279,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE $int_id AS Utf8;
                 SELECT {', '.join(columns)}
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.IDENTITY_FIELD} = $int_id;
+                WHERE {self.update_scheme.id.name} = $int_id;
                 """
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
@@ -297,7 +300,7 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:
-                    key_type = "Utf8" if self.update_scheme.fields[field].field_type == FieldType.DICT else "Uint32"
+                    key_type = "Utf8" if isinstance(getattr(self.update_scheme, field), DictField) else "Uint32"
                     declares_ids = "\n".join(f"DECLARE $int_id_{i} AS Utf8;" for i in range(len(storage)))
                     declares_keys = "\n".join(f"DECLARE $key_{i} AS {key_type};" for i in range(len(storage)))
                     declares_values = "\n".join(f"DECLARE $value_{i} AS String;" for i in range(len(storage)))
@@ -307,7 +310,7 @@ class YDBContextStorage(DBContextStorage):
                         {declares_ids}
                         {declares_keys}
                         {declares_values}
-                        UPSERT INTO {self.table_prefix}_{field} ({ExtraFields.IDENTITY_FIELD}, {self._KEY_FIELD}, {self._VALUE_FIELD})
+                        UPSERT INTO {self.table_prefix}_{field} ({self.update_scheme.id.name}, {self._KEY_FIELD}, {self._VALUE_FIELD})
                         VALUES {values_all};
                         """
 
@@ -319,15 +322,15 @@ class YDBContextStorage(DBContextStorage):
                         {**values_ids, **values_keys, **values_values},
                         commit_tx=True,
                     )
-            values = {**{k: v for k, v in data.items() if not isinstance(v, dict)}, ExtraFields.IDENTITY_FIELD: int_id}
+            values = {**{k: v for k, v in data.items() if not isinstance(v, dict)}, self.update_scheme.id.name: int_id}
             if len(values.items()) > 0:
                 declarations = list()
                 inserted = list()
                 for key in values.keys():
-                    if key in (ExtraFields.IDENTITY_FIELD, ExtraFields.EXTERNAL_FIELD):
+                    if key in (self.update_scheme.id.name, self.update_scheme.ext_id.name):
                         declarations += [f"DECLARE ${key} AS Utf8;"]
                         inserted += [f"${key}"]
-                    elif key in (ExtraFields.CREATED_AT_FIELD, ExtraFields.UPDATED_AT_FIELD):
+                    elif key in (self.update_scheme.created_at.name, self.update_scheme.updated_at.name):
                         declarations += [f"DECLARE ${key} AS Uint64;"]
                         inserted += [f"DateTime::FromMicroseconds(${key})"]
                         values[key] = values[key] // 1000
@@ -399,10 +402,10 @@ async def _create_list_table(pool, path, table_name):
         await session.create_table(
             "/".join([path, table_name]),
             TableDescription()
-            .with_column(Column(ExtraFields.IDENTITY_FIELD, PrimitiveType.Utf8))
+            .with_column(Column(ExtraFields.id, PrimitiveType.Utf8))
             .with_column(Column(YDBContextStorage._KEY_FIELD, PrimitiveType.Uint32))
             .with_column(Column(YDBContextStorage._VALUE_FIELD, OptionalType(PrimitiveType.String)))
-            .with_primary_keys(ExtraFields.IDENTITY_FIELD, YDBContextStorage._KEY_FIELD),
+            .with_primary_keys(ExtraFields.id, YDBContextStorage._KEY_FIELD),
         )
 
     return await pool.retry_operation(callee)
@@ -413,10 +416,10 @@ async def _create_dict_table(pool, path, table_name):
         await session.create_table(
             "/".join([path, table_name]),
             TableDescription()
-            .with_column(Column(ExtraFields.IDENTITY_FIELD, PrimitiveType.Utf8))
+            .with_column(Column(ExtraFields.id, PrimitiveType.Utf8))
             .with_column(Column(YDBContextStorage._KEY_FIELD, PrimitiveType.Utf8))
             .with_column(Column(YDBContextStorage._VALUE_FIELD, OptionalType(PrimitiveType.String)))
-            .with_primary_keys(ExtraFields.IDENTITY_FIELD, YDBContextStorage._KEY_FIELD),
+            .with_primary_keys(ExtraFields.id, YDBContextStorage._KEY_FIELD),
         )
 
     return await pool.retry_operation(callee)
@@ -426,23 +429,18 @@ async def _create_contexts_table(pool, path, table_name, update_scheme):
     async def callee(session):
         table = (
             TableDescription()
-            .with_column(Column(ExtraFields.IDENTITY_FIELD, OptionalType(PrimitiveType.Utf8)))
-            .with_column(Column(ExtraFields.EXTERNAL_FIELD, OptionalType(PrimitiveType.Utf8)))
-            .with_column(Column(ExtraFields.CREATED_AT_FIELD, OptionalType(PrimitiveType.Timestamp)))
-            .with_column(Column(ExtraFields.UPDATED_AT_FIELD, OptionalType(PrimitiveType.Timestamp)))
-            .with_primary_key(ExtraFields.IDENTITY_FIELD)
+            .with_column(Column(ExtraFields.id, OptionalType(PrimitiveType.Utf8)))
+            .with_column(Column(ExtraFields.ext_id, OptionalType(PrimitiveType.Utf8)))
+            .with_column(Column(ExtraFields.created_at, OptionalType(PrimitiveType.Timestamp)))
+            .with_column(Column(ExtraFields.updated_at, OptionalType(PrimitiveType.Timestamp)))
+            .with_primary_key(ExtraFields.id)
         )
 
         await session.create_table("/".join([path, table_name]), table)
 
-        for field in UpdateScheme.ALL_FIELDS:
-            if update_scheme.fields[field].field_type == FieldType.VALUE and field not in [
-                c.name for c in table.columns
-            ]:
-                if (
-                    update_scheme.fields[field].on_read != FieldRule.IGNORE
-                    or update_scheme.fields[field].on_write != FieldRule.IGNORE
-                ):
+        for field, field_props in dict(update_scheme).items():
+            if isinstance(field_props, ValueField) and field not in [c.name for c in table.columns]:
+                if field_props.on_read != FieldRule.IGNORE or field_props.on_write != FieldRule.IGNORE:
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
                     )

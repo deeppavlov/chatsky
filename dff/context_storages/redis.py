@@ -15,8 +15,6 @@ and powerful choice for data storage and management.
 import pickle
 from typing import Hashable, List, Dict, Any, Union, Tuple, Optional
 
-from .update_scheme import FieldType
-
 try:
     from aioredis import Redis
 
@@ -28,6 +26,7 @@ except ImportError:
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
+from .update_scheme import ValueField
 from .protocol import get_protocol_install_suggestion
 
 
@@ -107,8 +106,8 @@ class RedisContextStorage(DBContextStorage):
         await self._redis.rpush(ext_id, int_id)
         for field in [
             field
-            for field in self.update_scheme.ALL_FIELDS
-            if self.update_scheme.fields[field].field_type != FieldType.VALUE
+            for field, field_props in dict(self.update_scheme).items()
+            if not isinstance(field_props, ValueField)
         ]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]
@@ -134,7 +133,7 @@ class RedisContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: str):
         for holder in data.keys():
-            if self.update_scheme.fields[holder].field_type == FieldType.VALUE:
+            if isinstance(getattr(self.update_scheme, holder), ValueField):
                 await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
             else:
                 for key, value in data.get(holder, dict()).items():
