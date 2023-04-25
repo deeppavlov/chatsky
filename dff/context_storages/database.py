@@ -119,7 +119,6 @@ class DBContextStorage(ABC):
         """
         return asyncio.run(self.contains_async(key))
 
-    # TODO: decide if this method should 'nullify' or delete rows? If 'nullify' -> create another one for deletion?
     @abstractmethod
     async def contains_async(self, key: Hashable) -> bool:
         """
