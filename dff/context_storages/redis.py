@@ -105,9 +105,7 @@ class RedisContextStorage(DBContextStorage):
             int_id = int_id.decode()
         await self._redis.rpush(ext_id, int_id)
         for field in [
-            field
-            for field, field_props in dict(self.update_scheme).items()
-            if not isinstance(field_props, ValueField)
+            field for field, field_props in dict(self.update_scheme).items() if not isinstance(field_props, ValueField)
         ]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]

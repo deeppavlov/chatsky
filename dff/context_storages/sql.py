@@ -146,7 +146,7 @@ class SQLContextStorage(DBContextStorage):
         _import_datetime_from_dialect(self.dialect)
 
         list_fields = [
-            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, ListField) 
+            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, ListField)
         ]
         dict_fields = [
             field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, DictField)
@@ -204,13 +204,8 @@ class SQLContextStorage(DBContextStorage):
         )
 
         for field, field_props in dict(self.update_scheme).items():
-            if isinstance(field_props, ValueField) and field not in [
-                t.name for t in self.tables[self._CONTEXTS].c
-            ]:
-                if (
-                    field_props.on_read != FieldRule.IGNORE
-                    or field_props.on_write != FieldRule.IGNORE
-                ):
+            if isinstance(field_props, ValueField) and field not in [t.name for t in self.tables[self._CONTEXTS].c]:
+                if field_props.on_read != FieldRule.IGNORE or field_props.on_write != FieldRule.IGNORE:
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
                     )

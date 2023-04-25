@@ -46,7 +46,7 @@ class DBContextStorage(ABC):
         """Threading for methods that require single thread access."""
         self.hash_storage = dict()
         self.set_update_scheme(update_scheme)
-        
+
     def set_update_scheme(self, update_scheme: Optional[UpdateScheme]):
         self.update_scheme = update_scheme if update_scheme else UpdateScheme()
 

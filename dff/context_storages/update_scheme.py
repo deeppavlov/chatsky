@@ -83,7 +83,9 @@ class ListField(BaseSchemaField):
 
 
 class DictField(BaseSchemaField):
-    on_write: Literal[FieldRule.IGNORE, FieldRule.UPDATE, FieldRule.HASH_UPDATE, FieldRule.UPDATE_ONCE] = FieldRule.UPDATE
+    on_write: Literal[
+        FieldRule.IGNORE, FieldRule.UPDATE, FieldRule.HASH_UPDATE, FieldRule.UPDATE_ONCE
+    ] = FieldRule.UPDATE
     outlook_type: Literal[OutlookType.KEYS] = Field(OutlookType.KEYS, const=True)
     outlook: Union[str, List[Any]] = "[all]"
 
