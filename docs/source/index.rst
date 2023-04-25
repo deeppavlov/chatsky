@@ -18,8 +18,8 @@ allowing developers to easily adapt it to their specific needs and requirements.
    :maxdepth: 1
 
    get_started
-   documentation
    examples
+   reference
    tutorials
    development
    community

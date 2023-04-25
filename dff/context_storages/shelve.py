@@ -3,7 +3,7 @@ Shelve
 ------
 The Shelve module provides a shelve-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a shelve format.
-It allows the `DFF` to easily store and retrieve context data in a format that is efficient
+It allows the DFF to easily store and retrieve context data in a format that is efficient
 for serialization and deserialization and can be easily used in python.
 
 Shelve is a python library that allows to store and retrieve python objects.
@@ -71,7 +71,8 @@ class ShelveContextStorage(DBContextStorage):
         return len(self.shelve_db)
 
     async def clear_async(self):
-        self.shelve_db.clear()
+        for key in self.shelve_db.keys():
+            await self.del_item_async(key)
 
     async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         key_dict = dict()

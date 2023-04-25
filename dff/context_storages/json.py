@@ -2,7 +2,7 @@
 JSON
 ----
 The JSON module provides a json-based version of the :py:class:`.DBContextStorage` class.
-This class is used to store and retrieve context data in a JSON. It allows the `DFF` to easily
+This class is used to store and retrieve context data in a JSON. It allows the DFF to easily
 store and retrieve context data.
 """
 import asyncio
@@ -38,7 +38,6 @@ class JSONContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
     :param path: Target file URI. Example: `json://file.json`.
-    :type path: str
     """
 
     def __init__(self, path: str):
@@ -93,7 +92,8 @@ class JSONContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        self.storage.__dict__.clear()
+        for key in self.storage.__dict__.keys():
+            await self.del_item_async(key)
         await self._save()
 
     async def _save(self):

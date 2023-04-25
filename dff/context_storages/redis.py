@@ -3,7 +3,7 @@ Redis
 -----
 The Redis module provides a Redis-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a Redis.
-It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+It allows the DFF to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
 Redis is an open-source, in-memory data structure store that is known for its
@@ -36,10 +36,9 @@ class RedisContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
     :param path: Database URI string. Example: `redis://user:password@host:port`.
-    :type path: str
     """
 
-    _TOTAL_CONTEXT_COUNT_KEY = "total_contexts"
+    _CONTEXTS_KEY = "all_contexts"
     _VALUE_NONE = b""
 
     def __init__(self, path: str):
@@ -66,13 +65,13 @@ class RedisContextStorage(DBContextStorage):
         value_hash = self.hash_storage.get(key, None)
         await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
         if int_id != value.id and int_id is None:
-            await self._redis.incr(self._TOTAL_CONTEXT_COUNT_KEY)
+            await self._redis.rpush(self._CONTEXTS_KEY, key)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
     async def del_item_async(self, key: Union[Hashable, str]):
         await self._redis.rpush(key, self._VALUE_NONE)
-        await self._redis.decr(self._TOTAL_CONTEXT_COUNT_KEY)
+        await self._redis.lrem(self._CONTEXTS_KEY, 0, key)
 
     @threadsafe_method
     @auto_stringify_hashable_key()
@@ -86,12 +85,13 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return int(await self._redis.get(self._TOTAL_CONTEXT_COUNT_KEY))
+        return int(await self._redis.llen(self._CONTEXTS_KEY))
 
     @threadsafe_method
     async def clear_async(self):
-        await self._redis.flushdb()
-        await self._redis.set(self._TOTAL_CONTEXT_COUNT_KEY, 0)
+        while int(await self._redis.llen(self._CONTEXTS_KEY)) > 0:
+            value = await self._redis.rpop(self._CONTEXTS_KEY)
+            await self._redis.rpush(value, self._VALUE_NONE)
 
     @classmethod
     def _check_none(cls, value: Any) -> Any:
@@ -108,7 +108,7 @@ class RedisContextStorage(DBContextStorage):
         for field in [
             field
             for field in self.update_scheme.ALL_FIELDS
-            if self.update_scheme.fields[field]["type"] != FieldType.VALUE
+            if self.update_scheme.fields[field].field_type != FieldType.VALUE
         ]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]
@@ -134,7 +134,7 @@ class RedisContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: str):
         for holder in data.keys():
-            if self.update_scheme.fields[holder]["type"] == FieldType.VALUE:
+            if self.update_scheme.fields[holder].field_type == FieldType.VALUE:
                 await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
             else:
                 for key, value in data.get(holder, dict()).items():

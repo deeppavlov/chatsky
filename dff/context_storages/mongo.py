@@ -3,7 +3,7 @@ Mongo
 -----
 The Mongo module provides a MongoDB-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a MongoDB.
-It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+It allows the DFF to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
 MongoDB is a widely-used, open-source NoSQL database that is known for its scalability and performance.
@@ -112,8 +112,11 @@ class MongoContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        for collection in self.collections.values():
-            await collection.delete_many(dict())
+        external_keys = await self.collections[self._CONTEXTS].distinct(ExtraFields.EXTERNAL_FIELD)
+        documents_common = {ExtraFields.IDENTITY_FIELD: None, ExtraFields.CREATED_AT_FIELD: time.time_ns()}
+        documents = [dict(**documents_common, **{ExtraFields.EXTERNAL_FIELD: key}) for key in external_keys]
+        if len(documents) > 0:
+            await self.collections[self._CONTEXTS].insert_many(documents)
 
     @classmethod
     def _check_none(cls, value: Dict) -> Optional[Dict]:
