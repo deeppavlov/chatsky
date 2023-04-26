@@ -41,11 +41,12 @@ class BaseSchemaField(BaseModel):
     def parse_keys_outlook(cls, value, values: dict):
         field_name: str = values.get("name")
         outlook_type: OutlookType = values.get("outlook_type")
-        if outlook_type == OutlookType.KEYS and isinstance(value, str):
-            try:
-                value = eval(value, {}, {"all": ALL_ITEMS})
-            except Exception as e:
-                raise Exception(f"While parsing outlook of field '{field_name}' exception happened: {e}")
+        if outlook_type == OutlookType.KEYS:
+            if isinstance(value, str):
+                try:
+                    value = eval(value, {}, {"all": ALL_ITEMS})
+                except Exception as e:
+                    raise Exception(f"While parsing outlook of field '{field_name}' exception happened: {e}")
             if not isinstance(value, List):
                 raise Exception(f"Outlook of field '{field_name}' exception isn't a list'!")
             if ALL_ITEMS in value and len(value) > 1:

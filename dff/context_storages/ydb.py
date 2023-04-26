@@ -35,9 +35,8 @@ class YDBContextStorage(DBContextStorage):
     """
     Version of the :py:class:`.DBContextStorage` for YDB.
 
-    :param path: Standard sqlalchemy URI string.
-        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
-        instead of forward slashes '/' in the file path.
+    :param path: Standard sqlalchemy URI string. One of `grpc` or `grpcs` can be chosen as a protocol.
+        Example: `grpc://localhost:2134/local`.
     :param table_name: The name of the table to use.
     """
 

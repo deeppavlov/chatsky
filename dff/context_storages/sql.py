@@ -119,10 +119,13 @@ class SQLContextStorage(DBContextStorage):
     """
     | SQL-based version of the :py:class:`.DBContextStorage`.
     | Compatible with MySQL, Postgresql, Sqlite.
+    | When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
+    | instead of forward slashes '/' in the file path.
 
     :param path: Standard sqlalchemy URI string.
-        When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
-        instead of forward slashes '/' in the file path.
+        Examples: `sqlite+aiosqlite://path_to_the_file/file_name`,
+        `mysql+asyncmy://root:pass@localhost:3306/test`,
+        `postgresql+asyncpg://postgres:pass@localhost:5430/test`.
     :param table_name: The name of the table to use.
     :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
