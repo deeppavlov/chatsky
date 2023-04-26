@@ -22,21 +22,31 @@ def testing_saver(testing_file):
     yield saver_factory("csv://{}".format(testing_file))
 
 
+def get_testing_item():
+    while True:
+        flow = choice(["one", "two", "three"])
+        node = choice(["node_1", "node_2", "node_3", "node_4"])
+        yield [
+            StatsRecord(context_id=str(uuid4()), request_id=1, data_key="some_data", data={"duration": 0.0001}),
+            StatsRecord(
+                context_id=str(uuid4()),
+                request_id=1,
+                data_key="actor_data",
+                data={
+                    "flow": flow,
+                    "node": node,
+                    "label": ":".join([flow, node]),
+                },
+            ),
+        ]
+
+
 @pytest.fixture(scope="session")
 def testing_items():
-    yield [
-        StatsRecord(context_id=str(uuid4()), request_id=1, data_key="some_data", data={"duration": 0.0001}),
-        StatsRecord(
-            context_id=str(uuid4()),
-            request_id=1,
-            data_key="actor_data",
-            data={
-                "flow": choice(["one", "two", "three"]),
-                "node": choice(["node_1", "node_2", "node_3", "node_4"]),
-                "label": ":".join([choice(["one", "two", "three"]), choice(["node_1", "node_2", "node_3", "node_4"])]),
-            },
-        ),
-    ] * 100
+    items = [item for item, _ in zip(get_testing_item(), range(100))]
+    flat_list = [item for sublist in items for item in sublist]
+    assert len(flat_list) == 200
+    yield flat_list
 
 
 @pytest.fixture(scope="session")

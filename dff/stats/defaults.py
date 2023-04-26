@@ -4,6 +4,11 @@ Default Extractors
 This module includes a pool of default extractors
 that you can use out of the box.
 
+The default configuration for Superset dashboard leverages the data collected
+by the extractors below. In order to use the default charts,
+make sure that you include those functions in your pipeline.
+Detailed examples can be found in the `tutorials` section.
+
 """
 from datetime import datetime
 
@@ -20,6 +25,7 @@ default_extractor_pool = ExtractorPool()
 async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
+    This function is required for running the dashboard with the default configuration.
     """
     last_label = ctx.last_label
     if last_label is None:
@@ -33,6 +39,7 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's start time.
+    This function is required for running the dashboard with the default configuration.
     """
     start_time = datetime.now()
     ctx.misc[get_wrapper_field(info, "time")] = start_time
@@ -42,6 +49,7 @@ async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's finish time.
+    This function is required for running the dashboard with the default configuration.
     """
     start_time = ctx.misc[get_wrapper_field(info, "time")]
     data = {"execution_time": str(datetime.now() - start_time)}

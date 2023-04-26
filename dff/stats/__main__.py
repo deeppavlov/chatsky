@@ -53,21 +53,27 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
         required=True,
     )
     opts_parser = subparsers.add_parser("cfg_from_opts", help="Create a configuration archive from cli arguments.")
-    opts_parser.add_argument("-dT", "--db.type", choices=["postgresql", "clickhousedb+connect"], required=True)
-    opts_parser.add_argument("-dU", "--db.user", required=True)
-    opts_parser.add_argument("-dh", "--db.host", required=True)
-    opts_parser.add_argument("-dp", "--db.port", required=True)
-    opts_parser.add_argument("-dn", "--db.name", required=True)
-    opts_parser.add_argument("-dt", "--db.table", required=True)
-    opts_parser.add_argument("-o", "--outfile", required=True)
+    opts_parser.add_argument(
+        "-dT",
+        "--db.type",
+        choices=["postgresql", "clickhousedb+connect"],
+        required=True,
+        help="DBMS connection type: 'postgresql', or 'clickhouse+connect'.",
+    )
+    opts_parser.add_argument("-dU", "--db.user", required=True, help="Database user.")
+    opts_parser.add_argument("-dh", "--db.host", required=True, help="Database host.")
+    opts_parser.add_argument("-dp", "--db.port", required=True, help="Database port.")
+    opts_parser.add_argument("-dn", "--db.name", required=True, help="Name of the database.")
+    opts_parser.add_argument("-dt", "--db.table", required=True, help="Name of the table.")
+    opts_parser.add_argument("-o", "--outfile", required=True, help="Name for the configuration zip file.")
     file_parser = subparsers.add_parser("cfg_from_file", help="Create a configuration archive from a yaml file.")
     file_parser.add_argument("file", type=str)
-    file_parser.add_argument("-o", "--outfile", required=True)
+    file_parser.add_argument("-o", "--outfile", required=True, help="Name for the configuration zip file.")
     import_parser = subparsers.add_parser("import_dashboard", help="Upload a configuration archive to Superset.")
-    import_parser.add_argument("-U", "--username", required=True)
-    import_parser.add_argument("-P", "--password", required=True)
-    import_parser.add_argument("-dP", "--db.password", required=True)
-    import_parser.add_argument("-i", "--infile", required=True)
+    import_parser.add_argument("-U", "--username", required=True, help="Superset user.")
+    import_parser.add_argument("-P", "--password", required=True, help="Superset password.")
+    import_parser.add_argument("-dP", "--db.password", required=True, help="Database password.")
+    import_parser.add_argument("-i", "--infile", required=True, help="Zip archive holding configuration files.")
 
     if parsed_args is None:
         parsed_args = parser.parse_args(sys.argv[1:])

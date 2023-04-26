@@ -70,3 +70,6 @@ class CsvSaver(Saver):
                 row["data"] = json.loads(row["data"])
                 items.append(StatsRecord.parse_raw(json.dumps(row)))
             return items
+
+    async def create_table(self) -> None:
+        return None

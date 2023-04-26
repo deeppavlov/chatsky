@@ -79,7 +79,7 @@ class ClickHouseSaver(Saver):
 
     async def save(self, data: List[StatsRecord]) -> None:
         if not self._table_exists:  # check the flag each time to keep the constructor synchronous
-            await self._create_table()
+            raise RuntimeError(f"Table {self.table} does not exist.")
 
         if len(data) == 0:
             return
@@ -90,14 +90,14 @@ class ClickHouseSaver(Saver):
 
     async def load(self) -> List[StatsRecord]:
         if not self._table_exists:  # check the flag each time to keep the constructor synchronous
-            await self._create_table()
+            raise RuntimeError(f"Table {self.table} does not exist.")
 
         results = []
         async for row in self.ch_client.iterate(f"SELECT * FROM {self.table}"):
             results.append(StatsRecord.parse_obj({key: row[key] for key in row.keys()}))
         return results
 
-    async def _create_table(self):
+    async def create_table(self):
         await self.ch_client.execute(
             f"CREATE TABLE if not exists {self.table} ("
             "context_id String, "

@@ -1,4 +1,3 @@
-from typing import Optional
 from .clickhouse import ClickHouseSaver
 from .postgresql import PostgresSaver
 from .csv_saver import CsvSaver
@@ -10,7 +9,7 @@ Mapping between dbms types and `Saver` classes.
 """
 
 
-def saver_factory(path: str, table: Optional[str] = "dff_stats") -> Saver:
+async def saver_factory(path: str, table: str = "dff_stats") -> Saver:
     """
     Use saver_factory to instantiate various saver types.
     The function takes a database connection URI or its equivalent, and a table name.
@@ -38,4 +37,6 @@ def saver_factory(path: str, table: Optional[str] = "dff_stats") -> Saver:
             {", ".join(SAVER_MAPPING.keys())}.\n
             For more information, see the function doc:\n{saver_factory.__doc__}"""
         )
-    return SAVER_MAPPING[db_type](path, table)
+    saver: Saver = SAVER_MAPPING[db_type](path, table)
+    await saver.create_table()
+    return saver

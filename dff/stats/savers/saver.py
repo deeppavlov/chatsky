@@ -24,7 +24,7 @@ class Saver(ABC):
     """
 
     @abstractmethod
-    def save(
+    async def save(
         self,
         data: List[StatsRecord],
     ) -> None:
@@ -37,9 +37,17 @@ class Saver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    def load(self) -> List[StatsRecord]:
+    async def load(self) -> List[StatsRecord]:
         """
         Load the data from a database or a file.
+
+        """
+        raise NotImplementedError
+
+    @abstractmethod
+    async def create_table(self) -> None:
+        """
+        Create the target table in the DBM system.
 
         """
         raise NotImplementedError
