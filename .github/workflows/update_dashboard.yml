@@ -30,7 +30,7 @@ jobs:
         - name: Extract Docker metadata
           uses: docker/metadata-action@v4
           with:
-            images: ghcr.io/${{ github.repository }}/TODO
+            images: ghcr.io/${{ github.repository }}/superset_df_dashboard
             tags: |
               type=ref,event=branch
               type=semver,event={{version}}
