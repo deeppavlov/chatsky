@@ -15,7 +15,7 @@ from dff.script import Context
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT_ARGS
 
 logger = logging.getLogger(__name__)
 
@@ -31,11 +31,11 @@ that will be run before or after `Actor` respectively.
 These services can be used to access external APIs, annotate user input, etc.
 
 Service callable signature can be one of the following:
-`[ctx]`, `[ctx, actor]` or `[ctx, actor, info]` (see tutorial 3),
+`[ctx]`, `[ctx, pipeline]` or `[ctx, actor, info]` (see tutorial 3),
 where:
 
 * `ctx` - Context of the current dialog.
-* `actor` - Actor of the pipeline.
+* `pipeline` - The current pipeline.
 * `info` - dictionary, containing information about
         current service and pipeline execution state (see tutorial 4).
 
@@ -57,17 +57,15 @@ def pong_processor(ctx: Context):
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
-    ("greeting_flow", "start_node"),
-    ("greeting_flow", "fallback_node"),
-    {},  # `context_storage` - a dictionary or
+    *TOY_SCRIPT_ARGS,
+    context_storage={},  # `context_storage` - a dictionary or
     # a `DBContextStorage` instance,
     # a place to store dialog contexts
-    CLIMessengerInterface(),
+    messenger_interface=CLIMessengerInterface(),
     # `messenger_interface` - a message channel adapter,
     # it's not used in this tutorial
-    [ping_processor],
-    [pong_processor],
+    pre_services=[ping_processor],
+    post_services=[pong_processor],
 )
 
 

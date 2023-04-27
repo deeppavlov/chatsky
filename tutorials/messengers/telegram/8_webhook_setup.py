@@ -14,7 +14,7 @@ from dff.messengers.telegram import (
     CallbackTelegramInterface,
 )
 from dff.pipeline import Pipeline
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -39,9 +39,7 @@ interface = CallbackTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
 
 # %%
 pipeline = Pipeline.from_script(
-    script=TOY_SCRIPT,  # Actor script object, defined in `.utils` module.
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
+    *TOY_SCRIPT_ARGS,
     messenger_interface=interface,  # The interface can be passed as a pipeline argument.
 )
 

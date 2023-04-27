@@ -11,9 +11,8 @@ import os
 from telebot.types import Message
 
 import dff.script.conditions as cnd
-from dff.script import Context, Actor, TRANSITIONS, RESPONSE
+from dff.script import Context, TRANSITIONS, RESPONSE
 from dff.script.core.message import Image, Attachments
-
 from dff.messengers.telegram import (
     PollingTelegramInterface,
     TelegramMessage,
@@ -132,7 +131,7 @@ happy_path = (
 
 
 # %%
-def extract_data(ctx: Context, _: Actor):  # A function to extract data with
+def extract_data(ctx: Context, _: Pipeline):  # A function to extract data with
     message = ctx.last_request
     if message is None:
         return ctx

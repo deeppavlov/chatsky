@@ -27,12 +27,15 @@ The above command will set the minimum dependencies to start working with DFF.
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 ```bash
 pip install dff[core]  # minimal dependencies (by default)
+pip install dff[json]  # dependencies for using JSON
+pip install dff[pickle] # dependencies for using Pickle
 pip install dff[redis]  # dependencies for using Redis
 pip install dff[mongodb]  # dependencies for using MongoDB
 pip install dff[mysql]  # dependencies for using MySQL
 pip install dff[postgresql]  # dependencies for using PostgreSQL
 pip install dff[sqlite]  # dependencies for using SQLite
 pip install dff[ydb]  # dependencies for using Yandex Database
+pip install dff[telegram]  # dependencies for using Telegram
 pip install dff[full]  # full dependencies including all options above
 pip install dff[tests]  # dependencies for running tests
 pip install dff[test_full]  # full dependencies for running all tests (all options above)
@@ -128,24 +131,19 @@ These are not meant to be used in production, but can be helpful for prototyping
 ## Basic example
 
 ```python
-from dff.script import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 from dff.context_storages import SQLContextStorage
 from .script import some_df_script
 
 db = SQLContextStorage("postgresql+asyncpg://user:password@host:port/dbname")
 
-actor = Actor(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
+pipeline = Pipeline.from_script(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
 
 
 def handle_request(request):
     user_id = request.args["user_id"]
-    if user_id not in db:
-        context = Context(id=user_id)
-    else:
-        context = db[user_id]
-    new_context = actor(context)
-    db[user_id] = new_context
-    assert user_id in db
+    new_context = pipeline(request, user_id)
     return new_context.last_response
 
 ```

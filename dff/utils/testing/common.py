@@ -12,7 +12,7 @@ from dff.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
 
-def is_interactive_mode() -> bool:
+def is_interactive_mode() -> bool:  # pragma: no cover
     """
     Checking whether the tutorial code should be run in interactive mode.
 

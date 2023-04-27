@@ -12,19 +12,28 @@ from dff.script import Context
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    HAPPY_PATH,
+    TOY_SCRIPT,
+    TOY_SCRIPT_ARGS,
+)
 
 
 # %% [markdown]
 """
-`Pipeline` is an object, that automates `Actor` execution and context management.
+`Pipeline` is an object, that automates script execution and context management.
 `from_script` method can be used to create
 a pipeline of the most basic structure:
 "preprocessors -> actor -> postprocessors"
 as well as to define `context_storage` and `messenger_interface`.
+Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script`
+and handles it. It is responsible for processing user input and determining
+the appropriate response based on the current state of the conversation and the script.
 These parameters usage will be shown in tutorials 2, 3 and 6.
 
-Here only required for Actor creating parameters are provided to pipeline.
+Here only required parameters are provided to pipeline.
 `context_storage` will default to simple Python dict and
 `messenger_interface` will never be used.
 pre- and postprocessors lists are empty.
@@ -36,9 +45,22 @@ its `last_response` property will be actors response.
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,  # Actor script object, defined in `dff.utils.testing.toy_script`.
+    TOY_SCRIPT,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
+# %% [markdown]
+"""
+For the sake of brevity, other tutorials might use `TOY_SCRIPT_ARGS` to initialize pipeline:
+"""
+
+# %%
+assert TOY_SCRIPT_ARGS == (
+    TOY_SCRIPT,
+    ("greeting_flow", "start_node"),
+    ("greeting_flow", "fallback_node"),
 )
 
 

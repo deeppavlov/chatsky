@@ -10,10 +10,10 @@ The following tutorial shows messenger interfaces usage.
 import logging
 
 from dff.messengers.common.interface import CallbackMessengerInterface
-from dff.script import Context, Actor, Message
+from dff.script import Context, Message
 from flask import Flask, request, Request
 
-from dff.pipeline import Pipeline
+from dff.pipeline import Pipeline, ACTOR
 from dff.utils.testing import is_interactive_mode, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
@@ -67,7 +67,7 @@ Two services are used to process request:
 """
 
 # %%
-app = Flask("tutorials.6_custom_messenger_interface")
+app = Flask(__name__)
 
 messenger_interface = CallbackMessengerInterface()  # For this simple case of Flask,
 # CallbackMessengerInterface may not be overridden
@@ -117,19 +117,15 @@ def cat_response2webpage(ctx: Context):
 
 
 # %%
-actor = Actor(
-    TOY_SCRIPT,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
-
-
 pipeline_dict = {
+    "script": TOY_SCRIPT,
+    "start_label": ("greeting_flow", "start_node"),
+    "fallback_label": ("greeting_flow", "fallback_node"),
     "messenger_interface": messenger_interface,
     "components": [
         purify_request,
         {
-            "handler": actor,
+            "handler": ACTOR,
             "name": "encapsulated-actor",
         },  # Actor here is encapsulated in another service with specific name
         cat_response2webpage,
