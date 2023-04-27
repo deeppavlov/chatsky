@@ -37,7 +37,7 @@ async_files_dependencies = [
 ]
 
 redis_dependencies = [
-    "aioredis~=2.0.1",
+    "redis~=4.5.4",
 ]
 
 mongodb_dependencies = [
