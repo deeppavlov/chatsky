@@ -35,14 +35,39 @@ class DFFUser(FastHttpUser):
                     catch_response=True
             ) as candidate_response:
                 text_response = Message.parse_obj(candidate_response.json().get("response"))
-                if text_response != response:
-                    candidate_response.failure(f"Incorrect response: {text_response}")
+                if response is not None:
+                    if callable(response):
+                        error_message = response(text_response)
+                        if error_message is not None:
+                            candidate_response.failure(error_message)
+                    elif text_response != response:
+                        candidate_response.failure(f"Expected: {response.json()}\nGot: {text_response.json()}")
 
             time.sleep(self.wait_time())
 
-    @task
+    @task(3)  # <- this task is 3 times more likely than the other
     def dialog_1(self):
         self.check_happy_path(HAPPY_PATH)
+
+    @task
+    def dialog_2(self):
+        def check_first_message(msg: Message) -> str | None:
+            if msg.text is None:
+                return f"Message does not contain text: {msg.json()}"
+            if "Hi" not in msg.text:
+                return f'"Hi" is not in the response message: {msg.json()}'
+            return None
+
+        self.check_happy_path(
+            [
+                # a function can be used to check the return message
+                (Message(text="Hi"), check_first_message),
+                # a None is used if return message should not be checked
+                (Message(text="i'm fine, how are you?"), None),
+                # this should fail
+                (Message(text="Hi"), check_first_message),
+            ]
+        )
 
 
 # %%
