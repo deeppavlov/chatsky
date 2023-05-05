@@ -17,7 +17,7 @@ import time
 import sys
 from locust import FastHttpUser, task, constant, main
 from dff.script import Message
-from dff.utils.testing import HAPPY_PATH
+from dff.utils.testing import HAPPY_PATH, is_interactive_mode
 
 
 # %%
@@ -28,11 +28,11 @@ class DFFUser(FastHttpUser):
         user_id = str(uuid.uuid4())
         for request, response in happy_path:
             with self.client.post(
-                    f"/chat?user_id={user_id}",
-                    headers={"accept": "application/json", "Content-Type": "application/json"},
-                    name=f"/chat?user_message={request.json()}",
-                    data=request.json(),
-                    catch_response=True
+                f"/chat?user_id={user_id}",
+                headers={"accept": "application/json", "Content-Type": "application/json"},
+                name=f"/chat?user_message={request.json()}",
+                data=request.json(),
+                catch_response=True,
             ) as candidate_response:
                 text_response = Message.parse_obj(candidate_response.json().get("response"))
                 if response is not None:
@@ -41,7 +41,9 @@ class DFFUser(FastHttpUser):
                         if error_message is not None:
                             candidate_response.failure(error_message)
                     elif text_response != response:
-                        candidate_response.failure(f"Expected: {response.json()}\nGot: {text_response.json()}")
+                        candidate_response.failure(
+                            f"Expected: {response.json()}\nGot: {text_response.json()}"
+                        )
 
             time.sleep(self.wait_time())
 
@@ -72,5 +74,6 @@ class DFFUser(FastHttpUser):
 
 # %%
 if __name__ == "__main__":
-    sys.argv = ["locust", "-f", __file__]
-    main.main()
+    if is_interactive_mode():
+        sys.argv = ["locust", "-f", __file__]
+        main.main()
