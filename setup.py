@@ -108,6 +108,14 @@ test_requirements = merge_req_lists(
         "flask[async]>=2.1.2",
         "psutil>=5.9.1",
         "telethon>=1.27.0,<2.0",
+        "anyio>=3.6.2",
+        "fastapi>=0.95.1",
+        "idna>=3.4",
+        "sniffio>=1.3.0",
+        "starlette>=0.26.1",
+        "h11>=0.14.0",
+        "uvicorn>=0.21.1",
+        "websockets>=11.0",
     ],
     requests_requirements,
 )
@@ -174,7 +182,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.3.2",
+    version="0.4.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
