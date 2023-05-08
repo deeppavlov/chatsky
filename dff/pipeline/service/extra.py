@@ -13,7 +13,13 @@ from typing import Optional, List, ForwardRef
 from dff.script import Context
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates, wrap_sync_function_in_async
-from ..types import ServiceRuntimeInfo, ExtraHandlerType, ExtraHandlerBuilder, ExtraHandlerFunction
+from ..types import (
+    ServiceRuntimeInfo,
+    ExtraHandlerType,
+    ExtraHandlerBuilder,
+    ExtraHandlerFunction,
+    ExtraHandlerRuntimeInfo,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -95,16 +101,12 @@ class _ComponentExtraHandler:
         elif handler_params == 2:
             await wrap_sync_function_in_async(function, ctx, pipeline)
         elif handler_params == 3:
-            await wrap_sync_function_in_async(
-                function,
-                ctx,
-                pipeline,
-                {
-                    "function": function,
-                    "stage": self.stage,
-                    "component": component_info,
-                },
-            )
+            extra_handler_runtime_info: ExtraHandlerRuntimeInfo = {
+                "function": function,
+                "stage": self.stage,
+                "component": component_info,
+            }
+            await wrap_sync_function_in_async(function, ctx, pipeline, extra_handler_runtime_info)
         else:
             raise Exception(
                 f"Too many parameters required for component {component_info['name']} {self.stage.name}"
