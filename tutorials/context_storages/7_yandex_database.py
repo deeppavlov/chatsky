@@ -17,7 +17,7 @@ from dff.utils.testing.common import (
     run_interactive_mode,
     is_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 
 # %%
@@ -35,12 +35,7 @@ db_uri = "{}{}".format(
 )
 db = context_storage_factory(db_uri)
 
-pipeline = Pipeline.from_script(
-    TOY_SCRIPT,
-    context_storage=db,
-    start_label=("greeting_flow", "start_node"),
-    fallback_label=("greeting_flow", "fallback_node"),
-)
+pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 
 
 # %%

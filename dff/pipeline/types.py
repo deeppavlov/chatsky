@@ -17,6 +17,7 @@ from typing_extensions import NotRequired, TypedDict, TypeAlias
 _ForwardPipeline = NewType("Pipeline", None)
 _ForwardPipelineComponent = NewType("PipelineComponent", None)
 _ForwardService = NewType("Service", _ForwardPipelineComponent)
+_ForwardServiceBuilder = NewType("ServiceBuilder", None)
 _ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
 _ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", None)
 _ForwardProvider = NewType("ABCProvider", ABC)
@@ -193,7 +194,7 @@ ServiceBuilder: TypeAlias = Union[
     TypedDict(
         "ServiceDict",
         {
-            "handler": "ServiceBuilder",
+            "handler": _ForwardServiceBuilder,
             "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "timeout": NotRequired[Optional[float]],
