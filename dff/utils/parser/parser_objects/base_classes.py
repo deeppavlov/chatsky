@@ -115,6 +115,7 @@ class BaseParserObject(ABC):
             If set to None, an object is dumped in one line.
         :return: Representation of the object as a string.
         """
+        raise NotImplementedError()
 
     def __repr__(self) -> str:
         return self.__class__.__name__ + "(" + self.true_value() + ")"
@@ -144,6 +145,7 @@ class BaseParserObject(ABC):
         :param node: AST node to construct the object from.
         :return: Constructed object(s) or None if an object cannot be constructed from `node`.
         """
+        raise NotImplementedError()
 
 
 class Statement(BaseParserObject, ABC):
@@ -170,7 +172,7 @@ class Statement(BaseParserObject, ABC):
               return a mapping from names of defined objects inside the statement to their definitions.
             - :py:class:`~.Python` should return an instance of itself.
         """
-        ...
+        raise NotImplementedError()
 
     @classmethod
     @tp.overload
@@ -208,7 +210,7 @@ class Expression(BaseParserObject, ABC):
     @classmethod
     @abstractmethod
     def from_ast(cls, node: tp.Union[ast.stmt, ast.expr], **kwargs) -> tp.Optional["Expression"]:
-        ...
+        raise NotImplementedError()
 
     @classmethod
     def from_str(cls, string: str) -> "Expression":
@@ -270,7 +272,7 @@ class ReferenceObject(BaseParserObject, ABC):
 
         :return: Referenced object or None if it can't be resolved.
         """
-        ...
+        raise NotImplementedError()
 
     @cached_property
     def absolute(self) -> tp.Optional[BaseParserObject]:  # todo: handle recursion
@@ -295,6 +297,7 @@ class ReferenceObject(BaseParserObject, ABC):
         `referenced_object`\\s are, respectively, `dff.pipeline.Pipeline` and
         `dff.pipeline.dictionary[dff.pipeline.number][5]`.
         """
+        raise NotImplementedError()
 
     def __repr__(self):
         if self.dump(indent=None) == self.true_value():
