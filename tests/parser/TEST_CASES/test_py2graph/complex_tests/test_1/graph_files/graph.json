@@ -1,0 +1,342 @@
+{
+    "directed": true,
+    "multigraph": true,
+    "graph": {
+        "script": {
+            "namespaces": {
+                "main": {
+                    "module": "!import module",
+                    "TRANSITIONS": "!from dff.core.engine.core.keywords TRANSITIONS",
+                    "GLOBAL": "!from dff.core.engine.core.keywords GLOBAL",
+                    "Actor": "!from dff.core.engine.core.actor Actor",
+                    "glob": {
+                        "glob": "GLOBAL"
+                    },
+                    "flow": {
+                        "flow": "flow"
+                    },
+                    "act": "!call\nname: Actor\nargs:\n  script:\n    glob[\"glob\"]:\n      TRANSITIONS:\n        module.consts.there[module.node1.ints[module.node1.ints[3]]]: module.proxy.node1.ints[3]\n    flow[\"flow\"]:\n      node1: module.proxy.node1.node\n      module.proxy.node1.d[2][3]: module.node1.node\n    flow2:\n      node1: module.proxy.node1.node\n  start_label:\n  - !str flow\n  - node1\n"
+                },
+                "module.__init__": {
+                    "proxy": "!import module.proxy"
+                },
+                "module.proxy": {
+                    "node1": "!import module.node1"
+                },
+                "module.node1": {
+                    "tr": "!from dff.core.engine.core.keywords TRANSITIONS",
+                    "consts": "!import module.consts",
+                    "d": {
+                        "'1'\n": "flow",
+                        "'2'\n": {
+                            "'3'\n": "node2"
+                        }
+                    },
+                    "ints": {
+                        "'3'\n": "'3'\n"
+                    },
+                    "here": {
+                        "(\"flow2\", \"node1\")": "print(\"cond\")"
+                    },
+                    "node": {
+                        "tr": {
+                            "(\"flow\", \"node1\")": "print(\"cnd\")",
+                            "(d[1], d[2][ints[3]])": "consts.conds[1]",
+                            "consts.there[ints[3]]": "here[consts.there[ints[3]]]"
+                        }
+                    }
+                },
+                "module.consts": {
+                    "conds": {
+                        "'1'\n": "print(\"2\")"
+                    },
+                    "there": {
+                        "'3'\n": "(\"flow2\", \"node1\")"
+                    }
+                }
+            }
+        }
+    },
+    "nodes": [
+        {
+            "ref": [
+                "main",
+                "act",
+                "script",
+                "glob[\"glob\"]"
+            ],
+            "local": false,
+            "id": [
+                "GLOBAL"
+            ]
+        },
+        {
+            "ref": [
+                "module.node1",
+                "node"
+            ],
+            "local": false,
+            "id": [
+                "flow2",
+                "node1"
+            ]
+        },
+        {
+            "ref": [
+                "module.node1",
+                "node"
+            ],
+            "local": false,
+            "start_label": true,
+            "id": [
+                "flow",
+                "node1"
+            ]
+        },
+        {
+            "ref": [
+                "module.node1",
+                "node"
+            ],
+            "local": false,
+            "id": [
+                "flow",
+                "node2"
+            ]
+        }
+    ],
+    "links": [
+        {
+            "label_ref": [
+                "module.consts",
+                "there",
+                "3"
+            ],
+            "label": "(\"flow2\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "ints",
+                "3"
+            ],
+            "condition": "3",
+            "source": [
+                "GLOBAL"
+            ],
+            "target": [
+                "flow2",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.node1",
+                "node",
+                "tr"
+            ],
+            "label": "(\"flow\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "node",
+                "tr",
+                "(\"flow\", \"node1\")"
+            ],
+            "condition": "print(\"cnd\")",
+            "source": [
+                "flow2",
+                "node1"
+            ],
+            "target": [
+                "flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.node1",
+                "node",
+                "tr"
+            ],
+            "label": "(d[1], d[2][ints[3]])",
+            "condition_ref": [
+                "module.consts",
+                "conds",
+                "1"
+            ],
+            "condition": "print(\"2\")",
+            "source": [
+                "flow2",
+                "node1"
+            ],
+            "target": [
+                "flow",
+                "node2"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.consts",
+                "there",
+                "3"
+            ],
+            "label": "(\"flow2\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "here",
+                "(\"flow2\", \"node1\")"
+            ],
+            "condition": "print(\"cond\")",
+            "source": [
+                "flow2",
+                "node1"
+            ],
+            "target": [
+                "flow2",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.node1",
+                "node",
+                "tr"
+            ],
+            "label": "(\"flow\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "node",
+                "tr",
+                "(\"flow\", \"node1\")"
+            ],
+            "condition": "print(\"cnd\")",
+            "source": [
+                "flow",
+                "node1"
+            ],
+            "target": [
+                "flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.node1",
+                "node",
+                "tr"
+            ],
+            "label": "(d[1], d[2][ints[3]])",
+            "condition_ref": [
+                "module.consts",
+                "conds",
+                "1"
+            ],
+            "condition": "print(\"2\")",
+            "source": [
+                "flow",
+                "node1"
+            ],
+            "target": [
+                "flow",
+                "node2"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.consts",
+                "there",
+                "3"
+            ],
+            "label": "(\"flow2\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "here",
+                "(\"flow2\", \"node1\")"
+            ],
+            "condition": "print(\"cond\")",
+            "source": [
+                "flow",
+                "node1"
+            ],
+            "target": [
+                "flow2",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.node1",
+                "node",
+                "tr"
+            ],
+            "label": "(\"flow\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "node",
+                "tr",
+                "(\"flow\", \"node1\")"
+            ],
+            "condition": "print(\"cnd\")",
+            "source": [
+                "flow",
+                "node2"
+            ],
+            "target": [
+                "flow",
+                "node1"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.node1",
+                "node",
+                "tr"
+            ],
+            "label": "(d[1], d[2][ints[3]])",
+            "condition_ref": [
+                "module.consts",
+                "conds",
+                "1"
+            ],
+            "condition": "print(\"2\")",
+            "source": [
+                "flow",
+                "node2"
+            ],
+            "target": [
+                "flow",
+                "node2"
+            ],
+            "key": 0
+        },
+        {
+            "label_ref": [
+                "module.consts",
+                "there",
+                "3"
+            ],
+            "label": "(\"flow2\", \"node1\")",
+            "condition_ref": [
+                "module.node1",
+                "here",
+                "(\"flow2\", \"node1\")"
+            ],
+            "condition": "print(\"cond\")",
+            "source": [
+                "flow",
+                "node2"
+            ],
+            "target": [
+                "flow2",
+                "node1"
+            ],
+            "key": 0
+        }
+    ]
+}

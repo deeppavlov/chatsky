@@ -1,0 +1,18 @@
+namespaces:
+  main:
+    Actor: !from dff.core.engine.core.actor Actor
+    script: !from scripts script
+    actor: !call
+      name: Actor
+      args:
+        script: script
+        start_label:
+          - flow
+          - node
+  scripts:
+    kw: !from dff.core.engine.core keywords
+    another_script:
+      flow:
+        node:
+          kw.RESPONSE: hi
+    script: another_script

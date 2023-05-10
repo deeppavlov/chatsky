@@ -1,0 +1,14 @@
+namespaces:
+  main:
+    Actor: !from dff.core.engine.core.actor Actor
+    keywords: !from dff.core.engine.core keywords
+    script:
+      keywords.GLOBAL:
+        keywords.RESPONSE: !str
+    actor: !call
+      name: Actor
+      args:
+        script: script
+        start_label:
+        - keywords.GLOBAL
+        - keywords.RESPONSE

@@ -1,0 +1,31 @@
+namespaces:
+  main:
+    Actor: !from dff.core.engine.core.actor Actor
+    kw: !from dff.core.engine.core keywords
+    node:
+      '3': node
+    keywords_2:
+      '2': kw.RESPONSE
+    keywords:
+      rsp: keywords_2[2]
+    strs:
+      '1':
+        !str node:
+          '1': !str node
+      '2':
+        !str node:
+          '2': !str node
+    strings: strs
+    dicts:
+      '1':
+        strs[1][node[3]][1]:
+          keywords["rsp"]: hi
+    script:
+      flow: dicts[1]
+    actor: !call
+      name: Actor
+      args:
+        script: script
+        start_label:
+        - flow
+        - strings[2][node[3]][2]

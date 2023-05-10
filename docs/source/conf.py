@@ -179,6 +179,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.utils.parser", "Parser"),
             ("dff.utils.testing", "Utils"),
         ]
     )

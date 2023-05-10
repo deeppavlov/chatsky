@@ -1,8 +1,12 @@
 # .coveragerc to control coverage.py
 [run]
-concurrency=thread,greenlet
+concurrency=multiprocessing
+parallel=true
+sigterm=true
 
 [report]
+omit =
+    dff/utils/testing/parser_test_generators.py
 # Regexes for lines to exclude from consideration
 exclude_lines =
     # Have to re-enable the standard pragma
@@ -13,3 +17,16 @@ exclude_lines =
 
     # Don't complain if tests don't cover error handling:
     except .*
+
+    # Don't complain if tests don't cover unreachable code:
+    if tp.TYPE_CHECKING:
+    if TYPE_CHECKING:
+    if typing.TYPE_CHECKING:
+
+    # Don't complain if tests don't cover abstract methods:
+    @abstractmethod
+
+    # Don't complain if tests don't cover type overload:
+    @tp.overload
+    @overload
+    @typing.overload
