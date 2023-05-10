@@ -6,7 +6,7 @@ from tempfile import TemporaryDirectory
 import pytest
 
 try:
-    from dff.utils.parser.base_parser_object import (
+    from dff.utils.parser.parser_objects import (
         Dict,
         Expression,
         Python,

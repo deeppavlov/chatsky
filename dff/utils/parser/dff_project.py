@@ -22,8 +22,7 @@ try:
 except ImportError:
     raise ImportError("Module `networkx` is not installed. Install it with `pip install dff[parser]`.")
 
-from dff.utils.parser.base_parser_object import (
-    cached_property,
+from dff.utils.parser.parser_objects import (
     BaseParserObject,
     Call,
     ReferenceObject,
@@ -37,6 +36,7 @@ from dff.utils.parser.base_parser_object import (
     Statement,
     Python,
 )
+from dff.utils.parser.utils import cached_property
 from dff.utils.parser.namespace import Namespace
 from dff.utils.parser.exceptions import ScriptValidationError, ParsingError
 from dff.utils.parser.yaml import yaml

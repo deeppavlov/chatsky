@@ -1,10 +1,31 @@
+# flake8: noqa: F401
 """
 Utils
 -----
-This module defines useful functions.
+This module defines useful functions and version-specific implementations.
 """
 from typing import Union, Iterable
 from collections.abc import Iterable as abc_Iterable
+
+try:
+    from functools import cached_property
+except ImportError:
+    try:
+        from cached_property import cached_property  # type: ignore
+    except ImportError:
+        raise ModuleNotFoundError(
+            "Module `cached_property` is not installed. Install it with `pip install dff[parser]`."
+        )
+# todo: remove this when python3.7 support is dropped
+
+try:
+    from ast import unparse
+except ImportError:
+    try:
+        from astunparse import unparse  # type: ignore
+    except ImportError:
+        raise ModuleNotFoundError("Module `astunparse` is not installed. Install it with `pip install dff[parser]`.")
+# todo: remove this when python3.8 support is dropped
 
 
 def is_instance(obj: object, cls: Union[str, type, Iterable[Union[str, type]]]):

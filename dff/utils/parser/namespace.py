@@ -9,15 +9,15 @@ import typing as tp
 import ast
 from pathlib import Path
 
-from dff.utils.parser.base_parser_object import (
+from dff.utils.parser.parser_objects import (
     BaseParserObject,
-    cached_property,
     Statement,
     Assignment,
     Import,
     ImportFrom,
     Python,
 )
+from dff.utils.parser.utils import cached_property
 
 if tp.TYPE_CHECKING:
     from dff.utils.parser.dff_project import DFFProject
