@@ -13,6 +13,9 @@ TEST_DIR = Path(__file__).parent / "TEST_CASES"
 
 def rebuild_complex_cases():
     """
+    Generate new files for each `complex_case` inside the `TEST_DIR / complex_cases` directory.
+    The generated files are used to test that the parser is working correctly as well as showcase parser capabilities.
+
     Expected structure of directories inside `TEST_DIR / complex_cases`:
         - `python_files` directory containing dff project.
         - `new_script.yaml` file -- an edited dff project.
@@ -26,7 +29,7 @@ def rebuild_complex_cases():
           (`to_python(new_script.yaml) -> python_files`).
 
     :raises RuntimeError:
-        If the directory is missing required filed.
+        If the directory is missing a required file.
     """
     for working_dir in (TEST_DIR / "complex_cases").iterdir():
         if not working_dir.is_dir():
