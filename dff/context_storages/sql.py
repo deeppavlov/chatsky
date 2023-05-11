@@ -317,11 +317,11 @@ class SQLContextStorage(DBContextStorage):
         return key_dict, int_id
 
     # TODO: optimize for PostgreSQL: single query.
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
         result_dict = dict()
         async with self.engine.begin() as conn:
-            for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
-                keys = [key for key, value in outlook[field].items() if value]
+            for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+                keys = [key for key, value in subscript[field].items() if value]
                 stmt = select(self.tables[field].c[self._KEY_FIELD], self.tables[field].c[self._VALUE_FIELD])
                 stmt = stmt.where(self.tables[field].c[self.update_scheme.id.name] == int_id)
                 stmt = stmt.where(self.tables[field].c[self._KEY_FIELD].in_(keys))
@@ -333,7 +333,7 @@ class SQLContextStorage(DBContextStorage):
             columns = [
                 c
                 for c in self.tables[self._CONTEXTS].c
-                if isinstance(outlook.get(c.name, False), bool) and outlook.get(c.name, False)
+                if isinstance(subscript.get(c.name, False), bool) and subscript.get(c.name, False)
             ]
             stmt = select(*columns)
             stmt = stmt.where(self.tables[self._CONTEXTS].c[self.update_scheme.id.name] == int_id)

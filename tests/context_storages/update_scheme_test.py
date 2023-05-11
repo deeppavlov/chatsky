@@ -16,11 +16,11 @@ async def default_scheme_creation(context_id, testing_context):
         return list(container[-1].dict().get(field_name, dict()).keys()) if len(container) > 0 else list()
 
     async def read_sequence(
-        field_name: str, outlook: List[Hashable], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]
+        field_name: str, subscript: List[Hashable], _: Union[UUID, int, str], ext_id: Union[UUID, int, str]
     ) -> Dict[Hashable, Any]:
         container = context_storage.get(ext_id, list())
         return (
-            {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in outlook}
+            {item: container[-1].dict().get(field_name, dict()).get(item, None) for item in subscript}
             if len(container) > 0
             else dict()
         )

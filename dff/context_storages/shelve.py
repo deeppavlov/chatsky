@@ -84,17 +84,17 @@ class ShelveContextStorage(DBContextStorage):
             key_dict[field] = list(container_dict.get(field, dict()).keys())
         return key_dict, container_dict.get(self.update_scheme.id.name, None)
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: str) -> Dict:
         result_dict = dict()
         context = self.shelve_db[ext_id][-1].dict()
-        for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
-            for key in [key for key, value in outlook[field].items() if value]:
+        for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+            for key in [key for key, value in subscript[field].items() if value]:
                 value = context.get(field, dict()).get(key, None)
                 if value is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
                     result_dict[field][key] = value
-        for field in [field for field, value in outlook.items() if isinstance(value, bool) and value]:
+        for field in [field for field, value in subscript.items() if isinstance(value, bool) and value]:
             value = context.get(field, None)
             if value is not None:
                 result_dict[field] = value

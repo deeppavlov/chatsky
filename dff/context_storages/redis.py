@@ -114,16 +114,16 @@ class RedisContextStorage(DBContextStorage):
                 key_dict[field] += [int(res) if res.isdigit() else res]
         return key_dict, int_id
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str) -> Dict:
         result_dict = dict()
-        for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
-            for key in [key for key, value in outlook[field].items() if value]:
+        for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+            for key in [key for key, value in subscript[field].items() if value]:
                 value = await self._redis.get(f"{ext_id}:{int_id}:{field}:{key}")
                 if value is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
                     result_dict[field][key] = pickle.loads(value)
-        for field in [field for field, value in outlook.items() if isinstance(value, bool) and value]:
+        for field in [field for field, value in subscript.items() if isinstance(value, bool) and value]:
             value = await self._redis.get(f"{ext_id}:{int_id}:{field}")
             if value is not None:
                 result_dict[field] = pickle.loads(value)

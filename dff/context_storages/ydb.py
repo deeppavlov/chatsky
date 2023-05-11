@@ -244,11 +244,11 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(keys_callee)
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
         async def callee(session):
             result_dict = dict()
-            for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
-                keys = [f'"{key}"' for key, value in outlook[field].items() if value]
+            for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+                keys = [f'"{key}"' for key, value in subscript[field].items() if value]
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DECLARE $int_id AS Utf8;
@@ -272,7 +272,7 @@ class YDBContextStorage(DBContextStorage):
                                 result_dict[field] = dict()
                             result_dict[field][key] = pickle.loads(value)
 
-            columns = [key for key, value in outlook.items() if isinstance(value, bool) and value]
+            columns = [key for key, value in subscript.items() if isinstance(value, bool) and value]
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $int_id AS Utf8;

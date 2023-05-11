@@ -137,10 +137,10 @@ class MongoContextStorage(DBContextStorage):
             key_dict[name] = await collection.find({self.update_scheme.id.name: last_id}).distinct(self._KEY_KEY)
         return key_dict, last_id
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
         result_dict = dict()
-        for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
-            for key in [key for key, value in outlook[field].items() if value]:
+        for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+            for key in [key for key, value in subscript[field].items() if value]:
                 value = (
                     await self.collections[field]
                     .find({self.update_scheme.id.name: int_id, self._KEY_KEY: key})
