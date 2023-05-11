@@ -87,6 +87,16 @@ def rebuild_complex_cases():
 
 
 def rebuild_core_tutorials():
+    """
+    Generate results of applying parser to `script/core` tutorials.
+
+    The results are represented by three files for each tutorial:
+    1. `tutorial_name.json` is a result of :py:meth:`~.DFFProject.to_graph`.
+    2. `tutorial_name.py` is a result of :py:meth:`~.DFFProject.to_python`.
+    3. `tutorial_name.yaml` is a result of :py:meth:`~.DFFProject.to_yaml`.
+
+    All the generated files are stored inside the `tests/parser/TEST_CASES/core_tutorials` directory.
+    """
     engine_tutorial_dir = Path("tutorials/script/core")
 
     test_dir = TEST_DIR / "core_tutorials"
