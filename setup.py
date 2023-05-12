@@ -113,7 +113,7 @@ test_requirements = merge_req_lists(
         "sniffio~=1.3.0",
         "starlette~=0.26.1",
         "h11~=0.14.0",
-        "uvicorn~=0.21.1",
+        "uvicorn>=0.21.1,<0.23.0",
         "websockets~=11.0.2",
     ],
     requests_requirements,
