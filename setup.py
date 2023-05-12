@@ -149,7 +149,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy~=0.950",
+    "mypy>=0.950,<2.0",
 ]
 
 devel_full = merge_req_lists(
