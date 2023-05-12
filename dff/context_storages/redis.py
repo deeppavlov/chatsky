@@ -114,7 +114,9 @@ class RedisContextStorage(DBContextStorage):
                 key_dict[field] += [int(res) if res.isdigit() else res]
         return key_dict, int_id
 
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str) -> Dict:
+    async def _read_ctx(
+        self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str
+    ) -> Dict:
         result_dict = dict()
         for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
             for key in [key for key, value in subscript[field].items() if value]:

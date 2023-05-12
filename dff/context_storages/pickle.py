@@ -43,7 +43,6 @@ class PickleContextStorage(DBContextStorage):
 
     def set_update_scheme(self, scheme: UpdateScheme):
         super().set_update_scheme(scheme)
-        self.update_scheme.mark_db_not_persistent()
         self.update_scheme.id.on_write = FieldRule.UPDATE
 
     @threadsafe_method

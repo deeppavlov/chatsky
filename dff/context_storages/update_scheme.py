@@ -50,7 +50,9 @@ class BaseSchemaField(BaseModel):
             if not isinstance(value, List):
                 raise Exception(f"subscript of field '{field_name}' exception isn't a list'!")
             if ALL_ITEMS in value and len(value) > 1:
-                raise Exception(f"Element 'all' should be the only element of the subscript of the field '{field_name}'!")
+                raise Exception(
+                    f"Element 'all' should be the only element of the subscript of the field '{field_name}'!"
+                )
         return value
 
 
@@ -116,12 +118,6 @@ class UpdateScheme(BaseModel):
     ext_id: ValueField = ValueField(name=ExtraFields.ext_id)
     created_at: ValueField = ValueField(name=ExtraFields.created_at)
     updated_at: ValueField = ValueField(name=ExtraFields.updated_at)
-
-    def mark_db_not_persistent(self):
-        for field, field_props in dict(self).items():
-            if field_props.on_write in (FieldRule.HASH_UPDATE, FieldRule.UPDATE_ONCE, FieldRule.APPEND):
-                field_props.on_write = FieldRule.UPDATE
-                setattr(self, field, field_props)
 
     @staticmethod
     def _get_update_field(dictionary_keys: Iterable, subscript: List, subscript_type: SubscriptType) -> List:
