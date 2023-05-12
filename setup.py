@@ -37,7 +37,7 @@ async_files_dependencies = [
 ]
 
 redis_dependencies = [
-    "aioredis~=2.0.1",
+    "redis~=4.5.4",
 ]
 
 mongodb_dependencies = [
@@ -103,18 +103,18 @@ test_requirements = merge_req_lists(
         "flake8~=3.9.2",
         "click~=8.0.4",
         "black~=20.8b1",
-        "isort~=5.12.0",
+        "isort~=5.11.5",
         "flask[async]~=2.2.3",
         "psutil~=5.9.5",
         "telethon~=1.28.5",
-        "anyio>=3.6.2",
-        "fastapi>=0.95.1",
-        "idna>=3.4",
-        "sniffio>=1.3.0",
-        "starlette>=0.26.1",
-        "h11>=0.14.0",
-        "uvicorn>=0.21.1",
-        "websockets>=11.0",
+        "anyio~=3.6.2",
+        "fastapi~=0.95.1",
+        "idna~=3.4.0",
+        "sniffio~=1.3.0",
+        "starlette~=0.26.1",
+        "h11~=0.14.0",
+        "uvicorn~=0.21.1",
+        "websockets~=11.0.2",
     ],
     requests_requirements,
 )
