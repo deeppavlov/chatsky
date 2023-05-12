@@ -92,7 +92,7 @@ full = merge_req_lists(
 )
 
 requests_requirements = [
-    "requests~=2.28.2",
+    "requests>=2.28.2,<2.31.0",
 ]
 
 test_requirements = merge_req_lists(
