@@ -71,7 +71,7 @@ postgresql_dependencies = merge_req_lists(
 )
 
 ydb_dependencies = [
-    "ydb~=2.5.0",
+    "ydb>=2.5,<3.4",
     "six~=1.16.0",
 ]
 
