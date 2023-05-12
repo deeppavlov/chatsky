@@ -12,7 +12,13 @@ from dff.script import Context
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    HAPPY_PATH,
+    TOY_SCRIPT,
+    TOY_SCRIPT_ARGS,
+)
 
 
 # %% [markdown]
@@ -42,6 +48,19 @@ pipeline = Pipeline.from_script(
     TOY_SCRIPT,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
+)
+
+
+# %% [markdown]
+"""
+For the sake of brevity, other tutorials might use `TOY_SCRIPT_ARGS` to initialize pipeline:
+"""
+
+# %%
+assert TOY_SCRIPT_ARGS == (
+    TOY_SCRIPT,
+    ("greeting_flow", "start_node"),
+    ("greeting_flow", "fallback_node"),
 )
 
 

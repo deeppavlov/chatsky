@@ -34,6 +34,20 @@ TOY_SCRIPT = {
 }
 """
 An example of a simple script.
+
+:meta hide-value:
+"""
+
+TOY_SCRIPT_ARGS = (TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node"))
+"""
+Arguments to pass to :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline.from_script` in order to
+use :py:data:`~.TOY_SCRIPT`:
+
+.. code-block::
+
+    Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=..., ...)
+
+:meta hide-value:
 """
 
 HAPPY_PATH = (
@@ -45,4 +59,6 @@ HAPPY_PATH = (
 )
 """
 An example of a simple dialog.
+
+:meta hide-value:
 """
