@@ -3,19 +3,46 @@
 # Web API: 3. Load testing with Locust
 
 This tutorial shows how to use an API endpoint created in the FastAPI tutorial in load testing.
-
-You can either run this file directly or run locust targeting this file.
-
-You can see the result at http://127.0.0.1:8089.
-At the locust config page pass http://127.0.0.1:8000 as host.
 """
+
+
+# %% [markdown]
+"""
+## Running Locust
+
+1. Run this file directly:
+   ```bash
+   python {file_name}
+   ```
+2. Run locust targeting this file:
+   ```bash
+   locust -f {file_name}
+   ```
+3. Run in interactive mode:
+   ```python
+   sys.argv = ["locust", "-f", {file_name}]
+   main.main()
+   ```
+
+You should see the result at http://127.0.0.1:8089.
+"""
+
+
+# %%
+########################################################################################
+# this patch is only needed to run this file in IPython kernel and can be safely removed
+import gevent.monkey
+gevent.monkey.patch_all()
+########################################################################################
 
 
 # %%
 import uuid
 import time
 import sys
+
 from locust import FastHttpUser, task, constant, main
+
 from dff.script import Message
 from dff.utils.testing import HAPPY_PATH, is_interactive_mode
 
