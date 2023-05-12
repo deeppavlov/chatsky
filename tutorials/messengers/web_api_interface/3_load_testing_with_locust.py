@@ -32,7 +32,10 @@ You should see the result at http://127.0.0.1:8089.
 ########################################################################################
 # this patch is only needed to run this file in IPython kernel and can be safely removed
 import gevent.monkey
+
 gevent.monkey.patch_all()
+
+# flake8: noqa: E402
 ########################################################################################
 
 
