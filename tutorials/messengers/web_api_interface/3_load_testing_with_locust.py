@@ -25,6 +25,8 @@ This tutorial shows how to use an API endpoint created in the FastAPI tutorial i
    ```
 
 You should see the result at http://127.0.0.1:8089.
+
+Make sure that your POST endpoint is also running (run the FastAPI tutorial).
 """
 
 
