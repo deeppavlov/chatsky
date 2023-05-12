@@ -76,7 +76,7 @@ ydb_dependencies = [
 ]
 
 telegram_dependencies = [
-    "pytelegrambotapi~=4.5.1",
+    "pytelegrambotapi>=4.5.1,<4.12.0",
 ]
 
 full = merge_req_lists(
