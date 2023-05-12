@@ -25,8 +25,8 @@ except ImportError:
 
 from dff.script import Context
 
-from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
-from .update_scheme import ValueField
+from .database import DBContextStorage, threadsafe_method, cast_key_to_string
+from .context_schema import ValueSchemaField
 from .protocol import get_protocol_install_suggestion
 
 
@@ -48,32 +48,32 @@ class RedisContextStorage(DBContextStorage):
         self._redis = Redis.from_url(self.full_path)
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         fields, int_id = await self._read_keys(key)
         if int_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, int_id)
+        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, key, int_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
         fields, int_id = await self._read_keys(key)
         value_hash = self.hash_storage.get(key, None)
-        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
+        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, key)
         if int_id != value.id and int_id is None:
             await self._redis.rpush(self._CONTEXTS_KEY, key)
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
         await self._redis.rpush(key, self._VALUE_NONE)
         await self._redis.lrem(self._CONTEXTS_KEY, 0, key)
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
         if bool(await self._redis.exists(key)):
             value = await self._redis.rpop(key)
@@ -97,35 +97,41 @@ class RedisContextStorage(DBContextStorage):
         return None if value == cls._VALUE_NONE else value
 
     async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
-        key_dict = dict()
+        nested_dict_keys = dict()
         int_id = self._check_none(await self._redis.rpop(ext_id))
         if int_id is None:
-            return key_dict, None
+            return nested_dict_keys, None
         else:
             int_id = int_id.decode()
         await self._redis.rpush(ext_id, int_id)
         for field in [
-            field for field, field_props in dict(self.update_scheme).items() if not isinstance(field_props, ValueField)
+            field
+            for field, field_props in dict(self.context_schema).items()
+            if not isinstance(field_props, ValueSchemaField)
         ]:
             for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
                 res = key.decode().split(":")[-1]
-                if field not in key_dict:
-                    key_dict[field] = list()
-                key_dict[field] += [int(res) if res.isdigit() else res]
-        return key_dict, int_id
+                if field not in nested_dict_keys:
+                    nested_dict_keys[field] = list()
+                nested_dict_keys[field] += [int(res) if res.isdigit() else res]
+        return nested_dict_keys, int_id
 
     async def _read_ctx(
         self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str
     ) -> Dict:
         result_dict = dict()
-        for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+        non_empty_value_subset = [
+            field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
+        ]
+        for field in non_empty_value_subset:
             for key in [key for key, value in subscript[field].items() if value]:
                 value = await self._redis.get(f"{ext_id}:{int_id}:{field}:{key}")
                 if value is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
                     result_dict[field][key] = pickle.loads(value)
-        for field in [field for field, value in subscript.items() if isinstance(value, bool) and value]:
+        true_value_subset = [field for field, value in subscript.items() if isinstance(value, bool) and value]
+        for field in true_value_subset:
             value = await self._redis.get(f"{ext_id}:{int_id}:{field}")
             if value is not None:
                 result_dict[field] = pickle.loads(value)
@@ -133,7 +139,7 @@ class RedisContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: str):
         for holder in data.keys():
-            if isinstance(getattr(self.update_scheme, holder), ValueField):
+            if isinstance(getattr(self.context_schema, holder), ValueSchemaField):
                 await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
             else:
                 for key, value in data.get(holder, dict()).items():

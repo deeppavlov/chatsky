@@ -10,7 +10,7 @@ from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .update_scheme import UpdateScheme, FieldRule
+from .context_schema import ContextSchema, SchemaFieldPolicy
 
 try:
     import aiofiles
@@ -21,7 +21,7 @@ except ImportError:
     json_available = False
     aiofiles = None
 
-from .database import DBContextStorage, threadsafe_method, auto_stringify_hashable_key
+from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from dff.script import Context
 
 
@@ -44,31 +44,31 @@ class JSONContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path)
         asyncio.run(self._load())
 
-    def set_update_scheme(self, scheme: UpdateScheme):
-        super().set_update_scheme(scheme)
-        self.update_scheme.id.on_write = FieldRule.UPDATE
+    def set_context_schema(self, scheme: ContextSchema):
+        super().set_context_schema(scheme)
+        self.context_schema.id.on_write = SchemaFieldPolicy.UPDATE
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         await self._load()
         fields, int_id = await self._read_keys(key)
         if int_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, int_id)
+        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, key, int_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
         fields, _ = await self._read_keys(key)
-        value_hash = self.hash_storage.get(key, None)
-        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
+        value_hash = self.hash_storage.get(key)
+        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, key)
         await self._save()
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
         container = self.storage.__dict__.get(key, list())
         container.append(None)
@@ -76,7 +76,7 @@ class JSONContextStorage(DBContextStorage):
         await self._save()
 
     @threadsafe_method
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
         await self._load()
         if key in self.storage.__dict__:
@@ -108,26 +108,31 @@ class JSONContextStorage(DBContextStorage):
                 self.storage = SerializableStorage.parse_raw(await file_stream.read())
 
     async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
-        key_dict = dict()
+        nested_dict_keys = dict()
         container = self.storage.__dict__.get(ext_id, list())
         if len(container) == 0:
-            return key_dict, None
+            return nested_dict_keys, None
         container_dict = container[-1].dict() if container[-1] is not None else dict()
-        for field in [key for key, value in container_dict.items() if isinstance(value, dict)]:
-            key_dict[field] = list(container_dict.get(field, dict()).keys())
-        return key_dict, container_dict.get(self.update_scheme.id.name, None)
+        field_names = [key for key, value in container_dict.items() if isinstance(value, dict)]
+        for field in field_names:
+            nested_dict_keys[field] = list(container_dict.get(field, dict()).keys())
+        return nested_dict_keys, container_dict.get(self.context_schema.id.name, None)
 
     async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: str) -> Dict:
         result_dict = dict()
         context = self.storage.__dict__[ext_id][-1].dict()
-        for field in [field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0]:
+        non_empty_value_subset = [
+            field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
+        ]
+        for field in non_empty_value_subset:
             for key in [key for key, value in subscript[field].items() if value]:
-                value = context.get(field, dict()).get(key, None)
+                value = context.get(field, dict()).get(key)
                 if value is not None:
                     if field not in result_dict:
                         result_dict[field] = dict()
                     result_dict[field][key] = value
-        for field in [field for field, value in subscript.items() if isinstance(value, bool) and value]:
+        true_value_subset = [field for field, value in subscript.items() if isinstance(value, bool) and value]
+        for field in true_value_subset:
             value = context.get(field, None)
             if value is not None:
                 result_dict[field] = value
