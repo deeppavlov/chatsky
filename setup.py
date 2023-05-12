@@ -144,7 +144,7 @@ doc = merge_req_lists(
 
 devel = [
     "bump2version~=1.0.1",
-    "build~=0.7.0",
+    "build>=0.7,<0.11",
     "twine~=4.0.0",
 ]
 
