@@ -192,15 +192,15 @@ def threadsafe_method(func: Callable):
 
 
 def cast_key_to_string(key_name: str = "key"):
-    def auto_stringify(func: Callable):
+    def stringify_args(func: Callable):
         all_keys = signature(func).parameters.keys()
 
-        async def stringify_arg(*args, **kwargs):
+        async def inner(*args, **kwargs):
             return await func(*[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)], **kwargs)
 
-        return stringify_arg
+        return inner
 
-    return auto_stringify
+    return stringify_args
 
 
 def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
