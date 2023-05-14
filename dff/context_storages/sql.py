@@ -234,6 +234,8 @@ class SQLContextStorage(DBContextStorage):
         super().set_context_schema(scheme)
         self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
         self.context_schema.ext_id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.created_at.on_write = SchemaFieldWritePolicy.IGNORE
+        self.context_schema.updated_at.on_write = SchemaFieldWritePolicy.IGNORE
 
     @threadsafe_method
     @cast_key_to_string()

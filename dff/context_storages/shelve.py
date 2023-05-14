@@ -35,7 +35,7 @@ class ShelveContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE
+        self.context_schema.set_all_writable_rules_to_update()
 
     @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
