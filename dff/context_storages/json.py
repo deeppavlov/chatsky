@@ -10,7 +10,7 @@ from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 
 from pydantic import BaseModel, Extra, root_validator
 
-from .context_schema import ContextSchema, SchemaFieldWritePolicy
+from .context_schema import ContextSchema
 
 try:
     import aiofiles

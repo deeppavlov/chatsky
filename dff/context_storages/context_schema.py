@@ -139,7 +139,11 @@ class ContextSchema(BaseModel):
 
     def set_all_writable_rules_to_update(self):
         for field, field_props in dict(self).items():
-            if field_props.on_write in (SchemaFieldWritePolicy.HASH_UPDATE, SchemaFieldWritePolicy.UPDATE_ONCE, SchemaFieldWritePolicy.APPEND):
+            if field_props.on_write in (
+                SchemaFieldWritePolicy.HASH_UPDATE,
+                SchemaFieldWritePolicy.UPDATE_ONCE,
+                SchemaFieldWritePolicy.APPEND,
+            ):
                 field_props.on_write = SchemaFieldWritePolicy.UPDATE
                 setattr(self, field, field_props)
 

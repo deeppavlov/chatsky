@@ -17,7 +17,7 @@ from shelve import DbfilenameShelf
 from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 
 from dff.script import Context
-from .context_schema import ContextSchema, SchemaFieldWritePolicy
+from .context_schema import ContextSchema
 
 from .database import DBContextStorage, cast_key_to_string
 
