@@ -23,7 +23,8 @@ from .protocol import get_protocol_install_suggestion
 from .context_schema import (
     ContextSchema,
     ExtraFields,
-    SchemaFieldPolicy,
+    SchemaFieldWritePolicy,
+    SchemaFieldReadPolicy,
     DictSchemaField,
     ListSchemaField,
     ValueSchemaField,
@@ -78,10 +79,10 @@ class YDBContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldPolicy.UPDATE_ONCE
-        self.context_schema.ext_id.on_write = SchemaFieldPolicy.UPDATE_ONCE
-        self.context_schema.created_at.on_write = SchemaFieldPolicy.UPDATE_ONCE
-        self.context_schema.updated_at.on_write = SchemaFieldPolicy.UPDATE
+        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.ext_id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.created_at.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.updated_at.on_write = SchemaFieldWritePolicy.UPDATE
 
     @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
@@ -453,7 +454,7 @@ async def _create_contexts_table(pool, path, table_name, context_schema):
 
         for field, field_props in dict(context_schema).items():
             if isinstance(field_props, ValueSchemaField) and field not in [c.name for c in table.columns]:
-                if field_props.on_read != SchemaFieldPolicy.IGNORE or field_props.on_write != SchemaFieldPolicy.IGNORE:
+                if field_props.on_read != SchemaFieldReadPolicy.IGNORE or field_props.on_write != SchemaFieldWritePolicy.IGNORE:
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
                     )

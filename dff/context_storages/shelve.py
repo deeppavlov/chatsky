@@ -17,7 +17,7 @@ from shelve import DbfilenameShelf
 from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 
 from dff.script import Context
-from .context_schema import ContextSchema, SchemaFieldPolicy
+from .context_schema import ContextSchema, SchemaFieldWritePolicy
 
 from .database import DBContextStorage, cast_key_to_string
 
@@ -35,7 +35,7 @@ class ShelveContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldPolicy.UPDATE
+        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE
 
     @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:

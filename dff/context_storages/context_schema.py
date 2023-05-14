@@ -21,8 +21,12 @@ _ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], s
 _WriteContextFunction = Callable[[Dict[str, Any], str, str], Awaitable]
 
 
-class SchemaFieldPolicy(str, Enum):
+class SchemaFieldReadPolicy(str, Enum):
     READ = "read"
+    IGNORE = "ignore"
+
+
+class SchemaFieldWritePolicy(str, Enum):
     IGNORE = "ignore"
     UPDATE = "update"
     HASH_UPDATE = "hash_update"
@@ -32,8 +36,8 @@ class SchemaFieldPolicy(str, Enum):
 
 class BaseSchemaField(BaseModel):
     name: str
-    on_read: Literal[SchemaFieldPolicy.READ, SchemaFieldPolicy.IGNORE] = SchemaFieldPolicy.READ
-    on_write: SchemaFieldPolicy = SchemaFieldPolicy.IGNORE
+    on_read: SchemaFieldReadPolicy = SchemaFieldReadPolicy.READ
+    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.IGNORE
     subscript_type: SubscriptType = SubscriptType.NONE
     subscript: Optional[Union[str, List[Any]]] = None
 
@@ -57,9 +61,7 @@ class BaseSchemaField(BaseModel):
 
 
 class ListSchemaField(BaseSchemaField):
-    on_write: Literal[
-        SchemaFieldPolicy.IGNORE, SchemaFieldPolicy.APPEND, SchemaFieldPolicy.UPDATE_ONCE
-    ] = SchemaFieldPolicy.APPEND
+    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.APPEND
     subscript_type: Literal[SubscriptType.KEYS, SubscriptType.SLICE] = SubscriptType.SLICE
     subscript: Union[str, List[Any]] = "[:]"
 
@@ -88,17 +90,13 @@ class ListSchemaField(BaseSchemaField):
 
 
 class DictSchemaField(BaseSchemaField):
-    on_write: Literal[
-        SchemaFieldPolicy.IGNORE, SchemaFieldPolicy.UPDATE, SchemaFieldPolicy.HASH_UPDATE, SchemaFieldPolicy.UPDATE_ONCE
-    ] = SchemaFieldPolicy.UPDATE
+    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.UPDATE
     subscript_type: Literal[SubscriptType.KEYS] = Field(SubscriptType.KEYS, const=True)
     subscript: Union[str, List[Any]] = "[all]"
 
 
 class ValueSchemaField(BaseSchemaField):
-    on_write: Literal[
-        SchemaFieldPolicy.IGNORE, SchemaFieldPolicy.UPDATE, SchemaFieldPolicy.HASH_UPDATE, SchemaFieldPolicy.UPDATE_ONCE
-    ] = SchemaFieldPolicy.IGNORE
+    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.IGNORE
     subscript_type: Literal[SubscriptType.NONE] = Field(SubscriptType.NONE, const=True)
     subscript: Literal[None] = Field(None, const=True)
 
@@ -133,7 +131,7 @@ class ContextSchema(BaseModel):
             return [sorted_keys[key] for key in subscript] if len(sorted_keys) > 0 else list()
 
     def _update_hashes(self, value: Union[Dict[str, Any], Any], field: str, hashes: Dict[str, Any]):
-        if getattr(self, field).on_write == SchemaFieldPolicy.HASH_UPDATE:
+        if getattr(self, field).on_write == SchemaFieldWritePolicy.HASH_UPDATE:
             if isinstance(value, dict):
                 hashes[field] = {k: sha256(str(v).encode("utf-8")) for k, v in value.items()}
             else:
@@ -145,7 +143,7 @@ class ContextSchema(BaseModel):
         fields_subscript = dict()
         field_props: BaseSchemaField
         for field, field_props in dict(self).items():
-            if field_props.on_read == SchemaFieldPolicy.IGNORE:
+            if field_props.on_read == SchemaFieldReadPolicy.IGNORE:
                 fields_subscript[field] = False
             elif isinstance(field_props, ListSchemaField):
                 list_field_indices = fields.get(field, list())
@@ -184,9 +182,9 @@ class ContextSchema(BaseModel):
         patch_dict = dict()
         field_props: BaseSchemaField
         for field, field_props in dict(self).items():
-            if field_props.on_write == SchemaFieldPolicy.IGNORE:
+            if field_props.on_write == SchemaFieldWritePolicy.IGNORE:
                 continue
-            elif field_props.on_write == SchemaFieldPolicy.UPDATE_ONCE and hashes is not None:
+            elif field_props.on_write == SchemaFieldWritePolicy.UPDATE_ONCE and hashes is not None:
                 continue
 
             elif isinstance(field_props, ListSchemaField):
@@ -194,7 +192,7 @@ class ContextSchema(BaseModel):
                 update_field = self._get_subset_from_subscript(
                     ctx_dict[field].keys(), field_props.subscript, field_props.subscript_type
                 )
-                if field_props.on_write == SchemaFieldPolicy.APPEND:
+                if field_props.on_write == SchemaFieldWritePolicy.APPEND:
                     patch_dict[field] = {
                         idx: ctx_dict[field][idx] for idx in set(update_field) - set(list_field_indices)
                     }
@@ -207,7 +205,7 @@ class ContextSchema(BaseModel):
                 update_keys_all = dictionary_field_keys + list(ctx_dict[field].keys())
                 update_keys = set(update_keys_all if ALL_ITEMS in update_field else update_field)
 
-                if field_props.on_write == SchemaFieldPolicy.HASH_UPDATE:
+                if field_props.on_write == SchemaFieldWritePolicy.HASH_UPDATE:
                     patch_dict[field] = dict()
                     for item in update_keys:
                         item_hash = sha256(str(ctx_dict[field][item]).encode("utf-8"))

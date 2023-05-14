@@ -28,7 +28,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ContextSchema, SchemaFieldPolicy, ValueSchemaField, ExtraFields
+from .context_schema import ContextSchema, SchemaFieldWritePolicy, ValueSchemaField, ExtraFields
 
 
 class MongoContextStorage(DBContextStorage):
@@ -61,9 +61,9 @@ class MongoContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldPolicy.UPDATE_ONCE
-        self.context_schema.ext_id.on_write = SchemaFieldPolicy.UPDATE_ONCE
-        self.context_schema.created_at.on_write = SchemaFieldPolicy.UPDATE_ONCE
+        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.ext_id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.created_at.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
 
     @threadsafe_method
     @cast_key_to_string()

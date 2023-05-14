@@ -20,7 +20,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ContextSchema, SchemaFieldPolicy, DictSchemaField, ListSchemaField, ValueSchemaField
+from .context_schema import ContextSchema, SchemaFieldWritePolicy, SchemaFieldReadPolicy, DictSchemaField, ListSchemaField, ValueSchemaField
 
 try:
     from sqlalchemy import (
@@ -213,7 +213,7 @@ class SQLContextStorage(DBContextStorage):
             if isinstance(field_props, ValueSchemaField) and field not in [
                 t.name for t in self.tables[self._CONTEXTS].c
             ]:
-                if field_props.on_read != SchemaFieldPolicy.IGNORE or field_props.on_write != SchemaFieldPolicy.IGNORE:
+                if field_props.on_read != SchemaFieldReadPolicy.IGNORE or field_props.on_write != SchemaFieldWritePolicy.IGNORE:
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
                     )
@@ -222,8 +222,8 @@ class SQLContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldPolicy.UPDATE_ONCE
-        self.context_schema.ext_id.on_write = SchemaFieldPolicy.UPDATE_ONCE
+        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.ext_id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
 
     @threadsafe_method
     @cast_key_to_string()

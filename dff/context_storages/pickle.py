@@ -14,7 +14,7 @@ import asyncio
 import pickle
 from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
 
-from .context_schema import ContextSchema, SchemaFieldPolicy
+from .context_schema import ContextSchema, SchemaFieldWritePolicy
 
 try:
     import aiofiles
@@ -43,7 +43,7 @@ class PickleContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldPolicy.UPDATE
+        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE
 
     @threadsafe_method
     @cast_key_to_string()
