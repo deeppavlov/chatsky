@@ -90,13 +90,13 @@ class ListSchemaField(BaseSchemaField):
 
 
 class DictSchemaField(BaseSchemaField):
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.UPDATE
+    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.HASH_UPDATE
     subscript_type: Literal[SubscriptType.KEYS] = Field(SubscriptType.KEYS, const=True)
     subscript: Union[str, List[Any]] = "[all]"
 
 
 class ValueSchemaField(BaseSchemaField):
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.IGNORE
+    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.UPDATE
     subscript_type: Literal[SubscriptType.NONE] = Field(SubscriptType.NONE, const=True)
     subscript: Literal[None] = Field(None, const=True)
 
@@ -136,6 +136,12 @@ class ContextSchema(BaseModel):
                 hashes[field] = {k: sha256(str(v).encode("utf-8")) for k, v in value.items()}
             else:
                 hashes[field] = sha256(str(value).encode("utf-8"))
+
+    def set_all_writable_rules_to_update(self):
+        for field, field_props in dict(self).items():
+            if field_props.on_write in (SchemaFieldWritePolicy.HASH_UPDATE, SchemaFieldWritePolicy.UPDATE_ONCE, SchemaFieldWritePolicy.APPEND):
+                field_props.on_write = SchemaFieldWritePolicy.UPDATE
+                setattr(self, field, field_props)
 
     async def read_context(
         self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: str, int_id: str

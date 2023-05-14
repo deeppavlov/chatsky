@@ -122,7 +122,8 @@ class PickleContextStorage(DBContextStorage):
             field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
         ]
         for field in non_empty_value_subset:
-            for key in [key for key, value in subscript[field].items() if value]:
+            non_empty_key_set = [key for key, value in subscript[field].items() if value]
+            for key in non_empty_key_set:
                 value = context.get(field, dict()).get(key, None)
                 if value is not None:
                     if field not in result_dict:
