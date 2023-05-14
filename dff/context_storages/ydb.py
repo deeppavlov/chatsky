@@ -454,7 +454,10 @@ async def _create_contexts_table(pool, path, table_name, context_schema):
 
         for field, field_props in dict(context_schema).items():
             if isinstance(field_props, ValueSchemaField) and field not in [c.name for c in table.columns]:
-                if field_props.on_read != SchemaFieldReadPolicy.IGNORE or field_props.on_write != SchemaFieldWritePolicy.IGNORE:
+                if (
+                    field_props.on_read != SchemaFieldReadPolicy.IGNORE
+                    or field_props.on_write != SchemaFieldWritePolicy.IGNORE
+                ):
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
                     )
