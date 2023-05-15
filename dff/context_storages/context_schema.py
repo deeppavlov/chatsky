@@ -16,11 +16,6 @@ class SubscriptType(Enum):
     NONE = auto()
 
 
-_ReadKeys = Dict[str, List[str]]
-_ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], str, str], Awaitable[Dict]]
-_WriteContextFunction = Callable[[Dict[str, Any], str, str], Awaitable]
-
-
 class SchemaFieldReadPolicy(str, Enum):
     READ = "read"
     IGNORE = "ignore"
@@ -32,6 +27,20 @@ class SchemaFieldWritePolicy(str, Enum):
     HASH_UPDATE = "hash_update"
     UPDATE_ONCE = "update_once"
     APPEND = "append"
+
+
+_ReadKeys = Dict[str, List[str]]
+_ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], str, str], Awaitable[Dict]]
+_WriteContextFunction = Callable[[Dict[str, Any], str, str], Awaitable]
+_NonListWritePolicies = Literal[
+    SchemaFieldWritePolicy.IGNORE,
+    SchemaFieldWritePolicy.UPDATE,
+    SchemaFieldWritePolicy.HASH_UPDATE,
+    SchemaFieldWritePolicy.UPDATE_ONCE,
+]
+_ListWritePolicies = Literal[
+    SchemaFieldWritePolicy.IGNORE, SchemaFieldWritePolicy.APPEND, SchemaFieldWritePolicy.UPDATE_ONCE
+]
 
 
 class BaseSchemaField(BaseModel):
@@ -61,7 +70,7 @@ class BaseSchemaField(BaseModel):
 
 
 class ListSchemaField(BaseSchemaField):
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.APPEND
+    on_write: _ListWritePolicies = SchemaFieldWritePolicy.APPEND
     subscript_type: Literal[SubscriptType.KEYS, SubscriptType.SLICE] = SubscriptType.SLICE
     subscript: Union[str, List[Any]] = "[:]"
 
@@ -90,13 +99,13 @@ class ListSchemaField(BaseSchemaField):
 
 
 class DictSchemaField(BaseSchemaField):
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.HASH_UPDATE
+    on_write: _NonListWritePolicies = SchemaFieldWritePolicy.HASH_UPDATE
     subscript_type: Literal[SubscriptType.KEYS] = Field(SubscriptType.KEYS, const=True)
     subscript: Union[str, List[Any]] = "[all]"
 
 
 class ValueSchemaField(BaseSchemaField):
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.UPDATE
+    on_write: _NonListWritePolicies = SchemaFieldWritePolicy.UPDATE
     subscript_type: Literal[SubscriptType.NONE] = Field(SubscriptType.NONE, const=True)
     subscript: Literal[None] = Field(None, const=True)
 
