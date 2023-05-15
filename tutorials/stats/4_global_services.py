@@ -67,9 +67,9 @@ pipeline.add_global_handler(
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
-    from dff.utils.testing.stats_cli import parse_args
-
     if is_interactive_mode():
+        from dff.utils.testing.stats_cli import parse_args
+
         args = parse_args()
         uri = args["uri"]
     else:
