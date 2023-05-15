@@ -71,10 +71,10 @@ pipeline = Pipeline.from_dict(
             Service(handler=heavy_service),  # add `heavy_service` before the actor
             Service(
                 handler=to_service(
-                    before_handler=[default_extractor_pool['before']["extract_timing"]],
+                    before_handler=[default_extractor_pool["before"]["extract_timing"]],
                     after_handler=[
                         get_service_state,
-                        default_extractor_pool['after']["extract_timing"],
+                        default_extractor_pool["after"]["extract_timing"],
                     ],
                 )(
                     ACTOR

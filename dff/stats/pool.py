@@ -37,11 +37,7 @@ class StatsExtractorPool:
 
     def __init__(self):
         self.subscribers: List[PoolSubscriber] = []
-        self.extractors = {
-            ExtraHandlerType.UNDEFINED: {},
-            ExtraHandlerType.BEFORE: {},
-            ExtraHandlerType.AFTER: {}
-        }
+        self.extractors = {ExtraHandlerType.UNDEFINED: {}, ExtraHandlerType.BEFORE: {}, ExtraHandlerType.AFTER: {}}
 
     def _wrap_extractor(self, extractor: Callable) -> Callable:
         @functools.wraps(extractor)
@@ -73,7 +69,9 @@ class StatsExtractorPool:
         self.subscribers.append(subscriber)
 
     @validate_arguments
-    def add_extractor(self, extractor: Callable, handler_type: ExtraHandlerType = ExtraHandlerType.UNDEFINED) -> ExtraHandlerFunction:
+    def add_extractor(
+        self, extractor: Callable, handler_type: ExtraHandlerType = ExtraHandlerType.UNDEFINED
+    ) -> ExtraHandlerFunction:
         """Generic function for adding extractors.
         Requires handler type, e.g. 'before' or 'after'.
 
@@ -105,7 +103,7 @@ class StatsExtractorPool:
     @property
     def before_handlers(self) -> List[ExtraHandlerFunction]:
         return list(self.extractors[ExtraHandlerType.BEFORE].values())
-    
+
     @property
     def after_handlers(self) -> List[ExtraHandlerFunction]:
         return list(self.extractors[ExtraHandlerType.AFTER].values())
