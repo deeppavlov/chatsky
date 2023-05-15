@@ -1,27 +1,28 @@
 """
 Pool
 ----
-This module defines the :py:class:`.ExtractorPool` class.
+This module defines the :py:class:`.StatsExtractorPool` class.
 
 """
 import functools
 import asyncio
-from typing import List, Callable, Optional
+from typing import List, Callable
 
+from pydantic import validate_arguments
 from dff.script import Context
-from dff.pipeline import ExtraHandlerRuntimeInfo
+from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerType, ExtraHandlerFunction
 from .subscriber import PoolSubscriber
 
 
-class ExtractorPool:
+class StatsExtractorPool:
     """
     This class can be used to store sets of wrappers for statistics collection a.k.a. extractors.
-    New extractors can be added with the help of the :py:meth:`new_extractor` decorator.
-    These can be accessed by their name:
+    New extractors can be added with the help of the :py:meth:`add_extractor` method.
+    These can be accessed by their name and handler_type:
 
     .. code-block::
 
-        pool[extractor.__name__]
+        pool[handler_type][extractor.__name__]
 
     After execution, the result of each extractor will be propagated to subscribers.
     Subscribers should be of type :py:class:`~.PoolSubscriber`.
@@ -34,15 +35,13 @@ class ExtractorPool:
 
     """
 
-    def __init__(self, extractors: Optional[List[Callable]] = None):
-
+    def __init__(self):
         self.subscribers: List[PoolSubscriber] = []
-        if extractors is not None:
-            if not all(callable(i) for i in extractors):
-                raise RuntimeError("Non-callable item found in `extractors`")
-            self.extractors = {item.__name__: self._wrap_extractor(item) for item in extractors}
-        else:
-            self.extractors = {}
+        self.extractors = {
+            ExtraHandlerType.UNDEFINED: {},
+            ExtraHandlerType.BEFORE: {},
+            ExtraHandlerType.AFTER: {}
+        }
 
     def _wrap_extractor(self, extractor: Callable) -> Callable:
         @functools.wraps(extractor)
@@ -61,6 +60,10 @@ class ExtractorPool:
 
         return extractor_wrapper
 
+    @validate_arguments
+    def __getitem__(self, key: ExtraHandlerType):
+        return self.extractors[key]
+
     def add_subscriber(self, subscriber: PoolSubscriber):
         """
         Subscribe a `PoolSubscriber` object to events from this pool.
@@ -69,16 +72,40 @@ class ExtractorPool:
         """
         self.subscribers.append(subscriber)
 
-    def new_extractor(self, extractor: Callable) -> Callable:
+    @validate_arguments
+    def add_extractor(self, extractor: Callable, handler_type: ExtraHandlerType = ExtraHandlerType.UNDEFINED) -> ExtraHandlerFunction:
+        """Generic function for adding extractors.
+        Requires handler type, e.g. 'before' or 'after'.
+
+        :param extractor: Decorated extractor function.
+        :param handler_type: Function execution stage: `before` or `after`.
         """
-        This method is used to decorate functions that must be added
-        as new extractors.
+        wrapped_extractor = self._wrap_extractor(extractor)
+        self.extractors[handler_type][extractor.__name__] = wrapped_extractor
+        return self.extractors[handler_type][extractor.__name__]
+
+    def add_before_extractor(self, extractor: Callable) -> ExtraHandlerFunction:
+        """
+        This method functions as a decorator and adds the decorated function
+        to the `before` group.
 
         :param extractor: Decorated extractor function.
         """
-        wrapped_extractor = self._wrap_extractor(extractor)
-        self.extractors[extractor.__name__] = wrapped_extractor
-        return self.extractors[extractor.__name__]
+        return self.add_extractor(extractor, ExtraHandlerType.BEFORE)
 
-    def __getitem__(self, key: str):
-        return self.extractors.__getitem__(key)
+    def add_after_extractor(self, extractor: Callable) -> ExtraHandlerFunction:
+        """
+        This method functions as a decorator and adds the decorated function
+        to the `after` group.
+
+        :param extractor: Decorated extractor function.
+        """
+        return self.add_extractor(extractor, ExtraHandlerType.AFTER)
+
+    @property
+    def before_handlers(self) -> List[ExtraHandlerFunction]:
+        return list(self.extractors[ExtraHandlerType.BEFORE].values())
+    
+    @property
+    def after_handlers(self) -> List[ExtraHandlerFunction]:
+        return list(self.extractors[ExtraHandlerType.AFTER].values())

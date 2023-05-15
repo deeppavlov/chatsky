@@ -13,7 +13,7 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ServiceGroup, ExtraHandlerRuntimeInfo
-from dff.stats import StatsStorage, StatsRecord, ExtractorPool, default_extractor_pool
+from dff.stats import StatsStorage, StatsRecord, StatsExtractorPool, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.common import is_interactive_mode
 
@@ -30,14 +30,14 @@ This can be done in the manner demonstrated below.
 
 
 # %%
-extractor_pool = ExtractorPool()
+extractor_pool = StatsExtractorPool()
 
 
 async def heavy_service(_):
     await asyncio.sleep(0.02)
 
 
-@extractor_pool.new_extractor
+@extractor_pool.add_after_extractor
 async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     data = {"runtime_state": info["component"]["execution_state"]}
     group_stats = StatsRecord.from_context(ctx, info, data)
@@ -52,8 +52,8 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             ServiceGroup(
-                before_handler=[default_extractor_pool["extract_timing_before"]],
-                after_handler=[default_extractor_pool["extract_timing_after"], get_group_stats],
+                before_handler=[default_extractor_pool["before"]["extract_timing"]],
+                after_handler=[default_extractor_pool["after"]["extract_timing"], get_group_stats],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
             ACTOR,
@@ -73,7 +73,7 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_PASSWORD"),
             os.getenv("CLICKHOUSE_DB"),
         )
-    stats = StatsStorage.from_uri(uri)
-    extractor_pool.add_subscriber(stats)
-    default_extractor_pool.add_subscriber(stats)
+    stats_storage = StatsStorage.from_uri(uri)
+    extractor_pool.add_subscriber(stats_storage)
+    default_extractor_pool.add_subscriber(stats_storage)
     pipeline.run()

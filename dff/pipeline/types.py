@@ -63,18 +63,18 @@ class GlobalExtraHandlerType(Enum):
 
 
 @unique
-class ExtraHandlerType(Enum):
+class ExtraHandlerType(str, Enum):
     """
     Enum, representing wrapper type, pre- or postprocessing.
     The following types are supported:
 
-    - PREPROCESSING: wrapper function called before component,
-    - POSTPROCESSING: wrapper function called after component.
+    - BEFORE: wrapper function called before component,
+    - AFTER: wrapper function called after component.
     """
 
-    UNDEFINED = auto()
-    BEFORE = auto()
-    AFTER = auto()
+    UNDEFINED = "undefined"
+    BEFORE = "before"
+    AFTER = "after"
 
 
 PIPELINE_STATE_KEY = "PIPELINE"

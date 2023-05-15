@@ -1,13 +1,7 @@
 import pytest
 from dff.script import Context
 from dff.stats.defaults import extract_current_label
-from dff.stats import StatsRecord, ExtractorPool
-
-
-def test_pool_constructor_type_checking():
-    with pytest.raises(RuntimeError) as e:
-        ExtractorPool([1, 2])
-    assert e
+from dff.stats import StatsRecord
 
 
 @pytest.mark.asyncio

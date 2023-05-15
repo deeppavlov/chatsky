@@ -14,14 +14,14 @@ from datetime import datetime
 
 from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo
-from .pool import ExtractorPool
+from .pool import StatsExtractorPool
 from .record import StatsRecord
 from .utils import get_wrapper_field
 
-default_extractor_pool = ExtractorPool()
+default_extractor_pool = StatsExtractorPool()
 
 
-@default_extractor_pool.new_extractor
+@default_extractor_pool.add_after_extractor
 async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
@@ -35,8 +35,8 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     )
 
 
-@default_extractor_pool.new_extractor
-async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+@default_extractor_pool.add_before_extractor
+async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's start time.
     This function is required for running the dashboard with the default configuration.
@@ -45,8 +45,8 @@ async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc[get_wrapper_field(info, "time")] = start_time
 
 
-@default_extractor_pool.new_extractor
-async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+@default_extractor_pool.add_after_extractor
+async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's finish time.
     This function is required for running the dashboard with the default configuration.

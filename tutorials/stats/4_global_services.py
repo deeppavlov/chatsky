@@ -13,7 +13,7 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
-from dff.stats import StatsStorage, ExtractorPool, StatsRecord, default_extractor_pool
+from dff.stats import StatsStorage, StatsExtractorPool, StatsRecord, default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.common import is_interactive_mode
 
@@ -33,14 +33,14 @@ in order to measure the exact running time of the pipeline.
 
 
 # %%
-extractor_pool = ExtractorPool()
+extractor_pool = StatsExtractorPool()
 
 
 async def heavy_service(_):
     await asyncio.sleep(0.02)
 
 
-@extractor_pool.new_extractor
+@extractor_pool.add_after_extractor
 async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     data = {"runtime_state": info["component"]["execution_state"]}
     group_stats = StatsRecord.from_context(ctx, info, data)
@@ -59,10 +59,10 @@ pipeline_dict = {
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
 pipeline.add_global_handler(
-    GlobalExtraHandlerType.BEFORE_ALL, default_extractor_pool["extract_timing_before"]
+    GlobalExtraHandlerType.BEFORE_ALL, default_extractor_pool["before"]["extract_timing"]
 )
 pipeline.add_global_handler(
-    GlobalExtraHandlerType.AFTER_ALL, default_extractor_pool["extract_timing_after"]
+    GlobalExtraHandlerType.AFTER_ALL, default_extractor_pool["after"]["extract_timing"]
 )
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
@@ -78,7 +78,7 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_PASSWORD"),
             os.getenv("CLICKHOUSE_DB"),
         )
-    stats = StatsStorage.from_uri(uri)
-    extractor_pool.add_subscriber(stats)
-    default_extractor_pool.add_subscriber(stats)
+    stats_storage = StatsStorage.from_uri(uri)
+    extractor_pool.add_subscriber(stats_storage)
+    default_extractor_pool.add_subscriber(stats_storage)
     pipeline.run()

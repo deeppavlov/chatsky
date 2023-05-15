@@ -14,7 +14,7 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
-from dff.stats import StatsStorage, ExtractorPool, StatsRecord
+from dff.stats import StatsStorage, StatsExtractorPool, StatsRecord
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.common import is_interactive_mode
 
@@ -22,15 +22,15 @@ from dff.utils.testing.common import is_interactive_mode
 # %% [markdown]
 """
 The statistics are collected from services by wrapping them in special 'extractor' functions.
-These functions have a specific signature: their arguments are always a `Context`, an `Actor`,
+These functions have a specific signature: their arguments are always a `Context`, an `Pipeline`,
 and an `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance.
-It is a preferred practice to define them as asynchronous.
+It is a preferred practice to define them as asynchronous functions.
 
-Before you use the said functions, you should create an `ExtractorPool`
+Before you use the said functions, you should create an `StatsExtractorPool`
 or import a ready one as a first step.
 
-Then, you should define the handlers and add them to some pool, using the `new_extractor` method.
-The latter can be called by decorating the function (see below).
+Then, you should define the handlers and add them to some pool,
+using either `add_before_extractor` or `add_after_extractor` (see below).
 
 Finally, one should also create a `StatsStorage`, which compresses data into batches
 and saves it to a database. The database credentials can be configured by either
@@ -47,11 +47,11 @@ The whole process is illustrated in the example below.
 
 # %%
 # Create a pool.
-extractor_pool = ExtractorPool()
+extractor_pool = StatsExtractorPool()
 
 
 # Create an extractor and add it to the pool.
-@extractor_pool.new_extractor
+@extractor_pool.add_after_extractor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
@@ -95,8 +95,8 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_PASSWORD"),
             os.getenv("CLICKHOUSE_DB"),
         )
-    stats = StatsStorage.from_uri(uri)
+    stats_storage = StatsStorage.from_uri(uri)
 
-    # Subscribe the storage to the changes in the pool.
-    extractor_pool.add_subscriber(stats)
+    # Subscribe the storage to changes in the pool.
+    extractor_pool.add_subscriber(stats_storage)
     pipeline.run()

@@ -6,8 +6,6 @@ This module includes utilities designed for statistics collection.
 """
 from dff.pipeline import ExtraHandlerRuntimeInfo
 
-STATS_KEY = "STATS_KEY"
-
 
 def get_wrapper_field(info: ExtraHandlerRuntimeInfo, postfix: str = "") -> str:
     """
