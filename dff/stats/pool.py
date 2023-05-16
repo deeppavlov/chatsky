@@ -6,7 +6,7 @@ This module defines the :py:class:`.StatsExtractorPool` class.
 """
 import functools
 import asyncio
-from typing import List, Callable
+from typing import List, Callable, Literal
 
 from pydantic import validate_arguments
 from dff.script import Context
@@ -37,7 +37,7 @@ class StatsExtractorPool:
 
     def __init__(self):
         self.subscribers: List[PoolSubscriber] = []
-        self.extractors = {ExtraHandlerType.UNDEFINED: {}, ExtraHandlerType.BEFORE: {}, ExtraHandlerType.AFTER: {}}
+        self.extractors = {ExtraHandlerType.BEFORE: {}, ExtraHandlerType.AFTER: {}}
 
     def _wrap_extractor(self, extractor: Callable) -> Callable:
         @functools.wraps(extractor)
@@ -70,7 +70,9 @@ class StatsExtractorPool:
 
     @validate_arguments
     def add_extractor(
-        self, extractor: Callable, handler_type: ExtraHandlerType = ExtraHandlerType.UNDEFINED
+        self,
+        extractor: Callable,
+        handler_type: Literal[ExtraHandlerType.BEFORE, ExtraHandlerType.AFTER] = ExtraHandlerType.AFTER,
     ) -> ExtraHandlerFunction:
         """Generic function for adding extractors.
         Requires handler type, e.g. 'before' or 'after'.
