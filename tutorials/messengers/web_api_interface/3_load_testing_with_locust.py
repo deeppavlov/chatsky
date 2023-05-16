@@ -86,19 +86,14 @@ class DFFUser(FastHttpUser):
         for request, response in happy_path:
             with self.client.post(
                 f"/chat?user_id={user_id}",
-                headers={
-                    "accept": "application/json",
-                    "Content-Type": "application/json"
-                },
+                headers={"accept": "application/json", "Content-Type": "application/json"},
                 # Name is the displayed name of the request.
                 name=f"/chat?user_message={request.json()}",
                 data=request.json(),
                 catch_response=True,
             ) as candidate_response:
 
-                text_response = Message.parse_obj(
-                    candidate_response.json().get("response")
-                )
+                text_response = Message.parse_obj(candidate_response.json().get("response"))
 
                 if response is not None:
                     if callable(response):
@@ -107,8 +102,7 @@ class DFFUser(FastHttpUser):
                             candidate_response.failure(error_message)
                     elif text_response != response:
                         candidate_response.failure(
-                            f"Expected: {response.json()}\n"
-                            f"Got: {text_response.json()}"
+                            f"Expected: {response.json()}\nGot: {text_response.json()}"
                         )
 
             time.sleep(self.wait_time())
