@@ -6,9 +6,10 @@ This module defines the :py:class:`.StatsExtractorPool` class.
 """
 import functools
 import asyncio
-from typing import List, Callable, Literal
+from typing import List, Callable
 
 from pydantic import validate_arguments
+from pydantic.typing import Literal
 from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerType, ExtraHandlerFunction
 from .subscriber import PoolSubscriber
