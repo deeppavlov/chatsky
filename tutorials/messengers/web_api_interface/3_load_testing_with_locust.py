@@ -57,16 +57,49 @@ class DFFUser(FastHttpUser):
     wait_time = constant(1)
 
     def check_happy_path(self, happy_path):
+        """
+        Check a happy path.
+        For each `(request, response)` pair in `happy_path`:
+        1. Send request to the API endpoint and catch its response.
+        2. Compare API response with the `response`.
+           If they do not match, fail the request.
+
+        :param happy_path:
+            An iterable of tuples of
+            `(Message, Message | Callable(Message->str|None) | None)`.
+
+            If the second element is `Message`,
+            check that API response matches it.
+
+            If the second element is `None`,
+            do not check the API response.
+
+            If the second element is a `Callable`,
+            call it with the API response as its argument.
+            If the function returns a string,
+            that string is considered an error message.
+            If the function returns `None`,
+            the API response is considered correct.
+        """
         user_id = str(uuid.uuid4())
+
         for request, response in happy_path:
             with self.client.post(
                 f"/chat?user_id={user_id}",
-                headers={"accept": "application/json", "Content-Type": "application/json"},
+                headers={
+                    "accept": "application/json",
+                    "Content-Type": "application/json"
+                },
+                # Name is the displayed name of the request.
                 name=f"/chat?user_message={request.json()}",
                 data=request.json(),
                 catch_response=True,
             ) as candidate_response:
-                text_response = Message.parse_obj(candidate_response.json().get("response"))
+
+                text_response = Message.parse_obj(
+                    candidate_response.json().get("response")
+                )
+
                 if response is not None:
                     if callable(response):
                         error_message = response(text_response)
@@ -74,7 +107,8 @@ class DFFUser(FastHttpUser):
                             candidate_response.failure(error_message)
                     elif text_response != response:
                         candidate_response.failure(
-                            f"Expected: {response.json()}\nGot: {text_response.json()}"
+                            f"Expected: {response.json()}\n"
+                            f"Got: {text_response.json()}"
                         )
 
             time.sleep(self.wait_time())
