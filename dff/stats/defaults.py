@@ -21,7 +21,7 @@ from .utils import get_wrapper_field
 default_extractor_pool = StatsExtractorPool()
 
 
-@default_extractor_pool.add_after_extractor
+@default_extractor_pool.add_extractor("after")
 async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
@@ -35,7 +35,7 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     )
 
 
-@default_extractor_pool.add_before_extractor
+@default_extractor_pool.add_extractor("before")
 async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's start time.
@@ -45,7 +45,7 @@ async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc[get_wrapper_field(info, "time")] = start_time
 
 
-@default_extractor_pool.add_after_extractor
+@default_extractor_pool.add_extractor("after")
 async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
     """
     Extract the pipeline component's finish time.

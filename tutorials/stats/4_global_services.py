@@ -40,7 +40,7 @@ async def heavy_service(_):
     await asyncio.sleep(0.02)
 
 
-@extractor_pool.add_after_extractor
+@extractor_pool.add_extractor("after")
 async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     data = {"runtime_state": info["component"]["execution_state"]}
     group_stats = StatsRecord.from_context(ctx, info, data)

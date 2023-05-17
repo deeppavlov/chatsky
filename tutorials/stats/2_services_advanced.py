@@ -38,7 +38,7 @@ As for using multiple pools, you can subscribe your storage to any number of poo
 extractor_pool = StatsExtractorPool()
 
 
-@extractor_pool.add_after_extractor
+@extractor_pool.add_extractor("after")
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {

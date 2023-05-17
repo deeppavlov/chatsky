@@ -30,7 +30,7 @@ Before you use the said functions, you should create an `StatsExtractorPool`
 or import a ready one as a first step.
 
 Then, you should define the handlers and add them to some pool,
-using either `add_before_extractor` or `add_after_extractor` (see below).
+using either `add_extractor` (see below).
 
 Finally, one should also create a `StatsStorage`, which compresses data into batches
 and saves it to a database. The database credentials can be configured by either
@@ -51,7 +51,7 @@ extractor_pool = StatsExtractorPool()
 
 
 # Create an extractor and add it to the pool.
-@extractor_pool.add_after_extractor
+@extractor_pool.add_extractor("after")
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
