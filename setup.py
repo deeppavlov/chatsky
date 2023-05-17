@@ -115,6 +115,7 @@ test_requirements = merge_req_lists(
         "h11~=0.14.0",
         "uvicorn~=0.21.1",
         "websockets~=11.0.2",
+        "locust~=2.15",
     ],
     requests_requirements,
 )
