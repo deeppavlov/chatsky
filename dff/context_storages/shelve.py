@@ -54,6 +54,7 @@ class ShelveContextStorage(DBContextStorage):
 
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
+        self.hash_storage[key] = None
         container = self.shelve_db.get(key, list())
         container.append(None)
         self.shelve_db[key] = container
@@ -70,6 +71,7 @@ class ShelveContextStorage(DBContextStorage):
         return len(self.shelve_db)
 
     async def clear_async(self):
+        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         for key in self.shelve_db.keys():
             await self.del_item_async(key)
 
@@ -106,7 +108,7 @@ class ShelveContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], _: str, ext_id: str):
         container = self.shelve_db.setdefault(ext_id, list())
-        if len(container) > 0:
+        if len(container) > 0 and container[-1] is not None:
             container[-1] = Context.cast({**container[-1].dict(), **data})
         else:
             container.append(Context.cast(data))

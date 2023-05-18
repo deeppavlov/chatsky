@@ -32,13 +32,13 @@ def generic_test(db: DBContextStorage, testing_context: Context, context_id: str
 
 
 def operational_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Perform cleanup
-    db.clear()
-
     # Write and read initial context
     db[context_id] = testing_context
     read_context = db[context_id]
     assert testing_context.dict() == read_context.dict()
+
+    # Remove key
+    del db[context_id]
 
     # Add key to misc and request to requests
     read_context.misc.update(new_key="new_value")

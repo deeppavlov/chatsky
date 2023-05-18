@@ -85,6 +85,7 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
+        self.hash_storage[key] = None
         await self.collections[self._CONTEXTS].insert_one(
             {
                 self.context_schema.id.name: None,
@@ -114,6 +115,7 @@ class MongoContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
+        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         external_keys = await self.collections[self._CONTEXTS].distinct(self.context_schema.ext_id.name)
         documents_common = {self.context_schema.id.name: None, self.context_schema.created_at.name: time.time_ns()}
         documents = [dict(**documents_common, **{self.context_schema.ext_id.name: key}) for key in external_keys]

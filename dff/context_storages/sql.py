@@ -257,6 +257,7 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
+        self.hash_storage[key] = None
         async with self.engine.begin() as conn:
             await conn.execute(
                 self.tables[self._CONTEXTS]
@@ -284,6 +285,7 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
+        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         async with self.engine.begin() as conn:
             query = select(self.tables[self._CONTEXTS].c[self.context_schema.ext_id.name]).distinct()
             result = (await conn.execute(query)).fetchall()

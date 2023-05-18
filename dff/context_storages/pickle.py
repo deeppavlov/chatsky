@@ -67,6 +67,7 @@ class PickleContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
+        self.hash_storage[key] = None
         container = self.storage.get(key, list())
         container.append(None)
         self.storage[key] = container
@@ -88,6 +89,7 @@ class PickleContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
+        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         for key in self.storage.keys():
             await self.del_item_async(key)
         await self._save()
@@ -138,7 +140,7 @@ class PickleContextStorage(DBContextStorage):
 
     async def _write_ctx(self, data: Dict[str, Any], _: str, ext_id: str):
         container = self.storage.setdefault(ext_id, list())
-        if len(container) > 0:
+        if len(container) > 0 and container[-1] is not None:
             container[-1] = Context.cast({**container[-1].dict(), **data})
         else:
             container.append(Context.cast(data))

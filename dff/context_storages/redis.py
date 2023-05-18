@@ -69,6 +69,7 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
+        self.hash_storage[key] = None
         await self._redis.rpush(key, self._VALUE_NONE)
         await self._redis.lrem(self._CONTEXTS_KEY, 0, key)
 
@@ -88,6 +89,7 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
+        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         while int(await self._redis.llen(self._CONTEXTS_KEY)) > 0:
             value = await self._redis.rpop(self._CONTEXTS_KEY)
             await self._redis.rpush(value, self._VALUE_NONE)
