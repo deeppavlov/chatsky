@@ -89,7 +89,6 @@ requests = { version = "^2.28.2", optional = true }
 websockets = { version = "^11.0", optional = true }
 aiofiles = { version = "^23.1.0", optional = true }
 jupytext = { version = "^1.14.5", optional = true }
-requests = { version = "^2.28.2", optional = true }
 pytest-cov = { version = "^4.0.0", optional = true }
 aiosqlite = { version = "^0.19.0", optional = true }
 starlette = { version = "^0.26.1", optional = true }
@@ -103,10 +102,10 @@ sphinx-copybutton = { version = "^0.5.2", optional = true }
 sphinxcontrib-katex = { version = "^0.9.0", optional = true }
 pydata-sphinx-theme = { version = "^0.13.3", optional = true }
 sphinxcontrib-apidoc = { version = "^0.3.0", optional = true }
-flask =  { version = "^2.2.3", extras=["async], optional = true }
+flask =  { version = "^2.2.3", extras=["async"], optional = true }
 sphinxcontrib-httpdomain = { version = "^1.8.0", optional = true }
 sphinx-autodoc-typehints = { version = "^1.23.0", optional = true }
-sqlalchemy = { version = "^2.0.10", extras=["asyncio], optional = true }
+sqlalchemy = { version = "^2.0.10", extras=["asyncio"], optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -114,14 +113,14 @@ pickle = ["aiofiles"]
 sqlite = ["sqlalchemy", "aiosqlite"]
 redis = ["aioredis"]
 mongodb = ["motor"]
-mysql = ["sqlalchemy", "asyncmy, "cryptography"]
+mysql = ["sqlalchemy", "asyncmy", "cryptography"]
 postgresql = ["sqlalchemy", "asyncpg"]
 ydb = ["ydb", "six"]
 telegram = ["pytelegrambotapi"]
-full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy, "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
+full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
 tests = ["requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
-test_full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy, "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
-tutorials = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy, "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
+test_full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
+tutorials = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
 devel = ["bump2version", "build", "twine"]
 doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sphinxcontrib-httpdomain", "sphinxcontrib-katex", "sphinx-favicon", "sphinx-copybutton", "sphinx-gallery", "sphinx-autodoc-typehints", "nbsphinx", "jupytext", "jupyter"]
 mypy = ["mypy"]
