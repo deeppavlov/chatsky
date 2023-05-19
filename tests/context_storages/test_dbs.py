@@ -17,10 +17,8 @@ from dff.context_storages import (
     mongo_available,
     ydb_available,
     context_storage_factory,
-    DBContextStorage,
 )
 
-from dff.script import Context
 from dff.utils.testing.cleanup_db import (
     delete_shelve,
     delete_json,
@@ -30,10 +28,9 @@ from dff.utils.testing.cleanup_db import (
     delete_sql,
     delete_ydb,
 )
+from tests.context_storages.test_functions import TEST_FUNCTIONS
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.pipeline import Pipeline
-from dff.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -61,29 +58,6 @@ MYSQL_ACTIVE = ping_localhost(3307)
 YDB_ACTIVE = ping_localhost(2136)
 
 
-def generic_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # perform cleanup
-    db.clear()
-    assert len(db) == 0
-    # test write operations
-    db[context_id] = Context(id=context_id)
-    assert context_id in db
-    assert len(db) == 1
-    db[context_id] = testing_context  # overwriting a key
-    assert len(db) == 1
-    # test read operations
-    new_ctx = db[context_id]
-    assert isinstance(new_ctx, Context)
-    assert {**new_ctx.dict(), "id": str(new_ctx.id)} == {**testing_context.dict(), "id": str(testing_context.id)}
-    # test delete operations
-    del db[context_id]
-    assert context_id not in db
-    # test `get` method
-    assert db.get(context_id) is None
-    pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
-    check_happy_path(pipeline, happy_path=HAPPY_PATH)
-
-
 @pytest.mark.parametrize(
     ["protocol", "expected"],
     [
@@ -99,26 +73,30 @@ def test_protocol_suggestion(protocol, expected):
 
 def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_shelve(db))
 
 
 def test_dict(testing_context, context_id):
     db = dict()
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
 
 
 @pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
 def test_json(testing_file, testing_context, context_id):
     db = context_storage_factory(f"json://{testing_file}")
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_json(db))
 
 
 @pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
 def test_pickle(testing_file, testing_context, context_id):
     db = context_storage_factory(f"pickle://{testing_file}")
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_pickle(db))
 
 
@@ -135,7 +113,8 @@ def test_mongo(testing_context, context_id):
             os.getenv("MONGO_INITDB_ROOT_USERNAME"),
         )
     )
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_mongo(db))
 
 
@@ -143,7 +122,8 @@ def test_mongo(testing_context, context_id):
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 def test_redis(testing_context, context_id):
     db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_redis(db))
 
 
@@ -157,7 +137,8 @@ def test_postgres(testing_context, context_id):
             os.getenv("POSTGRES_DB"),
         )
     )
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -165,7 +146,8 @@ def test_postgres(testing_context, context_id):
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
     db = context_storage_factory(f"sqlite+aiosqlite:{separator}{testing_file}")
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -179,7 +161,8 @@ def test_mysql(testing_context, context_id):
             os.getenv("MYSQL_DATABASE"),
         )
     )
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -193,5 +176,6 @@ def test_ydb(testing_context, context_id):
         ),
         table_name_prefix="test_dff_table",
     )
-    generic_test(db, testing_context, context_id)
+    for test in TEST_FUNCTIONS:
+        test(db, testing_context, context_id)
     asyncio.run(delete_ydb(db))

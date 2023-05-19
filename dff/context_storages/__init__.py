@@ -10,4 +10,4 @@ from .redis import RedisContextStorage, redis_available
 from .mongo import MongoContextStorage, mongo_available
 from .shelve import ShelveContextStorage
 from .protocol import PROTOCOLS, get_protocol_install_suggestion
-from .update_scheme import UpdateScheme
+from .context_schema import ContextSchema

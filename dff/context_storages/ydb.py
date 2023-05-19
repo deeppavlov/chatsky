@@ -18,9 +18,17 @@ from urllib.parse import urlsplit
 
 from dff.script import Context
 
-from .database import DBContextStorage, auto_stringify_hashable_key
+from .database import DBContextStorage, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .update_scheme import UpdateScheme, ExtraFields, FieldRule, DictField, ListField, ValueField
+from .context_schema import (
+    ContextSchema,
+    ExtraFields,
+    SchemaFieldWritePolicy,
+    SchemaFieldReadPolicy,
+    DictSchemaField,
+    ListSchemaField,
+    ValueSchemaField,
+)
 
 try:
     from ydb import SerializableReadWrite, SchemeError, TableDescription, Column, OptionalType, PrimitiveType
@@ -54,48 +62,54 @@ class YDBContextStorage(DBContextStorage):
 
         self.table_prefix = table_name_prefix
         list_fields = [
-            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, ListField)
+            field
+            for field, field_props in dict(self.context_schema).items()
+            if isinstance(field_props, ListSchemaField)
         ]
         dict_fields = [
-            field for field, field_props in dict(self.update_scheme).items() if isinstance(field_props, DictField)
+            field
+            for field, field_props in dict(self.context_schema).items()
+            if isinstance(field_props, DictSchemaField)
         ]
         self.driver, self.pool = asyncio.run(
             _init_drive(
-                timeout, self.endpoint, self.database, table_name_prefix, self.update_scheme, list_fields, dict_fields
+                timeout, self.endpoint, self.database, table_name_prefix, self.context_schema, list_fields, dict_fields
             )
         )
 
-    def set_update_scheme(self, scheme: UpdateScheme):
-        super().set_update_scheme(scheme)
-        self.update_scheme.id.on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.ext_id.on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.created_at.on_write = FieldRule.UPDATE_ONCE
-        self.update_scheme.updated_at.on_write = FieldRule.UPDATE
+    def set_context_schema(self, scheme: ContextSchema):
+        super().set_context_schema(scheme)
+        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.ext_id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.created_at.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.updated_at.on_write = SchemaFieldWritePolicy.UPDATE
 
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
         fields, int_id = await self._read_keys(key)
         if int_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.update_scheme.read_context(fields, self._read_ctx, key, int_id)
+        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, key, int_id)
         self.hash_storage[key] = hashes
         return context
 
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
         fields, _ = await self._read_keys(key)
         value_hash = self.hash_storage.get(key, None)
-        await self.update_scheme.write_context(value, value_hash, fields, self._write_ctx, key)
+        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, key)
 
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
+        self.hash_storage[key] = None
+
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $ext_id AS Utf8;
                 DECLARE $created_at AS Uint64;
                 DECLARE $updated_at AS Uint64;
-                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.update_scheme.id.name}, {self.update_scheme.ext_id.name}, {self.update_scheme.created_at.name}, {self.update_scheme.updated_at.name})
+                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.context_schema.id.name}, {self.context_schema.ext_id.name}, {self.context_schema.created_at.name}, {self.context_schema.updated_at.name})
                 VALUES (NULL, $ext_id, DateTime::FromMicroseconds($created_at), DateTime::FromMicroseconds($updated_at));
                 """  # noqa 501
 
@@ -108,16 +122,16 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    @auto_stringify_hashable_key()
+    @cast_key_to_string()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $externalId AS Utf8;
-                SELECT {self.update_scheme.id.name} as int_id, {self.update_scheme.created_at.name}
+                SELECT {self.context_schema.id.name} as int_id, {self.context_schema.created_at.name}
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {self.update_scheme.ext_id.name} = $externalId
-                ORDER BY {self.update_scheme.created_at.name} DESC
+                WHERE {self.context_schema.ext_id.name} = $externalId
+                ORDER BY {self.context_schema.created_at.name} DESC
                 LIMIT 1;
                 """
 
@@ -134,9 +148,9 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT COUNT(DISTINCT {self.update_scheme.ext_id.name}) as cnt
+                SELECT COUNT(DISTINCT {self.context_schema.ext_id.name}) as cnt
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {self.update_scheme.id.name} IS NOT NULL;
+                WHERE {self.context_schema.id.name} IS NOT NULL;
                 """
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
@@ -148,10 +162,12 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     async def clear_async(self):
+        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
+
         async def ids_callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT DISTINCT {self.update_scheme.ext_id.name} as ext_id
+                SELECT DISTINCT {self.context_schema.ext_id.name} as ext_id
                 FROM {self.table_prefix}_{self._CONTEXTS};
                 """
 
@@ -180,7 +196,7 @@ class YDBContextStorage(DBContextStorage):
                 {declarations}
                 DECLARE $created_at AS Uint64;
                 DECLARE $updated_at AS Uint64;
-                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.update_scheme.id.name}, {self.update_scheme.ext_id.name}, {self.update_scheme.created_at.name}, {self.update_scheme.updated_at.name})
+                INSERT INTO {self.table_prefix}_{self._CONTEXTS} ({self.context_schema.id.name}, {self.context_schema.ext_id.name}, {self.context_schema.created_at.name}, {self.context_schema.updated_at.name})
                 VALUES {', '.join(values)};
                 """  # noqa 501
 
@@ -198,10 +214,10 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $externalId AS Utf8;
-                SELECT {self.update_scheme.id.name} as int_id, {self.update_scheme.created_at.name}
+                SELECT {self.context_schema.id.name} as int_id, {self.context_schema.created_at.name}
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {self.update_scheme.ext_id.name} = $externalId
-                ORDER BY {self.update_scheme.created_at.name} DESC
+                WHERE {self.context_schema.ext_id.name} = $externalId
+                ORDER BY {self.context_schema.created_at.name} DESC
                 LIMIT 1;
                 """
 
@@ -213,15 +229,15 @@ class YDBContextStorage(DBContextStorage):
             return result_sets[0].rows[0].int_id if len(result_sets[0].rows) > 0 else None
 
         async def keys_callee(session):
-            key_dict = dict()
+            nested_dict_keys = dict()
             int_id = await latest_id_callee(session)
             if int_id is None:
-                return key_dict, None
+                return nested_dict_keys, None
 
             for table in [
                 field
-                for field, field_props in dict(self.update_scheme).items()
-                if not isinstance(field_props, ValueField)
+                for field, field_props in dict(self.context_schema).items()
+                if not isinstance(field_props, ValueSchemaField)
             ]:
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
@@ -238,23 +254,26 @@ class YDBContextStorage(DBContextStorage):
                 )
 
                 if len(result_sets[0].rows) > 0:
-                    key_dict[table] = [row[self._KEY_FIELD] for row in result_sets[0].rows]
+                    nested_dict_keys[table] = [row[self._KEY_FIELD] for row in result_sets[0].rows]
 
-            return key_dict, int_id
+            return nested_dict_keys, int_id
 
         return await self.pool.retry_operation(keys_callee)
 
-    async def _read_ctx(self, outlook: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
         async def callee(session):
             result_dict = dict()
-            for field in [field for field, value in outlook.items() if isinstance(value, dict) and len(value) > 0]:
-                keys = [f'"{key}"' for key, value in outlook[field].items() if value]
+            non_empty_value_subset = [
+                field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
+            ]
+            for field in non_empty_value_subset:
+                keys = [f'"{key}"' for key, value in subscript[field].items() if value]
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DECLARE $int_id AS Utf8;
                     SELECT {self._KEY_FIELD}, {self._VALUE_FIELD}
                     FROM {self.table_prefix}_{field}
-                    WHERE {self.update_scheme.id.name} = $int_id AND ListHas(AsList({', '.join(keys)}), {self._KEY_FIELD});
+                    WHERE {self.context_schema.id.name} = $int_id AND ListHas(AsList({', '.join(keys)}), {self._KEY_FIELD});
                     """  # noqa E501
 
                 result_sets = await (session.transaction(SerializableReadWrite())).execute(
@@ -272,13 +291,13 @@ class YDBContextStorage(DBContextStorage):
                                 result_dict[field] = dict()
                             result_dict[field][key] = pickle.loads(value)
 
-            columns = [key for key, value in outlook.items() if isinstance(value, bool) and value]
+            columns = [key for key, value in subscript.items() if isinstance(value, bool) and value]
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE $int_id AS Utf8;
                 SELECT {', '.join(columns)}
                 FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {self.update_scheme.id.name} = $int_id;
+                WHERE {self.context_schema.id.name} = $int_id;
                 """
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
@@ -299,7 +318,7 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:
-                    key_type = "Utf8" if isinstance(getattr(self.update_scheme, field), DictField) else "Uint32"
+                    key_type = "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
                     declares_ids = "\n".join(f"DECLARE $int_id_{i} AS Utf8;" for i in range(len(storage)))
                     declares_keys = "\n".join(f"DECLARE $key_{i} AS {key_type};" for i in range(len(storage)))
                     declares_values = "\n".join(f"DECLARE $value_{i} AS String;" for i in range(len(storage)))
@@ -309,7 +328,7 @@ class YDBContextStorage(DBContextStorage):
                         {declares_ids}
                         {declares_keys}
                         {declares_values}
-                        UPSERT INTO {self.table_prefix}_{field} ({self.update_scheme.id.name}, {self._KEY_FIELD}, {self._VALUE_FIELD})
+                        UPSERT INTO {self.table_prefix}_{field} ({self.context_schema.id.name}, {self._KEY_FIELD}, {self._VALUE_FIELD})
                         VALUES {values_all};
                         """  # noqa E501
 
@@ -321,15 +340,15 @@ class YDBContextStorage(DBContextStorage):
                         {**values_ids, **values_keys, **values_values},
                         commit_tx=True,
                     )
-            values = {**{k: v for k, v in data.items() if not isinstance(v, dict)}, self.update_scheme.id.name: int_id}
+            values = {**{k: v for k, v in data.items() if not isinstance(v, dict)}, self.context_schema.id.name: int_id}
             if len(values.items()) > 0:
                 declarations = list()
                 inserted = list()
                 for key in values.keys():
-                    if key in (self.update_scheme.id.name, self.update_scheme.ext_id.name):
+                    if key in (self.context_schema.id.name, self.context_schema.ext_id.name):
                         declarations += [f"DECLARE ${key} AS Utf8;"]
                         inserted += [f"${key}"]
-                    elif key in (self.update_scheme.created_at.name, self.update_scheme.updated_at.name):
+                    elif key in (self.context_schema.created_at.name, self.context_schema.updated_at.name):
                         declarations += [f"DECLARE ${key} AS Uint64;"]
                         inserted += [f"DateTime::FromMicroseconds(${key})"]
                         values[key] = values[key] // 1000
@@ -359,7 +378,7 @@ async def _init_drive(
     endpoint: str,
     database: str,
     table_name_prefix: str,
-    scheme: UpdateScheme,
+    scheme: ContextSchema,
     list_fields: List[str],
     dict_fields: List[str],
 ):
@@ -424,7 +443,7 @@ async def _create_dict_table(pool, path, table_name):
     return await pool.retry_operation(callee)
 
 
-async def _create_contexts_table(pool, path, table_name, update_scheme):
+async def _create_contexts_table(pool, path, table_name, context_schema):
     async def callee(session):
         table = (
             TableDescription()
@@ -437,9 +456,12 @@ async def _create_contexts_table(pool, path, table_name, update_scheme):
 
         await session.create_table("/".join([path, table_name]), table)
 
-        for field, field_props in dict(update_scheme).items():
-            if isinstance(field_props, ValueField) and field not in [c.name for c in table.columns]:
-                if field_props.on_read != FieldRule.IGNORE or field_props.on_write != FieldRule.IGNORE:
+        for field, field_props in dict(context_schema).items():
+            if isinstance(field_props, ValueSchemaField) and field not in [c.name for c in table.columns]:
+                if (
+                    field_props.on_read != SchemaFieldReadPolicy.IGNORE
+                    or field_props.on_write != SchemaFieldWritePolicy.IGNORE
+                ):
                     raise RuntimeError(
                         f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
                     )

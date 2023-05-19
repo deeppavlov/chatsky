@@ -15,7 +15,7 @@ from abc import ABC, abstractmethod
 from inspect import signature
 from typing import Callable, Hashable, Optional
 
-from .update_scheme import UpdateScheme
+from .context_schema import ContextSchema
 from .protocol import PROTOCOLS
 from ..script import Context
 
@@ -36,7 +36,7 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(self, path: str, update_scheme: Optional[UpdateScheme] = None):
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -45,10 +45,10 @@ class DBContextStorage(ABC):
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
         self.hash_storage = dict()
-        self.set_update_scheme(update_scheme)
+        self.set_context_schema(context_schema)
 
-    def set_update_scheme(self, update_scheme: Optional[UpdateScheme]):
-        self.update_scheme = update_scheme if update_scheme else UpdateScheme()
+    def set_context_schema(self, context_schema: Optional[ContextSchema]):
+        self.context_schema = context_schema if context_schema else ContextSchema()
 
     def __getitem__(self, key: Hashable) -> Context:
         """
@@ -191,16 +191,16 @@ def threadsafe_method(func: Callable):
     return _synchronized
 
 
-def auto_stringify_hashable_key(key_name: str = "key"):
-    def auto_stringify(func: Callable):
+def cast_key_to_string(key_name: str = "key"):
+    def stringify_args(func: Callable):
         all_keys = signature(func).parameters.keys()
 
-        async def stringify_arg(*args, **kwargs):
+        async def inner(*args, **kwargs):
             return await func(*[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)], **kwargs)
 
-        return stringify_arg
+        return inner
 
-    return auto_stringify
+    return stringify_args
 
 
 def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
