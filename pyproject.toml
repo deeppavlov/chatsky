@@ -6,7 +6,7 @@ license = "Apache-2.0"
 authors = [
     "Denis Kuznetsov <kuznetsov.den.p@gmail.com>",
 ]
-mainteiners = [
+maintainers = [
     "Roman Zlobin <email>",
     "Aleksandr Sergeev <email>",
     "Daniil Ignatiev <email>",
@@ -46,12 +46,14 @@ exclude = [
     { path = "__pycache__" },
     { path = "*.py[co]" },
     { path = "docs" },
+    { path = "scripts" },
 ]
 
 
 
 [tool.poetry.urls]
 "Tutorials" = "https://deeppavlov.github.io/dialog_flow_framework/tutorials.html"
+# TODO: some else??
 
 
 
@@ -68,10 +70,10 @@ mypy = { version = "^0.950", optional = true }
 click = { version = "^8.0.4", optional = true }
 anyio = { version = "^3.6.2", optional = true }
 motor = { version = "^3.1.2", optional = true }
-build = { version = "^0.7.0", optional = true }
-twine = { version = "^4.0.0", optional = true }
+build = { version = "^0.7.0", optional = true } # TODO: needed?
+twine = { version = "^4.0.0", optional = true } # TODO: needed?
 black = { version = "^20.8b1", optional = true }
-isort = { version = "^5.12.0", optional = true }
+isort = { version = "^5.11.0", optional = true }
 pytest = { version = "^7.3.1", optional = true }
 flake8 = { version = "^3.9.2", optional = true }
 psutil = { version = "^5.9.5", optional = true }
@@ -84,6 +86,7 @@ uvicorn = { version = "^0.21.1", optional = true }
 fastapi = { version = "^0.95.1", optional = true }
 aioredis = { version = "^2.0.1", optional = true }
 nbsphinx = { version = "^0.9.1", optional = true }
+colorama = { version = "^0.4.6", optional = true }
 telethon = { version = "^1.28.5", optional = true }
 requests = { version = "^2.28.2", optional = true }
 websockets = { version = "^11.0", optional = true }
@@ -94,15 +97,17 @@ aiosqlite = { version = "^0.19.0", optional = true }
 starlette = { version = "^0.26.1", optional = true }
 bump2version = { version = "^1.0.1", optional = true }
 cryptography = { version = "^40.0.2", optional = true }
+python-dotenv = { version = "^0.21.1", optional = true }
 sphinx-gallery = { version = "^0.7.0", optional = true }
 sphinx-favicon = { version = "^1.0.1", optional = true }
 pytest-asyncio = { version = "^0.14.0", optional = true }
 pytelegrambotapi = { version = "^4.5.1", optional = true }
+python-on-whales = { version = "^0.60.1", optional = true }
 sphinx-copybutton = { version = "^0.5.2", optional = true }
 sphinxcontrib-katex = { version = "^0.9.0", optional = true }
 pydata-sphinx-theme = { version = "^0.13.3", optional = true }
 sphinxcontrib-apidoc = { version = "^0.3.0", optional = true }
-flask =  { version = "^2.2.3", extras=["async"], optional = true }
+flask = { version = "^2.2.3", extras=["async"], optional = true }
 sphinxcontrib-httpdomain = { version = "^1.8.0", optional = true }
 sphinx-autodoc-typehints = { version = "^1.23.0", optional = true }
 sqlalchemy = { version = "^2.0.10", extras=["asyncio"], optional = true }
@@ -119,14 +124,32 @@ ydb = ["ydb", "six"]
 telegram = ["pytelegrambotapi"]
 full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
 tests = ["requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
-test_full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
-tutorials = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "requests", "pytest", "pytest-cov", "pytest-asyncio", "flake8", "click", "black", "isort", "flask", "psutil", "telethon", "anyio", "fastapi", "idna", "sniffio", "starlette", "h11", "uvicorn", "websockets"]
-devel = ["bump2version", "build", "twine"]
+devel = ["colorama", "python-on-whales", "python-dotenv", "mypy", "bump2version", "build", "twine"]
 doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sphinxcontrib-httpdomain", "sphinxcontrib-katex", "sphinx-favicon", "sphinx-copybutton", "sphinx-gallery", "sphinx-autodoc-typehints", "nbsphinx", "jupytext", "jupyter"]
-mypy = ["mypy"]
+
+
+
+[tool.poetry.scripts]
+help = { callable = "scripts.utilities:help" }
+lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
+format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
+test = { callable = "scripts.test_and_docs:test", extras = ["tests", "devel"] }
+test_all = { callable = "scripts.test_and_docs:test_all", extras = ["tutorials", "devel"] }
+docs = { callable = "scripts.test_and_docs:docs", extras = ["tutorials", "doc", "devel"] } # TODO: finish
+pre_commit = { callable = "scripts.utilities:pre_commit" } # TODO: investigate uilt-in commit hooks
+version_patch = { callable = "scripts.utilities:version_patch", extras = ["devel"] } # TODO
+version_minor = { callable = "scripts.utilities:version_minor", extras = ["devel"] } # TODO
+version_major = { callable = "scripts.utilities:version_major", extras = ["devel"] } # TODO
+clean_docs = { callable = "scripts.clean:clean_docs" }
+clean = { callable = "scripts.clean:clean" }
 
 
 
 [build-system]
 requires = ["poetry-core>=1.0.0"]
 build-backend = "poetry.core.masonry.api"
+
+
+
+[tool.isort]
+profile = "black"

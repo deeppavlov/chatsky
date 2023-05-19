@@ -25,7 +25,7 @@ __Installing dependencies__
 \"\"\"
 
 # %%
-!python3 -m pip install -q dff[tutorials]
+!python3 -m pip install -q dff[full,tests]
 # Installs dff with dependencies for running tutorials
 # To install the minimal version of dff, use `pip install dff`
 # To install other options of dff, use `pip install dff[OPTION_NAME1,OPTION_NAME2]`

@@ -89,6 +89,6 @@ def depart_gallery_html_wrapper(func):
     return wrapper
 
 
-if __name__ == "__main__":
+def main():
     wrap_source_function(extract_summary, extract_summary_wrapper)
     wrap_source_function(depart_gallery_html, depart_gallery_html_wrapper)
