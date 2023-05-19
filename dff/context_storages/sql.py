@@ -297,6 +297,13 @@ class SQLContextStorage(DBContextStorage):
                 await conn.execute(self.tables[self._CONTEXTS].insert().values(elements))
 
     async def _create_self_tables(self):
+        from sqlalchemy import create_mock_engine
+        from sqlalchemy.dialects import postgresql
+        def dump(sql, *multiparams, **params):
+            print(f"{sql.compile(dialect=postgresql.dialect())};")
+        engine = create_mock_engine("postgresql://", dump)
+        for table in self.tables.values():
+            table.create(engine)
         async with self.engine.begin() as conn:
             for table in self.tables.values():
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
