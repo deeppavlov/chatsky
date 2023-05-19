@@ -102,6 +102,7 @@ class YDBContextStorage(DBContextStorage):
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
         self.hash_storage[key] = None
+
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -162,6 +163,7 @@ class YDBContextStorage(DBContextStorage):
 
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
+
         async def ids_callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");

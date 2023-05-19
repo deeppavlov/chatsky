@@ -387,5 +387,8 @@ class SQLContextStorage(DBContextStorage):
                 insert_stmt = insert(self.tables[self._CONTEXTS]).values(
                     {**values, self.context_schema.id.name: int_id}
                 )
-                update_stmt = _get_update_stmt(self.dialect, insert_stmt, values.keys(), [self.context_schema.id.name])
+                value_keys = set(
+                    list(values.keys()) + [self.context_schema.created_at.name, self.context_schema.updated_at.name]
+                )
+                update_stmt = _get_update_stmt(self.dialect, insert_stmt, value_keys, [self.context_schema.id.name])
                 await conn.execute(update_stmt)
