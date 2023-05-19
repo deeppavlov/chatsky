@@ -85,9 +85,21 @@ requests_requirements = [
     "requests>=2.28.1",
 ]
 
+otl_dependencies = [
+    "opentelemetry-api==1.17.0",
+    "opentelemetry-exporter-otlp==1.17.0",
+    "opentelemetry-exporter-otlp-proto-grpc==1.17.0",
+    "opentelemetry-exporter-otlp-proto-http==1.17.0",
+    "opentelemetry-instrumentation==0.38b0",
+    "opentelemetry-proto==1.17.0",
+    "opentelemetry-sdk==1.17.0",
+    "opentelemetry-semantic-conventions==0.38b0",
+]
+
 stats_dependencies = merge_req_lists(
     _sql_dependencies,
     requests_requirements,
+    otl_dependencies,
     [
         "tqdm==4.62.3",
         "omegaconf>=2.2.2",
