@@ -16,7 +16,7 @@ class PoolSubscriber(ABC):
     """
 
     @abstractmethod
-    def on_record_event(self, record: StatsRecord):
+    async def on_record_event(self, record: StatsRecord):
         """
         Callback function to execute on new record being appended.
 

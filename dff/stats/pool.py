@@ -38,8 +38,17 @@ get_tracer_provider().add_span_processor(
 class StatsExtractorPool:
     """
     This class can be used to store sets of wrappers for statistics collection a.k.a. extractors.
-    New extractors can be added with the help of the :py:meth:`add_extractor` method.
-    These can be accessed by their name and group:
+    Extractors are stored inside user-defined groups which allows for easy access to related functions.
+    New extractors can be added with the help of the :py:meth:`add_extractor` method,
+    specifying a group is required.
+
+    Lists of all extractors inside particular groups are available as attributes of a pool instance.
+
+    .. code-block::
+
+        pool.group
+
+    Individual extractors can also be accessed as dictionary items:
 
     .. code-block::
 
@@ -114,9 +123,14 @@ class StatsExtractorPool:
             """
             wrapped_extractor = self._wrap_extractor(extractor)
             self.extractors[group] = {**self.extractors.get(group, {}), extractor.__name__: wrapped_extractor}
-            return self.extractors[group][extractor.__name__]
+            return wrapped_extractor
 
         return add_extractor_inner
+
+    def __getattr__(self, attr: str):
+        if attr not in self.extractors:
+            raise AttributeError(f"Attribute {attr} does not exist.")
+        return [item for item in self.extractors.get(attr, {}).values()]
 
     @property
     def all_handlers(self) -> List[ExtraHandlerFunction]:

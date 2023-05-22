@@ -79,7 +79,7 @@ telegram_dependencies = [
     "pytelegrambotapi~=4.5.1",
 ]
 
-clickhouse_dependencies = ["aiochclient>=2.2.0", "httpx<=0.23.0", "sqlparse==0.4.2"]
+clickhouse_dependencies = ["aiochclient>=2.2.0", "httpx<=0.23.0", "sqlparse==0.4.4"]
 
 requests_requirements = [
     "requests>=2.28.1",

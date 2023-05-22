@@ -9,6 +9,7 @@ factory with specific parameters.
 import json
 from typing import List
 from urllib import parse
+import asyncio
 
 from pydantic import validator
 
@@ -76,6 +77,7 @@ class ClickHouseSaver(Saver):
             raise ValueError("Invalid database URI or credentials")
         self.ch_client = ChClient(http_client, url=self.url, user=user, password=password, database=self.db)
         self._table_exists = False
+        asyncio.run(self.create_table())
 
     async def save(self, data: List[StatsRecord]) -> None:
         if not self._table_exists:  # check the flag each time to keep the constructor synchronous

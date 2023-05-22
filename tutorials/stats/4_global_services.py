@@ -14,6 +14,7 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, StatsExtractorPool, StatsRecord, default_extractor_pool
+from dff.stats.defaults import extract_timing_before, extract_timing_after
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.common import is_interactive_mode
 
@@ -58,12 +59,8 @@ pipeline_dict = {
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
-pipeline.add_global_handler(
-    GlobalExtraHandlerType.BEFORE_ALL, default_extractor_pool["before"]["extract_timing"]
-)
-pipeline.add_global_handler(
-    GlobalExtraHandlerType.AFTER_ALL, default_extractor_pool["after"]["extract_timing"]
-)
+pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, extract_timing_before)
+pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, extract_timing_after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
