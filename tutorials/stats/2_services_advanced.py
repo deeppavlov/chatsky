@@ -49,12 +49,12 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 # %%
-# use together extractor_pool and default_extractor_pool
-# run extract_timing_before before `heavy_service`
-# run get_service_state and extract_timing_after after `heavy_service`
+# The cell demonstrates how extractor functions can be accessed for use in services.
+# `get_service_state` is accessed by passing the function directly.
+# Lists of extractors from `before` and `after` groups are accessed as pool attributes.
 @to_service(
-    before_handler=[default_extractor_pool["before"]["extract_timing"]],
-    after_handler=[get_service_state, default_extractor_pool["after"]["extract_timing"]],
+    after_handler=[get_service_state, *default_extractor_pool.after],
+    before_handler=default_extractor_pool.before,
 )
 async def heavy_service(ctx: Context):
     _ = ctx  # get something from ctx if needed
@@ -71,10 +71,10 @@ pipeline = Pipeline.from_dict(
             Service(handler=heavy_service),  # add `heavy_service` before the actor
             Service(
                 handler=to_service(
-                    before_handler=[default_extractor_pool["before"]["extract_timing"]],
+                    before_handler=default_extractor_pool.before,
                     after_handler=[
                         get_service_state,
-                        default_extractor_pool["after"]["extract_timing"],
+                        *default_extractor_pool.after,
                     ],
                 )(
                     ACTOR

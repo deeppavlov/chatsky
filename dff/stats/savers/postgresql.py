@@ -8,6 +8,7 @@ factory with specific parameters.
 """
 from typing import List
 from urllib import parse
+import asyncio
 
 try:
     from sqlalchemy.ext.asyncio import create_async_engine
@@ -54,6 +55,8 @@ class PostgresSaver(Saver):
             Column("data_key", String),
             Column("data", JSON),
         )
+        self._table_exists = False
+        asyncio.run(self.create_table())
 
     async def save(self, data: List[StatsRecord]) -> None:
         if not self._table_exists:  # check the flag each time to keep the constructor synchronous

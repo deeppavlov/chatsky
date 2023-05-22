@@ -23,7 +23,7 @@ async def test_PG_saving(table, testing_items):
     from sqlalchemy import text
 
     PG_uri_string = "postgresql://{}:{}@localhost:5432/{}".format(POSTGRES_USERNAME, POSTGRES_PASSWORD, POSTGRES_DB)
-    saver: PostgresSaver = await saver_factory(PG_uri_string, table=table)
+    saver: PostgresSaver = saver_factory(PG_uri_string, table=table)
 
     async with saver.engine.connect() as conn:
         await conn.execute(text(f"TRUNCATE {table}"))
@@ -50,7 +50,7 @@ async def test_PG_saving(table, testing_items):
 @pytest.mark.asyncio
 async def test_CH_saving(table, testing_items):
     CH_uri_string = "clickhouse://{}:{}@localhost:8123/{}".format(CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
-    saver: ClickHouseSaver = await saver_factory(CH_uri_string, table=table)
+    saver: ClickHouseSaver = saver_factory(CH_uri_string, table=table)
 
     await saver.ch_client.execute(f"TRUNCATE {table}")
 

@@ -52,8 +52,8 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             ServiceGroup(
-                before_handler=[default_extractor_pool["before"]["extract_timing"]],
-                after_handler=[default_extractor_pool["after"]["extract_timing"], get_group_stats],
+                before_handler=default_extractor_pool.before,
+                after_handler=[get_group_stats, *default_extractor_pool.after],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
             ACTOR,

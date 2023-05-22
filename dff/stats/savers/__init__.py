@@ -9,7 +9,7 @@ Mapping between dbms types and `Saver` classes.
 """
 
 
-async def saver_factory(path: str, table: str = "dff_stats") -> Saver:
+def saver_factory(path: str, table: str = "dff_stats") -> Saver:
     """
     Use saver_factory to instantiate various saver types.
     The function takes a database connection URI or its equivalent, and a table name.
@@ -38,5 +38,4 @@ async def saver_factory(path: str, table: str = "dff_stats") -> Saver:
             For more information, see the function doc:\n{saver_factory.__doc__}"""
         )
     saver: Saver = SAVER_MAPPING[db_type](path, table)
-    await saver.create_table()
     return saver

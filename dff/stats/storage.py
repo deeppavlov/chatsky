@@ -65,5 +65,5 @@ class StatsStorage(PoolSubscriber):
         :param table: Database table to use for data persistence.
         :param batch_size: Number of records that will trigger the saving operation.
         """
-        saver = asyncio.run(saver_factory(uri, table))
+        saver = saver_factory(uri, table)
         return cls(saver=saver, batch_size=batch_size)

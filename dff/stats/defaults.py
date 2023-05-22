@@ -21,7 +21,7 @@ from .utils import get_wrapper_field
 default_extractor_pool = StatsExtractorPool()
 
 
-@default_extractor_pool.add_extractor("after")
+@default_extractor_pool.add_extractor("label")
 async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
@@ -36,7 +36,7 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 @default_extractor_pool.add_extractor("before")
-async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's start time.
     This function is required for running the dashboard with the default configuration.
@@ -46,7 +46,7 @@ async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 @default_extractor_pool.add_extractor("after")
-async def extract_timing(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
+async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
     """
     Extract the pipeline component's finish time.
     This function is required for running the dashboard with the default configuration.
