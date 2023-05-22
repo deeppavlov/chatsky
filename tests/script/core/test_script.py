@@ -1,6 +1,5 @@
 # %%
 import itertools
-from typing import Callable
 
 from dff.script import (
     GLOBAL,
@@ -92,7 +91,7 @@ def node_creation(pre_response_proc):
 
 def node_test(node: Node):
     assert list(node.transitions)[0] == ("", "node", float("-inf"))
-    assert isinstance(list(node.transitions.values())[0], Callable)
+    assert callable(list(node.transitions.values())[0])
     assert isinstance(node.pre_response_processing, dict)
     assert isinstance(node.pre_transitions_processing, dict)
     assert node.misc == {"key": "val"}
