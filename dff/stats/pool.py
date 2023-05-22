@@ -12,15 +12,16 @@ from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerType, ExtraHandlerFunction
 from .subscriber import PoolSubscriber
 from .record import StatsRecord
+from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import set_logger_provider, get_logger_provider, get_logger, SeverityNumber
 from opentelemetry.trace import get_tracer, SpanKind, get_tracer_provider, set_tracer_provider, Span
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk._logs import LoggerProvider, LogRecord
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
+from . import exporter_patch  # noqa: F401
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from .exporter import OTLPLogExporter
-from opentelemetry.sdk.resources import Resource
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
 resource = Resource.create({"service.name": "basic_service"})
 tracer_provider = TracerProvider(resource=resource)
