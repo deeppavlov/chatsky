@@ -95,8 +95,8 @@ if __name__ == "__main__":
             os.getenv("CLICKHOUSE_PASSWORD"),
             os.getenv("CLICKHOUSE_DB"),
         )
-    stats_storage = StatsStorage.from_uri(uri)
+    # stats_storage = StatsStorage.from_uri(uri)
 
     # Subscribe the storage to changes in the pool.
-    extractor_pool.add_subscriber(stats_storage)
+    # extractor_pool.add_subscriber(stats_storage)
     pipeline.run()

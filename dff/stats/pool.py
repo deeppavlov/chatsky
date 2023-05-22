@@ -19,7 +19,7 @@ from opentelemetry.sdk._logs import LoggerProvider, LogRecord
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
+from .exporter import OTLPLogExporter
 from opentelemetry.sdk.resources import Resource
 
 resource = Resource.create({"service.name": "basic_service"})
