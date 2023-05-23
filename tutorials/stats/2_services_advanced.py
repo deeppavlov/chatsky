@@ -13,11 +13,10 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
-from dff.stats import StatsStorage, StatsExtractorPool, StatsRecord
-from dff.stats import default_extractor_pool  # import default pool from addon
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.utils.testing.common import is_interactive_mode
-
+from dff.stats.otel import configure_logger, configure_tracer
+from opentelemetry.trace import get_tracer
+from opentelemetry._logs import get_logger
 
 # %% [markdown]
 """
@@ -35,17 +34,18 @@ As for using multiple pools, you can subscribe your storage to any number of poo
 
 
 # %%
-extractor_pool = StatsExtractorPool()
+configure_logger()
+logger = get_logger(__name__)
+configure_tracer()
+tracer = get_tracer(__name__)
 
-
-@extractor_pool.add_extractor("after")
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
         "execution_state": info["component"]["execution_state"],
     }
     # return a record to save into connected database
-    return StatsRecord.from_context(ctx, info, data)
+    return data
 
 
 # %%
@@ -86,18 +86,4 @@ pipeline = Pipeline.from_dict(
 
 
 if __name__ == "__main__":
-    if is_interactive_mode():
-        from dff.utils.testing.stats_cli import parse_args
-
-        args = parse_args()
-        uri = args["uri"]
-    else:
-        uri = "clickhouse://{0}:{1}@localhost:8123/{2}".format(
-            os.getenv("CLICKHOUSE_USER"),
-            os.getenv("CLICKHOUSE_PASSWORD"),
-            os.getenv("CLICKHOUSE_DB"),
-        )
-    stats_storage = StatsStorage.from_uri(uri)
-    extractor_pool.add_subscriber(stats_storage)
-    default_extractor_pool.add_subscriber(stats_storage)
     pipeline.run()
