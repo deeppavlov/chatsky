@@ -7,6 +7,8 @@ from opentelemetry.proto.common.v1.common_pb2 import AnyValue, KeyValueList
 
 def grpc_mapping_translation_patch(wrapped, _, args, kwargs):
     translated_value = args[0]
+    if isinstance(translated_value, type(None)):
+        return AnyValue(string_value='')
     if isinstance(translated_value, Mapping):
         return AnyValue(
             kvlist_value=KeyValueList(values=[_translate_key_values(str(k), v) for k, v in translated_value.items()])

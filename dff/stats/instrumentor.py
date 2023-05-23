@@ -42,9 +42,9 @@ class DFFInstrumentor(BaseInstrumentor):
     def _instrument(self, **kwargs):
         if len(kwargs) > 0:
             self._configure_providers(**kwargs)
-        wrap_function_wrapper(defaults, "get_current_label", self)
-        wrap_function_wrapper(defaults, "get_timing_before", self)
-        wrap_function_wrapper(defaults, "get_timing_after", self)
+        wrap_function_wrapper(defaults, "get_current_label", self.__call__.__wrapped__)
+        wrap_function_wrapper(defaults, "get_timing_before", self.__call__.__wrapped__)
+        wrap_function_wrapper(defaults, "get_timing_after", self.__call__.__wrapped__)
 
     def _uninstrument(self, **kwargs):
         unwrap(defaults, "get_current_label")
