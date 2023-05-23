@@ -24,34 +24,30 @@ jobs:
     steps:
       - uses: actions/checkout@v2
 
-      - name: Build images
-        run: |
-          docker-compose up -d
-
       - name: set up python 3.10
         uses: actions/setup-python@v2
         with:
           python-version: "3.10"
 
-      - name:  build & install package
+      - name: setup poetry and install dependencies
         run: |
-          python -m pip install build
-          python -m build
+          pip install poetry
+          poetry install --all-extras
+          poetry build
           find . -name "*.whl" -exec python -m pip install {}[test_full] ';'
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials .env_file makefile .coveragerc )
+          export backup_files=( tests tutorials .env_file .coveragerc )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
           for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
-          touch venv  # disable venv target
 
       - name: set up mutex
         uses: ben-z/gh-action-mutex@v1.0-alpha-6
 
       - name: run tests
         run: |
-          make test
+          poetry run test

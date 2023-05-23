@@ -26,20 +26,16 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Build images
+      - name: setup poetry and install dependencies
         run: |
-          docker-compose up -d
-
-      - name: install dependencies
-        run: |
-            sudo apt install pandoc
-            make venv
+          pip install poetry
+          poetry install --all-extras
 
       - name: build documentation
         env:
           GITHUB_API_TOKEN: ${{ secrets.READ_ONLY_GITHUB_API_TOKEN }}
         run: |
-            make doc
+            poetry run docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll

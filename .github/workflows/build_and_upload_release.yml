@@ -16,21 +16,16 @@ jobs:
       - name: set up python
         uses: actions/setup-python@v2
 
-      - name: install latest pip, setuptools, twine + wheel
+      - name: setup poetry
         run: |
-          python -m pip install --upgrade pip setuptools twine wheel
+          pip install poetry
 
-      - name: build wheels
-        run: |
-          python setup.py bdist_wheel
-          python setup.py sdist
-
-      - name: upload to pypi via twine
+      - name: build wheels and upload to pypi
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
           # TODO: poetry --build publish -u USERNAME -p PASSWORD
         run: |
-          twine upload --verbose -u '__token__' dist/*
+          true
 
       - name: upload binaries into release
         uses: svenstaro/upload-release-action@v2

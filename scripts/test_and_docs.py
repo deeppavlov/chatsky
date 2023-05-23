@@ -1,4 +1,5 @@
 import os
+import sys
 
 import sphinx.ext.apidoc as apidoc
 import sphinx.cmd.build as build
@@ -32,10 +33,12 @@ def test():
 
 
 def test_all():
-    docker = python_on_whales.DockerClient(compose_files=["docker-compose.yml"])
-    docker.compose.up(detach=True, wait=True)
+    if "linux" in sys.platform:
+        docker = python_on_whales.DockerClient(compose_files=["docker-compose.yml"])
+        docker.compose.up(detach=True, wait=True)
     test()
-    docker.compose.down(remove_orphans=False)
+    if "linux" in sys.platform:
+        docker.compose.down(remove_orphans=False)
     lint()
 
 
