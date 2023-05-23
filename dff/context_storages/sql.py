@@ -366,7 +366,7 @@ class SQLContextStorage(DBContextStorage):
                     result_dict[key] = value
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: str):
+    async def _write_ctx(self, data: Dict[str, Any], update: bool, int_id: str, _: str):
         async with self.engine.begin() as conn:
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:

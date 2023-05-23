@@ -314,7 +314,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: str):
+    async def _write_ctx(self, data: Dict[str, Any], update: bool, int_id: str, _: str):
         async def callee(session):
             for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
                 if len(storage.items()) > 0:

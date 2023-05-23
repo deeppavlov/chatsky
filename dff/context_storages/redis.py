@@ -139,7 +139,7 @@ class RedisContextStorage(DBContextStorage):
                 result_dict[field] = pickle.loads(value)
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, ext_id: str):
+    async def _write_ctx(self, data: Dict[str, Any], update: bool, int_id: str, ext_id: str):
         for holder in data.keys():
             if isinstance(getattr(self.context_schema, holder), ValueSchemaField):
                 await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))

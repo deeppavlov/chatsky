@@ -164,7 +164,7 @@ class MongoContextStorage(DBContextStorage):
             result_dict = {**value[-1], **result_dict}
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], int_id: str, _: str):
+    async def _write_ctx(self, data: Dict[str, Any], update: bool, int_id: str, _: str):
         non_empty_value_subset = [field for field, value in data.items() if isinstance(value, dict) and len(value) > 0]
         for field in non_empty_value_subset:
             for key in [key for key, value in data[field].items() if value]:

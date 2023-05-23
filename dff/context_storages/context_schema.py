@@ -31,7 +31,7 @@ class SchemaFieldWritePolicy(str, Enum):
 
 _ReadKeys = Dict[str, List[str]]
 _ReadContextFunction = Callable[[Dict[str, Union[bool, Dict[Hashable, bool]]], str, str], Awaitable[Dict]]
-_WriteContextFunction = Callable[[Dict[str, Any], str, str], Awaitable]
+_WriteContextFunction = Callable[[Dict[str, Any], bool, str, str], Awaitable]
 _NonListWritePolicies = Literal[
     SchemaFieldWritePolicy.IGNORE,
     SchemaFieldWritePolicy.UPDATE,
@@ -235,4 +235,4 @@ class ContextSchema(BaseModel):
             else:
                 patch_dict[field] = ctx_dict[field]
 
-        await val_writer(patch_dict, ctx.id, ext_id)
+        await val_writer(patch_dict, hashes is not None, ctx.id, ext_id)

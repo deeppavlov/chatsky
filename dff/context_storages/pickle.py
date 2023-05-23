@@ -138,9 +138,9 @@ class PickleContextStorage(DBContextStorage):
                 result_dict[field] = value
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], _: str, ext_id: str):
+    async def _write_ctx(self, data: Dict[str, Any], update: bool, _: str, ext_id: str):
         container = self.storage.setdefault(ext_id, list())
-        if len(container) > 0 and container[-1] is not None:
+        if update and len(container) > 0 and container[-1] is not None:
             container[-1] = Context.cast({**container[-1].dict(), **data})
         else:
             container.append(Context.cast(data))
