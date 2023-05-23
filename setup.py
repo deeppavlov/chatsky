@@ -29,7 +29,7 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 core = [
     "pydantic~=1.10.7",
     "nest-asyncio~=1.5.6",
-    "typing-extensions~=4.5.0",
+    "typing-extensions>=4.5,<4.7",
 ]
 
 async_files_dependencies = [
