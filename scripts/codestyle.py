@@ -30,8 +30,10 @@ def lint() -> int:
     would_format = format(False)
     if would_format == 1:
         print("================================\nBad formatting? Run: make format\n================================")
-    return lint_result or would_format
 
+    # TODO: Add mypy testing
+    # @mypy . --exclude venv*,build
+    return lint_result or would_format
 
 
 def format(modify: bool = True) -> int:

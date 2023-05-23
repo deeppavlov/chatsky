@@ -70,8 +70,6 @@ mypy = { version = "^0.950", optional = true }
 click = { version = "^8.0.4", optional = true }
 anyio = { version = "^3.6.2", optional = true }
 motor = { version = "^3.1.2", optional = true }
-build = { version = "^0.7.0", optional = true } # TODO: needed?
-twine = { version = "^4.0.0", optional = true } # TODO: needed?
 black = { version = "^20.8b1", optional = true }
 isort = { version = "^5.11.0", optional = true }
 pytest = { version = "^7.3.1", optional = true }
@@ -135,11 +133,11 @@ lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
 format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
 test = { callable = "scripts.test_and_docs:test", extras = ["tests", "devel"] }
 test_all = { callable = "scripts.test_and_docs:test_all", extras = ["tutorials", "devel"] }
-docs = { callable = "scripts.test_and_docs:docs", extras = ["tutorials", "doc", "devel"] } # TODO: finish
-pre_commit = { callable = "scripts.utilities:pre_commit" } # TODO: investigate uilt-in commit hooks
-version_patch = { callable = "scripts.utilities:version_patch", extras = ["devel"] } # TODO
-version_minor = { callable = "scripts.utilities:version_minor", extras = ["devel"] } # TODO
-version_major = { callable = "scripts.utilities:version_major", extras = ["devel"] } # TODO
+docs = { callable = "scripts.test_and_docs:docs", extras = ["tutorials", "doc", "devel"] }
+pre_commit = { callable = "scripts.utilities:pre_commit" }
+version_patch = { callable = "scripts.utilities:version_patch", extras = ["devel"] }
+version_minor = { callable = "scripts.utilities:version_minor", extras = ["devel"] }
+version_major = { callable = "scripts.utilities:version_major", extras = ["devel"] }
 clean_docs = { callable = "scripts.clean:clean_docs" }
 clean = { callable = "scripts.clean:clean" }
 

@@ -28,6 +28,7 @@ jobs:
       - name: upload to pypi via twine
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          # TODO: poetry --build publish -u USERNAME -p PASSWORD
         run: |
           twine upload --verbose -u '__token__' dist/*
 
