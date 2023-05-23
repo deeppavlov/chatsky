@@ -46,7 +46,7 @@ async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 @default_extractor_pool.add_extractor("after")
-async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
+async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's finish time.
     This function is required for running the dashboard with the default configuration.
