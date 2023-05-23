@@ -8,15 +8,14 @@ several service groups.
 
 
 # %%
-import os
 import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats.otel import configure_logger, configure_tracer
-from opentelemetry.trace import get_tracer
-from opentelemetry._logs import get_logger
+from dff.stats.utils import set_logger_destination, set_tracer_destination
+from dff.stats.instrumentor import DFFInstrumentor
+from dff.stats import defaults
 
 
 # %% [markdown]
@@ -31,16 +30,16 @@ This can be done in the manner demonstrated below.
 
 
 # %%
-configure_logger()
-logger = get_logger(__name__)
-configure_tracer()
-tracer = get_tracer(__name__)
+set_logger_destination("grpc://localhost:4317")
+set_tracer_destination("grpc://localhost:4317")
+dff_instrumentor = DFFInstrumentor()
 
 
 async def heavy_service(_):
     await asyncio.sleep(0.02)
 
 
+@dff_instrumentor
 async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     data = {"runtime_state": info["component"]["execution_state"]}
     return data
@@ -54,8 +53,12 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             ServiceGroup(
-                before_handler=default_extractor_pool.before,
-                after_handler=[get_group_stats, *default_extractor_pool.after],
+                before_handler=[defaults.get_timing_before],
+                after_handler=[
+                    get_group_stats,
+                    defaults.get_timing_after,
+                    defaults.get_current_label,
+                ],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),
             ACTOR,

@@ -17,7 +17,7 @@ from dff.pipeline import ExtraHandlerRuntimeInfo
 from .utils import get_wrapper_field
 
 
-async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
     This function is required for running the dashboard with the default configuration.
@@ -28,7 +28,7 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return {"flow": last_label[0], "node": last_label[1], "label": ": ".join(last_label)}
 
 
-async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     Extract the pipeline component's start time.
     This function is required for running the dashboard with the default configuration.
@@ -37,7 +37,7 @@ async def extract_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     ctx.misc[get_wrapper_field(info, "time")] = start_time
 
 
-async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
+async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
     """
     Extract the pipeline component's finish time.
     This function is required for running the dashboard with the default configuration.

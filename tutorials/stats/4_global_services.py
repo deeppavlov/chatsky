@@ -8,16 +8,14 @@ from several global services.
 
 
 # %%
-import os
 import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
-from dff.stats.defaults import extract_timing_before, extract_timing_after
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats.otel import configure_logger, configure_tracer
-from opentelemetry.trace import get_tracer
-from opentelemetry._logs import get_logger
+from dff.stats.utils import set_logger_destination, set_tracer_destination
+from dff.stats.instrumentor import DFFInstrumentor
+from dff.stats import defaults
 
 
 # %% [markdown]
@@ -35,19 +33,19 @@ in order to measure the exact running time of the pipeline.
 
 
 # %%
-configure_logger()
-logger = get_logger(__name__)
-configure_tracer()
-tracer = get_tracer(__name__)
+set_logger_destination("grpc://localhost:4317")
+set_tracer_destination("grpc://localhost:4317")
+dff_instrumentor = DFFInstrumentor()
+
+
+@dff_instrumentor
+async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    data = {"runtime_state": info["component"]["execution_state"]}
+    return data
 
 
 async def heavy_service(_):
     await asyncio.sleep(0.02)
-
-
-async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    data = {"runtime_state": info["component"]["execution_state"]}
-    return data
 
 
 # %%
@@ -61,8 +59,8 @@ pipeline_dict = {
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
-pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, extract_timing_before)
-pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, extract_timing_after)
+pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, defaults.get_timing_before)
+pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, defaults.get_timing_after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":

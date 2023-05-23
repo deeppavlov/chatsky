@@ -8,15 +8,14 @@ for statistics collection.
 
 
 # %%
-import os
 import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats.otel import configure_logger, configure_tracer
-from opentelemetry.trace import get_tracer
-from opentelemetry._logs import get_logger
+from dff.stats.utils import set_logger_destination, set_tracer_destination
+from dff.stats.instrumentor import DFFInstrumentor
+from dff.stats import defaults
 
 # %% [markdown]
 """
@@ -34,11 +33,12 @@ As for using multiple pools, you can subscribe your storage to any number of poo
 
 
 # %%
-configure_logger()
-logger = get_logger(__name__)
-configure_tracer()
-tracer = get_tracer(__name__)
+set_logger_destination("grpc://localhost:4317")
+set_tracer_destination("grpc://localhost:4317")
+dff_instrumentor = DFFInstrumentor()
 
+
+@dff_instrumentor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {
@@ -53,8 +53,12 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 # `get_service_state` is accessed by passing the function directly.
 # Lists of extractors from `before` and `after` groups are accessed as pool attributes.
 @to_service(
-    after_handler=[get_service_state, *default_extractor_pool.after],
-    before_handler=default_extractor_pool.before,
+    after_handler=[
+        get_service_state,
+        defaults.get_timing_after,
+        defaults.get_current_label,
+    ],
+    before_handler=[defaults.get_timing_before],
 )
 async def heavy_service(ctx: Context):
     _ = ctx  # get something from ctx if needed
@@ -71,10 +75,11 @@ pipeline = Pipeline.from_dict(
             Service(handler=heavy_service),  # add `heavy_service` before the actor
             Service(
                 handler=to_service(
-                    before_handler=default_extractor_pool.before,
+                    before_handler=[defaults.get_timing_before],
                     after_handler=[
                         get_service_state,
-                        *default_extractor_pool.after,
+                        defaults.get_timing_after,
+                        defaults.get_current_label,
                     ],
                 )(
                     ACTOR

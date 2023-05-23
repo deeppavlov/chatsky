@@ -9,15 +9,13 @@ these functions to collect statistics and persist them to a database.
 
 
 # %%
-import os
 import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats.otel import configure_logger, configure_tracer
-from opentelemetry.trace import get_tracer
-from opentelemetry._logs import get_logger
+from dff.stats.utils import set_logger_destination, set_tracer_destination
+from dff.stats.instrumentor import DFFInstrumentor
 
 
 # %% [markdown]
@@ -47,13 +45,12 @@ The whole process is illustrated in the example below.
 
 
 # %%
-# Create a pool.
-configure_logger()
-logger = get_logger(__name__)
-configure_tracer()
-tracer = get_tracer(__name__)
+set_logger_destination("grpc://localhost:4317")
+set_tracer_destination("grpc://localhost:4317")
+dff_instrumentor = DFFInstrumentor()
 
-# Create an extractor and add it to the pool.
+
+@dff_instrumentor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract execution state of service from info
     data = {

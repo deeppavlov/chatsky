@@ -1,4 +1,5 @@
-from typing import Collection
+import asyncio
+from typing import Collection, Optional
 
 from wrapt.wrappers import wrap_function_wrapper
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
@@ -15,6 +16,7 @@ from opentelemetry.sdk.metrics import MeterProvider
 
 from dff.script.core.context import get_last_index
 from dff.stats.utils import get_wrapper_field
+from dff.stats import defaults
 
 
 INSTRUMENTS = ["dff"]
@@ -32,6 +34,24 @@ set_meter_provider(meter_provider)
 class DFFInstrumentor(BaseInstrumentor):
     def __init__(self, **kwargs) -> None:
         super().__init__()
+        self._configure_providers(**kwargs)
+
+    def instrumentation_dependencies(self) -> Collection[str]:
+        return INSTRUMENTS
+
+    def _instrument(self, **kwargs):
+        if len(kwargs) > 0:
+            self._configure_providers(**kwargs)
+        wrap_function_wrapper(defaults, "get_current_label", self)
+        wrap_function_wrapper(defaults, "get_timing_before", self)
+        wrap_function_wrapper(defaults, "get_timing_after", self)
+
+    def _uninstrument(self, **kwargs):
+        unwrap(defaults, "get_current_label")
+        unwrap(defaults, "get_timing_before")
+        unwrap(defaults, "get_timing_after")
+
+    def _configure_providers(self, **kwargs):
         self._logger_provider = kwargs.get("logger_provider") or get_logger_provider()
         self._tracer_provider = kwargs.get("tracer_provider") or get_tracer_provider()
         self._meter_provider = kwargs.get("meter_provider") or get_meter_provider()
@@ -39,35 +59,32 @@ class DFFInstrumentor(BaseInstrumentor):
         self._tracer = get_tracer(__name__, None, self._tracer_provider)
         self._meter = get_meter(__name__, None, self._meter_provider)
 
-    def instrumentation_dependencies(self) -> Collection[str]:
-        return INSTRUMENTS
-    
-    def _instrument(self, **kwargs):
-        wrap_function_wrapper(__module__, 'function', self)
-    
-    def _uninstrument(self, **kwargs):
-        unwrap(__module__, 'function')
-    
-    def __call__(self, wrapped, _, args, kwargs):
-        ctx = args[0]
-        context_id = str(ctx.id)  # context is always passed as initial argument
-        request_id = get_last_index(ctx.requests)
-        result: dict = wrapped(*args, **kwargs)
+    async def __call__(self, wrapped, _, args, kwargs):
+        ctx, _, info = args
+        attributes = {"context_id": str(ctx.id), "request_id": get_last_index(ctx.requests)}
         data_key = get_wrapper_field(info)
 
+        result: Optional[dict]
+        if asyncio.iscoroutinefunction(wrapped):
+            result = await wrapped(ctx, _, info)
+        else:
+            result = wrapped(ctx, _, info)
+
+        if result is None:
+            return result
+
         span: Span
-        with self._tracer.start_as_current_span(f"dff{result.data_key}", kind=SpanKind.INTERNAL) as span:
+        with self._tracer.start_as_current_span(f"dff{data_key}", kind=SpanKind.INTERNAL) as span:
             span_ctx = span.get_span_context()
             record = LogRecord(
-                observed_timestamp=result.timestamp.timestamp(),
                 span_id=span_ctx.span_id,
                 trace_id=span_ctx.trace_id,
-                body=result.data,
+                body=result,
                 trace_flags=span_ctx.trace_flags,
                 severity_text=None,
                 severity_number=SeverityNumber(1),
                 resource=resource,
-                attributes={"context_id": result.context_id, "request_id": result.request_id},
+                attributes=attributes,
             )
             self._logger.emit(record=record)
         return result
