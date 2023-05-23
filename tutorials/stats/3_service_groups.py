@@ -32,6 +32,7 @@ This can be done in the manner demonstrated below.
 set_logger_destination("grpc://localhost:4317")
 set_tracer_destination("grpc://localhost:4317")
 dff_instrumentor = DFFInstrumentor()
+dff_instrumentor.instrument()
 
 
 async def heavy_service(_):

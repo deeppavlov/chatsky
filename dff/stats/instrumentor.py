@@ -1,7 +1,7 @@
 import asyncio
 from typing import Collection, Optional
 
-from wrapt.wrappers import wrap_function_wrapper
+from wrapt import wrap_function_wrapper, decorator
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.instrumentation.utils import unwrap
 from opentelemetry.metrics import get_meter, get_meter_provider, set_meter_provider
@@ -59,6 +59,7 @@ class DFFInstrumentor(BaseInstrumentor):
         self._tracer = get_tracer(__name__, None, self._tracer_provider)
         self._meter = get_meter(__name__, None, self._meter_provider)
 
+    @decorator
     async def __call__(self, wrapped, _, args, kwargs):
         ctx, _, info = args
         attributes = {"context_id": str(ctx.id), "request_id": get_last_index(ctx.requests)}

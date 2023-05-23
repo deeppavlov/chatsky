@@ -12,7 +12,7 @@ def grpc_mapping_translation_patch(wrapped, _, args, kwargs):
             kvlist_value=KeyValueList(values=[_translate_key_values(str(k), v) for k, v in translated_value.items()])
         )
     else:
-        wrapped(*args, **kwargs)
+        return wrapped(*args, **kwargs)
 
 
 _wrap(otlp_exporter_grpc, "exporter._translate_value", grpc_mapping_translation_patch)

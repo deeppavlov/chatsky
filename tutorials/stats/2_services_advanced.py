@@ -35,6 +35,7 @@ As for using multiple pools, you can subscribe your storage to any number of poo
 set_logger_destination("grpc://localhost:4317")
 set_tracer_destination("grpc://localhost:4317")
 dff_instrumentor = DFFInstrumentor()
+dff_instrumentor.instrument()
 
 
 @dff_instrumentor

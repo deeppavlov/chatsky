@@ -35,6 +35,7 @@ in order to measure the exact running time of the pipeline.
 set_logger_destination("grpc://localhost:4317")
 set_tracer_destination("grpc://localhost:4317")
 dff_instrumentor = DFFInstrumentor()
+dff_instrumentor.instrument()
 
 
 @dff_instrumentor
