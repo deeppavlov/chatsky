@@ -14,8 +14,7 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats.utils import set_logger_destination, set_tracer_destination
-from dff.stats.instrumentor import DFFInstrumentor
+from dff.stats import DFFInstrumentor, set_logger_destination, set_tracer_destination
 
 
 # %% [markdown]
