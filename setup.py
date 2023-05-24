@@ -117,7 +117,9 @@ test_requirements = merge_req_lists(
         "websockets~=11.0.2",
         "locust~=2.15",
         "streamlit~=1.22.0",
-        "streamlit-chat~=0.0.2",
+        "streamlit-chat~=0.0.2;python_version>'3.7'",
+        # This fork allows installation of streamlit-chat on python 3.7
+        "streamlit-chat @ git+https://github.com/RLKRo/st-chat.git@set-release-true ; python_version=='3.7'",
     ],
     requests_requirements,
 )
