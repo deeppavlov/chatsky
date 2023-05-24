@@ -7,7 +7,6 @@ import pytest
 @pytest.fixture(scope="function")
 def testing_context():
     yield Context(
-        id=str(112668),
         misc={"some_key": "some_value", "other_key": "other_value"},
         requests={0: Message(text="message text")},
     )

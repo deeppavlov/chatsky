@@ -65,10 +65,11 @@ class Context(BaseModel):
             "last_request": "set_last_request",
         }
 
-    id: str = Field(default_factory=lambda: str(uuid4()))
+    storage_key: str = Field(default_factory=lambda: str(uuid4()))
     """
-    `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
+    `storage_key` is the unique context identifier, by which it's stored in cintext storage.
+    By default, randomly generated using `uuid4` `storage_key` is used.
+    `storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     labels: Dict[int, NodeLabel2Type] = {}
     """

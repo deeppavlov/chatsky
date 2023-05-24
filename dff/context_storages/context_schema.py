@@ -80,7 +80,7 @@ class ListSchemaField(BaseSchemaField):
         if isinstance(subscript, str) and ":" in subscript:
             values.update({"subscript_type": SubscriptType.SLICE, "subscript": subscript})
         else:
-            values.update({"subscript_type": SubscriptType.KEYS, "subscript": subscript})
+            values.update({"subscript_type ": SubscriptType.KEYS, "subscript": subscript}) # TODO: FIX THIS ASAP!!!
         return values
 
     @validator("subscript", always=True)
@@ -111,20 +111,21 @@ class ValueSchemaField(BaseSchemaField):
 
 
 class ExtraFields(str, Enum):
-    id = "id"
-    ext_id = "ext_id"
+    primary_id = "primary_id"
+    active_ctx = "active_ctx"
     created_at = "created_at"
     updated_at = "updated_at"
 
 
 class ContextSchema(BaseModel):
-    id: ValueSchemaField = ValueSchemaField(name=ExtraFields.id)
+    primary_id: ValueSchemaField = ValueSchemaField(name=ExtraFields.primary_id)
+    active_ctx: ValueSchemaField = ValueSchemaField(name=ExtraFields.active_ctx)
+    storage_key: ValueSchemaField = ValueSchemaField(name="storage_key")
     requests: ListSchemaField = ListSchemaField(name="requests")
     responses: ListSchemaField = ListSchemaField(name="responses")
     labels: ListSchemaField = ListSchemaField(name="labels")
     misc: DictSchemaField = DictSchemaField(name="misc")
     framework_states: DictSchemaField = DictSchemaField(name="framework_states")
-    ext_id: ValueSchemaField = ValueSchemaField(name=ExtraFields.ext_id)
     created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at)
     updated_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.updated_at)
 
@@ -157,7 +158,7 @@ class ContextSchema(BaseModel):
                 setattr(self, field, field_props)
 
     async def read_context(
-        self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, ext_id: str, int_id: str
+        self, fields: _ReadKeys, ctx_reader: _ReadContextFunction, primary_id: str, storage_key: str
     ) -> Tuple[Context, Dict]:
         fields_subscript = dict()
         field_props: BaseSchemaField
@@ -179,23 +180,23 @@ class ContextSchema(BaseModel):
                 fields_subscript[field] = True
 
         hashes = dict()
-        ctx_dict = await ctx_reader(fields_subscript, int_id, ext_id)
+        ctx_dict = await ctx_reader(fields_subscript, primary_id, storage_key)
         for field in self.dict():
             if ctx_dict.get(field, None) is None:
-                if field == ExtraFields.id:
-                    ctx_dict[field] = int_id
-                elif field == ExtraFields.ext_id:
-                    ctx_dict[field] = ext_id
+                if field == ExtraFields.primary_id:
+                    ctx_dict[field] = primary_id
             if ctx_dict.get(field, None) is not None:
                 self._update_hashes(ctx_dict[field], field, hashes)
 
         return Context.cast(ctx_dict), hashes
 
     async def write_context(
-        self, ctx: Context, hashes: Optional[Dict], fields: _ReadKeys, val_writer: _WriteContextFunction, ext_id: str
+        self, ctx: Context, hashes: Optional[Dict], fields: _ReadKeys, val_writer: _WriteContextFunction, primary_id: str, storage_key: str
     ):
+        ctx.storage_key = storage_key
         ctx_dict = ctx.dict()
-        ctx_dict[self.ext_id.name] = str(ext_id)
+        ctx_dict[self.active_ctx.name] = True
+        ctx_dict[self.primary_id.name] = str(primary_id)
         ctx_dict[self.created_at.name] = ctx_dict[self.updated_at.name] = time.time_ns()
 
         patch_dict = dict()
@@ -235,4 +236,4 @@ class ContextSchema(BaseModel):
             else:
                 patch_dict[field] = ctx_dict[field]
 
-        await val_writer(patch_dict, hashes is not None, ctx.id, ext_id)
+        await val_writer(patch_dict, hashes is not None, primary_id, storage_key)

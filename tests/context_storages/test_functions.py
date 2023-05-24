@@ -10,7 +10,7 @@ def generic_test(db: DBContextStorage, testing_context: Context, context_id: str
     assert len(db) == 0
 
     # Test write operations
-    db[context_id] = Context(id=context_id)
+    db[context_id] = Context()
     assert context_id in db
     assert len(db) == 1
     db[context_id] = testing_context  # overwriting a key
@@ -32,6 +32,9 @@ def generic_test(db: DBContextStorage, testing_context: Context, context_id: str
 
 
 def operational_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Perform cleanup
+    db.clear()
+
     # Write and read initial context
     db[context_id] = testing_context
     read_context = db[context_id]

@@ -39,24 +39,27 @@ class ShelveContextStorage(DBContextStorage):
 
     @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        fields, int_id = await self._read_keys(key)
-        if int_id is None:
+        fields, primary_id = await self._read_keys(key)
+        if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, key, int_id)
+        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, primary_id, key)
         self.hash_storage[key] = hashes
         return context
 
     @cast_key_to_string()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        fields, _ = await self._read_keys(key)
+        fields, primary_id = await self._read_keys(key)
         value_hash = self.hash_storage.get(key, None)
-        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, key)
+        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, primary_id, key)
 
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
         self.hash_storage[key] = None
-        container = self.shelve_db.get(key, list())
-        container.append(None)
+        if key not in self.shelve_db:
+            raise KeyError(f"No entry for key {key}.")
+        container = self.shelve_db[key]
+        if len(container) > 0:
+            container[-1][self.context_schema.active_ctx.name] = False 
         self.shelve_db[key] = container
 
     @cast_key_to_string()
@@ -64,30 +67,31 @@ class ShelveContextStorage(DBContextStorage):
         if key in self.shelve_db:
             container = self.shelve_db.get(key, list())
             if len(container) != 0:
-                return container[-1] is not None
+                return container[-1][self.context_schema.active_ctx.name]
         return False
 
     async def len_async(self) -> int:
-        return len(self.shelve_db)
+        return len([v for v in self.shelve_db.values() if len(v) > 0 and v[-1][self.context_schema.active_ctx.name]])
 
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         for key in self.shelve_db.keys():
             await self.del_item_async(key)
 
-    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
+    async def _read_keys(self, storage_key: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
         nested_dict_keys = dict()
-        container = self.shelve_db.get(ext_id, list())
+        container = self.shelve_db.get(storage_key, list())
         if len(container) == 0:
             return nested_dict_keys, None
-        container_dict = container[-1].dict() if container[-1] is not None else dict()
-        for field in [key for key, value in container_dict.items() if isinstance(value, dict)]:
+        container_dict = container[-1] if container[-1][self.context_schema.active_ctx.name] else dict()
+        field_names = [key for key, value in container_dict.items() if isinstance(value, dict)]
+        for field in field_names:
             nested_dict_keys[field] = list(container_dict.get(field, dict()).keys())
-        return nested_dict_keys, container_dict.get(self.context_schema.id.name, None)
+        return nested_dict_keys, container_dict.get(self.context_schema.primary_id.name, None)
 
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, ext_id: str) -> Dict:
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, storage_key: str) -> Dict:
         result_dict = dict()
-        context = self.shelve_db[ext_id][-1].dict()
+        context = self.shelve_db[storage_key][-1]
         non_empty_value_subset = [
             field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
         ]
@@ -106,10 +110,10 @@ class ShelveContextStorage(DBContextStorage):
                 result_dict[field] = value
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], update: bool, _: str, ext_id: str):
-        container = self.shelve_db.setdefault(ext_id, list())
-        if update and len(container) > 0 and container[-1] is not None:
-            container[-1] = Context.cast({**container[-1].dict(), **data})
+    async def _write_ctx(self, data: Dict[str, Any], update: bool, _: str, storage_key: str):
+        container = self.shelve_db.setdefault(storage_key, list())
+        if update:
+            container[-1] = {**container[-1], **data}
         else:
-            container.append(Context.cast(data))
-        self.shelve_db[ext_id] = container
+            container.append(data)
+        self.shelve_db[storage_key] = container
