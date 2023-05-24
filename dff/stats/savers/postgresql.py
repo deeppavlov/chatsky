@@ -42,7 +42,6 @@ class PostgresSaver(Saver):
         if IMPORT_ERROR_MESSAGE is not None:
             raise ImportError(IMPORT_ERROR_MESSAGE)
         self.table = table
-        self._table_exists = False
         parsed_path = parse.urlparse(path)
         self.engine = create_async_engine(parse.urlunparse([(parsed_path.scheme + "+asyncpg"), *parsed_path[1:]]))
         self.metadata = MetaData()
@@ -58,8 +57,6 @@ class PostgresSaver(Saver):
         asyncio.run(self.create_table())
 
     async def save(self, data: List[StatsRecord]) -> None:
-        if not self._table_exists:  # check the flag each time to keep the constructor synchronous
-            raise RuntimeError(f"Table {self.table} does not exist.")
         if len(data) == 0:
             return
         async with self.engine.connect() as conn:
@@ -67,8 +64,6 @@ class PostgresSaver(Saver):
             await conn.commit()
 
     async def load(self) -> List[StatsRecord]:
-        if not self._table_exists:  # check the flag each time to keep the constructor synchronous
-            raise RuntimeError(f"Table {self.table} does not exist.")
         stats = []
 
         async with self.engine.connect() as conn:
@@ -86,10 +81,7 @@ class PostgresSaver(Saver):
         async with self.engine.connect() as conn:
             exist_result = await conn.run_sync(table_exists)
             if exist_result:
-                self._table_exists = True
                 return
 
             await conn.run_sync(self.metadata.create_all)
             await conn.commit()
-
-        self._table_exists = True
