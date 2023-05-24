@@ -34,6 +34,12 @@ set_meter_provider(meter_provider)
 class DFFInstrumentor(BaseInstrumentor):
     def __init__(self, **kwargs) -> None:
         super().__init__()
+        self._logger_provider = None
+        self._tracer_provider = None
+        self._meter_provider = None
+        self._logger = None
+        self._tracer = None
+        self._meter = None
         self._configure_providers(**kwargs)
 
     def instrumentation_dependencies(self) -> Collection[str]:

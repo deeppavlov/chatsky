@@ -14,6 +14,7 @@ from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.stats import DFFInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import OTLPLogExporter, OTLPSpanExporter, InMemoryLogExporter, InMemorySpanExporter
 from dff.stats import defaults
 
 
@@ -32,10 +33,7 @@ in order to measure the exact running time of the pipeline.
 
 
 # %%
-set_logger_destination("grpc://localhost:4317")
-set_tracer_destination("grpc://localhost:4317")
 dff_instrumentor = DFFInstrumentor()
-dff_instrumentor.instrument()
 
 
 @dff_instrumentor
@@ -64,4 +62,7 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, defaults.get_timin
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
+    set_logger_destination(OTLPLogExporter("grpc://localhost:4317"))
+    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317"))
+    dff_instrumentor.instrument()
     pipeline.run()

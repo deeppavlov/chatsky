@@ -14,6 +14,7 @@ from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.stats import DFFInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import OTLPLogExporter, OTLPSpanExporter
 from dff.stats import defaults
 
 
@@ -29,10 +30,7 @@ This can be done in the manner demonstrated below.
 
 
 # %%
-set_logger_destination("grpc://localhost:4317")
-set_tracer_destination("grpc://localhost:4317")
 dff_instrumentor = DFFInstrumentor()
-dff_instrumentor.instrument()
 
 
 async def heavy_service(_):
@@ -67,4 +65,7 @@ pipeline = Pipeline.from_dict(
 )
 
 if __name__ == "__main__":
+    set_logger_destination(OTLPLogExporter("grpc://localhost:4317"))
+    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317"))
+    dff_instrumentor.instrument()
     pipeline.run()
