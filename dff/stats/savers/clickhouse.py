@@ -76,7 +76,6 @@ class ClickHouseSaver(Saver):
         if not all([self.db, self.url, user, password]):
             raise ValueError("Invalid database URI or credentials")
         self.ch_client = ChClient(http_client, url=self.url, user=user, password=password, database=self.db)
-        self._table_exists = False
         asyncio.run(self.create_table())
 
     async def save(self, data: List[StatsRecord]) -> None:

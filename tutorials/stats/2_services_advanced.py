@@ -14,7 +14,7 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.stats import StatsStorage, StatsExtractorPool, StatsRecord
-from dff.stats import default_extractor_pool  # import default pool from addon
+from dff.stats import default_extractor_pool
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.common import is_interactive_mode
 
@@ -49,7 +49,7 @@ async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 # %%
-# The cell demonstrates how extractor functions can be accessed for use in services.
+# The following snippet demonstrates how extractor functions can be accessed for use in services.
 # `get_service_state` is accessed by passing the function directly.
 # Lists of extractors from `before` and `after` groups are accessed as pool attributes.
 @to_service(

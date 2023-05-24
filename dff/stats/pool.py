@@ -86,8 +86,8 @@ class StatsExtractorPool:
 
     def __getattr__(self, attr: str):
         if attr not in self.extractors:
-            raise AttributeError(f"Attribute {attr} does not exist.")
-        return [item for item in self.extractors.get(attr, {}).values()]
+            raise AttributeError(f"Attribute '{attr}' does not exist.")
+        return [item for item in self.extractors[attr].values()]
 
     @property
     def all_handlers(self) -> List[ExtraHandlerFunction]:

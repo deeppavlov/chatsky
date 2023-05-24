@@ -14,7 +14,7 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.stats import StatsStorage, StatsExtractorPool, StatsRecord, default_extractor_pool
-from dff.stats.defaults import extract_timing_before, extract_timing_after
+from dff.stats import extract_timing_before, extract_timing_after
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.utils.testing.common import is_interactive_mode
 

@@ -55,7 +55,6 @@ class PostgresSaver(Saver):
             Column("data_key", String),
             Column("data", JSON),
         )
-        self._table_exists = False
         asyncio.run(self.create_table())
 
     async def save(self, data: List[StatsRecord]) -> None:
