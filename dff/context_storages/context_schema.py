@@ -61,7 +61,7 @@ class BaseSchemaField(BaseModel):
                 except Exception as e:
                     raise Exception(f"While parsing subscript of field '{field_name}' exception happened: {e}")
             if not isinstance(value, List):
-                raise Exception(f"subscript of field '{field_name}' exception isn't a list'!")
+                raise Exception(f"Subscript of field '{field_name}' exception isn't a list or str!")
             if ALL_ITEMS in value and len(value) > 1:
                 raise Exception(
                     f"Element 'all' should be the only element of the subscript of the field '{field_name}'!"
@@ -76,11 +76,11 @@ class ListSchemaField(BaseSchemaField):
 
     @root_validator()
     def infer_subscript_type(cls, values: dict) -> dict:
-        subscript = values.get("subscript") or "[:]"
+        subscript = values.get("subscript", "[:]")
         if isinstance(subscript, str) and ":" in subscript:
             values.update({"subscript_type": SubscriptType.SLICE, "subscript": subscript})
         else:
-            values.update({"subscript_type ": SubscriptType.KEYS, "subscript": subscript})
+            values.update({"subscript_type": SubscriptType.KEYS, "subscript": subscript})
         return values
 
     @validator("subscript", always=True)
@@ -94,7 +94,7 @@ class ListSchemaField(BaseSchemaField):
             else:
                 value = [int(item) for item in [value[0] or 0, value[1] or -1]]
         if not all([isinstance(item, int) for item in value]):
-            raise Exception(f"subscript of field '{field_name}' contains non-integer values!")
+            raise Exception(f"Subscript of field '{field_name}' contains non-integer values!")
         return value
 
 
