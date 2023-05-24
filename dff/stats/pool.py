@@ -7,9 +7,10 @@ This module defines the :py:class:`.StatsExtractorPool` class.
 import functools
 import asyncio
 from typing import List, Callable, Dict
+from collections import defaultdict
 
 from dff.script import Context
-from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerType, ExtraHandlerFunction
+from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerFunction
 from .subscriber import PoolSubscriber
 
 
@@ -39,7 +40,7 @@ class StatsExtractorPool:
 
     def __init__(self):
         self.subscribers: List[PoolSubscriber] = []
-        self.extractors: Dict[str, Dict[str, ExtraHandlerFunction]] = {}
+        self.extractors: Dict[str, Dict[str, ExtraHandlerFunction]] = defaultdict(dict)
 
     def _wrap_extractor(self, extractor: Callable) -> Callable:
         @functools.wraps(extractor)
@@ -58,7 +59,7 @@ class StatsExtractorPool:
 
         return extractor_wrapper
 
-    def __getitem__(self, key: ExtraHandlerType):
+    def __getitem__(self, key: str):
         return self.extractors[key]
 
     def add_subscriber(self, subscriber: PoolSubscriber):
@@ -78,7 +79,7 @@ class StatsExtractorPool:
             :param group: Function execution stage: `before` or `after`.
             """
             wrapped_extractor = self._wrap_extractor(extractor)
-            self.extractors[group] = {**self.extractors.get(group, {}), extractor.__name__: wrapped_extractor}
+            self.extractors[group][extractor.__name__] = wrapped_extractor
             return wrapped_extractor
 
         return add_extractor_inner
