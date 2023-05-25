@@ -12,28 +12,6 @@ from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerType, ExtraHandlerFunction
 from .subscriber import PoolSubscriber
 from .record import StatsRecord
-from opentelemetry.sdk.resources import Resource
-from opentelemetry._logs import set_logger_provider, get_logger_provider, get_logger, SeverityNumber
-from opentelemetry.trace import get_tracer, SpanKind, get_tracer_provider, set_tracer_provider, Span
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk._logs import LoggerProvider, LogRecord
-from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
-from opentelemetry.sdk.trace.export import BatchSpanProcessor
-from . import exporter_patch  # noqa: F401
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
-
-resource = Resource.create({"service.name": "basic_service"})
-tracer_provider = TracerProvider(resource=resource)
-logger_provider = LoggerProvider(resource=resource)
-set_logger_provider(logger_provider)
-set_tracer_provider(tracer_provider)
-get_logger_provider().add_log_record_processor(
-    BatchLogRecordProcessor(OTLPLogExporter(endpoint="grpc://localhost:4317", insecure=True))
-)
-get_tracer_provider().add_span_processor(
-    BatchSpanProcessor(OTLPSpanExporter(endpoint="grpc://localhost:4317", insecure=True))
-)
 
 
 class StatsExtractorPool:
@@ -68,8 +46,6 @@ class StatsExtractorPool:
 
     def __init__(self):
         self.subscribers: List[PoolSubscriber] = []
-        self._tracer = get_tracer(__name__)
-        self._logger = get_logger(__name__)
         self.extractors: Dict[str, Dict[str, ExtraHandlerFunction]] = {}
 
     def _wrap_extractor(self, extractor: Callable) -> Callable:
@@ -82,22 +58,6 @@ class StatsExtractorPool:
 
             if result is None:
                 return result
-
-            span: Span
-            with self._tracer.start_as_current_span(f"dff{result.data_key}", kind=SpanKind.INTERNAL) as span:
-                span_ctx = span.get_span_context()
-                record = LogRecord(
-                    observed_timestamp=result.timestamp.timestamp(),
-                    span_id=span_ctx.span_id,
-                    trace_id=span_ctx.trace_id,
-                    body=result.data,
-                    trace_flags=span_ctx.trace_flags,
-                    severity_text=None,
-                    severity_number=SeverityNumber(1),
-                    resource=resource,
-                    attributes={"context_id": result.context_id, "request_id": result.request_id},
-                )
-                self._logger.emit(record=record)
 
             return result
 
