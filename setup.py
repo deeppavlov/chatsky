@@ -98,7 +98,7 @@ requests_requirements = [
 test_requirements = merge_req_lists(
     [
         "pytest~=7.3.1",
-        "pytest-cov~=4.0.0",
+        "pytest-cov>=4.0,<4.2",
         "pytest-asyncio~=0.14.0",
         "flake8~=3.9.2",
         "click~=8.0.4",
