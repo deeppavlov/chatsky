@@ -3,7 +3,16 @@
 # Telegram: 5. Conditions with Media
 
 This tutorial shows how to use media-related logic in your script.
+
+Here, [TelegramMessage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.message.html#telegram-message)
+class is used to represent telegram message, [TelegramUI](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.message.html#dff.messengers.telegram.message.TelegramUI) and
+[RemoveKeyboard](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.message.html#dff.messengers.telegram.message.RemoveKeyboard)
+classes are used for configuring additional telegram message features.
+
+Different [message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#message)
+classes are used for representing different common message features, like Attachment, Audio, Button, Image, etc.
 """
+
 
 # %%
 import os

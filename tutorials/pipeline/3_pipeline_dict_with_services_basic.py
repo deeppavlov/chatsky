@@ -4,6 +4,9 @@
 
 The following tutorial shows `pipeline` creation from
 dict and most important pipeline components.
+
+Here, [Service](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.service.html#service)
+class, that can be used for pre- and postprocessing of messages is shown.
 """
 
 

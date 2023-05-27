@@ -3,6 +3,12 @@
 # 5. MySQL
 
 This is a tutorial on using MySQL.
+
+See [MySQL](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.sql.html#sql) class
+for storing you users' contexts in SQL databases.
+
+The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [asyncmy](https://github.com/long2ice/asyncmy)
+libraries for asynchronous access to MySQL DB.
 """
 
 

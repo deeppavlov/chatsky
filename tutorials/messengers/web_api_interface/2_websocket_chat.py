@@ -14,6 +14,12 @@ As mentioned in that tutorial,
 > ... for this example, we'll use a very simple HTML document with some JavaScript,
 > all inside a long string.
 > This, of course, is not optimal and you wouldn't use it for production.
+
+Here, `_run_pipeline` (same as [run](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.run))
+method is used to execute pipeline once.
+
+[Message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Message)
+is used to represent incoming to pipeline data.
 """
 
 

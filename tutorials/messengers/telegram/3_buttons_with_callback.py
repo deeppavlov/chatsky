@@ -2,10 +2,18 @@
 """
 # Telegram: 3. Buttons with Callback
 
-
 This tutorial demonstrates, how to add an inline keyboard and utilize
 inline queries.
+
+Here, [TelegramMessage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.message.html#telegram-message)
+class is used to represent telegram message, [TelegramUI](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.message.html#dff.messengers.telegram.message.TelegramUI) and
+[RemoveKeyboard](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.message.html#dff.messengers.telegram.message.RemoveKeyboard)
+classes are used for configuring additional telegram message features.
+
+Different [message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#message)
+classes are used for representing different common message features, like Attachment, Audio, Button, Image, etc.
 """
+
 
 # %%
 import os

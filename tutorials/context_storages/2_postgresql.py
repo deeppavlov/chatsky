@@ -3,6 +3,12 @@
 # 2. PostgreSQL
 
 This is a tutorial on using PostgreSQL.
+
+See [SQLContextStorage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.sql.html#sql) class
+for storing you users' contexts in SQL databases.
+
+The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [asyncpg](https://magicstack.github.io/asyncpg/current/)
+libraries for asynchronous access to PostgreSQL DB.
 """
 
 
