@@ -3,8 +3,15 @@
 # Core: 4. Transitions
 
 This tutorial shows settings for transitions between flows and nodes.
+
+Here, [conditions](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.conditions.std_conditions.html#conditions)
+for transition between many different script steps are shown.
+
+Some of the destination steps can be set using [labels](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.labels.std_labels.html#labels).
+
 First of all, let's do all the necessary imports from DFF.
 """
+
 
 # %%
 import re

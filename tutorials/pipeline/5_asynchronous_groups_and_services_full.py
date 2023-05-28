@@ -4,6 +4,9 @@
 
 The following tutorial shows `pipeline`
 asynchronous service and service group usage.
+
+Here, [ServiceGroup](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.group.html#dff.pipeline.service.group.ServiceGroup)s
+are shown for advanced and asynchronous data pre- and postprocessing.
 """
 
 

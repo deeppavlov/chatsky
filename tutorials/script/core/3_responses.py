@@ -3,6 +3,10 @@
 # Core: 3. Responses
 
 This tutorial shows different options for setting responses.
+
+Here, [responses](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.responses.std_responses.html#responses)
+that allow returning answers to user from script are shown. 
+
 Let's do all the necessary imports from DFF.
 """
 

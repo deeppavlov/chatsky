@@ -3,6 +3,10 @@
 # 7. Extra Handlers (basic)
 
 The following tutorial shows extra handlers possibilities and use cases.
+
+Here, extra handlers [BeforeHandler](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.extra.html#dff.pipeline.service.extra.BeforeHandler)
+and [AfterHandler](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.extra.html#dff.pipeline.service.extra.AfterHandler)
+are shown as additional means of data processing, attached to services.
 """
 
 

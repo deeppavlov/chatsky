@@ -2,6 +2,11 @@
 """
 # Responses: 1. Basics
 
+Here, the process of response forming is shown.
+Special keywords [RESPONSE](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.RESPONSE)
+and [TRANSITIONS](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.TRANSITIONS)
+are used for that.
+
 """
 
 

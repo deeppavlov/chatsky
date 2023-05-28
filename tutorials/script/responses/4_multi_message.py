@@ -3,6 +3,10 @@
 # Responses: 4. Multi Message
 
 This tutorial shows Multi Message usage.
+
+The [MultiMessage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.MultiMessage)
+represents a combination of several messages.
+
 Let's do all the necessary imports from DFF.
 """
 

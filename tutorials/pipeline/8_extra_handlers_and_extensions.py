@@ -4,6 +4,9 @@
 
 The following tutorial shows how pipeline can be extended
 by global extra handlers and custom functions.
+
+Here, [add_global_handler](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.add_global_handler)
+function is shown, that can be used to add extra handlers before and/or after all pipeline services.
 """
 
 

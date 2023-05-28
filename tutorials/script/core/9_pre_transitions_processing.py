@@ -3,6 +3,10 @@
 # Core: 9. Pre-transitions processing
 
 This tutorial shows pre-transitions processing feature.
+
+Here, [PRE_TRANSITIONS_PROCESSING](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.PRE_TRANSITIONS_PROCESSING)
+that can be used for additional context processing before transitioning to the next step is shown.
+
 First of all, let's do all the necessary imports from DFF.
 """
 

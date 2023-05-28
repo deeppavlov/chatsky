@@ -3,6 +3,10 @@
 # 6. Custom messenger interface
 
 The following tutorial shows messenger interfaces usage.
+
+Here, [CallbackMessengerInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.interface.html#dff.messengers.telegram.interface.CallbackTelegramInterface)
+and [PollingMessengerInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.interface.html#dff.messengers.telegram.interface.PollingTelegramInterface)
+are shown as alternatives for connection to custom user messenger backends.
 """
 
 

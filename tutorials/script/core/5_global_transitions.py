@@ -3,8 +3,13 @@
 # Core: 5. Global transitions
 
 This tutorial shows the global setting of transitions.
+
+Here, global [conditions](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.conditions.std_conditions.html#conditions)
+for default transition between many different script steps are shown.
+
 First of all, let's do all the necessary imports from DFF.
 """
+
 
 # %%
 import re
