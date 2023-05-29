@@ -1,23 +1,18 @@
-slice_name: Transition layout
-viz_type: graph_chart
+slice_name: Transition ratio [chord]
+description: null
+certified_by: null
+certification_details: null
+viz_type: chord
 params:
   adhoc_filters: []
-  baseEdgeWidth: 3
-  baseNodeSize: 20
-  color_scheme: supersetColors
+  color_scheme: bnbColors
+  columns: prev_label
   datasource: 1__table
-  draggable: false
-  edgeLength: 400
-  edgeSymbol: none,arrow
   extra_form_data: {}
-  friction: 0.2
   granularity_sqla: start_time
-  gravity: 0.3
-  layout: force
-  legendOrientation: top
-  legendType: scroll
+  groupby: label
   metric:
-    aggregate: COUNT
+    aggregate: COUNT_DISTINCT
     column:
       advanced_data_type: null
       certification_details: null
@@ -38,21 +33,16 @@ params:
     expressionType: SIMPLE
     hasCustomLabel: false
     isNew: false
-    label: COUNT(context_id)
-    optionName: metric_qxsyaujh63_4b75kyx6b5g
+    label: COUNT_DISTINCT(context_id)
+    optionName: metric_97lz5hqft8j_aqofzpt1ma5
     sqlExpression: null
-  repulsion: 1000
-  roam: scale
   row_limit: 10000
-  selectedMode: single
-  show_legend: true
-  source: prev_label
-  source_category: flow_label
-  target: label
-  target_category: flow_label
+  slice_id: 13
   time_range: No filter
-  viz_type: graph_chart
+  viz_type: chord
+  y_axis_format: ~g
+query_context: null
 cache_timeout: null
-uuid: 801e8c66-f693-46e3-a9a5-7b2b0b08a4a7
+uuid: 388d2359-8d13-4795-8dc9-1cb5dfa92ee1
 version: 1.0.0
 dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

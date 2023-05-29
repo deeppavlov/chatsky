@@ -1,4 +1,7 @@
 slice_name: Node visits [sunburst]
+description: null
+certified_by: null
+certification_details: null
 viz_type: sunburst
 params:
   adhoc_filters:
@@ -59,6 +62,7 @@ params:
   slice_id: 8
   time_range: No filter
   viz_type: sunburst
+query_context: null
 cache_timeout: null
 uuid: e955f48c-824c-423c-a11c-5b5dca162927
 version: 1.0.0

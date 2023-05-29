@@ -1,25 +1,22 @@
-slice_name: Sankey
-viz_type: sankey
+slice_name: Node counts
+description: null
+certified_by: null
+certification_details: null
+viz_type: dist_bar
 params:
-  adhoc_filters:
-  - clause: WHERE
-    comparator: null
-    expressionType: SQL
-    filterOptionName: filter_cljmtv9ss6h_363sjm3f3n1
-    isExtra: false
-    isNew: false
-    operator: null
-    sqlExpression: label <> prev_label
-    subject: null
+  adhoc_filters: []
+  bar_stacked: true
+  bottom_margin: auto
   color_scheme: supersetColors
+  columns:
+  - flow_label
   datasource: 1__table
   extra_form_data: {}
-  granularity_sqla: time
+  granularity_sqla: start_time
   groupby:
-  - prev_label
   - label
-  metric:
-    aggregate: COUNT
+  metrics:
+  - aggregate: COUNT_DISTINCT
     column:
       advanced_data_type: null
       certification_details: null
@@ -29,7 +26,7 @@ params:
       expression: null
       filterable: true
       groupby: true
-      id: 17
+      id: 1
       is_certified: false
       is_dttm: false
       python_date_format: null
@@ -40,14 +37,23 @@ params:
     expressionType: SIMPLE
     hasCustomLabel: false
     isNew: false
-    label: COUNT(context_id)
-    optionName: metric_hlw7e194evs_ghfqyq1fa7v
+    label: COUNT_DISTINCT(context_id)
+    optionName: metric_axee7fzlpu_upud0bdjv6
     sqlExpression: null
+  order_bars: true
+  order_desc: true
+  rich_tooltip: true
   row_limit: 10000
-  slice_id: 9
+  show_legend: true
   time_range: No filter
-  viz_type: sankey
+  viz_type: dist_bar
+  x_ticks_layout: auto
+  y_axis_bounds:
+  - null
+  - null
+  y_axis_format: SMART_NUMBER
+query_context: null
 cache_timeout: null
-uuid: a87d9345-49f7-49c7-80ff-610b3bee31e0
+uuid: 0c47c7b5-f500-46cb-97e3-9ebb637f0c8a
 version: 1.0.0
-dataset_uuid: 2ec02aa6-e414-4103-9dc3-cba7fc7b4777
+dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

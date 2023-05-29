@@ -1,4 +1,7 @@
 slice_name: Flow visit ratio monitor
+description: null
+certified_by: null
+certification_details: null
 viz_type: echarts_timeseries_bar
 params:
   adhoc_filters: []
@@ -63,6 +66,7 @@ params:
   y_axis_title_margin: 50
   y_axis_title_position: Left
   zoomable: true
+query_context: null
 cache_timeout: null
 uuid: ba02528b-184b-4304-b027-f2b7d9011ab0
 version: 1.0.0

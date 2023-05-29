@@ -1,19 +1,16 @@
-slice_name: Node counts
-viz_type: dist_bar
+slice_name: Node visits [cloud]
+description: null
+certified_by: null
+certification_details: null
+viz_type: word_cloud
 params:
   adhoc_filters: []
-  bar_stacked: true
-  bottom_margin: auto
   color_scheme: supersetColors
-  columns:
-  - flow_label
   datasource: 1__table
   extra_form_data: {}
   granularity_sqla: start_time
-  groupby:
-  - label
-  metrics:
-  - aggregate: COUNT_DISTINCT
+  metric:
+    aggregate: COUNT
     column:
       advanced_data_type: null
       certification_details: null
@@ -34,22 +31,18 @@ params:
     expressionType: SIMPLE
     hasCustomLabel: false
     isNew: false
-    label: COUNT_DISTINCT(context_id)
-    optionName: metric_axee7fzlpu_upud0bdjv6
+    label: COUNT(context_id)
+    optionName: metric_mmbslhy6cnd_6zv1lh26whx
     sqlExpression: null
-  order_bars: true
-  order_desc: true
-  rich_tooltip: true
-  row_limit: 10000
-  show_legend: true
+  rotation: flat
+  row_limit: 500
+  series: label
+  size_from: 10
+  size_to: 80
   time_range: No filter
-  viz_type: dist_bar
-  x_ticks_layout: auto
-  y_axis_bounds:
-  - null
-  - null
-  y_axis_format: SMART_NUMBER
+  viz_type: word_cloud
+query_context: null
 cache_timeout: null
-uuid: 0c47c7b5-f500-46cb-97e3-9ebb637f0c8a
+uuid: b25b4292-ff21-4164-98ac-b1cba95e2994
 version: 1.0.0
 dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

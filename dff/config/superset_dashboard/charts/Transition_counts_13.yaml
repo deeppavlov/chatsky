@@ -1,15 +1,23 @@
-slice_name: Transition ratio [chord]
-viz_type: chord
+slice_name: Transition counts
+description: null
+certified_by: null
+certification_details: null
+viz_type: dist_bar
 params:
   adhoc_filters: []
-  color_scheme: bnbColors
-  columns: prev_label
+  bar_stacked: true
+  bottom_margin: auto
+  color_scheme: supersetColors
+  columns:
+  - flow_label
   datasource: 1__table
   extra_form_data: {}
   granularity_sqla: start_time
-  groupby: label
-  metric:
-    aggregate: COUNT_DISTINCT
+  groupby:
+  - prev_label
+  - label
+  metrics:
+  - aggregate: COUNT_DISTINCT
     column:
       advanced_data_type: null
       certification_details: null
@@ -31,14 +39,25 @@ params:
     hasCustomLabel: false
     isNew: false
     label: COUNT_DISTINCT(context_id)
-    optionName: metric_97lz5hqft8j_aqofzpt1ma5
+    optionName: metric_tc3lb0a1pff_dyroibp08h7
     sqlExpression: null
+  order_desc: true
+  rich_tooltip: true
   row_limit: 10000
-  slice_id: 13
+  show_legend: true
+  slice_id: 6
   time_range: No filter
-  viz_type: chord
-  y_axis_format: ~g
+  viz_type: dist_bar
+  x_axis_label: Transitions
+  x_ticks_layout: auto
+  y_axis_bounds:
+  - null
+  - null
+  y_axis_format: SMART_NUMBER
+  y_axis_label: Counts
+  y_axis_showminmax: false
+query_context: null
 cache_timeout: null
-uuid: 388d2359-8d13-4795-8dc9-1cb5dfa92ee1
+uuid: 9fcc7cc1-9257-4c0d-b377-b3a60a8bf3df
 version: 1.0.0
 dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

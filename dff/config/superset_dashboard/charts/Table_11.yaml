@@ -1,4 +1,7 @@
 slice_name: Table
+description: null
+certified_by: null
+certification_details: null
 viz_type: table
 params:
   adhoc_filters: []
@@ -24,6 +27,7 @@ params:
   time_grain_sqla: null
   time_range: No filter
   viz_type: table
+query_context: null
 cache_timeout: null
 uuid: 38d353dc-c0ef-41a0-97c7-3dcbebab9e02
 version: 1.0.0

@@ -1,11 +1,26 @@
-slice_name: Node visits [cloud]
-viz_type: word_cloud
+slice_name: Node visits [ratio]
+description: null
+certified_by: null
+certification_details: null
+viz_type: pie
 params:
   adhoc_filters: []
   color_scheme: supersetColors
   datasource: 1__table
+  date_format: smart_date
+  donut: true
   extra_form_data: {}
   granularity_sqla: start_time
+  groupby:
+  - flow_label
+  - node_label
+  innerRadius: 36
+  label_line: false
+  label_type: key
+  labels_outside: true
+  legendMargin: 100
+  legendOrientation: top
+  legendType: plain
   metric:
     aggregate: COUNT
     column:
@@ -29,16 +44,20 @@ params:
     hasCustomLabel: false
     isNew: false
     label: COUNT(context_id)
-    optionName: metric_mmbslhy6cnd_6zv1lh26whx
+    optionName: metric_lk827d91wws_mq94n624y6
     sqlExpression: null
-  rotation: flat
-  row_limit: 500
-  series: label
-  size_from: 10
-  size_to: 80
+  number_format: SMART_NUMBER
+  outerRadius: 70
+  row_limit: 100
+  show_labels: true
+  show_labels_threshold: 5
+  show_legend: true
+  show_total: true
+  sort_by_metric: true
   time_range: No filter
-  viz_type: word_cloud
+  viz_type: pie
+query_context: null
 cache_timeout: null
-uuid: b25b4292-ff21-4164-98ac-b1cba95e2994
+uuid: f9fb7893-3533-4519-bbc4-1f4853f380e1
 version: 1.0.0
 dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

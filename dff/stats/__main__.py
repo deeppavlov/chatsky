@@ -56,9 +56,9 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     opts_parser.add_argument(
         "-dT",
         "--db.type",
-        choices=["postgresql", "clickhousedb+connect"],
+        choices=["clickhousedb+connect"],
         required=True,
-        help="DBMS connection type: 'postgresql', or 'clickhouse+connect'.",
+        help="DBMS connection type: 'clickhouse+connect' or ....",
     )
     opts_parser.add_argument("-dU", "--db.user", required=True, help="Database user.")
     opts_parser.add_argument("-dh", "--db.host", required=True, help="Database host.")

@@ -1,41 +1,42 @@
 table_name: dff_node_stats
-main_dttm_col: start_time
+main_dttm_col: null
 description: null
 default_endpoint: null
 offset: 0
 cache_timeout: null
-schema: public
-sql: "WITH main AS (\n  SELECT context_id, request_id, time as start_time, data_key,\
-  \ data,\n   cast(data -> 'flow' as text) as flow_label, \n   cast(data -> 'node'\
-  \ as text) as node_label, \n   cast(data -> 'label' as text) as label \n   FROM\
-  \ test ORDER BY context_id, request_id)\nSELECT context_id, request_id, start_time,\
-  \ data_key, cast(data as text) as data, \nflow_label, node_label, label, LAG(label,1)\
-  \ OVER (ORDER BY context_id, request_id) as prev_label\nFROM main;"
+schema: test
+sql: "\nWITH main as (\nSELECT DISTINCT otel_logs.LogAttributes['context_id'] as context_id,\n\
+  \notel_logs.LogAttributes['request_id'] as request_id, \notel_logs.Timestamp as\
+  \ start_time,\n\notel_traces.SpanName as data_key,\notel_logs.Body as data,\n\n\
+  JSON_VALUE(otel_logs.Body, '$.label') as label,\nJSON_VALUE(otel_logs.Body, '$.flow')\
+  \ as flow_label,\n\nJSON_VALUE(otel_logs.Body, '$.node') as node_label,\notel_logs.TraceId\
+  \ as trace_id,\n\notel_traces.TraceId\nFROM otel_logs, otel_traces \n\nWHERE otel_logs.TraceId\
+  \ = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label' \n\nORDER\
+  \ BY context_id, request_id\n) SELECT context_id,\nrequest_id,\nstart_time,\n\n\
+  data_key,\ndata,\nlabel,\nneighbor(label, -1) as prev_label,\nflow_label,\n\nnode_label\n\
+  FROM main\nWHERE label != ''\n"
 params: null
 template_params: null
 filter_select_enabled: false
 fetch_values_predicate: null
 extra: null
 uuid: fda98ab8-f550-45f1-9ded-0113f3e67260
-metrics: []
+metrics:
+- metric_name: count
+  verbose_name: null
+  metric_type: null
+  expression: count(*)
+  description: null
+  d3format: null
+  extra:
+    warning_markdown: ''
+  warning_text: null
 columns:
 - column_name: start_time
   verbose_name: null
   is_dttm: true
   is_active: true
-  type: DATETIME
-  advanced_data_type: null
-  groupby: true
-  filterable: true
-  expression: null
-  description: null
-  python_date_format: null
-  extra: {}
-- column_name: request_id
-  verbose_name: null
-  is_dttm: false
-  is_active: true
-  type: INTEGER
+  type: DateTime64(9)
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -47,7 +48,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: LowCardinality(String)
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -59,7 +60,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -71,7 +72,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -83,7 +84,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -95,7 +96,19 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: request_id
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -107,7 +120,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -119,7 +132,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -128,4 +141,4 @@ columns:
   python_date_format: null
   extra: {}
 version: 1.0.0
-database_uuid: 355926fc-e7d6-439e-b506-393ac7410e63
+database_uuid: ee32f76e-55e3-483a-935a-22d03072db23

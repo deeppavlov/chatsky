@@ -44,25 +44,45 @@ TYPE_MAPPING_CH = {
 Mapping of standard sql column types to Clickhouse native types.
 """
 
-SQL_STMT_MAPPING = {
-    "dff_acyclic_nodes.yaml": "WITH main AS (\n  SELECT DISTINCT {table}.context_id, request_id, timestamp, \
-    CAST({lblfield} AS {texttype}) AS label\n  \
-    FROM {table} INNER JOIN \n  (\n    WITH helper AS \
-    (\n         SELECT DISTINCT context_id, request_id, CAST({lblfield} AS {texttype}) \
-    AS label from {table}\n         ) \n    SELECT context_id FROM helper GROUP BY context_id\n\
-        HAVING count(context_id) = COUNT(DISTINCT label)\n  ) AS plain_ctx ON {table}.context_id \
-    = plain_ctx.context_id\n     ORDER BY context_id, request_id\n     ) SELECT context_id, \
-    request_id, timestamp as start_time, label,\n    {lag} \
-    AS prev_label\nFROM main;",
-    "dff_node_stats.yaml": "WITH main AS (\n  SELECT context_id, request_id, timestamp AS start_time, data_key, \
-    data,\n   CAST({flowfield} AS {texttype}) AS flow_label, \n   CAST({nodefield} \
-    AS {texttype}) AS node_label, \n   CAST({lblfield} AS {texttype}) AS label \n   FROM \
-    {table} ORDER BY context_id, request_id)\nSELECT context_id, request_id, start_time, \
-    data_key, CAST(data AS {texttype}) AS data, \nflow_label, node_label, label, {lag} AS prev_label\nFROM main;",
-    "dff_final_nodes.yaml": "WITH main AS (SELECT context_id, max(request_id) AS max_hist FROM {table} GROUP \
-    BY context_id)     \nSELECT {table}.*, CAST({flowfield} AS {texttype}) AS flow_label, \
-    CAST({nodefield} AS {texttype}) AS node_label FROM {table} INNER JOIN main \nON {table}.context_id \
-    = main.context_id AND {table}.request_id = main.max_hist;",
+DFF_NODE_STATS_STATEMENT = """
+WITH main as (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
+{table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as start_time,\n
+otel_traces.SpanName as data_key,\n{table}.Body as data,\n
+{lblfield} as label,\n{flowfield} as flow_label,\n
+{nodefield} as node_label,\n{table}.TraceId as trace_id,\n
+otel_traces.TraceId\nFROM {table}, otel_traces \n
+WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label' \n
+ORDER BY context_id, request_id\n) SELECT context_id,\nrequest_id,\nstart_time,\n
+data_key,\ndata,\nlabel,\n{lag} as prev_label,\nflow_label,\n
+node_label\nFROM main\nWHERE label != ''
+"""
+DFF_ACYCLIC_NODES_STATEMENT = """
+WITH main AS (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
+{table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as timestamp,\n
+{lblfield} as label\nFROM {table}\n
+INNER JOIN \n  (\n  WITH helper AS \n    (\n    
+SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
+{table}.LogAttributes['request_id'] as request_id,\n
+{lblfield} as label\n    FROM {table}\n    )\n
+SELECT context_id FROM helper\n  GROUP BY context_id\n  HAVING COUNT(context_id) = COUNT(DISTINCT label)\n
+) as plain_ctx\nON plain_ctx.context_id = context_id\n
+ORDER by context_id, request_id\n)\nSELECT * FROM main
+"""
+DFF_FINAL_NODES_STATEMENT = """
+WITH main AS\n(\nSELECT LogAttributes['context_id'] AS context_id,\nmax(LogAttributes['request_id']) AS max_history\n
+FROM {table}\nGROUP BY context_id\n)\nSELECT DISTINCT LogAttributes['context_id'] AS context_id,\n
+LogAttributes['request_id'] AS request_id,\n{table}.Timestamp AS start_time,\n
+{lblfield} AS label,\n{flowfield} AS flow_label,\n
+{nodefield} AS node_label\n FROM {table} \n
+INNER JOIN main\nON context_id  = main.context_id \nAND request_id = main.max_history\n
+INNER JOIN otel_traces\nON {table}.TraceId = otel_traces.TraceId\n
+WHERE otel_traces.SpanName = 'get_current_label'
+"""
+
+SQL_STATEMENT_MAPPING = {
+    "dff_acyclic_nodes.yaml": DFF_ACYCLIC_NODES_STATEMENT,
+    "dff_node_stats.yaml": DFF_NODE_STATS_STATEMENT,
+    "dff_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
 }
 """
 Select statements for dashboard configuration with names and types represented as placeholders.
@@ -168,9 +188,9 @@ def make_zip_config(parsed_args: argparse.Namespace):
             table="${db.table}",
             lag="neighbor(label, -1)",
             texttype="String",
-            lblfield="JSON_VALUE(data, '$.label')",
-            flowfield="JSON_VALUE(data, '$.flow')",
-            nodefield="JSON_VALUE(data, '$.node')",
+            lblfield="JSON_VALUE(${db.table}.Body, '$.label')",
+            flowfield="JSON_VALUE(${db.table}.Body, '$.flow')",
+            nodefield="JSON_VALUE(${db.table}.Body, '$.node')",
         )
     else:
         params = dict(
@@ -182,10 +202,10 @@ def make_zip_config(parsed_args: argparse.Namespace):
             nodefield="data -> 'node'",
         )
 
-    conf = SQL_STMT_MAPPING.copy()
+    conf = SQL_STATEMENT_MAPPING.copy()
     for key in conf.keys():
         conf[key] = {}
-        conf[key]["sql"] = SQL_STMT_MAPPING[key].format(**params)
+        conf[key]["sql"] = SQL_STATEMENT_MAPPING[key].format(**params)
 
     resolve_conf = OmegaConf.create(
         {

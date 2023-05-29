@@ -1,23 +1,24 @@
-slice_name: Node visits [ratio]
-viz_type: pie
+slice_name: Transition layout
+description: null
+certified_by: null
+certification_details: null
+viz_type: graph_chart
 params:
   adhoc_filters: []
+  baseEdgeWidth: 3
+  baseNodeSize: 20
   color_scheme: supersetColors
   datasource: 1__table
-  date_format: smart_date
-  donut: true
+  draggable: false
+  edgeLength: 400
+  edgeSymbol: none,arrow
   extra_form_data: {}
+  friction: 0.2
   granularity_sqla: start_time
-  groupby:
-  - flow_label
-  - node_label
-  innerRadius: 36
-  label_line: false
-  label_type: key
-  labels_outside: true
-  legendMargin: 100
+  gravity: 0.3
+  layout: force
   legendOrientation: top
-  legendType: plain
+  legendType: scroll
   metric:
     aggregate: COUNT
     column:
@@ -41,19 +42,21 @@ params:
     hasCustomLabel: false
     isNew: false
     label: COUNT(context_id)
-    optionName: metric_lk827d91wws_mq94n624y6
+    optionName: metric_qxsyaujh63_4b75kyx6b5g
     sqlExpression: null
-  number_format: SMART_NUMBER
-  outerRadius: 70
-  row_limit: 100
-  show_labels: true
-  show_labels_threshold: 5
+  repulsion: 1000
+  roam: scale
+  row_limit: 10000
+  selectedMode: single
   show_legend: true
-  show_total: true
-  sort_by_metric: true
+  source: prev_label
+  source_category: flow_label
+  target: label
+  target_category: flow_label
   time_range: No filter
-  viz_type: pie
+  viz_type: graph_chart
+query_context: null
 cache_timeout: null
-uuid: f9fb7893-3533-4519-bbc4-1f4853f380e1
+uuid: 801e8c66-f693-46e3-a9a5-7b2b0b08a4a7
 version: 1.0.0
 dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260
