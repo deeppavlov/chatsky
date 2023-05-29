@@ -68,8 +68,8 @@ class DFFInstrumentor(BaseInstrumentor):
     @decorator
     async def __call__(self, wrapped, _, args, kwargs):
         ctx, _, info = args
-        attributes = {"context_id": str(ctx.id), "request_id": get_last_index(ctx.requests)}
-        data_key = get_wrapper_field(info)
+        pipeline_component = get_wrapper_field(info)
+        attributes = {"context_id": str(ctx.id), "request_id": get_last_index(ctx.requests), "pipeline_component": pipeline_component}
 
         result: Optional[dict]
         if asyncio.iscoroutinefunction(wrapped):
@@ -81,7 +81,7 @@ class DFFInstrumentor(BaseInstrumentor):
             return result
 
         span: Span
-        with self._tracer.start_as_current_span(f"dff{data_key}", kind=SpanKind.INTERNAL) as span:
+        with self._tracer.start_as_current_span(wrapped.__name__, kind=SpanKind.INTERNAL) as span:
             span_ctx = span.get_span_context()
             record = LogRecord(
                 span_id=span_ctx.span_id,

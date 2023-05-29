@@ -33,12 +33,15 @@ in order to measure the exact running time of the pipeline.
 
 
 # %%
+set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
+set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
 dff_instrumentor = DFFInstrumentor()
+dff_instrumentor.instrument()
 
 
 @dff_instrumentor
 async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    data = {"runtime_state": info["component"]["execution_state"]}
+    data = {"execution_state": info["component"]["execution_state"]}
     return data
 
 
@@ -62,7 +65,4 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, defaults.get_timin
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
-    set_logger_destination(OTLPLogExporter("grpc://localhost:4317"))
-    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317"))
-    dff_instrumentor.instrument()
     pipeline.run()

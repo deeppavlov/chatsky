@@ -30,7 +30,10 @@ This can be done in the manner demonstrated below.
 
 
 # %%
+set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
+set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
 dff_instrumentor = DFFInstrumentor()
+dff_instrumentor.instrument()
 
 
 async def heavy_service(_):
@@ -38,8 +41,8 @@ async def heavy_service(_):
 
 
 @dff_instrumentor
-async def get_group_stats(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    data = {"runtime_state": info["component"]["execution_state"]}
+async def get_group_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    data = {"execution_state": info["component"]["execution_state"]}
     return data
 
 
@@ -53,7 +56,7 @@ pipeline = Pipeline.from_dict(
             ServiceGroup(
                 before_handler=[defaults.get_timing_before],
                 after_handler=[
-                    get_group_stats,
+                    get_group_state,
                     defaults.get_timing_after,
                     defaults.get_current_label,
                 ],
@@ -65,7 +68,4 @@ pipeline = Pipeline.from_dict(
 )
 
 if __name__ == "__main__":
-    set_logger_destination(OTLPLogExporter("grpc://localhost:4317"))
-    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317"))
-    dff_instrumentor.instrument()
     pipeline.run()

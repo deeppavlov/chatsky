@@ -45,7 +45,10 @@ The whole process is illustrated in the example below.
 
 
 # %%
+set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
+set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
 dff_instrumentor = DFFInstrumentor()
+dff_instrumentor.instrument()
 
 
 @dff_instrumentor
@@ -81,7 +84,4 @@ pipeline = Pipeline.from_dict(
 
 
 if __name__ == "__main__":
-    set_logger_destination(OTLPLogExporter("grpc://localhost:4317"))
-    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317"))
-    dff_instrumentor.instrument()
     pipeline.run()
