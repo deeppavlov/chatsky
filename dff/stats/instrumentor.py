@@ -69,7 +69,11 @@ class DFFInstrumentor(BaseInstrumentor):
     async def __call__(self, wrapped, _, args, kwargs):
         ctx, _, info = args
         pipeline_component = get_wrapper_field(info)
-        attributes = {"context_id": str(ctx.id), "request_id": get_last_index(ctx.requests), "pipeline_component": pipeline_component}
+        attributes = {
+            "context_id": str(ctx.id),
+            "request_id": get_last_index(ctx.requests),
+            "pipeline_component": pipeline_component,
+        }
 
         result: Optional[dict]
         if asyncio.iscoroutinefunction(wrapped):
