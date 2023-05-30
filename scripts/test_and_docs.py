@@ -1,13 +1,13 @@
 import os
 import sys
 
+import scripts.patch_sphinx
 import sphinx.ext.apidoc as apidoc
 import sphinx.cmd.build as build
 import python_on_whales
 import pytest
 import dotenv
 
-import docs.source.utils.patching as patching
 from .codestyle import lint
 from .clean import clean_docs
 
@@ -44,7 +44,6 @@ def test_all():
 
 def docs():
     clean_docs()
-    patching.main()
     dotenv.load_dotenv(".env_file")
     os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
     apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "dff"])
