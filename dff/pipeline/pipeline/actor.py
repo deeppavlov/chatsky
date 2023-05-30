@@ -289,7 +289,7 @@ class Actor:
         true_labels = []
         for label, condition in transitions.items():
             if self.condition_handler(condition, ctx, pipeline, *args, **kwargs):
-                if isinstance(label, Callable):
+                if callable(label):
                     label = label(ctx, pipeline, *args, **kwargs)
                     # TODO: explicit handling of errors
                     if label is None:
@@ -340,7 +340,7 @@ class Actor:
             ctx.validation = True
             ctx.add_request(Message(text="text"))
 
-            label = label(ctx, pipeline) if isinstance(label, Callable) else normalize_label(label, flow_label)
+            label = label(ctx, pipeline) if callable(label) else normalize_label(label, flow_label)
 
             # validate labeling
             try:
