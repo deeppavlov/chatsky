@@ -5,7 +5,7 @@ import black
 from flake8.api import legacy as flake8
 
 
-_STANDARD_PATHS = ["dff", "examples", "scripts", "tests"]
+_STANDARD_PATHS = ["dff", "scripts", "tests"]
 _STANDARD_PATHS_LEN = 120
 _SHORT_PATHS = ["tutorials"]
 _SHORT_PATHS_LEN = 100
@@ -30,7 +30,9 @@ def lint() -> int:
 
     would_format = format(False)
     if would_format == 1:
-        print("================================\nBad formatting? Run: poetry run format\n================================")
+        print(
+            "================================\nBad formatting? Run: poetry run format\n================================"
+        )
 
     # TODO: Add mypy testing
     # @mypy . --exclude venv*,build
