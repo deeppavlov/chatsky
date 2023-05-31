@@ -59,7 +59,7 @@ mysql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
         "asyncmy~=0.2.7",
-        "cryptography~=40.0.2",
+        "cryptography>=40.0.2,<41.1.0",
     ],
 )
 
