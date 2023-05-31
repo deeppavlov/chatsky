@@ -6,11 +6,11 @@ This class is used to store and retrieve context data in a JSON. It allows the D
 store and retrieve context data.
 """
 import asyncio
-from typing import Hashable, Union, List, Any, Dict, Tuple, Optional
+from typing import Hashable, Union, List, Any, Dict, Optional
 
-from pydantic import BaseModel, Extra, root_validator
+from pydantic import BaseModel, Extra
 
-from .context_schema import ContextSchema, ExtraFields
+from .context_schema import ALL_ITEMS, ExtraFields
 
 try:
     import aiofiles
@@ -26,11 +26,7 @@ from dff.script import Context
 
 
 class SerializableStorage(BaseModel, extra=Extra.allow):
-    @root_validator
-    def validate_any(cls, vals):
-        for key, values in vals.items():
-            vals[key] = [None if value is None else value for value in values]
-        return vals
+    pass
 
 
 class JSONContextStorage(DBContextStorage):
@@ -44,59 +40,51 @@ class JSONContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path)
         asyncio.run(self._load())
 
-    def set_context_schema(self, scheme: ContextSchema):
-        super().set_context_schema(scheme)
-        self.context_schema.set_all_writable_rules_to_update()
-
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
+    async def get_item_async(self, key: str) -> Context:
         await self._load()
-        fields, primary_id = await self._read_keys(key)
+        primary_id = await self._get_last_ctx(key)
         if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, primary_id, key)
+        context, hashes = await self.context_schema.read_context(self._read_ctx, primary_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     @cast_key_to_string()
-    async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        fields, primary_id = await self._read_keys(key)
+    async def set_item_async(self, key: str, value: Context):
+        primary_id = await self._get_last_ctx(key)
         value_hash = self.hash_storage.get(key)
-        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, primary_id, key)
+        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
         await self._save()
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: Union[Hashable, str]):
+    async def del_item_async(self, key: str):
         self.hash_storage[key] = None
-        if key not in self.storage.__dict__:
+        primary_id = await self._get_last_ctx(key)
+        if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        if len(self.storage.__dict__[key]) > 0:
-            self.storage.__dict__[key][-1][self.context_schema.active_ctx.name] = False 
+        self.storage.__dict__[primary_id][ExtraFields.active_ctx.name] = False
         await self._save()
 
     @threadsafe_method
     @cast_key_to_string()
-    async def contains_async(self, key: Union[Hashable, str]) -> bool:
+    async def contains_async(self, key: str) -> bool:
         await self._load()
-        if key in self.storage.__dict__:
-            container = self.storage.__dict__.get(key, list())
-            if len(container) != 0:
-                return container[-1][self.context_schema.active_ctx.name]
-        return False
+        return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        values = self.storage.__dict__.values()
-        return len([v for v in values if len(v) > 0 and v[-1][self.context_schema.active_ctx.name]])
+        await self._load()
+        return len([v for v in self.storage.__dict__.values() if v[ExtraFields.active_ctx.name]])
 
     @threadsafe_method
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         for key in self.storage.__dict__.keys():
-            await self.del_item_async(key)
+            self.storage.__dict__[key][ExtraFields.active_ctx.name] = False
         await self._save()
 
     async def _save(self):
@@ -111,41 +99,35 @@ class JSONContextStorage(DBContextStorage):
             async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
                 self.storage = SerializableStorage.parse_raw(await file_stream.read())
 
-    async def _read_keys(self, storage_key: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
-        nested_dict_keys = dict()
-        container = self.storage.__dict__.get(storage_key, list())
-        if len(container) == 0:
-            return nested_dict_keys, None
-        container_dict = container[-1] if container[-1][self.context_schema.active_ctx.name] else dict()
-        field_names = [key for key, value in container_dict.items() if isinstance(value, dict)]
-        for field in field_names:
-            nested_dict_keys[field] = list(container_dict.get(field, dict()).keys())
-        return nested_dict_keys, container_dict.get(self.context_schema.primary_id.name, None)
+    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+        for key, value in self.storage.__dict__.items():
+            if value[ExtraFields.storage_key.name] == storage_key and value[ExtraFields.active_ctx.name]:
+                return key
+        return None
 
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], _: str, storage_key: str) -> Dict:
-        result_dict = dict()
-        context = self.storage.__dict__[storage_key][-1]
-        non_empty_value_subset = [
-            field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
-        ]
-        for field in non_empty_value_subset:
-            non_empty_key_set = [key for key, value in subscript[field].items() if value]
-            for key in non_empty_key_set:
-                value = context.get(field, dict()).get(key)
-                if value is not None:
-                    if field not in result_dict:
-                        result_dict[field] = dict()
-                    result_dict[field][key] = value
-        true_value_subset = [field for field, value in subscript.items() if isinstance(value, bool) and value]
-        for field in true_value_subset:
-            value = context.get(field, None)
-            if value is not None:
-                result_dict[field] = value
-        return result_dict
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
+        context = dict()
+        for key, value in subscript.items():
+            source = self.storage.__dict__[primary_id][key]
+            if isinstance(value, bool) and value:
+                context[key] = source
+            elif isinstance(source, dict):
+                if isinstance(value, int):
+                    read_slice = sorted(source.keys())[value:]
+                    context[key] = {k: v for k, v in source.items() if k in read_slice}
+                elif isinstance(value, list):
+                    context[key] = {k: v for k, v in source.items() if k in value}
+                elif value == ALL_ITEMS:
+                    context[key] = source
+        return context
 
-    async def _write_ctx(self, data: Dict[str, Any], update: bool, _: str, storage_key: str):
-        container = self.storage.__dict__.setdefault(storage_key, list())
-        if update:
-            container[-1] = {**container[-1], **data}
+    async def _write_ctx_val(self, key: str, data: Union[Dict[str, Any], Any], enforce: bool, nested: bool, primary_id: str):
+        destination = self.storage.__dict__.setdefault(primary_id, dict())
+        if nested:
+            nested_destination = destination.setdefault(key, dict())
+            for data_key, data_value in data.items():
+                if enforce or data_key not in nested_destination:
+                    nested_destination[data_key] = data_value
         else:
-            container.append(data)
+            if enforce or key not in destination:
+                destination[key] = data
