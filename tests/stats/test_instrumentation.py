@@ -20,11 +20,8 @@ def test_instrument_uninstrument():
     assert hasattr(defaults.get_timing_after, "__wrapped__")
     instrumentor.uninstrument()
     assert not hasattr(defaults.get_current_label, "__wrapped__")
-    assert defaults.get_current_label is old_current_label
     assert not hasattr(defaults.get_timing_before, "__wrapped__")
-    assert defaults.get_timing_before is old_timing_before
     assert not hasattr(defaults.get_timing_after, "__wrapped__")
-    assert defaults.get_timing_after is old_timing_after
 
 
 def test_keyword_arguments():

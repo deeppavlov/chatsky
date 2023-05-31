@@ -81,7 +81,10 @@ class DFFInstrumentor(BaseInstrumentor):
         else:
             result = wrapped(ctx, _, info)
 
-        if result is None:
+        if result is None or not self.is_instrumented_by_opentelemetry:
+            # self.is_instrumented_by_opentelemetry allows to disable
+            # the decorator programmatically if
+            # instrumentation is disabled.
             return result
 
         span: Span
