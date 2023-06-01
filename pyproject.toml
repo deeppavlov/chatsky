@@ -133,9 +133,10 @@ doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sph
 help = { callable = "scripts.utilities:help" }
 lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
 format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
-test = { callable = "scripts.test_and_docs:test", extras = ["tests", "devel"] }
-test_all = { callable = "scripts.test_and_docs:test_all", extras = ["tutorials", "devel"] }
-docs = { callable = "scripts.test_and_docs:docs", extras = ["tutorials", "doc", "devel"] }
+test = { callable = "scripts.test:test", extras = ["tests", "devel"] }
+test_no_cov = { callable = "scripts.test:test_no_cov", extras = ["tests", "devel"] }
+test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full"] }
+docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel"] }
 pre_commit = { callable = "scripts.utilities:pre_commit" }
 version_patch = { callable = "scripts.utilities:version_patch", extras = ["devel"] }
 version_minor = { callable = "scripts.utilities:version_minor", extras = ["devel"] }
