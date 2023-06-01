@@ -6,10 +6,10 @@ It serves as an interface class
 that defines methods for saving and loading data.
 
 """
-from typing import List
+from typing import List, Tuple
 from abc import ABC, abstractmethod
 
-from ..record import StatsRecord
+from ..record import LogRecord, TraceRecord
 
 
 class Saver(ABC):
@@ -26,7 +26,7 @@ class Saver(ABC):
     @abstractmethod
     async def save(
         self,
-        data: List[StatsRecord],
+        data: List[Tuple[TraceRecord, LogRecord]],
     ) -> None:
         """
         Save the data to a database or a file.
@@ -37,7 +37,7 @@ class Saver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load(self) -> List[StatsRecord]:
+    async def load(self) -> List[Tuple[TraceRecord, LogRecord]]:
         """
         Load the data from a database or a file.
 

@@ -33,36 +33,86 @@ DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 Local path to superset dashboard files to import.
 """
 
-TYPE_MAPPING_CH = {
+CLICKHOUSE_TYPES_MAP = {
     "FLOAT": "Nullable(Float64)",
     "STRING": "Nullable(String)",
     "LONGINTEGER": "Nullable(Int64)",
     "INTEGER": "Nullable(Int64)",
-    "DATETIME": "Nullable(DateTime)",
+    "DATETIME": "Nullable(DateTime(9))",
+    "HSTORE": "Map(String, String)",
+    "ARRAY(DATETIME)": "Array(DateTime(9))",
+    "ARRAY(STRING)": "Array(String)",
+    "ARRAY(HSTORE)": "Array(Map(String, String))",
 }
 """
 Mapping of standard sql column types to Clickhouse native types.
 """
+CLICKHOUSE_STATEMENT_SUBSTITUTES = dict(
+    logs_table="${db.table}",
+    traces_table="otel_traces",
+    lag="neighbor(label, -1)",
+    context_id_attr="LogAttributes['context_id']",
+    request_id_attr="LogAttributes['request_id']",
+    label_field="JSON_VALUE(Body, '$.label')",
+    flow_field="JSON_VALUE(Body, '$.flow')",
+    node_field="JSON_VALUE(Body, '$.node')",
+)
+"""
+Syntax sybstitutes for Clickhouse statements.
+"""
+POSTGRES_STATEMENT_SUBSTITUTES = dict(
+    logs_table="${db.table}",
+    traces_table="otel_traces",
+    lag="LAG(label,1) OVER (ORDER BY context_id, request_id)",
+    context_id_attr="LogAttributes -> 'context_id'",
+    request_id_attr="LogAttributes -> 'request_id'",
+    label_field="Body -> 'label'",
+    flow_field="Body -> 'flow'",
+    node_field="Body -> 'node'",
+)
+"""
+Syntax substitutes for PostgreSQL statements.
+"""
 
-SQL_STMT_MAPPING = {
-    "dff_acyclic_nodes.yaml": "WITH main AS (\n  SELECT DISTINCT {table}.context_id, request_id, timestamp, \
-    CAST({lblfield} AS {texttype}) AS label\n  \
-    FROM {table} INNER JOIN \n  (\n    WITH helper AS \
-    (\n         SELECT DISTINCT context_id, request_id, CAST({lblfield} AS {texttype}) \
-    AS label from {table}\n         ) \n    SELECT context_id FROM helper GROUP BY context_id\n\
-        HAVING count(context_id) = COUNT(DISTINCT label)\n  ) AS plain_ctx ON {table}.context_id \
-    = plain_ctx.context_id\n     ORDER BY context_id, request_id\n     ) SELECT context_id, \
-    request_id, timestamp as start_time, label,\n    {lag} \
-    AS prev_label\nFROM main;",
-    "dff_node_stats.yaml": "WITH main AS (\n  SELECT context_id, request_id, timestamp AS start_time, data_key, \
-    data,\n   CAST({flowfield} AS {texttype}) AS flow_label, \n   CAST({nodefield} \
-    AS {texttype}) AS node_label, \n   CAST({lblfield} AS {texttype}) AS label \n   FROM \
-    {table} ORDER BY context_id, request_id)\nSELECT context_id, request_id, start_time, \
-    data_key, CAST(data AS {texttype}) AS data, \nflow_label, node_label, label, {lag} AS prev_label\nFROM main;",
-    "dff_final_nodes.yaml": "WITH main AS (SELECT context_id, max(request_id) AS max_hist FROM {table} GROUP \
-    BY context_id)     \nSELECT {table}.*, CAST({flowfield} AS {texttype}) AS flow_label, \
-    CAST({nodefield} AS {texttype}) AS node_label FROM {table} INNER JOIN main \nON {table}.context_id \
-    = main.context_id AND {table}.request_id = main.max_hist;",
+DFF_NODE_STATS_STATEMENT = """
+WITH main as (\nSELECT DISTINCT {logs_table}.{context_id_attr} as context_id,\n
+{logs_table}.{request_id_attr} as request_id, \n{logs_table}.Timestamp as start_time,\n
+{traces_table}.SpanName as data_key,\n{logs_table}.Body as data,\n
+{label_field} as label,\n{flow_field} as flow_label,\n
+{node_field} as node_label,\n{logs_table}.TraceId as trace_id,\n
+{traces_table}.TraceId\nFROM {logs_table}, {traces_table} \n
+WHERE {logs_table}.TraceId = {traces_table}.TraceId and {traces_table}.SpanName = 'get_current_label' \n
+ORDER BY context_id, request_id\n) SELECT context_id,\nrequest_id,\nstart_time,\n
+data_key,\ndata,\nlabel,\n{lag} as prev_label,\nflow_label,\n
+node_label\nFROM main\nWHERE label != ''
+"""
+DFF_ACYCLIC_NODES_STATEMENT = """
+WITH main AS (\nSELECT DISTINCT {logs_table}.{context_id_attr} as context_id,\n
+{logs_table}.{request_id_attr} as request_id, \n{logs_table}.Timestamp as timestamp,\n
+{label_field} as label\nFROM {logs_table}\n
+INNER JOIN \n  (\n  WITH helper AS \n    (\n    
+SELECT DISTINCT {logs_table}.{context_id_attr} as context_id,\n
+{logs_table}.{request_id_attr} as request_id,\n
+{label_field} as label\n    FROM {logs_table}\n    )\n
+SELECT context_id FROM helper\n  GROUP BY context_id\n  HAVING COUNT(context_id) = COUNT(DISTINCT label)\n
+) as plain_ctx\nON plain_ctx.context_id = context_id\n
+ORDER by context_id, request_id\n)\nSELECT * FROM main
+"""
+DFF_FINAL_NODES_STATEMENT = """
+WITH main AS\n(\nSELECT {context_id_attr} AS context_id,\nmax({request_id_attr}) AS max_history\n
+FROM {logs_table}\nGROUP BY context_id\n)\nSELECT DISTINCT {logs_table}.{context_id_attr} AS context_id,\n
+{logs_table}.{request_id_attr} AS request_id,\n{logs_table}.Timestamp AS start_time,\n
+{label_field} AS label,\n{flow_field} AS flow_label,\n
+{node_field} AS node_label\n FROM {logs_table} \n
+INNER JOIN main\nON context_id  = main.context_id \nAND request_id = main.max_history\n
+INNER JOIN {traces_table}\nON {logs_table}.TraceId = {traces_table}.TraceId\n
+WHERE {traces_table}.SpanName = 'get_current_label'
+"""
+
+SQL_STATEMENT_MAPPING = {
+    "dff_acyclic_nodes.yaml": DFF_ACYCLIC_NODES_STATEMENT,
+    "dff_node_stats.yaml": DFF_NODE_STATS_STATEMENT,
+    "dff_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
 }
 """
 Select statements for dashboard configuration with names and types represented as placeholders.
@@ -164,28 +214,14 @@ def make_zip_config(parsed_args: argparse.Namespace):
         cli_conf = OmegaConf.from_cli()
 
     if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
-        params = dict(
-            table="${db.table}",
-            lag="neighbor(label, -1)",
-            texttype="String",
-            lblfield="JSON_VALUE(data, '$.label')",
-            flowfield="JSON_VALUE(data, '$.flow')",
-            nodefield="JSON_VALUE(data, '$.node')",
-        )
+        params = CLICKHOUSE_STATEMENT_SUBSTITUTES
     else:
-        params = dict(
-            table="${db.table}",
-            lag="LAG(label,1) OVER (ORDER BY context_id, request_id)",
-            texttype="TEXT",
-            lblfield="data -> 'label'",
-            flowfield="data -> 'flow'",
-            nodefield="data -> 'node'",
-        )
+        params = POSTGRES_STATEMENT_SUBSTITUTES
 
-    conf = SQL_STMT_MAPPING.copy()
+    conf = SQL_STATEMENT_MAPPING.copy()
     for key in conf.keys():
         conf[key] = {}
-        conf[key]["sql"] = SQL_STMT_MAPPING[key].format(**params)
+        conf[key]["sql"] = SQL_STATEMENT_MAPPING[key].format(**params)
 
     resolve_conf = OmegaConf.create(
         {
@@ -220,7 +256,7 @@ def make_zip_config(parsed_args: argparse.Namespace):
             new_file_config = OmegaConf.merge(file_config, getattr(user_config, filepath.name))
             if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
                 for col in OmegaConf.select(new_file_config, "columns"):
-                    col.type = TYPE_MAPPING_CH.get(col.type, col.type)
+                    col.type = CLICKHOUSE_TYPES_MAP.get(col.type, col.type)
             OmegaConf.save(new_file_config, filepath)
 
         logger.info(f"Saving the archive to {outfile_name}.")
