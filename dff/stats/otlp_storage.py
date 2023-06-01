@@ -1,6 +1,8 @@
+import datetime
 from typing import Optional
 
-from .record import StatsRecord
+from dff.script.core.context import Context, get_last_index
+from dff.pipeline import ExtraHandlerRuntimeInfo
 from .subscriber import PoolSubscriber
 from . import exporter_patch  # noqa: F401
 
@@ -33,20 +35,27 @@ class OpenTelemetryStorage(PoolSubscriber):
         self._tracer = get_tracer(__name__)
         self._logger = get_logger(__name__)
 
-    async def on_record_event(self, record: StatsRecord):
+    async def on_record_event(self, ctx: Context, info: ExtraHandlerRuntimeInfo, data: dict):
+        """
+        Callback that gets executed after a record has been added.
+
+        :param ctx: Request context.
+        :param info: Extra handler runtime info.
+        :param data: Target data.
+        """
         span: Span
-        with self._tracer.start_as_current_span(f"dff{record.data_key}", kind=SpanKind.INTERNAL) as span:
+        with self._tracer.start_as_current_span(data["data_key"], kind=SpanKind.INTERNAL) as span:
             span_ctx = span.get_span_context()
             record = LogRecord(
-                observed_timestamp=record.timestamp.timestamp(),
+                observed_timestamp=datetime.datetime.now().timestamp(),
                 span_id=span_ctx.span_id,
                 trace_id=span_ctx.trace_id,
-                body=record.data,
+                body=data,
                 trace_flags=span_ctx.trace_flags,
                 severity_text=None,
                 severity_number=SeverityNumber(1),
                 resource=resource,
-                attributes={"context_id": record.context_id, "request_id": record.request_id},
+                attributes={"context_id": ctx.id, "request_id": get_last_index(ctx.requests)},
             )
             self._logger.emit(record=record)
 

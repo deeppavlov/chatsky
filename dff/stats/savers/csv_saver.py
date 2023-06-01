@@ -16,10 +16,10 @@ import pathlib
 import os
 
 from .saver import Saver
-from ..record import TraceRecord, LogRecord
+from ..record import StatsTraceRecord, StatsLogRecord
 
-TRACE_FIELDNAMES = list(TraceRecord.schema()["properties"].keys())
-LOG_FIELDNAMES = list(LogRecord.schema()["properties"].keys())
+TRACE_FIELDNAMES = list(StatsTraceRecord.schema()["properties"].keys())
+LOG_FIELDNAMES = list(StatsLogRecord.schema()["properties"].keys())
 
 
 class CsvSaver(Saver):
@@ -37,16 +37,15 @@ class CsvSaver(Saver):
         .. code-block::
 
             CsvSaver("csv://foo/bar.csv")
-
-    :param table: Does not affect the class. Added for constructor uniformity.
+    :param kwargs: Arbitrary keyword arguments are allowed for API uniformity.
     """
 
-    def __init__(self, path: str, _: str = "dff_stats") -> None:
+    def __init__(self, path: str, **kwargs) -> None:
         path = path.partition("://")[2].rstrip(".csv")
         self.log_path = pathlib.Path(path + ".log.csv")
         self.trace_path = pathlib.Path(path + ".trace.csv")
 
-    async def save(self, data: List[Tuple[TraceRecord, LogRecord]]) -> None:
+    async def save(self, data: List[Tuple[StatsTraceRecord, StatsLogRecord]]) -> None:
         if len(data) == 0:
             return
 
@@ -72,7 +71,7 @@ class CsvSaver(Saver):
         log_file.close()
         trace_file.close()
 
-    async def load(self) -> List[Tuple[TraceRecord, LogRecord]]:
+    async def load(self) -> List[Tuple[StatsTraceRecord, StatsLogRecord]]:
         log_file = open(self.log_path, "r", encoding="utf-8")
         trace_file = open(self.trace_path, "r", encoding="utf-8")
         log_reader = csv.DictReader(log_file, delimiter=",", quotechar='"', quoting=csv.QUOTE_NONNUMERIC)
@@ -80,7 +79,7 @@ class CsvSaver(Saver):
         items = []
         for trace, log in zip(trace_reader, log_reader):
             log["Body"] = json.loads(log["Body"])
-            items.append((TraceRecord.parse_raw(json.dumps(trace)), LogRecord.parse_raw(json.dumps(log))))
+            items.append((StatsTraceRecord.parse_raw(json.dumps(trace)), StatsLogRecord.parse_raw(json.dumps(log))))
         log_file.close()
         trace_file.close()
         return items

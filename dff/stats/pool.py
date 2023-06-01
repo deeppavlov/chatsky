@@ -4,14 +4,12 @@ Pool
 This module defines the :py:class:`.StatsExtractorPool` class.
 
 """
-import functools
 import asyncio
 from typing import List, Callable, Dict, Optional
 
-from dff.script import Context
-from dff.pipeline import ExtraHandlerRuntimeInfo, ExtraHandlerType, ExtraHandlerFunction
+from wrapt import decorator
+from dff.pipeline import ExtraHandlerType, ExtraHandlerFunction
 from .subscriber import PoolSubscriber
-from .record import StatsRecord
 
 
 class StatsExtractorPool:
@@ -48,20 +46,21 @@ class StatsExtractorPool:
         self.subscribers: List[PoolSubscriber] = []
         self.extractors: Dict[str, Dict[str, ExtraHandlerFunction]] = {}
 
-    def _wrap_extractor(self, extractor: Callable) -> Callable:
-        @functools.wraps(extractor)
-        async def extractor_wrapper(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-            if asyncio.iscoroutinefunction(extractor):
-                result: Optional[StatsRecord] = await extractor(ctx, _, info)
-            else:
-                result: Optional[StatsRecord] = extractor(ctx, _, info)
+    @decorator
+    async def _wrap_extractor(self, extractor, _, args, kwargs):
+        ctx, _, info = args
+        if asyncio.iscoroutinefunction(extractor):
+            result: Optional[dict] = await extractor(ctx, _, info)
+        else:
+            result: Optional[dict] = extractor(ctx, _, info)
 
-            if result is None:
-                return result
-
+        if result is None:
             return result
 
-        return extractor_wrapper
+        for subscriber in self.subscribers:
+            await subscriber.on_record_event(ctx, {"data_key": extractor.__name__, **result})
+
+        return result
 
     def __getitem__(self, key: ExtraHandlerType):
         return self.extractors[key]

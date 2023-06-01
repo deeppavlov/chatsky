@@ -7,10 +7,12 @@ that can be used to persist information to a database.
 """
 
 import asyncio
-from typing import List
+from typing import List, Tuple
+from dff.script.core.context import Context
+from dff.pipeline import ExtraHandlerRuntimeInfo
 
 from .savers import Saver, saver_factory
-from .record import StatsRecord
+from .record import StatsLogRecord, StatsTraceRecord
 from .subscriber import PoolSubscriber
 
 
@@ -29,7 +31,7 @@ class StatsStorage(PoolSubscriber):
         self.saver: Saver = saver
         self.batch_size: int = batch_size
         self.lock = asyncio.Lock()
-        self.data: List[StatsRecord] = []
+        self.data: List[Tuple[StatsTraceRecord, StatsLogRecord]] = []
 
     async def save(self):
         """
@@ -46,18 +48,24 @@ class StatsStorage(PoolSubscriber):
         await self.saver.save(self.data)
         self.data.clear()
 
-    async def on_record_event(self, record: StatsRecord):
+    async def on_record_event(self, ctx: Context, info: ExtraHandlerRuntimeInfo, data: dict):
         """
         Callback that gets executed after a record has been added.
 
-        :param record: Target record.
+        :param ctx: Request context.
+        :param info: Extra handler runtime info.
+        :param data: Target data.
         """
         async with self.lock:
-            self.data.append(record)
+            trace_record = StatsTraceRecord.from_context(ctx, info, data)
+            log_record = StatsLogRecord.from_context(ctx, info, data)
+            log_record.SpanId = trace_record.SpanId
+            log_record.TraceId = trace_record.TraceId
+            self.data.append((trace_record, log_record))
             await self.save()
 
     @classmethod
-    def from_uri(cls, uri: str, table: str = "dff_stats", batch_size: int = 1):
+    def from_uri(cls, uri: str, logs_table: str = "otel_logs", traces_table: str = "otel_traces", batch_size: int = 1):
         """
         Instantiates the saver from the given arguments.
 
@@ -65,5 +73,5 @@ class StatsStorage(PoolSubscriber):
         :param table: Database table to use for data persistence.
         :param batch_size: Number of records that will trigger the saving operation.
         """
-        saver = saver_factory(uri, table)
+        saver = saver_factory(uri, logs_table=logs_table, traces_table=traces_table)
         return cls(saver=saver, batch_size=batch_size)

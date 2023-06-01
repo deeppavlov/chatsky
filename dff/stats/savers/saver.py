@@ -9,7 +9,7 @@ that defines methods for saving and loading data.
 from typing import List, Tuple
 from abc import ABC, abstractmethod
 
-from ..record import LogRecord, TraceRecord
+from ..record import StatsLogRecord, StatsTraceRecord
 
 
 class Saver(ABC):
@@ -26,10 +26,10 @@ class Saver(ABC):
     @abstractmethod
     async def save(
         self,
-        data: List[Tuple[TraceRecord, LogRecord]],
+        data: List[Tuple[StatsTraceRecord, StatsLogRecord]],
     ) -> None:
         """
-        Save the data to a database or a file.
+        Save the trace record - log record pairs to a database or a file.
         Append if the table already exists.
 
         :param data: Collection of data to persist to the database.
@@ -37,9 +37,9 @@ class Saver(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def load(self) -> List[Tuple[TraceRecord, LogRecord]]:
+    async def load(self) -> List[Tuple[StatsTraceRecord, StatsLogRecord]]:
         """
-        Load the data from a database or a file.
+        Load the trace records and log records from a database or a file.
 
         """
         raise NotImplementedError

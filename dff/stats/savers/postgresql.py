@@ -20,7 +20,7 @@ except ImportError as e:
     IMPORT_ERROR_MESSAGE = e.msg
 
 from .saver import Saver
-from ..record import TraceRecord, LogRecord
+from ..record import StatsTraceRecord, StatsLogRecord
 
 
 LOG_COLUMNS = [
@@ -31,7 +31,7 @@ LOG_COLUMNS = [
     Column("SeverityText", String),
     Column("SeverityNumber", Integer),
     Column("ServiceName", String),
-    Column("Body", String),
+    Column("Body", JSON),
     Column("ResourceAttributes", HSTORE),
     Column("LogAttributes", HSTORE),
 ]
@@ -63,16 +63,17 @@ class PostgresSaver(Saver):
     """
     Saves the stats dataframe to - and reads from a Postgresql database.
     The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
-    factory with specific parameters.
+    factory with postgres-specific URI.
 
     :param path: The construction path.
         It should match the sqlalchemy :py:class:`~sqlalchemy.engine.Engine` initialization string.
 
         .. code-block::
 
-            Saver("postgresql://user:password@localhost:5432/default")
+            PostgresSaver("postgresql://user:password@localhost:5432/default")
 
-    :param table: Sets the name of the db table to use. Defaults to "dff_stats".
+    :param logs_table: Name of log table. Defaults to "otel_logs".
+    :param traces_table: Name of traces table. Deafaults to "otel_traces".
     """
 
     def __init__(self, path: str, logs_table: str = "otel_logs", traces_table: str = "otel_traces") -> None:
@@ -88,7 +89,7 @@ class PostgresSaver(Saver):
         self.traces_table = Table(self.traces_tablename, self.metadata, *TRACE_COLUMNS)
         asyncio.run(self.create_table())
 
-    async def save(self, data: List[Tuple[TraceRecord, LogRecord]]) -> None:
+    async def save(self, data: List[Tuple[StatsTraceRecord, StatsLogRecord]]) -> None:
         if len(data) == 0:
             return
         async with self.engine.connect() as conn:
@@ -96,7 +97,7 @@ class PostgresSaver(Saver):
             await conn.execute(insert(self.logs_table).values([item[1].dict(by_alias=True) for item in data]))
             await conn.commit()
 
-    async def load(self) -> List[Tuple[TraceRecord, LogRecord]]:
+    async def load(self) -> List[Tuple[StatsTraceRecord, StatsLogRecord]]:
         stats = []
 
         async with self.engine.connect() as conn:
@@ -104,7 +105,7 @@ class PostgresSaver(Saver):
             log_select = await conn.execute(select(self.logs_table))
 
         for trace, log in zip(trace_select, log_select):
-            stats.append((TraceRecord.from_orm(trace), LogRecord.from_orm(log)))
+            stats.append((StatsTraceRecord.from_orm(trace), StatsLogRecord.from_orm(log)))
 
         return stats
 

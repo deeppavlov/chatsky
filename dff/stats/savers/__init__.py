@@ -1,3 +1,5 @@
+from typing import Optional
+
 from .clickhouse import ClickHouseSaver
 from .postgresql import PostgresSaver
 from .csv_saver import CsvSaver
@@ -9,7 +11,9 @@ Mapping between dbms types and `Saver` classes.
 """
 
 
-def saver_factory(path: str, table: str = "dff_stats") -> Saver:
+def saver_factory(
+    path: str, logs_table: Optional[str] = "otel_logs", traces_table: Optional[str] = "otel_traces"
+) -> Saver:
     """
     Use saver_factory to instantiate various saver types.
     The function takes a database connection URI or its equivalent, and a table name.
@@ -26,7 +30,8 @@ def saver_factory(path: str, table: str = "dff_stats") -> Saver:
     csv://file.csv
 
     :param path: Database uri.
-    :param table: Table name. Can be set to `None` for csv storages
+    :param logs_table: Logs table name. Can be set to `None` for csv storage type.
+    :param traces_table: Traces table name. Can be set to `None` for csv storage type.
     """
     db_type, _, credentials = path.partition("://")
     if not all((db_type, credentials)):
@@ -37,5 +42,5 @@ def saver_factory(path: str, table: str = "dff_stats") -> Saver:
             {", ".join(SAVER_MAPPING.keys())}.\n
             For more information, see the function doc:\n{saver_factory.__doc__}"""
         )
-    saver: Saver = SAVER_MAPPING[db_type](path, table)
+    saver: Saver = SAVER_MAPPING[db_type](path, logs_table=logs_table, traces_table=traces_table)
     return saver

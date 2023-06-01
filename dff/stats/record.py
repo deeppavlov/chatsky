@@ -5,6 +5,7 @@ The following module defines a data model for a standard database record
 persisted by :py:mod:`~dff.stats`.
 
 """
+from uuid import uuid4
 import datetime
 import json
 from typing import Any
@@ -12,7 +13,6 @@ from typing import Any
 from pydantic import BaseModel, Field, validator
 from dff.script.core.context import Context, get_last_index
 from dff.pipeline import ExtraHandlerRuntimeInfo
-from dff.stats.utils import get_wrapper_field
 
 
 class ORMRecord(BaseModel):
@@ -20,14 +20,14 @@ class ORMRecord(BaseModel):
         orm_mode = True
 
 
-class TraceRecord(ORMRecord):
+class StatsTraceRecord(ORMRecord):
     Timestamp: datetime.datetime = Field(default_factory=datetime.datetime.now)
-    TraceId: str = ""
-    SpanId: str = ""
+    TraceId: str = Field(default_factory=uuid4)
+    SpanId: str = Field(default_factory=uuid4)
     ParentSpanId: str = ""
     TraceState: str = ""
     SpanName: str = ""
-    SpanKind: str = ""
+    SpanKind: str = "INTERNAL"
     ServiceName: str = "dialog_flow_framework"
     ResourceAttributes: dict = Field(default_factory=dict)
     SpanAttributes: dict = Field(default_factory=dict)
@@ -47,11 +47,15 @@ class TraceRecord(ORMRecord):
         """
         Construct a trace record from local variables of a pipeline processor function:
         context, handler information, and arbitrary json-serializeable data.
+
+        :param ctx: Request con[text.
+        :param info: Extra handler runtime info.
+        :param data: Target data.
         """
-        return cls(Timestamp=datetime.datetime.now())
+        return cls(Timestamp=datetime.datetime.now(), SpanName=data.get("data_key", ""))
 
 
-class LogRecord(ORMRecord):
+class StatsLogRecord(ORMRecord):
     Timestamp: datetime.datetime = Field(default_factory=datetime.datetime.now)
     TraceId: str = ""
     SpanId: str = ""
@@ -59,7 +63,7 @@ class LogRecord(ORMRecord):
     SeverityText: str = ""
     SeverityNumber: int = 1
     ServiceName: str = "dialog_flow_framework"
-    Body: str = Field(default=json.dumps({}))
+    Body: dict = Field(default_factory=dict)
     ResourceAttributes: dict = Field(default_factory=dict)
     LogAttributes: dict = Field(default_factory=dict)
 
@@ -74,8 +78,13 @@ class LogRecord(ORMRecord):
         """
         Construct a log record from local variables of a pipeline processor function:
         context, handler information, and arbitrary json-serializeable data.
+
+        :param ctx: Request context.
+        :param info: Extra handler runtime info.
+        :param data: Target data.
         """
         return cls(
             Timestamp=datetime.datetime.now(),
+            Body=data,
             LogAttributes={"context_id": ctx.id, "request_id": get_last_index(ctx.requests)},
         )

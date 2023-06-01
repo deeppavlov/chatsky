@@ -90,7 +90,7 @@ DFF_ACYCLIC_NODES_STATEMENT = """
 WITH main AS (\nSELECT DISTINCT {logs_table}.{context_id_attr} as context_id,\n
 {logs_table}.{request_id_attr} as request_id, \n{logs_table}.Timestamp as timestamp,\n
 {label_field} as label\nFROM {logs_table}\n
-INNER JOIN \n  (\n  WITH helper AS \n    (\n    
+INNER JOIN \n  (\n  WITH helper AS \n    (\n
 SELECT DISTINCT {logs_table}.{context_id_attr} as context_id,\n
 {logs_table}.{request_id_attr} as request_id,\n
 {label_field} as label\n    FROM {logs_table}\n    )\n

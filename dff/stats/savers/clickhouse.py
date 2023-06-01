@@ -22,10 +22,10 @@ except ImportError as e:
     IMPORT_ERROR_MESSAGE = e.msg
 
 from .saver import Saver
-from ..record import LogRecord, TraceRecord
+from ..record import StatsLogRecord, StatsTraceRecord
 
 
-class ClickhouseTraceRecord(TraceRecord):
+class ClickhouseStatsTraceRecord(StatsTraceRecord):
     @validator("Timestamp")
     def val_timestamp(cls, data):
         if not isinstance(data, str):
@@ -33,7 +33,7 @@ class ClickhouseTraceRecord(TraceRecord):
         return data
 
 
-class ClickhouseLogRecord(LogRecord):
+class ClickhouseStatsLogRecord(StatsLogRecord):
     @validator("Body", pre=True)
     def val_data(cls, data):
         if not isinstance(data, str):
@@ -111,7 +111,7 @@ class ClickHouseSaver(Saver):
     """
     Saves and reads the stats dataframe from a Clickhouse database.
     The class should be constructed by calling the :py:func:`~dff.stats.savers.saver_factory`
-    factory with specific parameters.
+    factory with Clickhouse-specific URI.
 
     :param path: The construction path.
         It should match the sqlalchemy :py:class:`~sqlalchemy.engine.Engine` initialization string.
@@ -120,7 +120,8 @@ class ClickHouseSaver(Saver):
 
             ClickHouseSaver("clickhouse://user:password@localhost:8000/default")
 
-    :param table: Sets the name of the db table to use. Defaults to "dff_stats".
+    :param logs_table: Name of log table. Defaults to "otel_logs".
+    :param traces_table: Name of traces table. Deafaults to "otel_traces".
     """
 
     def __init__(self, path: str, logs_table: str = "otel_logs", traces_table: str = "otel_traces") -> None:
@@ -139,28 +140,28 @@ class ClickHouseSaver(Saver):
         self.ch_client = ChClient(http_client, url=self.url, user=user, password=password, database=self.db)
         asyncio.run(self.create_table())
 
-    async def save(self, data: List[Tuple[TraceRecord, LogRecord]]) -> None:
+    async def save(self, data: List[Tuple[StatsTraceRecord, StatsLogRecord]]) -> None:
         if len(data) == 0:
             return
 
         await self.ch_client.execute(
             f"INSERT INTO {self.traces_table} VALUES",
-            *[tuple(ClickhouseLogRecord.parse_obj(item[0]).dict().values()) for item in data],
+            *[tuple(ClickhouseStatsLogRecord.parse_obj(item[0]).dict().values()) for item in data],
         )
         await self.ch_client.execute(
             f"INSERT INTO {self.logs_table} VALUES",
-            *[tuple(ClickhouseLogRecord.parse_obj(item[1]).dict().values()) for item in data],
+            *[tuple(ClickhouseStatsLogRecord.parse_obj(item[1]).dict().values()) for item in data],
         )
 
-    async def load(self) -> List[Tuple[TraceRecord, LogRecord]]:
+    async def load(self) -> List[Tuple[StatsTraceRecord, StatsLogRecord]]:
         results = []
         iterator = zip(
             self.ch_client.iterate(f"SELECT * FROM {self.traces_table}"),
             self.ch_client.iterate(f"SELECT * FROM {self.logs_table}"),
         )
         async for trace, log in iterator:
-            parsed_trace = TraceRecord.parse_obj({key: trace[key] for key in trace.keys()})
-            parsed_log = LogRecord.parse_obj({key: log[key] for key in log.keys()})
+            parsed_trace = StatsTraceRecord.parse_obj({key: trace[key] for key in trace.keys()})
+            parsed_log = StatsLogRecord.parse_obj({key: log[key] for key in log.keys()})
             results.append((parsed_trace, parsed_log))
         return results
 

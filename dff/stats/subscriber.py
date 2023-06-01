@@ -5,7 +5,8 @@ The following module defines an interface for classes that
 subscribe to changes in an extractor pool (:py:class:`.dff.stats.pool.StatsExtractorPool`).
 """
 from abc import ABC, abstractmethod
-from .record import StatsRecord
+from dff.script.core.context import Context
+from dff.pipeline import ExtraHandlerRuntimeInfo
 
 
 class PoolSubscriber(ABC):
@@ -16,10 +17,12 @@ class PoolSubscriber(ABC):
     """
 
     @abstractmethod
-    async def on_record_event(self, record: StatsRecord):
+    async def on_record_event(self, ctx: Context, info: ExtraHandlerRuntimeInfo, data: dict):
         """
         Callback function to execute on new record being appended.
 
-        :param record: Target record.
+        :param ctx: Request context.
+        :param info: Handler runtime info.
+        :param data: Target record data.
         """
         raise NotImplementedError

@@ -15,7 +15,6 @@ from datetime import datetime
 from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo
 from .pool import StatsExtractorPool
-from .record import StatsRecord
 from .utils import get_wrapper_field
 
 default_extractor_pool = StatsExtractorPool()
@@ -29,10 +28,8 @@ async def extract_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
     last_label = ctx.last_label
     if last_label is None:
-        return StatsRecord.from_context(ctx, info, {"flow": None, "node": None, "label": None})
-    return StatsRecord.from_context(
-        ctx, info, {"flow": last_label[0], "node": last_label[1], "label": ": ".join(last_label)}
-    )
+        return {"flow": None, "node": None, "label": None}
+    return {"flow": last_label[0], "node": last_label[1], "label": ": ".join(last_label)}
 
 
 @default_extractor_pool.add_extractor("before")
@@ -52,6 +49,4 @@ async def extract_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo): 
     This function is required for running the dashboard with the default configuration.
     """
     start_time = ctx.misc[get_wrapper_field(info, "time")]
-    data = {"execution_time": str(datetime.now() - start_time)}
-    group_stats = StatsRecord.from_context(ctx, info, data)
-    return group_stats
+    return {"execution_time": str(datetime.now() - start_time)}
