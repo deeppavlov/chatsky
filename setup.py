@@ -29,7 +29,7 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 core = [
     "pydantic==1.10.7",
     "nest-asyncio==1.5.6",
-    "typing-extensions==4.5.0",
+    "typing-extensions==4.6.2",
 ]
 
 async_files_dependencies = [
@@ -59,7 +59,7 @@ mysql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
         "asyncmy==0.2.7",
-        "cryptography==40.0.2",
+        "cryptography==41.0.0",
     ],
 )
 
@@ -71,12 +71,12 @@ postgresql_dependencies = merge_req_lists(
 )
 
 ydb_dependencies = [
-    "ydb==2.5.0",
+    "ydb==3.3.4",
     "six==1.16.0",
 ]
 
 telegram_dependencies = [
-    "pytelegrambotapi==4.5.1",
+    "pytelegrambotapi==4.12.0",
 ]
 
 full = merge_req_lists(
@@ -92,28 +92,29 @@ full = merge_req_lists(
 )
 
 requests_requirements = [
-    "requests==2.28.2",
+    "requests==2.31.0",
 ]
 
 test_requirements = merge_req_lists(
     [
         "pytest==7.3.1",
-        "pytest-cov==4.0.0",
-        "pytest-asyncio==0.14.0",
-        "flake8==3.9.2",
-        "click==8.0.4",
-        "black==20.8b1",
-        "isort==5.11.5",
-        "flask[async]==2.2.3",
+        "pytest-cov==4.1.0",
+        "pytest-asyncio==0.21.0",
+        "flake8==6.0.0",
+        "click==8.1.3",
+        "black==23.3.0",
+        "isort==5.12.0",
+        "flask[async]==2.3.2; python_version>'3.8'",
+        "flask[async]==2.2.5; python_version=='3.7'",
         "psutil==5.9.5",
         "telethon==1.28.5",
-        "anyio==3.6.2",
+        "anyio==3.7.0",
         "fastapi==0.95.1",
         "idna==3.4.0",
         "sniffio==1.3.0",
-        "starlette==0.26.1",
+        "starlette==0.27.0",
         "h11==0.14.0",
-        "uvicorn==0.21.1",
+        "uvicorn==0.22.0",
         "websockets==11.0.2",
         "locust==2.15",
     ],
@@ -127,14 +128,14 @@ tests_full = merge_req_lists(
 
 doc = merge_req_lists(
     [
-        "sphinx==5.3.0",
+        "sphinx==7.0.1",
         "pydata-sphinx-theme==0.13.3",
         "sphinxcontrib-apidoc==0.3.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon==1.0.1",
         "sphinx-copybutton==0.5.2",
-        "sphinx-gallery==0.7.0",
+        "sphinx-gallery==0.13.0",
         "sphinx-autodoc-typehints==1.23.0",
         "nbsphinx==0.9.1",
         "jupytext==1.14.5",
@@ -145,12 +146,12 @@ doc = merge_req_lists(
 
 devel = [
     "bump2version==1.0.1",
-    "build==0.7.0",
+    "build==0.10.0",
     "twine==4.0.0",
 ]
 
 mypy_dependencies = [
-    "mypy==0.950",
+    "mypy==1.3.0",
 ]
 
 devel_full = merge_req_lists(
