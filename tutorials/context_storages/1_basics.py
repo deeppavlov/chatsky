@@ -63,6 +63,9 @@ try:
 except TypeError:
     pass
 
+new_db = context_storage_factory("json://dbs/file.json")
+pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=new_db)
+
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     # This is a function for automatic tutorial running (testing) with HAPPY_PATH
