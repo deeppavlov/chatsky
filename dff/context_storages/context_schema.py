@@ -2,7 +2,7 @@ import time
 from hashlib import sha256
 from enum import Enum
 import uuid
-from pydantic import BaseModel
+from pydantic import BaseModel, Field
 from typing import Dict, List, Optional, Tuple, Callable, Any, Union, Awaitable, Hashable
 from typing_extensions import Literal
 
@@ -28,9 +28,12 @@ _WriteContextFunction = Callable[[str, Union[Dict[str, Any], Any], bool, bool, s
 
 
 class BaseSchemaField(BaseModel):
-    name: str
+    name: str = Field("", allow_mutation=False)
     on_read: SchemaFieldReadPolicy = SchemaFieldReadPolicy.READ
     on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.IGNORE
+
+    class Config:
+        validate_assignment = True
 
 
 class ListSchemaField(BaseSchemaField):
@@ -56,8 +59,8 @@ class ExtraFields(str, Enum):
 
 
 class ContextSchema(BaseModel):
-    active_ctx: ValueSchemaField = ValueSchemaField(name=ExtraFields.active_ctx)
-    storage_key: ValueSchemaField = ValueSchemaField(name=ExtraFields.storage_key)
+    active_ctx: ValueSchemaField = Field(ValueSchemaField(name=ExtraFields.active_ctx), allow_mutation=False)
+    storage_key: ValueSchemaField = Field(ValueSchemaField(name=ExtraFields.storage_key), allow_mutation=False)
     requests: ListSchemaField = ListSchemaField(name="requests")
     responses: ListSchemaField = ListSchemaField(name="responses")
     labels: ListSchemaField = ListSchemaField(name="labels")
@@ -65,6 +68,9 @@ class ContextSchema(BaseModel):
     framework_states: DictSchemaField = DictSchemaField(name="framework_states")
     created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at)
     updated_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.updated_at)
+
+    class Config:
+        validate_assignment = True
 
     def _calculate_hashes(self, value: Union[Dict[str, Any], Any]) -> Union[Dict[str, Any], Hashable]:
         if isinstance(value, dict):
