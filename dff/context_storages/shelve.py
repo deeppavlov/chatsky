@@ -38,7 +38,7 @@ class ShelveContextStorage(DBContextStorage):
         primary_id = await self._get_last_ctx(key)
         if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(self._read_ctx, primary_id)
+        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
         self.hash_storage[key] = hashes
         return context
 
@@ -54,23 +54,23 @@ class ShelveContextStorage(DBContextStorage):
         primary_id = await self._get_last_ctx(key)
         if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        self.shelve_db[primary_id][ExtraFields.active_ctx.name] = False
+        self.shelve_db[primary_id][ExtraFields.active_ctx.value] = False
 
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
         return await self._get_last_ctx(key) is not None
 
     async def len_async(self) -> int:
-        return len([v for v in self.shelve_db.values() if v[ExtraFields.active_ctx.name]])
+        return len([v for v in self.shelve_db.values() if v[ExtraFields.active_ctx.value]])
 
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         for key in self.shelve_db.keys():
-            self.shelve_db[key][ExtraFields.active_ctx.name] = False
+            self.shelve_db[key][ExtraFields.active_ctx.value] = False
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
         for key, value in self.shelve_db.items():
-            if value[ExtraFields.storage_key.name] == storage_key and value[ExtraFields.active_ctx.name]:
+            if value[ExtraFields.storage_key.value] == storage_key and value[ExtraFields.active_ctx.value]:
                 return key
         return None
 

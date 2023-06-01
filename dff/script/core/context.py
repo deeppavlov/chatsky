@@ -17,11 +17,10 @@ The context can be easily serialized to a format that can be stored or transmitt
 This allows developers to save the context data and resume the conversation later.
 """
 import logging
-from uuid import uuid4
 
 from typing import Any, Optional, Union, Dict, List, Set
 
-from pydantic import BaseModel, validate_arguments, Field, validator
+from pydantic import BaseModel, PrivateAttr, validate_arguments, validator
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
@@ -65,11 +64,11 @@ class Context(BaseModel):
             "last_request": "set_last_request",
         }
 
-    storage_key: str = Field(default_factory=lambda: str(uuid4()))
+    _storage_key: Optional[str] = PrivateAttr(default=None)
     """
-    `storage_key` is the unique context identifier, by which it's stored in cintext storage.
-    By default, randomly generated using `uuid4` `storage_key` is used.
-    `storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
+    `_storage_key` is the unique private context identifier, by which it's stored in cintext storage.
+    By default, randomly generated using `uuid4` `_storage_key` is used.
+    `_storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     labels: Dict[int, NodeLabel2Type] = {}
     """
@@ -126,6 +125,10 @@ class Context(BaseModel):
     _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
     _sort_requests = validator("requests", allow_reuse=True)(sort_dict_keys)
     _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
+
+    @property
+    def storage_key(self):
+        return self._storage_key
 
     @classmethod
     def cast(cls, ctx: Optional[Union["Context", dict, str]] = None, *args, **kwargs) -> "Context":

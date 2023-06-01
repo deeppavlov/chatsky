@@ -35,7 +35,7 @@ class BaseSchemaField(BaseModel):
 
 class ListSchemaField(BaseSchemaField):
     on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.APPEND
-    subscript: Union[Literal["__all__"], int] = -1
+    subscript: Union[Literal["__all__"], int] = -3
 
 
 class DictSchemaField(BaseSchemaField):
@@ -49,7 +49,7 @@ class ValueSchemaField(BaseSchemaField):
 
 class ExtraFields(str, Enum):
     primary_id = "primary_id"
-    storage_key = "storage_key"
+    storage_key = "_storage_key"
     active_ctx = "active_ctx"
     created_at = "created_at"
     updated_at = "updated_at"
@@ -72,11 +72,12 @@ class ContextSchema(BaseModel):
         else:
             return sha256(str(value).encode("utf-8"))
 
-    async def read_context(self, ctx_reader: _ReadContextFunction, primary_id: str) -> Tuple[Context, Dict]:
+    async def read_context(self, ctx_reader: _ReadContextFunction, storage_key: str, primary_id: str) -> Tuple[Context, Dict]:
         fields_subscript = dict()
-        field_props: BaseSchemaField
 
-        for field, field_props in dict(self).items():
+        field_props: BaseSchemaField
+        for field_props in dict(self).values():
+            field = field_props.name
             if field_props.on_read == SchemaFieldReadPolicy.IGNORE:
                 fields_subscript[field] = False
             elif isinstance(field_props, ListSchemaField) or isinstance(field_props, DictSchemaField):
@@ -89,20 +90,24 @@ class ContextSchema(BaseModel):
         for key in ctx_dict.keys():
             hashes[key] = self._calculate_hashes(ctx_dict[key])
 
-        return Context.cast(ctx_dict), hashes
+        ctx = Context.cast(ctx_dict)
+        ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
+        return ctx, hashes
 
     async def write_context(
         self, ctx: Context, hashes: Optional[Dict], val_writer: _WriteContextFunction, storage_key: str, primary_id: Optional[str]
     ):
-        ctx.storage_key = storage_key
+        ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
         ctx_dict = ctx.dict()
         primary_id = str(uuid.uuid4()) if primary_id is None else primary_id
 
+        ctx_dict[ExtraFields.storage_key.value] = storage_key
         ctx_dict[self.active_ctx.name] = True
         ctx_dict[self.created_at.name] = ctx_dict[self.updated_at.name] = time.time_ns()
 
         field_props: BaseSchemaField
-        for field, field_props in dict(self).items():
+        for field_props in dict(self).values():
+            field = field_props.name
             update_values = ctx_dict[field]
             update_nested = not isinstance(field_props, ValueSchemaField)
             if field_props.on_write == SchemaFieldWritePolicy.IGNORE:

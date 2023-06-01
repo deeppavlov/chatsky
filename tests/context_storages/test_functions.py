@@ -8,6 +8,7 @@ def generic_test(db: DBContextStorage, testing_context: Context, context_id: str
     # Perform cleanup
     db.clear()
     assert len(db) == 0
+    assert testing_context.storage_key == None
 
     # Test write operations
     db[context_id] = Context()
@@ -20,6 +21,9 @@ def generic_test(db: DBContextStorage, testing_context: Context, context_id: str
     new_ctx = db[context_id]
     assert isinstance(new_ctx, Context)
     assert new_ctx.dict() == testing_context.dict()
+
+    if not isinstance(db, dict):
+        assert testing_context.storage_key == new_ctx.storage_key == context_id
 
     # Test delete operations
     del db[context_id]
@@ -45,15 +49,18 @@ def operational_test(db: DBContextStorage, testing_context: Context, context_id:
 
     # Add key to misc and request to requests
     read_context.misc.update(new_key="new_value")
-    read_context.add_request(Message(text="new message"))
+    for i in range(1, 5):
+        read_context.add_request(Message(text=f"new message: {i}"))
     write_context = read_context.dict()
-    del write_context["requests"][0]
+
+    if not isinstance(db, dict):
+        for i in sorted(write_context["requests"].keys())[:-3]:
+            del write_context["requests"][i]
 
     # Write and read updated context
     db[context_id] = read_context
     read_context = db[context_id]
-    # TODO: testing for DICT fails because of line 50: DICT does read 0th request.
-    #assert write_context == read_context.dict()
+    assert write_context == read_context.dict()
 
 
 TEST_FUNCTIONS = [generic_test, operational_test]
