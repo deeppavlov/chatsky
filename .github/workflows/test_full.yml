@@ -33,12 +33,13 @@ jobs:
 
       - name: install dependencies
         run: |
+          pip install --upgrade pip
           pip install poetry
-          poetry install --all-extras
+          poetry install --extras "full tests devel" --no-ansi --no-interaction
 
       - name: run pytest
         run: |
-          poetry run test_all
+          poetry run test_no_cov
 
   test_no_deps:
     runs-on: "ubuntu-latest"
@@ -52,9 +53,10 @@ jobs:
 
       - name: install dependencies
         run: |
+          pip install --upgrade pip
           pip install poetry
-          poetry install --all-extras
+          poetry install --extras "tests devel" --no-ansi --no-interaction
 
       - name: run pytest
         run: |
-          poetry run test_all
+          poetry run test_no_cov
