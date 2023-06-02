@@ -5,7 +5,7 @@ This module includes utilities designed for statistics collection.
 
 """
 from typing import Optional
-from . import exporter_patch
+from . import exporter_patch  # noqa: F401
 from opentelemetry._logs import get_logger_provider
 from opentelemetry.trace import get_tracer_provider
 from opentelemetry.metrics import get_meter_provider

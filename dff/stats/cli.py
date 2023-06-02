@@ -60,7 +60,7 @@ DFF_ACYCLIC_NODES_STATEMENT = """
 WITH main AS (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
 {table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as timestamp,\n
 {lblfield} as label\nFROM {table}\n
-INNER JOIN \n  (\n  WITH helper AS \n    (\n    
+INNER JOIN \n  (\n  WITH helper AS \n    (\n
 SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
 {table}.LogAttributes['request_id'] as request_id,\n
 {lblfield} as label\n    FROM {table}\n    )\n

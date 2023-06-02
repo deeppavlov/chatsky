@@ -1,6 +1,6 @@
 import pytest
 
-from dff import stats
+from dff import stats  # noqa: F401
 from opentelemetry.proto.common.v1.common_pb2 import AnyValue
 from opentelemetry.exporter.otlp.proto.grpc.exporter import _translate_value
 

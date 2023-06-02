@@ -11,9 +11,6 @@ from opentelemetry._logs import get_logger_provider
 
 def test_instrument_uninstrument():
     instrumentor = DFFInstrumentor()
-    old_timing_before = defaults.get_timing_before
-    old_timing_after = defaults.get_timing_after
-    old_current_label = defaults.get_current_label
     instrumentor.instrument()
     assert hasattr(defaults.get_current_label, "__wrapped__")
     assert hasattr(defaults.get_timing_before, "__wrapped__")

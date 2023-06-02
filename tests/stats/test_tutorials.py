@@ -17,7 +17,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
         ("4_global_services", 10),
     ],
 )
-def test_examples(example_module_name: str, expected_logs: int, tracer_exporter_and_provider, log_exporter_and_provider):
+def test_examples(example_module_name: str, expected_logs, tracer_exporter_and_provider, log_exporter_and_provider):
     module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
