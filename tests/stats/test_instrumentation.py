@@ -1,12 +1,16 @@
-from dff.stats.instrumentor import DFFInstrumentor
-from dff.stats import defaults
+import pytest
 
-from opentelemetry.sdk.trace import TracerProvider
-from opentelemetry.sdk._logs import LoggerProvider
-from opentelemetry.sdk.metrics import MeterProvider
-from opentelemetry.trace import get_tracer_provider
-from opentelemetry.metrics import get_meter_provider
-from opentelemetry._logs import get_logger_provider
+try:
+    from dff.stats import defaults
+    from dff.stats import DFFInstrumentor
+    from opentelemetry.sdk.trace import TracerProvider
+    from opentelemetry.sdk._logs import LoggerProvider
+    from opentelemetry.sdk.metrics import MeterProvider
+    from opentelemetry.trace import get_tracer_provider
+    from opentelemetry.metrics import get_meter_provider
+    from opentelemetry._logs import get_logger_provider
+except ImportError:
+    pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
 
 def test_instrument_uninstrument():

@@ -5,10 +5,10 @@ import pytest
 
 try:
     import omegaconf  # noqa: F401
+    from dff.stats.__main__ import main
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
-from dff.stats.__main__ import main
 from tests.db_list import SUPERSET_ACTIVE
 from dff.utils.testing.stats_cli import parse_args
 

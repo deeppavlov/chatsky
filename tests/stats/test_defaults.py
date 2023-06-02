@@ -1,7 +1,6 @@
 import pytest
 from dff.script import Context
 from dff.stats import defaults
-from dff.stats import DFFInstrumentor
 
 
 @pytest.mark.asyncio
@@ -26,6 +25,10 @@ async def test_get_current_label(context: Context, expected: set):
     ],
 )
 async def test_otlp_integration(context, expected, tracer_exporter_and_provider, log_exporter_and_provider):
+    try:
+        from dff.stats import DFFInstrumentor
+    except ImportError:
+        pytest.skip("One of the Opentelemetry packages is missing.")
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     instrumentor = DFFInstrumentor()
