@@ -120,11 +120,10 @@ def dashboard_display_test(args: Namespace, base_url: str):
     assert dashboard_json["result"]["dashboard_title"] == "DFF Node Stats"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
-    assert datasets_json["count"] == 3
-    assert datasets_json["ids"] == [1, 2, 3]
-    assert [item["id"] for item in datasets_json["result"]] == [1, 2, 3]
+    assert datasets_json["count"] == 2
+    assert datasets_json["ids"] == [1, 2]
+    assert [item["id"] for item in datasets_json["result"]] == [1, 2]
     assert [item["table_name"] for item in datasets_json["result"]] == [
-        "dff_acyclic_nodes",
         "dff_final_nodes",
         "dff_node_stats",
     ]
