@@ -8,16 +8,16 @@ import tempfile
 import shutil
 import sys
 import argparse
-import json
 import os
 import logging
+from urllib import parse
 from pathlib import Path
 from typing import Optional
 from zipfile import ZipFile, ZIP_DEFLATED
 
 try:
-    import requests
     from omegaconf import OmegaConf
+    from .utils import get_superset_session
 except ImportError:
     raise ImportError("Some packages are not found. Run `pip install dff[stats]`")
 
@@ -31,6 +31,14 @@ Root directory of the local `dff` installation.
 DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 """
 Local path to superset dashboard files to import.
+"""
+DASHBOARD_SLUG = "dff-node-stats"
+"""
+This variable stores a slug used for building the http address of the DFF dashboard.
+"""
+DEFAULT_SUPERSET_URL = parse.urlunsplit(("http", "localhost:8088", "/", "", ""))
+"""
+Default location of the Superset dashboard.
 """
 
 TYPE_MAPPING_CH = {
@@ -120,44 +128,16 @@ def import_dashboard(
     """
     zip_file = parsed_args.infile
     zip_filename = os.path.basename(zip_file)
-    username = parsed_args.username
-    password = parsed_args.password
     db_password = getattr(parsed_args, "db.password")
 
-    BASE_URL = "http://localhost:8088"
-    HEALTHCHECK_URL = f"{BASE_URL}/healthcheck"
-    LOGIN_URL = f"{BASE_URL}/api/v1/security/login"
-    IMPORT_DASHBOARD_URL = f"{BASE_URL}/api/v1/dashboard/import/"
-    CSRF_URL = f"{BASE_URL}/api/v1/security/csrf_token/"
-    session = requests.Session()
-
-    # do healthcheck
-    response = session.get(HEALTHCHECK_URL, timeout=10)
-    response.raise_for_status()
-
-    # get access token
-    access_request = session.post(
-        LOGIN_URL,
-        headers={"Content-Type": "application/json", "Accept": "*/*"},
-        data=json.dumps({"username": username, "password": password, "refresh": True, "provider": "db"}),
-    )
-    access_request.raise_for_status()
-    access_token = access_request.json()["access_token"]
-
-    # get csrf_token
-    csrf_request = session.get(CSRF_URL, headers={"Authorization": f"Bearer {access_token}"})
-    csrf_request.raise_for_status()
-    csrf_token = csrf_request.json()["result"]
-
+    session, headers = get_superset_session(parsed_args, DEFAULT_SUPERSET_URL)
+    import_dashboard_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/dashboard/import/")
     # upload files
     with open(zip_file, "rb") as f:
         response = session.request(
             "POST",
-            IMPORT_DASHBOARD_URL,
-            headers={
-                "Authorization": f"Bearer {access_token}",
-                "X-CSRFToken": csrf_token,
-            },
+            import_dashboard_url,
+            headers=headers,
             data={
                 "passwords": '{"databases/dff_database.yaml":"' + db_password + '"}',
                 "overwrite": "true",

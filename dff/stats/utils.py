@@ -4,7 +4,12 @@ Utils
 This module includes utilities designed for statistics collection.
 
 """
-from typing import Optional
+import json
+from urllib import parse
+from typing import Optional, Tuple
+from argparse import Namespace
+
+import requests
 from . import exporter_patch  # noqa: F401
 from opentelemetry._logs import get_logger_provider
 from opentelemetry.trace import get_tracer_provider
@@ -47,3 +52,37 @@ def get_wrapper_field(info: ExtraHandlerRuntimeInfo, postfix: str = "") -> str:
     """
     path = info["component"]["path"].replace(".", "-")
     return f"{path}" + (f"-{postfix}" if postfix else "")
+
+
+def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088/") -> Tuple[requests.Session, dict]:
+    """
+    Utility function for authorized interaction with Superset HTTP API.
+
+    :param args: Command line arguments including Superset username and Superset password.
+    :param base_url: Base superset URL.
+
+    :return: Authorized session - authorization headers tuple.
+    """
+    healthcheck_url = parse.urljoin(base_url, "/healthcheck")
+    login_url = parse.urljoin(base_url, "/api/v1/security/login")
+    csrf_url = parse.urljoin(base_url, "/api/v1/security/csrf_token/")
+
+    session = requests.Session()
+    # do healthcheck
+    response = session.get(healthcheck_url, timeout=10)
+    response.raise_for_status()
+    # get access token
+    access_request = session.post(
+        login_url,
+        headers={"Content-Type": "application/json", "Accept": "*/*"},
+        data=json.dumps({"username": args.username, "password": args.password, "refresh": True, "provider": "db"}),
+    )
+    access_token = access_request.json()["access_token"]
+    # get csrf_token
+    csrf_request = session.get(csrf_url, headers={"Authorization": f"Bearer {access_token}"})
+    csrf_token = csrf_request.json()["result"]
+    headers = {
+        "Authorization": f"Bearer {access_token}",
+        "X-CSRFToken": csrf_token,
+    }
+    return session, headers

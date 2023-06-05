@@ -1,11 +1,14 @@
 import sys
 import os
-from argparse import Namespace
 import pytest
+from urllib import parse
+from argparse import Namespace
 
 try:
     import omegaconf  # noqa: F401
     from dff.stats.__main__ import main
+    from dff.stats.cli import DEFAULT_SUPERSET_URL, DASHBOARD_SLUG
+    from dff.stats.utils import get_superset_session
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
@@ -88,6 +91,50 @@ def test_main(testing_cfg_dir, args):
     assert os.path.getsize(args.outfile) > 2200
 
 
+def dashboard_display_test(args: Namespace, base_url: str):
+    dashboard_url = parse.urljoin(base_url, f"/api/v1/dashboard/{DASHBOARD_SLUG}")
+    charts_url = parse.urljoin(base_url, "/api/v1/chart")
+    datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
+
+    session, headers = get_superset_session(args, base_url)
+    dashboard_res = session.get(dashboard_url, headers=headers)
+    assert dashboard_res.status_code == 200
+    dashboard_json = dashboard_res.json()
+    assert dashboard_json["result"]["charts"] == [
+        "Flow visit ratio monitor",
+        "Node Visits",
+        "Node counts",
+        "Node visit ratio monitor",
+        "Node visits [cloud]",
+        "Node visits [ratio]",
+        "Node visits [sunburst]",
+        "Service load [max dialogue length]",
+        "Service load [users]",
+        "Table",
+        "Terminal labels",
+        "Transition counts",
+        "Transition layout",
+        "Transition ratio [chord]",
+    ]
+    assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-node-stats/"
+    assert dashboard_json["result"]["dashboard_title"] == "DFF Node Stats"
+    datasets_result = session.get(datasets_url, headers=headers)
+    datasets_json = datasets_result.json()
+    assert datasets_json["count"] == 3
+    assert datasets_json["ids"] == [1, 2, 3]
+    assert [item["id"] for item in datasets_json["result"]] == [1, 2, 3]
+    assert [item["table_name"] for item in datasets_json["result"]] == [
+        "dff_acyclic_nodes",
+        "dff_final_nodes",
+        "dff_node_stats",
+    ]
+    charts_result = session.get(charts_url, headers=headers)
+    charts_json = charts_result.json()
+    assert charts_json["count"] == 15
+    assert sorted(charts_json["ids"]) == list(range(1, 16))
+    session.close()
+
+
 @pytest.mark.skipif(not SUPERSET_ACTIVE, reason="Superset server not active")
 @pytest.mark.parametrize(
     ["zip_args", "upload_args"],
@@ -120,6 +167,7 @@ def test_upload(testing_cfg_dir, zip_args, upload_args):
     main(zip_args)
     upload_args.infile = testing_cfg_dir + upload_args.infile
     main(upload_args)
+    dashboard_display_test(upload_args, base_url=DEFAULT_SUPERSET_URL)
 
 
 @pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])

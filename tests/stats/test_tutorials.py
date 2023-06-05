@@ -2,14 +2,15 @@ import importlib
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.stats import opentelemetry_available
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.toy_script import HAPPY_PATH
+try:
+    from dff import stats  # noqa: F401
+except ImportError:
+    pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
+
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
-
-if not opentelemetry_available:
-    pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
 
 @pytest.mark.parametrize(
