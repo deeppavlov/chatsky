@@ -19,7 +19,7 @@ def tracer_exporter_and_provider():
         pytest.skip("One of the Opentelemetry packages is missing.")
     exporter = InMemorySpanExporter()
     tracer_provider = TracerProvider(resource=resource)
-    tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
+    tracer_provider.add_span_processor(BatchSpanProcessor(exporter, schedule_delay_millis=999))
     yield exporter, tracer_provider
 
 
@@ -29,7 +29,7 @@ def log_exporter_and_provider():
         pytest.skip("One of the Opentelemetry packages is missing.")
     exporter = InMemoryLogExporter()
     logger_provider = LoggerProvider(resource=resource)
-    logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+    logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter, schedule_delay_millis=999))
     yield exporter, logger_provider
 
 
@@ -39,7 +39,7 @@ def otlp_trace_exp_provider():
         pytest.skip("One of the Opentelemetry packages is missing.")
     exporter = OTLPSpanExporter("grpc://localhost:4317", insecure=True)
     tracer_provider = TracerProvider(resource=resource)
-    tracer_provider.add_span_processor(BatchSpanProcessor(exporter))
+    tracer_provider.add_span_processor(BatchSpanProcessor(exporter, schedule_delay_millis=999))
     yield exporter, tracer_provider
 
 
@@ -49,7 +49,7 @@ def otlp_log_exp_provider():
         pytest.skip("One of the Opentelemetry packages is missing.")
     exporter = OTLPLogExporter("grpc://localhost:4317", insecure=True)
     logger_provider = LoggerProvider(resource=resource)
-    logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter))
+    logger_provider.add_log_record_processor(BatchLogRecordProcessor(exporter, schedule_delay_millis=999))
     yield exporter, logger_provider
 
 
