@@ -14,14 +14,17 @@ public-domain, SQL database engine.
 """
 import asyncio
 import importlib
-from typing import Hashable, Dict, Union, Any, List, Iterable, Tuple, Optional
+from typing import Hashable, Dict, Union, List, Iterable, Optional
 
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
 from .context_schema import (
+    ALL_ITEMS,
     ContextSchema,
+    ExtraFields,
+    FieldDescriptor,
     SchemaFieldWritePolicy,
     SchemaFieldReadPolicy,
     DictSchemaField,
@@ -38,11 +41,13 @@ try:
         String,
         DateTime,
         Integer,
+        Boolean,
         Index,
         inspect,
         select,
-        func,
+        update,
         insert,
+        func,
     )
     from sqlalchemy.dialects.mysql import DATETIME
     from sqlalchemy.ext.asyncio import create_async_engine
@@ -110,13 +115,19 @@ def _get_current_time(dialect: str):
 
 def _get_update_stmt(dialect: str, insert_stmt, columns: Iterable[str], unique: List[str]):
     if dialect == "postgresql" or dialect == "sqlite":
-        update_stmt = insert_stmt.on_conflict_do_update(
-            index_elements=unique, set_={column: insert_stmt.excluded[column] for column in columns}
-        )
+        if len(columns) > 0:
+            update_stmt = insert_stmt.on_conflict_do_update(
+                index_elements=unique, set_={column: insert_stmt.excluded[column] for column in columns}
+            )
+        else:
+            update_stmt = insert_stmt.on_conflict_do_nothing()
     elif dialect == "mysql":
-        update_stmt = insert_stmt.on_duplicate_key_update(
-            **{column: insert_stmt.inserted[column] for column in columns}
-        )
+        if len(columns) > 0:
+            update_stmt = insert_stmt.on_duplicate_key_update(
+                **{column: insert_stmt.inserted[column] for column in columns}
+            )
+        else:
+            update_stmt = insert_stmt.prefix_with("IGNORE")
     else:
         update_stmt = insert_stmt
     return update_stmt
@@ -174,10 +185,10 @@ class SQLContextStorage(DBContextStorage):
                 field: Table(
                     f"{table_name_prefix}_{field}",
                     MetaData(),
-                    Column(self.context_schema.id.name, String(self._UUID_LENGTH), nullable=False),
+                    Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
                     Column(self._KEY_FIELD, Integer, nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
-                    Index(f"{field}_list_index", self.context_schema.id.name, self._KEY_FIELD, unique=True),
+                    Index(f"{field}_list_index", ExtraFields.primary_id.value, self._KEY_FIELD, unique=True),
                 )
                 for field in list_fields
             }
@@ -187,10 +198,18 @@ class SQLContextStorage(DBContextStorage):
                 field: Table(
                     f"{table_name_prefix}_{field}",
                     MetaData(),
-                    Column(self.context_schema.id.name, String(self._UUID_LENGTH), nullable=False),
+                    Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
                     Column(self._KEY_FIELD, String(self._KEY_LENGTH), nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
-                    Index(f"{field}_dictionary_index", self.context_schema.id.name, self._KEY_FIELD, unique=True),
+                    Column(ExtraFields.created_at.value, DateTime, server_default=current_time, nullable=False),
+                    Column(
+                        ExtraFields.updated_at.value,
+                        DateTime,
+                        server_default=current_time,
+                        server_onupdate=current_time,
+                        nullable=False,
+                    ),
+                    Index(f"{field}_dictionary_index", ExtraFields.primary_id.value, self._KEY_FIELD, unique=True),
                 )
                 for field in dict_fields
             }
@@ -200,24 +219,25 @@ class SQLContextStorage(DBContextStorage):
                 self._CONTEXTS: Table(
                     f"{table_name_prefix}_{self._CONTEXTS}",
                     MetaData(),
+                    Column(ExtraFields.active_ctx.value, Boolean(), default=True, nullable=False),
+                    Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
+                    Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
+                    Column(ExtraFields.created_at.value, DateTime, server_default=current_time, nullable=False),
                     Column(
-                        self.context_schema.id.name, String(self._UUID_LENGTH), index=True, unique=True, nullable=True
-                    ),
-                    Column(self.context_schema.ext_id.name, String(self._UUID_LENGTH), index=True, nullable=False),
-                    Column(self.context_schema.created_at.name, DateTime, server_default=current_time, nullable=False),
-                    Column(
-                        self.context_schema.updated_at.name,
+                        ExtraFields.updated_at.value,
                         DateTime,
                         server_default=current_time,
                         server_onupdate=current_time,
                         nullable=False,
                     ),
+                    Index("general_context_id_index", ExtraFields.primary_id.value, unique=True),
+                    Index("general_context_key_index", ExtraFields.storage_key.value),
                 )
             }
         )
 
-        for field, field_props in dict(self.context_schema).items():
-            if isinstance(field_props, ValueSchemaField) and field not in [
+        for _, field_props in dict(self.context_schema).items():
+            if isinstance(field_props, ValueSchemaField) and field_props.name not in [
                 t.name for t in self.tables[self._CONTEXTS].c
             ]:
                 if (
@@ -225,60 +245,56 @@ class SQLContextStorage(DBContextStorage):
                     or field_props.on_write != SchemaFieldWritePolicy.IGNORE
                 ):
                     raise RuntimeError(
-                        f"Value field `{field}` is not ignored in the scheme, yet no columns are created for it!"
+                        f"Value field `{field_props.name}` is not ignored in the scheme, yet no columns are created for it!"
                     )
 
         asyncio.run(self._create_self_tables())
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
-        self.context_schema.ext_id.on_write = SchemaFieldWritePolicy.UPDATE_ONCE
+        self.context_schema.active_ctx.on_write = SchemaFieldWritePolicy.IGNORE
+        self.context_schema.storage_key.on_write = SchemaFieldWritePolicy.UPDATE
         self.context_schema.created_at.on_write = SchemaFieldWritePolicy.IGNORE
         self.context_schema.updated_at.on_write = SchemaFieldWritePolicy.IGNORE
 
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        fields, int_id = await self._read_keys(key)
-        if int_id is None:
+    async def get_item_async(self, key: str) -> Context:
+        primary_id = await self._get_last_ctx(key)
+        if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, key, int_id)
+        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     @cast_key_to_string()
-    async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        fields, _ = await self._read_keys(key)
-        value_hash = self.hash_storage.get(key, None)
-        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, key)
+    async def set_item_async(self, key: str, value: Context):
+        primary_id = await self._get_last_ctx(key)
+        value_hash = self.hash_storage.get(key)
+        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: Union[Hashable, str]):
+    async def del_item_async(self, key: str):
         self.hash_storage[key] = None
+        primary_id = await self._get_last_ctx(key)
+        if primary_id is None:
+            raise KeyError(f"No entry for key {key}.")
+        stmt = update(self.tables[self._CONTEXTS])
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.storage_key.value] == key)
+        stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin() as conn:
-            await conn.execute(
-                self.tables[self._CONTEXTS]
-                .insert()
-                .values({self.context_schema.id.name: None, self.context_schema.ext_id.name: key})
-            )
+            await conn.execute(stmt)
 
     @threadsafe_method
     @cast_key_to_string()
-    async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        stmt = select(self.tables[self._CONTEXTS].c[self.context_schema.id.name])
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[self.context_schema.ext_id.name] == key)
-        stmt = stmt.order_by(self.tables[self._CONTEXTS].c[self.context_schema.created_at.name].desc())
-        async with self.engine.begin() as conn:
-            return (await conn.execute(stmt)).fetchone()[0] is not None
+    async def contains_async(self, key: str) -> bool:
+        return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        stmt = select(self.tables[self._CONTEXTS].c[self.context_schema.ext_id.name])
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[self.context_schema.id.name] != None)  # noqa E711
-        stmt = stmt.group_by(self.tables[self._CONTEXTS].c[self.context_schema.ext_id.name])
+        stmt = select(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value] == True)
         stmt = select(func.count()).select_from(stmt.subquery())
         async with self.engine.begin() as conn:
             return (await conn.execute(stmt)).fetchone()[0]
@@ -286,15 +302,11 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
+        stmt = update(self.tables[self._CONTEXTS])
+        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value] == True)
+        stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin() as conn:
-            query = select(self.tables[self._CONTEXTS].c[self.context_schema.ext_id.name]).distinct()
-            result = (await conn.execute(query)).fetchall()
-            if len(result) > 0:
-                elements = [
-                    dict(**{self.context_schema.id.name: None}, **{self.context_schema.ext_id.name: key[0]})
-                    for key in result
-                ]
-                await conn.execute(self.tables[self._CONTEXTS].insert().values(elements))
+            await conn.execute(stmt)
 
     async def _create_self_tables(self):
         async with self.engine.begin() as conn:
@@ -314,81 +326,76 @@ class SQLContextStorage(DBContextStorage):
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    # TODO: optimize for PostgreSQL: single query.
-    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
-        subq = select(self.tables[self._CONTEXTS].c[self.context_schema.id.name])
-        subq = subq.where(self.tables[self._CONTEXTS].c[self.context_schema.ext_id.name] == ext_id)
-        subq = subq.order_by(self.tables[self._CONTEXTS].c[self.context_schema.created_at.name].desc()).limit(1)
-        nested_dict_keys = dict()
+    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+        ctx_table = self.tables[self._CONTEXTS]
+        stmt = select(ctx_table.c[ExtraFields.primary_id.value])
+        stmt = stmt.where((ctx_table.c[ExtraFields.storage_key.value] == storage_key) & (ctx_table.c[ExtraFields.active_ctx.value] == True))
+        stmt = stmt.limit(1)
         async with self.engine.begin() as conn:
-            int_id = (await conn.execute(subq)).fetchone()
-            if int_id is None:
-                return nested_dict_keys, None
+            primary_id = (await conn.execute(stmt)).fetchone()
+            if primary_id is None:
+                return None
             else:
-                int_id = int_id[0]
-            mutable_tables_subset = [field for field in self.tables.keys() if field != self._CONTEXTS]
-            for field in mutable_tables_subset:
-                stmt = select(self.tables[field].c[self._KEY_FIELD])
-                stmt = stmt.where(self.tables[field].c[self.context_schema.id.name] == int_id)
-                for [key] in (await conn.execute(stmt)).fetchall():
-                    if key is not None:
-                        if field not in nested_dict_keys:
-                            nested_dict_keys[field] = list()
-                        nested_dict_keys[field] += [key]
-        return nested_dict_keys, int_id
+                return primary_id[0]
 
     # TODO: optimize for PostgreSQL: single query.
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, _: str) -> Dict:
-        result_dict = dict()
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
+        result_dict, values_slice = dict(), list()
+
         async with self.engine.begin() as conn:
-            non_empty_value_subset = [
-                field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
-            ]
-            for field in non_empty_value_subset:
-                keys = [key for key, value in subscript[field].items() if value]
-                stmt = select(self.tables[field].c[self._KEY_FIELD], self.tables[field].c[self._VALUE_FIELD])
-                stmt = stmt.where(self.tables[field].c[self.context_schema.id.name] == int_id)
-                stmt = stmt.where(self.tables[field].c[self._KEY_FIELD].in_(keys))
-                for [key, value] in (await conn.execute(stmt)).fetchall():
+            for field, value in subscript.items():
+                if isinstance(value, bool) and value:
+                    values_slice += [field]
+                else:
+                    raw_stmt = select(self.tables[field].c[self._KEY_FIELD], self.tables[field].c[self._VALUE_FIELD])
+                    raw_stmt = raw_stmt.where(self.tables[field].c[ExtraFields.primary_id.value] == primary_id)
+
+                    if isinstance(value, int):
+                        if value > 0:
+                            filtered_stmt = raw_stmt.order_by(self.tables[field].c[self._KEY_FIELD].asc()).limit(value)
+                        else:
+                            filtered_stmt = raw_stmt.order_by(self.tables[field].c[self._KEY_FIELD].desc()).limit(-value)
+                    elif isinstance(value, list):
+                        filtered_stmt = raw_stmt.where(self.tables[field].c[self._KEY_FIELD].in_(value))
+                    elif value == ALL_ITEMS:
+                        filtered_stmt = raw_stmt
+
+                    for (key, value) in (await conn.execute(filtered_stmt)).fetchall():
+                        if value is not None:
+                            if field not in result_dict:
+                                result_dict[field] = dict()
+                            result_dict[field][key] = value
+
+                columns = [c for c in self.tables[self._CONTEXTS].c if c.name in values_slice]
+                stmt = select(*columns).where(self.tables[self._CONTEXTS].c[ExtraFields.primary_id.value] == primary_id)
+                for (key, value) in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
                     if value is not None:
-                        if field not in result_dict:
-                            result_dict[field] = dict()
-                        result_dict[field][key] = value
-            columns = [
-                c
-                for c in self.tables[self._CONTEXTS].c
-                if isinstance(subscript.get(c.name, False), bool) and subscript.get(c.name, False)
-            ]
-            stmt = select(*columns)
-            stmt = stmt.where(self.tables[self._CONTEXTS].c[self.context_schema.id.name] == int_id)
-            for [key, value] in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
-                if value is not None:
-                    result_dict[key] = value
+                        result_dict[key] = value
+
         return result_dict
 
-    async def _write_ctx(self, data: Dict[str, Any], update: bool, int_id: str, _: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
         async with self.engine.begin() as conn:
-            for field, storage in {k: v for k, v in data.items() if isinstance(v, dict)}.items():
-                if len(storage.items()) > 0:
-                    values = [
-                        {self.context_schema.id.name: int_id, self._KEY_FIELD: key, self._VALUE_FIELD: value}
-                        for key, value in storage.items()
-                    ]
-                    insert_stmt = insert(self.tables[field]).values(values)
-                    update_stmt = _get_update_stmt(
-                        self.dialect,
-                        insert_stmt,
-                        [c.name for c in self.tables[field].c],
-                        [self.context_schema.id.name, self._KEY_FIELD],
-                    )
-                    await conn.execute(update_stmt)
-            values = {k: v for k, v in data.items() if not isinstance(v, dict)}
-            if len(values.items()) > 0:
-                insert_stmt = insert(self.tables[self._CONTEXTS]).values(
-                    {**values, self.context_schema.id.name: int_id}
+            if nested and len(payload[0]) > 0:
+                data, enforce = payload
+                values = [{ExtraFields.primary_id.value: primary_id, self._KEY_FIELD: key, self._VALUE_FIELD: value} for key, value in data.items()]
+                insert_stmt = insert(self.tables[field]).values(values)
+                update_stmt = _get_update_stmt(
+                    self.dialect,
+                    insert_stmt,
+                    [self._VALUE_FIELD] if enforce else [],
+                    [ExtraFields.primary_id.value, self._KEY_FIELD],
                 )
-                value_keys = set(
-                    list(values.keys()) + [self.context_schema.created_at.name, self.context_schema.updated_at.name]
+                await conn.execute(update_stmt)
+
+            elif not nested and len(payload) > 0:
+                values = {key: data for key, (data, _) in payload.items()}
+                insert_stmt = insert(self.tables[self._CONTEXTS]).values({**values, ExtraFields.primary_id.value: primary_id})
+                enforced_keys = set(key for key in values.keys() if payload[key][1])
+                update_stmt = _get_update_stmt(
+                    self.dialect,
+                    insert_stmt,
+                    enforced_keys,
+                    [ExtraFields.primary_id.value]
                 )
-                update_stmt = _get_update_stmt(self.dialect, insert_stmt, value_keys, [self.context_schema.id.name])
                 await conn.execute(update_stmt)

@@ -86,10 +86,7 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        last_context = (
-            await self.collections[self._CONTEXTS].find_one({ExtraFields.active_ctx: True, ExtraFields.storage_key: key})
-        )
-        return last_context is not None
+        return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
@@ -114,7 +111,7 @@ class MongoContextStorage(DBContextStorage):
 
     async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
         primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
-        values_slice, nested = list(), dict()
+        values_slice, result_dict = list(), dict()
 
         for field, value in subscript.items():
             if isinstance(value, bool) and value:
@@ -139,15 +136,15 @@ class MongoContextStorage(DBContextStorage):
 
                 projection = [str(key) for key in filtered_keys if self._MISC_KEY not in str(key) and key != self._ID_KEY]
                 if len(projection) > 0:
-                    nested[field] = await self.collections[field].find_one(
+                    result_dict[field] = await self.collections[field].find_one(
                         {primary_id_key: primary_id}, projection
                     )
-                    del nested[field][self._ID_KEY]
+                    del result_dict[field][self._ID_KEY]
 
         values = await self.collections[self._CONTEXTS].find_one(
             {ExtraFields.primary_id: primary_id}, values_slice
         )
-        return {**values, **nested}
+        return {**values, **result_dict}
 
     async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
         def conditional_insert(key: Any, value: Dict) -> Dict:
