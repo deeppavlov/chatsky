@@ -11,7 +11,7 @@ You can see the result at http://127.0.0.1:8000/docs.
 # %%
 from dff.script import Message
 from dff.pipeline import Pipeline
-from dff.utils.testing import TOY_SCRIPT, is_interactive_mode
+from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
 
 import uvicorn
 from pydantic import BaseModel
@@ -19,9 +19,7 @@ from fastapi import FastAPI
 
 
 # %%
-pipeline = Pipeline.from_script(
-    TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node")
-)
+pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS)
 
 
 # %%
@@ -29,17 +27,16 @@ app = FastAPI()
 
 
 class Output(BaseModel):
-    user_id: int
+    user_id: str
     response: Message
 
 
 @app.post("/chat", response_model=Output)
 async def respond(
-    user_id: int,
-    user_message: str,
+    user_id: str,
+    user_message: Message,
 ):
-    request = Message(text=user_message)
-    context = await pipeline._run_pipeline(request, user_id)  # run in async
+    context = await pipeline._run_pipeline(user_message, user_id)  # run in async
     return {"user_id": user_id, "response": context.last_response}
 
 

@@ -5,7 +5,7 @@ The Utils module contains several service functions that are commonly used throu
 These functions provide a variety of utility functionality.
 """
 import collections
-from typing import Union, List, Callable
+from typing import Union, List
 from inspect import isfunction
 
 from ..service.service import Service
@@ -77,7 +77,7 @@ def rename_component_incrementing(
     """
     if isinstance(service, Service) and isinstance(service.handler, str) and service.handler == "ACTOR":
         base_name = "actor"
-    elif isinstance(service, Service) and isinstance(service.handler, Callable):
+    elif isinstance(service, Service) and callable(service.handler):
         if isfunction(service.handler):
             base_name = service.handler.__name__
         else:
