@@ -6,6 +6,16 @@ from opentelemetry.proto.common.v1.common_pb2 import AnyValue, KeyValueList
 
 
 def grpc_mapping_translation_patch(wrapped, _, args, kwargs):
+    """
+    This decorator patches the `_translate_value` function
+    from OpenTelemetry GRPC Log exporter module allowing the class
+    to translate values of type `dict` and `NoneType`
+    into the `protobuf` protocol.
+
+    :param wrapped: The original function.
+    :param args: Positional arguments of the original function.
+    :param kwargs: Keyword arguments of the original function.
+    """
     translated_value = args[0]
     if isinstance(translated_value, type(None)):
         return AnyValue(string_value="")

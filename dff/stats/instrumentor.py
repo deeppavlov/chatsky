@@ -23,6 +23,10 @@ INSTRUMENTS = ["dff"]
 SERVICE_NAME = "dialog_flow_framework"
 
 resource = Resource.create({"service.name": SERVICE_NAME})
+"""
+Singletone :py:class:`~Resource` instance shared inside the framework.
+"""
+
 tracer_provider = TracerProvider(resource=resource)
 logger_provider = LoggerProvider(resource=resource)
 meter_provider = MeterProvider(resource=resource)
@@ -32,6 +36,21 @@ set_meter_provider(meter_provider)
 
 
 class DFFInstrumentor(BaseInstrumentor):
+    """
+    Utility class for instrumenting DFF-related functions
+    that implements the :py:class:`~BaseInstrumentor` interface.
+    :py:meth:`~instrument` and :py:meth:`~uninstrument` methods
+    are available to apply and revert the instrumentation effects.
+    Logger provider and tracer provider can be passed to the class
+    as keyword arguments;
+    otherwise, the global logger provider and tracer provider are leveraged.
+    The class implements the :py:meth:`~__call__` method, so that
+    regular functions can be decorated using the class instance.
+
+    :param kwargs: you can pass `logger_provider`, `tracer_provider` and `meter_provider`
+        parameters to make use of custom instances instead of the globally available.
+    """
+
     def __init__(self, **kwargs) -> None:
         super().__init__()
         self._logger_provider = None
@@ -67,6 +86,19 @@ class DFFInstrumentor(BaseInstrumentor):
 
     @decorator
     async def __call__(self, wrapped, _, args, kwargs):
+        """
+        Regular functions that match the :py:class:`~dff.pipeline.types.ExtraHandlerFunction`
+        signature can be decorated with the class instance to log the returned value.
+        This method implements the logging procedure.
+        The returned value is assumed to be `dict` or `NoneType`.
+        Logging non-atomic values is discouraged, as they cannot be translated using
+        the `Protobuf` protocol.
+        Logging is ignored if the application is in 'uninstrumented' state.
+
+        :param wrapped: Function to decorate.
+        :param args: Positional arguments of the decorated function.
+        :param kwargs: Keyword arguments of the decorated function.
+        """
         ctx, _, info = args
         pipeline_component = get_wrapper_field(info)
         attributes = {

@@ -25,18 +25,33 @@ from dff.pipeline import ExtraHandlerRuntimeInfo
 
 
 def set_logger_destination(exporter: Optional[LogExporter] = None):
+    """
+    Configure the global Opentelemetry logger provider to export logs to the given destination.
+
+    :param exporter: Opentelemetry log exporter instance.
+    """
     if exporter is None:
         exporter = OTLPLogExporter(endpoint="grpc://localhost:4317", insecure=True)
     get_logger_provider().add_log_record_processor(BatchLogRecordProcessor(exporter))
 
 
 def set_meter_destination(exporter: Optional[MetricExporter] = None):
+    """
+    Configure the global Opentelemetry meter provider to export metrics to the given destination.
+
+    :param exporter: Opentelemetry meter exporter instance.
+    """
     if exporter is None:
         exporter = OTLPMetricExporter(endpoint="grpc://localhost:4317", insecure=True)
     get_meter_provider()._all_metric_readers.add(PeriodicExportingMetricReader(exporter))
 
 
 def set_tracer_destination(exporter: Optional[SpanExporter] = None):
+    """
+    Configure the global Opentelemetry tracer provider to export traces to the given destination.
+
+    :param exporter: Opentelemetry span exporter instance.
+    """
     if exporter is None:
         exporter = OTLPSpanExporter(endpoint="grpc://localhost:4317", insecure=True)
     get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
