@@ -7,13 +7,13 @@ from tests.test_utils import get_path_from_tests_to_current_dir
 from tests.db_list import ping_localhost
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.toy_script import HAPPY_PATH
-from aiochclient import ChClient
-from httpx import AsyncClient
 
 try:
+    from aiochclient import ChClient
+    from httpx import AsyncClient
     from dff import stats  # noqa: F401
 except ImportError:
-    pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
+    pytest.skip(allow_module_level=True, reason="There are dependencies missing.")
 
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
