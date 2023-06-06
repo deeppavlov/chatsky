@@ -102,7 +102,7 @@ def test_pickle(testing_file, testing_context, context_id):
 
 @pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running")
 @pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing")
-def _test_mongo(testing_context, context_id):
+def test_mongo(testing_context, context_id):
     if system() == "Windows":
         pytest.skip()
 
@@ -120,7 +120,7 @@ def _test_mongo(testing_context, context_id):
 
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
-def _test_redis(testing_context, context_id):
+def test_redis(testing_context, context_id):
     db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
     for test in TEST_FUNCTIONS:
         test(db, testing_context, context_id)

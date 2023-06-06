@@ -14,10 +14,10 @@ libraries like pickle or JSON.
 """
 import pickle
 from shelve import DbfilenameShelf
-from typing import Hashable, Union, List, Any, Dict, Optional
+from typing import Hashable, Union, List, Dict, Optional
 
 from dff.script import Context
-from .context_schema import ALL_ITEMS, ExtraFields
+from .context_schema import ALL_ITEMS, ExtraFields, FieldDescriptor
 
 from .database import DBContextStorage, cast_key_to_string
 
@@ -80,7 +80,7 @@ class ShelveContextStorage(DBContextStorage):
             source = self.shelve_db[primary_id][key]
             if isinstance(value, bool) and value:
                 context[key] = source
-            elif isinstance(source, dict):
+            else:
                 if isinstance(value, int):
                     read_slice = sorted(source.keys())[value:]
                     context[key] = {k: v for k, v in source.items() if k in read_slice}
@@ -90,13 +90,15 @@ class ShelveContextStorage(DBContextStorage):
                     context[key] = source
         return context
 
-    async def _write_ctx_val(self, key: str, data: Union[Dict[str, Any], Any], enforce: bool, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
         destination = self.shelve_db.setdefault(primary_id, dict())
         if nested:
-            nested_destination = destination.setdefault(key, dict())
-            for data_key, data_value in data.items():
-                if enforce or data_key not in nested_destination:
-                    nested_destination[data_key] = data_value
+            data, enforce = payload
+            nested_destination = destination.setdefault(field, dict())
+            for key, value in data.items():
+                if enforce or key not in nested_destination:
+                    nested_destination[key] = value
         else:
-            if enforce or key not in destination:
-                destination[key] = data
+            for key, (data, enforce) in payload.items():
+                if enforce or key not in destination:
+                    destination[key] = data

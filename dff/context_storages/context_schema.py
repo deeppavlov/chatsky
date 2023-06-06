@@ -23,8 +23,9 @@ class SchemaFieldWritePolicy(str, Enum):
     APPEND = "append"
 
 
+FieldDescriptor = Union[Dict[str, Tuple[Union[Dict[str, Any], Any], bool]], Tuple[Union[Dict[str, Any], Any], bool]]
 _ReadContextFunction = Callable[[Dict[str, Union[bool, int, List[Hashable]]], str], Awaitable[Dict]]
-_WriteContextFunction = Callable[[str, Union[Dict[str, Any], Any], bool, bool, str], Awaitable]
+_WriteContextFunction = Callable[[Optional[str], FieldDescriptor, bool, str], Awaitable]
 
 
 class BaseSchemaField(BaseModel):
@@ -66,7 +67,7 @@ class ContextSchema(BaseModel):
     labels: ListSchemaField = ListSchemaField(name="labels")
     misc: DictSchemaField = DictSchemaField(name="misc")
     framework_states: DictSchemaField = DictSchemaField(name="framework_states")
-    created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at)
+    created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at, on_write=SchemaFieldWritePolicy.UPDATE)
     updated_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.updated_at)
 
     class Config:
@@ -102,7 +103,7 @@ class ContextSchema(BaseModel):
 
     async def write_context(
         self, ctx: Context, hashes: Optional[Dict], val_writer: _WriteContextFunction, storage_key: str, primary_id: Optional[str]
-    ):
+    ) -> str:
         ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
         ctx_dict = ctx.dict()
         primary_id = str(uuid.uuid4()) if primary_id is None else primary_id
@@ -111,6 +112,7 @@ class ContextSchema(BaseModel):
         ctx_dict[self.active_ctx.name] = True
         ctx_dict[self.created_at.name] = ctx_dict[self.updated_at.name] = time.time_ns()
 
+        flat_values = dict()
         field_props: BaseSchemaField
         for field_props in dict(self).values():
             field = field_props.name
@@ -130,4 +132,9 @@ class ContextSchema(BaseModel):
                 update_enforce = False
             else:
                 update_enforce = True
-            await val_writer(field, update_values, update_enforce, update_nested, primary_id)
+            if update_nested:
+                await val_writer(field, (update_values, update_enforce), True, primary_id)
+            else:
+                flat_values.update({field: (update_values, update_enforce)})
+        await val_writer(None, flat_values, False, primary_id)
+        return primary_id

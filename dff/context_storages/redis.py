@@ -13,7 +13,7 @@ Additionally, Redis can be used as a cache, message broker, and database, making
 and powerful choice for data storage and management.
 """
 import pickle
-from typing import Hashable, List, Dict, Any, Union, Tuple, Optional
+from typing import Hashable, List, Dict, Union, Optional
 
 try:
     from aioredis import Redis
@@ -26,7 +26,7 @@ except ImportError:
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from .context_schema import ValueSchemaField
+from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields, FieldDescriptor, SchemaFieldWritePolicy
 from .protocol import get_protocol_install_suggestion
 
 
@@ -38,7 +38,8 @@ class RedisContextStorage(DBContextStorage):
     """
 
     _CONTEXTS_KEY = "all_contexts"
-    _VALUE_NONE = b""
+    _INDEX_TABLE = "index"
+    _DATA_TABLE = "data"
 
     def __init__(self, path: str):
         DBContextStorage.__init__(self, path)
@@ -47,103 +48,88 @@ class RedisContextStorage(DBContextStorage):
             raise ImportError("`redis` package is missing.\n" + install_suggestion)
         self._redis = Redis.from_url(self.full_path)
 
+    def set_context_schema(self, scheme: ContextSchema):
+        super().set_context_schema(scheme)
+        self.context_schema.active_ctx.on_write = SchemaFieldWritePolicy.IGNORE
+
     @threadsafe_method
     @cast_key_to_string()
     async def get_item_async(self, key: Union[Hashable, str]) -> Context:
-        fields, int_id = await self._read_keys(key)
-        if int_id is None:
+        primary_id = await self._get_last_ctx(key)
+        if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(fields, self._read_ctx, key, int_id)
+        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
         self.hash_storage[key] = hashes
         return context
 
     @threadsafe_method
     @cast_key_to_string()
     async def set_item_async(self, key: Union[Hashable, str], value: Context):
-        fields, int_id = await self._read_keys(key)
-        value_hash = self.hash_storage.get(key, None)
-        await self.context_schema.write_context(value, value_hash, fields, self._write_ctx, key)
-        if int_id != value.id and int_id is None:
-            await self._redis.rpush(self._CONTEXTS_KEY, key)
+        primary_id = await self._get_last_ctx(key)
+        value_hash = self.hash_storage.get(key)
+        primary_id = await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
+        await self._redis.set(f"{self._INDEX_TABLE}:{key}:{ExtraFields.primary_id.value}", primary_id)
 
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: Union[Hashable, str]):
         self.hash_storage[key] = None
-        await self._redis.rpush(key, self._VALUE_NONE)
-        await self._redis.lrem(self._CONTEXTS_KEY, 0, key)
+        if await self._get_last_ctx(key) is None:
+            raise KeyError(f"No entry for key {key}.")
+        await self._redis.delete(f"{self._INDEX_TABLE}:{key}:{ExtraFields.primary_id.value}")
 
     @threadsafe_method
     @cast_key_to_string()
     async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        if bool(await self._redis.exists(key)):
-            value = await self._redis.rpop(key)
-            await self._redis.rpush(key, value)
-            return self._check_none(value) is not None
-        else:
-            return False
+        primary_key = await self._redis.get(f"{self._INDEX_TABLE}:{key}:{ExtraFields.primary_id.value}")
+        return primary_key is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return int(await self._redis.llen(self._CONTEXTS_KEY))
+        return len(await self._redis.keys(f"{self._INDEX_TABLE}:*"))
 
     @threadsafe_method
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        while int(await self._redis.llen(self._CONTEXTS_KEY)) > 0:
-            value = await self._redis.rpop(self._CONTEXTS_KEY)
-            await self._redis.rpush(value, self._VALUE_NONE)
+        for key in await self._redis.keys(f"{self._INDEX_TABLE}:*"):
+            await self._redis.delete(key)
 
-    @classmethod
-    def _check_none(cls, value: Any) -> Any:
-        return None if value == cls._VALUE_NONE else value
+    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+        last_primary_id = await self._redis.get(f"{self._INDEX_TABLE}:{storage_key}:{ExtraFields.primary_id.value}")
+        return last_primary_id.decode() if last_primary_id is not None else None
 
-    async def _read_keys(self, ext_id: str) -> Tuple[Dict[str, List[str]], Optional[str]]:
-        nested_dict_keys = dict()
-        int_id = self._check_none(await self._redis.rpop(ext_id))
-        if int_id is None:
-            return nested_dict_keys, None
-        else:
-            int_id = int_id.decode()
-        await self._redis.rpush(ext_id, int_id)
-        for field in [
-            field
-            for field, field_props in dict(self.context_schema).items()
-            if not isinstance(field_props, ValueSchemaField)
-        ]:
-            for key in await self._redis.keys(f"{ext_id}:{int_id}:{field}:*"):
-                res = key.decode().split(":")[-1]
-                if field not in nested_dict_keys:
-                    nested_dict_keys[field] = list()
-                nested_dict_keys[field] += [int(res) if res.isdigit() else res]
-        return nested_dict_keys, int_id
-
-    async def _read_ctx(
-        self, subscript: Dict[str, Union[bool, Dict[Hashable, bool]]], int_id: str, ext_id: str
-    ) -> Dict:
-        result_dict = dict()
-        non_empty_value_subset = [
-            field for field, value in subscript.items() if isinstance(value, dict) and len(value) > 0
-        ]
-        for field in non_empty_value_subset:
-            for key in [key for key, value in subscript[field].items() if value]:
-                value = await self._redis.get(f"{ext_id}:{int_id}:{field}:{key}")
-                if value is not None:
-                    if field not in result_dict:
-                        result_dict[field] = dict()
-                    result_dict[field][key] = pickle.loads(value)
-        true_value_subset = [field for field, value in subscript.items() if isinstance(value, bool) and value]
-        for field in true_value_subset:
-            value = await self._redis.get(f"{ext_id}:{int_id}:{field}")
-            if value is not None:
-                result_dict[field] = pickle.loads(value)
-        return result_dict
-
-    async def _write_ctx(self, data: Dict[str, Any], update: bool, int_id: str, ext_id: str):
-        for holder in data.keys():
-            if isinstance(getattr(self.context_schema, holder), ValueSchemaField):
-                await self._redis.set(f"{ext_id}:{int_id}:{holder}", pickle.dumps(data.get(holder, None)))
+    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
+        context = dict()
+        for key, value in subscript.items():
+            if isinstance(value, bool) and value:
+                raw_value = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{key}")
+                context[key] = pickle.loads(raw_value) if raw_value is not None else None
             else:
-                for key, value in data.get(holder, dict()).items():
-                    await self._redis.set(f"{ext_id}:{int_id}:{holder}:{key}", pickle.dumps(value))
-        await self._redis.rpush(ext_id, int_id)
+                value_fields = await self._redis.keys(f"{self._DATA_TABLE}:{primary_id}:{key}:*")
+                value_field_names = [value_key.decode().split(":")[-1] for value_key in value_fields]
+                if isinstance(value, int):
+                    value_field_names = sorted([int(key) for key in value_field_names])[value:]
+                elif isinstance(value, list):
+                    value_field_names = [key for key in value_field_names if key in value]
+                elif value != ALL_ITEMS:
+                    value_field_names = list()
+                context[key] = dict()
+                for field in value_field_names:
+                    raw_value = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{key}:{field}")
+                    context[key][field] = pickle.loads(raw_value) if raw_value is not None else None
+        return context
+
+    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+        if nested:
+            data, enforce = payload
+            for key, value in data.items():
+                current_data = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{field}:{key}")
+                if enforce or current_data is None:
+                    raw_data = pickle.dumps(value)
+                    await self._redis.set(f"{self._DATA_TABLE}:{primary_id}:{field}:{key}", raw_data)
+        else:
+            for key, (data, enforce) in payload.items():
+                current_data = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{key}")
+                if enforce or current_data is None:
+                    raw_data = pickle.dumps(data)
+                    await self._redis.set(f"{self._DATA_TABLE}:{primary_id}:{key}", raw_data)
