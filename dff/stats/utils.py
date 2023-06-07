@@ -1,7 +1,7 @@
 """
 Utils
 -----
-This module includes utilities designed for statistics collection.
+This module includes utility functions designed for statistics collection.
 
 """
 import json

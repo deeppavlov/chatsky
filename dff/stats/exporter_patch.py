@@ -1,3 +1,10 @@
+"""
+Exporter patch
+----------------
+This module contains temporary utilities
+that patch Opentelemetry's GRPC log exporter
+which makes it possible to export arbitrary dict-like values.
+"""
 from typing import Mapping
 from wrapt import wrap_function_wrapper as _wrap
 import opentelemetry.exporter.otlp.proto.grpc as otlp_exporter_grpc

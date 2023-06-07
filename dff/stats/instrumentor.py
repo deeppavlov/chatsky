@@ -1,3 +1,13 @@
+"""
+Instrumentor
+-------------
+This modules contains the :py:class:`~DFFInstrumentor` class that implements
+Opentelemetry's `BaseInstrumentor` interface and allows for automated
+instrumentation of Dialog Flow Framework applications,
+e.g. for automated logging and log export.
+
+For detailed reference, see `~DFFInstrumentor` class.
+"""
 import asyncio
 from typing import Collection, Optional
 
