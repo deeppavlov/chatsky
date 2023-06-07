@@ -64,7 +64,7 @@ def time_context_read_write(context_storage: DBContextStorage, context: Context,
 
     write_times: list[float] = []
     read_times: list[float] = []
-    for _ in tqdm(range(context_num), desc="Benchmarking context storage"):
+    for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}"):
         ctx_id = uuid4()
 
         # write operation benchmark
@@ -86,15 +86,15 @@ def time_context_read_write(context_storage: DBContextStorage, context: Context,
 
 
 def report(
-        context_storage: DBContextStorage,
+        *context_storages: DBContextStorage,
         context_num: int = 1000,
         dialog_len: int = 10000,
         misc_len: int = 0,
 ):
     """
-    Benchmark context storage and generate a report.
+    Benchmark context storage(s) and generate a report.
 
-    :param context_storage: Context storage to benchmark.
+    :param context_storages: Context storages to benchmark.
     :param context_num: Number of times a single context should be written to/read from context storage.
     :param dialog_len:
         A number of turns inside a single context. The context will contain simple text requests/responses.
@@ -113,13 +113,28 @@ Size of one context: {context_size} ({tqdm.format_sizeof(context_size, divisor=1
     print(f"""Starting benchmarking with following parameters:
 {benchmark_stats}""")
 
-    write, read = time_context_read_write(context_storage, context, context_num)
-    print(f"""--------------------------------------------------
+    line_separator = "-" * 80
+
+    result = f"""{line_separator}
 DB benchmark
---------------------------------------------------
+{line_separator}
 {benchmark_stats}
---------------------------------------------------
-Result
---------------------------------------------------
+{line_separator}"""
+
+    for context_storage in context_storages:
+        result += f"""
+Result --- {context_storage.full_path}
+{line_separator}"""
+        try:
+            write, read = time_context_read_write(context_storage, context, context_num)
+
+            result += f"""
 Average write time for one context: {sum(write) / len(write)} s
-Average read time for one context: {sum(read) / len(read)} s""")
+Average read time for one context: {sum(read) / len(read)} s
+{line_separator}"""
+        except Exception as e:
+            result += f"""
+{getattr(e, 'message', repr(e))}
+{line_separator}"""
+
+    print(result)
