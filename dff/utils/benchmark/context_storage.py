@@ -1,18 +1,18 @@
 """
-Benchmark
----------
-This module contains functions used to benchmark context storages.
+Context storage benchmarking
+----------------------------
+This module contains functions for context storages benchmarking.
 
-## Basic usage
+Basic usage::
 
-```
-from dff.utils.benchmark.context_storage import report
-from dff.context_storages import context_storage_factory
 
-storage = context_storage_factory("postgresql+asyncpg://postgres:pass@localhost:5432/test", table_name="benchmark")
+    from dff.utils.benchmark.context_storage import report
+    from dff.context_storages import context_storage_factory
 
-report(storage)
-```
+    storage = context_storage_factory("postgresql+asyncpg://postgres:pass@localhost:5432/test", table_name="benchmark")
+
+    report(storage)
+
 """
 from uuid import uuid4
 from time import perf_counter
