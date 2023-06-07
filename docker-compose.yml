@@ -40,6 +40,9 @@ services:
     hostname: localhost
   dashboard:
     env_file: [.env_file]
+    build:
+      context: ./dff/utils/docker
+      dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
     ports:
       - "8088:8088"
