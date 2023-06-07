@@ -179,7 +179,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
-            ("dff.utils.testing", "Utils"),
+            ("dff.utils", "Utils"),
         ]
     )
     pull_release_notes_from_github()
