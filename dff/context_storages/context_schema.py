@@ -67,7 +67,7 @@ class ContextSchema(BaseModel):
     labels: ListSchemaField = ListSchemaField(name="labels")
     misc: DictSchemaField = DictSchemaField(name="misc")
     framework_states: DictSchemaField = DictSchemaField(name="framework_states")
-    created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at, on_write=SchemaFieldWritePolicy.UPDATE)
+    created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at, on_write=SchemaFieldWritePolicy.APPEND)
     updated_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.updated_at)
 
     class Config:

@@ -303,7 +303,6 @@ class SQLContextStorage(DBContextStorage):
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         stmt = update(self.tables[self._CONTEXTS])
-        stmt = stmt.where(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value] == True)
         stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin() as conn:
             await conn.execute(stmt)

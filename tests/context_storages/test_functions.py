@@ -62,5 +62,8 @@ def operational_test(db: DBContextStorage, testing_context: Context, context_id:
     read_context = db[context_id]
     assert write_context == read_context.dict()
 
+    # TODO: assert correct UPDATE policy
+    # TODO: fix errors if this function runs first??
+
 
 TEST_FUNCTIONS = [generic_test, operational_test]

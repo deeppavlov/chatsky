@@ -168,7 +168,7 @@ def test_mysql(testing_context, context_id):
 
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
-def _test_ydb(testing_context, context_id):
+def test_ydb(testing_context, context_id):
     db = context_storage_factory(
         "{}{}".format(
             os.getenv("YDB_ENDPOINT"),
