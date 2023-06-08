@@ -11,7 +11,7 @@ from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, It
 
 from dff.context_storages import DBContextStorage
 from dff.script import Context, ActorStage, NodeLabel2Type, Script
-from typing_extensions import NotRequired, TypedDict, TypeAlias, NamedTuple
+from typing_extensions import NotRequired, TypedDict, TypeAlias
 from pydantic import BaseModel
 
 

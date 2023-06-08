@@ -7,7 +7,6 @@ The following tutorial shows `pipeline` service group usage and start conditions
 
 
 # %%
-import json
 import logging
 
 from dff.pipeline import (
