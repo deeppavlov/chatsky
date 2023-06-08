@@ -28,6 +28,16 @@ try:
 except ImportError:
     matplotlib = None
 
+try:
+    import pandas
+except ImportError:
+    pandas = None
+
+try:
+    import polars
+except ImportError:
+    polars = None
+
 from dff.context_storages import DBContextStorage
 from dff.script import Context, Message
 
@@ -53,9 +63,46 @@ def get_context(dialog_len: int, misc_len: int) -> Context:
     )
 
 
+@tp.overload
 def time_context_read_write(
-        context_storage: DBContextStorage, context: Context, context_num: int
+        context_storage: DBContextStorage,
+        context: Context,
+        context_num: int,
+        as_dataframe: None = None,
 ) -> tp.Tuple[tp.List[float], tp.List[float]]:
+    ...
+
+
+@tp.overload
+def time_context_read_write(
+        context_storage: DBContextStorage,
+        context: Context,
+        context_num: int,
+        as_dataframe: tp.Literal["pandas"],
+) -> "pandas.DataFrame":
+    ...
+
+
+@tp.overload
+def time_context_read_write(
+        context_storage: DBContextStorage,
+        context: Context,
+        context_num: int,
+        as_dataframe: tp.Literal["polars"],
+) -> "polars.DataFrame":
+    ...
+
+
+def time_context_read_write(
+        context_storage: DBContextStorage,
+        context: Context,
+        context_num: int,
+        as_dataframe: tp.Optional[tp.Literal["pandas", "polars"]] = None,
+) -> tp.Union[
+    tp.Tuple[tp.List[float], tp.List[float]],
+    "pandas.DataFrame",
+    "polars.DataFrame",
+]:
     """
     Generate `context_num` ids and for each write into `context_storage` value of `context` under generated id,
     after that read the value stored in `context_storage` under generated id and compare it to `context`.
@@ -67,7 +114,18 @@ def time_context_read_write(
     :param context_storage: Context storage to benchmark.
     :param context: An instance of context which will be repeatedly written into context storage.
     :param context_num: A number of times the context will be written and checked.
-    :return: Two lists: first one contains individual write times, second one contains individual read times.
+    :param as_dataframe:
+        If the function should return the results as a pandas or a polars DataFrame.
+        If set to None, does not return a Dataframe.
+        Defaults to None.
+    :return:
+        Depends on `as_dataframe` parameter.
+        1. By default, it is set to None in which case it returns:
+            two lists: first one contains individual write times, second one contains individual read times.
+        2. If set to "pandas":
+            A pandas DataFrame with two columns: "write" and "read" which contain corresponding data series.
+        3. If set to "polars":
+            A polars DataFrame with the same columns as in a pandas DataFrame.
     :raises RuntimeError: If context written into context storage does not match read context.
     """
     context_storage.clear()
@@ -92,7 +150,23 @@ def time_context_read_write(
             raise RuntimeError(f"True context:\n{context}\nActual context:\n{actual_context}")
 
     context_storage.clear()
-    return write_times, read_times
+
+    if as_dataframe is None:
+        return write_times, read_times
+    elif as_dataframe == "pandas":
+        if pandas is None:
+            raise RuntimeError("Install `pandas` in order to get benchmark results as a pandas DataFrame.")
+        return pandas.DataFrame(data={
+            "write": write_times,
+            "read": read_times
+        })
+    elif as_dataframe == "polars":
+        if polars is None:
+            raise RuntimeError("Install `polars` in order to get benchmark results as a polars DataFrame.")
+        return polars.DataFrame({
+            "write": write_times,
+            "read": read_times
+        })
 
 
 def report(
