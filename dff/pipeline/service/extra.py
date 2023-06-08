@@ -69,7 +69,7 @@ class _ComponentExtraHandler:
             self.functions = functions
             self.timeout = timeout
             self.requested_async_flag = asynchronous
-            self.calculated_async_flag = all([asyncio.iscoroutinefunction(function) for function in self.functions])
+            self.calculated_async_flag = all([asyncio.iscoroutinefunction(func) for func in self.functions])
             self.stage = stage
         else:
             raise Exception(f"Unknown type for {type(self).__name__} {functions}")
@@ -93,24 +93,20 @@ class _ComponentExtraHandler:
         return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
     async def _run_function(
-        self, function: ExtraHandlerFunction, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo
+        self, func: ExtraHandlerFunction, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo
     ):
-        handler_params = len(inspect.signature(function).parameters)
+        handler_params = len(inspect.signature(func).parameters)
         if handler_params == 1:
-            await wrap_sync_function_in_async(function, ctx)
+            await wrap_sync_function_in_async(func, ctx)
         elif handler_params == 2:
-            await wrap_sync_function_in_async(function, ctx, pipeline)
+            await wrap_sync_function_in_async(func, ctx, pipeline)
         elif handler_params == 3:
-            extra_handler_runtime_info: ExtraHandlerRuntimeInfo = {
-                "function": function,
-                "stage": self.stage,
-                "component": component_info,
-            }
-            await wrap_sync_function_in_async(function, ctx, pipeline, extra_handler_runtime_info)
+            extra_handler_runtime_info = ExtraHandlerRuntimeInfo(func=func, stage=self.stage, component=component_info)
+            await wrap_sync_function_in_async(func, ctx, pipeline, extra_handler_runtime_info)
         else:
             raise Exception(
-                f"Too many parameters required for component {component_info['name']} {self.stage.name}"
-                f" wrapper handler '{function.__name__}': {handler_params}!"
+                f"Too many parameters required for component {component_info.name} {self.stage}"
+                f" wrapper handler '{func.__name__}': {handler_params}!"
             )
 
     async def _run(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
@@ -126,18 +122,16 @@ class _ComponentExtraHandler:
         """
 
         if self.asynchronous:
-            futures = [self._run_function(function, ctx, pipeline, component_info) for function in self.functions]
-            for function, future in zip(self.functions, asyncio.as_completed(futures)):
+            futures = [self._run_function(func, ctx, pipeline, component_info) for func in self.functions]
+            for func, future in zip(self.functions, asyncio.as_completed(futures)):
                 try:
                     await future
                 except asyncio.TimeoutError:
-                    logger.warning(
-                        f"Component {component_info['name']} {self.stage.name} wrapper '{function.__name__}' timed out!"
-                    )
+                    logger.warning(f"Component {component_info.name} {self.stage} wrapper '{func.__name__}' timed out!")
 
         else:
-            for function in self.functions:
-                await self._run_function(function, ctx, pipeline, component_info)
+            for func in self.functions:
+                await self._run_function(func, ctx, pipeline, component_info)
 
     async def __call__(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
         """
@@ -167,7 +161,7 @@ class _ComponentExtraHandler:
             "type": type(self).__name__,
             "timeout": self.timeout,
             "asynchronous": self.asynchronous,
-            "functions": [function.__name__ for function in self.functions],
+            "functions": [func.__name__ for func in self.functions],
         }
 
 
