@@ -65,44 +65,40 @@ def get_context(dialog_len: int, misc_len: int) -> Context:
 
 @tp.overload
 def time_context_read_write(
-        context_storage: DBContextStorage,
-        context: Context,
-        context_num: int,
-        as_dataframe: None = None,
+    context_storage: DBContextStorage,
+    context: Context,
+    context_num: int,
+    as_dataframe: None = None,
 ) -> tp.Tuple[tp.List[float], tp.List[float]]:
     ...
 
 
 @tp.overload
 def time_context_read_write(
-        context_storage: DBContextStorage,
-        context: Context,
-        context_num: int,
-        as_dataframe: tp.Literal["pandas"],
+    context_storage: DBContextStorage,
+    context: Context,
+    context_num: int,
+    as_dataframe: tp.Literal["pandas"],
 ) -> "pandas.DataFrame":
     ...
 
 
 @tp.overload
 def time_context_read_write(
-        context_storage: DBContextStorage,
-        context: Context,
-        context_num: int,
-        as_dataframe: tp.Literal["polars"],
+    context_storage: DBContextStorage,
+    context: Context,
+    context_num: int,
+    as_dataframe: tp.Literal["polars"],
 ) -> "polars.DataFrame":
     ...
 
 
 def time_context_read_write(
-        context_storage: DBContextStorage,
-        context: Context,
-        context_num: int,
-        as_dataframe: tp.Optional[tp.Literal["pandas", "polars"]] = None,
-) -> tp.Union[
-    tp.Tuple[tp.List[float], tp.List[float]],
-    "pandas.DataFrame",
-    "polars.DataFrame",
-]:
+    context_storage: DBContextStorage,
+    context: Context,
+    context_num: int,
+    as_dataframe: tp.Optional[tp.Literal["pandas", "polars"]] = None,
+) -> tp.Union[tp.Tuple[tp.List[float], tp.List[float]], "pandas.DataFrame", "polars.DataFrame"]:
     """
     Generate `context_num` ids and for each write into `context_storage` value of `context` under generated id,
     after that read the value stored in `context_storage` under generated id and compare it to `context`.
@@ -156,25 +152,19 @@ def time_context_read_write(
     elif as_dataframe == "pandas":
         if pandas is None:
             raise RuntimeError("Install `pandas` in order to get benchmark results as a pandas DataFrame.")
-        return pandas.DataFrame(data={
-            "write": write_times,
-            "read": read_times
-        })
+        return pandas.DataFrame(data={"write": write_times, "read": read_times})
     elif as_dataframe == "polars":
         if polars is None:
             raise RuntimeError("Install `polars` in order to get benchmark results as a polars DataFrame.")
-        return polars.DataFrame({
-            "write": write_times,
-            "read": read_times
-        })
+        return polars.DataFrame({"write": write_times, "read": read_times})
 
 
 def report(
-        *context_storages: DBContextStorage,
-        context_num: int = 1000,
-        dialog_len: int = 10000,
-        misc_len: int = 0,
-        pdf: tp.Optional[str] = None,
+    *context_storages: DBContextStorage,
+    context_num: int = 1000,
+    dialog_len: int = 10000,
+    misc_len: int = 0,
+    pdf: tp.Optional[str] = None,
 ):
     """
     Benchmark context storage(s) and generate a report.
@@ -194,17 +184,16 @@ def report(
     context = get_context(dialog_len, misc_len)
     context_size = get_context_size(context)
 
-    benchmark_config = f"Number of contexts: {context_num}\n" \
-                      f"Dialog len: {dialog_len}\n" \
-                      f"Misc len: {misc_len}\n" \
-                      f"Size of one context: {context_size} ({tqdm.format_sizeof(context_size, divisor=1024)})"
+    benchmark_config = (
+        f"Number of contexts: {context_num}\n"
+        f"Dialog len: {dialog_len}\n"
+        f"Misc len: {misc_len}\n"
+        f"Size of one context: {context_size} ({tqdm.format_sizeof(context_size, divisor=1024)})"
+    )
 
     print(f"Starting benchmarking with following parameters:\n{benchmark_config}")
 
-    benchmarking_results: tp.Dict[str, tp.Union[
-        tp.Tuple[tp.List[float], tp.List[float]],
-        str
-    ]] = {}
+    benchmarking_results: tp.Dict[str, tp.Union[tp.Tuple[tp.List[float], tp.List[float]], str]] = {}
 
     for context_storage in context_storages:
         try:
@@ -212,7 +201,7 @@ def report(
 
             benchmarking_results[context_storage.full_path] = write, read
         except Exception as e:
-            benchmarking_results[context_storage.full_path] = getattr(e, 'message', repr(e))
+            benchmarking_results[context_storage.full_path] = getattr(e, "message", repr(e))
 
     # define functions for displaying results
     line_separator = "-" * 80
@@ -223,19 +212,18 @@ def report(
         result = f"{storage_name}\n{line_separator}\n"
         if not isinstance(benchmarking_result, str):
             write, read = benchmarking_result
-            result += f"Average write time: {sum(write) / len(write)} s\n" \
-                      f"Average read time: {sum(read) / len(read)} s\n{line_separator}"
+            result += (
+                f"Average write time: {sum(write) / len(write)} s\n"
+                f"Average read time: {sum(read) / len(read)} s\n{line_separator}"
+            )
         else:
             result += f"{benchmarking_result}\n{line_separator}"
         return result
 
     def get_scores_and_leaderboard(
-            sort_by: tp.Literal["Write", "Read"]
-    ) -> tp.Tuple[
-        tp.List[tp.Tuple[str, tp.Optional[float]]],
-        str
-    ]:
-        benchmark_index = 0 if sort_by == 'Write' else 1
+        sort_by: tp.Literal["Write", "Read"]
+    ) -> tp.Tuple[tp.List[tp.Tuple[str, tp.Optional[float]]], str]:
+        benchmark_index = 0 if sort_by == "Write" else 1
 
         scores = sorted(
             [
@@ -243,16 +231,19 @@ def report(
                 for storage_name, result in benchmarking_results.items()
                 if not isinstance(result, str)
             ],
-            key=lambda benchmark: benchmark[1]  # sort in ascending order
+            key=lambda benchmark: benchmark[1],  # sort in ascending order
         )
         scores += [
-            (storage_name, None)
-            for storage_name, result in benchmarking_results.items()
-            if isinstance(result, str)
+            (storage_name, None) for storage_name, result in benchmarking_results.items() if isinstance(result, str)
         ]
-        leaderboard = f"{sort_by} time leaderboard\n{line_separator}\n" + "\n".join(
-            [f"{result}{' s' if result is not None else ''}: {storage_name}" for storage_name, result in scores]
-        ) + "\n" + line_separator
+        leaderboard = (
+            f"{sort_by} time leaderboard\n{line_separator}\n"
+            + "\n".join(
+                [f"{result}{' s' if result is not None else ''}: {storage_name}" for storage_name, result in scores]
+            )
+            + "\n"
+            + line_separator
+        )
 
         return scores, leaderboard
 
@@ -284,7 +275,7 @@ def report(
             plt.figure(figsize=figure_size)
             plt.scatter(range(len(write)), write, label="write times")
             plt.scatter(range(len(read)), read, label="read times")
-            plt.legend(loc='best')
+            plt.legend(loc="best")
             plt.grid(True)
             plt.title(storage_name)
 
