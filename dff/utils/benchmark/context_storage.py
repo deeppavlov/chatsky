@@ -16,20 +16,28 @@ Basic usage::
 """
 from uuid import uuid4
 from time import perf_counter
+import typing as tp
 
 from pympler import asizeof
 from tqdm.auto import tqdm
+
+try:
+    import matplotlib
+    from matplotlib.backends.backend_pdf import PdfPages
+    import matplotlib.pyplot as plt
+except ImportError:
+    matplotlib = None
 
 from dff.context_storages import DBContextStorage
 from dff.script import Context, Message
 
 
-def get_context_size(context: Context):
+def get_context_size(context: Context) -> int:
     """Return size of a provided context."""
     return asizeof.asizeof(context)
 
 
-def get_context(dialog_len: int, misc_len: int):
+def get_context(dialog_len: int, misc_len: int) -> Context:
     """
     Return a context with a given number of dialog turns and a given length of misc field.
 
@@ -45,7 +53,9 @@ def get_context(dialog_len: int, misc_len: int):
     )
 
 
-def time_context_read_write(context_storage: DBContextStorage, context: Context, context_num: int):
+def time_context_read_write(
+        context_storage: DBContextStorage, context: Context, context_num: int
+) -> tp.Tuple[tp.List[float], tp.List[float]]:
     """
     Generate `context_num` ids and for each write into `context_storage` value of `context` under generated id,
     after that read the value stored in `context_storage` under generated id and compare it to `context`.
@@ -62,8 +72,8 @@ def time_context_read_write(context_storage: DBContextStorage, context: Context,
     """
     context_storage.clear()
 
-    write_times: list[float] = []
-    read_times: list[float] = []
+    write_times: tp.List[float] = []
+    read_times: tp.List[float] = []
     for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}"):
         ctx_id = uuid4()
 
@@ -90,6 +100,7 @@ def report(
         context_num: int = 1000,
         dialog_len: int = 10000,
         misc_len: int = 0,
+        pdf: tp.Optional[str] = None,
 ):
     """
     Benchmark context storage(s) and generate a report.
@@ -101,40 +112,135 @@ def report(
     :param misc_len:
         Number of items in the misc field.
         Use this parameter if context storage only has access to the most recent requests/responses.
+    :param pdf:
+        A pdf file name to save report to.
+        Defaults to None.
+        If set to None, prints the result to stdout instead of creating a pdf file.
     """
     context = get_context(dialog_len, misc_len)
     context_size = get_context_size(context)
 
-    benchmark_stats = f"""Number of contexts: {context_num}
-Dialog len: {dialog_len}
-Misc len: {misc_len}
-Size of one context: {context_size} ({tqdm.format_sizeof(context_size, divisor=1024)})"""
+    benchmark_config = f"Number of contexts: {context_num}\n" \
+                      f"Dialog len: {dialog_len}\n" \
+                      f"Misc len: {misc_len}\n" \
+                      f"Size of one context: {context_size} ({tqdm.format_sizeof(context_size, divisor=1024)})"
 
-    print(f"""Starting benchmarking with following parameters:
-{benchmark_stats}""")
+    print(f"Starting benchmarking with following parameters:\n{benchmark_config}")
 
-    line_separator = "-" * 80
-
-    result = f"""{line_separator}
-DB benchmark
-{line_separator}
-{benchmark_stats}
-{line_separator}"""
+    benchmarking_results: tp.Dict[str, tp.Union[
+        tp.Tuple[tp.List[float], tp.List[float]],
+        str
+    ]] = {}
 
     for context_storage in context_storages:
-        result += f"""
-Result --- {context_storage.full_path}
-{line_separator}"""
         try:
             write, read = time_context_read_write(context_storage, context, context_num)
 
-            result += f"""
-Average write time for one context: {sum(write) / len(write)} s
-Average read time for one context: {sum(read) / len(read)} s
-{line_separator}"""
+            benchmarking_results[context_storage.full_path] = write, read
         except Exception as e:
-            result += f"""
-{getattr(e, 'message', repr(e))}
-{line_separator}"""
+            benchmarking_results[context_storage.full_path] = getattr(e, 'message', repr(e))
 
-    print(result)
+    # define functions for displaying results
+    line_separator = "-" * 80
+
+    pretty_config = f"{line_separator}\nDB benchmark\n{line_separator}\n{benchmark_config}\n{line_separator}"
+
+    def pretty_benchmark_result(storage_name, benchmarking_result) -> str:
+        result = f"{storage_name}\n{line_separator}\n"
+        if not isinstance(benchmarking_result, str):
+            write, read = benchmarking_result
+            result += f"Average write time: {sum(write) / len(write)} s\n" \
+                      f"Average read time: {sum(read) / len(read)} s\n{line_separator}"
+        else:
+            result += f"{benchmarking_result}\n{line_separator}"
+        return result
+
+    def get_scores_and_leaderboard(
+            sort_by: tp.Literal["Write", "Read"]
+    ) -> tp.Tuple[
+        tp.List[tp.Tuple[str, tp.Optional[float]]],
+        str
+    ]:
+        benchmark_index = 0 if sort_by == 'Write' else 1
+
+        scores = sorted(
+            [
+                (storage_name, sum(result[benchmark_index]) / len(result[benchmark_index]))
+                for storage_name, result in benchmarking_results.items()
+                if not isinstance(result, str)
+            ],
+            key=lambda benchmark: benchmark[1]  # sort in ascending order
+        )
+        scores += [
+            (storage_name, None)
+            for storage_name, result in benchmarking_results.items()
+            if isinstance(result, str)
+        ]
+        leaderboard = f"{sort_by} time leaderboard\n{line_separator}\n" + "\n".join(
+            [f"{result}{' s' if result is not None else ''}: {storage_name}" for storage_name, result in scores]
+        ) + "\n" + line_separator
+
+        return scores, leaderboard
+
+    _, write_leaderboard = get_scores_and_leaderboard("Write")
+    _, read_leaderboard = get_scores_and_leaderboard("Read")
+
+    if pdf is None:
+        result = pretty_config
+
+        for storage_name, benchmarking_result in benchmarking_results.items():
+            result += f"\n{pretty_benchmark_result(storage_name, benchmarking_result)}"
+
+        if len(context_storages) > 1:
+            result += f"\n{write_leaderboard}\n{read_leaderboard}"
+
+        print(result)
+    else:
+        if matplotlib is None:
+            raise RuntimeError("`matplotlib` is required to generate pdf reports.")
+
+        figure_size = (11, 8)
+
+        def text_page(text, *, x=0.5, y=0.5, size=18, ha="center", family="monospace", **kwargs):
+            page = plt.figure(figsize=figure_size)
+            page.clf()
+            page.text(x, y, text, transform=page.transFigure, size=size, ha=ha, family=family, **kwargs)
+
+        def scatter_page(storage_name, write, read):
+            plt.figure(figsize=figure_size)
+            plt.scatter(range(len(write)), write, label="write times")
+            plt.scatter(range(len(read)), read, label="read times")
+            plt.legend(loc='best')
+            plt.grid(True)
+            plt.title(storage_name)
+
+        with PdfPages(pdf) as mpl_pdf:
+            text_page(pretty_config, size=24)
+            mpl_pdf.savefig()
+            plt.close()
+
+            if len(context_storages) > 1:
+                text_page(write_leaderboard, x=0.05, size=14, ha="left")
+                mpl_pdf.savefig()
+                plt.close()
+                text_page(read_leaderboard, x=0.05, size=14, ha="left")
+                mpl_pdf.savefig()
+                plt.close()
+
+            for storage_name, benchmarking_result in benchmarking_results.items():
+                txt = pretty_benchmark_result(storage_name, benchmarking_result)
+
+                if not isinstance(benchmarking_result, str):
+                    write, read = benchmarking_result
+
+                    text_page(txt)
+                    mpl_pdf.savefig()
+                    plt.close()
+
+                    scatter_page(storage_name, write, read)
+                    mpl_pdf.savefig()
+                    plt.close()
+                else:
+                    text_page(txt)
+                    mpl_pdf.savefig()
+                    plt.close()
