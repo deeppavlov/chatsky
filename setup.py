@@ -27,56 +27,56 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 
 
 core = [
-    "pydantic==1.10.7",
-    "nest-asyncio==1.5.6",
-    "typing-extensions==4.6.2",
+    "pydantic",
+    "nest-asyncio",
+    "typing-extensions",
 ]
 
 async_files_dependencies = [
-    "aiofiles==23.1.0",
+    "aiofiles",
 ]
 
 redis_dependencies = [
-    "redis==4.5.4",
+    "redis",
 ]
 
 mongodb_dependencies = [
-    "motor==3.1.2",
+    "motor",
 ]
 
 _sql_dependencies = [
-    "sqlalchemy[asyncio]==2.0.10",
+    "sqlalchemy[asyncio]",
 ]
 
 sqlite_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "aiosqlite==0.19.0",
+        "aiosqlite",
     ],
 )
 
 mysql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "asyncmy==0.2.7",
-        "cryptography==41.0.0",
+        "asyncmy",
+        "cryptography",
     ],
 )
 
 postgresql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "asyncpg==0.27.0",
+        "asyncpg",
     ],
 )
 
 ydb_dependencies = [
-    "ydb==3.3.4",
-    "six==1.16.0",
+    "ydb",
+    "six",
 ]
 
 telegram_dependencies = [
-    "pytelegrambotapi==4.12.0",
+    "pytelegrambotapi",
 ]
 
 full = merge_req_lists(
