@@ -79,6 +79,11 @@ telegram_dependencies = [
     "pytelegrambotapi~=4.5.1",
 ]
 
+benchmark_dependencies = [
+    "pympler",
+    "tqdm",
+]
+
 full = merge_req_lists(
     core,
     async_files_dependencies,
@@ -89,6 +94,7 @@ full = merge_req_lists(
     postgresql_dependencies,
     ydb_dependencies,
     telegram_dependencies,
+    benchmark_dependencies,
 )
 
 requests_requirements = [
@@ -116,8 +122,7 @@ test_requirements = merge_req_lists(
         "uvicorn~=0.21.1",
         "websockets~=11.0.2",
         "locust~=2.15",
-        "pympler",
-        "tqdm",
+        "matplotlib",
     ],
     requests_requirements,
 )
@@ -173,6 +178,7 @@ EXTRA_DEPENDENCIES = {
     "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
     "telegram": telegram_dependencies,  # dependencies for using Telegram
+    "benchmark": benchmark_dependencies,  # dependencies for benchmarking
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)

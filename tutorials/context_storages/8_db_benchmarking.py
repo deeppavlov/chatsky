@@ -80,6 +80,8 @@ report(*storages, context_num=100, dialog_len=1)
 """
 You can also generate a pdf report which additionally includes
 plots of write and read times for each storage.
+
+Generating pdf reports requires the `matplotlib` package.
 """
 
 # %%
