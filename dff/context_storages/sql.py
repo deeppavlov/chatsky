@@ -14,7 +14,7 @@ public-domain, SQL database engine.
 """
 import asyncio
 import importlib
-from typing import Hashable, Dict, Union, List, Iterable, Optional
+from typing import Callable, Hashable, Dict, Union, List, Iterable, Optional
 
 from dff.script import Context
 
@@ -43,6 +43,7 @@ try:
         Integer,
         Boolean,
         Index,
+        Insert,
         inspect,
         select,
         update,
@@ -89,19 +90,15 @@ if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
 
-def _import_insert_for_dialect(dialect: str):
-    """
-    Imports the insert function into global scope depending on the chosen sqlalchemy dialect.
-    :param dialect: Chosen sqlalchemy dialect.
-    """
-    global insert
-    insert = getattr(importlib.import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
+def _import_insert_for_dialect(dialect: str) -> Callable[[str], Insert]:
+    return getattr(importlib.import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
-def _import_datetime_from_dialect(dialect: str):
-    global DateTime
+def _import_datetime_from_dialect(dialect: str) -> DateTime:
     if dialect == "mysql":
-        DateTime = DATETIME(fsp=6)
+        return DATETIME(fsp=6)
+    else:
+        return DateTime
 
 
 def _get_current_time(dialect: str):
@@ -156,14 +153,17 @@ class SQLContextStorage(DBContextStorage):
     _UUID_LENGTH = 36
     _KEY_LENGTH = 256
 
+    DATETIME_CLASS: DateTime
+    INSERT_CALLABLE: insert
+
     def __init__(self, path: str, table_name_prefix: str = "dff_table", custom_driver: bool = False):
         DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
-        _import_insert_for_dialect(self.dialect)
-        _import_datetime_from_dialect(self.dialect)
+        self.INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
+        self.DATETIME_CLASS = _import_datetime_from_dialect(self.dialect)
 
         list_fields = [
             field
@@ -201,10 +201,10 @@ class SQLContextStorage(DBContextStorage):
                     Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
                     Column(self._KEY_FIELD, String(self._KEY_LENGTH), nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
-                    Column(ExtraFields.created_at.value, DateTime, server_default=current_time, nullable=False),
+                    Column(ExtraFields.created_at.value, self.DATETIME_CLASS, server_default=current_time, nullable=False),
                     Column(
                         ExtraFields.updated_at.value,
-                        DateTime,
+                        self.DATETIME_CLASS,
                         server_default=current_time,
                         server_onupdate=current_time,
                         nullable=False,
@@ -222,10 +222,10 @@ class SQLContextStorage(DBContextStorage):
                     Column(ExtraFields.active_ctx.value, Boolean(), default=True, nullable=False),
                     Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
                     Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
-                    Column(ExtraFields.created_at.value, DateTime, server_default=current_time, nullable=False),
+                    Column(ExtraFields.created_at.value, self.DATETIME_CLASS, server_default=current_time, nullable=False),
                     Column(
                         ExtraFields.updated_at.value,
-                        DateTime,
+                        self.DATETIME_CLASS,
                         server_default=current_time,
                         server_onupdate=current_time,
                         nullable=False,
@@ -294,8 +294,9 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def len_async(self) -> int:
-        stmt = select(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value] == True)
-        stmt = select(func.count()).select_from(stmt.subquery())
+        subq = select(self.tables[self._CONTEXTS])
+        subq = subq.where(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value] == True)
+        stmt = select(func.count()).select_from(subq.subquery())
         async with self.engine.begin() as conn:
             return (await conn.execute(stmt)).fetchone()[0]
 
@@ -378,7 +379,7 @@ class SQLContextStorage(DBContextStorage):
             if nested and len(payload[0]) > 0:
                 data, enforce = payload
                 values = [{ExtraFields.primary_id.value: primary_id, self._KEY_FIELD: key, self._VALUE_FIELD: value} for key, value in data.items()]
-                insert_stmt = insert(self.tables[field]).values(values)
+                insert_stmt = self.INSERT_CALLABLE(self.tables[field]).values(values)
                 update_stmt = _get_update_stmt(
                     self.dialect,
                     insert_stmt,
@@ -389,7 +390,7 @@ class SQLContextStorage(DBContextStorage):
 
             elif not nested and len(payload) > 0:
                 values = {key: data for key, (data, _) in payload.items()}
-                insert_stmt = insert(self.tables[self._CONTEXTS]).values({**values, ExtraFields.primary_id.value: primary_id})
+                insert_stmt = self.INSERT_CALLABLE(self.tables[self._CONTEXTS]).values({**values, ExtraFields.primary_id.value: primary_id})
                 enforced_keys = set(key for key in values.keys() if payload[key][1])
                 update_stmt = _get_update_stmt(
                     self.dialect,
