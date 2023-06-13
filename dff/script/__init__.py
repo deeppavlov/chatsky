@@ -18,7 +18,6 @@ from .core.normalization import (
     normalize_transitions,
     normalize_response,
     normalize_processing,
-    normalize_keywords,
     normalize_script,
 )
 from .core.script import Node, Script
