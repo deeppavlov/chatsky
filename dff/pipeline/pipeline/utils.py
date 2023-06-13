@@ -5,7 +5,7 @@ The Utils module contains several service functions that are commonly used throu
 These functions provide a variety of utility functionality.
 """
 import collections
-from typing import Union, List, Callable
+from typing import Union, List
 from inspect import isfunction
 
 from ..service.service import Service
@@ -77,7 +77,7 @@ def rename_component_incrementing(
     """
     if isinstance(service, Service) and isinstance(service.handler, str) and service.handler == "ACTOR":
         base_name = "actor"
-    elif isinstance(service, Service) and isinstance(service.handler, Callable):
+    elif isinstance(service, Service) and callable(service.handler):
         if isfunction(service.handler):
             base_name = service.handler.__name__
         else:
@@ -101,6 +101,9 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> bool
     It also searches for "ACTOR" in the group, throwing exception if no actor or multiple actors found.
 
     :param service_group: Service group to resolve name collisions in.
+    :param path:
+        A prefix for component paths -- path of `component` is equal to `{path}.{component.name}`.
+        Defaults to ".".
     """
     actor = False
     names_counter = collections.Counter([component.name for component in service_group.components])

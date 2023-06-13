@@ -4,7 +4,7 @@
 
 __author__ = "Denis Kuznetsov"
 __email__ = "kuznetsov.den.p@gmail.com"
-__version__ = "0.3.2"
+__version__ = "0.4.1"
 
 
 import nest_asyncio

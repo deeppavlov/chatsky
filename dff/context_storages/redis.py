@@ -16,7 +16,7 @@ import pickle
 from typing import Hashable, List, Dict, Union, Optional
 
 try:
-    from aioredis import Redis
+    from redis.asyncio import Redis
 
     redis_available = True
 except ImportError:

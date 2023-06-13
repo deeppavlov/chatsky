@@ -33,7 +33,7 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
     :return: Result of the label normalization,
         if Callable is returned, the normalized result is returned.
     """
-    if isinstance(label, Callable):
+    if callable(label):
 
         def get_label_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
             try:
@@ -69,7 +69,7 @@ def normalize_condition(condition: ConditionType) -> Callable:
     :param condition: Condition to normalize.
     :return: The function condition wrapped into the try/except.
     """
-    if isinstance(condition, Callable):
+    if callable(condition):
 
         def callable_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
             try:
@@ -104,7 +104,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
     :param response: Response to normalize.
     :return: Function that returns callable response.
     """
-    if isinstance(response, Callable):
+    if callable(response):
         return response
     else:
         if response is None:
