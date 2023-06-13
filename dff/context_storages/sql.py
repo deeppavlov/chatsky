@@ -25,6 +25,7 @@ from .context_schema import (
     ContextSchema,
     ExtraFields,
     FieldDescriptor,
+    FrozenValueSchemaField,
     SchemaFieldWritePolicy,
     SchemaFieldReadPolicy,
     DictSchemaField,
@@ -249,10 +250,14 @@ class SQLContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.active_ctx.on_write = SchemaFieldWritePolicy.IGNORE
-        self.context_schema.storage_key.on_write = SchemaFieldWritePolicy.UPDATE
-        self.context_schema.created_at.on_write = SchemaFieldWritePolicy.IGNORE
-        self.context_schema.updated_at.on_write = SchemaFieldWritePolicy.IGNORE
+        params = {
+            **self.context_schema.dict(),
+            "active_ctx": FrozenValueSchemaField(name=ExtraFields.active_ctx, on_write=SchemaFieldWritePolicy.IGNORE),
+            "storage_key": FrozenValueSchemaField(name=ExtraFields.storage_key, on_write=SchemaFieldWritePolicy.UPDATE),
+            "created_at": ValueSchemaField(name=ExtraFields.created_at, on_write=SchemaFieldWritePolicy.IGNORE),
+            "updated_at": ValueSchemaField(name=ExtraFields.updated_at, on_write=SchemaFieldWritePolicy.IGNORE),
+        }
+        self.context_schema = ContextSchema(**params)
 
     @threadsafe_method
     @cast_key_to_string()

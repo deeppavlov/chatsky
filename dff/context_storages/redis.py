@@ -26,7 +26,7 @@ except ImportError:
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields, FieldDescriptor, SchemaFieldWritePolicy
+from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields, FieldDescriptor, FrozenValueSchemaField, SchemaFieldWritePolicy
 from .protocol import get_protocol_install_suggestion
 
 
@@ -50,7 +50,11 @@ class RedisContextStorage(DBContextStorage):
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
-        self.context_schema.active_ctx.on_write = SchemaFieldWritePolicy.IGNORE
+        params = {
+            **self.context_schema.dict(),
+            "active_ctx": FrozenValueSchemaField(name=ExtraFields.active_ctx, on_write=SchemaFieldWritePolicy.IGNORE),
+        }
+        self.context_schema = ContextSchema(**params)
 
     @threadsafe_method
     @cast_key_to_string()

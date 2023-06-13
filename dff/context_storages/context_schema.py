@@ -51,6 +51,11 @@ class ValueSchemaField(BaseSchemaField):
     on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.UPDATE
 
 
+class FrozenValueSchemaField(ValueSchemaField):
+    class Config:
+        allow_mutation = False
+
+
 class ExtraFields(str, Enum):
     primary_id = "primary_id"
     storage_key = "_storage_key"
@@ -60,8 +65,8 @@ class ExtraFields(str, Enum):
 
 
 class ContextSchema(BaseModel):
-    active_ctx: ValueSchemaField = Field(ValueSchemaField(name=ExtraFields.active_ctx), allow_mutation=False)
-    storage_key: ValueSchemaField = Field(ValueSchemaField(name=ExtraFields.storage_key), allow_mutation=False)
+    active_ctx: ValueSchemaField = Field(FrozenValueSchemaField(name=ExtraFields.active_ctx), allow_mutation=False)
+    storage_key: ValueSchemaField = Field(FrozenValueSchemaField(name=ExtraFields.storage_key), allow_mutation=False)
     requests: ListSchemaField = ListSchemaField(name="requests")
     responses: ListSchemaField = ListSchemaField(name="responses")
     labels: ListSchemaField = ListSchemaField(name="labels")
