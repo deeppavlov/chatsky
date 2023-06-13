@@ -14,6 +14,7 @@ public-domain, SQL database engine.
 """
 import asyncio
 import importlib
+import os
 from typing import Callable, Hashable, Dict, Union, List, Iterable, Optional
 
 from dff.script import Context
@@ -111,6 +112,17 @@ def _get_current_time(dialect: str):
         return func.now()
 
 
+def _get_write_limit(dialect: str):
+    if dialect == "sqlite":
+        return (os.getenv("SQLITE_MAX_VARIABLE_NUMBER", 999) - 10) // 3
+    elif dialect == "mysql":
+        return False
+    elif dialect == "postgresql":
+        return 32757 // 3
+    else:
+        return 9990 // 3
+
+
 def _get_update_stmt(dialect: str, insert_stmt, columns: Iterable[str], unique: List[str]):
     if dialect == "postgresql" or dialect == "sqlite":
         if len(columns) > 0:
@@ -162,6 +174,7 @@ class SQLContextStorage(DBContextStorage):
         self.dialect: str = self.engine.dialect.name
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
         self._DATETIME_CLASS = _import_datetime_from_dialect(self.dialect)
+        self._param_limit = _get_write_limit(self.dialect)
 
         list_fields = [
             field
@@ -253,7 +266,6 @@ class SQLContextStorage(DBContextStorage):
         params = {
             **self.context_schema.dict(),
             "active_ctx": FrozenValueSchemaField(name=ExtraFields.active_ctx, on_write=SchemaFieldWritePolicy.IGNORE),
-            "storage_key": FrozenValueSchemaField(name=ExtraFields.storage_key, on_write=SchemaFieldWritePolicy.UPDATE),
             "created_at": ValueSchemaField(name=ExtraFields.created_at, on_write=SchemaFieldWritePolicy.IGNORE),
             "updated_at": ValueSchemaField(name=ExtraFields.updated_at, on_write=SchemaFieldWritePolicy.IGNORE),
         }
@@ -274,7 +286,7 @@ class SQLContextStorage(DBContextStorage):
     async def set_item_async(self, key: str, value: Context):
         primary_id = await self._get_last_ctx(key)
         value_hash = self.hash_storage.get(key)
-        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
+        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id, self._param_limit)
 
     @threadsafe_method
     @cast_key_to_string()

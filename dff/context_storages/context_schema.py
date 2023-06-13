@@ -107,7 +107,7 @@ class ContextSchema(BaseModel):
         return ctx, hashes
 
     async def write_context(
-        self, ctx: Context, hashes: Optional[Dict], val_writer: _WriteContextFunction, storage_key: str, primary_id: Optional[str]
+        self, ctx: Context, hashes: Optional[Dict], val_writer: _WriteContextFunction, storage_key: str, primary_id: Optional[str], chunk_size: Union[Literal[False], int] = False
     ) -> str:
         ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
         ctx_dict = ctx.dict()
@@ -138,7 +138,12 @@ class ContextSchema(BaseModel):
             else:
                 update_enforce = True
             if update_nested:
-                await val_writer(field, (update_values, update_enforce), True, primary_id)
+                if not bool(chunk_size):
+                    await val_writer(field, (update_values, update_enforce), True, primary_id)
+                else:
+                    for ch in range(0, len(update_values), chunk_size):
+                        chunk = {k: update_values[k] for k in list(update_values.keys())[ch:ch + chunk_size]}
+                        await val_writer(field, (chunk, update_enforce), True, primary_id)
             else:
                 flat_values.update({field: (update_values, update_enforce)})
         await val_writer(None, flat_values, False, primary_id)
