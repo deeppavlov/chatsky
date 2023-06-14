@@ -1,5 +1,4 @@
-from dff.context_storages import DBContextStorage
-from dff.context_storages.context_schema import SchemaFieldWritePolicy
+from dff.context_storages import DBContextStorage, SchemaFieldWritePolicy
 from dff.pipeline import Pipeline
 from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path

@@ -9,8 +9,11 @@ The following tutorial shows the basic use of the database connection.
 # %%
 import pathlib
 
-from dff.context_storages import context_storage_factory
-from dff.context_storages.context_schema import SchemaFieldReadPolicy, SchemaFieldWritePolicy
+from dff.context_storages import (
+    context_storage_factory,
+    SchemaFieldReadPolicy,
+    SchemaFieldWritePolicy,
+)
 
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import (

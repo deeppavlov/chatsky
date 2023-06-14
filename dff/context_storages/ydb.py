@@ -53,8 +53,20 @@ class YDBContextStorage(DBContextStorage):
     """
     Version of the :py:class:`.DBContextStorage` for YDB.
 
+    Context value fields are stored in table `contexts`.
+    Columns of the table are: active_ctx, primary_id, storage_key, created_at and updated_at.
+
+    Context dictionary fields are stored in tables `TABLE_NAME_PREFIX_FIELD`.
+    Columns of the tables are: primary_id, key, value, created_at and updated_at,
+    where key contains nested dict key and value contains nested dict value.
+
+    Context reading is done with one query to each table.
+    Context reading is done with multiple queries to each table, one for each nested key.
+
     :param path: Standard sqlalchemy URI string. One of `grpc` or `grpcs` can be chosen as a protocol.
         Example: `grpc://localhost:2134/local`.
+        NB! Do not forget to provide credentials in environmental variables
+        or set `YDB_ANONYMOUS_CREDENTIALS` variable to `1`!
     :param table_name: The name of the table to use.
     """
 

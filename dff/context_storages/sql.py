@@ -149,6 +149,16 @@ class SQLContextStorage(DBContextStorage):
     | When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
     | instead of forward slashes '/' in the file path.
 
+    Context value fields are stored in table `contexts`.
+    Columns of the table are: active_ctx, primary_id, storage_key, created_at and updated_at.
+
+    Context dictionary fields are stored in tables `TABLE_NAME_PREFIX_FIELD`.
+    Columns of the tables are: primary_id, key, value, created_at and updated_at,
+    where key contains nested dict key and value contains nested dict value.
+
+    Context reading is done with one query to each table.
+    Context reading is done with one query to each table, but that can be optimized for PostgreSQL.
+
     :param path: Standard sqlalchemy URI string.
         Examples: `sqlite+aiosqlite://path_to_the_file/file_name`,
         `mysql+asyncmy://root:pass@localhost:3306/test`,
@@ -198,6 +208,16 @@ class SQLContextStorage(DBContextStorage):
                     Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
                     Column(self._KEY_FIELD, Integer, nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
+                    Column(
+                        ExtraFields.created_at.value, self._DATETIME_CLASS, server_default=current_time, nullable=False
+                    ),
+                    Column(
+                        ExtraFields.updated_at.value,
+                        self._DATETIME_CLASS,
+                        server_default=current_time,
+                        server_onupdate=current_time,
+                        nullable=False,
+                    ),
                     Index(f"{field}_list_index", ExtraFields.primary_id.value, self._KEY_FIELD, unique=True),
                 )
                 for field in list_fields

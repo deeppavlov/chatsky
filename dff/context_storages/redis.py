@@ -41,10 +41,19 @@ class RedisContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
+    That's how relations between primary identifiers and active context storage keys are stored:
+    `"index:STORAGE_KEY:primary_id": "PRIMARY_ID"`
+    The absence of the pair means absence of active context for given storage key.
+
+    That's how context fields are stored:
+    `"data:PRIMARY_ID:FIELD": "DATA"`
+    That's how context dictionary fields are stored:
+    `"data:PRIMARY_ID:FIELD:KEY": "DATA"`
+    For serialization of non-string data types `pickle` module is used.
+
     :param path: Database URI string. Example: `redis://user:password@host:port`.
     """
 
-    _CONTEXTS_KEY = "all_contexts"
     _INDEX_TABLE = "index"
     _DATA_TABLE = "data"
 

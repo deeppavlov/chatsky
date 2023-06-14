@@ -49,6 +49,9 @@ class DBContextStorage(ABC):
         self.set_context_schema(context_schema)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):
+        """
+        Set given context schema or the default if None.
+        """
         self.context_schema = context_schema if context_schema else ContextSchema()
 
     def __getitem__(self, key: Hashable) -> Context:
@@ -193,6 +196,10 @@ def threadsafe_method(func: Callable):
 
 
 def cast_key_to_string(key_name: str = "key"):
+    """
+    A decorator that casts function parameter (`key_name`) to string.
+    """
+
     def stringify_args(func: Callable):
         all_keys = signature(func).parameters.keys()
 
