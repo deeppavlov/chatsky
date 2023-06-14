@@ -83,7 +83,7 @@ def check_cond_seq(cond_seq: list):
     :param cond_seq: List of conditions to check.
     """
     for cond in cond_seq:
-        if not isinstance(cond, Callable):
+        if not callable(cond):
             raise TypeError(f"{cond_seq} has to consist of callable objects")
 
 

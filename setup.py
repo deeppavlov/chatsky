@@ -27,57 +27,56 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 
 
 core = [
-    "pydantic>=1.8.2",
-    "nest_asyncio>=1.5.5",
-    "typing_extensions>=4.0.0",
+    "pydantic",
+    "nest-asyncio",
+    "typing-extensions",
 ]
 
 async_files_dependencies = [
-    "aiofiles>=22.1.0",
+    "aiofiles",
 ]
 
 redis_dependencies = [
-    "aioredis>=2.0.1",
+    "redis",
 ]
 
 mongodb_dependencies = [
-    "motor>=3.1.1",
+    "motor",
 ]
 
 _sql_dependencies = [
-    "sqlalchemy[asyncio]>=2.0.2",
+    "sqlalchemy[asyncio]",
 ]
 
 sqlite_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "aiosqlite>=0.18.0",
-        "sqlalchemy[asyncio]>=1.4.27",
+        "aiosqlite",
     ],
 )
 
 mysql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "asyncmy>=0.2.5",
-        "cryptography>=36.0.2",
+        "asyncmy",
+        "cryptography",
     ],
 )
 
 postgresql_dependencies = merge_req_lists(
     _sql_dependencies,
     [
-        "asyncpg>=0.27.0",
+        "asyncpg",
     ],
 )
 
 ydb_dependencies = [
-    "ydb~=2.5.0",
-    "six>=1.16.0",
+    "ydb",
+    "six",
 ]
 
 telegram_dependencies = [
-    "pytelegrambotapi==4.5.1",
+    "pytelegrambotapi",
 ]
 
 full = merge_req_lists(
@@ -93,21 +92,28 @@ full = merge_req_lists(
 )
 
 requests_requirements = [
-    "requests>=2.28.1",
+    "requests==2.31.0",
 ]
 
 test_requirements = merge_req_lists(
     [
-        "pytest >=7.2.1,<8.0.0",
-        "pytest-cov >=4.0.0,<5.0.0",
-        "pytest-asyncio >=0.14.0,<0.15.0",
-        "flake8 >=3.8.3,<4.0.0",
-        "click<=8.0.4",
-        "black ==20.8b1",
-        "isort >=5.0.6,<6.0.0",
-        "flask[async]>=2.1.2",
-        "psutil>=5.9.1",
-        "telethon>=1.27.0,<2.0",
+        "pytest==7.3.1",
+        "pytest-cov==4.1.0",
+        "pytest-asyncio==0.21.0",
+        "flake8==6.0.0; python_version>'3.8'",
+        "flake8==3.9.2; python_version=='3.7'",
+        "click==8.1.3",
+        "black==23.3.0",
+        "isort==5.12.0; python_version>'3.8'",
+        "isort==5.11.5; python_version=='3.7'",
+        "flask[async]==2.3.2; python_version>'3.8'",
+        "flask[async]==2.2.3; python_version=='3.7'",
+        "psutil==5.9.5",
+        "telethon==1.28.5",
+        "fastapi==0.96.0",
+        "uvicorn==0.22.0",
+        "websockets==11.0.2",
+        "locust==2.15",
     ],
     requests_requirements,
 )
@@ -119,30 +125,31 @@ tests_full = merge_req_lists(
 
 doc = merge_req_lists(
     [
-        "sphinx<6",
-        "pydata_sphinx_theme>=0.12.0",
+        "sphinx==7.0.1; python_version>'3.8'",
+        "sphinx==5.3.0; python_version=='3.7'",
+        "pydata-sphinx-theme==0.13.3",
         "sphinxcontrib-apidoc==0.3.0",
-        "sphinxcontrib-httpdomain>=1.8.0",
+        "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
-        "sphinx-favicon>=1.0.1",
-        "sphinx_copybutton>=0.5",
-        "sphinx_gallery==0.7.0",
-        "sphinx-autodoc-typehints>=1.19.4",
-        "nbsphinx>=0.8.9",
-        "jupytext>=1.14.1",
-        "jupyter>=1.0.0",
+        "sphinx-favicon==1.0.1",
+        "sphinx-copybutton==0.5.2",
+        "sphinx-gallery==0.13.0",
+        "sphinx-autodoc-typehints==1.23.0",
+        "nbsphinx==0.9.1",
+        "jupytext==1.14.5",
+        "jupyter==1.0.0",
     ],
     requests_requirements,
 )
 
 devel = [
-    "bump2version>=1.0.1",
-    "build==0.7.0",
+    "bump2version==1.0.1",
+    "build==0.10.0",
     "twine==4.0.0",
 ]
 
 mypy_dependencies = [
-    "mypy==0.950",
+    "mypy==1.3.0",
 ]
 
 devel_full = merge_req_lists(
@@ -174,17 +181,14 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.3.2",
+    version="0.4.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/deeppavlov/dialog_flow_framework",
     author="Denis Kuznetsov",
     author_email="kuznetsov.den.p@gmail.com",
-    classifiers=[  # Optional
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
+    classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
@@ -196,11 +200,11 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3 :: Only",
     ],
-    keywords="chatbots",  # Optional
-    packages=find_packages(where="."),  # Required
+    keywords="chatbots",
+    packages=find_packages(where="."),
     include_package_data=True,
     python_requires=">=3.7, <4",
-    install_requires=core,  # Optional
+    install_requires=core,
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
 )
