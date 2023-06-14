@@ -49,7 +49,6 @@ try:
         inspect,
         select,
         update,
-        insert,
         func,
     )
     from sqlalchemy.dialects.mysql import DATETIME
@@ -212,7 +211,9 @@ class SQLContextStorage(DBContextStorage):
                     Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
                     Column(self._KEY_FIELD, String(self._KEY_LENGTH), nullable=False),
                     Column(self._VALUE_FIELD, PickleType, nullable=False),
-                    Column(ExtraFields.created_at.value, self._DATETIME_CLASS, server_default=current_time, nullable=False),
+                    Column(
+                        ExtraFields.created_at.value, self._DATETIME_CLASS, server_default=current_time, nullable=False
+                    ),
                     Column(
                         ExtraFields.updated_at.value,
                         self._DATETIME_CLASS,
@@ -231,9 +232,13 @@ class SQLContextStorage(DBContextStorage):
                     f"{table_name_prefix}_{self._CONTEXTS}",
                     MetaData(),
                     Column(ExtraFields.active_ctx.value, Boolean(), default=True, nullable=False),
-                    Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
+                    Column(
+                        ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False
+                    ),
                     Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
-                    Column(ExtraFields.created_at.value, self._DATETIME_CLASS, server_default=current_time, nullable=False),
+                    Column(
+                        ExtraFields.created_at.value, self._DATETIME_CLASS, server_default=current_time, nullable=False
+                    ),
                     Column(
                         ExtraFields.updated_at.value,
                         self._DATETIME_CLASS,
@@ -256,7 +261,8 @@ class SQLContextStorage(DBContextStorage):
                     or field_props.on_write != SchemaFieldWritePolicy.IGNORE
                 ):
                     raise RuntimeError(
-                        f"Value field `{field_props.name}` is not ignored in the scheme, yet no columns are created for it!"
+                        f"Value field `{field_props.name}` is not ignored in the scheme,"
+                        "yet no columns are created for it!"
                     )
 
         asyncio.run(self._create_self_tables())
@@ -286,7 +292,9 @@ class SQLContextStorage(DBContextStorage):
     async def set_item_async(self, key: str, value: Context):
         primary_id = await self._get_last_ctx(key)
         value_hash = self.hash_storage.get(key)
-        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id, self._param_limit)
+        await self.context_schema.write_context(
+            value, value_hash, self._write_ctx_val, key, primary_id, self._param_limit
+        )
 
     @threadsafe_method
     @cast_key_to_string()
@@ -309,7 +317,7 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def len_async(self) -> int:
         subq = select(self.tables[self._CONTEXTS])
-        subq = subq.where(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value] == True)
+        subq = subq.where(self.tables[self._CONTEXTS].c[ExtraFields.active_ctx.value])
         stmt = select(func.count()).select_from(subq.subquery())
         async with self.engine.begin() as conn:
             return (await conn.execute(stmt)).fetchone()[0]
@@ -343,7 +351,9 @@ class SQLContextStorage(DBContextStorage):
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
         ctx_table = self.tables[self._CONTEXTS]
         stmt = select(ctx_table.c[ExtraFields.primary_id.value])
-        stmt = stmt.where((ctx_table.c[ExtraFields.storage_key.value] == storage_key) & (ctx_table.c[ExtraFields.active_ctx.value] == True))
+        stmt = stmt.where(
+            (ctx_table.c[ExtraFields.storage_key.value] == storage_key) & (ctx_table.c[ExtraFields.active_ctx.value])
+        )
         stmt = stmt.limit(1)
         async with self.engine.begin() as conn:
             primary_id = (await conn.execute(stmt)).fetchone()
@@ -368,7 +378,9 @@ class SQLContextStorage(DBContextStorage):
                         if value > 0:
                             filtered_stmt = raw_stmt.order_by(self.tables[field].c[self._KEY_FIELD].asc()).limit(value)
                         else:
-                            filtered_stmt = raw_stmt.order_by(self.tables[field].c[self._KEY_FIELD].desc()).limit(-value)
+                            filtered_stmt = raw_stmt.order_by(self.tables[field].c[self._KEY_FIELD].desc()).limit(
+                                -value
+                            )
                     elif isinstance(value, list):
                         filtered_stmt = raw_stmt.where(self.tables[field].c[self._KEY_FIELD].in_(value))
                     elif value == ALL_ITEMS:
@@ -392,7 +404,10 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin() as conn:
             if nested and len(payload[0]) > 0:
                 data, enforce = payload
-                values = [{ExtraFields.primary_id.value: primary_id, self._KEY_FIELD: key, self._VALUE_FIELD: value} for key, value in data.items()]
+                values = [
+                    {ExtraFields.primary_id.value: primary_id, self._KEY_FIELD: key, self._VALUE_FIELD: value}
+                    for key, value in data.items()
+                ]
                 insert_stmt = self._INSERT_CALLABLE(self.tables[field]).values(values)
                 update_stmt = _get_update_stmt(
                     self.dialect,
@@ -404,12 +419,9 @@ class SQLContextStorage(DBContextStorage):
 
             elif not nested and len(payload) > 0:
                 values = {key: data for key, (data, _) in payload.items()}
-                insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS]).values({**values, ExtraFields.primary_id.value: primary_id})
-                enforced_keys = set(key for key in values.keys() if payload[key][1])
-                update_stmt = _get_update_stmt(
-                    self.dialect,
-                    insert_stmt,
-                    enforced_keys,
-                    [ExtraFields.primary_id.value]
+                insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS]).values(
+                    {**values, ExtraFields.primary_id.value: primary_id}
                 )
+                enforced_keys = set(key for key in values.keys() if payload[key][1])
+                update_stmt = _get_update_stmt(self.dialect, insert_stmt, enforced_keys, [ExtraFields.primary_id.value])
                 await conn.execute(update_stmt)

@@ -118,13 +118,17 @@ class MongoContextStorage(DBContextStorage):
                 values_slice += [field]
             else:
                 # AFAIK, we can only read ALL keys and then filter, there's no other way for Mongo :(
-                raw_keys = await self.collections[field].aggregate(
-                    [
-                        { "$match": { primary_id_key: primary_id } },
-                        { "$project": { "kvarray": { "$objectToArray": "$$ROOT" } }},
-                        { "$project": { "keys": "$kvarray.k" } }
-                    ]
-                ).to_list(1)
+                raw_keys = (
+                    await self.collections[field]
+                    .aggregate(
+                        [
+                            {"$match": {primary_id_key: primary_id}},
+                            {"$project": {"kvarray": {"$objectToArray": "$$ROOT"}}},
+                            {"$project": {"keys": "$kvarray.k"}},
+                        ]
+                    )
+                    .to_list(1)
+                )
                 raw_keys = raw_keys[0]["keys"]
 
                 if isinstance(value, int):
@@ -134,22 +138,22 @@ class MongoContextStorage(DBContextStorage):
                 elif value == ALL_ITEMS:
                     filtered_keys = raw_keys
 
-                projection = [str(key) for key in filtered_keys if self._MISC_KEY not in str(key) and key != self._ID_KEY]
+                projection = [
+                    str(key) for key in filtered_keys if self._MISC_KEY not in str(key) and key != self._ID_KEY
+                ]
                 if len(projection) > 0:
                     result_dict[field] = await self.collections[field].find_one(
                         {primary_id_key: primary_id}, projection
                     )
                     del result_dict[field][self._ID_KEY]
 
-        values = await self.collections[self._CONTEXTS].find_one(
-            {ExtraFields.primary_id: primary_id}, values_slice
-        )
+        values = await self.collections[self._CONTEXTS].find_one({ExtraFields.primary_id: primary_id}, values_slice)
         return {**values, **result_dict}
 
     async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
         def conditional_insert(key: Any, value: Dict) -> Dict:
-            return { "$cond": [ { "$not": [ f"${key}" ] }, value, f"${key}" ] }
-        
+            return {"$cond": [{"$not": [f"${key}"]}, value, f"${key}"]}
+
         primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
         created_at_key = f"{self._MISC_KEY}_{ExtraFields.created_at}"
         updated_at_key = f"{self._MISC_KEY}_{ExtraFields.updated_at}"
@@ -158,31 +162,36 @@ class MongoContextStorage(DBContextStorage):
             data, enforce = payload
             for key in data.keys():
                 if self._MISC_KEY in str(key):
-                    raise RuntimeError(f"Context field {key} keys can't start from {self._MISC_KEY} - that is a reserved key for MongoDB context storage!")
+                    raise RuntimeError(
+                        f"Context field {key} keys can't start from {self._MISC_KEY}"
+                        " - that is a reserved key for MongoDB context storage!"
+                    )
                 if key == self._ID_KEY:
-                    raise RuntimeError(f"Context field {key} can't contain key {self._ID_KEY} - that is a reserved key for MongoDB!")
+                    raise RuntimeError(
+                        f"Context field {key} can't contain key {self._ID_KEY} - that is a reserved key for MongoDB!"
+                    )
 
-            update_value = data if enforce else {str(key): conditional_insert(key, value) for key, value in data.items()}
+            update_value = (
+                data if enforce else {str(key): conditional_insert(key, value) for key, value in data.items()}
+            )
             update_value.update(
                 {
                     primary_id_key: conditional_insert(primary_id_key, primary_id),
                     created_at_key: conditional_insert(created_at_key, time.time_ns()),
-                    updated_at_key: time.time_ns()
+                    updated_at_key: time.time_ns(),
                 }
             )
 
             await self.collections[field].update_one(
-                {primary_id_key: primary_id},
-                [ { "$set": update_value } ],
-                upsert=True
+                {primary_id_key: primary_id}, [{"$set": update_value}], upsert=True
             )
 
         else:
-            update_value = {key: data if enforce else conditional_insert(key, data) for key, (data, enforce) in payload.items()}
+            update_value = {
+                key: data if enforce else conditional_insert(key, data) for key, (data, enforce) in payload.items()
+            }
             update_value.update({ExtraFields.updated_at: time.time_ns()})
 
             await self.collections[self._CONTEXTS].update_one(
-                {ExtraFields.primary_id: primary_id},
-                [ { "$set": update_value } ],
-                upsert=True
+                {ExtraFields.primary_id: primary_id}, [{"$set": update_value}], upsert=True
             )

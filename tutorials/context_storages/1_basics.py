@@ -27,18 +27,24 @@ db = context_storage_factory("json://dbs/file.json")
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 
-# Scheme field subscriptcan be changed: that will mean that only these MISC keys will be read and written
+# Scheme field subscriptcan be changed:
+# that will mean that only these MISC keys will be read and written
 db.context_schema.misc.subscript = ["some_key", "some_other_key"]
 
-# Scheme field subscriptcan be changed: that will mean that only last REQUESTS will be read and written
+# Scheme field subscriptcan be changed:
+# that will mean that only last REQUESTS will be read and written
 db.context_schema.requests.subscript = -5
 
-# The default policy for reading is `SchemaFieldReadPolicy.READ` - the values will be read
-# However, another possible policy option is `SchemaFieldReadPolicy.IGNORE` - the values will be ignored
+# The default policy for reading is `SchemaFieldReadPolicy.READ` -
+# the values will be read
+# However, another possible policy option is `SchemaFieldReadPolicy.IGNORE` -
+# the values will be ignored
 db.context_schema.responses.on_read = SchemaFieldReadPolicy.IGNORE
 
-# The default policy for writing values is `SchemaFieldReadPolicy.UPDATE` - the value will be updated
-# However, another possible policy options are `SchemaFieldReadPolicy.IGNORE` - the value will be ignored
+# The default policy for writing values is `SchemaFieldReadPolicy.UPDATE` -
+# the value will be updated
+# However, another possible policy options are `SchemaFieldReadPolicy.IGNORE` -
+# the value will be ignored
 # `SchemaFieldReadPolicy.HASH_UPDATE` and `APPEND` are also possible,
 # but they will be described together with writing dictionaries
 db.context_schema.created_at.on_write = SchemaFieldWritePolicy.IGNORE

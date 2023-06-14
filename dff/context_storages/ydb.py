@@ -32,7 +32,15 @@ from .context_schema import (
 )
 
 try:
-    from ydb import SerializableReadWrite, SchemeError, TableDescription, Column, OptionalType, PrimitiveType, TableIndex
+    from ydb import (
+        SerializableReadWrite,
+        SchemeError,
+        TableDescription,
+        Column,
+        OptionalType,
+        PrimitiveType,
+        TableIndex,
+    )
     from ydb.aio import Driver, SessionPool
     from ydb.issues import PreconditionFailed
 
@@ -108,11 +116,11 @@ class YDBContextStorage(DBContextStorage):
     async def del_item_async(self, key: str):
         async def callee(session):
             query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                UPDATE {self.table_prefix}_{self._CONTEXTS} SET {ExtraFields.active_ctx.value}=False
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value};
-                """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.storage_key.value} AS Utf8;
+UPDATE {self.table_prefix}_{self._CONTEXTS} SET {ExtraFields.active_ctx.value}=False
+WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value};
+"""
 
             await (session.transaction(SerializableReadWrite())).execute(
                 await session.prepare(query),
@@ -130,11 +138,11 @@ class YDBContextStorage(DBContextStorage):
     async def len_async(self) -> int:
         async def callee(session):
             query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) as cnt
-                FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.active_ctx.value} == True;
-                """
+PRAGMA TablePathPrefix("{self.database}");
+SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) as cnt
+FROM {self.table_prefix}_{self._CONTEXTS}
+WHERE {ExtraFields.active_ctx.value} == True;
+"""
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
                 await session.prepare(query),
@@ -147,9 +155,9 @@ class YDBContextStorage(DBContextStorage):
     async def clear_async(self):
         async def callee(session):
             query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                UPDATE {self.table_prefix}_{self._CONTEXTS} SET {ExtraFields.active_ctx.value}=False;
-                """
+PRAGMA TablePathPrefix("{self.database}");
+UPDATE {self.table_prefix}_{self._CONTEXTS} SET {ExtraFields.active_ctx.value}=False;
+"""
 
             await (session.transaction(SerializableReadWrite())).execute(
                 await session.prepare(query),
@@ -162,13 +170,13 @@ class YDBContextStorage(DBContextStorage):
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
         async def callee(session):
             query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT {ExtraFields.primary_id.value}
-                FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
-                LIMIT 1;
-                """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.storage_key.value} AS Utf8;
+SELECT {ExtraFields.primary_id.value}
+FROM {self.table_prefix}_{self._CONTEXTS}
+WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
+LIMIT 1;
+"""
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
                 await session.prepare(query),
@@ -188,24 +196,24 @@ class YDBContextStorage(DBContextStorage):
                     values_slice += [field]
                 else:
                     query = f"""
-                        PRAGMA TablePathPrefix("{self.database}");
-                        DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                        SELECT {self._KEY_FIELD}, {self._VALUE_FIELD}
-                        FROM {self.table_prefix}_{field}
-                        WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value}
-                        """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+SELECT {self._KEY_FIELD}, {self._VALUE_FIELD}
+FROM {self.table_prefix}_{field}
+WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value}
+"""
 
                     if isinstance(value, int):
                         if value > 0:
                             query += f"""
-                                ORDER BY {self._KEY_FIELD} ASC
-                                LIMIT {value}
-                            """
+ORDER BY {self._KEY_FIELD} ASC
+LIMIT {value}
+"""
                         else:
                             query += f"""
-                                ORDER BY {self._KEY_FIELD} DESC
-                                LIMIT {-value}
-                            """
+ORDER BY {self._KEY_FIELD} DESC
+LIMIT {-value}
+"""
                     elif isinstance(value, list):
                         keys = [f'"{key}"' for key in value]
                         query += f" AND ListHas(AsList({', '.join(keys)}), {self._KEY_FIELD})\nLIMIT 1001"
@@ -224,7 +232,9 @@ class YDBContextStorage(DBContextStorage):
                         )
 
                         if len(result_sets[0].rows) > 0:
-                            for key, value in {row[self._KEY_FIELD]: row[self._VALUE_FIELD] for row in result_sets[0].rows}.items():
+                            for key, value in {
+                                row[self._KEY_FIELD]: row[self._VALUE_FIELD] for row in result_sets[0].rows
+                            }.items():
                                 if value is not None:
                                     if field not in result_dict:
                                         result_dict[field] = dict()
@@ -234,12 +244,12 @@ class YDBContextStorage(DBContextStorage):
 
             columns = [key for key in values_slice]
             query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                SELECT {', '.join(columns)}
-                FROM {self.table_prefix}_{self._CONTEXTS}
-                WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
-                """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+SELECT {', '.join(columns)}
+FROM {self.table_prefix}_{self._CONTEXTS}
+WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
+"""
 
             result_sets = await (session.transaction(SerializableReadWrite())).execute(
                 await session.prepare(query),
@@ -264,16 +274,22 @@ class YDBContextStorage(DBContextStorage):
                     key_type = "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
                     declares_keys = "\n".join(f"DECLARE $key_{i} AS {key_type};" for i in range(len(data)))
                     declares_values = "\n".join(f"DECLARE $value_{i} AS String;" for i in range(len(data)))
-                    values_all = ", ".join(f"(${ExtraFields.primary_id.value}, CurrentUtcDatetime(), CurrentUtcDatetime(), $key_{i}, $value_{i})" for i in range(len(data)))
+                    two_current_times = "CurrentUtcDatetime(), CurrentUtcDatetime()"
+                    values_all = ", ".join(
+                        f"(${ExtraFields.primary_id.value}, {two_current_times}, $key_{i}, $value_{i})"
+                        for i in range(len(data))
+                    )
 
+                    default_times = f"{ExtraFields.created_at.value}, {ExtraFields.updated_at.value}"
+                    special_values = f"{self._KEY_FIELD}, {self._VALUE_FIELD}"
                     query = f"""
-                        PRAGMA TablePathPrefix("{self.database}");
-                        DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                        {declares_keys}
-                        {declares_values}
-                        UPSERT INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value}, {self._KEY_FIELD}, {self._VALUE_FIELD})
-                        VALUES {values_all};
-                    """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+{declares_keys}
+{declares_values}
+UPSERT INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {default_times}, {special_values})
+VALUES {values_all};
+"""
 
                     values_keys = {f"$key_{i}": key for i, key in enumerate(data.keys())}
                     values_values = {f"$value_{i}": pickle.dumps(value) for i, value in enumerate(data.values())}
@@ -284,21 +300,35 @@ class YDBContextStorage(DBContextStorage):
                     )
 
                 else:
-                    for key, value in data.items():  # We've got no other choice: othervise if some fields fail to be `INSERT`ed other will fail too
-                        key_type = "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
+                    for (
+                        key,
+                        value,
+                    ) in (
+                        data.items()
+                    ):  # We've got no other choice: othervise if some fields fail to be `INSERT`ed other will fail too
+                        key_type = (
+                            "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
+                        )
+                        keyword = "UPSERT" if enforce else "INSERT"
+                        default_times = f"{ExtraFields.created_at.value}, {ExtraFields.updated_at.value}"
+                        special_values = f"{self._KEY_FIELD}, {self._VALUE_FIELD}"
                         query = f"""
-                            PRAGMA TablePathPrefix("{self.database}");
-                            DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                            DECLARE $key_{field} AS {key_type};
-                            DECLARE $value_{field} AS String;
-                            {'UPSERT' if enforce else 'INSERT'} INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value}, {self._KEY_FIELD}, {self._VALUE_FIELD})
-                            VALUES (${ExtraFields.primary_id.value}, CurrentUtcDatetime(), CurrentUtcDatetime(), $key_{field}, $value_{field});
-                        """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+DECLARE $key_{field} AS {key_type};
+DECLARE $value_{field} AS String;
+{keyword} INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {default_times}, {special_values})
+VALUES (${ExtraFields.primary_id.value}, CurrentUtcDatetime(), CurrentUtcDatetime(), $key_{field}, $value_{field});
+"""
 
                         try:
                             await (session.transaction(SerializableReadWrite())).execute(
                                 await session.prepare(query),
-                                {f"${ExtraFields.primary_id.value}": primary_id, f"$key_{field}": key, f"$value_{field}": pickle.dumps(value)},
+                                {
+                                    f"${ExtraFields.primary_id.value}": primary_id,
+                                    f"$key_{field}": key,
+                                    f"$value_{field}": pickle.dumps(value),
+                                },
                                 commit_tx=True,
                             )
                         except PreconditionFailed:
@@ -330,24 +360,27 @@ class YDBContextStorage(DBContextStorage):
 
                 if stored:
                     query = f"""
-                        PRAGMA TablePathPrefix("{self.database}");
-                        DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                        {declarations}
-                        UPDATE {self.table_prefix}_{self._CONTEXTS} SET {', '.join(inset)}, {ExtraFields.active_ctx.value}=True
-                        WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
-                        """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+{declarations}
+UPDATE {self.table_prefix}_{self._CONTEXTS} SET {', '.join(inset)}, {ExtraFields.active_ctx.value}=True
+WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
+"""
                 else:
+                    prefix_columns = f"{ExtraFields.primary_id.value}, {ExtraFields.active_ctx.value}"
+                    all_keys = ", ".join(key for key in values.keys())
                     query = f"""
-                        PRAGMA TablePathPrefix("{self.database}");
-                        DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                        {declarations}
-                        UPSERT INTO {self.table_prefix}_{self._CONTEXTS} ({ExtraFields.primary_id.value}, {ExtraFields.active_ctx.value}, {', '.join(key for key in values.keys())})
-                        VALUES (${ExtraFields.primary_id.value}, True, {', '.join(inserted)});
-                        """
+PRAGMA TablePathPrefix("{self.database}");
+DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+{declarations}
+UPSERT INTO {self.table_prefix}_{self._CONTEXTS} ({prefix_columns}, {all_keys})
+VALUES (${ExtraFields.primary_id.value}, True, {', '.join(inserted)});
+"""
 
                 await (session.transaction(SerializableReadWrite())).execute(
                     await session.prepare(query),
-                    {f"${key}": value for key, value in values.items()} | {f"${ExtraFields.primary_id.value}": primary_id},
+                    {f"${key}": value for key, value in values.items()}
+                    | {f"${ExtraFields.primary_id.value}": primary_id},
                     commit_tx=True,
                 )
 
@@ -452,7 +485,8 @@ async def _create_contexts_table(pool, path, table_name, context_schema):
                     or field_props.on_write != SchemaFieldWritePolicy.IGNORE
                 ):
                     raise RuntimeError(
-                        f"Value field `{field_props.name}` is not ignored in the scheme, yet no columns are created for it!"
+                        f"Value field `{field_props.name}` is not ignored in the scheme,"
+                        "yet no columns are created for it!"
                     )
 
     return await pool.retry_operation(callee)

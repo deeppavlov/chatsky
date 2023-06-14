@@ -7,7 +7,7 @@ from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
 
 def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     assert len(db) == 0
-    assert testing_context.storage_key == None
+    assert testing_context.storage_key is None
 
     # Test write operations
     db[context_id] = Context()
@@ -62,7 +62,7 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
 def different_policies_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # Setup append policy for misc
     db.context_schema.misc.on_write = SchemaFieldWritePolicy.APPEND
-    
+
     # Setup some data in context misc
     testing_context.misc["OLD_KEY"] = "some old data"
     db[context_id] = testing_context

@@ -26,7 +26,14 @@ except ImportError:
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields, FieldDescriptor, FrozenValueSchemaField, SchemaFieldWritePolicy
+from .context_schema import (
+    ALL_ITEMS,
+    ContextSchema,
+    ExtraFields,
+    FieldDescriptor,
+    FrozenValueSchemaField,
+    SchemaFieldWritePolicy,
+)
 from .protocol import get_protocol_install_suggestion
 
 

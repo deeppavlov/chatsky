@@ -84,7 +84,9 @@ class ContextSchema(BaseModel):
         else:
             return sha256(str(value).encode("utf-8"))
 
-    async def read_context(self, ctx_reader: _ReadContextFunction, storage_key: str, primary_id: str) -> Tuple[Context, Dict]:
+    async def read_context(
+        self, ctx_reader: _ReadContextFunction, storage_key: str, primary_id: str
+    ) -> Tuple[Context, Dict]:
         fields_subscript = dict()
 
         field_props: BaseSchemaField
@@ -107,7 +109,13 @@ class ContextSchema(BaseModel):
         return ctx, hashes
 
     async def write_context(
-        self, ctx: Context, hashes: Optional[Dict], val_writer: _WriteContextFunction, storage_key: str, primary_id: Optional[str], chunk_size: Union[Literal[False], int] = False
+        self,
+        ctx: Context,
+        hashes: Optional[Dict],
+        val_writer: _WriteContextFunction,
+        storage_key: str,
+        primary_id: Optional[str],
+        chunk_size: Union[Literal[False], int] = False,
     ) -> str:
         ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
         ctx_dict = ctx.dict()
@@ -142,7 +150,8 @@ class ContextSchema(BaseModel):
                     await val_writer(field, (update_values, update_enforce), True, primary_id)
                 else:
                     for ch in range(0, len(update_values), chunk_size):
-                        chunk = {k: update_values[k] for k in list(update_values.keys())[ch:ch + chunk_size]}
+                        next_ch = ch + chunk_size
+                        chunk = {k: update_values[k] for k in list(update_values.keys())[ch:next_ch]}
                         await val_writer(field, (chunk, update_enforce), True, primary_id)
             else:
                 flat_values.update({field: (update_values, update_enforce)})
