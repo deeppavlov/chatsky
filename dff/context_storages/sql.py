@@ -95,7 +95,7 @@ def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
     return getattr(importlib.import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
-def _import_datetime_from_dialect(dialect: str) -> DateTime:
+def _import_datetime_from_dialect(dialect: str) -> "DateTime":
     if dialect == "mysql":
         return DATETIME(fsp=6)
     else:

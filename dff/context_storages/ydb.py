@@ -381,7 +381,7 @@ VALUES (${ExtraFields.primary_id.value}, True, {', '.join(inserted)});
                     await session.prepare(query),
                     {
                         **{f"${key}": value for key, value in values.items()},
-                        f"${ExtraFields.primary_id.value}": primary_id
+                        f"${ExtraFields.primary_id.value}": primary_id,
                     },
                     commit_tx=True,
                 )
