@@ -122,7 +122,7 @@ UPDATE {self.table_prefix}_{self._CONTEXTS} SET {ExtraFields.active_ctx.value}=F
 WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value};
 """
 
-            await (session.transaction(SerializableReadWrite())).execute(
+            await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {f"${ExtraFields.storage_key.value}": key},
                 commit_tx=True,
@@ -144,7 +144,7 @@ FROM {self.table_prefix}_{self._CONTEXTS}
 WHERE {ExtraFields.active_ctx.value} == True;
 """
 
-            result_sets = await (session.transaction(SerializableReadWrite())).execute(
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 commit_tx=True,
             )
@@ -159,7 +159,7 @@ PRAGMA TablePathPrefix("{self.database}");
 UPDATE {self.table_prefix}_{self._CONTEXTS} SET {ExtraFields.active_ctx.value}=False;
 """
 
-            await (session.transaction(SerializableReadWrite())).execute(
+            await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 commit_tx=True,
             )
@@ -178,7 +178,7 @@ WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {E
 LIMIT 1;
 """
 
-            result_sets = await (session.transaction(SerializableReadWrite())).execute(
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {f"${ExtraFields.storage_key.value}": storage_key},
                 commit_tx=True,
@@ -225,7 +225,7 @@ LIMIT {-value}
 
                     while result_sets is None or result_sets[0].truncated:
                         final_query = f"{query} OFFSET {final_offset};"
-                        result_sets = await (session.transaction(SerializableReadWrite())).execute(
+                        result_sets = await session.transaction(SerializableReadWrite()).execute(
                             await session.prepare(final_query),
                             {f"${ExtraFields.primary_id.value}": primary_id},
                             commit_tx=True,
@@ -251,7 +251,7 @@ FROM {self.table_prefix}_{self._CONTEXTS}
 WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
 """
 
-            result_sets = await (session.transaction(SerializableReadWrite())).execute(
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {f"${ExtraFields.primary_id.value}": primary_id},
                 commit_tx=True,
@@ -293,7 +293,7 @@ VALUES {values_all};
 
                     values_keys = {f"$key_{i}": key for i, key in enumerate(data.keys())}
                     values_values = {f"$value_{i}": pickle.dumps(value) for i, value in enumerate(data.values())}
-                    await (session.transaction(SerializableReadWrite())).execute(
+                    await session.transaction(SerializableReadWrite()).execute(
                         await session.prepare(query),
                         {f"${ExtraFields.primary_id.value}": primary_id, **values_keys, **values_values},
                         commit_tx=True,
@@ -322,7 +322,7 @@ VALUES (${ExtraFields.primary_id.value}, CurrentUtcDatetime(), CurrentUtcDatetim
 """
 
                         try:
-                            await (session.transaction(SerializableReadWrite())).execute(
+                            await session.transaction(SerializableReadWrite()).execute(
                                 await session.prepare(query),
                                 {
                                     f"${ExtraFields.primary_id.value}": primary_id,
@@ -377,10 +377,12 @@ UPSERT INTO {self.table_prefix}_{self._CONTEXTS} ({prefix_columns}, {all_keys})
 VALUES (${ExtraFields.primary_id.value}, True, {', '.join(inserted)});
 """
 
-                await (session.transaction(SerializableReadWrite())).execute(
+                await session.transaction(SerializableReadWrite()).execute(
                     await session.prepare(query),
-                    {f"${key}": value for key, value in values.items()}
-                    | {f"${ExtraFields.primary_id.value}": primary_id},
+                    {
+                        **{f"${key}": value for key, value in values.items()},
+                        f"${ExtraFields.primary_id.value}": primary_id
+                    },
                     commit_tx=True,
                 )
 
@@ -397,6 +399,8 @@ async def _init_drive(
     dict_fields: List[str],
 ):
     driver = Driver(endpoint=endpoint, database=database)
+    client_settings = driver.table_client._table_client_settings.with_allow_truncated_result(True)
+    driver.table_client._table_client_settings = client_settings
     await driver.wait(fail_fast=True, timeout=timeout)
 
     pool = SessionPool(driver, size=10)

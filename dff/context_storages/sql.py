@@ -91,7 +91,7 @@ if not sqlalchemy_available:
     postgres_available = sqlite_available = mysql_available = False
 
 
-def _import_insert_for_dialect(dialect: str) -> Callable[[str], Insert]:
+def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
     return getattr(importlib.import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
@@ -386,7 +386,7 @@ class SQLContextStorage(DBContextStorage):
                     elif value == ALL_ITEMS:
                         filtered_stmt = raw_stmt
 
-                    for (key, value) in (await conn.execute(filtered_stmt)).fetchall():
+                    for key, value in (await conn.execute(filtered_stmt)).fetchall():
                         if value is not None:
                             if field not in result_dict:
                                 result_dict[field] = dict()
@@ -394,7 +394,7 @@ class SQLContextStorage(DBContextStorage):
 
                 columns = [c for c in self.tables[self._CONTEXTS].c if c.name in values_slice]
                 stmt = select(*columns).where(self.tables[self._CONTEXTS].c[ExtraFields.primary_id.value] == primary_id)
-                for (key, value) in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
+                for key, value in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
                     if value is not None:
                         result_dict[key] = value
 
