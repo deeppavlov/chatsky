@@ -106,7 +106,7 @@ basic_test.no_dict = False
 partial_storage_test.no_dict = False
 different_policies_test.no_dict = True
 large_misc_test.no_dict = False
-_TEST_FUNCTIONS = [large_misc_test]
+_TEST_FUNCTIONS = [basic_test, partial_storage_test, different_policies_test, large_misc_test]
 
 
 def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
