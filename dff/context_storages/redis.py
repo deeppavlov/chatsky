@@ -16,7 +16,7 @@ import json
 from typing import Hashable
 
 try:
-    from aioredis import Redis
+    from redis.asyncio import Redis
 
     redis_available = True
 except ImportError:

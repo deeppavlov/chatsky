@@ -72,7 +72,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            await (session.transaction(ydb.SerializableReadWrite())).execute(
+            await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {"$queryId": str(key), "$queryContext": value.json()},
                 commit_tx=True,
@@ -95,7 +95,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
+            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
                     "$queryId": str(key),
@@ -124,7 +124,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            await (session.transaction(ydb.SerializableReadWrite())).execute(
+            await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {"$queryId": str(key)},
                 commit_tx=True,
@@ -150,7 +150,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
+            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
                     "$queryId": str(key),
@@ -173,7 +173,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
+            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 commit_tx=True,
             )
@@ -194,7 +194,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            await (session.transaction(ydb.SerializableReadWrite())).execute(
+            await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {},
                 commit_tx=True,

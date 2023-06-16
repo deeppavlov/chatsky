@@ -5,7 +5,7 @@ on:
     branches:
     - dev
     - test/**
-  pull_request:
+  pull_request_target:
     branches:
     - dev
   workflow_dispatch:
@@ -19,10 +19,10 @@ jobs:
     name: build and publish docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: set up python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
