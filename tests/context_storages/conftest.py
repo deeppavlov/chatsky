@@ -8,6 +8,7 @@ import pytest
 def testing_context():
     yield Context(
         misc={"some_key": "some_value", "other_key": "other_value"},
+        framework_states={"key_for_dict_value": dict()},
         requests={0: Message(text="message text")},
     )
 
