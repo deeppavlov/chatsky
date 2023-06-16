@@ -11,10 +11,12 @@ It stores data in a format similar to JSON, making it easy to work with the data
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
 """
+import asyncio
 import time
 from typing import Hashable, Dict, Union, Optional, List, Any
 
 try:
+    from pymongo import ASCENDING, HASHED
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
@@ -65,6 +67,20 @@ class MongoContextStorage(DBContextStorage):
         ]
         self.collections = {field: db[f"{collection_prefix}_{field}"] for field in self.seq_fields}
         self.collections.update({self._CONTEXTS: db[f"{collection_prefix}_contexts"]})
+
+        primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
+        asyncio.run(
+            asyncio.gather(
+                self.collections[self._CONTEXTS].create_index([(ExtraFields.primary_id, ASCENDING)], background=True),
+                self.collections[self._CONTEXTS].create_index([(ExtraFields.storage_key, HASHED)], background=True),
+                self.collections[self._CONTEXTS].create_index([(ExtraFields.active_ctx, HASHED)], background=True),
+                *[
+                    value.create_index([(primary_id_key, ASCENDING)], background=True, unique=True)
+                    for key, value in self.collections.items()
+                    if key != self._CONTEXTS
+                ],
+            )
+        )
 
     @threadsafe_method
     @cast_key_to_string()
