@@ -41,14 +41,13 @@ class RedisContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `redis` as the database backend.
 
-    That's how relations between primary identifiers and active context storage keys are stored:
-    `"index:STORAGE_KEY:primary_id": "PRIMARY_ID"`
-    The absence of the pair means absence of active context for given storage key.
+    The relations between primary identifiers and active context storage keys are stored
+    as a redis hash ("KEY_PREFIX:index").
 
     That's how context fields are stored:
-    `"data:PRIMARY_ID:FIELD": "DATA"`
+    `"KEY_PREFIX:data:PRIMARY_ID:FIELD": "DATA"`
     That's how context dictionary fields are stored:
-    `"data:PRIMARY_ID:FIELD:KEY": "DATA"`
+    `"KEY_PREFIX:data:PRIMARY_ID:FIELD:KEY": "DATA"`
     For serialization of non-string data types `pickle` module is used.
 
     :param path: Database URI string. Example: `redis://user:password@host:port`.
@@ -57,12 +56,14 @@ class RedisContextStorage(DBContextStorage):
     _INDEX_TABLE = "index"
     _DATA_TABLE = "data"
 
-    def __init__(self, path: str):
+    def __init__(self, path: str, key_prefix: str = "dff_keys"):
         DBContextStorage.__init__(self, path)
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")
             raise ImportError("`redis` package is missing.\n" + install_suggestion)
         self._redis = Redis.from_url(self.full_path)
+        self._index_key = f"{key_prefix}:{self._INDEX_TABLE}"
+        self._data_key = f"{key_prefix}:{self._DATA_TABLE}"
 
     def set_context_schema(self, scheme: ContextSchema):
         super().set_context_schema(scheme)
@@ -74,7 +75,7 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
+    async def get_item_async(self, key: str) -> Context:
         primary_id = await self._get_last_ctx(key)
         if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
@@ -84,48 +85,48 @@ class RedisContextStorage(DBContextStorage):
 
     @threadsafe_method
     @cast_key_to_string()
-    async def set_item_async(self, key: Union[Hashable, str], value: Context):
+    async def set_item_async(self, key: str, value: Context):
         primary_id = await self._get_last_ctx(key)
         value_hash = self.hash_storage.get(key)
         primary_id = await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
-        await self._redis.set(f"{self._INDEX_TABLE}:{key}:{ExtraFields.primary_id.value}", primary_id)
+        await self._redis.hset(self._index_key, key, primary_id)
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: Union[Hashable, str]):
+    async def del_item_async(self, key: str):
         self.hash_storage[key] = None
         if await self._get_last_ctx(key) is None:
             raise KeyError(f"No entry for key {key}.")
-        await self._redis.delete(f"{self._INDEX_TABLE}:{key}:{ExtraFields.primary_id.value}")
+        await self._redis.hdel(self._index_key, key)
 
     @threadsafe_method
     @cast_key_to_string()
-    async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        primary_key = await self._redis.get(f"{self._INDEX_TABLE}:{key}:{ExtraFields.primary_id.value}")
-        return primary_key is not None
+    async def contains_async(self, key: str) -> bool:
+        return await self._redis.hexists(self._index_key, key)
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(await self._redis.keys(f"{self._INDEX_TABLE}:*"))
+        return len(await self._redis.hkeys(self._index_key))
 
     @threadsafe_method
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        for key in await self._redis.keys(f"{self._INDEX_TABLE}:*"):
-            await self._redis.delete(key)
+        all_keys = await self._redis.hgetall(self._index_key)
+        if len(all_keys) > 0:
+            await self._redis.hdel(self._index_key, *all_keys)
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        last_primary_id = await self._redis.get(f"{self._INDEX_TABLE}:{storage_key}:{ExtraFields.primary_id.value}")
+        last_primary_id = await self._redis.hget(self._index_key, storage_key)
         return last_primary_id.decode() if last_primary_id is not None else None
 
     async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
         context = dict()
         for key, value in subscript.items():
             if isinstance(value, bool) and value:
-                raw_value = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{key}")
+                raw_value = await self._redis.get(f"{self._data_key}:{primary_id}:{key}")
                 context[key] = pickle.loads(raw_value) if raw_value is not None else None
             else:
-                value_fields = await self._redis.keys(f"{self._DATA_TABLE}:{primary_id}:{key}:*")
+                value_fields = await self._redis.keys(f"{self._data_key}:{primary_id}:{key}:*")
                 value_field_names = [value_key.decode().split(":")[-1] for value_key in value_fields]
                 if isinstance(value, int):
                     value_field_names = sorted([int(key) for key in value_field_names])[value:]
@@ -135,7 +136,7 @@ class RedisContextStorage(DBContextStorage):
                     value_field_names = list()
                 context[key] = dict()
                 for field in value_field_names:
-                    raw_value = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{key}:{field}")
+                    raw_value = await self._redis.get(f"{self._data_key}:{primary_id}:{key}:{field}")
                     context[key][field] = pickle.loads(raw_value) if raw_value is not None else None
         return context
 
@@ -143,13 +144,13 @@ class RedisContextStorage(DBContextStorage):
         if nested:
             data, enforce = payload
             for key, value in data.items():
-                current_data = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{field}:{key}")
+                current_data = await self._redis.get(f"{self._data_key}:{primary_id}:{field}:{key}")
                 if enforce or current_data is None:
                     raw_data = pickle.dumps(value)
-                    await self._redis.set(f"{self._DATA_TABLE}:{primary_id}:{field}:{key}", raw_data)
+                    await self._redis.set(f"{self._data_key}:{primary_id}:{field}:{key}", raw_data)
         else:
             for key, (data, enforce) in payload.items():
-                current_data = await self._redis.get(f"{self._DATA_TABLE}:{primary_id}:{key}")
+                current_data = await self._redis.get(f"{self._data_key}:{primary_id}:{key}")
                 if enforce or current_data is None:
                     raw_data = pickle.dumps(data)
-                    await self._redis.set(f"{self._DATA_TABLE}:{primary_id}:{key}", raw_data)
+                    await self._redis.set(f"{self._data_key}:{primary_id}:{key}", raw_data)

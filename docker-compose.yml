@@ -2,7 +2,7 @@ version: "3.9"
 services:
   mysql:
     env_file: [.env_file]
-    image: mysql:8.0.33s
+    image: mysql:8.0.33
     restart: unless-stopped
     ports:
       - 3307:3306
