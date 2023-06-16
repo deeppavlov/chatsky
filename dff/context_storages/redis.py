@@ -111,9 +111,7 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     async def clear_async(self):
         self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        all_keys = await self._redis.hgetall(self._index_key)
-        if len(all_keys) > 0:
-            await self._redis.hdel(self._index_key, *all_keys)
+        await self._redis.delete(self._index_key)
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
         last_primary_id = await self._redis.hget(self._index_key, storage_key)
