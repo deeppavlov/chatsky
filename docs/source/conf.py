@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import datetime
 
 # -- Path setup --------------------------------------------------------------
 
@@ -89,8 +90,9 @@ autosummary_generate_overwrite = False
 
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
-nbsphinx_prolog = """
+nbsphinx_prolog = f"""
 :tutorial_name: {{ env.docname }}
+:build_time: {datetime.datetime.now().strftime("%b %d, %Y")}
 """
 
 html_logo = "_static/images/logo-simple.svg"
