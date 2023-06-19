@@ -90,9 +90,12 @@ autosummary_generate_overwrite = False
 
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
-nbsphinx_prolog = f"""
+build_date = datetime.datetime.now().strftime("%b %d, %Y")
+rst_prolog = f"""
+.. |build_date| replace:: {build_date}
+"""
+nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
-:build_time: {datetime.datetime.now().strftime("%b %d, %Y")}
 """
 
 html_logo = "_static/images/logo-simple.svg"
