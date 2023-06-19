@@ -12,7 +12,8 @@ from copy import copy
 from collections.abc import Iterable
 from typing import Callable, Any, Dict, Union
 
-from dff.core.engine.core import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 
 from pydantic import Field, BaseModel, validator
 from pydantic.typing import ForwardRef
@@ -54,23 +55,23 @@ class BaseSlot(BaseModel, ABC):
         return hasattr(self, "children") and len(self.children) > 0
 
     @abstractmethod
-    def unset_value(self) -> Callable[[Context, Actor], None]:
+    def unset_value(self) -> Callable[[Context, Pipeline], None]:
         raise NotImplementedError("Base class has no attribute 'value'")
 
     @abstractmethod
-    def get_value(self) -> Callable[[Context, Actor], Dict[str, Union[str, None]]]:
+    def get_value(self) -> Callable[[Context, Pipeline], Dict[str, Union[str, None]]]:
         raise NotImplementedError("Base class has no attribute 'value'")
 
     @abstractmethod
-    def is_set(self) -> Callable[[Context, Actor], bool]:
+    def is_set(self) -> Callable[[Context, Pipeline], bool]:
         raise NotImplementedError("Base class has no attribute 'value'")
 
     @abstractmethod
-    def fill_template(self, template: str) -> Callable[[Context, Actor], str]:
+    def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
         raise NotImplementedError("Base class has no attribute 'value'")
 
     @abstractmethod
-    def extract_value(self, ctx: Context, actor: Actor) -> Any:
+    def extract_value(self, ctx: Context, pipeline: Pipeline) -> Any:
         """
         `Extract value` method is distinct for most slots. So, if you would like to
         introduce your own slot type, it is assumed, that you will override the
@@ -111,46 +112,46 @@ class GroupSlot(BaseSlot):
 
     def is_set(self):
         @requires_storage(f"Can't check value for {self.name}: slot storage missing", return_val=False)
-        def is_set_inner(ctx: Context, actor: Actor):
-            return all([child.is_set()(ctx, actor) for child in self.children.values()])
+        def is_set_inner(ctx: Context, pipeline: Pipeline):
+            return all([child.is_set()(ctx, pipeline) for child in self.children.values()])
 
         return is_set_inner
 
-    def get_value(self) -> Callable[[Context, Actor], Dict[str, Union[str, None]]]:
+    def get_value(self) -> Callable[[Context, Pipeline], Dict[str, Union[str, None]]]:
         @requires_storage(f"Can't get value for {self.name}: slot storage missing")
-        def get_inner(ctx: Context, actor: Actor) -> Dict[str, Union[str, None]]:
+        def get_inner(ctx: Context, pipeline: Pipeline) -> Dict[str, Union[str, None]]:
             values = dict()
             for child in self.children.values():
                 if isinstance(child, GroupSlot):
-                    values.update({key: value for key, value in child.get_value()(ctx, actor).items()})
+                    values.update({key: value for key, value in child.get_value()(ctx, pipeline).items()})
                 else:
-                    values.update({child.name: child.get_value()(ctx, actor)})
+                    values.update({child.name: child.get_value()(ctx, pipeline)})
             return values
 
         return get_inner
 
     def unset_value(self):
         @requires_storage(f"Can't unset value for {self.name}: slot storage missing")
-        def unset_inner(ctx: Context, actor: Actor):
+        def unset_inner(ctx: Context, pipeline: Pipeline):
             for child in self.children.values():
-                child.unset_value()(ctx, actor)
+                child.unset_value()(ctx, pipeline)
 
         return unset_inner
 
     def fill_template(self, template: str) -> Callable:
         @requires_storage(f"Can't fill a template with {self.name}: slot storage missing.", return_val=template)
-        def fill_inner(ctx: Context, actor: Actor) -> str:
+        def fill_inner(ctx: Context, pipeline: Pipeline) -> str:
             new_template = template
             for _, child in self.children.items():
-                new_template = child.fill_template(new_template)(ctx, actor)
+                new_template = child.fill_template(new_template)(ctx, pipeline)
 
             return new_template
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, actor: Actor):
+    def extract_value(self, ctx: Context, pipeline: Pipeline):
         for child in self.children.values():
-            val = child.extract_value(ctx, actor)
+            val = child.extract_value(ctx, pipeline)
         return self.value
 
 
@@ -165,26 +166,26 @@ class ValueSlot(BaseSlot):
 
     def is_set(self):
         @requires_storage(f"Can't check value for {self.name}: slot storage missing", return_val=False)
-        def is_set_inner(ctx: Context, actor: Actor):
+        def is_set_inner(ctx: Context, pipeline: Pipeline):
             return bool(ctx.framework_states[SLOT_STORAGE_KEY].get(self.name))
 
         return is_set_inner
 
-    def get_value(self) -> Callable[[Context, Actor], Union[str, None]]:
+    def get_value(self) -> Callable[[Context, Pipeline], Union[str, None]]:
         @requires_storage(f"Can't get value for {self.name}: slot storage missing")
-        def get_inner(ctx: Context, actor: Actor) -> Union[str, None]:
+        def get_inner(ctx: Context, pipeline: Pipeline) -> Union[str, None]:
             return ctx.framework_states[SLOT_STORAGE_KEY].get(self.name)
 
         return get_inner
 
     def unset_value(self):
         @requires_storage(f"Can't unset value for {self.name}: slot storage missing")
-        def unset_inner(ctx: Context, actor: Actor):
+        def unset_inner(ctx: Context, pipeline: Pipeline):
             ctx.framework_states[SLOT_STORAGE_KEY][self.name] = None
 
         return unset_inner
 
-    def fill_template(self, template: str) -> Callable[[Context, Actor], str]:
+    def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
         """
         Value Slot's `fill_template` method does not perform template filling on its own, but allows you
         to cut corners on some standard operations. E. g., if you include the following snippet in
@@ -193,7 +194,7 @@ class ValueSlot(BaseSlot):
 
         .. code-block::
 
-            checked_template = super(RegexpSlot, self).fill_template(template)(ctx, actor)
+            checked_template = super(RegexpSlot, self).fill_template(template)(ctx, pipeline)
             if not checked_template:
                 return '...some stub response...'
 
@@ -216,8 +217,8 @@ class ValueSlot(BaseSlot):
         """
 
         @requires_storage(f"Can't fill a template with {self.name}: slot storage missing.")
-        def fill_inner(ctx: Context, actor: Actor) -> Union[str, None]:
-            if not self.name in template or self.get_value()(ctx, actor) is None:
+        def fill_inner(ctx: Context, pipeline: Pipeline) -> Union[str, None]:
+            if not self.name in template or self.get_value()(ctx, pipeline) is None:
                 return None
             return template
 
@@ -237,8 +238,8 @@ class RegexpSlot(ValueSlot):
     match_group_idx: int = 0
 
     def fill_template(self, template: str) -> Callable:
-        def fill_inner(ctx: Context, actor: Actor):
-            checked_template = super(RegexpSlot, self).fill_template(template)(ctx, actor)
+        def fill_inner(ctx: Context, pipeline: Pipeline):
+            checked_template = super(RegexpSlot, self).fill_template(template)(ctx, pipeline)
             if checked_template is None:  # the check returning None means that an error has occured.
                 return template
 
@@ -247,7 +248,7 @@ class RegexpSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, actor: Actor):
+    def extract_value(self, ctx: Context, pipeline: Pipeline):
         search = re.search(self.regexp, ctx.last_request)
         self.value = search.group(self.match_group_idx) if search else None
         return self.value
@@ -263,8 +264,8 @@ class FunctionSlot(ValueSlot):
     func: Callable[[str], str]
 
     def fill_template(self, template: str) -> Callable:
-        def fill_inner(ctx: Context, actor: Actor):
-            checked_template = super(FunctionSlot, self).fill_template(template)(ctx, actor)
+        def fill_inner(ctx: Context, pipeline: Pipeline):
+            checked_template = super(FunctionSlot, self).fill_template(template)(ctx, pipeline)
             if not checked_template:  # the check returning None means that an error has occured.
                 return template
 
@@ -273,7 +274,7 @@ class FunctionSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, actor: Actor):
+    def extract_value(self, ctx: Context, pipeline: Pipeline):
         self.value = self.func(ctx.last_request)
         return self.value
 

@@ -7,8 +7,9 @@ from typing import Dict, Callable, Any
 from logging import getLogger
 from functools import wraps
 
-from dff.core.engine.core import Context, Actor
-from dff.core.engine.core.actor import ActorStage
+from dff.script import Context
+from dff.pipeline import Pipeline
+from dff.pipeline.pipeline.actor import ActorStage
 
 logger = getLogger(__name__)
 
@@ -22,7 +23,7 @@ def requires_storage(
 ) -> Callable:
     def storage_decorator(func: Callable) -> Callable:
         @wraps(func)
-        def storage_wrapper(ctx: Context, actor: Actor, *args, **kwargs) -> Any:
+        def storage_wrapper(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Any:
             if ctx.validation:
                 return return_val
 
@@ -30,7 +31,7 @@ def requires_storage(
                 logger.warning(warn_message)
                 return return_val
 
-            return func(ctx, actor, *args, **kwargs)
+            return func(ctx, pipeline, *args, **kwargs)
 
         return storage_wrapper
 
@@ -53,7 +54,7 @@ def register_storage(actor: Actor, storage_key: str = SLOT_STORAGE_KEY, storage:
     if not storage:
         storage = dict()
 
-    def register_storage_inner(ctx: Context, actor: Actor, *args, **kwargs) -> None:
+    def register_storage_inner(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> None:
         if storage_key in ctx.framework_states:
             return
         ctx.framework_states[storage_key] = storage

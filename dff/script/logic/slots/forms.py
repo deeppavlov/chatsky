@@ -9,11 +9,12 @@ from random import choice
 from math import inf
 from collections import Counter
 
-import dff.core.engine.labels as lbl
+from dff.script import labels as lbl
 from pydantic import BaseModel, Field, PrivateAttr, validate_arguments
 
-from dff.core.engine.core import Context, Actor
-from dff.core.engine.core.types import NodeLabel3Type, NodeLabel2Type
+from dff.script import Context
+from dff.pipeline import Pipeline
+from dff.script.core.types import NodeLabel3Type, NodeLabel2Type
 
 from .root import root_slot
 from .handlers import get_values
@@ -90,7 +91,7 @@ class FormPolicy(BaseModel):
     @validate_arguments
     def to_next_label(
         self, priority: Optional[float] = None, fallback_node: Optional[Union[NodeLabel2Type, NodeLabel3Type]] = None
-    ) -> Callable[[Context, Actor], NodeLabel3Type]:
+    ) -> Callable[[Context, Pipeline], NodeLabel3Type]:
         """
         This method checks, if all slots from the form have been set and returns transitions to required nodes,
         if there remain any. Returns an always ignored transition otherwise.
@@ -100,14 +101,14 @@ class FormPolicy(BaseModel):
 
         priority: Optional[float] = None
             The weight that will be assigned to the transition.
-            Defaults to 1 (default priority in dff.core.engine :py:class:`~Actor`).
+            Defaults to 1 (default priority in dff.core.engine :py:class:`~Pipeline`).
 
         """
 
-        def to_next_label_inner(ctx: Context, actor: Actor) -> NodeLabel3Type:
-            current_priority = priority or actor.label_priority
+        def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
+            current_priority = priority or pipeline.actor.label_priority, pipeline
             for slot_name, node_list in self.mapping.items():
-                is_set = root_slot.children[slot_name].is_set()(ctx, actor)
+                is_set = root_slot.children[slot_name].is_set()(ctx, pipeline)
                 if is_set is True:
                     continue
 
@@ -116,8 +117,8 @@ class FormPolicy(BaseModel):
                 ]  # assert that the visit limit has not been reached for all of the nodes.
 
                 if len(filtered_node_list) == 0:
-                    _ = self.update_state(FormState.FAILED)(ctx, actor)
-                    fallback = fallback_node if fallback_node else lbl.to_fallback(-inf)(ctx, actor)
+                    _ = self.update_state(FormState.FAILED)(ctx, pipeline)
+                    fallback = fallback_node if fallback_node else lbl.to_fallback(-inf)(ctx, pipeline)
                     return fallback
 
                 chosen_node = choice(filtered_node_list)
@@ -126,8 +127,8 @@ class FormPolicy(BaseModel):
                     self._node_cache.update([chosen_node])  # update visit counts
                 return (*chosen_node, current_priority)
 
-            _ = self.update_state(FormState.COMPLETE)(ctx, actor)
-            fallback = fallback_node if fallback_node else lbl.to_fallback(-inf)(ctx, actor)
+            _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)
+            fallback = fallback_node if fallback_node else lbl.to_fallback(-inf)(ctx, pipeline)
             return fallback
 
         return to_next_label_inner
@@ -147,7 +148,7 @@ class FormPolicy(BaseModel):
         """
 
         @requires_storage("Form storage has not been registered.", storage_key=FORM_STORAGE_KEY, return_val=False)
-        def is_active_inner(ctx: Context, actor: Actor) -> bool:
+        def is_active_inner(ctx: Context, pipeline: Pipeline) -> bool:
             true_state = ctx.framework_states[FORM_STORAGE_KEY].get(self.name, FormState.INACTIVE)
             return true_state == state
 
@@ -167,7 +168,7 @@ class FormPolicy(BaseModel):
 
         """
 
-        def update_inner(ctx: Context, actor: Actor) -> Context:
+        def update_inner(ctx: Context, pipeline: Pipeline) -> Context:
             if not ctx.validation and FORM_STORAGE_KEY not in ctx.framework_states:
                 raise ValueError("Form storage has not been registered.")
 
@@ -179,15 +180,15 @@ class FormPolicy(BaseModel):
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.INACTIVE
                 return ctx
 
-            if is_set_all(list(self.mapping.keys()))(ctx, actor) is True:
+            if is_set_all(list(self.mapping.keys()))(ctx, pipeline) is True:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.COMPLETE
             return ctx
 
         return update_inner
 
     def get_values(self):
-        def get_values_inner(ctx: Context, actor: Actor):
+        def get_values_inner(ctx: Context, pipeline: Pipeline):
             slots = list(self.mapping.keys())
-            return get_values(ctx, actor, slots)
+            return get_values(ctx, pipeline, slots)
 
         return get_values_inner

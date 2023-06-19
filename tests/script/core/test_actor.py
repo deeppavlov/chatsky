@@ -1,4 +1,5 @@
 # %%
+from dff.pipeline import Pipeline
 from dff.script import (
     TRANSITIONS,
     RESPONSE,
@@ -6,7 +7,6 @@ from dff.script import (
     LOCAL,
     PRE_TRANSITIONS_PROCESSING,
     PRE_RESPONSE_PROCESSING,
-    Actor,
     Context,
     Message,
 )
@@ -20,8 +20,8 @@ def positive_test(samples, custom_class):
         try:
             res = custom_class(**sample)
             results += [res]
-        except Exception as exeption:
-            raise Exception(f"sample={sample} gets exception={exeption}")
+        except Exception as exception:
+            raise Exception(f"sample={sample} gets exception={exception}")
     return results
 
 
@@ -51,58 +51,62 @@ def raised_response(ctx: Context, actor, *args, **kwargs):
 def test_actor():
     try:
         # fail of start label
-        Actor({"flow": {"node1": {}}}, start_label=("flow1", "node1"))
-        raise Exception("can not be passed")
+        Pipeline.from_script({"flow": {"node1": {}}}, start_label=("flow1", "node1"))
+        raise Exception("can not be passed: fail of start label")
     except ValueError:
         pass
     try:
         # fail of fallback label
-        Actor({"flow": {"node1": {}}}, start_label=("flow", "node1"), fallback_label=("flow1", "node1"))
-        raise Exception("can not be passed")
+        Pipeline.from_script({"flow": {"node1": {}}}, start_label=("flow", "node1"), fallback_label=("flow1", "node1"))
+        raise Exception("can not be passed: fail of fallback label")
     except ValueError:
         pass
     try:
         # fail of missing node
-        Actor({"flow": {"node1": {TRANSITIONS: {"miss_node1": true()}}}}, start_label=("flow", "node1"))
-        raise Exception("can not be passed")
+        Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {"miss_node1": true()}}}}, start_label=("flow", "node1"))
+        raise Exception("can not be passed: fail of missing node")
     except ValueError:
         pass
     try:
         # fail of condition returned type
-        Actor({"flow": {"node1": {TRANSITIONS: {"node1": std_func}}}}, start_label=("flow", "node1"))
-        raise Exception("can not be passed")
+        Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {"node1": std_func}}}}, start_label=("flow", "node1"))
+        raise Exception("can not be passed: fail of condition returned type")
     except ValueError:
         pass
     try:
         # fail of response returned Callable
-        actor = Actor(
+        pipeline = Pipeline.from_script(
             {"flow": {"node1": {RESPONSE: lambda c, a: lambda x: 1, TRANSITIONS: {repeat(): true()}}}},
             start_label=("flow", "node1"),
         )
         ctx = Context()
-        actor(ctx)
-        raise Exception("can not be passed")
+        pipeline.actor(pipeline, ctx)
+        raise Exception("can not be passed: fail of response returned Callable")
     except ValueError:
         pass
     try:
         # failed response
-        actor = Actor(
+        Pipeline.from_script(
             {"flow": {"node1": {RESPONSE: raised_response, TRANSITIONS: {repeat(): true()}}}},
             start_label=("flow", "node1"),
         )
-        raise Exception("can not be passed")
+        raise Exception("can not be passed: failed response")
     except ValueError:
         pass
 
     # empty ctx stability
-    actor = Actor({"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1"))
+    pipeline = Pipeline.from_script(
+        {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1")
+    )
     ctx = Context()
-    actor(ctx)
+    pipeline.actor(pipeline, ctx)
 
     # fake label stability
-    actor = Actor({"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1"))
+    pipeline = Pipeline.from_script(
+        {"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
+    )
     ctx = Context()
-    actor(ctx)
+    pipeline.actor(pipeline, ctx)
 
 
 limit_errors = {}
@@ -206,10 +210,10 @@ def test_call_limit():
     }
     # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
     ctx = Context()
-    actor = Actor(script=script, start_label=("flow1", "node1"), validation_stage=False)
+    pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"), validation_stage=False)
     for i in range(4):
         ctx.add_request(Message(text="req1"))
-        ctx = actor(ctx)
+        ctx = pipeline.actor(pipeline, ctx)
     if limit_errors:
         error_msg = repr(limit_errors)
         raise Exception(error_msg)

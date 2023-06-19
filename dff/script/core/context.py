@@ -1,9 +1,20 @@
 """
 Context
----------------------------
-Data structure that is used for the context storage.
-It provides a convenient interface for working with data:
-adding data, data serialization, type checking etc.
+-------
+A Context is a data structure that is used to store information about the current state of a conversation.
+It is used to keep track of the user's input, the current stage of the conversation, and any other
+information that is relevant to the current context of a dialog.
+The Context provides a convenient interface for working with data, allowing developers to easily add,
+retrieve, and manipulate data as the conversation progresses.
+
+The Context data structure provides several key features to make working with data easier.
+Developers can use the context to store any information that is relevant to the current conversation,
+such as user data, session data, conversation history, or etc.
+This allows developers to easily access and use this data throughout the conversation flow.
+
+Another important feature of the context is data serialization.
+The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
+This allows developers to save the context data and resume the conversation later.
 """
 import logging
 from uuid import UUID, uuid4
@@ -57,7 +68,7 @@ class Context(BaseModel):
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behaviour, e.g while collecting the statistical data.
+    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     labels: Dict[int, NodeLabel2Type] = {}
     """
@@ -90,20 +101,20 @@ class Context(BaseModel):
     """
     validation: bool = False
     """
-    `validation` is a flag that signals that :py:class:`~dff.script.Actor`,
+    `validation` is a flag that signals that :py:class:`~dff.script.Pipeline`,
     while being initialized, checks the :py:class:`~dff.script.Script`.
-    The functions that can give not validable data
+    The functions that can give not valid data
     while being validated must use this flag to take the validation mode into account.
     Otherwise the validation will not be passed.
     """
     framework_states: Dict[ModuleName, Dict[str, Any]] = {}
     """
     `framework_states` is used for addons states or for
-    :py:class:`~dff.script.Actor`'s states.
-    :py:class:`~dff.script.Actor`
+    :py:class:`~dff.script.Pipeline`'s states.
+    :py:class:`~dff.script.Pipeline`
     records all its intermediate conditions into the `framework_states`.
     After :py:class:`~dff.script.Context` processing is finished,
-    :py:class:`~dff.script.Actor` resets `framework_states` and
+    :py:class:`~dff.script.Pipeline` resets `framework_states` and
     returns :py:class:`~dff.script.Context`.
 
         - key - Temporary variable name.
@@ -226,7 +237,8 @@ class Context(BaseModel):
         return self.responses.get(last_index)
 
     def set_last_response(self, response: Optional[Message]):
-        """Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        """
+        Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
@@ -236,13 +248,14 @@ class Context(BaseModel):
     def last_request(self) -> Optional[Message]:
         """
         Returns the last `request` of the current :py:class:`~dff.script.Context`.
-        Returns `None if `requests` is empty.
+        Returns `None` if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
     def set_last_request(self, request: Optional[Message]):
-        """Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        """
+        Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)

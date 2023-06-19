@@ -6,7 +6,8 @@ This module is for general functions that can be used in processing, conditions,
 import logging
 from typing import Dict, Optional, List
 
-from dff.core.engine.core import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 
 from .types import BaseSlot, GroupSlot
 from .root import root_slot as root
@@ -15,7 +16,7 @@ from .utils import SLOT_STORAGE_KEY
 logger = logging.getLogger(__name__)
 
 
-def extract(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> list:
+def extract(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> list:
     """
     Extract the specified slots and return the received values as a list.
     If the value of a particular slot cannot be extracted, None is included instead.
@@ -51,8 +52,8 @@ def extract(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> li
             results.append(None)
             continue
         target_slot: BaseSlot = root.children.get(name)
-        val = target_slot.extract_value(ctx, actor)
-        if not target_slot.is_set()(ctx, actor):
+        val = target_slot.extract_value(ctx, pipeline)
+        if not target_slot.is_set()(ctx, pipeline):
             if isinstance(target_slot, GroupSlot):
                 ctx.framework_states[SLOT_STORAGE_KEY].update(val)
             else:
@@ -62,7 +63,7 @@ def extract(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> li
     return results
 
 
-def get_values(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> list:
+def get_values(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> list:
     """
     Get values of the specified slots, assuming that they have been extracted beforehand.
     If slot argument is omitted, values of all slots will be returned.
@@ -95,11 +96,11 @@ def get_values(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) ->
         if name not in root.children:
             results.append(None)
         else:
-            results.append(root.children[name].get_value()(ctx, actor))
+            results.append(root.children[name].get_value()(ctx, pipeline))
     return results
 
 
-def get_filled_template(template: str, ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> str:
+def get_filled_template(template: str, ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> str:
     """
     Fill a template string with slot values.
 
@@ -128,12 +129,12 @@ def get_filled_template(template: str, ctx: Context, actor: Actor, slots: Option
         )
 
     for _, slot in filler_slots.items():
-        template = slot.fill_template(template)(ctx, actor)
+        template = slot.fill_template(template)(ctx, pipeline)
 
     return template
 
 
-def unset(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> None:
+def unset(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> None:
     """
     Expunge the target slot values from the context, so that they don't count as 'set' anymore.
 
@@ -160,5 +161,5 @@ def unset(ctx: Context, actor: Actor, slots: Optional[List[str]] = None) -> None
         return
 
     for name in target_names:
-        root.children[name].unset_value()(ctx, actor)
+        root.children[name].unset_value()(ctx, pipeline)
     return

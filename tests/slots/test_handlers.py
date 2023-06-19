@@ -49,8 +49,18 @@ def test_error(testing_context, testing_actor):
     [
         (dff.script.logic.slots.RegexpSlot(name="test", regexp=".+"), False),
         (dff.script.logic.slots.RegexpSlot(name="test", regexp=".+"), True),
-        (dff.script.logic.slots.GroupSlot(name="test", children=[dff.script.logic.slots.RegexpSlot(name="test", regexp=".+")]), False),
-        (dff.script.logic.slots.GroupSlot(name="test", children=[dff.script.logic.slots.RegexpSlot(name="test", regexp=".+")]), True),
+        (
+            dff.script.logic.slots.GroupSlot(
+                name="test", children=[dff.script.logic.slots.RegexpSlot(name="test", regexp=".+")]
+            ),
+            False,
+        ),
+        (
+            dff.script.logic.slots.GroupSlot(
+                name="test", children=[dff.script.logic.slots.RegexpSlot(name="test", regexp=".+")]
+            ),
+            True,
+        ),
     ],
 )
 def test_unset(testing_context, testing_actor, slot: BaseSlot, noparams: bool, root: RootSlot):

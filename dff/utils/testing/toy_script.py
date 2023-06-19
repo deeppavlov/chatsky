@@ -1,3 +1,9 @@
+"""
+Toy script
+----------
+This module contains a simple script and a dialog which are used
+in tutorials.
+"""
 from dff.script.conditions import exact_match
 from dff.script import TRANSITIONS, RESPONSE, Message
 
@@ -26,6 +32,23 @@ TOY_SCRIPT = {
         },
     }
 }
+"""
+An example of a simple script.
+
+:meta hide-value:
+"""
+
+TOY_SCRIPT_ARGS = (TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node"))
+"""
+Arguments to pass to :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline.from_script` in order to
+use :py:data:`~.TOY_SCRIPT`:
+
+.. code-block::
+
+    Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=..., ...)
+
+:meta hide-value:
+"""
 
 HAPPY_PATH = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),
@@ -34,3 +57,8 @@ HAPPY_PATH = (
     (Message(text="Ok, goodbye."), Message(text="bye")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
 )
+"""
+An example of a simple dialog.
+
+:meta hide-value:
+"""

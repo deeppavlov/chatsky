@@ -8,7 +8,8 @@ from functools import partial
 
 from pydantic import validate_arguments
 
-from dff.core.engine.core import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 
 from .root import root_slot
 from .utils import requires_storage
@@ -31,8 +32,8 @@ def is_set(slots: List[str], use_all: bool = True, use_any: bool = False) -> Cal
         raise ValueError("Parameters `use_all` and `use_any` are mutually exclusive.")
 
     @requires_storage("Cannot check slot status: slot storage missing.", return_val=False)
-    def is_set_inner(ctx: Context, actor: Actor) -> bool:
-        slots_set = [root_slot.children[name].is_set()(ctx, actor) for name in slots]
+    def is_set_inner(ctx: Context, pipeline: Pipeline) -> bool:
+        slots_set = [root_slot.children[name].is_set()(ctx, pipeline) for name in slots]
         if use_all:
             return all(slots_set)
         if use_any:
@@ -49,7 +50,7 @@ is_set_any.__doc__ = is_set.__doc__
 
 
 @validate_arguments
-def set_like_mask(mask: Dict[str, bool]) -> Callable[[Context, Actor], bool]:
+def set_like_mask(mask: Dict[str, bool]) -> Callable[[Context, Pipeline], bool]:
     """
     Check, if the state of one or more slots corresponds to a dict-based boolean mask.
 
@@ -61,9 +62,9 @@ def set_like_mask(mask: Dict[str, bool]) -> Callable[[Context, Actor], bool]:
         `True` for 'set', `False` for 'not set'.
     """
 
-    def set_like_mask_inner(ctx: Context, actor: Actor) -> bool:
+    def set_like_mask_inner(ctx: Context, pipeline: Pipeline) -> bool:
         slots = list(mask.keys())
-        values = [root_slot.children[name].is_set()(ctx, actor) for name in slots]
+        values = [root_slot.children[name].is_set()(ctx, pipeline) for name in slots]
         return list(mask.values()) == values
 
     return set_like_mask_inner

@@ -8,8 +8,8 @@ from typing import Optional, Union, List, Callable
 
 from pydantic import validate_arguments
 
-from dff.core.engine.core import Context, Actor
-from dff.connectors.messenger.generics import Response
+from dff.script import Context, Message
+from dff.pipeline import Pipeline
 
 from .handlers import get_filled_template, extract as extract_handler, unset as unset_handler
 
@@ -29,8 +29,8 @@ def extract(slots: Optional[List[str]]) -> Callable:
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
 
-    def extract_inner(ctx: Context, actor: Actor) -> Context:
-        result = extract_handler(ctx, actor, slots)
+    def extract_inner(ctx: Context, pipeline: Pipeline) -> Context:
+        result = extract_handler(ctx, pipeline, slots)
         return ctx
 
     return extract_inner
@@ -38,8 +38,8 @@ def extract(slots: Optional[List[str]]) -> Callable:
 
 @validate_arguments
 def unset(slots: Optional[List[str]] = None):
-    def unset_inner(ctx: Context, actor: Actor) -> Context:
-        unset_handler(ctx, actor, slots)
+    def unset_inner(ctx: Context, pipeline: Pipeline) -> Context:
+        unset_handler(ctx, pipeline, slots)
         return ctx
 
     return unset_inner
@@ -59,24 +59,17 @@ def fill_template(slots: Optional[List[str]] = None):
         Slot names to use. If this parameter is omitted, all slots will be used.
     """
 
-    def fill_inner(ctx: Context, actor: Actor) -> Union[Response, str]:
+    def fill_inner(ctx: Context, pipeline: Pipeline) -> Message:
 
         # get current node response
         response = ctx.current_node.response
         if callable(response):
-            response = response(ctx, actor)
-        if not isinstance(response, str) and not isinstance(response, Response):
-            return ctx
+            response = response(ctx, pipeline)
 
-        template = response if isinstance(response, str) else response.text
-        new_template = get_filled_template(template, ctx, actor, slots)
+        new_text = get_filled_template(response.text, ctx, pipeline, slots)
 
-        # assign to node
-        if isinstance(response, str):
-            ctx.current_node.response = new_template
-        elif isinstance(response, Response):
-            response.text = new_template
-            ctx.current_node.response = response
+        response.text = new_text
+        ctx.current_node.response = response
 
         return ctx
 
