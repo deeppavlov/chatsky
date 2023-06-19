@@ -223,5 +223,6 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     For more information, see the function doc:\n{context_storage_factory.__doc__}
     """
     _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
-    target_class = getattr(importlib.import_module(f".{module}", package="dff.context_storages"), _class)
+    module = importlib.import_module(f".{module}", package="dff.context_storages_old")
+    target_class = getattr(importlib.reload(module), _class)
     return target_class(path, **kwargs)
