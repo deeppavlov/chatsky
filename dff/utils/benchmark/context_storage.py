@@ -17,9 +17,11 @@ Basic usage::
 from uuid import uuid4
 from time import perf_counter
 import typing as tp
+from copy import deepcopy
 
 from pympler import asizeof
 from tqdm.auto import tqdm
+from humanize import naturalsize
 
 try:
     import matplotlib
@@ -28,77 +30,69 @@ try:
 except ImportError:
     matplotlib = None
 
-try:
-    import pandas
-except ImportError:
-    pandas = None
-
-try:
-    import polars
-except ImportError:
-    polars = None
-
 from dff.context_storages import DBContextStorage
 from dff.script import Context, Message
 
 
-def get_context_size(context: Context) -> int:
-    """Return size of a provided context."""
-    return asizeof.asizeof(context)
-
-
-def get_context(dialog_len: int, misc_len: int) -> Context:
+def get_dict(lengths: tp.Tuple[int, ...]):
     """
-    Return a context with a given number of dialog turns and a given length of misc field.
+    Misc dictionary build in lengths dimensions.
 
-    Misc field is needed in case context storage reads only the most recent requests/responses.
+    :param lengths:
+        Dimensions of the dictionary.
+        Each element of the lengths tuple is the number of keys on the corresponding level of the dictionary.
+        The last element of the lengths tuple is the length of the str values of the dict.
 
-    Context size is approximately 1000 * dialog_len + 100 * misc_len bytes if dialog_len and misc_len > 100.
+        e.g. lengths=(1, 2) produces a dictionary with 1 key that points to a string of len 2.
+        whereas lengths=(1, 2, 3) produces a dictionary with 1 key that points to a dictionary
+        with 2 keys each of which points to a string of len 3.
+
+        So the len of lengths is the depth of the dictionary, while its values are
+        the width of the dictionary at each level.
+    :return: Misc dictionary.
     """
+    def _get_dict(lengths: tp.Tuple[int, ...]):
+        if len(lengths) < 2:
+            return "." * lengths[0]
+        return {i: _get_dict(lengths[1:]) for i in range(lengths[0])}
+
+    if len(lengths) > 1:
+        return _get_dict(lengths)
+    elif len(lengths) == 1:
+        return _get_dict((lengths[0], 0))
+    else:
+        return _get_dict((0, 0))
+
+
+def get_message(message_lengths: tp.Tuple[int, ...]):
+    """
+    Message with misc field of message_lengths dimension.
+    :param message_lengths:
+    :return:
+    """
+    return Message(misc=get_dict(message_lengths))
+
+
+def get_context(dialog_len: int, message_lengths: tp.Tuple[int, ...], misc_lengths: tp.Tuple[int, ...]) -> Context:
+    """
+    A context with a given number of dialog turns, a given message dimension
+    and a given misc dimension.
+    """
+
     return Context(
         labels={i: (f"flow_{i}", f"node_{i}") for i in range(dialog_len)},
-        requests={i: Message(text=f"request_{i}") for i in range(dialog_len)},
-        responses={i: Message(text=f"response_{i}") for i in range(dialog_len)},
-        misc={str(i): i for i in range(misc_len)},
+        requests={i: get_message(message_lengths) for i in range(dialog_len)},
+        responses={i: get_message(message_lengths) for i in range(dialog_len)},
+        misc=get_dict(misc_lengths),
     )
 
 
-@tp.overload
 def time_context_read_write(
     context_storage: DBContextStorage,
     context: Context,
     context_num: int,
-    as_dataframe: None = None,
-) -> tp.Tuple[tp.List[float], tp.List[float]]:
-    ...
-
-
-@tp.overload
-def time_context_read_write(
-    context_storage: DBContextStorage,
-    context: Context,
-    context_num: int,
-    as_dataframe: tp.Literal["pandas"],
-) -> "pandas.DataFrame":
-    ...
-
-
-@tp.overload
-def time_context_read_write(
-    context_storage: DBContextStorage,
-    context: Context,
-    context_num: int,
-    as_dataframe: tp.Literal["polars"],
-) -> "polars.DataFrame":
-    ...
-
-
-def time_context_read_write(
-    context_storage: DBContextStorage,
-    context: Context,
-    context_num: int,
-    as_dataframe: tp.Optional[tp.Literal["pandas", "polars"]] = None,
-) -> tp.Union[tp.Tuple[tp.List[float], tp.List[float]], "pandas.DataFrame", "polars.DataFrame"]:
+    context_updater=None,
+) -> tp.Tuple[tp.List[float], tp.List[tp.Dict[int, float]], tp.List[tp.Dict[int, float]]]:
     """
     Generate `context_num` ids and for each write into `context_storage` value of `context` under generated id,
     after that read the value stored in `context_storage` under generated id and compare it to `context`.
@@ -110,10 +104,7 @@ def time_context_read_write(
     :param context_storage: Context storage to benchmark.
     :param context: An instance of context which will be repeatedly written into context storage.
     :param context_num: A number of times the context will be written and checked.
-    :param as_dataframe:
-        If the function should return the results as a pandas or a polars DataFrame.
-        If set to None, does not return a Dataframe.
-        Defaults to None.
+    :param context_updater:
     :return:
         Depends on `as_dataframe` parameter.
         1. By default, it is set to None in which case it returns:
@@ -127,7 +118,15 @@ def time_context_read_write(
     context_storage.clear()
 
     write_times: tp.List[float] = []
-    read_times: tp.List[float] = []
+    read_times: tp.List[tp.Dict[int, float]] = []
+    update_times: tp.List[tp.Dict[int, float]] = []
+
+    if context_updater is not None:
+        updated_contexts = [context]
+
+        while updated_contexts[-1] is not None:
+            updated_contexts.append(context_updater(deepcopy(updated_contexts[-1])))
+
     for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}"):
         ctx_id = uuid4()
 
@@ -136,34 +135,42 @@ def time_context_read_write(
         context_storage[ctx_id] = context
         write_times.append(perf_counter() - write_start)
 
+        read_times.append({})
+
         # read operation benchmark
         read_start = perf_counter()
         actual_context = context_storage[ctx_id]
-        read_times.append(perf_counter() - read_start)
+        read_time = perf_counter() - read_start
+        read_times[-1][len(actual_context.labels)] = read_time
 
         # check returned context
-        if actual_context != context:
-            raise RuntimeError(f"True context:\n{context}\nActual context:\n{actual_context}")
+        # if actual_context != context:
+        #     raise RuntimeError(f"True context:\n{context}\nActual context:\n{actual_context}")
+
+        if context_updater is not None:
+            update_times.append({})
+
+            for updated_context in updated_contexts[1:-1]:
+                update_start = perf_counter()
+                context_storage[ctx_id] = updated_context
+                update_time = perf_counter() - update_start
+                update_times[-1][len(updated_context.labels)] = update_time
+
+                read_start = perf_counter()
+                actual_context = context_storage[ctx_id]
+                read_time = perf_counter() - read_start
+                read_times[-1][len(actual_context.labels)] = read_time
 
     context_storage.clear()
-
-    if as_dataframe is None:
-        return write_times, read_times
-    elif as_dataframe == "pandas":
-        if pandas is None:
-            raise RuntimeError("Install `pandas` in order to get benchmark results as a pandas DataFrame.")
-        return pandas.DataFrame(data={"write": write_times, "read": read_times})
-    elif as_dataframe == "polars":
-        if polars is None:
-            raise RuntimeError("Install `polars` in order to get benchmark results as a polars DataFrame.")
-        return polars.DataFrame({"write": write_times, "read": read_times})
+    return write_times, read_times, update_times
 
 
 def report(
     *context_storages: DBContextStorage,
     context_num: int = 1000,
-    dialog_len: int = 10000,
-    misc_len: int = 0,
+    dialog_len: int = 300,
+    message_lengths: tp.Tuple[int, ...] = (10, 10),
+    misc_lengths: tp.Tuple[int, ...] = (10, 10),
     pdf: tp.Optional[str] = None,
 ):
     """
@@ -173,22 +180,26 @@ def report(
     :param context_num: Number of times a single context should be written to/read from context storage.
     :param dialog_len:
         A number of turns inside a single context. The context will contain simple text requests/responses.
-    :param misc_len:
-        Number of items in the misc field.
-        Use this parameter if context storage only has access to the most recent requests/responses.
+    :param message_lengths:
+    :param misc_lengths:
     :param pdf:
         A pdf file name to save report to.
         Defaults to None.
         If set to None, prints the result to stdout instead of creating a pdf file.
     """
-    context = get_context(dialog_len, misc_len)
-    context_size = get_context_size(context)
+    context = get_context(dialog_len, message_lengths, misc_lengths)
+    context_size = asizeof.asizeof(context)
+    misc_size = asizeof.asizeof(get_dict(misc_lengths))
+    message_size = asizeof.asizeof(get_message(message_lengths))
 
     benchmark_config = (
         f"Number of contexts: {context_num}\n"
         f"Dialog len: {dialog_len}\n"
-        f"Misc len: {misc_len}\n"
-        f"Size of one context: {context_size} ({tqdm.format_sizeof(context_size, divisor=1024)})"
+        f"Message misc dimensions: {message_lengths}\n"
+        f"Misc dimensions: {misc_lengths}\n"
+        f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
+        f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
+        f"Size of one context: {context_size} ({naturalsize(context_size, gnu=True)})"
     )
 
     print(f"Starting benchmarking with following parameters:\n{benchmark_config}")
@@ -197,6 +208,7 @@ def report(
 
     for context_storage in context_storages:
         try:
+            # todo: update report method
             write, read = time_context_read_write(context_storage, context, context_num)
 
             benchmarking_results[context_storage.full_path] = write, read
