@@ -91,7 +91,7 @@ autosummary_generate_overwrite = False
 # Finding tutorials directories
 nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
 build_date = datetime.datetime.now().strftime("%b %d, %Y")
-rst_prolog = f"""
+rst_epilog = f"""
 .. |build_date| replace:: {build_date}
 """
 nbsphinx_prolog = """
