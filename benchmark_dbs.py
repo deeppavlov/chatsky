@@ -166,7 +166,7 @@ dbs = {
     "Redis": "redis://:pass@localhost:6379/0",
     "MySQL": "mysql+asyncmy://root:pass@localhost:3307/test",
     "SQLite": f"sqlite+aiosqlite:{sqlite_separator}{sqlite_file.absolute()}",
-    # "YDB": "grpc://localhost:2136/local",
+    "YDB": "grpc://localhost:2136/local",
 }
 
 # benchmark
@@ -179,19 +179,6 @@ benchmark_all(
     db_uris=dbs,
     from_dialog_len=1,
     to_dialog_len=50,
-    message_lengths=(3, 5, 6, 5, 3),
-    misc_lengths=(2, 4, 3, 8, 100),
-)
-
-benchmark_all(
-    "benchmarks/alexaprize_longer.json",
-    "Alexaprize-like dialogue benchmarks (longer)",
-    "This benchmark set tests against parameters that mimic dialogues from alexaprize,"
-    "but dialog len is increased.",
-    db_uris=dbs,
-    from_dialog_len=100,
-    to_dialog_len=1001,
-    step_dialog_len=100,
     message_lengths=(3, 5, 6, 5, 3),
     misc_lengths=(2, 4, 3, 8, 100),
 )
@@ -213,4 +200,17 @@ benchmark_all(
     "Default",
     "This benchmark set tests using default parameters.",
     db_uris=dbs,
+)
+
+benchmark_all(
+    "benchmarks/alexaprize_longer.json",
+    "Alexaprize-like dialogue benchmarks (longer)",
+    "This benchmark set tests against parameters that mimic dialogues from alexaprize,"
+    "but dialog len is increased.",
+    db_uris=dbs,
+    from_dialog_len=100,
+    to_dialog_len=1001,
+    step_dialog_len=100,
+    message_lengths=(3, 5, 6, 5, 3),
+    misc_lengths=(2, 4, 3, 8, 100),
 )
