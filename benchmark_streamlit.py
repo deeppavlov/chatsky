@@ -3,7 +3,6 @@ import json
 from pathlib import Path
 from statistics import mean
 import pandas as pd
-import numpy as np
 from pympler import asizeof
 from humanize import naturalsize
 import altair as alt

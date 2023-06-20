@@ -82,6 +82,7 @@ telegram_dependencies = [
 benchmark_dependencies = [
     "pympler",
     "tqdm",
+    "humanize",
 ]
 
 full = merge_req_lists(
@@ -121,6 +122,9 @@ test_requirements = merge_req_lists(
         "websockets==11.0.2",
         "locust==2.15",
         "matplotlib",
+        "streamlit",
+        "pandas",
+        "altair",
     ],
     requests_requirements,
 )
