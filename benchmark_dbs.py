@@ -91,7 +91,7 @@ class BenchmarkCase(BaseModel):
 
 def save_results_to_file(
     benchmark_cases: tp.List[BenchmarkCase],
-    file: str | pathlib.Path,
+    file: tp.Union[str, pathlib.Path],
     name: str,
     description: str,
 ):
@@ -109,7 +109,7 @@ def save_results_to_file(
 
 
 def benchmark_all(
-    file: str | pathlib.Path,
+    file: tp.Union[str, pathlib.Path],
     name: str,
     description: str,
     db_uris: tp.Dict[str, str],
