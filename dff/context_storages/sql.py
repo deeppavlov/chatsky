@@ -385,6 +385,7 @@ class SQLContextStorage(DBContextStorage):
     # TODO: optimize for PostgreSQL: single query.
     async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
         result_dict, values_slice = dict(), list()
+        request_fields, database_requests = list(), list()
 
         async with self.engine.begin() as conn:
             for field, value in subscript.items():
@@ -406,17 +407,26 @@ class SQLContextStorage(DBContextStorage):
                     elif value == ALL_ITEMS:
                         filtered_stmt = raw_stmt
 
-                    for key, value in (await conn.execute(filtered_stmt)).fetchall():
-                        if value is not None:
-                            if field not in result_dict:
-                                result_dict[field] = dict()
-                            result_dict[field][key] = value
+                    database_requests += [conn.execute(filtered_stmt)]
+                    request_fields += [field]
 
-                columns = [c for c in self.tables[self._CONTEXTS].c if c.name in values_slice]
-                stmt = select(*columns).where(self.tables[self._CONTEXTS].c[ExtraFields.primary_id.value] == primary_id)
-                for key, value in zip([c.name for c in columns], (await conn.execute(stmt)).fetchone()):
+            columns = [c for c in self.tables[self._CONTEXTS].c if c.name in values_slice]
+            stmt = select(*columns).where(self.tables[self._CONTEXTS].c[ExtraFields.primary_id.value] == primary_id)
+            context_request = conn.execute(stmt)
+        
+            responses = await asyncio.gather(*database_requests, context_request)
+            database_responses = responses[:-1]
+
+            for field, future in zip(request_fields, database_responses):
+                for key, value in future.fetchall():
                     if value is not None:
-                        result_dict[key] = value
+                        if field not in result_dict:
+                            result_dict[field] = dict()
+                        result_dict[field][key] = value
+
+            for key, value in zip([c.name for c in columns], responses[-1].fetchone()):
+                if value is not None:
+                    result_dict[key] = value
 
         return result_dict
 
