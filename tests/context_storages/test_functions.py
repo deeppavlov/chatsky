@@ -1,14 +1,12 @@
-from dff.context_storages import DBContextStorage
+from dff.context_storages import DBContextStorage, SchemaFieldWritePolicy
 from dff.pipeline import Pipeline
 from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
 
 
-def generic_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Perform cleanup
-    db.clear()
+def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     assert len(db) == 0
-    assert testing_context.storage_key == None
+    assert testing_context.storage_key is None
 
     # Test write operations
     db[context_id] = Context()
@@ -35,10 +33,7 @@ def generic_test(db: DBContextStorage, testing_context: Context, context_id: str
     check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
 
-def operational_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Perform cleanup
-    db.clear()
-
+def partial_storage_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # Write and read initial context
     db[context_id] = testing_context
     read_context = db[context_id]
@@ -62,8 +57,60 @@ def operational_test(db: DBContextStorage, testing_context: Context, context_id:
     read_context = db[context_id]
     assert write_context == read_context.dict()
 
-    # TODO: assert correct UPDATE policy
-    # TODO: fix errors if this function runs first??
+
+def different_policies_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Setup append policy for misc
+    db.context_schema.misc.on_write = SchemaFieldWritePolicy.APPEND
+
+    # Setup some data in context misc
+    testing_context.misc["OLD_KEY"] = "some old data"
+    db[context_id] = testing_context
+
+    # Alter context
+    testing_context.misc["OLD_KEY"] = "some new data"
+    testing_context.misc["NEW_KEY"] = "some new data"
+    db[context_id] = testing_context
+
+    # Check keys updated correctly
+    new_context = db[context_id]
+    assert new_context.misc["OLD_KEY"] == "some old data"
+    assert new_context.misc["NEW_KEY"] == "some new data"
+
+    # Setup append policy for misc
+    db.context_schema.misc.on_write = SchemaFieldWritePolicy.HASH_UPDATE
+
+    # Alter context
+    testing_context.misc["NEW_KEY"] = "brand new data"
+    db[context_id] = testing_context
+
+    # Check keys updated correctly
+    new_context = db[context_id]
+    assert new_context.misc["NEW_KEY"] == "brand new data"
 
 
-TEST_FUNCTIONS = [generic_test, operational_test]
+def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Fill context misc with data
+    for i in range(100000):
+        testing_context.misc[f"key_{i}"] = f"data number #{i}"
+    db[context_id] = testing_context
+
+    # Check data stored in context
+    new_context = db[context_id]
+    assert len(new_context.misc) == len(testing_context.misc)
+    for i in range(100000):
+        assert new_context.misc[f"key_{i}"] == f"data number #{i}"
+
+
+basic_test.no_dict = False
+partial_storage_test.no_dict = False
+different_policies_test.no_dict = True
+large_misc_test.no_dict = False
+_TEST_FUNCTIONS = [basic_test, partial_storage_test, different_policies_test, large_misc_test]
+
+
+def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
+    frozen_ctx = testing_context.dict()
+    for test in _TEST_FUNCTIONS:
+        if not (getattr(test, "no_dict", False) and isinstance(db, dict)):
+            db.clear()
+            test(db, Context.cast(frozen_ctx), context_id)

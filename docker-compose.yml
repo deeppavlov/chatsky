@@ -2,26 +2,26 @@ version: "3.9"
 services:
   mysql:
     env_file: [.env_file]
-    image: mysql:latest
+    image: mysql:8.0.33
     restart: unless-stopped
     ports:
       - 3307:3306
   psql:
     env_file: [.env_file]
-    image: postgres:latest
+    image: postgres:16beta1
     restart: unless-stopped
     ports:
       - 5432:5432
   redis:
     env_file: [.env_file]
-    image: redis:latest
+    image: redis:7.2-rc2
     restart: unless-stopped
     command: --requirepass pass
     ports:
       - 6379:6379
   mongo:
     env_file: [.env_file]
-    image: mongo:latest
+    image: mongo:7.0.0-rc3
     restart: unless-stopped
     ports:
       - 27017:27017

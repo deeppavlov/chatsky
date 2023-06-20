@@ -8,6 +8,7 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 import asyncio
+import functools
 import importlib
 import threading
 from functools import wraps
@@ -48,6 +49,9 @@ class DBContextStorage(ABC):
         self.set_context_schema(context_schema)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):
+        """
+        Set given context schema or the default if None.
+        """
         self.context_schema = context_schema if context_schema else ContextSchema()
 
     def __getitem__(self, key: Hashable) -> Context:
@@ -192,11 +196,19 @@ def threadsafe_method(func: Callable):
 
 
 def cast_key_to_string(key_name: str = "key"):
+    """
+    A decorator that casts function parameter (`key_name`) to string.
+    """
+
     def stringify_args(func: Callable):
         all_keys = signature(func).parameters.keys()
 
+        @functools.wraps(func)
         async def inner(*args, **kwargs):
-            return await func(*[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)], **kwargs)
+            return await func(
+                *[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)],
+                **{name: str(value) if name == key_name else value for name, value in kwargs.items()},
+            )
 
         return inner
 

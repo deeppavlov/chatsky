@@ -11,10 +11,12 @@ It stores data in a format similar to JSON, making it easy to work with the data
 and environments. Additionally, MongoDB is highly scalable and can handle large amounts of data
 and high levels of read and write traffic.
 """
+import asyncio
 import time
 from typing import Hashable, Dict, Union, Optional, List, Any
 
 try:
+    from pymongo import ASCENDING, HASHED
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
@@ -33,6 +35,14 @@ from .context_schema import ALL_ITEMS, FieldDescriptor, ValueSchemaField, ExtraF
 class MongoContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
+
+    Context value fields are stored in `COLLECTION_PREFIX_contexts` collection as dictionaries.
+    Extra field `_id` contains mongo-specific unique identifier.
+
+    Context dictionary fields are stored in `COLLECTION_PREFIX_FIELD` collection as dictionaries.
+    Extra field `_id` contains mongo-specific unique identifier.
+    Extra fields starting with `__mongo_misc_key` contain additional information for statistics and should be ignored.
+    Additional information includes primary identifier, creation and update date and time.
 
     :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
     :param collection: Name of the collection to store the data in.
@@ -57,6 +67,20 @@ class MongoContextStorage(DBContextStorage):
         ]
         self.collections = {field: db[f"{collection_prefix}_{field}"] for field in self.seq_fields}
         self.collections.update({self._CONTEXTS: db[f"{collection_prefix}_contexts"]})
+
+        primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
+        asyncio.run(
+            asyncio.gather(
+                self.collections[self._CONTEXTS].create_index([(ExtraFields.primary_id, ASCENDING)], background=True),
+                self.collections[self._CONTEXTS].create_index([(ExtraFields.storage_key, HASHED)], background=True),
+                self.collections[self._CONTEXTS].create_index([(ExtraFields.active_ctx, HASHED)], background=True),
+                *[
+                    value.create_index([(primary_id_key, ASCENDING)], background=True, unique=True)
+                    for key, value in self.collections.items()
+                    if key != self._CONTEXTS
+                ],
+            )
+        )
 
     @threadsafe_method
     @cast_key_to_string()
@@ -118,13 +142,17 @@ class MongoContextStorage(DBContextStorage):
                 values_slice += [field]
             else:
                 # AFAIK, we can only read ALL keys and then filter, there's no other way for Mongo :(
-                raw_keys = await self.collections[field].aggregate(
-                    [
-                        { "$match": { primary_id_key: primary_id } },
-                        { "$project": { "kvarray": { "$objectToArray": "$$ROOT" } }},
-                        { "$project": { "keys": "$kvarray.k" } }
-                    ]
-                ).to_list(1)
+                raw_keys = (
+                    await self.collections[field]
+                    .aggregate(
+                        [
+                            {"$match": {primary_id_key: primary_id}},
+                            {"$project": {"kvarray": {"$objectToArray": "$$ROOT"}}},
+                            {"$project": {"keys": "$kvarray.k"}},
+                        ]
+                    )
+                    .to_list(1)
+                )
                 raw_keys = raw_keys[0]["keys"]
 
                 if isinstance(value, int):
@@ -134,22 +162,22 @@ class MongoContextStorage(DBContextStorage):
                 elif value == ALL_ITEMS:
                     filtered_keys = raw_keys
 
-                projection = [str(key) for key in filtered_keys if self._MISC_KEY not in str(key) and key != self._ID_KEY]
+                projection = [
+                    str(key) for key in filtered_keys if self._MISC_KEY not in str(key) and key != self._ID_KEY
+                ]
                 if len(projection) > 0:
                     result_dict[field] = await self.collections[field].find_one(
                         {primary_id_key: primary_id}, projection
                     )
                     del result_dict[field][self._ID_KEY]
 
-        values = await self.collections[self._CONTEXTS].find_one(
-            {ExtraFields.primary_id: primary_id}, values_slice
-        )
+        values = await self.collections[self._CONTEXTS].find_one({ExtraFields.primary_id: primary_id}, values_slice)
         return {**values, **result_dict}
 
     async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
         def conditional_insert(key: Any, value: Dict) -> Dict:
-            return { "$cond": [ { "$not": [ f"${key}" ] }, value, f"${key}" ] }
-        
+            return {"$cond": [{"$not": [f"${key}"]}, value, f"${key}"]}
+
         primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
         created_at_key = f"{self._MISC_KEY}_{ExtraFields.created_at}"
         updated_at_key = f"{self._MISC_KEY}_{ExtraFields.updated_at}"
@@ -158,31 +186,36 @@ class MongoContextStorage(DBContextStorage):
             data, enforce = payload
             for key in data.keys():
                 if self._MISC_KEY in str(key):
-                    raise RuntimeError(f"Context field {key} keys can't start from {self._MISC_KEY} - that is a reserved key for MongoDB context storage!")
+                    raise RuntimeError(
+                        f"Context field {key} keys can't start from {self._MISC_KEY}"
+                        " - that is a reserved key for MongoDB context storage!"
+                    )
                 if key == self._ID_KEY:
-                    raise RuntimeError(f"Context field {key} can't contain key {self._ID_KEY} - that is a reserved key for MongoDB!")
+                    raise RuntimeError(
+                        f"Context field {key} can't contain key {self._ID_KEY} - that is a reserved key for MongoDB!"
+                    )
 
-            update_value = data if enforce else {str(key): conditional_insert(key, value) for key, value in data.items()}
+            update_value = (
+                data if enforce else {str(key): conditional_insert(key, value) for key, value in data.items()}
+            )
             update_value.update(
                 {
                     primary_id_key: conditional_insert(primary_id_key, primary_id),
                     created_at_key: conditional_insert(created_at_key, time.time_ns()),
-                    updated_at_key: time.time_ns()
+                    updated_at_key: time.time_ns(),
                 }
             )
 
             await self.collections[field].update_one(
-                {primary_id_key: primary_id},
-                [ { "$set": update_value } ],
-                upsert=True
+                {primary_id_key: primary_id}, [{"$set": update_value}], upsert=True
             )
 
         else:
-            update_value = {key: data if enforce else conditional_insert(key, data) for key, (data, enforce) in payload.items()}
+            update_value = {
+                key: data if enforce else conditional_insert(key, data) for key, (data, enforce) in payload.items()
+            }
             update_value.update({ExtraFields.updated_at: time.time_ns()})
 
             await self.collections[self._CONTEXTS].update_one(
-                {ExtraFields.primary_id: primary_id},
-                [ { "$set": update_value } ],
-                upsert=True
+                {ExtraFields.primary_id: primary_id}, [{"$set": update_value}], upsert=True
             )

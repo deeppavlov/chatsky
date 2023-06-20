@@ -28,7 +28,7 @@ from dff.utils.testing.cleanup_db import (
     delete_sql,
     delete_ydb,
 )
-from tests.context_storages.test_functions import TEST_FUNCTIONS
+from tests.context_storages.test_functions import run_all_functions
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 
@@ -73,30 +73,26 @@ def test_protocol_suggestion(protocol, expected):
 
 def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_shelve(db))
 
 
 def test_dict(testing_context, context_id):
     db = dict()
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
 
 
 @pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
 def test_json(testing_file, testing_context, context_id):
     db = context_storage_factory(f"json://{testing_file}")
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_json(db))
 
 
 @pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
 def test_pickle(testing_file, testing_context, context_id):
     db = context_storage_factory(f"pickle://{testing_file}")
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_pickle(db))
 
 
@@ -113,8 +109,7 @@ def test_mongo(testing_context, context_id):
             os.getenv("MONGO_INITDB_ROOT_USERNAME"),
         )
     )
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_mongo(db))
 
 
@@ -122,8 +117,7 @@ def test_mongo(testing_context, context_id):
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 def test_redis(testing_context, context_id):
     db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_redis(db))
 
 
@@ -137,8 +131,7 @@ def test_postgres(testing_context, context_id):
             os.getenv("POSTGRES_DB"),
         )
     )
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -146,8 +139,7 @@ def test_postgres(testing_context, context_id):
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
     db = context_storage_factory(f"sqlite+aiosqlite:{separator}{testing_file}")
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -161,8 +153,7 @@ def test_mysql(testing_context, context_id):
             os.getenv("MYSQL_DATABASE"),
         )
     )
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_sql(db))
 
 
@@ -176,6 +167,5 @@ def test_ydb(testing_context, context_id):
         ),
         table_name_prefix="test_dff_table",
     )
-    for test in TEST_FUNCTIONS:
-        test(db, testing_context, context_id)
+    run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_ydb(db))
