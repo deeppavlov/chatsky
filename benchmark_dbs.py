@@ -108,10 +108,7 @@ def save_results_to_file(
         json.dump(result, fd)
 
 
-def benchmark_all(
-    file: tp.Union[str, pathlib.Path],
-    name: str,
-    description: str,
+def get_cases(
     db_uris: tp.Dict[str, str],
     case_name_postfix: str = "",
     context_num: int = 100,
@@ -120,6 +117,7 @@ def benchmark_all(
     step_dialog_len: int = 10,
     message_lengths: tp.Tuple[int, ...] = (10, 10),
     misc_lengths: tp.Tuple[int, ...] = (10, 10),
+    description: str = "",
 ):
     benchmark_cases = []
     for db, uri in db_uris.items():
@@ -133,6 +131,7 @@ def benchmark_all(
                 step_dialog_len=step_dialog_len,
                 message_lengths=message_lengths,
                 misc_lengths=misc_lengths,
+                description=description,
             )
         )
         benchmark_cases.append(
@@ -145,9 +144,36 @@ def benchmark_all(
                 step_dialog_len=step_dialog_len,
                 message_lengths=message_lengths,
                 misc_lengths=misc_lengths,
+                description=description,
             )
         )
-    save_results_to_file(benchmark_cases, file, name, description)
+    return benchmark_cases
+
+
+def benchmark_all(
+    file: tp.Union[str, pathlib.Path],
+    name: str,
+    description: str,
+    db_uris: tp.Dict[str, str],
+    case_name_postfix: str = "",
+    context_num: int = 100,
+    from_dialog_len: int = 300,
+    to_dialog_len: int = 500,
+    step_dialog_len: int = 10,
+    message_lengths: tp.Tuple[int, ...] = (10, 10),
+    misc_lengths: tp.Tuple[int, ...] = (10, 10),
+):
+    save_results_to_file(get_cases(
+        db_uris,
+        case_name_postfix,
+        context_num,
+        from_dialog_len,
+        to_dialog_len,
+        step_dialog_len,
+        message_lengths,
+        misc_lengths,
+        description=description,
+    ), file, name, description)
 
 
 # create dir and files
@@ -175,7 +201,7 @@ pathlib.Path("benchmarks").mkdir(exist_ok=True)
 benchmark_all(
     "benchmarks/alexaprize.json",
     "Alexaprize-like dialogue benchmarks",
-    "This benchmark set tests against parameters that mimic dialogues from alexaprize.",
+    "Benchmark with dialogues similar to those from alexaprize.",
     db_uris=dbs,
     from_dialog_len=1,
     to_dialog_len=50,
@@ -186,7 +212,7 @@ benchmark_all(
 benchmark_all(
     "benchmarks/short_messages.json",
     "Short messages",
-    "This benchmark set tests with short messages, long dialog len.",
+    "Benchmark with short messages, long dialog len.",
     db_uris=dbs,
     from_dialog_len=100,
     to_dialog_len=1001,
@@ -198,19 +224,46 @@ benchmark_all(
 benchmark_all(
     "benchmarks/default.json",
     "Default",
-    "This benchmark set tests using default parameters.",
+    "Benchmark using default parameters.",
     db_uris=dbs,
 )
 
 benchmark_all(
     "benchmarks/alexaprize_longer.json",
     "Alexaprize-like dialogue benchmarks (longer)",
-    "This benchmark set tests against parameters that mimic dialogues from alexaprize,"
-    "but dialog len is increased.",
+    "Benchmark with dialogues similar to those from alexaprize, but dialog len is increased.",
     db_uris=dbs,
     from_dialog_len=100,
     to_dialog_len=1001,
     step_dialog_len=100,
     message_lengths=(3, 5, 6, 5, 3),
     misc_lengths=(2, 4, 3, 8, 100),
+)
+
+save_results_to_file(
+    [
+        *get_cases(
+            db_uris=dbs,
+            case_name_postfix="-long-dialog-len",
+            from_dialog_len=10000,
+            to_dialog_len=11001,
+            step_dialog_len=100,
+            description="Benchmark with very long dialog len."
+        ),
+        *get_cases(
+            db_uris=dbs,
+            case_name_postfix="-long-message-len",
+            message_lengths=(10000, 1),
+            description="Benchmark with messages containing many keys."
+        ),
+        *get_cases(
+            db_uris=dbs,
+            case_name_postfix="-long-misc-len",
+            misc_lengths=(10000, 1),
+            description="Benchmark with misc containing many keys."
+        ),
+    ],
+    file="benchmarks/extremes.json",
+    name="Extreme",
+    description="Set of benchmarks testing extreme cases."
 )
