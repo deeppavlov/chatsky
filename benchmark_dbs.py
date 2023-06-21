@@ -73,24 +73,29 @@ save_results_to_file(
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-dialog-len",
+            context_num=10,
             from_dialog_len=10000,
             to_dialog_len=11001,
-            step_dialog_len=100,
+            step_dialog_len=200,
             description="Benchmark with very long dialog len."
         ),
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-message-len",
+            context_num=10,
             from_dialog_len=1,
-            to_dialog_len=2,
+            to_dialog_len=3,
+            step_dialog_len=1,
             message_lengths=(10000, 1),
             description="Benchmark with messages containing many keys."
         ),
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-misc-len",
+            context_num=10,
             from_dialog_len=1,
-            to_dialog_len=2,
+            to_dialog_len=3,
+            step_dialog_len=1,
             misc_lengths=(10000, 1),
             description="Benchmark with misc containing many keys."
         ),
