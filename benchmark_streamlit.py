@@ -36,8 +36,49 @@ if "compare" not in st.session_state:
     st.session_state["compare"] = []
 
 
+def get_diff(last_metric, first_metric):
+    if st.session_state["percent_compare"]:
+        return f"{(last_metric / first_metric - 1):.3%}"
+    else:
+        return f"{last_metric - first_metric:.3}"
+
+
+def get_opposite_benchmark(benchmark_set, benchmark):
+    compare_params = (
+        ["db_factory", "uri"],
+        ("context_num", ),
+        ("from_dialog_len", ),
+        ("to_dialog_len", ),
+        ("step_dialog_len", ),
+        ("message_lengths", ),
+        ("misc_lengths", ),
+    )
+
+    def get_param(bench, param):
+        if len(param) == 1:
+            return bench.get(param[0])
+        else:
+            return get_param(bench.get(param[0]), param[1:])
+
+    opposite_benchmarks = [
+        opposite_benchmark
+        for field, opposite_benchmark in benchmark_set.items()
+        if field not in ("name", "description", "uuid") and opposite_benchmark["uuid"] != benchmark["uuid"] and all(
+            get_param(benchmark, param) == get_param(opposite_benchmark, param) for param in compare_params
+        )
+    ]
+
+    if len(opposite_benchmarks) == 1:
+        return opposite_benchmarks[0]
+    else:
+        return None
+
+
 def set_average_results(benchmark):
     if not benchmark["success"] or isinstance(benchmark["result"], str):
+        return
+
+    if benchmark.get("average_results") is not None:
         return
 
     def get_complex_stats(results):
@@ -67,6 +108,11 @@ def set_average_results(benchmark):
 
 
 st.sidebar.text(f"Benchmarks take {naturalsize(asizeof.asizeof(st.session_state['benchmarks']))} RAM")
+
+st.sidebar.divider()
+
+st.sidebar.checkbox("Compare dev and partial in view tab", value=True, key="partial_compare_checkbox")
+st.sidebar.checkbox("Percent comparison", value=True, key="percent_compare")
 
 add_tab, view_tab, compare_tab = st.tabs(["Benchmark sets", "View", "Compare"])
 
@@ -221,11 +267,44 @@ with view_tab:
     else:
         set_average_results(selected_benchmark)
 
+        diffs = None
+        if st.session_state["partial_compare_checkbox"]:
+            opposite_benchmark = get_opposite_benchmark(selected_set, selected_benchmark)
+
+            if opposite_benchmark:
+                if not opposite_benchmark["success"]:
+                    diffs = {
+                        "write": "-",
+                        "read": "-",
+                        "update": "-",
+                    }
+                else:
+                    set_average_results(opposite_benchmark)
+                    diffs = {
+                        key: get_diff(
+                            selected_benchmark["average_results"][f"pretty_{key}"],
+                            opposite_benchmark["average_results"][f"pretty_{key}"]
+                        ) for key in ("write", "read", "update")
+                    }
+
         write, read, update = st.columns(3)
 
-        write.metric("Write", selected_benchmark["average_results"]["pretty_write"])
-        read.metric("Read", selected_benchmark["average_results"]["pretty_read"])
-        update.metric("Update", selected_benchmark["average_results"]["pretty_update"])
+        columns = {
+            "write": write,
+            "read": read,
+            "update": update,
+        }
+
+        for column_name, column in columns.items():
+            column.metric(
+                column_name.title(),
+                selected_benchmark["average_results"][f"pretty_{column_name}"],
+                delta=diffs[column_name] if diffs else None,
+                delta_color="inverse"
+            )
+
+        if diffs:
+            st.text(f"* In comparison with {opposite_benchmark['name']} ({opposite_benchmark['uuid']})")
 
         compare_item = {
             "benchmark_set": benchmark_set,
@@ -291,9 +370,6 @@ with compare_tab:
         )
 
         if len(st.session_state["compare"]) == 2:
-            def get_diff(last_metric, first_metric):
-                return (last_metric / first_metric - 1) * 100
-
             write, read, update = st.columns(3)
 
             first_dict, second_dict = st.session_state["compare"]
@@ -307,7 +383,7 @@ with compare_tab:
             for column_name, column in columns.items():
                 column.metric(
                     label=column_name.title(),
-                    value=second_dict[column_name],
-                    delta=f"{get_diff(second_dict[column_name], first_dict[column_name])} %",
+                    value=f"{second_dict[column_name]:.3}",
+                    delta=get_diff(second_dict[column_name], first_dict[column_name]),
                     delta_color="inverse"
                 )
