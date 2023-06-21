@@ -62,8 +62,8 @@ def get_opposite_benchmark(benchmark_set, benchmark):
 
     opposite_benchmarks = [
         opposite_benchmark
-        for field, opposite_benchmark in benchmark_set.items()
-        if field not in ("name", "description", "uuid") and opposite_benchmark["uuid"] != benchmark["uuid"] and all(
+        for opposite_benchmark in benchmark_set["benchmarks"].values()
+        if opposite_benchmark["uuid"] != benchmark["uuid"] and all(
             get_param(benchmark, param) == get_param(opposite_benchmark, param) for param in compare_params
         )
     ]
@@ -125,13 +125,13 @@ add_tab, view_tab, compare_tab = st.tabs(["Benchmark sets", "View", "Compare"])
 with add_tab:
     benchmark_list = []
 
-    for file, benchmark in st.session_state["benchmarks"].items():
+    for file, benchmark_set in st.session_state["benchmarks"].items():
         benchmark_list.append(
             {
                 "file": file,
-                "name": benchmark["name"],
-                "description": benchmark["description"],
-                "uuid": benchmark["uuid"],
+                "name": benchmark_set["name"],
+                "description": benchmark_set["description"],
+                "uuid": benchmark_set["uuid"],
                 "delete": False,
             }
         )
@@ -220,8 +220,7 @@ with view_tab:
 
     benchmarks = {
         f"{benchmark['name']} ({benchmark['uuid']})": benchmark
-        for field, benchmark in selected_set.items()
-        if field not in ("name", "description", "uuid")
+        for benchmark in selected_set["benchmarks"].values()
     }
 
     benchmark = benchmark_choice.selectbox("Benchmark", benchmarks.keys())
