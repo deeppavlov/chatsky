@@ -103,6 +103,7 @@ def set_average_results(benchmark):
     result["pretty_write"] = float(f'{result["average_write_time"]:.3}')
     result["pretty_read"] = float(f'{result["average_read_time"]:.3}')
     result["pretty_update"] = float(f'{result["average_update_time"]:.3}')
+    result["pretty_read+update"] = float(f'{result["average_read_time"] + result["average_update_time"]:.3}')
 
     benchmark["average_results"] = result
 
@@ -276,6 +277,7 @@ with view_tab:
                         "write": "-",
                         "read": "-",
                         "update": "-",
+                        "read+update": "-",
                     }
                 else:
                     set_average_results(opposite_benchmark)
@@ -283,15 +285,16 @@ with view_tab:
                         key: get_diff(
                             selected_benchmark["average_results"][f"pretty_{key}"],
                             opposite_benchmark["average_results"][f"pretty_{key}"]
-                        ) for key in ("write", "read", "update")
+                        ) for key in ("write", "read", "update", "read+update")
                     }
 
-        write, read, update = st.columns(3)
+        write, read, update, read_update = st.columns(4)
 
         columns = {
             "write": write,
             "read": read,
             "update": update,
+            "read+update": read_update,
         }
 
         for column_name, column in columns.items():
@@ -308,9 +311,10 @@ with view_tab:
         compare_item = {
             "benchmark_set": benchmark_set,
             "benchmark": benchmark,
-            "write": selected_benchmark["average_results"]["average_write_time"],
-            "read": selected_benchmark["average_results"]["average_read_time"],
-            "update": selected_benchmark["average_results"]["average_update_time"],
+            "write": selected_benchmark["average_results"]["pretty_write"],
+            "read": selected_benchmark["average_results"]["pretty_read"],
+            "update": selected_benchmark["average_results"]["pretty_update"],
+            "read+update": selected_benchmark["average_results"]["pretty_read+update"],
         }
 
         def add_results_to_compare_tab():
@@ -362,14 +366,14 @@ with compare_tab:
     if not df.empty:
         st.dataframe(
             df.style.highlight_min(
-                axis=0, subset=["write", "read", "update"], props='background-color:green;'
+                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:green;'
             ).highlight_max(
-                axis=0, subset=["write", "read", "update"], props='background-color:red;'
+                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:red;'
             )
         )
 
         if len(st.session_state["compare"]) == 2:
-            write, read, update = st.columns(3)
+            write, read, update, read_update = st.columns(4)
 
             first_dict, second_dict = st.session_state["compare"]
 
@@ -377,12 +381,13 @@ with compare_tab:
                 "write": write,
                 "read": read,
                 "update": update,
+                "read+update": read_update
             }
 
             for column_name, column in columns.items():
                 column.metric(
                     label=column_name.title(),
-                    value=f"{second_dict[column_name]:.3}",
+                    value=f"{second_dict[column_name]}",
                     delta=get_diff(second_dict[column_name], first_dict[column_name]),
                     delta_color="inverse"
                 )
