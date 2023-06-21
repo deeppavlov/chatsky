@@ -192,7 +192,7 @@ dbs = {
     "Redis": "redis://:pass@localhost:6379/0",
     "MySQL": "mysql+asyncmy://root:pass@localhost:3307/test",
     "SQLite": f"sqlite+aiosqlite:{sqlite_separator}{sqlite_file.absolute()}",
-    "YDB": "grpc://localhost:2136/local",
+    # "YDB": "grpc://localhost:2136/local",
 }
 
 # benchmark
@@ -253,12 +253,16 @@ save_results_to_file(
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-message-len",
+            from_dialog_len=1,
+            to_dialog_len=2,
             message_lengths=(10000, 1),
             description="Benchmark with messages containing many keys."
         ),
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-misc-len",
+            from_dialog_len=1,
+            to_dialog_len=2,
             misc_lengths=(10000, 1),
             description="Benchmark with misc containing many keys."
         ),
