@@ -3,14 +3,12 @@ from platform import system
 import typing as tp
 from uuid import uuid4
 import json
+import importlib
 
 from pympler import asizeof
 from pydantic import BaseModel, Field
 
 from dff.script import Context
-from dff.context_storages import context_storage_factory as partial_factory
-from dff.context_storages_old import context_storage_factory as dev_factory
-
 
 import dff.utils.benchmark.context_storage as bm
 
@@ -18,14 +16,13 @@ import dff.utils.benchmark.context_storage as bm
 # define benchmark classes and tools
 
 class DBFactory(BaseModel):
-    base_factory: tp.Literal["dev", "partial"]
     uri: str
+    factory_module: str = "dff.context_storages"
+    factory: str = "context_storage_factory"
 
     def db(self):
-        if self.base_factory == "dev":
-            return dev_factory(self.uri)
-        else:
-            return partial_factory(self.uri)
+        module = importlib.import_module(self.factory_module)
+        return getattr(module, self.factory)(self.uri)
 
 
 class BenchmarkCase(BaseModel):
@@ -125,7 +122,7 @@ def get_cases(
         benchmark_cases.append(
             BenchmarkCase(
                 name=db + "-dev" + case_name_postfix,
-                db_factory=DBFactory(base_factory="dev", uri=uri),
+                db_factory=DBFactory(uri=uri, factory_module="dff.context_storages_old"),
                 context_num=context_num,
                 from_dialog_len=from_dialog_len,
                 to_dialog_len=to_dialog_len,
@@ -138,7 +135,7 @@ def get_cases(
         benchmark_cases.append(
             BenchmarkCase(
                 name=db + "-partial" + case_name_postfix,
-                db_factory=DBFactory(base_factory="partial", uri=uri),
+                db_factory=DBFactory(uri=uri),
                 context_num=context_num,
                 from_dialog_len=from_dialog_len,
                 to_dialog_len=to_dialog_len,
