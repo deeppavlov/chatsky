@@ -12,7 +12,8 @@ for file in benchmark_path.iterdir():
 
         new_benchmark_set = {k: v for k, v in benchmark_set.items() if k in non_benchmark_fields}
 
-        new_benchmark_set["benchmarks"] = {k: v for k, v in benchmark_set.items() if k not in non_benchmark_fields}
+        if "benchmarks" not in benchmark_set:
+            new_benchmark_set["benchmarks"] = {k: v for k, v in benchmark_set.items() if k not in non_benchmark_fields}
 
         for key, benchmark in new_benchmark_set["benchmarks"].items():
             if benchmark["db_factory"].get("base_factory") == "dev":
