@@ -4,7 +4,7 @@ Response
 This module is for functions that should be executed at the response stage.
 They produce the response that will be ultimately given to the user.
 """
-from typing import Union, Optional, List
+from typing import Optional, List
 
 from pydantic import validate_arguments
 

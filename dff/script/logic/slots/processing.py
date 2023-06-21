@@ -30,7 +30,7 @@ def extract(slots: Optional[List[str]]) -> Callable:
     """
 
     def extract_inner(ctx: Context, pipeline: Pipeline) -> Context:
-        result = extract_handler(ctx, pipeline, slots)
+        _ = extract_handler(ctx, pipeline, slots)
         return ctx
 
     return extract_inner

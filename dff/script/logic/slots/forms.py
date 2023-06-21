@@ -19,7 +19,7 @@ from dff.script.core.types import NodeLabel3Type, NodeLabel2Type
 from .root import root_slot
 from .handlers import get_values
 from .conditions import is_set_all
-from .utils import requires_storage, FORM_STORAGE_KEY
+from .types import FORM_STORAGE_KEY
 
 
 class FormState(Enum):
@@ -71,19 +71,14 @@ class FormPolicy(BaseModel):
         """
         Create a new form.
 
-        Parameters
-        ----------
-
-        name: str
-            The name of the form. It is used to save states of the form to the current context and keep track of them.
-        mapping: Dict[str, List[:class:`~NodeLabel2Type`]]
-            A dictionary that maps slot names to nodes. Nodes should be described with (flow_name, node_name) tuples.
+        :param name: The name of the form used for tracking the form state.
+        :param mapping: A dictionary that maps slot names to nodes. 
+            Nodes should be described with (flow_name, node_name) tuples.
             In case one node should set multiple slots, include them in a common group slot
             and use the name of the group slot as a key.
             Since `dict` type is ordered since python 3.6, slots will be iterated over in the order
             that you pass them in.
-        allowed_repeats: int = 0
-            This parameter regulates, how many times the policy can return to an already visited node.
+        :param allowed_repeats: This parameter regulates, how many times the policy can return to an already visited node.
             If the limit on allowed repeats has been reached, the policy will stop to affect transitions.
         """
         super().__init__(name=name, mapping=mapping, allowed_repeats=allowed_repeats, **data)
@@ -96,13 +91,8 @@ class FormPolicy(BaseModel):
         This method checks, if all slots from the form have been set and returns transitions to required nodes,
         if there remain any. Returns an always ignored transition otherwise.
 
-        Parameters
-        ----------
-
-        priority: Optional[float] = None
-            The weight that will be assigned to the transition.
+        :param priority: The weight that will be assigned to the transition.
             Defaults to 1 (default priority in dff.core.engine :py:class:`~Pipeline`).
-
         """
 
         def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
@@ -139,17 +129,11 @@ class FormPolicy(BaseModel):
         This method produces a dff.core.engine condition that yields `True` if the state of the form
         equals the passed :class:`~FormState` or `False` otherwise.
 
-        Parameters
-        -----------
-
-        state: :class:`~FormState`
-            Target state to check for.
-
+        :param state: Target state to check for.
         """
 
-        @requires_storage("Form storage has not been registered.", storage_key=FORM_STORAGE_KEY, return_val=False)
-        def is_active_inner(ctx: Context, pipeline: Pipeline) -> bool:
-            true_state = ctx.framework_states[FORM_STORAGE_KEY].get(self.name, FormState.INACTIVE)
+        def is_active_inner(ctx: Context, _: Pipeline) -> bool:
+            true_state = ctx.framework_states.get(FORM_STORAGE_KEY, {}).get(self.name, FormState.INACTIVE)
             return true_state == state
 
         return is_active_inner
@@ -169,8 +153,7 @@ class FormPolicy(BaseModel):
         """
 
         def update_inner(ctx: Context, pipeline: Pipeline) -> Context:
-            if not ctx.validation and FORM_STORAGE_KEY not in ctx.framework_states:
-                raise ValueError("Form storage has not been registered.")
+            ctx.framework_states[FORM_STORAGE_KEY] = ctx.framework_states.get(FORM_STORAGE_KEY, {})
 
             if state:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = state

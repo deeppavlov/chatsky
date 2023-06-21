@@ -1,24 +1,21 @@
 import pytest
 
-from dff.core.engine.core import Context
-
-from examples.slots.basic_example import actor
-
-from dff.script.logic.slots.utils import register_storage, FORM_STORAGE_KEY, SLOT_STORAGE_KEY
+from dff.script import Context, Message, TRANSITIONS, RESPONSE
+from dff.script import conditions as cnd
+from dff.pipeline import Pipeline
 from dff.script.logic.slots.root import root_slot
 
 
 @pytest.fixture
-def testing_actor():
-    actor.handlers.clear()
-    register_storage(actor, FORM_STORAGE_KEY)
-    register_storage(actor, SLOT_STORAGE_KEY)
-    yield actor
+def testing_pipeline():
+    script = {"old_flow": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.true()}}}}
+    pipeline = Pipeline.from_script(script=script, start_label=("old_flow", ""))
+    yield pipeline
 
 
 @pytest.fixture
-def testing_context(testing_actor):
-    ctx = testing_actor(Context())
+def testing_context():
+    ctx = Context()
     ctx.add_request("I am Groot")
     yield ctx
 

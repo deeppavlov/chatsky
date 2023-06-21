@@ -9,9 +9,8 @@ from typing import Dict, Optional, List
 from dff.script import Context
 from dff.pipeline import Pipeline
 
-from .types import BaseSlot, GroupSlot
+from .types import BaseSlot, GroupSlot, SLOT_STORAGE_KEY
 from .root import root_slot as root
-from .utils import SLOT_STORAGE_KEY
 
 logger = logging.getLogger(__name__)
 
@@ -27,15 +26,9 @@ def extract(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None)
         the list of values is guaranteed to be of the same length.
         Otherwise, the length equals the number of all non-child slots.
 
-    Parameters
-    ----------
-
-    ctx: :py:class:`~Context`
-        DF engine context
-    actor: :py:class:`~Actor`
-        DF engine actor
-    slots: Optional[List[str]]
-        List of slot names to extract.
+    :param ctx: Context.
+    :param pipeline: Pipeline.
+    :param slots: List of slot names to extract.
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
 
     """
@@ -54,10 +47,11 @@ def extract(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None)
         target_slot: BaseSlot = root.children.get(name)
         val = target_slot.extract_value(ctx, pipeline)
         if not target_slot.is_set()(ctx, pipeline):
+            current_val = ctx.framework_states.get(SLOT_STORAGE_KEY, {})
             if isinstance(target_slot, GroupSlot):
-                ctx.framework_states[SLOT_STORAGE_KEY].update(val)
+                ctx.framework_states[SLOT_STORAGE_KEY] = {**current_val, **val}
             else:
-                ctx.framework_states[SLOT_STORAGE_KEY][name] = val
+                ctx.framework_states[SLOT_STORAGE_KEY] = {**current_val, **{name: val}}
         results.append(val)
 
     return results
@@ -73,15 +67,9 @@ def get_values(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = No
         the list of values is guaranteed to be of the same length.
         Otherwise, the length equals the number of all non-child slots.
 
-    Parameters
-    ----------
-
-    ctx: :py:class:`~Context`
-        DF engine context
-    actor: :py:class:`~Actor`
-        DF engine actor
-    slots: Optional[List[str]]
-        List of slot names to extract.
+    :param ctx: Context
+    :param pipeline: Pipeline.
+    :param slots: List of slot names to extract.
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
 
     """
@@ -104,17 +92,10 @@ def get_filled_template(template: str, ctx: Context, pipeline: Pipeline, slots: 
     """
     Fill a template string with slot values.
 
-    Parameters
-    ----------
-
-    template: str
-        Template to fill. Names of slots to be used should be placed in curly braces: 'Username is {profile/username}'.
-    ctx: :py:class:`~Context`
-        DF engine context
-    actor: :py:class:`~Actor`
-        DF engine actor
-    slots: Optional[List[str]]
-        List of slot names to extract.
+    :param template: Template string.
+    :param ctx: Context.
+    :param pipeline: Pipeline.
+    :param slots: List of slot names to extract.
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
     filler_slots: Dict[str, BaseSlot]
@@ -138,15 +119,9 @@ def unset(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -
     """
     Expunge the target slot values from the context, so that they don't count as 'set' anymore.
 
-    Parameters
-    ----------
-
-    ctx: :py:class:`~Context`
-        DF engine context
-    actor: :py:class:`~Actor`
-        DF engine actor
-    slots: Optional[List[str]]
-        List of slot names to extract.
+    :param ctx: Context.
+    :param pipeline: Pipeline.
+    :param slots: List of slot names to extract.
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
     if slots:

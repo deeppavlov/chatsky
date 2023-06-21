@@ -6,23 +6,21 @@ Generally, these types should be imported from __init__.py for the sake of autom
 Import from here, if you want to registed slots manually.
 """
 import re
-from abc import ABC, abstractmethod
 import logging
+from abc import ABC, abstractmethod
 from copy import copy
 from collections.abc import Iterable
 from typing import Callable, Any, Dict, Union
 
+from pydantic import Field, BaseModel, validator
+
 from dff.script import Context
 from dff.pipeline import Pipeline
 
-from pydantic import Field, BaseModel, validator
-from pydantic.typing import ForwardRef
-
-from .utils import requires_storage, SLOT_STORAGE_KEY
+SLOT_STORAGE_KEY = "slot_storage"
+FORM_STORAGE_KEY = "form_storage"
 
 logger = logging.getLogger(__name__)
-
-BaseSlot = ForwardRef("BaseSlot")
 
 
 class BaseSlot(BaseModel, ABC):
@@ -48,11 +46,11 @@ class BaseSlot(BaseModel, ABC):
     def __deepcopy__(self, *args, **kwargs):
         return copy(self)
 
-    def __eq__(self, other: BaseSlot):
+    def __eq__(self, other: "BaseSlot"):
         return self.dict(exclude={"name"}) == other.dict(exclude={"name"})
 
     def has_children(self) -> bool:
-        return hasattr(self, "children") and len(self.children) > 0
+        return len(getattr(self, "children", [])) > 0
 
     @abstractmethod
     def unset_value(self) -> Callable[[Context, Pipeline], None]:
@@ -101,24 +99,22 @@ class GroupSlot(BaseSlot):
         return children
 
     @property
-    def value(self):
+    def value(self) -> dict:
         values = dict()
-        for name, child in self.children.items():
+        for _, child in self.children.items():
             if isinstance(child, GroupSlot):
                 values.update({key: value for key, value in child.value.items()})
-            else:
+            elif isinstance(child, ValueSlot):
                 values.update({child.name: child.value})
         return values
 
     def is_set(self):
-        @requires_storage(f"Can't check value for {self.name}: slot storage missing", return_val=False)
         def is_set_inner(ctx: Context, pipeline: Pipeline):
             return all([child.is_set()(ctx, pipeline) for child in self.children.values()])
 
         return is_set_inner
 
     def get_value(self) -> Callable[[Context, Pipeline], Dict[str, Union[str, None]]]:
-        @requires_storage(f"Can't get value for {self.name}: slot storage missing")
         def get_inner(ctx: Context, pipeline: Pipeline) -> Dict[str, Union[str, None]]:
             values = dict()
             for child in self.children.values():
@@ -131,7 +127,6 @@ class GroupSlot(BaseSlot):
         return get_inner
 
     def unset_value(self):
-        @requires_storage(f"Can't unset value for {self.name}: slot storage missing")
         def unset_inner(ctx: Context, pipeline: Pipeline):
             for child in self.children.values():
                 child.unset_value()(ctx, pipeline)
@@ -139,7 +134,6 @@ class GroupSlot(BaseSlot):
         return unset_inner
 
     def fill_template(self, template: str) -> Callable:
-        @requires_storage(f"Can't fill a template with {self.name}: slot storage missing.", return_val=template)
         def fill_inner(ctx: Context, pipeline: Pipeline) -> str:
             new_template = template
             for _, child in self.children.items():
@@ -151,7 +145,7 @@ class GroupSlot(BaseSlot):
 
     def extract_value(self, ctx: Context, pipeline: Pipeline):
         for child in self.children.values():
-            val = child.extract_value(ctx, pipeline)
+            _ = child.extract_value(ctx, pipeline)
         return self.value
 
 
@@ -165,22 +159,20 @@ class ValueSlot(BaseSlot):
     value: Any = None
 
     def is_set(self):
-        @requires_storage(f"Can't check value for {self.name}: slot storage missing", return_val=False)
         def is_set_inner(ctx: Context, pipeline: Pipeline):
-            return bool(ctx.framework_states[SLOT_STORAGE_KEY].get(self.name))
+            return bool(ctx.framework_states.get(SLOT_STORAGE_KEY, {}).get(self.name))
 
         return is_set_inner
 
     def get_value(self) -> Callable[[Context, Pipeline], Union[str, None]]:
-        @requires_storage(f"Can't get value for {self.name}: slot storage missing")
-        def get_inner(ctx: Context, pipeline: Pipeline) -> Union[str, None]:
-            return ctx.framework_states[SLOT_STORAGE_KEY].get(self.name)
+        def get_inner(ctx: Context, _: Pipeline) -> Union[str, None]:
+            return ctx.framework_states.get(SLOT_STORAGE_KEY, {}).get(self.name)
 
         return get_inner
 
     def unset_value(self):
-        @requires_storage(f"Can't unset value for {self.name}: slot storage missing")
-        def unset_inner(ctx: Context, pipeline: Pipeline):
+        def unset_inner(ctx: Context, _: Pipeline):
+            ctx.framework_states[SLOT_STORAGE_KEY] = ctx.framework_states.get(SLOT_STORAGE_KEY, {})
             ctx.framework_states[SLOT_STORAGE_KEY][self.name] = None
 
         return unset_inner
@@ -216,7 +208,6 @@ class ValueSlot(BaseSlot):
 
         """
 
-        @requires_storage(f"Can't fill a template with {self.name}: slot storage missing.")
         def fill_inner(ctx: Context, pipeline: Pipeline) -> Union[str, None]:
             if not self.name in template or self.get_value()(ctx, pipeline) is None:
                 return None
@@ -277,6 +268,3 @@ class FunctionSlot(ValueSlot):
     def extract_value(self, ctx: Context, pipeline: Pipeline):
         self.value = self.func(ctx.last_request)
         return self.value
-
-
-BaseSlot.update_forward_refs()

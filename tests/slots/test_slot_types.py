@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 from dff.script.logic.slots.types import RegexpSlot, GroupSlot, FunctionSlot
@@ -16,14 +14,14 @@ from dff.script.logic.slots.root import flatten_slot_tree, RootSlot, add_slots
         ("I won't tell you my name", "(?<=name is ).+$", None, False),
     ],
 )
-def test_regexp(input, regexp, expected, _set, testing_context, testing_actor):
+def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline):
     testing_context = testing_context.copy()
     testing_context.add_request(input)
     slot = RegexpSlot(name="test", regexp=regexp)
-    result = slot.extract_value(testing_context, testing_actor)
+    result = slot.extract_value(testing_context, testing_pipeline)
     assert result == expected
     testing_context.framework_states["slots"][slot.name] = result
-    assert slot.is_set()(testing_context, testing_actor) == _set
+    assert slot.is_set()(testing_context, testing_pipeline) == _set
 
 
 @pytest.mark.parametrize(
@@ -49,15 +47,15 @@ def test_regexp(input, regexp, expected, _set, testing_context, testing_actor):
         ),
     ],
 )
-def test_group(input, children, expected, is_set, testing_context, testing_actor):
+def test_group(input, children, expected, is_set, testing_context, testing_pipeline):
     testing_context = testing_context.copy()
     testing_context.add_request(input)
     slot = GroupSlot(name="test", children=children)
     assert len(slot.children) == len(children)
-    result = slot.extract_value(testing_context, testing_actor)
+    result = slot.extract_value(testing_context, testing_pipeline)
     assert result == expected
     testing_context.framework_states["slots"].update(result)
-    assert slot.is_set()(testing_context, testing_actor) == is_set
+    assert slot.is_set()(testing_context, testing_pipeline) == is_set
 
 
 @pytest.mark.parametrize(
@@ -73,14 +71,14 @@ def test_group(input, children, expected, is_set, testing_context, testing_actor
         ("I won't tell you my name", lambda msg: [i for i in msg.split(" ") if "@" in i] or None, None, False),
     ],
 )
-def test_function(input, func, expected, _set, testing_context, testing_actor):
-    testing_context = testing_context.copy()
-    testing_context.add_request(input)
+def test_function(input, func, expected, _set, testing_context, testing_pipeline):
+    new_testing_context = testing_context.copy()
+    new_testing_context.add_request(input)
     slot = FunctionSlot(name="test", func=func)
-    result = slot.extract_value(testing_context, testing_actor)
+    result = slot.extract_value(new_testing_context, testing_pipeline)
     assert result == expected
-    testing_context.framework_states["slots"][slot.name] = result
-    assert slot.is_set()(testing_context, testing_actor) == _set
+    new_testing_context.framework_states["slots"][slot.name] = result
+    assert slot.is_set()(new_testing_context, testing_pipeline) == _set
 
 
 def test_children():

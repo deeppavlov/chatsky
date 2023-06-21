@@ -1,5 +1,3 @@
-import sys
-
 import pytest
 
 from dff.script.logic.slots import GroupSlot, RegexpSlot, RootSlot
