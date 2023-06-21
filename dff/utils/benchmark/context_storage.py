@@ -15,13 +15,19 @@ Basic usage::
 
 """
 from uuid import uuid4
+import pathlib
 from time import perf_counter
 import typing as tp
 from copy import deepcopy
+import json
+import importlib
 
+from pydantic import BaseModel, Field
 from pympler import asizeof
 from tqdm.auto import tqdm
 from humanize import naturalsize
+
+from dff.script import Context
 
 try:
     import matplotlib
@@ -321,3 +327,162 @@ def report(
                     text_page(txt)
                     mpl_pdf.savefig()
                     plt.close()
+
+
+class DBFactory(BaseModel):
+    uri: str
+    factory_module: str = "dff.context_storages"
+    factory: str = "context_storage_factory"
+
+    def db(self):
+        module = importlib.import_module(self.factory_module)
+        return getattr(module, self.factory)(self.uri)
+
+
+class BenchmarkCase(BaseModel):
+    name: str
+    db_factory: DBFactory
+    uuid: str = Field(default_factory=lambda: str(uuid4()))
+    description: str = ""
+    context_num: int = 100
+    from_dialog_len: int = 300
+    to_dialog_len: int = 500
+    step_dialog_len: int = 10
+    message_lengths: tp.Tuple[int, ...] = (10, 10)
+    misc_lengths: tp.Tuple[int, ...] = (10, 10)
+
+    def get_context_updater(self):
+        def _context_updater(context: Context):
+            start_len = len(context.requests)
+            if start_len + self.step_dialog_len < self.to_dialog_len:
+                for i in range(start_len, start_len + self.step_dialog_len):
+                    context.add_label((f"flow_{i}", f"node_{i}"))
+                    context.add_request(get_message(self.message_lengths))
+                    context.add_response(get_message(self.message_lengths))
+                return context
+            else:
+                return None
+
+        return _context_updater
+
+    def sizes(self):
+        return {
+            "starting_context_size": asizeof.asizeof(
+                get_context(self.from_dialog_len, self.message_lengths, self.misc_lengths)
+            ),
+            "final_context_size": asizeof.asizeof(
+                get_context(self.to_dialog_len, self.message_lengths, self.misc_lengths)
+            ),
+            "misc_size": asizeof.asizeof(get_dict(self.misc_lengths)),
+            "message_size": asizeof.asizeof(get_message(self.message_lengths)),
+        }
+
+    def run(self):
+        try:
+            write_times, read_times, update_times = time_context_read_write(
+                self.db_factory.db(),
+                get_context(self.from_dialog_len, self.message_lengths, self.misc_lengths),
+                self.context_num,
+                context_updater=self.get_context_updater()
+            )
+            return {
+                "success": True,
+                "result": {
+                    "write_times": write_times,
+                    "read_times": read_times,
+                    "update_times": update_times,
+                }
+            }
+        except Exception as e:
+            return {
+                "success": False,
+                "result": getattr(e, "message", repr(e))
+            }
+
+
+def save_results_to_file(
+    benchmark_cases: tp.List[BenchmarkCase],
+    file: tp.Union[str, pathlib.Path],
+    name: str,
+    description: str,
+):
+    uuid = str(uuid4())
+    result: tp.Dict[str, tp.Any] = {
+        "name": name,
+        "description": description,
+        "uuid": uuid,
+        "benchmarks": {},
+    }
+    for case in benchmark_cases:
+        result["benchmarks"][case.uuid] = {**case.dict(), **case.sizes(), **case.run()}
+
+    with open(file, "w", encoding="utf-8") as fd:
+        json.dump(result, fd)
+
+
+def get_cases(
+    db_uris: tp.Dict[str, str],
+    case_name_postfix: str = "",
+    context_num: int = 100,
+    from_dialog_len: int = 300,
+    to_dialog_len: int = 500,
+    step_dialog_len: int = 10,
+    message_lengths: tp.Tuple[int, ...] = (10, 10),
+    misc_lengths: tp.Tuple[int, ...] = (10, 10),
+    description: str = "",
+):
+    benchmark_cases = []
+    for db, uri in db_uris.items():
+        benchmark_cases.append(
+            BenchmarkCase(
+                name=db + "-dev" + case_name_postfix,
+                db_factory=DBFactory(uri=uri, factory_module="dff.context_storages_old"),
+                context_num=context_num,
+                from_dialog_len=from_dialog_len,
+                to_dialog_len=to_dialog_len,
+                step_dialog_len=step_dialog_len,
+                message_lengths=message_lengths,
+                misc_lengths=misc_lengths,
+                description=description,
+            )
+        )
+        benchmark_cases.append(
+            BenchmarkCase(
+                name=db + "-partial" + case_name_postfix,
+                db_factory=DBFactory(uri=uri),
+                context_num=context_num,
+                from_dialog_len=from_dialog_len,
+                to_dialog_len=to_dialog_len,
+                step_dialog_len=step_dialog_len,
+                message_lengths=message_lengths,
+                misc_lengths=misc_lengths,
+                description=description,
+            )
+        )
+    return benchmark_cases
+
+
+def benchmark_all(
+    file: tp.Union[str, pathlib.Path],
+    name: str,
+    description: str,
+    db_uris: tp.Dict[str, str],
+    case_name_postfix: str = "",
+    context_num: int = 100,
+    from_dialog_len: int = 300,
+    to_dialog_len: int = 500,
+    step_dialog_len: int = 10,
+    message_lengths: tp.Tuple[int, ...] = (10, 10),
+    misc_lengths: tp.Tuple[int, ...] = (10, 10),
+):
+    save_results_to_file(get_cases(
+        db_uris,
+        case_name_postfix,
+        context_num,
+        from_dialog_len,
+        to_dialog_len,
+        step_dialog_len,
+        message_lengths,
+        misc_lengths,
+        description=description,
+    ), file, name, description)
