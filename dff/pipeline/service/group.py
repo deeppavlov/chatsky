@@ -244,7 +244,7 @@ class ServiceGroup(PipelineComponent):
         :type services: :py:data:`~.ServiceGroupBuilder`
         :return: List of services and service groups.
         """
-        handled_services = []
+        handled_services: List[Union[Service, "ServiceGroup"]] = []
         for service in services:
             if isinstance(service, List) or isinstance(service, ServiceGroup):
                 handled_services.append(ServiceGroup(service))
