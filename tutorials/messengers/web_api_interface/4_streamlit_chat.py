@@ -3,6 +3,9 @@
 #
 # This tutorial shows how to use an API endpoint created in the FastAPI tutorial
 # in a Streamlit chat.
+#
+# A demonstration of the chat:
+# ![](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/img/streamlit.gif)
 
 
 # %% [markdown]
