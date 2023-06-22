@@ -42,9 +42,8 @@ benchmark_all(
     "Short messages",
     "Benchmark with short messages, long dialog len.",
     db_uris=dbs,
-    from_dialog_len=100,
-    to_dialog_len=1001,
-    step_dialog_len=100,
+    from_dialog_len=500,
+    to_dialog_len=550,
     message_lengths=(2, 30),
     misc_lengths=(0, 0),
 )
@@ -61,9 +60,8 @@ benchmark_all(
     "Alexaprize-like dialogue benchmarks (longer)",
     "Benchmark with dialogues similar to those from alexaprize, but dialog len is increased.",
     db_uris=dbs,
-    from_dialog_len=100,
-    to_dialog_len=1001,
-    step_dialog_len=100,
+    from_dialog_len=500,
+    to_dialog_len=550,
     message_lengths=(3, 5, 6, 5, 3),
     misc_lengths=(2, 4, 3, 8, 100),
 )
@@ -75,8 +73,7 @@ save_results_to_file(
             case_name_postfix="-long-dialog-len",
             context_num=10,
             from_dialog_len=10000,
-            to_dialog_len=11001,
-            step_dialog_len=200,
+            to_dialog_len=10050,
             description="Benchmark with very long dialog len."
         ),
         *get_cases(
@@ -85,7 +82,6 @@ save_results_to_file(
             context_num=10,
             from_dialog_len=1,
             to_dialog_len=3,
-            step_dialog_len=1,
             message_lengths=(10000, 1),
             description="Benchmark with messages containing many keys."
         ),
@@ -95,7 +91,6 @@ save_results_to_file(
             context_num=10,
             from_dialog_len=1,
             to_dialog_len=3,
-            step_dialog_len=1,
             misc_lengths=(10000, 1),
             description="Benchmark with misc containing many keys."
         ),

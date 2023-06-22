@@ -346,8 +346,8 @@ class BenchmarkCase(BaseModel):
     description: str = ""
     context_num: int = 100
     from_dialog_len: int = 300
-    to_dialog_len: int = 500
-    step_dialog_len: int = 10
+    to_dialog_len: int = 311
+    step_dialog_len: int = 1
     message_lengths: tp.Tuple[int, ...] = (10, 10)
     misc_lengths: tp.Tuple[int, ...] = (10, 10)
 
@@ -425,8 +425,8 @@ def get_cases(
     case_name_postfix: str = "",
     context_num: int = 100,
     from_dialog_len: int = 300,
-    to_dialog_len: int = 500,
-    step_dialog_len: int = 10,
+    to_dialog_len: int = 311,
+    step_dialog_len: int = 1,
     message_lengths: tp.Tuple[int, ...] = (10, 10),
     misc_lengths: tp.Tuple[int, ...] = (10, 10),
     description: str = "",
@@ -470,8 +470,8 @@ def benchmark_all(
     case_name_postfix: str = "",
     context_num: int = 100,
     from_dialog_len: int = 300,
-    to_dialog_len: int = 500,
-    step_dialog_len: int = 10,
+    to_dialog_len: int = 311,
+    step_dialog_len: int = 1,
     message_lengths: tp.Tuple[int, ...] = (10, 10),
     misc_lengths: tp.Tuple[int, ...] = (10, 10),
 ):
