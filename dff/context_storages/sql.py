@@ -15,7 +15,7 @@ public-domain, SQL database engine.
 import asyncio
 import importlib
 import os
-from typing import Callable, Dict, List, Iterable, Optional
+from typing import Any, Callable, Dict, List, Iterable, Optional, Tuple
 
 from dff.script import Context
 
@@ -84,6 +84,17 @@ def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
     return getattr(importlib.import_module(f"sqlalchemy.dialects.{dialect}"), "insert")
 
 
+def _get_write_limit(dialect: str):
+    if dialect == "sqlite":
+        return (int(os.getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 3
+    elif dialect == "mysql":
+        return False
+    elif dialect == "postgresql":
+        return 32757 // 3
+    else:
+        return 9990 // 3
+
+
 def _import_datetime_from_dialect(dialect: str) -> "DateTime":
     if dialect == "mysql":
         return DATETIME(fsp=6)
@@ -106,8 +117,7 @@ def _get_current_time(dialect: str):
     else:
         return func.now()
 
-def _get_update_stmt(dialect: str, insert_stmt, columns: Iterable[str], unique: Optional[List[str]] = None):
-    unique = [ExtraFields.primary_id.value] if unique is None else unique
+def _get_update_stmt(dialect: str, insert_stmt, columns: Iterable[str], unique: List[str]):
     if dialect == "postgresql" or dialect == "sqlite":
         if len(columns) > 0:
             update_stmt = insert_stmt.on_conflict_do_update(
@@ -169,6 +179,7 @@ class SQLContextStorage(DBContextStorage):
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
+        self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
         _DATETIME_CLASS = _import_datetime_from_dialect(self.dialect)
@@ -228,7 +239,7 @@ class SQLContextStorage(DBContextStorage):
     @cast_key_to_string()
     async def set_item_async(self, key: str, value: Context):
         primary_id = await self._get_last_ctx(key)
-        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id)
+        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id, self._insert_limit)
 
     @threadsafe_method
     @cast_key_to_string()
@@ -311,22 +322,18 @@ class SQLContextStorage(DBContextStorage):
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
                 {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id}
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN])
+            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN], [ExtraFields.primary_id.value])
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: Dict, _: str, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], _: str, primary_id: str):
         async with self.engine.begin() as conn:
-            flattened_dict = list()
-            for field, payload in data.items():
-                for key, value in payload.items():
-                    flattened_dict += [(field, key, value)]
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [
                     {self._FIELD_COLUMN: field, self._KEY_COLUMN: key, self._VALUE_COLUMN: value, ExtraFields.primary_id.value: primary_id}
-                    for field, key, value in flattened_dict
+                    for field, key, value in data
                 ]
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._VALUE_COLUMN])
+            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._VALUE_COLUMN], [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN])
             await conn.execute(update_stmt)
 
     # TODO: optimize for PostgreSQL: single query.

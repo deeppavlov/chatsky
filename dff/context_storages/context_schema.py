@@ -2,7 +2,7 @@ from asyncio import gather, get_event_loop, create_task
 from uuid import uuid4
 from enum import Enum
 from pydantic import BaseModel, Field, PrivateAttr, validator
-from typing import Any, Coroutine, Dict, List, Optional, Callable, Union, Awaitable
+from typing import Any, Coroutine, Dict, List, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
 from dff.script import Context
@@ -23,7 +23,7 @@ _ReadLogContextFunction = Callable[[str, str], Awaitable[Dict]]
 _WritePackedContextFunction = Callable[[Dict, str, str], Awaitable]
 # TODO!
 
-_WriteLogContextFunction = Callable[[Dict, str, str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], str, str], Coroutine]
 # TODO!
 
 
@@ -149,6 +149,7 @@ class ContextSchema(BaseModel):
         log_writer: _WriteLogContextFunction,
         storage_key: str,
         primary_id: Optional[str],
+        chunk_size: Union[Literal[False], int] = False,
     ) -> str:
         """
         Write context to storage.
@@ -181,6 +182,17 @@ class ContextSchema(BaseModel):
                 last_keys = last_keys[-field_props.subscript:]
             ctx_dict[field_props.name] = {k:v for k, v in nest_dict.items() if k in last_keys}
 
-        self._pending_futures += [create_task(log_writer(logs_dict, storage_key, primary_id))]
         await pac_writer(ctx_dict, storage_key, primary_id)
+
+        flattened_dict = list()
+        for field, payload in logs_dict.items():
+            for key, value in payload.items():
+                flattened_dict += [(field, key, value)]
+        if not bool(chunk_size):
+            self._pending_futures += [create_task(log_writer(flattened_dict, storage_key, primary_id))]
+        else:
+            for ch in range(0, len(flattened_dict), chunk_size):
+                next_ch = ch + chunk_size
+                chunk = flattened_dict[ch:next_ch]
+                self._pending_futures += [create_task(log_writer(chunk, storage_key, primary_id))]
         return primary_id
