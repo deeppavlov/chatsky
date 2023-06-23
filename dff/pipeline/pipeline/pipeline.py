@@ -14,6 +14,7 @@ class, which is defined in the Component module. Together, these classes provide
 to structure and manage the messages processing flow.
 """
 import asyncio
+import contextlib
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
@@ -361,7 +362,10 @@ class Pipeline:
         :param ctx_id: Current dialog id.
         :return: Dialog `Context`.
         """
-        return asyncio.run(self._run_pipeline(request, ctx_id))
+        try:
+            return asyncio.run(self._run_pipeline(request, ctx_id))
+        except KeyboardInterrupt:
+            return Context()
 
     @property
     def script(self) -> Script:
