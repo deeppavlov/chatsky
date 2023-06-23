@@ -26,14 +26,7 @@ except ImportError:
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from .context_schema import (
-    ALL_ITEMS,
-    ContextSchema,
-    ExtraFields,
-    FieldDescriptor,
-    FrozenValueSchemaField,
-    SchemaFieldWritePolicy,
-)
+from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields
 from .protocol import get_protocol_install_suggestion
 
 
@@ -138,7 +131,7 @@ class RedisContextStorage(DBContextStorage):
                     context[key][field] = pickle.loads(raw_value) if raw_value is not None else None
         return context
 
-    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
         if nested:
             data, enforce = payload
             for key, value in data.items():

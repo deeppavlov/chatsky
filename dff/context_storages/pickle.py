@@ -14,7 +14,7 @@ import asyncio
 import pickle
 from typing import Hashable, Union, List, Dict, Optional
 
-from .context_schema import ALL_ITEMS, ExtraFields, FieldDescriptor
+from .context_schema import ALL_ITEMS, ExtraFields
 
 try:
     import aiofiles
@@ -122,7 +122,7 @@ class PickleContextStorage(DBContextStorage):
                     context[key] = source
         return context
 
-    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
         destination = self.storage.setdefault(primary_id, dict())
         if nested:
             data, enforce = payload

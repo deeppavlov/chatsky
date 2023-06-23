@@ -17,7 +17,7 @@ from shelve import DbfilenameShelf
 from typing import Hashable, Union, List, Dict, Optional
 
 from dff.script import Context
-from .context_schema import ALL_ITEMS, ExtraFields, FieldDescriptor
+from .context_schema import ALL_ITEMS, ExtraFields
 
 from .database import DBContextStorage, cast_key_to_string
 
@@ -90,7 +90,7 @@ class ShelveContextStorage(DBContextStorage):
                     context[key] = source
         return context
 
-    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
         destination = self.shelve_db.setdefault(primary_id, dict())
         if nested:
             data, enforce = payload

@@ -29,7 +29,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ALL_ITEMS, FieldDescriptor, ValueSchemaField, ExtraFields
+from .context_schema import ALL_ITEMS, ExtraFields
 
 
 class MongoContextStorage(DBContextStorage):
@@ -174,7 +174,7 @@ class MongoContextStorage(DBContextStorage):
         values = await self.collections[self._CONTEXTS].find_one({ExtraFields.primary_id: primary_id}, values_slice)
         return {**values, **result_dict}
 
-    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
         def conditional_insert(key: Any, value: Dict) -> Dict:
             return {"$cond": [{"$not": [f"${key}"]}, value, f"${key}"]}
 

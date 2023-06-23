@@ -10,6 +10,7 @@ with Yandex Cloud services using python. This allows the DFF to easily integrate
 take advantage of the scalability and high-availability features provided by the service.
 """
 import asyncio
+import datetime
 import os
 import pickle
 from typing import Hashable, Union, List, Dict, Optional
@@ -19,17 +20,7 @@ from dff.script import Context
 
 from .database import DBContextStorage, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import (
-    ContextSchema,
-    ExtraFields,
-    FieldDescriptor,
-    FrozenValueSchemaField,
-    SchemaFieldWritePolicy,
-    SchemaFieldReadPolicy,
-    DictSchemaField,
-    ListSchemaField,
-    ValueSchemaField,
-)
+from .context_schema import ContextSchema, ExtraFields
 
 try:
     from ydb import (
@@ -42,7 +33,6 @@ try:
         TableIndex,
     )
     from ydb.aio import Driver, SessionPool
-    from ydb.issues import PreconditionFailed
 
     ydb_available = True
 except ImportError:
@@ -277,75 +267,58 @@ WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
         async def callee(session):
             if nested and len(payload[0]) > 0:
                 data, enforce = payload
 
-                if enforce:
-                    key_type = "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
-                    declares_keys = "\n".join(f"DECLARE $key_{i} AS {key_type};" for i in range(len(data)))
-                    declares_values = "\n".join(f"DECLARE $value_{i} AS String;" for i in range(len(data)))
-                    two_current_times = "CurrentUtcDatetime(), CurrentUtcDatetime()"
-                    values_all = ", ".join(
-                        f"(${ExtraFields.primary_id.value}, {two_current_times}, $key_{i}, $value_{i})"
-                        for i in range(len(data))
-                    )
+                request = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+                    SELECT {ExtraFields.created_at.value}, {self._KEY_FIELD}, {self._VALUE_FIELD} FROM {self.table_prefix}_{field} WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
+                """
+                existing_keys = await session.transaction(SerializableReadWrite()).execute(
+                    await session.prepare(request),
+                    {f"${ExtraFields.primary_id.value}": primary_id},
+                    commit_tx=True,
+                )
+                # raise Exception(existing_keys[0].rows)
 
-                    default_times = f"{ExtraFields.created_at.value}, {ExtraFields.updated_at.value}"
-                    special_values = f"{self._KEY_FIELD}, {self._VALUE_FIELD}"
-                    query = f"""
-PRAGMA TablePathPrefix("{self.database}");
-DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-{declares_keys}
-{declares_values}
-UPSERT INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {default_times}, {special_values})
-VALUES {values_all};
-"""
+                key_type = "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DECLARE ${ExtraFields.primary_id.value} AS Utf8;
+                    DECLARE $key_{field} AS {key_type};
+                    DECLARE $value_{field} AS String;
+                    DECLARE ${ExtraFields.created_at.value} AS Timestamp;
+                    UPSERT INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value}, {self._KEY_FIELD}, {self._VALUE_FIELD})
+                    VALUES (${ExtraFields.primary_id.value}, ${ExtraFields.created_at.value}, CurrentUtcDatetime(), $key_{field}, $value_{field});
+                    """
 
-                    values_keys = {f"$key_{i}": key for i, key in enumerate(data.keys())}
-                    values_values = {f"$value_{i}": pickle.dumps(value) for i, value in enumerate(data.values())}
-                    await session.transaction(SerializableReadWrite()).execute(
-                        await session.prepare(query),
-                        {f"${ExtraFields.primary_id.value}": primary_id, **values_keys, **values_values},
-                        commit_tx=True,
-                    )
+                new_fields = {
+                    f"${ExtraFields.primary_id.value}": primary_id,
+                    f"${ExtraFields.created_at.value}": datetime.datetime.now(),
+                    **{f"$key_{field}": key for key in data.keys()},
+                    **{f"$value_{field}": value for value in data.values()},
+                }
 
-                else:
-                    for (
-                        key,
-                        value,
-                    ) in (
-                        data.items()
-                    ):  # We've got no other choice: othervise if some fields fail to be `INSERT`ed other will fail too
-                        key_type = (
-                            "Utf8" if isinstance(getattr(self.context_schema, field), DictSchemaField) else "Uint32"
-                        )
-                        keyword = "UPSERT" if enforce else "INSERT"
-                        default_times = f"{ExtraFields.created_at.value}, {ExtraFields.updated_at.value}"
-                        special_values = f"{self._KEY_FIELD}, {self._VALUE_FIELD}"
-                        query = f"""
-PRAGMA TablePathPrefix("{self.database}");
-DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-DECLARE $key_{field} AS {key_type};
-DECLARE $value_{field} AS String;
-{keyword} INTO {self.table_prefix}_{field} ({ExtraFields.primary_id.value}, {default_times}, {special_values})
-VALUES (${ExtraFields.primary_id.value}, CurrentUtcDatetime(), CurrentUtcDatetime(), $key_{field}, $value_{field});
-"""
+                old_fields = {
+                    f"${ExtraFields.primary_id.value}": primary_id,
+                    f"${ExtraFields.created_at.value}": datetime.datetime.now(),
+                    **{f"$key_{field}": key for key in existing_keys.keys()},
+                    **{f"$value_{field}": value for value in existing_keys.values()[1]},
+                }
 
-                        try:
-                            await session.transaction(SerializableReadWrite()).execute(
-                                await session.prepare(query),
-                                {
-                                    f"${ExtraFields.primary_id.value}": primary_id,
-                                    f"$key_{field}": key,
-                                    f"$value_{field}": pickle.dumps(value),
-                                },
-                                commit_tx=True,
-                            )
-                        except PreconditionFailed:
-                            if not enforce:
-                                pass  # That would mean that `INSERT` query failed successfully 👍
+                await session.transaction(SerializableReadWrite()).execute(
+                    await session.prepare(query),
+                    {
+                        f"${ExtraFields.primary_id.value}": primary_id,
+                        f"${ExtraFields.created_at.value}": datetime.datetime.now(),
+                        f"$key_{field}": key,
+                        f"$value_{field}": pickle.dumps(value),
+                    },
+                    commit_tx=True,
+                )
 
             elif not nested and len(payload) > 0:
                 values = {key: data for key, (data, _) in payload.items()}

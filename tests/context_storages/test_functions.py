@@ -1,4 +1,4 @@
-from dff.context_storages import DBContextStorage, SchemaFieldWritePolicy
+from dff.context_storages import DBContextStorage
 from dff.pipeline import Pipeline
 from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
@@ -58,34 +58,7 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
     assert write_context == read_context.dict()
 
 
-def different_policies_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Setup append policy for misc
-    db.context_schema.misc.on_write = SchemaFieldWritePolicy.APPEND
-
-    # Setup some data in context misc
-    testing_context.misc["OLD_KEY"] = "some old data"
-    db[context_id] = testing_context
-
-    # Alter context
-    testing_context.misc["OLD_KEY"] = "some new data"
-    testing_context.misc["NEW_KEY"] = "some new data"
-    db[context_id] = testing_context
-
-    # Check keys updated correctly
-    new_context = db[context_id]
-    assert new_context.misc["OLD_KEY"] == "some old data"
-    assert new_context.misc["NEW_KEY"] == "some new data"
-
-    # Setup append policy for misc
-    db.context_schema.misc.on_write = SchemaFieldWritePolicy.HASH_UPDATE
-
-    # Alter context
-    testing_context.misc["NEW_KEY"] = "brand new data"
-    db[context_id] = testing_context
-
-    # Check keys updated correctly
-    new_context = db[context_id]
-    assert new_context.misc["NEW_KEY"] == "brand new data"
+# TODO: add test for pending futures finishing.
 
 
 def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: str):
@@ -103,9 +76,8 @@ def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: 
 
 basic_test.no_dict = False
 partial_storage_test.no_dict = False
-different_policies_test.no_dict = True
 large_misc_test.no_dict = False
-_TEST_FUNCTIONS = [basic_test, partial_storage_test, different_policies_test, large_misc_test]
+_TEST_FUNCTIONS = [basic_test, partial_storage_test, large_misc_test]
 
 
 def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
