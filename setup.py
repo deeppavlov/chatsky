@@ -110,7 +110,7 @@ test_requirements = merge_req_lists(
         "flask[async]==2.2.3; python_version=='3.7'",
         "psutil==5.9.5",
         "telethon==1.28.5",
-        "fastapi==0.97.0",
+        "fastapi==0.98.0",
         "uvicorn==0.22.0",
         "websockets==11.0.2",
         "locust==2.15",
