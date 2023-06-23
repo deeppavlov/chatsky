@@ -10,7 +10,7 @@ from typing import Hashable, Union, List, Dict, Optional
 
 from pydantic import BaseModel, Extra
 
-from .context_schema import ALL_ITEMS, ExtraFields, FieldDescriptor
+from .context_schema import ALL_ITEMS, ExtraFields
 
 try:
     import aiofiles
@@ -121,7 +121,7 @@ class JSONContextStorage(DBContextStorage):
                     context[key] = source
         return context
 
-    async def _write_ctx_val(self, field: Optional[str], payload: FieldDescriptor, nested: bool, primary_id: str):
+    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
         destination = self.storage.__dict__.setdefault(primary_id, dict())
         if nested:
             data, enforce = payload

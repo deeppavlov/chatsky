@@ -23,7 +23,6 @@ from dff.context_storages import (
     mysql_available,
     ydb_available,
 )
-from dff.context_storages.context_schema import ValueSchemaField
 
 
 async def delete_json(storage: JSONContextStorage):

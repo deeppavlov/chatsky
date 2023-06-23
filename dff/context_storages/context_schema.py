@@ -1,9 +1,8 @@
-import time
-from hashlib import sha256
+from asyncio import gather, get_event_loop, create_task
+from uuid import uuid4
 from enum import Enum
-import uuid
-from pydantic import BaseModel, Field
-from typing import Dict, List, Optional, Tuple, Callable, Any, Union, Awaitable, Hashable
+from pydantic import BaseModel, Field, PrivateAttr, validator
+from typing import Any, Coroutine, Dict, List, Optional, Callable, Union, Awaitable
 from typing_extensions import Literal
 
 from dff.script import Context
@@ -15,81 +14,22 @@ it means that all keys of the dictionary or list will be read or written.
 Can be used as a value of `subscript` parameter for `DictSchemaField`s and `ListSchemaField`s.
 """
 
+_ReadPackedContextFunction = Callable[[str, str], Awaitable[Dict]]
+# TODO!
 
-class SchemaFieldReadPolicy(str, Enum):
+_ReadLogContextFunction = Callable[[str, str], Awaitable[Dict]]
+# TODO!
+
+_WritePackedContextFunction = Callable[[Dict, str, str], Awaitable]
+# TODO!
+
+_WriteLogContextFunction = Callable[[Dict, str, str], Coroutine]
+# TODO!
+
+
+class SchemaField(BaseModel):
     """
-    Read policy of context field.
-    The following policies are supported:
-
-    - READ: the context field is read from the context storage (default),
-    - IGNORE: the context field is completely ignored in runtime
-        (it can be still used with other tools for accessing database, like statistics).
-    """
-
-    READ = "read"
-    IGNORE = "ignore"
-
-
-class SchemaFieldWritePolicy(str, Enum):
-    """
-    Write policy of context field.
-    The following policies are supported:
-
-    - IGNORE: the context field is completely ignored in runtime,
-    - UPDATE: the context field is unconditionally updated every time (default for `ValueSchemaField`s),
-    - HASH_UPDATE: the context field is updated only if it differs from the value in storage
-        (sha256 will be used to calculate difference, for dictionary the difference is calculated key-wise),
-    - APPEND: the context field will be updated only if it doesn't exist in storage
-        (for dictionary only the missing keys will be added).
-    """
-
-    IGNORE = "ignore"
-    UPDATE = "update"
-    HASH_UPDATE = "hash_update"
-    APPEND = "append"
-
-
-FieldDescriptor = Union[Dict[str, Tuple[Any, bool]], Tuple[Any, bool]]
-"""
-Field descriptor type.
-It contains data and boolean (if writing of data should be enforced).
-Field can be dictionary or single value.
-In case if the field is a dictionary:
-field descriptior is the dictionary; to each value the enforced boolean is added (each value is a tuple).
-In case if the field is a value:
-field descriptior is the tuple of the value and enforced boolean.
-"""
-
-_ReadContextFunction = Callable[[Dict[str, Union[bool, int, List[Hashable]]], str], Awaitable[Dict]]
-"""
-Context reader function type.
-The function accepts subscript, that is a dict, where keys context field names to read.
-The dict values are:
-- booleans: that means that the whole field should be read (`True`) or ignored (`False`),
-- ints: that means that if the field is a dict, only **N** first keys should be read
-    if **N** is positive, else last **N** keys. Keys should be sorted as numbers if they are numeric
-    or lexicographically if at least some of them are strings,
-- list: that means that only keys that belong to the list should be read, others should be ignored.
-The function is asynchronous, it returns dictionary representation of Context.
-"""
-
-_WriteContextFunction = Callable[[Optional[str], FieldDescriptor, bool, str], Awaitable]
-"""
-Context writer function type.
-The function will be called multiple times: once for each dictionary field of Context.
-It will be called once more for the whole context itself for writing its' value fields.
-The function accepts:
-- field name: string, the name of field to write, None if writing the whole context,
-- field descriptor: dictionary, representing data to be written and if writing of the data should be enforced,
-- nested flag: boolean, `True` if writing dictionary field of Context, `False` if writing the Context itself,
-- primary id: string primary identificator of the context.
-The function is asynchronous, it returns None.
-"""
-
-
-class BaseSchemaField(BaseModel):
-    """
-    Base class for context field schema.
+    Schema for context fields that are dictionaries with numeric keys fields.
     Used for controlling read / write policy of the particular field.
     """
 
@@ -98,31 +38,8 @@ class BaseSchemaField(BaseModel):
     `name` is the name of backing Context field.
     It can not (and should not) be changed in runtime.
     """
-    on_read: SchemaFieldReadPolicy = SchemaFieldReadPolicy.READ
-    """
-    `on_read` is the default field read policy.
-    Default: :py:const:`~.SchemaFieldReadPolicy.READ`.
-    """
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.IGNORE
-    """
-    `on_write` is the default field write policy.
-    Default: :py:const:`~.SchemaFieldReadPolicy.IGNORE`.
-    """
 
-    class Config:
-        validate_assignment = True
-
-
-class ListSchemaField(BaseSchemaField):
-    """
-    Schema for context fields that are dictionaries with numeric keys fields.
-    """
-
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.APPEND
-    """
-    Default: :py:const:`~.SchemaFieldReadPolicy.APPEND`.
-    """
-    subscript: Union[Literal["__all__"], int] = -3
+    subscript: Union[Literal["__all__"], int] = 3
     """
     `subscript` is used for limiting keys for reading and writing.
     It can be a string `__all__` meaning all existing keys or number,
@@ -131,46 +48,17 @@ class ListSchemaField(BaseSchemaField):
     Default: -3.
     """
 
-
-class DictSchemaField(BaseSchemaField):
-    """
-    Schema for context fields that are dictionaries with string keys fields.
-    """
-
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.HASH_UPDATE
-    """
-    Default: :py:const:`~.SchemaFieldReadPolicy.HASH_UPDATE`.
-    """
-    subscript: Union[Literal["__all__"], List[Hashable]] = ALL_ITEMS
-    """
-    `subscript` is used for limiting keys for reading and writing.
-    It can be a string `__all__` meaning all existing keys or number,
-    positive for first **N** keys and negative for last **N** keys.
-    Keys should be sorted as lexicographically.
-    Default: `__all__`.
-    """
-
-
-class ValueSchemaField(BaseSchemaField):
-    """
-    Schema for context fields that aren't dictionaries.
-    """
-
-    on_write: SchemaFieldWritePolicy = SchemaFieldWritePolicy.UPDATE
-    """
-    Default: :py:const:`~.SchemaFieldReadPolicy.UPDATE`.
-    """
-
-
-class FrozenValueSchemaField(ValueSchemaField):
-    """
-    Immutable schema for context fields that aren't dictionaries.
-    Schema should be used for keys that are used to keep database integrity
-    and whose policies shouldn't be changed by user.
-    """
+    _subscript_callback: Callable = PrivateAttr(default=lambda: None)
+    # TODO!
 
     class Config:
-        allow_mutation = False
+        validate_assignment = True
+
+    @validator("subscript")
+    def _run_callback_before_changing_subscript(cls, value: Any, values: Dict):
+        if "_subscript_callback" in values:
+            values["_subscript_callback"]()
+        return value
 
 
 class ExtraFields(str, Enum):
@@ -192,100 +80,75 @@ class ContextSchema(BaseModel):
     Allows fields ignoring, filtering, sorting and partial reading and writing of dictionary fields.
     """
 
-    active_ctx: ValueSchemaField = Field(FrozenValueSchemaField(name=ExtraFields.active_ctx), allow_mutation=False)
-    """
-    Special field for marking currently active context.
-    Not active contexts are still stored in storage for statistical purposes.
-    Properties of this field can't be changed.
-    """
-    storage_key: ValueSchemaField = Field(FrozenValueSchemaField(name=ExtraFields.storage_key), allow_mutation=False)
-    """
-    Special field for key under that the context was stored (Context property `storage_key`).
-    Properties of this field can't be changed.
-    """
-    requests: ListSchemaField = ListSchemaField(name="requests")
+    requests: SchemaField = Field(SchemaField(name="requests"), allow_mutation=False)
     """
     Field for storing Context field `requests`.
     """
-    responses: ListSchemaField = ListSchemaField(name="responses")
+
+    responses: SchemaField = Field(SchemaField(name="responses"), allow_mutation=False)
     """
     Field for storing Context field `responses`.
     """
-    labels: ListSchemaField = ListSchemaField(name="labels")
+
+    labels: SchemaField = Field(SchemaField(name="labels"), allow_mutation=False)
     """
     Field for storing Context field `labels`.
     """
-    misc: DictSchemaField = DictSchemaField(name="misc")
-    """
-    Field for storing Context field `misc`.
-    """
-    framework_states: DictSchemaField = DictSchemaField(name="framework_states")
-    """
-    Field for storing Context field `framework_states`.
-    """
-    created_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.created_at, on_write=SchemaFieldWritePolicy.APPEND)
-    """
-    Special field for keeping track of time the context was first time stored.
-    """
-    updated_at: ValueSchemaField = ValueSchemaField(name=ExtraFields.updated_at)
-    """
-    Special field for keeping track of time the context was last time updated.
-    """
+
+    _pending_futures: List[Awaitable] = PrivateAttr(default=list())
+    # TODO!
 
     class Config:
         validate_assignment = True
 
-    def _calculate_hashes(self, value: Union[Dict[str, Any], Any]) -> Union[Dict[str, Any], Hashable]:
-        """
-        Calculate hashes for a context field: single hashes for value fields
-        and dictionary of hashes for dictionary fields.
-        """
-        if isinstance(value, dict):
-            return {k: sha256(str(v).encode("utf-8")) for k, v in value.items()}
-        else:
-            return sha256(str(value).encode("utf-8"))
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
-    async def read_context(
-        self, ctx_reader: _ReadContextFunction, storage_key: str, primary_id: str
-    ) -> Tuple[Context, Dict]:
+        field_props: SchemaField
+        for field_props in dict(self).values():
+            field_props.__setattr__("_subscript_callback", self.close)
+
+    def __del__(self):
+        self.close()
+
+    def close(self):
+        async def _await_all_pending_transactions():
+            await gather(*self._pending_futures)
+
+        try:
+            loop = get_event_loop()
+            if loop.is_running():
+                loop.create_task(_await_all_pending_transactions())
+            else:
+                loop.run_until_complete(_await_all_pending_transactions())
+        except Exception:
+            pass
+
+    async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str, primary_id: str) -> Context:
         """
         Read context from storage.
         Calculate what fields (and what keys of what fields) to read, call reader function and cast result to context.
-        `ctx_reader` - the function used for context reading from a storage (see :py:const:`~._ReadContextFunction`).
+        `pac_reader` - the function used for context reading from a storage (see :py:const:`~._ReadContextFunction`).
         `storage_key` - the key the context is stored with (used in cases when the key is not preserved in storage).
         `primary_id` - the context unique identifier.
         returns tuple of context and context hashes
         (hashes should be kept and passed to :py:func:`~.ContextSchema.write_context`).
+        # TODO: handle case when required subscript is more than received.
         """
-        fields_subscript = dict()
-
-        field_props: BaseSchemaField
-        for field_props in dict(self).values():
-            field = field_props.name
-            if field_props.on_read == SchemaFieldReadPolicy.IGNORE:
-                fields_subscript[field] = False
-            elif isinstance(field_props, ListSchemaField) or isinstance(field_props, DictSchemaField):
-                fields_subscript[field] = field_props.subscript
-            else:
-                fields_subscript[field] = True
-
-        hashes = dict()
-        ctx_dict = await ctx_reader(fields_subscript, primary_id)
-        for key in ctx_dict.keys():
-            hashes[key] = self._calculate_hashes(ctx_dict[key])
+        ctx_dict = await pac_reader(storage_key, primary_id)
+        ctx_dict[ExtraFields.primary_id.value] = primary_id
 
         ctx = Context.cast(ctx_dict)
         ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
-        return ctx, hashes
+        return ctx
 
     async def write_context(
         self,
         ctx: Context,
-        hashes: Optional[Dict],
-        val_writer: _WriteContextFunction,
+        pac_writer: _WritePackedContextFunction,
+        log_writer: _WriteLogContextFunction,
         storage_key: str,
         primary_id: Optional[str],
-        chunk_size: Union[Literal[False], int] = False,
     ) -> str:
         """
         Write context to storage.
@@ -306,41 +169,18 @@ class ContextSchema(BaseModel):
         """
         ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
         ctx_dict = ctx.dict()
-        primary_id = str(uuid.uuid4()) if primary_id is None else primary_id
+        logs_dict = dict()
+        primary_id = str(uuid4()) if primary_id is None else primary_id
 
-        ctx_dict[ExtraFields.storage_key.value] = storage_key
-        ctx_dict[self.active_ctx.name] = True
-        ctx_dict[self.created_at.name] = ctx_dict[self.updated_at.name] = time.time_ns()
-
-        flat_values = dict()
-        field_props: BaseSchemaField
+        field_props: SchemaField
         for field_props in dict(self).values():
-            field = field_props.name
-            update_values = ctx_dict[field]
-            update_nested = not isinstance(field_props, ValueSchemaField)
-            if field_props.on_write == SchemaFieldWritePolicy.IGNORE:
-                continue
-            elif field_props.on_write == SchemaFieldWritePolicy.HASH_UPDATE:
-                update_enforce = True
-                if hashes is not None and hashes.get(field) is not None:
-                    new_hashes = self._calculate_hashes(ctx_dict[field])
-                    if isinstance(new_hashes, dict):
-                        update_values = {k: v for k, v in ctx_dict[field].items() if hashes[field][k] != new_hashes[k]}
-                    else:
-                        update_values = ctx_dict[field] if hashes[field] != new_hashes else False
-            elif field_props.on_write == SchemaFieldWritePolicy.APPEND:
-                update_enforce = False
-            else:
-                update_enforce = True
-            if update_nested:
-                if not bool(chunk_size):
-                    await val_writer(field, (update_values, update_enforce), True, primary_id)
-                else:
-                    for ch in range(0, len(update_values), chunk_size):
-                        next_ch = ch + chunk_size
-                        chunk = {k: update_values[k] for k in list(update_values.keys())[ch:next_ch]}
-                        await val_writer(field, (chunk, update_enforce), True, primary_id)
-            else:
-                flat_values.update({field: (update_values, update_enforce)})
-        await val_writer(None, flat_values, False, primary_id)
+            nest_dict = ctx_dict[field_props.name]
+            logs_dict[field_props.name] = nest_dict
+            last_keys = sorted(nest_dict.keys())
+            if isinstance(field_props.subscript, int):
+                last_keys = last_keys[-field_props.subscript:]
+            ctx_dict[field_props.name] = {k:v for k, v in nest_dict.items() if k in last_keys}
+
+        self._pending_futures += [create_task(log_writer(logs_dict, storage_key, primary_id))]
+        await pac_writer(ctx_dict, storage_key, primary_id)
         return primary_id
