@@ -147,7 +147,7 @@ def time_context_read_write(
         read_start = perf_counter()
         actual_context = context_storage[ctx_id]
         read_time = perf_counter() - read_start
-        read_times[-1][len(actual_context.labels)] = read_time
+        read_times[-1][len(context.labels)] = read_time
 
         # check returned context
         # if actual_context != context:
@@ -165,7 +165,7 @@ def time_context_read_write(
                 read_start = perf_counter()
                 actual_context = context_storage[ctx_id]
                 read_time = perf_counter() - read_start
-                read_times[-1][len(actual_context.labels)] = read_time
+                read_times[-1][len(updated_context.labels)] = read_time
 
     context_storage.clear()
     return write_times, read_times, update_times
