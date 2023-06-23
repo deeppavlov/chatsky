@@ -1,15 +1,20 @@
+"""
+Common
+------
+This module contains several functions which are used to run demonstrations in tutorials.
+"""
 from os import getenv
 from typing import Callable, Tuple, Any, Optional
 from uuid import uuid4
 
-from dff.script import Context
+from dff.script import Context, Message
 from dff.pipeline import Pipeline
 from dff.utils.testing.response_comparers import default_comparer
 
 
-def is_interactive_mode() -> bool:
+def is_interactive_mode() -> bool:  # pragma: no cover
     """
-    Checking whether the example code should be run in interactive mode.
+    Checking whether the tutorial code should be run in interactive mode.
 
     :return: `True` if it's being executed by Jupyter kernel and DISABLE_INTERACTIVE_MODE env variable isn't set,
         `False` otherwise.
@@ -32,7 +37,7 @@ def check_happy_path(
     printout_enable: bool = True,
 ):
     """
-    Running example with provided pipeline for provided requests, comparing responses with correct expected responses.
+    Running tutorial with provided pipeline for provided requests, comparing responses with correct expected responses.
     In cases when additional processing of responses is needed (e.g. in case of response being an HTML string),
     a special function (response comparer) is used.
 
@@ -53,19 +58,20 @@ def check_happy_path(
             print(f" (bot) <<< {repr(candidate_response)}")
         parsed_response_with_deviation = response_comparer(candidate_response, reference_response, ctx)
         if parsed_response_with_deviation is not None:
-            error_msg = f"\n\npipeline = {pipeline.info_dict}\n\n"
-            error_msg += f"ctx = {ctx}\n\n"
-            error_msg += f"step_id = {step_id}\n"
-            error_msg += f"request = {repr(request)}\n"
-            error_msg += f"candidate_response = {repr(parsed_response_with_deviation)}\n"
-            error_msg += f"reference_response = {repr(reference_response)}\n"
-            error_msg += "candidate_response != reference_response"
-            raise Exception(error_msg)
+            raise Exception(
+                f"\n\npipeline = {pipeline.info_dict}\n\n"
+                f"ctx = {ctx}\n\n"
+                f"step_id = {step_id}\n"
+                f"request = {repr(request)}\n"
+                f"candidate_response = {repr(parsed_response_with_deviation)}\n"
+                f"reference_response = {repr(reference_response)}\n"
+                "candidate_response != reference_response"
+            )
 
 
-def run_interactive_mode(pipeline: Pipeline):
+def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
     """
-    Running example with provided pipeline in interactive mode, just like with CLI messenger interface.
+    Running tutorial with provided pipeline in interactive mode, just like with CLI messenger interface.
     The dialog won't be stored anywhere, it will only be outputted to STDOUT.
 
     :param pipeline: The Pipeline instance, that will be used for running.
@@ -75,5 +81,5 @@ def run_interactive_mode(pipeline: Pipeline):
     print("Start a dialogue with the bot")
     while True:
         request = input(">>> ")
-        ctx = pipeline(request=request, ctx_id=ctx_id)
+        ctx = pipeline(request=Message(text=request), ctx_id=ctx_id)
         print(f"<<< {repr(ctx.last_response)}")

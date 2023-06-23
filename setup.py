@@ -2,7 +2,7 @@
 # -*- coding: utf-8 -*-
 
 import pathlib
-from typing import Iterable, List
+from typing import List
 
 from setuptools import setup, find_packages
 
@@ -18,7 +18,7 @@ description = [line for line in readme_lines if line and not line.startswith("#"
 long_description = "\n".join(readme_lines)
 
 
-def merge_req_lists(req_lists: Iterable[List[str]]) -> List[str]:
+def merge_req_lists(*req_lists: List[str]) -> List[str]:
     result: set[str] = set()
     for req_list in req_lists:
         for req in req_list:
@@ -27,116 +27,153 @@ def merge_req_lists(req_lists: Iterable[List[str]]) -> List[str]:
 
 
 core = [
-    "pydantic>=1.8.2",
-    "nest_asyncio>=1.5.5",
-    "typing_extensions>=4.0.0",
+    "pydantic",
+    "nest-asyncio",
+    "typing-extensions",
 ]
 
-sqlite_dependencies = [
-    "sqlalchemy>=1.4.27, <2.0",
+async_files_dependencies = [
+    "aiofiles",
 ]
 
 redis_dependencies = [
-    "redis>=4.1.2",
+    "redis",
 ]
 
 mongodb_dependencies = [
-    "pymongo==4.3.2",  # TODO: wait for bson using bug will be fixed
-    "bson>=0.5.10",
+    "motor",
 ]
 
-mysql_dependencies = [
-    "sqlalchemy>=1.4.27",
-    "pymysql>=1.0.2",
-    "cryptography>=36.0.2",
+_sql_dependencies = [
+    "sqlalchemy[asyncio]",
 ]
 
-postgresql_dependencies = [
-    "sqlalchemy>=1.4.27",
-    "psycopg2-binary==2.9.4",  # TODO: change to >= when psycopg2 will be stabe for windows
-]
+sqlite_dependencies = merge_req_lists(
+    _sql_dependencies,
+    [
+        "aiosqlite",
+    ],
+)
+
+mysql_dependencies = merge_req_lists(
+    _sql_dependencies,
+    [
+        "asyncmy",
+        "cryptography",
+    ],
+)
+
+postgresql_dependencies = merge_req_lists(
+    _sql_dependencies,
+    [
+        "asyncpg",
+    ],
+)
 
 ydb_dependencies = [
-    "ydb>=2.5.0",
+    "ydb",
+    "six",
+]
+
+telegram_dependencies = [
+    "pytelegrambotapi",
 ]
 
 full = merge_req_lists(
-    [
-        core,
-        sqlite_dependencies,
-        redis_dependencies,
-        mongodb_dependencies,
-        mysql_dependencies,
-        postgresql_dependencies,
-        ydb_dependencies,
-    ]
+    core,
+    async_files_dependencies,
+    sqlite_dependencies,
+    redis_dependencies,
+    mongodb_dependencies,
+    mysql_dependencies,
+    postgresql_dependencies,
+    ydb_dependencies,
+    telegram_dependencies,
 )
 
-test_requirements = [
-    "pytest >=6.2.4,<7.0.0",
-    "pytest-cov >=2.12.0,<3.0.0",
-    "pytest-asyncio >=0.14.0,<0.15.0",
-    "flake8 >=3.8.3,<4.0.0",
-    "click<=8.0.4",
-    "black ==20.8b1",
-    "isort >=5.0.6,<6.0.0",
-    "flask[async]>=2.1.2",
-    "psutil>=5.9.1",
-    "requests>=2.28.1",
+requests_requirements = [
+    "requests==2.31.0",
 ]
+
+test_requirements = merge_req_lists(
+    [
+        "pytest==7.3.1",
+        "pytest-cov==4.1.0",
+        "pytest-asyncio==0.21.0",
+        "flake8==6.0.0; python_version>'3.8'",
+        "flake8==3.9.2; python_version=='3.7'",
+        "click==8.1.3",
+        "black==23.3.0",
+        "isort==5.12.0; python_version>'3.8'",
+        "isort==5.11.5; python_version=='3.7'",
+        "flask[async]==2.3.2; python_version>'3.8'",
+        "flask[async]==2.2.3; python_version=='3.7'",
+        "psutil==5.9.5",
+        "telethon==1.28.5",
+        "fastapi==0.96.0",
+        "uvicorn==0.22.0",
+        "websockets==11.0.2",
+        "locust==2.15",
+    ],
+    requests_requirements,
+)
 
 tests_full = merge_req_lists(
-    [
-        full,
-        test_requirements,
-    ]
+    full,
+    test_requirements,
 )
 
-doc = [
-    "sphinx>=1.7.9",
-    "dff_sphinx_theme>=0.1.17",
-    "sphinxcontrib-apidoc==0.3.0",
-    "sphinxcontrib-httpdomain>=1.8.0",
-    "sphinxcontrib-katex==0.9.0",
-    "sphinx_copybutton>=0.5",
-    "sphinx_gallery==0.7.0",
-    "sphinx-autodoc-typehints>=1.19.4",
-    "nbsphinx>=0.8.9",
-    "jupytext>=1.14.1",
-    "jupyter>=1.0.0",
-]
+doc = merge_req_lists(
+    [
+        "sphinx==7.0.1; python_version>'3.8'",
+        "sphinx==5.3.0; python_version=='3.7'",
+        "pydata-sphinx-theme==0.13.3",
+        "sphinxcontrib-apidoc==0.3.0",
+        "sphinxcontrib-httpdomain==1.8.0",
+        "sphinxcontrib-katex==0.9.0",
+        "sphinx-favicon==1.0.1",
+        "sphinx-copybutton==0.5.2",
+        "sphinx-gallery==0.13.0",
+        "sphinx-autodoc-typehints==1.23.0",
+        "nbsphinx==0.9.1",
+        "jupytext==1.14.5",
+        "jupyter==1.0.0",
+    ],
+    requests_requirements,
+)
 
 devel = [
-    "bump2version>=1.0.1",
-    "build==0.7.0",
+    "bump2version==1.0.1",
+    "build==0.10.0",
     "twine==4.0.0",
 ]
 
 mypy_dependencies = [
-    "mypy",
+    "mypy==1.3.0",
 ]
 
 devel_full = merge_req_lists(
-    [
-        tests_full,
-        doc,
-        devel,
-        mypy_dependencies,
-    ]
+    tests_full,
+    doc,
+    devel,
+    mypy_dependencies,
 )
 
 EXTRA_DEPENDENCIES = {
     "core": core,  # minimal dependencies (by default)
+    "json": async_files_dependencies,  # dependencies for using JSON
+    "pickle": async_files_dependencies,  # dependencies for using Pickle
     "sqlite": sqlite_dependencies,  # dependencies for using SQLite
     "redis": redis_dependencies,  # dependencies for using Redis
     "mongodb": mongodb_dependencies,  # dependencies for using MongoDB
     "mysql": mysql_dependencies,  # dependencies for using MySQL
     "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
+    "telegram": telegram_dependencies,  # dependencies for using Telegram
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
-    "examples": tests_full,  # dependencies for running examples (all options above)
+    "tutorials": tests_full,  # dependencies for running tutorials (all options above)
     "devel": devel,  # dependencies for development
     "doc": doc,  # dependencies for documentation
     "devel_full": devel_full,  # full dependencies for development (all options above)
@@ -144,17 +181,14 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.2.0",
+    version="0.4.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
     url="https://github.com/deeppavlov/dialog_flow_framework",
     author="Denis Kuznetsov",
     author_email="kuznetsov.den.p@gmail.com",
-    classifiers=[  # Optional
-        #   3 - Alpha
-        #   4 - Beta
-        #   5 - Production/Stable
+    classifiers=[
         "Development Status :: 5 - Production/Stable",
         "Intended Audience :: Developers",
         "Topic :: Software Development :: Build Tools",
@@ -166,11 +200,11 @@ setup(
         "Programming Language :: Python :: 3.9",
         "Programming Language :: Python :: 3 :: Only",
     ],
-    keywords="chatbots",  # Optional
-    packages=find_packages(where="."),  # Required
+    keywords="chatbots",
+    packages=find_packages(where="."),
     include_package_data=True,
     python_requires=">=3.7, <4",
-    install_requires=core,  # Optional
+    install_requires=core,
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
 )

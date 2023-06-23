@@ -2,21 +2,22 @@ import os
 import sys
 import re
 
-from dff_sphinx_theme.extras import generate_example_links_for_notebook_creation, regenerate_apiref
-
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
+from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
+from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
+from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-project = "Dialog Flow Framework"
+project = "DFF"
 copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.2.0"
+release = "0.4.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -27,6 +28,7 @@ release = "0.2.0"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -36,6 +38,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinxcontrib.katex",
     "sphinx_copybutton",
+    "sphinx_favicon",
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
@@ -73,49 +76,101 @@ sphinx_gallery_conf = {
 # The theme to use for HTML and HTML Help pages.  See the documentation for
 # a list of builtin themes.
 #
-html_theme = "dff_sphinx_theme"
+html_theme = "pydata_sphinx_theme"
 
 # Add any paths that contain custom static files (such as style sheets) here,
 # relative to this directory. They are copied after the builtin static files,
 # so a file named "default.css" will overwrite the builtin "default.css".
-html_static_path = []
+html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
+autosummary_generate_overwrite = False
 
-# Finding examples directories
-nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
+# Finding tutorials directories
+nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
-:tutorial_path: \\.
-:github_url: deeppavlov/dialog_flow_framework
 """
+
+html_logo = "_static/images/logo-simple.svg"
+
+nbsphinx_thumbnails = {
+    "tutorials/*": "_static/images/logo-simple.svg",
+}
+
+html_context = {
+    "github_user": "deeppavlov",
+    "github_repo": "dialog_flow_framework",
+    "github_version": "dev",
+    "doc_path": "docs/source",
+}
+
+html_css_files = [
+    "css/custom.css",
+]
 
 # Theme options
 html_theme_options = {
-    "logo_only": True,
-    "tab_intro_dff": "#",
-    "tab_intro_addons": "#",
-    "tab_intro_designer": "#",
-    "tab_get_started": "#",
-    "tab_tutorials": "#",
-    # Matches ROOT tag, should be ONE PER MODULE, other tabs = other modules (may be relative paths)
-    "tab_documentation": "./",
-    "tab_ecosystem": "#",
-    "tab_about_us": "#",
+    "header_links_before_dropdown": 7,
+    "logo": {
+        "alt_text": "DFF logo (simple and nice)",
+        "text": "Dialog Flow Framework",
+    },
+    "icon_links": [
+        {
+            "name": "DeepPavlov Forum",
+            "url": "https://forum.deeppavlov.ai",
+            "icon": "_static/images/logo-deeppavlov.svg",
+            "type": "local",
+        },
+        {
+            "name": "Telegram",
+            "url": "https://t.me/DeepPavlovDreamDiscussions",
+            "icon": "fa-brands fa-telegram",
+            "type": "fontawesome",
+        },
+        {
+            "name": "GitHub",
+            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "icon": "fa-brands fa-github",
+            "type": "fontawesome",
+        },
+    ],
+    "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
+favicons = [
+    {"href": "images/logo-dff.svg"},
+]
+
+
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(
+    generate_tutorial_links_for_notebook_creation(
         [
-            "examples/script/*.py",
-            "examples/pipeline/*.py",
-            "examples/context_storages/*.py",
-            "examples/messengers/*.py",
+            ("tutorials.context_storages", "Context Storages"),
+            (
+                "tutorials.messengers",
+                "Interfaces",
+                [
+                    ("telegram", "Telegram"),
+                    ("web_api_interface", "Web API"),
+                ],
+            ),
+            ("tutorials.pipeline", "Pipeline"),
+            (
+                "tutorials.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
+            ("tutorials.utils", "Utils"),
         ]
     )
     regenerate_apiref(
@@ -124,5 +179,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.utils.testing", "Utils"),
         ]
     )
+    pull_release_notes_from_github()

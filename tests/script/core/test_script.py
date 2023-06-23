@@ -1,6 +1,5 @@
 # %%
 import itertools
-from typing import Callable
 
 from dff.script import (
     GLOBAL,
@@ -21,8 +20,8 @@ def positive_test(samples, custom_class):
         try:
             res = custom_class(**sample)
             results += [res]
-        except Exception as exeption:
-            raise Exception(f"sample={sample} gets exception={exeption}")
+        except Exception as exception:
+            raise Exception(f"sample={sample} gets exception={exception}")
     return results
 
 
@@ -44,7 +43,6 @@ def test_node_creation():
 
 
 def node_creation(pre_response_proc):
-
     samples = {
         "transition": [std_func, "node", ("flow", "node"), ("node", 2.0), ("flow", "node", 2.0)],
         "condition": [std_func],
@@ -92,7 +90,7 @@ def node_creation(pre_response_proc):
 
 def node_test(node: Node):
     assert list(node.transitions)[0] == ("", "node", float("-inf"))
-    assert isinstance(list(node.transitions.values())[0], Callable)
+    assert callable(list(node.transitions.values())[0])
     assert isinstance(node.pre_response_processing, dict)
     assert isinstance(node.pre_transitions_processing, dict)
     assert node.misc == {"key": "val"}

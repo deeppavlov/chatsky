@@ -1,13 +1,12 @@
 """
 Utils
 -----
-This module contains several service functions.
+The Utils module contains several service functions that are commonly used throughout the framework.
+These functions provide a variety of utility functionality.
 """
 import collections
-from typing import Union, List, Callable
+from typing import Union, List
 from inspect import isfunction
-
-from dff.script import Actor
 
 from ..service.service import Service
 from ..service.group import ServiceGroup
@@ -65,7 +64,7 @@ def rename_component_incrementing(
     that has similar name with other components in the same group.
     The name is generated according to these rules:
 
-    - If service's handler is `Actor`, it is named `actor`.
+    - If service's handler is "ACTOR", it is named `actor`.
     - If service's handler is `Callable`, it is named after this `callable`.
     - If it's a service group, it is named `service_group`.
     - Otherwise, it is names `noname_service`.
@@ -76,9 +75,9 @@ def rename_component_incrementing(
     :param collisions: Services in the same service group as service.
     :return: Generated name
     """
-    if isinstance(service, Service) and isinstance(service.handler, Actor):
+    if isinstance(service, Service) and isinstance(service.handler, str) and service.handler == "ACTOR":
         base_name = "actor"
-    elif isinstance(service, Service) and isinstance(service.handler, Callable):
+    elif isinstance(service, Service) and callable(service.handler):
         if isfunction(service.handler):
             base_name = service.handler.__name__
         else:
@@ -94,16 +93,19 @@ def rename_component_incrementing(
     return f"{base_name}_{name_index}"
 
 
-def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Actor:
+def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> bool:
     """
     Function that iterates through a service group (and all its subgroups),
     finalizing component's names and paths in it.
     Components are renamed only if user didn't set a name for them. Their paths are also generated here.
-    It also searches for :py:class:`~.Actor` in the group, throwing exception if no actor or multiple actors found.
+    It also searches for "ACTOR" in the group, throwing exception if no actor or multiple actors found.
 
     :param service_group: Service group to resolve name collisions in.
+    :param path:
+        A prefix for component paths -- path of `component` is equal to `{path}.{component.name}`.
+        Defaults to ".".
     """
-    actor = None
+    actor = False
     names_counter = collections.Counter([component.name for component in service_group.components])
     for component in service_group.components:
         if component.name is None:
@@ -112,16 +114,16 @@ def finalize_service_group(service_group: ServiceGroup, path: str = ".") -> Acto
             raise Exception(f"User defined service name collision ({path})!")
         component.path = f"{path}.{component.name}"
 
-        if isinstance(component, Service) and isinstance(component.handler, Actor):
-            current_actor = component.handler
+        if isinstance(component, Service) and isinstance(component.handler, str) and component.handler == "ACTOR":
+            actor_found = True
         elif isinstance(component, ServiceGroup):
-            current_actor = finalize_service_group(component, f"{path}.{component.name}")
+            actor_found = finalize_service_group(component, f"{path}.{component.name}")
         else:
-            current_actor = None
+            actor_found = False
 
-        if current_actor is not None:
-            if actor is None:
-                actor = current_actor
+        if actor_found:
+            if not actor:
+                actor = actor_found
             else:
                 raise Exception(f"More than one actor found in group ({path})!")
     return actor

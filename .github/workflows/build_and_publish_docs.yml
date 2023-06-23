@@ -5,21 +5,24 @@ on:
     branches:
     - dev
     - docs/**
-  pull_request:
+  pull_request_target:
     branches:
     - dev
   workflow_dispatch:
 
+concurrency:
+  group: ${{ github.workflow }}-${{ github.ref }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
 
 jobs:
   publish:
     name: build and publish docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v3
 
       - name: set up python 3.9
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: 3.9
 
@@ -33,11 +36,30 @@ jobs:
             make venv
 
       - name: build documentation
+        env:
+          GITHUB_API_TOKEN: ${{ secrets.READ_ONLY_GITHUB_API_TOKEN }}
         run: |
             make doc
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
+
+      - name: save branch name without slashes
+        if: ${{ github.ref != 'refs/heads/dev' }}
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        run: |
+          BRANCH_NAME=${{ env.BRANCH_NAME }}
+          BRANCH_NAME=${BRANCH_NAME////_}
+          echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
+
+      - name: save artifact
+        if: ${{ github.ref != 'refs/heads/dev' }}
+        uses: actions/upload-artifact@v3
+        with:
+          name: ${{ format('github-pages-for-branch-{0}', env.BRANCH_NAME) }}
+          path: docs/build/
+          retention-days: 3
 
       - name: deploy website
         if: ${{ github.ref == 'refs/heads/dev' }}

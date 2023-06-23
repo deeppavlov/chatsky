@@ -1,19 +1,23 @@
 """
 Types
 -----
-This module contains several classes and special types (see below).
+The Types module contains several classes and special types that are used throughout the `DFF Pipeline`.
+The classes and special types in this module can include data models,
+data structures, and other types that are defined for type hinting.
 """
 from abc import ABC
 from enum import unique, Enum, auto
 from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable
 
-from dff.context_storages import DBAbstractContextStorage
-from dff.script import Context, Actor
+from dff.context_storages import DBContextStorage
+from dff.script import Context, ActorStage, NodeLabel2Type, Script
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 
 
+_ForwardPipeline = NewType("Pipeline", None)
 _ForwardPipelineComponent = NewType("PipelineComponent", None)
 _ForwardService = NewType("Service", _ForwardPipelineComponent)
+_ForwardServiceBuilder = NewType("ServiceBuilder", None)
 _ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
 _ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", None)
 _ForwardProvider = NewType("ABCProvider", ABC)
@@ -80,10 +84,10 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 """
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[[Context, Actor], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[[Context, _ForwardPipeline], bool]
 """
 A function type for components `start_conditions`.
-Accepts context and actor (current pipeline state), returns boolean (whether service can be launched).
+Accepts context and pipeline, returns boolean (whether service can be launched).
 """
 
 
@@ -138,26 +142,26 @@ Also contains `component` - runtime info dictionary of the component this wrappe
 
 ExtraHandlerFunction: TypeAlias = Union[
     Callable[[Context], None],
-    Callable[[Context, Actor], None],
-    Callable[[Context, Actor, ExtraHandlerRuntimeInfo], None],
+    Callable[[Context, _ForwardPipeline], None],
+    Callable[[Context, _ForwardPipeline, ExtraHandlerRuntimeInfo], None],
 ]
 """
 A function type for creating wrappers (before and after functions).
-Can accept current dialog context, actor, attached to the pipeline, and current wrapper info dictionary.
+Can accept current dialog context, pipeline, and current wrapper info dictionary.
 """
 
 
 ServiceFunction: TypeAlias = Union[
     Callable[[Context], None],
     Callable[[Context], Awaitable[None]],
-    Callable[[Context, Actor], None],
-    Callable[[Context, Actor], Awaitable[None]],
-    Callable[[Context, Actor, ServiceRuntimeInfo], None],
-    Callable[[Context, Actor, ServiceRuntimeInfo], Awaitable[None]],
+    Callable[[Context, _ForwardPipeline], None],
+    Callable[[Context, _ForwardPipeline], Awaitable[None]],
+    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], None],
+    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], Awaitable[None]],
 ]
 """
 A function type for creating service handlers.
-Can accept current dialog context, actor, attached to the pipeline, and current service info dictionary.
+Can accept current dialog context, pipeline, and current service info dictionary.
 Can be both synchronous and asynchronous.
 """
 
@@ -186,11 +190,11 @@ It can be:
 ServiceBuilder: TypeAlias = Union[
     ServiceFunction,
     _ForwardService,
-    Actor,
+    str,
     TypedDict(
         "ServiceDict",
         {
-            "handler": "ServiceBuilder",
+            "handler": _ForwardServiceBuilder,
             "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "timeout": NotRequired[Optional[float]],
@@ -206,7 +210,7 @@ It can be:
 
 - ServiceFunction (will become handler)
 - Service object (will be spread and recreated)
-- Actor (will be wrapped in a Service as a handler)
+- String 'ACTOR' - the pipeline Actor will be placed there
 - Dictionary, containing keys that are present in Service constructor parameters
 """
 
@@ -228,11 +232,19 @@ PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
         "messenger_interface": NotRequired[Optional[_ForwardProvider]],
-        "context_storage": NotRequired[Optional[Union[DBAbstractContextStorage, Dict]]],
+        "context_storage": NotRequired[Optional[Union[DBContextStorage, Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
+        "script": Union[Script, Dict],
+        "start_label": NodeLabel2Type,
+        "fallback_label": NotRequired[Optional[NodeLabel2Type]],
+        "label_priority": NotRequired[float],
+        "validation_stage": NotRequired[Optional[bool]],
+        "condition_handler": NotRequired[Optional[Callable]],
+        "verbose": NotRequired[bool],
+        "handlers": NotRequired[Optional[Dict[ActorStage, List[Callable]]]],
     },
 )
 """

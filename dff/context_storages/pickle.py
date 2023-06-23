@@ -1,10 +1,26 @@
 """
 Pickle
 ------
-Provides the pickle-based version of the :py:class:`.DBContextStorage`.
+The Pickle module provides a pickle-based version of the :py:class:`.DBContextStorage` class.
+This class is used to store and retrieve context data in a pickle format.
+It allows the DFF to easily store and retrieve context data in a format that is efficient
+for serialization and deserialization and can be easily used in python.
+
+Pickle is a python library that allows to serialize and deserialize python objects.
+It is efficient and fast, but it is not recommended to use it to transfer data across
+different languages or platforms because it's not cross-language compatible.
 """
+import asyncio
 import pickle
-import os
+from typing import Hashable
+
+try:
+    import aiofiles
+    import aiofiles.os
+
+    pickle_available = True
+except ImportError:
+    pickle_available = False
 
 from .database import DBContextStorage, threadsafe_method
 from dff.script import Context
@@ -15,51 +31,49 @@ class PickleContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
     :param path: Target file URI. Example: 'pickle://file.pkl'.
-    :type path: str
     """
 
     def __init__(self, path: str):
         DBContextStorage.__init__(self, path)
-
-        self._load()
+        asyncio.run(self._load())
 
     @threadsafe_method
-    def __len__(self):
+    async def len_async(self) -> int:
         return len(self.dict)
 
     @threadsafe_method
-    def __setitem__(self, key: str, item: Context) -> None:
-        self.dict.__setitem__(key, item)
-        self._save()
+    async def set_item_async(self, key: Hashable, value: Context):
+        self.dict.__setitem__(str(key), value)
+        await self._save()
 
     @threadsafe_method
-    def __getitem__(self, key: str) -> Context:
-        self._load()
-        return self.dict.__getitem__(key)
+    async def get_item_async(self, key: Hashable) -> Context:
+        await self._load()
+        return Context.cast(self.dict.__getitem__(str(key)))
 
     @threadsafe_method
-    def __delitem__(self, key: str) -> None:
-        self.dict.__delitem__(key)
-        self._save()
+    async def del_item_async(self, key: Hashable):
+        self.dict.__delitem__(str(key))
+        await self._save()
 
     @threadsafe_method
-    def __contains__(self, key: str) -> bool:
-        self._load()
-        return self.dict.__contains__(key)
+    async def contains_async(self, key: Hashable) -> bool:
+        await self._load()
+        return self.dict.__contains__(str(key))
 
     @threadsafe_method
-    def clear(self) -> None:
+    async def clear_async(self):
         self.dict.clear()
-        self._save()
+        await self._save()
 
-    def _save(self) -> None:
-        with open(self.path, "wb+") as file:
-            pickle.dump(self.dict, file)
+    async def _save(self):
+        async with aiofiles.open(self.path, "wb+") as file:
+            await file.write(pickle.dumps(self.dict))
 
-    def _load(self) -> None:
-        if not os.path.isfile(self.path) or os.stat(self.path).st_size == 0:
+    async def _load(self):
+        if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
             self.dict = dict()
-            open(self.path, "a").close()
+            await self._save()
         else:
-            with open(self.path, "rb") as file:
-                self.dict = pickle.load(file)
+            async with aiofiles.open(self.path, "rb") as file:
+                self.dict = pickle.loads(await file.read())

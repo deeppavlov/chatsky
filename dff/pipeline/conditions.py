@@ -1,10 +1,13 @@
 """
 Conditions
 ----------
+The conditions module contains functions that can be used to determine whether the pipeline component to which they
+are attached should be executed or not.
+The standard set of them allows user to setup dependencies between pipeline components.
 """
-from typing import Optional
+from typing import Optional, ForwardRef
 
-from dff.script import Actor, Context
+from dff.script import Context
 
 from .types import (
     PIPELINE_STATE_KEY,
@@ -13,13 +16,15 @@ from .types import (
     StartConditionCheckerAggregationFunction,
 )
 
+Pipeline = ForwardRef("Pipeline")
 
-def always_start_condition(_: Context, __: Actor) -> bool:
+
+def always_start_condition(_: Context, __: Pipeline) -> bool:
     """
     Condition that always allows service execution. It's the default condition for all services.
 
-    :param ctx: Current dialog context.
-    :param actor: Pipeline actor.
+    :param _: Current dialog context.
+    :param __: Pipeline.
     """
     return True
 
@@ -32,7 +37,7 @@ def service_successful_condition(path: Optional[str] = None) -> StartConditionCh
     :param path: The path of the condition pipeline component.
     """
 
-    def check_service_state(ctx: Context, _: Actor):
+    def check_service_state(ctx: Context, _: Pipeline):
         state = ctx.framework_states[PIPELINE_STATE_KEY].get(path, ComponentExecutionState.NOT_RUN.name)
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
 
@@ -47,8 +52,8 @@ def not_condition(function: StartConditionCheckerFunction) -> StartConditionChec
     :param function: The function to return opposite of.
     """
 
-    def not_function(ctx: Context, actor: Actor):
-        return not function(ctx, actor)
+    def not_function(ctx: Context, pipeline: Pipeline):
+        return not function(ctx, pipeline)
 
     return not_function
 
@@ -64,8 +69,8 @@ def aggregate_condition(
     :param functions: Functions to aggregate.
     """
 
-    def aggregation_function(ctx: Context, actor: Actor):
-        return aggregator([function(ctx, actor) for function in functions])
+    def aggregation_function(ctx: Context, pipeline: Pipeline):
+        return aggregator([function(ctx, pipeline) for function in functions])
 
     return aggregation_function
 
