@@ -394,9 +394,11 @@ class BenchmarkCase(BaseModel):
                 }
             }
         except Exception as e:
+            exception_message = getattr(e, "message", repr(e))
+            print(exception_message)
             return {
                 "success": False,
-                "result": getattr(e, "message", repr(e))
+                "result": exception_message,
             }
 
 
