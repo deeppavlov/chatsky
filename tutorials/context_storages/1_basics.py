@@ -8,7 +8,7 @@ See [context_storage_factory](https://deeppavlov.github.io/dialog_flow_framework
 for creating a context storage factory by path.
 
 In this example JSON file is used as a storage.
-"""
+"""  # noqa: E501
 
 
 # %%

@@ -10,7 +10,7 @@ class, that can be used for pre- and postprocessing of messages is shown.
 
 Pipeline [from_dict](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.from_dict)
 static method can be used for pipeline creation (from dictionary).
-"""
+"""  # noqa: E501
 
 
 # %%

@@ -12,7 +12,7 @@ Additionally, function [check_happy_path](https://deeppavlov.github.io/dialog_fl
 that can be used for Pipeline testing is presented.
 
 Let's do all the necessary imports from DFF:
-"""
+"""  # noqa: E501
 
 
 # %%

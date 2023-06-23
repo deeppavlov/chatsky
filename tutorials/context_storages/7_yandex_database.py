@@ -8,7 +8,7 @@ See [YDB](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_
 for storing you users' contexts in Yandex database.
 
 The DFF uses [ydb.aio](https://ydb.tech/en/docs/) library for asynchronous access to Yandex DB.
-"""
+"""  # noqa: E501
 
 
 # %%

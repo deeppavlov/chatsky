@@ -7,7 +7,7 @@ module as an extension to `dff.script.core`.
 
 Here, `__call__` (same as [run](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.run))
 method is used to execute pipeline once.
-"""
+"""  # noqa: E501
 
 
 # %%

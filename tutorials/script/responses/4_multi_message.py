@@ -8,7 +8,7 @@ The [MultiMessage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff
 represents a combination of several messages.
 
 Let's do all the necessary imports from DFF.
-"""
+"""  # noqa: E501
 
 
 # %%

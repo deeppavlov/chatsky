@@ -8,7 +8,7 @@ See [RedisContextStorage](https://deeppavlov.github.io/dialog_flow_framework/api
 for storing you users' contexts in Redis database.
 
 The DFF uses [redis.asyncio](https://redis.readthedocs.io/en/latest/) library for asynchronous access to Redis DB.
-"""
+"""  # noqa: E501
 
 
 # %%

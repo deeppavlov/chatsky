@@ -8,7 +8,7 @@ See [MongoContextStorage](https://deeppavlov.github.io/dialog_flow_framework/api
 for storing you users' contexts in Mongo database.
 
 The DFF uses [motor](https://motor.readthedocs.io/en/stable/) library for asynchronous access to MongoDB.
-"""
+"""  # noqa: E501
 
 
 # %%

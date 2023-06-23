@@ -11,7 +11,7 @@ The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [aiosqlite](ht
 libraries for asynchronous access to SQLite DB.
 
 Note that protocol separator for windows differs from one for linux.
-"""
+"""  # noqa: E501
 
 
 # %%

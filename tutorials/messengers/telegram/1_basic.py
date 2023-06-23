@@ -9,7 +9,7 @@ Here, [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framew
 class and [telebot](https://pytba.readthedocs.io/en/latest/index.html) library are used for accessing telegram API in polling mode.
 
 Telegram API token is used for access telegram API.
-"""
+"""  # noqa: E501
 
 
 # %%

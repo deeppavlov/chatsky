@@ -8,7 +8,7 @@ Here, global [conditions](https://deeppavlov.github.io/dialog_flow_framework/api
 for default transition between many different script steps are shown.
 
 First of all, let's do all the necessary imports from DFF.
-"""
+"""  # noqa: E501
 
 
 # %%

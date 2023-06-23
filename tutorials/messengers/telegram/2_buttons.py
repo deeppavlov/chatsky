@@ -11,7 +11,7 @@ classes are used for configuring additional telegram message features.
 
 Different [message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#message)
 classes are used for representing different common message features, like Attachment, Audio, Button, Image, etc.
-"""
+"""  # noqa: E501
 
 
 # %%

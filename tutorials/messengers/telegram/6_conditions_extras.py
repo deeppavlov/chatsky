@@ -16,7 +16,7 @@ classes are used for representing different common message features, like Attach
 [telegram_condition](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.messenger.html#dff.messengers.telegram.messenger.telegram_condition)
 function and different types of [UpdateType](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.messenger.html#dff.messengers.telegram.messenger.UpdateType)
 can be used for telegram message type checking.
-"""
+"""  # noqa: E501
 
 
 # %%

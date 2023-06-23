@@ -5,8 +5,7 @@
 Here, [Button](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Button)
 class is shown. Buttons are special response decorations (just like other [element](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#message)s)
 They can be attached to any message and will have different forms in differend messengers (implementation-defined).
-
-"""
+"""  # noqa: E501
 
 
 # %%

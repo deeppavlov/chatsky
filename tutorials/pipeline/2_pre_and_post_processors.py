@@ -7,7 +7,7 @@ module as an extension to `dff.script.core`.
 
 Here, [MISC](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html#dff.script.core.context.Context.misc)
 dictionary of context is used for storing message additional data.
-"""
+"""  # noqa: E501
 
 
 # %%

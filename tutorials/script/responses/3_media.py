@@ -8,8 +8,7 @@ class is shown. Attachments can be used for attaching different media elements
 [Document](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Document)
 or [Audio](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Audio))
 can be used. They can be attached to any message and will have different forms in differend messengers (implementation-defined).
-
-"""
+"""  # noqa: E501
 
 
 # %%

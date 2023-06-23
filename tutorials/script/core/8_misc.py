@@ -8,7 +8,7 @@ Here, [MISC](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.scrip
 that can be used for user data storage inside of a context is shown.
 
 First of all, let's do all the necessary imports from DFF.
-"""
+"""  # noqa: E501
 
 
 # %%
