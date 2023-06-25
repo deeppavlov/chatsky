@@ -204,8 +204,6 @@ class SQLContextStorage(DBContextStorage):
                 server_onupdate=current_time,
                 nullable=False,
             ),
-            Index("context_id_index", ExtraFields.primary_id.value, unique=True),
-            Index("context_key_index", ExtraFields.storage_key.value),
         )
         self.tables[self._LOGS_TABLE] = Table(
             f"{table_name_prefix}_{self._LOGS_TABLE}",
