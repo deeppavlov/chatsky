@@ -407,18 +407,19 @@ def save_results_to_file(
     file: tp.Union[str, pathlib.Path],
     name: str,
     description: str,
+    exist_ok: bool = False,
 ):
-    uuid = str(uuid4())
-    result: tp.Dict[str, tp.Any] = {
-        "name": name,
-        "description": description,
-        "uuid": uuid,
-        "benchmarks": {},
-    }
-    for case in benchmark_cases:
-        result["benchmarks"][case.uuid] = {**case.dict(), **case.sizes(), **case.run()}
+    with open(file, "w" if exist_ok else "x", encoding="utf-8") as fd:
+        uuid = str(uuid4())
+        result: tp.Dict[str, tp.Any] = {
+            "name": name,
+            "description": description,
+            "uuid": uuid,
+            "benchmarks": {},
+        }
+        for case in benchmark_cases:
+            result["benchmarks"][case.uuid] = {**case.dict(), **case.sizes(), **case.run()}
 
-    with open(file, "w", encoding="utf-8") as fd:
         json.dump(result, fd)
 
 
@@ -476,15 +477,22 @@ def benchmark_all(
     step_dialog_len: int = 1,
     message_lengths: tp.Tuple[int, ...] = (10, 10),
     misc_lengths: tp.Tuple[int, ...] = (10, 10),
+    exist_ok: bool = False,
 ):
-    save_results_to_file(get_cases(
-        db_uris,
-        case_name_postfix,
-        context_num,
-        from_dialog_len,
-        to_dialog_len,
-        step_dialog_len,
-        message_lengths,
-        misc_lengths,
-        description=description,
-    ), file, name, description)
+    save_results_to_file(
+        get_cases(
+            db_uris,
+            case_name_postfix,
+            context_num,
+            from_dialog_len,
+            to_dialog_len,
+            step_dialog_len,
+            message_lengths,
+            misc_lengths,
+            description=description,
+        ),
+        file,
+        name,
+        description,
+        exist_ok=exist_ok
+    )
