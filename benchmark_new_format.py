@@ -1,6 +1,8 @@
 import json
 import pathlib
 
+from dff.utils.benchmark.context_storage import BenchmarkCase
+
 benchmark_path = pathlib.Path("benchmarks")
 
 for file in benchmark_path.iterdir():
@@ -16,6 +18,7 @@ for file in benchmark_path.iterdir():
             new_benchmark_set["benchmarks"] = {k: v for k, v in benchmark_set.items() if k not in non_benchmark_fields}
 
         for key, benchmark in new_benchmark_set["benchmarks"].items():
+            # update old factory specification
             if benchmark["db_factory"].get("base_factory") == "dev":
                 postfix = "_old"
             elif benchmark["db_factory"].get("base_factory") == "partial":
@@ -31,6 +34,10 @@ for file in benchmark_path.iterdir():
                         "factory": "context_storage_factory",
                     }
                 )
+
+        # update average calculation
+        for benchmark in new_benchmark_set["benchmarks"].values():
+            BenchmarkCase.set_average_results(benchmark)
 
         with open(file, "w") as fd:
             json.dump(new_benchmark_set, fd)
