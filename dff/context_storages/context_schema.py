@@ -98,6 +98,9 @@ class ContextSchema(BaseModel):
     _pending_futures: List[Awaitable] = PrivateAttr(default=list())
     # TODO!
 
+    _allow_async: bool = PrivateAttr(default=True)
+    # TODO!
+
     class Config:
         validate_assignment = True
 
@@ -111,9 +114,16 @@ class ContextSchema(BaseModel):
     def __del__(self):
         self.close()
 
+    def enable_async(self, allow: bool):
+        self._allow_async = allow
+
     def close(self):
         async def _await_all_pending_transactions():
-            await gather(*self._pending_futures)
+            if self._allow_async:
+                await gather(*self._pending_futures)
+            else:
+                for task in self._pending_futures:
+                    await task
 
         try:
             loop = get_event_loop()
