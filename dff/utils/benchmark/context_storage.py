@@ -21,6 +21,7 @@ import typing as tp
 from copy import deepcopy
 import json
 import importlib
+from statistics import mean
 
 from pydantic import BaseModel, Field
 from pympler import asizeof
@@ -377,7 +378,40 @@ class BenchmarkCase(BaseModel):
             "message_size": asizeof.asizeof(get_message(self.message_lengths)),
         }
 
-    def run(self):
+    @staticmethod
+    def set_average_results(benchmark):
+        if not benchmark["success"] or isinstance(benchmark["result"], str):
+            return
+
+        def get_complex_stats(results):
+            average_grouped_by_context_num = [mean(times.values()) for times in results]
+            average_grouped_by_dialog_len = {
+                key: mean([times[key] for times in results]) for key in next(iter(results), {}).keys()
+            }
+            average = mean(average_grouped_by_context_num)
+            return average_grouped_by_context_num, average_grouped_by_dialog_len, average
+
+        read_stats = get_complex_stats(benchmark["result"]["read_times"])
+        update_stats = get_complex_stats(benchmark["result"]["update_times"])
+
+        result = {
+            "average_write_time": mean(benchmark["result"]["write_times"]),
+            "average_read_time": read_stats[2],
+            "average_update_time": update_stats[2],
+            "write_times": benchmark["result"]["write_times"],
+            "read_times_grouped_by_context_num": read_stats[0],
+            "read_times_grouped_by_dialog_len": read_stats[1],
+            "update_times_grouped_by_context_num": update_stats[0],
+            "update_times_grouped_by_dialog_len": update_stats[1],
+        }
+        result["pretty_write"] = float(f'{result["average_write_time"]:.3}')
+        result["pretty_read"] = float(f'{result["average_read_time"]:.3}')
+        result["pretty_update"] = float(f'{result["average_update_time"]:.3}')
+        result["pretty_read+update"] = float(f'{result["average_read_time"] + result["average_update_time"]:.3}')
+
+        benchmark["average_results"] = result
+
+    def _run(self):
         try:
             write_times, read_times, update_times = time_context_read_write(
                 self.db_factory.db(),
@@ -400,6 +434,11 @@ class BenchmarkCase(BaseModel):
                 "success": False,
                 "result": exception_message,
             }
+
+    def run(self):
+        benchmark = self._run()
+        BenchmarkCase.set_average_results(benchmark)
+        return benchmark
 
 
 def save_results_to_file(

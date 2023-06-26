@@ -1,7 +1,6 @@
 import streamlit as st
 import json
 from pathlib import Path
-from statistics import mean
 import pandas as pd
 from pympler import asizeof
 from humanize import naturalsize
@@ -47,7 +46,6 @@ def add_metrics(container, value_benchmark, diff_benchmark=None):
     write, read, update, read_update = container.columns(4)
     column_names = ("write", "read", "update", "read+update")
 
-    set_average_results(value_benchmark)
     if not value_benchmark["success"]:
         values = {key: "-" for key in column_names}
         diffs = None
@@ -57,7 +55,6 @@ def add_metrics(container, value_benchmark, diff_benchmark=None):
         }
 
         if diff_benchmark is not None:
-            set_average_results(diff_benchmark)
             if not diff_benchmark["success"]:
                 diffs = {key: "-" for key in column_names}
             else:
@@ -112,40 +109,6 @@ def get_opposite_benchmarks(benchmark_set, benchmark):
     ]
 
     return opposite_benchmarks
-
-
-def set_average_results(benchmark):
-    if not benchmark["success"] or isinstance(benchmark["result"], str):
-        return
-
-    if benchmark.get("average_results") is not None:
-        return
-
-    def get_complex_stats(results):
-        average_grouped_by_context_num = [mean(times.values()) for times in results]
-        average_grouped_by_dialog_len = {key: mean([times[key] for times in results]) for key in results[0].keys()}
-        average = mean(average_grouped_by_context_num)
-        return average_grouped_by_context_num, average_grouped_by_dialog_len, average
-
-    read_stats = get_complex_stats(benchmark["result"]["read_times"])
-    update_stats = get_complex_stats(benchmark["result"]["update_times"])
-
-    result = {
-        "average_write_time": mean(benchmark["result"]["write_times"]),
-        "average_read_time": read_stats[2],
-        "average_update_time": update_stats[2],
-        "write_times": benchmark["result"]["write_times"],
-        "read_times_grouped_by_context_num": read_stats[0],
-        "read_times_grouped_by_dialog_len": read_stats[1],
-        "update_times_grouped_by_context_num": update_stats[0],
-        "update_times_grouped_by_dialog_len": update_stats[1],
-    }
-    result["pretty_write"] = float(f'{result["average_write_time"]:.3}')
-    result["pretty_read"] = float(f'{result["average_read_time"]:.3}')
-    result["pretty_update"] = float(f'{result["average_update_time"]:.3}')
-    result["pretty_read+update"] = float(f'{result["average_read_time"] + result["average_update_time"]:.3}')
-
-    benchmark["average_results"] = result
 
 
 st.sidebar.text(f"Benchmarks take {naturalsize(asizeof.asizeof(st.session_state['benchmarks']))} RAM")
@@ -305,8 +268,6 @@ with view_tab:
     if not selected_benchmark["success"]:
         st.warning(selected_benchmark["result"])
     else:
-        set_average_results(selected_benchmark)
-
         opposite_benchmark = None
 
         if st.session_state["partial_compare_checkbox"]:
