@@ -122,7 +122,7 @@ test_requirements = merge_req_lists(
         "websockets==11.0.2",
         "locust==2.15",
         "matplotlib",
-        "streamlit",
+        "streamlit==1.23.1",
         "pandas",
         "altair",
     ],
