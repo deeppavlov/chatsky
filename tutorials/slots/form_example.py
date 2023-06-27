@@ -11,7 +11,6 @@ from dff.script import conditions as cnd
 
 import dff.script.logic.slots
 from dff.script.logic.slots.forms import FormState
-from dff.script.logic.slots.utils import FORM_STORAGE_KEY, SLOT_STORAGE_KEY
 from dff.script.logic.slots import processing as slot_procs
 from dff.script.logic.slots import response as slot_rsp
 from dff.script.logic.slots import conditions as slot_cnd

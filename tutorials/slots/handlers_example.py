@@ -1,5 +1,5 @@
 from dff.script import conditions as cnd
-from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Context
+from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Context, Message
 
 from dff.pipeline import Pipeline
 
@@ -54,15 +54,15 @@ def custom_behaviour_question(ctx: Context, pipeline: Pipeline):
         new_template = new_template + "boy" + middle + "boy?"
     else:
         new_template = new_template + "girl" + middle + "girl?"
-    return new_template
+    return Message(text=new_template)
 
 
 def custom_esteem(ctx: Context, pipeline: Pipeline):
     value = dff.script.logic.slots.get_values(ctx, pipeline, slots=["pet/pet_info/behaviour"])[0]
     if value == "bad":
-        return "Sorry to hear that."
+        return Message(text="Sorry to hear that.")
     else:
-        return "Great to hear that!"
+        return Message(text="Great to hear that!")
 
 
 script = {
@@ -76,7 +76,7 @@ script = {
             },
         },
         "ask": {
-            RESPONSE: "I heard that you have a pet. Is it a cat, or a dog?",
+            RESPONSE: Message(text="I heard that you have a pet. Is it a cat, or a dog?"),
         },
         "repeat_question": {RESPONSE: "Seriously, is it a cat, or a dog?"},
     },
@@ -89,9 +89,9 @@ script = {
             },
         },
         "ask": {
-            RESPONSE: "Great! Is it a he, or a she?",
+            RESPONSE: Message(text="Great! Is it a he, or a she?"),
         },
-        "repeat_question": {RESPONSE: "I mean, is it a he, or a she? Name whatever is closer."},
+        "repeat_question": {RESPONSE: Message(text="I mean, is it a he, or a she? Name whatever is closer.")},
     },
     "behaviour_flow": {
         LOCAL: {
@@ -109,7 +109,7 @@ script = {
     "root": {
         "start": {RESPONSE: "", TRANSITIONS: {("pet_flow", "ask"): cnd.true()}},
         "fallback": {
-            RESPONSE: "It's been a nice talk! See you.",
+            RESPONSE: Message(text="It's been a nice talk! See you."),
             TRANSITIONS: {("pet_flow", "ask"): cnd.true()},
             PRE_TRANSITIONS_PROCESSING: {"forget": slot_procs.unset(["pet"])},
         },

@@ -4,7 +4,8 @@ Root
 This module contains the root slot and the corresponding type. 
 This instance is a singleton, so it will be shared each time you use the add-on.
 """
-from typing import Tuple, Dict
+import wrapt
+from typing import Tuple, Dict, overload, Iterable
 from functools import singledispatch
 
 from .types import BaseSlot, GroupSlot
@@ -41,19 +42,27 @@ class RootSlot(GroupSlot):
 root_slot = RootSlot(name="root_slot")
 
 
-@singledispatch
+@overload
+def add_slots(slots: BaseSlot) -> None:
+    ...
+
+
+@overload
+def add_slots(slots: Iterable[BaseSlot]) -> None:
+    ...
+
+
 def add_slots(slots):
-    raise NotImplementedError
+    if isinstance(slots, BaseSlot):
+        add_nodes, _ = flatten_slot_tree(slots)
+        root_slot.children.update(add_nodes)
+    else:
+        for slot in slots:
+            add_slots(slot)
 
 
-@add_slots.register(BaseSlot)
-def _(slots: BaseSlot):
-    add_nodes, _ = flatten_slot_tree(slots)
-    root_slot.children.update(add_nodes)
-
-
-@add_slots.register(set)
-@add_slots.register(list)
-def _(slots):
-    for slot in slots:
-        add_slots(slot)
+@wrapt.decorator
+def auto_register(cls, _, args, kwargs):
+    slot_instance = cls(*args, **kwargs)
+    add_slots(slot_instance)
+    return slot_instance
