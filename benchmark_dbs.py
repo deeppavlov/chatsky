@@ -33,8 +33,8 @@ benchmark_all(
     db_uris=dbs,
     from_dialog_len=1,
     to_dialog_len=50,
-    message_lengths=(3, 5, 6, 5, 3),
-    misc_lengths=(2, 4, 3, 8, 100),
+    message_dimensions=(3, 5, 6, 5, 3),
+    misc_dimensions=(2, 4, 3, 8, 100),
 )
 
 benchmark_all(
@@ -44,8 +44,8 @@ benchmark_all(
     db_uris=dbs,
     from_dialog_len=500,
     to_dialog_len=550,
-    message_lengths=(2, 30),
-    misc_lengths=(0, 0),
+    message_dimensions=(2, 30),
+    misc_dimensions=(0, 0),
 )
 
 benchmark_all(
@@ -62,8 +62,8 @@ benchmark_all(
     db_uris=dbs,
     from_dialog_len=500,
     to_dialog_len=550,
-    message_lengths=(3, 5, 6, 5, 3),
-    misc_lengths=(2, 4, 3, 8, 100),
+    message_dimensions=(3, 5, 6, 5, 3),
+    misc_dimensions=(2, 4, 3, 8, 100),
 )
 
 save_results_to_file(
@@ -82,7 +82,7 @@ save_results_to_file(
             context_num=10,
             from_dialog_len=1,
             to_dialog_len=3,
-            message_lengths=(10000, 1),
+            message_dimensions=(10000, 1),
             description="Benchmark with messages containing many keys."
         ),
         *get_cases(
@@ -91,7 +91,7 @@ save_results_to_file(
             context_num=10,
             from_dialog_len=1,
             to_dialog_len=3,
-            misc_lengths=(10000, 1),
+            misc_dimensions=(10000, 1),
             description="Benchmark with misc containing many keys."
         ),
     ],

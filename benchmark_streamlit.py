@@ -90,8 +90,8 @@ def get_opposite_benchmarks(benchmark_set, benchmark):
         ("from_dialog_len", ),
         ("to_dialog_len", ),
         ("step_dialog_len", ),
-        ("message_lengths", ),
-        ("misc_lengths", ),
+        ("message_dimensions", ),
+        ("misc_dimensions", ),
     )
 
     def get_param(bench, param):
@@ -247,8 +247,8 @@ with view_tab:
                 "from_dialog_len",
                 "to_dialog_len",
                 "step_dialog_len",
-                "message_lengths",
-                "misc_lengths",
+                "message_dimensions",
+                "misc_dimensions",
             )
         }
 
