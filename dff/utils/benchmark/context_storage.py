@@ -453,6 +453,7 @@ def save_results_to_file(
             "benchmarks": {},
         }
         for case in benchmark_cases:
+            json.dump(result, fd)
             result["benchmarks"][case.uuid] = {**case.dict(), **case.sizes(), **case.run()}
 
         json.dump(result, fd)
