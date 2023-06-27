@@ -169,11 +169,7 @@ class DBFactory(BaseModel):
         return getattr(module, self.factory)(self.uri)
 
 
-class BenchmarkCase(BaseModel):
-    name: str
-    db_factory: DBFactory
-    uuid: str = Field(default_factory=lambda: str(uuid4()))
-    description: str = ""
+class BenchmarkConfig(BaseModel):
     context_num: int = 100
     from_dialog_len: int = 300
     to_dialog_len: int = 311
@@ -181,19 +177,8 @@ class BenchmarkCase(BaseModel):
     message_dimensions: tp.Tuple[int, ...] = (10, 10)
     misc_dimensions: tp.Tuple[int, ...] = (10, 10)
 
-    def get_context_updater(self):
-        def _context_updater(context: Context):
-            start_len = len(context.requests)
-            if start_len + self.step_dialog_len < self.to_dialog_len:
-                for i in range(start_len, start_len + self.step_dialog_len):
-                    context.add_label((f"flow_{i}", f"node_{i}"))
-                    context.add_request(get_message(self.message_dimensions))
-                    context.add_response(get_message(self.message_dimensions))
-                return context
-            else:
-                return None
-
-        return _context_updater
+    class Config:
+        allow_mutation = False
 
     def sizes(self):
         return {
@@ -206,6 +191,28 @@ class BenchmarkCase(BaseModel):
             "misc_size": asizeof.asizeof(get_dict(self.misc_dimensions)),
             "message_size": asizeof.asizeof(get_message(self.message_dimensions)),
         }
+
+
+class BenchmarkCase(BaseModel):
+    name: str
+    db_factory: DBFactory
+    benchmark_config: BenchmarkConfig = BenchmarkConfig()
+    uuid: str = Field(default_factory=lambda: str(uuid4()))
+    description: str = ""
+
+    def get_context_updater(self):
+        def _context_updater(context: Context):
+            start_len = len(context.requests)
+            if start_len + self.benchmark_config.step_dialog_len < self.benchmark_config.to_dialog_len:
+                for i in range(start_len, start_len + self.benchmark_config.step_dialog_len):
+                    context.add_label((f"flow_{i}", f"node_{i}"))
+                    context.add_request(get_message(self.benchmark_config.message_dimensions))
+                    context.add_response(get_message(self.benchmark_config.message_dimensions))
+                return context
+            else:
+                return None
+
+        return _context_updater
 
     @staticmethod
     def set_average_results(benchmark):
@@ -244,8 +251,12 @@ class BenchmarkCase(BaseModel):
         try:
             write_times, read_times, update_times = time_context_read_write(
                 self.db_factory.db(),
-                get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions),
-                self.context_num,
+                get_context(
+                    self.benchmark_config.from_dialog_len,
+                    self.benchmark_config.message_dimensions,
+                    self.benchmark_config.misc_dimensions
+                ),
+                self.benchmark_config.context_num,
                 context_updater=self.get_context_updater()
             )
             return {
@@ -287,7 +298,7 @@ def save_results_to_file(
         }
         for case in benchmark_cases:
             json.dump(result, fd)
-            result["benchmarks"][case.uuid] = {**case.dict(), **case.sizes(), **case.run()}
+            result["benchmarks"][case.uuid] = {**case.dict(), **case.benchmark_config.sizes(), **case.run()}
 
         json.dump(result, fd)
 
@@ -297,12 +308,7 @@ def benchmark_all(
     name: str,
     description: str,
     db_uris: tp.Dict[str, str],
-    context_num: int = 100,
-    from_dialog_len: int = 300,
-    to_dialog_len: int = 311,
-    step_dialog_len: int = 1,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
+    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
     exist_ok: bool = False,
 ):
     save_results_to_file(
@@ -311,12 +317,7 @@ def benchmark_all(
                 name=db_name,
                 description=description,
                 db_factory=DBFactory(uri=db_uri),
-                context_num=context_num,
-                from_dialog_len=from_dialog_len,
-                to_dialog_len=to_dialog_len,
-                step_dialog_len=step_dialog_len,
-                message_dimensions=message_dimensions,
-                misc_dimensions=misc_dimensions,
+                benchmark_config=benchmark_config,
             )
             for db_name, db_uri in db_uris.items()
         ],
@@ -329,38 +330,29 @@ def benchmark_all(
 
 def report(
     db_uris: tp.Dict[str, str],
-    context_num: int = 100,
-    from_dialog_len: int = 300,
-    to_dialog_len: int = 311,
-    step_dialog_len: int = 1,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
+    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
 ):
     benchmark_cases = [
         BenchmarkCase(
             name=db_name,
             db_factory=DBFactory(uri=db_uri),
-            context_num=context_num,
-            from_dialog_len=from_dialog_len,
-            to_dialog_len=to_dialog_len,
-            step_dialog_len=step_dialog_len,
-            message_dimensions=message_dimensions,
-            misc_dimensions=misc_dimensions,
+            benchmark_config=benchmark_config,
         )
         for db_name, db_uri in db_uris.items()
     ]
-    starting_context_size = asizeof.asizeof(get_context(from_dialog_len, message_dimensions, misc_dimensions))
-    final_context_size= asizeof.asizeof(get_context(to_dialog_len, message_dimensions, misc_dimensions))
-    misc_size = asizeof.asizeof(get_dict(misc_dimensions))
-    message_size = asizeof.asizeof(get_message(message_dimensions))
+    sizes = benchmark_config.sizes()
+    starting_context_size = sizes["starting_context_size"]
+    final_context_size = sizes["final_context_size"]
+    misc_size = sizes["misc_size"]
+    message_size = sizes["message_size"]
 
-    benchmark_config = (
-        f"Number of contexts: {context_num}\n"
-        f"From dialog len: {from_dialog_len}\n"
-        f"To dialog len: {to_dialog_len}\n"
-        f"Step dialog len: {step_dialog_len}\n"
-        f"Message misc dimensions: {message_dimensions}\n"
-        f"Misc dimensions: {misc_dimensions}\n"
+    benchmark_config_report = (
+        f"Number of contexts: {benchmark_config.context_num}\n"
+        f"From dialog len: {benchmark_config.from_dialog_len}\n"
+        f"To dialog len: {benchmark_config.to_dialog_len}\n"
+        f"Step dialog len: {benchmark_config.step_dialog_len}\n"
+        f"Message misc dimensions: {benchmark_config.message_dimensions}\n"
+        f"Misc dimensions: {benchmark_config.misc_dimensions}\n"
         f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
         f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
         f"Starting context size: {starting_context_size} ({naturalsize(starting_context_size, gnu=True)})\n"
@@ -370,9 +362,9 @@ def report(
     # define functions for displaying results
     line_separator = "-" * 80
 
-    print(f"Starting benchmarking with following parameters:\n{benchmark_config}")
+    print(f"Starting benchmarking with following parameters:\n{benchmark_config_report}")
 
-    report_result = f"\n{line_separator}\n".join(["", "DB benchmark", benchmark_config, ""])
+    report_result = f"\n{line_separator}\n".join(["", "DB benchmark", benchmark_config_report, ""])
 
     for benchmark_case in benchmark_cases:
         result = benchmark_case.run()
