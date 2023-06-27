@@ -458,54 +458,11 @@ def save_results_to_file(
         json.dump(result, fd)
 
 
-def get_cases(
-    db_uris: tp.Dict[str, str],
-    case_name_postfix: str = "",
-    context_num: int = 100,
-    from_dialog_len: int = 300,
-    to_dialog_len: int = 311,
-    step_dialog_len: int = 1,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
-    description: str = "",
-):
-    benchmark_cases = []
-    for db, uri in db_uris.items():
-        benchmark_cases.append(
-            BenchmarkCase(
-                name=db + "-dev" + case_name_postfix,
-                db_factory=DBFactory(uri=uri, factory_module="dff.context_storages_old"),
-                context_num=context_num,
-                from_dialog_len=from_dialog_len,
-                to_dialog_len=to_dialog_len,
-                step_dialog_len=step_dialog_len,
-                message_dimensions=message_dimensions,
-                misc_dimensions=misc_dimensions,
-                description=description,
-            )
-        )
-        benchmark_cases.append(
-            BenchmarkCase(
-                name=db + "-partial" + case_name_postfix,
-                db_factory=DBFactory(uri=uri),
-                context_num=context_num,
-                from_dialog_len=from_dialog_len,
-                to_dialog_len=to_dialog_len,
-                step_dialog_len=step_dialog_len,
-                message_dimensions=message_dimensions,
-                misc_dimensions=misc_dimensions,
-                description=description,
-            )
-        )
-    return benchmark_cases
-
-
 def benchmark_all(
     file: tp.Union[str, pathlib.Path],
     name: str,
     description: str,
     db_uris: tp.Dict[str, str],
-    case_name_postfix: str = "",
     context_num: int = 100,
     from_dialog_len: int = 300,
     to_dialog_len: int = 311,
@@ -515,17 +472,20 @@ def benchmark_all(
     exist_ok: bool = False,
 ):
     save_results_to_file(
-        get_cases(
-            db_uris,
-            case_name_postfix,
-            context_num,
-            from_dialog_len,
-            to_dialog_len,
-            step_dialog_len,
-            message_dimensions,
-            misc_dimensions,
-            description=description,
-        ),
+        [
+            BenchmarkCase(
+                name=db_name,
+                description=description,
+                db_factory=DBFactory(uri=db_uri),
+                context_num=context_num,
+                from_dialog_len=from_dialog_len,
+                to_dialog_len=to_dialog_len,
+                step_dialog_len=step_dialog_len,
+                message_dimensions=message_dimensions,
+                misc_dimensions=misc_dimensions,
+            )
+            for db_name, db_uri in db_uris.items()
+        ],
         file,
         name,
         description,
