@@ -41,46 +41,46 @@ from dff.context_storages import DBContextStorage
 from dff.script import Context, Message
 
 
-def get_dict(lengths: tp.Tuple[int, ...]):
+def get_dict(dimensions: tp.Tuple[int, ...]):
     """
-    Misc dictionary build in lengths dimensions.
+    Misc dictionary build in `dimensions` dimensions.
 
-    :param lengths:
+    :param dimensions:
         Dimensions of the dictionary.
-        Each element of the lengths tuple is the number of keys on the corresponding level of the dictionary.
-        The last element of the lengths tuple is the length of the str values of the dict.
+        Each element of the dimensions tuple is the number of keys on the corresponding level of the dictionary.
+        The last element of the dimensions tuple is the length of the str values of the dict.
 
-        e.g. lengths=(1, 2) produces a dictionary with 1 key that points to a string of len 2.
-        whereas lengths=(1, 2, 3) produces a dictionary with 1 key that points to a dictionary
+        e.g. dimensions=(1, 2) produces a dictionary with 1 key that points to a string of len 2.
+        whereas dimensions=(1, 2, 3) produces a dictionary with 1 key that points to a dictionary
         with 2 keys each of which points to a string of len 3.
 
-        So the len of lengths is the depth of the dictionary, while its values are
+        So, the len of dimensions is the depth of the dictionary, while its values are
         the width of the dictionary at each level.
     :return: Misc dictionary.
     """
-    def _get_dict(lengths: tp.Tuple[int, ...]):
-        if len(lengths) < 2:
-            return "." * lengths[0]
-        return {i: _get_dict(lengths[1:]) for i in range(lengths[0])}
+    def _get_dict(dimensions: tp.Tuple[int, ...]):
+        if len(dimensions) < 2:
+            return "." * dimensions[0]
+        return {i: _get_dict(dimensions[1:]) for i in range(dimensions[0])}
 
-    if len(lengths) > 1:
-        return _get_dict(lengths)
-    elif len(lengths) == 1:
-        return _get_dict((lengths[0], 0))
+    if len(dimensions) > 1:
+        return _get_dict(dimensions)
+    elif len(dimensions) == 1:
+        return _get_dict((dimensions[0], 0))
     else:
         return _get_dict((0, 0))
 
 
-def get_message(message_lengths: tp.Tuple[int, ...]):
+def get_message(message_dimensions: tp.Tuple[int, ...]):
     """
-    Message with misc field of message_lengths dimension.
-    :param message_lengths:
+    Message with misc field of message_dimensions dimension.
+    :param message_dimensions:
     :return:
     """
-    return Message(misc=get_dict(message_lengths))
+    return Message(misc=get_dict(message_dimensions))
 
 
-def get_context(dialog_len: int, message_lengths: tp.Tuple[int, ...], misc_lengths: tp.Tuple[int, ...]) -> Context:
+def get_context(dialog_len: int, message_dimensions: tp.Tuple[int, ...], misc_dimensions: tp.Tuple[int, ...]) -> Context:
     """
     A context with a given number of dialog turns, a given message dimension
     and a given misc dimension.
@@ -88,9 +88,9 @@ def get_context(dialog_len: int, message_lengths: tp.Tuple[int, ...], misc_lengt
 
     return Context(
         labels={i: (f"flow_{i}", f"node_{i}") for i in range(dialog_len)},
-        requests={i: get_message(message_lengths) for i in range(dialog_len)},
-        responses={i: get_message(message_lengths) for i in range(dialog_len)},
-        misc=get_dict(misc_lengths),
+        requests={i: get_message(message_dimensions) for i in range(dialog_len)},
+        responses={i: get_message(message_dimensions) for i in range(dialog_len)},
+        misc=get_dict(misc_dimensions),
     )
 
 
@@ -176,8 +176,8 @@ def report(
     *context_storages: DBContextStorage,
     context_num: int = 1000,
     dialog_len: int = 300,
-    message_lengths: tp.Tuple[int, ...] = (10, 10),
-    misc_lengths: tp.Tuple[int, ...] = (10, 10),
+    message_dimensions: tp.Tuple[int, ...] = (10, 10),
+    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
     pdf: tp.Optional[str] = None,
 ):
     """
@@ -187,23 +187,23 @@ def report(
     :param context_num: Number of times a single context should be written to/read from context storage.
     :param dialog_len:
         A number of turns inside a single context. The context will contain simple text requests/responses.
-    :param message_lengths:
-    :param misc_lengths:
+    :param message_dimensions:
+    :param misc_dimensions:
     :param pdf:
         A pdf file name to save report to.
         Defaults to None.
         If set to None, prints the result to stdout instead of creating a pdf file.
     """
-    context = get_context(dialog_len, message_lengths, misc_lengths)
+    context = get_context(dialog_len, message_dimensions, misc_dimensions)
     context_size = asizeof.asizeof(context)
-    misc_size = asizeof.asizeof(get_dict(misc_lengths))
-    message_size = asizeof.asizeof(get_message(message_lengths))
+    misc_size = asizeof.asizeof(get_dict(misc_dimensions))
+    message_size = asizeof.asizeof(get_message(message_dimensions))
 
     benchmark_config = (
         f"Number of contexts: {context_num}\n"
         f"Dialog len: {dialog_len}\n"
-        f"Message misc dimensions: {message_lengths}\n"
-        f"Misc dimensions: {misc_lengths}\n"
+        f"Message misc dimensions: {message_dimensions}\n"
+        f"Misc dimensions: {misc_dimensions}\n"
         f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
         f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
         f"Size of one context: {context_size} ({naturalsize(context_size, gnu=True)})"
@@ -349,8 +349,8 @@ class BenchmarkCase(BaseModel):
     from_dialog_len: int = 300
     to_dialog_len: int = 311
     step_dialog_len: int = 1
-    message_lengths: tp.Tuple[int, ...] = (10, 10)
-    misc_lengths: tp.Tuple[int, ...] = (10, 10)
+    message_dimensions: tp.Tuple[int, ...] = (10, 10)
+    misc_dimensions: tp.Tuple[int, ...] = (10, 10)
 
     def get_context_updater(self):
         def _context_updater(context: Context):
@@ -358,8 +358,8 @@ class BenchmarkCase(BaseModel):
             if start_len + self.step_dialog_len < self.to_dialog_len:
                 for i in range(start_len, start_len + self.step_dialog_len):
                     context.add_label((f"flow_{i}", f"node_{i}"))
-                    context.add_request(get_message(self.message_lengths))
-                    context.add_response(get_message(self.message_lengths))
+                    context.add_request(get_message(self.message_dimensions))
+                    context.add_response(get_message(self.message_dimensions))
                 return context
             else:
                 return None
@@ -369,13 +369,13 @@ class BenchmarkCase(BaseModel):
     def sizes(self):
         return {
             "starting_context_size": asizeof.asizeof(
-                get_context(self.from_dialog_len, self.message_lengths, self.misc_lengths)
+                get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
             ),
             "final_context_size": asizeof.asizeof(
-                get_context(self.to_dialog_len, self.message_lengths, self.misc_lengths)
+                get_context(self.to_dialog_len, self.message_dimensions, self.misc_dimensions)
             ),
-            "misc_size": asizeof.asizeof(get_dict(self.misc_lengths)),
-            "message_size": asizeof.asizeof(get_message(self.message_lengths)),
+            "misc_size": asizeof.asizeof(get_dict(self.misc_dimensions)),
+            "message_size": asizeof.asizeof(get_message(self.message_dimensions)),
         }
 
     @staticmethod
@@ -415,7 +415,7 @@ class BenchmarkCase(BaseModel):
         try:
             write_times, read_times, update_times = time_context_read_write(
                 self.db_factory.db(),
-                get_context(self.from_dialog_len, self.message_lengths, self.misc_lengths),
+                get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions),
                 self.context_num,
                 context_updater=self.get_context_updater()
             )
@@ -469,8 +469,8 @@ def get_cases(
     from_dialog_len: int = 300,
     to_dialog_len: int = 311,
     step_dialog_len: int = 1,
-    message_lengths: tp.Tuple[int, ...] = (10, 10),
-    misc_lengths: tp.Tuple[int, ...] = (10, 10),
+    message_dimensions: tp.Tuple[int, ...] = (10, 10),
+    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
     description: str = "",
 ):
     benchmark_cases = []
@@ -483,8 +483,8 @@ def get_cases(
                 from_dialog_len=from_dialog_len,
                 to_dialog_len=to_dialog_len,
                 step_dialog_len=step_dialog_len,
-                message_lengths=message_lengths,
-                misc_lengths=misc_lengths,
+                message_dimensions=message_dimensions,
+                misc_dimensions=misc_dimensions,
                 description=description,
             )
         )
@@ -496,8 +496,8 @@ def get_cases(
                 from_dialog_len=from_dialog_len,
                 to_dialog_len=to_dialog_len,
                 step_dialog_len=step_dialog_len,
-                message_lengths=message_lengths,
-                misc_lengths=misc_lengths,
+                message_dimensions=message_dimensions,
+                misc_dimensions=misc_dimensions,
                 description=description,
             )
         )
@@ -514,8 +514,8 @@ def benchmark_all(
     from_dialog_len: int = 300,
     to_dialog_len: int = 311,
     step_dialog_len: int = 1,
-    message_lengths: tp.Tuple[int, ...] = (10, 10),
-    misc_lengths: tp.Tuple[int, ...] = (10, 10),
+    message_dimensions: tp.Tuple[int, ...] = (10, 10),
+    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
     exist_ok: bool = False,
 ):
     save_results_to_file(
@@ -526,8 +526,8 @@ def benchmark_all(
             from_dialog_len,
             to_dialog_len,
             step_dialog_len,
-            message_lengths,
-            misc_lengths,
+            message_dimensions,
+            misc_dimensions,
             description=description,
         ),
         file,

@@ -39,5 +39,12 @@ for file in benchmark_path.iterdir():
         for benchmark in new_benchmark_set["benchmarks"].values():
             BenchmarkCase.set_average_results(benchmark)
 
+        # update lengths -> dimensions renaming
+        for benchmark in new_benchmark_set["benchmarks"].values():
+            for param in ("message", "misc"):
+                dimensions = benchmark.pop(f"{param}_lengths", None)
+                if dimensions is not None:
+                    benchmark[f"{param}_dimensions"] = dimensions
+
         with open(file, "w") as fd:
             json.dump(new_benchmark_set, fd)
