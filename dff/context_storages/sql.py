@@ -186,7 +186,6 @@ class SQLContextStorage(DBContextStorage):
         _PICKLETYPE_CLASS = _import_pickletype_for_dialect(self.dialect)
 
         self.tables_prefix = table_name_prefix
-        self.context_schema.enable_async(self.dialect == "sqlite")
 
         self.tables = dict()
         current_time = _get_current_time(self.dialect)

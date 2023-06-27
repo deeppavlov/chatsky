@@ -1,7 +1,7 @@
-from asyncio import gather, get_event_loop, create_task
+from asyncio import gather, create_task
 from uuid import uuid4
 from enum import Enum
-from pydantic import BaseModel, Field, PrivateAttr, validator
+from pydantic import BaseModel, Field
 from typing import Any, Coroutine, Dict, List, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
@@ -48,17 +48,8 @@ class SchemaField(BaseModel):
     Default: -3.
     """
 
-    _subscript_callback: Callable = PrivateAttr(default=lambda: None)
-    # TODO!
-
     class Config:
         validate_assignment = True
-
-    @validator("subscript")
-    def _run_callback_before_changing_subscript(cls, value: Any, values: Dict):
-        if "_subscript_callback" in values:
-            values["_subscript_callback"]()
-        return value
 
 
 class ExtraFields(str, Enum):
@@ -95,44 +86,11 @@ class ContextSchema(BaseModel):
     Field for storing Context field `labels`.
     """
 
-    _pending_futures: List[Awaitable] = PrivateAttr(default=list())
-    # TODO!
-
-    _allow_async: bool = PrivateAttr(default=True)
-    # TODO!
-
     class Config:
         validate_assignment = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-        field_props: SchemaField
-        for field_props in dict(self).values():
-            field_props.__setattr__("_subscript_callback", self.close)
-
-    def __del__(self):
-        self.close()
-
-    def enable_async(self, allow: bool):
-        self._allow_async = allow
-
-    def close(self):
-        async def _await_all_pending_transactions():
-            if self._allow_async:
-                await gather(*self._pending_futures)
-            else:
-                for task in self._pending_futures:
-                    await task
-
-        try:
-            loop = get_event_loop()
-            if loop.is_running():
-                loop.create_task(_await_all_pending_transactions())
-            else:
-                loop.run_until_complete(_await_all_pending_transactions())
-        except Exception:
-            pass
 
     async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str, primary_id: str) -> Context:
         """
@@ -198,11 +156,14 @@ class ContextSchema(BaseModel):
         for field, payload in logs_dict.items():
             for key, value in payload.items():
                 flattened_dict += [(field, key, value)]
-        if not bool(chunk_size):
-            self._pending_futures += [create_task(log_writer(flattened_dict, storage_key, primary_id))]
-        else:
-            for ch in range(0, len(flattened_dict), chunk_size):
-                next_ch = ch + chunk_size
-                chunk = flattened_dict[ch:next_ch]
-                self._pending_futures += [create_task(log_writer(chunk, storage_key, primary_id))]
+        if len(flattened_dict) > 0:
+            if not bool(chunk_size):
+                await log_writer(flattened_dict, storage_key, primary_id)
+            else:
+                tasks = list()
+                for ch in range(0, len(flattened_dict), chunk_size):
+                    next_ch = ch + chunk_size
+                    chunk = flattened_dict[ch:next_ch]
+                    tasks += [log_writer(chunk, storage_key, primary_id)]
+                await gather(*tasks)
         return primary_id
