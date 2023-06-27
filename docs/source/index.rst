@@ -5,7 +5,7 @@
 Dialog Flow Framework
 =====================
 
-*Date*: |build_date| *Version*: |version|
+*Date*: |today| *Version*: |version|
 
 .. image:: https://pepy.tech/badge/dff
    :alt: Number of downloads
