@@ -146,13 +146,9 @@ def time_context_read_write(
 
         # read operation benchmark
         read_start = perf_counter()
-        actual_context = context_storage[ctx_id]
+        _ = context_storage[ctx_id]
         read_time = perf_counter() - read_start
         read_times[-1][len(context.labels)] = read_time
-
-        # check returned context
-        # if actual_context != context:
-        #     raise RuntimeError(f"True context:\n{context}\nActual context:\n{actual_context}")
 
         if context_updater is not None:
             update_times.append({})
@@ -164,7 +160,7 @@ def time_context_read_write(
                 update_times[-1][len(updated_context.labels)] = update_time
 
                 read_start = perf_counter()
-                actual_context = context_storage[ctx_id]
+                _ = context_storage[ctx_id]
                 read_time = perf_counter() - read_start
                 read_times[-1][len(updated_context.labels)] = read_time
 
