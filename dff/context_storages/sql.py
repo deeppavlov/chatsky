@@ -86,13 +86,13 @@ def _import_insert_for_dialect(dialect: str) -> Callable[[str], "Insert"]:
 
 def _get_write_limit(dialect: str):
     if dialect == "sqlite":
-        return (int(os.getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 3
+        return (int(os.getenv("SQLITE_MAX_VARIABLE_NUMBER", 999)) - 10) // 4
     elif dialect == "mysql":
         return False
     elif dialect == "postgresql":
-        return 32757 // 3
+        return 32757 // 4
     else:
-        return 9990 // 3
+        return 9990 // 4
 
 
 def _import_datetime_from_dialect(dialect: str) -> "DateTime":
@@ -186,6 +186,7 @@ class SQLContextStorage(DBContextStorage):
         _PICKLETYPE_CLASS = _import_pickletype_for_dialect(self.dialect)
 
         self.tables_prefix = table_name_prefix
+        self.context_schema.enable_async_access(self.dialect == "sqlite")
 
         self.tables = dict()
         current_time = _get_current_time(self.dialect)
