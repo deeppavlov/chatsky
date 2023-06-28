@@ -78,7 +78,7 @@ dbs = {
 pathlib.Path("benchmarks").mkdir(exist_ok=True)
 
 benchmark_all(
-    "benchmarks/alexaprize1.json",
+    "benchmarks/alexaprize.json",
     "Alexaprize-like dialogue benchmarks",
     "Benchmark with dialogues similar to those from alexaprize.",
     db_uris=dbs,
