@@ -46,5 +46,19 @@ for file in benchmark_path.iterdir():
                 if dimensions is not None:
                     benchmark[f"{param}_dimensions"] = dimensions
 
+        # update benchmark_config
+        for benchmark in new_benchmark_set["benchmarks"].values():
+            if "benchmark_config" not in benchmark:
+                benchmark_config = {
+                    "context_num": benchmark.pop("context_num"),
+                    "from_dialog_len": benchmark.pop("from_dialog_len"),
+                    "to_dialog_len": benchmark.pop("to_dialog_len"),
+                    "step_dialog_len": benchmark.pop("step_dialog_len"),
+                    "message_dimensions": benchmark.pop("message_dimensions"),
+                    "misc_dimensions": benchmark.pop("misc_dimensions"),
+                }
+
+                benchmark["benchmark_config"] = benchmark_config
+
         with open(file, "w") as fd:
             json.dump(new_benchmark_set, fd)
