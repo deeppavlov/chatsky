@@ -1,7 +1,7 @@
-from asyncio import gather, create_task
+from asyncio import gather
 from uuid import uuid4
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PrivateAttr
 from typing import Any, Coroutine, Dict, List, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
@@ -86,11 +86,16 @@ class ContextSchema(BaseModel):
     Field for storing Context field `labels`.
     """
 
+    _supports_async: bool = PrivateAttr(default=False)
+
     class Config:
         validate_assignment = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def enable_async_access(self, enabled: bool):
+        self._supports_async = enabled
 
     async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str, primary_id: str) -> Context:
         """
@@ -165,5 +170,9 @@ class ContextSchema(BaseModel):
                     next_ch = ch + chunk_size
                     chunk = flattened_dict[ch:next_ch]
                     tasks += [log_writer(chunk, storage_key, primary_id)]
-                await gather(*tasks)
+                if self._supports_async:
+                    await gather(*tasks)
+                else:
+                    for task in tasks:
+                        await task
         return primary_id
