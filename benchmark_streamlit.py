@@ -86,12 +86,12 @@ def add_metrics(container, value_benchmark, diff_benchmark=None):
 def get_opposite_benchmarks(benchmark_set, benchmark):
     compare_params = (
         ("db_factory", "uri"),
-        ("context_num", ),
-        ("from_dialog_len", ),
-        ("to_dialog_len", ),
-        ("step_dialog_len", ),
-        ("message_dimensions", ),
-        ("misc_dimensions", ),
+        ("benchmark_config", "context_num"),
+        ("benchmark_config", "from_dialog_len"),
+        ("benchmark_config", "to_dialog_len"),
+        ("benchmark_config", "step_dialog_len"),
+        ("benchmark_config", "message_dimensions"),
+        ("benchmark_config", "misc_dimensions"),
     )
 
     def get_param(bench, param):
@@ -243,12 +243,7 @@ with view_tab:
             stat: selected_benchmark[stat]
             for stat in (
                 "db_factory",
-                "context_num",
-                "from_dialog_len",
-                "to_dialog_len",
-                "step_dialog_len",
-                "message_dimensions",
-                "misc_dimensions",
+                "benchmark_config",
             )
         }
 

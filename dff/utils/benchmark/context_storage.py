@@ -28,15 +28,6 @@ from pympler import asizeof
 from tqdm.auto import tqdm
 from humanize import naturalsize
 
-from dff.script import Context
-
-try:
-    import matplotlib
-    from matplotlib.backends.backend_pdf import PdfPages
-    import matplotlib.pyplot as plt
-except ImportError:
-    matplotlib = None
-
 from dff.context_storages import DBContextStorage
 from dff.script import Context, Message
 
@@ -168,164 +159,6 @@ def time_context_read_write(
     return write_times, read_times, update_times
 
 
-def report(
-    *context_storages: DBContextStorage,
-    context_num: int = 1000,
-    dialog_len: int = 300,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
-    pdf: tp.Optional[str] = None,
-):
-    """
-    Benchmark context storage(s) and generate a report.
-
-    :param context_storages: Context storages to benchmark.
-    :param context_num: Number of times a single context should be written to/read from context storage.
-    :param dialog_len:
-        A number of turns inside a single context. The context will contain simple text requests/responses.
-    :param message_dimensions:
-    :param misc_dimensions:
-    :param pdf:
-        A pdf file name to save report to.
-        Defaults to None.
-        If set to None, prints the result to stdout instead of creating a pdf file.
-    """
-    context = get_context(dialog_len, message_dimensions, misc_dimensions)
-    context_size = asizeof.asizeof(context)
-    misc_size = asizeof.asizeof(get_dict(misc_dimensions))
-    message_size = asizeof.asizeof(get_message(message_dimensions))
-
-    benchmark_config = (
-        f"Number of contexts: {context_num}\n"
-        f"Dialog len: {dialog_len}\n"
-        f"Message misc dimensions: {message_dimensions}\n"
-        f"Misc dimensions: {misc_dimensions}\n"
-        f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
-        f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
-        f"Size of one context: {context_size} ({naturalsize(context_size, gnu=True)})"
-    )
-
-    print(f"Starting benchmarking with following parameters:\n{benchmark_config}")
-
-    benchmarking_results: tp.Dict[str, tp.Union[tp.Tuple[tp.List[float], tp.List[float]], str]] = {}
-
-    for context_storage in context_storages:
-        try:
-            # todo: update report method
-            write, read = time_context_read_write(context_storage, context, context_num)
-
-            benchmarking_results[context_storage.full_path] = write, read
-        except Exception as e:
-            benchmarking_results[context_storage.full_path] = getattr(e, "message", repr(e))
-
-    # define functions for displaying results
-    line_separator = "-" * 80
-
-    pretty_config = f"{line_separator}\nDB benchmark\n{line_separator}\n{benchmark_config}\n{line_separator}"
-
-    def pretty_benchmark_result(storage_name, benchmarking_result) -> str:
-        result = f"{storage_name}\n{line_separator}\n"
-        if not isinstance(benchmarking_result, str):
-            write, read = benchmarking_result
-            result += (
-                f"Average write time: {sum(write) / len(write)} s\n"
-                f"Average read time: {sum(read) / len(read)} s\n{line_separator}"
-            )
-        else:
-            result += f"{benchmarking_result}\n{line_separator}"
-        return result
-
-    def get_scores_and_leaderboard(
-        sort_by: tp.Literal["Write", "Read"]
-    ) -> tp.Tuple[tp.List[tp.Tuple[str, tp.Optional[float]]], str]:
-        benchmark_index = 0 if sort_by == "Write" else 1
-
-        scores = sorted(
-            [
-                (storage_name, sum(result[benchmark_index]) / len(result[benchmark_index]))
-                for storage_name, result in benchmarking_results.items()
-                if not isinstance(result, str)
-            ],
-            key=lambda benchmark: benchmark[1],  # sort in ascending order
-        )
-        scores += [
-            (storage_name, None) for storage_name, result in benchmarking_results.items() if isinstance(result, str)
-        ]
-        leaderboard = (
-            f"{sort_by} time leaderboard\n{line_separator}\n"
-            + "\n".join(
-                [f"{result}{' s' if result is not None else ''}: {storage_name}" for storage_name, result in scores]
-            )
-            + "\n"
-            + line_separator
-        )
-
-        return scores, leaderboard
-
-    _, write_leaderboard = get_scores_and_leaderboard("Write")
-    _, read_leaderboard = get_scores_and_leaderboard("Read")
-
-    if pdf is None:
-        result = pretty_config
-
-        for storage_name, benchmarking_result in benchmarking_results.items():
-            result += f"\n{pretty_benchmark_result(storage_name, benchmarking_result)}"
-
-        if len(context_storages) > 1:
-            result += f"\n{write_leaderboard}\n{read_leaderboard}"
-
-        print(result)
-    else:
-        if matplotlib is None:
-            raise RuntimeError("`matplotlib` is required to generate pdf reports.")
-
-        figure_size = (11, 8)
-
-        def text_page(text, *, x=0.5, y=0.5, size=18, ha="center", family="monospace", **kwargs):
-            page = plt.figure(figsize=figure_size)
-            page.clf()
-            page.text(x, y, text, transform=page.transFigure, size=size, ha=ha, family=family, **kwargs)
-
-        def scatter_page(storage_name, write, read):
-            plt.figure(figsize=figure_size)
-            plt.scatter(range(len(write)), write, label="write times")
-            plt.scatter(range(len(read)), read, label="read times")
-            plt.legend(loc="best")
-            plt.grid(True)
-            plt.title(storage_name)
-
-        with PdfPages(pdf) as mpl_pdf:
-            text_page(pretty_config, size=24)
-            mpl_pdf.savefig()
-            plt.close()
-
-            if len(context_storages) > 1:
-                text_page(write_leaderboard, x=0.05, size=14, ha="left")
-                mpl_pdf.savefig()
-                plt.close()
-                text_page(read_leaderboard, x=0.05, size=14, ha="left")
-                mpl_pdf.savefig()
-                plt.close()
-
-            for storage_name, benchmarking_result in benchmarking_results.items():
-                txt = pretty_benchmark_result(storage_name, benchmarking_result)
-
-                if not isinstance(benchmarking_result, str):
-                    write, read = benchmarking_result
-
-                    text_page(txt)
-                    mpl_pdf.savefig()
-                    plt.close()
-
-                    scatter_page(storage_name, write, read)
-                    mpl_pdf.savefig()
-                    plt.close()
-                else:
-                    text_page(txt)
-                    mpl_pdf.savefig()
-                    plt.close()
-
-
 class DBFactory(BaseModel):
     uri: str
     factory_module: str = "dff.context_storages"
@@ -336,11 +169,7 @@ class DBFactory(BaseModel):
         return getattr(module, self.factory)(self.uri)
 
 
-class BenchmarkCase(BaseModel):
-    name: str
-    db_factory: DBFactory
-    uuid: str = Field(default_factory=lambda: str(uuid4()))
-    description: str = ""
+class BenchmarkConfig(BaseModel):
     context_num: int = 100
     from_dialog_len: int = 300
     to_dialog_len: int = 311
@@ -348,19 +177,8 @@ class BenchmarkCase(BaseModel):
     message_dimensions: tp.Tuple[int, ...] = (10, 10)
     misc_dimensions: tp.Tuple[int, ...] = (10, 10)
 
-    def get_context_updater(self):
-        def _context_updater(context: Context):
-            start_len = len(context.requests)
-            if start_len + self.step_dialog_len < self.to_dialog_len:
-                for i in range(start_len, start_len + self.step_dialog_len):
-                    context.add_label((f"flow_{i}", f"node_{i}"))
-                    context.add_request(get_message(self.message_dimensions))
-                    context.add_response(get_message(self.message_dimensions))
-                return context
-            else:
-                return None
-
-        return _context_updater
+    class Config:
+        allow_mutation = False
 
     def sizes(self):
         return {
@@ -373,6 +191,28 @@ class BenchmarkCase(BaseModel):
             "misc_size": asizeof.asizeof(get_dict(self.misc_dimensions)),
             "message_size": asizeof.asizeof(get_message(self.message_dimensions)),
         }
+
+
+class BenchmarkCase(BaseModel):
+    name: str
+    db_factory: DBFactory
+    benchmark_config: BenchmarkConfig = BenchmarkConfig()
+    uuid: str = Field(default_factory=lambda: str(uuid4()))
+    description: str = ""
+
+    def get_context_updater(self):
+        def _context_updater(context: Context):
+            start_len = len(context.requests)
+            if start_len + self.benchmark_config.step_dialog_len < self.benchmark_config.to_dialog_len:
+                for i in range(start_len, start_len + self.benchmark_config.step_dialog_len):
+                    context.add_label((f"flow_{i}", f"node_{i}"))
+                    context.add_request(get_message(self.benchmark_config.message_dimensions))
+                    context.add_response(get_message(self.benchmark_config.message_dimensions))
+                return context
+            else:
+                return None
+
+        return _context_updater
 
     @staticmethod
     def set_average_results(benchmark):
@@ -411,8 +251,12 @@ class BenchmarkCase(BaseModel):
         try:
             write_times, read_times, update_times = time_context_read_write(
                 self.db_factory.db(),
-                get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions),
-                self.context_num,
+                get_context(
+                    self.benchmark_config.from_dialog_len,
+                    self.benchmark_config.message_dimensions,
+                    self.benchmark_config.misc_dimensions
+                ),
+                self.benchmark_config.context_num,
                 context_updater=self.get_context_updater()
             )
             return {
@@ -453,8 +297,7 @@ def save_results_to_file(
             "benchmarks": {},
         }
         for case in benchmark_cases:
-            json.dump(result, fd)
-            result["benchmarks"][case.uuid] = {**case.dict(), **case.sizes(), **case.run()}
+            result["benchmarks"][case.uuid] = {**case.dict(), **case.benchmark_config.sizes(), **case.run()}
 
         json.dump(result, fd)
 
@@ -464,12 +307,7 @@ def benchmark_all(
     name: str,
     description: str,
     db_uris: tp.Dict[str, str],
-    context_num: int = 100,
-    from_dialog_len: int = 300,
-    to_dialog_len: int = 311,
-    step_dialog_len: int = 1,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
+    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
     exist_ok: bool = False,
 ):
     save_results_to_file(
@@ -478,12 +316,7 @@ def benchmark_all(
                 name=db_name,
                 description=description,
                 db_factory=DBFactory(uri=db_uri),
-                context_num=context_num,
-                from_dialog_len=from_dialog_len,
-                to_dialog_len=to_dialog_len,
-                step_dialog_len=step_dialog_len,
-                message_dimensions=message_dimensions,
-                misc_dimensions=misc_dimensions,
+                benchmark_config=benchmark_config,
             )
             for db_name, db_uri in db_uris.items()
         ],
@@ -492,3 +325,61 @@ def benchmark_all(
         description,
         exist_ok=exist_ok
     )
+
+
+def report(
+    db_uris: tp.Dict[str, str],
+    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
+):
+    benchmark_cases = [
+        BenchmarkCase(
+            name=db_name,
+            db_factory=DBFactory(uri=db_uri),
+            benchmark_config=benchmark_config,
+        )
+        for db_name, db_uri in db_uris.items()
+    ]
+    sizes = benchmark_config.sizes()
+    starting_context_size = sizes["starting_context_size"]
+    final_context_size = sizes["final_context_size"]
+    misc_size = sizes["misc_size"]
+    message_size = sizes["message_size"]
+
+    benchmark_config_report = (
+        f"Number of contexts: {benchmark_config.context_num}\n"
+        f"From dialog len: {benchmark_config.from_dialog_len}\n"
+        f"To dialog len: {benchmark_config.to_dialog_len}\n"
+        f"Step dialog len: {benchmark_config.step_dialog_len}\n"
+        f"Message misc dimensions: {benchmark_config.message_dimensions}\n"
+        f"Misc dimensions: {benchmark_config.misc_dimensions}\n"
+        f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
+        f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
+        f"Starting context size: {starting_context_size} ({naturalsize(starting_context_size, gnu=True)})\n"
+        f"Final context size: {final_context_size} ({naturalsize(final_context_size, gnu=True)})"
+    )
+
+    # define functions for displaying results
+    line_separator = "-" * 80
+
+    print(f"Starting benchmarking with following parameters:\n{benchmark_config_report}")
+
+    report_result = f"\n{line_separator}\n".join(["", "DB benchmark", benchmark_config_report, ""])
+
+    for benchmark_case in benchmark_cases:
+        result = benchmark_case.run()
+        report_result += f"\n{line_separator}\n".join(
+            [
+                benchmark_case.name,
+                "".join(
+                    [
+                        f"{metric.title() + ': ' + str(result['average_results']['pretty_' + metric]):20}"
+                        if result["success"] else
+                        result["result"]
+                        for metric in ("write", "read", "update", "read+update")
+                    ]
+                ),
+                "",
+            ]
+        )
+
+    print(report_result, end="")

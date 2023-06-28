@@ -2,19 +2,14 @@ import pathlib
 import typing as tp
 from platform import system
 
-from dff.utils.benchmark.context_storage import save_results_to_file, BenchmarkCase, DBFactory
+from dff.utils.benchmark.context_storage import save_results_to_file, BenchmarkCase, DBFactory, BenchmarkConfig
 
 
 # partial-specific logic
 def get_cases(
     db_uris: tp.Dict[str, str],
     case_name_postfix: str = "",
-    context_num: int = 100,
-    from_dialog_len: int = 300,
-    to_dialog_len: int = 311,
-    step_dialog_len: int = 1,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
+    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
     description: str = "",
 ):
     benchmark_cases = []
@@ -23,12 +18,7 @@ def get_cases(
             BenchmarkCase(
                 name=db + "-dev" + case_name_postfix,
                 db_factory=DBFactory(uri=uri, factory_module="dff.context_storages_old"),
-                context_num=context_num,
-                from_dialog_len=from_dialog_len,
-                to_dialog_len=to_dialog_len,
-                step_dialog_len=step_dialog_len,
-                message_dimensions=message_dimensions,
-                misc_dimensions=misc_dimensions,
+                benchmark_config=benchmark_config,
                 description=description,
             )
         )
@@ -36,12 +26,7 @@ def get_cases(
             BenchmarkCase(
                 name=db + "-partial" + case_name_postfix,
                 db_factory=DBFactory(uri=uri),
-                context_num=context_num,
-                from_dialog_len=from_dialog_len,
-                to_dialog_len=to_dialog_len,
-                step_dialog_len=step_dialog_len,
-                message_dimensions=message_dimensions,
-                misc_dimensions=misc_dimensions,
+                benchmark_config=benchmark_config,
                 description=description,
             )
         )
@@ -54,24 +39,14 @@ def benchmark_all(
     description: str,
     db_uris: tp.Dict[str, str],
     case_name_postfix: str = "",
-    context_num: int = 100,
-    from_dialog_len: int = 300,
-    to_dialog_len: int = 311,
-    step_dialog_len: int = 1,
-    message_dimensions: tp.Tuple[int, ...] = (10, 10),
-    misc_dimensions: tp.Tuple[int, ...] = (10, 10),
+    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
     exist_ok: bool = False,
 ):
     save_results_to_file(
         get_cases(
             db_uris,
             case_name_postfix,
-            context_num,
-            from_dialog_len,
-            to_dialog_len,
-            step_dialog_len,
-            message_dimensions,
-            misc_dimensions,
+            benchmark_config=benchmark_config,
             description=description,
         ),
         file,
@@ -107,10 +82,12 @@ benchmark_all(
     "Alexaprize-like dialogue benchmarks",
     "Benchmark with dialogues similar to those from alexaprize.",
     db_uris=dbs,
-    from_dialog_len=1,
-    to_dialog_len=50,
-    message_dimensions=(3, 5, 6, 5, 3),
-    misc_dimensions=(2, 4, 3, 8, 100),
+    benchmark_config=BenchmarkConfig(
+        from_dialog_len=1,
+        to_dialog_len=50,
+        message_dimensions=(3, 5, 6, 5, 3),
+        misc_dimensions=(2, 4, 3, 8, 100),
+    )
 )
 
 benchmark_all(
@@ -118,10 +95,12 @@ benchmark_all(
     "Short messages",
     "Benchmark with short messages, long dialog len.",
     db_uris=dbs,
-    from_dialog_len=500,
-    to_dialog_len=550,
-    message_dimensions=(2, 30),
-    misc_dimensions=(0, 0),
+    benchmark_config=BenchmarkConfig(
+        from_dialog_len=500,
+        to_dialog_len=550,
+        message_dimensions=(2, 30),
+        misc_dimensions=(0, 0),
+    )
 )
 
 benchmark_all(
@@ -136,10 +115,12 @@ benchmark_all(
     "Alexaprize-like dialogue benchmarks (longer)",
     "Benchmark with dialogues similar to those from alexaprize, but dialog len is increased.",
     db_uris=dbs,
-    from_dialog_len=500,
-    to_dialog_len=550,
-    message_dimensions=(3, 5, 6, 5, 3),
-    misc_dimensions=(2, 4, 3, 8, 100),
+    benchmark_config=BenchmarkConfig(
+        from_dialog_len=500,
+        to_dialog_len=550,
+        message_dimensions=(3, 5, 6, 5, 3),
+        misc_dimensions=(2, 4, 3, 8, 100),
+    )
 )
 
 save_results_to_file(
@@ -147,27 +128,33 @@ save_results_to_file(
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-dialog-len",
-            context_num=10,
-            from_dialog_len=10000,
-            to_dialog_len=10050,
+            benchmark_config=BenchmarkConfig(
+                context_num=10,
+                from_dialog_len=10000,
+                to_dialog_len=10050,
+            ),
             description="Benchmark with very long dialog len."
         ),
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-message-len",
-            context_num=10,
-            from_dialog_len=1,
-            to_dialog_len=3,
-            message_dimensions=(10000, 1),
+            benchmark_config=BenchmarkConfig(
+                context_num=10,
+                from_dialog_len=1,
+                to_dialog_len=3,
+                message_dimensions=(10000, 1),
+            ),
             description="Benchmark with messages containing many keys."
         ),
         *get_cases(
             db_uris=dbs,
             case_name_postfix="-long-misc-len",
-            context_num=10,
-            from_dialog_len=1,
-            to_dialog_len=3,
-            misc_dimensions=(10000, 1),
+            benchmark_config=BenchmarkConfig(
+                context_num=10,
+                from_dialog_len=1,
+                to_dialog_len=3,
+                misc_dimensions=(10000, 1),
+            ),
             description="Benchmark with misc containing many keys."
         ),
     ],
