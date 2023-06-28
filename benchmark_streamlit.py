@@ -161,6 +161,9 @@ with add_tab:
             del st.session_state["benchmarks"][file]
             delist_container.text(f"Delisted {file}")
 
+        with open(benchmark_results_files, "w", encoding="utf-8") as fd:
+            json.dump(list(st.session_state["benchmark_files"]), fd)
+
 
     delist_container.button(label="Delist selected benchmark sets", on_click=delist_benchmarks)
 
