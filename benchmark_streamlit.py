@@ -319,7 +319,7 @@ with view_tab:
             data = pd.DataFrame({"context_num": range(len(graph_data)), "time": graph_data})
 
         chart = alt.Chart(data).mark_circle().encode(
-            x="dialog_len:Q" if isinstance(graph_data, dict) else "context_num:Q",
+            x=alt.X("dialog_len:Q" if isinstance(graph_data, dict) else "context_num:Q", scale=alt.Scale(zero=False)),
             y="time:Q",
         ).interactive()
 
