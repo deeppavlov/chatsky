@@ -92,7 +92,6 @@ class DFFUser(FastHttpUser):
                 data=request.json(),
                 catch_response=True,
             ) as candidate_response:
-
                 text_response = Message.parse_obj(candidate_response.json().get("response"))
 
                 if response is not None:

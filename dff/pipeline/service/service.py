@@ -14,7 +14,7 @@ Actor wrapping service can be synchronous only.
 import logging
 import asyncio
 import inspect
-from typing import Optional, Callable, ForwardRef
+from typing import Optional, ForwardRef
 
 from dff.script import Context
 
@@ -85,7 +85,7 @@ class Service(PipelineComponent):
                     overridden_parameters,
                 )
             )
-        elif isinstance(handler, Callable) or isinstance(handler, str) and handler == "ACTOR":
+        elif callable(handler) or isinstance(handler, str) and handler == "ACTOR":
             self.handler = handler
             super(Service, self).__init__(
                 before_handler,
@@ -180,6 +180,7 @@ class Service(PipelineComponent):
 
         if isinstance(self.handler, str) and self.handler == "ACTOR":
             return ctx
+        return None
 
     @property
     def info_dict(self) -> dict:
@@ -190,7 +191,7 @@ class Service(PipelineComponent):
         representation = super(Service, self).info_dict
         if isinstance(self.handler, str) and self.handler == "ACTOR":
             service_representation = "Instance of Actor"
-        elif isinstance(self.handler, Callable):
+        elif callable(self.handler):
             service_representation = f"Callable '{self.handler.__name__}'"
         else:
             service_representation = "[Unknown]"
