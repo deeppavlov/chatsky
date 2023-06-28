@@ -114,6 +114,8 @@ test_requirements = merge_req_lists(
         "uvicorn==0.22.0",
         "websockets==11.0.2",
         "locust==2.15",
+        "streamlit~=1.23.1",
+        "streamlit-chat~=0.1.1",
     ],
     requests_requirements,
 )
