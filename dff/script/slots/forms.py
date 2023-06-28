@@ -13,13 +13,12 @@ from dff.script import labels as lbl
 from pydantic import BaseModel, Field, PrivateAttr, validate_arguments
 
 from dff.script import Context
-from dff.pipeline import Pipeline
+from dff.pipeline.pipeline.pipeline import Pipeline, FORM_STORAGE_KEY
 from dff.script.core.types import NodeLabel3Type, NodeLabel2Type
 
-from .root import root_slot
 from .handlers import get_values
-from .conditions import is_set_all
-from .types import FORM_STORAGE_KEY
+from .types import root_slot
+from .conditions import slot_extracted_condition
 
 
 class FormState(Enum):
@@ -72,7 +71,7 @@ class FormPolicy(BaseModel):
         Create a new form.
 
         :param name: The name of the form used for tracking the form state.
-        :param mapping: A dictionary that maps slot names to nodes. 
+        :param mapping: A dictionary that maps slot names to nodes.
             Nodes should be described with (flow_name, node_name) tuples.
             In case one node should set multiple slots, include them in a common group slot
             and use the name of the group slot as a key.
@@ -163,7 +162,7 @@ class FormPolicy(BaseModel):
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.INACTIVE
                 return ctx
 
-            if is_set_all(list(self.mapping.keys()))(ctx, pipeline) is True:
+            if all([slot_extracted_condition(slot)(ctx, pipeline) for slot in self.mapping.keys()]) is True:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.COMPLETE
             return ctx
 

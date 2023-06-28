@@ -1,38 +1,44 @@
+# %% [markdown]
+"""
+# 3. Handler Example
+
+...
+"""
+
+# %%
 from dff.script import conditions as cnd
-from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Context, Message
+from dff.script import (
+    RESPONSE,
+    TRANSITIONS,
+    PRE_TRANSITIONS_PROCESSING,
+    GLOBAL,
+    LOCAL,
+    Context,
+    Message,
+)
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import (
-    check_happy_path,
-    is_interactive_mode,
-)
-import dff.script.logic.slots
-from dff.script.logic.slots import conditions as slot_cnd
-from dff.script.logic.slots import processing as slot_procs
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.script import slots
+from dff.script.slots import conditions as slot_cnd
+from dff.script.slots import processing as slot_procs
 
-pet = dff.script.logic.slots.GroupSlot(
+pet = slots.GroupSlot(
     name="pet",
     children=[
-        dff.script.logic.slots.GroupSlot(
+        slots.GroupSlot(
             name="pet_info",
             children=[
-                dff.script.logic.slots.RegexpSlot(
-                    name="sort", regexp=r"(dog|cat)", match_group_idx=1
-                ),
-                dff.script.logic.slots.RegexpSlot(
-                    name="gender", regexp=r"(she|(?<=[^s])he|^he)", match_group_idx=1
-                ),
-                dff.script.logic.slots.RegexpSlot(
-                    name="behaviour", regexp=r"(good|bad)", match_group_idx=1
-                ),
+                slots.RegexpSlot(name="sort", regexp=r"(dog|cat)", match_group_idx=1),
+                slots.RegexpSlot(name="gender", regexp=r"(she|(?<=[^s])he|^he)", match_group_idx=1),
+                slots.RegexpSlot(name="behaviour", regexp=r"(good|bad)", match_group_idx=1),
             ],
         )
     ],
 )
-dff.script.logic.slots.add_slots(pet)
 
-# You can use dff.script.logic.slots handlers to define custom functions.
+# You can use dff.script.slots handlers to define custom functions.
 # These include conditions, responses, and processing routines.
 # The following function can yield 4 responses depending on slot values:
 # - Is he a good boy or a bad boy?
@@ -42,12 +48,10 @@ dff.script.logic.slots.add_slots(pet)
 def custom_behaviour_question(ctx: Context, pipeline: Pipeline):
     template = "Is {pet/pet_info/gender} a good "
     middle = " or a bad "
-    new_template = dff.script.logic.slots.get_filled_template(
-        template, ctx, pipeline, slots=["pet/pet_info/gender"]
-    )
-    gender = dff.script.logic.slots.get_values(ctx, pipeline, slots=["pet/pet_info/gender"])[0]
+    new_template = slots.get_filled_template(template, ctx, pipeline, slots=["pet/pet_info/gender"])
+    gender = slots.get_values(ctx, pipeline, slots=["pet/pet_info/gender"])[0]
     if gender is None:
-        new_template = dff.script.logic.slots.get_filled_template(
+        new_template = slots.get_filled_template(
             "Is your {pet/pet_info/sort} good or is it bad?", ctx, pipeline
         )
     elif gender == "he":
@@ -58,7 +62,7 @@ def custom_behaviour_question(ctx: Context, pipeline: Pipeline):
 
 
 def custom_esteem(ctx: Context, pipeline: Pipeline):
-    value = dff.script.logic.slots.get_values(ctx, pipeline, slots=["pet/pet_info/behaviour"])[0]
+    value = slots.get_values(ctx, pipeline, slots=["pet/pet_info/behaviour"])[0]
     if value == "bad":
         return Message(text="Sorry to hear that.")
     else:
@@ -91,7 +95,9 @@ script = {
         "ask": {
             RESPONSE: Message(text="Great! Is it a he, or a she?"),
         },
-        "repeat_question": {RESPONSE: Message(text="I mean, is it a he, or a she? Name whatever is closer.")},
+        "repeat_question": {
+            RESPONSE: Message(text="I mean, is it a he, or a she? Name whatever is closer.")
+        },
     },
     "behaviour_flow": {
         LOCAL: {
@@ -140,15 +146,7 @@ pipeline = Pipeline.from_script(
     fallback_label=("root", "fallback"),
 )
 
-# %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
-    # (testing) with HAPPY_PATH
-
-    # This runs tutorial in interactive mode if not in IPython env
-    # and if `DISABLE_INTERACTIVE_MODE` is not set
+    check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
-        ctx_id = 0  # 0 will be current dialog (context) identification.
-        while True:
-            ctx: Context = pipeline(input("Send request: "), ctx_id)
-            print(ctx.last_response)
+        run_interactive_mode(pipeline)

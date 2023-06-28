@@ -3,7 +3,7 @@ import pytest
 from dff.script import Context, Message, TRANSITIONS, RESPONSE
 from dff.script import conditions as cnd
 from dff.pipeline import Pipeline
-from dff.script.logic.slots.root import root_slot
+from dff.script.slots import root_slot
 
 
 @pytest.fixture
@@ -20,6 +20,6 @@ def testing_context():
     yield ctx
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def root():
     yield root_slot

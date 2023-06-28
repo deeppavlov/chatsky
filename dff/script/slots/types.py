@@ -6,27 +6,24 @@ Generally, these types should be imported from __init__.py for the sake of autom
 Import from here, if you want to registed slots manually.
 """
 import re
-import logging
+import wrapt
 from abc import ABC, abstractmethod
 from copy import copy
 from collections.abc import Iterable
-from typing import Callable, Any, Dict, Union
+from typing import Callable, Any, Tuple, Dict, Union, overload, TypeVar
 
 from pydantic import Field, BaseModel, validator
 
 from dff.script import Context
-from dff.pipeline import Pipeline
+from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STORAGE_KEY
 
-SLOT_STORAGE_KEY = "slot_storage"
-FORM_STORAGE_KEY = "form_storage"
-
-logger = logging.getLogger(__name__)
+T = TypeVar("T")
 
 
 class BaseSlot(BaseModel, ABC):
     """
     BaseSlot is a base class for all slots.
-    Not meant for direct subclassing, unlike :py:class:`~ValueSlot` and :py:class:`~GroupSlot`.
+    Not meant for direct subclassing, unlike :py:class:`~ValueSlot` and :py:class:`~_GroupSlot`.
     """
 
     name: str
@@ -78,7 +75,7 @@ class BaseSlot(BaseModel, ABC):
         raise NotImplementedError("Base class has no attribute 'value'")
 
 
-class GroupSlot(BaseSlot):
+class _GroupSlot(BaseSlot):
     """
     This class defines a slot group that includes one or more :py:class:`~ValueSlot` instances.
     When a slot has been included to a group, it should further be referenced as a part of that group.
@@ -102,7 +99,7 @@ class GroupSlot(BaseSlot):
     def value(self) -> dict:
         values = dict()
         for _, child in self.children.items():
-            if isinstance(child, GroupSlot):
+            if isinstance(child, _GroupSlot):
                 values.update({key: value for key, value in child.value.items()})
             elif isinstance(child, ValueSlot):
                 values.update({child.name: child.value})
@@ -118,7 +115,7 @@ class GroupSlot(BaseSlot):
         def get_inner(ctx: Context, pipeline: Pipeline) -> Dict[str, Union[str, None]]:
             values = dict()
             for child in self.children.values():
-                if isinstance(child, GroupSlot):
+                if isinstance(child, _GroupSlot):
                     values.update({key: value for key, value in child.get_value()(ctx, pipeline).items()})
                 else:
                     values.update({child.name: child.get_value()(ctx, pipeline)})
@@ -149,7 +146,63 @@ class GroupSlot(BaseSlot):
         return self.value
 
 
-class ValueSlot(BaseSlot):
+def singleton(result: Union[T, None] = None) -> Callable[..., T]:
+    @wrapt.decorator
+    def singleton_decorator(cls: Callable[..., T], _, args, kwargs) -> T:
+        nonlocal result
+        if result is None:
+            result = cls(*args, **kwargs)
+        return result
+
+    return singleton_decorator
+
+
+@singleton()
+class RootSlot(_GroupSlot):
+    @staticmethod
+    def flatten_slot_tree(node: BaseSlot) -> Tuple[Dict[str, BaseSlot], Dict[str, BaseSlot]]:
+        add_nodes = {node.name: node}
+        remove_nodes = {}
+        if node.has_children():
+            for name, child in node.children.items():
+                remove_nodes.update({child.name: child})
+                child.name = "/".join([node.name, name])
+                child_add_nodes, child_remove_nodes = RootSlot.flatten_slot_tree(child)
+                add_nodes.update(child_add_nodes)
+                remove_nodes.update(child_remove_nodes)
+        return add_nodes, remove_nodes
+
+    @overload
+    def add_slots(self, slots: BaseSlot) -> None:
+        ...
+
+    @overload
+    def add_slots(self, slots: Iterable[BaseSlot]) -> None:
+        ...
+
+    def add_slots(self, slots):
+        if isinstance(slots, BaseSlot):
+            add_nodes, _ = self.flatten_slot_tree(slots)
+            self.children.update(add_nodes)
+        else:
+            for slot in slots:
+                self.add_slots(slot)
+
+
+root_slot: RootSlot = RootSlot(name="root")
+
+
+class ChildSlot(BaseSlot):
+    def __init__(self, *, name, **kwargs):
+        super().__init__(name=name, **kwargs)
+        root_slot.add_slots(self)
+
+
+class GroupSlot(_GroupSlot, ChildSlot):
+    ...
+
+
+class ValueSlot(ChildSlot):
     """
     Value slot is a base class for all slots that are designed to store and extract concrete values.
     Subclass it, if you want to declare your own slot type.
@@ -209,7 +262,7 @@ class ValueSlot(BaseSlot):
         """
 
         def fill_inner(ctx: Context, pipeline: Pipeline) -> Union[str, None]:
-            if not self.name in template or self.get_value()(ctx, pipeline) is None:
+            if self.name not in template or self.get_value()(ctx, pipeline) is None:
                 return None
             return template
 

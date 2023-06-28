@@ -1,17 +1,14 @@
-import pytest
-
-from dff.script.logic.slots import GroupSlot, RegexpSlot, RootSlot
-from dff.script.logic.slots.root import add_slots
+from dff.script.slots import GroupSlot, RegexpSlot
 
 
-def test_nesting(root: RootSlot):
+def test_nesting(root):
     f_name = RegexpSlot(name="f_name", regexp="(?<=name )[a-z]+")
     l_name = RegexpSlot(name="l_name", regexp=".+")
     name = GroupSlot(name="name", children=[f_name, l_name])
     cat_data = GroupSlot(name="cat_data", children=[name])
     cat = GroupSlot(name="cat", children=[cat_data])
     root.children.clear()
-    add_slots([cat])
+    root.add_slots(cat)
     assert sorted(root.children.keys()) == [
         "cat",
         "cat/cat_data",
@@ -21,7 +18,7 @@ def test_nesting(root: RootSlot):
     ]
 
 
-def test_nesting_2(root: RootSlot):
+def test_nesting_2(root):
     f_name = RegexpSlot(name="name", regexp=".+")
     l_name = RegexpSlot(name="name", regexp=".+")
     first = GroupSlot(name="first", children=[f_name])
@@ -29,7 +26,7 @@ def test_nesting_2(root: RootSlot):
     common = GroupSlot(name="common", children=[first, last])
     just_name = RegexpSlot(name="name", regexp=".+")
     root.children.clear()
-    add_slots([just_name, common])
+    root.add_slots([just_name, common])
     assert sorted(root.children.keys()) == [
         "common",
         "common/first",

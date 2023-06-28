@@ -4,7 +4,7 @@ Processing
 This module encapsulates operations that can be done to slots during the processing stage.
 """
 import logging
-from typing import Optional, Union, List, Callable
+from typing import Optional, List, Callable
 
 from pydantic import validate_arguments
 

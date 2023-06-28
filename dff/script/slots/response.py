@@ -18,7 +18,7 @@ from .handlers import get_filled_template
 def fill_template(template: Message, slots: Optional[List[str]] = None):
     """
     Fill a template with slot values.
-    Response should be an instance of :py:class:`~str` or of the :py:class:`~Response` class from dff.connectors.messenger.generics add-on.
+    Response should be an instance of :py:class:`~Message` class.
 
     Parameters
     ----------

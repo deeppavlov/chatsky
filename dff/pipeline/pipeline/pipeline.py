@@ -38,6 +38,8 @@ from dff.pipeline.pipeline.actor import Actor
 
 logger = logging.getLogger(__name__)
 
+SLOT_STORAGE_KEY = "slot_storage"
+FORM_STORAGE_KEY = "form_storage"
 ACTOR = "ACTOR"
 
 
@@ -328,6 +330,8 @@ class Pipeline:
             ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
+        ctx.framework_states[SLOT_STORAGE_KEY] = ctx.framework_states.get(SLOT_STORAGE_KEY, {})
+        ctx.framework_states[FORM_STORAGE_KEY] = ctx.framework_states.get(FORM_STORAGE_KEY, {})
         ctx.add_request(request)
         ctx = await self._services_pipeline(ctx, self)
         del ctx.framework_states[PIPELINE_STATE_KEY]

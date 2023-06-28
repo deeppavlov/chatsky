@@ -1,7 +1,7 @@
 import pytest
 
-from dff.script.logic.slots.types import RegexpSlot, GroupSlot, FunctionSlot
-from dff.script.logic.slots.root import flatten_slot_tree, RootSlot, add_slots
+from dff.script.slots import RegexpSlot, GroupSlot, FunctionSlot
+from dff.script.slots.types import RootSlot, root_slot
 
 # pytest.skip(allow_module_level=True)
 
@@ -83,9 +83,9 @@ def test_function(input, func, expected, _set, testing_context, testing_pipeline
 
 def test_children():
     slot = GroupSlot(name="test", children=[RegexpSlot(name="test", regexp="(?<=am ).+")])
-    assert slot.has_children() == True
+    assert slot.has_children() is True
     slot.children.pop("test")
-    assert slot.has_children() == False
+    assert slot.has_children() is False
 
 
 @pytest.mark.parametrize(
@@ -139,7 +139,7 @@ def test_children():
 )
 def test_flatten(root_name, length, children, names):
     slot = GroupSlot(name=root_name, children=children)
-    flatten_result, _ = flatten_slot_tree(slot)
+    flatten_result, _ = root_slot.flatten_slot_tree(slot)
     assert len(flatten_result) == length
     assert all(map(lambda x: x.startswith(root_name), flatten_result.keys()))
     if names:
@@ -148,5 +148,5 @@ def test_flatten(root_name, length, children, names):
 
 def test_slot_root(root: RootSlot):
     slot = RegexpSlot(name="test", regexp=r".+")
-    add_slots([slot])
+    root.add_slots([slot])
     assert slot.name in root.children

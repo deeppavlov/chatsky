@@ -1,3 +1,11 @@
+# %% [markdown]
+"""
+# 1. Basic Example
+
+...
+"""
+
+# %%
 from dff.script import conditions as cnd
 from dff.script import (
     RESPONSE,
@@ -10,45 +18,43 @@ from dff.script import (
 )
 
 from dff.pipeline import Pipeline
+from dff.script import slots
+from dff.script.slots import processing as slot_procs
+from dff.script.slots import response as slot_rps
+from dff.script.slots import conditions as slot_cnd
 
-from dff.utils.testing import (
-    check_happy_path,
-    is_interactive_mode,
-)
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
-import dff.script.logic.slots
-from dff.script.logic.slots import processing as slot_procs
-from dff.script.logic.slots import response as slot_rps
-from dff.script.logic.slots import conditions as slot_cnd
+# %% [markdown]
+"""
+Instantiating slots.
 
-# Group 1: person/username, person/email
-person_slot = dff.script.logic.slots.GroupSlot(
+Group 1: person/username, person/email
+"""
+
+# %%
+person_slot = slots.GroupSlot(
     name="person",
     children=[
-        dff.script.logic.slots.RegexpSlot(
-            name="username", regexp=r"username is ([a-zA-Z]+)", match_group_idx=1
-        ),
-        dff.script.logic.slots.RegexpSlot(
-            name="email", regexp=r"email is ([a-z@\.A-Z]+)", match_group_idx=1
-        ),
+        slots.RegexpSlot(name="username", regexp=r"username is ([a-zA-Z]+)", match_group_idx=1),
+        slots.RegexpSlot(name="email", regexp=r"email is ([a-z@\.A-Z]+)", match_group_idx=1),
     ],
 )
 # Group 2: friend/first_name, friend/last_name
-friend_slot = dff.script.logic.slots.GroupSlot(
+friend_slot = slots.GroupSlot(
     name="friend",
     children=[
-        dff.script.logic.slots.RegexpSlot(name="first_name", regexp=r"^[A-Z][a-z]+?(?= )"),
-        dff.script.logic.slots.RegexpSlot(name="last_name", regexp=r"(?<= )[A-Z][a-z]+"),
+        slots.RegexpSlot(name="first_name", regexp=r"^[A-Z][a-z]+?(?= )"),
+        slots.RegexpSlot(name="last_name", regexp=r"(?<= )[A-Z][a-z]+"),
     ],
 )
-dff.script.logic.slots.add_slots([person_slot, friend_slot])
-# ALTERNATE SYNTAX: you can register slots manually.
-# from dff.script.logic.slots import slot_types
-# username_slot = slot_types.RegexpSlot(name="username", regexp=r"(?<=username is )[a-zA-Z]+")
-# person_slot = slot_types.GroupSlot(name="person", children=[username_slot])
-# dff.script.logic.slots.root.register_slots([person_slot])
 
+# %% [markdown]
+"""
+Define script.
+"""
 
+# %%
 script = {
     GLOBAL: {TRANSITIONS: {("username_flow", "ask"): cnd.regexp(r"^[sS]tart")}},
     "username_flow": {
@@ -112,6 +118,7 @@ script = {
     },
 }
 
+# %%
 HAPPY_PATH = [
     ("hi", "Write your username (my username is ...):"),
     ("my username is groot", "Write your email (my email is ...):"),
@@ -128,15 +135,7 @@ pipeline = Pipeline.from_script(
     fallback_label=("root", "fallback"),
 )
 
-# %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
-    # (testing) with HAPPY_PATH
-
-    # This runs tutorial in interactive mode if not in IPython env
-    # and if `DISABLE_INTERACTIVE_MODE` is not set
+    check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
-        ctx_id = 0  # 0 will be current dialog (context) identification.
-        while True:
-            ctx: Context = pipeline(input("Send request: "), ctx_id)
-            print(ctx.last_response)
+        run_interactive_mode(pipeline)

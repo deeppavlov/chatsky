@@ -1,33 +1,38 @@
+# %% [markdown]
+"""
+# 2. Form Example
+
+...
+"""
+
+# %%
 from dff.script import labels as lbl
 from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Context
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import (
-    check_happy_path,
-    is_interactive_mode,
-)
+from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 from dff.script import conditions as cnd
 
-import dff.script.logic.slots
-from dff.script.logic.slots.forms import FormState
-from dff.script.logic.slots import processing as slot_procs
-from dff.script.logic.slots import response as slot_rsp
-from dff.script.logic.slots import conditions as slot_cnd
+from dff.script import slots
+from dff.script.slots.forms import FormState
+from dff.script.slots import processing as slot_procs
+from dff.script.slots import response as slot_rsp
+from dff.script.slots import conditions as slot_cnd
 
 
 def is_unrelated_intent(ctx, actor):
     return False
 
 
-RestaurantCuisine = dff.script.logic.slots.RegexpSlot(
+RestaurantCuisine = slots.RegexpSlot(
     name="cuisine", regexp=r"([A-Za-z]+) cuisine", match_group_idx=1
 )
-RestaurantAddress = dff.script.logic.slots.RegexpSlot(
+RestaurantAddress = slots.RegexpSlot(
     name="restaurantaddress", regexp=r"(at|in) (.+)", match_group_idx=2
 )
-NumberOfPeople = dff.script.logic.slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
-RestaurantForm = dff.script.logic.slots.FormPolicy(
+NumberOfPeople = slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
+RestaurantForm = slots.FormPolicy(
     "restaurant",
     {
         RestaurantCuisine.name: [("restaurant", "cuisine")],
@@ -35,7 +40,6 @@ RestaurantForm = dff.script.logic.slots.FormPolicy(
         NumberOfPeople.name: [("restaurant", "number")],
     },
 )
-dff.script.logic.slots.add_slots([RestaurantCuisine, RestaurantAddress, NumberOfPeople])
 
 script = {
     GLOBAL: {
@@ -74,9 +78,7 @@ script = {
         "offer_accepted": {
             RESPONSE: "Very well then, processing your request.",
             PRE_TRANSITIONS_PROCESSING: {
-                "activate_form": RestaurantForm.update_state(
-                    dff.script.logic.slots.FormState.ACTIVE
-                ),
+                "activate_form": RestaurantForm.update_state(slots.FormState.ACTIVE),
             },
         },
         "form_filled": {
@@ -136,7 +138,6 @@ HAPPY_PATH = [
     ("yes", "Nice chatting with you!"),
 ]
 
-
 # %%
 pipeline = Pipeline.from_script(
     script,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
@@ -144,15 +145,7 @@ pipeline = Pipeline.from_script(
     fallback_label=("root", "fallback"),
 )
 
-# %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
-    # (testing) with HAPPY_PATH
-
-    # This runs tutorial in interactive mode if not in IPython env
-    # and if `DISABLE_INTERACTIVE_MODE` is not set
+    check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
-        ctx_id = 0  # 0 will be current dialog (context) identification.
-        while True:
-            ctx: Context = pipeline(input("Send request: "), ctx_id)
-            print(ctx.last_response)
+        run_interactive_mode(pipeline)

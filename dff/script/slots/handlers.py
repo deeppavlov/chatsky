@@ -9,8 +9,7 @@ from typing import Dict, Optional, List
 from dff.script import Context
 from dff.pipeline import Pipeline
 
-from .types import BaseSlot, GroupSlot, SLOT_STORAGE_KEY
-from .root import root_slot as root
+from .types import BaseSlot, GroupSlot, SLOT_STORAGE_KEY, root_slot as root
 
 logger = logging.getLogger(__name__)
 
