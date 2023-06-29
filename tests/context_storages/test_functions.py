@@ -1,4 +1,4 @@
-from dff.context_storages import DBContextStorage
+from dff.context_storages import DBContextStorage, ALL_ITEMS
 from dff.pipeline import Pipeline
 from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
@@ -20,6 +20,7 @@ def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     assert isinstance(new_ctx, Context)
     assert new_ctx.dict() == testing_context.dict()
 
+    # Check storage_key has been set up correctly
     if not isinstance(db, dict):
         assert testing_context.storage_key == new_ctx.storage_key == context_id
 
@@ -48,8 +49,9 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
         read_context.add_request(Message(text=f"new message: {i}"))
     write_context = read_context.dict()
 
+    # Patch context to use with dict context storage, that doesn't follow read limits
     if not isinstance(db, dict):
-        for i in sorted(write_context["requests"].keys())[:-3]:
+        for i in sorted(write_context["requests"].keys())[:2]:
             del write_context["requests"][i]
 
     # Write and read updated context
@@ -58,7 +60,38 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
     assert write_context == read_context.dict()
 
 
-# TODO: add test for pending futures finishing.
+def midair_subscript_change_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Set all appended request to be written
+    db.context_schema.append_single_log = False
+
+    # Add new requestgs to context
+    for i in range(1, 10):
+        testing_context.add_request(Message(text=f"new message: {i}"))
+
+    # Make read limit larger (7)
+    db[context_id] = testing_context
+    db.context_schema.requests.subscript = 7
+
+    # Create a copy of context that simulates expected read value (last 7 requests)
+    write_context = testing_context.dict()
+    for i in sorted(write_context["requests"].keys())[:-7]:
+        del write_context["requests"][i]
+
+    # Check that expected amount of requests was read only
+    read_context = db[context_id]
+    assert write_context == read_context.dict()
+
+    # Make read limit smaller (2)
+    db.context_schema.requests.subscript = 2
+
+    # Create a copy of context that simulates expected read value (last 2 requests)
+    write_context = testing_context.dict()
+    for i in sorted(write_context["requests"].keys())[:-2]:
+        del write_context["requests"][i]
+
+    # Check that expected amount of requests was read only
+    read_context = db[context_id]
+    assert write_context == read_context.dict()
 
 
 def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: str):
@@ -74,10 +107,61 @@ def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: 
         assert new_context.misc[f"key_{i}"] == f"data number #{i}"
 
 
+def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
+    # Set all appended request to be written
+    db.context_schema.append_single_log = False
+
+    # Setup schema so that only last request will be written to database
+    db.context_schema.requests.subscript = 1
+
+    # Fill database with contexts with one misc value and two requests
+    for i in range(1, 101):
+        db[f"{context_id}_{i}"] = Context(
+            misc={f"key_{i}": f"ctx misc value {i}"},
+            requests={0: Message(text="useful message"), i: Message(text="some message")}
+        )
+
+    # Setup schema so that all requests will be read from database
+    db.context_schema.requests.subscript = ALL_ITEMS
+
+    # Check database length
+    assert len(db) == 100
+
+    # Check that both misc and requests are read as expected
+    for i in range(1, 101):
+        read_ctx = db[f"{context_id}_{i}"]
+        assert read_ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
+        assert read_ctx.requests[0].text == "useful message"
+
+
+def single_log_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Set only the last appended request to be written
+    db.context_schema.append_single_log = True
+
+    # Set only one request to be included into CONTEXTS table
+    db.context_schema.requests.subscript = 1
+
+    # Add new requestgs to context
+    for i in range(1, 10):
+        testing_context.add_request(Message(text=f"new message: {i}"))
+    db[context_id] = testing_context
+
+    # Setup schema so that all requests will be read from database
+    db.context_schema.requests.subscript = ALL_ITEMS
+
+    # Read context and check only the last context was read - LOGS database was not populated 
+    read_context = db[context_id]
+    assert len(read_context.requests) == 1
+    assert read_context.requests[9] == testing_context.requests[9]
+
+
 basic_test.no_dict = False
 partial_storage_test.no_dict = False
+midair_subscript_change_test.no_dict = True
 large_misc_test.no_dict = False
-_TEST_FUNCTIONS = [basic_test, partial_storage_test, large_misc_test]
+many_ctx_test.no_dict = True
+single_log_test.no_dict = True
+_TEST_FUNCTIONS = [basic_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, single_log_test]
 
 
 def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):

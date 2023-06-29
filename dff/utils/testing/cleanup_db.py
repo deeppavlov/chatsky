@@ -109,12 +109,7 @@ async def delete_ydb(storage: YDBContextStorage):
         raise Exception("Can't delete ydb database - ydb provider unavailable!")
 
     async def callee(session):
-        fields = [
-            field
-            for field, field_props in dict(storage.context_schema).items()
-            if not isinstance(field_props, ValueSchemaField)
-        ] + [storage._CONTEXTS]
-        for field in fields:
+        for field in [storage._CONTEXTS_TABLE, storage._LOGS_TABLE]:
             await session.drop_table("/".join([storage.database, f"{storage.table_prefix}_{field}"]))
 
     await storage.pool.retry_operation(callee)
