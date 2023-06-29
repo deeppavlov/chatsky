@@ -61,14 +61,11 @@ class YDBContextStorage(DBContextStorage):
     """
 
     _CONTEXTS_TABLE = "contexts"
-    _LOGS_TABLE= "logs"
+    _LOGS_TABLE = "logs"
     _KEY_COLUMN = "key"
     _VALUE_COLUMN = "value"
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
-
-    # TODO: no documentation found, might be larger or not exist at all!
-    _ROW_WRITE_LIMIT = 10000
 
     def __init__(self, path: str, table_name_prefix: str = "dff_table", timeout=5):
         DBContextStorage.__init__(self, path)
@@ -78,20 +75,10 @@ class YDBContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("grpc")
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
+         # TODO: no documentation found, might be larger or not exist at all!
+        self._insert_limit = 10000
         self.table_prefix = table_name_prefix
         self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, table_name_prefix))
-
-    @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key, primary_id)
-
-    @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
-        primary_id = await self._get_last_ctx(key)
-        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id, self._ROW_WRITE_LIMIT)
 
     @cast_key_to_string()
     async def del_item_async(self, key: str):
@@ -110,10 +97,6 @@ class YDBContextStorage(DBContextStorage):
             )
 
         return await self.pool.retry_operation(callee)
-
-    @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
-        return await self._get_last_ctx(key) is not None
 
     async def len_async(self) -> int:
         async def callee(session):
@@ -146,7 +129,8 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+    @cast_key_to_string()
+    async def _get_last_ctx(self, key: str) -> Optional[str]:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
@@ -159,7 +143,7 @@ class YDBContextStorage(DBContextStorage):
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
-                {f"${ExtraFields.storage_key.value}": storage_key},
+                {f"${ExtraFields.storage_key.value}": key},
                 commit_tx=True,
             )
             return result_sets[0].rows[0][ExtraFields.primary_id.value] if len(result_sets[0].rows) > 0 else None
@@ -189,7 +173,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, _: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
         async def callee(session):
             limit = 1001 if keys_limit is None else keys_limit
 
@@ -271,7 +255,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], _: str, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
         async def callee(session):
             for field, key, value in data:
                 request = f"""
@@ -328,17 +312,17 @@ async def _init_drive(timeout: int, endpoint: str, database: str, table_name_pre
     pool = SessionPool(driver, size=10)
 
     logs_table_name = f"{table_name_prefix}_{YDBContextStorage._LOGS_TABLE}"
-    if not await _is_table_exists(pool, database, logs_table_name):
+    if not await _does_table_exist(pool, database, logs_table_name):
         await _create_logs_table(pool, database, logs_table_name)
 
     ctx_table_name = f"{table_name_prefix}_{YDBContextStorage._CONTEXTS_TABLE}"
-    if not await _is_table_exists(pool, database, ctx_table_name):
+    if not await _does_table_exist(pool, database, ctx_table_name):
         await _create_contexts_table(pool, database, ctx_table_name)
 
     return driver, pool
 
 
-async def _is_table_exists(pool, path, table_name) -> bool:
+async def _does_table_exist(pool, path, table_name) -> bool:
     async def callee(session):
         await session.describe_table(os.path.join(path, table_name))
 
@@ -360,8 +344,8 @@ async def _create_logs_table(pool, path, table_name):
             .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
             .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
             .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))
-            .with_index(TableIndex(f"{table_name}_primary_id_index").with_index_columns(ExtraFields.primary_id.value))
-            .with_index(TableIndex(f"{table_name}_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
+            .with_index(TableIndex("logs_primary_id_index").with_index_columns(ExtraFields.primary_id.value))
+            .with_index(TableIndex("logs_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
             .with_primary_keys(ExtraFields.primary_id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN),
         )
 
@@ -379,7 +363,8 @@ async def _create_contexts_table(pool, path, table_name):
             .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
-            .with_index(TableIndex("general_context_key_index").with_index_columns(ExtraFields.storage_key.value))
+            .with_index(TableIndex("context_key_index").with_index_columns(ExtraFields.storage_key.value))
+            .with_index(TableIndex("context_active_index").with_index_columns(ExtraFields.active_ctx.value))
             .with_primary_key(ExtraFields.primary_id.value)
         )
 

@@ -17,13 +17,13 @@ Can be used as a value of `subscript` parameter for `DictSchemaField`s and `List
 _ReadPackedContextFunction = Callable[[str, str], Awaitable[Dict]]
 # TODO!
 
-_ReadLogContextFunction = Callable[[Optional[int], int, str, str, str], Awaitable[Dict]]
+_ReadLogContextFunction = Callable[[Optional[int], int, str, str], Awaitable[Dict]]
 # TODO!
 
 _WritePackedContextFunction = Callable[[Dict, str, str], Awaitable]
 # TODO!
 
-_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], str, str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], str], Coroutine]
 # TODO!
 
 
@@ -121,9 +121,9 @@ class ContextSchema(BaseModel):
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
                 elif len(nest_dict) < field_props.subscript:
                     limit = field_props.subscript - len(nest_dict)
-                    tasks[field_name] = log_reader(limit, len(nest_dict), field_name, storage_key, primary_id)
+                    tasks[field_name] = log_reader(limit, len(nest_dict), field_name, primary_id)
             else:
-                tasks[field_name] = log_reader(None, len(nest_dict), field_name, storage_key, primary_id)
+                tasks[field_name] = log_reader(None, len(nest_dict), field_name, primary_id)
 
         if self._supports_async:
             tasks = dict(zip(tasks.keys(), await gather(*tasks.values())))
@@ -185,13 +185,13 @@ class ContextSchema(BaseModel):
                 flattened_dict += [(field, key, value)]
         if len(flattened_dict) > 0:
             if not bool(chunk_size):
-                await log_writer(flattened_dict, storage_key, primary_id)
+                await log_writer(flattened_dict, primary_id)
             else:
                 tasks = list()
                 for ch in range(0, len(flattened_dict), chunk_size):
                     next_ch = ch + chunk_size
                     chunk = flattened_dict[ch:next_ch]
-                    tasks += [log_writer(chunk, storage_key, primary_id)]
+                    tasks += [log_writer(chunk, primary_id)]
                 if self._supports_async:
                     await gather(*tasks)
                 else:

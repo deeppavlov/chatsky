@@ -164,7 +164,7 @@ class SQLContextStorage(DBContextStorage):
     """
 
     _CONTEXTS_TABLE = "contexts"
-    _LOGS_TABLE= "logs"
+    _LOGS_TABLE = "logs"
     _KEY_COLUMN = "key"
     _VALUE_COLUMN = "value"
     _FIELD_COLUMN = "field"
@@ -193,7 +193,7 @@ class SQLContextStorage(DBContextStorage):
         self.tables[self._CONTEXTS_TABLE] = Table(
             f"{table_name_prefix}_{self._CONTEXTS_TABLE}",
             MetaData(),
-            Column(ExtraFields.active_ctx.value, Boolean, default=True, nullable=False),
+            Column(ExtraFields.active_ctx.value, Boolean, default=True, index=True, nullable=False),
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
             Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS, nullable=False),
@@ -228,20 +228,6 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key, primary_id)
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
-        primary_id = await self._get_last_ctx(key)
-        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id, self._insert_limit)
-
-    @threadsafe_method
-    @cast_key_to_string()
     async def del_item_async(self, key: str):
         primary_id = await self._get_last_ctx(key)
         if primary_id is None:
@@ -251,11 +237,6 @@ class SQLContextStorage(DBContextStorage):
         stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin() as conn:
             await conn.execute(stmt)
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
-        return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
@@ -290,11 +271,13 @@ class SQLContextStorage(DBContextStorage):
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+    @threadsafe_method
+    @cast_key_to_string()
+    async def _get_last_ctx(self, key: str) -> Optional[str]:
         ctx_table = self.tables[self._CONTEXTS_TABLE]
         stmt = select(ctx_table.c[ExtraFields.primary_id.value])
         stmt = stmt.where(
-            (ctx_table.c[ExtraFields.storage_key.value] == storage_key) & (ctx_table.c[ExtraFields.active_ctx.value])
+            (ctx_table.c[ExtraFields.storage_key.value] == key) & (ctx_table.c[ExtraFields.active_ctx.value])
         )
         stmt = stmt.limit(1)
         async with self.engine.begin() as conn:
@@ -314,7 +297,7 @@ class SQLContextStorage(DBContextStorage):
             else:
                 return dict()
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, _: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
         async with self.engine.begin() as conn:
             stmt = select(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN])
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[ExtraFields.primary_id.value] == primary_id)
@@ -337,7 +320,7 @@ class SQLContextStorage(DBContextStorage):
             update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN], [ExtraFields.primary_id.value])
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], _: str, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [

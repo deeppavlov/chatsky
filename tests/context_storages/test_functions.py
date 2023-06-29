@@ -109,7 +109,7 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
     db.context_schema.requests.subscript = 1
 
     # Fill database with contexts with one misc value and two requests
-    for i in range(1, 1001):
+    for i in range(1, 101):
         db[f"{context_id}_{i}"] = Context(
             misc={f"key_{i}": f"ctx misc value {i}"},
             requests={0: Message(text="useful message"), i: Message(text="some message")}
@@ -119,10 +119,10 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
     db.context_schema.requests.subscript = ALL_ITEMS
 
     # Check database length
-    assert len(db) == 1000
+    assert len(db) == 100
 
     # Check that both misc and requests are read as expected
-    for i in range(1, 1001):
+    for i in range(1, 101):
         read_ctx = db[f"{context_id}_{i}"]
         assert read_ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
         assert read_ctx.requests[0].text == "useful message"

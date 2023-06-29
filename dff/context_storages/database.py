@@ -14,11 +14,44 @@ import threading
 from functools import wraps
 from abc import ABC, abstractmethod
 from inspect import signature
-from typing import Callable, Hashable, Optional
+from typing import Any, Callable, Dict, Hashable, List, Optional, Tuple
 
 from .context_schema import ContextSchema
 from .protocol import PROTOCOLS
 from ..script import Context
+
+
+def threadsafe_method(func: Callable):
+    """
+    A decorator that makes sure methods of an object instance are threadsafe.
+    """
+
+    @wraps(func)
+    def _synchronized(self, *args, **kwargs):
+        with self._lock:
+            return func(self, *args, **kwargs)
+
+    return _synchronized
+
+
+def cast_key_to_string(key_name: str = "key"):
+    """
+    A decorator that casts function parameter (`key_name`) to string.
+    """
+
+    def stringify_args(func: Callable):
+        all_keys = signature(func).parameters.keys()
+
+        @functools.wraps(func)
+        async def inner(*args, **kwargs):
+            return await func(
+                *[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)],
+                **{name: str(value) if name == key_name else value for name, value in kwargs.items()},
+            )
+
+        return inner
+
+    return stringify_args
 
 
 class DBContextStorage(ABC):
@@ -45,6 +78,8 @@ class DBContextStorage(ABC):
         """`full_path` without a prefix defining db used"""
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
+        self._insert_limit = False
+        # TODO: doc!
         self.set_context_schema(context_schema)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):
@@ -62,15 +97,19 @@ class DBContextStorage(ABC):
         """
         return asyncio.run(self.get_item_async(key))
 
-    @abstractmethod
-    async def get_item_async(self, key: Hashable) -> Context:
+    @threadsafe_method
+    @cast_key_to_string()
+    async def get_item_async(self, key: str) -> Context:
         """
         Asynchronous method for accessing stored Context.
 
         :param key: Hashable key used to store Context instance.
         :return: The stored context, associated with the given key.
         """
-        raise NotImplementedError
+        primary_id = await self._get_last_ctx(key)
+        if primary_id is None:
+            raise KeyError(f"No entry for key {key}.")
+        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key, primary_id)
 
     def __setitem__(self, key: Hashable, value: Context):
         """
@@ -81,15 +120,17 @@ class DBContextStorage(ABC):
         """
         return asyncio.run(self.set_item_async(key, value))
 
-    @abstractmethod
-    async def set_item_async(self, key: Hashable, value: Context):
+    @threadsafe_method
+    @cast_key_to_string()
+    async def set_item_async(self, key: str, value: Context):
         """
         Asynchronous method for storing Context.
 
         :param key: Hashable key used to store Context instance.
         :param value: Context to store.
         """
-        raise NotImplementedError
+        primary_id = await self._get_last_ctx(key)
+        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id, self._insert_limit)
 
     def __delitem__(self, key: Hashable):
         """
@@ -117,7 +158,6 @@ class DBContextStorage(ABC):
         """
         return asyncio.run(self.contains_async(key))
 
-    @abstractmethod
     async def contains_async(self, key: Hashable) -> bool:
         """
         Asynchronous method for finding whether any Context is stored with given key.
@@ -125,7 +165,7 @@ class DBContextStorage(ABC):
         :param key: Hashable key used to check if Context instance is stored.
         :return: True if there is Context accessible by given key, False otherwise.
         """
-        raise NotImplementedError
+        return await self._get_last_ctx(key) is not None
 
     def __len__(self) -> int:
         """
@@ -180,38 +220,30 @@ class DBContextStorage(ABC):
         except KeyError:
             return default
 
+    @abstractmethod
+    async def _get_last_ctx(self, key: Hashable) -> Optional[str]:
+        # TODO: docs
+        raise NotImplementedError
 
-def threadsafe_method(func: Callable):
-    """
-    A decorator that makes sure methods of an object instance are threadsafe.
-    """
+    @abstractmethod
+    async def _read_pac_ctx(self, _: str, primary_id: str) -> Dict:
+        # TODO: doc!
+        raise NotImplementedError
 
-    @wraps(func)
-    def _synchronized(self, *args, **kwargs):
-        with self._lock:
-            return func(self, *args, **kwargs)
+    @abstractmethod
+    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
+        # TODO: doc!
+        raise NotImplementedError
 
-    return _synchronized
+    @abstractmethod
+    async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
+        # TODO: doc!
+        raise NotImplementedError
 
-
-def cast_key_to_string(key_name: str = "key"):
-    """
-    A decorator that casts function parameter (`key_name`) to string.
-    """
-
-    def stringify_args(func: Callable):
-        all_keys = signature(func).parameters.keys()
-
-        @functools.wraps(func)
-        async def inner(*args, **kwargs):
-            return await func(
-                *[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)],
-                **{name: str(value) if name == key_name else value for name, value in kwargs.items()},
-            )
-
-        return inner
-
-    return stringify_args
+    @abstractmethod
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
+        # TODO: doc!
+        raise NotImplementedError
 
 
 def context_storage_factory(path: str, **kwargs) -> DBContextStorage:

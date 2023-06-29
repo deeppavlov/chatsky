@@ -55,8 +55,6 @@ class MongoContextStorage(DBContextStorage):
     _VALUE_COLUMN = "value"
     _PACKED_COLUMN = "data"
 
-    _ID_KEY = "_id"
-
     def __init__(self, path: str, collection_prefix: str = "dff_collection"):
         DBContextStorage.__init__(self, path)
         if not mongo_available:
@@ -81,20 +79,6 @@ class MongoContextStorage(DBContextStorage):
 
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key, primary_id)
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
-        primary_id = await self._get_last_ctx(key)
-        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id)
-
-    @threadsafe_method
-    @cast_key_to_string()
     async def del_item_async(self, key: str):
         await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.active_ctx.value: True, ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}})
 
@@ -116,21 +100,27 @@ class MongoContextStorage(DBContextStorage):
         packed = await self.collections[self._CONTEXTS_TABLE].find_one({ExtraFields.primary_id.value: primary_id}, [self._PACKED_COLUMN])
         return pickle.loads(packed[self._PACKED_COLUMN])
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, _: str, primary_id: str) -> Dict:
-        results = await self.collections[self._LOGS_TABLE].aggregate(
-            list(filter(lambda e: e is not None, [
-                {"$match": {ExtraFields.primary_id.value: primary_id, field_name: {"$exists": True}}},
-                {"$project": {field_name: 1, "objs": {"$objectToArray": f"${field_name}"}}},
-                {"$project": {"objs": 1, "keys": {"$map": {"input": "$objs.k", "as": "key", "in": {"$toInt": "$$key"}}}}},
-                {"$project": {"objs": 1, "keys": {"$sortArray": {"input": "$keys", "sortBy": -1}}}},
-                {"$project": {"objs": 1, "keys": {"$lastN": {"input": "$keys", "n": {"$subtract": [{"$size": "$keys"}, keys_offset]}}}}},
-                {"$project": {"objs": 1, "keys": {"$firstN": {"input": "$keys", "n": keys_limit}}}} if keys_limit is not None else None,
-                {"$unwind": "$objs"},
-                {"$project": {self._KEY_COLUMN: {"$toInt": "$objs.k"}, self._VALUE_COLUMN: f"$objs.v.{self._VALUE_COLUMN}", "keys": 1}},
-                {"$project": {self._KEY_COLUMN: 1, self._VALUE_COLUMN: 1, "included": {"$in": ["$key", "$keys"]}}},
-                {"$match": {"included": True}}
-            ]))
-        ).to_list(None)
+    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
+        keys_word = "keys"
+        keys = await self.collections[self._LOGS_TABLE].aggregate([
+            {"$match": {ExtraFields.primary_id.value: primary_id, field_name: {"$exists": True}}},
+            {"$project": {field_name: 1, "objs": {"$objectToArray": f"${field_name}"}}},
+            {"$project": {keys_word: "$objs.k"}}
+        ]).to_list(None)
+
+        if len(keys) == 0:
+            return dict()
+        keys = sorted([int(key) for key in keys[0][keys_word]], reverse=True)
+        keys = keys[keys_offset:] if keys_limit is None else keys[keys_offset:keys_offset+keys_limit]
+
+        results = await self.collections[self._LOGS_TABLE].aggregate([
+            {"$match": {ExtraFields.primary_id.value: primary_id, field_name: {"$exists": True}}},
+            {"$project": {field_name: 1, "objs": {"$objectToArray": f"${field_name}"}}},
+            {"$unwind": "$objs"},
+            {"$project": {self._KEY_COLUMN: {"$toInt": "$objs.k"}, self._VALUE_COLUMN: f"$objs.v.{self._VALUE_COLUMN}"}},
+            {"$project": {self._KEY_COLUMN: 1, self._VALUE_COLUMN: 1, "included": {"$in": ["$key", keys]}}},
+            {"$match": {"included": True}}
+        ]).to_list(None)
         return {result[self._KEY_COLUMN]: pickle.loads(result[self._VALUE_COLUMN]) for result in results}
 
     async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
@@ -148,7 +138,7 @@ class MongoContextStorage(DBContextStorage):
             upsert=True
         )
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], _: str, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
         now = datetime.datetime.now()
         await self.collections[self._LOGS_TABLE].bulk_write([
             UpdateOne({
