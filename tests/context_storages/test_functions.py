@@ -61,6 +61,9 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
 
 
 def midair_subscript_change_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Set all appended request to be written
+    db.context_schema.append_single_log = False
+
     # Add new requestgs to context
     for i in range(1, 10):
         testing_context.add_request(Message(text=f"new message: {i}"))
@@ -105,6 +108,9 @@ def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: 
 
 
 def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
+    # Set all appended request to be written
+    db.context_schema.append_single_log = False
+
     # Setup schema so that only last request will be written to database
     db.context_schema.requests.subscript = 1
 
@@ -128,12 +134,34 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
         assert read_ctx.requests[0].text == "useful message"
 
 
+def single_log_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Set only the last appended request to be written
+    db.context_schema.append_single_log = True
+
+    # Set only one request to be included into CONTEXTS table
+    db.context_schema.requests.subscript = 1
+
+    # Add new requestgs to context
+    for i in range(1, 10):
+        testing_context.add_request(Message(text=f"new message: {i}"))
+    db[context_id] = testing_context
+
+    # Setup schema so that all requests will be read from database
+    db.context_schema.requests.subscript = ALL_ITEMS
+
+    # Read context and check only the last context was read - LOGS database was not populated 
+    read_context = db[context_id]
+    assert len(read_context.requests) == 1
+    assert read_context.requests[9] == testing_context.requests[9]
+
+
 basic_test.no_dict = False
 partial_storage_test.no_dict = False
 midair_subscript_change_test.no_dict = True
 large_misc_test.no_dict = False
 many_ctx_test.no_dict = True
-_TEST_FUNCTIONS = [basic_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test]
+single_log_test.no_dict = True
+_TEST_FUNCTIONS = [basic_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, single_log_test]
 
 
 def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
