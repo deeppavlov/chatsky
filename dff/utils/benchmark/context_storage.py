@@ -119,18 +119,14 @@ def time_context_read_write(
     read_times: tp.List[tp.Dict[int, float]] = []
     update_times: tp.List[tp.Dict[int, float]] = []
 
-    if context_updater is not None:
-        updated_contexts = [context]
-
-        while updated_contexts[-1] is not None:
-            updated_contexts.append(context_updater(deepcopy(updated_contexts[-1])))
-
     for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}"):
+        tmp_context = deepcopy(context)
+
         ctx_id = uuid4()
 
         # write operation benchmark
         write_start = perf_counter()
-        context_storage[ctx_id] = context
+        context_storage[ctx_id] = tmp_context
         write_times.append(perf_counter() - write_start)
 
         read_times.append({})
@@ -139,21 +135,25 @@ def time_context_read_write(
         read_start = perf_counter()
         _ = context_storage[ctx_id]
         read_time = perf_counter() - read_start
-        read_times[-1][len(context.labels)] = read_time
+        read_times[-1][len(tmp_context.labels)] = read_time
 
         if context_updater is not None:
             update_times.append({})
 
-            for updated_context in updated_contexts[1:-1]:
+            tmp_context = context_updater(tmp_context)
+
+            while tmp_context is not None:
                 update_start = perf_counter()
-                context_storage[ctx_id] = updated_context
+                context_storage[ctx_id] = tmp_context
                 update_time = perf_counter() - update_start
-                update_times[-1][len(updated_context.labels)] = update_time
+                update_times[-1][len(tmp_context.labels)] = update_time
 
                 read_start = perf_counter()
                 _ = context_storage[ctx_id]
                 read_time = perf_counter() - read_start
-                read_times[-1][len(updated_context.labels)] = read_time
+                read_times[-1][len(tmp_context.labels)] = read_time
+
+                tmp_context = context_updater(tmp_context)
 
     context_storage.clear()
     return write_times, read_times, update_times
