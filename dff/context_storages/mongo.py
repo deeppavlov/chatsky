@@ -12,11 +12,12 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 import asyncio
-import time
-from typing import Hashable, Dict, Union, Optional, List, Any
+import datetime
+import pickle
+from typing import Dict, Tuple, Optional, List, Any
 
 try:
-    from pymongo import ASCENDING, HASHED
+    from pymongo import ASCENDING, HASHED, UpdateOne
     from motor.motor_asyncio import AsyncIOMotorClient
 
     mongo_available = True
@@ -48,8 +49,12 @@ class MongoContextStorage(DBContextStorage):
     :param collection: Name of the collection to store the data in.
     """
 
-    _CONTEXTS = "contexts"
-    _MISC_KEY = "__mongo_misc_key"
+    _CONTEXTS_TABLE = "contexts"
+    _LOGS_TABLE = "logs"
+    _KEY_COLUMN = "key"
+    _VALUE_COLUMN = "value"
+    _PACKED_COLUMN = "data"
+
     _ID_KEY = "_id"
 
     def __init__(self, path: str, collection_prefix: str = "dff_collection"):
@@ -60,162 +65,98 @@ class MongoContextStorage(DBContextStorage):
         self._mongo = AsyncIOMotorClient(self.full_path, uuidRepresentation="standard")
         db = self._mongo.get_default_database()
 
-        self.seq_fields = [
-            field
-            for field, field_props in dict(self.context_schema).items()
-            if not isinstance(field_props, ValueSchemaField)
-        ]
-        self.collections = {field: db[f"{collection_prefix}_{field}"] for field in self.seq_fields}
-        self.collections.update({self._CONTEXTS: db[f"{collection_prefix}_contexts"]})
+        self.collections = {
+            self._CONTEXTS_TABLE: db[f"{collection_prefix}_{self._CONTEXTS_TABLE}"],
+            self._LOGS_TABLE: db[f"{collection_prefix}_{self._LOGS_TABLE}"],
+        }
 
-        primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
         asyncio.run(
             asyncio.gather(
-                self.collections[self._CONTEXTS].create_index([(ExtraFields.primary_id, ASCENDING)], background=True),
-                self.collections[self._CONTEXTS].create_index([(ExtraFields.storage_key, HASHED)], background=True),
-                self.collections[self._CONTEXTS].create_index([(ExtraFields.active_ctx, HASHED)], background=True),
-                *[
-                    value.create_index([(primary_id_key, ASCENDING)], background=True, unique=True)
-                    for key, value in self.collections.items()
-                    if key != self._CONTEXTS
-                ],
+                self.collections[self._CONTEXTS_TABLE].create_index([(ExtraFields.primary_id.value, ASCENDING)], background=True, unique=True),
+                self.collections[self._CONTEXTS_TABLE].create_index([(ExtraFields.storage_key.value, HASHED)], background=True),
+                self.collections[self._CONTEXTS_TABLE].create_index([(ExtraFields.active_ctx.value, HASHED)], background=True),
+                self.collections[self._LOGS_TABLE].create_index([(ExtraFields.primary_id.value, ASCENDING)], background=True)
             )
         )
 
     @threadsafe_method
     @cast_key_to_string()
-    async def get_item_async(self, key: Union[Hashable, str]) -> Context:
+    async def get_item_async(self, key: str) -> Context:
         primary_id = await self._get_last_ctx(key)
         if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
-        self.hash_storage[key] = hashes
-        return context
+        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key, primary_id)
 
     @threadsafe_method
     @cast_key_to_string()
-    async def set_item_async(self, key: Union[Hashable, str], value: Context):
+    async def set_item_async(self, key: str, value: Context):
         primary_id = await self._get_last_ctx(key)
-        value_hash = self.hash_storage.get(key)
-        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
+        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id)
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: Union[Hashable, str]):
-        self.hash_storage[key] = None
-        await self.collections[self._CONTEXTS].update_many(
-            {ExtraFields.active_ctx: True, ExtraFields.storage_key: key}, {"$set": {ExtraFields.active_ctx: False}}
-        )
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def contains_async(self, key: Union[Hashable, str]) -> bool:
-        return await self._get_last_ctx(key) is not None
+    async def del_item_async(self, key: str):
+        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.active_ctx.value: True, ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}})
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(
-            await self.collections[self._CONTEXTS].distinct(
-                self.context_schema.storage_key.name, {ExtraFields.active_ctx: True}
-            )
-        )
+        return len(await self.collections[self._CONTEXTS_TABLE].distinct(ExtraFields.storage_key.value, {ExtraFields.active_ctx.value: True}))
 
     @threadsafe_method
     async def clear_async(self):
-        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        await self.collections[self._CONTEXTS].update_many(
-            {ExtraFields.active_ctx: True}, {"$set": {ExtraFields.active_ctx: False}}
+        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.active_ctx.value: True}, {"$set": {ExtraFields.active_ctx.value: False}})
+
+    @threadsafe_method
+    @cast_key_to_string()
+    async def _get_last_ctx(self, key: str) -> Optional[str]:
+        last_ctx = await self.collections[self._CONTEXTS_TABLE].find_one({ExtraFields.active_ctx.value: True, ExtraFields.storage_key.value: key})
+        return last_ctx[ExtraFields.primary_id.value] if last_ctx is not None else None
+
+    async def _read_pac_ctx(self, _: str, primary_id: str) -> Dict:
+        packed = await self.collections[self._CONTEXTS_TABLE].find_one({ExtraFields.primary_id.value: primary_id}, [self._PACKED_COLUMN])
+        return pickle.loads(packed[self._PACKED_COLUMN])
+
+    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, _: str, primary_id: str) -> Dict:
+        results = await self.collections[self._LOGS_TABLE].aggregate(
+            list(filter(lambda e: e is not None, [
+                {"$match": {ExtraFields.primary_id.value: primary_id, field_name: {"$exists": True}}},
+                {"$project": {field_name: 1, "objs": {"$objectToArray": f"${field_name}"}}},
+                {"$project": {"objs": 1, "keys": {"$map": {"input": "$objs.k", "as": "key", "in": {"$toInt": "$$key"}}}}},
+                {"$project": {"objs": 1, "keys": {"$sortArray": {"input": "$keys", "sortBy": -1}}}},
+                {"$project": {"objs": 1, "keys": {"$lastN": {"input": "$keys", "n": {"$subtract": [{"$size": "$keys"}, keys_offset]}}}}},
+                {"$project": {"objs": 1, "keys": {"$firstN": {"input": "$keys", "n": keys_limit}}}} if keys_limit is not None else None,
+                {"$unwind": "$objs"},
+                {"$project": {self._KEY_COLUMN: {"$toInt": "$objs.k"}, self._VALUE_COLUMN: f"$objs.v.{self._VALUE_COLUMN}", "keys": 1}},
+                {"$project": {self._KEY_COLUMN: 1, self._VALUE_COLUMN: 1, "included": {"$in": ["$key", "$keys"]}}},
+                {"$match": {"included": True}}
+            ]))
+        ).to_list(None)
+        return {result[self._KEY_COLUMN]: pickle.loads(result[self._VALUE_COLUMN]) for result in results}
+
+    async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
+        now = datetime.datetime.now()
+        await self.collections[self._CONTEXTS_TABLE].update_one(
+            {ExtraFields.primary_id.value: primary_id},
+            [{"$set": {
+                self._PACKED_COLUMN: pickle.dumps(data),
+                ExtraFields.storage_key.value: storage_key,
+                ExtraFields.primary_id.value: primary_id,
+                ExtraFields.active_ctx.value: True, 
+                ExtraFields.created_at.value: {"$cond": [{"$not": [f"${ExtraFields.created_at.value}"]}, now, f"${ExtraFields.created_at.value}"]},
+                ExtraFields.updated_at.value: now
+            }}],
+            upsert=True
         )
 
-    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        last_ctx = await self.collections[self._CONTEXTS].find_one(
-            {ExtraFields.active_ctx: True, ExtraFields.storage_key: storage_key}
-        )
-        return last_ctx[ExtraFields.primary_id] if last_ctx is not None else None
-
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
-        primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
-        values_slice, result_dict = list(), dict()
-
-        for field, value in subscript.items():
-            if isinstance(value, bool) and value:
-                values_slice += [field]
-            else:
-                # AFAIK, we can only read ALL keys and then filter, there's no other way for Mongo :(
-                raw_keys = (
-                    await self.collections[field]
-                    .aggregate(
-                        [
-                            {"$match": {primary_id_key: primary_id}},
-                            {"$project": {"kvarray": {"$objectToArray": "$$ROOT"}}},
-                            {"$project": {"keys": "$kvarray.k"}},
-                        ]
-                    )
-                    .to_list(1)
-                )
-                raw_keys = raw_keys[0]["keys"]
-
-                if isinstance(value, int):
-                    filtered_keys = sorted(int(key) for key in raw_keys if key.isdigit())[value:]
-                elif isinstance(value, list):
-                    filtered_keys = [key for key in raw_keys if key in value]
-                elif value == ALL_ITEMS:
-                    filtered_keys = raw_keys
-
-                projection = [
-                    str(key) for key in filtered_keys if self._MISC_KEY not in str(key) and key != self._ID_KEY
-                ]
-                if len(projection) > 0:
-                    result_dict[field] = await self.collections[field].find_one(
-                        {primary_id_key: primary_id}, projection
-                    )
-                    del result_dict[field][self._ID_KEY]
-
-        values = await self.collections[self._CONTEXTS].find_one({ExtraFields.primary_id: primary_id}, values_slice)
-        return {**values, **result_dict}
-
-    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
-        def conditional_insert(key: Any, value: Dict) -> Dict:
-            return {"$cond": [{"$not": [f"${key}"]}, value, f"${key}"]}
-
-        primary_id_key = f"{self._MISC_KEY}_{ExtraFields.primary_id}"
-        created_at_key = f"{self._MISC_KEY}_{ExtraFields.created_at}"
-        updated_at_key = f"{self._MISC_KEY}_{ExtraFields.updated_at}"
-
-        if nested:
-            data, enforce = payload
-            for key in data.keys():
-                if self._MISC_KEY in str(key):
-                    raise RuntimeError(
-                        f"Context field {key} keys can't start from {self._MISC_KEY}"
-                        " - that is a reserved key for MongoDB context storage!"
-                    )
-                if key == self._ID_KEY:
-                    raise RuntimeError(
-                        f"Context field {key} can't contain key {self._ID_KEY} - that is a reserved key for MongoDB!"
-                    )
-
-            update_value = (
-                data if enforce else {str(key): conditional_insert(key, value) for key, value in data.items()}
-            )
-            update_value.update(
-                {
-                    primary_id_key: conditional_insert(primary_id_key, primary_id),
-                    created_at_key: conditional_insert(created_at_key, time.time_ns()),
-                    updated_at_key: time.time_ns(),
-                }
-            )
-
-            await self.collections[field].update_one(
-                {primary_id_key: primary_id}, [{"$set": update_value}], upsert=True
-            )
-
-        else:
-            update_value = {
-                key: data if enforce else conditional_insert(key, data) for key, (data, enforce) in payload.items()
-            }
-            update_value.update({ExtraFields.updated_at: time.time_ns()})
-
-            await self.collections[self._CONTEXTS].update_one(
-                {ExtraFields.primary_id: primary_id}, [{"$set": update_value}], upsert=True
-            )
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], _: str, primary_id: str):
+        now = datetime.datetime.now()
+        await self.collections[self._LOGS_TABLE].bulk_write([
+            UpdateOne({
+                ExtraFields.primary_id.value: primary_id
+            }, [{"$set": {
+                ExtraFields.primary_id.value: primary_id,
+                f"{field}.{key}.{self._VALUE_COLUMN}": pickle.dumps(value),
+                f"{field}.{key}.{ExtraFields.created_at.value}": {"$cond": [{"$not": [f"${ExtraFields.created_at.value}"]}, now, f"${ExtraFields.created_at.value}"]},
+                f"{field}.{key}.{ExtraFields.updated_at.value}": now
+            }}], upsert=True)
+        for field, key, value in data])
