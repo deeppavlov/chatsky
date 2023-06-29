@@ -5,7 +5,7 @@
 # in a Streamlit chat.
 #
 # A demonstration of the chat:
-# ![demo](https://raw.githubusercontent.com/deeppavlov/dialog_flow_framework/dev/img/streamlit.gif)
+# ![demo](https://raw.githubusercontent.com/deeppavlov/dialog_flow_framework/dev/img/streamlit.png)
 
 
 # %% [markdown]
