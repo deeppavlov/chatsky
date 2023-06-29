@@ -243,7 +243,6 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        self.hash_storage[key] = None
         primary_id = await self._get_last_ctx(key)
         if primary_id is None:
             raise KeyError(f"No entry for key {key}.")
@@ -268,7 +267,6 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
         stmt = update(self.tables[self._CONTEXTS_TABLE])
         stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin() as conn:

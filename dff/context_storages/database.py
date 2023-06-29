@@ -45,7 +45,6 @@ class DBContextStorage(ABC):
         """`full_path` without a prefix defining db used"""
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
-        self.hash_storage = dict()
         self.set_context_schema(context_schema)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):
