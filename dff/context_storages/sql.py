@@ -170,7 +170,7 @@ class SQLContextStorage(DBContextStorage):
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    _UUID_LENGTH = 36
+    _UUID_LENGTH = 64
     _FIELD_LENGTH = 256
 
     def __init__(self, path: str, table_name_prefix: str = "dff_table", custom_driver: bool = False):
@@ -186,7 +186,7 @@ class SQLContextStorage(DBContextStorage):
         _PICKLETYPE_CLASS = _import_pickletype_for_dialect(self.dialect)
 
         self.tables_prefix = table_name_prefix
-        self.context_schema.enable_async_access(self.dialect == "sqlite")
+        self.context_schema.enable_async_access(self.dialect != "sqlite")
 
         self.tables = dict()
         current_time = _get_current_time(self.dialect)
@@ -316,16 +316,18 @@ class SQLContextStorage(DBContextStorage):
             else:
                 return dict()
 
-    async def _read_log_ctx(self, keys_num: int, keys_offset: int, field_name: str, _: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, _: str, primary_id: str) -> Dict:
         async with self.engine.begin() as conn:
-            stmt = select(self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN])
+            stmt = select(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN])
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[ExtraFields.primary_id.value] == primary_id)
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[self._FIELD_COLUMN] == field_name)
-            stmt = stmt.order_by(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN].asc())
-            stmt = stmt.limit(keys_num).offset(keys_offset)
+            stmt = stmt.order_by(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN].desc())
+            if keys_limit is not None:
+                stmt = stmt.limit(keys_limit)
+            stmt = stmt.offset(keys_offset)
             result = (await conn.execute(stmt)).fetchall()
             if len(result) > 0:
-                return {keys_offset + idx: value[0] for idx, value in enumerate(result)}
+                return {key: value for key, value in result}
             else:
                 return dict()
 

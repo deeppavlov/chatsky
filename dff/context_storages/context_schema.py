@@ -17,7 +17,7 @@ Can be used as a value of `subscript` parameter for `DictSchemaField`s and `List
 _ReadPackedContextFunction = Callable[[str, str], Awaitable[Dict]]
 # TODO!
 
-_ReadLogContextFunction = Callable[[int, int, str, str, str], Awaitable[Dict]]
+_ReadLogContextFunction = Callable[[Optional[int], int, str, str, str], Awaitable[Dict]]
 # TODO!
 
 _WritePackedContextFunction = Callable[[Dict, str, str], Awaitable]
@@ -106,7 +106,6 @@ class ContextSchema(BaseModel):
         `primary_id` - the context unique identifier.
         returns tuple of context and context hashes
         (hashes should be kept and passed to :py:func:`~.ContextSchema.write_context`).
-        # TODO: handle case when required subscript is more than received.
         """
         ctx_dict = await pac_reader(storage_key, primary_id)
         ctx_dict[ExtraFields.primary_id.value] = primary_id
@@ -114,15 +113,17 @@ class ContextSchema(BaseModel):
         tasks = dict()
         field_props: SchemaField
         for field_props in dict(self).values():
+            field_name = field_props.name
+            nest_dict = ctx_dict[field_name]
             if isinstance(field_props.subscript, int):
-                field_name = field_props.name
-                nest_dict = ctx_dict[field_name]
                 if len(nest_dict) > field_props.subscript:
                     last_keys = sorted(nest_dict.keys())[-field_props.subscript:]
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
                 elif len(nest_dict) < field_props.subscript:
-                    extra_length = field_props.subscript - len(nest_dict)
-                    tasks[field_name] = log_reader(extra_length, len(nest_dict), field_name, storage_key, primary_id)
+                    limit = field_props.subscript - len(nest_dict)
+                    tasks[field_name] = log_reader(limit, len(nest_dict), field_name, storage_key, primary_id)
+            else:
+                tasks[field_name] = log_reader(None, len(nest_dict), field_name, storage_key, primary_id)
 
         if self._supports_async:
             tasks = dict(zip(tasks.keys(), await gather(*tasks.values())))

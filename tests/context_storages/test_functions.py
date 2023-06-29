@@ -1,4 +1,4 @@
-from dff.context_storages import DBContextStorage
+from dff.context_storages import DBContextStorage, ALL_ITEMS
 from dff.pipeline import Pipeline
 from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
@@ -104,11 +104,36 @@ def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: 
         assert new_context.misc[f"key_{i}"] == f"data number #{i}"
 
 
+def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
+    # Setup schema so that only last request will be written to database
+    db.context_schema.requests.subscript = 1
+
+    # Fill database with contexts with one misc value and two requests
+    for i in range(1, 1001):
+        db[f"{context_id}_{i}"] = Context(
+            misc={f"key_{i}": f"ctx misc value {i}"},
+            requests={0: Message(text="useful message"), i: Message(text="some message")}
+        )
+
+    # Setup schema so that all requests will be read from database
+    db.context_schema.requests.subscript = ALL_ITEMS
+
+    # Check database length
+    assert len(db) == 1000
+
+    # Check that both misc and requests are read as expected
+    for i in range(1, 1001):
+        read_ctx = db[f"{context_id}_{i}"]
+        assert read_ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
+        assert read_ctx.requests[0].text == "useful message"
+
+
 basic_test.no_dict = False
 partial_storage_test.no_dict = False
 midair_subscript_change_test.no_dict = True
 large_misc_test.no_dict = False
-_TEST_FUNCTIONS = [basic_test, partial_storage_test, midair_subscript_change_test, large_misc_test]
+many_ctx_test.no_dict = True
+_TEST_FUNCTIONS = [basic_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test]
 
 
 def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
