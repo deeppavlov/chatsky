@@ -192,6 +192,20 @@ class BenchmarkConfig(BaseModel):
             "message_size": asizeof.asizeof(get_message(self.message_dimensions)),
         }
 
+    def get_context_updater(self):
+        def _context_updater(context: Context):
+            start_len = len(context.requests)
+            if start_len + self.step_dialog_len < self.to_dialog_len:
+                for i in range(start_len, start_len + self.step_dialog_len):
+                    context.add_label((f"flow_{i}", f"node_{i}"))
+                    context.add_request(get_message(self.message_dimensions))
+                    context.add_response(get_message(self.message_dimensions))
+                return context
+            else:
+                return None
+
+        return _context_updater
+
 
 class BenchmarkCase(BaseModel):
     name: str
@@ -199,20 +213,6 @@ class BenchmarkCase(BaseModel):
     benchmark_config: BenchmarkConfig = BenchmarkConfig()
     uuid: str = Field(default_factory=lambda: str(uuid4()))
     description: str = ""
-
-    def get_context_updater(self):
-        def _context_updater(context: Context):
-            start_len = len(context.requests)
-            if start_len + self.benchmark_config.step_dialog_len < self.benchmark_config.to_dialog_len:
-                for i in range(start_len, start_len + self.benchmark_config.step_dialog_len):
-                    context.add_label((f"flow_{i}", f"node_{i}"))
-                    context.add_request(get_message(self.benchmark_config.message_dimensions))
-                    context.add_response(get_message(self.benchmark_config.message_dimensions))
-                return context
-            else:
-                return None
-
-        return _context_updater
 
     @staticmethod
     def set_average_results(benchmark):
@@ -257,7 +257,7 @@ class BenchmarkCase(BaseModel):
                     self.benchmark_config.misc_dimensions
                 ),
                 self.benchmark_config.context_num,
-                context_updater=self.get_context_updater()
+                context_updater=self.benchmark_config.get_context_updater()
             )
             return {
                 "success": True,
