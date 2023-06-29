@@ -14,7 +14,7 @@ from dff.script import (
     PRE_RESPONSE_PROCESSING,
     GLOBAL,
     LOCAL,
-    Context,
+    Message,
 )
 
 from dff.pipeline import Pipeline
@@ -66,9 +66,11 @@ script = {
             },
         },
         "ask": {
-            RESPONSE: "Write your username (my username is ...):",
+            RESPONSE: Message(text="Write your username (my username is ...):"),
         },
-        "repeat_question": {RESPONSE: "Please, type your username again (my username is ...):"},
+        "repeat_question": {
+            RESPONSE: Message(text="Please, type your username again (my username is ...):")
+        },
     },
     "email_flow": {
         LOCAL: {
@@ -81,9 +83,11 @@ script = {
             },
         },
         "ask": {
-            RESPONSE: "Write your email (my email is ...):",
+            RESPONSE: Message(text="Write your email (my email is ...):"),
         },
-        "repeat_question": {RESPONSE: "Please, write your email again (my email is ...):"},
+        "repeat_question": {
+            RESPONSE: Message(text="Please, write your email again (my email is ...):")
+        },
     },
     "friend_flow": {
         LOCAL: {
@@ -95,23 +99,27 @@ script = {
                 ("friend_flow", "repeat_question", 0.8): cnd.true(),
             },
         },
-        "ask": {RESPONSE: "Please, name me one of your friends: (John Doe)"},
-        "repeat_question": {RESPONSE: "Please, name me one of your friends again: (John Doe)"},
+        "ask": {RESPONSE: Message(text="Please, name me one of your friends: (John Doe)")},
+        "repeat_question": {
+            RESPONSE: Message(text="Please, name me one of your friends again: (John Doe)")
+        },
     },
     "root": {
-        "start": {RESPONSE: "", TRANSITIONS: {("username_flow", "ask"): cnd.true()}},
+        "start": {RESPONSE: Message(text=""), TRANSITIONS: {("username_flow", "ask"): cnd.true()}},
         "fallback": {
-            RESPONSE: "Finishing query",
+            RESPONSE: Message(text="Finishing query"),
             TRANSITIONS: {("username_flow", "ask"): cnd.true()},
         },
         "utter": {
             RESPONSE: slot_rps.fill_template(
-                "Your friend is called {friend/first_name} {friend/last_name}"
+                Message(text="Your friend is called {friend/first_name} {friend/last_name}")
             ),
             TRANSITIONS: {("root", "utter_alternative"): cnd.true()},
         },
         "utter_alternative": {
-            RESPONSE: "Your username is {person/username}. Your email is {person/email}.",
+            RESPONSE: Message(
+                text="Your username is {person/username}. Your email is {person/email}."
+            ),
             PRE_RESPONSE_PROCESSING: {"fill": slot_procs.fill_template()},
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -120,12 +128,15 @@ script = {
 
 # %%
 HAPPY_PATH = [
-    ("hi", "Write your username (my username is ...):"),
-    ("my username is groot", "Write your email (my email is ...):"),
-    ("my email is groot@gmail.com", "Please, name me one of your friends: (John Doe)"),
-    ("Bob Page", "Your friend is called Bob Page"),
-    ("ok", "Your username is groot. Your email is groot@gmail.com."),
-    ("ok", "Finishing query"),
+    (Message(text="hi"), Message(text="Write your username (my username is ...):")),
+    (Message(text="my username is groot"), Message(text="Write your email (my email is ...):")),
+    (
+        Message(text="my email is groot@gmail.com"),
+        Message(text="Please, name me one of your friends: (John Doe)"),
+    ),
+    (Message(text="Bob Page"), Message(text="Your friend is called Bob Page")),
+    (Message(text="ok"), Message(text="Your username is groot. Your email is groot@gmail.com.")),
+    (Message(text="ok"), Message(text="Finishing query")),
 ]
 
 # %%

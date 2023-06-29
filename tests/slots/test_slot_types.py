@@ -1,5 +1,5 @@
 import pytest
-
+from dff.script import Message
 from dff.script.slots import RegexpSlot, GroupSlot, FunctionSlot
 from dff.script.slots.types import RootSlot, root_slot
 
@@ -9,9 +9,9 @@ from dff.script.slots.types import RootSlot, root_slot
 @pytest.mark.parametrize(
     ("input", "regexp", "expected", "_set"),
     [
-        ("I am Groot", "(?<=am ).+", "Groot", True),
-        ("My email is groot@gmail.com", "(?<=email is ).+", "groot@gmail.com", True),
-        ("I won't tell you my name", "(?<=name is ).+$", None, False),
+        (Message(text="I am Groot"), "(?<=am ).+", "Groot", True),
+        (Message(text="My email is groot@gmail.com"), "(?<=email is ).+", "groot@gmail.com", True),
+        (Message(text="I won't tell you my name"), "(?<=name is ).+$", None, False),
     ],
 )
 def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline):
@@ -20,7 +20,7 @@ def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline
     slot = RegexpSlot(name="test", regexp=regexp)
     result = slot.extract_value(testing_context, testing_pipeline)
     assert result == expected
-    testing_context.framework_states["slots"][slot.name] = result
+    testing_context.framework_states["slot_storage"][slot.name] = result
     assert slot.is_set()(testing_context, testing_pipeline) == _set
 
 
@@ -28,21 +28,21 @@ def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline
     ("input", "children", "expected", "is_set"),
     [
         (
-            "I am Groot. My email is groot@gmail.com",
+            Message(text="I am Groot. My email is groot@gmail.com"),
             [
                 RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
                 RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ],
-            {"name": "Groot", "email": "groot@gmail.com"},
+            {"test/name": "Groot", "test/email": "groot@gmail.com"},
             True,
         ),
         (
-            "I am Groot. I won't tell you my name",
+            Message(text="I am Groot. I won't tell you my name"),
             [
                 RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
                 RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
             ],
-            {"name": "Groot", "email": None},
+            {"test/name": "Groot", "test/email": None},
             False,
         ),
     ],
@@ -54,21 +54,26 @@ def test_group(input, children, expected, is_set, testing_context, testing_pipel
     assert len(slot.children) == len(children)
     result = slot.extract_value(testing_context, testing_pipeline)
     assert result == expected
-    testing_context.framework_states["slots"].update(result)
+    testing_context.framework_states["slot_storage"].update(result)
     assert slot.is_set()(testing_context, testing_pipeline) == is_set
 
 
 @pytest.mark.parametrize(
     ("input", "func", "expected", "_set"),
     [
-        ("I am Groot", lambda msg: msg.split(" ")[2], "Groot", True),
+        (Message(text="I am Groot"), lambda msg: msg.split(" ")[2], "Groot", True),
         (
-            "My email is groot@gmail.com",
+            Message(text="My email is groot@gmail.com"),
             lambda msg: [i for i in msg.split(" ") if "@" in i][0],
             "groot@gmail.com",
             True,
         ),
-        ("I won't tell you my name", lambda msg: [i for i in msg.split(" ") if "@" in i] or None, None, False),
+        (
+            Message(text="I won't tell you my name"),
+            lambda msg: [i for i in msg.split(" ") if "@" in i] or None,
+            None,
+            False,
+        ),
     ],
 )
 def test_function(input, func, expected, _set, testing_context, testing_pipeline):
@@ -77,7 +82,7 @@ def test_function(input, func, expected, _set, testing_context, testing_pipeline
     slot = FunctionSlot(name="test", func=func)
     result = slot.extract_value(new_testing_context, testing_pipeline)
     assert result == expected
-    new_testing_context.framework_states["slots"][slot.name] = result
+    new_testing_context.framework_states["slot_storage"][slot.name] = result
     assert slot.is_set()(new_testing_context, testing_pipeline) == _set
 
 

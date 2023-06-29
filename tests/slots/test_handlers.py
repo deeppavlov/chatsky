@@ -1,5 +1,5 @@
 import pytest
-from dff.script import slots
+from dff.script import slots, Message
 
 from dff.script.slots.handlers import get_values, get_filled_template, extract, unset
 from dff.script.slots import FunctionSlot
@@ -11,10 +11,10 @@ from dff.script.slots.conditions import slot_extracted_condition
 @pytest.mark.parametrize(
     ["input", "noparams", "expected"],
     [
-        ("my name is Groot", False, ["Groot"]),
-        ("my name ain't Groot", False, [None]),
-        ("my name is Groot", True, ["Groot"]),
-        ("my name ain't Groot", True, [None]),
+        (Message(text="my name is Groot"), False, ["Groot"]),
+        (Message(text="my name ain't Groot"), False, [None]),
+        (Message(text="my name is Groot"), True, ["Groot"]),
+        (Message(text="my name ain't Groot"), True, [None]),
     ],
 )
 def test_get_template(input, noparams, expected, testing_context, testing_pipeline, root):
@@ -23,15 +23,14 @@ def test_get_template(input, noparams, expected, testing_context, testing_pipeli
     template = "{" + slot_name + "}"
     root.children.clear()
     slot = FunctionSlot(name=slot_name, func=lambda x: x.partition("name is ")[-1] or None)
-    root.add_slots([slot])
     if noparams:
         result_1 = extract(testing_context, testing_pipeline)
         result_2 = get_values(testing_context, testing_pipeline)
         result_3 = get_filled_template(template, testing_context, testing_pipeline)
     else:
-        result_1 = extract(testing_context, testing_pipeline, [slot_name])
-        result_2 = get_values(testing_context, testing_pipeline, [slot_name])
-        result_3 = get_filled_template(template, testing_context, testing_pipeline, [slot_name])
+        result_1 = extract(testing_context, testing_pipeline, [slot.name])
+        result_2 = get_values(testing_context, testing_pipeline, [slot.name])
+        result_3 = get_filled_template(template, testing_context, testing_pipeline, [slot.name])
     if result_3 == template:
         result_3 = None
     assert result_1 == result_2 == [result_3] == expected
@@ -61,13 +60,13 @@ def test_error(testing_context, testing_pipeline):
 def test_unset(testing_context, testing_pipeline, slot: BaseSlot, noparams: bool, root):
     root.children.clear()
     root.add_slots([slot])
-    testing_context.add_request("Something")
+    testing_context.add_request(Message(text="Something"))
     if not noparams:
         _ = extract(testing_context, testing_pipeline, [slot.name])
         unset(testing_context, testing_pipeline, [slot.name])
     else:
         _ = extract(testing_context, testing_pipeline)
         unset(testing_context, testing_pipeline)
-    result = any_condition(slot_extracted_condition)(slot.name)(testing_context, testing_pipeline)
-    _ = all_condition(slot_extracted_condition)(slot.name)(testing_context, testing_pipeline)
+    result = any_condition(slot_extracted_condition(slot.name))(testing_context, testing_pipeline)
+    _ = all_condition(slot_extracted_condition(slot.name))(testing_context, testing_pipeline)
     assert result is False

@@ -38,13 +38,17 @@ pet = slots.GroupSlot(
     ],
 )
 
-# You can use dff.script.slots handlers to define custom functions.
-# These include conditions, responses, and processing routines.
-# The following function can yield 4 responses depending on slot values:
-# - Is he a good boy or a bad boy?
-# - Is she a good girl or a bad girl?
-# - Is your cat good or is it bad?
-# - Is your dog good or is it bad?
+# %% [markdown]
+"""You can use dff.script.slots handlers to define custom functions.
+These include conditions, responses, and processing routines.
+The following function can yield 4 responses depending on slot values:
+- Is he a good boy or a bad boy?
+- Is she a good girl or a bad girl?
+- Is your cat good or is it bad?
+- Is your dog good or is it bad?"""
+
+
+# %%
 def custom_behaviour_question(ctx: Context, pipeline: Pipeline):
     template = "Is {pet/pet_info/gender} a good "
     middle = " or a bad "
@@ -82,7 +86,7 @@ script = {
         "ask": {
             RESPONSE: Message(text="I heard that you have a pet. Is it a cat, or a dog?"),
         },
-        "repeat_question": {RESPONSE: "Seriously, is it a cat, or a dog?"},
+        "repeat_question": {RESPONSE: Message(text="Seriously, is it a cat, or a dog?")},
     },
     "gender_flow": {
         LOCAL: {
@@ -113,7 +117,7 @@ script = {
         "repeat_question": {RESPONSE: custom_behaviour_question},
     },
     "root": {
-        "start": {RESPONSE: "", TRANSITIONS: {("pet_flow", "ask"): cnd.true()}},
+        "start": {RESPONSE: Message(text=""), TRANSITIONS: {("pet_flow", "ask"): cnd.true()}},
         "fallback": {
             RESPONSE: Message(text="It's been a nice talk! See you."),
             TRANSITIONS: {("pet_flow", "ask"): cnd.true()},
@@ -127,16 +131,16 @@ script = {
 }
 
 HAPPY_PATH = [
-    ("hi", "I heard that you have a pet. Is it a cat, or a dog?"),
-    ("it is a dog", "Great! Is it a he, or a she?"),
-    ("he", "Is he a good boy or a bad boy?"),
-    ("it's bad", "Sorry to hear that."),
-    ("ok", "It's been a nice talk! See you."),
-    ("ok", "I heard that you have a pet. Is it a cat, or a dog?"),
-    ("a CAT", "Seriously, is it a cat, or a dog?"),
-    ("it's a cat", "Great! Is it a he, or a she?"),
-    ("she", "Is she a good girl or a bad girl?"),
-    ("she is good", "Great to hear that!"),
+    (Message(text="hi"), Message(text="I heard that you have a pet. Is it a cat, or a dog?")),
+    (Message(text="it is a dog"), Message(text="Great! Is it a he, or a she?")),
+    (Message(text="he"), Message(text="Is he a good boy or a bad boy?")),
+    (Message(text="it's bad"), Message(text="Sorry to hear that.")),
+    (Message(text="ok"), Message(text="It's been a nice talk! See you.")),
+    (Message(text="ok"), Message(text="I heard that you have a pet. Is it a cat, or a dog?")),
+    (Message(text="a CAT"), Message(text="Seriously, is it a cat, or a dog?")),
+    (Message(text="it's a cat"), Message(text="Great! Is it a he, or a she?")),
+    (Message(text="she"), Message(text="Is she a good girl or a bad girl?")),
+    (Message(text="she is good"), Message(text="Great to hear that!")),
 ]
 
 # %%

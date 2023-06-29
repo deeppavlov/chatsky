@@ -6,16 +6,16 @@ Generally, these types should be imported from __init__.py for the sake of autom
 Import from here, if you want to registed slots manually.
 """
 import re
-import wrapt
 from abc import ABC, abstractmethod
 from copy import copy
 from collections.abc import Iterable
 from typing import Callable, Any, Tuple, Dict, Union, overload, TypeVar
 
+import wrapt
 from pydantic import Field, BaseModel, validator
 
 from dff.script import Context
-from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STORAGE_KEY
+from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STORAGE_KEY  # noqa: F401
 
 T = TypeVar("T")
 
@@ -159,6 +159,11 @@ def singleton(result: Union[T, None] = None) -> Callable[..., T]:
 
 @singleton()
 class RootSlot(_GroupSlot):
+    """
+    Root slot is a universally unique slot group that automatically
+    registers all the other slots and makes them globally available.
+    """
+
     @staticmethod
     def flatten_slot_tree(node: BaseSlot) -> Tuple[Dict[str, BaseSlot], Dict[str, BaseSlot]]:
         add_nodes = {node.name: node}
@@ -212,7 +217,7 @@ class ValueSlot(ChildSlot):
     value: Any = None
 
     def is_set(self):
-        def is_set_inner(ctx: Context, pipeline: Pipeline):
+        def is_set_inner(ctx: Context, _: Pipeline):
             return bool(ctx.framework_states.get(SLOT_STORAGE_KEY, {}).get(self.name))
 
         return is_set_inner
@@ -292,8 +297,8 @@ class RegexpSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, pipeline: Pipeline):
-        search = re.search(self.regexp, ctx.last_request)
+    def extract_value(self, ctx: Context, _: Pipeline):
+        search = re.search(self.regexp, ctx.last_request.text)
         self.value = search.group(self.match_group_idx) if search else None
         return self.value
 
@@ -318,6 +323,6 @@ class FunctionSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, pipeline: Pipeline):
-        self.value = self.func(ctx.last_request)
+    def extract_value(self, ctx: Context, _: Pipeline):
+        self.value = self.func(ctx.last_request.text)
         return self.value

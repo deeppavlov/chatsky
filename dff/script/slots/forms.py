@@ -77,7 +77,7 @@ class FormPolicy(BaseModel):
             and use the name of the group slot as a key.
             Since `dict` type is ordered since python 3.6, slots will be iterated over in the order
             that you pass them in.
-        :param allowed_repeats: This parameter regulates, how many times the policy can return to an already visited node.
+        :param allowed_repeats: This parameter regulates, how many times a node can be revisited.
             If the limit on allowed repeats has been reached, the policy will stop to affect transitions.
         """
         super().__init__(name=name, mapping=mapping, allowed_repeats=allowed_repeats, **data)
@@ -95,7 +95,7 @@ class FormPolicy(BaseModel):
         """
 
         def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
-            current_priority = priority or pipeline.actor.label_priority, pipeline
+            current_priority = priority or pipeline.actor.label_priority
             for slot_name, node_list in self.mapping.items():
                 is_set = root_slot.children[slot_name].is_set()(ctx, pipeline)
                 if is_set is True:
@@ -114,6 +114,7 @@ class FormPolicy(BaseModel):
 
                 if not ctx.validation:
                     self._node_cache.update([chosen_node])  # update visit counts
+                print((*chosen_node, current_priority))
                 return (*chosen_node, current_priority)
 
             _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)

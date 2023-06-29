@@ -1,6 +1,7 @@
+from uuid import uuid4
 import pytest
 
-from dff.script import Context, Message, TRANSITIONS, RESPONSE
+from dff.script import Message, TRANSITIONS, RESPONSE
 from dff.script import conditions as cnd
 from dff.pipeline import Pipeline
 from dff.script.slots import root_slot
@@ -14,12 +15,12 @@ def testing_pipeline():
 
 
 @pytest.fixture
-def testing_context():
-    ctx = Context()
-    ctx.add_request("I am Groot")
+def testing_context(testing_pipeline: Pipeline):
+    ctx_id = uuid4()
+    ctx = testing_pipeline(Message(text="Hi!"), ctx_id)
     yield ctx
 
 
-@pytest.fixture(scope="function")
+@pytest.fixture(scope="session")
 def root():
     yield root_slot

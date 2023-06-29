@@ -21,11 +21,7 @@ def extract(slots: Optional[List[str]]) -> Callable:
     """
     Extract slots from a specified list.
 
-    Parameters
-    ----------
-
-    slots: Optional[List[str]]
-        List of slot names to extract.
+    :param slots: List of slot names to extract.
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
 
@@ -49,14 +45,10 @@ def unset(slots: Optional[List[str]] = None):
 def fill_template(slots: Optional[List[str]] = None):
     """
     Fill the response template in the current node.
-    Response should be an instance of :py:class:`~str` or of the :py:class:`~Response` class from dff.connectors.messenger.generics add-on.
+    Response should be an instance of :py:class:`~Message`.
     Names of slots to be used should be placed in curly braces: 'Username is {profile/username}'.
 
-    Parameters
-    ----------
-
-    slots: Optional[List[str]] = None
-        Slot names to use. If this parameter is omitted, all slots will be used.
+    :param slots: Slot names to use. If this parameter is omitted, all slots will be used.
     """
 
     def fill_inner(ctx: Context, pipeline: Pipeline) -> Message:

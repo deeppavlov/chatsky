@@ -7,7 +7,7 @@
 
 # %%
 from dff.script import labels as lbl
-from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Context
+from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Message
 
 from dff.pipeline import Pipeline
 
@@ -67,75 +67,81 @@ script = {
         },
         "offer": {
             RESPONSE: slot_rsp.fill_template(
-                "Would you like me to find a {cuisine} cuisine restaurant?"
+                Message(text="Would you like me to find a {cuisine} cuisine restaurant?")
             ),
             TRANSITIONS: {lbl.forward(1.1): cnd.regexp(r"[yY]es|[yY]eah|[Oo][Kk]|[Ff]ine")},
             PRE_TRANSITIONS_PROCESSING: {
                 "reset_form": RestaurantForm.update_state(FormState.INACTIVE),
                 "reset_slots": slot_procs.unset([RestaurantAddress.name, NumberOfPeople.name]),
-            },  # Explicitly resetting form and slot states in case the user returns to the node after one order
+            },  # Explicitly resetting form and slot states
         },
         "offer_accepted": {
-            RESPONSE: "Very well then, processing your request.",
+            RESPONSE: Message(text="Very well then, processing your request."),
             PRE_TRANSITIONS_PROCESSING: {
                 "activate_form": RestaurantForm.update_state(slots.FormState.ACTIVE),
             },
         },
         "form_filled": {
             RESPONSE: slot_rsp.fill_template(
-                "All done, a table for {numberofpeople} people will be reserved in due time"
+                Message(text="All done, a table for {numberofpeople} has been reserved")
             ),
             TRANSITIONS: {("chitchat", "chat_3", 1.1): cnd.true()},
         },
         "cuisine": {
-            RESPONSE: "What kind of cuisine would you like to have?",
+            RESPONSE: Message(text="What kind of cuisine would you like to have?"),
         },
         "address": {
-            RESPONSE: "In what area would you like to find a restaurant?",
+            RESPONSE: Message(text="In what area would you like to find a restaurant?"),
         },
         "number": {
-            RESPONSE: "How many people would you like to invite?",
+            RESPONSE: Message(text="How many people would you like to invite?"),
         },
     },
     "chitchat": {
         LOCAL: {TRANSITIONS: {lbl.forward(1): cnd.true()}},
-        "chat_1": {RESPONSE: "How's life?"},
+        "chat_1": {RESPONSE: Message(text="How's life?")},
         "chat_2": {
-            RESPONSE: "What kind of cuisine do you like?",
+            RESPONSE: Message(text="What kind of cuisine do you like?"),
             TRANSITIONS: {
                 ("restaurant", "offer", 1.2): slot_cnd.is_set_all(["cuisine"]),
                 ("chitchat", "chat_3", 1.1): cnd.true(),
             },
         },
         "chat_3": {
-            RESPONSE: "Did you like the latest Star Wars film?",
+            RESPONSE: Message(text="Did you like the latest Star Wars film?"),
             TRANSITIONS: {lbl.to_fallback(1.1): cnd.true()},
         },
-        "chat_4": {RESPONSE: "Who do you think will win the Champions League?"},
+        "chat_4": {RESPONSE: Message(text="Who do you think will win the Champions League?")},
     },
     "root": {
-        "start": {RESPONSE: "", TRANSITIONS: {("chitchat", "chat_1", 2): cnd.true()}},
+        "start": {RESPONSE: Message(text=""), TRANSITIONS: {("chitchat", "chat_1", 2): cnd.true()}},
         "fallback": {
-            RESPONSE: "Nice chatting with you!",
+            RESPONSE: Message(text="Nice chatting with you!"),
             TRANSITIONS: {("chitchat", "chat_1", 2): cnd.true()},
         },
     },
 }
 
 HAPPY_PATH = [
-    ("hi", "How's life?"),
-    ("good", "What kind of cuisine do you like?"),
-    ("none", "Did you like the latest Star Wars film?"),
-    ("yes", "Nice chatting with you!"),
-    ("hi", "How's life?"),
-    ("good", "What kind of cuisine do you like?"),
-    ("french cuisine", "Would you like me to find a french cuisine restaurant?"),
-    ("yes", "Very well then, processing your request."),
-    ("ok", "In what area would you like to find a restaurant?"),
-    ("in London", "How many people would you like to invite?"),
-    ("3 people", "All done, a table for 3 people will be reserved in due time"),
-    ("ok", "Did you like the latest Star Wars film?"),
-    ("yes", "Nice chatting with you!"),
+    (Message(text="hi"), Message(text="How's life?")),
+    (Message(text="good"), Message(text="What kind of cuisine do you like?")),
+    (Message(text="none"), Message(text="Did you like the latest Star Wars film?")),
+    (Message(text="yes"), Message(text="Nice chatting with you!")),
+    (Message(text="hi"), Message(text="How's life?")),
+    (Message(text="good"), Message(text="What kind of cuisine do you like?")),
+    (
+        Message(text="french cuisine"),
+        Message(text="Would you like me to find a french cuisine restaurant?"),
+    ),
+    (Message(text="yes"), Message(text="Very well then, processing your request.")),
+    (Message(text="ok"), Message(text="In what area would you like to find a restaurant?")),
+    (Message(text="in London"), Message(text="How many people would you like to invite?")),
+    (
+        Message(text="3 people"),
+        Message(text="All done, a table for 3 has been reserved"),
+    ),
+    (Message(text="ok"), Message(text="Did you like the latest Star Wars film?")),
+    (Message(text="yes"), Message(text="Nice chatting with you!")),
 ]
 
 # %%

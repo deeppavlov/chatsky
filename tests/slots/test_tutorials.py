@@ -12,10 +12,9 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 @pytest.mark.parametrize(
     "tutorial_module_name",
     [
-        "generics_example",
-        "basic_example",
-        "handlers_example",
-        "form_example",
+        "1_basic_example",
+        "2_form_example",
+        "3_handlers_example",
     ],
 )
 def test_examples(tutorial_module_name, root):

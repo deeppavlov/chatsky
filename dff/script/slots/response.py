@@ -20,13 +20,8 @@ def fill_template(template: Message, slots: Optional[List[str]] = None):
     Fill a template with slot values.
     Response should be an instance of :py:class:`~Message` class.
 
-    Parameters
-    ----------
-
-    template:
-        Template to fill. Names of slots to be used should be placed in curly braces: 'Username is {profile/username}'.
-    slots: Optional[List[str]] = None
-        Slot names to use. If this parameter is omitted, all slots will be used.
+    :param template: Template message with placeholders enclosed by curly brackets {profile/username}'.
+    :param slots: Slot names to use. If this parameter is omitted, all slots will be used.
     """
 
     def fill_inner(ctx: Context, pipeline: Pipeline):
