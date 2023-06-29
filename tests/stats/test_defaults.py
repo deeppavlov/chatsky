@@ -1,5 +1,6 @@
 import pytest
 from dff.script import Context
+from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 
 try:
     from dff.stats import DFFInstrumentor, defaults
@@ -35,7 +36,12 @@ async def test_otlp_integration(context, expected, tracer_exporter_and_provider,
     if instrumentor.is_instrumented_by_opentelemetry:
         instrumentor.uninstrument()
     instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
-    _ = await defaults.get_current_label(context, None, {"component": {"path": "."}})
+    runtime_info = ExtraHandlerRuntimeInfo(
+        func=lambda x: x,
+        stage="BEFORE",
+        component=ServiceRuntimeInfo(path=".", name=".", asynchronous=False, execution_state={".": "FINISHED"}),
+    )
+    _ = await defaults.get_current_label(context, None, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0

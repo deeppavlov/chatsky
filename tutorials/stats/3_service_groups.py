@@ -42,7 +42,7 @@ async def heavy_service(_):
 
 @dff_instrumentor
 async def get_group_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    data = {"execution_state": info["component"]["execution_state"]}
+    data = {"execution_state": info.component.execution_state}
     return data
 
 

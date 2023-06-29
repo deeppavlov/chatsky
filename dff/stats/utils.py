@@ -65,7 +65,7 @@ def get_wrapper_field(info: ExtraHandlerRuntimeInfo, postfix: str = "") -> str:
     :param info: Handler runtime info obtained from the pipeline.
     :param postfix: Field-specific postfix that will be appended to the field name.
     """
-    path = info["component"]["path"].replace(".", "-")
+    path = info.component.path.replace(".", "-")
     return f"{path}" + (f"-{postfix}" if postfix else "")
 
 

@@ -41,7 +41,7 @@ dff_instrumentor.instrument()
 
 @dff_instrumentor
 async def get_pipeline_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    data = {"execution_state": info["component"]["execution_state"]}
+    data = {"execution_state": info.component.execution_state}
     return data
 
 
