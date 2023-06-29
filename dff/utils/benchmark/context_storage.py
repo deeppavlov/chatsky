@@ -180,10 +180,13 @@ class BenchmarkConfig(BaseModel):
     class Config:
         allow_mutation = False
 
+    def get_context(self):
+        return get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
+
     def sizes(self):
         return {
             "starting_context_size": asizeof.asizeof(
-                get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
+                self.get_context()
             ),
             "final_context_size": asizeof.asizeof(
                 get_context(self.to_dialog_len, self.message_dimensions, self.misc_dimensions)
@@ -251,11 +254,7 @@ class BenchmarkCase(BaseModel):
         try:
             write_times, read_times, update_times = time_context_read_write(
                 self.db_factory.db(),
-                get_context(
-                    self.benchmark_config.from_dialog_len,
-                    self.benchmark_config.message_dimensions,
-                    self.benchmark_config.misc_dimensions
-                ),
+                self.benchmark_config.get_context(),
                 self.benchmark_config.context_num,
                 context_updater=self.benchmark_config.get_context_updater()
             )
