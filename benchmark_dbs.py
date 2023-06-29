@@ -75,10 +75,12 @@ dbs = {
 }
 
 # benchmark
-pathlib.Path("benchmarks").mkdir(exist_ok=True)
+benchmark_dir = pathlib.Path("benchmarks")
+
+benchmark_dir.mkdir(exist_ok=True)
 
 benchmark_all(
-    "benchmarks/alexaprize.json",
+    benchmark_dir / "alexaprize.json",
     "Alexaprize-like dialogue benchmarks",
     "Benchmark with dialogues similar to those from alexaprize.",
     db_uris=dbs,
@@ -91,7 +93,7 @@ benchmark_all(
 )
 
 benchmark_all(
-    "benchmarks/short_messages.json",
+    benchmark_dir / "short_messages.json",
     "Short messages",
     "Benchmark with short messages, long dialog len.",
     db_uris=dbs,
@@ -104,14 +106,14 @@ benchmark_all(
 )
 
 benchmark_all(
-    "benchmarks/default.json",
+    benchmark_dir / "default.json",
     "Default",
     "Benchmark using default parameters.",
     db_uris=dbs,
 )
 
 benchmark_all(
-    "benchmarks/alexaprize_longer.json",
+    benchmark_dir / "alexaprize_longer.json",
     "Alexaprize-like dialogue benchmarks (longer)",
     "Benchmark with dialogues similar to those from alexaprize, but dialog len is increased.",
     db_uris=dbs,
@@ -158,7 +160,7 @@ save_results_to_file(
             description="Benchmark with misc containing many keys."
         ),
     ],
-    file="benchmarks/extremes.json",
+    file=benchmark_dir / "extremes.json",
     name="Extreme",
     description="Set of benchmarks testing extreme cases."
 )
