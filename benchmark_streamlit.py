@@ -253,13 +253,8 @@ with view_tab:
         }
 
         size_stats = {
-            stat: naturalsize(selected_benchmark[stat], gnu=True)
-            for stat in (
-                "starting_context_size",
-                "final_context_size",
-                "misc_size",
-                "message_size",
-            )
+            stat: naturalsize(value, gnu=True)
+            for stat, value in selected_benchmark["sizes"].items()
         }
 
         st.json(reproducible_stats)

@@ -60,5 +60,16 @@ for file in benchmark_path.iterdir():
 
                 benchmark["benchmark_config"] = benchmark_config
 
+        # update sizes
+        for benchmark in new_benchmark_set["benchmarks"].values():
+            if "sizes" not in benchmark:
+                sizes = {
+                    key: benchmark.pop(key) for key in (
+                        "starting_context_size", "final_context_size", "misc_size", "message_size"
+                    )
+                }
+
+                benchmark["sizes"] = sizes
+
         with open(file, "w") as fd:
             json.dump(new_benchmark_set, fd)
