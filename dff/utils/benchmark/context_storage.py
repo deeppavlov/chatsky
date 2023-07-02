@@ -130,6 +130,7 @@ def time_context_read_write(
         write_times.append(perf_counter() - write_start)
 
         read_times.append({})
+        update_times.append({})
 
         # read operation benchmark
         read_start = perf_counter()
@@ -138,7 +139,6 @@ def time_context_read_write(
         read_times[-1][len(tmp_context.labels)] = read_time
 
         if context_updater is not None:
-            update_times.append({})
 
             tmp_context = context_updater(tmp_context)
 
