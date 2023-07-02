@@ -36,6 +36,8 @@ if "compare" not in st.session_state:
 
 
 def get_diff(last_metric, first_metric):
+    if last_metric is None or first_metric is None:
+        return "-"
     if st.session_state["percent_compare"]:
         return f"{(last_metric / first_metric - 1):.3%}"
     else:

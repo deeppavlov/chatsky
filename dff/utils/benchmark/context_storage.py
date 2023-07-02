@@ -223,11 +223,14 @@ class BenchmarkCase(BaseModel):
             return
 
         def get_complex_stats(results):
+            if len(results) == 0 or len(results[0]) == 0:
+                return [], {}, None
+
             average_grouped_by_context_num = [mean(times.values()) for times in results]
             average_grouped_by_dialog_len = {
-                key: mean([times[key] for times in results]) for key in next(iter(results), {}).keys()
+                key: mean([times[key] for times in results]) for key in results[0].keys()
             }
-            average = mean(average_grouped_by_context_num)
+            average = float(mean(average_grouped_by_context_num))
             return average_grouped_by_context_num, average_grouped_by_dialog_len, average
 
         read_stats = get_complex_stats(benchmark["result"]["read_times"])
@@ -242,10 +245,14 @@ class BenchmarkCase(BaseModel):
             "update_times_grouped_by_context_num": update_stats[0],
             "update_times_grouped_by_dialog_len": update_stats[1],
         }
-        result["pretty_write"] = float(f'{result["average_write_time"]:.3}')
-        result["pretty_read"] = float(f'{result["average_read_time"]:.3}')
-        result["pretty_update"] = float(f'{result["average_update_time"]:.3}')
-        result["pretty_read+update"] = float(f'{result["average_read_time"] + result["average_update_time"]:.3}')
+        result["pretty_write"] = float(f'{result["average_write_time"]:.3}')\
+            if result["average_write_time"] is not None else None
+        result["pretty_read"] = float(f'{result["average_read_time"]:.3}')\
+            if result["average_read_time"] is not None else None
+        result["pretty_update"] = float(f'{result["average_update_time"]:.3}')\
+            if result["average_update_time"] is not None else None
+        result["pretty_read+update"] = float(f'{result["average_read_time"] + result["average_update_time"]:.3}')\
+            if result["average_read_time"] is not None and result["average_update_time"] is not None else None
 
         benchmark["average_results"] = result
 
