@@ -237,7 +237,6 @@ class BenchmarkCase(BaseModel):
             "average_write_time": mean(benchmark["result"]["write_times"]),
             "average_read_time": read_stats[2],
             "average_update_time": update_stats[2],
-            "write_times": benchmark["result"]["write_times"],
             "read_times_grouped_by_context_num": read_stats[0],
             "read_times_grouped_by_dialog_len": read_stats[1],
             "update_times_grouped_by_context_num": update_stats[0],

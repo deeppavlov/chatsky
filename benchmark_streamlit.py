@@ -302,7 +302,7 @@ with view_tab:
         select_graph, graph = st.columns([1, 3])
 
         graphs = {
-            "Write": selected_benchmark["average_results"]["write_times"],
+            "Write": selected_benchmark["result"]["write_times"],
             "Read (grouped by contex_num)": selected_benchmark["average_results"]["read_times_grouped_by_context_num"],
             "Read (grouped by dialog_len)": selected_benchmark["average_results"]["read_times_grouped_by_dialog_len"],
             "Update (grouped by contex_num)": selected_benchmark["average_results"]["update_times_grouped_by_context_num"],
