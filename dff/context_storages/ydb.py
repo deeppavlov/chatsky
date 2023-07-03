@@ -75,8 +75,6 @@ class YDBContextStorage(DBContextStorage):
             install_suggestion = get_protocol_install_suggestion("grpc")
             raise ImportError("`ydb` package is missing.\n" + install_suggestion)
 
-         # TODO: no documentation found, might be larger or not exist at all!
-        self._insert_limit = 10000
         self.table_prefix = table_name_prefix
         self.driver, self.pool = asyncio.run(_init_drive(timeout, self.endpoint, self.database, table_name_prefix))
 
