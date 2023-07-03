@@ -2,7 +2,8 @@
 """
 # 2. Form Example
 
-...
+The following tutorial shows the way you can utilize the `FormPolicy` class
+to enhance the dialog with a greedy form-filling strategy.
 """
 
 # %%
@@ -20,11 +21,11 @@ from dff.script.slots import processing as slot_procs
 from dff.script.slots import response as slot_rsp
 from dff.script.slots import conditions as slot_cnd
 
-
-def is_unrelated_intent(ctx, actor):
-    return False
-
-
+# %% [markdown]
+"""
+As an initial step, all the slots that belong to the form need to be istantiated.
+"""
+# %%
 RestaurantCuisine = slots.RegexpSlot(
     name="cuisine", regexp=r"([A-Za-z]+) cuisine", match_group_idx=1
 )
@@ -32,6 +33,17 @@ RestaurantAddress = slots.RegexpSlot(
     name="restaurantaddress", regexp=r"(at|in) (.+)", match_group_idx=2
 )
 NumberOfPeople = slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
+# %% [markdown]
+"""
+Secondly, the `FormPolicy` object is instantiated where slot names are
+mapped to lists of node names. This allows the form component to manage
+the dialog ensuring that the user traverses the nodes used for slot extraction.
+
+Slots will be iterated in order to determine the next transition.
+If none is possible, the form policy will suggest a fallback transition.
+
+"""
+# %%
 RestaurantForm = slots.FormPolicy(
     "restaurant",
     {
@@ -41,6 +53,18 @@ RestaurantForm = slots.FormPolicy(
     },
 )
 
+# %% [markdown]
+"""
+Thirdly, `to_next_label` method of the form object is used globally in the script
+which leads to the relevant condition being checked at every dialog turn.
+If the condition is met, the policy will suggest a transition to one of the
+nodes from the mapping.
+
+Priority float number is used for the condition to take precedence in cases
+when multiple transition options are possible.
+
+"""
+# %%
 script = {
     GLOBAL: {
         TRANSITIONS: {
@@ -146,7 +170,7 @@ HAPPY_PATH = [
 
 # %%
 pipeline = Pipeline.from_script(
-    script,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
+    script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )

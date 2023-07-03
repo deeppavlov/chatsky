@@ -9,8 +9,8 @@ from dff.script.slots import root_slot
 
 @pytest.fixture
 def testing_pipeline():
-    script = {"old_flow": {"": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"": cnd.true()}}}}
-    pipeline = Pipeline.from_script(script=script, start_label=("old_flow", ""))
+    script = {"flow": {"node": {RESPONSE: lambda c, p: Message(), TRANSITIONS: {"node": cnd.true()}}}}
+    pipeline = Pipeline.from_script(script=script, start_label=("flow", "node"))
     yield pipeline
 
 

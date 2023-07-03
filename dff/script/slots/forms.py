@@ -114,7 +114,6 @@ class FormPolicy(BaseModel):
 
                 if not ctx.validation:
                     self._node_cache.update([chosen_node])  # update visit counts
-                print((*chosen_node, current_priority))
                 return (*chosen_node, current_priority)
 
             _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)

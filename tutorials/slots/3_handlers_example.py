@@ -2,7 +2,9 @@
 """
 # 3. Handler Example
 
-...
+The following module demonstrates the implementation
+of custom handler functions that can be used to produce
+conditions or responses based on the current slot values.
 """
 
 # %%
@@ -39,13 +41,15 @@ pet = slots.GroupSlot(
 )
 
 # %% [markdown]
-"""You can use dff.script.slots handlers to define custom functions.
+"""
+You can use the slot handlers to define custom functions.
 These include conditions, responses, and processing routines.
 The following function can yield 4 responses depending on slot values:
 - Is he a good boy or a bad boy?
 - Is she a good girl or a bad girl?
 - Is your cat good or is it bad?
-- Is your dog good or is it bad?"""
+- Is your dog good or is it bad?
+"""
 
 
 # %%
@@ -65,6 +69,14 @@ def custom_behaviour_question(ctx: Context, pipeline: Pipeline):
     return Message(text=new_template)
 
 
+# %% [markdown]
+"""
+Another response handler that yields one of two distinct response
+values depending on the values of slots.
+"""
+
+
+# %%
 def custom_esteem(ctx: Context, pipeline: Pipeline):
     value = slots.get_values(ctx, pipeline, slots=["pet/pet_info/behaviour"])[0]
     if value == "bad":
@@ -73,6 +85,7 @@ def custom_esteem(ctx: Context, pipeline: Pipeline):
         return Message(text="Great to hear that!")
 
 
+# %%
 script = {
     GLOBAL: {TRANSITIONS: {("pet_flow", "ask"): cnd.regexp(r"^[sS]tart")}},
     "pet_flow": {
@@ -145,7 +158,7 @@ HAPPY_PATH = [
 
 # %%
 pipeline = Pipeline.from_script(
-    script,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
+    script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )

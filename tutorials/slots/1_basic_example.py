@@ -2,7 +2,8 @@
 """
 # 1. Basic Example
 
-...
+The following tutorial shows basic usage of slots extraction
+module packaged with `dff.script`.
 """
 
 # %%
@@ -20,16 +21,22 @@ from dff.script import (
 from dff.pipeline import Pipeline
 from dff.script import slots
 from dff.script.slots import processing as slot_procs
-from dff.script.slots import response as slot_rps
+from dff.script.slots import response as slot_rsp
 from dff.script.slots import conditions as slot_cnd
 
 from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
 
 # %% [markdown]
 """
-Instantiating slots.
+The slots fall into the following category groups:
+ * Value slots can be used to extract slot values from user utterances.
+ * Group slots can be used to split value slots into groups with an arbitrary level of nesting.
+
+You can build the slot tree by passing the child slot instances to the `children` property
+of the parent slot. In the following cell, we define two slot groups:
 
 Group 1: person/username, person/email
+Group 2: friend/first_name, friend/last_name
 """
 
 # %%
@@ -40,7 +47,6 @@ person_slot = slots.GroupSlot(
         slots.RegexpSlot(name="email", regexp=r"email is ([a-z@\.A-Z]+)", match_group_idx=1),
     ],
 )
-# Group 2: friend/first_name, friend/last_name
 friend_slot = slots.GroupSlot(
     name="friend",
     children=[
@@ -51,7 +57,9 @@ friend_slot = slots.GroupSlot(
 
 # %% [markdown]
 """
-Define script.
+Use the handlers offered by the `slots` module (`slot_cnd`, `slot_proc`, `slot_rsp`)
+to define transitions and response values making use of the state of the slot component.
+
 """
 
 # %%
@@ -111,7 +119,7 @@ script = {
             TRANSITIONS: {("username_flow", "ask"): cnd.true()},
         },
         "utter": {
-            RESPONSE: slot_rps.fill_template(
+            RESPONSE: slot_rsp.fill_template(
                 Message(text="Your friend is called {friend/first_name} {friend/last_name}")
             ),
             TRANSITIONS: {("root", "utter_alternative"): cnd.true()},
@@ -141,12 +149,16 @@ HAPPY_PATH = [
 
 # %%
 pipeline = Pipeline.from_script(
-    script,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
+    script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
 )
 
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)
+    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
+    # (testing) with HAPPY_PATH
+
+    # This runs tutorial in interactive mode if not in IPython env
+    # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
         run_interactive_mode(pipeline)

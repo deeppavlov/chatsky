@@ -9,7 +9,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import copy
 from collections.abc import Iterable
-from typing import Callable, Any, Tuple, Dict, Union, overload, TypeVar
+from typing import Callable, Any, Tuple, Dict, Union, overload, TypeVar, Optional
 
 import wrapt
 from pydantic import Field, BaseModel, validator
@@ -27,6 +27,7 @@ class BaseSlot(BaseModel, ABC):
     """
 
     name: str
+    children: Optional[Dict[str, "BaseSlot"]]
 
     @validator("name", pre=True)
     def validate_name(cls, name: str):
@@ -47,7 +48,7 @@ class BaseSlot(BaseModel, ABC):
         return self.dict(exclude={"name"}) == other.dict(exclude={"name"})
 
     def has_children(self) -> bool:
-        return len(getattr(self, "children", [])) > 0
+        return self.children is not None and len(self.children) > 0
 
     @abstractmethod
     def unset_value(self) -> Callable[[Context, Pipeline], None]:
@@ -84,6 +85,7 @@ class _GroupSlot(BaseSlot):
 
     """
 
+    value: None = Field(None)
     children: Dict[str, BaseSlot] = Field(default_factory=dict)
 
     @validator("children", pre=True)
@@ -94,16 +96,6 @@ class _GroupSlot(BaseSlot):
             name = values["name"]
             raise ValueError(f"Error in slot {name}: group slot should have at least one child or more.")
         return children
-
-    @property
-    def value(self) -> dict:
-        values = dict()
-        for _, child in self.children.items():
-            if isinstance(child, _GroupSlot):
-                values.update({key: value for key, value in child.value.items()})
-            elif isinstance(child, ValueSlot):
-                values.update({child.name: child.value})
-        return values
 
     def is_set(self):
         def is_set_inner(ctx: Context, pipeline: Pipeline):
@@ -118,7 +110,7 @@ class _GroupSlot(BaseSlot):
                 if isinstance(child, _GroupSlot):
                     values.update({key: value for key, value in child.get_value()(ctx, pipeline).items()})
                 else:
-                    values.update({child.name: child.get_value()(ctx, pipeline)})
+                    values.update({child.name: child.value})
             return values
 
         return get_inner
@@ -143,7 +135,7 @@ class _GroupSlot(BaseSlot):
     def extract_value(self, ctx: Context, pipeline: Pipeline):
         for child in self.children.values():
             _ = child.extract_value(ctx, pipeline)
-        return self.value
+        return self.get_value()(ctx, pipeline)
 
 
 def singleton(result: Union[T, None] = None) -> Callable[..., T]:
@@ -214,7 +206,8 @@ class ValueSlot(ChildSlot):
 
     """
 
-    value: Any = None
+    children: None = Field(None)
+    value: Optional[str] = None
 
     def is_set(self):
         def is_set_inner(ctx: Context, _: Pipeline):
