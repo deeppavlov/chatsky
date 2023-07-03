@@ -155,7 +155,7 @@ def time_context_read_write(
 
                 tmp_context = context_updater(tmp_context)
 
-    context_storage.clear()
+        context_storage.clear()
     return write_times, read_times, update_times
 
 
