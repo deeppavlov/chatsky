@@ -180,6 +180,7 @@ class Service(PipelineComponent):
 
         if isinstance(self.handler, str) and self.handler == "ACTOR":
             return ctx
+        return None
 
     @property
     def info_dict(self) -> dict:

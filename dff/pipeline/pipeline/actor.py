@@ -107,7 +107,6 @@ class Actor:
     def __call__(
         self, pipeline: Pipeline, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs
     ) -> Union[Context, dict, str]:
-
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
         self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT, *args, **kwargs)
