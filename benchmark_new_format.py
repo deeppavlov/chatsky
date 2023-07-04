@@ -71,5 +71,8 @@ for file in benchmark_path.iterdir():
 
                 benchmark["sizes"] = sizes
 
+        benchmarks = new_benchmark_set.pop("benchmarks")
+        new_benchmark_set["benchmarks"] = list(benchmarks.values())
+
         with open(file, "w") as fd:
             json.dump(new_benchmark_set, fd)

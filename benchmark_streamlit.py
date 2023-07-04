@@ -104,7 +104,7 @@ def get_opposite_benchmarks(benchmark_set, benchmark):
 
     opposite_benchmarks = [
         opposite_benchmark
-        for opposite_benchmark in benchmark_set["benchmarks"].values()
+        for opposite_benchmark in benchmark_set["benchmarks"]
         if opposite_benchmark["uuid"] != benchmark["uuid"] and all(
             get_param(benchmark, param) == get_param(opposite_benchmark, param) for param in compare_params
         )
@@ -229,7 +229,7 @@ with view_tab:
 
     benchmarks = {
         f"{benchmark['name']} ({benchmark['uuid']})": benchmark
-        for benchmark in selected_set["benchmarks"].values()
+        for benchmark in selected_set["benchmarks"]
     }
 
     benchmark = benchmark_choice.selectbox("Benchmark", benchmarks.keys())
@@ -367,8 +367,8 @@ with compare_tab:
 
 with mass_compare_tab:
     sets = {
-        f"{benchmark['name']} ({benchmark['uuid']})": benchmark
-        for benchmark in st.session_state["benchmarks"].values()
+        f"{benchmark_set['name']} ({benchmark_set['uuid']})": benchmark_set
+        for benchmark_set in st.session_state["benchmarks"].values()
     }
     benchmark_set = st.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox")
 
@@ -380,7 +380,7 @@ with mass_compare_tab:
 
     added_benchmarks = set()
 
-    for benchmark in selected_set["benchmarks"].values():
+    for benchmark in selected_set["benchmarks"]:
         if benchmark["uuid"] in added_benchmarks:
             continue
 
