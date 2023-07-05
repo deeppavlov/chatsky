@@ -16,9 +16,11 @@ Another important feature of the context is data serialization.
 The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
 This allows developers to save the context data and resume the conversation later.
 """
+from datetime import datetime
 import logging
 
 from typing import Any, Optional, Union, Dict, List, Set
+from uuid import uuid4
 
 from pydantic import BaseModel, PrivateAttr, validate_arguments, validator
 from .types import NodeLabel2Type, ModuleName
@@ -70,6 +72,12 @@ class Context(BaseModel):
     By default, randomly generated using `uuid4` `_storage_key` is used.
     `_storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
+    _primary_id: str = PrivateAttr(default_factory=lambda: str(uuid4()))
+    # TODO: doc!
+    _created_at: datetime = PrivateAttr(default=datetime.now())
+    # TODO: doc!
+    _updated_at: datetime = PrivateAttr(default=datetime.now())
+    # TODO: doc!
     labels: Dict[int, NodeLabel2Type] = {}
     """
     `labels` stores the history of all passed `labels`
