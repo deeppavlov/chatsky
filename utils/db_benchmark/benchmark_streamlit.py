@@ -57,39 +57,16 @@ if "compare" not in st.session_state:
     st.session_state["compare"] = []
 
 
-def get_diff(last_metric, first_metric):
-    if last_metric is None or first_metric is None:
-        return "-"
-    if st.session_state["percent_compare"]:
-        return f"{(last_metric / first_metric - 1):.3%}"
-    else:
-        return f"{last_metric - first_metric:.3}"
-
-
-def add_metrics(container, value_benchmark, diff_benchmark=None):
+def add_metrics(container, value_benchmark):
     write, read, update, read_update = container.columns(4)
     column_names = ("write", "read", "update", "read+update")
 
     if not value_benchmark["success"]:
         values = {key: "-" for key in column_names}
-        diffs = None
     else:
         values = {
             key: value_benchmark["average_results"][f"pretty_{key}"] for key in column_names
         }
-
-        if diff_benchmark is not None:
-            if not diff_benchmark["success"]:
-                diffs = {key: "-" for key in column_names}
-            else:
-                diffs = {
-                    key: get_diff(
-                        value_benchmark["average_results"][f"pretty_{key}"],
-                        diff_benchmark["average_results"][f"pretty_{key}"]
-                    ) for key in column_names
-                }
-        else:
-            diffs = None
 
     columns = {
         "write": write,
@@ -102,45 +79,10 @@ def add_metrics(container, value_benchmark, diff_benchmark=None):
         column.metric(
             column_name.title(),
             values[column_name],
-            delta=diffs[column_name] if diffs else None,
-            delta_color="inverse"
         )
-
-
-def get_opposite_benchmarks(benchmark_set, benchmark):
-    compare_params = (
-        ("db_factory", "uri"),
-        ("benchmark_config", "context_num"),
-        ("benchmark_config", "from_dialog_len"),
-        ("benchmark_config", "to_dialog_len"),
-        ("benchmark_config", "step_dialog_len"),
-        ("benchmark_config", "message_dimensions"),
-        ("benchmark_config", "misc_dimensions"),
-    )
-
-    def get_param(bench, param):
-        if len(param) == 1:
-            return bench.get(param[0])
-        else:
-            return get_param(bench.get(param[0]), param[1:])
-
-    opposite_benchmarks = [
-        opposite_benchmark
-        for opposite_benchmark in benchmark_set["benchmarks"]
-        if opposite_benchmark["uuid"] != benchmark["uuid"] and all(
-            get_param(benchmark, param) == get_param(opposite_benchmark, param) for param in compare_params
-        )
-    ]
-
-    return opposite_benchmarks
 
 
 st.sidebar.text(f"Benchmarks take {naturalsize(asizeof.asizeof(st.session_state['benchmarks']))} RAM")
-
-st.sidebar.divider()
-
-st.sidebar.checkbox("Compare dev and partial in view tab", value=True, key="partial_compare_checkbox")
-st.sidebar.checkbox("Percent comparison", value=True, key="percent_compare")
 
 add_tab, view_tab, compare_tab, mass_compare_tab = st.tabs(["Benchmark sets", "View", "Compare", "Mass compare"])
 
@@ -285,18 +227,7 @@ with view_tab:
     if not selected_benchmark["success"]:
         st.warning(selected_benchmark["result"])
     else:
-        opposite_benchmark = None
-
-        if st.session_state["partial_compare_checkbox"]:
-            opposite_benchmarks = get_opposite_benchmarks(selected_set, selected_benchmark)
-
-            if len(opposite_benchmarks) == 1:
-                opposite_benchmark = opposite_benchmarks[0]
-
-        add_metrics(st.container(), selected_benchmark, opposite_benchmark)
-
-        if opposite_benchmark is not None:
-            st.text(f"* In comparison with {opposite_benchmark['name']} ({opposite_benchmark['uuid']})")
+        add_metrics(st.container(), selected_benchmark)
 
         compare_item = {
             "benchmark_set": benchmark_set,
@@ -362,26 +293,6 @@ with compare_tab:
             )
         )
 
-        if len(st.session_state["compare"]) == 2:
-            write, read, update, read_update = st.columns(4)
-
-            first_dict, second_dict = st.session_state["compare"]
-
-            columns = {
-                "write": write,
-                "read": read,
-                "update": update,
-                "read+update": read_update
-            }
-
-            for column_name, column in columns.items():
-                column.metric(
-                    label=column_name.title(),
-                    value=f"{second_dict[column_name]}",
-                    delta=get_diff(second_dict[column_name], first_dict[column_name]),
-                    delta_color="inverse"
-                )
-
 ###############################################################################
 # Mass compare tab
 # Allows comparing all benchmarks inside a single set
@@ -400,21 +311,26 @@ with mass_compare_tab:
 
     selected_set = sets[benchmark_set]
 
-    added_benchmarks = set()
+    compare_items = []
 
-    for benchmark in selected_set["benchmarks"]:
-        if benchmark["uuid"] in added_benchmarks:
-            continue
+    for selected_benchmark in selected_set["benchmarks"]:
+        compare_items.append(
+            {
+                "benchmark": f"{selected_benchmark['name']} ({selected_benchmark['uuid']})",
+                "write": selected_benchmark["average_results"]["pretty_write"],
+                "read": selected_benchmark["average_results"]["pretty_read"],
+                "update": selected_benchmark["average_results"]["pretty_update"],
+                "read+update": selected_benchmark["average_results"]["pretty_read+update"],
+            }
+        )
 
-        opposite_benchmarks = get_opposite_benchmarks(selected_set, benchmark)
+    df = pd.DataFrame(compare_items)
 
-        added_benchmarks.add(benchmark["uuid"])
-        added_benchmarks.update({bm["uuid"] for bm in opposite_benchmarks})
-        st.divider()
-
-        if len(opposite_benchmarks) == 1:
-            opposite_benchmark = opposite_benchmarks[0]
-            st.subheader(f"{benchmark['name']} ({benchmark['uuid']})")
-            add_metrics(st.container(), benchmark, opposite_benchmark)
-            st.subheader(f"{opposite_benchmark['name']} ({opposite_benchmark['uuid']})")
-            add_metrics(st.container(), opposite_benchmark, benchmark)
+    if not df.empty:
+        st.dataframe(
+            df.style.highlight_min(
+                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:green;'
+            ).highlight_max(
+                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:red;'
+            )
+        )
