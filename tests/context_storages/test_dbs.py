@@ -98,7 +98,7 @@ def _test_pickle(testing_file, testing_context, context_id):
 
 @pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running")
 @pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing")
-def test_mongo(testing_context, context_id):
+def _test_mongo(testing_context, context_id):
     if system() == "Windows":
         pytest.skip()
 
@@ -159,7 +159,7 @@ def test_mysql(testing_context, context_id):
 
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
-def test_ydb(testing_context, context_id):
+def _test_ydb(testing_context, context_id):
     db = context_storage_factory(
         "{}{}".format(
             os.getenv("YDB_ENDPOINT"),

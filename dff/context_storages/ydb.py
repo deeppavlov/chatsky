@@ -100,7 +100,7 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) as cnt
+                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
                 WHERE {ExtraFields.active_ctx.value} == True;
                 """
@@ -128,15 +128,14 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
     @cast_key_to_string()
-    async def _get_last_ctx(self, key: str) -> Optional[str]:
+    async def contains_async(self, key: str) -> bool:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT {ExtraFields.primary_id.value}
+                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
-                LIMIT 1;
+                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
@@ -144,30 +143,30 @@ class YDBContextStorage(DBContextStorage):
                 {f"${ExtraFields.storage_key.value}": key},
                 commit_tx=True,
             )
-            return result_sets[0].rows[0][ExtraFields.primary_id.value] if len(result_sets[0].rows) > 0 else None
+            return result_sets[0].rows[0].cnt != 0 if len(result_sets[0].rows) > 0 else False
 
         return await self.pool.retry_operation(callee)
 
-    async def _read_pac_ctx(self, _: str, primary_id: str) -> Dict:
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                SELECT {self._PACKED_COLUMN}
+                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
+                SELECT {ExtraFields.primary_id.value}, {self._PACKED_COLUMN}
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value}
+                WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
                 """
             
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
-                {f"${ExtraFields.primary_id.value}": primary_id},
+                {f"${ExtraFields.storage_key.value}": storage_key},
                 commit_tx=True,
             )
 
             if len(result_sets[0].rows) > 0:
-                return pickle.loads(result_sets[0].rows[0][self._PACKED_COLUMN])
+                return pickle.loads(result_sets[0].rows[0][self._PACKED_COLUMN]), result_sets[0].rows[0][ExtraFields.primary_id.value]
             else:
-                return dict()
+                return dict(), None
 
         return await self.pool.retry_operation(callee)
 

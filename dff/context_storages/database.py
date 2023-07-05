@@ -106,10 +106,7 @@ class DBContextStorage(ABC):
         :param key: Hashable key used to store Context instance.
         :return: The stored context, associated with the given key.
         """
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key, primary_id)
+        return await self.context_schema.read_context(self._read_pac_ctx, self._read_log_ctx, key)
 
     def __setitem__(self, key: Hashable, value: Context):
         """
@@ -129,8 +126,7 @@ class DBContextStorage(ABC):
         :param key: Hashable key used to store Context instance.
         :param value: Context to store.
         """
-        primary_id = await self._get_last_ctx(key)
-        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, primary_id, self._insert_limit)
+        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, self._insert_limit)
 
     def __delitem__(self, key: Hashable):
         """
@@ -158,6 +154,7 @@ class DBContextStorage(ABC):
         """
         return asyncio.run(self.contains_async(key))
 
+    @abstractmethod
     async def contains_async(self, key: Hashable) -> bool:
         """
         Asynchronous method for finding whether any Context is stored with given key.
@@ -165,7 +162,7 @@ class DBContextStorage(ABC):
         :param key: Hashable key used to check if Context instance is stored.
         :return: True if there is Context accessible by given key, False otherwise.
         """
-        return await self._get_last_ctx(key) is not None
+        raise NotImplementedError
 
     def __len__(self) -> int:
         """
@@ -216,17 +213,12 @@ class DBContextStorage(ABC):
         :return: The stored context, associated with the given key or default value.
         """
         try:
-            return await self.get_item_async(str(key))
+            return await self.get_item_async(key)
         except KeyError:
             return default
 
     @abstractmethod
-    async def _get_last_ctx(self, key: Hashable) -> Optional[str]:
-        # TODO: docs
-        raise NotImplementedError
-
-    @abstractmethod
-    async def _read_pac_ctx(self, _: str, primary_id: str) -> Dict:
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         # TODO: doc!
         raise NotImplementedError
 

@@ -14,7 +14,7 @@ it means that all keys of the dictionary or list will be read or written.
 Can be used as a value of `subscript` parameter for `DictSchemaField`s and `ListSchemaField`s.
 """
 
-_ReadPackedContextFunction = Callable[[str, str], Awaitable[Dict]]
+_ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
 # TODO!
 
 _ReadLogContextFunction = Callable[[Optional[int], int, str, str], Awaitable[Dict]]
@@ -58,11 +58,11 @@ class ExtraFields(str, Enum):
     These fields only can be used for data manipulation within context storage.
     """
 
-    primary_id = "primary_id"
-    storage_key = "_storage_key"
     active_ctx = "active_ctx"
-    created_at = "created_at"
-    updated_at = "updated_at"
+    primary_id = "_primary_id"
+    storage_key = "_storage_key"
+    created_at = "_created_at"
+    updated_at = "_updated_at"
 
 
 class ContextSchema(BaseModel):
@@ -96,7 +96,7 @@ class ContextSchema(BaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str, primary_id: str) -> Context:
+    async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str) -> Context:
         """
         Read context from storage.
         Calculate what fields (and what keys of what fields) to read, call reader function and cast result to context.
@@ -106,8 +106,9 @@ class ContextSchema(BaseModel):
         returns tuple of context and context hashes
         (hashes should be kept and passed to :py:func:`~.ContextSchema.write_context`).
         """
-        ctx_dict = await pac_reader(storage_key, primary_id)
-        ctx_dict[ExtraFields.primary_id.value] = primary_id
+        ctx_dict, primary_id = await pac_reader(storage_key)
+        if primary_id is None:
+            raise KeyError(f"No entry for key {primary_id}.")
 
         tasks = dict()
         for field_props in [value for value in dict(self).values() if isinstance(value, SchemaField)]:
@@ -132,7 +133,8 @@ class ContextSchema(BaseModel):
             ctx_dict[field_name].update(tasks[field_name])
 
         ctx = Context.cast(ctx_dict)
-        ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
+        setattr(ctx, ExtraFields.primary_id.value, primary_id)
+        setattr(ctx, ExtraFields.storage_key.value, storage_key)
         return ctx
 
     async def write_context(
@@ -141,9 +143,8 @@ class ContextSchema(BaseModel):
         pac_writer: _WritePackedContextFunction,
         log_writer: _WriteLogContextFunction,
         storage_key: str,
-        primary_id: Optional[str],
         chunk_size: Union[Literal[False], int] = False,
-    ) -> str:
+    ):
         """
         Write context to storage.
         Calculate what fields (and what keys of what fields) to write,
@@ -161,10 +162,9 @@ class ContextSchema(BaseModel):
             otherwise should be boolean `False` or number `0`.
         returns string, the context primary id.
         """
-        ctx.__setattr__(ExtraFields.storage_key.value, storage_key)
         ctx_dict = ctx.dict()
         logs_dict = dict()
-        primary_id = str(uuid4()) if primary_id is None else primary_id
+        primary_id = getattr(ctx, ExtraFields.primary_id.value, str(uuid4()))
 
         for field_props in [value for value in dict(self).values() if isinstance(value, SchemaField)]:
             nest_dict = ctx_dict[field_props.name]
@@ -202,4 +202,6 @@ class ContextSchema(BaseModel):
                 else:
                     for task in tasks:
                         await task
-        return primary_id
+
+        setattr(ctx, ExtraFields.primary_id.value, primary_id)
+        setattr(ctx, ExtraFields.storage_key.value, storage_key)
