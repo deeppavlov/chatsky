@@ -1,10 +1,15 @@
 from copy import deepcopy
 import json
+import pathlib
 
+from jsonschema import validate
 import pytest
 
 import dff.utils.benchmark.context_storage as bm
 from dff.context_storages import JSONContextStorage
+
+
+ROOT_DIR = pathlib.Path(__file__).parent.parent.parent
 
 
 def test_get_dict():
@@ -247,11 +252,14 @@ def test_benchmark_case(tmp_path):
 
 
 def test_save_to_file(tmp_path):
+    with open(ROOT_DIR / "utils/db_benchmark/benchmark_schema.json", "r", encoding="utf-8") as fd:
+        schema = json.load(fd)
+
     bm.benchmark_all(
         tmp_path / "result.json",
         "test",
         "test",
-        {"json": f"json://{tmp_path}/json.json"},
+        {"json": f"json://{tmp_path}/json.json", "error": "NONE"},
         bm.BenchmarkConfig(
             context_num=5,
             from_dialog_len=1,
@@ -267,8 +275,13 @@ def test_save_to_file(tmp_path):
 
     assert set(benchmark_set.keys()) == {"name", "description", "uuid", "benchmarks"}
 
-    benchmark = tuple(benchmark_set["benchmarks"].values())[0]
+    benchmark = tuple(benchmark_set["benchmarks"])[0]
 
     assert set(benchmark.keys()) == {
         "name", "db_factory", "benchmark_config", "uuid", "description", "sizes", "success", "result", "average_results"
     }
+
+    assert not benchmark_set["benchmarks"][1]["success"]
+    assert "average_results" not in benchmark_set["benchmarks"][1]
+
+    validate(instance=benchmark_set, schema=schema)

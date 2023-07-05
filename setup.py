@@ -125,6 +125,7 @@ test_requirements = merge_req_lists(
         "streamlit-chat~=0.1.1",
         "pandas",
         "altair",
+        "jsonschema==4.17.3",
     ],
     requests_requirements,
 )
