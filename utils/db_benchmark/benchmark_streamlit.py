@@ -314,15 +314,16 @@ with mass_compare_tab:
     compare_items = []
 
     for selected_benchmark in selected_set["benchmarks"]:
-        compare_items.append(
-            {
-                "benchmark": f"{selected_benchmark['name']} ({selected_benchmark['uuid']})",
-                "write": selected_benchmark["average_results"]["pretty_write"],
-                "read": selected_benchmark["average_results"]["pretty_read"],
-                "update": selected_benchmark["average_results"]["pretty_update"],
-                "read+update": selected_benchmark["average_results"]["pretty_read+update"],
-            }
-        )
+        if selected_benchmark["success"]:
+            compare_items.append(
+                {
+                    "benchmark": f"{selected_benchmark['name']} ({selected_benchmark['uuid']})",
+                    "write": selected_benchmark["average_results"]["pretty_write"],
+                    "read": selected_benchmark["average_results"]["pretty_read"],
+                    "update": selected_benchmark["average_results"]["pretty_update"],
+                    "read+update": selected_benchmark["average_results"]["pretty_read+update"],
+                }
+            )
 
     df = pd.DataFrame(compare_items)
 
