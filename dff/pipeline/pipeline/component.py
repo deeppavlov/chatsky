@@ -115,7 +115,7 @@ class PipelineComponent(abc.ABC):
         """
         if PIPELINE_STATE_KEY not in ctx.framework_states:
             ctx.framework_states[PIPELINE_STATE_KEY] = {}
-        ctx.framework_states[PIPELINE_STATE_KEY][self.path] = value.name
+        ctx.framework_states[PIPELINE_STATE_KEY][self.path] = value
 
     def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
         """
@@ -127,9 +127,7 @@ class PipelineComponent(abc.ABC):
             (usually it's :py:attr:`~.pipeline.types.ComponentExecutionState.NOT_RUN`).
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
         """
-        return ComponentExecutionState[
-            ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
-        ]
+        return ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
 
     @property
     def asynchronous(self) -> bool:
@@ -162,7 +160,7 @@ class PipelineComponent(abc.ABC):
             if extra_handler.asynchronous and isinstance(extra_handler_result, Awaitable):
                 await extra_handler_result
         except asyncio.TimeoutError:
-            logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage.name} extra handler timed out!")
+            logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
     async def _run(self, ctx: Context, pipeline: Optional[Pipeline] = None) -> Optional[Context]:
@@ -213,15 +211,15 @@ class PipelineComponent(abc.ABC):
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :return: :py:class:`~.dff.script.typing.ServiceRuntimeInfo`
-            dict where all not set fields are replaced with `[None]`.
+            object where all not set fields are replaced with `[None]`.
         """
-        return {
-            "name": self.name if self.name is not None else "[None]",
-            "path": self.path if self.path is not None else "[None]",
-            "timeout": self.timeout,
-            "asynchronous": self.asynchronous,
-            "execution_state": copy.deepcopy(ctx.framework_states[PIPELINE_STATE_KEY]),
-        }
+        return ServiceRuntimeInfo(
+            name=self.name if self.name is not None else "[None]",
+            path=self.path if self.path is not None else "[None]",
+            timeout=self.timeout,
+            asynchronous=self.asynchronous,
+            execution_state=copy.deepcopy(ctx.framework_states[PIPELINE_STATE_KEY]),
+        )
 
     @property
     def info_dict(self) -> dict:
