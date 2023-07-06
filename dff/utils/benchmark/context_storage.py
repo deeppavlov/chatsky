@@ -46,6 +46,7 @@ def get_dict(dimensions: tp.Tuple[int, ...]):
         So, the len of dimensions is the depth of the dictionary, while its values are
         the width of the dictionary at each level.
     """
+
     def _get_dict(dimensions: tp.Tuple[int, ...]):
         if len(dimensions) < 2:
             return "." * dimensions[0]
@@ -160,7 +161,6 @@ def time_context_read_write(
         read_times[-1][len(tmp_context.labels)] = read_time
 
         if context_updater is not None:
-
             tmp_context = context_updater(tmp_context)
 
             while tmp_context is not None:
@@ -185,6 +185,7 @@ class DBFactory(BaseModel):
     A class for storing information about context storage to benchmark.
     Also used to create a context storage from the configuration.
     """
+
     uri: str
     """URI of the context storage."""
     factory_module: str = "dff.context_storages"
@@ -204,6 +205,7 @@ class BenchmarkConfig(BaseModel):
     """
     Configuration for a benchmark. Sets dialog len, misc sizes, number of benchmarks.
     """
+
     context_num: int = 100
     """
     Number of times the contexts will be benchmarked.
@@ -258,9 +260,7 @@ class BenchmarkConfig(BaseModel):
                 - "message_size" -- size of a misc field of a message.
         """
         return {
-            "starting_context_size": asizeof.asizeof(
-                self.get_context()
-            ),
+            "starting_context_size": asizeof.asizeof(self.get_context()),
             "final_context_size": asizeof.asizeof(
                 get_context(self.to_dialog_len, self.message_dimensions, self.misc_dimensions)
             ),
@@ -278,6 +278,7 @@ class BenchmarkConfig(BaseModel):
             unless such dialog len would be equal to `to_dialog_len` or exceed than it,
             in which case None is returned.
         """
+
         def _context_updater(context: Context):
             start_len = len(context.labels)
             if start_len + self.step_dialog_len < self.to_dialog_len:
@@ -297,6 +298,7 @@ class BenchmarkCase(BaseModel):
     This class represents a benchmark case and includes
     information about it, its configuration and configuration of a context storage to benchmark.
     """
+
     name: str
     """Name of a benchmark case."""
     db_factory: DBFactory
@@ -347,9 +349,7 @@ class BenchmarkCase(BaseModel):
                 return [], {}, None
 
             average_grouped_by_context_num = [mean(times.values()) for times in results]
-            average_grouped_by_dialog_len = {
-                key: mean([times[key] for times in results]) for key in results[0].keys()
-            }
+            average_grouped_by_dialog_len = {key: mean([times[key] for times in results]) for key in results[0].keys()}
             average = float(mean(average_grouped_by_context_num))
             return average_grouped_by_context_num, average_grouped_by_dialog_len, average
 
@@ -365,14 +365,20 @@ class BenchmarkCase(BaseModel):
             "update_times_grouped_by_context_num": update_stats[0],
             "update_times_grouped_by_dialog_len": update_stats[1],
         }
-        result["pretty_write"] = float(f'{result["average_write_time"]:.3}')\
-            if result["average_write_time"] is not None else None
-        result["pretty_read"] = float(f'{result["average_read_time"]:.3}')\
-            if result["average_read_time"] is not None else None
-        result["pretty_update"] = float(f'{result["average_update_time"]:.3}')\
-            if result["average_update_time"] is not None else None
-        result["pretty_read+update"] = float(f'{result["average_read_time"] + result["average_update_time"]:.3}')\
-            if result["average_read_time"] is not None and result["average_update_time"] is not None else None
+        result["pretty_write"] = (
+            float(f'{result["average_write_time"]:.3}') if result["average_write_time"] is not None else None
+        )
+        result["pretty_read"] = (
+            float(f'{result["average_read_time"]:.3}') if result["average_read_time"] is not None else None
+        )
+        result["pretty_update"] = (
+            float(f'{result["average_update_time"]:.3}') if result["average_update_time"] is not None else None
+        )
+        result["pretty_read+update"] = (
+            float(f'{result["average_read_time"] + result["average_update_time"]:.3}')
+            if result["average_read_time"] is not None and result["average_update_time"] is not None
+            else None
+        )
 
         benchmark["average_results"] = result
 
@@ -382,7 +388,7 @@ class BenchmarkCase(BaseModel):
                 self.db_factory.db(),
                 self.benchmark_config.get_context(),
                 self.benchmark_config.context_num,
-                context_updater=self.benchmark_config.get_context_updater()
+                context_updater=self.benchmark_config.get_context_updater(),
             )
             return {
                 "success": True,
@@ -390,7 +396,7 @@ class BenchmarkCase(BaseModel):
                     "write_times": write_times,
                     "read_times": read_times,
                     "update_times": update_times,
-                }
+                },
             }
         except Exception as e:
             exception_message = getattr(e, "message", repr(e))
@@ -498,7 +504,7 @@ def benchmark_all(
         file,
         name,
         description,
-        exist_ok=exist_ok
+        exist_ok=exist_ok,
     )
 
 
@@ -556,8 +562,8 @@ def report(
                 "".join(
                     [
                         f"{metric.title() + ': ' + str(result['average_results']['pretty_' + metric]):20}"
-                        if result["success"] else
-                        result["result"]
+                        if result["success"]
+                        else result["result"]
                         for metric in ("write", "read", "update", "read+update")
                     ]
                 ),

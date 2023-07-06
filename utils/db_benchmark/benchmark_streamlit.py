@@ -64,9 +64,7 @@ def add_metrics(container, value_benchmark):
     if not value_benchmark["success"]:
         values = {key: "-" for key in column_names}
     else:
-        values = {
-            key: value_benchmark["average_results"][f"pretty_{key}"] for key in column_names
-        }
+        values = {key: value_benchmark["average_results"][f"pretty_{key}"] for key in column_names}
 
     columns = {
         "write": write,
@@ -113,9 +111,9 @@ with add_tab:
     delist_container.divider()
 
     def delist_benchmarks():
-        delisted_sets = [f"{name} ({uuid})"
-                         for name, uuid in edited_df.loc[edited_df["delete"]][["name", "uuid"]].values
-                         ]
+        delisted_sets = [
+            f"{name} ({uuid})" for name, uuid in edited_df.loc[edited_df["delete"]][["name", "uuid"]].values
+        ]
 
         st.session_state["compare"] = [
             item for item in st.session_state["compare"] if item["benchmark_set"] not in delisted_sets
@@ -129,7 +127,6 @@ with add_tab:
 
         with open(BENCHMARK_RESULTS_FILES, "w", encoding="utf-8") as fd:
             json.dump(list(st.session_state["benchmark_files"]), fd)
-
 
     delist_container.button(label="Delist selected benchmark sets", on_click=delist_benchmarks)
 
@@ -177,8 +174,7 @@ with view_tab:
     set_choice, benchmark_choice, compare = st.columns([3, 3, 1])
 
     sets = {
-        f"{benchmark['name']} ({benchmark['uuid']})": benchmark
-        for benchmark in st.session_state["benchmarks"].values()
+        f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in st.session_state["benchmarks"].values()
     }
     benchmark_set = set_choice.selectbox("Benchmark set", sets.keys())
 
@@ -191,10 +187,7 @@ with view_tab:
     set_choice.text("Set description:")
     set_choice.markdown(selected_set["description"])
 
-    benchmarks = {
-        f"{benchmark['name']} ({benchmark['uuid']})": benchmark
-        for benchmark in selected_set["benchmarks"]
-    }
+    benchmarks = {f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in selected_set["benchmarks"]}
 
     benchmark = benchmark_choice.selectbox("Benchmark", benchmarks.keys())
 
@@ -216,10 +209,7 @@ with view_tab:
             )
         }
 
-        size_stats = {
-            stat: naturalsize(value, gnu=True)
-            for stat, value in selected_benchmark["sizes"].items()
-        }
+        size_stats = {stat: naturalsize(value, gnu=True) for stat, value in selected_benchmark["sizes"].items()}
 
         st.json(reproducible_stats)
         st.json(size_stats)
@@ -246,17 +236,19 @@ with view_tab:
 
         compare.button(
             "Add to Compare" if compare_item not in st.session_state["compare"] else "Remove from Compare",
-            on_click=add_results_to_compare_tab
+            on_click=add_results_to_compare_tab,
         )
 
         select_graph, graph = st.columns([1, 3])
 
+        average_results = selected_benchmark["average_results"]
+
         graphs = {
             "Write": selected_benchmark["result"]["write_times"],
-            "Read (grouped by contex_num)": selected_benchmark["average_results"]["read_times_grouped_by_context_num"],
-            "Read (grouped by dialog_len)": selected_benchmark["average_results"]["read_times_grouped_by_dialog_len"],
-            "Update (grouped by contex_num)": selected_benchmark["average_results"]["update_times_grouped_by_context_num"],
-            "Update (grouped by dialog_len)": selected_benchmark["average_results"]["update_times_grouped_by_dialog_len"],
+            "Read (grouped by contex_num)": average_results["read_times_grouped_by_context_num"],
+            "Read (grouped by dialog_len)": average_results["read_times_grouped_by_dialog_len"],
+            "Update (grouped by contex_num)": average_results["update_times_grouped_by_context_num"],
+            "Update (grouped by dialog_len)": average_results["update_times_grouped_by_dialog_len"],
         }
 
         selected_graph = select_graph.selectbox("Select graph to display", graphs.keys())
@@ -268,10 +260,17 @@ with view_tab:
         else:
             data = pd.DataFrame({"context_num": range(len(graph_data)), "time": graph_data})
 
-        chart = alt.Chart(data).mark_circle().encode(
-            x=alt.X("dialog_len:Q" if isinstance(graph_data, dict) else "context_num:Q", scale=alt.Scale(zero=False)),
-            y="time:Q",
-        ).interactive()
+        chart = (
+            alt.Chart(data)
+            .mark_circle()
+            .encode(
+                x=alt.X(
+                    "dialog_len:Q" if isinstance(graph_data, dict) else "context_num:Q", scale=alt.Scale(zero=False)
+                ),
+                y="time:Q",
+            )
+            .interactive()
+        )
 
         graph.altair_chart(chart, use_container_width=True)
 
@@ -287,10 +286,8 @@ with compare_tab:
     if not df.empty:
         st.dataframe(
             df.style.highlight_min(
-                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:green;'
-            ).highlight_max(
-                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:red;'
-            )
+                axis=0, subset=["write", "read", "update", "read+update"], props="background-color:green;"
+            ).highlight_max(axis=0, subset=["write", "read", "update", "read+update"], props="background-color:red;")
         )
 
 ###############################################################################
@@ -330,8 +327,6 @@ with mass_compare_tab:
     if not df.empty:
         st.dataframe(
             df.style.highlight_min(
-                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:green;'
-            ).highlight_max(
-                axis=0, subset=["write", "read", "update", "read+update"], props='background-color:red;'
-            )
+                axis=0, subset=["write", "read", "update", "read+update"], props="background-color:green;"
+            ).highlight_max(axis=0, subset=["write", "read", "update", "read+update"], props="background-color:red;")
         )

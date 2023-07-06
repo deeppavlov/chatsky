@@ -26,16 +26,13 @@ def test_get_context():
         labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
         requests={0: bm.Message(misc={0: ".."}), 1: bm.Message(misc={0: ".."})},
         responses={0: bm.Message(misc={0: ".."}), 1: bm.Message(misc={0: ".."})},
-        misc={0: "...", 1: "..."}
+        misc={0: "...", 1: "..."},
     )
 
 
 def test_benchmark_config():
     config = bm.BenchmarkConfig(
-        from_dialog_len=1,
-        to_dialog_len=5,
-        message_dimensions=(2, 2),
-        misc_dimensions=(3, 3, 3)
+        from_dialog_len=1, to_dialog_len=5, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
     )
     context = config.get_context()
     actual_context = bm.get_context(1, (2, 2), (3, 3, 3))
@@ -67,11 +64,7 @@ def test_benchmark_config():
 
 def test_context_updater_with_steps():
     config = bm.BenchmarkConfig(
-        from_dialog_len=1,
-        to_dialog_len=11,
-        step_dialog_len=3,
-        message_dimensions=(2, 2),
-        misc_dimensions=(3, 3, 3)
+        from_dialog_len=1, to_dialog_len=11, step_dialog_len=3, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
     )
 
     context_updater = config.get_context_updater()
@@ -114,14 +107,11 @@ def test_time_context_read_write(context_storage):
         to_dialog_len=11,
         step_dialog_len=3,
         message_dimensions=(2, 2),
-        misc_dimensions=(3, 3, 3)
+        misc_dimensions=(3, 3, 3),
     )
 
     results = bm.time_context_read_write(
-        context_storage,
-        config.get_context(),
-        config.context_num,
-        config.get_context_updater()
+        context_storage, config.get_context(), config.context_num, config.get_context_updater()
     )
 
     assert len(context_storage) == 0
@@ -150,7 +140,7 @@ def test_time_context_read_write_without_updates(context_storage):
         to_dialog_len=2,
         step_dialog_len=3,
         message_dimensions=(2, 2),
-        misc_dimensions=(3, 3, 3)
+        misc_dimensions=(3, 3, 3),
     )
 
     results = bm.time_context_read_write(
@@ -192,7 +182,7 @@ def test_average_results():
             "write_times": [1, 2],
             "read_times": [{0: 3, 1: 4}, {0: 5, 1: 6}],
             "update_times": [{0: 7, 1: 8}, {0: 9, 1: 10}],
-        }
+        },
     }
 
     bm.BenchmarkCase.set_average_results(benchmark)
@@ -217,7 +207,7 @@ def test_average_results():
             "write_times": [1, 2],
             "read_times": [{0: 3}, {0: 5}],
             "update_times": [{}, {}],
-        }
+        },
     }
 
     bm.BenchmarkCase.set_average_results(benchmark)
@@ -233,7 +223,7 @@ def test_benchmark_case(tmp_path):
             to_dialog_len=11,
             step_dialog_len=3,
             message_dimensions=(2, 2),
-            misc_dimensions=(3, 3, 3)
+            misc_dimensions=(3, 3, 3),
         ),
     )
 
@@ -266,8 +256,8 @@ def test_save_to_file(tmp_path):
             to_dialog_len=11,
             step_dialog_len=3,
             message_dimensions=(2, 2),
-            misc_dimensions=(3, 3, 3)
-        )
+            misc_dimensions=(3, 3, 3),
+        ),
     )
 
     with open(tmp_path / "result.json", "r", encoding="utf-8") as fd:
@@ -278,7 +268,15 @@ def test_save_to_file(tmp_path):
     benchmark = tuple(benchmark_set["benchmarks"])[0]
 
     assert set(benchmark.keys()) == {
-        "name", "db_factory", "benchmark_config", "uuid", "description", "sizes", "success", "result", "average_results"
+        "name",
+        "db_factory",
+        "benchmark_config",
+        "uuid",
+        "description",
+        "sizes",
+        "success",
+        "result",
+        "average_results",
     }
 
     assert not benchmark_set["benchmarks"][1]["success"]

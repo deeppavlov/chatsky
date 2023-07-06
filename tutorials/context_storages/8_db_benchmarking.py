@@ -12,8 +12,6 @@ import pathlib
 from platform import system
 import tempfile
 
-from dff.context_storages import context_storage_factory
-
 import dff.utils.benchmark.context_storage as benchmark
 
 # %% [markdown]
@@ -73,7 +71,7 @@ benchmark.report(
         to_dialog_len=5,
         message_dimensions=(3, 10),
         misc_dimensions=(3, 10),
-    )
+    ),
 )
 
 # %% [markdown]
@@ -112,14 +110,15 @@ benchmark.benchmark_all(
         to_dialog_len=5,
         message_dimensions=(3, 10),
         misc_dimensions=(3, 10),
-    )
+    ),
 )
 
 # %% [markdown]
 """
 ## Viewing benchmark results
 
-Now that the results are saved to a file you can either view them manually or using [our streamlit app](
+Now that the results are saved to a file you can either view them manually or
+use [our streamlit app](
 ../../../utils/db_benchmark/benchmark_streamlit.py
 ).
 

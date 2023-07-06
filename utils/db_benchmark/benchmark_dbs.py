@@ -6,7 +6,13 @@ This module contains config presets for benchmarks.
 import pathlib
 from platform import system
 
-from dff.utils.benchmark.context_storage import save_results_to_file, BenchmarkConfig, benchmark_all, BenchmarkCase, DBFactory
+from dff.utils.benchmark.context_storage import (
+    save_results_to_file,
+    BenchmarkConfig,
+    benchmark_all,
+    BenchmarkCase,
+    DBFactory,
+)
 
 
 # create dir and files
@@ -42,7 +48,7 @@ benchmark_all(
         to_dialog_len=50,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
-    )
+    ),
 )
 
 benchmark_all(
@@ -55,7 +61,7 @@ benchmark_all(
         to_dialog_len=550,
         message_dimensions=(2, 30),
         misc_dimensions=(0, 0),
-    )
+    ),
 )
 
 benchmark_all(
@@ -75,7 +81,7 @@ benchmark_all(
         to_dialog_len=550,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
-    )
+    ),
 )
 
 save_results_to_file(
@@ -83,46 +89,46 @@ save_results_to_file(
         *[
             BenchmarkCase(
                 db_factory=DBFactory(uri=uri),
-                name=name+"-long-dialog-len",
+                name=name + "-long-dialog-len",
                 benchmark_config=BenchmarkConfig(
                     context_num=10,
                     from_dialog_len=10000,
                     to_dialog_len=10050,
                 ),
-                description="Benchmark with very long dialog len."
+                description="Benchmark with very long dialog len.",
             )
             for name, uri in dbs.items()
         ],
         *[
             BenchmarkCase(
                 db_factory=DBFactory(uri=uri),
-                name=name+"-long-message-len",
+                name=name + "-long-message-len",
                 benchmark_config=BenchmarkConfig(
                     context_num=10,
                     from_dialog_len=1,
                     to_dialog_len=3,
                     message_dimensions=(10000, 1),
                 ),
-                description="Benchmark with messages containing many keys."
+                description="Benchmark with messages containing many keys.",
             )
             for name, uri in dbs.items()
         ],
         *[
             BenchmarkCase(
                 db_factory=DBFactory(uri=uri),
-                name=name+"-long-misc-len",
+                name=name + "-long-misc-len",
                 benchmark_config=BenchmarkConfig(
                     context_num=10,
                     from_dialog_len=1,
                     to_dialog_len=3,
                     misc_dimensions=(10000, 1),
                 ),
-                description="Benchmark with misc containing many keys."
+                description="Benchmark with misc containing many keys.",
             )
             for name, uri in dbs.items()
         ],
     ],
     file=benchmark_dir / "extremes.json",
     name="Extreme",
-    description="Set of benchmarks testing extreme cases."
+    description="Set of benchmarks testing extreme cases.",
 )
