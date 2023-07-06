@@ -23,6 +23,8 @@ from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
 from .context_schema import ALL_ITEMS, ExtraFields
 
+from .sql_dumper import create_dump_engine
+
 try:
     from sqlalchemy import (
         Table,
@@ -177,7 +179,7 @@ class SQLContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
-        self.engine = create_async_engine(self.full_path)
+        self.engine = create_dump_engine(self.full_path)
         self.dialect: str = self.engine.dialect.name
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
@@ -230,7 +232,7 @@ class SQLContextStorage(DBContextStorage):
         stmt = update(self.tables[self._CONTEXTS_TABLE])
         stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
         stmt = stmt.values({ExtraFields.storage_key.value: None})
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("DELETE") as conn:
             await conn.execute(stmt)
 
     @threadsafe_method
@@ -238,14 +240,14 @@ class SQLContextStorage(DBContextStorage):
         subq = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
         subq = subq.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None)).distinct()
         stmt = select(func.count()).select_from(subq.subquery())
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("LENGTH") as conn:
             return (await conn.execute(stmt)).fetchone()[0]
 
     @threadsafe_method
     async def clear_async(self):
         stmt = update(self.tables[self._CONTEXTS_TABLE])
         stmt = stmt.values({ExtraFields.storage_key.value: None})
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("CLEAR") as conn:
             await conn.execute(stmt)
 
     @threadsafe_method
@@ -256,11 +258,11 @@ class SQLContextStorage(DBContextStorage):
         subq = subq.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None))
         subq = subq.order_by(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.updated_at.value].desc()).limit(1)
         stmt = select(func.count()).select_from(subq.subquery())
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("CONTAINS") as conn:
             return (await conn.execute(stmt)).fetchone()[0] != 0
 
     async def _create_self_tables(self):
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("CREATE_TABLES") as conn:
             for table in self.tables.values():
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
                     await conn.run_sync(table.create, self.engine)
@@ -278,7 +280,7 @@ class SQLContextStorage(DBContextStorage):
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("READ_PAC") as conn:
             stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value], self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN])
             stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == storage_key)
             stmt = stmt.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None))
@@ -290,7 +292,7 @@ class SQLContextStorage(DBContextStorage):
                 return dict(), None
 
     async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("READ_LOG") as conn:
             stmt = select(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN])
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[ExtraFields.primary_id.value] == primary_id)
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[self._FIELD_COLUMN] == field_name)
@@ -305,7 +307,7 @@ class SQLContextStorage(DBContextStorage):
                 return dict()
 
     async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("WRITE_PAC") as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
                 {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id}
             )
@@ -313,7 +315,7 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(update_stmt)
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
-        async with self.engine.begin() as conn:
+        async with self.engine.begin("WRITE_LOG") as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [
                     {self._FIELD_COLUMN: field, self._KEY_COLUMN: key, self._VALUE_COLUMN: value, ExtraFields.primary_id.value: primary_id}
