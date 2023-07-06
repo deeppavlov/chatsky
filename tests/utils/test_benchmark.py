@@ -2,11 +2,15 @@ from copy import deepcopy
 import json
 import pathlib
 
-from jsonschema import validate
 import pytest
 
-import dff.utils.benchmark.context_storage as bm
-from dff.context_storages import JSONContextStorage
+try:
+    from jsonschema import validate
+
+    import dff.utils.benchmark.context_storage as bm
+    from dff.context_storages import JSONContextStorage
+except ImportError:
+    pytest.skip(reason="`dff[benchmark,tests]` not installed", allow_module_level=True)
 
 
 ROOT_DIR = pathlib.Path(__file__).parent.parent.parent
