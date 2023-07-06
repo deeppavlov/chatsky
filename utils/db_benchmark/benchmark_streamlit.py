@@ -27,6 +27,11 @@ from humanize import naturalsize
 import altair as alt
 import streamlit as st
 
+try:
+    from benchmark_new_format import update_benchmark_file
+except ImportError:
+    update_benchmark_file = None
+
 
 st.set_page_config(
     page_title="DB benchmark",
@@ -50,6 +55,8 @@ if "benchmarks" not in st.session_state:
     st.session_state["benchmarks"] = {}
 
     for file in st.session_state["benchmark_files"]:
+        if update_benchmark_file is not None:
+            update_benchmark_file(file)
         with open(file, "r", encoding="utf-8") as fd:
             st.session_state["benchmarks"][file] = json.load(fd)
 
@@ -147,6 +154,9 @@ with add_tab:
         if not Path(benchmark_file).exists():
             add_container.warning("File does not exists")
             return
+
+        if update_benchmark_file is not None:
+            update_benchmark_file(benchmark_file)
 
         with open(benchmark_file, "r", encoding="utf-8") as fd:
             file_contents = json.load(fd)
