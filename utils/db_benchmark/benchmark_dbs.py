@@ -1,3 +1,8 @@
+"""
+Benchmark DBs
+-------------
+This module contains config presets for benchmarks.
+"""
 import pathlib
 import typing as tp
 from platform import system
@@ -75,10 +80,12 @@ dbs = {
 }
 
 # benchmark
-pathlib.Path("benchmarks").mkdir(exist_ok=True)
+benchmark_dir = pathlib.Path("benchmarks")
+
+benchmark_dir.mkdir(exist_ok=True)
 
 benchmark_all(
-    "benchmarks/alexaprize.json",
+    benchmark_dir / "alexaprize.json",
     "Alexaprize-like dialogue benchmarks",
     "Benchmark with dialogues similar to those from alexaprize.",
     db_uris=dbs,
@@ -87,11 +94,11 @@ benchmark_all(
         to_dialog_len=50,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
-    )
+    ),
 )
 
 benchmark_all(
-    "benchmarks/short_messages.json",
+    benchmark_dir / "short_messages.json",
     "Short messages",
     "Benchmark with short messages, long dialog len.",
     db_uris=dbs,
@@ -100,18 +107,18 @@ benchmark_all(
         to_dialog_len=550,
         message_dimensions=(2, 30),
         misc_dimensions=(0, 0),
-    )
+    ),
 )
 
 benchmark_all(
-    "benchmarks/default.json",
+    benchmark_dir / "default.json",
     "Default",
     "Benchmark using default parameters.",
     db_uris=dbs,
 )
 
 benchmark_all(
-    "benchmarks/alexaprize_longer.json",
+    benchmark_dir / "alexaprize_longer.json",
     "Alexaprize-like dialogue benchmarks (longer)",
     "Benchmark with dialogues similar to those from alexaprize, but dialog len is increased.",
     db_uris=dbs,
@@ -120,7 +127,7 @@ benchmark_all(
         to_dialog_len=550,
         message_dimensions=(3, 5, 6, 5, 3),
         misc_dimensions=(2, 4, 3, 8, 100),
-    )
+    ),
 )
 
 save_results_to_file(
@@ -158,7 +165,7 @@ save_results_to_file(
             description="Benchmark with misc containing many keys."
         ),
     ],
-    file="benchmarks/extremes.json",
+    file=benchmark_dir / "extremes.json",
     name="Extreme",
-    description="Set of benchmarks testing extreme cases."
+    description="Set of benchmarks testing extreme cases.",
 )

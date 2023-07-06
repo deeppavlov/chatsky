@@ -47,13 +47,11 @@ In the end `ctx.misc` is logged to info channel.
 
 # %%
 def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    ctx.misc.update({f"{info['component']['name']}": datetime.now()})
+    ctx.misc.update({f"{info.component.name}": datetime.now()})
 
 
 def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    ctx.misc.update(
-        {f"{info['component']['name']}": datetime.now() - ctx.misc[f"{info['component']['name']}"]}
-    )
+    ctx.misc.update({f"{info.component.name}": datetime.now() - ctx.misc[f"{info.component.name}"]})
 
 
 async def heavy_service(_):
