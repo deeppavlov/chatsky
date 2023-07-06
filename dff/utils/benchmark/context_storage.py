@@ -3,16 +3,14 @@ Context storage benchmarking
 ----------------------------
 This module contains functions for context storages benchmarking.
 
-Basic usage::
+The basic function is :py:func:`~.time_context_read_write` but it has a low level interface.
 
+Higher level wrappers of the function provided by this module are:
 
-    from dff.utils.benchmark.context_storage import report
-    from dff.context_storages import context_storage_factory
+- :py:func:`~.save_results_to_file` and :py:func:`~.benchmark_all` are used to save benchmark results to a file.
+- :py:func:`~.report` is used to print results to stdout.
 
-    storage = context_storage_factory("postgresql+asyncpg://postgres:pass@localhost:5432/test", table_name="benchmark")
-
-    report(storage)
-
+Wrappers use :py:class:`~.BenchmarkConfig` to configure benchmarks.
 """
 from uuid import uuid4
 import pathlib
@@ -34,20 +32,19 @@ from dff.script import Context, Message
 
 def get_dict(dimensions: tp.Tuple[int, ...]):
     """
-    Misc dictionary build in `dimensions` dimensions.
+    Return misc dictionary build in `dimensions` dimensions.
 
     :param dimensions:
         Dimensions of the dictionary.
         Each element of the dimensions tuple is the number of keys on the corresponding level of the dictionary.
-        The last element of the dimensions tuple is the length of the str values of the dict.
+        The last element of the dimensions tuple is the length of the string values of the dict.
 
-        e.g. dimensions=(1, 2) produces a dictionary with 1 key that points to a string of len 2.
-        whereas dimensions=(1, 2, 3) produces a dictionary with 1 key that points to a dictionary
+        e.g. dimensions=(1, 2) returns a dictionary with 1 key that points to a string of len 2.
+        whereas dimensions=(1, 2, 3) returns a dictionary with 1 key that points to a dictionary
         with 2 keys each of which points to a string of len 3.
 
         So, the len of dimensions is the depth of the dictionary, while its values are
         the width of the dictionary at each level.
-    :return: Misc dictionary.
     """
     def _get_dict(dimensions: tp.Tuple[int, ...]):
         if len(dimensions) < 2:
@@ -64,19 +61,27 @@ def get_dict(dimensions: tp.Tuple[int, ...]):
 
 def get_message(message_dimensions: tp.Tuple[int, ...]):
     """
-    Message with misc field of message_dimensions dimension.
-    :param message_dimensions:
-    :return:
+    Return message with a non-empty misc field.
+
+    :param message_dimensions: Dimensions of the misc field of the message. See :py:func:`~.get_dict`.
     """
     return Message(misc=get_dict(message_dimensions))
 
 
-def get_context(dialog_len: int, message_dimensions: tp.Tuple[int, ...], misc_dimensions: tp.Tuple[int, ...]) -> Context:
+def get_context(
+    dialog_len: int,
+    message_dimensions: tp.Tuple[int, ...],
+    misc_dimensions: tp.Tuple[int, ...],
+) -> Context:
     """
-    A context with a given number of dialog turns, a given message dimension
-    and a given misc dimension.
-    """
+    Return context with a non-empty misc, labels, requests, responses fields.
 
+    :param dialog_len: Number of labels, requests and responses.
+    :param message_dimensions:
+        A parameter used to generate messages for requests and responses. See :py:func:`~.get_message`.
+    :param misc_dimensions:
+        A parameter used to generate misc field. See :py:func:`~.get_dict`.
+    """
     return Context(
         labels={i: (f"flow_{i}", f"node_{i}") for i in range(dialog_len)},
         requests={i: get_message(message_dimensions) for i in range(dialog_len)},
@@ -92,26 +97,42 @@ def time_context_read_write(
     context_updater=None,
 ) -> tp.Tuple[tp.List[float], tp.List[tp.Dict[int, float]], tp.List[tp.Dict[int, float]]]:
     """
-    Generate `context_num` ids and for each write into `context_storage` value of `context` under generated id,
-    after that read the value stored in `context_storage` under generated id and compare it to `context`.
+    Benchmark "context_storage" by writing and reading `context` into it / from it `context_num` times.
+    If context_updater is not None it is used to update `context` and use it to benchmark updating contexts
+    (as well as reading updated contexts).
 
-    Keep track of the time it takes to write and read context to/from the context storage.
-
-    This function clear context storage before and after execution.
+    This function clears "context_storage" before and after execution.
 
     :param context_storage: Context storage to benchmark.
     :param context: An instance of context which will be repeatedly written into context storage.
-    :param context_num: A number of times the context will be written and checked.
+    :param context_num: A number of times the context will be written and read.
     :param context_updater:
+        None or a function.
+        If not None, function should accept :py:class:`~.Context` and return an updated :py:class:`~.Context`.
+        The updated context can be either the same object (at the same pointer) or a different object (e.g. copied).
+        The updated context should have a higher dialog length than the received context
+        (to emulate context updating during dialog).
+        The function should return `None` to stop updating contexts.
+        For an example of such function, see :py:meth:`~.BenchmarkConfig.get_context_updater`.
+
+        To avoid keeping many contexts in memory,
+        this function will be called with every argument `context_num` times (for each cycle), so it should
+        return the same updated context for the same context and shouldn't take a long time to update a context.
     :return:
-        Depends on `as_dataframe` parameter.
-        1. By default, it is set to None in which case it returns:
-            two lists: first one contains individual write times, second one contains individual read times.
-        2. If set to "pandas":
-            A pandas DataFrame with two columns: "write" and "read" which contain corresponding data series.
-        3. If set to "polars":
-            A polars DataFrame with the same columns as in a pandas DataFrame.
-    :raises RuntimeError: If context written into context storage does not match read context.
+        A tuple of 3 elements.
+
+        The first element -- a list of write times. Its length is equal to `context_num`.
+
+        The second element -- a list of dictionaries with read times.
+        Each dictionary maps from int to float. The key in the mapping is the `dialog_len` of the context and the
+        values are the read times for the corresponding `dialog_len`.
+        If `context_updater` is None, all dictionaries will have only one key -- dialog length of `context`.
+        Otherwise, the dictionaries will also have a key for each updated context.
+
+        The third element -- a list of dictionaries with update times.
+        Structurally the same as the second element, but none of the elements here have a key for
+        dialog_len of the `context`.
+        So if `context_updater` is None, all dictionaries will be empty.
     """
     context_storage.clear()
 
@@ -119,7 +140,7 @@ def time_context_read_write(
     read_times: tp.List[tp.Dict[int, float]] = []
     update_times: tp.List[tp.Dict[int, float]] = []
 
-    for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}"):
+    for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}", leave=False):
         tmp_context = deepcopy(context)
 
         ctx_id = uuid4()
@@ -160,30 +181,82 @@ def time_context_read_write(
 
 
 class DBFactory(BaseModel):
+    """
+    A class for storing information about context storage to benchmark.
+    Also used to create a context storage from the configuration.
+    """
     uri: str
+    """URI of the context storage."""
     factory_module: str = "dff.context_storages"
+    """A module containing `factory`."""
     factory: str = "context_storage_factory"
+    """Name of the context storage factory. (function that creates context storages from URIs)"""
 
     def db(self):
+        """
+        Create a context storage using `factory` from `uri`.
+        """
         module = importlib.import_module(self.factory_module)
         return getattr(module, self.factory)(self.uri)
 
 
 class BenchmarkConfig(BaseModel):
+    """
+    Configuration for a benchmark. Sets dialog len, misc sizes, number of benchmarks.
+    """
     context_num: int = 100
+    """
+    Number of times the contexts will be benchmarked.
+    Increasing this number decreases standard error of the mean for benchmarked data.
+    """
     from_dialog_len: int = 300
+    """Starting dialog len of a context."""
     to_dialog_len: int = 311
+    """
+    Final dialog len of a context.
+    :py:meth:`~.BenchmarkConfig.get_context_updater` will return contexts
+    until their dialog len is less then `to_dialog_len`.
+    """
     step_dialog_len: int = 1
+    """
+    Increment step for dialog len.
+    :py:meth:`~.BenchmarkConfig.get_context_updater` will return contexts
+    increasing dialog len by `step_dialog_len`.
+    """
     message_dimensions: tp.Tuple[int, ...] = (10, 10)
+    """
+    Dimensions of misc dictionaries inside messages.
+    See :py:func:`~.get_message`.
+    """
     misc_dimensions: tp.Tuple[int, ...] = (10, 10)
+    """
+    Dimensions of misc dictionary.
+    See :py:func:`~.get_dict`.
+    """
 
     class Config:
         allow_mutation = False
 
     def get_context(self):
+        """
+        Return context with `from_dialog_len`, `message_dimensions`, `misc_dimensions`.
+
+        Wraps :py:func:`~.get_context`.
+        """
         return get_context(self.from_dialog_len, self.message_dimensions, self.misc_dimensions)
 
     def sizes(self):
+        """
+        Return sizes of objects defined by this config.
+
+        :return:
+            A dictionary with 4 elements:
+                - "starting_context_size" -- size of a context with `from_dialog_len`.
+                - "final_context_size" -- size of a context with `to_dialog_len`.
+                  A context of this size will never actually be benchmarked.
+                - "misc_size" -- size of a misc field of a context.
+                - "message_size" -- size of a misc field of a message.
+        """
         return {
             "starting_context_size": asizeof.asizeof(
                 self.get_context()
@@ -196,8 +269,17 @@ class BenchmarkConfig(BaseModel):
         }
 
     def get_context_updater(self):
+        """
+        Return context updater function based on configuration.
+
+        :return:
+            A function that accepts a context, modifies it and returns it.
+            The updated context has `step_dialog_len` more labels, requests and responses,
+            unless such dialog len would be equal to `to_dialog_len` or exceed than it,
+            in which case None is returned.
+        """
         def _context_updater(context: Context):
-            start_len = len(context.requests)
+            start_len = len(context.labels)
             if start_len + self.step_dialog_len < self.to_dialog_len:
                 for i in range(start_len, start_len + self.step_dialog_len):
                     context.add_label((f"flow_{i}", f"node_{i}"))
@@ -211,14 +293,52 @@ class BenchmarkConfig(BaseModel):
 
 
 class BenchmarkCase(BaseModel):
+    """
+    This class represents a benchmark case and includes
+    information about it, its configuration and configuration of a context storage to benchmark.
+    """
     name: str
+    """Name of a benchmark case."""
     db_factory: DBFactory
+    """DBFactory that specifies context storage to benchmark."""
     benchmark_config: BenchmarkConfig = BenchmarkConfig()
+    """Benchmark configuration."""
     uuid: str = Field(default_factory=lambda: str(uuid4()))
+    """Unique id of the case. Defaults to a random uuid."""
     description: str = ""
+    """Description of the case. Defaults to an empty string."""
 
     @staticmethod
     def set_average_results(benchmark):
+        """
+        Modify `benchmark` dictionary to include averaged benchmark results.
+
+        Add field "average_results" to the benchmark that contains the following fields:
+
+            - average_write_time
+            - average_read_time
+            - average_update_time
+            - read_times_grouped_by_context_num -- a list of read times.
+              Each element is the average of read times with the same context_num.
+            - read_times_grouped_by_dialog_len -- a dictionary of read times.
+              Its values are the averages of read times with the same dialog_len,
+              its keys are dialog_len values.
+            - update_times_grouped_by_context_num
+            - update_times_grouped_by_dialog_len
+            - pretty_write -- average write time with only 3 significant digits.
+            - pretty_read
+            - pretty_update
+            - pretty_read+update -- sum of average read and update times with only 3 significant digits.
+
+        :param benchmark:
+            A dictionary returned by `BenchmarkCase._run`.
+            Should include a "success" and "result" fields.
+            "success" field should be true.
+            "result" field should be a dictionary with the values returned by
+            :py:func:`~.time_context_read_write` and keys
+            "write_times", "read_times" and "update_times".
+        :return: None
+        """
         if not benchmark["success"] or isinstance(benchmark["result"], str):
             return
 
@@ -281,6 +401,20 @@ class BenchmarkCase(BaseModel):
             }
 
     def run(self):
+        """
+        Run benchmark, return results.
+
+        :return:
+            A dictionary with 3 keys: "success", "result", "average_results".
+
+            Success is a bool value. It is false if an exception was raised during benchmarking.
+
+            Result is either an exception message or a dictionary with 3 keys
+            ("write_times", "read_times", "update_times").
+            Values of those fields are the values returned by :py:func:`~.time_context_read_write`.
+
+            Average results field is as described in :py:meth:`~.BenchmarkCase.set_average_results`.
+        """
         benchmark = self._run()
         BenchmarkCase.set_average_results(benchmark)
         return benchmark
@@ -293,6 +427,28 @@ def save_results_to_file(
     description: str,
     exist_ok: bool = False,
 ):
+    """
+    Benchmark all `benchmark_cases` and save results to a file.
+
+    Result are saved in json format with this schema (click to expand):
+
+    .. collapse:: utils/db_benchmark/benchmark_schema.json
+
+        .. literalinclude:: ../../../utils/db_benchmark/benchmark_schema.json
+
+
+    Files created by this function cen be viewed with the streamlit app located in the same directory:
+
+    .. collapse:: utils/db_benchmark/benchmark_streamlit.py
+
+        .. literalinclude:: ../../../utils/db_benchmark/benchmark_streamlit.py
+
+    :param benchmark_cases: A list of benchmark cases that specify benchmarks.
+    :param file: File to save results to.
+    :param name: Name of the benchmark set.
+    :param description: Description of the benchmark set.
+    :param exist_ok: Whether to continue if the file already exists.
+    """
     with open(file, "w" if exist_ok else "x", encoding="utf-8") as fd:
         uuid = str(uuid4())
         result: tp.Dict[str, tp.Any] = {
@@ -315,6 +471,20 @@ def benchmark_all(
     benchmark_config: BenchmarkConfig = BenchmarkConfig(),
     exist_ok: bool = False,
 ):
+    """
+    A wrapper for :py:func:`~.save_results_to_file`.
+
+    Generates `benchmark_cases` from `db_uris` and `benchmark_config`:
+    URIs inside `db_uris` dictionary are used to initialize :py:class:`~.DBFactory` instances
+    which are then used along with `benchmark_config` to initialize :py:class:`~.BenchmarkCase` instances.
+
+    :param file: File to save results to.
+    :param name: Name of the benchmark set.
+    :param description: Description of the benchmark set. The same description is used for benchmark cases.
+    :param db_uris: A mapping from DB names to DB URIs. The names are used as names for benchmark cases.
+    :param benchmark_config: A benchmark config to use in all benchmark cases.
+    :param exist_ok: Whether to continue if the file already exists.
+    """
     save_results_to_file(
         [
             BenchmarkCase(
@@ -336,6 +506,15 @@ def report(
     db_uris: tp.Dict[str, str],
     benchmark_config: BenchmarkConfig = BenchmarkConfig(),
 ):
+    """
+    Benchmark DBs with a config and print results to stdout.
+
+    Printed stats contain benchmark config, object sizes, average benchmark values for successful cases and
+    exception message for unsuccessful cases.
+
+    :param db_uris: A mapping from DB names to DB uris. DB names are used as names for benchmark cases.
+    :param benchmark_config: Benchmark config to use in all benchmark cases.
+    """
     benchmark_cases = [
         BenchmarkCase(
             name=db_name,
@@ -363,7 +542,6 @@ def report(
         f"Final context size: {final_context_size} ({naturalsize(final_context_size, gnu=True)})"
     )
 
-    # define functions for displaying results
     line_separator = "-" * 80
 
     print(f"Starting benchmarking with following parameters:\n{benchmark_config_report}")
