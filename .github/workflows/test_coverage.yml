@@ -49,9 +49,6 @@ jobs:
           rm -rf /tmp/backup
           touch venv  # disable venv target
 
-      - name: set up mutex
-        uses: ben-z/gh-action-mutex@v1.0-alpha-6
-
       - name: run tests
         run: |
           make test

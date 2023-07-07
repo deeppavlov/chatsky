@@ -27,7 +27,7 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 
 
 core = [
-    "pydantic",
+    "pydantic<2.0",
     "nest-asyncio",
     "typing-extensions",
 ]
@@ -130,13 +130,13 @@ test_requirements = merge_req_lists(
         "pytest==7.3.1",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.21.0",
-        "flake8==6.0.0; python_version>'3.8'",
+        "flake8==6.0.0; python_version>'3.7'",
         "flake8==3.9.2; python_version=='3.7'",
         "click==8.1.3",
         "black==23.3.0",
-        "isort==5.12.0; python_version>'3.8'",
+        "isort==5.12.0; python_version>'3.7'",
         "isort==5.11.5; python_version=='3.7'",
-        "flask[async]==2.3.2; python_version>'3.8'",
+        "flask[async]==2.3.2; python_version>'3.7'",
         "flask[async]==2.2.3; python_version=='3.7'",
         "psutil==5.9.5",
         "telethon==1.28.5",
@@ -157,7 +157,7 @@ tests_full = merge_req_lists(
 
 doc = merge_req_lists(
     [
-        "sphinx==7.0.1; python_version>'3.8'",
+        "sphinx==7.0.1; python_version>'3.7'",
         "sphinx==5.3.0; python_version=='3.7'",
         "pydata-sphinx-theme==0.13.3",
         "sphinxcontrib-apidoc==0.3.0",
@@ -216,7 +216,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.4.1",
+    version="0.4.2",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
