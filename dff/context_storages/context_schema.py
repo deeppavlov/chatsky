@@ -115,7 +115,9 @@ class ContextSchema(BaseModel):
             field_name = field_props.name
             nest_dict = ctx_dict[field_name]
             if isinstance(field_props.subscript, int):
-                if len(nest_dict) > field_props.subscript:
+                sorted_dict = sorted(list(nest_dict.keys()))
+                last_read_key = sorted_dict[-1] if len(sorted_dict) > 0 else 0
+                if len(nest_dict) > field_props.subscript and last_read_key > field_props.subscript:
                     last_keys = sorted(nest_dict.keys())[-field_props.subscript:]
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
                 elif len(nest_dict) < field_props.subscript:
