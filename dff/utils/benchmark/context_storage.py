@@ -206,7 +206,7 @@ class BenchmarkConfig(BaseModel):
     Configuration for a benchmark. Sets dialog len, misc sizes, number of benchmarks.
     """
 
-    context_num: int = 100
+    context_num: int = 30
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
@@ -463,7 +463,9 @@ def save_results_to_file(
             "uuid": uuid,
             "benchmarks": [],
         }
-        for case in benchmark_cases:
+        cases = tqdm(benchmark_cases, leave=False)
+        for case in cases:
+            cases.set_description(f"Benchmarking: {case.name}")
             result["benchmarks"].append({**case.dict(), "sizes": case.benchmark_config.sizes(), **case.run()})
 
         json.dump(result, fd)
@@ -473,33 +475,33 @@ def benchmark_all(
     file: tp.Union[str, pathlib.Path],
     name: str,
     description: str,
-    db_uris: tp.Dict[str, str],
-    benchmark_config: BenchmarkConfig = BenchmarkConfig(),
+    db_uri: str,
+    benchmark_configs: tp.Dict[str, BenchmarkConfig],
     exist_ok: bool = False,
 ):
     """
     A wrapper for :py:func:`~.save_results_to_file`.
 
-    Generates `benchmark_cases` from `db_uris` and `benchmark_config`:
-    URIs inside `db_uris` dictionary are used to initialize :py:class:`~.DBFactory` instances
-    which are then used along with `benchmark_config` to initialize :py:class:`~.BenchmarkCase` instances.
+    Generates `benchmark_cases` from `db_uri` and `benchmark_configs`:
+    `db_uri` is used to initialize :py:class:`~.DBFactory` instance
+    which is then used along with `benchmark_configs` to initialize :py:class:`~.BenchmarkCase` instances.
 
     :param file: File to save results to.
     :param name: Name of the benchmark set.
     :param description: Description of the benchmark set. The same description is used for benchmark cases.
-    :param db_uris: A mapping from DB names to DB URIs. The names are used as names for benchmark cases.
-    :param benchmark_config: A benchmark config to use in all benchmark cases.
+    :param db_uri: URI of the database to benchmark
+    :param benchmark_configs: Mapping from case names to configs.
     :param exist_ok: Whether to continue if the file already exists.
     """
     save_results_to_file(
         [
             BenchmarkCase(
-                name=db_name,
+                name=case_name,
                 description=description,
                 db_factory=DBFactory(uri=db_uri),
                 benchmark_config=benchmark_config,
             )
-            for db_name, db_uri in db_uris.items()
+            for case_name, benchmark_config in benchmark_configs.items()
         ],
         file,
         name,

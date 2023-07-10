@@ -7,11 +7,8 @@ import pathlib
 from platform import system
 
 from dff.utils.benchmark.context_storage import (
-    save_results_to_file,
     BenchmarkConfig,
     benchmark_all,
-    BenchmarkCase,
-    DBFactory,
 )
 
 
@@ -38,97 +35,49 @@ benchmark_dir = pathlib.Path("benchmarks")
 
 benchmark_dir.mkdir(exist_ok=True)
 
-benchmark_all(
-    benchmark_dir / "alexaprize.json",
-    "Alexaprize-like dialogue benchmarks",
-    "Benchmark with dialogues similar to those from alexaprize.",
-    db_uris=dbs,
-    benchmark_config=BenchmarkConfig(
-        from_dialog_len=1,
-        to_dialog_len=50,
-        message_dimensions=(3, 5, 6, 5, 3),
-        misc_dimensions=(2, 4, 3, 8, 100),
-    ),
-)
 
-benchmark_all(
-    benchmark_dir / "short_messages.json",
-    "Short messages",
-    "Benchmark with short messages, long dialog len.",
-    db_uris=dbs,
-    benchmark_config=BenchmarkConfig(
-        from_dialog_len=500,
-        to_dialog_len=550,
-        message_dimensions=(2, 30),
-        misc_dimensions=(0, 0),
-    ),
-)
-
-benchmark_all(
-    benchmark_dir / "default.json",
-    "Default",
-    "Benchmark using default parameters.",
-    db_uris=dbs,
-)
-
-benchmark_all(
-    benchmark_dir / "alexaprize_longer.json",
-    "Alexaprize-like dialogue benchmarks (longer)",
-    "Benchmark with dialogues similar to those from alexaprize, but dialog len is increased.",
-    db_uris=dbs,
-    benchmark_config=BenchmarkConfig(
-        from_dialog_len=500,
-        to_dialog_len=550,
-        message_dimensions=(3, 5, 6, 5, 3),
-        misc_dimensions=(2, 4, 3, 8, 100),
-    ),
-)
-
-save_results_to_file(
-    [
-        *[
-            BenchmarkCase(
-                db_factory=DBFactory(uri=uri),
-                name=name + "-long-dialog-len",
-                benchmark_config=BenchmarkConfig(
-                    context_num=10,
-                    from_dialog_len=10000,
-                    to_dialog_len=10050,
-                ),
-                description="Benchmark with very long dialog len.",
-            )
-            for name, uri in dbs.items()
-        ],
-        *[
-            BenchmarkCase(
-                db_factory=DBFactory(uri=uri),
-                name=name + "-long-message-len",
-                benchmark_config=BenchmarkConfig(
-                    context_num=10,
-                    from_dialog_len=1,
-                    to_dialog_len=3,
-                    message_dimensions=(10000, 1),
-                ),
-                description="Benchmark with messages containing many keys.",
-            )
-            for name, uri in dbs.items()
-        ],
-        *[
-            BenchmarkCase(
-                db_factory=DBFactory(uri=uri),
-                name=name + "-long-misc-len",
-                benchmark_config=BenchmarkConfig(
-                    context_num=10,
-                    from_dialog_len=1,
-                    to_dialog_len=3,
-                    misc_dimensions=(10000, 1),
-                ),
-                description="Benchmark with misc containing many keys.",
-            )
-            for name, uri in dbs.items()
-        ],
-    ],
-    file=benchmark_dir / "extremes.json",
-    name="Extreme",
-    description="Set of benchmarks testing extreme cases.",
-)
+for db_name, db_uri in dbs.items():
+    benchmark_all(
+        benchmark_dir / f"{db_name}.json",
+        db_name,
+        description="Basic configs",
+        db_uri=db_uri,
+        benchmark_configs={
+            "large-misc": BenchmarkConfig(
+                from_dialog_len=1,
+                to_dialog_len=50,
+                message_dimensions=(3, 5, 6, 5, 3),
+                misc_dimensions=(2, 4, 3, 8, 100),
+            ),
+            "short-messages": BenchmarkConfig(
+                from_dialog_len=500,
+                to_dialog_len=550,
+                message_dimensions=(2, 30),
+                misc_dimensions=(0, 0),
+            ),
+            "default": BenchmarkConfig(),
+            "large-misc--long-dialog": BenchmarkConfig(
+                from_dialog_len=500,
+                to_dialog_len=550,
+                message_dimensions=(3, 5, 6, 5, 3),
+                misc_dimensions=(2, 4, 3, 8, 100),
+            ),
+            "very-long-dialog-len": BenchmarkConfig(
+                context_num=10,
+                from_dialog_len=10000,
+                to_dialog_len=10050,
+            ),
+            "very-long-message-len": BenchmarkConfig(
+                context_num=10,
+                from_dialog_len=1,
+                to_dialog_len=3,
+                message_dimensions=(10000, 1),
+            ),
+            "very-long-misc-len": BenchmarkConfig(
+                context_num=10,
+                from_dialog_len=1,
+                to_dialog_len=3,
+                misc_dimensions=(10000, 1),
+            ),
+        }
+    )
