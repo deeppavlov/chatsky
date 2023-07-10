@@ -440,19 +440,12 @@ def save_results_to_file(
     """
     Benchmark all `benchmark_cases` and save results to a file.
 
-    Result are saved in json format with this schema (click to expand):
-
-    .. collapse:: utils/db_benchmark/benchmark_schema.json
-
-        .. literalinclude:: ../../../utils/db_benchmark/benchmark_schema.json
-
+    Result are saved in json format with this schema:
+    `utils/db_benchmark/benchmark_schema.json <../../../utils/db_benchmark/benchmark_schema.json>`_.
 
     Files created by this function cen be viewed either by using :py:func:`~.report` or
     streamlit app located in the utils directory:
-
-    .. collapse:: utils/db_benchmark/benchmark_streamlit.py
-
-        .. literalinclude:: ../../../utils/db_benchmark/benchmark_streamlit.py
+    `utils/db_benchmark/benchmark_streamlit.py <../../../utils/db_benchmark/benchmark_streamlit.py>`_.
 
     :param benchmark_cases: A list of benchmark cases that specify benchmarks.
     :param file: File to save results to.
