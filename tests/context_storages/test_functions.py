@@ -4,6 +4,26 @@ from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
 
 
+def simple_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Operation WRITE
+    db[context_id] = testing_context
+
+    # Operation LENGTH
+    assert len(db) == 1
+
+    # Operation CONTAINS
+    assert context_id in db
+
+    # Operation READ
+    assert db[context_id] is not None
+
+    # Operation DELETE
+    del db[context_id]
+
+    # Operation CLEAR
+    db.clear()
+
+
 def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     assert len(db) == 0
     assert testing_context.storage_key is None
@@ -30,6 +50,10 @@ def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
 
     # Test `get` method
     assert db.get(context_id) is None
+
+
+def pipeline_test(db: DBContextStorage, _: Context, __: str):
+    # Test Pipeline workload on DB
     pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
     check_happy_path(pipeline, happy_path=HAPPY_PATH)
 
@@ -155,13 +179,15 @@ def single_log_test(db: DBContextStorage, testing_context: Context, context_id: 
     assert read_context.requests[9] == testing_context.requests[9]
 
 
+simple_test.no_dict = False
 basic_test.no_dict = False
+pipeline_test.no_dict = False
 partial_storage_test.no_dict = False
 midair_subscript_change_test.no_dict = True
 large_misc_test.no_dict = False
 many_ctx_test.no_dict = True
 single_log_test.no_dict = True
-_TEST_FUNCTIONS = [basic_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, single_log_test]
+_TEST_FUNCTIONS = [simple_test, basic_test, pipeline_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, single_log_test]
 
 
 def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
