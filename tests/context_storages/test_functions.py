@@ -12,7 +12,7 @@ def simple_test(db: DBContextStorage, testing_context: Context, context_id: str)
     assert len(db) == 1
 
     # Operation CONTAINS
-    assert context_id in db == True
+    assert context_id in db
 
     # Operation READ
     assert db[context_id] is not None
