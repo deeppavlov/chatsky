@@ -117,10 +117,10 @@ class ContextSchema(BaseModel):
             if isinstance(field_props.subscript, int):
                 sorted_dict = sorted(list(nest_dict.keys()))
                 last_read_key = sorted_dict[-1] if len(sorted_dict) > 0 else 0
-                if len(nest_dict) > field_props.subscript and last_read_key > field_props.subscript:
+                if len(nest_dict) > field_props.subscript:
                     last_keys = sorted(nest_dict.keys())[-field_props.subscript:]
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
-                elif len(nest_dict) < field_props.subscript:
+                elif len(nest_dict) < field_props.subscript and last_read_key > field_props.subscript:
                     limit = field_props.subscript - len(nest_dict)
                     tasks[field_name] = log_reader(limit, len(nest_dict), field_name, primary_id)
             else:
