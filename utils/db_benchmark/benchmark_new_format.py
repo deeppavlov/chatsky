@@ -23,9 +23,8 @@ def update_benchmark_file(benchmark_set_file: tp.Union[pathlib.Path, str]):
     for benchmark in benchmark_set["benchmarks"]:
         if "sizes" not in benchmark:
             sizes = {
-                key: benchmark.pop(key) for key in (
-                    "starting_context_size", "final_context_size", "misc_size", "message_size"
-                )
+                key: benchmark.pop(key)
+                for key in ("starting_context_size", "final_context_size", "misc_size", "message_size")
             }
 
             benchmark["sizes"] = sizes
