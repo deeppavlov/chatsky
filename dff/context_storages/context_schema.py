@@ -17,7 +17,7 @@ Can be used as a value of `subscript` parameter for `DictSchemaField`s and `List
 _ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
 # TODO!
 
-_ReadLogContextFunction = Callable[[Optional[int], int, str, str], Awaitable[Dict]]
+_ReadLogContextFunction = Callable[[Optional[int], str, str], Awaitable[Dict]]
 # TODO!
 
 _WritePackedContextFunction = Callable[[Dict, str, str], Awaitable]
@@ -88,6 +88,8 @@ class ContextSchema(BaseModel):
 
     append_single_log: bool = True
 
+    duplicate_context_in_logs: bool = False
+
     supports_async: bool = False
 
     class Config:
@@ -122,9 +124,9 @@ class ContextSchema(BaseModel):
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
                 elif len(nest_dict) < field_props.subscript and last_read_key > field_props.subscript:
                     limit = field_props.subscript - len(nest_dict)
-                    tasks[field_name] = log_reader(limit, len(nest_dict), field_name, primary_id)
+                    tasks[field_name] = log_reader(limit, field_name, primary_id)
             else:
-                tasks[field_name] = log_reader(None, len(nest_dict), field_name, primary_id)
+                tasks[field_name] = log_reader(None, field_name, primary_id)
 
         if self.supports_async:
             tasks = dict(zip(tasks.keys(), await gather(*tasks.values())))
@@ -173,16 +175,19 @@ class ContextSchema(BaseModel):
             last_keys = sorted(nest_dict.keys())
 
             if self.append_single_log:
-                logs_dict[field_props.name] = dict()
                 if len(last_keys) > 0:
-                    logs_dict[field_props.name] = {last_keys[-1]: nest_dict[last_keys[-1]]}
+                    if self.duplicate_context_in_logs or not isinstance(field_props.subscript, int) or field_props.subscript > 0:
+                        logs_dict[field_props.name] = {last_keys[-1]: nest_dict[last_keys[-1]]}
             else:
-                logs_dict[field_props.name] = nest_dict
+                if self.duplicate_context_in_logs or not isinstance(field_props.subscript, int):
+                    logs_dict[field_props.name] = nest_dict
+                else:
+                    logs_dict[field_props.name] = {key: nest_dict[key] for key in last_keys[:-field_props.subscript]}
 
             if isinstance(field_props.subscript, int):
                 last_keys = last_keys[-field_props.subscript:]
 
-            ctx_dict[field_props.name] = {k:v for k, v in nest_dict.items() if k in last_keys}
+            ctx_dict[field_props.name] = {k: v for k, v in nest_dict.items() if k in last_keys}
 
         await pac_writer(ctx_dict, storage_key, primary_id)
 
