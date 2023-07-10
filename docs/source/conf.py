@@ -36,7 +36,6 @@ extensions = [
     "sphinx.ext.viewcode",
     "sphinx.ext.mathjax",
     "sphinx.ext.extlinks",
-    "sphinx_toolbox.collapse",
     "sphinxcontrib.katex",
     "sphinx_copybutton",
     "sphinx_favicon",

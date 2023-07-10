@@ -148,7 +148,6 @@ doc = merge_req_lists(
         "nbsphinx==0.9.1",
         "jupytext==1.14.5",
         "jupyter==1.0.0",
-        "sphinx-toolbox==3.4.0",
     ],
     requests_requirements,
 )

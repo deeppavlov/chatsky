@@ -43,42 +43,9 @@ storages = {
 
 # %% [markdown]
 """
-## Generating a report
-
-The report will print a size of one context and stats for the context storage:
-average write, read, update times.
-
-Note: context storage passed into the `report` function will be cleared.
-
-Setting `context_num` to 50 means that we'll run fifty cycles of writing and reading context.
-This way we'll be able to get a more accurate average read/write time as well as
-check if read/write times are dependent on the number of contexts in the storage.
-
-You can also configure the `dialog_len`, `message_dimensions` and `misc_dimensions` parameters.
-This allows you to set the context you want the benchmarks to run with.
-
-For more info on each configuration parameter see [BenchmarkConfig](
-../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.BenchmarkConfig
-).
-"""
-
-# %%
-benchmark.report(
-    storages,
-    benchmark_config=benchmark.BenchmarkConfig(
-        context_num=50,
-        from_dialog_len=1,
-        to_dialog_len=5,
-        message_dimensions=(3, 10),
-        misc_dimensions=(3, 10),
-    ),
-)
-
-# %% [markdown]
-"""
 ## Saving benchmark results to a file
 
-Instead of printing the results into console, you can save them to a file.
+Benchmark results are saved to files.
 
 For that there exist two functions:
 [benchmark_all](
@@ -89,7 +56,32 @@ and
 ../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.save_results_to_file
 ).
 
+Note: context storages passed into these functions will be cleared.
+
+### Configuration
+
 The first one is a higher-level wrapper of the second one.
+The first function accepts [BenchmarkCases](
+../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.BenchmarkCase
+) which configure databases that are being benchmark and configurations of the benchmarks.
+The second function accepts only a single URI for the database and several benchmark configurations.
+So, the second function is simpler to use, while the first function allows for more configuration
+(e.g. having different databases benchmarked in a single file).
+
+Both function use [BenchmarkConfig](
+../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.BenchmarkConfig
+) to configure benchmark behaviour.
+
+It has several parameters:
+
+Setting `context_num` to 50 means that we'll run fifty cycles of writing and reading context.
+This way we'll be able to get a more accurate average read/write time as well as
+check if read/write times are dependent on the number of contexts in the storage.
+
+You can also configure the `dialog_len`, `message_dimensions` and `misc_dimensions` parameters.
+This allows you to set the contexts you want your database to be benchmarked with.
+
+### File structure
 
 The files are saved according to this [schema](../../../utils/db_benchmark/benchmark_schema.json).
 
@@ -99,26 +91,30 @@ https://github.com/deeppavlov/dialog_flow_framework/blob/dev/utils/db_benchmark/
 """
 
 # %%
-benchmark.benchmark_all(
-    file=tutorial_dir / "results.json",
-    name="Tutorial benchmark",
-    description="Benchmark for tutorial",
-    db_uris=storages,
-    benchmark_config=benchmark.BenchmarkConfig(
-        context_num=50,
-        from_dialog_len=1,
-        to_dialog_len=5,
-        message_dimensions=(3, 10),
-        misc_dimensions=(3, 10),
-    ),
-)
+for db_name, db_uri in storages.items():
+    benchmark.benchmark_all(
+        file=tutorial_dir / f"{db_name}.json",
+        name="Tutorial benchmark",
+        description="Benchmark for tutorial",
+        db_uri=db_uri,
+        benchmark_configs={
+            "simple_config": benchmark.BenchmarkConfig(
+                context_num=50,
+                from_dialog_len=1,
+                to_dialog_len=5,
+                message_dimensions=(3, 10),
+                misc_dimensions=(3, 10),
+            ),
+        },
+    )
 
 # %% [markdown]
 """
 ## Viewing benchmark results
 
-Now that the results are saved to a file you can either view them manually or
-use [our streamlit app](
+Now that the results are saved to a file you can either view them using [report](
+../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.report
+) function or the [streamlit app](
 ../../../utils/db_benchmark/benchmark_streamlit.py
 ).
 
@@ -126,3 +122,15 @@ The app can also be found on [github](
 https://github.com/deeppavlov/dialog_flow_framework/blob/dev/utils/db_benchmark/benchmark_streamlit.py
 ).
 """
+
+# %% [markdown]
+"""
+### Using the report function
+
+The report function will print specified information from a given file.
+
+By default it prints the name and average metrics for each case.
+"""
+
+# %%
+benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
