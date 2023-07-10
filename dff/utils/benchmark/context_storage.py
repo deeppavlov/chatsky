@@ -510,7 +510,7 @@ def benchmark_all(
 
 def report(
     file: tp.Union[str, pathlib.Path],
-    display: tp.Set[tp_e.Literal['name', 'desc', 'config', 'sizes', 'metrics']] = set({'name', 'metrics'}),
+    display: tp.Set[tp_e.Literal["name", "desc", "config", "sizes", "metrics"]] = set({"name", "metrics"}),
 ):
     """
     Print average results from a result file to stdout.
@@ -549,7 +549,7 @@ def report(
             f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
             f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
             f"Starting context size: {starting_context_size} ({naturalsize(starting_context_size, gnu=True)})\n"
-            f"Final context size: {final_context_size} ({naturalsize(final_context_size, gnu=True)})"
+            f"Final context size: {final_context_size} ({naturalsize(final_context_size, gnu=True)})",
         )
 
     sep = "-" * 80

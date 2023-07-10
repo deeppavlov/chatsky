@@ -79,5 +79,5 @@ for db_name, db_uri in dbs.items():
                 to_dialog_len=3,
                 misc_dimensions=(10000, 1),
             ),
-        }
+        },
     )

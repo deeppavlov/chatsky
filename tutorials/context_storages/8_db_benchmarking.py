@@ -105,7 +105,7 @@ for db_name, db_uri in storages.items():
                 message_dimensions=(3, 10),
                 misc_dimensions=(3, 10),
             ),
-        }
+        },
     )
 
 # %% [markdown]
@@ -133,7 +133,4 @@ By default it prints the name and average metrics for each case.
 """
 
 # %%
-benchmark.report(
-    file=tutorial_dir / "Shelve.json",
-    display={"name", "config", "metrics"}
-)
+benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})

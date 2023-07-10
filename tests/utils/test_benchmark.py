@@ -263,7 +263,7 @@ def test_save_to_file(tmp_path):
                 message_dimensions=(2, 2),
                 misc_dimensions=(3, 3, 3),
             )
-        }
+        },
     )
 
     with open(tmp_path / "result.json", "r", encoding="utf-8") as fd:
@@ -301,7 +301,7 @@ def test_save_to_file(tmp_path):
                 message_dimensions=(2, 2),
                 misc_dimensions=(3, 3, 3),
             )
-        }
+        },
     )
 
     with open(tmp_path / "result_unsuccessful.json", "r", encoding="utf-8") as fd:
