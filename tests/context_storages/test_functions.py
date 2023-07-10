@@ -1,4 +1,6 @@
+from typing import Dict, Union
 from dff.context_storages import DBContextStorage, ALL_ITEMS
+from dff.context_storages.context_schema import SchemaField
 from dff.pipeline import Pipeline
 from dff.script import Context, Message
 from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
@@ -159,9 +161,6 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
 
 
 def single_log_test(db: DBContextStorage, testing_context: Context, context_id: str):
-    # Set only the last appended request to be written
-    db.context_schema.append_single_log = True
-
     # Set only one request to be included into CONTEXTS table
     db.context_schema.requests.subscript = 1
 
@@ -190,9 +189,14 @@ single_log_test.no_dict = True
 _TEST_FUNCTIONS = [simple_test, basic_test, pipeline_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, single_log_test]
 
 
-def run_all_functions(db: DBContextStorage, testing_context: Context, context_id: str):
+def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Context, context_id: str):
     frozen_ctx = testing_context.dict()
     for test in _TEST_FUNCTIONS:
+        if isinstance(db, DBContextStorage):
+            db.context_schema.append_single_log = True
+            db.context_schema.duplicate_context_in_logs = False
+            for field_props in [value for value in dict(db.context_schema).values() if isinstance(value, SchemaField)]:
+                field_props.subscript = 3
         if not (getattr(test, "no_dict", False) and isinstance(db, dict)):
             db.clear()
             test(db, Context.cast(frozen_ctx), context_id)

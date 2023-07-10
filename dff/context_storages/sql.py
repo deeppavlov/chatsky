@@ -289,7 +289,7 @@ class SQLContextStorage(DBContextStorage):
             else:
                 return dict(), None
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         async with self.engine.begin() as conn:
             stmt = select(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN])
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[ExtraFields.primary_id.value] == primary_id)
@@ -297,7 +297,6 @@ class SQLContextStorage(DBContextStorage):
             stmt = stmt.order_by(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN].desc())
             if keys_limit is not None:
                 stmt = stmt.limit(keys_limit)
-            stmt = stmt.offset(keys_offset)
             result = (await conn.execute(stmt)).fetchall()
             if len(result) > 0:
                 return {key: value for key, value in result}
