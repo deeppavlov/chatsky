@@ -253,15 +253,17 @@ def test_save_to_file(tmp_path):
         tmp_path / "result.json",
         "test",
         "test",
-        {"json": f"json://{tmp_path}/json.json", "error": "NONE"},
-        bm.BenchmarkConfig(
-            context_num=5,
-            from_dialog_len=1,
-            to_dialog_len=11,
-            step_dialog_len=3,
-            message_dimensions=(2, 2),
-            misc_dimensions=(3, 3, 3),
-        ),
+        f"json://{tmp_path}/json.json",
+        {
+            "config": bm.BenchmarkConfig(
+                context_num=5,
+                from_dialog_len=1,
+                to_dialog_len=11,
+                step_dialog_len=3,
+                message_dimensions=(2, 2),
+                misc_dimensions=(3, 3, 3),
+            )
+        },
     )
 
     with open(tmp_path / "result.json", "r", encoding="utf-8") as fd:
@@ -283,7 +285,29 @@ def test_save_to_file(tmp_path):
         "average_results",
     }
 
-    assert not benchmark_set["benchmarks"][1]["success"]
-    assert "average_results" not in benchmark_set["benchmarks"][1]
+    validate(instance=benchmark_set, schema=schema)
+
+    bm.benchmark_all(
+        tmp_path / "result_unsuccessful.json",
+        "test",
+        "test",
+        "None",
+        {
+            "config": bm.BenchmarkConfig(
+                context_num=5,
+                from_dialog_len=1,
+                to_dialog_len=11,
+                step_dialog_len=3,
+                message_dimensions=(2, 2),
+                misc_dimensions=(3, 3, 3),
+            )
+        },
+    )
+
+    with open(tmp_path / "result_unsuccessful.json", "r", encoding="utf-8") as fd:
+        benchmark_set = json.load(fd)
+
+    assert not benchmark_set["benchmarks"][0]["success"]
+    assert "average_results" not in benchmark_set["benchmarks"][0]
 
     validate(instance=benchmark_set, schema=schema)

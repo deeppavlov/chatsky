@@ -275,10 +275,7 @@ with add_tab:
 
     with upload_container.form("upload_form", clear_on_submit=True):
         st.file_uploader(
-            "Upload benchmark results",
-            accept_multiple_files=True,
-            type="json",
-            key="benchmark_file_uploader"
+            "Upload benchmark results", accept_multiple_files=True, type="json", key="benchmark_file_uploader"
         )
         st.form_submit_button("Submit", on_click=process_uploaded_files)
 
