@@ -170,7 +170,7 @@ class DBFactory(BaseModel):
 
 
 class BenchmarkConfig(BaseModel):
-    context_num: int = 100
+    context_num: int = 10
     from_dialog_len: int = 300
     to_dialog_len: int = 311
     step_dialog_len: int = 1

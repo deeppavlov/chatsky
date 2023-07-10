@@ -67,11 +67,11 @@ dbs = {
     # "Pickle": "pickle://dbs/pickle.pkl",
     # "Shelve": "shelve://dbs/shelve",
     "PostgreSQL": "postgresql+asyncpg://postgres:pass@localhost:5432/test",
-    "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
+    # "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
     # "Redis": "redis://:pass@localhost:6379/0",
     "MySQL": "mysql+asyncmy://root:pass@localhost:3307/test",
     "SQLite": f"sqlite+aiosqlite:{sqlite_separator}{sqlite_file.absolute()}",
-    "YDB": "grpc://localhost:2136/local",
+    # "YDB": "grpc://localhost:2136/local",
 }
 
 # benchmark
