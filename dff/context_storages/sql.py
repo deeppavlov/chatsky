@@ -17,11 +17,9 @@ import importlib
 import os
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 
-from dff.script import Context
-
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ALL_ITEMS, ExtraFields
+from .context_schema import ExtraFields
 
 from .sql_dumper import create_dump_engine
 
@@ -30,11 +28,10 @@ try:
         Table,
         MetaData,
         Column,
-        PickleType,
+        LargeBinary,
         String,
         DateTime,
         Integer,
-        Boolean,
         Index,
         Insert,
         inspect,
@@ -42,6 +39,7 @@ try:
         update,
         func,
     )
+    from sqlalchemy.types import TypeEngine
     from sqlalchemy.dialects.mysql import DATETIME, LONGBLOB
     from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -101,14 +99,14 @@ def _import_datetime_from_dialect(dialect: str) -> "DateTime":
     if dialect == "mysql":
         return DATETIME(fsp=6)
     else:
-        return DateTime
+        return DateTime()
 
 
-def _import_pickletype_for_dialect(dialect: str) -> "PickleType":
+def _import_pickletype_for_dialect(dialect: str) -> "TypeEngine[bytes]":
     if dialect == "mysql":
-        return PickleType(impl=LONGBLOB)
+        return LONGBLOB()
     else:
-        return PickleType
+        return LargeBinary()
 
 
 def _get_current_time(dialect: str):
@@ -184,8 +182,8 @@ class SQLContextStorage(DBContextStorage):
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
-        _DATETIME_CLASS = _import_datetime_from_dialect(self.dialect)
-        _PICKLETYPE_CLASS = _import_pickletype_for_dialect(self.dialect)
+        _DATETIME_CLASS = _import_datetime_from_dialect
+        _PICKLETYPE_CLASS = _import_pickletype_for_dialect
 
         self.tables_prefix = table_name_prefix
         self.context_schema.supports_async = self.dialect != "sqlite"
@@ -197,11 +195,11 @@ class SQLContextStorage(DBContextStorage):
             MetaData(),
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
             Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=True),
-            Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS, nullable=False),
-            Column(ExtraFields.created_at.value, _DATETIME_CLASS, server_default=current_time, nullable=False),
+            Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS(self.dialect), nullable=False),
+            Column(ExtraFields.created_at.value, _DATETIME_CLASS(self.dialect), server_default=current_time, nullable=False),
             Column(
                 ExtraFields.updated_at.value,
-                _DATETIME_CLASS,
+                _DATETIME_CLASS(self.dialect),
                 server_default=current_time,
                 server_onupdate=current_time,
                 nullable=False,
@@ -212,11 +210,11 @@ class SQLContextStorage(DBContextStorage):
             MetaData(),
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(self._FIELD_COLUMN, String(self._FIELD_LENGTH), index=True, nullable=False),
-            Column(self._KEY_COLUMN, Integer, nullable=False),
-            Column(self._VALUE_COLUMN, PickleType, nullable=False),
+            Column(self._KEY_COLUMN, Integer(), nullable=False),
+            Column(self._VALUE_COLUMN, _PICKLETYPE_CLASS(self.dialect), nullable=False),
             Column(
                 ExtraFields.updated_at.value,
-                _DATETIME_CLASS,
+                _DATETIME_CLASS(self.dialect),
                 server_default=current_time,
                 server_onupdate=current_time,
                 nullable=False,
@@ -279,7 +277,7 @@ class SQLContextStorage(DBContextStorage):
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[bytes, Optional[str]]:
         async with self.engine.begin("READ_PAC") as conn:
             stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value], self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN])
             stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == storage_key)
@@ -289,7 +287,7 @@ class SQLContextStorage(DBContextStorage):
             if result is not None:
                 return result[1], result[0]
             else:
-                return dict(), None
+                return bytes(), None
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         async with self.engine.begin("READ_LOG") as conn:
@@ -305,7 +303,7 @@ class SQLContextStorage(DBContextStorage):
             else:
                 return dict()
 
-    async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: bytes, storage_key: str, primary_id: str):
         async with self.engine.begin("WRITE_PAC") as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
                 {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id}
@@ -313,7 +311,7 @@ class SQLContextStorage(DBContextStorage):
             update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value], [ExtraFields.primary_id.value])
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, bytes]], primary_id: str):
         async with self.engine.begin("WRITE_LOG") as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [
