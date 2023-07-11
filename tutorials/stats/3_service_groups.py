@@ -13,9 +13,9 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ServiceGroup, ExtraHandlerRuntimeInfo
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats import DFFInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
-from dff.stats import defaults
+from dff.stats import default_extractors
 
 
 # %% [markdown]
@@ -32,7 +32,7 @@ This can be done in the manner demonstrated below.
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
 set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
-dff_instrumentor = DFFInstrumentor()
+dff_instrumentor = OtelInstrumentor()
 dff_instrumentor.instrument()
 
 
@@ -54,11 +54,11 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             ServiceGroup(
-                before_handler=[defaults.get_timing_before],
+                before_handler=[default_extractors.get_timing_before],
                 after_handler=[
                     get_group_state,
-                    defaults.get_timing_after,
-                    defaults.get_current_label,
+                    default_extractors.get_timing_after,
+                    default_extractors.get_current_label,
                 ],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),

@@ -3,6 +3,13 @@ Utils
 -----
 This module includes utility functions designed for statistics collection.
 
+The functions below can be used to configure the opentelemetry destination.
+
+.. code:: python
+
+    set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
+    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
+
 """
 import json
 from urllib import parse

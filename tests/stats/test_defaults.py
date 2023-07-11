@@ -1,9 +1,10 @@
 import pytest
 from dff.script import Context
 from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
+from dff.stats import default_extractors
 
 try:
-    from dff.stats import DFFInstrumentor, defaults
+    from dff.stats import OtelInstrumentor
 except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
@@ -17,7 +18,7 @@ except ImportError:
     ],
 )
 async def test_get_current_label(context: Context, expected: set):
-    result = await defaults.get_current_label(context, None, {"component": {"path": "."}})
+    result = await default_extractors.get_current_label(context, None, {"component": {"path": "."}})
     assert expected.intersection(set(result.items())) == expected
 
 
@@ -32,7 +33,7 @@ async def test_get_current_label(context: Context, expected: set):
 async def test_otlp_integration(context, expected, tracer_exporter_and_provider, log_exporter_and_provider):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
-    instrumentor = DFFInstrumentor()
+    instrumentor = OtelInstrumentor()
     if instrumentor.is_instrumented_by_opentelemetry:
         instrumentor.uninstrument()
     instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
@@ -41,7 +42,7 @@ async def test_otlp_integration(context, expected, tracer_exporter_and_provider,
         stage="BEFORE",
         component=ServiceRuntimeInfo(path=".", name=".", asynchronous=False, execution_state={".": "FINISHED"}),
     )
-    _ = await defaults.get_current_label(context, None, runtime_info)
+    _ = await default_extractors.get_current_label(context, None, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0

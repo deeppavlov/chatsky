@@ -14,30 +14,25 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats import DFFInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
 
 
 # %% [markdown]
 """
-The statistics are collected from services by wrapping them in special 'extractor' functions.
-These functions have a specific signature: their arguments are always a `Context`, an `Pipeline`,
-and an `ExtraHandlerRuntimeInfo`. Their return value is always a `StatsRecord` instance.
+The statistics are collected from services by adding `extractor` functions as extra handlers.
+These functions have a specific signature: the expected arguments are always `Context`, `Pipeline`,
+and `ExtraHandlerRuntimeInfo`. The expected return value is an arbitrary `dict`.
 It is a preferred practice to define them as asynchronous functions.
 
-Before you use the said functions, you should create an `StatsExtractorPool`
-or import a ready one as a first step.
+The initial step in instrumenting a DFF application using Opentelemetry is to configure the
+export destination. To achieve this, you can use the functions provided by the `stats` module:
+`set_logger_destination`, `set_tracer_destination`, or `set_meter_destination`. These accept
+an appropriate Opentelemetry exporter instance and bind it to provider classes.
 
-Then, you should define the handlers and add them to some pool,
-using either `add_extractor` (see below).
-
-Finally, one should also create a `StatsStorage`, which compresses data into batches
-and saves it to a database. The database credentials can be configured by either
-instantiating a `Saver` class and passing it on construction, or by
-passing the database credentials to the `from_uri` class method.
-
-When this is done, subscribe the storage to one or more pools that you have created
-by calling the `add_subscriber` method.
+Nextly, the `OtelInstrumentor` class should be constructed that logs the output of extractors.
+Custom extractors can be decorated with the `OtelInstrumentor` instance.
+Default extractors are instrumented by calling the `instrument` method on the `OtelInstrumentor`.
 
 The whole process is illustrated in the example below.
 
@@ -47,7 +42,7 @@ The whole process is illustrated in the example below.
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
 set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
-dff_instrumentor = DFFInstrumentor()
+dff_instrumentor = OtelInstrumentor()
 dff_instrumentor.instrument()
 
 
@@ -76,8 +71,8 @@ pipeline = Pipeline.from_dict(
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
-            Service(handler=heavy_service),
-            Service(handler=to_service(after_handler=[get_service_state])(ACTOR)),
+            heavy_service,
+            Service(handler=ACTOR, after_handler=[get_service_state]),
         ],
     }
 )

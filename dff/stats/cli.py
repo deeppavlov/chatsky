@@ -32,7 +32,7 @@ DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 """
 Local path to superset dashboard files to import.
 """
-DASHBOARD_SLUG = "dff-node-stats"
+DASHBOARD_SLUG = "dff-stats"
 """
 This variable stores a slug used for building the http address of the DFF dashboard.
 """
@@ -53,37 +53,72 @@ Mapping of standard sql column types to Clickhouse native types.
 """
 
 DFF_NODE_STATS_STATEMENT = """
-WITH main as (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
-{table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as start_time,\n
-otel_traces.SpanName as data_key,\n{table}.Body as data,\n
-{lblfield} as label,\n{flowfield} as flow_label,\n
-{nodefield} as node_label,\n{table}.TraceId as trace_id,\n
-otel_traces.TraceId\nFROM {table}, otel_traces \n
-WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label' \n
-ORDER BY context_id, request_id\n) SELECT context_id,\nrequest_id,\nstart_time,\n
-data_key,\ndata,\nlabel,\n{lag} as prev_label,\nflow_label,\n
-node_label\nFROM main\nWHERE label != ''
+WITH main AS (
+    SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
+    {table}.LogAttributes['request_id'] as request_id,
+    {table}.Timestamp as start_time,
+    otel_traces.SpanName as data_key,
+    {table}.Body as data,
+    {lblfield} as label,
+    {flowfield} as flow_label,
+    {nodefield} as node_label,
+    {table}.TraceId as trace_id,
+    otel_traces.TraceId\nFROM {table}, otel_traces
+    WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label'
+    ORDER BY context_id, request_id
+) SELECT context_id,
+    request_id,
+    start_time,
+    data_key,
+    data,
+    label,
+    {lag} as prev_label,
+    flow_label,
+    node_label
+FROM main
+WHERE label != ''
 """
 DFF_ACYCLIC_NODES_STATEMENT = """
-WITH main AS (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
-{table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as timestamp,\n
-{lblfield} as label\nFROM {table}\n
-INNER JOIN \n  (\n  WITH helper AS \n    (\n
-SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
-{table}.LogAttributes['request_id'] as request_id,\n
-{lblfield} as label\n    FROM {table}\n    )\n
-SELECT context_id FROM helper\n  GROUP BY context_id\n  HAVING COUNT(context_id) = COUNT(DISTINCT label)\n
-) as plain_ctx\nON plain_ctx.context_id = context_id\n
-ORDER by context_id, request_id\n)\nSELECT * FROM main
+WITH main AS (
+    SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
+    {table}.LogAttributes['request_id'] as request_id,
+    {table}.Timestamp as timestamp,
+    {lblfield} as label\nFROM {table}
+    INNER JOIN
+(
+    WITH helper AS (
+        SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
+        {table}.LogAttributes['request_id'] as request_id,
+        {lblfield} as label
+        FROM {table}
+    )
+    SELECT context_id FROM helper
+    GROUP BY context_id
+    HAVING COUNT(context_id) = COUNT(DISTINCT label)
+) as plain_ctx
+ON plain_ctx.context_id = context_id
+ORDER by context_id, request_id
+)
+SELECT * FROM main
 """
 DFF_FINAL_NODES_STATEMENT = """
-WITH main AS\n(\nSELECT LogAttributes['context_id'] AS context_id,\nmax(LogAttributes['request_id']) AS max_history\n
-FROM {table}\nGROUP BY context_id\n)\nSELECT DISTINCT LogAttributes['context_id'] AS context_id,\n
-LogAttributes['request_id'] AS request_id,\n{table}.Timestamp AS start_time,\n
-{lblfield} AS label,\n{flowfield} AS flow_label,\n
-{nodefield} AS node_label\n FROM {table} \n
-INNER JOIN main\nON context_id  = main.context_id \nAND request_id = main.max_history\n
-INNER JOIN otel_traces\nON {table}.TraceId = otel_traces.TraceId\n
+WITH main AS (
+    SELECT LogAttributes['context_id'] AS context_id,
+    max(LogAttributes['request_id']) AS max_history
+    FROM {table}\nGROUP BY context_id
+)
+SELECT DISTINCT LogAttributes['context_id'] AS context_id,
+LogAttributes['request_id'] AS request_id,
+{table}.Timestamp AS start_time,
+{lblfield} AS label,
+{flowfield} AS flow_label,
+{nodefield} AS node_label
+FROM {table}
+INNER JOIN main
+ON context_id  = main.context_id
+AND request_id = main.max_history
+INNER JOIN otel_traces
+ON {table}.TraceId = otel_traces.TraceId
 WHERE otel_traces.SpanName = 'get_current_label'
 """
 
@@ -127,11 +162,13 @@ def import_dashboard(
     :param parsed_args: Command line arguments produced by `argparse`.
     """
     zip_file = parsed_args.infile
+    host, port = parsed_args.host, parsed_args.port
+    superset_url = parse.urlunsplit("http", f"{host}:{port}", "/", "", "")
     zip_filename = os.path.basename(zip_file)
     db_password = getattr(parsed_args, "db.password")
 
-    session, headers = get_superset_session(parsed_args, DEFAULT_SUPERSET_URL)
-    import_dashboard_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/dashboard/import/")
+    session, headers = get_superset_session(parsed_args, superset_url)
+    import_dashboard_url = parse.urljoin(superset_url, "/api/v1/dashboard/import/")
     # upload files
     with open(zip_file, "rb") as f:
         response = session.request(

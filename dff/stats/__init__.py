@@ -11,4 +11,4 @@ from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExp
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from .utils import get_wrapper_field, set_logger_destination, set_tracer_destination
-from .instrumentor import DFFInstrumentor
+from .instrumentor import OtelInstrumentor

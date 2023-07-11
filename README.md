@@ -187,34 +187,38 @@ pip install dff[stats,postgresql]
 
 ```python
 # import dependencies
-from dff.stats import StatsStorage, default_extractor_pool
-from dff.pipeline import ACTOR
+from dff.pipeline import Pipeline, Service, ACTOR
 
-# Extractor pools are namespaces that contain handler functions
-# Like all functions of this kind, they can be used in a pipeline
-# In the following example, the handlers measure the running time of the actor
-actor_service = to_service(
-    before_handler=[default_extractor_pool["extract_timing_before"]],
-    after_handler=[default_extractor_pool["extract_timing_after"]]
-)(ACTOR)
+from dff.stats import default_extractors
+from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import OTLPLogExporter, OTLPSpanExporter
+
+# initialize opentelemetry
+# insecure parameter allows for SSL-independent connections
+set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
+set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
+dff_instrumentor = OtelInstrumentor()
+dff_instrumentor.instrument()
+
+# Instrumentation is applied to pipeline's extra handlers so that their output
+# gets persisted to the database. Use these handlers to report statistics
+# about a particular service in the pipeline.
 
 pipeline = Pipeline.from_dict(
     {
         "components": [
-            Service(handler=actor_service),
+            Service(
+                handler=ACTOR,
+                before_handler=[default_extractors.get_timing_before],
+                after_handler=[
+                    default_extractors.get_timing_after,
+                    default_extractors.get_current_label,
+                ],
+            ),
         ]
     }
 )
 
-# Define a destination for stats saving
-db_uri = "postgresql://user:password@host:5432/default"
-# for clickhouse:
-# db_uri = "clickhouse://user:password@host:8123/default"
-# for csv:
-# db_uri = "csv://file.csv"
-storage = StatsStorage.from_uri(db_uri)
-# update the stats object
-default_extractor_pool.add_subscriber(storage)
 pipeline.run()
 ```
 

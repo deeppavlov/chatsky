@@ -13,9 +13,9 @@ import asyncio
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
 from dff.utils.testing.toy_script import TOY_SCRIPT
-from dff.stats import DFFInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
-from dff.stats import defaults
+from dff.stats import default_extractors
 
 
 # %% [markdown]
@@ -35,7 +35,7 @@ in order to measure the exact running time of the pipeline.
 # %%
 set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
 set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
-dff_instrumentor = DFFInstrumentor()
+dff_instrumentor = OtelInstrumentor()
 dff_instrumentor.instrument()
 
 
@@ -60,8 +60,8 @@ pipeline_dict = {
     ],
 }
 pipeline = Pipeline.from_dict(pipeline_dict)
-pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, defaults.get_timing_before)
-pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, defaults.get_timing_after)
+pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, default_extractors.get_timing_before)
+pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, default_extractors.get_timing_after)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":

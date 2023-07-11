@@ -12,14 +12,14 @@ from opentelemetry.exporter.otlp.proto.grpc.exporter import _translate_key_value
 from opentelemetry.proto.common.v1.common_pb2 import AnyValue, KeyValueList
 
 
-def grpc_mapping_translation_patch(wrapped, _, args, kwargs):
+def grpc_mapping_translation_patch(translate_value, _, args, kwargs):
     """
     This decorator patches the `_translate_value` function
     from OpenTelemetry GRPC Log exporter module allowing the class
     to translate values of type `dict` and `NoneType`
     into the `protobuf` protocol.
 
-    :param wrapped: The original function.
+    :param _translate_value: The original function.
     :param args: Positional arguments of the original function.
     :param kwargs: Keyword arguments of the original function.
     """
@@ -31,7 +31,7 @@ def grpc_mapping_translation_patch(wrapped, _, args, kwargs):
             kvlist_value=KeyValueList(values=[_translate_key_values(str(k), v) for k, v in translated_value.items()])
         )
     else:
-        return wrapped(*args, **kwargs)
+        return translate_value(*args, **kwargs)
 
 
 _wrap(otlp_exporter_grpc, "exporter._translate_value", grpc_mapping_translation_patch)
