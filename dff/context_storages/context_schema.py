@@ -2,7 +2,8 @@ from asyncio import gather
 from uuid import uuid4
 from enum import Enum
 from pydantic import BaseModel, Field
-from typing import Any, Coroutine, Dict, List, Optional, Callable, Tuple, Union, Awaitable
+from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
+from quickle import Encoder, Decoder
 from typing_extensions import Literal
 
 from dff.script import Context
@@ -14,16 +15,16 @@ it means that all keys of the dictionary or list will be read or written.
 Can be used as a value of `subscript` parameter for `DictSchemaField`s and `ListSchemaField`s.
 """
 
-_ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
+_ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[bytes, Optional[str]]]]
 # TODO!
 
 _ReadLogContextFunction = Callable[[Optional[int], str, str], Awaitable[Dict]]
 # TODO!
 
-_WritePackedContextFunction = Callable[[Dict, str, str], Awaitable]
+_WritePackedContextFunction = Callable[[bytes, str, str], Awaitable]
 # TODO!
 
-_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, bytes]], str], Coroutine]
 # TODO!
 
 
@@ -92,11 +93,20 @@ class ContextSchema(BaseModel):
 
     supports_async: bool = False
 
+    _serializer: Any = Encoder()
+
+    _deserializer: Any = Decoder()
+
     class Config:
         validate_assignment = True
+        arbitrary_types_allowed = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
+
+    def setup_serialization(self, serializer: Any, deserializer: Any):
+        self._serializer = serializer
+        self._deserializer = deserializer
 
     async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str) -> Context:
         """
@@ -108,9 +118,10 @@ class ContextSchema(BaseModel):
         returns tuple of context and context hashes
         (hashes should be kept and passed to :py:func:`~.ContextSchema.write_context`).
         """
-        ctx_dict, primary_id = await pac_reader(storage_key)
+        ctx_raw, primary_id = await pac_reader(storage_key)
         if primary_id is None:
             raise KeyError(f"No entry for key {primary_id}.")
+        ctx_dict = self._deserializer.loads(ctx_raw)
 
         tasks = dict()
         for field_props in [value for value in dict(self).values() if isinstance(value, SchemaField)]:
@@ -134,7 +145,8 @@ class ContextSchema(BaseModel):
             tasks = {key: await task for key, task in tasks.items()}
 
         for field_name in tasks.keys():
-            ctx_dict[field_name].update(tasks[field_name])
+            log_dict = {k: self._deserializer.loads(v) for k, v in tasks[field_name].items()}
+            ctx_dict[field_name].update(log_dict)
 
         ctx = Context.cast(ctx_dict)
         setattr(ctx, ExtraFields.primary_id.value, primary_id)
@@ -185,7 +197,8 @@ class ContextSchema(BaseModel):
 
             ctx_dict[field_props.name] = {k: v for k, v in nest_dict.items() if k in last_keys}
 
-        await pac_writer(ctx_dict, storage_key, primary_id)
+        ctx_raw = self._serializer.dumps(ctx_dict)
+        await pac_writer(ctx_raw, storage_key, primary_id)
 
         flattened_dict = list()
         for field, payload in logs_dict.items():
@@ -193,13 +206,15 @@ class ContextSchema(BaseModel):
                 flattened_dict += [(field, key, value)]
         if len(flattened_dict) > 0:
             if not bool(chunk_size):
-                await log_writer(flattened_dict, primary_id)
+                flattened_raw = self._serializer.dumps(flattened_dict)
+                await log_writer(flattened_raw, primary_id)
             else:
                 tasks = list()
                 for ch in range(0, len(flattened_dict), chunk_size):
                     next_ch = ch + chunk_size
                     chunk = flattened_dict[ch:next_ch]
-                    tasks += [log_writer(chunk, primary_id)]
+                    chunk_raw = self._serializer.dumps(chunk)
+                    tasks += [log_writer(chunk_raw, primary_id)]
                 if self.supports_async:
                     await gather(*tasks)
                 else:
