@@ -116,8 +116,8 @@ def dashboard_display_test(args: Namespace, base_url: str):
         "Transition layout",
         "Transition ratio [chord]",
     ]
-    assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-node-stats/"
-    assert dashboard_json["result"]["dashboard_title"] == "DFF Node Stats"
+    assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-stats/"
+    assert dashboard_json["result"]["dashboard_title"] == "DFF Stats"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
     assert datasets_json["count"] == 2
