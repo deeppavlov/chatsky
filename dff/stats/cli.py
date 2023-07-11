@@ -163,7 +163,7 @@ def import_dashboard(
     """
     zip_file = parsed_args.infile
     host, port = parsed_args.host, parsed_args.port
-    superset_url = parse.urlunsplit("http", f"{host}:{port}", "/", "", "")
+    superset_url = parse.urlunsplit(("http", f"{host}:{port}", "/", "", ""))
     zip_filename = os.path.basename(zip_file)
     db_password = getattr(parsed_args, "db.password")
 
