@@ -203,18 +203,17 @@ class ContextSchema(BaseModel):
         flattened_dict = list()
         for field, payload in logs_dict.items():
             for key, value in payload.items():
-                flattened_dict += [(field, key, value)]
+                raw_value = self._serializer.dumps(value)
+                flattened_dict += [(field, key, raw_value)]
         if len(flattened_dict) > 0:
             if not bool(chunk_size):
-                flattened_raw = self._serializer.dumps(flattened_dict)
-                await log_writer(flattened_raw, primary_id)
+                await log_writer(flattened_dict, primary_id)
             else:
                 tasks = list()
                 for ch in range(0, len(flattened_dict), chunk_size):
                     next_ch = ch + chunk_size
                     chunk = flattened_dict[ch:next_ch]
-                    chunk_raw = self._serializer.dumps(chunk)
-                    tasks += [log_writer(chunk_raw, primary_id)]
+                    tasks += [log_writer(chunk, primary_id)]
                 if self.supports_async:
                     await gather(*tasks)
                 else:
