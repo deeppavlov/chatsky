@@ -176,8 +176,30 @@ with add_tab:
             }
         )
 
-    df = pd.DataFrame(data=benchmark_list)
-    edited_df = st.data_editor(df, disabled=("file", "name", "description", "uuid"))
+    benchmark_list_df = pd.DataFrame(data=benchmark_list)
+
+    df_container = st.container()
+
+    def edit_name_desc():
+        edited_rows = st.session_state["result_df"]["edited_rows"]
+
+        for row, edits in edited_rows.items():
+            for column, column_value in edits.items():
+                if column in ("name", "description"):
+                    edited_file = benchmark_list_df.iat[row, 0]
+                    st.session_state["benchmarks"][edited_file][column] = column_value
+
+                    with open(edited_file, "w", encoding="utf-8") as edited_fd:
+                        json.dump(st.session_state["benchmarks"][edited_file], edited_fd)
+
+                    df_container.text(f"row {row}: changed {column} to '{column_value}'")
+
+    edited_df = df_container.data_editor(
+        benchmark_list_df,
+        key="result_df",
+        disabled=("file", "uuid"),
+        on_change=edit_name_desc
+    )
 
     delist_container = st.container()
     delist_container.divider()
