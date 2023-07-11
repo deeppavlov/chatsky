@@ -87,10 +87,19 @@ def add_metrics(container, value_benchmark):
         "read+update": read_update,
     }
 
+    metric_help = {
+        "write": "Average write time for a context with from_dialog_len turns into a clean context storage.",
+        "read": "Average read time (dialog_len ranges between from_dialog_len and to_dialog_len).",
+        "update": "Average update time (dialog_len ranges between from_dialog_len and to_dialog_len).",
+        "read+update": "Sum of average read and update times."
+                       " This metric is the time context_storage interface takes during each of the dialog turns."
+    }
+
     for column_name, column in columns.items():
         column.metric(
             column_name.title(),
             values[column_name],
+            help=metric_help[column_name]
         )
 
 
