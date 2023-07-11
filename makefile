@@ -46,12 +46,12 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose up -d
+	docker compose up -d
 .PHONY: docker_up
 
 wait_db: docker_up
-	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
+	while ! docker compose exec psql pg_isready; do sleep 1; done > /dev/null
+	while ! docker compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
 .PHONY: wait_db
 
 test: venv

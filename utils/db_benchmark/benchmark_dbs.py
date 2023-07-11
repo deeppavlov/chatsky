@@ -67,10 +67,10 @@ sqlite_separator = "///" if system() == "Windows" else "////"
 dbs = {
     # "JSON": "json://dbs/json.json",
     # "Pickle": "pickle://dbs/pickle.pkl",
-    "Shelve": "shelve://dbs/shelve",
+    # "Shelve": "shelve://dbs/shelve",
     "PostgreSQL": "postgresql+asyncpg://postgres:pass@localhost:5432/test",
-    "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
-    "Redis": "redis://:pass@localhost:6379/0",
+    # "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
+    # "Redis": "redis://:pass@localhost:6379/0",
     "MySQL": "mysql+asyncmy://root:pass@localhost:3307/test",
     "SQLite": f"sqlite+aiosqlite:{sqlite_separator}{sqlite_file.absolute()}",
     # "YDB": "grpc://localhost:2136/local",
@@ -102,7 +102,7 @@ for db_name, db_uri in dbs.items():
                 misc_dimensions=(0, 0),
             ),
             "default": BenchmarkConfig(),
-            "large-misc--long-dialog": BenchmarkConfig(
+            "large-misc-long-dialog": BenchmarkConfig(
                 from_dialog_len=500,
                 to_dialog_len=550,
                 message_dimensions=(3, 5, 6, 5, 3),

@@ -210,7 +210,7 @@ class BenchmarkConfig(BaseModel):
     Configuration for a benchmark. Sets dialog len, misc sizes, number of benchmarks.
     """
 
-    context_num: int = 30
+    context_num: int = 10
     """
     Number of times the contexts will be benchmarked.
     Increasing this number decreases standard error of the mean for benchmarked data.
