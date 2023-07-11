@@ -174,11 +174,7 @@ class ContextSchema(BaseModel):
             nest_dict = ctx_dict[field_props.name]
             last_keys = sorted(nest_dict.keys())
 
-            if self.append_single_log:
-                if len(last_keys) > 0:
-                    if self.duplicate_context_in_logs or not isinstance(field_props.subscript, int) or field_props.subscript > 0:
-                        logs_dict[field_props.name] = {last_keys[-1]: nest_dict[last_keys[-1]]}
-            else:
+            if not self.append_single_log:
                 if self.duplicate_context_in_logs or not isinstance(field_props.subscript, int):
                     logs_dict[field_props.name] = nest_dict
                 else:
