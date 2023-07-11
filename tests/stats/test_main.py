@@ -154,6 +154,8 @@ def dashboard_display_test(args: Namespace, base_url: str):
                 **{
                     "username": os.getenv("SUPERSET_USERNAME"),
                     "password": os.getenv("SUPERSET_PASSWORD"),
+                    "host": "localhost",
+                    "port": "8088",
                     "db.password": "qwerty",
                     "infile": "1.zip",
                 }
