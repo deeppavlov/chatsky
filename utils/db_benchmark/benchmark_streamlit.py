@@ -22,6 +22,7 @@ import json
 import pathlib
 from pathlib import Path
 from uuid import uuid4
+from copy import deepcopy
 
 import pandas as pd
 from pympler import asizeof
@@ -48,6 +49,11 @@ UPLOAD_FILES_DIR = Path("uploaded_benchmarks")
 # This directory stores all the benchmarks uploaded via the streamlit interface
 
 UPLOAD_FILES_DIR.mkdir(exist_ok=True)
+
+MERGE_FILES_DIR = Path("merged_benchmarks")
+# This directory stores all the benchmarks merged via the streamlit interface
+
+MERGE_FILES_DIR.mkdir(exist_ok=True)
 
 
 def check_password():
@@ -189,6 +195,39 @@ def get_opposite_benchmarks(benchmark_set, benchmark):
     return opposite_benchmarks
 
 
+def _add_benchmark(benchmark_file, container):
+    benchmark_file = str(benchmark_file)
+
+    if benchmark_file == "":
+        return
+
+    if benchmark_file in st.session_state["benchmark_files"]:
+        container.warning(f"Benchmark file already added: {benchmark_file}")
+        return
+
+    if not Path(benchmark_file).exists():
+        container.warning(f"File does not exists: {benchmark_file}")
+        return
+
+    if update_benchmark_file is not None:
+        update_benchmark_file(benchmark_file)
+
+    with open(benchmark_file, "r", encoding="utf-8") as fd:
+        file_contents = json.load(fd)
+
+    for benchmark in st.session_state["benchmarks"].values():
+        if file_contents["uuid"] == benchmark["uuid"]:
+            container.warning(f"Benchmark with the same uuid already exists: {benchmark_file}")
+            return
+
+    st.session_state["benchmark_files"].append(benchmark_file)
+    with open(BENCHMARK_RESULTS_FILES, "w", encoding="utf-8") as fd:
+        json.dump(list(st.session_state["benchmark_files"]), fd)
+    st.session_state["benchmarks"][benchmark_file] = file_contents
+
+    container.text(f"Added {benchmark_file}")
+
+
 st.sidebar.text(f"Benchmarks take {naturalsize(asizeof.asizeof(st.session_state['benchmarks']))} RAM")
 
 st.sidebar.divider()
@@ -196,7 +235,7 @@ st.sidebar.divider()
 st.sidebar.checkbox("Compare dev and partial in view tab", value=True, key="partial_compare_checkbox")
 st.sidebar.checkbox("Percent comparison", value=True, key="percent_compare")
 
-add_tab, view_tab, compare_tab, mass_compare_tab = st.tabs(["Benchmark sets", "View", "Compare", "Mass compare"])
+add_tab, merge_tab, view_tab, compare_tab, mass_compare_tab = st.tabs(["Benchmark sets", "Merge", "View", "Compare", "Mass compare"])
 
 
 ###############################################################################
@@ -266,38 +305,6 @@ with add_tab:
 
     delist_container.button(label="Delist selected benchmark sets", on_click=delist_benchmarks)
 
-    def _add_benchmark(benchmark_file, container):
-        benchmark_file = str(benchmark_file)
-
-        if benchmark_file == "":
-            return
-
-        if benchmark_file in st.session_state["benchmark_files"]:
-            container.warning(f"Benchmark file already added: {benchmark_file}")
-            return
-
-        if not Path(benchmark_file).exists():
-            container.warning(f"File does not exists: {benchmark_file}")
-            return
-
-        if update_benchmark_file is not None:
-            update_benchmark_file(benchmark_file)
-
-        with open(benchmark_file, "r", encoding="utf-8") as fd:
-            file_contents = json.load(fd)
-
-        for benchmark in st.session_state["benchmarks"].values():
-            if file_contents["uuid"] == benchmark["uuid"]:
-                container.warning(f"Benchmark with the same uuid already exists: {benchmark_file}")
-                return
-
-        st.session_state["benchmark_files"].append(benchmark_file)
-        with open(BENCHMARK_RESULTS_FILES, "w", encoding="utf-8") as fd:
-            json.dump(list(st.session_state["benchmark_files"]), fd)
-        st.session_state["benchmarks"][benchmark_file] = file_contents
-
-        container.text(f"Added {benchmark_file}")
-
     st.divider()
 
     add_container, add_from_dir_container = st.columns(2)
@@ -342,6 +349,92 @@ with add_tab:
             "Upload benchmark results", accept_multiple_files=True, type="json", key="benchmark_file_uploader"
         )
         st.form_submit_button("Submit", on_click=process_uploaded_files)
+
+
+###############################################################################
+# Merge tab
+# Allows merging several benchmarks from different files into a single one
+###############################################################################
+
+with merge_tab:
+    def get_subsets(benchmark_set):
+        benchmark_subsets = set()
+        for benchmark in benchmark_set["benchmarks"]:
+            if benchmark["name"].startswith("default"):
+                benchmark_subsets.add(benchmark["name"].removeprefix("default"))
+
+        return benchmark_subsets
+
+
+    sets = {
+        f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in st.session_state["benchmarks"].values()
+    }
+
+    subsets = {
+        key: get_subsets(sets[key]) for key in sets
+    }
+
+    all_subsets = {item for subset in subsets.values() for item in subset}
+
+    with st.empty():
+        merge_container = st.container()
+
+    def merge_subsets():
+        merged_benchmark_set = {
+            "name": st.session_state["merged_name"],
+            "description": st.session_state["merged_desc"],
+            "uuid": str(uuid4()),
+            "benchmarks": []
+        }
+        for subset in st.session_state["merged_subsets"]["added_rows"]:
+            if subset["subset"] not in subsets[subset["set"]]:
+                merge_container.warning(f'Subset {subset["subset"]} not in {subset["set"]}')
+            else:
+                current_set = sets[subset["set"]]
+
+                for potential_benchmark in current_set["benchmarks"]:
+                    if potential_benchmark["name"].endswith(subset["subset"]):
+                        new_benchmark = deepcopy(potential_benchmark)
+
+                        new_benchmark["name"] = potential_benchmark["name"].removesuffix(subset["subset"]) + subset["asname"]
+
+                        merged_benchmark_set["benchmarks"].append(new_benchmark)
+
+        merged_benchmark_file = (MERGE_FILES_DIR / merged_benchmark_set["uuid"]).with_suffix(".json")
+
+        with open(merged_benchmark_file, "w", encoding="utf-8") as merged_file:
+            json.dump(merged_benchmark_set, merged_file)
+
+        _add_benchmark(merged_benchmark_file, merge_container)
+
+
+    with st.form("merge_form", clear_on_submit=True):
+        merge_df = st.data_editor(
+            pd.DataFrame({"set": [], "subset": [], "asname": []}, dtype=str),
+            key="merged_subsets",
+            num_rows="dynamic",
+            column_config={
+                "set": st.column_config.SelectboxColumn(
+                    "Benchmark set",
+                    help="The set to retrieve a subset from",
+                    options=sets.keys()
+                ),
+                "subset": st.column_config.SelectboxColumn(
+                    "Benchmark subset",
+                    help="Subset of a set to add",
+                    options=all_subsets
+                ),
+                "asname": st.column_config.TextColumn(
+                    "Name of the subset in the resulting file",
+                )
+            }
+        )
+
+        name, desc, confirm = st.columns([2, 2, 1])
+
+        name.text_input("Merged set name", key="merged_name")
+        desc.text_input("Merged set description", key="merged_desc")
+        confirm.form_submit_button("Merge", on_click=merge_subsets)
 
 
 ###############################################################################
@@ -510,9 +603,12 @@ with mass_compare_tab:
         added_benchmarks.update({bm["uuid"] for bm in opposite_benchmarks})
         st.divider()
 
-        if len(opposite_benchmarks) == 1:
-            opposite_benchmark = opposite_benchmarks[0]
-            st.subheader(f"{benchmark['name']} ({benchmark['uuid']})")
-            add_metrics(st.container(), benchmark, opposite_benchmark)
+        st.subheader(f"{benchmark['name']} ({benchmark['uuid']})")
+        add_metrics(st.container(), benchmark)
+
+        last_benchmark = benchmark
+
+        for opposite_benchmark in opposite_benchmarks:
             st.subheader(f"{opposite_benchmark['name']} ({opposite_benchmark['uuid']})")
-            add_metrics(st.container(), opposite_benchmark, benchmark)
+            add_metrics(st.container(), opposite_benchmark, last_benchmark)
+            last_benchmark = opposite_benchmark
