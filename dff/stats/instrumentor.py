@@ -23,9 +23,12 @@ from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk._logs import LoggerProvider, LogRecord
 from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
 from dff.script.core.context import get_last_index
-from dff.stats.utils import get_wrapper_field
+from dff.stats.utils import get_wrapper_field, set_logger_destination, set_meter_destination, set_tracer_destination
 from dff.stats import default_extractors
 
 
@@ -36,10 +39,18 @@ resource = Resource.create({"service.name": SERVICE_NAME})
 """
 Singletone :py:class:`~Resource` instance shared inside the framework.
 """
-
 tracer_provider = TracerProvider(resource=resource)
+"""
+Global tracer provider bound to the DFF resource.
+"""
 logger_provider = LoggerProvider(resource=resource)
+"""
+Global logger provider bound to the DFF resource.
+"""
 meter_provider = MeterProvider(resource=resource)
+"""
+Global meter provider bound to the DFF resource.
+"""
 set_logger_provider(logger_provider)
 set_tracer_provider(tracer_provider)
 set_meter_provider(meter_provider)
@@ -87,6 +98,27 @@ class OtelInstrumentor(BaseInstrumentor):
         self._configure_providers(
             logger_provider=logger_provider, tracer_provider=tracer_provider, meter_provider=meter_provider
         )
+
+    @classmethod
+    def from_url(cls, url: str, insecure: bool = True, timeout: Optional[int] = None):
+        """
+        Construct an instrumentor instance using only the url of the OTLP Collector.
+        Inherently modifies the global provider instances adding an export destination
+        for the target url.
+
+        . code-block::
+
+            instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
+
+        :param url: Url of the running Otel Collector server. Due to limited support of HTTP protocol
+            by the Opentelemetry Python extension, GRPC protocol is preferred.
+        :param insecure: ...
+        :param timeout: Connection timeout in seconds, optional.
+        """
+        set_logger_destination(OTLPLogExporter(endpoint=url, insecure=insecure, timeout=timeout))
+        set_tracer_destination(OTLPSpanExporter(endpoint=url, insecure=insecure, timeout=timeout))
+        set_meter_destination(OTLPMetricExporter(endpoint=url, insecure=insecure, timeout=timeout))
+        return cls()
 
     def instrumentation_dependencies(self) -> Collection[str]:
         return INSTRUMENTS

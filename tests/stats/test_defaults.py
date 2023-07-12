@@ -4,7 +4,7 @@ from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 from dff.stats import default_extractors
 
 try:
-    from wrapt import wrap_function_wrapper
+    from wrapt import wrap_function_wrapper  # noqa: F401
     from dff.stats import OtelInstrumentor
 except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
