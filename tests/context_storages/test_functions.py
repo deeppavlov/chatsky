@@ -172,9 +172,10 @@ def single_log_test(db: DBContextStorage, testing_context: Context, context_id: 
     # Setup schema so that all requests will be read from database
     db.context_schema.requests.subscript = ALL_ITEMS
 
-    # Read context and check only the last context was read - LOGS database was not populated 
+    # Read context and check only the two last context was read - one from LOGS, one from CONTEXT 
     read_context = db[context_id]
-    assert len(read_context.requests) == 1
+    assert len(read_context.requests) == 2
+    assert read_context.requests[8] == testing_context.requests[8]
     assert read_context.requests[9] == testing_context.requests[9]
 
 
