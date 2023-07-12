@@ -18,14 +18,14 @@ def get_cases(
 ):
     benchmark_cases = []
     for config_name, config in benchmark_configs.items():
-        benchmark_cases.append(
-            BenchmarkCase(
-                name=config_name + "-dev",
-                db_factory=DBFactory(uri=db_uri, factory_module="dff.context_storages_old"),
-                benchmark_config=config,
-                description=description,
-            )
-        )
+        # benchmark_cases.append(
+        #     BenchmarkCase(
+        #         name=config_name + "-dev",
+        #         db_factory=DBFactory(uri=db_uri, factory_module="dff.context_storages_old"),
+        #         benchmark_config=config,
+        #         description=description,
+        #     )
+        # )
         benchmark_cases.append(
             BenchmarkCase(
                 name=config_name + "-partial",
