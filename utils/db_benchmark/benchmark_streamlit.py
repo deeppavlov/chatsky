@@ -119,8 +119,7 @@ def get_diff(last_metric, first_metric):
         return f"{last_metric - first_metric:.3}"
 
 
-def add_metrics(container, value_benchmark, diff_benchmark=None):
-    write, read, update, read_update = container.columns(4)
+def add_metrics(container, value_benchmark, diff_benchmark=None, one_column=None):
     column_names = ("write", "read", "update", "read+update")
 
     if not value_benchmark["success"]:
@@ -142,13 +141,6 @@ def add_metrics(container, value_benchmark, diff_benchmark=None):
         else:
             diffs = None
 
-    columns = {
-        "write": write,
-        "read": read,
-        "update": update,
-        "read+update": read_update,
-    }
-
     metric_help = {
         "write": "Average write time for a context with from_dialog_len turns into a clean context storage.",
         "read": "Average read time (dialog_len ranges between from_dialog_len and to_dialog_len).",
@@ -157,13 +149,31 @@ def add_metrics(container, value_benchmark, diff_benchmark=None):
                        " This metric is the time context_storage interface takes during each of the dialog turns."
     }
 
-    for column_name, column in columns.items():
-        column.metric(
-            column_name.title(),
-            values[column_name],
-            delta=diffs[column_name] if diffs else None,
+    if not one_column:
+        write, read, update, read_update = container.columns(4)
+
+        columns = {
+            "write": write,
+            "read": read,
+            "update": update,
+            "read+update": read_update,
+        }
+
+        for column_name, column in columns.items():
+            column.metric(
+                column_name.title(),
+                values[column_name],
+                delta=diffs[column_name] if diffs else None,
+                delta_color="inverse",
+                help=metric_help[column_name]
+            )
+    else:
+        container.metric(
+            one_column.title(),
+            values[one_column],
+            delta=diffs[one_column] if diffs else None,
             delta_color="inverse",
-            help=metric_help[column_name]
+            help=metric_help[one_column]
         )
 
 
@@ -356,16 +366,16 @@ with add_tab:
 # Allows merging several benchmarks from different files into a single one
 ###############################################################################
 
+def get_subsets(benchmark_set):
+    benchmark_subsets = []
+    for benchmark in benchmark_set["benchmarks"]:
+        if benchmark["name"].startswith("default"):
+            benchmark_subsets.append(benchmark["name"].removeprefix("default"))
+
+    return benchmark_subsets
+
+
 with merge_tab:
-    def get_subsets(benchmark_set):
-        benchmark_subsets = set()
-        for benchmark in benchmark_set["benchmarks"]:
-            if benchmark["name"].startswith("default"):
-                benchmark_subsets.add(benchmark["name"].removeprefix("default"))
-
-        return benchmark_subsets
-
-
     sets = {
         f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in st.session_state["benchmarks"].values()
     }
@@ -574,19 +584,25 @@ with compare_tab:
 ###############################################################################
 
 with mass_compare_tab:
+    select_box_column, compact_column = st.columns([3, 1])
+
     sets = {
         f"{benchmark_set['name']} ({benchmark_set['uuid']})": benchmark_set
         for benchmark_set in st.session_state["benchmarks"].values()
     }
-    benchmark_set = st.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox")
+    benchmark_set = select_box_column.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox")
 
     if benchmark_set is None:
         st.warning("No benchmark sets available")
         st.stop()
 
+    selected_mode = compact_column.selectbox("Metrics to display", ("all", "read", "write", "update", "read+update"), index=4)
+
     selected_set = sets[benchmark_set]
 
     added_benchmarks = set()
+
+    benchmark_clusters = []
 
     for benchmark in selected_set["benchmarks"]:
         if benchmark["uuid"] in added_benchmarks:
@@ -596,14 +612,57 @@ with mass_compare_tab:
 
         added_benchmarks.add(benchmark["uuid"])
         added_benchmarks.update({bm["uuid"] for bm in opposite_benchmarks})
+        benchmark_clusters.append([benchmark, *opposite_benchmarks])
+
+    if selected_mode == "all":
+        for benchmark_cluster in benchmark_clusters:
+            st.divider()
+
+            benchmark, *opposite_benchmarks = benchmark_cluster
+
+            st.subheader(f"{benchmark['name']} ({benchmark['uuid']})")
+            add_metrics(st.container(), benchmark)
+
+            last_benchmark = benchmark
+
+            for opposite_benchmark in opposite_benchmarks:
+                st.subheader(f"{opposite_benchmark['name']} ({opposite_benchmark['uuid']})")
+                add_metrics(st.container(), opposite_benchmark, last_benchmark)
+                last_benchmark = opposite_benchmark
+    else:
+        configs = []
+        for benchmark_cluster in benchmark_clusters:
+            if not benchmark_cluster[0]["name"].endswith("-dev"):
+                st.warning("First benchmark is not from dev")
+                st.stop()
+            config_name = benchmark_cluster[0]["name"].removesuffix("-dev")
+            configs.append(config_name)
+
+        if not all([len(cluster) == len(benchmark_clusters[0]) for cluster in benchmark_clusters]):
+            st.warning("Benchmarks with the same configs have different lengths")
+            st.stop()
+
+        subsets = get_subsets(selected_set)
+
+        for benchmark_cluster in benchmark_clusters:
+            if not all([benchmark["name"].endswith(subset) for benchmark, subset in zip(benchmark_cluster, subsets)]):
+                st.warning("Benchmarks with the same configs have different set names")
+                st.stop()
+
         st.divider()
+        _, *config_columns = st.columns(len(configs) + 1)
 
-        st.subheader(f"{benchmark['name']} ({benchmark['uuid']})")
-        add_metrics(st.container(), benchmark)
+        for config, config_column in zip(configs, config_columns):
+            config_column.text(config)
 
-        last_benchmark = benchmark
+        for index, subset in enumerate(subsets):
+            st.divider()
+            subset_column, *metric_columns = st.columns(len(configs) + 1)
 
-        for opposite_benchmark in opposite_benchmarks:
-            st.subheader(f"{opposite_benchmark['name']} ({opposite_benchmark['uuid']})")
-            add_metrics(st.container(), opposite_benchmark, last_benchmark)
-            last_benchmark = opposite_benchmark
+            subset_column.text(subset)
+
+            for benchmark_cluster, metric_column in zip(benchmark_clusters, metric_columns):
+                if index == 0:
+                    add_metrics(metric_column, benchmark_cluster[index], one_column=selected_mode)
+                else:
+                    add_metrics(metric_column, benchmark_cluster[index], benchmark_cluster[index - 1], one_column=selected_mode)
