@@ -370,11 +370,13 @@ with merge_tab:
         f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in st.session_state["benchmarks"].values()
     }
 
-    subsets = {
-        key: get_subsets(sets[key]) for key in sets
-    }
+    subsets = {}
 
-    all_subsets = {item for subset in subsets.values() for item in subset}
+    for set_name, benchmark_set in sets.items():
+        set_subsets = get_subsets(benchmark_set)
+
+        for set_subset in set_subsets:
+            subsets[f"{set_name} / {set_subset}"] = benchmark_set, set_subset
 
     with st.empty():
         merge_container = st.container()
@@ -387,18 +389,15 @@ with merge_tab:
             "benchmarks": []
         }
         for subset in st.session_state["merged_subsets"]["added_rows"]:
-            if subset["subset"] not in subsets[subset["set"]]:
-                merge_container.warning(f'Subset {subset["subset"]} not in {subset["set"]}')
-            else:
-                current_set = sets[subset["set"]]
+            current_set, set_subset = subsets[subset["subset"]]
 
-                for potential_benchmark in current_set["benchmarks"]:
-                    if potential_benchmark["name"].endswith(subset["subset"]):
-                        new_benchmark = deepcopy(potential_benchmark)
+            for potential_benchmark in current_set["benchmarks"]:
+                if potential_benchmark["name"].endswith(set_subset):
+                    new_benchmark = deepcopy(potential_benchmark)
 
-                        new_benchmark["name"] = potential_benchmark["name"].removesuffix(subset["subset"]) + subset["asname"]
+                    new_benchmark["name"] = potential_benchmark["name"].removesuffix(set_subset) + subset["asname"]
 
-                        merged_benchmark_set["benchmarks"].append(new_benchmark)
+                    merged_benchmark_set["benchmarks"].append(new_benchmark)
 
         merged_benchmark_file = (MERGE_FILES_DIR / merged_benchmark_set["uuid"]).with_suffix(".json")
 
@@ -410,19 +409,15 @@ with merge_tab:
 
     with st.form("merge_form", clear_on_submit=True):
         merge_df = st.data_editor(
-            pd.DataFrame({"set": [], "subset": [], "asname": []}, dtype=str),
+            pd.DataFrame({"subset": [], "asname": []}, dtype=str),
             key="merged_subsets",
             num_rows="dynamic",
             column_config={
-                "set": st.column_config.SelectboxColumn(
-                    "Benchmark set",
-                    help="The set to retrieve a subset from",
-                    options=sets.keys()
-                ),
                 "subset": st.column_config.SelectboxColumn(
                     "Benchmark subset",
                     help="Subset of a set to add",
-                    options=all_subsets
+                    width="large",
+                    options=subsets.keys()
                 ),
                 "asname": st.column_config.TextColumn(
                     "Name of the subset in the resulting file",
