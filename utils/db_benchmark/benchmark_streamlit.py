@@ -92,15 +92,11 @@ def add_metrics(container, value_benchmark):
         "read": "Average read time (dialog_len ranges between from_dialog_len and to_dialog_len).",
         "update": "Average update time (dialog_len ranges between from_dialog_len and to_dialog_len).",
         "read+update": "Sum of average read and update times."
-                       " This metric is the time context_storage interface takes during each of the dialog turns."
+        " This metric is the time context_storage interface takes during each of the dialog turns.",
     }
 
     for column_name, column in columns.items():
-        column.metric(
-            column_name.title(),
-            values[column_name],
-            help=metric_help[column_name]
-        )
+        column.metric(column_name.title(), values[column_name], help=metric_help[column_name])
 
 
 st.sidebar.text(f"Benchmarks take {naturalsize(asizeof.asizeof(st.session_state['benchmarks']))} RAM")
@@ -146,10 +142,7 @@ with add_tab:
                     df_container.text(f"row {row}: changed {column} to '{column_value}'")
 
     edited_df = df_container.data_editor(
-        benchmark_list_df,
-        key="result_df",
-        disabled=("file", "uuid"),
-        on_change=edit_name_desc
+        benchmark_list_df, key="result_df", disabled=("file", "uuid"), on_change=edit_name_desc
     )
 
     delist_container = st.container()
