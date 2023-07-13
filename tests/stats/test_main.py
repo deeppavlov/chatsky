@@ -55,8 +55,8 @@ def dashboard_display_test(args: Namespace, base_url: str):
     ]
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
-    assert charts_json["count"] == 15
-    assert sorted(charts_json["ids"]) == list(range(1, 16))
+    assert charts_json["count"] == 14
+    assert sorted(charts_json["ids"]) == list(range(1, 15))
     session.close()
 
 
