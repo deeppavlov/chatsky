@@ -151,7 +151,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy==1.3.0",
+    "mypy==1.4.1",
 ]
 
 devel_full = merge_req_lists(
