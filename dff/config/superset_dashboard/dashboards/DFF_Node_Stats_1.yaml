@@ -272,7 +272,7 @@ position:
     meta:
       background: BACKGROUND_TRANSPARENT
       headerSize: LARGE_HEADER
-      text: DFF Node Stats
+      text: DFF Stats
     parents:
     - ROOT_ID
     - GRID_ID
@@ -280,7 +280,7 @@ position:
   HEADER_ID:
     id: HEADER_ID
     meta:
-      text: DFF Node Stats
+      text: DFF Stats
     type: HEADER
   ROOT_ID:
     children:

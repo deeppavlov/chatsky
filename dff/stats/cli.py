@@ -151,18 +151,17 @@ def add_to_zip(zip_file: ZipFile, path: str, zippath: str):
             add_to_zip(zip_file, os.path.join(path, nm), os.path.join(zippath, nm))
 
 
-def import_dashboard(
-    parsed_args: Optional[argparse.Namespace] = None,
-):
+def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file: Optional[str] = None):
     """
     Import an Apache Superset dashboard to a local instance with specified arguments.
     Before using the command, make sure you have your Superset instance
     up and running: `ghcr.io/deeppavlov/superset_df_dashboard:latest`.
 
     :param parsed_args: Command line arguments produced by `argparse`.
+    :param zip_file: Zip archived dashboard config.
     """
-    zip_file = parsed_args.infile
-    host, port = parsed_args.host, parsed_args.port
+    host = parsed_args.host if hasattr(parsed_args, "host") else "localhost"
+    port = parsed_args.port if hasattr(parsed_args, "port") else "8088"
     superset_url = parse.urlunsplit(("http", f"{host}:{port}", "/", "", ""))
     zip_filename = os.path.basename(zip_file)
     db_password = getattr(parsed_args, "db.password")
@@ -186,19 +185,19 @@ def import_dashboard(
         logger.info(f"Upload finished with status {response.status_code}.")
 
 
-def make_zip_config(parsed_args: argparse.Namespace):
+def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     """
     Make a zip-archived Apache Superset dashboard config, using specified arguments.
 
     :param parsed_args: Command line arguments produced by `argparse`.
     """
-    outfile_name = parsed_args.outfile
+    outfile_name = parsed_args.outfile if hasattr(parsed_args, "outfile") else "temp.zip"
 
-    if hasattr(parsed_args, "file") and parsed_args.file is not None:  # parse yaml input
-        cli_conf = OmegaConf.load(parsed_args.file)
-    else:
-        sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items()]
-        cli_conf = OmegaConf.from_cli()
+    file_conf = OmegaConf.load(parsed_args.file)
+    sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items()]
+    cmd_conf = OmegaConf.from_cli()
+    cli_conf = OmegaConf.merge(file_conf, cmd_conf)
+    OmegaConf.resolve(cli_conf)
 
     if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
         params = dict(
@@ -273,3 +272,5 @@ def make_zip_config(parsed_args: argparse.Namespace):
             if zippath in ("", os.curdir, os.pardir):
                 zippath = ""
             add_to_zip(zf, nested_temp_dir, zippath)
+
+    return Path(outfile_name)

@@ -12,9 +12,10 @@ The functions below can be used to configure the opentelemetry destination.
 
 """
 import json
+import getpass
 from urllib import parse
 from typing import Optional, Tuple
-from argparse import Namespace
+from argparse import Namespace, Action
 
 import requests
 from . import exporter_patch  # noqa: F401
@@ -108,3 +109,26 @@ def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088
         "X-CSRFToken": csrf_token,
     }
     return session, headers
+
+
+class PasswordAction(Action):
+    def __init__(
+        self, option_strings, dest=None, nargs=0, default=None, required=False, type=None, metavar=None, help=None
+    ):
+        super().__init__(
+            option_strings=option_strings,
+            dest=dest,
+            nargs=nargs,
+            default=default,
+            required=required,
+            metavar=metavar,
+            type=type,
+            help=help,
+        )
+
+    def __call__(self, parser, args, values, option_string=None):
+        if values:
+            print("Setting password explicitly is discouraged.")
+            setattr(args, self.dest, values)
+        else:
+            setattr(args, self.dest, getpass.getpass())
