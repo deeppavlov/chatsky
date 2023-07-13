@@ -630,24 +630,24 @@ with mass_compare_tab:
                 add_metrics(st.container(), opposite_benchmark, last_benchmark)
                 last_benchmark = opposite_benchmark
     else:
-        configs = []
-        for benchmark_cluster in benchmark_clusters:
-            if not benchmark_cluster[0]["name"].endswith("-dev"):
-                st.warning("First benchmark is not from dev")
-                st.stop()
-            config_name = benchmark_cluster[0]["name"].removesuffix("-dev")
-            configs.append((config_name, benchmark_cluster[0]["benchmark_config"]))
-
-        if not all([len(cluster) == len(benchmark_clusters[0]) for cluster in benchmark_clusters]):
-            st.warning("Benchmarks with the same configs have different lengths")
-            st.stop()
-
         subsets = get_subsets(selected_set)
 
         for benchmark_cluster in benchmark_clusters:
             if not all([benchmark["name"].endswith(subset) for benchmark, subset in zip(benchmark_cluster, subsets)]):
                 st.warning("Benchmarks with the same configs have different set names")
                 st.stop()
+
+        if not all([len(cluster) == len(benchmark_clusters[0]) for cluster in benchmark_clusters]):
+            st.warning("Benchmarks with the same configs have different lengths")
+            st.stop()
+
+        configs = []
+        for benchmark_cluster in benchmark_clusters:
+            if not benchmark_cluster[0]["name"].endswith(subsets[0]):
+                st.warning(f"First benchmark is not from {subsets[0]}")
+                st.stop()
+            config_name = benchmark_cluster[0]["name"].removesuffix(subsets[0])
+            configs.append((config_name, benchmark_cluster[0]["benchmark_config"]))
 
         st.divider()
         _, *config_columns = st.columns(len(configs) + 1)
