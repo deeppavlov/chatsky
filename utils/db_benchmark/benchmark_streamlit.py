@@ -653,13 +653,13 @@ with mass_compare_tab:
         _, *config_columns = st.columns(len(configs) + 1)
 
         for config, config_column in zip(configs, config_columns):
-            config_column.text(config[0], help=str(config[1]))
+            config_column.markdown(config[0], help=str(config[1]))
 
         for index, subset in enumerate(subsets):
             st.divider()
             subset_column, *metric_columns = st.columns(len(configs) + 1)
 
-            subset_column.text(subset)
+            subset_column.markdown(subset)
 
             for benchmark_cluster, metric_column in zip(benchmark_clusters, metric_columns):
                 if index == 0:
