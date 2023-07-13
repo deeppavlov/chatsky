@@ -97,7 +97,7 @@ requests_requirements = [
 
 test_requirements = merge_req_lists(
     [
-        "pytest==7.3.1",
+        "pytest==7.4.0",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.21.0",
         "flake8==6.0.0; python_version>'3.7'",
