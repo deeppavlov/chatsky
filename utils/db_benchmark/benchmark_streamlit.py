@@ -636,7 +636,7 @@ with mass_compare_tab:
                 st.warning("First benchmark is not from dev")
                 st.stop()
             config_name = benchmark_cluster[0]["name"].removesuffix("-dev")
-            configs.append(config_name)
+            configs.append((config_name, benchmark_cluster[0]["benchmark_config"]))
 
         if not all([len(cluster) == len(benchmark_clusters[0]) for cluster in benchmark_clusters]):
             st.warning("Benchmarks with the same configs have different lengths")
@@ -653,7 +653,7 @@ with mass_compare_tab:
         _, *config_columns = st.columns(len(configs) + 1)
 
         for config, config_column in zip(configs, config_columns):
-            config_column.text(config)
+            config_column.text(config[0], help=str(config[1]))
 
         for index, subset in enumerate(subsets):
             st.divider()
