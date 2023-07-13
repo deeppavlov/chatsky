@@ -1,9 +1,9 @@
 from asyncio import gather
+from datetime import datetime
 from uuid import uuid4
 from enum import Enum
 from pydantic import BaseModel, Field
 from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
-from quickle import Encoder, Decoder
 from typing_extensions import Literal
 
 from dff.script import Context
@@ -15,16 +15,16 @@ it means that all keys of the dictionary or list will be read or written.
 Can be used as a value of `subscript` parameter for `DictSchemaField`s and `ListSchemaField`s.
 """
 
-_ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[bytes, Optional[str]]]]
+_ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
 # TODO!
 
 _ReadLogContextFunction = Callable[[Optional[int], str, str], Awaitable[Dict]]
 # TODO!
 
-_WritePackedContextFunction = Callable[[bytes, str, str], Awaitable]
+_WritePackedContextFunction = Callable[[Dict, datetime, datetime, str, str], Awaitable]
 # TODO!
 
-_WriteLogContextFunction = Callable[[List[Tuple[str, int, bytes]], str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any, datetime]], str], Coroutine]
 # TODO!
 
 
@@ -93,20 +93,12 @@ class ContextSchema(BaseModel):
 
     supports_async: bool = False
 
-    _serializer: Any = Encoder()
-
-    _deserializer: Any = Decoder()
-
     class Config:
         validate_assignment = True
         arbitrary_types_allowed = True
 
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
-
-    def setup_serialization(self, serializer: Any, deserializer: Any):
-        self._serializer = serializer
-        self._deserializer = deserializer
 
     async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str) -> Context:
         """
@@ -118,10 +110,9 @@ class ContextSchema(BaseModel):
         returns tuple of context and context hashes
         (hashes should be kept and passed to :py:func:`~.ContextSchema.write_context`).
         """
-        ctx_raw, primary_id = await pac_reader(storage_key)
+        ctx_dict, primary_id = await pac_reader(storage_key)
         if primary_id is None:
             raise KeyError(f"No entry for key {primary_id}.")
-        ctx_dict = self._deserializer.loads(ctx_raw)
 
         tasks = dict()
         for field_props in [value for value in dict(self).values() if isinstance(value, SchemaField)]:
@@ -145,7 +136,7 @@ class ContextSchema(BaseModel):
             tasks = {key: await task for key, task in tasks.items()}
 
         for field_name in tasks.keys():
-            log_dict = {k: self._deserializer.loads(v) for k, v in tasks[field_name].items()}
+            log_dict = {k: v for k, v in tasks[field_name].items()}
             ctx_dict[field_name].update(log_dict)
 
         ctx = Context.cast(ctx_dict)
@@ -178,6 +169,10 @@ class ContextSchema(BaseModel):
             otherwise should be boolean `False` or number `0`.
         returns string, the context primary id.
         """
+        updated_at = datetime.now()
+        setattr(ctx, ExtraFields.updated_at.value, updated_at)
+        created_at = getattr(ctx, ExtraFields.created_at.value, updated_at)
+
         ctx_dict = ctx.dict()
         logs_dict = dict()
         primary_id = getattr(ctx, ExtraFields.primary_id.value, str(uuid4()))
@@ -200,14 +195,12 @@ class ContextSchema(BaseModel):
 
             ctx_dict[field_props.name] = {k: v for k, v in nest_dict.items() if k in last_keys}
 
-        ctx_raw = self._serializer.dumps(ctx_dict)
-        await pac_writer(ctx_raw, storage_key, primary_id)
+        await pac_writer(ctx_dict, created_at, updated_at, storage_key, primary_id)
 
-        flattened_dict = list()
+        flattened_dict: List[Tuple[str, int, Dict, datetime]] = list()
         for field, payload in logs_dict.items():
             for key, value in payload.items():
-                raw_value = self._serializer.dumps(value)
-                flattened_dict += [(field, key, raw_value)]
+                flattened_dict += [(field, key, value, updated_at)]
         if len(flattened_dict) > 0:
             if not bool(chunk_size):
                 await log_writer(flattened_dict, primary_id)

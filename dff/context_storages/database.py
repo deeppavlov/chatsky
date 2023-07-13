@@ -13,9 +13,11 @@ import importlib
 import threading
 from functools import wraps
 from abc import ABC, abstractmethod
+from datetime import datetime
 from inspect import signature
 from typing import Any, Callable, Dict, Hashable, List, Optional, Tuple
 
+from .serializer import DefaultSerializer, validate_serializer
 from .context_schema import ContextSchema
 from .protocol import PROTOCOLS
 from ..script import Context
@@ -70,7 +72,7 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None):
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -81,6 +83,8 @@ class DBContextStorage(ABC):
         self._insert_limit = False
         # TODO: doc!
         self.set_context_schema(context_schema)
+        # TODO: doc!
+        self.serializer = validate_serializer(serializer)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):
         """
@@ -194,7 +198,7 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
-    def get(self, key: Hashable, default: Optional[Context] = None) -> Context:
+    def get(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:
         """
         Synchronous method for accessing stored Context, returning default if no Context is stored with the given key.
 
@@ -204,7 +208,7 @@ class DBContextStorage(ABC):
         """
         return asyncio.run(self.get_async(key, default))
 
-    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Context:
+    async def get_async(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:
         """
         Asynchronous method for accessing stored Context, returning default if no Context is stored with the given key.
 
@@ -223,17 +227,17 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         # TODO: doc!
         raise NotImplementedError
 
     @abstractmethod
-    async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         # TODO: doc!
         raise NotImplementedError
 
     @abstractmethod
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict, datetime]], primary_id: str):
         # TODO: doc!
         raise NotImplementedError
 

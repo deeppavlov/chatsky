@@ -15,18 +15,20 @@ public-domain, SQL database engine.
 import asyncio
 import importlib
 import os
+from datetime import datetime
 from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
 
+from .serializer import DefaultSerializer
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ExtraFields
+from .context_schema import ContextSchema, ExtraFields
 
 try:
     from sqlalchemy import (
         Table,
         MetaData,
         Column,
-        LargeBinary,
+        PickleType,
         String,
         DateTime,
         Integer,
@@ -37,7 +39,6 @@ try:
         update,
         func,
     )
-    from sqlalchemy.types import TypeEngine
     from sqlalchemy.dialects.mysql import DATETIME, LONGBLOB
     from sqlalchemy.ext.asyncio import create_async_engine
 
@@ -100,20 +101,12 @@ def _import_datetime_from_dialect(dialect: str) -> "DateTime":
         return DateTime()
 
 
-def _import_pickletype_for_dialect(dialect: str) -> "TypeEngine[bytes]":
+def _import_pickletype_for_dialect(dialect: str, serializer: Any) -> "PickleType":
     if dialect == "mysql":
-        return LONGBLOB()
+        return PickleType(pickler=serializer, impl=LONGBLOB)
     else:
-        return LargeBinary()
+        return PickleType(pickler=serializer)
 
-
-def _get_current_time(dialect: str):
-    if dialect == "sqlite":
-        return func.strftime("%Y-%m-%d %H:%M:%f", "NOW")
-    elif dialect == "mysql":
-        return func.now(6)
-    else:
-        return func.now()
 
 def _get_update_stmt(dialect: str, insert_stmt, columns: Collection[str], unique: Collection[str]):
     if dialect == "postgresql" or dialect == "sqlite":
@@ -171,8 +164,8 @@ class SQLContextStorage(DBContextStorage):
     _UUID_LENGTH = 64
     _FIELD_LENGTH = 256
 
-    def __init__(self, path: str, table_name_prefix: str = "dff_table", custom_driver: bool = False):
-        DBContextStorage.__init__(self, path)
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), table_name_prefix: str = "dff_table", custom_driver: bool = False):
+        DBContextStorage.__init__(self, path, context_schema, serializer)
 
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path)
@@ -187,21 +180,14 @@ class SQLContextStorage(DBContextStorage):
         self.context_schema.supports_async = self.dialect != "sqlite"
 
         self.tables = dict()
-        current_time = _get_current_time(self.dialect)
         self.tables[self._CONTEXTS_TABLE] = Table(
             f"{table_name_prefix}_{self._CONTEXTS_TABLE}",
             MetaData(),
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
             Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=True),
-            Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS(self.dialect), nullable=False),
-            Column(ExtraFields.created_at.value, _DATETIME_CLASS(self.dialect), server_default=current_time, nullable=False),
-            Column(
-                ExtraFields.updated_at.value,
-                _DATETIME_CLASS(self.dialect),
-                server_default=current_time,
-                server_onupdate=current_time,
-                nullable=False,
-            ),
+            Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
+            Column(ExtraFields.created_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
+            Column(ExtraFields.updated_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
         )
         self.tables[self._LOGS_TABLE] = Table(
             f"{table_name_prefix}_{self._LOGS_TABLE}",
@@ -209,14 +195,8 @@ class SQLContextStorage(DBContextStorage):
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(self._FIELD_COLUMN, String(self._FIELD_LENGTH), index=True, nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
-            Column(self._VALUE_COLUMN, _PICKLETYPE_CLASS(self.dialect), nullable=False),
-            Column(
-                ExtraFields.updated_at.value,
-                _DATETIME_CLASS(self.dialect),
-                server_default=current_time,
-                server_onupdate=current_time,
-                nullable=False,
-            ),
+            Column(self._VALUE_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
+            Column(ExtraFields.updated_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
             Index(f"logs_index", ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN, unique=True),
         )
 
@@ -237,7 +217,10 @@ class SQLContextStorage(DBContextStorage):
         subq = subq.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None)).distinct()
         stmt = select(func.count()).select_from(subq.subquery())
         async with self.engine.begin() as conn:
-            return (await conn.execute(stmt)).fetchone()[0]
+            result = (await conn.execute(stmt)).fetchone()
+            if result is None or len(result) == 0:
+                raise ValueError(f"Database {self.dialect} error: operation LENGTH")
+            return result[0]
 
     @threadsafe_method
     async def clear_async(self):
@@ -255,7 +238,10 @@ class SQLContextStorage(DBContextStorage):
         subq = subq.order_by(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.updated_at.value].desc()).limit(1)
         stmt = select(func.count()).select_from(subq.subquery())
         async with self.engine.begin() as conn:
-            return (await conn.execute(stmt)).fetchone()[0] != 0
+            result = (await conn.execute(stmt)).fetchone()
+            if result is None or len(result) == 0:
+                raise ValueError(f"Database {self.dialect} error: operation CONTAINS")
+            return result[0] != 0
 
     async def _create_self_tables(self):
         async with self.engine.begin() as conn:
@@ -275,7 +261,7 @@ class SQLContextStorage(DBContextStorage):
                 install_suggestion = get_protocol_install_suggestion("sqlite")
                 raise ImportError("Package `sqlalchemy` and/or `aiosqlite` is missing.\n" + install_suggestion)
 
-    async def _read_pac_ctx(self, storage_key: str) -> Tuple[bytes, Optional[str]]:
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         async with self.engine.begin() as conn:
             stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value], self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN])
             stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == storage_key)
@@ -285,7 +271,7 @@ class SQLContextStorage(DBContextStorage):
             if result is not None:
                 return result[1], result[0]
             else:
-                return bytes(), None
+                return dict(), None
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         async with self.engine.begin() as conn:
@@ -301,21 +287,21 @@ class SQLContextStorage(DBContextStorage):
             else:
                 return dict()
 
-    async def _write_pac_ctx(self, data: bytes, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
-                {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id}
+                {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id, ExtraFields.created_at.value: created, ExtraFields.updated_at.value: updated}
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value], [ExtraFields.primary_id.value])
+            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value, ExtraFields.updated_at.value], [ExtraFields.primary_id.value])
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, bytes]], primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict, datetime]], primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [
-                    {self._FIELD_COLUMN: field, self._KEY_COLUMN: key, self._VALUE_COLUMN: value, ExtraFields.primary_id.value: primary_id}
-                    for field, key, value in data
+                    {self._FIELD_COLUMN: field, self._KEY_COLUMN: key, self._VALUE_COLUMN: value, ExtraFields.primary_id.value: primary_id, ExtraFields.updated_at.value: updated}
+                    for field, key, value, updated in data
                 ]
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._VALUE_COLUMN], [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN])
+            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._VALUE_COLUMN, ExtraFields.updated_at.value], [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN])
             await conn.execute(update_stmt)
