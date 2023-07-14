@@ -1,4 +1,4 @@
-from typing import Any
+from typing import Any, Optional
 from inspect import signature
 
 from quickle import Encoder, Decoder
@@ -9,7 +9,7 @@ class DefaultSerializer:
         self._encoder = Encoder()
         self._decoder = Decoder()
 
-    def dumps(self, data: Any, _) -> bytes:
+    def dumps(self, data: Any, _: Optional[Any] = None) -> bytes:
         return self._encoder.dumps(data)
 
     def loads(self, data: bytes) -> Any:

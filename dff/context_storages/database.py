@@ -237,7 +237,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict, datetime]], primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         # TODO: doc!
         raise NotImplementedError
 
