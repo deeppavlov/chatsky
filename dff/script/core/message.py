@@ -9,8 +9,8 @@ from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 
-from pydantic import Extra, Field, ValidationError, FilePath, HttpUrl, BaseModel
-from pydantic import validator, root_validator
+from pydantic import field_validator, ConfigDict, Field, FilePath, HttpUrl, BaseModel
+from pydantic import model_validator
 
 
 class Session(Enum):
@@ -27,9 +27,7 @@ class DataModel(BaseModel):
     This class is a Pydantic BaseModel that serves as a base class for all DFF models.
     """
 
-    class Config:
-        extra = Extra.allow
-        arbitrary_types_allowed = True
+    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
 
 
 class Command(DataModel):
@@ -72,11 +70,11 @@ class Attachment(DataModel):
     def get_bytes(self) -> Optional[bytes]:
         if self.source is None:
             return None
-        if isinstance(self.source, HttpUrl):
-            with urlopen(self.source) as file:
+        if isinstance(self.source, Path):
+            with open(self.source, "rb") as file:
                 return file.read()
         else:
-            with open(self.source, "rb") as file:
+            with urlopen(self.source.unicode_string()) as file:
                 return file.read()
 
     def __eq__(self, other):
@@ -88,13 +86,17 @@ class Attachment(DataModel):
             return self.get_bytes() == other.get_bytes()
         return NotImplemented
 
-    @root_validator
-    def validate_source_or_id(cls, values):
-        if bool(values.get("source")) == bool(values.get("id")):
-            raise ValidationError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
+    @model_validator(mode="before")
+    @classmethod
+    def validate_source_or_id(cls, values: dict):
+        assert isinstance(values, dict)
+        assert bool(values.get("source")) != bool(
+            values.get("id")
+        ), "Attachment type requires exactly one parameter, `source` or `id`, to be set."
         return values
 
-    @validator("source")
+    @field_validator("source", mode="before")
+    @classmethod
     def validate_source(cls, value):
         if isinstance(value, Path):
             return Path(value)
@@ -175,7 +177,7 @@ class Keyboard(DataModel):
     that can be used for a chatbot or messaging application.
     """
 
-    buttons: List[Button] = Field(default_factory=list, min_items=1)
+    buttons: List[Button] = Field(default_factory=list, min_length=1)
 
     def __eq__(self, other):
         if isinstance(other, Keyboard):
@@ -201,8 +203,8 @@ class Message(DataModel):
 
     def __eq__(self, other):
         if isinstance(other, Message):
-            for field in self.__fields__:
-                if field not in other.__fields__:
+            for field in self.model_fields:
+                if field not in other.model_fields:
                     return False
                 if self.__getattribute__(field) != other.__getattribute__(field):
                     return False
@@ -210,7 +212,7 @@ class Message(DataModel):
         return NotImplemented
 
     def __repr__(self) -> str:
-        return " ".join([f"{key}='{value}'" for key, value in self.dict(exclude_none=True).items()])
+        return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
 
 
 class MultiMessage(Message):

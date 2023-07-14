@@ -17,7 +17,7 @@ def test_context():
     ctx.labels = shuffle_dict_keys(ctx.labels)
     ctx.requests = shuffle_dict_keys(ctx.requests)
     ctx.responses = shuffle_dict_keys(ctx.responses)
-    ctx = Context.cast(ctx.json())
+    ctx = Context.cast(ctx.model_dump_json())
     ctx.misc[123] = 312
     ctx.clear(5, ["requests", "responses", "misc", "labels", "framework_states"])
     ctx.misc[1001] = "11111"
@@ -52,7 +52,7 @@ def test_context():
     assert ctx.misc == {1001: "11111"}
     assert ctx.current_node is None
     ctx.overwrite_current_node_in_processing(Node(**{"response": Message(text="text")}))
-    ctx.json()
+    ctx.model_dump_json()
 
     try:
         Context.cast(123)

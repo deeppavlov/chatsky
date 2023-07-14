@@ -115,7 +115,7 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
-        value = json.loads(value.json())
+        value = json.loads(value.model_dump_json())
 
         insert_stmt = insert(self.table).values(id=str(key), context=value)
         update_stmt = await self._get_update_stmt(insert_stmt)

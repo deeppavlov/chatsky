@@ -59,13 +59,13 @@ Draft function that performs serialization.
 
 # %%
 def process_response(ctx: Context):
-    ctx_json = ctx.json()
+    ctx_json = ctx.model_dump_json()
     if isinstance(ctx_json, str):
         logging.info("context serialized to json str")
     else:
         raise Exception(f"ctx={ctx_json} has to be serialized to json string")
 
-    ctx_dict = ctx.dict()
+    ctx_dict = ctx.model_dump()
     if isinstance(ctx_dict, dict):
         logging.info("context serialized to dict")
     else:

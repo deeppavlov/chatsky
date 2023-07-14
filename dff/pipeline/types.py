@@ -112,7 +112,7 @@ Accepts str (component path), returns boolean (whether wrapper should be applied
 class ServiceRuntimeInfo(BaseModel):
     name: str
     path: str
-    timeout: Optional[float]
+    timeout: Optional[float] = None
     asynchronous: bool
     execution_state: Dict[str, ComponentExecutionState]
 

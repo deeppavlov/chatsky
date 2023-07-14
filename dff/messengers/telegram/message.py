@@ -22,7 +22,8 @@ from telebot.types import (
     ChatJoinRequest,
 )
 
-from dff.script.core.message import Message, Location, Keyboard, DataModel, root_validator, ValidationError
+from dff.script.core.message import Message, Location, Keyboard, DataModel
+from pydantic import model_validator
 
 
 class TelegramUI(Keyboard):
@@ -34,13 +35,14 @@ class TelegramUI(Keyboard):
     row_width: int = 3
     """Limits the maximum number of buttons in a row."""
 
-    @root_validator
-    def validate_buttons(cls, values):
-        if not values.get("is_inline"):
-            for button in values.get("buttons"):
-                if button.payload is not None or button.source is not None:
-                    raise ValidationError(f"`payload` and `source` are only used for inline keyboards: {button}")
-        return values
+    @model_validator(mode="after")
+    def validate_buttons(self, _):
+        if not self.is_inline:
+            for button in self.buttons:
+                assert (
+                    button.payload is None and button.source is None
+                ), f"`payload` and `source` are only used for inline keyboards: {button}"
+        return self
 
 
 class _ClickButton(DataModel):
@@ -66,9 +68,6 @@ class ParseMode(Enum):
 
 
 class TelegramMessage(Message):
-    class Config:
-        smart_union = True
-
     ui: Optional[
         Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
     ] = None
@@ -97,9 +96,9 @@ class TelegramMessage(Message):
 
     def __eq__(self, other):
         if isinstance(other, Message):
-            for field in self.__fields__:
+            for field in self.model_fields:
                 if field not in ("parse_mode", "update_id", "update", "update_type"):
-                    if field not in other.__fields__:
+                    if field not in other.model_fields:
                         return False
                     if self.__getattribute__(field) != other.__getattribute__(field):
                         return False
