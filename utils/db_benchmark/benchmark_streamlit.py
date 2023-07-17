@@ -245,7 +245,7 @@ st.sidebar.divider()
 st.sidebar.checkbox("Compare dev and partial in view tab", value=True, key="partial_compare_checkbox")
 st.sidebar.checkbox("Percent comparison", value=True, key="percent_compare")
 
-add_tab, merge_tab, view_tab, compare_tab, mass_compare_tab = st.tabs(["Benchmark sets", "Merge", "View", "Compare", "Mass compare"])
+mass_compare_tab, add_tab, merge_tab, view_tab, compare_tab = st.tabs(["Mass compare", "Benchmark sets", "Merge", "View", "Compare"])
 
 
 ###############################################################################
@@ -587,19 +587,40 @@ with compare_tab:
 ###############################################################################
 
 with mass_compare_tab:
-    select_box_column, compact_column = st.columns([3, 1])
+    select_box_column, compact_column, link_column = st.columns([6, 2, 1])
 
     sets = {
         f"{benchmark_set['name']} ({benchmark_set['uuid']})": benchmark_set
         for benchmark_set in st.session_state["benchmarks"].values()
     }
-    benchmark_set = select_box_column.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox")
+
+    set_indexes = {
+        benchmark_set['uuid']: index
+        for index, benchmark_set in enumerate(st.session_state["benchmarks"].values())
+    }
+
+    modes = ("all", "read", "write", "update", "read+update")
+
+    params = st.experimental_get_query_params()
+
+    queried_set = params.get("mass_compare_set", [])
+    set_index = 0
+    if len(queried_set) == 1:
+        set_index = set_indexes.get(queried_set[0], 0)
+    queried_mode = params.get("metric", [])
+    mode_index = 4
+    if len(queried_mode) == 1:
+        mode_index = modes.index(queried_mode[0])
+
+    benchmark_set = select_box_column.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox", index=set_index)
 
     if benchmark_set is None:
         st.warning("No benchmark sets available")
         st.stop()
 
-    selected_mode = compact_column.selectbox("Metrics to display", ("all", "read", "write", "update", "read+update"), index=4)
+    selected_mode = compact_column.selectbox("Metrics to display", modes, index=mode_index)
+
+    link_column.markdown(f"[Link](?mass_compare_set={benchmark_set.rsplit('(', maxsplit=1)[1].removesuffix(')')}&metric={selected_mode})")
 
     selected_set = sets[benchmark_set]
 
