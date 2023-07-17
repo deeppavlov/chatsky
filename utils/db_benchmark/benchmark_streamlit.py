@@ -380,13 +380,13 @@ with merge_tab:
         f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in st.session_state["benchmarks"].values()
     }
 
-    subsets = {}
+    merge_tab_subsets = {}
 
     for set_name, benchmark_set in sets.items():
         set_subsets = get_subsets(benchmark_set)
 
         for set_subset in set_subsets:
-            subsets[f"{set_name} / {set_subset}"] = benchmark_set, set_subset
+            merge_tab_subsets[f"{set_name} / {set_subset}"] = benchmark_set, set_subset
 
     with st.empty():
         merge_container = st.container()
@@ -399,13 +399,15 @@ with merge_tab:
             "benchmarks": []
         }
         for subset in st.session_state["merged_subsets"]["added_rows"]:
-            current_set, set_subset = subsets[subset["subset"]]
+            current_set, set_subset = merge_tab_subsets[subset["subset"]]
 
             for potential_benchmark in current_set["benchmarks"]:
                 if potential_benchmark["name"].endswith(set_subset):
                     new_benchmark = deepcopy(potential_benchmark)
 
-                    new_benchmark["name"] = potential_benchmark["name"].removesuffix(set_subset) + subset["asname"]
+                    asname = subset.get("asname", set_subset)
+                    if asname is not None:
+                        new_benchmark["name"] = potential_benchmark["name"].removesuffix(set_subset) + asname
 
                     merged_benchmark_set["benchmarks"].append(new_benchmark)
 
@@ -427,10 +429,11 @@ with merge_tab:
                     "Benchmark subset",
                     help="Subset of a set to add",
                     width="large",
-                    options=subsets.keys()
+                    options=merge_tab_subsets.keys()
                 ),
                 "asname": st.column_config.TextColumn(
                     "Name of the subset in the resulting file",
+                    help="Leave None if name should be unchanged."
                 )
             }
         )
