@@ -21,7 +21,8 @@ from uuid import UUID, uuid4
 
 from typing import Any, Optional, Union, Dict, List, Set
 
-from pydantic import ConfigDict, BaseModel, Field, field_validator, validate_call
+from pydantic import ConfigDict, BaseModel, Field, field_validator
+from pydantic import validate_call  # noqa: F401
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
