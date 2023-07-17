@@ -610,7 +610,7 @@ with mass_compare_tab:
     queried_mode = params.get("metric", [])
     mode_index = 4
     if len(queried_mode) == 1:
-        mode_index = modes.index(queried_mode[0])
+        mode_index = int(queried_mode[0])
 
     benchmark_set = select_box_column.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox", index=set_index)
 
@@ -620,7 +620,7 @@ with mass_compare_tab:
 
     selected_mode = compact_column.selectbox("Metrics to display", modes, index=mode_index)
 
-    link_column.markdown(f"[Link](?mass_compare_set={benchmark_set.rsplit('(', maxsplit=1)[1].removesuffix(')')}&metric={selected_mode})")
+    link_column.markdown(f"[Link](?mass_compare_set={benchmark_set.rsplit('(', maxsplit=1)[1].removesuffix(')')}&metric={modes.index(selected_mode)})")
 
     selected_set = sets[benchmark_set]
 
