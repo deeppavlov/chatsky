@@ -30,7 +30,7 @@ logger = logging.getLogger(__name__)
 Node = BaseModel
 
 
-@validate_call
+# @validate_call
 def get_last_index(dictionary: dict) -> int:
     """
     Obtaining the last index from the `dictionary`. Functions returns `-1` if the `dict` is empty.
@@ -149,7 +149,7 @@ class Context(BaseModel):
             )
         return ctx
 
-    @validate_call
+    # @validate_call
     def add_request(self, request: Message):
         """
         Adds to the context the next `request` corresponding to the next turn.
@@ -160,7 +160,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         self.requests[last_index + 1] = request
 
-    @validate_call
+    # @validate_call
     def add_response(self, response: Message):
         """
         Adds to the context the next `response` corresponding to the next turn.
@@ -171,7 +171,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         self.responses[last_index + 1] = response
 
-    @validate_call
+    # @validate_call
     def add_label(self, label: NodeLabel2Type):
         """
         Adds to the context the next :py:const:`label <dff.script.NodeLabel2Type>`,
@@ -183,7 +183,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    @validate_call
+    # @validate_call
     def clear(
         self,
         hold_last_n_indices: int,
@@ -232,7 +232,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    @validate_call
+    # @validate_call
     def set_last_response(self, response: Optional[Message]):
         """
         Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
@@ -250,7 +250,7 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    @validate_call
+    # @validate_call
     def set_last_request(self, request: Optional[Message]):
         """
         Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
@@ -280,7 +280,7 @@ class Context(BaseModel):
 
         return node
 
-    @validate_call
+    # @validate_call
     def overwrite_current_node_in_processing(self, processed_node: Node):
         """
         Overwrites the current node with a processed node. This method only works in processing functions.
