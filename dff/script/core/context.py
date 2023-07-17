@@ -24,7 +24,6 @@ from typing import Any, Optional, Union, Dict, List, Set
 from pydantic import ConfigDict, BaseModel, Field, field_validator, validate_call
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
-from functools import singledispatchmethod
 
 logger = logging.getLogger(__name__)
 
@@ -150,7 +149,6 @@ class Context(BaseModel):
             )
         return ctx
 
-    @singledispatchmethod
     @validate_call
     def add_request(self, request: Message):
         """
@@ -162,7 +160,6 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         self.requests[last_index + 1] = request
 
-    @singledispatchmethod
     @validate_call
     def add_response(self, response: Message):
         """
@@ -174,7 +171,6 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         self.responses[last_index + 1] = response
 
-    @singledispatchmethod
     @validate_call
     def add_label(self, label: NodeLabel2Type):
         """
@@ -187,7 +183,6 @@ class Context(BaseModel):
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    @singledispatchmethod
     @validate_call
     def clear(
         self,
@@ -237,7 +232,6 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    @singledispatchmethod
     @validate_call
     def set_last_response(self, response: Optional[Message]):
         """
@@ -256,7 +250,6 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    @singledispatchmethod
     @validate_call
     def set_last_request(self, request: Optional[Message]):
         """
@@ -287,7 +280,6 @@ class Context(BaseModel):
 
         return node
 
-    @singledispatchmethod
     @validate_call
     def overwrite_current_node_in_processing(self, processed_node: Node):
         """

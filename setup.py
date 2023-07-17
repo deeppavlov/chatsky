@@ -27,7 +27,7 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 
 
 core = [
-    "pydantic>=2.0,<3.0",
+    "pydantic>=2.0.3,<3.0",
     "nest-asyncio",
     "typing-extensions",
 ]
