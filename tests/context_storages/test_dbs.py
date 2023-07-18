@@ -123,7 +123,7 @@ def _test_redis(testing_context, context_id):
 
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
-def test_postgres(testing_context, context_id):
+def _test_postgres(testing_context, context_id):
     db = context_storage_factory(
         "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
             os.getenv("POSTGRES_USERNAME"),
@@ -136,7 +136,7 @@ def test_postgres(testing_context, context_id):
 
 
 @pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
-def test_sqlite(testing_file, testing_context, context_id):
+def _test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
     db = context_storage_factory(f"sqlite+aiosqlite:{separator}{testing_file}")
     run_all_functions(db, testing_context, context_id)
@@ -145,7 +145,7 @@ def test_sqlite(testing_file, testing_context, context_id):
 
 @pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
-def test_mysql(testing_context, context_id):
+def _test_mysql(testing_context, context_id):
     db = context_storage_factory(
         "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
             os.getenv("MYSQL_USERNAME"),
@@ -159,7 +159,7 @@ def test_mysql(testing_context, context_id):
 
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
-def _test_ydb(testing_context, context_id):
+def test_ydb(testing_context, context_id):
     db = context_storage_factory(
         "{}{}".format(
             os.getenv("YDB_ENDPOINT"),

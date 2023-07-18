@@ -24,7 +24,7 @@ _ReadLogContextFunction = Callable[[Optional[int], str, str], Awaitable[Dict]]
 _WritePackedContextFunction = Callable[[Dict, datetime, datetime, str, str], Awaitable]
 # TODO!
 
-_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any, datetime]], str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], datetime, str], Coroutine]
 # TODO!
 
 
@@ -197,19 +197,19 @@ class ContextSchema(BaseModel):
 
         await pac_writer(ctx_dict, created_at, updated_at, storage_key, primary_id)
 
-        flattened_dict: List[Tuple[str, int, Dict, datetime]] = list()
+        flattened_dict: List[Tuple[str, int, Dict]] = list()
         for field, payload in logs_dict.items():
             for key, value in payload.items():
-                flattened_dict += [(field, key, value, updated_at)]
+                flattened_dict += [(field, key, value)]
         if len(flattened_dict) > 0:
             if not bool(chunk_size):
-                await log_writer(flattened_dict, primary_id)
+                await log_writer(flattened_dict, updated_at, primary_id)
             else:
                 tasks = list()
                 for ch in range(0, len(flattened_dict), chunk_size):
                     next_ch = ch + chunk_size
                     chunk = flattened_dict[ch:next_ch]
-                    tasks += [log_writer(chunk, primary_id)]
+                    tasks += [log_writer(chunk, updated_at, primary_id)]
                 if self.supports_async:
                     await gather(*tasks)
                 else:

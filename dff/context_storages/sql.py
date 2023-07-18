@@ -297,12 +297,12 @@ class SQLContextStorage(DBContextStorage):
             update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value, ExtraFields.updated_at.value], [ExtraFields.primary_id.value])
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict, datetime]], primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         async with self.engine.begin("WRITE_LOG") as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [
                     {self._FIELD_COLUMN: field, self._KEY_COLUMN: key, self._VALUE_COLUMN: value, ExtraFields.primary_id.value: primary_id, ExtraFields.updated_at.value: updated}
-                    for field, key, value, updated in data
+                    for field, key, value in data
                 ]
             )
             update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._VALUE_COLUMN, ExtraFields.updated_at.value], [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN])

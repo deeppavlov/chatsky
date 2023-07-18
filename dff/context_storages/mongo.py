@@ -12,8 +12,7 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 import asyncio
-import datetime
-import pickle
+from datetime import datetime
 from typing import Dict, Tuple, Optional, List, Any
 
 try:
@@ -23,14 +22,11 @@ try:
     mongo_available = True
 except ImportError:
     mongo_available = False
-    AsyncIOMotorClient = None
-    ObjectId = None
-
-from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ALL_ITEMS, ExtraFields
+from .context_schema import ContextSchema, ExtraFields
+from .serializer import DefaultSerializer
 
 
 class MongoContextStorage(DBContextStorage):
@@ -53,10 +49,12 @@ class MongoContextStorage(DBContextStorage):
     _LOGS_TABLE = "logs"
     _KEY_COLUMN = "key"
     _VALUE_COLUMN = "value"
+    _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    def __init__(self, path: str, collection_prefix: str = "dff_collection"):
-        DBContextStorage.__init__(self, path)
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), collection_prefix: str = "dff_collection"):
+        DBContextStorage.__init__(self, path, context_schema, serializer)
+
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")
             raise ImportError("`mongodb` package is missing.\n" + install_suggestion)
@@ -80,73 +78,70 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.active_ctx.value: True, ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}})
+        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.storage_key.value: None}})
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(await self.collections[self._CONTEXTS_TABLE].distinct(ExtraFields.storage_key.value, {ExtraFields.active_ctx.value: True}))
+        count_key = "unique_count"
+        unique = await self.collections[self._CONTEXTS_TABLE].aggregate([
+            {"$match": {ExtraFields.storage_key.value: {"$ne": None}}},
+            {"$group": {"_id": None, "unique_keys": {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
+            {"$project": {count_key: {"$size": "$unique_keys"}}},
+        ]).to_list(1)
+        return 0 if len(unique) == 0 else unique[0][count_key]
 
     @threadsafe_method
     async def clear_async(self):
-        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.active_ctx.value: True}, {"$set": {ExtraFields.active_ctx.value: False}})
+        await self.collections[self._CONTEXTS_TABLE].update_many({}, {"$set": {ExtraFields.storage_key.value: None}})
 
-    @threadsafe_method
     @cast_key_to_string()
-    async def _get_last_ctx(self, key: str) -> Optional[str]:
-        last_ctx = await self.collections[self._CONTEXTS_TABLE].find_one({ExtraFields.active_ctx.value: True, ExtraFields.storage_key.value: key})
-        return last_ctx[ExtraFields.primary_id.value] if last_ctx is not None else None
+    async def contains_async(self, key: str) -> bool:
+        return await self.collections[self._CONTEXTS_TABLE].count_documents({"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.storage_key.value: {"$ne": None}}]}) > 0
 
-    async def _read_pac_ctx(self, _: str, primary_id: str) -> Dict:
-        packed = await self.collections[self._CONTEXTS_TABLE].find_one({ExtraFields.primary_id.value: primary_id}, [self._PACKED_COLUMN])
-        return pickle.loads(packed[self._PACKED_COLUMN])
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
+        packed = await self.collections[self._CONTEXTS_TABLE].find_one(
+            {"$and": [{ExtraFields.storage_key.value: storage_key}, {ExtraFields.storage_key.value: {"$ne": None}}]},
+            [self._PACKED_COLUMN, ExtraFields.primary_id.value],
+            sort=[(ExtraFields.updated_at.value, -1)]
+        )
+        if packed is not None:
+            return self.serializer.loads(packed[self._PACKED_COLUMN]), packed[ExtraFields.primary_id.value]
+        else:
+            return dict(), None
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
-        keys_word = "keys"
-        keys = await self.collections[self._LOGS_TABLE].aggregate([
-            {"$match": {ExtraFields.primary_id.value: primary_id, field_name: {"$exists": True}}},
-            {"$project": {field_name: 1, "objs": {"$objectToArray": f"${field_name}"}}},
-            {"$project": {keys_word: "$objs.k"}}
-        ]).to_list(None)
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+        logs = await self.collections[self._LOGS_TABLE].find(
+            {"$and": [{ExtraFields.primary_id.value: primary_id}, {self._FIELD_COLUMN: field_name}]},
+            [self._KEY_COLUMN, self._VALUE_COLUMN],
+            sort=[(self._KEY_COLUMN, -1)],
+            limit=keys_limit if keys_limit is not None else 0
+        ).to_list(None)
+        return {log[self._KEY_COLUMN]: self.serializer.loads(log[self._VALUE_COLUMN]) for log in logs}
 
-        if len(keys) == 0:
-            return dict()
-        keys = sorted([int(key) for key in keys[0][keys_word]], reverse=True)
-        keys = keys[keys_offset:] if keys_limit is None else keys[keys_offset:keys_offset+keys_limit]
-
-        results = await self.collections[self._LOGS_TABLE].aggregate([
-            {"$match": {ExtraFields.primary_id.value: primary_id, field_name: {"$exists": True}}},
-            {"$project": {field_name: 1, "objs": {"$objectToArray": f"${field_name}"}}},
-            {"$unwind": "$objs"},
-            {"$project": {self._KEY_COLUMN: {"$toInt": "$objs.k"}, self._VALUE_COLUMN: f"$objs.v.{self._VALUE_COLUMN}"}},
-            {"$project": {self._KEY_COLUMN: 1, self._VALUE_COLUMN: 1, "included": {"$in": ["$key", keys]}}},
-            {"$match": {"included": True}}
-        ]).to_list(None)
-        return {result[self._KEY_COLUMN]: pickle.loads(result[self._VALUE_COLUMN]) for result in results}
-
-    async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
-        now = datetime.datetime.now()
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         await self.collections[self._CONTEXTS_TABLE].update_one(
             {ExtraFields.primary_id.value: primary_id},
-            [{"$set": {
-                self._PACKED_COLUMN: pickle.dumps(data),
+            {"$set": {
+                self._PACKED_COLUMN: self.serializer.dumps(data),
                 ExtraFields.storage_key.value: storage_key,
                 ExtraFields.primary_id.value: primary_id,
-                ExtraFields.active_ctx.value: True, 
-                ExtraFields.created_at.value: {"$cond": [{"$not": [f"${ExtraFields.created_at.value}"]}, now, f"${ExtraFields.created_at.value}"]},
-                ExtraFields.updated_at.value: now
-            }}],
+                ExtraFields.created_at.value: created,
+                ExtraFields.updated_at.value: updated
+            }},
             upsert=True
         )
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
-        now = datetime.datetime.now()
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         await self.collections[self._LOGS_TABLE].bulk_write([
-            UpdateOne({
-                ExtraFields.primary_id.value: primary_id
-            }, [{"$set": {
+            UpdateOne({"$and": [
+                {ExtraFields.primary_id.value: primary_id},
+                {self._FIELD_COLUMN: field},
+                {self._KEY_COLUMN: key},
+            ]}, {"$set": {
+                self._FIELD_COLUMN: field,
+                self._KEY_COLUMN: key,
+                self._VALUE_COLUMN: self.serializer.dumps(value),
                 ExtraFields.primary_id.value: primary_id,
-                f"{field}.{key}.{self._VALUE_COLUMN}": pickle.dumps(value),
-                f"{field}.{key}.{ExtraFields.created_at.value}": {"$cond": [{"$not": [f"${ExtraFields.created_at.value}"]}, now, f"${ExtraFields.created_at.value}"]},
-                f"{field}.{key}.{ExtraFields.updated_at.value}": now
-            }}], upsert=True)
+                ExtraFields.updated_at.value: updated
+            }}, upsert=True)
         for field, key, value in data])
