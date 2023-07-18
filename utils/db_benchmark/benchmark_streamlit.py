@@ -245,7 +245,7 @@ st.sidebar.divider()
 st.sidebar.checkbox("Compare dev and partial in view tab", value=True, key="partial_compare_checkbox")
 st.sidebar.checkbox("Percent comparison", value=True, key="percent_compare")
 
-add_tab, merge_tab, view_tab, compare_tab, mass_compare_tab = st.tabs(["Benchmark sets", "Merge", "View", "Compare", "Mass compare"])
+mass_compare_tab, add_tab, merge_tab, view_tab, compare_tab = st.tabs(["Mass compare", "Benchmark sets", "Merge", "View", "Compare"])
 
 
 ###############################################################################
@@ -380,13 +380,13 @@ with merge_tab:
         f"{benchmark['name']} ({benchmark['uuid']})": benchmark for benchmark in st.session_state["benchmarks"].values()
     }
 
-    subsets = {}
+    merge_tab_subsets = {}
 
     for set_name, benchmark_set in sets.items():
         set_subsets = get_subsets(benchmark_set)
 
         for set_subset in set_subsets:
-            subsets[f"{set_name} / {set_subset}"] = benchmark_set, set_subset
+            merge_tab_subsets[f"{set_name} / {set_subset}"] = benchmark_set, set_subset
 
     with st.empty():
         merge_container = st.container()
@@ -399,13 +399,15 @@ with merge_tab:
             "benchmarks": []
         }
         for subset in st.session_state["merged_subsets"]["added_rows"]:
-            current_set, set_subset = subsets[subset["subset"]]
+            current_set, set_subset = merge_tab_subsets[subset["subset"]]
 
             for potential_benchmark in current_set["benchmarks"]:
                 if potential_benchmark["name"].endswith(set_subset):
                     new_benchmark = deepcopy(potential_benchmark)
 
-                    new_benchmark["name"] = potential_benchmark["name"].removesuffix(set_subset) + subset["asname"]
+                    asname = subset.get("asname", set_subset)
+                    if asname is not None:
+                        new_benchmark["name"] = potential_benchmark["name"].removesuffix(set_subset) + asname
 
                     merged_benchmark_set["benchmarks"].append(new_benchmark)
 
@@ -427,10 +429,11 @@ with merge_tab:
                     "Benchmark subset",
                     help="Subset of a set to add",
                     width="large",
-                    options=subsets.keys()
+                    options=merge_tab_subsets.keys()
                 ),
                 "asname": st.column_config.TextColumn(
                     "Name of the subset in the resulting file",
+                    help="Leave None if name should be unchanged."
                 )
             }
         )
@@ -584,19 +587,40 @@ with compare_tab:
 ###############################################################################
 
 with mass_compare_tab:
-    select_box_column, compact_column = st.columns([3, 1])
+    select_box_column, compact_column, link_column = st.columns([6, 2, 1])
 
     sets = {
         f"{benchmark_set['name']} ({benchmark_set['uuid']})": benchmark_set
         for benchmark_set in st.session_state["benchmarks"].values()
     }
-    benchmark_set = select_box_column.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox")
+
+    set_indexes = {
+        benchmark_set['uuid']: index
+        for index, benchmark_set in enumerate(st.session_state["benchmarks"].values())
+    }
+
+    modes = ("all", "read", "write", "update", "read+update")
+
+    params = st.experimental_get_query_params()
+
+    queried_set = params.get("mass_compare_set", [])
+    set_index = 0
+    if len(queried_set) == 1:
+        set_index = set_indexes.get(queried_set[0], 0)
+    queried_mode = params.get("metric", [])
+    mode_index = 4
+    if len(queried_mode) == 1:
+        mode_index = int(queried_mode[0])
+
+    benchmark_set = select_box_column.selectbox("Benchmark set", sets.keys(), key="mass_compare_selectbox", index=set_index)
 
     if benchmark_set is None:
         st.warning("No benchmark sets available")
         st.stop()
 
-    selected_mode = compact_column.selectbox("Metrics to display", ("all", "read", "write", "update", "read+update"), index=4)
+    selected_mode = compact_column.selectbox("Metrics to display", modes, index=mode_index)
+
+    link_column.markdown(f"[Link](?mass_compare_set={benchmark_set.rsplit('(', maxsplit=1)[1].removesuffix(')')}&metric={modes.index(selected_mode)})")
 
     selected_set = sets[benchmark_set]
 
@@ -630,18 +654,6 @@ with mass_compare_tab:
                 add_metrics(st.container(), opposite_benchmark, last_benchmark)
                 last_benchmark = opposite_benchmark
     else:
-        configs = []
-        for benchmark_cluster in benchmark_clusters:
-            if not benchmark_cluster[0]["name"].endswith("-dev"):
-                st.warning("First benchmark is not from dev")
-                st.stop()
-            config_name = benchmark_cluster[0]["name"].removesuffix("-dev")
-            configs.append(config_name)
-
-        if not all([len(cluster) == len(benchmark_clusters[0]) for cluster in benchmark_clusters]):
-            st.warning("Benchmarks with the same configs have different lengths")
-            st.stop()
-
         subsets = get_subsets(selected_set)
 
         for benchmark_cluster in benchmark_clusters:
@@ -649,17 +661,29 @@ with mass_compare_tab:
                 st.warning("Benchmarks with the same configs have different set names")
                 st.stop()
 
+        if not all([len(cluster) == len(benchmark_clusters[0]) for cluster in benchmark_clusters]):
+            st.warning("Benchmarks with the same configs have different lengths")
+            st.stop()
+
+        configs = []
+        for benchmark_cluster in benchmark_clusters:
+            if not benchmark_cluster[0]["name"].endswith(subsets[0]):
+                st.warning(f"First benchmark is not from {subsets[0]}")
+                st.stop()
+            config_name = benchmark_cluster[0]["name"].removesuffix(subsets[0])
+            configs.append((config_name, benchmark_cluster[0]["benchmark_config"]))
+
         st.divider()
         _, *config_columns = st.columns(len(configs) + 1)
 
         for config, config_column in zip(configs, config_columns):
-            config_column.text(config)
+            config_column.markdown(config[0], help=str(config[1]))
 
         for index, subset in enumerate(subsets):
             st.divider()
             subset_column, *metric_columns = st.columns(len(configs) + 1)
 
-            subset_column.text(subset)
+            subset_column.markdown(subset)
 
             for benchmark_cluster, metric_column in zip(benchmark_clusters, metric_columns):
                 if index == 0:
