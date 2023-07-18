@@ -146,7 +146,7 @@ def add_metrics(container, value_benchmark, diff_benchmark=None, one_column=None
         "read": "Average read time (dialog_len ranges between from_dialog_len and to_dialog_len).",
         "update": "Average update time (dialog_len ranges between from_dialog_len and to_dialog_len).",
         "read+update": "Sum of average read and update times."
-                       " This metric is the time context_storage interface takes during each of the dialog turns."
+        " This metric is the time context_storage interface takes during each of the dialog turns.",
     }
 
     if not one_column:
@@ -286,10 +286,7 @@ with add_tab:
                     df_container.text(f"row {row}: changed {column} to '{column_value}'")
 
     edited_df = df_container.data_editor(
-        benchmark_list_df,
-        key="result_df",
-        disabled=("file", "uuid"),
-        on_change=edit_name_desc
+        benchmark_list_df, key="result_df", disabled=("file", "uuid"), on_change=edit_name_desc
     )
 
     delist_container = st.container()
@@ -305,8 +302,8 @@ with add_tab:
         ]
 
         files_to_delist = edited_df.loc[edited_df["delete"]]["file"]
-        st.session_state["benchmark_files"] = list(set(st.session_state["benchmark_files"]) - set(files_to_delist))
         for file in files_to_delist:
+            st.session_state["benchmark_files"].remove(file)
             del st.session_state["benchmarks"][file]
             delist_container.text(f"Delisted {file}")
 
