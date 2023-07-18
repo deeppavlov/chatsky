@@ -16,11 +16,10 @@ import pickle
 from typing import Any, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
-from dff.script import Context
-
 from .database import DBContextStorage, cast_key_to_string
 from .protocol import get_protocol_install_suggestion
-from .context_schema import ExtraFields
+from .context_schema import ContextSchema, ExtraFields
+from .serializer import DefaultSerializer
 
 try:
     from ydb import (
@@ -67,8 +66,9 @@ class YDBContextStorage(DBContextStorage):
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    def __init__(self, path: str, table_name_prefix: str = "dff_table", timeout=5):
-        DBContextStorage.__init__(self, path)
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), table_name_prefix: str = "dff_table", timeout=5):
+        DBContextStorage.__init__(self, path, context_schema, serializer)
+
         protocol, netloc, self.database, _, _ = urlsplit(path)
         self.endpoint = "{}://{}".format(protocol, netloc)
         if not ydb_available:
@@ -84,7 +84,7 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False
+                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.storage_key.value}=None
                 WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value};
                 """
 
@@ -102,7 +102,7 @@ class YDBContextStorage(DBContextStorage):
                 PRAGMA TablePathPrefix("{self.database}");
                 SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.active_ctx.value} == True;
+                WHERE {ExtraFields.storage_key.value} is not None;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
@@ -117,7 +117,7 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False;
+                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.storage_key.value}=None;
                 """
 
             await session.transaction(SerializableReadWrite()).execute(
@@ -135,7 +135,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
                 SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
+                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.storage_key.value} is not None;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
@@ -156,7 +156,7 @@ class YDBContextStorage(DBContextStorage):
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
                 WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
                 """
-            
+
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {f"${ExtraFields.storage_key.value}": storage_key},
@@ -336,7 +336,6 @@ async def _create_logs_table(pool, path, table_name):
             "/".join([path, table_name]),
             TableDescription()
             .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
-            .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
             .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
@@ -356,7 +355,6 @@ async def _create_contexts_table(pool, path, table_name):
             TableDescription()
             .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
             .with_column(Column(ExtraFields.storage_key.value, OptionalType(PrimitiveType.Utf8)))
-            .with_column(Column(ExtraFields.active_ctx.value, OptionalType(PrimitiveType.Bool)))
             .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
