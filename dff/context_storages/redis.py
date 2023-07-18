@@ -12,8 +12,8 @@ structures such as strings, hashes, lists, sets, and more.
 Additionally, Redis can be used as a cache, message broker, and database, making it a versatile
 and powerful choice for data storage and management.
 """
-import pickle
-from typing import Hashable, List, Dict, Union, Optional
+from datetime import datetime
+from typing import Any, Hashable, List, Dict, Tuple, Union, Optional
 
 try:
     from redis.asyncio import Redis
@@ -21,13 +21,13 @@ try:
     redis_available = True
 except ImportError:
     redis_available = False
-    Redis = None
 
 from dff.script import Context
 
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields
 from .protocol import get_protocol_install_suggestion
+from .serializer import DefaultSerializer
 
 
 class RedisContextStorage(DBContextStorage):
@@ -47,101 +47,63 @@ class RedisContextStorage(DBContextStorage):
     """
 
     _INDEX_TABLE = "index"
-    _DATA_TABLE = "data"
+    _CONTEXTS_TABLE = "contexts"
+    _LOGS_TABLE = "logs"
+    _GENERAL_INDEX = "general"
+    _LOGS_INDEX = "subindex"
 
-    def __init__(self, path: str, key_prefix: str = "dff_keys"):
-        DBContextStorage.__init__(self, path)
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), key_prefix: str = "dff_keys"):
+        DBContextStorage.__init__(self, path, context_schema, serializer)
+
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")
             raise ImportError("`redis` package is missing.\n" + install_suggestion)
         self._redis = Redis.from_url(self.full_path)
         self._index_key = f"{key_prefix}:{self._INDEX_TABLE}"
-        self._data_key = f"{key_prefix}:{self._DATA_TABLE}"
-
-    def set_context_schema(self, scheme: ContextSchema):
-        super().set_context_schema(scheme)
-        params = {
-            **self.context_schema.dict(),
-            "active_ctx": FrozenValueSchemaField(name=ExtraFields.active_ctx, on_write=SchemaFieldWritePolicy.IGNORE),
-        }
-        self.context_schema = ContextSchema(**params)
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
-        self.hash_storage[key] = hashes
-        return context
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
-        primary_id = await self._get_last_ctx(key)
-        value_hash = self.hash_storage.get(key)
-        primary_id = await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
-        await self._redis.hset(self._index_key, key, primary_id)
+        self._context_key = f"{key_prefix}:{self._CONTEXTS_TABLE}"
+        self._logs_key = f"{key_prefix}:{self._LOGS_TABLE}"
 
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        self.hash_storage[key] = None
-        if await self._get_last_ctx(key) is None:
-            raise KeyError(f"No entry for key {key}.")
-        await self._redis.hdel(self._index_key, key)
+        await self._redis.hdel(f"{self._index_key}:{self._GENERAL_INDEX}", key)
 
     @threadsafe_method
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
-        return await self._redis.hexists(self._index_key, key)
+        return await self._redis.hexists(f"{self._index_key}:{self._GENERAL_INDEX}", key)
 
     @threadsafe_method
     async def len_async(self) -> int:
-        return len(await self._redis.hkeys(self._index_key))
+        return len(await self._redis.hkeys(f"{self._index_key}:{self._GENERAL_INDEX}"))
 
     @threadsafe_method
     async def clear_async(self):
-        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        await self._redis.delete(self._index_key)
+        await self._redis.delete(f"{self._index_key}:{self._GENERAL_INDEX}")
 
-    async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        last_primary_id = await self._redis.hget(self._index_key, storage_key)
-        return last_primary_id.decode() if last_primary_id is not None else None
-
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
-        context = dict()
-        for key, value in subscript.items():
-            if isinstance(value, bool) and value:
-                raw_value = await self._redis.get(f"{self._data_key}:{primary_id}:{key}")
-                context[key] = pickle.loads(raw_value) if raw_value is not None else None
-            else:
-                value_fields = await self._redis.keys(f"{self._data_key}:{primary_id}:{key}:*")
-                value_field_names = [value_key.decode().split(":")[-1] for value_key in value_fields]
-                if isinstance(value, int):
-                    value_field_names = sorted([int(key) for key in value_field_names])[value:]
-                elif isinstance(value, list):
-                    value_field_names = [key for key in value_field_names if key in value]
-                elif value != ALL_ITEMS:
-                    value_field_names = list()
-                context[key] = dict()
-                for field in value_field_names:
-                    raw_value = await self._redis.get(f"{self._data_key}:{primary_id}:{key}:{field}")
-                    context[key][field] = pickle.loads(raw_value) if raw_value is not None else None
-        return context
-
-    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
-        if nested:
-            data, enforce = payload
-            for key, value in data.items():
-                current_data = await self._redis.get(f"{self._data_key}:{primary_id}:{field}:{key}")
-                if enforce or current_data is None:
-                    raw_data = pickle.dumps(value)
-                    await self._redis.set(f"{self._data_key}:{primary_id}:{field}:{key}", raw_data)
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
+        last_primary_id = await self._redis.hget(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key)
+        if last_primary_id is not None:
+            primary = last_primary_id.decode()
+            packed = await self._redis.get(f"{self._context_key}:{primary}")
+            return self.serializer.loads(packed), primary
         else:
-            for key, (data, enforce) in payload.items():
-                current_data = await self._redis.get(f"{self._data_key}:{primary_id}:{key}")
-                if enforce or current_data is None:
-                    raw_data = pickle.dumps(data)
-                    await self._redis.set(f"{self._data_key}:{primary_id}:{key}", raw_data)
+            return dict(), None
+
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+        all_keys = await self._redis.smembers(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field_name}")
+        keys_limit = keys_limit if keys_limit is not None else len(all_keys)
+        read_keys = sorted([int(key) for key in all_keys], reverse=True)[:keys_limit]
+        return {key: self.serializer.loads(await self._redis.get(f"{self._logs_key}:{primary_id}:{field_name}:{key}")) for key in read_keys}
+
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+        await self._redis.hset(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key, primary_id)
+        await self._redis.set(f"{self._context_key}:{primary_id}", self.serializer.dumps(data))
+        await self._redis.set(f"{self._context_key}:{primary_id}:{ExtraFields.created_at.value}", self.serializer.dumps(created))
+        await self._redis.set(f"{self._context_key}:{primary_id}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated))
+
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+        for field, key, value in data:
+            await self._redis.sadd(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field}", str(key))
+            await self._redis.set(f"{self._logs_key}:{primary_id}:{field}:{key}", self.serializer.dumps(value))
+            await self._redis.set(f"{self._logs_key}:{primary_id}:{field}:{key}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated))
