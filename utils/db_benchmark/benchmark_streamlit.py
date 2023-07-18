@@ -158,8 +158,8 @@ with add_tab:
         ]
 
         files_to_delist = edited_df.loc[edited_df["delete"]]["file"]
-        st.session_state["benchmark_files"] = list(set(st.session_state["benchmark_files"]) - set(files_to_delist))
         for file in files_to_delist:
+            st.session_state["benchmark_files"].remove(file)
             del st.session_state["benchmarks"][file]
             delist_container.text(f"Delisted {file}")
 
