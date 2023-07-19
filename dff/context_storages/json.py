@@ -6,27 +6,40 @@ This class is used to store and retrieve context data in a JSON. It allows the D
 store and retrieve context data.
 """
 import asyncio
-from typing import Hashable, Union, List, Dict, Optional
+from datetime import datetime
+from pathlib import Path
+from base64 import encodebytes, decodebytes
+from typing import Any, List, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Extra
 
-from .context_schema import ALL_ITEMS, ExtraFields
+from .serializer import DefaultSerializer
+from .context_schema import ContextSchema, ExtraFields
+from .database import DBContextStorage, threadsafe_method, cast_key_to_string
 
 try:
-    import aiofiles
-    import aiofiles.os
+    from aiofiles import open
+    from aiofiles.os import stat, makedirs
+    from aiofiles.ospath import isfile
 
     json_available = True
 except ImportError:
     json_available = False
-    aiofiles = None
-
-from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from dff.script import Context
 
 
 class SerializableStorage(BaseModel, extra=Extra.allow):
     pass
+
+
+class StringSerializer:
+    def __init__(self, serializer: Any):
+        self._serializer = serializer
+
+    def dumps(self, data: Any, _: Optional[Any] = None) -> str:
+        return encodebytes(self._serializer.dumps(data)).decode("utf-8")
+
+    def loads(self, data: str) -> Any:
+        return self._serializer.loads(decodebytes(data.encode("utf-8")))
 
 
 class JSONContextStorage(DBContextStorage):
@@ -36,100 +49,92 @@ class JSONContextStorage(DBContextStorage):
     :param path: Target file URI. Example: `json://file.json`.
     """
 
-    def __init__(self, path: str):
-        DBContextStorage.__init__(self, path)
-        asyncio.run(self._load())
+    _CONTEXTS_TABLE = "contexts"
+    _LOGS_TABLE = "logs"
+    _VALUE_COLUMN = "value"
+    _PACKED_COLUMN = "data"
 
-    @threadsafe_method
-    @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
-        await self._load()
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
-        self.hash_storage[key] = hashes
-        return context
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
-        primary_id = await self._get_last_ctx(key)
-        value_hash = self.hash_storage.get(key)
-        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
-        await self._save()
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
+        DBContextStorage.__init__(self, path, context_schema, StringSerializer(serializer))
+        file_path = Path(self.path)
+        self.context_table = [file_path.with_stem(f"{file_path.stem}_{self._CONTEXTS_TABLE}"), SerializableStorage()]
+        self.log_table = [file_path.with_stem(f"{file_path.stem}_{self._LOGS_TABLE}"), SerializableStorage()]
+        asyncio.run(asyncio.gather(self._load(self.context_table), self._load(self.log_table)))
 
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        self.hash_storage[key] = None
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        self.storage.__dict__[primary_id][ExtraFields.active_ctx.value] = False
-        await self._save()
+        for id in self.context_table[1].__dict__.keys():
+            if self.context_table[1].__dict__[id][ExtraFields.storage_key.value] == key:
+                self.context_table[1].__dict__[id][ExtraFields.active_ctx.value] = False
+        await self._save(self.context_table)
 
     @threadsafe_method
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
-        await self._load()
+        self.context_table = await self._load(self.context_table)
         return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        await self._load()
-        return len([v for v in self.storage.__dict__.values() if v[ExtraFields.active_ctx.value]])
+        self.context_table = await self._load(self.context_table)
+        return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].__dict__.values() if v[ExtraFields.active_ctx.value]})
 
     @threadsafe_method
     async def clear_async(self):
-        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        for key in self.storage.__dict__.keys():
-            self.storage.__dict__[key][ExtraFields.active_ctx.value] = False
-        await self._save()
+        for key in self.context_table[1].__dict__.keys():
+            self.context_table[1].__dict__[key][ExtraFields.active_ctx.value] = False
+        await self._save(self.context_table)
 
-    async def _save(self):
-        async with aiofiles.open(self.path, "w+", encoding="utf-8") as file_stream:
-            await file_stream.write(self.storage.json())
+    async def _save(self, table: Tuple[Path, SerializableStorage]):
+        await makedirs(table[0].parent, exist_ok=True)
+        async with open(table[0], "w+", encoding="utf-8") as file_stream:
+            await file_stream.write(table[1].json())
 
-    async def _load(self):
-        if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
-            self.storage = SerializableStorage()
-            await self._save()
+    async def _load(self, table: Tuple[Path, SerializableStorage]) -> Tuple[Path, SerializableStorage]:
+        if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
+            storage = SerializableStorage()
+            await self._save((table[0], storage))
         else:
-            async with aiofiles.open(self.path, "r", encoding="utf-8") as file_stream:
-                self.storage = SerializableStorage.parse_raw(await file_stream.read())
+            async with open(table[0], "r", encoding="utf-8") as file_stream:
+                storage = SerializableStorage.parse_raw(await file_stream.read())
+        return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        for key, value in self.storage.__dict__.items():
+        timed = sorted(self.context_table[1].__dict__.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)
+        for key, value in timed:
             if value[ExtraFields.storage_key.value] == storage_key and value[ExtraFields.active_ctx.value]:
                 return key
         return None
 
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
-        context = dict()
-        for key, value in subscript.items():
-            source = self.storage.__dict__[primary_id][key]
-            if isinstance(value, bool) and value:
-                context[key] = source
-            else:
-                if isinstance(value, int):
-                    read_slice = sorted(source.keys())[value:]
-                    context[key] = {k: v for k, v in source.items() if k in read_slice}
-                elif isinstance(value, list):
-                    context[key] = {k: v for k, v in source.items() if k in value}
-                elif value == ALL_ITEMS:
-                    context[key] = source
-        return context
-
-    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
-        destination = self.storage.__dict__.setdefault(primary_id, dict())
-        if nested:
-            data, enforce = payload
-            nested_destination = destination.setdefault(field, dict())
-            for key, value in data.items():
-                if enforce or key not in nested_destination:
-                    nested_destination[key] = value
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
+        self.context_table = await self._load(self.context_table)
+        primary_id = await self._get_last_ctx(storage_key)
+        if primary_id is not None:
+            return self.serializer.loads(self.context_table[1].__dict__[primary_id][self._PACKED_COLUMN]), primary_id
         else:
-            for key, (data, enforce) in payload.items():
-                if enforce or key not in destination:
-                    destination[key] = data
+            return dict(), None
+
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+        self.log_table = await self._load(self.log_table)
+        key_set = [int(k) for k in sorted(self.log_table[1].__dict__[primary_id][field_name].keys(), reverse=True)]
+        keys = key_set if keys_limit is None else key_set[:keys_limit]
+        return {k: self.serializer.loads(self.log_table[1].__dict__[primary_id][field_name][str(k)][self._VALUE_COLUMN]) for k in keys}
+
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+        self.context_table[1].__dict__[primary_id] = {
+            ExtraFields.storage_key.value: storage_key,
+            ExtraFields.active_ctx.value: True,
+            self._PACKED_COLUMN: self.serializer.dumps(data),
+            ExtraFields.created_at.value: created,
+            ExtraFields.updated_at.value: updated,
+        }
+        await self._save(self.context_table)
+
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+        for field, key, value in data:
+            self.log_table[1].__dict__.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
+                self._VALUE_COLUMN: self.serializer.dumps(value),
+                ExtraFields.updated_at.value: updated,
+            })
+        await self._save(self.log_table)

@@ -13,7 +13,7 @@ Additionally, Redis can be used as a cache, message broker, and database, making
 and powerful choice for data storage and management.
 """
 from datetime import datetime
-from typing import Any, Hashable, List, Dict, Tuple, Union, Optional
+from typing import Any, List, Dict, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -22,10 +22,8 @@ try:
 except ImportError:
     redis_available = False
 
-from dff.script import Context
-
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from .context_schema import ALL_ITEMS, ContextSchema, ExtraFields
+from .context_schema import ContextSchema, ExtraFields
 from .protocol import get_protocol_install_suggestion
 from .serializer import DefaultSerializer
 
