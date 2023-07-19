@@ -83,7 +83,7 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.storage_key.value}=None
+                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False
                 WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value};
                 """
 
@@ -101,7 +101,7 @@ class YDBContextStorage(DBContextStorage):
                 PRAGMA TablePathPrefix("{self.database}");
                 SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} is not None;
+                WHERE {ExtraFields.active_ctx.value} == True;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
@@ -116,7 +116,7 @@ class YDBContextStorage(DBContextStorage):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.storage_key.value}=None;
+                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False;
                 """
 
             await session.transaction(SerializableReadWrite()).execute(
@@ -134,7 +134,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
                 SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.storage_key.value} is not None;
+                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
@@ -157,7 +157,7 @@ class YDBContextStorage(DBContextStorage):
                 ORDER BY {ExtraFields.updated_at.value} DESC
                 LIMIT 1;
                 """
-
+            
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {f"${ExtraFields.storage_key.value}": storage_key},
