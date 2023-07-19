@@ -18,14 +18,14 @@ def get_cases(
 ):
     benchmark_cases = []
     for config_name, config in benchmark_configs.items():
-        # benchmark_cases.append(
-        #     BenchmarkCase(
-        #         name=config_name + "-dev",
-        #         db_factory=DBFactory(uri=db_uri, factory_module="dff.context_storages_old"),
-        #         benchmark_config=config,
-        #         description=description,
-        #     )
-        # )
+        benchmark_cases.append(
+            BenchmarkCase(
+                name=config_name + "-dev",
+                db_factory=DBFactory(uri=db_uri, factory_module="dff.context_storages_old"),
+                benchmark_config=config,
+                description=description,
+            )
+        )
         benchmark_cases.append(
             BenchmarkCase(
                 name=config_name + "-partial",
@@ -65,15 +65,15 @@ sqlite_file.touch(exist_ok=True)
 sqlite_separator = "///" if system() == "Windows" else "////"
 
 dbs = {
-    # "JSON": "json://dbs/json.json",
-    # "Pickle": "pickle://dbs/pickle.pkl",
-    # "Shelve": "shelve://dbs/shelve",
+    "JSON": "json://dbs/json.json",
+    "Pickle": "pickle://dbs/pickle.pkl",
+    "Shelve": "shelve://dbs/shelve",
     "PostgreSQL": "postgresql+asyncpg://postgres:pass@localhost:5432/test",
-    # "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
-    # "Redis": "redis://:pass@localhost:6379/0",
+    "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
+    "Redis": "redis://:pass@localhost:6379/0",
     "MySQL": "mysql+asyncmy://root:pass@localhost:3307/test",
     "SQLite": f"sqlite+aiosqlite:{sqlite_separator}{sqlite_file.absolute()}",
-    # "YDB": "grpc://localhost:2136/local",
+    "YDB": "grpc://localhost:2136/local",
 }
 
 # benchmark
