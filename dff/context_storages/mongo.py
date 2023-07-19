@@ -78,13 +78,13 @@ class MongoContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.storage_key.value: None}})
+        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}})
 
     @threadsafe_method
     async def len_async(self) -> int:
         count_key = "unique_count"
         unique = await self.collections[self._CONTEXTS_TABLE].aggregate([
-            {"$match": {ExtraFields.storage_key.value: {"$ne": None}}},
+            {"$match": {ExtraFields.active_ctx.value: True}},
             {"$group": {"_id": None, "unique_keys": {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
             {"$project": {count_key: {"$size": "$unique_keys"}}},
         ]).to_list(1)
@@ -92,15 +92,15 @@ class MongoContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self):
-        await self.collections[self._CONTEXTS_TABLE].update_many({}, {"$set": {ExtraFields.storage_key.value: None}})
+        await self.collections[self._CONTEXTS_TABLE].update_many({}, {"$set": {ExtraFields.active_ctx.value: False}})
 
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
-        return await self.collections[self._CONTEXTS_TABLE].count_documents({"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.storage_key.value: {"$ne": None}}]}) > 0
+        return await self.collections[self._CONTEXTS_TABLE].count_documents({"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.active_ctx.value: True}]}) > 0
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         packed = await self.collections[self._CONTEXTS_TABLE].find_one(
-            {"$and": [{ExtraFields.storage_key.value: storage_key}, {ExtraFields.storage_key.value: {"$ne": None}}]},
+            {"$and": [{ExtraFields.storage_key.value: storage_key}, {ExtraFields.active_ctx.value: True}]},
             [self._PACKED_COLUMN, ExtraFields.primary_id.value],
             sort=[(ExtraFields.updated_at.value, -1)]
         )
@@ -122,6 +122,7 @@ class MongoContextStorage(DBContextStorage):
         await self.collections[self._CONTEXTS_TABLE].update_one(
             {ExtraFields.primary_id.value: primary_id},
             {"$set": {
+                ExtraFields.active_ctx.value: True,
                 self._PACKED_COLUMN: self.serializer.dumps(data),
                 ExtraFields.storage_key.value: storage_key,
                 ExtraFields.primary_id.value: primary_id,

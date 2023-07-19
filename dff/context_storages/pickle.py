@@ -12,21 +12,22 @@ different languages or platforms because it's not cross-language compatible.
 """
 import asyncio
 import pickle
-from typing import Hashable, Union, List, Dict, Optional
+from datetime import datetime
+from pathlib import Path
+from typing import Any, Tuple, List, Dict, Optional
 
-from .context_schema import ALL_ITEMS, ExtraFields
+from .context_schema import ContextSchema, ExtraFields
+from .database import DBContextStorage, threadsafe_method, cast_key_to_string
+from .serializer import DefaultSerializer
 
 try:
-    import aiofiles
-    import aiofiles.os
+    from aiofiles import open
+    from aiofiles.os import stat, makedirs
+    from aiofiles.ospath import isfile
 
     pickle_available = True
 except ImportError:
     pickle_available = False
-    aiofiles = None
-
-from .database import DBContextStorage, threadsafe_method, cast_key_to_string
-from dff.script import Context
 
 
 class PickleContextStorage(DBContextStorage):
@@ -36,101 +37,93 @@ class PickleContextStorage(DBContextStorage):
     :param path: Target file URI. Example: 'pickle://file.pkl'.
     """
 
-    def __init__(self, path: str):
-        DBContextStorage.__init__(self, path)
-        self.storage = dict()
-        asyncio.run(self._load())
+    _CONTEXTS_TABLE = "contexts"
+    _LOGS_TABLE = "logs"
+    _VALUE_COLUMN = "value"
+    _PACKED_COLUMN = "data"
 
-    @threadsafe_method
-    @cast_key_to_string()
-    async def get_item_async(self, key: str) -> Context:
-        await self._load()
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        context, hashes = await self.context_schema.read_context(self._read_ctx, key, primary_id)
-        self.hash_storage[key] = hashes
-        return context
-
-    @threadsafe_method
-    @cast_key_to_string()
-    async def set_item_async(self, key: str, value: Context):
-        primary_id = await self._get_last_ctx(key)
-        value_hash = self.hash_storage.get(key)
-        await self.context_schema.write_context(value, value_hash, self._write_ctx_val, key, primary_id)
-        await self._save()
+    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
+        DBContextStorage.__init__(self, path, context_schema, serializer)
+        file_path = Path(self.path)
+        self.context_table = [file_path.with_stem(f"{file_path.stem}_{self._CONTEXTS_TABLE}"), dict()]
+        self.log_table = [file_path.with_stem(f"{file_path.stem}_{self._LOGS_TABLE}"), dict()]
+        asyncio.run(asyncio.gather(self._load(self.context_table), self._load(self.log_table)))
 
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        self.hash_storage[key] = None
-        primary_id = await self._get_last_ctx(key)
-        if primary_id is None:
-            raise KeyError(f"No entry for key {key}.")
-        self.storage[primary_id][ExtraFields.active_ctx.value] = False
-        await self._save()
+        for id in self.context_table[1].keys():
+            if self.context_table[1][id][ExtraFields.storage_key.value] == key:
+                self.context_table[1][id][ExtraFields.active_ctx.value] = False
+        await self._save(self.context_table)
 
     @threadsafe_method
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
-        await self._load()
+        self.context_table = await self._load(self.context_table)
         return await self._get_last_ctx(key) is not None
 
     @threadsafe_method
     async def len_async(self) -> int:
-        await self._load()
-        return len([v for v in self.storage.values() if v[ExtraFields.active_ctx.value]])
+        self.context_table = await self._load(self.context_table)
+        return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].values() if v[ExtraFields.active_ctx.value]})
 
     @threadsafe_method
     async def clear_async(self):
-        self.hash_storage = {key: None for key, _ in self.hash_storage.items()}
-        for key in self.storage.keys():
-            self.storage[key][ExtraFields.active_ctx.value] = False
-        await self._save()
+        for key in self.context_table[1].keys():
+            self.context_table[1][key][ExtraFields.active_ctx.value] = False
+        await self._save(self.context_table)
 
-    async def _save(self):
-        async with aiofiles.open(self.path, "wb+") as file:
-            await file.write(pickle.dumps(self.storage))
+    async def _save(self, table: Tuple[Path, Dict]):
+        await makedirs(table[0].parent, exist_ok=True)
+        async with open(table[0], "wb+") as file:
+            await file.write(pickle.dumps(table[1]))
 
-    async def _load(self):
-        if not await aiofiles.os.path.isfile(self.path) or (await aiofiles.os.stat(self.path)).st_size == 0:
-            self.storage = dict()
-            await self._save()
+    async def _load(self, table: Tuple[Path, Dict]) -> Tuple[Path, Dict]:
+        if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
+            storage = dict()
+            await self._save((table[0], storage))
         else:
-            async with aiofiles.open(self.path, "rb") as file:
-                self.storage = pickle.loads(await file.read())
+            async with open(table[0], "rb") as file:
+                storage = pickle.loads(await file.read())
+        return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        for key, value in self.storage.items():
+        timed = sorted(self.context_table[1].items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)
+        for key, value in timed:
             if value[ExtraFields.storage_key.value] == storage_key and value[ExtraFields.active_ctx.value]:
                 return key
         return None
 
-    async def _read_ctx(self, subscript: Dict[str, Union[bool, int, List[Hashable]]], primary_id: str) -> Dict:
-        context = dict()
-        for key, value in subscript.items():
-            source = self.storage[primary_id][key]
-            if isinstance(value, bool) and value:
-                context[key] = source
-            else:
-                if isinstance(value, int):
-                    read_slice = sorted(source.keys())[value:]
-                    context[key] = {k: v for k, v in source.items() if k in read_slice}
-                elif isinstance(value, list):
-                    context[key] = {k: v for k, v in source.items() if k in value}
-                elif value == ALL_ITEMS:
-                    context[key] = source
-        return context
-
-    async def _write_ctx_val(self, field: Optional[str], payload: Dict, nested: bool, primary_id: str):
-        destination = self.storage.setdefault(primary_id, dict())
-        if nested:
-            data, enforce = payload
-            nested_destination = destination.setdefault(field, dict())
-            for key, value in data.items():
-                if enforce or key not in nested_destination:
-                    nested_destination[key] = value
+    async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
+        self.context_table = await self._load(self.context_table)
+        primary_id = await self._get_last_ctx(storage_key)
+        if primary_id is not None:
+            return self.serializer.loads(self.context_table[1][primary_id][self._PACKED_COLUMN]), primary_id
         else:
-            for key, (data, enforce) in payload.items():
-                if enforce or key not in destination:
-                    destination[key] = data
+            return dict(), None
+
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
+        self.log_table = await self._load(self.log_table)
+        key_set = [k for k in sorted(self.log_table[1][primary_id][field_name].keys(), reverse=True)]
+        keys = key_set if keys_limit is None else key_set[:keys_limit]
+        return {k: self.serializer.loads(self.log_table[1][primary_id][field_name][k][self._VALUE_COLUMN]) for k in keys}
+
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+        self.context_table[1][primary_id] = {
+            ExtraFields.storage_key.value: storage_key,
+            ExtraFields.active_ctx.value: True,
+            self._PACKED_COLUMN: self.serializer.dumps(data),
+            ExtraFields.created_at.value: created,
+            ExtraFields.updated_at.value: updated,
+        }
+        await self._save(self.context_table)
+
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+        for field, key, value in data:
+            self.log_table[1].setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
+                self._VALUE_COLUMN: self.serializer.dumps(value),
+                ExtraFields.updated_at.value: updated,
+            })
+        await self._save(self.log_table)
+
