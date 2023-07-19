@@ -76,21 +76,21 @@ def test_dict(testing_context, context_id):
     run_all_functions(db, testing_context, context_id)
 
 
-def _test_shelve(testing_file, testing_context, context_id):
+def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
     run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_shelve(db))
 
 
 @pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
-def _test_json(testing_file, testing_context, context_id):
+def test_json(testing_file, testing_context, context_id):
     db = context_storage_factory(f"json://{testing_file}")
     run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_json(db))
 
 
 @pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
-def _test_pickle(testing_file, testing_context, context_id):
+def test_pickle(testing_file, testing_context, context_id):
     db = context_storage_factory(f"pickle://{testing_file}")
     run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_pickle(db))
@@ -115,7 +115,7 @@ def _test_mongo(testing_context, context_id):
 
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
-def _test_redis(testing_context, context_id):
+def test_redis(testing_context, context_id):
     db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
     run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_redis(db))

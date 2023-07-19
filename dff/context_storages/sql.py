@@ -35,6 +35,7 @@ try:
         DateTime,
         Integer,
         Index,
+        Boolean,
         Insert,
         inspect,
         select,
@@ -186,7 +187,8 @@ class SQLContextStorage(DBContextStorage):
             f"{table_name_prefix}_{self._CONTEXTS_TABLE}",
             MetaData(),
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
-            Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=True),
+            Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
+            Column(ExtraFields.active_ctx.value, Boolean(), index=True, nullable=False, default=True),
             Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
             Column(ExtraFields.created_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
             Column(ExtraFields.updated_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
@@ -209,14 +211,14 @@ class SQLContextStorage(DBContextStorage):
     async def del_item_async(self, key: str):
         stmt = update(self.tables[self._CONTEXTS_TABLE])
         stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
-        stmt = stmt.values({ExtraFields.storage_key.value: None})
+        stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin("DELETE") as conn:
             await conn.execute(stmt)
 
     @threadsafe_method
     async def len_async(self) -> int:
         subq = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
-        subq = subq.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None)).distinct()
+        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
         stmt = select(func.count()).select_from(subq.subquery())
         async with self.engine.begin("LENGTH") as conn:
             result = (await conn.execute(stmt)).fetchone()
@@ -227,7 +229,7 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def clear_async(self):
         stmt = update(self.tables[self._CONTEXTS_TABLE])
-        stmt = stmt.values({ExtraFields.storage_key.value: None})
+        stmt = stmt.values({ExtraFields.active_ctx.value: False})
         async with self.engine.begin("CLEAR") as conn:
             await conn.execute(stmt)
 
@@ -236,8 +238,7 @@ class SQLContextStorage(DBContextStorage):
     async def contains_async(self, key: str) -> bool:
         subq = select(self.tables[self._CONTEXTS_TABLE])
         subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
-        subq = subq.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None))
-        subq = subq.order_by(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.updated_at.value].desc()).limit(1)
+        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value])
         stmt = select(func.count()).select_from(subq.subquery())
         async with self.engine.begin("CONTAINS") as conn:
             result = (await conn.execute(stmt)).fetchone()
@@ -267,7 +268,7 @@ class SQLContextStorage(DBContextStorage):
         async with self.engine.begin("READ_PAC") as conn:
             stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value], self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN])
             stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == storage_key)
-            stmt = stmt.filter(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value].isnot(None))
+            stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value])
             stmt = stmt.order_by(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.updated_at.value].desc()).limit(1)
             result = (await conn.execute(stmt)).fetchone()
             if result is not None:
@@ -294,7 +295,7 @@ class SQLContextStorage(DBContextStorage):
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
                 {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id, ExtraFields.created_at.value: created, ExtraFields.updated_at.value: updated}
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value, ExtraFields.updated_at.value], [ExtraFields.primary_id.value])
+            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value, ExtraFields.updated_at.value, ExtraFields.active_ctx.value], [ExtraFields.primary_id.value])
             await conn.execute(update_stmt)
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):

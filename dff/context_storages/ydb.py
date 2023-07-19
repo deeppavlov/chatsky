@@ -11,8 +11,7 @@ take advantage of the scalability and high-availability features provided by the
 """
 import asyncio
 import datetime
-import os
-import pickle
+from os.path import join
 from typing import Any, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
@@ -152,9 +151,11 @@ class YDBContextStorage(DBContextStorage):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT {ExtraFields.primary_id.value}, {self._PACKED_COLUMN}
+                SELECT {ExtraFields.primary_id.value}, {self._PACKED_COLUMN}, {ExtraFields.updated_at.value}
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
+                WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
+                ORDER BY {ExtraFields.updated_at.value} DESC
+                LIMIT 1;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
@@ -164,13 +165,13 @@ class YDBContextStorage(DBContextStorage):
             )
 
             if len(result_sets[0].rows) > 0:
-                return pickle.loads(result_sets[0].rows[0][self._PACKED_COLUMN]), result_sets[0].rows[0][ExtraFields.primary_id.value]
+                return self.serializer.loads(result_sets[0].rows[0][self._PACKED_COLUMN]), result_sets[0].rows[0][ExtraFields.primary_id.value]
             else:
                 return dict(), None
 
         return await self.pool.retry_operation(callee)
 
-    async def _read_log_ctx(self, keys_limit: Optional[int], keys_offset: int, field_name: str, primary_id: str) -> Dict:
+    async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         async def callee(session):
             limit = 1001 if keys_limit is None else keys_limit
 
@@ -185,7 +186,7 @@ class YDBContextStorage(DBContextStorage):
                 LIMIT {limit}
                 """
 
-            final_offset = keys_offset
+            final_offset = 0
             result_sets = None
 
             result_dict = dict()
@@ -199,7 +200,7 @@ class YDBContextStorage(DBContextStorage):
 
                 if len(result_sets[0].rows) > 0:
                     for key, value in {row[self._KEY_COLUMN]: row[self._VALUE_COLUMN] for row in result_sets[0].rows}.items():
-                        result_dict[key] = pickle.loads(value)
+                        result_dict[key] = self.serializer.loads(value)
 
                 final_offset += 1000
 
@@ -208,81 +209,45 @@ class YDBContextStorage(DBContextStorage):
         return await self.pool.retry_operation(callee)
 
 
-    async def _write_pac_ctx(self, data: Dict, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         async def callee(session):
-            request = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                SELECT {ExtraFields.created_at.value}
-                FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
-            """
-
-            existing_context = await session.transaction(SerializableReadWrite()).execute(
-                await session.prepare(request),
-                {f"${ExtraFields.primary_id.value}": primary_id},
-                commit_tx=True,
-            )
-
-            if len(existing_context[0].rows) > 0:
-                created_at = existing_context[0].rows[0][ExtraFields.created_at.value]
-            else:
-                created_at = datetime.datetime.now()
-
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${self._PACKED_COLUMN} AS String;
                 DECLARE ${ExtraFields.primary_id.value} AS Utf8;
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
                 DECLARE ${ExtraFields.created_at.value} AS Timestamp;
+                DECLARE ${ExtraFields.updated_at.value} AS Timestamp;
                 UPSERT INTO {self.table_prefix}_{self._CONTEXTS_TABLE} ({self._PACKED_COLUMN}, {ExtraFields.storage_key.value}, {ExtraFields.primary_id.value}, {ExtraFields.active_ctx.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
-                VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.primary_id.value}, True, ${ExtraFields.created_at.value}, CurrentUtcDatetime());
+                VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.primary_id.value}, True, ${ExtraFields.created_at.value}, ${ExtraFields.updated_at.value});
                 """
 
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {
-                    f"${self._PACKED_COLUMN}": pickle.dumps(data),
+                    f"${self._PACKED_COLUMN}": self.serializer.dumps(data),
                     f"${ExtraFields.primary_id.value}": primary_id,
                     f"${ExtraFields.storage_key.value}": storage_key,
-                    f"${ExtraFields.created_at.value}": created_at,
+                    f"${ExtraFields.created_at.value}": created,
+                    f"${ExtraFields.updated_at.value}": updated,
                 },
                 commit_tx=True,
             )
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Any]], primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         async def callee(session):
             for field, key, value in data:
-                request = f"""
-                    PRAGMA TablePathPrefix("{self.database}");
-                    DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                    SELECT {ExtraFields.created_at.value}
-                    FROM {self.table_prefix}_{self._LOGS_TABLE}
-                    WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value};
-                """
-
-                existing_context = await session.transaction(SerializableReadWrite()).execute(
-                    await session.prepare(request),
-                    {f"${ExtraFields.primary_id.value}": primary_id},
-                    commit_tx=True,
-                )
-
-                if len(existing_context[0].rows) > 0:
-                    created_at = existing_context[0].rows[0][ExtraFields.created_at.value]
-                else:
-                    created_at = datetime.datetime.now()
-
                 query = f"""
                     PRAGMA TablePathPrefix("{self.database}");
                     DECLARE ${self._FIELD_COLUMN} AS Utf8;
                     DECLARE ${self._KEY_COLUMN} AS Uint64;
                     DECLARE ${self._VALUE_COLUMN} AS String;
                     DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                    DECLARE ${ExtraFields.created_at.value} AS Timestamp;
-                    UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.primary_id.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
-                    VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.primary_id.value}, ${ExtraFields.created_at.value}, CurrentUtcDatetime());
+                    DECLARE ${ExtraFields.updated_at.value} AS Timestamp;
+                    UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.primary_id.value}, {ExtraFields.updated_at.value})
+                    VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.primary_id.value}, ${ExtraFields.updated_at.value});
                     """
 
                 await session.transaction(SerializableReadWrite()).execute(
@@ -290,9 +255,9 @@ class YDBContextStorage(DBContextStorage):
                     {
                         f"${self._FIELD_COLUMN}": field,
                         f"${self._KEY_COLUMN}": key,
-                        f"${self._VALUE_COLUMN}": pickle.dumps(value),
+                        f"${self._VALUE_COLUMN}": self.serializer.dumps(value),
                         f"${ExtraFields.primary_id.value}": primary_id,
-                        f"${ExtraFields.created_at.value}": created_at,
+                        f"${ExtraFields.updated_at.value}": updated,
                     },
                     commit_tx=True,
                 )
@@ -321,7 +286,7 @@ async def _init_drive(timeout: int, endpoint: str, database: str, table_name_pre
 
 async def _does_table_exist(pool, path, table_name) -> bool:
     async def callee(session):
-        await session.describe_table(os.path.join(path, table_name))
+        await session.describe_table(join(path, table_name))
 
     try:
         await pool.retry_operation(callee)
