@@ -295,24 +295,6 @@ async def _does_table_exist(pool, path, table_name) -> bool:
         return False
 
 
-async def _create_logs_table(pool, path, table_name):
-    async def callee(session):
-        await session.create_table(
-            "/".join([path, table_name]),
-            TableDescription()
-            .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
-            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
-            .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
-            .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
-            .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))
-            .with_index(TableIndex("logs_primary_id_index").with_index_columns(ExtraFields.primary_id.value))
-            .with_index(TableIndex("logs_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
-            .with_primary_keys(ExtraFields.primary_id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN),
-        )
-
-    return await pool.retry_operation(callee)
-
-
 async def _create_contexts_table(pool, path, table_name):
     async def callee(session):
         await session.create_table(
@@ -327,6 +309,24 @@ async def _create_contexts_table(pool, path, table_name):
             .with_index(TableIndex("context_key_index").with_index_columns(ExtraFields.storage_key.value))
             .with_index(TableIndex("context_active_index").with_index_columns(ExtraFields.active_ctx.value))
             .with_primary_key(ExtraFields.primary_id.value)
+        )
+
+    return await pool.retry_operation(callee)
+
+
+async def _create_logs_table(pool, path, table_name):
+    async def callee(session):
+        await session.create_table(
+            "/".join([path, table_name]),
+            TableDescription()
+            .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
+            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
+            .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
+            .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
+            .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))
+            .with_index(TableIndex("logs_primary_id_index").with_index_columns(ExtraFields.primary_id.value))
+            .with_index(TableIndex("logs_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
+            .with_primary_keys(ExtraFields.primary_id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN),
         )
 
     return await pool.retry_operation(callee)
