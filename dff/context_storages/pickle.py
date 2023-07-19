@@ -45,8 +45,10 @@ class PickleContextStorage(DBContextStorage):
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         file_path = Path(self.path)
-        self.context_table = [file_path.with_stem(f"{file_path.stem}_{self._CONTEXTS_TABLE}"), dict()]
-        self.log_table = [file_path.with_stem(f"{file_path.stem}_{self._LOGS_TABLE}"), dict()]
+        context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
+        self.context_table = [context_file, dict()]
+        log_file = file_path.with_name(f"{file_path.stem}_{self._LOGS_TABLE}{file_path.suffix}")
+        self.log_table = [log_file, dict()]
         asyncio.run(asyncio.gather(self._load(self.context_table), self._load(self.log_table)))
 
     @threadsafe_method
