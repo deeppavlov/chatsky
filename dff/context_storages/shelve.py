@@ -37,8 +37,10 @@ class ShelveContextStorage(DBContextStorage):
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         file_path = Path(self.path)
-        self.context_db = DbfilenameShelf(str(file_path.with_stem(f"{file_path.stem}_{self._CONTEXTS_TABLE}").resolve()), writeback=True)
-        self.log_db = DbfilenameShelf(str(file_path.with_stem(f"{file_path.stem}_{self._LOGS_TABLE}").resolve()), writeback=True)
+        context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
+        self.context_db = DbfilenameShelf(str(context_file.resolve()), writeback=True)
+        log_file = file_path.with_name(f"{file_path.stem}_{self._LOGS_TABLE}{file_path.suffix}")
+        self.log_db = DbfilenameShelf(str(log_file.resolve()), writeback=True)
 
     @cast_key_to_string()
     async def del_item_async(self, key: str):
