@@ -302,6 +302,7 @@ async def _create_contexts_table(pool, path, table_name):
             TableDescription()
             .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
             .with_column(Column(ExtraFields.storage_key.value, OptionalType(PrimitiveType.Utf8)))
+            .with_column(Column(ExtraFields.active_ctx.value, OptionalType(PrimitiveType.Bool)))
             .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
             .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
