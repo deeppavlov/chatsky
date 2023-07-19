@@ -23,7 +23,7 @@ from dff.script import Context
 
 
 class SerializableStorage(BaseModel, extra=Extra.allow):
-    @root_validator
+    @root_validator(allow_reuse=True)
     def validate_any(cls, vals):
         for key, value in vals.items():
             vals[key] = Context.cast(value)
