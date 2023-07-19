@@ -16,6 +16,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
 from dff.stats import default_extractors
+from dff.utils.testing import is_interactive_mode
 
 # %% [markdown]
 """
@@ -89,4 +90,5 @@ pipeline = Pipeline.from_dict(
 
 
 if __name__ == "__main__":
-    pipeline.run()
+    if is_interactive_mode():
+        pipeline.run()

@@ -26,10 +26,12 @@ logger.setLevel(logging.INFO)
 
 DFF_DIR = Path(__file__).absolute().parent.parent
 """
+:meta hide-value:
 Root directory of the local `dff` installation.
 """
 DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 """
+:meta hide-value:
 Local path to superset dashboard files to import.
 """
 DASHBOARD_SLUG = "dff-stats"
@@ -49,6 +51,7 @@ TYPE_MAPPING_CH = {
     "DATETIME": "Nullable(DateTime)",
 }
 """
+:meta hide-value:
 Mapping of standard sql column types to Clickhouse native types.
 """
 
@@ -128,6 +131,7 @@ SQL_STATEMENT_MAPPING = {
     "dff_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
 }
 """
+:meta hide-value:
 Select statements for dashboard configuration with names and types represented as placeholders.
 The placeholder system makes queries database agnostic, required values are set during the import phase.
 """
@@ -191,12 +195,16 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
 
     :param parsed_args: Command line arguments produced by `argparse`.
     """
-    outfile_name = parsed_args.outfile if hasattr(parsed_args, "outfile") else "temp.zip"
+    if hasattr(parsed_args, "outfile") and parsed_args.outfile:
+        outfile_name = parsed_args.outfile
+    else:
+        outfile_name = "temp.zip"
+    print(outfile_name)
 
     file_conf = OmegaConf.load(parsed_args.file)
     sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items()]
     cmd_conf = OmegaConf.from_cli()
-    cli_conf = OmegaConf.merge(file_conf, cmd_conf)
+    cli_conf = OmegaConf.merge(cmd_conf, file_conf)
     OmegaConf.resolve(cli_conf)
 
     if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":

@@ -15,6 +15,7 @@ from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
 from dff.utils.testing.toy_script import TOY_SCRIPT
 from dff.stats import OtelInstrumentor
+from dff.utils.testing import is_interactive_mode
 
 
 # %% [markdown]
@@ -25,15 +26,18 @@ and `ExtraHandlerRuntimeInfo`. The expected return value is an arbitrary `dict`.
 It is a preferred practice to define them as asynchronous functions.
 
 * The initial step in instrumenting a DFF application using Opentelemetry is to configure the
-export destination. To achieve this, you can use the functions provided by the `stats` module:
+export destination. `from_url` method of the `OtelInstrumentor` class simplifies this task
+allowing you to only pass the url of the OTLP Collector server.
+
+Alternatively, you can use the utility functions provided by the `stats` module:
 `set_logger_destination`, `set_tracer_destination`, or `set_meter_destination`. These accept
 an appropriate Opentelemetry exporter instance and bind it to provider classes.
 
-* Nextly, the `OtelInstrumentor` class should be constructed that logs the output of extractors.
+* Nextly, the `OtelInstrumentor` class should be constructed to log the extractor output.
 Custom extractors can be decorated with the `OtelInstrumentor` instance.
 Default extractors are instrumented by calling the `instrument` method on the `OtelInstrumentor`.
 
-* The whole process is illustrated in the example below.
+* The entirety of the process is illustrated in the example below.
 
 """
 
@@ -91,4 +95,5 @@ pipeline = Pipeline.from_dict(
 
 
 if __name__ == "__main__":
-    pipeline.run()
+    if is_interactive_mode():
+        pipeline.run()

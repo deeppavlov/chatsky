@@ -3,38 +3,26 @@ Main
 ----
 This module includes command line scripts for Superset dashboard configuration,
 e.g. for creating and importing configuration archives.
-In a configuration archive, you can override the default settings for db connection, passwords, etc.
-with your own parameters that can be passed either as a config file
-or as command line arguments.
+In a configuration archive, you can define such settings as passwords, networking addressses etc.
+using your own parameters that can be passed as a config file and overridden by command line arguments.
 
 Examples
 ********
 
 .. code:: bash
 
-    # Create an importable dashboard config from a yaml-formatted file.
-    dff.stats cfg_from_file file.yaml --outfile=/tmp/superset_dashboard.zip
-
-.. code:: bash
-
-    # Create an importable dashboard config from command line arguments.
-    dff.stats cfg_from_opts \\
-        --db.type=postgresql \\
-        --db.user=root \\
-        --db.host=localhost \\
-        --db.port=5432 \\
-        --db.name=test \\
-        --db.table=dff_stats \\
-        --outfile=/tmp/superset_dashboard.zip
-
-.. code:: bash
-
-    # Import the dashboard file into a running Superset server.
-    dff.stats import_dashboard \\
-        -U admin \\
-        -P admin \\
-        -i /tmp/superset_dashboard.zip \\
-        -dP password
+        # Create and import a configuration archive
+        dff.stats config.yaml \\
+            -U superset_user \\
+            -P superset_password \\
+            -dP database password \\
+            --db.type=postgresql \\
+            --db.user=root \\
+            --db.host=localhost \\
+            --db.port=5432 \\
+            --db.name=test \\
+            --db.table=dff_stats \\
+            --outfile=config_artifact.zip
 
 """
 import sys
@@ -60,7 +48,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
         dff.stats config.yaml \\
             -U superset_user \\
             -P superset_password \\
-            -dP password
+            -dP database password \\
             --db.type=postgresql \\
             --db.user=root \\
             --db.host=localhost \\
@@ -87,9 +75,25 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     parser.add_argument("-H", "--host", default="localhost", help="Superset host")
     parser.add_argument("-p", "--port", default="8088", help="Superset port.")
     parser.add_argument("-U", "--username", required=True, help="Superset user.")
-    parser.add_argument("-P", "--password", type=str, action=PasswordAction, help="Superset password.", required=True)
     parser.add_argument(
-        "-dP", "--db.password", type=str, action=PasswordAction, help="Database password.", required=True
+        "-P",
+        "--password",
+        dest="password",
+        type=str,
+        action=PasswordAction,
+        help="Superset password.",
+        nargs="?",
+        required=True,
+    )
+    parser.add_argument(
+        "-dP",
+        "--db.password",
+        dest="db.password",
+        type=str,
+        action=PasswordAction,
+        help="Database password.",
+        required=True,
+        nargs="?",
     )
 
     if parsed_args is None:
@@ -98,7 +102,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     outfile = make_zip_config(parsed_args)
     import_dashboard(parsed_args, zip_file=str(outfile))
 
-    if not hasattr(parsed_args, "outfile"):
+    if not hasattr(parsed_args, "outfile") or parsed_args.outfile is None:
         outfile.unlink()
 
 

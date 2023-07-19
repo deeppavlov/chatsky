@@ -14,7 +14,7 @@ except ImportError:
 from tests.db_list import SUPERSET_ACTIVE
 from tests.test_utils import get_path_from_tests_to_current_dir
 
-dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
+path_to_addon = get_path_from_tests_to_current_dir(__file__)
 
 
 def dashboard_display_test(args: Namespace, base_url: str):
@@ -79,7 +79,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
                     "host": "localhost",
                     "port": "8088",
                     "db.password": "qwerty",
-                    "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
+                    "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),
         ),
@@ -98,7 +98,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
                     "host": "localhost",
                     "port": "8088",
                     "db.password": "qwerty",
-                    "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
+                    "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),
         ),
@@ -117,7 +117,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
                     "host": "localhost",
                     "port": "8088",
                     "db.password": "qwerty",
-                    "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
+                    "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),
         ),

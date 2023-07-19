@@ -128,7 +128,7 @@ class PasswordAction(Action):
 
     def __call__(self, parser, args, values, option_string=None):
         if values:
-            print("Setting password explicitly is discouraged.")
+            print(f"{self.dest}: setting passwords explicitly through the command line is discouraged.")
             setattr(args, self.dest, values)
         else:
-            setattr(args, self.dest, getpass.getpass())
+            setattr(args, self.dest, getpass.getpass(prompt=f"{self.dest}: "))
