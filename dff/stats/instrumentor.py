@@ -99,6 +99,15 @@ class OtelInstrumentor(BaseInstrumentor):
             logger_provider=logger_provider, tracer_provider=tracer_provider, meter_provider=meter_provider
         )
 
+    def __enter__(self):
+        if not self.is_instrumented_by_opentelemetry:
+            self.instrument()
+        return self
+
+    def __exit__(self):
+        if self.is_instrumented_by_opentelemetry:
+            self.uninstrument()
+
     @classmethod
     def from_url(cls, url: str, insecure: bool = True, timeout: Optional[int] = None):
         """

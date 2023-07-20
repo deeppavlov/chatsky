@@ -26,13 +26,15 @@ logger.setLevel(logging.INFO)
 
 DFF_DIR = Path(__file__).absolute().parent.parent
 """
-:meta hide-value:
 Root directory of the local `dff` installation.
+
+:meta hide-value:
 """
 DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 """
-:meta hide-value:
 Local path to superset dashboard files to import.
+
+:meta hide-value:
 """
 DASHBOARD_SLUG = "dff-stats"
 """
@@ -51,8 +53,9 @@ TYPE_MAPPING_CH = {
     "DATETIME": "Nullable(DateTime)",
 }
 """
-:meta hide-value:
 Mapping of standard sql column types to Clickhouse native types.
+
+:meta hide-value:
 """
 
 DFF_NODE_STATS_STATEMENT = """
@@ -131,9 +134,10 @@ SQL_STATEMENT_MAPPING = {
     "dff_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
 }
 """
-:meta hide-value:
 Select statements for dashboard configuration with names and types represented as placeholders.
 The placeholder system makes queries database agnostic, required values are set during the import phase.
+
+:meta hide-value:
 """
 
 
