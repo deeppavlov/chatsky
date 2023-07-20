@@ -81,7 +81,7 @@ Service group `pipeline` can't be asynchronous because
 
 # %%
 async def simple_asynchronous_service(_, __, info: ServiceRuntimeInfo):
-    logger.info(f"Service '{info['name']}' is running")
+    logger.info(f"Service '{info.name}' is running")
 
 
 async def time_consuming_service(_):
@@ -104,7 +104,7 @@ def meta_web_querying_service(
                     f":photo_number_{photo_number}": json.loads(web_content)["title"]
                 }
             )
-        logger.info(f"Service '{info['name']}' has completed HTTPS request")
+        logger.info(f"Service '{info.name}' has completed HTTPS request")
 
     return web_querying_service
 

@@ -91,7 +91,7 @@ def get_extra_handler_misc_field(
     info: ExtraHandlerRuntimeInfo, postfix: str
 ) -> str:  # This method calculates `misc` field name dedicated to extra handler
     # based on its and its service name
-    return f"{info['component']['name']}-{postfix}"
+    return f"{info.component.name}-{postfix}"
 
 
 def time_measure_before_handler(ctx, _, info):
@@ -149,7 +149,7 @@ def heavy_service(ctx: Context):
     after_handler=[json_converter_after_handler],
 )
 def logging_service(ctx: Context, _, info: ServiceRuntimeInfo):
-    str_misc = ctx.misc[f"{info['name']}-str"]
+    str_misc = ctx.misc[f"{info.name}-str"]
     assert isinstance(str_misc, str)
     print(f"Stringified misc: {str_misc}")
 

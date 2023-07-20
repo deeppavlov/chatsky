@@ -83,33 +83,33 @@ def before_all(_, __, info: ExtraHandlerRuntimeInfo):
     global start_times, pipeline_info
     now = datetime.now()
     pipeline_info = {"start_time": now}
-    start_times = {info["component"]["path"]: now}
+    start_times = {info.component.path: now}
 
 
 def before(_, __, info: ExtraHandlerRuntimeInfo):
-    start_times.update({info["component"]["path"]: datetime.now()})
+    start_times.update({info.component.path: datetime.now()})
 
 
 def after(_, __, info: ExtraHandlerRuntimeInfo):
-    start_time = start_times[info["component"]["path"]]
+    start_time = start_times[info.component.path]
     pipeline_info.update(
         {
-            f"{info['component']['path']}_duration": datetime.now() - start_time,
-            f"{info['component']['path']}_success": info["component"]["execution_state"].get(
-                info["component"]["path"], ComponentExecutionState.NOT_RUN.name
+            f"{info.component.path}_duration": datetime.now() - start_time,
+            f"{info.component.path}_success": info.component.execution_state.get(
+                info.component.path, ComponentExecutionState.NOT_RUN
             ),
         }
     )
 
 
 def after_all(_, __, info: ExtraHandlerRuntimeInfo):
-    pipeline_info.update({"total_time": datetime.now() - start_times[info["component"]["path"]]})
+    pipeline_info.update({"total_time": datetime.now() - start_times[info.component.path]})
     logger.info(f"Pipeline stats: {json.dumps(pipeline_info, indent=4, default=str)}")
 
 
 async def long_service(_, __, info: ServiceRuntimeInfo):
     timeout = random.randint(0, 5) / 100
-    logger.info(f"Service {info['name']} is going to sleep for {timeout} seconds.")
+    logger.info(f"Service {info.name} is going to sleep for {timeout} seconds.")
     await asyncio.sleep(timeout)
 
 

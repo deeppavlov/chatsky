@@ -18,7 +18,6 @@ from dff.script.conditions import true
 
 from dff.script import (
     normalize_condition,
-    normalize_keywords,
     normalize_label,
     normalize_script,
     normalize_processing,
@@ -113,16 +112,10 @@ def test_normalize_processing():
 
 
 def test_normalize_keywords():
-    # TODO: Add full check for functions
-    subtest_normalize_keywords(PRE_RESPONSE_PROCESSING)
-
-
-def subtest_normalize_keywords(pre_response_processing):
-    # TODO: Add full check for functions
     node_template = {
         TRANSITIONS: {"node": std_func},
         RESPONSE: Message(text="text"),
-        pre_response_processing: {1: std_func},
+        PRE_RESPONSE_PROCESSING: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
@@ -134,7 +127,6 @@ def subtest_normalize_keywords(pre_response_processing):
         MISC.name.lower(): {"key": "val"},
     }
     script = {"flow": {"node": node_template.copy()}}
-    script = normalize_keywords(script)
     assert isinstance(script, dict)
     assert script["flow"]["node"] == node_template_gold
 
