@@ -76,20 +76,20 @@ class ShelveContextStorage(DBContextStorage):
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         primary_id = await self._get_last_ctx(storage_key)
         if primary_id is not None:
-            return self.serializer.loads(self.context_db[primary_id][self._PACKED_COLUMN]), primary_id
+            return self.context_db[primary_id][self._PACKED_COLUMN], primary_id
         else:
             return dict(), None
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         key_set = [k for k in sorted(self.log_db[primary_id][field_name].keys(), reverse=True)]
         keys = key_set if keys_limit is None else key_set[:keys_limit]
-        return {k: self.serializer.loads(self.log_db[primary_id][field_name][k][self._VALUE_COLUMN]) for k in keys}
+        return {k: self.log_db[primary_id][field_name][k][self._VALUE_COLUMN] for k in keys}
 
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         self.context_db[primary_id] = {
             ExtraFields.storage_key.value: storage_key,
             ExtraFields.active_ctx.value: True,
-            self._PACKED_COLUMN: self.serializer.dumps(data),
+            self._PACKED_COLUMN: data,
             ExtraFields.created_at.value: created,
             ExtraFields.updated_at.value: updated,
         }
@@ -97,6 +97,6 @@ class ShelveContextStorage(DBContextStorage):
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         for field, key, value in data:
             self.log_db.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
-                self._VALUE_COLUMN: self.serializer.dumps(value),
+                self._VALUE_COLUMN: value,
                 ExtraFields.updated_at.value: updated,
             })
