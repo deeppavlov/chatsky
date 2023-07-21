@@ -19,8 +19,8 @@ except ImportError:
     import pickle
 
     class DefaultSerializer:
-        def dumps(self, data: Any, protocol: Optional[Any] = None) -> bytes:
-            return pickle.dumps(data, protocol)
+        def dumps(self, data: Any, _: Optional[Any] = None) -> bytes:
+            return pickle.dumps(data)
 
         def loads(self, data: bytes) -> Any:
             return pickle.loads(data)
