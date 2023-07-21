@@ -83,7 +83,8 @@ class RedisContextStorage(DBContextStorage):
     async def clear_async(self, prune_history: bool = False):
         if prune_history:
             keys = await self._redis.keys(f"{self._prefix}:*")
-            await self._redis.delete(*keys)
+            if len(keys) > 0:
+                await self._redis.delete(*keys)
         else:
             await self._redis.delete(f"{self._index_key}:{self._GENERAL_INDEX}")
 
