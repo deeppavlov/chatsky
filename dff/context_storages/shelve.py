@@ -15,7 +15,7 @@ libraries like pickle or JSON.
 from datetime import datetime
 from pathlib import Path
 from shelve import DbfilenameShelf
-from typing import Any, Tuple, List, Dict, Optional
+from typing import Any, Set, Tuple, List, Dict, Optional
 
 from .context_schema import ContextSchema, ExtraFields
 from .database import DBContextStorage, cast_key_to_string
@@ -55,9 +55,16 @@ class ShelveContextStorage(DBContextStorage):
     async def len_async(self) -> int:
         return len({v[ExtraFields.storage_key.value] for v in self.context_db.values() if v[ExtraFields.active_ctx.value]})
 
-    async def clear_async(self):
-        for key in self.context_db.keys():
-            self.context_db[key][ExtraFields.active_ctx.value] = False
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            self.context_db.clear()
+            self.log_db.clear()
+        else:
+            for key in self.context_db.keys():
+                self.context_db[key][ExtraFields.active_ctx.value] = False
+
+    async def keys_async(self) -> Set[str]:
+        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_db.values() if ctx[ExtraFields.active_ctx.value]}
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
         timed = sorted(self.context_db.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)

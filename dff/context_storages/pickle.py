@@ -14,7 +14,7 @@ import asyncio
 import pickle
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Tuple, List, Dict, Optional
+from typing import Any, Set, Tuple, List, Dict, Optional
 
 from .context_schema import ContextSchema, ExtraFields
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
@@ -71,10 +71,20 @@ class PickleContextStorage(DBContextStorage):
         return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].values() if v[ExtraFields.active_ctx.value]})
 
     @threadsafe_method
-    async def clear_async(self):
-        for key in self.context_table[1].keys():
-            self.context_table[1][key][ExtraFields.active_ctx.value] = False
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            self.context_table[1].clear()
+            self.log_table[1].clear()
+            await self._save(self.log_table)
+        else:
+            for key in self.context_table[1].keys():
+                self.context_table[1][key][ExtraFields.active_ctx.value] = False
         await self._save(self.context_table)
+
+    @threadsafe_method
+    async def keys_async(self) -> Set[str]:
+        self.context_table = await self._load(self.context_table)
+        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_table[1].values() if ctx[ExtraFields.active_ctx.value]}
 
     async def _save(self, table: Tuple[Path, Dict]):
         await makedirs(table[0].parent, exist_ok=True)
