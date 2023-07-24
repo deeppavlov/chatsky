@@ -99,3 +99,6 @@ Running the command will automatically import the dashboard as well as the data 
 into the running superset server. If you are using a version of Superset different from the one
 shipped with DFF, make sure that your access rights are sufficient to update and edit
 dashboards and data sources.
+
+Navigating Superset
+-------------------
