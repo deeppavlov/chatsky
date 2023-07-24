@@ -1,6 +1,7 @@
 import os
 import pytest
 from urllib import parse
+from zipfile import ZipFile
 from argparse import Namespace
 
 try:
@@ -130,6 +131,19 @@ def test_main(testing_cfg_dir, args):
     assert os.path.exists(args.outfile)
     assert os.path.isfile(args.outfile)
     assert os.path.getsize(args.outfile) > 2200
+    with ZipFile(args.outfile) as file:
+        file.extractall(testing_cfg_dir)
+    database = omegaconf.OmegaConf.load(os.path.join(testing_cfg_dir, "superset_dashboard/databases/dff_database.yaml"))
+    sqlalchemy_uri = omegaconf.OmegaConf.select(database, "sqlalchemy_uri")
+    arg_vars = vars(args)
+    _type, user, host, port, name = (
+        arg_vars["db.type"],
+        arg_vars["db.user"],
+        arg_vars["db.host"],
+        arg_vars["db.port"],
+        arg_vars["db.name"],
+    )
+    assert sqlalchemy_uri == f"{_type}://{user}:XXXXXXXXXX@{host}:{port}/{name}"
 
 
 @pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])
