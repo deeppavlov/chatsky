@@ -138,7 +138,7 @@ doc = merge_req_lists(
         "sphinx-favicon==1.0.1",
         "sphinx-copybutton==0.5.2",
         "sphinx-gallery==0.13.0",
-        "sphinx-autodoc-typehints==1.23.0",
+        "sphinx-autodoc-typehints==1.24.0",
         "nbsphinx==0.9.1",
         "jupytext==1.14.5",
         "jupyter==1.0.0",
