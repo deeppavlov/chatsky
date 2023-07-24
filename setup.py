@@ -108,7 +108,7 @@ test_requirements = merge_req_lists(
         "psutil==5.9.5",
         "telethon==1.29.1",
         "fastapi==0.100.0",
-        "uvicorn==0.22.0",
+        "uvicorn==0.23.1",
         "websockets==11.0.2",
         "locust==2.15",
         "streamlit==1.24.1",
