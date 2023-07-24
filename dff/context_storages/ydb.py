@@ -12,7 +12,7 @@ take advantage of the scalability and high-availability features provided by the
 import asyncio
 import datetime
 from os.path import join
-from typing import Any, Tuple, List, Dict, Optional
+from typing import Any, Set, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
 
 from .database import DBContextStorage, cast_key_to_string
@@ -95,6 +95,26 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
+    @cast_key_to_string()
+    async def contains_async(self, key: str) -> bool:
+        async def callee(session):
+            query = f"""
+                PRAGMA TablePathPrefix("{self.database}");
+                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
+                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
+                FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
+                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
+                """
+
+            result_sets = await session.transaction(SerializableReadWrite()).execute(
+                await session.prepare(query),
+                {f"${ExtraFields.storage_key.value}": key},
+                commit_tx=True,
+            )
+            return result_sets[0].rows[0].cnt != 0 if len(result_sets[0].rows) > 0 else False
+
+        return await self.pool.retry_operation(callee)
+
     async def len_async(self) -> int:
         async def callee(session):
             query = f"""
@@ -112,12 +132,18 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def clear_async(self):
+    async def clear_async(self, prune_history: bool = False):
         async def callee(session):
-            query = f"""
-                PRAGMA TablePathPrefix("{self.database}");
-                UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.storage_key.value}=None;
-                """
+            if prune_history:
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    DELETE FROM {self.table_prefix}_{self._CONTEXTS_TABLE};
+                    """
+            else:
+                query = f"""
+                    PRAGMA TablePathPrefix("{self.database}");
+                    UPDATE {self.table_prefix}_{self._CONTEXTS_TABLE} SET {ExtraFields.active_ctx.value}=False;
+                    """
 
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
@@ -126,23 +152,20 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
+    async def keys_async(self) -> Set[str]:
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
-                DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
+                SELECT DISTINCT {ExtraFields.storage_key.value}
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
-                WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.storage_key.value} is not None;
+                WHERE {ExtraFields.active_ctx.value} == True;
                 """
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
-                {f"${ExtraFields.storage_key.value}": key},
                 commit_tx=True,
             )
-            return result_sets[0].rows[0].cnt != 0 if len(result_sets[0].rows) > 0 else False
+            return {row[ExtraFields.storage_key.value] for row in result_sets[0].rows}
 
         return await self.pool.retry_operation(callee)
 

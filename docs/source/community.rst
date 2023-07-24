@@ -9,7 +9,7 @@ Please take a short survey about DFF:
 This will allow us to make it better.
 
 `DeepPavlov Forum <https://forum.deeppavlov.ai>`_ is designed to discuss various aspects of DeepPavlov,
-which includes the DFF framework.
+which includes the DFF.
 
 `Telegram <https://t.me/DeepPavlovDreamDiscussions>`_ is a group chat where DFF users can ask questions and
 get help from the community.

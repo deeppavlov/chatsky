@@ -13,7 +13,7 @@ Additionally, Redis can be used as a cache, message broker, and database, making
 and powerful choice for data storage and management.
 """
 from datetime import datetime
-from typing import Any, List, Dict, Tuple, Optional
+from typing import Any, List, Dict, Set, Tuple, Optional
 
 try:
     from redis.asyncio import Redis
@@ -56,6 +56,10 @@ class RedisContextStorage(DBContextStorage):
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")
             raise ImportError("`redis` package is missing.\n" + install_suggestion)
+        if not bool(key_prefix):
+            raise ValueError("`key_prefix` parameter shouldn't be empty")
+
+        self._prefix = key_prefix
         self._redis = Redis.from_url(self.full_path)
         self._index_key = f"{key_prefix}:{self._INDEX_TABLE}"
         self._context_key = f"{key_prefix}:{self._CONTEXTS_TABLE}"
@@ -76,8 +80,18 @@ class RedisContextStorage(DBContextStorage):
         return len(await self._redis.hkeys(f"{self._index_key}:{self._GENERAL_INDEX}"))
 
     @threadsafe_method
-    async def clear_async(self):
-        await self._redis.delete(f"{self._index_key}:{self._GENERAL_INDEX}")
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            keys = await self._redis.keys(f"{self._prefix}:*")
+            if len(keys) > 0:
+                await self._redis.delete(*keys)
+        else:
+            await self._redis.delete(f"{self._index_key}:{self._GENERAL_INDEX}")
+
+    @threadsafe_method
+    async def keys_async(self) -> Set[str]:
+        keys = await self._redis.hkeys(f"{self._index_key}:{self._GENERAL_INDEX}")
+        return {key.decode() for key in keys}
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         last_primary_id = await self._redis.hget(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key)

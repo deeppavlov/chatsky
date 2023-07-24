@@ -11,5 +11,5 @@ from .mongo import MongoContextStorage, mongo_available
 from .shelve import ShelveContextStorage
 from .protocol import PROTOCOLS, get_protocol_install_suggestion
 from .context_schema import ContextSchema, ALL_ITEMS
-
 from .sql_dumper import create_dump_engine
+from .serializer import DefaultSerializer

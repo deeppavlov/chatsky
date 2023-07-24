@@ -1,19 +1,29 @@
 from typing import Any, Optional
 from inspect import signature
 
-from quickle import Encoder, Decoder
+try:
+    from quickle import Encoder, Decoder
 
+    class DefaultSerializer:
+        def __init__(self):
+            self._encoder = Encoder()
+            self._decoder = Decoder()
 
-class DefaultSerializer:
-    def __init__(self):
-        self._encoder = Encoder()
-        self._decoder = Decoder()
+        def dumps(self, data: Any, _: Optional[Any] = None) -> bytes:
+            return self._encoder.dumps(data)
 
-    def dumps(self, data: Any, _: Optional[Any] = None) -> bytes:
-        return self._encoder.dumps(data)
+        def loads(self, data: bytes) -> Any:
+            return self._decoder.loads(data)
 
-    def loads(self, data: bytes) -> Any:
-        return self._decoder.loads(data)
+except ImportError:
+    import pickle
+
+    class DefaultSerializer:
+        def dumps(self, data: Any, protocol: Optional[Any] = None) -> bytes:
+            return pickle.dumps(data, protocol)
+
+        def loads(self, data: bytes) -> Any:
+            return pickle.loads(data)
 
 
 def validate_serializer(serializer: Any) -> Any:

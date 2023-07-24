@@ -15,7 +15,7 @@ from functools import wraps
 from abc import ABC, abstractmethod
 from datetime import datetime
 from inspect import signature
-from typing import Any, Callable, Dict, Hashable, List, Optional, Tuple
+from typing import Any, Callable, Dict, Hashable, List, Optional, Set, Tuple
 
 from .serializer import DefaultSerializer, validate_serializer
 from .context_schema import ContextSchema
@@ -185,17 +185,24 @@ class DBContextStorage(ABC):
         """
         raise NotImplementedError
 
-    def clear(self):
+    def clear(self, prune_history: bool = False):
         """
         Synchronous method for clearing context storage, removing all the stored Contexts.
         """
-        return asyncio.run(self.clear_async())
+        return asyncio.run(self.clear_async(prune_history))
 
     @abstractmethod
-    async def clear_async(self):
+    async def clear_async(self, prune_history: bool = False):
         """
         Asynchronous method for clearing context storage, removing all the stored Contexts.
         """
+        raise NotImplementedError
+
+    def keys(self) -> Set[str]:
+        return asyncio.run(self.keys_async())
+
+    @abstractmethod
+    async def keys_async(self) -> Set[str]:
         raise NotImplementedError
 
     def get(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:

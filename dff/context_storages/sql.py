@@ -16,7 +16,7 @@ import asyncio
 import importlib
 import os
 from datetime import datetime
-from typing import Any, Callable, Collection, Dict, List, Optional, Tuple
+from typing import Any, Callable, Collection, Dict, List, Optional, Set, Tuple
 
 from .serializer import DefaultSerializer
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
@@ -40,6 +40,7 @@ try:
         inspect,
         select,
         update,
+        delete,
         func,
     )
     from sqlalchemy.dialects.mysql import DATETIME, LONGBLOB
@@ -216,24 +217,6 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(stmt)
 
     @threadsafe_method
-    async def len_async(self) -> int:
-        subq = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
-        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
-        stmt = select(func.count()).select_from(subq.subquery())
-        async with self.engine.begin("LENGTH") as conn:
-            result = (await conn.execute(stmt)).fetchone()
-            if result is None or len(result) == 0:
-                raise ValueError(f"Database {self.dialect} error: operation LENGTH")
-            return result[0]
-
-    @threadsafe_method
-    async def clear_async(self):
-        stmt = update(self.tables[self._CONTEXTS_TABLE])
-        stmt = stmt.values({ExtraFields.active_ctx.value: False})
-        async with self.engine.begin("CLEAR") as conn:
-            await conn.execute(stmt)
-
-    @threadsafe_method
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
         subq = select(self.tables[self._CONTEXTS_TABLE])
@@ -245,6 +228,35 @@ class SQLContextStorage(DBContextStorage):
             if result is None or len(result) == 0:
                 raise ValueError(f"Database {self.dialect} error: operation CONTAINS")
             return result[0] != 0
+
+    @threadsafe_method
+    async def len_async(self) -> int:
+        subq = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
+        subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
+        stmt = select(func.count()).select_from(subq.subquery())
+        async with self.engine.begin("LENGTH") as conn:
+            result = (await conn.execute(stmt)).fetchone()
+            if result is None or len(result) == 0:
+                raise ValueError(f"Database {self.dialect} error: operation LENGTH")
+            return result[0]
+
+    @threadsafe_method
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            stmt = delete(self.tables[self._CONTEXTS_TABLE])
+        else:
+            stmt = update(self.tables[self._CONTEXTS_TABLE])
+            stmt = stmt.values({ExtraFields.active_ctx.value: False})
+        async with self.engine.begin("CLEAR") as conn:
+            await conn.execute(stmt)
+
+    @threadsafe_method
+    async def keys_async(self) -> Set[str]:
+        stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
+        stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
+        async with self.engine.begin("KEYS") as conn:
+            result = (await conn.execute(stmt)).fetchall()
+            return set() if result is None else {res[0] for res in result}
 
     async def _create_self_tables(self):
         async with self.engine.begin("CREATE_TABLES") as conn:

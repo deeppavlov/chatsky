@@ -11,10 +11,9 @@ It is efficient and fast, but it is not recommended to use it to transfer data a
 different languages or platforms because it's not cross-language compatible.
 """
 import asyncio
-import pickle
 from datetime import datetime
 from pathlib import Path
-from typing import Any, Tuple, List, Dict, Optional
+from typing import Any, Set, Tuple, List, Dict, Optional
 
 from .context_schema import ContextSchema, ExtraFields
 from .database import DBContextStorage, threadsafe_method, cast_key_to_string
@@ -71,15 +70,25 @@ class PickleContextStorage(DBContextStorage):
         return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].values() if v[ExtraFields.active_ctx.value]})
 
     @threadsafe_method
-    async def clear_async(self):
-        for key in self.context_table[1].keys():
-            self.context_table[1][key][ExtraFields.active_ctx.value] = False
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            self.context_table[1].clear()
+            self.log_table[1].clear()
+            await self._save(self.log_table)
+        else:
+            for key in self.context_table[1].keys():
+                self.context_table[1][key][ExtraFields.active_ctx.value] = False
         await self._save(self.context_table)
+
+    @threadsafe_method
+    async def keys_async(self) -> Set[str]:
+        self.context_table = await self._load(self.context_table)
+        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_table[1].values() if ctx[ExtraFields.active_ctx.value]}
 
     async def _save(self, table: Tuple[Path, Dict]):
         await makedirs(table[0].parent, exist_ok=True)
         async with open(table[0], "wb+") as file:
-            await file.write(pickle.dumps(table[1]))
+            await file.write(self.serializer.dumps(table[1]))
 
     async def _load(self, table: Tuple[Path, Dict]) -> Tuple[Path, Dict]:
         if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
@@ -87,7 +96,7 @@ class PickleContextStorage(DBContextStorage):
             await self._save((table[0], storage))
         else:
             async with open(table[0], "rb") as file:
-                storage = pickle.loads(await file.read())
+                storage = self.serializer.loads(await file.read())
         return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
@@ -101,7 +110,7 @@ class PickleContextStorage(DBContextStorage):
         self.context_table = await self._load(self.context_table)
         primary_id = await self._get_last_ctx(storage_key)
         if primary_id is not None:
-            return self.serializer.loads(self.context_table[1][primary_id][self._PACKED_COLUMN]), primary_id
+            return self.context_table[1][primary_id][self._PACKED_COLUMN], primary_id
         else:
             return dict(), None
 
@@ -109,13 +118,13 @@ class PickleContextStorage(DBContextStorage):
         self.log_table = await self._load(self.log_table)
         key_set = [k for k in sorted(self.log_table[1][primary_id][field_name].keys(), reverse=True)]
         keys = key_set if keys_limit is None else key_set[:keys_limit]
-        return {k: self.serializer.loads(self.log_table[1][primary_id][field_name][k][self._VALUE_COLUMN]) for k in keys}
+        return {k: self.log_table[1][primary_id][field_name][k][self._VALUE_COLUMN] for k in keys}
 
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         self.context_table[1][primary_id] = {
             ExtraFields.storage_key.value: storage_key,
             ExtraFields.active_ctx.value: True,
-            self._PACKED_COLUMN: self.serializer.dumps(data),
+            self._PACKED_COLUMN: data,
             ExtraFields.created_at.value: created,
             ExtraFields.updated_at.value: updated,
         }
@@ -124,7 +133,7 @@ class PickleContextStorage(DBContextStorage):
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         for field, key, value in data:
             self.log_table[1].setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
-                self._VALUE_COLUMN: self.serializer.dumps(value),
+                self._VALUE_COLUMN: value,
                 ExtraFields.updated_at.value: updated,
             })
         await self._save(self.log_table)

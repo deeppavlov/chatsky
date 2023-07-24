@@ -36,6 +36,7 @@ def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     assert len(db) == 1
     db[context_id] = testing_context  # overwriting a key
     assert len(db) == 1
+    assert db.keys() == {context_id}
 
     # Test read operations
     new_ctx = db[context_id]
@@ -159,6 +160,25 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
         assert read_ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
         assert read_ctx.requests[0].text == "useful message"
 
+    # Check clear
+    db.clear()
+    assert len(db) == 0
+
+
+def keys_test(db: DBContextStorage, testing_context: Context, context_id: str):
+    # Fill database with contexts
+    for i in range(1, 11):
+        db[f"{context_id}_{i}"] = Context()
+
+    # Add and delete a context
+    db[context_id] = testing_context
+    del db[context_id]
+
+    # Check database keys
+    keys = db.keys()
+    assert len(keys) == 10
+    for i in range(1, 11):
+        assert f"{context_id}_{i}" in keys
 
 def single_log_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # Set only one request to be included into CONTEXTS table
@@ -186,8 +206,9 @@ partial_storage_test.no_dict = False
 midair_subscript_change_test.no_dict = True
 large_misc_test.no_dict = False
 many_ctx_test.no_dict = True
+keys_test.no_dict = False
 single_log_test.no_dict = True
-_TEST_FUNCTIONS = [simple_test, basic_test, pipeline_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, single_log_test]
+_TEST_FUNCTIONS = [simple_test, basic_test, pipeline_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, keys_test, single_log_test]
 
 
 def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Context, context_id: str):
@@ -199,5 +220,8 @@ def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Contex
             for field_props in [value for value in dict(db.context_schema).values() if isinstance(value, SchemaField)]:
                 field_props.subscript = 3
         if not (getattr(test, "no_dict", False) and isinstance(db, dict)):
-            db.clear()
+            if isinstance(db, dict):
+                db.clear()
+            else:
+                db.clear(prune_history=True)
             test(db, Context.cast(frozen_ctx), context_id)

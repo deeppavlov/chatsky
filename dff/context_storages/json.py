@@ -9,7 +9,7 @@ import asyncio
 from datetime import datetime
 from pathlib import Path
 from base64 import encodebytes, decodebytes
-from typing import Any, List, Tuple, Dict, Optional
+from typing import Any, List, Set, Tuple, Dict, Optional
 
 from pydantic import BaseModel, Extra
 
@@ -83,10 +83,20 @@ class JSONContextStorage(DBContextStorage):
         return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].__dict__.values() if v[ExtraFields.active_ctx.value]})
 
     @threadsafe_method
-    async def clear_async(self):
-        for key in self.context_table[1].__dict__.keys():
-            self.context_table[1].__dict__[key][ExtraFields.active_ctx.value] = False
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            self.context_table[1].__dict__.clear()
+            self.log_table[1].__dict__.clear()
+            await self._save(self.log_table)
+        else:
+            for key in self.context_table[1].__dict__.keys():
+                self.context_table[1].__dict__[key][ExtraFields.active_ctx.value] = False
         await self._save(self.context_table)
+
+    @threadsafe_method
+    async def keys_async(self) -> Set[str]:
+        self.context_table = await self._load(self.context_table)
+        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_table[1].__dict__.values() if ctx[ExtraFields.active_ctx.value]}
 
     async def _save(self, table: Tuple[Path, SerializableStorage]):
         await makedirs(table[0].parent, exist_ok=True)

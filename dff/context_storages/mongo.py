@@ -13,7 +13,7 @@ and high levels of read and write traffic.
 """
 import asyncio
 from datetime import datetime
-from typing import Dict, Tuple, Optional, List, Any
+from typing import Dict, Set, Tuple, Optional, List, Any
 
 try:
     from pymongo import ASCENDING, HASHED, UpdateOne
@@ -91,8 +91,21 @@ class MongoContextStorage(DBContextStorage):
         return 0 if len(unique) == 0 else unique[0][count_key]
 
     @threadsafe_method
-    async def clear_async(self):
-        await self.collections[self._CONTEXTS_TABLE].update_many({}, {"$set": {ExtraFields.active_ctx.value: False}})
+    async def clear_async(self, prune_history: bool = False):
+        if prune_history:
+            await self.collections[self._CONTEXTS_TABLE].drop()
+            await self.collections[self._LOGS_TABLE].drop()
+        else:
+            await self.collections[self._CONTEXTS_TABLE].update_many({}, {"$set": {ExtraFields.active_ctx.value: False}})
+
+    @threadsafe_method
+    async def keys_async(self) -> Set[str]:
+        unique_key = "unique_keys"
+        unique = await self.collections[self._CONTEXTS_TABLE].aggregate([
+            {"$match": {ExtraFields.active_ctx.value: True}},
+            {"$group": {"_id": None, unique_key: {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
+        ]).to_list(None)
+        return set(unique[0][unique_key])
 
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
