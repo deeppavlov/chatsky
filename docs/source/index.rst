@@ -24,6 +24,7 @@ allowing developers to easily adapt it to their specific needs and requirements.
    get_started
    tutorials
    examples
+   user_guides
    reference
    development
    community
