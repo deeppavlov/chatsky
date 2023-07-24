@@ -1,7 +1,7 @@
 db:
   type: clickhousedb+connect
   name: test
-  user: root
+  user: username
   host: 172.17.0.1
   port: 8123
   table: test

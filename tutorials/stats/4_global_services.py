@@ -12,11 +12,11 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, ExtraHandlerRuntimeInfo, GlobalExtraHandlerType
-from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
 from dff.stats import default_extractors
-from dff.utils.testing import is_interactive_mode
+from dff.utils.testing import is_interactive_mode, check_happy_path
 
 
 # %% [markdown]
@@ -66,5 +66,6 @@ pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, default_extractors
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_pipeline_state)
 
 if __name__ == "__main__":
+    check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
         pipeline.run()

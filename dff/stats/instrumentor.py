@@ -115,7 +115,7 @@ class OtelInstrumentor(BaseInstrumentor):
         Inherently modifies the global provider instances adding an export destination
         for the target url.
 
-        . code-block::
+        .. code-block::
 
             instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
 
@@ -130,6 +130,9 @@ class OtelInstrumentor(BaseInstrumentor):
         return cls()
 
     def instrumentation_dependencies(self) -> Collection[str]:
+        """
+        :meta private:
+        """
         return INSTRUMENTS
 
     def _instrument(self, logger_provider=None, tracer_provider=None, meter_provider=None):

@@ -13,9 +13,9 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
-from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.stats import OtelInstrumentor
-from dff.utils.testing import is_interactive_mode
+from dff.utils.testing import is_interactive_mode, check_happy_path
 
 
 # %% [markdown]
@@ -95,5 +95,6 @@ pipeline = Pipeline.from_dict(
 
 
 if __name__ == "__main__":
+    check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
         pipeline.run()

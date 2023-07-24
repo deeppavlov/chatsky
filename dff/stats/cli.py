@@ -203,13 +203,11 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
         outfile_name = parsed_args.outfile
     else:
         outfile_name = "temp.zip"
-    print(outfile_name)
 
     file_conf = OmegaConf.load(parsed_args.file)
-    sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items()]
+    sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items() if value]
     cmd_conf = OmegaConf.from_cli()
-    cli_conf = OmegaConf.merge(cmd_conf, file_conf)
-    OmegaConf.resolve(cli_conf)
+    cli_conf = OmegaConf.merge(file_conf, cmd_conf)
 
     if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
         params = dict(

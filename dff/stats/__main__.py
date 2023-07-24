@@ -15,7 +15,7 @@ Examples
         dff.stats config.yaml \\
             -U superset_user \\
             -P superset_password \\
-            -dP database password \\
+            -dP database_password \\
             --db.type=postgresql \\
             --db.user=root \\
             --db.host=localhost \\
@@ -48,7 +48,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
         dff.stats config.yaml \\
             -U superset_user \\
             -P superset_password \\
-            -dP database password \\
+            -dP database_password \\
             --db.type=postgresql \\
             --db.user=root \\
             --db.host=localhost \\

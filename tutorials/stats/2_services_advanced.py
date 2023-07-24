@@ -2,8 +2,9 @@
 """
 # 2. Services Advanced
 
-The following examples shows how to decorate several functions
-for statistics collection.
+The following examples shows how to set and access shared variables
+using collector functions and how this allows for interplay
+between before handlers and after handlers.
 """
 
 
@@ -12,11 +13,11 @@ import asyncio
 
 from dff.script import Context
 from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
-from dff.utils.testing.toy_script import TOY_SCRIPT
+from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
 from dff.stats import default_extractors
-from dff.utils.testing import is_interactive_mode
+from dff.utils.testing import is_interactive_mode, check_happy_path
 
 # %% [markdown]
 """
@@ -74,7 +75,7 @@ pipeline = Pipeline.from_dict(
         "start_label": ("greeting_flow", "start_node"),
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
-            heavy_service,  # add `heavy_service` before the actor
+            heavy_service,
             Service(
                 handler=ACTOR,
                 before_handler=[default_extractors.get_timing_before],
@@ -90,5 +91,6 @@ pipeline = Pipeline.from_dict(
 
 
 if __name__ == "__main__":
+    check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
         pipeline.run()
