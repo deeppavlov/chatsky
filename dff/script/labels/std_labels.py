@@ -32,7 +32,7 @@ def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
         if len(ctx.labels) >= 1:
             flow_label, label = list(ctx.labels.values())[-1]
         else:
-            flow_label, label = pipeline.actor.fallback_label[:2]
+            flow_label, label = pipeline.actor.start_label[:2]
         return (flow_label, label, current_priority)
 
     return repeat_transition_handler
@@ -120,12 +120,15 @@ def _get_label_by_index_shifting(
     """
     flow_label, node_label, current_priority = repeat(priority, *args, **kwargs)(ctx, pipeline, *args, **kwargs)
     labels = list(pipeline.script.get(flow_label, {}))
+    print(flow_label, node_label, current_priority)
 
     if node_label not in labels:
         return (*pipeline.actor.fallback_label[:2], current_priority)
 
     label_index = labels.index(node_label)
+    print(label_index)
     label_index = label_index + 1 if increment_flag else label_index - 1
+    print(label_index)
     if not (cyclicality_flag or (0 <= label_index < len(labels))):
         return (*pipeline.actor.fallback_label[:2], current_priority)
     label_index %= len(labels)
