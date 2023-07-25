@@ -2,6 +2,6 @@ db:
   type: clickhousedb+connect
   name: test
   user: username
-  host: 172.17.0.1
+  host: clickhouse
   port: 8123
-  table: test
+  table: otel_logs

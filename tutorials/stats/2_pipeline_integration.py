@@ -81,7 +81,6 @@ pipeline = Pipeline.from_dict(
                 after_handler=[
                     get_service_state,
                     default_extractors.get_timing_after,
-                    default_extractors.get_current_label,
                 ],
                 components=[{"handler": heavy_service}, {"handler": heavy_service}],
             ),

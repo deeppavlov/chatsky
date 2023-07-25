@@ -36,7 +36,7 @@ CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
     ["example_module_name", "expected_logs"],
     [
         ("1_extractor_functions", 10),
-        ("2_pipeline_integration", 40),
+        ("2_pipeline_integration", 35),
     ],
 )
 async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp_provider, otlp_trace_exp_provider):
@@ -66,7 +66,7 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
     ["example_module_name", "expected_logs"],
     [
         ("1_extractor_functions", 10),
-        ("2_pipeline_integration", 40),
+        ("2_pipeline_integration", 35),
     ],
 )
 async def test_examples_memory(

@@ -67,10 +67,10 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
         help="DBMS connection type: 'clickhouse+connect' or ....",
     )
     parser.add_argument("-dU", "--db.user", help="Database user.")
-    parser.add_argument("-dh", "--db.host", help="Database host.")
+    parser.add_argument("-dh", "--db.host", default="clickhouse", help="Database host.")
     parser.add_argument("-dp", "--db.port", help="Database port.")
     parser.add_argument("-dn", "--db.name", help="Name of the database.")
-    parser.add_argument("-dt", "--db.table", help="Name of the table.")
+    parser.add_argument("-dt", "--db.table", default="otel_logs", help="Name of the table.")
     parser.add_argument("-o", "--outfile", help="Optionally persist the configuration as a zip file.")
     parser.add_argument("-H", "--host", default="localhost", help="Superset host")
     parser.add_argument("-p", "--port", default="8088", help="Superset port.")

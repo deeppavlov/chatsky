@@ -4,57 +4,59 @@ Superset configuration
 Description
 -----------
 
-| Dialog Flow Stats collects usage statistics for your conversational service and allows you to visualize them using a pre-configured dashboard for [Apache Superset](https://superset.apache.org/) or [Preset](https://preset.io/).
-| We provide a pre-built Superset Docker image that includes all the necessary dependencies and ensures API compatibility. 
-| Authorization credentials for the image can be automatically configured via environment variables.
+| The Dialog Flow Stats module can be used to obtain and visualize usage statistics for your service.
+| Data aggregation relies on the `OpenTelemetry protocol <#>`_ and the `OpenTelemetry collector <#>`_ along with `Clickhouse <https://clickhouse.com/>`_ as an OLAP storage.
+| Interactive visualization is powered by `Apache Superset <https://superset.apache.org/>`_.
+| All the mentioned services are shipped as Docker containers, including a pre-built Superset image that ensures API compatibility.
+| Authorization credentials can be automatically configured through environment variables.
 
 .. code-block:: shell
+
     echo 'SUPERSET_USERNAME=...' >> .env
     echo 'SUPERSET_PASSWORD=...' >> .env
     docker run --env-file='.env' ghcr.io/deeppavlov/superset_df_dashboard:latest
 
-Currently, support is offered for multiple database types that can be used as a backend storage for your data:
+Collection procedure
+--------------------
 
-* [Postgresql](https://www.postgresql.org/)
-* [Clickhouse](https://clickhouse.com/)
-
-In addition, you can use the library without any dependencies
-to save your service logs to *csv*-formatted files.
-
-Installation
-------------
+**Installation**
 
 .. code-block:: shell
-    pip install dff[stats] # csv-only, no connection to Superset
+
     pip install dff[stats,clickhouse]
     pip install dff[stats,postgresql]
 
+**Launching services**
+
+.. code-block:: shell
+
+    docker-compose up
+
 **Setting up a pipeline**
 
+It is essential that you use get_current_label at least once, so that the default Superset charts
+can be successfully displayed.
+
 .. code-block:: python
+
     # import dependencies
     from dff.pipeline import Pipeline, Service, ACTOR
     from dff.stats import default_extractors
+    # using default_extractors.current_label is required for dashboard integration 
     from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
     from dff.stats import OTLPLogExporter, OTLPSpanExporter
     # initialize opentelemetry
-    # insecure parameter allows for SSL-independent connections
-    set_logger_destination(OTLPLogExporter("grpc://localhost:4317", insecure=True))
-    set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
-    dff_instrumentor = OtelInstrumentor()
+    # insecure parameter ensures that SSL encryption is not forced
+    dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
     dff_instrumentor.instrument()
-    # Instrumentation is applied to pipeline's extra handlers so that their output
-    # gets persisted to the database. Use these handlers to report statistics
-    # about a particular service in the pipeline.
+    # Special extractor functions can be used as handlers to report statistics for any pipeline component.
     pipeline = Pipeline.from_dict(
         {
             "components": [
                 Service(
                     handler=ACTOR,
-                    before_handler=[default_extractors.get_timing_before],
                     after_handler=[
-                        default_extractors.get_timing_after,
-                        default_extractors.get_current_label,
+                        default_extractors.get_current_label, # using required extractor
                     ],
                 ),
             ]
@@ -65,12 +67,13 @@ Installation
 Displaying the data
 -------------------
 
-In order to run the dashboard in Apache Superset, you should update the default configuration with the credentials of your database.
-The configuration can be optionally persisted as a zip archive.
+In order to display the Superset dashboard, you should update the default configuration with the credentials of your database.
+The configuration can be optionally saved as a zip archive for inspection / debug.
 
-You can set the majority of the configuration options using a YAML file. 
+You can set most of the configuration options using a YAML file.
 
 .. code-block:: yaml
+
     # config.yaml
     db:
         type: clickhousedb+connect
@@ -80,9 +83,11 @@ You can set the majority of the configuration options using a YAML file.
         port: 5432
         table: dff_stats
 
-The file should then be forwarded to the configuration script:
+The file can then be used to parametrize the configuration script.
+Password values can be omitted and set interactively.
 
 .. code-block:: shell
+
     dff.stats config.yaml \
     -U superset_user \
     -P superset_password \
@@ -97,8 +102,18 @@ The file should then be forwarded to the configuration script:
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
-shipped with DFF, make sure that your access rights are sufficient to update and edit
-dashboards and data sources.
+shipped with DFF, make sure that your access rights are sufficient to edit the workspace.
 
-Navigating Superset
+Using Superset
 -------------------
+
+| In order to view the imported dashboard, log into Superset using your username and password.
+| The dashboard will then be available in the `Dashboards` section of the Superset UI under the name of `DFF stats`.
+| The dashboard has four sections, each one of them containing different kind of data.
+*  The 'Overview' section summarizes the information about user interaction with your script. And displays a weighted graph of transitions from one node to another. The data is also shown in the form of a table for better introspection capabilities.
+* The data displayed in the 'General stats' section reports, how frequent each of the nodes in your script was visited by users. The information is aggregated in several forms for better interpretability.
+* 'Additional stats' includes charts for node visit counts aggregated over various specific variables.
+* General service load data aggregated over time can be found in the 'Service stats' section.
+
+On some occasions, Superset can show warnings about the database connection being faulty.
+In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.

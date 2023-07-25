@@ -27,6 +27,7 @@ allowing developers to easily adapt it to their specific needs and requirements.
    reference
    development
    community
+   user_guides
    about_us
 
 Indices and tables
