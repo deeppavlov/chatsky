@@ -32,7 +32,7 @@ def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
         if len(ctx.labels) >= 1:
             flow_label, label = list(ctx.labels.values())[-1]
         else:
-            flow_label, label = pipeline.actor.fallback_label[:2]
+            flow_label, label = pipeline.actor.start_label[:2]
         return (flow_label, label, current_priority)
 
     return repeat_transition_handler
