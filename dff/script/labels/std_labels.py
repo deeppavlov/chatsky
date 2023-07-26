@@ -53,6 +53,8 @@ def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         if len(ctx.labels) >= 2:
             flow_label, label = list(ctx.labels.values())[-2]
+        elif len(ctx.labels) == 1:
+            flow_label, label = pipeline.actor.start_label[:2]
         else:
             flow_label, label = pipeline.actor.fallback_label[:2]
         return (flow_label, label, current_priority)
