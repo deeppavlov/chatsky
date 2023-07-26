@@ -126,9 +126,9 @@ def test_mongo(testing_context, context_id):
 
     db = context_storage_factory(
         "mongodb://{}:{}@localhost:27017/{}".format(
-            os.getenv("MONGO_INITDB_ROOT_USERNAME"),
-            os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
-            os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+            os.environ["MONGO_INITDB_ROOT_USERNAME"],
+            os.environ["MONGO_INITDB_ROOT_PASSWORD"],
+            os.environ["MONGO_INITDB_ROOT_USERNAME"],
         )
     )
     generic_test(db, testing_context, context_id)
@@ -138,7 +138,7 @@ def test_mongo(testing_context, context_id):
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 def test_redis(testing_context, context_id):
-    db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0"))
+    db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.environ["REDIS_PASSWORD"], "0"))
     generic_test(db, testing_context, context_id)
     asyncio.run(delete_redis(db))
 
@@ -148,9 +148,9 @@ def test_redis(testing_context, context_id):
 def test_postgres(testing_context, context_id):
     db = context_storage_factory(
         "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
-            os.getenv("POSTGRES_USERNAME"),
-            os.getenv("POSTGRES_PASSWORD"),
-            os.getenv("POSTGRES_DB"),
+            os.environ["POSTGRES_USERNAME"],
+            os.environ["POSTGRES_PASSWORD"],
+            os.environ["POSTGRES_DB"],
         )
     )
     generic_test(db, testing_context, context_id)
@@ -170,9 +170,9 @@ def test_sqlite(testing_file, testing_context, context_id):
 def test_mysql(testing_context, context_id):
     db = context_storage_factory(
         "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
-            os.getenv("MYSQL_USERNAME"),
-            os.getenv("MYSQL_PASSWORD"),
-            os.getenv("MYSQL_DATABASE"),
+            os.environ["MYSQL_USERNAME"],
+            os.environ["MYSQL_PASSWORD"],
+            os.environ["MYSQL_DATABASE"],
         )
     )
     generic_test(db, testing_context, context_id)
@@ -184,8 +184,8 @@ def test_mysql(testing_context, context_id):
 def test_ydb(testing_context, context_id):
     db = context_storage_factory(
         "{}{}".format(
-            os.getenv("YDB_ENDPOINT"),
-            os.getenv("YDB_DATABASE"),
+            os.environ["YDB_ENDPOINT"],
+            os.environ["YDB_DATABASE"],
         ),
         table_name="test",
     )

@@ -22,9 +22,9 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 db_uri = "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
-    os.getenv("POSTGRES_USERNAME"),
-    os.getenv("POSTGRES_PASSWORD"),
-    os.getenv("POSTGRES_DB"),
+    os.environ["POSTGRES_USERNAME"],
+    os.environ["POSTGRES_PASSWORD"],
+    os.environ["POSTGRES_DB"],
 )
 db = context_storage_factory(db_uri)
 

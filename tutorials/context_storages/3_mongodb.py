@@ -22,9 +22,9 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 db_uri = "mongodb://{}:{}@localhost:27017/{}".format(
-    os.getenv("MONGO_INITDB_ROOT_USERNAME"),
-    os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
-    os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+    os.environ["MONGO_INITDB_ROOT_USERNAME"],
+    os.environ["MONGO_INITDB_ROOT_PASSWORD"],
+    os.environ["MONGO_INITDB_ROOT_USERNAME"],
 )
 db = context_storage_factory(db_uri)
 
