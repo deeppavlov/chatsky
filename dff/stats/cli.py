@@ -62,7 +62,7 @@ DFF_NODE_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
     {table}.LogAttributes['request_id'] as request_id,
-    {table}.Timestamp as start_time,
+    otel_traces.Timestamp as start_time,
     otel_traces.SpanName as data_key,
     {table}.Body as data,
     {lblfield} as label,

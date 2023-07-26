@@ -5,14 +5,14 @@ default_endpoint: null
 offset: 0
 cache_timeout: null
 schema: test
-sql: "\nWITH main AS\n(\nSELECT LogAttributes['context_id'] AS context_id,\nmax(LogAttributes['request_id'])\
-  \ AS max_history\n\nFROM otel_logs\nGROUP BY context_id\n)\nSELECT DISTINCT LogAttributes['context_id']\
-  \ AS context_id,\n\nLogAttributes['request_id'] AS request_id,\notel_logs.Timestamp\
-  \ AS start_time,\n\nJSON_VALUE(otel_logs.Body, '$.label') AS label,\nJSON_VALUE(otel_logs.Body,\
-  \ '$.flow') AS flow_label,\n\nJSON_VALUE(otel_logs.Body, '$.node') AS node_label\n\
-  \ FROM otel_logs \n\nINNER JOIN main\nON context_id  = main.context_id \nAND request_id\
-  \ = main.max_history\n\nINNER JOIN otel_traces\nON otel_logs.TraceId = otel_traces.TraceId\n\
-  \nWHERE otel_traces.SpanName = 'get_current_label'\n"
+sql: "\nWITH main AS (\n    SELECT LogAttributes['context_id'] AS context_id,\n  \
+  \  max(LogAttributes['request_id']) AS max_history\n    FROM otel_logs\nGROUP BY\
+  \ context_id\n)\nSELECT DISTINCT LogAttributes['context_id'] AS context_id,\nLogAttributes['request_id']\
+  \ AS request_id,\notel_logs.Timestamp AS start_time,\nJSON_VALUE(otel_logs.Body,\
+  \ '$.label') AS label,\nJSON_VALUE(otel_logs.Body, '$.flow') AS flow_label,\nJSON_VALUE(otel_logs.Body,\
+  \ '$.node') AS node_label\nFROM otel_logs\nINNER JOIN main\nON context_id  = main.context_id\n\
+  AND request_id = main.max_history\nINNER JOIN otel_traces\nON otel_logs.TraceId\
+  \ = otel_traces.TraceId\nWHERE otel_traces.SpanName = 'get_current_label'\n"
 params: null
 template_params: null
 filter_select_enabled: false

@@ -38,6 +38,7 @@ It is essential that you use get_current_label at least once, so that the defaul
 can be successfully displayed.
 
 .. code-block:: python
+    :linenos:
 
     # import dependencies
     from dff.pipeline import Pipeline, Service, ACTOR
@@ -73,6 +74,7 @@ The configuration can be optionally saved as a zip archive for inspection / debu
 You can set most of the configuration options using a YAML file.
 
 .. code-block:: yaml
+    :linenos:
 
     # config.yaml
     db:
@@ -87,6 +89,7 @@ The file can then be used to parametrize the configuration script.
 Password values can be omitted and set interactively.
 
 .. code-block:: shell
+    :linenos:
 
     dff.stats config.yaml \
     -U superset_user \
@@ -108,12 +111,36 @@ Using Superset
 -------------------
 
 | In order to view the imported dashboard, log into Superset using your username and password.
-| The dashboard will then be available in the `Dashboards` section of the Superset UI under the name of `DFF stats`.
+| The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
 | The dashboard has four sections, each one of them containing different kind of data.
-*  The 'Overview' section summarizes the information about user interaction with your script. And displays a weighted graph of transitions from one node to another. The data is also shown in the form of a table for better introspection capabilities.
-* The data displayed in the 'General stats' section reports, how frequent each of the nodes in your script was visited by users. The information is aggregated in several forms for better interpretability.
-* 'Additional stats' includes charts for node visit counts aggregated over various specific variables.
-* General service load data aggregated over time can be found in the 'Service stats' section.
+
+*  The **Overview** section summarizes the information about user interaction with your script. And displays a weighted graph of transitions from one node to another. The data is also shown in the form of a table for better introspection capabilities.
+
+.. figure:: ../_static/images/overview.png
+
+    Overview plots.
+
+* The data displayed in the **General stats** section reports, how frequent each of the nodes in your script was visited by users. The information is aggregated in several forms for better interpretability.
+
+.. figure:: ../_static/images/general_stats.png
+
+    General stats plots.
+
+* The **Additional stats** section includes charts for node visit counts aggregated over various specific variables.
+
+.. figure:: ../_static/images/additional_stats.png
+
+    Additional stats plots.
+
+* General service load data aggregated over time can be found in the **Service stats** section.
+
+.. figure:: ../_static/images/service_stats.png
+
+    Service stats plots.
 
 On some occasions, Superset can show warnings about the database connection being faulty.
 In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.
+
+.. figure:: ../_static/images/databases.png
+
+    Locate the database settings in the right corner of the screen.
