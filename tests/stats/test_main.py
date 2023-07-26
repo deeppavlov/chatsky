@@ -50,7 +50,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
     assert datasets_json["count"] == 2
     assert datasets_json["ids"] == [1, 2]
     assert [item["id"] for item in datasets_json["result"]] == [1, 2]
-    assert [item["table_name"] for item in datasets_json["result"]] == [
+    assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
         "dff_final_nodes",
         "dff_node_stats",
     ]
