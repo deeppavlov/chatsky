@@ -98,9 +98,7 @@ _all is an alias for all.
 
 
 @validate_arguments
-def aggregate(
-    cond_seq: list, aggregate_func: Callable = _any
-) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def aggregate(cond_seq: list, aggregate_func: Callable = _any) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Aggregate multiple functions into one by using aggregating function.
 
