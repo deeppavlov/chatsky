@@ -120,15 +120,12 @@ def _get_label_by_index_shifting(
     """
     flow_label, node_label, current_priority = repeat(priority, *args, **kwargs)(ctx, pipeline, *args, **kwargs)
     labels = list(pipeline.script.get(flow_label, {}))
-    print(flow_label, node_label, current_priority)
 
     if node_label not in labels:
         return (*pipeline.actor.fallback_label[:2], current_priority)
 
     label_index = labels.index(node_label)
-    print(label_index)
     label_index = label_index + 1 if increment_flag else label_index - 1
-    print(label_index)
     if not (cyclicality_flag or (0 <= label_index < len(labels))):
         return (*pipeline.actor.fallback_label[:2], current_priority)
     label_index %= len(labels)
