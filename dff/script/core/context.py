@@ -21,7 +21,7 @@ from uuid import UUID, uuid4
 
 from typing import Any, Optional, Union, Dict, List, Set
 
-from pydantic import ConfigDict, BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, field_validator
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
@@ -30,7 +30,6 @@ logger = logging.getLogger(__name__)
 Node = BaseModel
 
 
-# @validate_call
 def get_last_index(dictionary: dict) -> int:
     """
     Obtaining the last index from the `dictionary`. Functions returns `-1` if the `dict` is empty.
@@ -46,13 +45,6 @@ class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
     """
-
-    model_config = ConfigDict(
-        property_set_methods={
-            "last_response": "set_last_response",
-            "last_request": "set_last_request",
-        }
-    )
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
@@ -230,7 +222,8 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    def set_last_response(self, response: Optional[Message]):
+    @last_response.setter
+    def last_response(self, response: Optional[Message]):
         """
         Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
@@ -247,7 +240,8 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    def set_last_request(self, request: Optional[Message]):
+    @last_request.setter
+    def last_request(self, request: Optional[Message]):
         """
         Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
@@ -290,13 +284,6 @@ class Context(BaseModel):
                 f"The `{self.overwrite_current_node_in_processing.__name__}` "
                 "function can only be run during processing functions."
             )
-
-    def __setattr__(self, key, val):
-        method = self.model_config.get("property_set_methods", {}).get(key, None)
-        if method is None:
-            super().__setattr__(key, val)
-        else:
-            getattr(self, method)(val)
 
 
 Context.model_rebuild()

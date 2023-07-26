@@ -39,9 +39,8 @@ class TelegramUI(Keyboard):
     def validate_buttons(self, _):
         if not self.is_inline:
             for button in self.buttons:
-                assert (
-                    button.payload is None and button.source is None
-                ), f"`payload` and `source` are only used for inline keyboards: {button}"
+                if button.payload is not None or button.source is not None:
+                    raise AssertionError(f"`payload` and `source` are only used for inline keyboards: {button}")
         return self
 
 

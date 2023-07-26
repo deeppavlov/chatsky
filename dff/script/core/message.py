@@ -9,8 +9,7 @@ from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 
-from pydantic import field_validator, ConfigDict, Field, FilePath, HttpUrl, BaseModel
-from pydantic import model_validator
+from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
 
 
 class Session(Enum):
@@ -22,12 +21,12 @@ class Session(Enum):
     FINISHED = auto()
 
 
-class DataModel(BaseModel):
+class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
     """
     This class is a Pydantic BaseModel that serves as a base class for all DFF models.
     """
 
-    model_config = ConfigDict(extra="allow", arbitrary_types_allowed=True)
+    ...
 
 
 class Command(DataModel):
@@ -89,10 +88,10 @@ class Attachment(DataModel):
     @model_validator(mode="before")
     @classmethod
     def validate_source_or_id(cls, values: dict):
-        assert isinstance(values, dict)
-        assert bool(values.get("source")) != bool(
-            values.get("id")
-        ), "Attachment type requires exactly one parameter, `source` or `id`, to be set."
+        if not isinstance(values, dict):
+            raise AssertionError(f"Invalid constructor parameters: {str(values)}")
+        if bool(values.get("source")) == bool(values.get("id")):
+            raise AssertionError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
         return values
 
     @field_validator("source", mode="before")

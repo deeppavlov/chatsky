@@ -40,7 +40,7 @@ class Node(BaseModel, extra="forbid"):
     @classmethod
     @validate_call
     def normalize_transitions(
-        _, transitions: Dict[NodeLabelType, ConditionType]
+        cls, transitions: Dict[NodeLabelType, ConditionType]
     ) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
         """
         The function which is used to normalize transitions and returns normalized dict.
