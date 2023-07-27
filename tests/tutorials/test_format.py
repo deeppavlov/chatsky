@@ -13,7 +13,8 @@ patterns = [
     re.compile(r"# %%\n"),  # check python block
 ]
 
-start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n\n(?:[\S\s]*\n)?"""\n')
+docstring_start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n(?:\n[\S\s]*)?"""\n')
+comment_start_pattern = re.compile(r'# %% \[markdown\]\n# #(?: .*:)? \d+\. .*\n#(?:\n# [\S\s]*)?')
 
 
 def regexp_format_checker(dff_tutorial_py_file: pathlib.Path):
@@ -27,9 +28,14 @@ def regexp_format_checker(dff_tutorial_py_file: pathlib.Path):
 
 
 def notebook_start_checker(dff_tutorial_py_file: pathlib.Path):
-    file_lines = dff_tutorial_py_file.open("rt").readlines()
-    result = start_pattern.search("".join(file_lines))
-    if result is None:
+    file_lines = "".join(dff_tutorial_py_file.open("rt").readlines())
+    docstring_result = docstring_start_pattern.search(file_lines)
+    comment_result = comment_start_pattern.search(file_lines)
+    if docstring_result is not None:
+        return docstring_result.pos == 0
+    elif comment_result is not None:
+        return comment_result.pos == 0
+    else:
         raise Exception(
             (
                 f"Tutorial `{dff_tutorial_py_file.relative_to(dff_tutorials_dir.parent)}` "
@@ -37,8 +43,6 @@ def notebook_start_checker(dff_tutorial_py_file: pathlib.Path):
                 + "with a single '# %% [markdown]'."
             )
         )
-    else:
-        return result.pos == 0
 
 
 format_checkers = [regexp_format_checker, notebook_start_checker]

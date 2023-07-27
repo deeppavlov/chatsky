@@ -306,8 +306,8 @@ class Actor:
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
 
-    def _run_handlers(self, ctx, pipeline: Pipeline, actor_stade: ActorStage, *args, **kwargs):
-        [handler(ctx, pipeline, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
+    def _run_handlers(self, ctx, pipeline: Pipeline, actor_stage: ActorStage, *args, **kwargs):
+        [handler(ctx, pipeline, *args, **kwargs) for handler in self.handlers.get(actor_stage, [])]
 
     def _choose_label(
         self, specific_label: Optional[NodeLabel3Type], general_label: Optional[NodeLabel3Type]
