@@ -52,7 +52,6 @@ def fill_template(slots: Optional[List[str]] = None):
     """
 
     def fill_inner(ctx: Context, pipeline: Pipeline) -> Message:
-
         # get current node response
         response = ctx.current_node.response
         if callable(response):

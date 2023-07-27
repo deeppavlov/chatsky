@@ -174,7 +174,7 @@ class RootSlot(_GroupSlot):
         ...
 
     @overload
-    def add_slots(self, slots: Iterable[BaseSlot]) -> None:
+    def add_slots(self, slots: Iterable) -> None:
         ...
 
     def add_slots(self, slots):
