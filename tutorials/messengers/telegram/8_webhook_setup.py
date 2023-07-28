@@ -49,7 +49,7 @@ happy_path = HAPPY_PATH
 
 def main():
     if os.getenv("TG_BOT_TOKEN") is None:
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
+        raise RuntimeError("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     else:
         pipeline.run()
 
