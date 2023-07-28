@@ -45,6 +45,7 @@ def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the previous node with a given :py:const:`priority <float>`.
     If the priority is not given, `Pipeline.actor.label_priority` is used as default.
+    If the current node is the start node, fallback is returned.
 
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
