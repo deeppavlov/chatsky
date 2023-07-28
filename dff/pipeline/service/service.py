@@ -124,7 +124,7 @@ class Service(PipelineComponent):
         else:
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
 
-    def _run_as_actor(self, ctx: Context, pipeline: Pipeline):
+    async def _run_as_actor(self, ctx: Context, pipeline: Pipeline):
         """
         Method for running this service if its handler is an `Actor`.
         Catches runtime exceptions.
@@ -133,7 +133,7 @@ class Service(PipelineComponent):
         :return: Context, mutated by actor.
         """
         try:
-            ctx = pipeline.actor(pipeline, ctx)
+            ctx = await pipeline.actor(pipeline, ctx)
             self._set_state(ctx, ComponentExecutionState.FINISHED)
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
@@ -172,7 +172,7 @@ class Service(PipelineComponent):
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
         if isinstance(self.handler, str) and self.handler == "ACTOR":
-            ctx = self._run_as_actor(ctx, pipeline)
+            ctx = await self._run_as_actor(ctx, pipeline)
         else:
             await self._run_as_service(ctx, pipeline)
 
