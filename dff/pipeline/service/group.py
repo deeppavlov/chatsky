@@ -113,9 +113,9 @@ class ServiceGroup(PipelineComponent):
 
         if self.asynchronous:
             service_futures = [service(ctx, pipeline) for service in self.components]
-            for service, future in zip(self.components, asyncio.as_completed(service_futures)):
+            for service, future in zip(self.components, await asyncio.gather(*service_futures)):
                 try:
-                    service_result = await future
+                    service_result = future
                     if service.asynchronous and isinstance(service_result, Awaitable):
                         await service_result
                 except asyncio.TimeoutError:
