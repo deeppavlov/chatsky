@@ -264,7 +264,7 @@ class Actor:
         pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
         results = await asyncio.gather(
             *[wrap_sync_function_in_async(func, ctx, pipeline) for func in pre_transitions_processing.values()],
-            return_exceptions=True
+            return_exceptions=True,
         )
         for exc, (processing_name, processing_func) in zip(results, pre_transitions_processing.items()):
             if isinstance(exc, Exception):
@@ -284,7 +284,7 @@ class Actor:
         pre_response_processing = ctx.framework_states["actor"]["next_node"].pre_response_processing
         results = await asyncio.gather(
             *[wrap_sync_function_in_async(func, ctx, pipeline) for func in pre_response_processing.values()],
-            return_exceptions=True
+            return_exceptions=True,
         )
         for exc, (processing_name, processing_func) in zip(results, pre_response_processing.items()):
             if isinstance(exc, Exception):
