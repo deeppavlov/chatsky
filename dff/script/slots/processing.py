@@ -25,7 +25,7 @@ def extract(slots: Optional[List[str]]) -> Callable:
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
 
-    def extract_inner(ctx: Context, pipeline: Pipeline) -> Context:
+    async def extract_inner(ctx: Context, pipeline: Pipeline) -> Context:
         _ = extract_handler(ctx, pipeline, slots)
         return ctx
 

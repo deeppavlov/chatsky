@@ -20,7 +20,6 @@ from dff.script import (
     normalize_condition,
     normalize_label,
     normalize_script,
-    normalize_processing,
     normalize_response,
     normalize_transitions,
 )
@@ -88,27 +87,6 @@ def test_normalize_transitions():
 def test_normalize_response():
     assert callable(normalize_response(std_func))
     assert callable(normalize_response(Message(text="text")))
-
-
-def test_normalize_processing():
-    ctx, actor = create_env()
-
-    def true_processing_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        return ctx
-
-    def false_processing_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        raise Exception("False processing")
-
-    n_f = normalize_processing({1: true_processing_func})
-    assert callable(n_f)
-    assert isinstance(n_f(ctx, actor), Context)
-    n_f = normalize_processing({1: false_processing_func})
-    assert isinstance(n_f(ctx, actor), Context)
-
-    # TODO: Add full check for functions
-    assert callable(normalize_processing({}))
-    assert callable(normalize_processing({1: std_func}))
-    assert callable(normalize_processing({1: std_func, 2: std_func}))
 
 
 def test_normalize_keywords():

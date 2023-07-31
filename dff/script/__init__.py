@@ -17,7 +17,6 @@ from .core.normalization import (
     normalize_condition,
     normalize_transitions,
     normalize_response,
-    normalize_processing,
     normalize_script,
 )
 from .core.script import Node, Script

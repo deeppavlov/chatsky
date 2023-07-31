@@ -121,32 +121,6 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
 
 
 @validate_arguments
-def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
-    """
-    This function is used to normalize processing.
-    It returns function that consecutively applies all preprocessing stages from dict.
-
-    :param processing: Processing which contains all preprocessing stages in a format "PROC_i" -> proc_func_i.
-    :return: Function that consequentially applies all preprocessing stages from dict.
-    """
-    if isinstance(processing, dict):
-
-        def processing_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-            for processing_name, processing_func in processing.items():
-                try:
-                    if processing_func is not None:
-                        ctx = processing_func(ctx, pipeline, *args, **kwargs)
-                except Exception as exc:
-                    logger.error(
-                        f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
-                        exc_info=exc,
-                    )
-            return ctx
-
-        return processing_handler
-
-
-@validate_arguments
 def normalize_script(script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
     """
     This function normalizes :py:class:`.Script`: it returns dict where the GLOBAL node is moved

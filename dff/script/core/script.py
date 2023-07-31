@@ -14,7 +14,7 @@ from pydantic import BaseModel, validator, Extra
 
 from .types import LabelType, NodeLabelType, ConditionType
 from .message import Message
-from .normalization import normalize_response, normalize_processing, normalize_transitions, normalize_script
+from .normalization import normalize_response, normalize_transitions, normalize_script
 from typing import ForwardRef
 
 logger = logging.getLogger(__name__)
