@@ -157,10 +157,10 @@ class Actor:
         del ctx.framework_states["actor"]
         return ctx
 
-    def _context_init(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
+    @staticmethod
+    def _context_init(ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         ctx = Context.cast(ctx)
         if not ctx.requests:
-            ctx.add_label(self.start_label[:2])
             ctx.add_request(Message())
         ctx.framework_states["actor"] = {}
         return ctx
