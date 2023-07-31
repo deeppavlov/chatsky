@@ -54,6 +54,7 @@ class MongoContextStorage(DBContextStorage):
 
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), collection_prefix: str = "dff_collection"):
         DBContextStorage.__init__(self, path, context_schema, serializer)
+        self.context_schema.supports_async = True
 
         if not mongo_available:
             install_suggestion = get_protocol_install_suggestion("mongodb")

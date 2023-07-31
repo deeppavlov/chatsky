@@ -52,6 +52,7 @@ class RedisContextStorage(DBContextStorage):
 
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), key_prefix: str = "dff_keys"):
         DBContextStorage.__init__(self, path, context_schema, serializer)
+        self.context_schema.supports_async = True
 
         if not redis_available:
             install_suggestion = get_protocol_install_suggestion("redis")

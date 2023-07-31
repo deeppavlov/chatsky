@@ -43,6 +43,7 @@ class PickleContextStorage(DBContextStorage):
 
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
         DBContextStorage.__init__(self, path, context_schema, serializer)
+        self.context_schema.supports_async = True
         file_path = Path(self.path)
         context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
         self.context_table = [context_file, dict()]

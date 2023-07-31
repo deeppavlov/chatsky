@@ -67,6 +67,7 @@ class YDBContextStorage(DBContextStorage):
 
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), table_name_prefix: str = "dff_table", timeout=5):
         DBContextStorage.__init__(self, path, context_schema, serializer)
+        self.context_schema.supports_async = True
 
         protocol, netloc, self.database, _, _ = urlsplit(path)
         self.endpoint = "{}://{}".format(protocol, netloc)
