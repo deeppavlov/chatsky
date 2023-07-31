@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 8. Basics
+# 8. Partial context updates
 
-The following tutorial shows the basic use of the database connection.
+The following tutorial shows the advanced usage of context storage and context storage schema.
 """
 
 
@@ -11,8 +11,7 @@ import pathlib
 
 from dff.context_storages import (
     context_storage_factory,
-    SchemaFieldReadPolicy,
-    SchemaFieldWritePolicy,
+    ALL_ITEMS,
 )
 
 from dff.pipeline import Pipeline
@@ -24,56 +23,74 @@ from dff.utils.testing.common import (
 from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
-db = context_storage_factory("json://dbs/file.json")
-# db = context_storage_factory("pickle://dbs/file.pkl")
-# db = context_storage_factory("shelve://dbs/file.shlv")
+db = context_storage_factory("pickle://dbs/partly.pkl")
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 
-# Scheme field subscriptcan be changed:
-# that will mean that only these MISC keys will be read and written
-db.context_schema.misc.subscript = ["some_key", "some_other_key"]
+# %% [markdown]
+"""
 
-# Scheme field subscriptcan be changed:
-# that will mean that only last REQUESTS will be read and written
-db.context_schema.requests.subscript = -5
+## Context Schema
 
-# The default policy for reading is `SchemaFieldReadPolicy.READ` -
-# the values will be read
-# However, another possible policy option is `SchemaFieldReadPolicy.IGNORE` -
-# the values will be ignored
-db.context_schema.responses.on_read = SchemaFieldReadPolicy.IGNORE
+Context schema is a special object included in any context storage.
+This object helps you refining use of context storage, writing fields partially instead
+of writing them all at once.
 
-# The default policy for writing values is `SchemaFieldReadPolicy.UPDATE` -
-# the value will be updated
-# However, another possible policy options are `SchemaFieldReadPolicy.IGNORE` -
-# the value will be ignored
-# `SchemaFieldReadPolicy.HASH_UPDATE` and `APPEND` are also possible,
-# but they will be described together with writing dictionaries
-db.context_schema.created_at.on_write = SchemaFieldWritePolicy.IGNORE
+How does that partial field writing work?
+In most cases, every context storage operates two "tables", "dictionaries", "files", etc.
+One of them is called CONTEXTS and contains serialized context values, including
+last few (the exact number is controlled by context schema `subscript` property)
+dictionaries with integer keys (that are `requests`, `responses` and `labels`) items.
+The other is called LOGS and contains all the other items (not the most recent ones).
 
-# The default policy for writing dictionaries is `SchemaFieldReadPolicy.UPDATE_HASH`
-# - the values will be updated only if they have changed since the last time they were read
-# However, another possible policy option is `SchemaFieldReadPolicy.APPEND`
-# - the values will be updated if only they are not present in database
-db.context_schema.framework_states.on_write = SchemaFieldWritePolicy.APPEND
+Values from CONTEXTS table are read frequently and are not so numerous.
+Values from LOGS table are written frequently, but are almost never read.
+"""
 
-# Some field properties can't be changed: these are `storage_key` and `active_ctx`
-try:
-    db.context_schema.storage_key.on_write = SchemaFieldWritePolicy.IGNORE
-    raise RuntimeError("Shouldn't reach here without an error!")
-except TypeError:
-    pass
+# %%
 
-# Another important note: `name` property on neild can **never** be changed
-try:
-    db.context_schema.active_ctx.on_read = SchemaFieldReadPolicy.IGNORE
-    raise RuntimeError("Shouldn't reach here without an error!")
-except TypeError:
-    pass
+# Take a look at fields of ContextStorage, whose names match the names of Context fields.
+# There are three of them: `requests`, `responses` and `labels`, i.e. dictionaries
+# with integer keys.
 
-new_db = context_storage_factory("json://dbs/file.json")
-pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=new_db)
+
+# These fields have two properties, first of them is `name`
+# (it matches field name and can't be changed).
+print(db.context_schema.requests.name)
+
+# The fields also contain `subscript` property:
+# this property controls the number of *last* dictionary items that will be read and written
+# (the items are ordered by keys, ascending) - default value is 3.
+# In order to read *all* items at once the property can also be set to "__all__" literal
+# (it can also be imported as constant).
+
+# All items will be read and written.
+db.context_schema.requests.subscript = ALL_ITEMS
+
+# 5 last items will be read and written.
+db.context_schema.requests.subscript = 5
+
+
+# There are also some boolean field flags that worth attention.
+# Let's take a look at them:
+
+# `append_single_log` if set will *not* copy any values in CONTEXTS and LOGS tables.
+# I.e. only the values that are not written to CONTEXTS table anymore will be written to LOGS.
+# It is True by default.
+db.context_schema.append_single_log = True
+
+# `duplicate_context_in_logs` if set will *always* backup all items in CONTEXT table in LOGS table.
+# I.e. all the fields that are written to CONTEXT tables will be always backed up to LOGS.
+# It is False by default.
+db.context_schema.duplicate_context_in_logs = False
+
+# `supports_async` if set will try to perform *some* operations asynchroneously.
+# It is set automatically for different context storages to True or False according to their
+# capabilities. You should change it only if you use some external DB distribution that was not
+# tested by DFF development team.
+# NB! Here it is set to True because we use pickle context storage, backed up be `aiofiles` library.
+db.context_schema.supports_async = True
+
 
 if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
