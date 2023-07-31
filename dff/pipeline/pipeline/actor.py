@@ -261,12 +261,18 @@ class Actor:
 
     async def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
-        ctx = await wrap_sync_function_in_async(
-            ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing,
-            ctx,
-            pipeline,
-            *args,
-            **kwargs,
+        pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
+        await asyncio.gather(
+            *[
+                wrap_sync_function_in_async(
+                    func,
+                    ctx,
+                    pipeline,
+                    *args,
+                    **kwargs,
+                )
+                for func in pre_transitions_processing.values()
+            ]
         )
         ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
             "processed_node"
@@ -276,12 +282,18 @@ class Actor:
 
     async def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
-        ctx = await wrap_sync_function_in_async(
-            ctx.framework_states["actor"]["next_node"].run_pre_response_processing,
-            ctx,
-            pipeline,
-            *args,
-            **kwargs,
+        pre_response_processing = ctx.framework_states["actor"]["next_node"].pre_response_processing
+        await asyncio.gather(
+            *[
+                wrap_sync_function_in_async(
+                    func,
+                    ctx,
+                    pipeline,
+                    *args,
+                    **kwargs,
+                )
+                for func in pre_response_processing.values()
+            ]
         )
         ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
         del ctx.framework_states["actor"]["processed_node"]
