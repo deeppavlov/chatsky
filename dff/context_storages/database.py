@@ -70,6 +70,13 @@ class DBContextStorage(ABC):
         Keep in mind that in Windows you will have to use double backslashes '\\'
         instead of forward slashes '/' when defining the file path.
 
+    :param context_schema: Initial :py:class:`~.ContextSchema`.
+        If None, the default context schema is set.
+
+    :param serializer: Serializer to use with this context storage.
+        If None, the :py:class:`~.DefaultSerializer` is used.
+        Any object that passes :py:func:`validate_serializer` check can be a serializer.
+
     """
 
     def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
@@ -77,18 +84,18 @@ class DBContextStorage(ABC):
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
         self.path = file_path
-        """`full_path` without a prefix defining db used"""
+        """`full_path` without a prefix defining db used."""
         self._lock = threading.Lock()
         """Threading for methods that require single thread access."""
         self._insert_limit = False
-        # TODO: doc!
-        self.set_context_schema(context_schema)
-        # TODO: doc!
+        """Maximum number of items that can be inserted simultaneously, False if no such limit exists."""
         self.serializer = validate_serializer(serializer)
+        """Serializer that will be used with this storage."""
+        self.set_context_schema(context_schema)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):
         """
-        Set given context schema or the default if None.
+        Set given :py:class:`~.ContextSchema` or the default if None.
         """
         self.context_schema = context_schema if context_schema else ContextSchema()
 
@@ -199,10 +206,16 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     def keys(self) -> Set[str]:
+        """
+        Synchronous method for getting set of all storage keys.
+        """
         return asyncio.run(self.keys_async())
 
     @abstractmethod
     async def keys_async(self) -> Set[str]:
+        """
+        Asynchronous method for getting set of all storage keys.
+        """
         raise NotImplementedError
 
     def get(self, key: Hashable, default: Optional[Context] = None) -> Optional[Context]:
@@ -230,22 +243,34 @@ class DBContextStorage(ABC):
 
     @abstractmethod
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
-        # TODO: doc!
+        """
+        Method for reading context data from `CONTEXT` table for given key.
+        See :py:class:`~.ContextSchema` for details.
+        """
         raise NotImplementedError
 
     @abstractmethod
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
-        # TODO: doc!
+        """
+        Method for reading context data from `LOGS` table for given key.
+        See :py:class:`~.ContextSchema` for details.
+        """
         raise NotImplementedError
 
     @abstractmethod
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
-        # TODO: doc!
+        """
+        Method for writing context data to `CONTEXT` table for given key.
+        See :py:class:`~.ContextSchema` for details.
+        """
         raise NotImplementedError
 
     @abstractmethod
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
-        # TODO: doc!
+        """
+        Method for writing context data to `LOGS` table for given key.
+        See :py:class:`~.ContextSchema` for details.
+        """
         raise NotImplementedError
 
 

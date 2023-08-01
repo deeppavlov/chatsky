@@ -16,27 +16,39 @@ Can be used as a value of `subscript` parameter for `DictSchemaField`s and `List
 """
 
 _ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
-# TODO!
+"""
+Type alias of asynchronous function that should be called in order to retrieve context
+data from `CONTEXT` table. Matches type of :py:func:`DBContextStorage._read_pac_ctx` method.
+"""
 
 _ReadLogContextFunction = Callable[[Optional[int], str, str], Awaitable[Dict]]
-# TODO!
+"""
+Type alias of asynchronous function that should be called in order to retrieve context
+data from `LOGS` table. Matches type of :py:func:`DBContextStorage._read_log_ctx` method.
+"""
 
 _WritePackedContextFunction = Callable[[Dict, datetime, datetime, str, str], Awaitable]
-# TODO!
+"""
+Type alias of asynchronous function that should be called in order to write context
+data to `CONTEXT` table. Matches type of :py:func:`DBContextStorage._write_pac_ctx` method.
+"""
 
 _WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], datetime, str], Coroutine]
-# TODO!
+"""
+Type alias of asynchronous function that should be called in order to write context
+data to `LOGS` table. Matches type of :py:func:`DBContextStorage._write_log_ctx` method.
+"""
 
 
 class SchemaField(BaseModel):
     """
-    Schema for context fields that are dictionaries with numeric keys fields.
-    Used for controlling read / write policy of the particular field.
+    Schema for :py:class:`~.Context` fields that are dictionaries with numeric keys fields.
+    Used for controlling read and write policy of the particular field.
     """
 
     name: str = Field("", allow_mutation=False)
     """
-    `name` is the name of backing Context field.
+    `name` is the name of backing :py:class:`~.Context` field.
     It can not (and should not) be changed in runtime.
     """
 
@@ -46,7 +58,7 @@ class SchemaField(BaseModel):
     It can be a string `__all__` meaning all existing keys or number,
     positive for first **N** keys and negative for last **N** keys.
     Keys should be sorted as numbers.
-    Default: -3.
+    Default: 3.
     """
 
     class Config:
@@ -55,7 +67,7 @@ class SchemaField(BaseModel):
 
 class ExtraFields(str, Enum):
     """
-    Enum, conaining special :py:class:`dff.script.Context` field names.
+    Enum, conaining special :py:class:`~.Context` field names.
     These fields only can be used for data manipulation within context storage.
     """
 
@@ -68,8 +80,15 @@ class ExtraFields(str, Enum):
 
 class ContextSchema(BaseModel):
     """
-    Schema, describing how :py:class:`dff.script.Context` fields should be stored and retrieved from storage.
-    Allows fields ignoring, filtering, sorting and partial reading and writing of dictionary fields.
+    Schema, describing how :py:class:`~.Context` fields should be stored and retrieved from storage.
+    The default behaviour is the following: All the context data except for the fields that are
+    dictionaries with numeric keys is serialized and stored in `CONTEXT` **table** (that is a table
+    for SQL context storages only, it can also be a file or a namespace for different backends).
+    For the dictionaries with numeric keys, their entries are sorted according by key and the last
+    few are included into `CONTEXT` table, while the rest are stored in `LOGS` table.
+
+    That behaviour allows context storage to minimize the operation number for context reading and
+    writing.
     """
 
     requests: SchemaField = Field(SchemaField(name="requests"), allow_mutation=False)
@@ -88,10 +107,43 @@ class ContextSchema(BaseModel):
     """
 
     append_single_log: bool = True
+    """
+    If set will *not* write only one value to LOGS table each turn.
+
+    Example:
+    If `labels` field contains 7 entries and its subscript equals 3, (that means that 4 labels
+    were added during current turn), if `duplicate_context_in_logs` is set to False:
+    
+    - If `append_single_log` is True:
+       only the first label will be written to `LOGS`.
+    - If `append_single_log` is False:
+       all 4 first labels will be written to `LOGS`.
+
+    """
 
     duplicate_context_in_logs: bool = False
+    """
+    If set will *always* backup all items in `CONTEXT` table in `LOGS` table
+
+    Example:
+    If `labels` field contains 7 entries and its subscript equals 3 and `append_single_log`
+    is set to False:
+
+    - If `duplicate_context_in_logs` is False:
+       the last 3 entries will be stored in `CONTEXT` table and 4 first will be stored in `LOGS`.
+    - If `duplicate_context_in_logs` is True:
+       the last 3 entries will be stored in `CONTEXT` table and all 7 will be stored in `LOGS`.
+
+    """
 
     supports_async: bool = False
+    """
+    If set will try to perform *some* operations asynchroneously.
+
+    WARNING! Be careful with this flag. Some databases support asynchronous reads and writes,
+    and some do not. For all `DFF` context storages it will be set automatically.
+    Change it only if you implement a custom context storage.
+    """
 
     class Config:
         validate_assignment = True
@@ -103,12 +155,14 @@ class ContextSchema(BaseModel):
     async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str) -> Context:
         """
         Read context from storage.
-        Calculate what fields (and what keys of what fields) to read, call reader function and cast result to context.
-        `pac_reader` - the function used for context reading from a storage (see :py:const:`~._ReadContextFunction`).
-        `storage_key` - the key the context is stored with (used in cases when the key is not preserved in storage).
-        `primary_id` - the context unique identifier.
-        returns tuple of context and context hashes
-        (hashes should be kept and passed to :py:func:`~.ContextSchema.write_context`).
+        Calculate what fields to read, call reader function and cast result to context.
+        Also set `primary_id` and `storage_key` attributes of the read context.
+
+        :param pac_reader: the function used for reading context from `CONTEXT` table (see :py:const:`~._ReadPackedContextFunction`).
+        :param log_reader: the function used for reading context from `LOGS` table (see :py:const:`~._ReadLogContextFunction`).
+        :param storage_key: the key the context is stored with.
+
+        :return: the read :py:class:`~.Context` object.
         """
         ctx_dict, primary_id = await pac_reader(storage_key)
         if primary_id is None:
@@ -154,20 +208,16 @@ class ContextSchema(BaseModel):
     ):
         """
         Write context to storage.
-        Calculate what fields (and what keys of what fields) to write,
-        split large data into chunks if needed and call writer function.
-        `ctx` - the context to write.
-        `hashes` - hashes calculated for context during previous reading,
-            used only for :py:const:`~.SchemaFieldReadPolicy.UPDATE_HASHES`.
-        `val_writer` - the function used for context writing to a storage (see :py:const:`~._WriteContextFunction`).
-        `storage_key` - the key the context is stored with.
-        `primary_id` - the context unique identifier,
-            should be None if this is the first time writing this context,
-            otherwise the context will be overwritten.
-        `chunk_size` - chunk size for large dictionaries writing,
-            should be set to integer in case the storage has any writing query limitations,
-            otherwise should be boolean `False` or number `0`.
-        returns string, the context primary id.
+        Calculate what fields to write, split large data into chunks if needed and call writer function.
+        Also update `updated_at` attribute of the given context with current time, set `primary_id` and `storage_key`.
+
+        :param ctx: the context to store.
+        :param pac_writer: the function used for writing context to `CONTEXT` table (see :py:const:`~._WritePackedContextFunction`).
+        :param log_writer: the function used for writing context to `LOGS` table (see :py:const:`~._WriteLogContextFunction`).
+        :param storage_key: the key to store the context with.
+        :param chunk_size: maximum number of items that can be inserted simultaneously, False if no such limit exists.
+
+        :return: the read :py:class:`~.Context` object.
         """
         updated_at = datetime.now()
         setattr(ctx, ExtraFields.updated_at.value, updated_at)

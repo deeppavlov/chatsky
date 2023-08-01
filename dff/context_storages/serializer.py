@@ -5,6 +5,9 @@ try:
     from quickle import Encoder, Decoder
 
     class DefaultSerializer:
+        """
+        This default serializer uses `quickle` module for serialization.
+        """
         def __init__(self):
             self._encoder = Encoder()
             self._decoder = Decoder()
@@ -19,6 +22,9 @@ except ImportError:
     import pickle
 
     class DefaultSerializer:
+        """
+        This default serializer uses `pickle` module for serialization.
+        """
         def dumps(self, data: Any, protocol: Optional[Any] = None) -> bytes:
             return pickle.dumps(data, protocol)
 
@@ -27,6 +33,21 @@ except ImportError:
 
 
 def validate_serializer(serializer: Any) -> Any:
+    """
+    Check if serializer object has required functions and they accept required arguments.
+    Any serializer should have these two methods:
+
+    1. `loads(data: bytes) -> Any`: deserialization method, accepts bytes object and returns
+        serialized data.
+    2. `dumps(data: bytes, proto: Any)`: serialization method, accepts anything and returns
+        serialized bytes data.
+
+    :param serializer: An object to check.
+
+    :raise ValueError: Exception will be raised if the object is not a valid serializer.
+
+    :return: the serializer if it is a valid serializer.
+    """
     if not hasattr(serializer, "loads"):
         raise ValueError(f"Serializer object {serializer} lacks `loads(data: bytes) -> Any` method")
     if not hasattr(serializer, "dumps"):

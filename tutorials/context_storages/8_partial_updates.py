@@ -74,7 +74,7 @@ db.context_schema.requests.subscript = 5
 # There are also some boolean field flags that worth attention.
 # Let's take a look at them:
 
-# `append_single_log` if set will *not* copy any values in CONTEXTS and LOGS tables.
+# `append_single_log` if set will *not* write only one value to LOGS table each turn.
 # I.e. only the values that are not written to CONTEXTS table anymore will be written to LOGS.
 # It is True by default.
 db.context_schema.append_single_log = True
