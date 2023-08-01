@@ -137,21 +137,19 @@ class SQLContextStorage(DBContextStorage):
     | When using Sqlite on a Windows system, keep in mind that you have to use double backslashes '\\'
     | instead of forward slashes '/' in the file path.
 
-    Context value fields are stored in table `contexts`.
-    Columns of the table are: active_ctx, primary_id, storage_key, created_at and updated_at.
+    CONTEXT table is represented by `contexts` table.
+    Columns of the table are: active_ctx, primary_id, storage_key, data, created_at and updated_at.
 
-    Context dictionary fields are stored in tables `TABLE_NAME_PREFIX_FIELD`.
-    Columns of the tables are: primary_id, key, value, created_at and updated_at,
-    where key contains nested dict key and value contains nested dict value.
-
-    Context reading is done with one query to each table.
-    Context reading is done with one query to each table, but that can be optimized for PostgreSQL.
+    LOGS table is represented by `logs` table.
+    Columns of the table are: primary_id, field, key, value and updated_at.
 
     :param path: Standard sqlalchemy URI string.
         Examples: `sqlite+aiosqlite://path_to_the_file/file_name`,
         `mysql+asyncmy://root:pass@localhost:3306/test`,
         `postgresql+asyncpg://postgres:pass@localhost:5430/test`.
-    :param table_name: The name of the table to use.
+    :param context_schema: Context schema for this storage.
+    :param serializer: Serializer that will be used for serializing contexts.
+    :param table_name_prefix: "namespace" prefix for the two tables created for context storing.
     :param custom_driver: If you intend to use some other database driver instead of the recommended ones,
         set this parameter to `True` to bypass the import checks.
     """

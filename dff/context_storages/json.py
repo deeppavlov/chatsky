@@ -47,6 +47,8 @@ class JSONContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `json` as the storage format.
 
     :param path: Target file URI. Example: `json://file.json`.
+    :param context_schema: Context schema for this storage.
+    :param serializer: Serializer that will be used for serializing contexts.
     """
 
     _CONTEXTS_TABLE = "contexts"
@@ -59,9 +61,9 @@ class JSONContextStorage(DBContextStorage):
         self.context_schema.supports_async = True
         file_path = Path(self.path)
         context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
-        self.context_table = [context_file, SerializableStorage()]
+        self.context_table = (context_file, SerializableStorage())
         log_file = file_path.with_name(f"{file_path.stem}_{self._LOGS_TABLE}{file_path.suffix}")
-        self.log_table = [log_file, SerializableStorage()]
+        self.log_table = (log_file, SerializableStorage())
         asyncio.run(asyncio.gather(self._load(self.context_table), self._load(self.log_table)))
 
     @threadsafe_method

@@ -33,16 +33,13 @@ class MongoContextStorage(DBContextStorage):
     """
     Implements :py:class:`.DBContextStorage` with `mongodb` as the database backend.
 
-    Context value fields are stored in `COLLECTION_PREFIX_contexts` collection as dictionaries.
-    Extra field `_id` contains mongo-specific unique identifier.
-
-    Context dictionary fields are stored in `COLLECTION_PREFIX_FIELD` collection as dictionaries.
-    Extra field `_id` contains mongo-specific unique identifier.
-    Extra fields starting with `__mongo_misc_key` contain additional information for statistics and should be ignored.
-    Additional information includes primary identifier, creation and update date and time.
+    CONTEXTS table is stored as `COLLECTION_PREFIX_contexts` collection.
+    LOGS table is stored as `COLLECTION_PREFIX_logs` collection.
 
     :param path: Database URI. Example: `mongodb://user:password@host:port/dbname`.
-    :param collection: Name of the collection to store the data in.
+    :param context_schema: Context schema for this storage.
+    :param serializer: Serializer that will be used for serializing contexts.
+    :param collection_prefix: "namespace" prefix for the two collections created for context storing.
     """
 
     _CONTEXTS_TABLE = "contexts"

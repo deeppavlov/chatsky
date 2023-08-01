@@ -90,7 +90,7 @@ class DBContextStorage(ABC):
         self._insert_limit = False
         """Maximum number of items that can be inserted simultaneously, False if no such limit exists."""
         self.serializer = validate_serializer(serializer)
-        """Serializer that will be used with this storage."""
+        """Serializer that will be used with this storage (for serializing contexts in CONTEXT table)."""
         self.set_context_schema(context_schema)
 
     def set_context_schema(self, context_schema: Optional[ContextSchema]):

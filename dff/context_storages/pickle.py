@@ -34,6 +34,8 @@ class PickleContextStorage(DBContextStorage):
     Implements :py:class:`.DBContextStorage` with `pickle` as driver.
 
     :param path: Target file URI. Example: 'pickle://file.pkl'.
+    :param context_schema: Context schema for this storage.
+    :param serializer: Serializer that will be used for serializing contexts.
     """
 
     _CONTEXTS_TABLE = "contexts"
@@ -46,9 +48,9 @@ class PickleContextStorage(DBContextStorage):
         self.context_schema.supports_async = True
         file_path = Path(self.path)
         context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
-        self.context_table = [context_file, dict()]
+        self.context_table = (context_file, dict())
         log_file = file_path.with_name(f"{file_path.stem}_{self._LOGS_TABLE}{file_path.suffix}")
-        self.log_table = [log_file, dict()]
+        self.log_table = (log_file, dict())
         asyncio.run(asyncio.gather(self._load(self.context_table), self._load(self.log_table)))
 
     @threadsafe_method
