@@ -27,9 +27,9 @@ They can be installed via the following command:
 Example conversational chat-bot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let us go through creation of a simple bot that would play (virtual) ping-pong game with user.
-It will also greet user and handle exceptions.
-First, we would define the chat-bot in pseudo language:
+Let us go through the creation of a simple bot that would play (virtual) ping-pong game with its users.
+It would also greet them and handle exceptions.
+First, we define the chat-bot in pseudo language:
 
 .. code-block:: text
 
@@ -146,8 +146,8 @@ That's what the agent consists of:
 Advanced graph features
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Right now the agent we have created is a very simple one and does not behaves **exactly** as we wanted
-our bot to behave. Let's elaborate on that and see how can we improve our script:
+Right now the agent we have created is a very simple one and does not behave **exactly** as we wanted
+our bot to behave. Let's see how we can improve our script:
 
 .. code-block:: python
 
@@ -222,21 +222,21 @@ our bot to behave. Let's elaborate on that and see how can we improve our script
     if __name__ == "__main__":
         pipeline.run()
 
-That's what we changed:
+That's what we've changed:
 
 * ``greeting_node`` and ``response_node`` were merged, the resulting ``ping_pong_node`` has a
   callback response, it proposes user to play ping-pong if the previous node was ``start_node`` and
   plays ping-pong otherwise.
 
-* ``fallback_node`` has a callback response as well, it prints different mesasages according to the
-  previous node, that messages can also include user inputs.
+* ``fallback_node`` has a callback response as well, it prints different messages according to the
+  previous node.
 
 .. note::
 
     See `tutorial on response functions`_.
 
-* A special function ``get_previous_node_name`` was written to determine the value of the previous
-  visited node. It utilizes ``labels`` attribute of ``Context`` object.
+* A special function ``get_previous_node_name`` was written to determine the name of the previous
+  visited node. It utilizes ``labels`` attribute of the ``Context`` object.
 
 .. note::
 
@@ -259,6 +259,7 @@ Further exploration
 ~~~~~~~~~~~~~~~~~~~
 
 There are still come capabilities of Dialog Flow Framework that remain uncovered by this tutorial.
+
 For example:
 
 * You can use ``GLOBAL`` transitions that will be available from every node in your script.
