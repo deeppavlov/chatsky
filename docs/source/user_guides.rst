@@ -5,6 +5,6 @@ User guides
 ~~~~~~~~~~~~~~~~~
 
 In the ``basic conceptions`` tutorial the basics of DFF are described,
-that include but are not limited to: dialog graph creation, specifying start and fallback nodes,
+those include but are not limited to: dialog graph creation, specifying start and fallback nodes,
 setting transitions and conditions, using ``Context`` object in order to receive information
 about current script execution.
