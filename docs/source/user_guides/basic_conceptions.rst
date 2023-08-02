@@ -37,14 +37,14 @@ First, we define the chat-bot in pseudo language:
         Respond with "Hi! Let's play ping-pong!"
         If user writes something else:
             Respond with "You should've started the dialog with 'Hello!'"
-            Repeat from the beginning if user writes anything
+            Repeat from responding with "Hi! Let's play ping-pong!" if user writes anything
     
     If user afterwards writes "Ping" or "ping" or "Ping!" or "ping!":
         Respond with "Pong!"
         Repeat this behaviour
         If user writes something else:
             Respond with "You should've written 'Ping', not '[USER MESSAGE]'!"
-            Repeat from the beginning if user writes anything
+            Repeat from responding with "Hi! Let's play ping-pong!" if user writes anything
 
 Later in this tutorial we will create this chat-bot using DFF, starting from the very basics
 and then elaborating on more complicated topics.
