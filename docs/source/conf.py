@@ -8,7 +8,6 @@ sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
-from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -182,4 +181,3 @@ def setup(_):
             ("dff.utils.testing", "Utils"),
         ]
     )
-    pull_release_notes_from_github()
