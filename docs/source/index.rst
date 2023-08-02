@@ -18,6 +18,11 @@ It allows developers to easily create and manage complex dialog flows, integrate
 and handle user input in a flexible and efficient manner. Additionally, the framework is highly customizable,
 allowing developers to easily adapt it to their specific needs and requirements.
 
+.. note::
+
+    Any python version starting from Python 3.8 is supported by DFF,
+    however no tests for versions higher than 3.11 were executed.
+
 .. toctree::
    :maxdepth: 1
 

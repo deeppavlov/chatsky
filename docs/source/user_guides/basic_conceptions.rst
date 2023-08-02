@@ -35,14 +35,16 @@ First, we define the chat-bot in pseudo language:
 
     If user writes "Hello!":
         Respond with "Hi! Let's play ping-pong!"
+        If user writes something else:
+            Respond with "You should've started the dialog with 'Hello!'"
+            Repeat from the beginning if user writes anything
     
-    If user afterwards writes "Ping" or "ping" or "Ping!":
+    If user afterwards writes "Ping" or "ping" or "Ping!" or "ping!":
         Respond with "Pong!"
         Repeat this behaviour
-    
-    If user afterwards writes something else:
-        Respond with "That was against the rules!"
-        Repeat from the beginning if user writes anything
+        If user writes something else:
+            Respond with "You should've written 'Ping', not '[USER MESSAGE]'!"
+            Repeat from the beginning if user writes anything
 
 Later in this tutorial we will create this chat-bot using DFF, starting from the very basics
 and then elaborating on more complicated topics.
@@ -100,6 +102,7 @@ Let's start from creating the very simple dialog agent dialog agent:
 
     Current dialog agent implementation doesn't support different cases and/or marks in "Ping"
     messages, it only supports exact "Ping!" message from user.
+    It also supports only one standard error message for any error.
 
 That's what the agent consists of:
 
@@ -165,7 +168,9 @@ our bot to behave. Let's see how we can improve our script:
         The previous node will have key `max(keys) - 1`.
         """
         last_label = sorted(list(ctx.labels))[-2] if len(ctx.labels) >= 2 else None
+        # labels stores the list of nodes the bot transitioned to, so the second to last label would be label of a previous node
         return ctx.labels[last_label][1] if last_label is not None else "start_node"
+        # label is a two-item tuple used to identify a node, the first element is flow name and the second is node name
 
     def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
         """
