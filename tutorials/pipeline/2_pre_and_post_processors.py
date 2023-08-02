@@ -5,8 +5,8 @@
 The following tutorial shows more advanced usage of `pipeline`
 module as an extension to `dff.script.core`.
 
-Here, [MISC](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html#dff.script.core.context.Context.misc)
-dictionary of context is used for storing message additional data.
+Here, [misc](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html#dff.script.core.context.Context.misc)
+dictionary of context is used for storing additional data.
 """  # noqa: E501
 
 

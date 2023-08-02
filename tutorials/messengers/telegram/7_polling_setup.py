@@ -4,8 +4,8 @@
 
 The following tutorial shows how to configure `PollingTelegramInterface`.
 
-Here, [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.PollingMessengerInterface)
-and its' different parameters are shown.
+See [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.PollingMessengerInterface)
+for more information.
 """  # noqa: E501
 
 

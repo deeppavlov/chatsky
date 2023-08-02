@@ -2,9 +2,10 @@
 """
 # Responses: 2. Buttons
 
-Here, [Button](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Button)
-class is shown. Buttons are special response decorations (just like other [element](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#message)s)
-They can be attached to any message and will have different forms in differend messengers (implementation-defined).
+In this tutorial [Button](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Button)
+class is demonstrated.
+Buttons are one of [Message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Message) fields.
+They can be attached to any message but will only work if the chosen [messenger interface](https://deeppavlov.github.io/dialog_flow_framework/apiref/index_messenger_interfaces.html) supports them.
 """  # noqa: E501
 
 

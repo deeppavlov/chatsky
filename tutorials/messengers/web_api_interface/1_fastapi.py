@@ -10,7 +10,7 @@ Here, `_run_pipeline` (same as [run](https://deeppavlov.github.io/dialog_flow_fr
 method is used to execute pipeline once.
 
 [Message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Message)
-is used to represent incoming to pipeline data.
+is used in creating a JSON Schema for the endpoint.
 """  # noqa: E501
 
 

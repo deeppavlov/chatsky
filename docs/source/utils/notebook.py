@@ -17,13 +17,13 @@ def insert_installation_cell_into_py_tutorial():
 \"\"\"
 __Installing dependencies__
 
-The cell below installs dff with dependencies for running tutorials
-To install the minimal version of dff, use `pip install dff`
+The cell below installs dff with dependencies for running tutorials.
+To install the minimal version of dff, use `pip install dff`.
 To install other options of dff, use `pip install dff[OPTION_NAME1,OPTION_NAME2]`
 where OPTION_NAME can be one of the options from EXTRA_DEPENDENCIES.
-e.g `pip install dff[ydb, mysql]` installs dff with dependencies for using Yandex Database and MySQL
-EXTRA_DEPENDENCIES can be found in
-[here](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/README.md#installation)
+e.g `pip install dff[ydb, mysql]` installs dff with dependencies for using Yandex Database and MySQL.
+EXTRA_DEPENDENCIES can be found
+[here](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/README.md#installation).
 \"\"\"
 
 # %%

@@ -5,11 +5,7 @@
 The following tutorial shows `pipeline` creation from dict
 and most important pipeline components.
 
-Here, [Service](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.service.html#service)
-class, that can be used for some more complex pre- and postprocessing of messages is shown.
-
-Pipeline [from_dict](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.from_dict)
-static method can be used for pipeline creation (from dictionary).
+This tutorial is a more advanced version of the [previous tutorial](./tutorials.pipeline.3_pipeline_dict_with_services_basic.html).
 """  # noqa: E501
 
 

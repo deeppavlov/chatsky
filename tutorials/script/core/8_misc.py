@@ -4,8 +4,8 @@
 
 This tutorial shows `MISC` (miscellaneous) keyword usage.
 
-Here, [MISC](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.MISC)
-that can be used for user data storage inside of a context is shown.
+See [MISC](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.MISC)
+for more information.
 
 First of all, let's do all the necessary imports from DFF.
 """  # noqa: E501

@@ -8,7 +8,7 @@ It asks users for the '/start' command and then loops in one place.
 Here, [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.PollingMessengerInterface)
 class and [telebot](https://pytba.readthedocs.io/en/latest/index.html) library are used for accessing telegram API in polling mode.
 
-Telegram API token is used for access telegram API.
+Telegram API token is required to access telegram API.
 """  # noqa: E501
 
 
