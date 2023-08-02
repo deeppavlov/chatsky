@@ -21,7 +21,7 @@ logger = logging.getLogger(__name__)
 
 
 @validate_arguments
-def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Callable[..., bool]:
+def exact_match(match: Message, skip_none: bool = True) -> Callable[..., bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase
     is the same Message as the :py:const:`match`.
@@ -51,7 +51,7 @@ def exact_match(match: Message, skip_none: bool = True, *args, **kwargs) -> Call
 
 @validate_arguments
 def regexp(
-    pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0, *args, **kwargs
+    pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0
 ) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase contains
@@ -98,9 +98,7 @@ _all is an alias for all.
 
 
 @validate_arguments
-def aggregate(
-    cond_seq: list, aggregate_func: Callable = _any, *args, **kwargs
-) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def aggregate(cond_seq: list, aggregate_func: Callable = _any) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Aggregate multiple functions into one by using aggregating function.
 
@@ -120,7 +118,7 @@ def aggregate(
 
 
 @validate_arguments
-def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def any(cond_seq: list) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return function handler. This handler returns `True`
     if any function from the list is `True`.
@@ -136,7 +134,7 @@ def any(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, An
 
 
 @validate_arguments
-def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def all(cond_seq: list) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return function handler. This handler returns `True` only
     if all functions from the list are `True`.
@@ -152,7 +150,7 @@ def all(cond_seq: list, *args, **kwargs) -> Callable[[Context, Pipeline, Any, An
 
 
 @validate_arguments
-def negation(condition: Callable, *args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def negation(condition: Callable) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return function handler. This handler returns negation of the :py:func:`~condition`: `False`
     if :py:func:`~condition` holds `True` and returns `True` otherwise.
@@ -171,8 +169,6 @@ def has_last_labels(
     flow_labels: Optional[List[str]] = None,
     labels: Optional[List[NodeLabel2Type]] = None,
     last_n_indices: int = 1,
-    *args,
-    **kwargs,
 ) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return condition handler. This handler returns `True` if any label from
@@ -199,7 +195,7 @@ def has_last_labels(
 
 
 @validate_arguments
-def true(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def true() -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return function handler. This handler always returns `True`.
     """
@@ -211,7 +207,7 @@ def true(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
 
 
 @validate_arguments
-def false(*args, **kwargs) -> Callable[[Context, Pipeline, Any, Any], bool]:
+def false() -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
     Return function handler. This handler always returns `False`.
     """
