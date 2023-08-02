@@ -180,9 +180,10 @@ class SQLContextStorage(DBContextStorage):
         self.context_schema.supports_async = self.dialect != "sqlite"
 
         self.tables = dict()
+        self._metadata = MetaData()
         self.tables[self._CONTEXTS_TABLE] = Table(
             f"{table_name_prefix}_{self._CONTEXTS_TABLE}",
-            MetaData(),
+            self._metadata,
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, unique=True, nullable=False),
             Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(ExtraFields.active_ctx.value, Boolean(), index=True, nullable=False, default=True),
@@ -192,7 +193,7 @@ class SQLContextStorage(DBContextStorage):
         )
         self.tables[self._LOGS_TABLE] = Table(
             f"{table_name_prefix}_{self._LOGS_TABLE}",
-            MetaData(),
+            self._metadata,
             Column(ExtraFields.primary_id.value, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(self._FIELD_COLUMN, String(self._FIELD_LENGTH), index=True, nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),

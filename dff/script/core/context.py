@@ -68,16 +68,25 @@ class Context(BaseModel):
 
     _storage_key: Optional[str] = PrivateAttr(default=None)
     """
-    `_storage_key` is the unique private context identifier, by which it's stored in cintext storage.
+    `_storage_key` is the unique private context identifier, by which it's stored in context storage.
     By default, randomly generated using `uuid4` `_storage_key` is used.
     `_storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
     _primary_id: str = PrivateAttr(default_factory=lambda: str(uuid4()))
-    # TODO: doc!
-    _created_at: datetime = PrivateAttr(default=datetime.now())
-    # TODO: doc!
-    _updated_at: datetime = PrivateAttr(default=datetime.now())
-    # TODO: doc!
+    """
+    Primary id is the unique ID of the context.
+    It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
+    """
+    _created_at: datetime = PrivateAttr(default_factory=datetime.now)
+    """
+    Timestamp when the context was _first time saved to database_.
+    It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
+    """
+    _updated_at: datetime = PrivateAttr(default_factory=datetime.now)
+    """
+    Timestamp when the context was last time saved to database_.
+    It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
+    """
     labels: Dict[int, NodeLabel2Type] = {}
     """
     `labels` stores the history of all passed `labels`

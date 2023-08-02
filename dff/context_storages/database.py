@@ -8,7 +8,6 @@ that developers can inherit from in order to create their own context storage so
 This class implements the basic functionality and can be extended to add additional features as needed.
 """
 import asyncio
-import functools
 import importlib
 import threading
 from functools import wraps
@@ -44,7 +43,7 @@ def cast_key_to_string(key_name: str = "key"):
     def stringify_args(func: Callable):
         all_keys = signature(func).parameters.keys()
 
-        @functools.wraps(func)
+        @wraps(func)
         async def inner(*args, **kwargs):
             return await func(
                 *[str(arg) if name == key_name else arg for arg, name in zip(args, all_keys)],

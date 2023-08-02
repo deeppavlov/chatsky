@@ -46,7 +46,7 @@ class SchemaField(BaseModel):
     Used for controlling read and write policy of the particular field.
     """
 
-    name: str = Field("", allow_mutation=False)
+    name: str = Field(default_factory=str, allow_mutation=False)
     """
     `name` is the name of backing :py:class:`~.Context` field.
     It can not (and should not) be changed in runtime.
@@ -91,17 +91,17 @@ class ContextSchema(BaseModel):
     writing.
     """
 
-    requests: SchemaField = Field(SchemaField(name="requests"), allow_mutation=False)
+    requests: SchemaField = Field(default_factory=lambda: SchemaField(name="requests"), allow_mutation=False)
     """
     Field for storing Context field `requests`.
     """
 
-    responses: SchemaField = Field(SchemaField(name="responses"), allow_mutation=False)
+    responses: SchemaField = Field(default_factory=lambda: SchemaField(name="responses"), allow_mutation=False)
     """
     Field for storing Context field `responses`.
     """
 
-    labels: SchemaField = Field(SchemaField(name="labels"), allow_mutation=False)
+    labels: SchemaField = Field(default_factory=lambda: SchemaField(name="labels"), allow_mutation=False)
     """
     Field for storing Context field `labels`.
     """
@@ -138,7 +138,7 @@ class ContextSchema(BaseModel):
 
     supports_async: bool = False
     """
-    If set will try to perform *some* operations asynchroneously.
+    If set will try to perform *some* operations asynchronously.
 
     WARNING! Be careful with this flag. Some databases support asynchronous reads and writes,
     and some do not. For all `DFF` context storages it will be set automatically.
