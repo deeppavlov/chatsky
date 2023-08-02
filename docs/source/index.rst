@@ -11,17 +11,15 @@ Dialog Flow Framework
    :alt: Number of downloads
    :target: https://pypi.org/project/dff/
 
+.. image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg
+   :alt: Supported python versions
+
 The Dialog Flow Framework (DFF) is an open-source, `Apache 2.0 <https://www.apache.org/licenses/LICENSE-2.0>`_-licensed library
 that was developed specifically for creating dialog systems. DFF provides a comprehensive set of tools and resources for building conversational systems
 for a wide range of applications, including chatbots, virtual assistants, and other interactive systems.
 It allows developers to easily create and manage complex dialog flows, integrate with natural language processing (NLP) tools,
 and handle user input in a flexible and efficient manner. Additionally, the framework is highly customizable,
 allowing developers to easily adapt it to their specific needs and requirements.
-
-.. note::
-
-    Any python version starting from Python 3.8 is supported by DFF,
-    however no tests for versions higher than 3.11 were executed.
 
 .. toctree::
    :maxdepth: 1
