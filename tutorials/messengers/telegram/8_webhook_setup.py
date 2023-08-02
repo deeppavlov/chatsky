@@ -5,8 +5,8 @@
 The following tutorial shows how to use `CallbackTelegramInterface`
 that makes your bot accessible through a public webhook.
 
-Here, [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.CallbackMessengerInterface)
-is used for accessing telegram API in callback mode.
+See [CallbackMessengerInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.CallbackMessengerInterface)
+for more information.
 """  # noqa: E501
 
 
