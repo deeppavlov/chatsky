@@ -162,15 +162,13 @@ our bot to behave. Let's see how we can improve our script:
     def get_previous_node_name(ctx: Context) -> str:
         """
         Get name of the previous visited script node.
-        Visited node names are stored in `ctx.labels` dictionary.
-        The keys of the dictionary match the order of node visiting,
-        so the **current node** will be stored with `max(keys)` key.
-        The previous node will have key `max(keys) - 1`.
         """
         last_label = sorted(list(ctx.labels))[-2] if len(ctx.labels) >= 2 else None
-        # labels stores the list of nodes the bot transitioned to, so the second to last label would be label of a previous node
+        # labels store the list of nodes the bot transitioned to,
+        # so the second to last label would be the label of a previous node
         return ctx.labels[last_label][1] if last_label is not None else "start_node"
-        # label is a two-item tuple used to identify a node, the first element is flow name and the second is node name
+        # label is a two-item tuple used to identify a node,
+        # the first element is flow name and the second is node name
 
     def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
         """
