@@ -4,10 +4,10 @@ Basic Concepts
 Introduction
 ~~~~~~~~~~~~
 
-Dialog Flow Framework starts from creating conversational services,
-defining a specialized dialog graph that dictates the behavior of the dialog service.
+Dialog Flow Framework helps its users create conversational services, which is done by
+defining a specialized dialog graph that dictates the behaviour of the dialog service.
 This dialog graph essentially represents the dialog script that guides the conversation
-between the AI and the user.
+between the chat-bot and the user.
 
 The DFF leverages a specialized language known as a Domain-Specific Language (DSL)
 to enable developers to quickly write and comprehend dialog graphs.
@@ -24,17 +24,12 @@ They can be installed via the following command:
 
     pip3 install dff
 
-.. note::
+Example conversational chat-bot
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-    Any python version starting from Python 3.8 is supported by DFF,
-    however no tests for versions higher than 3.11 were executed.
-
-Example conversational AI
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Let us go through the creation of a simple bot that would play (virtual) ping-pong game with its users.
-It would also greet them and handle exceptions.
-First, we define the AI in pseudo language:
+Let us go through creation of a simple bot that would play (virtual) ping-pong game with user.
+It will also greet user and handle exceptions.
+First, we would define the chat-bot in pseudo language:
 
 .. code-block:: text
 
@@ -49,20 +44,19 @@ First, we define the AI in pseudo language:
         Respond with "That was against the rules!"
         Repeat from the beginning if user writes anything
 
-Later in this tutorial we will create this AI using DFF, starting from the very basics
+Later in this tutorial we will create this chat-bot using DFF, starting from the very basics
 and then elaborating on more complicated topics.
 
-Example AI graph
-~~~~~~~~~~~~~~~~
+Example chat-bot graph
+~~~~~~~~~~~~~~~~~~~~~~
 
-Let's start from creating the very simple dialog agent implementation:
+Let's start from creating the very simple dialog agent dialog agent:
 
 .. code-block:: python
 
     from dff.pipeline import Pipeline
     from dff.script import TRANSITIONS, RESPONSE, Message
     import dff.script.conditions as cnd
-    from dff.utils.testing.common import run_interactive_mode
 
     ping_pong_script = {
         "ping_pong_flow": {
@@ -100,7 +94,7 @@ Let's start from creating the very simple dialog agent implementation:
     )
 
     if __name__ == "__main__":
-        run_interactive_mode(pipeline)
+        pipeline.run()
 
 .. warning::
 
@@ -109,7 +103,7 @@ Let's start from creating the very simple dialog agent implementation:
 
 That's what the agent consists of:
 
-* ``ping_pong_script`` in order to create a dialog agent, a dialog **script** is needed;
+* ``ping_pong_script``: in order to create a dialog agent, a dialog **script** is needed;
   a script is a dictionary, where the keys are the names of the flows (that are "sub-dialogs",
   used to separate the whole dialog into multiple sub-dialogs).
 
@@ -145,18 +139,15 @@ That's what the agent consists of:
   the first specifies initial node flow and name and the second (optional) specifies fallback
   node flow and name (if not provided it equals to the first one by default). 
 
-* ``run_interactive_mode`` is a function for dialog testing, it executes pipeline in a loop,
-  using CLI to accept user input and provide user with output.
-
 .. note::
 
-    See :doc:`tutorial on basic dialog structure <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.1_basics.html>`.
+    See `tutorial on basic dialog structure`_.
 
 Advanced graph features
 ~~~~~~~~~~~~~~~~~~~~~~~
 
-Right now the agent we have created is a very simple one and does not behave **exactly** as we wanted
-our bot to behave. Let's see how we can improve our script:
+Right now the agent we have created is a very simple one and does not behaves **exactly** as we wanted
+our bot to behave. Let's elaborate on that and see how can we improve our script:
 
 .. code-block:: python
 
@@ -164,29 +155,34 @@ our bot to behave. Let's see how we can improve our script:
     from dff.script import TRANSITIONS, RESPONSE, Context, Message
     import dff.script.conditions as cnd
     import dff.script.labels as lbl
-    from dff.utils.testing.common import run_interactive_mode
 
     def get_previous_node_name(ctx: Context) -> str:
-        last_label = list(ctx.labels)[-2] if len(ctx.labels) >= 2 else None
+        """
+        Get name of the previous visited script node.
+        Visited node names are stored in `ctx.labels` dictionary.
+        The keys of the dictionary match the order of node visiting,
+        so the **current node** will be stored with `max(keys)` key.
+        The previous node will have key `max(keys) - 1`.
+        """
+        last_label = sorted(list(ctx.labels))[-2] if len(ctx.labels) >= 2 else None
         return ctx.labels[last_label][1] if last_label is not None else "start_node"
 
-    def ping_pong_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
-        if get_previous_node_name(ctx) == "start_node":
-            return Message(text="Hi! Let's play ping-pong!")
-        else:
-            return Message(text="Pong!")
-
     def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
-        if ctx.last_request is not None:
+        """
+        Generate response for fallback node, according to the previous node
+        we have been to.
+        If the previous node was `start_node`, a sample message will be returned,
+        otherwise the message will include user input.
+        """
+        if get_previous_node_name(ctx) == "start_node":
+            return Message(text="You should've started the dialog with 'Hello!'")
+        elif ctx.last_request is not None:
             last_request = ctx.last_request.text
             note = f"You should've written 'Ping', not '{last_request}'!"
-        else:
-            note = "You should've just written 'Ping'!"
-        if get_previous_node_name(ctx) == "start_node":
-            return Message(text="You should've started the dialog with 'Hello!',"
-                "anyway, let's play ping-pong!")
-        else:
             return Message(text=f"That was against the rules! {note}")
+        else:
+            raise RuntimeError("Error occured: last request is None!")
+            
 
     ping_pong_script = {
         "ping_pong_flow": {
@@ -196,8 +192,14 @@ our bot to behave. Let's see how we can improve our script:
                     lbl.forward(): cnd.exact_match(Message(text="Hello!")),
                 },
             },
+            "greeting_node": {
+                RESPONSE: Message(text="Hi! Let's play ping-pong!"),
+                TRANSITIONS: {
+                    lbl.forward(): cnd.regexp(r"^[P|p]ing!?$"),
+                },
+            },
             "ping_pong_node": {
-                RESPONSE: ping_pong_response,
+                RESPONSE: Message(text="Pong!"),
                 TRANSITIONS: {
                     lbl.repeat(): cnd.regexp(r"^[P|p]ing!?$"),
                 },
@@ -205,7 +207,7 @@ our bot to behave. Let's see how we can improve our script:
             "fallback_node": {
                 RESPONSE: fallback_response,
                 TRANSITIONS: {
-                    lbl.backward(): cnd.regexp(r"^[P|p]ing!?$"),
+                    "greeting_node": cnd.true(),
                 },
             },
         },
@@ -218,72 +220,83 @@ our bot to behave. Let's see how we can improve our script:
     )
 
     if __name__ == "__main__":
-        run_interactive_mode(pipeline)
+        pipeline.run()
 
-That's what we've changed:
+That's what we changed:
 
 * ``greeting_node`` and ``response_node`` were merged, the resulting ``ping_pong_node`` has a
   callback response, it proposes user to play ping-pong if the previous node was ``start_node`` and
   plays ping-pong otherwise.
 
-* ``fallback_node`` has a callback response as well, it prints different messages according to the
-  previous node.
+* ``fallback_node`` has a callback response as well, it prints different mesasages according to the
+  previous node, that messages can also include user inputs.
 
 .. note::
 
-    See :doc:`tutorial on response functions <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.3_responses.html>`.
+    See `tutorial on response functions`_.
 
-* A special function ``get_previous_node_name`` was written to determine the name of the previous
-  visited node. It utilizes ``labels`` attribute of the ``Context`` object.
+* A special function ``get_previous_node_name`` was written to determine the value of the previous
+  visited node. It utilizes ``labels`` attribute of ``Context`` object.
 
 .. note::
 
-    See :doc:`documentation of Context object <https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html>`.
+    See `documentation of Context object`_.
 
 * Transitions were changed: transitions to next, previous and current node were replaced with special
   standard transitions.
 
 .. note::
 
-    See :doc:`tutorial on transitions <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.4_transitions.html>`.
+    See `tutorial on transitions`_.
 
 * Conditions were changed: now regular expressions are used to check user text input value.
 
 .. note::
 
-    See :doc:`tutorial on conditions <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.2_conditions.html>`.
+    See `tutorial on conditions`_.
 
 Further exploration
 ~~~~~~~~~~~~~~~~~~~
 
 There are still come capabilities of Dialog Flow Framework that remain uncovered by this tutorial.
-
 For example:
 
 * You can use ``GLOBAL`` transitions that will be available from every node in your script.
-  See :doc:`tutorial on global transitions <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.5_global_transitions.html>`.
+  See `tutorial on global transitions`_.
 
 * You can serialize context (available on every transition and response)
   to json or dictionary in order to debug it or extract some values.
-  See :doc:`tutorial on context serialization <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.6_context_serialization.html>`.
+  See `tutorial on context serialization`_.
 
 * You can alter user input and modify generated responses.
   User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation.
-  See :doc:`tutorial on pre-response processing <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.7_pre_response_processing.html>`.
+  See `tutorial on pre-response processing`_.
   Node response can be modified with ``PRE_TRANSITION_PROCESSING`` and will happen **after** response generation.
-  See :doc:`tutorial on pre-transition processing <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.9_pre_transitions_processing.html>`.
+  See `tutorial on pre-transition processing`_.
 
 * Additional data ``MISC`` can be added to every node, flow and script itself.
-  The values in MISC will be available during one script execution only; they will be cleared on each new user input.
-  See :doc:`tutorial on script MISC <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.8_misc.html>`.
+  Warning! Unlike the other Context fields, the MISC values are not shared across script executions.
+  See `tutorial on script MISC`_.
 
 Conclusion
 ~~~~~~~~~~
 
 In this tutorial, we explored the basics of Dialog Flow Framework (DFF) to build dynamic conversational services.
-By using DFF's intuitive Domain-Specific Language (DSL) and well-structured dialog graphs, we created a simple interaction between user and AI.
+By using DFF's intuitive Domain-Specific Language (DSL) and well-structured dialog graphs, we created a simple interaction between user and chat-bot.
 We covered installation, understanding the DSL and building dialog graph.
-However, this is just the beginning. DFF offers a world of possibilities in conversational AI.
+However, this is just the beginning. DFF offers a world of possibilities in conversational chat-bot.
 With practice and exploration of advanced features, you can create human-like conversations and reach a wider audience by integrating with various platforms.
 Now, go forth, unleash your creativity, and create captivating conversational services with DFF.
 Happy building!
+
+
+.. _tutorial on basic dialog structure: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.1_basics.html
+.. _tutorial on response functions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.3_responses.html
+.. _documentation of Context object: https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html
+.. _tutorial on transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.4_transitions.html
+.. _tutorial on conditions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.2_conditions.html
+.. _tutorial on global transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.5_global_transitions.html
+.. _tutorial on context serialization: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.6_context_serialization.html
+.. _tutorial on pre-response processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.7_pre_response_processing.html
+.. _tutorial on pre-transition processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.9_pre_transitions_processing.html
+.. _tutorial on script MISC: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.8_misc.html
