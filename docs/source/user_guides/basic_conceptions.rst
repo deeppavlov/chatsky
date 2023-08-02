@@ -9,7 +9,7 @@ defining a specialized dialog graph that dictates the behaviour of the dialog se
 This dialog graph essentially represents the dialog script that guides the conversation
 between the chat-bot and the user.
 
-The DFF leverages a specialized language known as a Domain-Specific Language (DSL)
+DFF leverages a specialized language known as a Domain-Specific Language (DSL)
 to enable developers to quickly write and comprehend dialog graphs.
 This DSL greatly simplifies the process of designing complex conversations and handling
 various user inputs, making it easier to build sophisticated conversational systems.
@@ -52,7 +52,7 @@ and then elaborating on more complicated topics.
 Example chat-bot graph
 ~~~~~~~~~~~~~~~~~~~~~~
 
-Let's start from creating the very simple dialog agent dialog agent:
+Let's start from creating the very simple dialog agent:
 
 .. code-block:: python
 
@@ -100,7 +100,7 @@ Let's start from creating the very simple dialog agent dialog agent:
 
 .. warning::
 
-    Current dialog agent implementation doesn't support different cases and/or marks in "Ping"
+    Current dialog agent doesn't support different cases and/or marks in "Ping"
     messages, it only supports exact "Ping!" message from user.
     It also supports only one standard error message for any error.
 
@@ -111,7 +111,7 @@ That's what the agent consists of:
   used to separate the whole dialog into multiple sub-dialogs).
 
 * ``ping_pong_flow`` is our behaviour flow; flow is a separated dialog, containing linked
-  conversation nodes and maybe some extra data, transitions, etc.
+  conversation nodes and possibly some extra data, transitions, etc.
 
 * ``start_node`` is the initial node, contains no response, only transfers user to an other node
   according to the first message user sends.
@@ -186,7 +186,7 @@ our bot to behave. Let's see how we can improve our script:
             note = f"You should've written 'Ping', not '{last_request}'!"
             return Message(text=f"That was against the rules! {note}")
         else:
-            raise RuntimeError("Error occured: last request is None!")
+            raise RuntimeError("Error occurred: last request is None!")
             
 
     ping_pong_script = {
@@ -229,11 +229,7 @@ our bot to behave. Let's see how we can improve our script:
 
 That's what we've changed:
 
-* ``greeting_node`` and ``response_node`` were merged, the resulting ``ping_pong_node`` has a
-  callback response, it proposes user to play ping-pong if the previous node was ``start_node`` and
-  plays ping-pong otherwise.
-
-* ``fallback_node`` has a callback response as well, it prints different messages according to the
+* ``fallback_node`` has a callback response, it prints different messages depending on the
   previous node.
 
 .. note::
@@ -263,7 +259,7 @@ That's what we've changed:
 Further exploration
 ~~~~~~~~~~~~~~~~~~~
 
-There are still come capabilities of Dialog Flow Framework that remain uncovered by this tutorial.
+There are still a lot of capabilities of Dialog Flow Framework that remain uncovered by this tutorial.
 
 For example:
 
