@@ -112,7 +112,7 @@ html_css_files = [
 
 # Theme options
 html_theme_options = {
-    "header_links_before_dropdown": 8,
+    "header_links_before_dropdown": 5,
     "logo": {
         "alt_text": "DFF logo (simple and nice)",
         "text": "Dialog Flow Framework",

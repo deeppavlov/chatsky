@@ -27,7 +27,7 @@ They can be installed via the following command:
 Example conversational chat-bot
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Let us go through the creation of a simple bot that would play (virtual) ping-pong game with its users.
+Let us go through the creation of a simple bot that would play a (virtual) ping-pong game with its users.
 It would also greet them and handle exceptions.
 First, we define the chat-bot in pseudo language:
 
@@ -110,7 +110,7 @@ That's what the agent consists of:
   a script is a dictionary, where the keys are the names of the flows (that are "sub-dialogs",
   used to separate the whole dialog into multiple sub-dialogs).
 
-* ``ping_pong_flow`` is our behaviour flow; flow is a separated dialog, containing linked
+* ``ping_pong_flow`` is our behaviour flow; a flow is a separated dialog, containing linked
   conversation nodes and possibly some extra data, transitions, etc.
 
 * ``start_node`` is the initial node, contains no response, only transfers user to an other node
@@ -138,7 +138,7 @@ That's what the agent consists of:
   It transfers user to ``greeting_node`` no matter what user writes.
 
 * ``pipeline`` is a special object that processes user requests according to provided script.
-  In order to create pipeline, the script should be provided and two two-string tuples:
+  In order to create a pipeline, the script should be provided and two two-string tuples:
   the first specifies initial node flow and name and the second (optional) specifies fallback
   node flow and name (if not provided it equals to the first one by default). 
 
@@ -161,7 +161,7 @@ our bot to behave. Let's see how we can improve our script:
 
     def get_previous_node_name(ctx: Context) -> str:
         """
-        Get name of the previous visited script node.
+        Get the name of the previous visited script node.
         """
         last_label = sorted(list(ctx.labels))[-2] if len(ctx.labels) >= 2 else None
         # labels store the list of nodes the bot transitioned to,
@@ -275,7 +275,6 @@ For example:
   See `tutorial on pre-transition processing`_.
 
 * Additional data ``MISC`` can be added to every node, flow and script itself.
-  Warning! Unlike the other Context fields, the MISC values are not shared across script executions.
   See `tutorial on script MISC`_.
 
 Conclusion
