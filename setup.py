@@ -36,30 +36,17 @@ async_files_dependencies = [
     "aiofiles",
 ]
 
-_context_storage_dependencies = [
-    "quickle"
+redis_dependencies = [
+    "redis",
 ]
 
-redis_dependencies = merge_req_lists(
-    _context_storage_dependencies,
-    [
-        "redis",
-    ],
-)
+mongodb_dependencies = [
+    "motor",
+]
 
-mongodb_dependencies = merge_req_lists(
-    _context_storage_dependencies,
-    [
-        "motor",
-    ],
-)
-
-_sql_dependencies = merge_req_lists(
-    _context_storage_dependencies,
-    [
-        "sqlalchemy[asyncio]",
-    ],
-)
+_sql_dependencies = [
+    "sqlalchemy[asyncio]",
+]
 
 sqlite_dependencies = merge_req_lists(
     _sql_dependencies,
@@ -83,13 +70,10 @@ postgresql_dependencies = merge_req_lists(
     ],
 )
 
-ydb_dependencies = merge_req_lists(
-    _context_storage_dependencies,
-    [
-        "ydb",
-        "six",
-    ],
-)
+ydb_dependencies = [
+    "ydb",
+    "six",
+]
 
 telegram_dependencies = [
     "pytelegrambotapi",
