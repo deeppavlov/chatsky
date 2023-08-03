@@ -4,20 +4,11 @@ Utils
 This module contains utilities for connecting to Telegram.
 """
 from typing import Union, Iterable
-from typing_extensions import ParamSpec
 from contextlib import contextmanager
 from pathlib import Path
 from io import IOBase
 
-try:
-    from typing import TypeVar
-except ImportError:
-    from typing_extensions import TypeVar
-
 from telebot import types
-
-CallableParams = ParamSpec("CallableParams")
-ReturnType = TypeVar("ReturnType")
 
 
 def open_io(item: types.InputMedia):
