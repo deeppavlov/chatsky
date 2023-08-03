@@ -52,7 +52,10 @@ def generic_test(db, testing_context, context_id):
     # test read operations
     new_ctx = db[context_id]
     assert isinstance(new_ctx, Context)
-    assert {**new_ctx.dict(), "id": str(new_ctx.id)} == {**testing_context.dict(), "id": str(testing_context.id)}
+    assert {**new_ctx.model_dump(), "id": str(new_ctx.id)} == {
+        **testing_context.model_dump(),
+        "id": str(testing_context.id),
+    }
     # test delete operations
     del db[context_id]
     assert context_id not in db

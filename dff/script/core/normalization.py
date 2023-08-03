@@ -14,7 +14,7 @@ from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
-from pydantic import validate_arguments
+from pydantic import validate_call
 
 logger = logging.getLogger(__name__)
 
@@ -81,21 +81,7 @@ def normalize_condition(condition: ConditionType) -> Callable:
         return callable_condition_handler
 
 
-@validate_arguments
-def normalize_transitions(
-    transitions: Dict[NodeLabelType, ConditionType]
-) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
-    """
-    The function which is used to normalize transitions and returns normalized dict.
-
-    :param transitions: Transitions to normalize.
-    :return: Transitions with normalized label and condition.
-    """
-    transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
-    return transitions
-
-
-@validate_arguments
+@validate_call
 def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
     """
     This function is used to normalize response, if response Callable, it is returned, otherwise
@@ -120,7 +106,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         return response_handler
 
 
-@validate_arguments
+@validate_call
 def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
     """
     This function is used to normalize processing.
@@ -144,20 +130,3 @@ def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
             return ctx
 
         return processing_handler
-
-
-@validate_arguments
-def normalize_script(script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
-    """
-    This function normalizes :py:class:`.Script`: it returns dict where the GLOBAL node is moved
-    into the flow with the GLOBAL name. The function returns the structure
-
-    `{GLOBAL: {...NODE...}, ...}` -> `{GLOBAL: {GLOBAL: {...NODE...}}, ...}`.
-
-    :param script: :py:class:`.Script` that describes the dialog scenario.
-    :return: Normalized :py:class:`.Script`.
-    """
-    if isinstance(script, dict):
-        if Keywords.GLOBAL in script and all([isinstance(item, Keywords) for item in script[Keywords.GLOBAL].keys()]):
-            script[Keywords.GLOBAL] = {Keywords.GLOBAL: script[Keywords.GLOBAL]}
-    return script

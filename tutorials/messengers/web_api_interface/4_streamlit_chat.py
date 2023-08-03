@@ -5,7 +5,7 @@
 # in a Streamlit chat.
 #
 # A demonstration of the chat:
-# ![](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/img/streamlit.gif)
+# ![demo](https://user-images.githubusercontent.com/61429541/238721597-ef88261d-e9e6-497d-ba68-0bcc9a765808.png)
 
 
 # %% [markdown]
@@ -115,10 +115,12 @@ def send_and_receive():
 
     st.session_state["user_requests"].append(user_request)
 
-    bot_response = query(Message(text=user_request).dict(), user_id=st.session_state["user_id"])
+    bot_response = query(
+        Message(text=user_request).model_dump(), user_id=st.session_state["user_id"]
+    )
     bot_response.raise_for_status()
 
-    bot_message = Message.parse_obj(bot_response.json()["response"]).text
+    bot_message = Message.model_validate(bot_response.json()["response"]).text
 
     # # Implementation without using Message:
     # bot_response = query({"text": user_request}, user_id=st.session_state["user_id"])
