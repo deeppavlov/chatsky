@@ -42,7 +42,9 @@ async def test_otlp_integration(context, expected, tracer_exporter_and_provider,
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
-        component=ServiceRuntimeInfo(path=".", name=".", asynchronous=False, execution_state={".": "FINISHED"}),
+        component=ServiceRuntimeInfo(
+            path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
+        ),
     )
     _ = await default_extractors.get_current_label(context, None, runtime_info)
     tracer_provider.force_flush()
