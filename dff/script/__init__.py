@@ -15,10 +15,8 @@ from .core.keywords import (
 from .core.normalization import (
     normalize_label,
     normalize_condition,
-    normalize_transitions,
     normalize_response,
     normalize_processing,
-    normalize_script,
 )
 from .core.script import Node, Script
 from .core.types import (

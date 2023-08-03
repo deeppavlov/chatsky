@@ -21,7 +21,7 @@ from uuid import UUID, uuid4
 
 from typing import Any, Optional, Union, Dict, List, Set
 
-from pydantic import BaseModel, validate_arguments, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
@@ -30,19 +30,6 @@ logger = logging.getLogger(__name__)
 Node = BaseModel
 
 
-@validate_arguments
-def sort_dict_keys(dictionary: dict) -> dict:
-    """
-    Sorting the keys in the `dictionary`. This needs to be done after deserialization,
-    since the keys are deserialized in a random order.
-
-    :param dictionary: Dictionary with unsorted keys.
-    :return: Dictionary with sorted keys.
-    """
-    return {key: dictionary[key] for key in sorted(dictionary)}
-
-
-@validate_arguments
 def get_last_index(dictionary: dict) -> int:
     """
     Obtaining the last index from the `dictionary`. Functions returns `-1` if the `dict` is empty.
@@ -58,12 +45,6 @@ class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
     """
-
-    class Config:
-        property_set_methods = {
-            "last_response": "set_last_response",
-            "last_request": "set_last_request",
-        }
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
@@ -121,10 +102,17 @@ class Context(BaseModel):
         - value - Temporary variable data.
     """
 
-    # validators
-    _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
-    _sort_requests = validator("requests", allow_reuse=True)(sort_dict_keys)
-    _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
+    @field_validator("labels", "requests", "responses")
+    @classmethod
+    def sort_dict_keys(cls, dictionary: dict) -> dict:
+        """
+        Sorting the keys in the `dictionary`. This needs to be done after deserialization,
+        since the keys are deserialized in a random order.
+
+        :param dictionary: Dictionary with unsorted keys.
+        :return: Dictionary with sorted keys.
+        """
+        return {key: dictionary[key] for key in sorted(dictionary)}
 
     @classmethod
     def cast(cls, ctx: Optional[Union["Context", dict, str]] = None, *args, **kwargs) -> "Context":
@@ -144,16 +132,15 @@ class Context(BaseModel):
         if not ctx:
             ctx = Context(*args, **kwargs)
         elif isinstance(ctx, dict):
-            ctx = Context.parse_obj(ctx)
+            ctx = Context.model_validate(ctx)
         elif isinstance(ctx, str):
-            ctx = Context.parse_raw(ctx)
+            ctx = Context.model_validate_json(ctx)
         elif not issubclass(type(ctx), Context):
             raise ValueError(
                 f"context expected as sub class of Context class or object of dict/str(json) type, but got {ctx}"
             )
         return ctx
 
-    @validate_arguments
     def add_request(self, request: Message):
         """
         Adds to the context the next `request` corresponding to the next turn.
@@ -161,10 +148,10 @@ class Context(BaseModel):
 
         :param request: `request` to be added to the context.
         """
+        request_message = Message.model_validate(request)
         last_index = get_last_index(self.requests)
-        self.requests[last_index + 1] = request
+        self.requests[last_index + 1] = request_message
 
-    @validate_arguments
     def add_response(self, response: Message):
         """
         Adds to the context the next `response` corresponding to the next turn.
@@ -172,10 +159,10 @@ class Context(BaseModel):
 
         :param response: `response` to be added to the context.
         """
+        response_message = Message.model_validate(response)
         last_index = get_last_index(self.responses)
-        self.responses[last_index + 1] = response
+        self.responses[last_index + 1] = response_message
 
-    @validate_arguments
     def add_label(self, label: NodeLabel2Type):
         """
         Adds to the context the next :py:const:`label <dff.script.NodeLabel2Type>`,
@@ -187,7 +174,6 @@ class Context(BaseModel):
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    @validate_arguments
     def clear(
         self,
         hold_last_n_indices: int,
@@ -236,13 +222,14 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    def set_last_response(self, response: Optional[Message]):
+    @last_response.setter
+    def last_response(self, response: Optional[Message]):
         """
         Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
-        self.responses[last_index] = Message() if response is None else response
+        self.responses[last_index] = Message() if response is None else Message.model_validate(response)
 
     @property
     def last_request(self) -> Optional[Message]:
@@ -253,13 +240,14 @@ class Context(BaseModel):
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    def set_last_request(self, request: Optional[Message]):
+    @last_request.setter
+    def last_request(self, request: Optional[Message]):
         """
         Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
-        self.requests[last_index] = Message() if request is None else request
+        self.requests[last_index] = Message() if request is None else Message.model_validate(request)
 
     @property
     def current_node(self) -> Optional[Node]:
@@ -282,7 +270,6 @@ class Context(BaseModel):
 
         return node
 
-    @validate_arguments
     def overwrite_current_node_in_processing(self, processed_node: Node):
         """
         Overwrites the current node with a processed node. This method only works in processing functions.
@@ -291,19 +278,12 @@ class Context(BaseModel):
         """
         is_processing = self.framework_states.get("actor", {}).get("processed_node")
         if is_processing:
-            self.framework_states["actor"]["processed_node"] = processed_node
+            self.framework_states["actor"]["processed_node"] = Node.model_validate(processed_node)
         else:
             logger.warning(
                 f"The `{self.overwrite_current_node_in_processing.__name__}` "
                 "function can only be run during processing functions."
             )
 
-    def __setattr__(self, key, val):
-        method = self.__config__.property_set_methods.get(key, None)
-        if method is None:
-            super().__setattr__(key, val)
-        else:
-            getattr(self, method)(val)
 
-
-Context.update_forward_refs()
+Context.model_rebuild()
