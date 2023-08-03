@@ -11,15 +11,13 @@ how to contribute code to the project, manage your workflow, use tests, and so o
 Project roadmap
 ~~~~~~~~~~~~~~~
 
-`Project roadmap <https://deeppavlov.github.io/dialog_flow_framework/development.html>`_
+`Project roadmap <https://github.com/deeppavlov/dialog_flow_framework/milestones>`_
 outlines the future development plans for DFF, including new features and enhancements
 that are planned for upcoming releases.
 
 Release notes
 ~~~~~~~~~~~~~
 
-`Release notes <https://deeppavlov.github.io/dialog_flow_framework/development.html>`_
+`Release notes <https://github.com/deeppavlov/dialog_flow_framework/releases>`_
 contain information about the latest releases of DFF, including new features, improvements, and bug fixes.
-
-.. include:: release_notes.rst
 
