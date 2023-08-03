@@ -60,7 +60,7 @@ class MongoContextStorage(DBContextStorage):
     async def set_item_async(self, key: Hashable, value: Context):
         new_key = self._adjust_key(key)
         value = value if isinstance(value, Context) else Context.cast(value)
-        document = json.loads(value.json())
+        document = json.loads(value.model_dump_json())
 
         document.update(new_key)
         await self.collection.replace_one(new_key, document, upsert=True)
