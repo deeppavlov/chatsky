@@ -145,7 +145,7 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
     for i in range(1, 101):
         db[f"{context_id}_{i}"] = Context(
             misc={f"key_{i}": f"ctx misc value {i}"},
-            requests={0: Message(text="useful message"), i: Message(text="some message")}
+            requests={0: Message(text="useful message"), i: Message(text="some message")},
         )
 
     # Setup schema so that all requests will be read from database
@@ -180,6 +180,7 @@ def keys_test(db: DBContextStorage, testing_context: Context, context_id: str):
     for i in range(1, 11):
         assert f"{context_id}_{i}" in keys
 
+
 def single_log_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # Set only one request to be included into CONTEXTS table
     db.context_schema.requests.subscript = 1
@@ -192,7 +193,7 @@ def single_log_test(db: DBContextStorage, testing_context: Context, context_id: 
     # Setup schema so that all requests will be read from database
     db.context_schema.requests.subscript = ALL_ITEMS
 
-    # Read context and check only the two last context was read - one from LOGS, one from CONTEXT 
+    # Read context and check only the two last context was read - one from LOGS, one from CONTEXT
     read_context = db[context_id]
     assert len(read_context.requests) == 2
     assert read_context.requests[8] == testing_context.requests[8]
@@ -208,7 +209,17 @@ large_misc_test.no_dict = False
 many_ctx_test.no_dict = True
 keys_test.no_dict = False
 single_log_test.no_dict = True
-_TEST_FUNCTIONS = [simple_test, basic_test, pipeline_test, partial_storage_test, midair_subscript_change_test, large_misc_test, many_ctx_test, keys_test, single_log_test]
+_TEST_FUNCTIONS = [
+    simple_test,
+    basic_test,
+    pipeline_test,
+    partial_storage_test,
+    midair_subscript_change_test,
+    large_misc_test,
+    many_ctx_test,
+    keys_test,
+    single_log_test,
+]
 
 
 def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Context, context_id: str):

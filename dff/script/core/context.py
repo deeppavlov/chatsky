@@ -22,7 +22,7 @@ import logging
 from typing import Any, Optional, Union, Dict, List, Set
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator
+from pydantic import BaseModel, PrivateAttr, field_validator
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 

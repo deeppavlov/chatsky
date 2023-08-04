@@ -89,6 +89,7 @@ class ContextSchema(BaseModel):
     That behaviour allows context storage to minimize the operation number for context reading and
     writing.
     """
+
     model_config = ConfigDict(
         validate_assignment=True,
         arbitrary_types_allowed=True,
@@ -116,7 +117,7 @@ class ContextSchema(BaseModel):
     Example:
     If `labels` field contains 7 entries and its subscript equals 3, (that means that 4 labels
     were added during current turn), if `duplicate_context_in_logs` is set to False:
-    
+
     - If `append_single_log` is True:
        only the first label will be written to `LOGS`.
     - If `append_single_log` is False:
@@ -151,7 +152,9 @@ class ContextSchema(BaseModel):
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
-    async def read_context(self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str) -> Context:
+    async def read_context(
+        self, pac_reader: _ReadPackedContextFunction, log_reader: _ReadLogContextFunction, storage_key: str
+    ) -> Context:
         """
         Read context from storage.
         Calculate what fields to read, call reader function and cast result to context.
@@ -175,7 +178,7 @@ class ContextSchema(BaseModel):
                 sorted_dict = sorted(list(nest_dict.keys()))
                 last_read_key = sorted_dict[-1] if len(sorted_dict) > 0 else 0
                 if len(nest_dict) > field_props.subscript:
-                    last_keys = sorted(nest_dict.keys())[-field_props.subscript:]
+                    last_keys = sorted(nest_dict.keys())[-field_props.subscript :]
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
                 elif len(nest_dict) < field_props.subscript and last_read_key > field_props.subscript:
                     limit = field_props.subscript - len(nest_dict)
@@ -230,17 +233,21 @@ class ContextSchema(BaseModel):
             nest_dict = ctx_dict[field_props.name]
             last_keys = sorted(nest_dict.keys())
 
-            if self.append_single_log and isinstance(field_props.subscript, int) and len(nest_dict) > field_props.subscript:
+            if (
+                self.append_single_log
+                and isinstance(field_props.subscript, int)
+                and len(nest_dict) > field_props.subscript
+            ):
                 unfit = -field_props.subscript - 1
                 logs_dict[field_props.name] = {last_keys[unfit]: nest_dict[last_keys[unfit]]}
             else:
                 if self.duplicate_context_in_logs or not isinstance(field_props.subscript, int):
                     logs_dict[field_props.name] = nest_dict
                 else:
-                    logs_dict[field_props.name] = {key: nest_dict[key] for key in last_keys[:-field_props.subscript]}
+                    logs_dict[field_props.name] = {key: nest_dict[key] for key in last_keys[: -field_props.subscript]}
 
             if isinstance(field_props.subscript, int):
-                last_keys = last_keys[-field_props.subscript:]
+                last_keys = last_keys[-field_props.subscript :]
 
             ctx_dict[field_props.name] = {k: v for k, v in nest_dict.items() if k in last_keys}
 

@@ -43,7 +43,9 @@ class PickleContextStorage(DBContextStorage):
     _VALUE_COLUMN = "value"
     _PACKED_COLUMN = "data"
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
+    def __init__(
+        self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()
+    ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = False
         file_path = Path(self.path)
@@ -70,7 +72,13 @@ class PickleContextStorage(DBContextStorage):
     @threadsafe_method
     async def len_async(self) -> int:
         self.context_table = await self._load(self.context_table)
-        return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].values() if v[ExtraFields.active_ctx.value]})
+        return len(
+            {
+                v[ExtraFields.storage_key.value]
+                for v in self.context_table[1].values()
+                if v[ExtraFields.active_ctx.value]
+            }
+        )
 
     @threadsafe_method
     async def clear_async(self, prune_history: bool = False):
@@ -86,7 +94,11 @@ class PickleContextStorage(DBContextStorage):
     @threadsafe_method
     async def keys_async(self) -> Set[str]:
         self.context_table = await self._load(self.context_table)
-        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_table[1].values() if ctx[ExtraFields.active_ctx.value]}
+        return {
+            ctx[ExtraFields.storage_key.value]
+            for ctx in self.context_table[1].values()
+            if ctx[ExtraFields.active_ctx.value]
+        }
 
     async def _save(self, table: Tuple[Path, Dict]):
         await makedirs(table[0].parent, exist_ok=True)
@@ -135,9 +147,11 @@ class PickleContextStorage(DBContextStorage):
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         for field, key, value in data:
-            self.log_table[1].setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
-                self._VALUE_COLUMN: value,
-                ExtraFields.updated_at.value: updated,
-            })
+            self.log_table[1].setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(
+                key,
+                {
+                    self._VALUE_COLUMN: value,
+                    ExtraFields.updated_at.value: updated,
+                },
+            )
         await self._save(self.log_table)
-

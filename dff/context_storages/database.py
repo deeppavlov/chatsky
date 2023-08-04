@@ -78,7 +78,9 @@ class DBContextStorage(ABC):
 
     """
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()):
+    def __init__(
+        self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()
+    ):
         _, _, file_path = path.partition("://")
         self.full_path = path
         """Full path to access the context storage, as it was provided by user."""
@@ -136,7 +138,9 @@ class DBContextStorage(ABC):
         :param key: Hashable key used to store Context instance.
         :param value: Context to store.
         """
-        await self.context_schema.write_context(value, self._write_pac_ctx, self._write_log_ctx, key, self._insert_limit)
+        await self.context_schema.write_context(
+            value, self._write_pac_ctx, self._write_log_ctx, key, self._insert_limit
+        )
 
     def __delitem__(self, key: Hashable):
         """

@@ -49,7 +49,13 @@ class MongoContextStorage(DBContextStorage):
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), collection_prefix: str = "dff_collection"):
+    def __init__(
+        self,
+        path: str,
+        context_schema: Optional[ContextSchema] = None,
+        serializer: Any = DefaultSerializer(),
+        collection_prefix: str = "dff_collection",
+    ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True
 
@@ -66,26 +72,42 @@ class MongoContextStorage(DBContextStorage):
 
         asyncio.run(
             asyncio.gather(
-                self.collections[self._CONTEXTS_TABLE].create_index([(ExtraFields.primary_id.value, ASCENDING)], background=True, unique=True),
-                self.collections[self._CONTEXTS_TABLE].create_index([(ExtraFields.storage_key.value, HASHED)], background=True),
-                self.collections[self._CONTEXTS_TABLE].create_index([(ExtraFields.active_ctx.value, HASHED)], background=True),
-                self.collections[self._LOGS_TABLE].create_index([(ExtraFields.primary_id.value, ASCENDING)], background=True)
+                self.collections[self._CONTEXTS_TABLE].create_index(
+                    [(ExtraFields.primary_id.value, ASCENDING)], background=True, unique=True
+                ),
+                self.collections[self._CONTEXTS_TABLE].create_index(
+                    [(ExtraFields.storage_key.value, HASHED)], background=True
+                ),
+                self.collections[self._CONTEXTS_TABLE].create_index(
+                    [(ExtraFields.active_ctx.value, HASHED)], background=True
+                ),
+                self.collections[self._LOGS_TABLE].create_index(
+                    [(ExtraFields.primary_id.value, ASCENDING)], background=True
+                ),
             )
         )
 
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        await self.collections[self._CONTEXTS_TABLE].update_many({ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}})
+        await self.collections[self._CONTEXTS_TABLE].update_many(
+            {ExtraFields.storage_key.value: key}, {"$set": {ExtraFields.active_ctx.value: False}}
+        )
 
     @threadsafe_method
     async def len_async(self) -> int:
         count_key = "unique_count"
-        unique = await self.collections[self._CONTEXTS_TABLE].aggregate([
-            {"$match": {ExtraFields.active_ctx.value: True}},
-            {"$group": {"_id": None, "unique_keys": {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
-            {"$project": {count_key: {"$size": "$unique_keys"}}},
-        ]).to_list(1)
+        unique = (
+            await self.collections[self._CONTEXTS_TABLE]
+            .aggregate(
+                [
+                    {"$match": {ExtraFields.active_ctx.value: True}},
+                    {"$group": {"_id": None, "unique_keys": {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
+                    {"$project": {count_key: {"$size": "$unique_keys"}}},
+                ]
+            )
+            .to_list(1)
+        )
         return 0 if len(unique) == 0 else unique[0][count_key]
 
     @threadsafe_method
@@ -94,26 +116,39 @@ class MongoContextStorage(DBContextStorage):
             await self.collections[self._CONTEXTS_TABLE].drop()
             await self.collections[self._LOGS_TABLE].drop()
         else:
-            await self.collections[self._CONTEXTS_TABLE].update_many({}, {"$set": {ExtraFields.active_ctx.value: False}})
+            await self.collections[self._CONTEXTS_TABLE].update_many(
+                {}, {"$set": {ExtraFields.active_ctx.value: False}}
+            )
 
     @threadsafe_method
     async def keys_async(self) -> Set[str]:
         unique_key = "unique_keys"
-        unique = await self.collections[self._CONTEXTS_TABLE].aggregate([
-            {"$match": {ExtraFields.active_ctx.value: True}},
-            {"$group": {"_id": None, unique_key: {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
-        ]).to_list(None)
+        unique = (
+            await self.collections[self._CONTEXTS_TABLE]
+            .aggregate(
+                [
+                    {"$match": {ExtraFields.active_ctx.value: True}},
+                    {"$group": {"_id": None, unique_key: {"$addToSet": f"${ExtraFields.storage_key.value}"}}},
+                ]
+            )
+            .to_list(None)
+        )
         return set(unique[0][unique_key])
 
     @cast_key_to_string()
     async def contains_async(self, key: str) -> bool:
-        return await self.collections[self._CONTEXTS_TABLE].count_documents({"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.active_ctx.value: True}]}) > 0
+        return (
+            await self.collections[self._CONTEXTS_TABLE].count_documents(
+                {"$and": [{ExtraFields.storage_key.value: key}, {ExtraFields.active_ctx.value: True}]}
+            )
+            > 0
+        )
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         packed = await self.collections[self._CONTEXTS_TABLE].find_one(
             {"$and": [{ExtraFields.storage_key.value: storage_key}, {ExtraFields.active_ctx.value: True}]},
             [self._PACKED_COLUMN, ExtraFields.primary_id.value],
-            sort=[(ExtraFields.updated_at.value, -1)]
+            sort=[(ExtraFields.updated_at.value, -1)],
         )
         if packed is not None:
             return self.serializer.loads(packed[self._PACKED_COLUMN]), packed[ExtraFields.primary_id.value]
@@ -121,39 +156,56 @@ class MongoContextStorage(DBContextStorage):
             return dict(), None
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
-        logs = await self.collections[self._LOGS_TABLE].find(
-            {"$and": [{ExtraFields.primary_id.value: primary_id}, {self._FIELD_COLUMN: field_name}]},
-            [self._KEY_COLUMN, self._VALUE_COLUMN],
-            sort=[(self._KEY_COLUMN, -1)],
-            limit=keys_limit if keys_limit is not None else 0
-        ).to_list(None)
+        logs = (
+            await self.collections[self._LOGS_TABLE]
+            .find(
+                {"$and": [{ExtraFields.primary_id.value: primary_id}, {self._FIELD_COLUMN: field_name}]},
+                [self._KEY_COLUMN, self._VALUE_COLUMN],
+                sort=[(self._KEY_COLUMN, -1)],
+                limit=keys_limit if keys_limit is not None else 0,
+            )
+            .to_list(None)
+        )
         return {log[self._KEY_COLUMN]: self.serializer.loads(log[self._VALUE_COLUMN]) for log in logs}
 
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         await self.collections[self._CONTEXTS_TABLE].update_one(
             {ExtraFields.primary_id.value: primary_id},
-            {"$set": {
-                ExtraFields.active_ctx.value: True,
-                self._PACKED_COLUMN: self.serializer.dumps(data),
-                ExtraFields.storage_key.value: storage_key,
-                ExtraFields.primary_id.value: primary_id,
-                ExtraFields.created_at.value: created,
-                ExtraFields.updated_at.value: updated
-            }},
-            upsert=True
+            {
+                "$set": {
+                    ExtraFields.active_ctx.value: True,
+                    self._PACKED_COLUMN: self.serializer.dumps(data),
+                    ExtraFields.storage_key.value: storage_key,
+                    ExtraFields.primary_id.value: primary_id,
+                    ExtraFields.created_at.value: created,
+                    ExtraFields.updated_at.value: updated,
+                }
+            },
+            upsert=True,
         )
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
-        await self.collections[self._LOGS_TABLE].bulk_write([
-            UpdateOne({"$and": [
-                {ExtraFields.primary_id.value: primary_id},
-                {self._FIELD_COLUMN: field},
-                {self._KEY_COLUMN: key},
-            ]}, {"$set": {
-                self._FIELD_COLUMN: field,
-                self._KEY_COLUMN: key,
-                self._VALUE_COLUMN: self.serializer.dumps(value),
-                ExtraFields.primary_id.value: primary_id,
-                ExtraFields.updated_at.value: updated
-            }}, upsert=True)
-        for field, key, value in data])
+        await self.collections[self._LOGS_TABLE].bulk_write(
+            [
+                UpdateOne(
+                    {
+                        "$and": [
+                            {ExtraFields.primary_id.value: primary_id},
+                            {self._FIELD_COLUMN: field},
+                            {self._KEY_COLUMN: key},
+                        ]
+                    },
+                    {
+                        "$set": {
+                            self._FIELD_COLUMN: field,
+                            self._KEY_COLUMN: key,
+                            self._VALUE_COLUMN: self.serializer.dumps(value),
+                            ExtraFields.primary_id.value: primary_id,
+                            ExtraFields.updated_at.value: updated,
+                        }
+                    },
+                    upsert=True,
+                )
+                for field, key, value in data
+            ]
+        )
