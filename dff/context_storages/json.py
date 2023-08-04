@@ -28,7 +28,7 @@ except ImportError:
 
 
 class SerializableStorage(BaseModel):
-    model_config = ConfigDict(extra='allow')
+    model_config = ConfigDict(extra="allow")
 
 
 class StringSerializer:
@@ -69,9 +69,10 @@ class JSONContextStorage(DBContextStorage):
     @threadsafe_method
     @cast_key_to_string()
     async def del_item_async(self, key: str):
-        for id in self.context_table[1].__dict__.keys():
-            if self.context_table[1].__dict__[id][ExtraFields.storage_key.value] == key:
-                self.context_table[1].__dict__[id][ExtraFields.active_ctx.value] = False
+        assert self.context_table[1].model_extra is not None
+        for id in self.context_table[1].model_extra.keys():
+            if self.context_table[1].model_extra[id][ExtraFields.storage_key.value] == key:
+                self.context_table[1].model_extra[id][ExtraFields.active_ctx.value] = False
         await self._save(self.context_table)
 
     @threadsafe_method
@@ -83,23 +84,27 @@ class JSONContextStorage(DBContextStorage):
     @threadsafe_method
     async def len_async(self) -> int:
         self.context_table = await self._load(self.context_table)
-        return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].__dict__.values() if v[ExtraFields.active_ctx.value]})
+        assert self.context_table[1].model_extra is not None
+        return len({v[ExtraFields.storage_key.value] for v in self.context_table[1].model_extra.values() if v[ExtraFields.active_ctx.value]})
 
     @threadsafe_method
     async def clear_async(self, prune_history: bool = False):
+        assert self.context_table[1].model_extra is not None
+        assert self.log_table[1].model_extra is not None
         if prune_history:
-            self.context_table[1].__dict__.clear()
-            self.log_table[1].__dict__.clear()
+            self.context_table[1].model_extra.clear()
+            self.log_table[1].model_extra.clear()
             await self._save(self.log_table)
         else:
-            for key in self.context_table[1].__dict__.keys():
-                self.context_table[1].__dict__[key][ExtraFields.active_ctx.value] = False
+            for key in self.context_table[1].model_extra.keys():
+                self.context_table[1].model_extra[key][ExtraFields.active_ctx.value] = False
         await self._save(self.context_table)
 
     @threadsafe_method
     async def keys_async(self) -> Set[str]:
         self.context_table = await self._load(self.context_table)
-        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_table[1].__dict__.values() if ctx[ExtraFields.active_ctx.value]}
+        assert self.context_table[1].model_extra is not None
+        return {ctx[ExtraFields.storage_key.value] for ctx in self.context_table[1].model_extra.values() if ctx[ExtraFields.active_ctx.value]}
 
     async def _save(self, table: Tuple[Path, SerializableStorage]):
         await makedirs(table[0].parent, exist_ok=True)
@@ -116,7 +121,8 @@ class JSONContextStorage(DBContextStorage):
         return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        timed = sorted(self.context_table[1].__dict__.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)
+        assert self.context_table[1].model_extra is not None
+        timed = sorted(self.context_table[1].model_extra.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)
         for key, value in timed:
             if value[ExtraFields.storage_key.value] == storage_key and value[ExtraFields.active_ctx.value]:
                 return key
@@ -124,20 +130,23 @@ class JSONContextStorage(DBContextStorage):
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         self.context_table = await self._load(self.context_table)
+        assert self.context_table[1].model_extra is not None
         primary_id = await self._get_last_ctx(storage_key)
         if primary_id is not None:
-            return self.serializer.loads(self.context_table[1].__dict__[primary_id][self._PACKED_COLUMN]), primary_id
+            return self.serializer.loads(self.context_table[1].model_extra[primary_id][self._PACKED_COLUMN]), primary_id
         else:
             return dict(), None
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         self.log_table = await self._load(self.log_table)
-        key_set = [int(k) for k in sorted(self.log_table[1].__dict__[primary_id][field_name].keys(), reverse=True)]
+        assert self.log_table[1].model_extra is not None
+        key_set = [int(k) for k in sorted(self.log_table[1].model_extra[primary_id][field_name].keys(), reverse=True)]
         keys = key_set if keys_limit is None else key_set[:keys_limit]
-        return {k: self.serializer.loads(self.log_table[1].__dict__[primary_id][field_name][str(k)][self._VALUE_COLUMN]) for k in keys}
+        return {k: self.serializer.loads(self.log_table[1].model_extra[primary_id][field_name][str(k)][self._VALUE_COLUMN]) for k in keys}
 
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
-        self.context_table[1].__dict__[primary_id] = {
+        assert self.context_table[1].model_extra is not None
+        self.context_table[1].model_extra[primary_id] = {
             ExtraFields.storage_key.value: storage_key,
             ExtraFields.active_ctx.value: True,
             self._PACKED_COLUMN: self.serializer.dumps(data),
@@ -147,8 +156,9 @@ class JSONContextStorage(DBContextStorage):
         await self._save(self.context_table)
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+        assert self.log_table[1].model_extra is not None
         for field, key, value in data:
-            self.log_table[1].__dict__.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
+            self.log_table[1].model_extra.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(key, {
                 self._VALUE_COLUMN: self.serializer.dumps(value),
                 ExtraFields.updated_at.value: updated,
             })
