@@ -30,9 +30,12 @@ jobs:
         run: |
           docker-compose up -d
 
+      - uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: '3.1.6'
+
       - name: install dependencies
         run: |
-            sudo apt install pandoc
             make venv
 
       - name: build documentation
