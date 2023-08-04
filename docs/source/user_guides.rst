@@ -9,8 +9,11 @@ those include but are not limited to: dialog graph creation, specifying start an
 setting transitions and conditions, using ``Context`` object in order to receive information
 about current script execution.
 
-.. toctree::
-   :name: user_guides
-   :glob:
+:doc:`Superset guiide <./user_guides/superset_guide>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-   user_guides/*
+The ``superset guide`` tutorial highlights the usage of Superset visualization tool
+for exploring the telemetry data collected from your conversational services.
+We show how to plug in the telemetry collection and configure the pre-built
+Superset dashboard shipped with DFF.
+
