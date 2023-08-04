@@ -7,7 +7,6 @@ The following tutorial shows `pipeline` service group usage and start conditions
 
 
 # %%
-import json
 import logging
 
 from dff.pipeline import (
@@ -142,17 +141,17 @@ this should never happen.
 
 # %%
 def simple_service(_, __, info: ServiceRuntimeInfo):
-    logger.info(f"Service '{info['name']}' is running...")
+    logger.info(f"Service '{info.name}' is running...")
 
 
 def never_running_service(_, __, info: ServiceRuntimeInfo):
-    raise Exception(f"Oh no! The '{info['name']}' service is running!")
+    raise Exception(f"Oh no! The '{info.name}' service is running!")
 
 
 def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
     logger.info(
-        f"Service '{info['name']}' runtime execution info:"
-        f"{json.dumps(info, indent=4, default=str)}"
+        f"Service '{info.name}' runtime execution info:"
+        f"{info.model_dump_json(indent=4, default=str)}"
     )
 
 

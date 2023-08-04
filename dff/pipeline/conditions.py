@@ -38,22 +38,22 @@ def service_successful_condition(path: Optional[str] = None) -> StartConditionCh
     """
 
     def check_service_state(ctx: Context, _: Pipeline):
-        state = ctx.framework_states[PIPELINE_STATE_KEY].get(path, ComponentExecutionState.NOT_RUN.name)
+        state = ctx.framework_states[PIPELINE_STATE_KEY].get(path, ComponentExecutionState.NOT_RUN)
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
 
     return check_service_state
 
 
-def not_condition(function: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
+def not_condition(func: StartConditionCheckerFunction) -> StartConditionCheckerFunction:
     """
     Condition that returns opposite boolean value to the one returned by incoming function.
     Returns :py:data:`~.StartConditionCheckerFunction`.
 
-    :param function: The function to return opposite of.
+    :param func: The function to return opposite of.
     """
 
     def not_function(ctx: Context, pipeline: Pipeline):
-        return not function(ctx, pipeline)
+        return not func(ctx, pipeline)
 
     return not_function
 
@@ -70,7 +70,7 @@ def aggregate_condition(
     """
 
     def aggregation_function(ctx: Context, pipeline: Pipeline):
-        return aggregator([function(ctx, pipeline) for function in functions])
+        return aggregator([func(ctx, pipeline) for func in functions])
 
     return aggregation_function
 

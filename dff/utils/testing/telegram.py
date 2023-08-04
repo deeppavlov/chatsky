@@ -275,4 +275,4 @@ class TelegramTesting:  # pragma: no cover
                         last_message = bot_messages[0]
                     logging.info("Got responses")
                     result = await self.parse_responses(bot_messages, file_download_destination)
-                    assert result == TelegramMessage.parse_obj(response)
+                    assert result == TelegramMessage.model_validate(response)

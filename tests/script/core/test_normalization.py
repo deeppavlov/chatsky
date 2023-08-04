@@ -10,6 +10,8 @@ from dff.script import (
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
     Context,
+    Script,
+    Node,
     NodeLabel3Type,
     Message,
 )
@@ -18,12 +20,9 @@ from dff.script.conditions import true
 
 from dff.script import (
     normalize_condition,
-    normalize_keywords,
     normalize_label,
-    normalize_script,
     normalize_processing,
     normalize_response,
-    normalize_transitions,
 )
 
 
@@ -81,7 +80,7 @@ def test_normalize_condition():
 
 
 def test_normalize_transitions():
-    trans = normalize_transitions({("flow", "node", 1.0): std_func})
+    trans = Node.normalize_transitions({("flow", "node", 1.0): std_func})
     assert list(trans)[0] == ("flow", "node", 1.0)
     assert callable(list(trans.values())[0])
 
@@ -113,16 +112,10 @@ def test_normalize_processing():
 
 
 def test_normalize_keywords():
-    # TODO: Add full check for functions
-    subtest_normalize_keywords(PRE_RESPONSE_PROCESSING)
-
-
-def subtest_normalize_keywords(pre_response_processing):
-    # TODO: Add full check for functions
     node_template = {
         TRANSITIONS: {"node": std_func},
         RESPONSE: Message(text="text"),
-        pre_response_processing: {1: std_func},
+        PRE_RESPONSE_PROCESSING: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
@@ -134,7 +127,6 @@ def subtest_normalize_keywords(pre_response_processing):
         MISC.name.lower(): {"key": "val"},
     }
     script = {"flow": {"node": node_template.copy()}}
-    script = normalize_keywords(script)
     assert isinstance(script, dict)
     assert script["flow"]["node"] == node_template_gold
 
@@ -156,7 +148,7 @@ def test_normalize_script():
         MISC.name.lower(): {"key": "val"},
     }
     script = {GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}}
-    script = normalize_script(script)
+    script = Script.normalize_script(script)
     assert isinstance(script, dict)
     assert script[GLOBAL][GLOBAL] == node_template_gold
     assert script["flow"]["node"] == node_template_gold
