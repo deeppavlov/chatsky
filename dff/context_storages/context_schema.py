@@ -10,7 +10,7 @@ from dff.script import Context
 
 ALL_ITEMS = "__all__"
 """
-`__all__` - the default value for all `DictSchemaField`s:
+The default value for all `DictSchemaField`s:
 it means that all keys of the dictionary or list will be read or written.
 Can be used as a value of `subscript` parameter for `DictSchemaField`s and `ListSchemaField`s.
 """
