@@ -11,6 +11,7 @@ It is efficient and fast, but it is not recommended to use it to transfer data a
 different languages or platforms because it's not cross-language compatible.
 """
 import asyncio
+import logging
 from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, Tuple, List, Dict, Optional
@@ -28,6 +29,8 @@ try:
 except ImportError:
     pickle_available = False
 
+
+logger = logging.getLogger(__name__)
 
 class PickleContextStorage(DBContextStorage):
     """
@@ -104,6 +107,7 @@ class PickleContextStorage(DBContextStorage):
         await makedirs(table[0].parent, exist_ok=True)
         async with open(table[0], "wb+") as file:
             await file.write(self.serializer.dumps(table[1]))
+        logger.warning(f"File '{table[0]}' saved: {table[1]}")
 
     async def _load(self, table: Tuple[Path, Dict]) -> Tuple[Path, Dict]:
         if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
@@ -112,6 +116,7 @@ class PickleContextStorage(DBContextStorage):
         else:
             async with open(table[0], "rb") as file:
                 storage = self.serializer.loads(await file.read())
+        logger.warning(f"File '{table[0]}' loaded: {storage}")
         return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
