@@ -3,10 +3,12 @@ from inspect import signature
 
 import pickle
 
+
 class DefaultSerializer:
     """
     This default serializer uses `pickle` module for serialization.
     """
+
     def dumps(self, data: Any, protocol: Optional[Any] = None) -> bytes:
         return pickle.dumps(data, protocol)
 
@@ -35,7 +37,11 @@ def validate_serializer(serializer: Any) -> Any:
     if not hasattr(serializer, "dumps"):
         raise ValueError(f"Serializer object {serializer} lacks `dumps(data: bytes, proto: Any) -> bytes` method")
     if len(signature(serializer.loads).parameters) != 1:
-        raise ValueError(f"Serializer object {serializer} `loads(data: bytes) -> Any` method should accept exactly 1 argument")
+        raise ValueError(
+            f"Serializer object {serializer} `loads(data: bytes) -> Any` method should accept exactly 1 argument"
+        )
     if len(signature(serializer.dumps).parameters) != 2:
-        raise ValueError(f"Serializer object {serializer} `dumps(data: bytes, proto: Any) -> bytes` method should accept exactly 2 arguments")
+        raise ValueError(
+            f"Serializer object {serializer} `dumps(data: bytes, proto: Any) -> bytes` method should accept exactly 2 arguments"
+        )
     return serializer

@@ -64,7 +64,14 @@ class YDBContextStorage(DBContextStorage):
     _FIELD_COLUMN = "field"
     _PACKED_COLUMN = "data"
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), table_name_prefix: str = "dff_table", timeout=5):
+    def __init__(
+        self,
+        path: str,
+        context_schema: Optional[ContextSchema] = None,
+        serializer: Any = DefaultSerializer(),
+        table_name_prefix: str = "dff_table",
+        timeout=5,
+    ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True
 
@@ -180,7 +187,7 @@ class YDBContextStorage(DBContextStorage):
                 ORDER BY {ExtraFields.updated_at.value} DESC
                 LIMIT 1;
                 """
-            
+
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
                 {f"${ExtraFields.storage_key.value}": storage_key},
@@ -188,7 +195,10 @@ class YDBContextStorage(DBContextStorage):
             )
 
             if len(result_sets[0].rows) > 0:
-                return self.serializer.loads(result_sets[0].rows[0][self._PACKED_COLUMN]), result_sets[0].rows[0][ExtraFields.primary_id.value]
+                return (
+                    self.serializer.loads(result_sets[0].rows[0][self._PACKED_COLUMN]),
+                    result_sets[0].rows[0][ExtraFields.primary_id.value],
+                )
             else:
                 return dict(), None
 
@@ -222,7 +232,9 @@ class YDBContextStorage(DBContextStorage):
                 )
 
                 if len(result_sets[0].rows) > 0:
-                    for key, value in {row[self._KEY_COLUMN]: row[self._VALUE_COLUMN] for row in result_sets[0].rows}.items():
+                    for key, value in {
+                        row[self._KEY_COLUMN]: row[self._VALUE_COLUMN] for row in result_sets[0].rows
+                    }.items():
                         result_dict[key] = self.serializer.loads(value)
 
                 final_offset += 1000
@@ -230,7 +242,6 @@ class YDBContextStorage(DBContextStorage):
             return result_dict
 
         return await self.pool.retry_operation(callee)
-
 
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         async def callee(session):
@@ -331,7 +342,7 @@ async def _create_contexts_table(pool, path, table_name):
             .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
             .with_index(TableIndex("context_key_index").with_index_columns(ExtraFields.storage_key.value))
             .with_index(TableIndex("context_active_index").with_index_columns(ExtraFields.active_ctx.value))
-            .with_primary_key(ExtraFields.primary_id.value)
+            .with_primary_key(ExtraFields.primary_id.value),
         )
 
     return await pool.retry_operation(callee)
@@ -349,7 +360,9 @@ async def _create_logs_table(pool, path, table_name):
             .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))
             .with_index(TableIndex("logs_primary_id_index").with_index_columns(ExtraFields.primary_id.value))
             .with_index(TableIndex("logs_field_index").with_index_columns(YDBContextStorage._FIELD_COLUMN))
-            .with_primary_keys(ExtraFields.primary_id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN),
+            .with_primary_keys(
+                ExtraFields.primary_id.value, YDBContextStorage._FIELD_COLUMN, YDBContextStorage._KEY_COLUMN
+            ),
         )
 
     return await pool.retry_operation(callee)

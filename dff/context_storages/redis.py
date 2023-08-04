@@ -53,7 +53,13 @@ class RedisContextStorage(DBContextStorage):
     _GENERAL_INDEX = "general"
     _LOGS_INDEX = "subindex"
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), key_prefix: str = "dff_keys"):
+    def __init__(
+        self,
+        path: str,
+        context_schema: Optional[ContextSchema] = None,
+        serializer: Any = DefaultSerializer(),
+        key_prefix: str = "dff_keys",
+    ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True
 
@@ -110,16 +116,26 @@ class RedisContextStorage(DBContextStorage):
         all_keys = await self._redis.smembers(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field_name}")
         keys_limit = keys_limit if keys_limit is not None else len(all_keys)
         read_keys = sorted([int(key) for key in all_keys], reverse=True)[:keys_limit]
-        return {key: self.serializer.loads(await self._redis.get(f"{self._logs_key}:{primary_id}:{field_name}:{key}")) for key in read_keys}
+        return {
+            key: self.serializer.loads(await self._redis.get(f"{self._logs_key}:{primary_id}:{field_name}:{key}"))
+            for key in read_keys
+        }
 
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         await self._redis.hset(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key, primary_id)
         await self._redis.set(f"{self._context_key}:{primary_id}", self.serializer.dumps(data))
-        await self._redis.set(f"{self._context_key}:{primary_id}:{ExtraFields.created_at.value}", self.serializer.dumps(created))
-        await self._redis.set(f"{self._context_key}:{primary_id}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated))
+        await self._redis.set(
+            f"{self._context_key}:{primary_id}:{ExtraFields.created_at.value}", self.serializer.dumps(created)
+        )
+        await self._redis.set(
+            f"{self._context_key}:{primary_id}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated)
+        )
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         for field, key, value in data:
             await self._redis.sadd(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field}", str(key))
             await self._redis.set(f"{self._logs_key}:{primary_id}:{field}:{key}", self.serializer.dumps(value))
-            await self._redis.set(f"{self._logs_key}:{primary_id}:{field}:{key}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated))
+            await self._redis.set(
+                f"{self._logs_key}:{primary_id}:{field}:{key}:{ExtraFields.updated_at.value}",
+                self.serializer.dumps(updated),
+            )

@@ -164,7 +164,14 @@ class SQLContextStorage(DBContextStorage):
     _UUID_LENGTH = 64
     _FIELD_LENGTH = 256
 
-    def __init__(self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer(), table_name_prefix: str = "dff_table", custom_driver: bool = False):
+    def __init__(
+        self,
+        path: str,
+        context_schema: Optional[ContextSchema] = None,
+        serializer: Any = DefaultSerializer(),
+        table_name_prefix: str = "dff_table",
+        custom_driver: bool = False,
+    ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
 
         self._check_availability(custom_driver)
@@ -199,7 +206,7 @@ class SQLContextStorage(DBContextStorage):
             Column(self._KEY_COLUMN, Integer(), nullable=False),
             Column(self._VALUE_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
             Column(ExtraFields.updated_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
-            Index(f"logs_index", ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN, unique=True),
+            Index("logs_index", ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN, unique=True),
         )
 
         asyncio.run(self._create_self_tables())
@@ -275,7 +282,10 @@ class SQLContextStorage(DBContextStorage):
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         async with self.engine.begin() as conn:
-            stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value], self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN])
+            stmt = select(
+                self.tables[self._CONTEXTS_TABLE].c[ExtraFields.primary_id.value],
+                self.tables[self._CONTEXTS_TABLE].c[self._PACKED_COLUMN],
+            )
             stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == storage_key)
             stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value])
             stmt = stmt.order_by(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.updated_at.value].desc()).limit(1)
@@ -287,7 +297,9 @@ class SQLContextStorage(DBContextStorage):
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         async with self.engine.begin() as conn:
-            stmt = select(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN])
+            stmt = select(
+                self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN], self.tables[self._LOGS_TABLE].c[self._VALUE_COLUMN]
+            )
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[ExtraFields.primary_id.value] == primary_id)
             stmt = stmt.where(self.tables[self._LOGS_TABLE].c[self._FIELD_COLUMN] == field_name)
             stmt = stmt.order_by(self.tables[self._LOGS_TABLE].c[self._KEY_COLUMN].desc())
@@ -302,18 +314,45 @@ class SQLContextStorage(DBContextStorage):
     async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
-                {self._PACKED_COLUMN: data, ExtraFields.storage_key.value: storage_key, ExtraFields.primary_id.value: primary_id, ExtraFields.created_at.value: created, ExtraFields.updated_at.value: updated}
+                {
+                    self._PACKED_COLUMN: data,
+                    ExtraFields.storage_key.value: storage_key,
+                    ExtraFields.primary_id.value: primary_id,
+                    ExtraFields.created_at.value: created,
+                    ExtraFields.updated_at.value: updated,
+                }
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._PACKED_COLUMN, ExtraFields.storage_key.value, ExtraFields.updated_at.value, ExtraFields.active_ctx.value], [ExtraFields.primary_id.value])
+            update_stmt = _get_update_stmt(
+                self.dialect,
+                insert_stmt,
+                [
+                    self._PACKED_COLUMN,
+                    ExtraFields.storage_key.value,
+                    ExtraFields.updated_at.value,
+                    ExtraFields.active_ctx.value,
+                ],
+                [ExtraFields.primary_id.value],
+            )
             await conn.execute(update_stmt)
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [
-                    {self._FIELD_COLUMN: field, self._KEY_COLUMN: key, self._VALUE_COLUMN: value, ExtraFields.primary_id.value: primary_id, ExtraFields.updated_at.value: updated}
+                    {
+                        self._FIELD_COLUMN: field,
+                        self._KEY_COLUMN: key,
+                        self._VALUE_COLUMN: value,
+                        ExtraFields.primary_id.value: primary_id,
+                        ExtraFields.updated_at.value: updated,
+                    }
                     for field, key, value in data
                 ]
             )
-            update_stmt = _get_update_stmt(self.dialect, insert_stmt, [self._VALUE_COLUMN, ExtraFields.updated_at.value], [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN])
+            update_stmt = _get_update_stmt(
+                self.dialect,
+                insert_stmt,
+                [self._VALUE_COLUMN, ExtraFields.updated_at.value],
+                [ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN],
+            )
             await conn.execute(update_stmt)

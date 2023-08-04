@@ -20,7 +20,7 @@ def test_context():
     ctx = Context.cast(ctx.model_dump_json())
     ctx.misc[123] = 312
     ctx.clear(5, ["requests", "responses", "misc", "labels", "framework_states"])
-    ctx.misc[1001] = "11111"
+    ctx.misc["1001"] = "11111"
     ctx.add_request(Message(text=str(1000)))
     ctx.add_label((str(1000), str(1000 + 1)))
     ctx.add_response(Message(text=str(1000 + 1)))
@@ -49,7 +49,7 @@ def test_context():
         14: Message(text="29"),
         15: Message(text="1001"),
     }
-    assert ctx.misc == {1001: "11111"}
+    assert ctx.misc == {"1001": "11111"}
     assert ctx.current_node is None
     ctx.overwrite_current_node_in_processing(Node(**{"response": Message(text="text")}))
     ctx.model_dump_json()
