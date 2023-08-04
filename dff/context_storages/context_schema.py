@@ -2,7 +2,7 @@ from asyncio import gather
 from datetime import datetime
 from uuid import uuid4
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, ConfigDict
 from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
@@ -46,7 +46,7 @@ class SchemaField(BaseModel):
     Used for controlling read and write policy of the particular field.
     """
 
-    name: str = Field(default_factory=str, allow_mutation=False)
+    name: str = Field(default_factory=str, frozen=True)
     """
     `name` is the name of backing :py:class:`~.Context` field.
     It can not (and should not) be changed in runtime.
@@ -61,8 +61,7 @@ class SchemaField(BaseModel):
     Default: 3.
     """
 
-    class Config:
-        validate_assignment = True
+    model_config = ConfigDict(validate_assignment=True)
 
 
 class ExtraFields(str, Enum):
@@ -90,18 +89,22 @@ class ContextSchema(BaseModel):
     That behaviour allows context storage to minimize the operation number for context reading and
     writing.
     """
+    model_config = ConfigDict(
+        validate_assignment=True,
+        arbitrary_types_allowed=True,
+    )
 
-    requests: SchemaField = Field(default_factory=lambda: SchemaField(name="requests"), allow_mutation=False)
+    requests: SchemaField = Field(default_factory=lambda: SchemaField(name="requests"), frozen=True)
     """
     Field for storing Context field `requests`.
     """
 
-    responses: SchemaField = Field(default_factory=lambda: SchemaField(name="responses"), allow_mutation=False)
+    responses: SchemaField = Field(default_factory=lambda: SchemaField(name="responses"), frozen=True)
     """
     Field for storing Context field `responses`.
     """
 
-    labels: SchemaField = Field(default_factory=lambda: SchemaField(name="labels"), allow_mutation=False)
+    labels: SchemaField = Field(default_factory=lambda: SchemaField(name="labels"), frozen=True)
     """
     Field for storing Context field `labels`.
     """
@@ -145,10 +148,6 @@ class ContextSchema(BaseModel):
     Change it only if you implement a custom context storage.
     """
 
-    class Config:
-        validate_assignment = True
-        arbitrary_types_allowed = True
-
     def __init__(self, **kwargs):
         super().__init__(**kwargs)
 
@@ -171,7 +170,7 @@ class ContextSchema(BaseModel):
         tasks = dict()
         for field_props in [value for value in dict(self).values() if isinstance(value, SchemaField)]:
             field_name = field_props.name
-            nest_dict = ctx_dict[field_name]
+            nest_dict: Dict[int, Any] = ctx_dict[field_name]
             if isinstance(field_props.subscript, int):
                 sorted_dict = sorted(list(nest_dict.keys()))
                 last_read_key = sorted_dict[-1] if len(sorted_dict) > 0 else 0
@@ -223,7 +222,7 @@ class ContextSchema(BaseModel):
         setattr(ctx, ExtraFields.updated_at.value, updated_at)
         created_at = getattr(ctx, ExtraFields.created_at.value, updated_at)
 
-        ctx_dict = ctx.dict()
+        ctx_dict = ctx.model_dump()
         logs_dict = dict()
         primary_id = getattr(ctx, ExtraFields.primary_id.value, str(uuid4()))
 

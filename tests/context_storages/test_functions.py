@@ -41,7 +41,7 @@ def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # Test read operations
     new_ctx = db[context_id]
     assert isinstance(new_ctx, Context)
-    assert new_ctx.dict() == testing_context.dict()
+    assert new_ctx.model_dump() == testing_context.model_dump()
 
     # Check storage_key has been set up correctly
     if not isinstance(db, dict):
@@ -65,7 +65,7 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
     # Write and read initial context
     db[context_id] = testing_context
     read_context = db[context_id]
-    assert testing_context.dict() == read_context.dict()
+    assert testing_context.model_dump() == read_context.model_dump()
 
     # Remove key
     del db[context_id]
@@ -74,7 +74,7 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
     read_context.misc.update(new_key="new_value")
     for i in range(1, 5):
         read_context.add_request(Message(text=f"new message: {i}"))
-    write_context = read_context.dict()
+    write_context = read_context.model_dump()
 
     # Patch context to use with dict context storage, that doesn't follow read limits
     if not isinstance(db, dict):
@@ -84,7 +84,7 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
     # Write and read updated context
     db[context_id] = read_context
     read_context = db[context_id]
-    assert write_context == read_context.dict()
+    assert write_context == read_context.model_dump()
 
 
 def midair_subscript_change_test(db: DBContextStorage, testing_context: Context, context_id: str):
@@ -100,25 +100,25 @@ def midair_subscript_change_test(db: DBContextStorage, testing_context: Context,
     db.context_schema.requests.subscript = 7
 
     # Create a copy of context that simulates expected read value (last 7 requests)
-    write_context = testing_context.dict()
+    write_context = testing_context.model_dump()
     for i in sorted(write_context["requests"].keys())[:-7]:
         del write_context["requests"][i]
 
     # Check that expected amount of requests was read only
     read_context = db[context_id]
-    assert write_context == read_context.dict()
+    assert write_context == read_context.model_dump()
 
     # Make read limit smaller (2)
     db.context_schema.requests.subscript = 2
 
     # Create a copy of context that simulates expected read value (last 2 requests)
-    write_context = testing_context.dict()
+    write_context = testing_context.model_dump()
     for i in sorted(write_context["requests"].keys())[:-2]:
         del write_context["requests"][i]
 
     # Check that expected amount of requests was read only
     read_context = db[context_id]
-    assert write_context == read_context.dict()
+    assert write_context == read_context.model_dump()
 
 
 def large_misc_test(db: DBContextStorage, testing_context: Context, context_id: str):
@@ -212,7 +212,7 @@ _TEST_FUNCTIONS = [simple_test, basic_test, pipeline_test, partial_storage_test,
 
 
 def run_all_functions(db: Union[DBContextStorage, Dict], testing_context: Context, context_id: str):
-    frozen_ctx = testing_context.dict()
+    frozen_ctx = testing_context.model_dump_json()
     for test in _TEST_FUNCTIONS:
         if isinstance(db, DBContextStorage):
             db.context_schema.append_single_log = True

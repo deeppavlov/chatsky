@@ -22,7 +22,7 @@ import logging
 from typing import Any, Optional, Union, Dict, List, Set
 from uuid import uuid4
 
-from pydantic import BaseModel, PrivateAttr, validate_arguments, validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
@@ -46,12 +46,6 @@ class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
     """
-
-    class Config:
-        property_set_methods = {
-            "last_response": "set_last_response",
-            "last_request": "set_last_request",
-        }
 
     _storage_key: Optional[str] = PrivateAttr(default=None)
     """
@@ -125,10 +119,17 @@ class Context(BaseModel):
         - value - Temporary variable data.
     """
 
-    # validators
-    _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
-    _sort_requests = validator("requests", allow_reuse=True)(sort_dict_keys)
-    _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
+    @field_validator("labels", "requests", "responses")
+    @classmethod
+    def sort_dict_keys(cls, dictionary: dict) -> dict:
+        """
+        Sorting the keys in the `dictionary`. This needs to be done after deserialization,
+        since the keys are deserialized in a random order.
+
+        :param dictionary: Dictionary with unsorted keys.
+        :return: Dictionary with sorted keys.
+        """
+        return {key: dictionary[key] for key in sorted(dictionary)}
 
     @property
     def storage_key(self):

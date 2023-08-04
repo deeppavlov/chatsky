@@ -11,7 +11,7 @@ from pathlib import Path
 from base64 import encodebytes, decodebytes
 from typing import Any, List, Set, Tuple, Dict, Optional
 
-from pydantic import BaseModel, Extra
+from pydantic import BaseModel, ConfigDict
 
 from .serializer import DefaultSerializer
 from .context_schema import ContextSchema, ExtraFields
@@ -27,8 +27,8 @@ except ImportError:
     json_available = False
 
 
-class SerializableStorage(BaseModel, extra=Extra.allow):
-    pass
+class SerializableStorage(BaseModel):
+    model_config = ConfigDict(extra='allow')
 
 
 class StringSerializer:
@@ -104,7 +104,7 @@ class JSONContextStorage(DBContextStorage):
     async def _save(self, table: Tuple[Path, SerializableStorage]):
         await makedirs(table[0].parent, exist_ok=True)
         async with open(table[0], "w+", encoding="utf-8") as file_stream:
-            await file_stream.write(table[1].json())
+            await file_stream.write(table[1].model_dump_json())
 
     async def _load(self, table: Tuple[Path, SerializableStorage]) -> Tuple[Path, SerializableStorage]:
         if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
@@ -112,7 +112,7 @@ class JSONContextStorage(DBContextStorage):
             await self._save((table[0], storage))
         else:
             async with open(table[0], "r", encoding="utf-8") as file_stream:
-                storage = SerializableStorage.parse_raw(await file_stream.read())
+                storage = SerializableStorage.model_validate_json(await file_stream.read())
         return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
