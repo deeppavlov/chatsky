@@ -9,7 +9,7 @@ those include but are not limited to: dialog graph creation, specifying start an
 setting transitions and conditions, using ``Context`` object in order to receive information
 about current script execution.
 
-:doc:`Superset guiide <./user_guides/superset_guide>`
+:doc:`Superset guide <./user_guides/superset_guide>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``superset guide`` tutorial highlights the usage of Superset visualization tool

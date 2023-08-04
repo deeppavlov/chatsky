@@ -1,8 +1,10 @@
-Superset configuration
-=======================
+:orphan:
+
+Superset guide
+---------------------
 
 Description
------------
+~~~~~~~~~~~
 
 | The Dialog Flow Stats module can be used to obtain and visualize usage statistics for your service.
 | Data aggregation relies on the `OpenTelemetry protocol <#>`_ and the `OpenTelemetry collector <#>`_ along with `Clickhouse <https://clickhouse.com/>`_ as an OLAP storage.
@@ -17,7 +19,7 @@ Description
     docker run --env-file='.env' ghcr.io/deeppavlov/superset_df_dashboard:latest
 
 Collection procedure
---------------------
+~~~~~~~~~~~~~~~~~~~~
 
 **Installation**
 
@@ -34,8 +36,9 @@ Collection procedure
 
 **Setting up a pipeline**
 
-It is essential that you use get_current_label at least once, so that the default Superset charts
-can be successfully displayed.
+.. warning::
+    It is essential that you use `get_current_label` at least once, so that the default Superset charts
+    can be successfully displayed.
 
 .. code-block:: python
     :linenos:
@@ -66,7 +69,7 @@ can be successfully displayed.
     pipeline.run()
 
 Displaying the data
--------------------
+~~~~~~~~~~~~~~~~~~~
 
 In order to display the Superset dashboard, you should update the default configuration with the credentials of your database.
 The configuration can be optionally saved as a zip archive for inspection / debug.
@@ -108,7 +111,7 @@ into the running superset server. If you are using a version of Superset differe
 shipped with DFF, make sure that your access rights are sufficient to edit the workspace.
 
 Using Superset
--------------------
+~~~~~~~~~~~~~~
 
 | In order to view the imported dashboard, log into Superset using your username and password.
 | The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
