@@ -16,7 +16,7 @@ Description
 
     echo 'SUPERSET_USERNAME=...' >> .env
     echo 'SUPERSET_PASSWORD=...' >> .env
-    docker run --env-file='.env' ghcr.io/deeppavlov/superset_df_dashboard:latest
+    docker run --env-file='.env' --name=superset ghcr.io/deeppavlov/superset_df_dashboard:latest
 
 Collection procedure
 ~~~~~~~~~~~~~~~~~~~~
@@ -25,48 +25,23 @@ Collection procedure
 
 .. code-block:: shell
 
-    pip install dff[stats,clickhouse]
-    pip install dff[stats,postgresql]
+    pip install dff[stats]
 
 **Launching services**
 
 .. code-block:: shell
 
-    docker-compose up
+    docker-compose up otelcol clickhouse dashboard
 
-**Setting up a pipeline**
+**Collecting data**
 
-.. warning::
-    It is essential that you use `get_current_label` at least once, so that the default Superset charts
-    can be successfully displayed.
+Collecting data is done by means of instrumenting your conversational service before you run it.
+DFF tutorials showcase all the necessary steps, needed to achieve that. We will run
+`one of those files <./tutorials/tutorials.stats.1_extractor_functions>` in order to obtain sample data points to visualize.
 
-.. code-block:: python
-    :linenos:
+.. code-block:: shell
 
-    # import dependencies
-    from dff.pipeline import Pipeline, Service, ACTOR
-    from dff.stats import default_extractors
-    # using default_extractors.current_label is required for dashboard integration 
-    from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
-    from dff.stats import OTLPLogExporter, OTLPSpanExporter
-    # initialize opentelemetry
-    # insecure parameter ensures that SSL encryption is not forced
-    dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
-    dff_instrumentor.instrument()
-    # Special extractor functions can be used as handlers to report statistics for any pipeline component.
-    pipeline = Pipeline.from_dict(
-        {
-            "components": [
-                Service(
-                    handler=ACTOR,
-                    after_handler=[
-                        default_extractors.get_current_label, # using required extractor
-                    ],
-                ),
-            ]
-        }
-    )
-    pipeline.run()
+    export DISABLE_INTERACTIVE_MODE=1 && python tutorials/stats/1_extractor_functions.py
 
 Displaying the data
 ~~~~~~~~~~~~~~~~~~~
@@ -83,10 +58,10 @@ You can set most of the configuration options using a YAML file.
     db:
         type: clickhousedb+connect
         name: test
-        user: user
-        host: localhost
-        port: 5432
-        table: dff_stats
+        user: username
+        host: clickhouse
+        port: 8123
+        table: otel_logs
 
 The file can then be used to parametrize the configuration script.
 Password values can be omitted and set interactively.
@@ -94,16 +69,14 @@ Password values can be omitted and set interactively.
 .. code-block:: shell
     :linenos:
 
-    dff.stats config.yaml \
-    -U superset_user \
-    -P superset_password \
-    -dP database_password \
-    --db.type=postgresql \
-    --db.user=root \
+    dff.stats config.yaml -P -dP \
+    -U superset \
+    --db.type=clickhousedb+connect \
+    --db.user=username \
     --db.host=localhost \
-    --db.port=5432 \
+    --db.port=8123 \
     --db.name=test \
-    --db.table=dff_stats \
+    --db.table=otel_logs \
     --outfile=config_artifact.zip
 
 Running the command will automatically import the dashboard as well as the data sources
@@ -113,7 +86,7 @@ shipped with DFF, make sure that your access rights are sufficient to edit the w
 Using Superset
 ~~~~~~~~~~~~~~
 
-| In order to view the imported dashboard, log into Superset using your username and password.
+| In order to view the imported dashboard, log into `Superset <http://localhost:8088/>` using your username and password.
 | The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
 | The dashboard has four sections, each one of them containing different kind of data.
 

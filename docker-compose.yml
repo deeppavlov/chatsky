@@ -48,7 +48,7 @@ services:
       - "8088:8088"
   clickhouse:
     env_file: [.env_file]
-    image: yandex/clickhouse-server:latest
+    image: clickhouse/clickhouse-server:latest
     restart: unless-stopped
     ports:
       - '8123:8123'

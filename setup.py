@@ -79,8 +79,6 @@ telegram_dependencies = [
     "pytelegrambotapi",
 ]
 
-clickhouse_dependencies = ["aiochclient>=2.2.0", "httpx<=0.23.0", "sqlparse==0.4.4"]
-
 requests_requirements = [
     "requests>=2.28.1",
 ]
@@ -116,7 +114,6 @@ full = merge_req_lists(
     mysql_dependencies,
     postgresql_dependencies,
     ydb_dependencies,
-    clickhouse_dependencies,
     stats_dependencies,
     telegram_dependencies,
 )
@@ -143,6 +140,9 @@ test_requirements = merge_req_lists(
         "locust==2.15",
         "streamlit==1.25.0",
         "streamlit-chat==0.1.1",
+        "aiochclient>=2.2.0",
+        "httpx<=0.23.0",
+        "sqlparse==0.4.4"
     ],
     requests_requirements,
 )
@@ -198,7 +198,6 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,  # dependencies for using MySQL
     "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
-    "clickhouse": clickhouse_dependencies,  # dependencies for using Clickhouse
     "stats": stats_dependencies,  # dependencies for statistics collection
     "telegram": telegram_dependencies,  # dependencies for using Telegram
     "full": full,  # full dependencies including all options above

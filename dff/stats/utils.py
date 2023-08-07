@@ -21,7 +21,8 @@ import requests
 from . import exporter_patch  # noqa: F401
 from opentelemetry._logs import get_logger_provider
 from opentelemetry.trace import get_tracer_provider
-from opentelemetry.metrics import get_meter_provider
+from opentelemetry.metrics import set_meter_provider
+from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
 from opentelemetry.sdk.trace.export import BatchSpanProcessor
@@ -51,7 +52,7 @@ def set_meter_destination(exporter: Optional[MetricExporter] = None):
     """
     if exporter is None:
         exporter = OTLPMetricExporter(endpoint="grpc://localhost:4317", insecure=True)
-    get_meter_provider()._all_metric_readers.add(PeriodicExportingMetricReader(exporter))
+    set_meter_provider(MeterProvider(metric_readers=[PeriodicExportingMetricReader(exporter)]))
 
 
 def set_tracer_destination(exporter: Optional[SpanExporter] = None):
@@ -112,6 +113,11 @@ def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088
 
 
 class PasswordAction(Action):
+    """
+    Child class for Argparse's :py:class:`~Action` that prompts users for passwords interactively,
+    ensuring password safety, unless the password is specified directly.
+
+    """
     def __init__(
         self, option_strings, dest=None, nargs=0, default=None, required=False, type=None, metavar=None, help=None
     ):

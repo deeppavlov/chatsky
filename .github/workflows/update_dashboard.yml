@@ -2,6 +2,8 @@ name: update_dashboard
 
 on:
   push:
+    branches:
+      - 'dev'
     paths:
       - 'dff/utils/docker/dockerfile_stats'
       - 'dff/utils/docker/entrypoint.sh'
