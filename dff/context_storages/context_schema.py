@@ -1,3 +1,4 @@
+import time
 from asyncio import gather
 from datetime import datetime
 from uuid import uuid4
@@ -221,7 +222,7 @@ class ContextSchema(BaseModel):
 
         :return: the read :py:class:`~.Context` object.
         """
-        updated_at = datetime.now()
+        updated_at = datetime.fromtimestamp(time.time())
         setattr(ctx, ExtraFields.updated_at.value, updated_at)
         created_at = getattr(ctx, ExtraFields.created_at.value, updated_at)
 
