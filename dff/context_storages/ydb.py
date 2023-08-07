@@ -10,7 +10,6 @@ with Yandex Cloud services using python. This allows the DFF to easily integrate
 take advantage of the scalability and high-availability features provided by the service.
 """
 import asyncio
-import datetime
 from os.path import join
 from typing import Any, Set, Tuple, List, Dict, Optional
 from urllib.parse import urlsplit
@@ -243,15 +242,15 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         async def callee(session):
             query = f"""
                 PRAGMA TablePathPrefix("{self.database}");
                 DECLARE ${self._PACKED_COLUMN} AS String;
                 DECLARE ${ExtraFields.primary_id.value} AS Utf8;
                 DECLARE ${ExtraFields.storage_key.value} AS Utf8;
-                DECLARE ${ExtraFields.created_at.value} AS Timestamp;
-                DECLARE ${ExtraFields.updated_at.value} AS Timestamp;
+                DECLARE ${ExtraFields.created_at.value} AS Uint64;
+                DECLARE ${ExtraFields.updated_at.value} AS Uint64;
                 UPSERT INTO {self.table_prefix}_{self._CONTEXTS_TABLE} ({self._PACKED_COLUMN}, {ExtraFields.storage_key.value}, {ExtraFields.primary_id.value}, {ExtraFields.active_ctx.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
                 VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.primary_id.value}, True, ${ExtraFields.created_at.value}, ${ExtraFields.updated_at.value});
                 """
@@ -270,7 +269,7 @@ class YDBContextStorage(DBContextStorage):
 
         return await self.pool.retry_operation(callee)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         async def callee(session):
             for field, key, value in data:
                 query = f"""
@@ -279,7 +278,7 @@ class YDBContextStorage(DBContextStorage):
                     DECLARE ${self._KEY_COLUMN} AS Uint64;
                     DECLARE ${self._VALUE_COLUMN} AS String;
                     DECLARE ${ExtraFields.primary_id.value} AS Utf8;
-                    DECLARE ${ExtraFields.updated_at.value} AS Timestamp;
+                    DECLARE ${ExtraFields.updated_at.value} AS Uint64;
                     UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.primary_id.value}, {ExtraFields.updated_at.value})
                     VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.primary_id.value}, ${ExtraFields.updated_at.value});
                     """
@@ -337,8 +336,8 @@ async def _create_contexts_table(pool, path, table_name):
             .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
             .with_column(Column(ExtraFields.storage_key.value, OptionalType(PrimitiveType.Utf8)))
             .with_column(Column(ExtraFields.active_ctx.value, OptionalType(PrimitiveType.Bool)))
-            .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Timestamp)))
-            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
+            .with_column(Column(ExtraFields.created_at.value, OptionalType(PrimitiveType.Uint64)))
+            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Uint64)))
             .with_column(Column(YDBContextStorage._PACKED_COLUMN, OptionalType(PrimitiveType.String)))
             .with_index(TableIndex("context_key_index").with_index_columns(ExtraFields.storage_key.value))
             .with_index(TableIndex("context_active_index").with_index_columns(ExtraFields.active_ctx.value))
@@ -354,7 +353,7 @@ async def _create_logs_table(pool, path, table_name):
             "/".join([path, table_name]),
             TableDescription()
             .with_column(Column(ExtraFields.primary_id.value, PrimitiveType.Utf8))
-            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Timestamp)))
+            .with_column(Column(ExtraFields.updated_at.value, OptionalType(PrimitiveType.Uint64)))
             .with_column(Column(YDBContextStorage._FIELD_COLUMN, OptionalType(PrimitiveType.Utf8)))
             .with_column(Column(YDBContextStorage._KEY_COLUMN, PrimitiveType.Uint64))
             .with_column(Column(YDBContextStorage._VALUE_COLUMN, OptionalType(PrimitiveType.String)))

@@ -12,7 +12,6 @@ import importlib
 import threading
 from functools import wraps
 from abc import ABC, abstractmethod
-from datetime import datetime
 from inspect import signature
 from typing import Any, Callable, Dict, Hashable, List, Optional, Set, Tuple
 
@@ -261,7 +260,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         """
         Method for writing context data to `CONTEXT` table for given key.
         See :py:class:`~.ContextSchema` for details.
@@ -269,7 +268,7 @@ class DBContextStorage(ABC):
         raise NotImplementedError
 
     @abstractmethod
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         """
         Method for writing context data to `LOGS` table for given key.
         See :py:class:`~.ContextSchema` for details.

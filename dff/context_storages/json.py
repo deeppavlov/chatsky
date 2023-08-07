@@ -6,7 +6,6 @@ This class is used to store and retrieve context data in a JSON. It allows the D
 store and retrieve context data.
 """
 import asyncio
-from datetime import datetime
 from pathlib import Path
 from base64 import encodebytes, decodebytes
 from typing import Any, List, Set, Tuple, Dict, Optional
@@ -156,7 +155,7 @@ class JSONContextStorage(DBContextStorage):
             for k in keys
         }
 
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         self.context_table[1].model_extra[primary_id] = {
             ExtraFields.storage_key.value: storage_key,
             ExtraFields.active_ctx.value: True,
@@ -166,7 +165,7 @@ class JSONContextStorage(DBContextStorage):
         }
         await self._save(self.context_table)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         assert self.log_table[1].model_extra is not None
         for field, key, value in data:
             self.log_table[1].model_extra.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(

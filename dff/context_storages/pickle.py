@@ -12,7 +12,6 @@ different languages or platforms because it's not cross-language compatible.
 """
 import asyncio
 import logging
-from datetime import datetime
 from pathlib import Path
 from typing import Any, Set, Tuple, List, Dict, Optional
 
@@ -140,7 +139,7 @@ class PickleContextStorage(DBContextStorage):
         keys = key_set if keys_limit is None else key_set[:keys_limit]
         return {k: self.log_table[1][primary_id][field_name][k][self._VALUE_COLUMN] for k in keys}
 
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         self.context_table[1][primary_id] = {
             ExtraFields.storage_key.value: storage_key,
             ExtraFields.active_ctx.value: True,
@@ -150,7 +149,7 @@ class PickleContextStorage(DBContextStorage):
         }
         await self._save(self.context_table)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         for field, key, value in data:
             self.log_table[1].setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(
                 key,

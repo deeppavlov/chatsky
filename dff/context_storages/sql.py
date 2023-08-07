@@ -15,7 +15,6 @@ public-domain, SQL database engine.
 import asyncio
 import importlib
 import os
-from datetime import datetime
 from typing import Any, Callable, Collection, Dict, List, Optional, Set, Tuple
 
 from .serializer import DefaultSerializer
@@ -30,7 +29,7 @@ try:
         Column,
         PickleType,
         String,
-        DateTime,
+        BigInteger,
         Integer,
         Index,
         Boolean,
@@ -94,13 +93,6 @@ def _get_write_limit(dialect: str):
         return 32757 // 4
     else:
         return 9990 // 4
-
-
-def _import_datetime_from_dialect(dialect: str) -> "DateTime":
-    if dialect == "mysql":
-        return DATETIME(fsp=6)
-    else:
-        return DateTime()
 
 
 def _import_pickletype_for_dialect(dialect: str, serializer: Any) -> "PickleType":
@@ -180,7 +172,6 @@ class SQLContextStorage(DBContextStorage):
         self._insert_limit = _get_write_limit(self.dialect)
         self._INSERT_CALLABLE = _import_insert_for_dialect(self.dialect)
 
-        _DATETIME_CLASS = _import_datetime_from_dialect
         _PICKLETYPE_CLASS = _import_pickletype_for_dialect
 
         self.tables_prefix = table_name_prefix
@@ -195,8 +186,8 @@ class SQLContextStorage(DBContextStorage):
             Column(ExtraFields.storage_key.value, String(self._UUID_LENGTH), index=True, nullable=False),
             Column(ExtraFields.active_ctx.value, Boolean(), index=True, nullable=False, default=True),
             Column(self._PACKED_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
-            Column(ExtraFields.created_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
-            Column(ExtraFields.updated_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
+            Column(ExtraFields.created_at.value, BigInteger(), nullable=False),
+            Column(ExtraFields.updated_at.value, BigInteger(), nullable=False),
         )
         self.tables[self._LOGS_TABLE] = Table(
             f"{table_name_prefix}_{self._LOGS_TABLE}",
@@ -205,7 +196,7 @@ class SQLContextStorage(DBContextStorage):
             Column(self._FIELD_COLUMN, String(self._FIELD_LENGTH), index=True, nullable=False),
             Column(self._KEY_COLUMN, Integer(), nullable=False),
             Column(self._VALUE_COLUMN, _PICKLETYPE_CLASS(self.dialect, self.serializer), nullable=False),
-            Column(ExtraFields.updated_at.value, _DATETIME_CLASS(self.dialect), nullable=False),
+            Column(ExtraFields.updated_at.value, BigInteger(), nullable=False),
             Index("logs_index", ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN, unique=True),
         )
 
@@ -311,7 +302,7 @@ class SQLContextStorage(DBContextStorage):
             else:
                 return dict()
 
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._CONTEXTS_TABLE]).values(
                 {
@@ -335,7 +326,7 @@ class SQLContextStorage(DBContextStorage):
             )
             await conn.execute(update_stmt)
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         async with self.engine.begin() as conn:
             insert_stmt = self._INSERT_CALLABLE(self.tables[self._LOGS_TABLE]).values(
                 [

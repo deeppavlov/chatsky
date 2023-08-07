@@ -12,7 +12,6 @@ structures such as strings, hashes, lists, sets, and more.
 Additionally, Redis can be used as a cache, message broker, and database, making it a versatile
 and powerful choice for data storage and management.
 """
-from datetime import datetime
 from typing import Any, List, Dict, Set, Tuple, Optional
 
 try:
@@ -121,7 +120,7 @@ class RedisContextStorage(DBContextStorage):
             for key in read_keys
         }
 
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         await self._redis.hset(f"{self._index_key}:{self._GENERAL_INDEX}", storage_key, primary_id)
         await self._redis.set(f"{self._context_key}:{primary_id}", self.serializer.dumps(data))
         await self._redis.set(
@@ -131,7 +130,7 @@ class RedisContextStorage(DBContextStorage):
             f"{self._context_key}:{primary_id}:{ExtraFields.updated_at.value}", self.serializer.dumps(updated)
         )
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         for field, key, value in data:
             await self._redis.sadd(f"{self._index_key}:{self._LOGS_INDEX}:{primary_id}:{field}", str(key))
             await self._redis.set(f"{self._logs_key}:{primary_id}:{field}:{key}", self.serializer.dumps(value))

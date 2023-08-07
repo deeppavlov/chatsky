@@ -1,6 +1,5 @@
 import time
 from asyncio import gather
-from datetime import datetime
 from uuid import uuid4
 from enum import Enum
 from pydantic import BaseModel, Field, ConfigDict
@@ -28,13 +27,13 @@ Type alias of asynchronous function that should be called in order to retrieve c
 data from `LOGS` table. Matches type of :py:func:`DBContextStorage._read_log_ctx` method.
 """
 
-_WritePackedContextFunction = Callable[[Dict, datetime, datetime, str, str], Awaitable]
+_WritePackedContextFunction = Callable[[Dict, int, int, str, str], Awaitable]
 """
 Type alias of asynchronous function that should be called in order to write context
 data to `CONTEXT` table. Matches type of :py:func:`DBContextStorage._write_pac_ctx` method.
 """
 
-_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], datetime, str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], int, str], Coroutine]
 """
 Type alias of asynchronous function that should be called in order to write context
 data to `LOGS` table. Matches type of :py:func:`DBContextStorage._write_log_ctx` method.
@@ -222,7 +221,7 @@ class ContextSchema(BaseModel):
 
         :return: the read :py:class:`~.Context` object.
         """
-        updated_at = datetime.fromtimestamp(time.time_ns() / 1e9)
+        updated_at = time.time_ns()
         setattr(ctx, ExtraFields.updated_at.value, updated_at)
         created_at = getattr(ctx, ExtraFields.created_at.value, updated_at)
 

@@ -16,7 +16,7 @@ Another important feature of the context is data serialization.
 The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
 This allows developers to save the context data and resume the conversation later.
 """
-from datetime import datetime
+import time
 import logging
 
 from typing import Any, Optional, Union, Dict, List, Set
@@ -58,12 +58,12 @@ class Context(BaseModel):
     Primary id is the unique ID of the context.
     It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
     """
-    _created_at: datetime = PrivateAttr(default_factory=datetime.now)
+    _created_at: int = PrivateAttr(default_factory=time.time_ns)
     """
     Timestamp when the context was _first time saved to database_.
     It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
     """
-    _updated_at: datetime = PrivateAttr(default_factory=datetime.now)
+    _updated_at: int = PrivateAttr(default_factory=time.time_ns)
     """
     Timestamp when the context was last time saved to database_.
     It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.

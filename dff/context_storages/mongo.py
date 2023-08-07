@@ -12,7 +12,6 @@ and environments. Additionally, MongoDB is highly scalable and can handle large 
 and high levels of read and write traffic.
 """
 import asyncio
-from datetime import datetime
 from typing import Dict, Set, Tuple, Optional, List, Any
 
 try:
@@ -168,7 +167,7 @@ class MongoContextStorage(DBContextStorage):
         )
         return {log[self._KEY_COLUMN]: self.serializer.loads(log[self._VALUE_COLUMN]) for log in logs}
 
-    async def _write_pac_ctx(self, data: Dict, created: datetime, updated: datetime, storage_key: str, primary_id: str):
+    async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         await self.collections[self._CONTEXTS_TABLE].update_one(
             {ExtraFields.primary_id.value: primary_id},
             {
@@ -184,7 +183,7 @@ class MongoContextStorage(DBContextStorage):
             upsert=True,
         )
 
-    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: datetime, primary_id: str):
+    async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         await self.collections[self._LOGS_TABLE].bulk_write(
             [
                 UpdateOne(
