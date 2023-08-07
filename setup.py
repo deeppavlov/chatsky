@@ -110,7 +110,7 @@ test_requirements = merge_req_lists(
         "fastapi==0.100.0",
         "uvicorn==0.23.1",
         "websockets==11.0.2",
-        "locust==2.15",
+        "locust==2.16.1",
         "streamlit==1.25.0",
         "streamlit-chat==0.1.1",
     ],
