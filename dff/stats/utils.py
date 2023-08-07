@@ -118,6 +118,7 @@ class PasswordAction(Action):
     ensuring password safety, unless the password is specified directly.
 
     """
+
     def __init__(
         self, option_strings, dest=None, nargs=0, default=None, required=False, type=None, metavar=None, help=None
     ):

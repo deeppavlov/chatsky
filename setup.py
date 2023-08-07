@@ -142,7 +142,7 @@ test_requirements = merge_req_lists(
         "streamlit-chat==0.1.1",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
-        "sqlparse==0.4.4"
+        "sqlparse==0.4.4",
     ],
     requests_requirements,
 )
