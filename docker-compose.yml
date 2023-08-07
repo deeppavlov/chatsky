@@ -65,8 +65,8 @@ services:
       - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml
       - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml
     ports:
-      - "4317:4317"          # OTLP over gRPC receiver
-      - "4318:4318"     # OTLP over HTTP receiver
+      - "4317:4317"    # OTLP over gRPC receiver
+      - "4318:4318"    # OTLP over HTTP receiver
 volumes:
   mysql-data: &volume-spec
     name: "mysql-data"

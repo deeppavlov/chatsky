@@ -37,7 +37,8 @@ Collection procedure
 
 Collecting data is done by means of instrumenting your conversational service before you run it.
 DFF tutorials showcase all the necessary steps, needed to achieve that. We will run
-`one of those files <./tutorials/tutorials.stats.1_extractor_functions>` in order to obtain sample data points to visualize.
+`one of those files <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html/>_` 
+in order to obtain sample data points to visualize.
 
 .. code-block:: shell
 
@@ -86,7 +87,7 @@ shipped with DFF, make sure that your access rights are sufficient to edit the w
 Using Superset
 ~~~~~~~~~~~~~~
 
-| In order to view the imported dashboard, log into `Superset <http://localhost:8088/>` using your username and password.
+| In order to view the imported dashboard, log into `Superset <http://localhost:8088/>_` using your username and password.
 | The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
 | The dashboard has four sections, each one of them containing different kind of data.
 
