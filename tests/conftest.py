@@ -23,7 +23,7 @@ def pytest_runtest_makereport(item, call):
     test_marks = [mark.name for mark in item.own_markers]
 
     # check that any of the permitted marks is present
-    if allow_skip != "None":
+    if allow_skip != "none":
         if any([mark in test_marks for mark in allow_skip.split(",")]):
             return
 
@@ -40,5 +40,5 @@ def pytest_addoption(parser):
         default="all",
         help="A comma-separated list of marks. Any test without a mark from the list will fail on skip."
         " If not passed, every test is permitted to skip."
-        " Pass `None` to disallow any test from skipping.",
+        " Pass `none` to disallow any test from skipping.",
     )
