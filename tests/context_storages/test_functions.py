@@ -1,3 +1,4 @@
+from time import sleep
 from typing import Dict, Union
 from dff.context_storages import DBContextStorage, ALL_ITEMS
 from dff.context_storages.context_schema import SchemaField
@@ -34,6 +35,8 @@ def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     db[context_id] = Context()
     assert context_id in db
     assert len(db) == 1
+
+    sleep(0.001)
     db[context_id] = testing_context  # overwriting a key
     assert len(db) == 1
     assert db.keys() == {context_id}
@@ -147,6 +150,7 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
             misc={f"key_{i}": f"ctx misc value {i}"},
             requests={0: Message(text="useful message"), i: Message(text="some message")},
         )
+        sleep(0.001)
 
     # Setup schema so that all requests will be read from database
     db.context_schema.requests.subscript = ALL_ITEMS
@@ -169,6 +173,7 @@ def keys_test(db: DBContextStorage, testing_context: Context, context_id: str):
     # Fill database with contexts
     for i in range(1, 11):
         db[f"{context_id}_{i}"] = Context()
+        sleep(0.001)
 
     # Add and delete a context
     db[context_id] = testing_context
