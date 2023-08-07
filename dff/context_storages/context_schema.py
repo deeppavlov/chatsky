@@ -222,7 +222,7 @@ class ContextSchema(BaseModel):
 
         :return: the read :py:class:`~.Context` object.
         """
-        updated_at = datetime.fromtimestamp(time.time())
+        updated_at = datetime.fromtimestamp(time.time_ns() / 1e9)
         setattr(ctx, ExtraFields.updated_at.value, updated_at)
         created_at = getattr(ctx, ExtraFields.created_at.value, updated_at)
 
