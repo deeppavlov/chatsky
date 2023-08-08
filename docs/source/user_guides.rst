@@ -17,3 +17,9 @@ for exploring the telemetry data collected from your conversational services.
 We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
+
+.. toctree::
+   :hidden:
+
+   user_guides/basic_conceptions
+   user_guides/superset_guide
