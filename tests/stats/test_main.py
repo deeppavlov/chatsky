@@ -22,8 +22,26 @@ def dashboard_display_test(args: Namespace, base_url: str):
     dashboard_url = parse.urljoin(base_url, f"/api/v1/dashboard/{DASHBOARD_SLUG}")
     charts_url = parse.urljoin(base_url, "/api/v1/chart")
     datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
+    database_conn_url = parse.urljoin(base_url, "/api/v1/database/test_connection")
+    sqla_url = f"clickhousedb+connect://{getattr(args, 'db.user')}:{getattr(args, 'db.password')}@clickhouse:8123/test"
+    database_data = {
+        "configuration_method": "sqlalchemy_form",
+        "database_name": "dff_database",
+        "driver": "string",
+        "engine": None,
+        "extra": "",
+        "impersonate_user": False,
+        "masked_encrypted_extra": "",
+        "parameters": {},
+        "server_cert": None,
+        "sqlalchemy_uri": sqla_url,
+        "ssh_tunnel": None,
+    }
 
     session, headers = get_superset_session(args, base_url)
+    database_res = session.post(database_conn_url, json=database_data, headers=headers)
+    print(database_res.text)
+    assert database_res.status_code == 200
     dashboard_res = session.get(dashboard_url, headers=headers)
     assert dashboard_res.status_code == 200
     dashboard_json = dashboard_res.json()
@@ -69,55 +87,17 @@ def dashboard_display_test(args: Namespace, base_url: str):
             Namespace(
                 **{
                     "outfile": "1.zip",
-                    "db.type": "postgresql",
-                    "db.user": "root",
-                    "db.host": "localhost",
-                    "db.port": "5000",
-                    "db.name": "test",
-                    "db.table": "dff_stats",
-                    "username": os.getenv("SUPERSET_USERNAME"),
-                    "password": os.getenv("SUPERSET_PASSWORD"),
-                    "host": "localhost",
-                    "port": "8088",
-                    "db.password": "qwerty",
-                    "file": f"tutorials/{path_to_addon}/example_config.yaml",
-                }
-            ),
-        ),
-        (
-            Namespace(
-                **{
-                    "outfile": "2.zip",
-                    "db.type": "mysql+mysqldb",
-                    "db.user": "root",
-                    "db.host": "localhost",
-                    "db.port": "5000",
-                    "db.name": "test",
-                    "db.table": "dff_stats",
-                    "username": os.getenv("SUPERSET_USERNAME"),
-                    "password": os.getenv("SUPERSET_PASSWORD"),
-                    "host": "localhost",
-                    "port": "8088",
-                    "db.password": "qwerty",
-                    "file": f"tutorials/{path_to_addon}/example_config.yaml",
-                }
-            ),
-        ),
-        (
-            Namespace(
-                **{
-                    "outfile": "3.zip",
                     "db.type": "clickhousedb+connect",
-                    "db.user": "root",
+                    "db.user": os.getenv("CLICKHOUSE_USERNAME"),
                     "db.host": "localhost",
-                    "db.port": "5000",
+                    "db.port": "8123",
                     "db.name": "test",
-                    "db.table": "dff_stats",
+                    "db.table": "otel_logs",
                     "username": os.getenv("SUPERSET_USERNAME"),
                     "password": os.getenv("SUPERSET_PASSWORD"),
                     "host": "localhost",
                     "port": "8088",
-                    "db.password": "qwerty",
+                    "db.password": os.getenv("CLICKHOUSE_PASSWORD"),
                     "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),

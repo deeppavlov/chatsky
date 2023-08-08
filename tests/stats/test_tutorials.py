@@ -21,7 +21,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
 
 COLLECTOR_AVAILABLE = ping_localhost(4317)
 CLICKHOUSE_AVAILABLE = ping_localhost(8123)
-CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER")
+CLICKHOUSE_USERNAME = os.getenv("CLICKHOUSE_USERNAME")
 CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD")
 CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 
@@ -29,7 +29,7 @@ CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 @pytest.mark.skipif(not CLICKHOUSE_AVAILABLE, reason="Clickhouse unavailable.")
 @pytest.mark.skipif(not COLLECTOR_AVAILABLE, reason="OTLP collector unavailable.")
 @pytest.mark.skipif(
-    not all([CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB]), reason="Clickhouse credentials missing"
+    not all([CLICKHOUSE_USERNAME, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB]), reason="Clickhouse credentials missing"
 )
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
@@ -45,7 +45,7 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
     _, logger_provider = otlp_log_exp_provider
     http_client = AsyncClient()
     table = "otel_logs"
-    ch_client = ChClient(http_client, user=CLICKHOUSE_USER, password=CLICKHOUSE_PASSWORD, database=CLICKHOUSE_DB)
+    ch_client = ChClient(http_client, user=CLICKHOUSE_USERNAME, password=CLICKHOUSE_PASSWORD, database=CLICKHOUSE_DB)
 
     try:
         await ch_client.execute(f"TRUNCATE {table}")
