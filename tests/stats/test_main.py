@@ -88,7 +88,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
                 **{
                     "outfile": "1.zip",
                     "db.type": "clickhousedb+connect",
-                    "db.user": os.getenv("CLICKHOUSE_USERNAME"),
+                    "db.user": os.getenv("CLICKHOUSE_USER"),
                     "db.host": "localhost",
                     "db.port": "8123",
                     "db.name": "test",
