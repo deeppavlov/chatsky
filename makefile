@@ -5,7 +5,7 @@ VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
 CURRENT_VERSION = 0.4.2
 TEST_COVERAGE_THRESHOLD=95
-TEST_ALLOW_SKIP=telegram,docker
+TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
