@@ -58,7 +58,7 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
         elif isinstance(response, str):
             ready_response = TelegramMessage(text=response)
         elif isinstance(response, dict) or isinstance(response, Message):
-            ready_response = TelegramMessage.parse_obj(response)
+            ready_response = TelegramMessage.model_validate(response)
         else:
             raise TypeError(
                 "Type of the response argument should be one of the following:"

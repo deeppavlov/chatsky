@@ -117,7 +117,7 @@ async def test_keyboard_remove(pipeline_instance, api_credentials, bot_user, ses
     ],
 )
 async def test_telegram_attachment(generic_response, pipeline_instance, api_credentials, bot_user, session_file):
-    telegram_response = TelegramMessage.parse_obj(generic_response)
+    telegram_response = TelegramMessage.model_validate(generic_response)
     test_helper = TelegramTesting(
         pipeline=pipeline_instance, api_credentials=api_credentials, session_file=session_file, bot=bot_user
     )
@@ -150,7 +150,7 @@ async def test_telegram_attachment(generic_response, pipeline_instance, api_cred
     ],
 )
 async def test_attachments(attachments, pipeline_instance, api_credentials, bot_user, session_file):
-    telegram_response = TelegramMessage.parse_obj(attachments)
+    telegram_response = TelegramMessage.model_validate(attachments)
     test_helper = TelegramTesting(
         pipeline=pipeline_instance, api_credentials=api_credentials, session_file=session_file, bot=bot_user
     )

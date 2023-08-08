@@ -260,7 +260,7 @@ class TelegramTesting:  # pragma: no cover
                 last_message = None
                 for request, response in happy_path:
                     logging.info(f"Sending request {request}")
-                    user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
+                    user_message = await self.send_message(TelegramMessage.model_validate(request), bot_messages)
                     if user_message is not None:
                         last_message = user_message
                     logging.info("Request sent")
