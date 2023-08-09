@@ -1,8 +1,18 @@
+"""
+Context Schema
+--------------
+The `ContextSchema` module provides class for managing context storage rules.
+The :py:class:`~.Context` will be stored in two instances, `CONTEXT` and `LOGS`,
+that can be either files, databases or namespaces. The context itself alongsode with
+several latest requests, responses and labels are stored in `CONTEXT` table,
+while the older ones are kept in `LOGS` table and not accessed too often.
+"""
+
 import time
 from asyncio import gather
 from uuid import uuid4
 from enum import Enum
-from pydantic import BaseModel, Field, ConfigDict
+from pydantic import BaseModel, Field
 from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
@@ -40,7 +50,7 @@ data to `LOGS` table. Matches type of :py:func:`DBContextStorage._write_log_ctx`
 """
 
 
-class SchemaField(BaseModel):
+class SchemaField(BaseModel, validate_assignment=True):
     """
     Schema for :py:class:`~.Context` fields that are dictionaries with numeric keys fields.
     Used for controlling read and write policy of the particular field.
@@ -61,8 +71,6 @@ class SchemaField(BaseModel):
     Default: 3.
     """
 
-    model_config = ConfigDict(validate_assignment=True)
-
 
 class ExtraFields(str, Enum):
     """
@@ -77,7 +85,7 @@ class ExtraFields(str, Enum):
     updated_at = "_updated_at"
 
 
-class ContextSchema(BaseModel):
+class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed=True):
     """
     Schema, describing how :py:class:`~.Context` fields should be stored and retrieved from storage.
     The default behaviour is the following: All the context data except for the fields that are
@@ -89,11 +97,6 @@ class ContextSchema(BaseModel):
     That behaviour allows context storage to minimize the operation number for context reading and
     writing.
     """
-
-    model_config = ConfigDict(
-        validate_assignment=True,
-        arbitrary_types_allowed=True,
-    )
 
     requests: SchemaField = Field(default_factory=lambda: SchemaField(name="requests"), frozen=True)
     """

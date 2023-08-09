@@ -10,7 +10,7 @@ from pathlib import Path
 from base64 import encodebytes, decodebytes
 from typing import Any, List, Set, Tuple, Dict, Optional
 
-from pydantic import BaseModel, ConfigDict
+from pydantic import BaseModel
 
 from .serializer import DefaultSerializer
 from .context_schema import ContextSchema, ExtraFields
@@ -26,8 +26,8 @@ except ImportError:
     json_available = False
 
 
-class SerializableStorage(BaseModel):
-    model_config = ConfigDict(extra="allow")
+class SerializableStorage(BaseModel, extra="allow"):
+    pass
 
 
 class StringSerializer:
