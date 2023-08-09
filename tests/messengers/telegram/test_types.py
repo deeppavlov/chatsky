@@ -25,11 +25,6 @@ from dff.messengers.telegram.utils import open_io, close_io, batch_open_io
 
 from dff.utils.testing.telegram import TelegramTesting
 
-from tests.test_utils import tests_to_skip
-
-if "messenger_telegram" in tests_to_skip:
-    pytest.skip(reason="Telegram messenger will be skipped", allow_module_level=True)
-
 image = Image(
     source="https://gist.githubusercontent.com/scotthaleen/32f76a413e0dfd4b4d79c2a534d49c0b/raw"
     "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
