@@ -35,6 +35,7 @@ document = Document(source="https://github.com/mathiasbynens/small/raw/master/pd
 
 
 @pytest.mark.asyncio
+@pytest.mark.telegram
 async def test_text(pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage(text="test")
     test_helper = TelegramTesting(
@@ -74,6 +75,7 @@ async def test_text(pipeline_instance, api_credentials, bot_user, session_file):
         ),
     ],
 )
+@pytest.mark.telegram
 async def test_buttons(ui, button_type, markup_type, pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage(text="test", ui=ui)
     test_helper = TelegramTesting(
@@ -83,6 +85,7 @@ async def test_buttons(ui, button_type, markup_type, pipeline_instance, api_cred
 
 
 @pytest.mark.asyncio
+@pytest.mark.telegram
 async def test_keyboard_remove(pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage(text="test", ui=RemoveKeyboard())
     test_helper = TelegramTesting(
@@ -116,6 +119,7 @@ async def test_keyboard_remove(pipeline_instance, api_credentials, bot_user, ses
         (Message(text="test", attachments=Attachments(files=[document])),),
     ],
 )
+@pytest.mark.telegram
 async def test_telegram_attachment(generic_response, pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage.model_validate(generic_response)
     test_helper = TelegramTesting(
@@ -149,6 +153,7 @@ async def test_telegram_attachment(generic_response, pipeline_instance, api_cred
         (Message(text="test", attachments=Attachments(files=2 * [document])),),
     ],
 )
+@pytest.mark.telegram
 async def test_attachments(attachments, pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage.model_validate(attachments)
     test_helper = TelegramTesting(
@@ -158,6 +163,7 @@ async def test_attachments(attachments, pipeline_instance, api_credentials, bot_
 
 
 @pytest.mark.asyncio
+@pytest.mark.telegram
 async def test_location(pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage(text="location", location=Location(longitude=39.0, latitude=43.0))
     test_helper = TelegramTesting(
@@ -167,6 +173,7 @@ async def test_location(pipeline_instance, api_credentials, bot_user, session_fi
 
 
 @pytest.mark.asyncio
+@pytest.mark.telegram
 async def test_parsed_text(pipeline_instance, api_credentials, bot_user, session_file):
     telegram_response = TelegramMessage(text="[inline URL](http://www.example.com/)", parse_mode=ParseMode.MARKDOWN)
     test_helper = TelegramTesting(
