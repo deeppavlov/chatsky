@@ -163,8 +163,10 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
         Calculate what fields to read, call reader function and cast result to context.
         Also set `primary_id` and `storage_key` attributes of the read context.
 
-        :param pac_reader: the function used for reading context from `CONTEXT` table (see :py:const:`~._ReadPackedContextFunction`).
-        :param log_reader: the function used for reading context from `LOGS` table (see :py:const:`~._ReadLogContextFunction`).
+        :param pac_reader: the function used for reading context from
+            `CONTEXT` table (see :py:const:`~._ReadPackedContextFunction`).
+        :param log_reader: the function used for reading context from
+            `LOGS` table (see :py:const:`~._ReadLogContextFunction`).
         :param storage_key: the key the context is stored with.
 
         :return: the read :py:class:`~.Context` object.
@@ -181,7 +183,8 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
                 sorted_dict = sorted(list(nest_dict.keys()))
                 last_read_key = sorted_dict[-1] if len(sorted_dict) > 0 else 0
                 if len(nest_dict) > field_props.subscript:
-                    last_keys = sorted(nest_dict.keys())[-field_props.subscript :]
+                    limit = -field_props.subscript
+                    last_keys = sorted(nest_dict.keys())[limit:]
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
                 elif len(nest_dict) < field_props.subscript and last_read_key > field_props.subscript:
                     limit = field_props.subscript - len(nest_dict)
@@ -217,8 +220,10 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
         Also update `updated_at` attribute of the given context with current time, set `primary_id` and `storage_key`.
 
         :param ctx: the context to store.
-        :param pac_writer: the function used for writing context to `CONTEXT` table (see :py:const:`~._WritePackedContextFunction`).
-        :param log_writer: the function used for writing context to `LOGS` table (see :py:const:`~._WriteLogContextFunction`).
+        :param pac_writer: the function used for writing context to
+            `CONTEXT` table (see :py:const:`~._WritePackedContextFunction`).
+        :param log_writer: the function used for writing context to
+            `LOGS` table (see :py:const:`~._WriteLogContextFunction`).
         :param storage_key: the key to store the context with.
         :param chunk_size: maximum number of items that can be inserted simultaneously, False if no such limit exists.
 
@@ -247,10 +252,12 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
                 if self.duplicate_context_in_logs or not isinstance(field_props.subscript, int):
                     logs_dict[field_props.name] = nest_dict
                 else:
-                    logs_dict[field_props.name] = {key: nest_dict[key] for key in last_keys[: -field_props.subscript]}
+                    limit = -field_props.subscript
+                    logs_dict[field_props.name] = {key: nest_dict[key] for key in last_keys[:limit]}
 
             if isinstance(field_props.subscript, int):
-                last_keys = last_keys[-field_props.subscript :]
+                limit = -field_props.subscript
+                last_keys = last_keys[limit:]
 
             ctx_dict[field_props.name] = {k: v for k, v in nest_dict.items() if k in last_keys}
 

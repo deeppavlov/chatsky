@@ -40,7 +40,7 @@ try:
         delete,
         func,
     )
-    from sqlalchemy.dialects.mysql import DATETIME, LONGBLOB
+    from sqlalchemy.dialects.mysql import LONGBLOB
     from sqlalchemy.ext.asyncio import create_async_engine
 
     sqlalchemy_available = True

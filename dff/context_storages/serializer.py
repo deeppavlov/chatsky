@@ -42,6 +42,7 @@ def validate_serializer(serializer: Any) -> Any:
         )
     if len(signature(serializer.dumps).parameters) != 2:
         raise ValueError(
-            f"Serializer object {serializer} `dumps(data: bytes, proto: Any) -> bytes` method should accept exactly 2 arguments"
+            f"Serializer object {serializer} `dumps(data: bytes, proto: Any) -> bytes` "
+            "method should accept exactly 2 arguments"
         )
     return serializer

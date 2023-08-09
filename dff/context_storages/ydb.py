@@ -110,7 +110,7 @@ class YDBContextStorage(DBContextStorage):
                 SELECT COUNT(DISTINCT {ExtraFields.storage_key.value}) AS cnt
                 FROM {self.table_prefix}_{self._CONTEXTS_TABLE}
                 WHERE {ExtraFields.storage_key.value} == ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True;
-                """
+                """  # noqa: E501
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
@@ -185,7 +185,7 @@ class YDBContextStorage(DBContextStorage):
                 WHERE {ExtraFields.storage_key.value} = ${ExtraFields.storage_key.value} AND {ExtraFields.active_ctx.value} == True
                 ORDER BY {ExtraFields.updated_at.value} DESC
                 LIMIT 1;
-                """
+                """  # noqa: E501
 
             result_sets = await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
@@ -216,7 +216,7 @@ class YDBContextStorage(DBContextStorage):
                 WHERE {ExtraFields.primary_id.value} = ${ExtraFields.primary_id.value} AND {self._FIELD_COLUMN} = ${self._FIELD_COLUMN}
                 ORDER BY {self._KEY_COLUMN} DESC
                 LIMIT {limit}
-                """
+                """  # noqa: E501
 
             final_offset = 0
             result_sets = None
@@ -253,7 +253,7 @@ class YDBContextStorage(DBContextStorage):
                 DECLARE ${ExtraFields.updated_at.value} AS Uint64;
                 UPSERT INTO {self.table_prefix}_{self._CONTEXTS_TABLE} ({self._PACKED_COLUMN}, {ExtraFields.storage_key.value}, {ExtraFields.primary_id.value}, {ExtraFields.active_ctx.value}, {ExtraFields.created_at.value}, {ExtraFields.updated_at.value})
                 VALUES (${self._PACKED_COLUMN}, ${ExtraFields.storage_key.value}, ${ExtraFields.primary_id.value}, True, ${ExtraFields.created_at.value}, ${ExtraFields.updated_at.value});
-                """
+                """  # noqa: E501
 
             await session.transaction(SerializableReadWrite()).execute(
                 await session.prepare(query),
@@ -281,7 +281,7 @@ class YDBContextStorage(DBContextStorage):
                     DECLARE ${ExtraFields.updated_at.value} AS Uint64;
                     UPSERT INTO {self.table_prefix}_{self._LOGS_TABLE} ({self._FIELD_COLUMN}, {self._KEY_COLUMN}, {self._VALUE_COLUMN}, {ExtraFields.primary_id.value}, {ExtraFields.updated_at.value})
                     VALUES (${self._FIELD_COLUMN}, ${self._KEY_COLUMN}, ${self._VALUE_COLUMN}, ${ExtraFields.primary_id.value}, ${ExtraFields.updated_at.value});
-                    """
+                    """  # noqa: E501
 
                 await session.transaction(SerializableReadWrite()).execute(
                     await session.prepare(query),
