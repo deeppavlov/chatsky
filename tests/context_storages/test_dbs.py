@@ -76,7 +76,10 @@ def generic_test(db, testing_context, context_id):
     # test read operations
     new_ctx = db[context_id]
     assert isinstance(new_ctx, Context)
-    assert {**new_ctx.dict(), "id": str(new_ctx.id)} == {**testing_context.dict(), "id": str(testing_context.id)}
+    assert {**new_ctx.model_dump(), "id": str(new_ctx.id)} == {
+        **testing_context.model_dump(),
+        "id": str(testing_context.id),
+    }
     # test delete operations
     del db[context_id]
     assert context_id not in db
@@ -122,6 +125,7 @@ def test_pickle(testing_file, testing_context, context_id):
     asyncio.run(delete_pickle(db))
 
 
+@pytest.mark.docker
 @pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running")
 @pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing")
 @pytest.mark.skipif("db_mongo" in db_tests_to_skip, reason="MongoDB context storage will be skipped")
@@ -140,6 +144,7 @@ def test_mongo(testing_context, context_id):
     asyncio.run(delete_mongo(db))
 
 
+@pytest.mark.docker
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
 @pytest.mark.skipif("db_redis" in db_tests_to_skip, reason="Redis context storage will be skipped")
@@ -149,6 +154,7 @@ def test_redis(testing_context, context_id):
     asyncio.run(delete_redis(db))
 
 
+@pytest.mark.docker
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
 @pytest.mark.skipif("db_postgres" in db_tests_to_skip, reason="PostgreSQL context storage will be skipped")
@@ -173,6 +179,7 @@ def test_sqlite(testing_file, testing_context, context_id):
     asyncio.run(delete_sql(db))
 
 
+@pytest.mark.docker
 @pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
 @pytest.mark.skipif("db_mysql" in db_tests_to_skip, reason="MySQL context storage will be skipped")
@@ -188,6 +195,7 @@ def test_mysql(testing_context, context_id):
     asyncio.run(delete_sql(db))
 
 
+@pytest.mark.docker
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
 @pytest.mark.skipif("db_ydb" in db_tests_to_skip, reason="YDB context storage will be skipped")

@@ -49,6 +49,7 @@ def test_client_tutorials_without_telegram(tutorial_module_name):
         "7_polling_setup",
     ],
 )
+@pytest.mark.telegram
 async def test_client_tutorials(tutorial_module_name, api_credentials, bot_user, session_file):
     tutorial_module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
     pipeline = tutorial_module.pipeline

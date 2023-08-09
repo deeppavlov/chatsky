@@ -74,7 +74,7 @@ class YDBContextStorage(DBContextStorage):
 
             await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": str(key), "$queryContext": value.json()},
+                {"$queryId": str(key), "$queryContext": value.model_dump_json()},
                 commit_tx=True,
             )
 

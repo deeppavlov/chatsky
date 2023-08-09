@@ -16,7 +16,7 @@ from dff.script import Context, NodeLabel3Type
 Pipeline = ForwardRef("Pipeline")
 
 
-def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+def repeat(priority: Optional[float] = None) -> Callable:
     """
     Returns transition handler that takes :py:class:`.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -32,19 +32,20 @@ def repeat(priority: Optional[float] = None, *args, **kwargs) -> Callable:
         if len(ctx.labels) >= 1:
             flow_label, label = list(ctx.labels.values())[-1]
         else:
-            flow_label, label = pipeline.actor.fallback_label[:2]
+            flow_label, label = pipeline.actor.start_label[:2]
         return (flow_label, label, current_priority)
 
     return repeat_transition_handler
 
 
-def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+def previous(priority: Optional[float] = None) -> Callable:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
     This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the previous node with a given :py:const:`priority <float>`.
     If the priority is not given, `Pipeline.actor.label_priority` is used as default.
+    If the current node is the start node, fallback is returned.
 
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
@@ -53,6 +54,8 @@ def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         if len(ctx.labels) >= 2:
             flow_label, label = list(ctx.labels.values())[-2]
+        elif len(ctx.labels) == 1:
+            flow_label, label = pipeline.actor.start_label[:2]
         else:
             flow_label, label = pipeline.actor.fallback_label[:2]
         return (flow_label, label, current_priority)
@@ -60,7 +63,7 @@ def previous(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     return previous_transition_handler
 
 
-def to_start(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+def to_start(priority: Optional[float] = None) -> Callable:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -78,7 +81,7 @@ def to_start(priority: Optional[float] = None, *args, **kwargs) -> Callable:
     return to_start_transition_handler
 
 
-def to_fallback(priority: Optional[float] = None, *args, **kwargs) -> Callable:
+def to_fallback(priority: Optional[float] = None) -> Callable:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -118,7 +121,7 @@ def _get_label_by_index_shifting(
     :return: The tuple that consists of `(flow_label, label, priority)`.
         If fallback is executed `(flow_fallback_label, fallback_label, priority)` are returned.
     """
-    flow_label, node_label, current_priority = repeat(priority, *args, **kwargs)(ctx, pipeline, *args, **kwargs)
+    flow_label, node_label, current_priority = repeat(priority)(ctx, pipeline, *args, **kwargs)
     labels = list(pipeline.script.get(flow_label, {}))
 
     if node_label not in labels:
@@ -133,7 +136,7 @@ def _get_label_by_index_shifting(
     return (flow_label, labels[label_index], current_priority)
 
 
-def forward(priority: Optional[float] = None, cyclicality_flag: bool = True, *args, **kwargs) -> Callable:
+def forward(priority: Optional[float] = None, cyclicality_flag: bool = True) -> Callable:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -148,13 +151,13 @@ def forward(priority: Optional[float] = None, cyclicality_flag: bool = True, *ar
 
     def forward_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
         return _get_label_by_index_shifting(
-            ctx, pipeline, priority, increment_flag=True, cyclicality_flag=cyclicality_flag
+            ctx, pipeline, priority, increment_flag=True, cyclicality_flag=cyclicality_flag, *args, **kwargs
         )
 
     return forward_transition_handler
 
 
-def backward(priority: Optional[float] = None, cyclicality_flag: bool = True, *args, **kwargs) -> Callable:
+def backward(priority: Optional[float] = None, cyclicality_flag: bool = True) -> Callable:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -169,7 +172,7 @@ def backward(priority: Optional[float] = None, cyclicality_flag: bool = True, *a
 
     def back_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
         return _get_label_by_index_shifting(
-            ctx, pipeline, priority, increment_flag=False, cyclicality_flag=cyclicality_flag
+            ctx, pipeline, priority, increment_flag=False, cyclicality_flag=cyclicality_flag, *args, **kwargs
         )
 
     return back_transition_handler

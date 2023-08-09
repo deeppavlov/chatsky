@@ -11,7 +11,7 @@ module as an extension to `dff.script.core`.
 import logging
 
 from dff.messengers.common import CLIMessengerInterface
-from dff.script import Context
+from dff.script import Context, Message
 
 from dff.pipeline import Pipeline
 
@@ -74,7 +74,8 @@ if __name__ == "__main__":
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
-            ctx: Context = pipeline(input("Send request: "), ctx_id)
+            message = Message(text=input("Send request: "))
+            ctx: Context = pipeline(message, ctx_id)
             print(f"Response: {ctx.last_response}")
             ping_pong = ctx.misc.get("ping", False) and ctx.misc.get("pong", False)
             print(f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}.")
