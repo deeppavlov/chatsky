@@ -39,7 +39,7 @@ you can use the `content_types` parameter of the `telegram_condition`.
 
 
 # %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -165,10 +165,7 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if os.getenv("TG_BOT_TOKEN") is None:
-        raise RuntimeError("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
-    else:
-        pipeline.run()
+    pipeline.run()
 
 
 if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building

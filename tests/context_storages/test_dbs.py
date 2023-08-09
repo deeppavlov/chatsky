@@ -31,11 +31,12 @@ from dff.utils.testing.cleanup_db import (
     delete_ydb,
 )
 
-from tests.test_utils import get_path_from_tests_to_current_dir
+from tests.test_utils import get_path_from_tests_to_current_dir, tests_to_skip
 from dff.pipeline import Pipeline
 from dff.utils.testing import check_happy_path, TOY_SCRIPT_ARGS, HAPPY_PATH
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
+db_tests_to_skip = {var for var in tests_to_skip if var.startswith("db_")}
 
 
 def ping_localhost(port: int, timeout=60):
@@ -98,6 +99,7 @@ def test_protocol_suggestion(protocol, expected):
     assert result == expected
 
 
+@pytest.mark.skipif("db_shelve" in db_tests_to_skip, reason="Selve context storage will be skipped")
 def test_shelve(testing_file, testing_context, context_id):
     db = ShelveContextStorage(f"shelve://{testing_file}")
     generic_test(db, testing_context, context_id)
@@ -105,6 +107,7 @@ def test_shelve(testing_file, testing_context, context_id):
 
 
 @pytest.mark.skipif(not json_available, reason="JSON dependencies missing")
+@pytest.mark.skipif("db_json" in db_tests_to_skip, reason="JSON context storage will be skipped")
 def test_json(testing_file, testing_context, context_id):
     db = context_storage_factory(f"json://{testing_file}")
     generic_test(db, testing_context, context_id)
@@ -112,6 +115,7 @@ def test_json(testing_file, testing_context, context_id):
 
 
 @pytest.mark.skipif(not pickle_available, reason="Pickle dependencies missing")
+@pytest.mark.skipif("db_pickle" in db_tests_to_skip, reason="Pickle context storage will be skipped")
 def test_pickle(testing_file, testing_context, context_id):
     db = context_storage_factory(f"pickle://{testing_file}")
     generic_test(db, testing_context, context_id)
@@ -120,6 +124,7 @@ def test_pickle(testing_file, testing_context, context_id):
 
 @pytest.mark.skipif(not MONGO_ACTIVE, reason="Mongodb server is not running")
 @pytest.mark.skipif(not mongo_available, reason="Mongodb dependencies missing")
+@pytest.mark.skipif("db_mongo" in db_tests_to_skip, reason="MongoDB context storage will be skipped")
 def test_mongo(testing_context, context_id):
     if system() == "Windows":
         pytest.skip()
@@ -137,6 +142,7 @@ def test_mongo(testing_context, context_id):
 
 @pytest.mark.skipif(not REDIS_ACTIVE, reason="Redis server is not running")
 @pytest.mark.skipif(not redis_available, reason="Redis dependencies missing")
+@pytest.mark.skipif("db_redis" in db_tests_to_skip, reason="Redis context storage will be skipped")
 def test_redis(testing_context, context_id):
     db = context_storage_factory("redis://{}:{}@localhost:6379/{}".format("", os.environ["REDIS_PASSWORD"], "0"))
     generic_test(db, testing_context, context_id)
@@ -145,6 +151,7 @@ def test_redis(testing_context, context_id):
 
 @pytest.mark.skipif(not POSTGRES_ACTIVE, reason="Postgres server is not running")
 @pytest.mark.skipif(not postgres_available, reason="Postgres dependencies missing")
+@pytest.mark.skipif("db_postgres" in db_tests_to_skip, reason="PostgreSQL context storage will be skipped")
 def test_postgres(testing_context, context_id):
     db = context_storage_factory(
         "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
@@ -158,6 +165,7 @@ def test_postgres(testing_context, context_id):
 
 
 @pytest.mark.skipif(not sqlite_available, reason="Sqlite dependencies missing")
+@pytest.mark.skipif("db_sqlite" in db_tests_to_skip, reason="SQLite context storage will be skipped")
 def test_sqlite(testing_file, testing_context, context_id):
     separator = "///" if system() == "Windows" else "////"
     db = context_storage_factory(f"sqlite+aiosqlite:{separator}{testing_file}")
@@ -167,6 +175,7 @@ def test_sqlite(testing_file, testing_context, context_id):
 
 @pytest.mark.skipif(not MYSQL_ACTIVE, reason="Mysql server is not running")
 @pytest.mark.skipif(not mysql_available, reason="Mysql dependencies missing")
+@pytest.mark.skipif("db_mysql" in db_tests_to_skip, reason="MySQL context storage will be skipped")
 def test_mysql(testing_context, context_id):
     db = context_storage_factory(
         "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
@@ -181,6 +190,7 @@ def test_mysql(testing_context, context_id):
 
 @pytest.mark.skipif(not YDB_ACTIVE, reason="YQL server not running")
 @pytest.mark.skipif(not ydb_available, reason="YDB dependencies missing")
+@pytest.mark.skipif("db_ydb" in db_tests_to_skip, reason="YDB context storage will be skipped")
 def test_ydb(testing_context, context_id):
     db = context_storage_factory(
         "{}{}".format(

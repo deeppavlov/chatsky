@@ -12,9 +12,12 @@ try:
 except ImportError:
     pytest.skip(reason="`telegram` is not available", allow_module_level=True)
 
-from tests.test_utils import get_path_from_tests_to_current_dir
+from tests.test_utils import get_path_from_tests_to_current_dir, tests_to_skip
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.telegram import TelegramTesting, replace_click_button
+
+if "messenger_telegram" in tests_to_skip:
+    pytest.skip(reason="Telegram messenger will be skipped", allow_module_level=True)
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
