@@ -4,6 +4,7 @@
 
 """
 
+# %pip install dff
 
 # %%
 from dff.script.conditions import true

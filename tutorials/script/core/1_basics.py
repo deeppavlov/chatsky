@@ -6,6 +6,7 @@ This notebook shows basic tutorial of creating a simple dialog bot (agent).
 Let's do all the necessary imports from DFF:
 """
 
+# %pip install dff
 
 # %%
 from dff.script import TRANSITIONS, RESPONSE, Message

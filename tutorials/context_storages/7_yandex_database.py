@@ -5,6 +5,7 @@
 This is a tutorial on how to use Yandex DataBase.
 """
 
+# %pip install dff[ydb]
 
 # %%
 import os
