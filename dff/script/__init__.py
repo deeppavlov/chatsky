@@ -15,7 +15,6 @@ from .core.keywords import (
 from .core.normalization import (
     normalize_label,
     normalize_condition,
-    normalize_transitions,
     normalize_response,
     normalize_script,
 )
