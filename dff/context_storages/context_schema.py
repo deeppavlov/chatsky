@@ -20,9 +20,9 @@ from dff.script import Context
 
 ALL_ITEMS = "__all__"
 """
-The default value for all `DictSchemaField`s:
+The default value for all `DictSchemaField`:
 it means that all keys of the dictionary or list will be read or written.
-Can be used as a value of `subscript` parameter for `DictSchemaField`s and `ListSchemaField`s.
+Can be used as a value of `subscript` parameter for `DictSchemaField` and `ListSchemaField`.
 """
 
 _ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
