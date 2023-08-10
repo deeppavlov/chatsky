@@ -10,6 +10,8 @@ from dff.script import (
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
     Context,
+    Script,
+    Node,
     NodeLabel3Type,
     Message,
 )
@@ -19,9 +21,7 @@ from dff.script.conditions import true
 from dff.script import (
     normalize_condition,
     normalize_label,
-    normalize_script,
     normalize_response,
-    normalize_transitions,
 )
 
 
@@ -79,7 +79,7 @@ def test_normalize_condition():
 
 
 def test_normalize_transitions():
-    trans = normalize_transitions({("flow", "node", 1.0): std_func})
+    trans = Node.normalize_transitions({("flow", "node", 1.0): std_func})
     assert list(trans)[0] == ("flow", "node", 1.0)
     assert callable(list(trans.values())[0])
 
@@ -126,7 +126,7 @@ def test_normalize_script():
         MISC.name.lower(): {"key": "val"},
     }
     script = {GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}}
-    script = normalize_script(script)
+    script = Script.normalize_script(script)
     assert isinstance(script, dict)
     assert script[GLOBAL][GLOBAL] == node_template_gold
     assert script["flow"]["node"] == node_template_gold

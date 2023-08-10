@@ -15,7 +15,7 @@ from dff.script.slots.types import RootSlot, root_slot
     ],
 )
 def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline):
-    testing_context = testing_context.copy()
+    testing_context = testing_context.model_copy()
     testing_context.add_request(input)
     slot = RegexpSlot(name="test", regexp=regexp)
     result = slot.extract_value(testing_context, testing_pipeline)
@@ -48,7 +48,7 @@ def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline
     ],
 )
 def test_group(input, children, expected, is_set, testing_context, testing_pipeline):
-    testing_context = testing_context.copy()
+    testing_context = testing_context.model_copy()
     testing_context.add_request(input)
     slot = GroupSlot(name="test", children=children)
     assert len(slot.children) == len(children)
@@ -77,7 +77,7 @@ def test_group(input, children, expected, is_set, testing_context, testing_pipel
     ],
 )
 def test_function(input, func, expected, _set, testing_context, testing_pipeline):
-    new_testing_context = testing_context.copy()
+    new_testing_context = testing_context.model_copy()
     new_testing_context.add_request(input)
     slot = FunctionSlot(name="test", func=func)
     result = slot.extract_value(new_testing_context, testing_pipeline)

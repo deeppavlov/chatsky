@@ -32,7 +32,7 @@ def repeat(priority: Optional[float] = None) -> Callable:
         if len(ctx.labels) >= 1:
             flow_label, label = list(ctx.labels.values())[-1]
         else:
-            flow_label, label = pipeline.actor.fallback_label[:2]
+            flow_label, label = pipeline.actor.start_label[:2]
         return (flow_label, label, current_priority)
 
     return repeat_transition_handler
@@ -45,6 +45,7 @@ def previous(priority: Optional[float] = None) -> Callable:
     This handler returns a :py:const:`label <dff.script.NodeLabelType>`
     to the previous node with a given :py:const:`priority <float>`.
     If the priority is not given, `Pipeline.actor.label_priority` is used as default.
+    If the current node is the start node, fallback is returned.
 
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
@@ -53,6 +54,8 @@ def previous(priority: Optional[float] = None) -> Callable:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         if len(ctx.labels) >= 2:
             flow_label, label = list(ctx.labels.values())[-2]
+        elif len(ctx.labels) == 1:
+            flow_label, label = pipeline.actor.start_label[:2]
         else:
             flow_label, label = pipeline.actor.fallback_label[:2]
         return (flow_label, label, current_priority)
