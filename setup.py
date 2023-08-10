@@ -109,9 +109,22 @@ test_requirements = merge_req_lists(
     requests_requirements,
 )
 
+tutorial_dependencies = [
+    "flask[async]==2.3.2",
+    "psutil==5.9.5",
+    "telethon==1.29.1",
+    "fastapi==0.101.0",
+    "uvicorn==0.23.1",
+    "websockets==11.0.2",
+    "locust==2.16.1",
+    "streamlit==1.25.0",
+    "streamlit-chat==0.1.1",
+]
+
 tests_full = merge_req_lists(
     full,
     test_requirements,
+    tutorial_dependencies,
 )
 
 doc = merge_req_lists(
@@ -163,7 +176,6 @@ EXTRA_DEPENDENCIES = {
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
-    "tutorials": tests_full,  # dependencies for running tutorials (all options above)
     "devel": devel,  # dependencies for development
     "doc": doc,  # dependencies for documentation
     "devel_full": devel_full,  # full dependencies for development (all options above)
