@@ -10,6 +10,7 @@ class ReplacePattern(BaseModel, abc.ABC):
     """
     An interface for replace patterns.
     """
+
     @property
     @abc.abstractmethod
     def pattern(self) -> re.Pattern:
