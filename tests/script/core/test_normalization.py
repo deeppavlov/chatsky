@@ -18,7 +18,7 @@ from dff.script import (
 from dff.script.labels import repeat
 from dff.script.conditions import true
 
-from dff.script import (
+from dff.script.core.normalization import (
     normalize_condition,
     normalize_label,
     normalize_processing,

@@ -51,4 +51,4 @@ jobs:
 
       - name: run tests
         run: |
-          make test
+          make test TEST_ALLOW_SKIP=telegram
