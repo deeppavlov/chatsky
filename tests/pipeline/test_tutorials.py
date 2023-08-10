@@ -38,4 +38,3 @@ def test_tutorials(tutorial_module_name: str):
         check_happy_path(tutorial_module.pipeline, happy_path)
     else:
         check_happy_path(tutorial_module.pipeline, HAPPY_PATH)
-
