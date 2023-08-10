@@ -10,7 +10,7 @@ from math import inf
 from collections import Counter
 
 from dff.script import labels as lbl
-from pydantic import BaseModel, Field, PrivateAttr, validate_arguments
+from pydantic import BaseModel, Field, PrivateAttr, validate_call
 
 from dff.script import Context
 from dff.pipeline.pipeline.pipeline import Pipeline, FORM_STORAGE_KEY
@@ -82,7 +82,7 @@ class FormPolicy(BaseModel):
         """
         super().__init__(name=name, mapping=mapping, allowed_repeats=allowed_repeats, **data)
 
-    @validate_arguments
+    @validate_call
     def to_next_label(
         self, priority: Optional[float] = None, fallback_node: Optional[Union[NodeLabel2Type, NodeLabel3Type]] = None
     ) -> Callable[[Context, Pipeline], NodeLabel3Type]:
@@ -122,7 +122,7 @@ class FormPolicy(BaseModel):
 
         return to_next_label_inner
 
-    @validate_arguments
+    @validate_call
     def has_state(self, state: FormState):
         """
         This method produces a dff.core.engine condition that yields `True` if the state of the form
@@ -137,7 +137,7 @@ class FormPolicy(BaseModel):
 
         return is_active_inner
 
-    @validate_arguments
+    @validate_call
     def update_state(self, state: Optional[FormState] = None):
         """
         This method updates the form state that is stored in the context.

@@ -21,7 +21,6 @@ from dff.script.conditions import true
 from dff.script import (
     normalize_condition,
     normalize_label,
-    normalize_script,
     normalize_response,
 )
 

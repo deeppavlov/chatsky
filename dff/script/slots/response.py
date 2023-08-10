@@ -6,7 +6,7 @@ They produce the response that will be ultimately given to the user.
 """
 from typing import Optional, List
 
-from pydantic import validate_arguments
+from pydantic import validate_call
 
 from dff.script import Context, Message
 from dff.pipeline import Pipeline
@@ -14,7 +14,7 @@ from dff.pipeline import Pipeline
 from .handlers import get_filled_template
 
 
-@validate_arguments
+@validate_call
 def fill_template(template: Message, slots: Optional[List[str]] = None):
     """
     Fill a template with slot values.
@@ -25,7 +25,7 @@ def fill_template(template: Message, slots: Optional[List[str]] = None):
     """
 
     def fill_inner(ctx: Context, pipeline: Pipeline):
-        new_template = template.copy()
+        new_template = template.model_copy()
         new_text = get_filled_template(template.text, ctx, pipeline, slots)
         new_template.text = new_text
         return new_template

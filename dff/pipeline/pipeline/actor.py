@@ -259,19 +259,38 @@ class Actor:
             overwritten_node.transitions = current_node.transitions
         return overwritten_node
 
-    async def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
-        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
-        pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
+    async def _run_processing_parallel(self, processing: dict, ctx: Context, pipeline: Pipeline) -> Context:
         results = await asyncio.gather(
-            *[wrap_sync_function_in_async(func, ctx, pipeline) for func in pre_transitions_processing.values()],
+            *[wrap_sync_function_in_async(func, ctx, pipeline) for func in processing.values()],
             return_exceptions=True,
         )
-        for exc, (processing_name, processing_func) in zip(results, pre_transitions_processing.items()):
+        for exc, (processing_name, processing_func) in zip(results, processing.items()):
             if isinstance(exc, Exception):
                 logger.error(
                     f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
                     exc_info=exc,
                 )
+        return ctx
+
+    async def _run_processing_sequential(self, processing: dict, ctx: Context, pipeline: Pipeline) -> Context:
+        for processing_name, processing_func in processing.items():
+            try:
+                ctx = await wrap_sync_function_in_async(processing_func, ctx, pipeline)
+            except Exception as exc:
+                logger.error(
+                    f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
+                    exc_info=exc,
+                )
+        return ctx
+
+    async def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
+        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
+        pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
+
+        if pipeline.parallelize_processing:
+            ctx = await self._run_processing_parallel(pre_transitions_processing, ctx, pipeline)
+        else:
+            ctx = await self._run_processing_sequential(pre_transitions_processing, ctx, pipeline)
 
         ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
             "processed_node"
@@ -282,16 +301,11 @@ class Actor:
     async def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
         pre_response_processing = ctx.framework_states["actor"]["next_node"].pre_response_processing
-        results = await asyncio.gather(
-            *[wrap_sync_function_in_async(func, ctx, pipeline) for func in pre_response_processing.values()],
-            return_exceptions=True,
-        )
-        for exc, (processing_name, processing_func) in zip(results, pre_response_processing.items()):
-            if isinstance(exc, Exception):
-                logger.error(
-                    f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
-                    exc_info=exc,
-                )
+
+        if pipeline.parallelize_processing:
+            ctx = await self._run_processing_parallel(pre_response_processing, ctx, pipeline)
+        else:
+            ctx = await self._run_processing_sequential(pre_response_processing, ctx, pipeline)
 
         ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
         del ctx.framework_states["actor"]["processed_node"]

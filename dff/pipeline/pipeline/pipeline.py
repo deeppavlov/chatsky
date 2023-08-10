@@ -96,6 +96,7 @@ class Pipeline:
         after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[float] = None,
         optimization_warnings: bool = False,
+        parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
@@ -128,6 +129,8 @@ class Pipeline:
 
         if optimization_warnings:
             self._services_pipeline.log_optimization_warnings()
+
+        self.parallelize_processing = parallelize_processing
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True

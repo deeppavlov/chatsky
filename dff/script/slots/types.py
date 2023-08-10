@@ -12,7 +12,7 @@ from collections.abc import Iterable
 from typing import Callable, Any, Tuple, Dict, Union, overload, TypeVar, Optional
 
 import wrapt
-from pydantic import Field, BaseModel, validator
+from pydantic import Field, BaseModel, field_validator
 
 from dff.script import Context
 from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STORAGE_KEY  # noqa: F401
@@ -20,7 +20,7 @@ from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STOR
 T = TypeVar("T")
 
 
-class BaseSlot(BaseModel, ABC):
+class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
     """
     BaseSlot is a base class for all slots.
     Not meant for direct subclassing, unlike :py:class:`~ValueSlot` and :py:class:`~_GroupSlot`.
@@ -29,14 +29,11 @@ class BaseSlot(BaseModel, ABC):
     name: str
     children: Optional[Dict[str, "BaseSlot"]]
 
-    @validator("name", pre=True)
+    @field_validator("name", mode="before")
     def validate_name(cls, name: str):
         if "/" in name:
             raise ValueError("separator `/` cannot be used in slot names")
         return name
-
-    class Config:
-        arbitrary_types_allowed = True
 
     def __init__(self, name: str, **data):
         super().__init__(name=name, **data)
@@ -88,7 +85,7 @@ class _GroupSlot(BaseSlot):
     value: None = Field(None)
     children: Dict[str, BaseSlot] = Field(default_factory=dict)
 
-    @validator("children", pre=True)
+    @field_validator("children", mode="before")
     def validate_children(cls, children, values: dict):
         if not isinstance(children, dict) and isinstance(children, Iterable):
             children = {child.name: child for child in children}
