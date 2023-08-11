@@ -132,7 +132,7 @@ class Context(BaseModel):
         return {key: dictionary[key] for key in sorted(dictionary)}
 
     @property
-    def storage_key(self):
+    def storage_key(self) -> Optional[str]:
         return self._storage_key
 
     @classmethod
