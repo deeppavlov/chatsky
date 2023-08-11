@@ -3,6 +3,7 @@ These tests check that pipelines defined in tutorials follow `happy_path` define
 """
 import importlib
 import logging
+import os
 
 import pytest
 
@@ -11,6 +12,9 @@ try:
     import telethon  # noqa: F401
 except ImportError:
     pytest.skip(reason="`telegram` is not available", allow_module_level=True)
+
+if "TG_BOT_TOKEN" not in os.environ:
+    pytest.skip(reason="Telegram token is not available", allow_module_level=True)
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.utils.testing.common import check_happy_path
