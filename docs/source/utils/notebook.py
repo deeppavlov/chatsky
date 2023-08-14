@@ -63,31 +63,31 @@ class DocumentationLink(ReplacePattern):
     """
     Replace documentation linking directives.
 
-    Replace strings of the `!doclink({args})` format with corresponding links to local files.
+    Replace strings of the `%doclink({args})` format with corresponding links to local files.
 
     `args` is a comma-separated string of arguments to pass to the :py:meth:`.DocumentationLink.link_to_doc_page`.
 
-    So, `!doclink(arg1,arg2,arg3)` will be replaced with `link_to_doc_page(arg1, arg2, arg3)`, and
-    `!doclink(arg1,arg2)` will be replaced with `link_to_doc_page(arg1, arg2)`.
+    So, `%doclink(arg1,arg2,arg3)` will be replaced with `link_to_doc_page(arg1, arg2, arg3)`, and
+    `%doclink(arg1,arg2)` will be replaced with `link_to_doc_page(arg1, arg2)`.
 
     USAGE EXAMPLES
     --------------
 
-    [link](!doclink(api,script.core.script))
+    [link](%doclink(api,script.core.script))
 
-    [link](!doclink(api,script.core.script,Node))
+    [link](%doclink(api,script.core.script,Node))
 
-    [link](!doclink(tutorial,messengers.web_api_interface.4_streamlit_chat))
+    [link](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat))
 
-    [link](!doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration))
+    [link](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration))
 
-    [link](!doclink(guide,basic_conceptions))
+    [link](%doclink(guide,basic_conceptions))
 
-    [link](!doclink(guide,basic_conceptions,example-conversational-chat-bot))
+    [link](%doclink(guide,basic_conceptions,example-conversational-chat-bot))
 
     """
 
-    pattern: ClassVar[re.Pattern] = re.compile(r"!doclink\((.+?)\)")
+    pattern: ClassVar[re.Pattern] = re.compile(r"%doclink\((.+?)\)")
 
     @staticmethod
     def link_to_doc_page(
