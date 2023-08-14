@@ -14,8 +14,7 @@ except ImportError:
 
 
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
-DFF_TUTORIALS_DIR = PROJECT_ROOT_DIR / "tutorials"
-DFF_TUTORIAL_PY_FILES = map(str, DFF_TUTORIALS_DIR.glob("./**/*.py"))
+DFF_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
 
 def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str, tmp_path: "Path"):
