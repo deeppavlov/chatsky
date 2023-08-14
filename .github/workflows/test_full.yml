@@ -46,9 +46,9 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-              pytest -m "not slow" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
+              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
           else
-              pytest -m "not slow" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
+              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
           fi
         shell: bash
   test_no_deps:
@@ -74,5 +74,5 @@ jobs:
       - name: run pytest
         run: |
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-          pytest -m "not slow" --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
+          pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
         shell: bash
