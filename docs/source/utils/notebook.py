@@ -3,6 +3,7 @@ import abc
 from typing import ClassVar, Literal, Optional
 
 from pydantic import BaseModel
+
 try:
     from jupytext import jupytext
 except ImportError:
