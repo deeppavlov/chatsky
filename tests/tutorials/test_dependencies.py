@@ -17,7 +17,7 @@ PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
 DFF_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
 
-def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str, tmp_path: "Path"):
+def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     """
     Install dependencies required by a tutorial in `venv` and run the tutorial.
 
@@ -26,7 +26,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str, t
     :param tmp_path: Temporary path to save the tutorial to.
     :return:
     """
-    tutorial_path = tmp_path / "tutorial.py"
+    tutorial_path = venv.workspace / "tutorial.py"
 
     venv.env["DISABLE_INTERACTIVE_MODE"] = "1"
 
@@ -41,12 +41,11 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str, t
 
 @pytest.mark.parametrize("dff_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
 @pytest.mark.slow
-def test_tutorial_dependencies(dff_tutorial_py_file, tmp_path, virtualenv):
+def test_tutorial_dependencies(dff_tutorial_py_file, virtualenv):
     with open(dff_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()
 
     check_tutorial_dependencies(
         virtualenv,
         source_code,
-        tmp_path,
     )
