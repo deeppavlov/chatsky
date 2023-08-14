@@ -45,25 +45,17 @@ class InstallationCell(ReplacePattern):
     """
     Replace installation cells directives.
 
-    Replace `# %pip install {}` with 3 py:percent cells that install dependencies and split the tutorial in parts.
+    Uncomment `# %pip install {}`, add a "quiet" flag, add a comment explaining the cell.
     """
 
-    pattern: ClassVar[re.Pattern] = re.compile("# %pip install (.*)\n")
+    pattern: ClassVar[re.Pattern] = re.compile("\n# %pip install (.*)\n")
 
     @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
-        return f"""# %% [markdown]
-\"\"\"
-__Installing dependencies__
-\"\"\"
-
+        return f"""
 # %%
-%pip install {matchobj.group(1)}
-
-# %% [markdown]
-\"\"\"
-__Running tutorial__
-\"\"\"
+# installing dependencies
+%pip install -q {matchobj.group(1)}
 """
 
 
