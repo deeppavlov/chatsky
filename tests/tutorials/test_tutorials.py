@@ -38,7 +38,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 
 @pytest.mark.parametrize("dff_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
 @pytest.mark.slow
-def test_tutorial_dependencies(dff_tutorial_py_file, virtualenv):
+def test_tutorials(dff_tutorial_py_file, virtualenv):
     with open(dff_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()
 
