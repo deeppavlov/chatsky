@@ -3,7 +3,10 @@ import abc
 from typing import ClassVar, Literal, Optional
 
 from pydantic import BaseModel
-from jupytext import jupytext
+try:
+    from jupytext import jupytext
+except ImportError:
+    jupytext = None
 
 
 class ReplacePattern(BaseModel, abc.ABC):
@@ -145,4 +148,6 @@ def apply_replace_patterns(text: str) -> str:
 
 
 def py_percent_to_notebook(text: str):
+    if jupytext is None:
+        raise ModuleNotFoundError("`doc` dependencies are not installed.")
     return jupytext.reads(apply_replace_patterns(text), "py:percent")

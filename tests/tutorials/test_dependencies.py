@@ -7,10 +7,7 @@ import pytest
 if TYPE_CHECKING:
     from pytest_virtualenv import VirtualEnv
 
-try:
-    from docs.source.utils.notebook import InstallationCell
-except ImportError:
-    pytest.skip(reason="`doc` is not available", allow_module_level=True)
+from docs.source.utils.notebook import InstallationCell
 
 
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
