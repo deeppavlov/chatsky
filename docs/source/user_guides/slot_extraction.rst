@@ -1,0 +1,98 @@
+Slot Extraction
+---------------
+
+Introduction
+~~~~~~~~~~~~
+
+Extracting and filling slots is an essential part of any conversational service
+that comprises the inherent business logic. Like most frameworks, DFF
+provides components that address this task as a part of its `slots` module.
+These can be easily customized to leverage neural networks specifically designed
+for slot extraction or any other logic you might want to integrate.
+
+API overview
+~~~~~~~~~~~~
+
+The basic building block of the API is the `Slot` class and its descendants
+that vary depending on the value extraction logic. Each slot has a name
+by which it can be accessed and a method for extracting values.
+Below, we demonstrate the most basic class that extracts values
+from user utterances using a regular expression.
+
+.. code-block:: python
+
+    from dff.script.slots import RegexpSlot
+    ...
+    email_slot = RegexpSlot(name="email", regexp=r"^[A-Z][a-z]+?(?= )")
+
+Individual slots can be grouped allowing the developer to access them together
+as a namespace. This can be achieved using the `GroupSlot` component
+that can be initialized with a list of other slot instances as its children.
+The group slots also allow for arbitrary nesting, e. g. it is possible to include
+group slots in other group slots.
+
+.. code-block:: python
+
+    from dff.script.slots import GroupSlot
+    ...
+    profile_slot = slots.GroupSlot(name="profile", children=[email_slot])
+
+When all slots have been defined, you can refer to them in your script.
+Slots can be extracted at the `PRE_TRANSITION_PROCESSING` stage, the appropriate
+function being provided by the `processing` submodule.
+The only argument is the list of names of the slots that you want to extract
+from user utterances.
+
+.. code-block:: python
+
+    from dff.script.slots.processing import extract
+    ...
+    PRE_TRANSITIONS_PROCESSING: {"extract_action": extract(["slot_name"])}
+
+If you need to use slot values as conditions for dialog script traversal,
+you can use functions from the `conditions` module.
+
+.. code-block:: python
+    
+    from dff.script.slots.conditions import is_set_all, is_set_any
+    ...
+    TRANSITIONS: {("flow", "node", 1.2): is_set_all(["slot_name"])}
+    TRANSITIONS: {("flow", "node", 1.2): is_set_any(["slot_name"])}
+
+The `processing` module also provides functions that fill templates
+with slot values.
+
+.. code-block:: python
+    
+    from dff.script.slost.processing import fill_template
+    ...
+    PRE_RESPONSE_PROCESSING: {"fill_action": slot_procs.fill_template()}
+    RESPONSE: Message(text="Here is a value of slot 1: {slot_1}")
+
+Some real examples of scripts that leverage slot extraction can be found in the
+`tutorials` section.
+
+Form Policy
+~~~~~~~~~~~
+
+On some occasions, we need to collect some specific information from the user, like
+the details of the purchase they want to make. In such cases, we want the chatbot
+to ask questions, until it has all the necessary info.
+Dialog Flow Framework provides the means to achieve that,
+namely a special policy component that can be integrated in your script.
+This class checks on the state of a set of slots, and,
+as long as any of them is still missing a value,
+it enables transitions to the nodes that fill them.
+
+.. code-block:: python
+    :linenos:
+
+    # slot names are mapped to node addresses
+    form_policy = slots.FormPolicy(
+        "restaurant",
+        {
+            "restaurant_cuisine": [("restaurant", "cuisine")],
+            "restaurant_address": [("restaurant", "address")],
+            "restaurant_number": [("restaurant", "number")],
+        },
+    )

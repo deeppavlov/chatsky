@@ -14,3 +14,4 @@ about current script execution.
    :hidden:
 
    user_guides/basic_conceptions
+   user_guider/slot_extraction

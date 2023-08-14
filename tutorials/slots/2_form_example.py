@@ -26,13 +26,13 @@ from dff.script.slots import conditions as slot_cnd
 As an initial step, all the slots that belong to the form need to be istantiated.
 """
 # %%
-RestaurantCuisine = slots.RegexpSlot(
+restaurant_cuisine = slots.RegexpSlot(
     name="cuisine", regexp=r"([A-Za-z]+) cuisine", match_group_idx=1
 )
-RestaurantAddress = slots.RegexpSlot(
+restaurant_address = slots.RegexpSlot(
     name="restaurantaddress", regexp=r"(at|in) (.+)", match_group_idx=2
 )
-NumberOfPeople = slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
+number_of_people = slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
 # %% [markdown]
 """
 Secondly, the `FormPolicy` object is instantiated where slot names are
@@ -44,12 +44,12 @@ If none is possible, the form policy will suggest a fallback transition.
 
 """
 # %%
-RestaurantForm = slots.FormPolicy(
+restaurant_form = slots.FormPolicy(
     "restaurant",
     {
-        RestaurantCuisine.name: [("restaurant", "cuisine")],
-        RestaurantAddress.name: [("restaurant", "address")],
-        NumberOfPeople.name: [("restaurant", "number")],
+        restaurant_cuisine.name: [("restaurant", "cuisine")],
+        restaurant_address.name: [("restaurant", "address")],
+        number_of_people.name: [("restaurant", "number")],
     },
 )
 
@@ -68,13 +68,13 @@ when multiple transition options are possible.
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            RestaurantForm.to_next_label(1.1): RestaurantForm.has_state(FormState.ACTIVE),
+            restaurant_form.to_next_label(1.1): restaurant_form.has_state(FormState.ACTIVE),
         },
         PRE_TRANSITIONS_PROCESSING: {
-            "extract_cuisine": slot_procs.extract([RestaurantCuisine.name]),
-            "extract_address": slot_procs.extract([RestaurantAddress.name]),
-            "extract_number": slot_procs.extract([NumberOfPeople.name]),
-            "update_form_state": RestaurantForm.update_state(),
+            "extract_cuisine": slot_procs.extract([restaurant_cuisine.name]),
+            "extract_address": slot_procs.extract([restaurant_address.name]),
+            "extract_number": slot_procs.extract([number_of_people.name]),
+            "update_form_state": restaurant_form.update_state(),
         },
     },
     "restaurant": {
@@ -82,11 +82,11 @@ script = {
             TRANSITIONS: {
                 ("chitchat", "chat_3", 0.9): cnd.any(
                     [
-                        RestaurantForm.has_state(FormState.FAILED),
-                        RestaurantForm.has_state(FormState.INACTIVE),
+                        restaurant_form.has_state(FormState.FAILED),
+                        restaurant_form.has_state(FormState.INACTIVE),
                     ]
                 ),  # this transition ensures the form loop can be left
-                ("restaurant", "form_filled", 0.9): RestaurantForm.has_state(FormState.COMPLETE),
+                ("restaurant", "form_filled", 0.9): restaurant_form.has_state(FormState.COMPLETE),
             }
         },
         "offer": {
@@ -95,14 +95,14 @@ script = {
             ),
             TRANSITIONS: {lbl.forward(1.1): cnd.regexp(r"[yY]es|[yY]eah|[Oo][Kk]|[Ff]ine")},
             PRE_TRANSITIONS_PROCESSING: {
-                "reset_form": RestaurantForm.update_state(FormState.INACTIVE),
-                "reset_slots": slot_procs.unset([RestaurantAddress.name, NumberOfPeople.name]),
+                "reset_form": restaurant_form.update_state(FormState.INACTIVE),
+                "reset_slots": slot_procs.unset([restaurant_address.name, number_of_people.name]),
             },  # Explicitly resetting form and slot states
         },
         "offer_accepted": {
             RESPONSE: Message(text="Very well then, processing your request."),
             PRE_TRANSITIONS_PROCESSING: {
-                "activate_form": RestaurantForm.update_state(slots.FormState.ACTIVE),
+                "activate_form": restaurant_form.update_state(slots.FormState.ACTIVE),
             },
         },
         "form_filled": {
