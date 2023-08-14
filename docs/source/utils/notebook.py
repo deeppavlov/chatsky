@@ -124,13 +124,12 @@ class DocumentationLink(ReplacePattern):
         :return:
             A link to the corresponding documentation part.
         """
-        doc_prefix = ".."
         if page_type == "api":
-            return f"{doc_prefix}/apiref/dff.{page}.rst" + (f"#dff.{page}.{anchor}" if anchor is not None else "")
+            return f"../apiref/dff.{page}.rst" + (f"#dff.{page}.{anchor}" if anchor is not None else "")
         elif page_type == "tutorial":
-            return f"{doc_prefix}/tutorials/tutorials.{page}.py" + (f"#{anchor}" if anchor is not None else "")
+            return f"../tutorials/tutorials.{page}.py" + (f"#{anchor}" if anchor is not None else "")
         elif page_type == "guide":
-            return f"{doc_prefix}/user_guides/{page}.rst" + (f"#{anchor}" if anchor is not None else "")
+            return f"../user_guides/{page}.rst" + (f"#{anchor}" if anchor is not None else "")
 
     @staticmethod
     def replacement_string(matchobj: re.Match) -> str:
