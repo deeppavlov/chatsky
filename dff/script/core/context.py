@@ -133,6 +133,10 @@ class Context(BaseModel):
 
     @property
     def storage_key(self) -> Optional[str]:
+        """
+        Returns the key the context was saved in storage the last time.
+        Returns None if the context wasn't saved yet.
+        """
         return self._storage_key
 
     @classmethod
