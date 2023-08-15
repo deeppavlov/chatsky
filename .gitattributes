@@ -1,4 +1,6 @@
-*   -text
-# *.py    text eol=lf
-# *.sh    text eol=lf
-# *   text working-tree-encoding=UTF-8
+
+*   text=auto
+*.png   -text
+*.py    text eol=lf
+*.sh    text eol=lf
+*   text working-tree-encoding=UTF-8

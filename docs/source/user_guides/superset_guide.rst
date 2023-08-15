@@ -35,7 +35,7 @@ Collection procedure
 
 Collecting data is done by means of instrumenting your conversational service before you run it.
 DFF tutorials showcase all the necessary steps, needed to achieve that. We will run
-`one of those files <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html/>`_ 
+`one of those files <../tutorials/tutorials.stats.1_extractor_functions.py>`_ 
 in order to obtain sample data points to visualize.
 
 .. code-block:: shell
@@ -63,7 +63,7 @@ You can set most of the configuration options using a YAML file.
         table: otel_logs
 
 The file can then be used to parametrize the configuration script.
-Password values can be omitted and set interactively.
+Password values will be prompted once you run the following command:
 
 .. code-block:: shell
     :linenos:
