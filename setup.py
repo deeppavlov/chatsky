@@ -80,7 +80,7 @@ telegram_dependencies = [
 ]
 
 requests_requirements = [
-    "requests>=2.28.1",
+    "requests==2.31.0",
 ]
 
 otl_dependencies = [
@@ -117,10 +117,6 @@ full = merge_req_lists(
     stats_dependencies,
     telegram_dependencies,
 )
-
-requests_requirements = [
-    "requests==2.31.0",
-]
 
 test_requirements = merge_req_lists(
     [

@@ -8,13 +8,6 @@ Description
 | Data aggregation relies on the `OpenTelemetry protocol <#>`_ and the `OpenTelemetry collector <#>`_ along with `Clickhouse <https://clickhouse.com/>`_ as an OLAP storage.
 | Interactive visualization is powered by `Apache Superset <https://superset.apache.org/>`_.
 | All the mentioned services are shipped as Docker containers, including a pre-built Superset image that ensures API compatibility.
-| Authorization credentials can be automatically configured through environment variables.
-
-.. code-block:: shell
-
-    echo 'SUPERSET_USERNAME=...' >> .env
-    echo 'SUPERSET_PASSWORD=...' >> .env
-    docker run --env-file='.env' --name=superset ghcr.io/deeppavlov/superset_df_dashboard:latest
 
 Collection procedure
 ~~~~~~~~~~~~~~~~~~~~
@@ -28,7 +21,11 @@ Collection procedure
 **Launching services**
 
 .. code-block:: shell
+    :linenos:
 
+    # clone the original repository to access the docker-compose file
+    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    # launch the required services
     docker-compose up otelcol clickhouse dashboard
 
 **Collecting data**
@@ -66,17 +63,8 @@ The file can then be used to parametrize the configuration script.
 Password values will be prompted once you run the following command:
 
 .. code-block:: shell
-    :linenos:
 
-    dff.stats config.yaml -P -dP \
-    -U superset \
-    --db.type=clickhousedb+connect \
-    --db.user=username \
-    --db.host=localhost \
-    --db.port=8123 \
-    --db.name=test \
-    --db.table=otel_logs \
-    --outfile=config_artifact.zip
+    dff.stats config.yaml -P -dP -U superset --outfile=config_artifact.zip
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one

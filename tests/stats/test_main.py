@@ -23,7 +23,15 @@ def dashboard_display_test(args: Namespace, base_url: str):
     charts_url = parse.urljoin(base_url, "/api/v1/chart")
     datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
     database_conn_url = parse.urljoin(base_url, "/api/v1/database/test_connection")
-    sqla_url = f"clickhousedb+connect://{getattr(args, 'db.user')}:{getattr(args, 'db.password')}@clickhouse:8123/test"
+    db_type, db_user, db_password, db_host, db_port, db_table = (
+        getattr(args, "db.type"),
+        getattr(args, "db.user"),
+        getattr(args, "db.password"),
+        getattr(args, "db.host"),
+        getattr(args, "db.port"),
+        getattr(args, "db.table"),
+    )
+    sqla_url = f"{db_type}://{db_user}:{db_password}@{db_host}:{db_port}/{db_table}"
     database_data = {
         "configuration_method": "sqlalchemy_form",
         "database_name": "dff_database",
