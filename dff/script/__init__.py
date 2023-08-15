@@ -12,12 +12,6 @@ from .core.keywords import (
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
 )
-from .core.normalization import (
-    normalize_label,
-    normalize_condition,
-    normalize_response,
-    normalize_script,
-)
 from .core.script import Node, Script
 from .core.types import (
     LabelType,
