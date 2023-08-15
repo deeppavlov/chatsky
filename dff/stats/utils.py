@@ -19,9 +19,12 @@ from argparse import Namespace, Action
 
 import requests
 from . import exporter_patch  # noqa: F401
-from opentelemetry._logs import get_logger_provider
-from opentelemetry.trace import get_tracer_provider
-from opentelemetry.metrics import set_meter_provider
+from opentelemetry.sdk.resources import Resource
+from opentelemetry._logs import get_logger_provider, set_logger_provider
+from opentelemetry.trace import get_tracer_provider, set_tracer_provider
+from opentelemetry.metrics import get_meter_provider, set_meter_provider
+from opentelemetry.sdk.trace import TracerProvider
+from opentelemetry.sdk._logs import LoggerProvider
 from opentelemetry.sdk.metrics import MeterProvider
 from opentelemetry.sdk.metrics.export import PeriodicExportingMetricReader
 from opentelemetry.sdk._logs.export import BatchLogRecordProcessor
@@ -31,6 +34,23 @@ from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter, MetricExporter
 
 from dff.pipeline import ExtraHandlerRuntimeInfo
+
+SERVICE_NAME = "dialog_flow_framework"
+
+resource = Resource.create({"service.name": SERVICE_NAME})
+"""
+Singletone :py:class:`~Resource` instance shared inside the framework.
+"""
+tracer_provider = TracerProvider(resource=resource)
+"""
+Global tracer provider bound to the DFF resource.
+"""
+logger_provider = LoggerProvider(resource=resource)
+"""
+Global logger provider bound to the DFF resource.
+"""
+set_logger_provider(logger_provider)
+set_tracer_provider(tracer_provider)
 
 
 def set_logger_destination(exporter: Optional[LogExporter] = None):
@@ -52,7 +72,10 @@ def set_meter_destination(exporter: Optional[MetricExporter] = None):
     """
     if exporter is None:
         exporter = OTLPMetricExporter(endpoint="grpc://localhost:4317", insecure=True)
-    set_meter_provider(MeterProvider(metric_readers=[PeriodicExportingMetricReader(exporter)]))
+    cur_meter_provider = get_meter_provider()
+    new_meter_provider = MeterProvider(resource=resource, metric_readers=[PeriodicExportingMetricReader(exporter)])
+    if not isinstance(cur_meter_provider, MeterProvider):
+        set_meter_provider(new_meter_provider)
 
 
 def set_tracer_destination(exporter: Optional[SpanExporter] = None):

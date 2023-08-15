@@ -6,16 +6,12 @@ services:
     restart: unless-stopped
     ports:
       - 3307:3306
-    volumes:
-      - mysql-data:/var/lib/mysql/
   psql:
     env_file: [.env_file]
     image: postgres:latest
     restart: unless-stopped
     ports:
       - 5432:5432
-    volumes:
-      - pg-data:/var/lib/postgresql/data/
   redis:
     env_file: [.env_file]
     image: redis:latest
@@ -54,8 +50,6 @@ services:
       - '8123:8123'
       - '8443:8443'
       - '9000:9000'
-    volumes:
-      - ch-data:/var/lib/clickhouse/
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: otel-col
@@ -67,12 +61,3 @@ services:
     ports:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
-volumes:
-  mysql-data: &volume-spec
-    name: "mysql-data"
-  ch-data:
-    <<: *volume-spec
-    name: "ch-data"
-  pg-data:
-    <<: *volume-spec
-    name: "pg-data"

@@ -14,12 +14,11 @@ from typing import Collection, Optional
 from wrapt import wrap_function_wrapper, decorator
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.instrumentation.utils import unwrap
-from opentelemetry.metrics import get_meter, get_meter_provider, set_meter_provider, Meter
-from opentelemetry.trace import get_tracer, get_tracer_provider, set_tracer_provider, Tracer
-from opentelemetry._logs import get_logger, get_logger_provider, set_logger_provider, Logger
+from opentelemetry.metrics import get_meter, get_meter_provider, Meter
+from opentelemetry.trace import get_tracer, get_tracer_provider, Tracer
+from opentelemetry._logs import get_logger, get_logger_provider, Logger
 from opentelemetry._logs import SeverityNumber
 from opentelemetry.trace import SpanKind, Span
-from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk._logs import LoggerProvider, LogRecord
 from opentelemetry.sdk.metrics import MeterProvider
@@ -28,32 +27,17 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
 from dff.script.core.context import get_last_index
-from dff.stats.utils import get_wrapper_field, set_logger_destination, set_meter_destination, set_tracer_destination
+from dff.stats.utils import (
+    resource,
+    get_wrapper_field,
+    set_logger_destination,
+    set_meter_destination,
+    set_tracer_destination,
+)
 from dff.stats import default_extractors
 
 
 INSTRUMENTS = ["dff"]
-SERVICE_NAME = "dialog_flow_framework"
-
-resource = Resource.create({"service.name": SERVICE_NAME})
-"""
-Singletone :py:class:`~Resource` instance shared inside the framework.
-"""
-tracer_provider = TracerProvider(resource=resource)
-"""
-Global tracer provider bound to the DFF resource.
-"""
-logger_provider = LoggerProvider(resource=resource)
-"""
-Global logger provider bound to the DFF resource.
-"""
-meter_provider = MeterProvider(resource=resource)
-"""
-Global meter provider bound to the DFF resource.
-"""
-set_logger_provider(logger_provider)
-set_tracer_provider(tracer_provider)
-set_meter_provider(meter_provider)
 
 
 class OtelInstrumentor(BaseInstrumentor):
