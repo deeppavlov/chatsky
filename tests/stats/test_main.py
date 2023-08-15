@@ -12,9 +12,10 @@ try:
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
-from tests.db_list import SUPERSET_ACTIVE
+from tests.context_storages.test_dbs import ping_localhost
 from tests.test_utils import get_path_from_tests_to_current_dir
 
+SUPERSET_ACTIVE = ping_localhost(8088)
 path_to_addon = get_path_from_tests_to_current_dir(__file__)
 
 

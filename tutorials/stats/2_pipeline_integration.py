@@ -2,8 +2,10 @@
 """
 # 2. Pipeline Integration
 
-In the DFF ecosystem, extractor functions act as regular extra handlers (see `pipeline` module
-[documentation][1]).
+In the DFF ecosystem, extractor functions act as regular extra handlers (
+[see pipeline module documentation](
+https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.pipeline.7_extra_handlers_basic.html
+)).
 Hence, you can decorate any part of your pipeline, including services,
 service groups and the pipeline as a whole, to obtain the statistics
 specific for that component. Some examples of this functionality
@@ -104,7 +106,3 @@ if __name__ == "__main__":
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
         pipeline.run()
-# %% [markdown]
-"""
-[1] https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.pipeline.7_extra_handlers_basic.html
-"""  # noqa: E501

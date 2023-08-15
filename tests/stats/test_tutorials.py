@@ -4,7 +4,7 @@ import pytest
 import asyncio
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from tests.db_list import ping_localhost
+from tests.context_storages.test_dbs import ping_localhost
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.toy_script import HAPPY_PATH
 
