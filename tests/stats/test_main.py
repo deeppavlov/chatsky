@@ -98,7 +98,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
                     "outfile": "1.zip",
                     "db.type": "clickhousedb+connect",
                     "db.user": os.getenv("CLICKHOUSE_USER"),
-                    "db.host": "localhost",
+                    "db.host": "clickhouse",
                     "db.port": "8123",
                     "db.name": "test",
                     "db.table": "otel_logs",
@@ -113,6 +113,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
         ),
     ],
 )
+@pytest.mark.docker
 def test_main(testing_cfg_dir, args):
     args.outfile = testing_cfg_dir + args.outfile
     main(args)

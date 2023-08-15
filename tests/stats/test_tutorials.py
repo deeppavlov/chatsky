@@ -39,6 +39,7 @@ CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
         ("2_pipeline_integration", 35),
     ],
 )
+@pytest.mark.docker
 async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp_provider, otlp_trace_exp_provider):
     module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     _, tracer_provider = otlp_trace_exp_provider
