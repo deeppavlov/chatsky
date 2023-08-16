@@ -53,7 +53,7 @@ def get_dict(dimensions: Tuple[int, ...]):
     def _get_dict(dimensions: Tuple[int, ...]):
         if len(dimensions) < 2:
             return "." * dimensions[0]
-        return {i: _get_dict(dimensions[1:]) for i in range(dimensions[0])}
+        return {str(i): _get_dict(dimensions[1:]) for i in range(dimensions[0])}
 
     if len(dimensions) > 1:
         return _get_dict(dimensions)

@@ -18,9 +18,12 @@ ROOT_DIR = pathlib.Path(__file__).parent.parent.parent
 
 def test_get_dict():
     assert bm.get_dict(()) == {}
-    assert bm.get_dict((1,)) == {0: ""}
-    assert bm.get_dict((2, 3)) == {0: "...", 1: "..."}
-    assert bm.get_dict((2, 3, 4)) == {0: {0: "....", 1: "....", 2: "...."}, 1: {0: "....", 1: "....", 2: "...."}}
+    assert bm.get_dict((1,)) == {"0": ""}
+    assert bm.get_dict((2, 3)) == {"0": "...", "1": "..."}
+    assert bm.get_dict((2, 3, 4)) == {
+        "0": {"0": "....", "1": "....", "2": "...."},
+        "1": {"0": "....", "1": "....", "2": "...."}
+    }
 
 
 def test_get_context():
@@ -28,9 +31,9 @@ def test_get_context():
     assert context == bm.Context(
         id=context.id,
         labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
-        requests={0: bm.Message(misc={0: ".."}), 1: bm.Message(misc={0: ".."})},
-        responses={0: bm.Message(misc={0: ".."}), 1: bm.Message(misc={0: ".."})},
-        misc={0: "...", 1: "..."},
+        requests={0: bm.Message(misc={"0": ".."}), 1: bm.Message(misc={"0": ".."})},
+        responses={0: bm.Message(misc={"0": ".."}), 1: bm.Message(misc={"0": ".."})},
+        misc={"0": "...", "1": "..."},
     )
 
 
