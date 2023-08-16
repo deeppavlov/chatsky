@@ -204,7 +204,7 @@ class DBFactory(BaseModel):
         return getattr(module, self.factory)(self.uri)
 
 
-class BenchmarkConfig(BaseModel):
+class BenchmarkConfig(BaseModel, frozen=True):
     """
     Configuration for a benchmark. Sets dialog len, misc sizes, number of benchmarks.
     """
@@ -238,9 +238,6 @@ class BenchmarkConfig(BaseModel):
     Dimensions of misc dictionary.
     See :py:func:`~.get_dict`.
     """
-
-    class Config:
-        allow_mutation = False
 
     def get_context(self) -> Context:
         """
