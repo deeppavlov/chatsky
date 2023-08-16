@@ -5,7 +5,7 @@ on:
     branches:
     - dev
     - test/**
-  pull_request_target:
+  pull_request:
     branches:
     - dev
   workflow_dispatch:
@@ -30,14 +30,15 @@ jobs:
         run: |
           docker-compose up -d
 
+      - uses: r-lib/actions/setup-pandoc@v2
+        with:
+          pandoc-version: '3.1.6'
+
       - name: install dependencies
         run: |
-            sudo apt install pandoc
             make venv
 
       - name: build documentation
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.READ_ONLY_GITHUB_API_TOKEN }}
         run: |
             make doc
 

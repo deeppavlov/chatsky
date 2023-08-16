@@ -19,7 +19,7 @@ jobs:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: [macOS-latest, windows-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
@@ -46,8 +46,10 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
+              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
+          else
+              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
           fi
-          pytest --tb=long -vv --cache-clear --no-cov tests/
         shell: bash
   test_no_deps:
     runs-on: "ubuntu-latest"
@@ -58,10 +60,10 @@ jobs:
         run: |
           docker-compose up -d
 
-      - name: set up python 3.7
+      - name: set up python 3.8
         uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: install dependencies
         run: |
@@ -72,5 +74,5 @@ jobs:
       - name: run pytest
         run: |
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-          pytest --tb=long -vv --cache-clear --no-cov tests/
+          pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
         shell: bash

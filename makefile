@@ -3,8 +3,9 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.4.1
+CURRENT_VERSION = 0.4.2
 TEST_COVERAGE_THRESHOLD=95
+TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
 PATH := $(VENV_PATH)/bin:$(PATH)
 
@@ -55,7 +56,7 @@ wait_db: docker_up
 .PHONY: wait_db
 
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
 test_all: venv wait_db test lint

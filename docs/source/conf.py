@@ -8,7 +8,6 @@ sys.path.append(os.path.abspath("."))
 from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
-from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -17,7 +16,7 @@ copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.4.1"
+release = "0.4.2"
 
 
 # -- General configuration ---------------------------------------------------
@@ -112,7 +111,7 @@ html_css_files = [
 
 # Theme options
 html_theme_options = {
-    "header_links_before_dropdown": 7,
+    "header_links_before_dropdown": 5,
     "logo": {
         "alt_text": "DFF logo (simple and nice)",
         "text": "Dialog Flow Framework",
@@ -182,4 +181,3 @@ def setup(_):
             ("dff.utils", "Utils"),
         ]
     )
-    pull_release_notes_from_github()

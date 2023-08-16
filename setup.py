@@ -27,7 +27,7 @@ def merge_req_lists(*req_lists: List[str]) -> List[str]:
 
 
 core = [
-    "pydantic",
+    "pydantic>=2.0.3,<3.0",
     "nest-asyncio",
     "typing-extensions",
 ]
@@ -104,25 +104,22 @@ requests_requirements = [
 
 test_requirements = merge_req_lists(
     [
-        "pytest==7.3.1",
+        "pytest==7.4.0",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.21.0",
-        "flake8==6.0.0; python_version>'3.8'",
-        "flake8==3.9.2; python_version=='3.7'",
+        "flake8==6.1.0",
         "click==8.1.3",
-        "black==23.3.0",
-        "isort==5.12.0; python_version>'3.8'",
-        "isort==5.11.5; python_version=='3.7'",
-        "flask[async]==2.3.2; python_version>'3.8'",
-        "flask[async]==2.2.3; python_version=='3.7'",
+        "black==23.7.0",
+        "isort==5.12.0",
+        "flask[async]==2.3.2",
         "psutil==5.9.5",
-        "telethon==1.28.5",
-        "fastapi==0.97.0",
-        "uvicorn==0.22.0",
+        "telethon==1.29.1",
+        "fastapi==0.101.0",
+        "uvicorn==0.23.1",
         "websockets==11.0.2",
-        "locust==2.15",
-        "streamlit~=1.23.1",
-        "streamlit-chat~=0.1.1",
+        "locust==2.16.1",
+        "streamlit==1.25.0",
+        "streamlit-chat==0.1.1",
         "pandas",
         "altair",
         "jsonschema==4.17.3",
@@ -137,8 +134,7 @@ tests_full = merge_req_lists(
 
 doc = merge_req_lists(
     [
-        "sphinx==7.0.1; python_version>'3.8'",
-        "sphinx==5.3.0; python_version=='3.7'",
+        "sphinx==7.1.0",
         "pydata-sphinx-theme==0.13.3",
         "sphinxcontrib-apidoc==0.3.0",
         "sphinxcontrib-httpdomain==1.8.0",
@@ -146,9 +142,9 @@ doc = merge_req_lists(
         "sphinx-favicon==1.0.1",
         "sphinx-copybutton==0.5.2",
         "sphinx-gallery==0.13.0",
-        "sphinx-autodoc-typehints==1.23.0",
-        "nbsphinx==0.9.1",
-        "jupytext==1.14.5",
+        "sphinx-autodoc-typehints==1.14.1",
+        "nbsphinx==0.9.2",
+        "jupytext==1.15.0",
         "jupyter==1.0.0",
     ],
     requests_requirements,
@@ -161,7 +157,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy==1.3.0",
+    "mypy==1.5.0",
 ]
 
 devel_full = merge_req_lists(
@@ -194,7 +190,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.4.1",
+    version="0.4.2",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",
@@ -208,15 +204,16 @@ setup(
         "License :: OSI Approved :: Apache Software License",
         "Operating System :: OS Independent",
         "Programming Language :: Python :: 3",
-        "Programming Language :: Python :: 3.7",
         "Programming Language :: Python :: 3.8",
         "Programming Language :: Python :: 3.9",
+        "Programming Language :: Python :: 3.10",
+        "Programming Language :: Python :: 3.11",
         "Programming Language :: Python :: 3 :: Only",
     ],
     keywords="chatbots",
     packages=find_packages(where="."),
     include_package_data=True,
-    python_requires=">=3.7, <4",
+    python_requires=">=3.8, <4",
     install_requires=core,
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
