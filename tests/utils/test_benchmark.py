@@ -118,7 +118,7 @@ def test_time_context_read_write(context_storage):
     )
 
     results = bm.time_context_read_write(
-        context_storage, config.get_context(), config.context_num, config.get_context_updater()
+        context_storage, config.get_context, config.context_num, config.get_context_updater()
     )
 
     assert len(context_storage) == 0
@@ -152,7 +152,7 @@ def test_time_context_read_write_without_updates(context_storage):
 
     results = bm.time_context_read_write(
         context_storage,
-        config.get_context(),
+        config.get_context,
         config.context_num,
         None,
     )
@@ -163,7 +163,7 @@ def test_time_context_read_write_without_updates(context_storage):
 
     results = bm.time_context_read_write(
         context_storage,
-        config.get_context(),
+        config.get_context,
         config.context_num,
         config.get_context_updater(),  # context updater returns None
     )
