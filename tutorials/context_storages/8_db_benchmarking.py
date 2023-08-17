@@ -12,8 +12,7 @@ from pathlib import Path
 from platform import system
 import tempfile
 
-import dff.utils.db_benchmark.benchmark as benchmark
-from dff.utils.db_benchmark.report import report
+import dff.utils.db_benchmark as benchmark
 
 # %% [markdown]
 """
@@ -142,4 +141,4 @@ By default it prints the name and average metrics for each case.
 """
 
 # %%
-report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
+benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
