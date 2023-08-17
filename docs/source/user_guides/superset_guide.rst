@@ -5,9 +5,13 @@ Description
 ~~~~~~~~~~~
 
 | The Dialog Flow Stats module can be used to obtain and visualize usage statistics for your service.
-| Data aggregation relies on the `OpenTelemetry protocol <#>`_ and the `OpenTelemetry collector <#>`_ along with `Clickhouse <https://clickhouse.com/>`_ as an OLAP storage.
-| Interactive visualization is powered by `Apache Superset <https://superset.apache.org/>`_.
-| All the mentioned services are shipped as Docker containers, including a pre-built Superset image that ensures API compatibility.
+| The module relies on several open source solutions that allow for data persistence and visualization
+
+* `Clickhouse <https://clickhouse.com/>`_ serves as an OLAP storage for data.
+* Batching and preprocessing data is based on `OpenTelemetry protocol <https://opentelemetry.io/docs/what-is-opentelemetry/>`_ and the `OpenTelemetry collector <https://opentelemetry.io/docs/collector/>`_.
+* Interactive visualization is powered by `Apache Superset <https://superset.apache.org/>`_.
+
+All the mentioned services are shipped as Docker containers, including a pre-built Superset image that ensures API compatibility.
 
 Collection procedure
 ~~~~~~~~~~~~~~~~~~~~
@@ -64,7 +68,7 @@ Password values will be prompted once you run the following command:
 
 .. code-block:: shell
 
-    dff.stats config.yaml -P -dP -U superset --outfile=config_artifact.zip
+    dff.stats tutorials/stats/config.yaml -P -dP -U superset --outfile=config_artifact.zip
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one

@@ -15,7 +15,9 @@ while the expected return value is an arbitrary `dict` or a `None`. It is a pref
 to define extractors as asynchronous functions.
 
 The output of these functions will be captured by an OpenTelemetry instrumentor and directed to
-the log storage of your choice. For more information on OpenTelemetry instrumentation,
+the Opentelemetry collector server which in its turn batches and persists data
+to Clickhouse or other OLAP storages.
+For more information on OpenTelemetry instrumentation,
 refer to the body of this tutorial as well as OpenTelemetry documentation.
 
 """

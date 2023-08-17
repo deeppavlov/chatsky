@@ -16,10 +16,9 @@ Examples
             -U superset_user \\
             -P superset_password \\
             -dP database_password \\
-            --db.type=postgresql \\
-            --db.user=root \\
-            --db.host=localhost \\
-            --db.port=5432 \\
+            --db.user=database_user \\
+            --db.host=clickhouse \\
+            --db.port=8123 \\
             --db.name=test \\
             --db.table=dff_stats \\
             --outfile=config_artifact.zip
@@ -49,10 +48,9 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
             -U superset_user \\
             -P superset_password \\
             -dP database_password \\
-            --db.type=postgresql \\
-            --db.user=root \\
-            --db.host=localhost \\
-            --db.port=5432 \\
+            --db.user=database_user \\
+            --db.host=clickhouse \\
+            --db.port=8123 \\
             --db.name=test \\
             --db.table=dff_stats \\
             --outfile=config_artifact.zip
@@ -64,7 +62,8 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
         "-dT",
         "--db.type",
         choices=["clickhousedb+connect"],
-        help="DBMS connection type: 'clickhouse+connect' or ....",
+        help="DBMS connection type.",
+        default="clickhousedb+connect",
     )
     parser.add_argument("-dU", "--db.user", help="Database user.")
     parser.add_argument("-dh", "--db.host", default="clickhouse", help="Database host.")
