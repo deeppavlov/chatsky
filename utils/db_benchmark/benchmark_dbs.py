@@ -12,7 +12,7 @@ from dff.utils.benchmark.context_storage import (
 )
 
 
-# create dir and files
+# these files are required for file-based dbs
 pathlib.Path("dbs").mkdir(exist_ok=True)
 sqlite_file = pathlib.Path("dbs/sqlite.db")
 sqlite_file.touch(exist_ok=True)
@@ -30,7 +30,7 @@ dbs = {
     "YDB": "grpc://localhost:2136/local",
 }
 
-# benchmark
+# benchmarks will be saved to this directory
 benchmark_dir = pathlib.Path("benchmarks")
 
 benchmark_dir.mkdir(exist_ok=True)
