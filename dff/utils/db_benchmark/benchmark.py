@@ -460,9 +460,10 @@ def save_results_to_file(
             "benchmarks": [],
         }
         cases = tqdm(benchmark_cases, leave=False)
+        case: BenchmarkCase
         for case in cases:
             cases.set_description(f"Benchmarking: {case.name}")
-            result["benchmarks"].append({**case.dict(), "sizes": case.benchmark_config.sizes(), **case.run()})
+            result["benchmarks"].append({**case.model_dump(), "sizes": case.benchmark_config.sizes(), **case.run()})
 
         json.dump(result, fd)
 
