@@ -110,6 +110,14 @@ for db_name, db_uri in storages.items():
 
 # %% [markdown]
 """
+Running the cell above will create a file with benchmark results for every benchmarked DB:
+"""
+
+# %%
+list(tutorial_dir.iterdir())
+
+# %% [markdown]
+"""
 ## Viewing benchmark results
 
 Now that the results are saved to a file you can either view them using [report](
