@@ -1,6 +1,7 @@
 from copy import deepcopy
 import json
 from pathlib import Path
+import random
 
 import pytest
 
@@ -17,27 +18,31 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 
 
 def test_get_dict():
+    random.seed(42)
     assert bm.get_dict(()) == {}
     assert bm.get_dict((1,)) == {"0": ""}
-    assert bm.get_dict((2, 3)) == {"0": "...", "1": "..."}
+    assert bm.get_dict((2, 3)) == {"0": ">e3", "1": " zv"}
     assert bm.get_dict((2, 3, 4)) == {
-        "0": {"0": "....", "1": "....", "2": "...."},
-        "1": {"0": "....", "1": "....", "2": "...."}
+        "0": {"0": "sh d", "1": "] (b", "2": ".S43"},
+        "1": {"0": "brt#", "1": ":3*p", "2": "|@`("}
     }
 
 
 def test_get_context():
+    random.seed(42)
     context = bm.get_context(2, (1, 2), (2, 3))
     assert context == bm.Context(
         id=context.id,
         labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
-        requests={0: bm.Message(misc={"0": ".."}), 1: bm.Message(misc={"0": ".."})},
-        responses={0: bm.Message(misc={"0": ".."}), 1: bm.Message(misc={"0": ".."})},
-        misc={"0": "...", "1": "..."},
+        requests={0: bm.Message(misc={"0": ">e"}), 1: bm.Message(misc={"0": "3 "})},
+        responses={0: bm.Message(misc={"0": "zv"}), 1: bm.Message(misc={"0": "sh"})},
+        misc={"0": " d]", "1": " (b"},
     )
 
 
-def test_benchmark_config():
+def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(random, "choice", lambda x: ".")
+
     config = bm.BenchmarkConfig(
         from_dialog_len=1, to_dialog_len=5, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
     )
@@ -69,7 +74,9 @@ def test_benchmark_config():
             assert context == actual_context
 
 
-def test_context_updater_with_steps():
+def test_context_updater_with_steps(monkeypatch: pytest.MonkeyPatch):
+    monkeypatch.setattr(random, "choice", lambda x: ".")
+
     config = bm.BenchmarkConfig(
         from_dialog_len=1, to_dialog_len=11, step_dialog_len=3, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
     )
