@@ -13,6 +13,7 @@ from platform import system
 import tempfile
 
 import dff.utils.db_benchmark.benchmark as benchmark
+from dff.utils.db_benchmark.report import report
 
 # %% [markdown]
 """
@@ -121,7 +122,7 @@ list(tutorial_dir.iterdir())
 ## Viewing benchmark results
 
 Now that the results are saved to a file you can either view them using [report](
-../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.report
+../apiref/dff.utils.db_benchmark.report.rst#dff.utils.db_benchmark.report.report
 ) function or the [streamlit app](
 ../../../utils/db_benchmark/benchmark_streamlit.py
 ).
@@ -141,4 +142,4 @@ By default it prints the name and average metrics for each case.
 """
 
 # %%
-benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
+report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
