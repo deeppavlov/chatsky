@@ -6,7 +6,7 @@ This module contains config presets for benchmarks.
 import pathlib
 from platform import system
 
-from dff.utils.benchmark.context_storage import (
+from dff.utils.db_benchmark.benchmark import (
     BenchmarkConfig,
     benchmark_all,
 )

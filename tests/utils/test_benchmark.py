@@ -8,7 +8,7 @@ import pytest
 try:
     from jsonschema import validate
 
-    import dff.utils.benchmark.context_storage as bm
+    import dff.utils.db_benchmark.benchmark as bm
     from dff.context_storages import JSONContextStorage
 except ImportError:
     pytest.skip(reason="`dff[benchmark,tests]` not installed", allow_module_level=True)

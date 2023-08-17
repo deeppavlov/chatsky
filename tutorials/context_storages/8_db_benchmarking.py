@@ -4,7 +4,7 @@
 
 This tutorial shows how to benchmark context storages.
 
-For more info see [API reference](../apiref/dff.utils.benchmark.context_storage.rst).
+For more info see [API reference](../apiref/dff.utils.db_benchmark.benchmark.rst).
 """
 
 # %%
@@ -12,7 +12,7 @@ import pathlib
 from platform import system
 import tempfile
 
-import dff.utils.benchmark.context_storage as benchmark
+import dff.utils.db_benchmark.benchmark as benchmark
 
 # %% [markdown]
 """
@@ -49,11 +49,11 @@ Benchmark results are saved to files.
 
 For that there exist two functions:
 [benchmark_all](
-../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.benchmark_all
+../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.benchmark_all
 )
 and
 [save_results_to_file](
-../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.save_results_to_file
+../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.save_results_to_file
 ).
 
 Note: context storages passed into these functions will be cleared.
@@ -62,14 +62,14 @@ Note: context storages passed into these functions will be cleared.
 
 The first one is a higher-level wrapper of the second one.
 The first function accepts [BenchmarkCases](
-../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.BenchmarkCase
+../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkCase
 ) which configure databases that are being benchmark and configurations of the benchmarks.
 The second function accepts only a single URI for the database and several benchmark configurations.
 So, the second function is simpler to use, while the first function allows for more configuration
 (e.g. having different databases benchmarked in a single file).
 
 Both function use [BenchmarkConfig](
-../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.BenchmarkConfig
+../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkConfig
 ) to configure benchmark behaviour.
 
 It has several parameters:
@@ -121,7 +121,7 @@ list(tutorial_dir.iterdir())
 ## Viewing benchmark results
 
 Now that the results are saved to a file you can either view them using [report](
-../apiref/dff.utils.benchmark.context_storage.rst#dff.utils.benchmark.context_storage.report
+../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.report
 ) function or the [streamlit app](
 ../../../utils/db_benchmark/benchmark_streamlit.py
 ).
