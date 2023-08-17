@@ -5,6 +5,7 @@ from inspect import signature, getsourcefile, getsourcelines
 
 from sphinx.ext.autosummary import extract_summary
 from nbsphinx import depart_gallery_html
+import sphinx_autodoc_typehints
 
 logger = getLogger(__name__)
 logger.addHandler(StreamHandler())
@@ -92,3 +93,10 @@ def depart_gallery_html_wrapper(func):
 if __name__ == "__main__":
     wrap_source_function(extract_summary, extract_summary_wrapper)
     wrap_source_function(depart_gallery_html, depart_gallery_html_wrapper)
+    patch_source_file(getsourcefile(sphinx_autodoc_typehints), """
+class LoggerDummy():
+    def warning(*_, **__):
+        ...
+
+_LOGGER = LoggerDummy()
+""")
