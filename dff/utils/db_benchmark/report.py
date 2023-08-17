@@ -51,7 +51,8 @@ def report(
             f"To dialog len: {benchmark_config.to_dialog_len}\n"
             f"Step dialog len: {benchmark_config.step_dialog_len}\n"
             f"Message misc dimensions: {benchmark_config.message_dimensions}\n"
-            f"Misc dimensions: {benchmark_config.misc_dimensions}\n",
+            f"Misc dimensions: {benchmark_config.misc_dimensions}",
+            
             f"Size of misc field: {misc_size} ({naturalsize(misc_size, gnu=True)})\n"
             f"Size of one message: {message_size} ({naturalsize(message_size, gnu=True)})\n"
             f"Starting context size: {starting_context_size} ({naturalsize(starting_context_size, gnu=True)})\n"
