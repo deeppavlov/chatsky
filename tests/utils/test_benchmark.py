@@ -1,6 +1,6 @@
 from copy import deepcopy
 import json
-import pathlib
+from pathlib import Path
 
 import pytest
 
@@ -13,7 +13,7 @@ except ImportError:
     pytest.skip(reason="`dff[benchmark,tests]` not installed", allow_module_level=True)
 
 
-ROOT_DIR = pathlib.Path(__file__).parent.parent.parent
+ROOT_DIR = Path(__file__).parent.parent.parent
 
 
 def test_get_dict():
@@ -92,7 +92,7 @@ def test_context_updater_with_steps():
             assert context == actual_context
 
 
-def test_db_factory(tmp_path):
+def test_db_factory(tmp_path: Path):
     factory = bm.DBFactory(uri=f"json://{tmp_path}/json.json")
 
     db = factory.db()
@@ -101,13 +101,13 @@ def test_db_factory(tmp_path):
 
 
 @pytest.fixture
-def context_storage(tmp_path) -> JSONContextStorage:
+def context_storage(tmp_path: Path) -> JSONContextStorage:
     factory = bm.DBFactory(uri=f"json://{tmp_path}/json.json")
 
     return factory.db()
 
 
-def test_time_context_read_write(context_storage):
+def test_time_context_read_write(context_storage: JSONContextStorage):
     config = bm.BenchmarkConfig(
         context_num=5,
         from_dialog_len=1,
@@ -140,7 +140,7 @@ def test_time_context_read_write(context_storage):
         assert all([isinstance(update_time, float) and update_time > 0 for update_time in update_item.values()])
 
 
-def test_time_context_read_write_without_updates(context_storage):
+def test_time_context_read_write_without_updates(context_storage: JSONContextStorage):
     config = bm.BenchmarkConfig(
         context_num=5,
         from_dialog_len=1,
@@ -220,7 +220,7 @@ def test_average_results():
     bm.BenchmarkCase.set_average_results(benchmark)
 
 
-def test_benchmark_case(tmp_path):
+def test_benchmark_case(tmp_path: Path):
     case = bm.BenchmarkCase(
         name="",
         db_factory=bm.DBFactory(uri=f"json://{tmp_path}/json.json"),
@@ -248,7 +248,7 @@ def test_benchmark_case(tmp_path):
         assert all([isinstance(update_time, float) and update_time > 0 for update_time in update_item.values()])
 
 
-def test_save_to_file(tmp_path):
+def test_save_to_file(tmp_path: Path):
     with open(ROOT_DIR / "utils/db_benchmark/benchmark_schema.json", "r", encoding="utf-8") as fd:
         schema = json.load(fd)
 
