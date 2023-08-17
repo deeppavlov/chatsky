@@ -6,6 +6,7 @@ This tutorial shows pre-response processing feature.
 First of all, let's do all the necessary imports from DFF.
 """
 
+# %pip install dff
 
 # %%
 from dff.script import (

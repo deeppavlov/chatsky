@@ -6,6 +6,8 @@ This tutorial shows settings for transitions between flows and nodes.
 First of all, let's do all the necessary imports from DFF.
 """
 
+# %pip install dff
+
 # %%
 import re
 

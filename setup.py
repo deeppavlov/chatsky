@@ -123,19 +123,11 @@ test_requirements = merge_req_lists(
         "pytest==7.4.0",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.21.0",
+        "pytest_virtualenv==1.7.0",
         "flake8==6.1.0",
         "click==8.1.3",
         "black==23.7.0",
         "isort==5.12.0",
-        "flask[async]==2.3.2",
-        "psutil==5.9.5",
-        "telethon==1.29.1",
-        "fastapi==0.101.0",
-        "uvicorn==0.23.1",
-        "websockets==11.0.2",
-        "locust==2.16.1",
-        "streamlit==1.25.0",
-        "streamlit-chat==0.1.1",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
@@ -143,9 +135,22 @@ test_requirements = merge_req_lists(
     requests_requirements,
 )
 
+tutorial_dependencies = [
+    "flask[async]==2.3.2",
+    "psutil==5.9.5",
+    "telethon==1.29.1",
+    "fastapi==0.101.0",
+    "uvicorn==0.23.1",
+    "websockets==11.0.2",
+    "locust==2.16.1",
+    "streamlit==1.25.0",
+    "streamlit-chat==0.1.1",
+]
+
 tests_full = merge_req_lists(
     full,
     test_requirements,
+    tutorial_dependencies,
 )
 
 doc = merge_req_lists(
@@ -173,7 +178,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy==1.4.1",
+    "mypy==1.5.0",
 ]
 
 devel_full = merge_req_lists(
@@ -199,7 +204,6 @@ EXTRA_DEPENDENCIES = {
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
-    "tutorials": tests_full,  # dependencies for running tutorials (all options above)
     "devel": devel,  # dependencies for development
     "doc": doc,  # dependencies for documentation
     "devel_full": devel_full,  # full dependencies for development (all options above)

@@ -4,6 +4,8 @@
 
 """
 
+# %pip install dff
+
 # %%
 import dff.script.conditions as cnd
 import dff.script.labels as lbl

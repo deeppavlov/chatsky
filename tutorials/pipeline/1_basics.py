@@ -6,6 +6,7 @@ The following tutorial shows basic usage of `pipeline`
 module as an extension to `dff.script.core`.
 """
 
+# %pip install dff
 
 # %%
 from dff.script import Context, Message
