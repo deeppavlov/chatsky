@@ -147,13 +147,13 @@ def time_context_read_write(
     update_times: List[Dict[int, float]] = []
 
     for _ in tqdm(range(context_num), desc=f"Benchmarking context storage:{context_storage.full_path}", leave=False):
-        tmp_context = context_factory()
+        context = context_factory()
 
         ctx_id = uuid4()
 
         # write operation benchmark
         write_start = perf_counter()
-        context_storage[ctx_id] = tmp_context
+        context_storage[ctx_id] = context
         write_times.append(perf_counter() - write_start)
 
         read_times.append({})
@@ -163,23 +163,23 @@ def time_context_read_write(
         read_start = perf_counter()
         _ = context_storage[ctx_id]
         read_time = perf_counter() - read_start
-        read_times[-1][len(tmp_context.labels)] = read_time
+        read_times[-1][len(context.labels)] = read_time
 
         if context_updater is not None:
-            tmp_context = context_updater(tmp_context)
+            updated_context = context_updater(context)
 
-            while tmp_context is not None:
+            while updated_context is not None:
                 update_start = perf_counter()
-                context_storage[ctx_id] = tmp_context
+                context_storage[ctx_id] = updated_context
                 update_time = perf_counter() - update_start
-                update_times[-1][len(tmp_context.labels)] = update_time
+                update_times[-1][len(updated_context.labels)] = update_time
 
                 read_start = perf_counter()
                 _ = context_storage[ctx_id]
                 read_time = perf_counter() - read_start
-                read_times[-1][len(tmp_context.labels)] = read_time
+                read_times[-1][len(updated_context.labels)] = read_time
 
-                tmp_context = context_updater(tmp_context)
+                updated_context = context_updater(updated_context)
 
         context_storage.clear()
     return write_times, read_times, update_times
