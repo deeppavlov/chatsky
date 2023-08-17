@@ -19,7 +19,6 @@ The file is used to store paths to benchmark result files.
 Benchmark result files added via this module are not changed (only read).
 """
 import json
-import pathlib
 from pathlib import Path
 from uuid import uuid4
 
@@ -207,7 +206,7 @@ with add_tab:
     add_from_dir_container.text_input(label="Directory with benchmark files", key="add_from_dir")
 
     def add_from_dir():
-        dir_path = pathlib.Path(st.session_state["add_from_dir"])
+        dir_path = Path(st.session_state["add_from_dir"])
         if dir_path.is_dir():
             for file in dir_path.iterdir():
                 _add_benchmark(file, add_from_dir_container)

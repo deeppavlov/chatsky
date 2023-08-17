@@ -3,7 +3,7 @@ Report
 --------
 This method contains a function to print benchmark results to console.
 """
-import pathlib
+from pathlib import Path
 from typing import Union, Set, Literal, Tuple
 import json
 
@@ -13,7 +13,7 @@ from dff.utils.db_benchmark.benchmark import BenchmarkConfig
 
 
 def report(
-    file: Union[str, pathlib.Path],
+    file: Union[str, Path],
     display: Set[Literal["name", "desc", "config", "sizes", "metrics"]] = set({"name", "metrics"}),
 ):
     """

@@ -8,7 +8,7 @@ For more info see [API reference](../apiref/dff.utils.db_benchmark.benchmark.rst
 """
 
 # %%
-import pathlib
+from pathlib import Path
 from platform import system
 import tempfile
 
@@ -22,7 +22,7 @@ from dff.utils.db_benchmark.report import report
 
 # %%
 # this cell is only required for pickle, shelve and sqlite databases
-tutorial_dir = pathlib.Path(tempfile.mkdtemp())
+tutorial_dir = Path(tempfile.mkdtemp())
 db_path = tutorial_dir / "dbs"
 db_path.mkdir()
 sqlite_file = db_path / "sqlite.db"

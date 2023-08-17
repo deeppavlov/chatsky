@@ -3,7 +3,7 @@ Benchmark DBs
 -------------
 This module contains config presets for benchmarks.
 """
-import pathlib
+from pathlib import Path
 from platform import system
 
 from dff.utils.db_benchmark.benchmark import (
@@ -13,8 +13,8 @@ from dff.utils.db_benchmark.benchmark import (
 
 
 # these files are required for file-based dbs
-pathlib.Path("dbs").mkdir(exist_ok=True)
-sqlite_file = pathlib.Path("dbs/sqlite.db")
+Path("dbs").mkdir(exist_ok=True)
+sqlite_file = Path("dbs/sqlite.db")
 sqlite_file.touch(exist_ok=True)
 sqlite_separator = "///" if system() == "Windows" else "////"
 
@@ -31,7 +31,7 @@ dbs = {
 }
 
 # benchmarks will be saved to this directory
-benchmark_dir = pathlib.Path("benchmarks")
+benchmark_dir = Path("benchmarks")
 
 benchmark_dir.mkdir(exist_ok=True)
 
