@@ -12,6 +12,9 @@ specific for that component. Some examples of this functionality
 are showcased in this tutorial.
 
 """
+
+# %pip install dff[stats]
+
 # %%
 import asyncio
 

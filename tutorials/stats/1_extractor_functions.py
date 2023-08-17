@@ -22,6 +22,8 @@ refer to the body of this tutorial as well as OpenTelemetry documentation.
 
 """
 
+# %pip install dff[stats]
+
 # %%
 import asyncio
 
