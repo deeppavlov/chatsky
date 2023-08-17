@@ -120,6 +120,8 @@ with add_tab:
 
     df_container = st.container()
 
+    df_container.info("In the table below you can view all your files with benchmark results as well as delete them.")
+
     def edit_name_desc():
         edited_rows = st.session_state["result_df"]["edited_rows"]
 
@@ -135,31 +137,30 @@ with add_tab:
                     df_container.text(f"row {row}: changed {column} to '{column_value}'")
 
     edited_df = df_container.data_editor(
-        benchmark_list_df, key="result_df", disabled=("file", "uuid"), on_change=edit_name_desc
+        benchmark_list_df, key="result_df", disabled=("file", "uuid"), on_change=edit_name_desc,
     )
 
-    delist_container = st.container()
-    delist_container.divider()
+    delete_container = st.container()
 
-    def delist_benchmarks():
-        delisted_sets = [
+    def delete_benchmarks():
+        deleted_sets = [
             f"{name} ({uuid})" for name, uuid in edited_df.loc[edited_df["delete"]][["name", "uuid"]].values
         ]
 
         st.session_state["compare"] = [
-            item for item in st.session_state["compare"] if item["benchmark_set"] not in delisted_sets
+            item for item in st.session_state["compare"] if item["benchmark_set"] not in deleted_sets
         ]
 
-        files_to_delist = edited_df.loc[edited_df["delete"]]["file"]
-        for file in files_to_delist:
+        files_to_delete = edited_df.loc[edited_df["delete"]]["file"]
+        for file in files_to_delete:
             st.session_state["benchmark_files"].remove(file)
             del st.session_state["benchmarks"][file]
-            delist_container.text(f"Delisted {file}")
+            delete_container.text(f"Deleted {file}")
 
         with open(BENCHMARK_RESULTS_FILES, "w", encoding="utf-8") as fd:
             json.dump(list(st.session_state["benchmark_files"]), fd)
 
-    delist_container.button(label="Delist selected benchmark sets", on_click=delist_benchmarks)
+    delete_container.button(label="Delete selected benchmark sets", on_click=delete_benchmarks)
 
     def _add_benchmark(benchmark_file, container):
         benchmark_file = str(benchmark_file)
@@ -192,6 +193,8 @@ with add_tab:
 
     st.divider()
 
+    st.info("Below you can add your benchmark files (either from local files or via uploading).")
+
     add_container, add_from_dir_container = st.columns(2)
 
     add_container.text_input(label="Benchmark set file", key="add_benchmark_file")
@@ -210,8 +213,6 @@ with add_tab:
                 _add_benchmark(file, add_from_dir_container)
 
     add_from_dir_container.button("Add all files from directory", on_click=add_from_dir)
-
-    st.divider()
 
     upload_container = st.container()
 
@@ -305,9 +306,13 @@ with view_tab:
             else:
                 st.session_state["compare"].remove(compare_item)
 
+        item_in_compare = compare_item not in st.session_state["compare"]
+
         compare.button(
-            "Add to Compare" if compare_item not in st.session_state["compare"] else "Remove from Compare",
+            "Add to Compare" if item_in_compare else "Remove from Compare",
             on_click=add_results_to_compare_tab,
+            help="Add current benchmark to the 'Compare' tab." if item_in_compare
+            else "Remove current benchmark from the 'Compare' tab."
         )
 
         select_graph, graph = st.columns([1, 3])
@@ -354,12 +359,16 @@ with view_tab:
 with compare_tab:
     df = pd.DataFrame(st.session_state["compare"])
 
+    st.info("Here you can compare metrics of different benchmarks. Add them here via the 'View' tab.")
+
     if not df.empty:
         st.dataframe(
             df.style.highlight_min(
                 axis=0, subset=["write", "read", "update", "read+update"], props="background-color:green;"
             ).highlight_max(axis=0, subset=["write", "read", "update", "read+update"], props="background-color:red;")
         )
+    else:
+        st.warning("Currently, there are no benchmarks to compare.")
 
 ###############################################################################
 # Mass compare tab
@@ -367,6 +376,8 @@ with compare_tab:
 ###############################################################################
 
 with mass_compare_tab:
+    st.info("Here you can compare benchmarks inside of a specific set.")
+
     sets = {
         f"{benchmark_set['name']} ({benchmark_set['uuid']})": benchmark_set
         for benchmark_set in st.session_state["benchmarks"].values()
