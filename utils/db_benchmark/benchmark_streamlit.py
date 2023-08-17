@@ -136,7 +136,10 @@ with add_tab:
                     df_container.text(f"row {row}: changed {column} to '{column_value}'")
 
     edited_df = df_container.data_editor(
-        benchmark_list_df, key="result_df", disabled=("file", "uuid"), on_change=edit_name_desc,
+        benchmark_list_df,
+        key="result_df",
+        disabled=("file", "uuid"),
+        on_change=edit_name_desc,
     )
 
     delete_container = st.container()
@@ -310,8 +313,9 @@ with view_tab:
         compare.button(
             "Add to Compare" if item_in_compare else "Remove from Compare",
             on_click=add_results_to_compare_tab,
-            help="Add current benchmark to the 'Compare' tab." if item_in_compare
-            else "Remove current benchmark from the 'Compare' tab."
+            help="Add current benchmark to the 'Compare' tab."
+            if item_in_compare
+            else "Remove current benchmark from the 'Compare' tab.",
         )
 
         select_graph, graph = st.columns([1, 3])
