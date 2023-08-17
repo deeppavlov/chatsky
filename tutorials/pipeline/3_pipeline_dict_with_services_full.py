@@ -6,6 +6,7 @@ The following tutorial shows `pipeline` creation from dict
 and most important pipeline components.
 """
 
+# %pip install dff
 
 # %%
 import json

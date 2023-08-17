@@ -16,6 +16,7 @@ As mentioned in that tutorial,
 > This, of course, is not optimal and you wouldn't use it for production.
 """
 
+# %pip install dff uvicorn fastapi
 
 # %%
 from dff.script import Message
