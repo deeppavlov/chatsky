@@ -4,11 +4,12 @@
 
 This is a tutorial on using MongoDB.
 
-See [MongoContextStorage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.mongo.html#mongo) class
+See %mddoclink(api,context_storages.mongo,MongoContextStorage) class
 for storing you users' contexts in Mongo database.
 
-The DFF uses [motor](https://motor.readthedocs.io/en/stable/) library for asynchronous access to MongoDB.
-"""  # noqa: E501
+The DFF uses [motor](https://motor.readthedocs.io/en/stable/)
+library for asynchronous access to MongoDB.
+"""
 
 # %pip install dff[mongodb]
 

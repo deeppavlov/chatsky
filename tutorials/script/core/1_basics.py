@@ -4,15 +4,16 @@
 
 This notebook shows basic tutorial of creating a simple dialog bot (agent).
 
-Here, basic usege of [Pipeline](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline)
-primitive is shown: its' creation with [from_script](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.from_script)
+Here, basic usege of %mddoclink(api,pipeline.pipeline.pipeline,Pipeline)
+primitive is shown: its' creation with
+%mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_script)
 and execution.
 
-Additionally, function [check_happy_path](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.utils.testing.common.html#dff.utils.testing.common.check_happy_path)
+Additionally, function %mddoclink(api,utils.testing.common,check_happy_path)
 that can be used for Pipeline testing is presented.
 
 Let's do all the necessary imports from DFF:
-"""  # noqa: E501
+"""
 
 # %pip install dff
 

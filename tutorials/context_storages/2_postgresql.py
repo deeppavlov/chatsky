@@ -4,12 +4,13 @@
 
 This is a tutorial on using PostgreSQL.
 
-See [SQLContextStorage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.sql.html#sql) class
+See %mddoclink(api,context_storages.sql,SQLContextStorage) class
 for storing your users' contexts in SQL databases.
 
-DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [asyncpg](https://magicstack.github.io/asyncpg/current/)
+DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+and [asyncpg](https://magicstack.github.io/asyncpg/current/)
 libraries for asynchronous access to PostgreSQL DB.
-"""  # noqa: E501
+"""
 
 # %pip install dff[postgresql]
 

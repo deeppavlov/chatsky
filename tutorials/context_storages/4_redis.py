@@ -4,11 +4,12 @@
 
 This is a tutorial on using Redis.
 
-See [RedisContextStorage](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.redis.html#redis) class
+See %mddoclink(api,context_storages.redis,RedisContextStorage) class
 for storing you users' contexts in Redis database.
 
-The DFF uses [redis.asyncio](https://redis.readthedocs.io/en/latest/) library for asynchronous access to Redis DB.
-"""  # noqa: E501
+The DFF uses [redis.asyncio](https://redis.readthedocs.io/en/latest/)
+library for asynchronous access to Redis DB.
+"""
 
 # %pip install dff[redis]
 

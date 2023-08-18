@@ -4,9 +4,9 @@
 
 The following tutorial shows how to configure `PollingTelegramInterface`.
 
-See [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.PollingMessengerInterface)
+See %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
 for more information.
-"""  # noqa: E501
+"""
 
 # %pip install dff[telegram]
 

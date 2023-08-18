@@ -4,11 +4,11 @@
 
 This tutorial shows different options for setting responses.
 
-Here, [responses](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.responses.std_responses.html#responses)
+Here, [responses](%doclink(api,script.responses.std_responses))
 that allow giving custom answers to users are shown.
 
 Let's do all the necessary imports from DFF.
-"""  # noqa: E501
+"""
 
 # %pip install dff
 

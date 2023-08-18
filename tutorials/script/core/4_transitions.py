@@ -4,13 +4,14 @@
 
 This tutorial shows settings for transitions between flows and nodes.
 
-Here, [conditions](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.conditions.std_conditions.html#conditions)
+Here, [conditions](%doclink(api,script.conditions.std_conditions))
 for transition between many different script steps are shown.
 
-Some of the destination steps can be set using [labels](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.labels.std_labels.html#labels).
+Some of the destination steps can be set using
+[labels](%doclink(api,script.labels.std_labels)).
 
 First of all, let's do all the necessary imports from DFF.
-"""  # noqa: E501
+"""
 
 
 # %pip install dff

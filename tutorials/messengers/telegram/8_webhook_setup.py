@@ -5,9 +5,9 @@
 The following tutorial shows how to use `CallbackTelegramInterface`
 that makes your bot accessible through a public webhook.
 
-See [CallbackMessengerInterface](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.common.interface.html#dff.messengers.common.interface.CallbackMessengerInterface)
+See %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
 for more information.
-"""  # noqa: E501
+"""
 
 # %pip install dff[telegram] flask
 

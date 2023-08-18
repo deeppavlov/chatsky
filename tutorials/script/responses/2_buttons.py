@@ -2,11 +2,12 @@
 """
 # Responses: 2. Buttons
 
-In this tutorial [Button](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Button)
+In this tutorial %mddoclink(api,script.core.message,Button)
 class is demonstrated.
-Buttons are one of [Message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Message) fields.
-They can be attached to any message but will only work if the chosen [messenger interface](https://deeppavlov.github.io/dialog_flow_framework/apiref/index_messenger_interfaces.html) supports them.
-"""  # noqa: E501
+Buttons are one of %mddoclink(api,script.core.message,Message) fields.
+They can be attached to any message but will only work if the chosen
+[messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
+"""
 
 
 # %pip install dff

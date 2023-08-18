@@ -4,14 +4,15 @@
 
 This is a tutorial on using SQLite.
 
-See [SQLite](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.sql.html#sql) class
+See %mddoclink(api,context_storages.sql,SQLContextStorage) class
 for storing you users' contexts in SQL databases.
 
-The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [aiosqlite](https://readthedocs.org/projects/aiosqlite/)
+The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+and [aiosqlite](https://readthedocs.org/projects/aiosqlite/)
 libraries for asynchronous access to SQLite DB.
 
 Note that protocol separator for windows differs from one for linux.
-"""  # noqa: E501
+"""
 
 # %pip install dff[sqlite]
 

@@ -6,12 +6,11 @@ This tutorial shows how to create an API for DFF using FastAPI.
 
 You can see the result at http://127.0.0.1:8000/docs.
 
-Here, `_run_pipeline` (same as [run](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.run))
+Here, `_run_pipeline` (same as %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.run))
 method is used to execute pipeline once.
 
-[Message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Message)
-is used in creating a JSON Schema for the endpoint.
-"""  # noqa: E501
+%mddoclink(api,script.core.message,Message) is used in creating a JSON Schema for the endpoint.
+"""
 
 # %pip install dff uvicorn fastapi
 

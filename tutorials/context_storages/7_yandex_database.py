@@ -4,11 +4,12 @@
 
 This is a tutorial on how to use Yandex DataBase.
 
-See [YDB](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.ydb.html#yandex-db) class
+See %mddoclink(api,context_storages.ydb,YDBContextStorage) class
 for storing you users' contexts in Yandex database.
 
-The DFF uses [ydb.aio](https://ydb.tech/en/docs/) library for asynchronous access to Yandex DB.
-"""  # noqa: E501
+The DFF uses [ydb.aio](https://ydb.tech/en/docs/)
+library for asynchronous access to Yandex DB.
+"""
 
 # %pip install dff[ydb]
 

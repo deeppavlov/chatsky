@@ -4,15 +4,14 @@
 
 This tutorial shows pre-response processing feature.
 
-Here, [PRE_RESPONSE_PROCESSING](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.PRE_RESPONSE_PROCESSING)
+Here, %mddoclink(api,script.core.keywords,Keywords.PRE_RESPONSE_PROCESSING)
 is demonstrated which can be used for additional context processing before response handlers.
 
-There are also some other
-[Keywords](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords)
+There are also some other %mddoclink(api,script.core.keywords,Keywords)
 worth attention used in this tutorial.
 
 First of all, let's do all the necessary imports from DFF.
-"""  # noqa: E501
+"""
 
 # %pip install dff
 

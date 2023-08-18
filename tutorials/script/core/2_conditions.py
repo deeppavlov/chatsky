@@ -5,11 +5,11 @@
 This tutorial shows different options for
 setting transition conditions from one node to another.
 
-Here, [conditions](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.conditions.std_conditions.html#conditions)
+Here, [conditions](%doclink(api,script.conditions.std_conditions))
 for script transitions are shown.
 
 First of all, let's do all the necessary imports from DFF.
-"""  # noqa: E501
+"""
 
 # %pip install dff
 

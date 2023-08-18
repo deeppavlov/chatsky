@@ -4,11 +4,12 @@
 
 This tutorial shows pre-transitions processing feature.
 
-Here, [PRE_TRANSITIONS_PROCESSING](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.keywords.html#dff.script.core.keywords.Keywords.PRE_TRANSITIONS_PROCESSING)
-is demonstrated which can be used for additional context processing before transitioning to the next step.
+Here, %mddoclink(api,script.core.keywords,Keywords.PRE_TRANSITIONS_PROCESSING)
+is demonstrated which can be used for additional context
+processing before transitioning to the next step.
 
 First of all, let's do all the necessary imports from DFF.
-"""  # noqa: E501
+"""
 
 # %pip install dff
 

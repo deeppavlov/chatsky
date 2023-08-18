@@ -4,10 +4,9 @@
 
 The following tutorial shows `pipeline` service group usage and start conditions.
 
-Here, [Service](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.service.html#dff.pipeline.service.service.Service)s
-and [ServiceGroup](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.group.html#dff.pipeline.service.group.ServiceGroup)s
-are shown for advanced data pre- and postprocessing based on conditions.
-"""  # noqa: E501
+This tutorial is a more advanced version of the
+[previous tutorial](%doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
+"""
 
 # %pip install dff
 

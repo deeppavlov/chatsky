@@ -4,10 +4,9 @@
 
 The following tutorial shows extra handlers possibilities and use cases.
 
-Here, extra handlers [BeforeHandler](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.extra.html#dff.pipeline.service.extra.BeforeHandler)
-and [AfterHandler](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.extra.html#dff.pipeline.service.extra.AfterHandler)
-are shown as additional means of data processing, attached to services.
-"""  # noqa: E501
+This tutorial is a more advanced version of the
+[previous tutorial](%doclink(tutorial,pipeline.7_extra_handlers_basic)).
+"""
 
 # %pip install dff psutil
 

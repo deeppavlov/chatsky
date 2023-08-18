@@ -59,7 +59,7 @@ class InstallationCell(ReplacePattern):
         return f"""
 # %%
 # installing dependencies
-%pip install -q {matchobj.group(1)}
+!pip install -q {matchobj.group(1)}
 """
 
 
@@ -129,7 +129,8 @@ class DocumentationLink(ReplacePattern):
             A link to the corresponding documentation part.
         """
         if page_type == "api":
-            return f"../apiref/dff.{page}.rst" + (f"#dff.{page}.{anchor}" if anchor is not None else "")
+            prefix = "" if page.startswith("index") else "dff."
+            return f"../apiref/{prefix}{page}.rst" + (f"#{prefix}{page}.{anchor}" if anchor is not None else "")
         elif page_type == "tutorial":
             return f"../tutorials/tutorials.{page}.py" + (f"#{anchor}" if anchor is not None else "")
         elif page_type == "guide":
@@ -141,8 +142,46 @@ class DocumentationLink(ReplacePattern):
         return DocumentationLink.link_to_doc_page(*args)
 
 
+class MarkdownDocumentationLink(DocumentationLink):
+    """
+    Replace documentation linking directives with markdown-style links.
+
+    Replace strings of the `%mddoclink({args})` format with corresponding links to local files.
+
+    `args` is a comma-separated string of arguments to pass to the :py:meth:`.DocumentationLink.link_to_doc_page`.
+
+    So, `%mddoclink(arg1,arg2,arg3)` will be replaced with `[text](link_to_doc_page(arg1, arg2, arg3))`, and
+    `%doclink(arg1,arg2)` will be replaced with `[text](link_to_doc_page(arg1, arg2))` with `text` being the last
+    path segment of `arg2` or `arg3` (if present).
+
+    USAGE EXAMPLES
+    --------------
+
+    [script](%doclink(api,script.core.script))
+
+    [Node](%doclink(api,script.core.script,Node))
+
+    [4_streamlit_chat](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat))
+
+    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration))
+
+    [basic_conceptions](%doclink(guide,basic_conceptions))
+
+    [example-conversational-chat-bot](%doclink(guide,basic_conceptions,example-conversational-chat-bot))
+
+    """
+
+    pattern: ClassVar[re.Pattern] = re.compile(r"%mddoclink\((.+?)\)")
+
+    @staticmethod
+    def replacement_string(matchobj: re.Match) -> str:
+        args = matchobj.group(1).split(",")
+        link_text = args[-1].split(".")[-1]
+        return f"[{link_text}]({DocumentationLink.link_to_doc_page(*args)})"
+
+
 def apply_replace_patterns(text: str) -> str:
-    for cls in (InstallationCell, DocumentationLink):
+    for cls in (InstallationCell, DocumentationLink, MarkdownDocumentationLink):
         text = cls.replace(text)
 
     return text

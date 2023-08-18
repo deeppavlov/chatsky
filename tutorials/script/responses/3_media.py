@@ -2,13 +2,14 @@
 """
 # Responses: 3. Media
 
-Here, [Attachments](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Attachments)
-class is shown. Attachments can be used for attaching different media elements
-(such as [Image](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Image),
-[Document](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Document)
-or [Audio](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#dff.script.core.message.Audio)).
-They can be attached to any message but will only work if the chosen [messenger interface](https://deeppavlov.github.io/dialog_flow_framework/apiref/index_messenger_interfaces.html) supports them.
-"""  # noqa: E501
+Here, %mddoclink(api,script.core.message,Attachments) class is shown.
+Attachments can be used for attaching different media elements
+(such as %mddoclink(api,script.core.message,Image), %mddoclink(api,script.core.message,Document)
+or %mddoclink(api,script.core.message,Audio)).
+
+They can be attached to any message but will only work if the chosen
+[messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
+"""
 
 # %pip install dff
 

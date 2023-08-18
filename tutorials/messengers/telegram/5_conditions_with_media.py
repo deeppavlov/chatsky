@@ -4,12 +4,13 @@
 
 This tutorial shows how to use media-related logic in your script.
 
-Here, [telegram_condition](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.messengers.telegram.messenger.html#dff.messengers.telegram.messenger.telegram_condition)
+Here, %mddoclink(api,messengers.telegram.messenger,telegram_condition)
 function is used for graph navigation according to Telegram events.
 
-Different [message](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.message.html#message)
-classes are used for representing different common message features, like Attachment, Audio, Button, Image, etc.
-"""  # noqa: E501
+Different %mddoclink(api,script.core.message,message)
+classes are used for representing different common message features,
+like Attachment, Audio, Button, Image, etc.
+"""
 
 
 # %pip install dff[telegram]

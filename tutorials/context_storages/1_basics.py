@@ -4,11 +4,11 @@
 
 The following tutorial shows the basic use of the database connection.
 
-See [context_storage_factory](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory) function
+See %mddoclink(api,context_storages.database,context_storage_factory) function
 for creating a context storage by path.
 
 In this example JSON file is used as a storage.
-"""  # noqa: E501
+"""
 
 # %pip install dff[json,pickle]
 

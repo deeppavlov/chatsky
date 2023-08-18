@@ -5,12 +5,12 @@
 The following tutorial shows `pipeline` creation from
 dict and most important pipeline components.
 
-Here, [Service](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.service.service.html#service)
+Here, %mddoclink(api,pipeline.service.service,Service)
 class, that can be used for pre- and postprocessing of messages is shown.
 
-Pipeline's [from_dict](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.pipeline.pipeline.pipeline.html#dff.pipeline.pipeline.pipeline.Pipeline.from_dict)
+Pipeline's %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_dict)
 static method is used for pipeline creation (from dictionary).
-"""  # noqa: E501
+"""
 
 # %pip install dff
 
