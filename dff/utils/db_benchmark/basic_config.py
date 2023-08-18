@@ -136,6 +136,7 @@ class BasicBenchmarkConfig(BenchmarkConfig, frozen=True):
             A dictionary with two keys.
             Key "params" stores fields of this configuration.
             Key "sizes" stores string representation of following values:
+
                 - "starting_context_size" -- size of a context with `from_dialog_len`.
                 - "final_context_size" -- size of a context with `to_dialog_len`.
                   A context of this size will never actually be benchmarked.
@@ -210,4 +211,8 @@ basic_configurations = {
         misc_dimensions=(10000, 1),
     ),
 }
-"""Configuration that covers many dialog cases (as well as some edge-cases)."""
+"""
+Configuration that covers many dialog cases (as well as some edge-cases).
+
+:meta hide-value:
+"""
