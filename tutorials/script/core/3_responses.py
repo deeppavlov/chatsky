@@ -10,6 +10,7 @@ that allow giving custom answers to users are shown.
 Let's do all the necessary imports from DFF.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import re

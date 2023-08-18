@@ -41,7 +41,7 @@ jobs:
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials .env_file makefile .coveragerc )
+          export backup_files=( tests tutorials .env_file makefile .coveragerc pytest.ini docs )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
@@ -51,4 +51,4 @@ jobs:
 
       - name: run tests
         run: |
-          make test
+          make test TEST_ALLOW_SKIP=telegram

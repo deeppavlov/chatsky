@@ -10,6 +10,7 @@ represents a combination of several messages.
 Let's do all the necessary imports from DFF.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 

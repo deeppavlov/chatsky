@@ -8,6 +8,7 @@ and [TRANSITIONS](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.
 are used for that.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 from typing import NamedTuple

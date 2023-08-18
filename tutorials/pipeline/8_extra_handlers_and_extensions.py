@@ -9,6 +9,7 @@ Here, [add_global_handler](https://deeppavlov.github.io/dialog_flow_framework/ap
 function is shown, that can be used to add extra handlers before and/or after all pipeline services.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import asyncio

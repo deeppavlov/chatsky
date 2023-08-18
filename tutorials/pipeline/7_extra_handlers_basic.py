@@ -9,6 +9,7 @@ and [AfterHandler](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff
 are shown as additional means of data processing, attached to services.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import asyncio

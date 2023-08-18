@@ -9,6 +9,7 @@ Here, [ServiceGroup](https://deeppavlov.github.io/dialog_flow_framework/apiref/d
 are shown for advanced and asynchronous data pre- and postprocessing.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import asyncio

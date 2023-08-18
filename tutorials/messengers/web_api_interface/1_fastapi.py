@@ -13,6 +13,7 @@ method is used to execute pipeline once.
 is used in creating a JSON Schema for the endpoint.
 """  # noqa: E501
 
+# %pip install dff uvicorn fastapi
 
 # %%
 from dff.script import Message

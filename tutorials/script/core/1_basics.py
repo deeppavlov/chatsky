@@ -14,6 +14,7 @@ that can be used for Pipeline testing is presented.
 Let's do all the necessary imports from DFF:
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 from dff.script import TRANSITIONS, RESPONSE, Message

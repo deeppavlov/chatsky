@@ -11,6 +11,7 @@ DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [asyncpg](https://
 libraries for asynchronous access to PostgreSQL DB.
 """  # noqa: E501
 
+# %pip install dff[postgresql]
 
 # %%
 import os

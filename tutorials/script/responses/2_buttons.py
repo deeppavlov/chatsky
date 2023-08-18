@@ -9,6 +9,8 @@ They can be attached to any message but will only work if the chosen [messenger 
 """  # noqa: E501
 
 
+# %pip install dff
+
 # %%
 import dff.script.conditions as cnd
 import dff.script.labels as lbl

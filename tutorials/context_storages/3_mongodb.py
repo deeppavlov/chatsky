@@ -10,6 +10,7 @@ for storing you users' contexts in Mongo database.
 The DFF uses [motor](https://motor.readthedocs.io/en/stable/) library for asynchronous access to MongoDB.
 """  # noqa: E501
 
+# %pip install dff[mongodb]
 
 # %%
 import os

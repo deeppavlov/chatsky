@@ -8,6 +8,7 @@ See [PollingTelegramInterface](https://deeppavlov.github.io/dialog_flow_framewor
 for more information.
 """  # noqa: E501
 
+# %pip install dff[telegram]
 
 # %%
 import os

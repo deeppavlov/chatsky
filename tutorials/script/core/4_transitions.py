@@ -13,6 +13,8 @@ First of all, let's do all the necessary imports from DFF.
 """  # noqa: E501
 
 
+# %pip install dff
+
 # %%
 import re
 

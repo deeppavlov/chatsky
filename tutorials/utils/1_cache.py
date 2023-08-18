@@ -6,6 +6,7 @@
 
 # TODO: no entry in documentation!
 
+# %pip install dff
 
 # %%
 from dff.script.conditions import true

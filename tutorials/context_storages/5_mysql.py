@@ -11,6 +11,7 @@ The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/) and [asyncmy](http
 libraries for asynchronous access to MySQL DB.
 """  # noqa: E501
 
+# %pip install dff[mysql]
 
 # %%
 import os

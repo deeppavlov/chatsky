@@ -22,6 +22,7 @@ method is used to execute pipeline once.
 is used to represent text messages.
 """  # noqa: E501
 
+# %pip install dff uvicorn fastapi
 
 # %%
 from dff.script import Message

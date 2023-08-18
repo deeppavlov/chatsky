@@ -12,6 +12,8 @@ classes are used for representing different common message features, like Attach
 """  # noqa: E501
 
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

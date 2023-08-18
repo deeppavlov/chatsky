@@ -9,6 +9,7 @@ and [ServiceGroup](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff
 are shown for advanced data pre- and postprocessing based on conditions.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import json

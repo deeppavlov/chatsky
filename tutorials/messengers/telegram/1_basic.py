@@ -11,6 +11,7 @@ class and [telebot](https://pytba.readthedocs.io/en/latest/index.html) library a
 Telegram API token is required to access telegram API.
 """  # noqa: E501
 
+# %pip install dff[telegram]
 
 # %%
 import os

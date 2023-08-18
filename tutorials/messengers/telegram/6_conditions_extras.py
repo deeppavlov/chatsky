@@ -11,6 +11,8 @@ are used for telegram message type checking.
 """  # noqa: E501
 
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

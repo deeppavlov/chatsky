@@ -9,6 +9,7 @@ and [PollingMessengerInterface](https://deeppavlov.github.io/dialog_flow_framewo
 are shown as alternatives for connection to custom user messenger backends.
 """  # noqa: E501
 
+# %pip install dff flask
 
 # %%
 import logging

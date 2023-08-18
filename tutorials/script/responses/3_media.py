@@ -10,6 +10,7 @@ or [Audio](https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.
 They can be attached to any message but will only work if the chosen [messenger interface](https://deeppavlov.github.io/dialog_flow_framework/apiref/index_messenger_interfaces.html) supports them.
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 from dff.script import RESPONSE, TRANSITIONS

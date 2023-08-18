@@ -12,6 +12,7 @@ Pipeline's [from_dict](https://deeppavlov.github.io/dialog_flow_framework/apiref
 static method is used for pipeline creation (from dictionary).
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import logging

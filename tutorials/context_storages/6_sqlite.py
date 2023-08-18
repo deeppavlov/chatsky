@@ -13,6 +13,7 @@ libraries for asynchronous access to SQLite DB.
 Note that protocol separator for windows differs from one for linux.
 """  # noqa: E501
 
+# %pip install dff[sqlite]
 
 # %%
 import pathlib

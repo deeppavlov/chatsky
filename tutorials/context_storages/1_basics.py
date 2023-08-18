@@ -10,6 +10,7 @@ for creating a context storage by path.
 In this example JSON file is used as a storage.
 """  # noqa: E501
 
+# %pip install dff[json,pickle]
 
 # %%
 import pathlib

@@ -8,6 +8,7 @@ and most important pipeline components.
 This tutorial is a more advanced version of the [previous tutorial](./tutorials.pipeline.3_pipeline_dict_with_services_basic.html).
 """  # noqa: E501
 
+# %pip install dff
 
 # %%
 import json

@@ -9,6 +9,7 @@ See [CallbackMessengerInterface](https://deeppavlov.github.io/dialog_flow_framew
 for more information.
 """  # noqa: E501
 
+# %pip install dff[telegram] flask
 
 # %%
 import os

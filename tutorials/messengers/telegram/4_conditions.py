@@ -10,6 +10,8 @@ function is used for graph navigation according to Telegram events.
 """  # noqa: E501
 
 
+# %pip install dff[telegram]
+
 # %%
 import os
 
