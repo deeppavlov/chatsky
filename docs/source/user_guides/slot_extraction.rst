@@ -23,7 +23,7 @@ from user utterances using a regular expression.
 
     from dff.script.slots import RegexpSlot
     ...
-    email_slot = RegexpSlot(name="email", regexp=r"^[A-Z][a-z]+?(?= )")
+    email_slot = RegexpSlot(name="email", regexp=r"[a-z@\.A-Z]+")
 
 Individual slots can be grouped allowing the developer to access them together
 as a namespace. This can be achieved using the `GroupSlot` component
@@ -38,7 +38,7 @@ group slots in other group slots.
     profile_slot = slots.GroupSlot(name="profile", children=[email_slot])
 
 When all slots have been defined, you can refer to them in your script.
-Slots can be extracted at the `PRE_TRANSITION_PROCESSING` stage, the appropriate
+Slots can be extracted at the `PRE_TRANSITIONS_PROCESSING` stage, the appropriate
 function being provided by the `processing` submodule.
 The only argument is the list of names of the slots that you want to extract
 from user utterances.
@@ -87,6 +87,8 @@ it enables transitions to the nodes that fill them.
 .. code-block:: python
     :linenos:
 
+    from dff.script.slots import FormPolicy
+    ...
     # slot names are mapped to node addresses
     form_policy = slots.FormPolicy(
         "restaurant",
@@ -96,3 +98,27 @@ it enables transitions to the nodes that fill them.
             "restaurant_number": [("restaurant", "number")],
         },
     )
+
+The form policy class includes several methods that need to be used in the script.
+Most importantly, `to_next_label` method needs to be used as a transition target.
+This will lead to the policy suggesting one of the nodes in the mapping
+given that the respective slot is not set.
+
+.. code-block:: python
+
+    form_policy.to_next_label(1.1): cnd.true(),
+
+The form is also a stateful object which requires the user to leverage the methods
+for state management. States should be updated at the `PRE_TRANSITIONS_PROCESSING` stage,
+which can be done at the `GLOBAL` level.
+
+.. code-block:: python
+
+    PRE_TRANSITIONS_PROCESSING: {"update_action": form_policy.update_state()}
+
+Meanwhile, it is also possible to make transitions depending on state values
+of a form policy.
+
+.. code-block:: python
+
+    TRANSITIONS: {("flow", "node"): form_policy.has_state(FormState.ACTIVE)}

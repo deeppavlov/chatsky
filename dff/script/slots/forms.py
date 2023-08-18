@@ -10,7 +10,7 @@ from math import inf
 from collections import Counter
 
 from dff.script import labels as lbl
-from pydantic import BaseModel, Field, PrivateAttr, validate_call
+from pydantic import BaseModel, Field, validate_call
 
 from dff.script import Context
 from dff.pipeline.pipeline.pipeline import Pipeline, FORM_STORAGE_KEY
@@ -64,7 +64,7 @@ class FormPolicy(BaseModel):
     name: str
     mapping: Dict[str, List[NodeLabel2Type]] = Field(default_factory=dict)
     allowed_repeats: int = Field(default=0, gt=-1)
-    _node_cache: Dict[NodeLabel2Type, int] = PrivateAttr(default_factory=Counter)
+    node_cache: Dict[NodeLabel2Type, int] = Field(default_factory=Counter)
 
     def __init__(self, name: str, mapping: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data):
         """
@@ -102,7 +102,7 @@ class FormPolicy(BaseModel):
                     continue
 
                 filtered_node_list = [
-                    node for node in node_list if self._node_cache.get(node, 0) <= self.allowed_repeats
+                    node for node in node_list if self.node_cache.get(node, 0) <= self.allowed_repeats
                 ]  # assert that the visit limit has not been reached for all of the nodes.
 
                 if len(filtered_node_list) == 0:
@@ -113,7 +113,7 @@ class FormPolicy(BaseModel):
                 chosen_node = choice(filtered_node_list)
 
                 if not ctx.validation:
-                    self._node_cache.update([chosen_node])  # update visit counts
+                    self.node_cache.update([chosen_node])  # update visit counts
                 return (*chosen_node, current_priority)
 
             _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)
@@ -152,7 +152,7 @@ class FormPolicy(BaseModel):
         """
 
         def update_inner(ctx: Context, pipeline: Pipeline) -> Context:
-            ctx.framework_states[FORM_STORAGE_KEY] = ctx.framework_states.get(FORM_STORAGE_KEY, {})
+            ctx.framework_states.setdefault(FORM_STORAGE_KEY, {})
 
             if state:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = state

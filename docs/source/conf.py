@@ -169,6 +169,7 @@ def setup(_):
                     ("responses", "Responses"),
                 ],
             ),
+            ("tutorials.slots", "Slots"),
             ("tutorials.utils", "Utils"),
         ]
     )

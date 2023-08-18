@@ -9,15 +9,13 @@ import re
 from abc import ABC, abstractmethod
 from copy import copy
 from collections.abc import Iterable
-from typing import Callable, Any, Tuple, Dict, Union, overload, TypeVar, Optional
+from typing import Callable, Any, Tuple, Dict, Union, overload, Optional
 
-import wrapt
 from pydantic import Field, BaseModel, field_validator
 
 from dff.script import Context
 from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STORAGE_KEY  # noqa: F401
-
-T = TypeVar("T")
+from .utils import singleton
 
 
 class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
@@ -32,7 +30,7 @@ class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
     @field_validator("name", mode="before")
     def validate_name(cls, name: str):
         if "/" in name:
-            raise ValueError("separator `/` cannot be used in slot names")
+            raise ValueError("Character `/` cannot be used in slot names.")
         return name
 
     def __init__(self, name: str, **data):
@@ -75,10 +73,7 @@ class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
 
 class _GroupSlot(BaseSlot):
     """
-    This class defines a slot group that includes one or more :py:class:`~ValueSlot` instances.
-    When a slot has been included to a group, it should further be referenced as a part of that group.
-    E. g. when slot 'name' is included to a group 'person',
-    from that point on it should be referenced as 'person/name'.
+    Base class for :py:class:`~RootSlot` and :py:class:`~GroupSlot`.
 
     """
 
@@ -135,17 +130,6 @@ class _GroupSlot(BaseSlot):
         return self.get_value()(ctx, pipeline)
 
 
-def singleton(result: Union[T, None] = None) -> Callable[..., T]:
-    @wrapt.decorator
-    def singleton_decorator(cls: Callable[..., T], _, args, kwargs) -> T:
-        nonlocal result
-        if result is None:
-            result = cls(*args, **kwargs)
-        return result
-
-    return singleton_decorator
-
-
 @singleton()
 class RootSlot(_GroupSlot):
     """
@@ -193,6 +177,14 @@ class ChildSlot(BaseSlot):
 
 
 class GroupSlot(_GroupSlot, ChildSlot):
+    """
+    This class defines a slot group that includes one or more :py:class:`~ValueSlot` instances.
+    When a slot has been included to a group, it should further be referenced as a part of that group.
+    E. g. when slot 'name' is included to a group 'person',
+    from that point on it should be referenced as 'person/name'.
+
+    """
+
     ...
 
 
@@ -204,7 +196,7 @@ class ValueSlot(ChildSlot):
     """
 
     children: None = Field(None)
-    value: Optional[str] = None
+    value: Any = None
 
     def is_set(self):
         def is_set_inner(ctx: Context, _: Pipeline):
@@ -220,7 +212,7 @@ class ValueSlot(ChildSlot):
 
     def unset_value(self):
         def unset_inner(ctx: Context, _: Pipeline):
-            ctx.framework_states[SLOT_STORAGE_KEY] = ctx.framework_states.get(SLOT_STORAGE_KEY, {})
+            ctx.framework_states.setdefault(SLOT_STORAGE_KEY, {})
             ctx.framework_states[SLOT_STORAGE_KEY][self.name] = None
 
         return unset_inner
