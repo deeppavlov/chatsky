@@ -6,6 +6,7 @@ The following tutorial shows how pipeline can be extended
 by global extra handlers and custom functions.
 """
 
+# %pip install dff
 
 # %%
 import asyncio

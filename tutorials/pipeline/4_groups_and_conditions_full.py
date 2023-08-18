@@ -5,6 +5,7 @@
 The following tutorial shows `pipeline` service group usage and start conditions.
 """
 
+# %pip install dff
 
 # %%
 import logging

@@ -6,6 +6,8 @@ This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
 """
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

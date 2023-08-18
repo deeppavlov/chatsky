@@ -5,6 +5,7 @@
 The following tutorial shows messenger interfaces usage.
 """
 
+# %pip install dff flask
 
 # %%
 import logging

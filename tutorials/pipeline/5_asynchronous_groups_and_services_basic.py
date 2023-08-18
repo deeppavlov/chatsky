@@ -6,6 +6,7 @@ The following tutorial shows `pipeline` asynchronous
 service and service group usage.
 """
 
+# %pip install dff
 
 # %%
 import asyncio

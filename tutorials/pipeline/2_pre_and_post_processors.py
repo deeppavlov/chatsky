@@ -6,6 +6,7 @@ The following tutorial shows more advanced usage of `pipeline`
 module as an extension to `dff.script.core`.
 """
 
+# %pip install dff
 
 # %%
 import logging

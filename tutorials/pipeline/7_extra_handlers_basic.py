@@ -5,6 +5,7 @@
 The following tutorial shows extra handlers possibilities and use cases.
 """
 
+# %pip install dff
 
 # %%
 import asyncio
