@@ -60,73 +60,7 @@
           },
           "benchmark_config": {
             "description": "Configuration of the benchmark",
-            "type": "object",
-            "properties": {
-              "context_num": {
-                "description": "Number of times each context was written/read",
-                "type": "integer",
-                "minimum": 1
-              },
-              "from_dialog_len": {
-                "description": "Starting dialog len",
-                "type": "integer",
-                "minimum": 0
-              },
-              "to_dialog_len": {
-                "description": "Final dialog len (exclusive)",
-                "type": "integer",
-                "minimum": 1
-              },
-              "step_dialog_len": {
-                "description": "Increment step of dialog len",
-                "type": "integer",
-                "minimum": 1
-              },
-              "message_dimensions": {
-                "description": "Dimensions of a misc field of each message",
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": 0
-                }
-              },
-              "misc_dimensions": {
-                "description": "Dimensions of a misc field of contexts",
-                "type": "array",
-                "items": {
-                  "type": "integer",
-                  "minimum": 0
-                }
-              }
-            },
-            "required": ["context_num", "from_dialog_len", "to_dialog_len", "step_dialog_len", "message_dimensions", "misc_dimensions"]
-          },
-          "sizes": {
-            "description": "A dictionary with size statistics for objects used during benchmarking",
-            "type": "object",
-            "properties": {
-              "starting_context_size": {
-                "description": "Context size of from_dialog_len length",
-                "type": "integer",
-                "minimum": 1
-              },
-              "final_context_size": {
-                "description": "Context size of to_dialog_len length",
-                "type": "integer",
-                "minimum": 1
-              },
-              "misc_size": {
-                "description": "Size of the misc field of a context",
-                "type": "integer",
-                "minimum": 1
-              },
-              "message_size": {
-                "description": "Size of a message",
-                "type": "integer",
-                "minimum": 1
-              }
-            },
-            "required": ["starting_context_size", "final_context_size", "misc_size", "message_size"]
+            "type": "object"
           },
           "result": {
             "description": "Raw benchmark results or error message",
@@ -227,7 +161,7 @@
             ]
           }
         },
-        "required": ["name", "description", "uuid", "success", "db_factory", "benchmark_config", "sizes", "result"]
+        "required": ["name", "description", "uuid", "success", "db_factory", "benchmark_config", "result"]
       }
     }
   },

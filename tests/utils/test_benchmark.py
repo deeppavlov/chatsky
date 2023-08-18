@@ -8,8 +8,10 @@ import pytest
 try:
     from jsonschema import validate
 
-    import dff.utils.db_benchmark.benchmark as bm
+    import dff.utils.db_benchmark as bm
+    from dff.utils.db_benchmark.basic_config import get_context, get_dict, get_message
     from dff.context_storages import JSONContextStorage
+    from dff.script import Context, Message
 except ImportError:
     pytest.skip(reason="`dff[benchmark,tests]` not installed", allow_module_level=True)
 
@@ -19,10 +21,10 @@ ROOT_DIR = Path(__file__).parent.parent.parent
 
 def test_get_dict():
     random.seed(42)
-    assert bm.get_dict(()) == {}
-    assert bm.get_dict((1,)) == {"0": ""}
-    assert bm.get_dict((2, 3)) == {"0": ">e3", "1": " zv"}
-    assert bm.get_dict((2, 3, 4)) == {
+    assert get_dict(()) == {}
+    assert get_dict((1,)) == {"0": ""}
+    assert get_dict((2, 3)) == {"0": ">e3", "1": " zv"}
+    assert get_dict((2, 3, 4)) == {
         "0": {"0": "sh d", "1": "] (b", "2": ".S43"},
         "1": {"0": "brt#", "1": ":3*p", "2": "|@`("},
     }
@@ -30,12 +32,12 @@ def test_get_dict():
 
 def test_get_context():
     random.seed(42)
-    context = bm.get_context(2, (1, 2), (2, 3))
-    assert context == bm.Context(
+    context = get_context(2, (1, 2), (2, 3))
+    assert context == Context(
         id=context.id,
         labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
-        requests={0: bm.Message(misc={"0": ">e"}), 1: bm.Message(misc={"0": "3 "})},
-        responses={0: bm.Message(misc={"0": "zv"}), 1: bm.Message(misc={"0": "sh"})},
+        requests={0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "3 "})},
+        responses={0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})},
         misc={"0": " d]", "1": " (b"},
     )
 
@@ -43,20 +45,19 @@ def test_get_context():
 def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(random, "choice", lambda x: ".")
 
-    config = bm.BenchmarkConfig(
+    config = bm.BasicBenchmarkConfig(
         from_dialog_len=1, to_dialog_len=5, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
     )
     context = config.get_context()
-    actual_context = bm.get_context(1, (2, 2), (3, 3, 3))
+    actual_context = get_context(1, (2, 2), (3, 3, 3))
     actual_context.id = context.id
     assert context == actual_context
 
-    sizes = config.sizes()
+    info = config.info()
     for size in ("starting_context_size", "final_context_size", "misc_size", "message_size"):
-        assert isinstance(sizes[size], int)
-        assert sizes[size] > 0
+        assert isinstance(info["sizes"][size], str)
 
-    context_updater = config.get_context_updater()
+    context_updater = config.context_updater
 
     contexts = [context]
 
@@ -69,7 +70,7 @@ def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
         if context is not None:
             assert len(context.labels) == len(context.requests) == len(context.responses) == index + 1
 
-            actual_context = bm.get_context(index + 1, (2, 2), (3, 3, 3))
+            actual_context = get_context(index + 1, (2, 2), (3, 3, 3))
             actual_context.id = context.id
             assert context == actual_context
 
@@ -77,11 +78,11 @@ def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
 def test_context_updater_with_steps(monkeypatch: pytest.MonkeyPatch):
     monkeypatch.setattr(random, "choice", lambda x: ".")
 
-    config = bm.BenchmarkConfig(
+    config = bm.BasicBenchmarkConfig(
         from_dialog_len=1, to_dialog_len=11, step_dialog_len=3, message_dimensions=(2, 2), misc_dimensions=(3, 3, 3)
     )
 
-    context_updater = config.get_context_updater()
+    context_updater = config.context_updater
 
     contexts = [config.get_context()]
 
@@ -94,7 +95,7 @@ def test_context_updater_with_steps(monkeypatch: pytest.MonkeyPatch):
         if context is not None:
             assert len(context.labels) == len(context.requests) == len(context.responses) == index
 
-            actual_context = bm.get_context(index, (2, 2), (3, 3, 3))
+            actual_context = get_context(index, (2, 2), (3, 3, 3))
             actual_context.id = context.id
             assert context == actual_context
 
@@ -115,7 +116,7 @@ def context_storage(tmp_path: Path) -> JSONContextStorage:
 
 
 def test_time_context_read_write(context_storage: JSONContextStorage):
-    config = bm.BenchmarkConfig(
+    config = bm.BasicBenchmarkConfig(
         context_num=5,
         from_dialog_len=1,
         to_dialog_len=11,
@@ -125,7 +126,7 @@ def test_time_context_read_write(context_storage: JSONContextStorage):
     )
 
     results = bm.time_context_read_write(
-        context_storage, config.get_context, config.context_num, config.get_context_updater()
+        context_storage, config.get_context, config.context_num, config.context_updater
     )
 
     assert len(context_storage) == 0
@@ -148,7 +149,7 @@ def test_time_context_read_write(context_storage: JSONContextStorage):
 
 
 def test_time_context_read_write_without_updates(context_storage: JSONContextStorage):
-    config = bm.BenchmarkConfig(
+    config = bm.BasicBenchmarkConfig(
         context_num=5,
         from_dialog_len=1,
         to_dialog_len=2,
@@ -172,7 +173,7 @@ def test_time_context_read_write_without_updates(context_storage: JSONContextSto
         context_storage,
         config.get_context,
         config.context_num,
-        config.get_context_updater(),  # context updater returns None
+        config.context_updater,  # context updater returns None
     )
     _, read, update = results
 
@@ -231,7 +232,7 @@ def test_benchmark_case(tmp_path: Path):
     case = bm.BenchmarkCase(
         name="",
         db_factory=bm.DBFactory(uri=f"json://{tmp_path}/json.json"),
-        benchmark_config=bm.BenchmarkConfig(
+        benchmark_config=bm.BasicBenchmarkConfig(
             context_num=5,
             from_dialog_len=1,
             to_dialog_len=11,
@@ -265,7 +266,7 @@ def test_save_to_file(tmp_path: Path):
         "test",
         f"json://{tmp_path}/json.json",
         {
-            "config": bm.BenchmarkConfig(
+            "config": bm.BasicBenchmarkConfig(
                 context_num=5,
                 from_dialog_len=1,
                 to_dialog_len=11,
@@ -289,7 +290,6 @@ def test_save_to_file(tmp_path: Path):
         "benchmark_config",
         "uuid",
         "description",
-        "sizes",
         "success",
         "result",
         "average_results",
@@ -303,7 +303,7 @@ def test_save_to_file(tmp_path: Path):
         "test",
         "None",
         {
-            "config": bm.BenchmarkConfig(
+            "config": bm.BasicBenchmarkConfig(
                 context_num=5,
                 from_dialog_len=1,
                 to_dialog_len=11,

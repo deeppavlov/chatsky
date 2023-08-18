@@ -71,6 +71,10 @@ So, the second function is simpler to use, while the first function allows for m
 Both function use [BenchmarkConfig](
 ../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkConfig
 ) to configure benchmark behaviour.
+`BenchmarkConfig` is only an interface for benchmark configurations. Its most basic implementation is
+[BasicBenchmarkConfig](
+../apiref/dff.utils.db_benchmark.basic_config.rst#dff.utils.db_benchmark.basic_config.BasicBenchmarkConfig
+).
 
 It has several parameters:
 
@@ -98,7 +102,7 @@ for db_name, db_uri in storages.items():
         description="Benchmark for tutorial",
         db_uri=db_uri,
         benchmark_configs={
-            "simple_config": benchmark.BenchmarkConfig(
+            "simple_config": benchmark.BasicBenchmarkConfig(
                 context_num=50,
                 from_dialog_len=1,
                 to_dialog_len=5,
@@ -142,3 +146,40 @@ By default it prints the name and average metrics for each case.
 
 # %%
 benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
+
+# %% [markdown]
+"""
+## Additional information
+
+### Configuration presets
+
+The [dff.utils.db_benchmarks.basic_config](
+../apiref/dff.utils.db_benchmark.basic_config.rst
+) module also includes a dictionary containing configuration presets. Those cover various contexts and messages as well
+as some edge cases.
+
+To use configuration presets, simply pass them to benchmark functions.
+"""
+
+# %%
+print(benchmark.basic_configurations.keys())
+
+# benchmark.benchmark_all(
+#     ...,
+#     benchmark_configs=benchmark.basic_configurations
+# )
+
+# %% [markdown]
+"""
+### Custom configuration
+
+If the basic configuration is not enough for you, you can create your own.
+
+To do so, inherit from the [dff.utils.db_benchmark.benchmark.BenchmarkConfig](
+../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkConfig
+) class. You need to define three methods:
+
+- `get_context` -- method to get initial contexts.
+- `info` -- method for getting display info representing the configuration.
+- `context_updater` -- method for updating contexts.
+"""

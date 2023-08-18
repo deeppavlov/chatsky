@@ -9,3 +9,4 @@ from dff.utils.db_benchmark.benchmark import (
     benchmark_all,
 )
 from dff.utils.db_benchmark.report import report
+from dff.utils.db_benchmark.basic_config import BasicBenchmarkConfig, basic_configurations

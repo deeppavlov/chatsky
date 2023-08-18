@@ -6,9 +6,9 @@ This module contains config presets for benchmarks.
 from pathlib import Path
 from platform import system
 
-from dff.utils.db_benchmark.benchmark import (
-    BenchmarkConfig,
+from dff.utils.db_benchmark import (
     benchmark_all,
+    basic_configurations
 )
 
 
@@ -42,42 +42,5 @@ for db_name, db_uri in dbs.items():
         db_name,
         description="Basic configs",
         db_uri=db_uri,
-        benchmark_configs={
-            "large-misc": BenchmarkConfig(
-                from_dialog_len=1,
-                to_dialog_len=50,
-                message_dimensions=(3, 5, 6, 5, 3),
-                misc_dimensions=(2, 4, 3, 8, 100),
-            ),
-            "short-messages": BenchmarkConfig(
-                from_dialog_len=500,
-                to_dialog_len=550,
-                message_dimensions=(2, 30),
-                misc_dimensions=(0, 0),
-            ),
-            "default": BenchmarkConfig(),
-            "large-misc--long-dialog": BenchmarkConfig(
-                from_dialog_len=500,
-                to_dialog_len=550,
-                message_dimensions=(3, 5, 6, 5, 3),
-                misc_dimensions=(2, 4, 3, 8, 100),
-            ),
-            "very-long-dialog-len": BenchmarkConfig(
-                context_num=10,
-                from_dialog_len=10000,
-                to_dialog_len=10050,
-            ),
-            "very-long-message-len": BenchmarkConfig(
-                context_num=10,
-                from_dialog_len=1,
-                to_dialog_len=3,
-                message_dimensions=(10000, 1),
-            ),
-            "very-long-misc-len": BenchmarkConfig(
-                context_num=10,
-                from_dialog_len=1,
-                to_dialog_len=3,
-                misc_dimensions=(10000, 1),
-            ),
-        },
+        benchmark_configs=basic_configurations,
     )

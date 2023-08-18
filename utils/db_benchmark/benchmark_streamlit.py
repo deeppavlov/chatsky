@@ -275,7 +275,7 @@ with view_tab:
     benchmark_choice.markdown(selected_benchmark["description"])
 
     with st.expander("Benchmark stats"):
-        reproducible_stats = {
+        benchmark_stats = {
             stat: selected_benchmark[stat]
             for stat in (
                 "db_factory",
@@ -283,10 +283,7 @@ with view_tab:
             )
         }
 
-        size_stats = {stat: naturalsize(value, gnu=True) for stat, value in selected_benchmark["sizes"].items()}
-
-        st.json(reproducible_stats)
-        st.json(size_stats)
+        st.json(benchmark_stats)
 
     if not selected_benchmark["success"]:
         st.warning(selected_benchmark["result"])
