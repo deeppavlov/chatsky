@@ -4,8 +4,10 @@
 
 This tutorial shows how to benchmark context storages.
 
-For more info see [API reference](../apiref/dff.utils.db_benchmark.benchmark.rst).
+For more info see [API reference](%doclink(api,utils.db_benchmark.benchmark)).
 """
+
+# %pip install dff[benchmark,json,pickle,postgresql,mongodb,redis,mysql,sqlite,ydb]
 
 # %%
 from pathlib import Path
@@ -49,11 +51,11 @@ Benchmark results are saved to files.
 
 For that there exist two functions:
 [benchmark_all](
-../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.benchmark_all
+%doclink(api,utils.db_benchmark.benchmark,benchmark_all)
 )
 and
 [save_results_to_file](
-../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.save_results_to_file
+%doclink(api,utils.db_benchmark.benchmark,save_results_to_file)
 ).
 
 Note: context storages passed into these functions will be cleared.
@@ -62,19 +64,19 @@ Note: context storages passed into these functions will be cleared.
 
 The first one is a higher-level wrapper of the second one.
 The first function accepts [BenchmarkCases](
-../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkCase
+%doclink(api,utils.db_benchmark.benchmark,BenchmarkCase)
 ) which configure databases that are being benchmark and configurations of the benchmarks.
 The second function accepts only a single URI for the database and several benchmark configurations.
 So, the second function is simpler to use, while the first function allows for more configuration
 (e.g. having different databases benchmarked in a single file).
 
 Both function use [BenchmarkConfig](
-../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkConfig
+%doclink(api,utils.db_benchmark.benchmark,BenchmarkConfig)
 ) to configure benchmark behaviour.
 `BenchmarkConfig` is only an interface for benchmark configurations.
 Its most basic implementation is
 [BasicBenchmarkConfig](
-../apiref/dff.utils.db_benchmark.basic_config.rst#dff.utils.db_benchmark.basic_config.BasicBenchmarkConfig
+%doclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig)
 ).
 
 It has several parameters:
@@ -124,7 +126,7 @@ list(tutorial_dir.iterdir())
 ## Viewing benchmark results
 
 Now that the results are saved to a file you can either view them using [report](
-../apiref/dff.utils.db_benchmark.report.rst#dff.utils.db_benchmark.report.report
+%doclink(api,utils.db_benchmark.report,report)
 ) function or our streamlit app.
 
 The app can be found on [github](
@@ -151,7 +153,7 @@ benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "
 ### Configuration presets
 
 The [dff.utils.db_benchmarks.basic_config](
-../apiref/dff.utils.db_benchmark.basic_config.rst
+%doclink(api,utils.db_benchmark.basic_config)
 ) module also includes a dictionary containing configuration presets.
 Those cover various contexts and messages as well as some edge cases.
 
@@ -173,7 +175,7 @@ print(benchmark.basic_configurations.keys())
 If the basic configuration is not enough for you, you can create your own.
 
 To do so, inherit from the [dff.utils.db_benchmark.benchmark.BenchmarkConfig](
-../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkConfig
+%doclink(api,utils.db_benchmark.benchmark,BenchmarkConfig)
 ) class. You need to define three methods:
 
 - `get_context` -- method to get initial contexts.
