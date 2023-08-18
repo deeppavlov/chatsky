@@ -71,7 +71,8 @@ So, the second function is simpler to use, while the first function allows for m
 Both function use [BenchmarkConfig](
 ../apiref/dff.utils.db_benchmark.benchmark.rst#dff.utils.db_benchmark.benchmark.BenchmarkConfig
 ) to configure benchmark behaviour.
-`BenchmarkConfig` is only an interface for benchmark configurations. Its most basic implementation is
+`BenchmarkConfig` is only an interface for benchmark configurations.
+Its most basic implementation is
 [BasicBenchmarkConfig](
 ../apiref/dff.utils.db_benchmark.basic_config.rst#dff.utils.db_benchmark.basic_config.BasicBenchmarkConfig
 ).
@@ -155,8 +156,8 @@ benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "
 
 The [dff.utils.db_benchmarks.basic_config](
 ../apiref/dff.utils.db_benchmark.basic_config.rst
-) module also includes a dictionary containing configuration presets. Those cover various contexts and messages as well
-as some edge cases.
+) module also includes a dictionary containing configuration presets.
+Those cover various contexts and messages as well as some edge cases.
 
 To use configuration presets, simply pass them to benchmark functions.
 """

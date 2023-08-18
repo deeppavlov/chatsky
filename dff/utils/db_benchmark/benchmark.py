@@ -362,7 +362,13 @@ def save_results_to_file(
         case: BenchmarkCase
         for case in cases:
             cases.set_description(f"Benchmarking: {case.name}")
-            result["benchmarks"].append({**case.model_dump(exclude={"benchmark_config"}), "benchmark_config": case.benchmark_config.info(), **case.run()})
+            result["benchmarks"].append(
+                {
+                    **case.model_dump(exclude={"benchmark_config"}),
+                    "benchmark_config": case.benchmark_config.info(),
+                    **case.run(),
+                }
+            )
 
         json.dump(result, fd)
 

@@ -9,7 +9,7 @@ try:
     from jsonschema import validate
 
     import dff.utils.db_benchmark as bm
-    from dff.utils.db_benchmark.basic_config import get_context, get_dict, get_message
+    from dff.utils.db_benchmark.basic_config import get_context, get_dict
     from dff.context_storages import JSONContextStorage
     from dff.script import Context, Message
 except ImportError:
