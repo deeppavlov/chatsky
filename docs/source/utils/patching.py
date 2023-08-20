@@ -93,10 +93,13 @@ def depart_gallery_html_wrapper(func):
 if __name__ == "__main__":
     wrap_source_function(extract_summary, extract_summary_wrapper)
     wrap_source_function(depart_gallery_html, depart_gallery_html_wrapper)
-    patch_source_file(getsourcefile(sphinx_autodoc_typehints), """
+    patch_source_file(
+        getsourcefile(sphinx_autodoc_typehints),
+        """
 class LoggerDummy():
     def warning(self, message, *args):
         print(f"Warning suppressed: {message % args}")
 
 _LOGGER = LoggerDummy()
-""")
+""",
+    )
