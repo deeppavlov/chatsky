@@ -53,7 +53,7 @@ def dashboard_display_test(args: Namespace, base_url: str):
     dashboard_res = session.get(dashboard_url, headers=headers)
     assert dashboard_res.status_code == 200
     dashboard_json = dashboard_res.json()
-    assert dashboard_json["result"]["charts"] == [
+    assert sorted(dashboard_json["result"]["charts"]) == [
         "Flow visit ratio monitor",
         "Node Visits",
         "Node counts",
