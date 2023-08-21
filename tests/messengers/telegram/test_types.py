@@ -1,4 +1,3 @@
-import os
 import json
 from io import IOBase
 from pathlib import Path
@@ -10,9 +9,6 @@ try:
     import telethon  # noqa: F401
 except ImportError:
     pytest.skip(reason="`telegram` is not available", allow_module_level=True)
-
-if "TG_BOT_TOKEN" not in os.environ:
-    pytest.skip(reason="Telegram token is not available", allow_module_level=True)
 
 from pydantic import ValidationError
 from telebot import types

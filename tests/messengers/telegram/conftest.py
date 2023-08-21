@@ -40,7 +40,10 @@ def env_vars():
     env_variables = {"TG_BOT_TOKEN": None, "TG_API_ID": None, "TG_API_HASH": None, "TG_BOT_USERNAME": None}
 
     for arg in env_variables:
-        env_variables[arg] = os.environ[arg]
+        env_variables[arg] = os.getenv(arg)
+
+        if env_variables[arg] is None:
+            pytest.skip(f"`{arg}` is not set", allow_module_level=True)
 
     yield env_variables
 

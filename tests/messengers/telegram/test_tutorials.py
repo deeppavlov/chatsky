@@ -3,7 +3,6 @@ These tests check that pipelines defined in tutorials follow `happy_path` define
 """
 import importlib
 import logging
-import os
 
 import pytest
 
@@ -12,9 +11,6 @@ try:
     import telethon  # noqa: F401
 except ImportError:
     pytest.skip(reason="`telegram` is not available", allow_module_level=True)
-
-if "TG_BOT_TOKEN" not in os.environ:
-    pytest.skip(reason="Telegram token is not available", allow_module_level=True)
 
 from tests.test_utils import get_path_from_tests_to_current_dir
 from dff.utils.testing.common import check_happy_path
@@ -31,7 +27,8 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
         "3_buttons_with_callback",
     ],
 )
-def test_client_tutorials_without_telegram(tutorial_module_name):
+def test_client_tutorials_without_telegram(tutorial_module_name, env_vars):
+    assert "TG_BOT_TOKEN" in env_vars
     tutorial_module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
     pipeline = tutorial_module.pipeline
     happy_path = tutorial_module.happy_path
