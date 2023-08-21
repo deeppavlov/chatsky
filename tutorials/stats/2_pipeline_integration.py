@@ -3,9 +3,8 @@
 # 2. Pipeline Integration
 
 In the DFF ecosystem, extractor functions act as regular extra handlers (
-[see the pipeline module documentation](
-https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.pipeline.7_extra_handlers_basic.html
-)).
+[see the pipeline module documentation](%doclink(tutorial,pipeline.7_extra_handlers_basic
+))).
 Hence, you can decorate any part of your pipeline, including services,
 service groups and the pipeline as a whole, to obtain the statistics
 specific for that component. Some examples of this functionality
