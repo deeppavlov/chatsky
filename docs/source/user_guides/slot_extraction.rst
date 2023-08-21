@@ -25,6 +25,37 @@ from user utterances using a regular expression.
     ...
     email_slot = RegexpSlot(name="email", regexp=r"[a-z@\.A-Z]+")
 
+The slots can implement arbitrary logic including requests to external services.
+For instance, Deeppavlov library includes a number of models that may be of use for slot
+extraction task. In particular, we will demonstrate the use of the NER model.
+
+.. code-block:: shell
+
+    docker pull deeppavlov/deeppavlov:latest
+    docker run -d --name=ner \
+        -e CONFIG=ner_conll2003_bert \
+        -p 5000:5000 \
+        -v ~/.deeppavlov:/root/deeppavlov \
+        -v ~/.cache:/root/cache \
+        deeppavlov/deeppavlov:latest
+
+Now that you have a Deeppavlov docker image running on port 5000, you can take the following steps to take
+full advantage of its predictions.
+
+.. code-block:: python
+
+    import requests
+    from dff.script.slots import FunctionSlot
+    ...
+    # we assume that there is a 'NER' service running on port 5000 
+    def use_deeppavlov_ner(utterance: str) -> str:
+        ner_tuple = requests.post("http://localhost:5000/model", json={"x": [utterance]}).json()
+        if "B-PER" not in ner_tuple[1][0]:
+            return None
+        return ner_tuple[0][0][ner_tuple[1][0].index("B-PER")]
+
+    name_slot = FunctionSlot(name="first_name", func=use_deeppavlov_ner)
+
 Individual slots can be grouped allowing the developer to access them together
 as a namespace. This can be achieved using the `GroupSlot` component
 that can be initialized with a list of other slot instances as its children.
@@ -35,7 +66,7 @@ group slots in other group slots.
 
     from dff.script.slots import GroupSlot
     ...
-    profile_slot = slots.GroupSlot(name="profile", children=[email_slot])
+    profile_slot = slots.GroupSlot(name="profile", children=[name_slot, email_slot])
 
 When all slots have been defined, you can refer to them in your script.
 Slots can be extracted at the `PRE_TRANSITIONS_PROCESSING` stage, the appropriate
@@ -64,7 +95,7 @@ with slot values.
 
 .. code-block:: python
     
-    from dff.script.slost.processing import fill_template
+    from dff.script.slots.processing import fill_template
     ...
     PRE_RESPONSE_PROCESSING: {"fill_action": slot_procs.fill_template()}
     RESPONSE: Message(text="Here is a value of slot 1: {slot_1}")

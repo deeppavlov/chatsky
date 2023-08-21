@@ -34,3 +34,13 @@ services:
       # - 2135:2135
       - 2136:2136
     hostname: localhost
+  ner:
+    image: deeppavlov/deeppavlov:latest
+    environment:
+      - CONFIG=ner_conll2003_bert
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - ~/.deeppavlov:/root/.deeppavlov/
+      - ~/.cache:/root/.cache/
