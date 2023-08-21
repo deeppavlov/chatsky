@@ -96,16 +96,12 @@ def dashboard_display_test(args: Namespace, base_url: str):
                 **{
                     "outfile": "1.zip",
                     "db.driver": "clickhousedb+connect",
-                    "db.user": os.environ["CLICKHOUSE_USER"],
                     "db.host": "clickhouse",
                     "db.port": "8123",
                     "db.name": "test",
                     "db.table": "otel_logs",
-                    "username": os.environ["SUPERSET_USERNAME"],
-                    "password": os.environ["SUPERSET_PASSWORD"],
                     "host": "localhost",
                     "port": "8088",
-                    "db.password": os.environ["CLICKHOUSE_PASSWORD"],
                     "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),
@@ -114,6 +110,14 @@ def dashboard_display_test(args: Namespace, base_url: str):
 )
 @pytest.mark.docker
 def test_main(testing_cfg_dir, args):
+    args.__dict__.update(
+        {
+            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
+            "username": os.environ["SUPERSET_USERNAME"],
+            "password": os.environ["SUPERSET_PASSWORD"],
+            "db.user": os.environ["CLICKHOUSE_USER"],
+        }
+    )
     args.outfile = testing_cfg_dir + args.outfile
     main(args)
     dashboard_display_test(args, base_url=DEFAULT_SUPERSET_URL)
