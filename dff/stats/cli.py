@@ -13,7 +13,6 @@ import logging
 from urllib import parse
 from pathlib import Path
 from typing import Optional
-from zipfile import ZipFile, ZIP_DEFLATED
 
 try:
     from omegaconf import OmegaConf
@@ -141,24 +140,6 @@ The placeholder system makes queries database agnostic, required values are set 
 """
 
 
-def add_to_zip(zip_file: ZipFile, path: str, zippath: str):
-    """
-    Recursively add files from a folder to a zip-archive. Recreates the standard
-    library function of the same name.
-
-    :param zip_file: File descriptor for source zip file.
-    :param path: Path to target file or directory.
-    :param zippath: Path to output zip file.
-    """
-    if os.path.isfile(path):
-        zip_file.write(path, zippath, ZIP_DEFLATED)
-    elif os.path.isdir(path):
-        if zippath:
-            zip_file.write(path, zippath)
-        for nm in sorted(os.listdir(path)):
-            add_to_zip(zip_file, os.path.join(path, nm), os.path.join(zippath, nm))
-
-
 def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file: Optional[str] = None):
     """
     Import an Apache Superset dashboard to a local instance with specified arguments.
@@ -209,7 +190,7 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     cmd_conf = OmegaConf.from_cli()
     cli_conf = OmegaConf.merge(file_conf, cmd_conf)
 
-    if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
+    if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
         params = dict(
             table="${db.table}",
             lag="neighbor(label, -1)",
@@ -219,14 +200,7 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
             nodefield="JSON_VALUE(${db.table}.Body, '$.node')",
         )
     else:
-        params = dict(
-            table="${db.table}",
-            lag="LAG(label,1) OVER (ORDER BY context_id, request_id)",
-            texttype="TEXT",
-            lblfield="data -> 'label'",
-            flowfield="data -> 'flow'",
-            nodefield="data -> 'node'",
-        )
+        raise ValueError("The only supported database driver is 'clickhousedb+connect'.")
 
     conf = SQL_STATEMENT_MAPPING.copy()
     for key in conf.keys():
@@ -236,7 +210,7 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     resolve_conf = OmegaConf.create(
         {
             "database": {
-                "sqlalchemy_uri": "${db.type}://${db.user}:XXXXXXXXXX@${db.host}:${db.port}/${db.name}",
+                "sqlalchemy_uri": "${db.driver}://${db.user}:XXXXXXXXXX@${db.host}:${db.port}/${db.name}",
             },
             **conf,
         }
@@ -264,23 +238,13 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
         for filepath in dataset_dir.iterdir():
             file_config = OmegaConf.load(filepath)
             new_file_config = OmegaConf.merge(file_config, getattr(user_config, filepath.name))
-            if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
+            if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
                 for col in OmegaConf.select(new_file_config, "columns"):
                     col.type = TYPE_MAPPING_CH.get(col.type, col.type)
             OmegaConf.save(new_file_config, filepath)
 
         logger.info(f"Saving the archive to {outfile_name}.")
 
-        zip_args = {}
-        if sys.version >= "3.8":
-            zip_args["strict_timestamps"] = False
-
-        with ZipFile(outfile_name, "w", **zip_args) as zf:
-            zippath = os.path.basename(nested_temp_dir)
-            if not zippath:
-                zippath = os.path.basename(os.path.dirname(nested_temp_dir))
-            if zippath in ("", os.curdir, os.pardir):
-                zippath = ""
-            add_to_zip(zf, nested_temp_dir, zippath)
+        shutil.make_archive(outfile_name.rstrip(".zip"), format="zip", root_dir=temp_config_dir)
 
     return Path(outfile_name)

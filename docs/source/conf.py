@@ -97,7 +97,7 @@ html_logo = "_static/images/logo-simple.svg"
 nbsphinx_thumbnails = {
     "tutorials/*": "_static/images/logo-simple.svg",
 }
-
+nbsphinx_allow_errors = True
 html_context = {
     "github_user": "deeppavlov",
     "github_repo": "dialog_flow_framework",

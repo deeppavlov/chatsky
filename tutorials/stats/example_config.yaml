@@ -1,5 +1,5 @@
 db:
-  type: clickhousedb+connect
+  driver: clickhousedb+connect
   name: test
   user: username
   host: clickhouse

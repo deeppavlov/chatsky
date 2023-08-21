@@ -16,8 +16,7 @@ from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.instrumentation.utils import unwrap
 from opentelemetry.metrics import get_meter, get_meter_provider, Meter
 from opentelemetry.trace import get_tracer, get_tracer_provider, Tracer
-from opentelemetry._logs import get_logger, get_logger_provider, Logger
-from opentelemetry._logs import SeverityNumber
+from opentelemetry._logs import get_logger, get_logger_provider, Logger, SeverityNumber
 from opentelemetry.trace import SpanKind, Span
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk._logs import LoggerProvider, LogRecord
@@ -105,7 +104,7 @@ class OtelInstrumentor(BaseInstrumentor):
 
         :param url: Url of the running Otel Collector server. Due to limited support of HTTP protocol
             by the Opentelemetry Python extension, GRPC protocol is preferred.
-        :param insecure: ...
+        :param insecure: Whether non-SSL-protected connection is allowed. Defaults to True.
         :param timeout: Connection timeout in seconds, optional.
         """
         set_logger_destination(OTLPLogExporter(endpoint=url, insecure=insecure, timeout=timeout))
@@ -116,6 +115,9 @@ class OtelInstrumentor(BaseInstrumentor):
     def instrumentation_dependencies(self) -> Collection[str]:
         """
         :meta private:
+
+        Required libraries. Implements the Python Opentelemetry instrumentor interface.
+
         """
         return INSTRUMENTS
 

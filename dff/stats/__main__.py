@@ -59,10 +59,10 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     )
     parser.add_argument("file", type=str)
     parser.add_argument(
-        "-dT",
-        "--db.type",
+        "-dD",
+        "--db.driver",
         choices=["clickhousedb+connect"],
-        help="DBMS connection type.",
+        help="DBMS driver.",
         default="clickhousedb+connect",
     )
     parser.add_argument("-dU", "--db.user", help="Database user.")

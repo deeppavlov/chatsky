@@ -24,15 +24,15 @@ def dashboard_display_test(args: Namespace, base_url: str):
     charts_url = parse.urljoin(base_url, "/api/v1/chart")
     datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
     database_conn_url = parse.urljoin(base_url, "/api/v1/database/test_connection")
-    db_type, db_user, db_password, db_host, db_port, db_name = (
-        getattr(args, "db.type"),
+    db_driver, db_user, db_password, db_host, db_port, db_name = (
+        getattr(args, "db.driver"),
         getattr(args, "db.user"),
         getattr(args, "db.password"),
         getattr(args, "db.host"),
         getattr(args, "db.port"),
         getattr(args, "db.name"),
     )
-    sqla_url = f"{db_type}://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    sqla_url = f"{db_driver}://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
     database_data = {
         "configuration_method": "sqlalchemy_form",
         "database_name": "dff_database",
@@ -95,17 +95,17 @@ def dashboard_display_test(args: Namespace, base_url: str):
             Namespace(
                 **{
                     "outfile": "1.zip",
-                    "db.type": "clickhousedb+connect",
-                    "db.user": os.getenv("CLICKHOUSE_USER"),
+                    "db.driver": "clickhousedb+connect",
+                    "db.user": os.environ["CLICKHOUSE_USER"],
                     "db.host": "clickhouse",
                     "db.port": "8123",
                     "db.name": "test",
                     "db.table": "otel_logs",
-                    "username": os.getenv("SUPERSET_USERNAME"),
-                    "password": os.getenv("SUPERSET_PASSWORD"),
+                    "username": os.environ["SUPERSET_USERNAME"],
+                    "password": os.environ["SUPERSET_PASSWORD"],
                     "host": "localhost",
                     "port": "8088",
-                    "db.password": os.getenv("CLICKHOUSE_PASSWORD"),
+                    "db.password": os.environ["CLICKHOUSE_PASSWORD"],
                     "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),
@@ -125,14 +125,14 @@ def test_main(testing_cfg_dir, args):
     database = omegaconf.OmegaConf.load(os.path.join(testing_cfg_dir, "superset_dashboard/databases/dff_database.yaml"))
     sqlalchemy_uri = omegaconf.OmegaConf.select(database, "sqlalchemy_uri")
     arg_vars = vars(args)
-    _type, user, host, port, name = (
-        arg_vars["db.type"],
+    driver, user, host, port, name = (
+        arg_vars["db.driver"],
         arg_vars["db.user"],
         arg_vars["db.host"],
         arg_vars["db.port"],
         arg_vars["db.name"],
     )
-    assert sqlalchemy_uri == f"{_type}://{user}:XXXXXXXXXX@{host}:{port}/{name}"
+    assert sqlalchemy_uri == f"{driver}://{user}:XXXXXXXXXX@{host}:{port}/{name}"
 
 
 @pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])
