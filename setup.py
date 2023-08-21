@@ -136,7 +136,7 @@ doc = merge_req_lists(
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon==1.0.1",
         "sphinx-copybutton==0.5.2",
-        "sphinx-gallery==0.13.0",
+        "sphinx-gallery==0.14.0",
         "sphinx-autodoc-typehints==1.24.0",
         "nbsphinx==0.9.2",
         "jupytext==1.15.0",
