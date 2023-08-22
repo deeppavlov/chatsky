@@ -23,6 +23,14 @@ from dff.messengers.telegram.message import _ClickButton
 from dff.utils.testing.common import is_interactive_mode
 
 
+try:
+    import pytest
+    if "TG_BOT_TOKEN" not in os.environ:
+        pytest.skip("`telegram` token not available.")
+except ImportError:
+    pass
+
+
 # %% [markdown]
 """
 If you want to send an inline keyboard to your Telegram chat,

@@ -18,6 +18,14 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from dff.utils.testing.common import is_interactive_mode
 
 
+try:
+    import pytest
+    if "TG_BOT_TOKEN" not in os.environ:
+        pytest.skip("`telegram` token not available.")
+except ImportError:
+    pass
+
+
 # %% [markdown]
 """
 To set up a webhook, you need a messenger and a web application instance.

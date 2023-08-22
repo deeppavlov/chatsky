@@ -18,6 +18,14 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from telebot.util import update_types
 
 
+try:
+    import pytest
+    if "TG_BOT_TOKEN" not in os.environ:
+        pytest.skip("`telegram` token not available.")
+except ImportError:
+    pass
+
+
 # %% [markdown]
 """
 `PollingTelegramInterface` can be configured with the same parameters
