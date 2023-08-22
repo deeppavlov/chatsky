@@ -4,6 +4,8 @@
 
 """
 
+# %pip install dff
+
 # %%
 from dff.script.conditions import true
 from dff.script import Context, TRANSITIONS, RESPONSE, Message

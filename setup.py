@@ -101,39 +101,44 @@ test_requirements = merge_req_lists(
         "pytest==7.4.0",
         "pytest-cov==4.1.0",
         "pytest-asyncio==0.21.0",
+        "pytest_virtualenv==1.7.0",
         "flake8==6.1.0",
         "click==8.1.3",
         "black==23.7.0",
         "isort==5.12.0",
-        "flask[async]==2.3.2",
-        "psutil==5.9.5",
-        "telethon==1.29.1",
-        "fastapi==0.101.0",
-        "uvicorn==0.23.1",
-        "websockets==11.0.2",
-        "locust==2.16.1",
-        "streamlit==1.25.0",
-        "streamlit-chat==0.1.1",
     ],
     requests_requirements,
 )
 
+tutorial_dependencies = [
+    "flask[async]==2.3.2",
+    "psutil==5.9.5",
+    "telethon==1.29.1",
+    "fastapi==0.101.0",
+    "uvicorn==0.23.1",
+    "websockets==11.0.2",
+    "locust==2.16.1",
+    "streamlit==1.25.0",
+    "streamlit-chat==0.1.1",
+]
+
 tests_full = merge_req_lists(
     full,
     test_requirements,
+    tutorial_dependencies,
 )
 
 doc = merge_req_lists(
     [
-        "sphinx==7.1.0",
+        "sphinx==7.2.2",
         "pydata-sphinx-theme==0.13.3",
         "sphinxcontrib-apidoc==0.3.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon==1.0.1",
         "sphinx-copybutton==0.5.2",
-        "sphinx-gallery==0.13.0",
-        "sphinx-autodoc-typehints==1.14.1",
+        "sphinx-gallery==0.14.0",
+        "sphinx-autodoc-typehints==1.24.0",
         "nbsphinx==0.9.2",
         "jupytext==1.15.0",
         "jupyter==1.0.0",
@@ -148,7 +153,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy==1.4.1",
+    "mypy==1.5.0",
 ]
 
 devel_full = merge_req_lists(
@@ -172,7 +177,6 @@ EXTRA_DEPENDENCIES = {
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
-    "tutorials": tests_full,  # dependencies for running tutorials (all options above)
     "devel": devel,  # dependencies for development
     "doc": doc,  # dependencies for documentation
     "devel_full": devel_full,  # full dependencies for development (all options above)

@@ -6,6 +6,8 @@ This tutorial shows the global setting of transitions.
 First of all, let's do all the necessary imports from DFF.
 """
 
+# %pip install dff
+
 # %%
 import re
 

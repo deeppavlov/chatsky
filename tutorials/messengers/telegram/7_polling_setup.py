@@ -6,6 +6,7 @@ The following tutorial shows how to configure `PollingTelegramInterface`.
 
 """
 
+# %pip install dff[telegram]
 
 # %%
 import os
