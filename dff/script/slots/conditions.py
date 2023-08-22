@@ -2,6 +2,10 @@
 Conditions
 ---------------------------
 Functions from this module allow you to condition graph transitions depending on slot values.
+Combined with operators available in :py:mod:`~dff.script.conditions.std_conditions`,
+like :py:func:`~dff.script.conditions.std_conditions.negation`,
+they provide a feasible way of iterating the script graph depending on the status of slot values.
+
 """
 from dff.script import Context
 from dff.pipeline import Pipeline, StartConditionCheckerFunction, all_condition, any_condition

@@ -9,7 +9,7 @@ import re
 from abc import ABC, abstractmethod
 from copy import copy
 from collections.abc import Iterable
-from typing import Callable, Any, Tuple, Dict, Union, overload, Optional
+from typing import Callable, Any, Tuple, Dict, Union, Optional
 
 from pydantic import Field, BaseModel, field_validator
 
@@ -150,15 +150,7 @@ class RootSlot(_GroupSlot):
                 remove_nodes.update(child_remove_nodes)
         return add_nodes, remove_nodes
 
-    @overload
-    def add_slots(self, slots: BaseSlot) -> None:
-        ...
-
-    @overload
-    def add_slots(self, slots: Iterable) -> None:
-        ...
-
-    def add_slots(self, slots):
+    def add_slots(self, slots: Union[BaseSlot, Iterable[BaseSlot]]):
         if isinstance(slots, BaseSlot):
             add_nodes, _ = self.flatten_slot_tree(slots)
             self.children.update(add_nodes)

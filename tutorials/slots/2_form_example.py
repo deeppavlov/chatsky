@@ -6,6 +6,8 @@ The following tutorial shows the way you can utilize the `FormPolicy` class
 to enhance the dialog with a greedy form-filling strategy.
 """
 
+# %pip install dff
+
 # %%
 from dff.script import labels as lbl
 from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Message

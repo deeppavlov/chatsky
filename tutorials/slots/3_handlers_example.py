@@ -7,6 +7,8 @@ of custom handler functions that can be used to produce
 conditions or responses based on the current slot values.
 """
 
+# %pip install dff
+
 # %%
 from dff.script import conditions as cnd
 from dff.script import (

@@ -6,6 +6,8 @@ The following tutorial shows basic usage of slots extraction
 module packaged with `dff.script`.
 """
 
+# %pip install dff
+
 # %%
 from dff.script import conditions as cnd
 from dff.script import (
