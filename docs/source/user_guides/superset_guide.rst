@@ -55,7 +55,7 @@ You can set most of the configuration options using a YAML file.
 .. code-block:: yaml
     :linenos:
 
-    # tutorials/stats/config.yaml
+    # tutorials/stats/example_config.yaml
     db:
         driver: clickhousedb+connect
         name: test
@@ -68,7 +68,7 @@ The file can then be used to parametrize the configuration script.
 
 .. code-block:: shell
 
-    dff.stats tutorials/stats/config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
+    dff.stats tutorials/stats/example_config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
 
 .. warning::
     
@@ -77,6 +77,12 @@ The file can then be used to parametrize the configuration script.
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
 shipped with DFF, make sure that your access rights are sufficient to edit the workspace.
+
+.. warning::
+
+    Currently, the Superset HTTP API does not completely override existing charts and data sources during import,
+    but merges their configuration instead. Thus, if you need to completely overwrite the settings for some objects, you need to delete them either
+    through the Superset API or through the GUI.
 
 Using Superset
 ~~~~~~~~~~~~~~

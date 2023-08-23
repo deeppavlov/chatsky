@@ -50,6 +50,8 @@ services:
       - '8123:8123'
       - '8443:8443'
       - '9000:9000'
+    volumes:
+      - ch-data:/var/lib/clickhouse/
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     container_name: otel-col
@@ -61,3 +63,6 @@ services:
     ports:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
+volumes:
+  ch-data:
+    name: "ch-data"

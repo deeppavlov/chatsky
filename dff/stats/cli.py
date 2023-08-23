@@ -245,6 +245,6 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
 
         logger.info(f"Saving the archive to {outfile_name}.")
 
-        shutil.make_archive(outfile_name.rstrip(".zip"), format="zip", root_dir=temp_config_dir)
+        shutil.make_archive(outfile_name[: outfile_name.rindex(".zip")], format="zip", root_dir=temp_config_dir)
 
     return Path(outfile_name)

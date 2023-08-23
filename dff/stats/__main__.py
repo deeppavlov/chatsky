@@ -20,7 +20,7 @@ Examples
             --db.host=clickhouse \\
             --db.port=8123 \\
             --db.name=test \\
-            --db.table=dff_stats \\
+            --db.table=otel_logs \\
             --outfile=config_artifact.zip
 
 """
@@ -52,7 +52,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
             --db.host=clickhouse \\
             --db.port=8123 \\
             --db.name=test \\
-            --db.table=dff_stats \\
+            --db.table=otel_logs \\
             --outfile=config_artifact.zip
 
         Use the `--help` flag to get more information."""
