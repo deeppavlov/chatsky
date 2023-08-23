@@ -30,6 +30,7 @@ Collection procedure
     # clone the original repository to access the docker-compose file
     git clone https://github.com/deeppavlov/dialog_flow_framework.git
     # launch the required services
+    cd dialog_flow_framework
     docker-compose up otelcol clickhouse dashboard
 
 **Collecting data**
@@ -54,9 +55,9 @@ You can set most of the configuration options using a YAML file.
 .. code-block:: yaml
     :linenos:
 
-    # config.yaml
+    # tutorials/stats/config.yaml
     db:
-        type: clickhousedb+connect
+        driver: clickhousedb+connect
         name: test
         user: username
         host: clickhouse
