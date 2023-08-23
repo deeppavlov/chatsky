@@ -6,7 +6,7 @@ on:
       - 'dev'
     paths:
       - 'dff/utils/docker/dockerfile_stats'
-      - 'dff/utils/docker/entrypoint.sh'
+      - 'dff/utils/docker/entrypoint_stats.sh'
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}

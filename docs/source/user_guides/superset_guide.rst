@@ -64,11 +64,14 @@ You can set most of the configuration options using a YAML file.
         table: otel_logs
 
 The file can then be used to parametrize the configuration script.
-Password values will be prompted once you run the following command:
 
 .. code-block:: shell
 
-    dff.stats tutorials/stats/config.yaml -P -dP -U superset --outfile=config_artifact.zip
+    dff.stats tutorials/stats/config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
+
+.. warning::
+    
+    Here we passed passwords via CLI, which is not recommended. For enhanced security, call the command above omitting the passwords (`dff.stats -P -dP -U superset ...`) and you will be prompted to enter them interactively.
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
@@ -77,7 +80,7 @@ shipped with DFF, make sure that your access rights are sufficient to edit the w
 Using Superset
 ~~~~~~~~~~~~~~
 
-| In order to view the imported dashboard, log into `Superset <http://localhost:8088/>`_ using your username and password.
+| In order to view the imported dashboard, log into `Superset <http://localhost:8088/>`_ using your username and password (which are both `superset` by default and can be configured via `.env_file`).
 | The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
 | The dashboard has four sections, each one of them containing different kind of data.
 
