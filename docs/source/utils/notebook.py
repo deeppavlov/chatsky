@@ -77,17 +77,31 @@ class DocumentationLink(ReplacePattern):
     USAGE EXAMPLES
     --------------
 
-    [Node](%doclink(api,script.core.script)) -> [Node](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/dff/script/core/script#Node)
+    [Node](%doclink(api,script.core.script)) -> [Node](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/dff/script/core/script#Node
+    )
 
-    [Node](%doclink(api,script.core.script,Node)) -> [Node](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat)
+    [Node](%doclink(api,script.core.script,Node)) -> [Node](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat
+    )
 
-    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) -> [API-configuration](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat#API-configuration)
+    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) -> [API-configuration](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat#API-configuration
+    )
 
-    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration)) -> [API-configuration](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat#API-configuration)
+    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration))
+        -> [API-configuration](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat#API-configuration
+    )
 
-    [basic_conceptions](%doclink(guide,basic_conceptions)) -> [basic_conceptions](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions)
+    [basic_conceptions](%doclink(guide,basic_conceptions)) -> [basic_conceptions](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions
+    )
 
-    [example-conversational-chat-bot](%doclink(guide,basic_conceptions,example-conversational-chat-bot)) -> [example-conversational-chat-bot](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions#example-conversational-chat-bot)
+    [example-conversational-chat-bot](%doclink(guide,basic_conceptions,example-conversational-chat-bot))
+        -> [example-conversational-chat-bot](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions#example-conversational-chat-bot
+    )
 
     """
 
@@ -157,15 +171,25 @@ class MarkdownDocumentationLink(DocumentationLink):
     USAGE EXAMPLES
     --------------
 
-    %mddoclink(api,script.core.script,Node) -> [Node](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/dff/script/core/script#Node)
+    %mddoclink(api,script.core.script,Node) -> [Node](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/dff/script/core/script#Node
+    )
 
-    %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat) -> [4_streamlit_chat](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat)
+    %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat) -> [4_streamlit_chat](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat
+    )
 
-    %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration) -> [API-configuration](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat#API-configuration)
+    %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration) -> [API-configuration](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/messengers/web_api_interface/4_streamlit_chat#API-configuration
+    )
 
-    %mddoclink(guide,basic_conceptions) -> [basic_conceptions](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions)
+    %mddoclink(guide,basic_conceptions) -> [basic_conceptions](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions
+    )
 
-    %mddoclink(guide,basic_conceptions,example-conversational-chat-bot) -> [example-conversational-chat-bot](http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions#example-conversational-chat-bot)
+    %mddoclink(guide,basic_conceptions,example-conversational-chat-bot) -> [example-conversational-chat-bot](
+        http://github.com/deeppavlov/dialog_flow_framework/tree/dev/docs/sources/user_guides/basic_conceptions#example-conversational-chat-bot
+    )
 
     """
 
