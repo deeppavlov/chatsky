@@ -17,6 +17,11 @@ If the file does not exist there, it will be created.
 The file is used to store paths to benchmark result files.
 
 Benchmark result files added via this module are not changed (only read).
+
+You can install all the dependencies of this module with
+```
+pip install dff[benchmark]
+```
 """
 import json
 from pathlib import Path
