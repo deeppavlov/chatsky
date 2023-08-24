@@ -195,26 +195,7 @@ with add_tab:
 
     st.divider()
 
-    st.info("Below you can add your benchmark files (either from local files or via uploading).")
-
-    add_container, add_from_dir_container = st.columns(2)
-
-    add_container.text_input(label="Benchmark set file", key="add_benchmark_file")
-
-    def add_benchmark():
-        _add_benchmark(st.session_state["add_benchmark_file"], add_container)
-
-    add_container.button("Add one file from file", on_click=add_benchmark)
-
-    add_from_dir_container.text_input(label="Directory with benchmark files", key="add_from_dir")
-
-    def add_from_dir():
-        dir_path = Path(st.session_state["add_from_dir"])
-        if dir_path.is_dir():
-            for file in dir_path.iterdir():
-                _add_benchmark(file, add_from_dir_container)
-
-    add_from_dir_container.button("Add all files from directory", on_click=add_from_dir)
+    st.info("Below you can upload your benchmark files.")
 
     upload_container = st.container()
 
