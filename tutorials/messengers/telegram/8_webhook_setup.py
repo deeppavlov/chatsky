@@ -19,13 +19,9 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from dff.utils.testing.common import is_interactive_mode
 
 
-try:
-    import pytest
-
-    if "TG_BOT_TOKEN" not in os.environ:
-        pytest.skip("`telegram` token not available.", allow_module_level=True)
-except ImportError:
-    pass
+if "TG_BOT_TOKEN" not in os.environ:
+    print("`telegram` token not available.")
+    exit(0)
 
 
 # %% [markdown]
