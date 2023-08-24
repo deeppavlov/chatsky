@@ -7,7 +7,7 @@ This is a tutorial on using MongoDB.
 See %mddoclink(api,context_storages.mongo,MongoContextStorage) class
 for storing you users' contexts in Mongo database.
 
-The DFF uses [motor](https://motor.readthedocs.io/en/stable/)
+DFF uses [motor](https://motor.readthedocs.io/en/stable/)
 library for asynchronous access to MongoDB.
 """
 

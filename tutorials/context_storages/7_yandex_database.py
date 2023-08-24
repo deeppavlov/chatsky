@@ -7,7 +7,7 @@ This is a tutorial on how to use Yandex DataBase.
 See %mddoclink(api,context_storages.ydb,YDBContextStorage) class
 for storing you users' contexts in Yandex database.
 
-The DFF uses [ydb.aio](https://ydb.tech/en/docs/)
+DFF uses [ydb.aio](https://ydb.tech/en/docs/)
 library for asynchronous access to Yandex DB.
 """
 

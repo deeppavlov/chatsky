@@ -7,7 +7,7 @@ This is a tutorial on using MySQL.
 See %mddoclink(api,context_storages.sql,SQLContextStorage) class
 for storing you users' contexts in SQL databases.
 
-The DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
 and [asyncmy](https://github.com/long2ice/asyncmy)
 libraries for asynchronous access to MySQL DB.
 """

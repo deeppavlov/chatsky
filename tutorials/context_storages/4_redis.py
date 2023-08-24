@@ -7,7 +7,7 @@ This is a tutorial on using Redis.
 See %mddoclink(api,context_storages.redis,RedisContextStorage) class
 for storing you users' contexts in Redis database.
 
-The DFF uses [redis.asyncio](https://redis.readthedocs.io/en/latest/)
+DFF uses [redis.asyncio](https://redis.readthedocs.io/en/latest/)
 library for asynchronous access to Redis DB.
 """
 

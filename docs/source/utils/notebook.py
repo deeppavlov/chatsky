@@ -59,7 +59,7 @@ class InstallationCell(ReplacePattern):
         return f"""
 # %%
 # installing dependencies
-!pip install -q {matchobj.group(1)}
+%pip install -q {matchobj.group(1)}
 """
 
 
@@ -77,7 +77,11 @@ class DocumentationLink(ReplacePattern):
     USAGE EXAMPLES
     --------------
 
-    [Node](%doclink(api,script.core.script)) -> [Node](
+    [index_pipeline](%doclink(api,index_pipeline)) -> [index_pipeline](
+        ../apiref/index_pipeline.rst
+    )
+
+    [script](%doclink(api,script.core.script)) -> [script](
         ../apiref/dff.script.core.script.rst
     )
 
@@ -85,7 +89,7 @@ class DocumentationLink(ReplacePattern):
         ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
     )
 
-    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) -> [API-configuration](
+    [4_streamlit_chat](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) -> [4_streamlit_chat](
         ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py
     )
 
@@ -166,10 +170,14 @@ class MarkdownDocumentationLink(DocumentationLink):
 
     So, `%mddoclink(arg1,arg2,arg3)` will be replaced with `[text](link_to_doc_page(arg1, arg2, arg3))`, and
     `%doclink(arg1,arg2)` will be replaced with `[text](link_to_doc_page(arg1, arg2))` with `text` being the last
-    path segment of `arg2` or `arg3` (if present).
+    path segment of the last argument.
 
     USAGE EXAMPLES
     --------------
+
+    %mddoclink(api,index_pipeline) -> [index_pipeline](
+        ../apiref/index_pipeline.rst
+    )
 
     %mddoclink(api,script.core.script,Node) -> [Node](
         ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
