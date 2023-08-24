@@ -20,6 +20,7 @@ from telebot.util import update_types
 
 try:
     import pytest
+
     if "TG_BOT_TOKEN" not in os.environ:
         pytest.skip("`telegram` token not available.")
 except ImportError:

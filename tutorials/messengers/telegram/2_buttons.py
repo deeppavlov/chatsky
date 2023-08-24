@@ -24,6 +24,7 @@ from dff.utils.testing.common import is_interactive_mode
 
 try:
     import pytest
+
     if "TG_BOT_TOKEN" not in os.environ:
         pytest.skip("`telegram` token not available.")
 except ImportError:
