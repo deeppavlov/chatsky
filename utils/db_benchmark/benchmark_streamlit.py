@@ -157,6 +157,7 @@ with add_tab:
         for file in files_to_delete:
             st.session_state["benchmark_files"].remove(file)
             del st.session_state["benchmarks"][file]
+            Path(file).unlink()
             delete_container.text(f"Deleted {file}")
 
         with open(BENCHMARK_RESULTS_FILES, "w", encoding="utf-8") as fd:
