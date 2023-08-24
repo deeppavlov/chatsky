@@ -129,15 +129,15 @@ tests_full = merge_req_lists(
 
 doc = merge_req_lists(
     [
-        "sphinx==7.1.0",
+        "sphinx==7.2.2",
         "pydata-sphinx-theme==0.13.3",
         "sphinxcontrib-apidoc==0.3.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon==1.0.1",
         "sphinx-copybutton==0.5.2",
-        "sphinx-gallery==0.13.0",
-        "sphinx-autodoc-typehints==1.14.1",
+        "sphinx-gallery==0.14.0",
+        "sphinx-autodoc-typehints==1.24.0",
         "nbsphinx==0.9.2",
         "jupytext==1.15.0",
         "jupyter==1.0.0",
