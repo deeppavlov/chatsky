@@ -51,6 +51,7 @@ In order to display the Superset dashboard, you should update the default config
 The configuration can be optionally saved as a zip archive for inspection / debug.
 
 You can set most of the configuration options using a YAML file.
+The default example file can be found in the `tutorials/stats` directory:
 
 .. code-block:: yaml
     :linenos:
@@ -77,12 +78,6 @@ The file can then be used to parametrize the configuration script.
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
 shipped with DFF, make sure that your access rights are sufficient to edit the workspace.
-
-.. warning::
-
-    Currently, the Superset HTTP API does not completely override existing charts and data sources during import,
-    but merges their configuration instead. Thus, if you need to completely overwrite the settings for some objects, you need to delete them either
-    through the Superset API or through the GUI.
 
 Using Superset
 ~~~~~~~~~~~~~~

@@ -106,7 +106,7 @@ def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088
     Utility function for authorized interaction with Superset HTTP API.
 
     :param args: Command line arguments including Superset username and Superset password.
-    :param base_url: Base superset URL.
+    :param base_url: Base Superset URL.
 
     :return: Authorized session - authorization headers tuple.
     """
@@ -133,6 +133,40 @@ def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088
         "X-CSRFToken": csrf_token,
     }
     return session, headers
+
+
+def drop_superset_assets(session: requests.Session, headers: dict, base_url: str):
+    """
+    Drop the existing assets from the Superset dashboard.
+
+    :param session: Authorized Superset session.
+    :param headers: Superset session headers.
+    :param base_url: Base Superset URL.
+    """
+    dashboard_url = parse.urljoin(base_url, "/api/v1/dashboard/")
+    charts_url = parse.urljoin(base_url, "/api/v1/chart")
+    datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
+    database_url = parse.urljoin(base_url, "/api/v1/database/")
+
+    dashboard_res = session.get(dashboard_url, headers=headers)
+    dashboard_json = dashboard_res.json()
+    if dashboard_json["count"] > 0:
+        requests.delete(dashboard_url, headers=headers)
+
+    charts_result = session.get(charts_url, headers=headers)
+    charts_json = charts_result.json()
+    if charts_json["count"] > 0:
+        requests.delete(charts_url, headers=headers)
+
+    datasets_result = session.get(datasets_url, headers=headers)
+    datasets_json = datasets_result.json()
+    if datasets_json["count"] > 0:
+        requests.delete(datasets_url, headers=headers)
+
+    database_res = session.get(database_url, headers=headers)
+    database_json = database_res.json()
+    if database_json["count"] > 0:
+        requests.delete(database_url, headers=headers)
 
 
 class PasswordAction(Action):

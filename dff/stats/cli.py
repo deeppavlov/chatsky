@@ -16,7 +16,7 @@ from typing import Optional
 
 try:
     from omegaconf import OmegaConf
-    from .utils import get_superset_session
+    from .utils import get_superset_session, drop_superset_assets
 except ImportError:
     raise ImportError("Some packages are not found. Run `pip install dff[stats]`")
 
@@ -156,6 +156,7 @@ def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file:
     db_password = getattr(parsed_args, "db.password")
 
     session, headers = get_superset_session(parsed_args, superset_url)
+    drop_superset_assets(session, headers, superset_url)
     import_dashboard_url = parse.urljoin(superset_url, "/api/v1/dashboard/import/")
     # upload files
     with open(zip_file, "rb") as f:
