@@ -90,8 +90,8 @@ This allows you to set the contexts you want your database to be benchmarked wit
 
 ### File structure
 
-The files are saved according to the schema which can be found on [github](
-https://github.com/deeppavlov/dialog_flow_framework/blob/dev/utils/db_benchmark/benchmark_schema.json
+The files are saved according to [the schema](
+../_misc/benchmark_schema.json
 ).
 """
 
@@ -127,10 +127,8 @@ list(tutorial_dir.iterdir())
 
 Now that the results are saved to a file you can either view them using [report](
 %doclink(api,utils.db_benchmark.report,report)
-) function or our streamlit app.
-
-The app can be found on [github](
-https://github.com/deeppavlov/dialog_flow_framework/blob/dev/utils/db_benchmark/benchmark_streamlit.py
+) function or [our streamlit app](
+../_misc/benchmark_streamlit.py
 ).
 """
 

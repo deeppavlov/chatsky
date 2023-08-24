@@ -7,6 +7,7 @@ import re
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
+from utils.link_misc_files import link_misc_files  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
@@ -62,7 +63,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["*.py", "utils/*.py", "**/_*.py"]
+exclude_patterns = ["*.py", "utils/*.py", "**/_*.py", "_misc/*.py"]
 
 html_short_title = "None"
 
@@ -149,6 +150,12 @@ autodoc_default_options = {"members": True, "undoc-members": False, "private-mem
 
 
 def setup(_):
+    link_misc_files(
+        [
+            "utils/db_benchmark/benchmark_schema.json",
+            "utils/db_benchmark/benchmark_streamlit.py",
+        ]
+    )
     generate_tutorial_links_for_notebook_creation(
         [
             ("tutorials.context_storages", "Context Storages"),
