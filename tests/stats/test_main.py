@@ -60,7 +60,6 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
         "Node visits [cloud]",
         "Node visits [ratio]",
         "Node visits [sunburst]",
-        "Service load [max dialogue length]",
         "Service load [users]",
         "Table",
         "Terminal labels",

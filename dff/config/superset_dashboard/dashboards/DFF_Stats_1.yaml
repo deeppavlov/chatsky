@@ -118,22 +118,6 @@ position:
     - TAB-Gw0Ffh1lG
     - ROW-ZcN9G9RL5
     type: CHART
-  CHART-explore-17-1:
-    children: []
-    id: CHART-explore-17-1
-    meta:
-      chartId: 8
-      height: 50
-      sliceName: Service load [max dialogue length]
-      uuid: 276c3aa7-89bc-49ff-91b6-6232ae35c854
-      width: 12
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - TABS-Xoi5oUBxZI
-    - TAB-6zE8noCIsx
-    - ROW-8mDf9VqR4
-    type: CHART
   CHART-explore-20-1:
     children: []
     id: CHART-explore-20-1
@@ -299,18 +283,6 @@ position:
     - TABS-Xoi5oUBxZI
     - TAB-6zE8noCIsx
     type: ROW
-  ROW-8mDf9VqR4:
-    children:
-    - CHART-explore-17-1
-    id: ROW-8mDf9VqR4
-    meta:
-      background: BACKGROUND_TRANSPARENT
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - TABS-Xoi5oUBxZI
-    - TAB-6zE8noCIsx
-    type: ROW
   ROW-Ae7v1prsp2:
     children:
     - CHART-mYC2udeF3a
@@ -450,7 +422,6 @@ position:
   TAB-6zE8noCIsx:
     children:
     - ROW-Ae7v1prsp2
-    - ROW-8mDf9VqR4
     - ROW-ksepbeQu6
     - ROW-ZTVWOu2o0
     - ROW-7g6_n72hZ
