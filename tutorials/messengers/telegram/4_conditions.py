@@ -27,7 +27,7 @@ try:
     import pytest
 
     if "TG_BOT_TOKEN" not in os.environ:
-        pytest.skip("`telegram` token not available.")
+        pytest.skip("`telegram` token not available.", allow_module_level=True)
 except ImportError:
     pass
 
