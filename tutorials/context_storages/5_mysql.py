@@ -5,6 +5,7 @@
 This is a tutorial on using MySQL.
 """
 
+# %pip install dff[mysql]
 
 # %%
 import os

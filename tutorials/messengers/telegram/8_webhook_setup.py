@@ -6,6 +6,7 @@ The following tutorial shows how to use `CallbackTelegramInterface`
 that makes your bot accessible through a public webhook.
 """
 
+# %pip install dff[telegram] flask
 
 # %%
 import os

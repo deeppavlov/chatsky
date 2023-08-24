@@ -5,6 +5,7 @@
 This is a tutorial on using MongoDB.
 """
 
+# %pip install dff[mongodb]
 
 # %%
 import os

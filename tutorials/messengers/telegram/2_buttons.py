@@ -6,6 +6,8 @@
 This tutorial shows how to display and hide a basic keyboard in Telegram.
 """
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

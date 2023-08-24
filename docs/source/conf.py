@@ -5,7 +5,7 @@ import re
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
+from utils.notebook import py_percent_to_notebook  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
@@ -87,7 +87,7 @@ html_show_sourcelink = False
 autosummary_generate_overwrite = False
 
 # Finding tutorials directories
-nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
+nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """

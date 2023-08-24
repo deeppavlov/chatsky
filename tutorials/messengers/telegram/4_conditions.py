@@ -6,6 +6,8 @@ This tutorial shows how to process Telegram updates in your script
 and reuse handler triggers from the `pytelegrambotapi` library.
 """
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

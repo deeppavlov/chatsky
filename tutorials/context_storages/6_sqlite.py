@@ -5,6 +5,7 @@
 This is a tutorial on using SQLite.
 """
 
+# %pip install dff[sqlite]
 
 # %%
 import pathlib

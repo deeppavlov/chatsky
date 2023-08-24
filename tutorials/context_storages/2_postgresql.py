@@ -5,6 +5,7 @@
 This is a tutorial on using PostgreSQL.
 """
 
+# %pip install dff[postgresql]
 
 # %%
 import os

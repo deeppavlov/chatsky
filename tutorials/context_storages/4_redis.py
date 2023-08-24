@@ -5,6 +5,7 @@
 This is a tutorial on using Redis.
 """
 
+# %pip install dff[redis]
 
 # %%
 import os

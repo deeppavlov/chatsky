@@ -5,6 +5,7 @@
 This tutorial shows how to use an API endpoint created in the FastAPI tutorial in load testing.
 """
 
+# %pip install dff locust
 
 # %% [markdown]
 """
