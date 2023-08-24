@@ -146,6 +146,43 @@ benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "
 
 # %% [markdown]
 """
+### Using Streamlit app
+
+To run the app, execute:
+
+```
+# download file
+curl https://deeppavlov.github.io/dialog_flow_framework/_misc/benchmark_streamlit.py \
+-o benchmark_streamlit.py
+# install dependencies
+pip install dff[benchmark]
+# run
+streamlit run benchmark_streamlit.py
+```
+
+You can upload files with benchmark results using the first tab of the app ("Benchmark sets"):
+
+.. figure:: ../_static/images/benchmark_sets.png
+
+The second tab ("View") lets you inspect individual benchmark results.
+It also allows you to add a specific benchmark result
+to the "Compare" tab via the button in the top-right corner.
+
+.. figure:: ../_static/images/benchmark_view.png
+
+In the "Compare" tab you can view main metrics (write, read, update, read+update)
+of previously added benchmark results:
+
+.. figure:: ../_static/images/benchmark_compare.png
+
+"Mass compare" tab saves you the trouble of manually adding
+to compare every benchmark result from a single file.
+
+.. figure:: ../_static/images/benchmark_mass_compare.png
+"""
+
+# %% [markdown]
+"""
 ## Additional information
 
 ### Configuration presets
