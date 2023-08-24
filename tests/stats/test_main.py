@@ -8,7 +8,7 @@ try:
     import omegaconf  # noqa: F401
     from dff.stats.__main__ import main
     from dff.stats.cli import DEFAULT_SUPERSET_URL, DASHBOARD_SLUG
-    from dff.stats.utils import get_superset_session
+    from dff.stats.utils import get_superset_session, drop_superset_assets
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
@@ -19,7 +19,7 @@ SUPERSET_ACTIVE = ping_localhost(8088)
 path_to_addon = get_path_from_tests_to_current_dir(__file__)
 
 
-def dashboard_display_test(args: Namespace, base_url: str):
+def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     dashboard_url = parse.urljoin(base_url, f"/api/v1/dashboard/{DASHBOARD_SLUG}")
     charts_url = parse.urljoin(base_url, "/api/v1/chart")
     datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
@@ -47,7 +47,6 @@ def dashboard_display_test(args: Namespace, base_url: str):
         "ssh_tunnel": None,
     }
 
-    session, headers = get_superset_session(args, base_url)
     database_res = session.post(database_conn_url, json=database_data, headers=headers)
     assert database_res.status_code == 200
     dashboard_res = session.get(dashboard_url, headers=headers)
@@ -119,8 +118,16 @@ def test_main(testing_cfg_dir, args):
         }
     )
     args.outfile = testing_cfg_dir + args.outfile
+    session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
+    dashboard_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/dashboard/")
+
+    drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
+    dashboard_result = session.get(dashboard_url, headers=headers)
+    dashboard_json = dashboard_result.json()
+    assert dashboard_json["count"] == 0
+
     main(args)
-    dashboard_display_test(args, base_url=DEFAULT_SUPERSET_URL)
+    dashboard_display_test(args, session, headers, base_url=DEFAULT_SUPERSET_URL)
     assert os.path.exists(args.outfile)
     assert os.path.isfile(args.outfile)
     assert os.path.getsize(args.outfile) > 2200

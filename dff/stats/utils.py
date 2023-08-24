@@ -143,30 +143,35 @@ def drop_superset_assets(session: requests.Session, headers: dict, base_url: str
     :param headers: Superset session headers.
     :param base_url: Base Superset URL.
     """
-    dashboard_url = parse.urljoin(base_url, "/api/v1/dashboard/")
+    dashboard_url = parse.urljoin(base_url, "/api/v1/dashboard")
     charts_url = parse.urljoin(base_url, "/api/v1/chart")
     datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
     database_url = parse.urljoin(base_url, "/api/v1/database/")
+    delete_res: requests.Response
 
     dashboard_res = session.get(dashboard_url, headers=headers)
     dashboard_json = dashboard_res.json()
     if dashboard_json["count"] > 0:
-        requests.delete(dashboard_url, headers=headers)
+        delete_res = requests.delete(dashboard_url, params={"q": json.dumps(dashboard_json["ids"])}, headers=headers)
+        delete_res.raise_for_status()
 
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
     if charts_json["count"] > 0:
-        requests.delete(charts_url, headers=headers)
+        delete_res = requests.delete(charts_url, params={"q": json.dumps(charts_json["ids"])}, headers=headers)
+        delete_res.raise_for_status()
 
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
     if datasets_json["count"] > 0:
-        requests.delete(datasets_url, headers=headers)
+        delete_res = requests.delete(datasets_url, params={"q": json.dumps(datasets_json["ids"])}, headers=headers)
+        delete_res.raise_for_status()
 
     database_res = session.get(database_url, headers=headers)
     database_json = database_res.json()
     if database_json["count"] > 0:
-        requests.delete(database_url, headers=headers)
+        delete_res = requests.delete(database_url + str(database_json["ids"][-1]), headers=headers)
+        delete_res.raise_for_status()
 
 
 class PasswordAction(Action):
