@@ -29,15 +29,14 @@ metrics:
   expression: count(*)
   description: null
   d3format: null
-  extra:
-    warning_markdown: ''
+  extra: {}
   warning_text: null
 columns:
-- column_name: start_time
+- column_name: data_key
   verbose_name: null
-  is_dttm: true
+  is_dttm: false
   is_active: true
-  type: DATETIME64(9)
+  type: LowCardinality(String)
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -45,11 +44,11 @@ columns:
   description: null
   python_date_format: null
   extra: {}
-- column_name: data_key
+- column_name: start_time
   verbose_name: null
-  is_dttm: false
+  is_dttm: true
   is_active: true
-  type: LOWCARDINALITY(STRING)
+  type: DateTime
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -61,7 +60,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -73,7 +72,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -85,7 +84,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -97,7 +96,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -109,7 +108,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -121,7 +120,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -133,7 +132,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: STRING
+  type: String
   advanced_data_type: null
   groupby: true
   filterable: true

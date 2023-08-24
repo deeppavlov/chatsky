@@ -169,7 +169,6 @@ def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file:
                 "overwrite": "true",
             },
             files=[("formData", (zip_filename, f, "application/zip"))],
-            timeout=10,
         )
         response.raise_for_status()
         logger.info(f"Upload finished with status {response.status_code}.")

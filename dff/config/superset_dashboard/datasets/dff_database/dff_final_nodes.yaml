@@ -26,8 +26,7 @@ metrics:
   expression: count(*)
   description: null
   d3format: null
-  extra:
-    warning_markdown: ''
+  extra: {}
   warning_text: null
 columns:
 - column_name: start_time
