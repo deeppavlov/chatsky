@@ -145,6 +145,7 @@ def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file:
     Import an Apache Superset dashboard to a local instance with specified arguments.
     Before using the command, make sure you have your Superset instance
     up and running: `ghcr.io/deeppavlov/superset_df_dashboard:latest`.
+    The import will override existing dashboard configurations if present.
 
     :param parsed_args: Command line arguments produced by `argparse`.
     :param zip_file: Zip archived dashboard config.

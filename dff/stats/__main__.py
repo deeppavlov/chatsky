@@ -11,7 +11,8 @@ Examples
 
 .. code:: bash
 
-        # Create and import a configuration archive
+        # Create and import a configuration archive.
+        # The import overrides existing dashboard configurations.
         dff.stats config.yaml \\
             -U superset_user \\
             -P superset_password \\
@@ -41,7 +42,8 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     """
     parser = argparse.ArgumentParser(
         usage="""Creates a configuration archive and uploads it to the Superset server.
-        The function accepts a configuration yaml file. All of the options can also be overridden
+        The import overrides existing dashboard configurations if present.
+        The function accepts a yaml file; also, all of the options can also be overridden
         via the command line. Setting passwords interactively is supported.
 
         dff.stats config.yaml \\
