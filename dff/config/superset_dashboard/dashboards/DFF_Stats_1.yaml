@@ -532,4 +532,24 @@ metadata:
   - '#546570'
   - '#c4ccd3'
   cross_filters_enabled: false
+  native_filter_configuration:
+  - id: NATIVE_FILTER-5vyW3SgU5
+    controlValues:
+      enableEmptyFilter: false
+    name: Time grain
+    filterType: filter_timegrain
+    targets:
+    - datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-6zE8noCIsx
+      excluded:
+      - 7
+    type: NATIVE_FILTER
+    description: ''
 version: 1.0.0

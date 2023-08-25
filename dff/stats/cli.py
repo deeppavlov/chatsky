@@ -243,8 +243,9 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
                     col.type = TYPE_MAPPING_CH.get(col.type, col.type)
             OmegaConf.save(new_file_config, filepath)
 
+        if ".zip" not in outfile_name:
+            raise ValueError(f"Outfile name missing .zip extension: {outfile_name}.")
         logger.info(f"Saving the archive to {outfile_name}.")
-
         shutil.make_archive(outfile_name[: outfile_name.rindex(".zip")], format="zip", root_dir=temp_config_dir)
 
     return Path(outfile_name)
