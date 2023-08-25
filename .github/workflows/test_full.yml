@@ -43,12 +43,17 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
+              pytest --tb=long -vv --cache-clear --no-cov tests/
           else
-              pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
+              pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=docker tests/
           fi
         shell: bash
   test_no_deps:
@@ -72,6 +77,11 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/

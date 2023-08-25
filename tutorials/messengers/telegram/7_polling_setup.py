@@ -19,11 +19,6 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from telebot.util import update_types
 
 
-if "TG_BOT_TOKEN" not in os.environ:
-    print("`telegram` token not available.")
-    exit(0)
-
-
 # %% [markdown]
 """
 `PollingTelegramInterface` can be configured with the same parameters

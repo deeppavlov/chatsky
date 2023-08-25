@@ -24,11 +24,6 @@ from dff.messengers.telegram import (
 from dff.utils.testing.common import is_interactive_mode
 
 
-if "TG_BOT_TOKEN" not in os.environ:
-    print("`telegram` token not available.")
-    exit(0)
-
-
 # %% [markdown]
 """
 To display or hide a keyboard, you can utilize the `ui` field of the `TelegramMessage` class.

@@ -19,11 +19,6 @@ from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
 
 
-if "TG_BOT_TOKEN" not in os.environ:
-    print("`telegram` token not available.")
-    exit(0)
-
-
 # %% [markdown]
 """
 In order to integrate your script with Telegram, you need an instance of
