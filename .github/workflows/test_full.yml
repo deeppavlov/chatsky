@@ -51,9 +51,9 @@ jobs:
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-              pytest --tb=long -vv --cache-clear --no-cov tests/
+              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
           else
-              pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=docker tests/
+              pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
           fi
         shell: bash
   test_no_deps:

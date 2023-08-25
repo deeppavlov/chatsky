@@ -56,4 +56,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          make test
+          make test TEST_ALLOW_SKIP=telegram
