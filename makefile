@@ -1,3 +1,5 @@
+.ONESHELL:
+
 SHELL = /bin/bash
 
 PYTHON = python3
@@ -8,6 +10,7 @@ TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
 PATH := $(VENV_PATH)/bin:$(PATH)
+PWD := $(shell pwd)
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -61,6 +64,20 @@ test: venv
 
 test_all: venv wait_db test lint
 .PHONY: test_all
+
+build_drawio:
+	docker run -it --rm --name="drawio-convert" -v $(PWD)/docs/source/diagrams:/data rlespinasse/drawio-export -f png --on-changes --remove-page-suffix
+	for folder in docs/source/diagrams/*; do
+		foldername=`basename $${folder}`
+		for file in $${folder}/*; do
+			filename=`basename $${file}`
+			if [[ -d $${file} && $${filename} == "export" ]]; then
+				mkdir -p docs/source/_static/drawio/$${foldername}
+				cp -r $${file}/* docs/source/_static/drawio/$${foldername}
+			fi
+		done
+	done
+.PHONY: build_drawio
 
 doc: venv clean_docs
 	python3 docs/source/utils/patching.py
