@@ -79,7 +79,7 @@ build_drawio:
 	done
 .PHONY: build_drawio
 
-doc: venv clean_docs
+doc: venv clean_docs build_drawio
 	python3 docs/source/utils/patching.py
 	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
@@ -108,6 +108,7 @@ clean_docs:
 	rm -rf docs/tutorials
 	rm -rf docs/source/apiref
 	rm -rf docs/source/tutorials
+	rm -rf docs/source/_static/drawio
 .PHONY: clean_docs
 
 clean: clean_docs
