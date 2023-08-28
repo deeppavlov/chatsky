@@ -113,7 +113,7 @@ tutorial_dependencies = [
     "flask[async]==2.3.2",
     "psutil==5.9.5",
     "telethon==1.29.1",
-    "fastapi==0.101.0",
+    "fastapi==0.103.0",
     "uvicorn==0.23.1",
     "websockets==11.0.2",
     "locust==2.16.1",
