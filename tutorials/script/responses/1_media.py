@@ -1,6 +1,8 @@
 # %% [markdown]
 """
-# Responses: 3. Media
+# Responses: 1. Media
+
+This tutorial demonstrates how to use media files in your script.
 
 """
 
@@ -19,6 +21,17 @@ from dff.utils.testing import (
     run_interactive_mode,
 )
 
+# %% [markdown]
+"""
+You can use the `Attachments` class to send up to 10 media files to the user.
+Depending on the type of media you want to share, you can use one of the following classes:
+`Audio`, `Video`, `Image`, or `Document`.
+The files can be referred to either by the source (local file path or URL)
+or by the unique identifier (assigned by messenger services like Telegram to cloud-stored files).
+
+In this example, we send to users the python logo which is hosted online.
+
+"""
 
 # %%
 img_url = "https://www.python.org/static/img/python-logo.png"

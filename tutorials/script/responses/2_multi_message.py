@@ -1,9 +1,10 @@
 # %% [markdown]
 """
-# Responses: 4. Multi Message
+# Responses: 2. Multi Message
 
-This tutorial shows Multi Message usage.
-Let's do all the necessary imports from DFF.
+This tutorial shows the usage of the `MultiMessage` class.
+It can be used to batch multiple `Message` instances as multiple response options.
+The logic for candidate selection can then be implemented elsewhere.
 """
 
 # %pip install dff
