@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Web API: 1. FastAPI
+# Web API: 2. FastAPI
 
 This tutorial shows how to create an API for DFF using FastAPI.
 

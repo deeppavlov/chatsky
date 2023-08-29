@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 6. Custom messenger interface
+# Web API: 1. flask
 
 The following tutorial shows messenger interfaces usage.
 """
@@ -12,7 +12,7 @@ import logging
 
 from dff.messengers.common.interface import CallbackMessengerInterface
 from dff.script import Context, Message
-from flask import Flask, request, Request
+from flask import Flask, request, Request, redirect
 
 from dff.pipeline import Pipeline, ACTOR
 from dff.utils.testing import is_interactive_mode, TOY_SCRIPT
@@ -81,16 +81,27 @@ def construct_webpage_by_response(response: str) -> str:
         <head>
             <meta name="viewport" content="width=device-width, initial-scale=1">
             <style>
-                p {{text-align: center;}}
+                p {{
+                    text-align: center;
+                    margin-bottom: 2rem;
+                }}
                 img {{
                     display: block;
                     margin-left: auto;
                     margin-right: auto;
                 }}
+                form {{
+                    text-align: center;
+                    display: block;
+                    margin-left: auto;
+                    margin-right: auto;
+                    margin-bottom: 2rem;
+                }}
             </style>
         </head>
         <body>
         <p><b>{response}</b></p>
+        <form method="get"><input name="request" type="text"/><button>Submit</button></form>
         <img
             src="https://source.unsplash.com/random?{response}"
             alt="Response picture" style="width:50%;height:50%;"
@@ -134,10 +145,20 @@ pipeline_dict = {
 }
 
 
+@app.route("/")
+@app.route("/chat")
+async def to_interface():
+    return redirect("/pipeline_web_interface")
+
+
 @app.route("/pipeline_web_interface")
 async def route():
+    if not request.args or not request.args.get("request"):
+        message = Message(text="Hi")
+    else:
+        message = Message(text=request.args.get("request"))
     ctx_id = 0  # 0 will be current dialog (context) identification.
-    return messenger_interface.on_request(request, ctx_id).last_response.text
+    return messenger_interface.on_request(message, ctx_id).last_response.misc["webpage"]
 
 
 # %%
