@@ -6,6 +6,7 @@ This tutorial shows Multi Message usage.
 Let's do all the necessary imports from DFF.
 """
 
+# %pip install dff
 
 # %%
 

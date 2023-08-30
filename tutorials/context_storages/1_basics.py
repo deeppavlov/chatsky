@@ -5,6 +5,7 @@
 The following tutorial shows the basic use of the database connection.
 """
 
+# %pip install dff[json,pickle]
 
 # %%
 import pathlib

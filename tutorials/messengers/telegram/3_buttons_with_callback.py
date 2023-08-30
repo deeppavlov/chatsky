@@ -7,6 +7,8 @@ This tutorial demonstrates, how to add an inline keyboard and utilize
 inline queries.
 """
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

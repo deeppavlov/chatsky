@@ -5,6 +5,7 @@
 The following example shows `pipeline` service group usage and start conditions.
 """
 
+# %pip install dff
 
 # %%
 import json
