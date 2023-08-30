@@ -1,14 +1,10 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: F401
 
-
-from . import exporter_patch  # noqa: F401
+from . import exporter_patch
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 from opentelemetry.sdk._logs.export import InMemoryLogExporter, ConsoleLogExporter
 from opentelemetry.sdk.metrics.export import InMemoryMetricReader, ConsoleMetricExporter
-from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
-from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
-from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from .utils import get_wrapper_field, set_logger_destination, set_tracer_destination
-from .instrumentor import DFFInstrumentor
+from .instrumentor import OtelInstrumentor, OTLPMetricExporter, OTLPLogExporter, OTLPSpanExporter

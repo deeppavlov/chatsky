@@ -1,8 +1,8 @@
 import pytest
 
 try:
-    from dff.stats import defaults
-    from dff.stats import DFFInstrumentor
+    from dff.stats import default_extractors
+    from dff.stats import OtelInstrumentor
     from opentelemetry.sdk.trace import TracerProvider
     from opentelemetry.sdk._logs import LoggerProvider
     from opentelemetry.sdk.metrics import MeterProvider
@@ -14,19 +14,19 @@ except ImportError:
 
 
 def test_instrument_uninstrument():
-    instrumentor = DFFInstrumentor()
+    instrumentor = OtelInstrumentor()
     instrumentor.instrument()
-    assert hasattr(defaults.get_current_label, "__wrapped__")
-    assert hasattr(defaults.get_timing_before, "__wrapped__")
-    assert hasattr(defaults.get_timing_after, "__wrapped__")
+    assert hasattr(default_extractors.get_current_label, "__wrapped__")
+    assert hasattr(default_extractors.get_timing_before, "__wrapped__")
+    assert hasattr(default_extractors.get_timing_after, "__wrapped__")
     instrumentor.uninstrument()
-    assert not hasattr(defaults.get_current_label, "__wrapped__")
-    assert not hasattr(defaults.get_timing_before, "__wrapped__")
-    assert not hasattr(defaults.get_timing_after, "__wrapped__")
+    assert not hasattr(default_extractors.get_current_label, "__wrapped__")
+    assert not hasattr(default_extractors.get_timing_before, "__wrapped__")
+    assert not hasattr(default_extractors.get_timing_after, "__wrapped__")
 
 
 def test_keyword_arguments():
-    instrumentor = DFFInstrumentor()
+    instrumentor = OtelInstrumentor()
     assert instrumentor._meter_provider is get_meter_provider()
     assert instrumentor._logger_provider is get_logger_provider()
     assert instrumentor._tracer_provider is get_tracer_provider()

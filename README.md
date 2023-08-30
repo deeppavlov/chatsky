@@ -10,7 +10,7 @@ You can use it in services such as writing skills for Amazon Alexa, etc., chatbo
 [![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
 [![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
-![Python 3.7, 3.8, 3.9](https://img.shields.io/badge/python-3.7%20%7C%203.8%20%7C%203.9-green.svg)
+![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
 [![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
@@ -150,107 +150,6 @@ def handle_request(request):
 
 To get more advanced examples, take a look at
 [tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/context_storages) on GitHub.
-
-# Quick Start -- df_stats
-
-## Description
-
-Dialog Flow Stats collects usage statistics for your conversational service and allows you to visualize them using a pre-configured dashboard for [Apache Superset](https://superset.apache.org/) or [Preset](https://preset.io/).
-
-We provide a pre-built Superset Docker image that includes all the necessary dependencies and ensures API compatibility. 
-
-Authorization credentials for the image can be automatically configured via environment variables.
-
-```shell
-echo 'SUPERSET_USERNAME=...' >> .env
-echo 'SUPERSET_PASSWORD=...' >> .env
-docker run --env-file='.env' ghcr.io/deeppavlov/superset_df_dashboard:latest
-```
-
-Currently, support is offered for multiple database types that can be used as a backend storage for your data:
-
-* [Postgresql](https://www.postgresql.org/)
-* [Clickhouse](https://clickhouse.com/)
-
-In addition, you can use the library without any dependencies
-to save your service logs to `csv`-formatted files.
-
-## Installation
-
-```bash
-pip install dff[stats] # csv-only, no connection to Superset
-pip install dff[stats,clickhouse]
-pip install dff[stats,postgresql]
-```
-
-## Setting up a pipeline
-
-```python
-# import dependencies
-from dff.stats import StatsStorage, default_extractor_pool
-from dff.pipeline import ACTOR
-
-# Extractor pools are namespaces that contain handler functions
-# Like all functions of this kind, they can be used in a pipeline
-# In the following example, the handlers measure the running time of the actor
-actor_service = to_service(
-    before_handler=[default_extractor_pool["extract_timing_before"]],
-    after_handler=[default_extractor_pool["extract_timing_after"]]
-)(ACTOR)
-
-pipeline = Pipeline.from_dict(
-    {
-        "components": [
-            Service(handler=actor_service),
-        ]
-    }
-)
-
-# Define a destination for stats saving
-db_uri = "postgresql://user:password@host:5432/default"
-# for clickhouse:
-# db_uri = "clickhouse://user:password@host:8123/default"
-# for csv:
-# db_uri = "csv://file.csv"
-storage = StatsStorage.from_uri(db_uri)
-# update the stats object
-default_extractor_pool.add_subscriber(storage)
-pipeline.run()
-```
-
-## Display your data
-
-### Adjust Dashboard Configuration
-
-In order to run the dashboard in Apache Superset, you should update the default configuration with the credentials of your database. The output will be saved to a zip archive.
-
-Auth credentials can be passed as command line arguments.
-
-```bash
-dff.stats cfg_from_opts --help
-```
-
-Alternatively, you can save the settings in a YAML file. 
-
-```yaml
-db:
-  type: clickhousedb+connect
-  name: test
-  user: user
-  host: localhost
-  port: 5432
-  table: dff_stats
-```
-
-The file should then be forwarded to the configuration script:
-
-```bash
-dff.stats cfg_from_file config.yaml --outfile=./superset_dashboard.zip
-```
-
-### Import the Dashboard Config
-
-Log in to Superset, open the `Dashboards` tab and press the **import** button on the right of the screen. You will be prompted for the database password. If all of the database credentials match, the dashboard will appear in the dashboard list.
 
 # Contributing to the Dialog Flow Framework
 

@@ -7,6 +7,7 @@ This tutorial shows how to create an API for DFF using FastAPI.
 You can see the result at http://127.0.0.1:8000/docs.
 """
 
+# %pip install dff uvicorn fastapi
 
 # %%
 from dff.script import Message

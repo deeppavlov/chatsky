@@ -1,12 +1,12 @@
 """
 Instrumentor
 -------------
-This modules contains the :py:class:`~DFFInstrumentor` class that implements
+This modules contains the :py:class:`~OtelInstrumentor` class that implements
 Opentelemetry's `BaseInstrumentor` interface and allows for automated
 instrumentation of Dialog Flow Framework applications,
 e.g. for automated logging and log export.
 
-For detailed reference, see `~DFFInstrumentor` class.
+For detailed reference, see `~OtelInstrumentor` class.
 """
 import asyncio
 from typing import Collection, Optional
@@ -14,82 +14,131 @@ from typing import Collection, Optional
 from wrapt import wrap_function_wrapper, decorator
 from opentelemetry.instrumentation.instrumentor import BaseInstrumentor
 from opentelemetry.instrumentation.utils import unwrap
-from opentelemetry.metrics import get_meter, get_meter_provider, set_meter_provider
-from opentelemetry.trace import get_tracer, get_tracer_provider, set_tracer_provider
-from opentelemetry._logs import get_logger, get_logger_provider, set_logger_provider
-from opentelemetry._logs import SeverityNumber
+from opentelemetry.metrics import get_meter, get_meter_provider, Meter
+from opentelemetry.trace import get_tracer, get_tracer_provider, Tracer
+from opentelemetry._logs import get_logger, get_logger_provider, Logger, SeverityNumber
 from opentelemetry.trace import SpanKind, Span
-from opentelemetry.sdk.resources import Resource
 from opentelemetry.sdk.trace import TracerProvider
 from opentelemetry.sdk._logs import LoggerProvider, LogRecord
 from opentelemetry.sdk.metrics import MeterProvider
+from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter
+from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
+from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
 from dff.script.core.context import get_last_index
-from dff.stats.utils import get_wrapper_field
-from dff.stats import defaults
+from dff.stats.utils import (
+    resource,
+    get_wrapper_field,
+    set_logger_destination,
+    set_meter_destination,
+    set_tracer_destination,
+)
+from dff.stats import default_extractors
 
 
 INSTRUMENTS = ["dff"]
-SERVICE_NAME = "dialog_flow_framework"
-
-resource = Resource.create({"service.name": SERVICE_NAME})
-"""
-Singletone :py:class:`~Resource` instance shared inside the framework.
-"""
-
-tracer_provider = TracerProvider(resource=resource)
-logger_provider = LoggerProvider(resource=resource)
-meter_provider = MeterProvider(resource=resource)
-set_logger_provider(logger_provider)
-set_tracer_provider(tracer_provider)
-set_meter_provider(meter_provider)
 
 
-class DFFInstrumentor(BaseInstrumentor):
+class OtelInstrumentor(BaseInstrumentor):
     """
     Utility class for instrumenting DFF-related functions
     that implements the :py:class:`~BaseInstrumentor` interface.
     :py:meth:`~instrument` and :py:meth:`~uninstrument` methods
-    are available to apply and revert the instrumentation effects.
-    Logger provider and tracer provider can be passed to the class
-    as keyword arguments;
-    otherwise, the global logger provider and tracer provider are leveraged.
+    are available to apply and revert the instrumentation effects,
+    e.g. enable and disable logging at runtime.
+
+    .. code-block::
+
+        dff_instrumentor = OtelInstrumentor()
+        dff_instrumentor.instrument()
+        dff_instrumentor.uninstrument()
+
+    Opentelemetry provider instances can be optionally passed to the class constructor.
+    Otherwise, the global logger, tracer and meter providers are leveraged.
+
     The class implements the :py:meth:`~__call__` method, so that
     regular functions can be decorated using the class instance.
 
-    :param kwargs: you can pass `logger_provider`, `tracer_provider` and `meter_provider`
-        parameters to make use of custom instances instead of the globally available.
+    .. code-block::
+
+        @dff_instrumentor
+        def function(context, pipeline, runtime_info):
+            ...
+
+    :param logger_provider: Opentelemetry logger provider. Used to construct a logger instance.
+    :param tracer_provider: Opentelemetry tracer provider. Used to construct a tracer instance.
+    :parame meter_provider: Opentelemetry meter provider. Used to construct a meter instance.
     """
 
-    def __init__(self, **kwargs) -> None:
+    def __init__(self, logger_provider=None, tracer_provider=None, meter_provider=None) -> None:
         super().__init__()
-        self._logger_provider = None
-        self._tracer_provider = None
-        self._meter_provider = None
-        self._logger = None
-        self._tracer = None
-        self._meter = None
-        self._configure_providers(**kwargs)
+        self._logger_provider: Optional[LoggerProvider] = None
+        self._tracer_provider: Optional[TracerProvider] = None
+        self._meter_provider: Optional[MeterProvider] = None
+        self._logger: Optional[Logger] = None
+        self._tracer: Optional[Tracer] = None
+        self._meter: Optional[Meter] = None
+        self._configure_providers(
+            logger_provider=logger_provider, tracer_provider=tracer_provider, meter_provider=meter_provider
+        )
+
+    def __enter__(self):
+        if not self.is_instrumented_by_opentelemetry:
+            self.instrument()
+        return self
+
+    def __exit__(self):
+        if self.is_instrumented_by_opentelemetry:
+            self.uninstrument()
+
+    @classmethod
+    def from_url(cls, url: str, insecure: bool = True, timeout: Optional[int] = None):
+        """
+        Construct an instrumentor instance using only the url of the OTLP Collector.
+        Inherently modifies the global provider instances adding an export destination
+        for the target url.
+
+        .. code-block::
+
+            instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
+
+        :param url: Url of the running Otel Collector server. Due to limited support of HTTP protocol
+            by the Opentelemetry Python extension, GRPC protocol is preferred.
+        :param insecure: Whether non-SSL-protected connection is allowed. Defaults to True.
+        :param timeout: Connection timeout in seconds, optional.
+        """
+        set_logger_destination(OTLPLogExporter(endpoint=url, insecure=insecure, timeout=timeout))
+        set_tracer_destination(OTLPSpanExporter(endpoint=url, insecure=insecure, timeout=timeout))
+        set_meter_destination(OTLPMetricExporter(endpoint=url, insecure=insecure, timeout=timeout))
+        return cls()
 
     def instrumentation_dependencies(self) -> Collection[str]:
+        """
+        :meta private:
+
+        Required libraries. Implements the Python Opentelemetry instrumentor interface.
+
+        """
         return INSTRUMENTS
 
-    def _instrument(self, **kwargs):
-        if len(kwargs) > 0:
-            self._configure_providers(**kwargs)
-        wrap_function_wrapper(defaults, "get_current_label", self.__call__.__wrapped__)
-        wrap_function_wrapper(defaults, "get_timing_before", self.__call__.__wrapped__)
-        wrap_function_wrapper(defaults, "get_timing_after", self.__call__.__wrapped__)
+    def _instrument(self, logger_provider=None, tracer_provider=None, meter_provider=None):
+        if any([logger_provider, meter_provider, tracer_provider]):
+            self._configure_providers(
+                logger_provider=logger_provider, tracer_provider=tracer_provider, meter_provider=meter_provider
+            )
+        wrap_function_wrapper(default_extractors, "get_current_label", self.__call__.__wrapped__)
+        wrap_function_wrapper(default_extractors, "get_timing_before", self.__call__.__wrapped__)
+        wrap_function_wrapper(default_extractors, "get_timing_after", self.__call__.__wrapped__)
 
     def _uninstrument(self, **kwargs):
-        unwrap(defaults, "get_current_label")
-        unwrap(defaults, "get_timing_before")
-        unwrap(defaults, "get_timing_after")
+        unwrap(default_extractors, "get_current_label")
+        unwrap(default_extractors, "get_timing_before")
+        unwrap(default_extractors, "get_timing_after")
 
-    def _configure_providers(self, **kwargs):
-        self._logger_provider = kwargs.get("logger_provider") or get_logger_provider()
-        self._tracer_provider = kwargs.get("tracer_provider") or get_tracer_provider()
-        self._meter_provider = kwargs.get("meter_provider") or get_meter_provider()
+    def _configure_providers(self, logger_provider, tracer_provider, meter_provider):
+        self._logger_provider = logger_provider or get_logger_provider()
+        self._tracer_provider = tracer_provider or get_tracer_provider()
+        self._meter_provider = meter_provider or get_meter_provider()
         self._logger = get_logger(__name__, None, self._logger_provider)
         self._tracer = get_tracer(__name__, None, self._tracer_provider)
         self._meter = get_meter(__name__, None, self._meter_provider)

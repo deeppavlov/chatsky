@@ -4,7 +4,7 @@ import pytest
 import asyncio
 
 from tests.test_utils import get_path_from_tests_to_current_dir
-from tests.db_list import ping_localhost
+from tests.context_storages.test_dbs import ping_localhost
 from dff.utils.testing.common import check_happy_path
 from dff.utils.testing.toy_script import HAPPY_PATH
 
@@ -35,12 +35,11 @@ CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 @pytest.mark.parametrize(
     ["example_module_name", "expected_logs"],
     [
-        ("1_services_basic", 10),
-        ("2_services_advanced", 30),
-        ("3_service_groups", 15),
-        ("4_global_services", 10),
+        ("1_extractor_functions", 10),
+        ("2_pipeline_integration", 35),
     ],
 )
+@pytest.mark.docker
 async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp_provider, otlp_trace_exp_provider):
     module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     _, tracer_provider = otlp_trace_exp_provider
@@ -67,10 +66,8 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
 @pytest.mark.parametrize(
     ["example_module_name", "expected_logs"],
     [
-        ("1_services_basic", 10),
-        ("2_services_advanced", 30),
-        ("3_service_groups", 15),
-        ("4_global_services", 10),
+        ("1_extractor_functions", 10),
+        ("2_pipeline_integration", 35),
     ],
 )
 async def test_examples_memory(

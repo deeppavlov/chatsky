@@ -4,6 +4,7 @@
 
 """
 
+# %pip install dff
 
 # %%
 from dff.script import RESPONSE, TRANSITIONS

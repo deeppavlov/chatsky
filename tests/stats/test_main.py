@@ -1,106 +1,58 @@
-import sys
 import os
 import pytest
 from urllib import parse
+from zipfile import ZipFile
 from argparse import Namespace
 
 try:
     import omegaconf  # noqa: F401
     from dff.stats.__main__ import main
     from dff.stats.cli import DEFAULT_SUPERSET_URL, DASHBOARD_SLUG
-    from dff.stats.utils import get_superset_session
+    from dff.stats.utils import get_superset_session, drop_superset_assets
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
-from tests.db_list import SUPERSET_ACTIVE
-from dff.utils.testing.stats_cli import parse_args
+from tests.context_storages.test_dbs import ping_localhost
+from tests.test_utils import get_path_from_tests_to_current_dir
+
+SUPERSET_ACTIVE = ping_localhost(8088)
+path_to_addon = get_path_from_tests_to_current_dir(__file__)
 
 
-@pytest.mark.parametrize(
-    "args",
-    [
-        [
-            "",
-            "cfg_from_opts",
-            "--db.type=postgresql",
-            "--db.user=user",
-            "--db.password=password",
-            "--db.host=localhost",
-            "--db.port=5432",
-            "--db.name=db",
-            "--db.table=test",
-        ],
-        ["", "cfg_from_file", "--db.password=pass", "./tutorials/stats/example_config.yaml"],
-        ["", "cfg_from_uri", "--uri=postgresql://user:password@localhost:5432/db/test"],
-    ],
-)
-def test_parse_args(args):
-    sys.argv = args
-    assert parse_args()
-
-
-@pytest.mark.parametrize(
-    ["args"],
-    [
-        (
-            Namespace(
-                **{
-                    "outfile": "1.zip",
-                    "db.type": "postgresql",
-                    "db.user": "root",
-                    "db.host": "localhost",
-                    "db.port": "5000",
-                    "db.name": "test",
-                    "db.table": "dff_stats",
-                }
-            ),
-        ),
-        (
-            Namespace(
-                **{
-                    "outfile": "2.zip",
-                    "db.type": "mysql+mysqldb",
-                    "db.user": "root",
-                    "db.host": "localhost",
-                    "db.port": "5000",
-                    "db.name": "test",
-                    "db.table": "dff_stats",
-                }
-            ),
-        ),
-        (
-            Namespace(
-                **{
-                    "outfile": "3.zip",
-                    "db.type": "clickhousedb+connect",
-                    "db.user": "root",
-                    "db.host": "localhost",
-                    "db.port": "5000",
-                    "db.name": "test",
-                    "db.table": "dff_stats",
-                }
-            ),
-        ),
-    ],
-)
-def test_main(testing_cfg_dir, args):
-    args.outfile = testing_cfg_dir + args.outfile
-    main(args)
-    assert os.path.exists(args.outfile)
-    assert os.path.isfile(args.outfile)
-    assert os.path.getsize(args.outfile) > 2200
-
-
-def dashboard_display_test(args: Namespace, base_url: str):
+def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     dashboard_url = parse.urljoin(base_url, f"/api/v1/dashboard/{DASHBOARD_SLUG}")
     charts_url = parse.urljoin(base_url, "/api/v1/chart")
     datasets_url = parse.urljoin(base_url, "/api/v1/dataset")
+    database_conn_url = parse.urljoin(base_url, "/api/v1/database/test_connection")
+    db_driver, db_user, db_password, db_host, db_port, db_name = (
+        getattr(args, "db.driver"),
+        getattr(args, "db.user"),
+        getattr(args, "db.password"),
+        getattr(args, "db.host"),
+        getattr(args, "db.port"),
+        getattr(args, "db.name"),
+    )
+    sqla_url = f"{db_driver}://{db_user}:{db_password}@{db_host}:{db_port}/{db_name}"
+    database_data = {
+        "configuration_method": "sqlalchemy_form",
+        "database_name": "dff_database",
+        "driver": "string",
+        "engine": None,
+        "extra": "",
+        "impersonate_user": False,
+        "masked_encrypted_extra": "",
+        "parameters": {},
+        "server_cert": None,
+        "sqlalchemy_uri": sqla_url,
+        "ssh_tunnel": None,
+    }
 
-    session, headers = get_superset_session(args, base_url)
+    database_res = session.post(database_conn_url, json=database_data, headers=headers)
+    assert database_res.status_code == 200
     dashboard_res = session.get(dashboard_url, headers=headers)
     assert dashboard_res.status_code == 200
     dashboard_json = dashboard_res.json()
-    assert dashboard_json["result"]["charts"] == [
+    assert sorted(dashboard_json["result"]["charts"]) == [
         "Flow visit ratio monitor",
         "Node Visits",
         "Node counts",
@@ -108,7 +60,6 @@ def dashboard_display_test(args: Namespace, base_url: str):
         "Node visits [cloud]",
         "Node visits [ratio]",
         "Node visits [sunburst]",
-        "Service load [max dialogue length]",
         "Service load [users]",
         "Table",
         "Terminal labels",
@@ -116,14 +67,14 @@ def dashboard_display_test(args: Namespace, base_url: str):
         "Transition layout",
         "Transition ratio [chord]",
     ]
-    assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-node-stats/"
-    assert dashboard_json["result"]["dashboard_title"] == "DFF Node Stats"
+    assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-stats/"
+    assert dashboard_json["result"]["dashboard_title"] == "DFF Stats"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
     assert datasets_json["count"] == 2
     assert datasets_json["ids"] == [1, 2]
     assert [item["id"] for item in datasets_json["result"]] == [1, 2]
-    assert [item["table_name"] for item in datasets_json["result"]] == [
+    assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
         "dff_final_nodes",
         "dff_node_stats",
     ]
@@ -136,37 +87,62 @@ def dashboard_display_test(args: Namespace, base_url: str):
 
 @pytest.mark.skipif(not SUPERSET_ACTIVE, reason="Superset server not active")
 @pytest.mark.parametrize(
-    ["zip_args", "upload_args"],
+    ["args"],
     [
         (
             Namespace(
                 **{
                     "outfile": "1.zip",
-                    "db.type": "postgresql",
-                    "db.user": "root",
-                    "db.host": "localhost",
-                    "db.port": "5000",
+                    "db.driver": "clickhousedb+connect",
+                    "db.host": "clickhouse",
+                    "db.port": "8123",
                     "db.name": "test",
-                    "db.table": "dff_stats",
-                }
-            ),
-            Namespace(
-                **{
-                    "username": os.getenv("SUPERSET_USERNAME"),
-                    "password": os.getenv("SUPERSET_PASSWORD"),
-                    "db.password": "qwerty",
-                    "infile": "1.zip",
+                    "db.table": "otel_logs",
+                    "host": "localhost",
+                    "port": "8088",
+                    "file": f"tutorials/{path_to_addon}/example_config.yaml",
                 }
             ),
         ),
     ],
 )
-def test_upload(testing_cfg_dir, zip_args, upload_args):
-    zip_args.outfile = testing_cfg_dir + zip_args.outfile
-    main(zip_args)
-    upload_args.infile = testing_cfg_dir + upload_args.infile
-    main(upload_args)
-    dashboard_display_test(upload_args, base_url=DEFAULT_SUPERSET_URL)
+@pytest.mark.docker
+def test_main(testing_cfg_dir, args):
+    args.__dict__.update(
+        {
+            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
+            "username": os.environ["SUPERSET_USERNAME"],
+            "password": os.environ["SUPERSET_PASSWORD"],
+            "db.user": os.environ["CLICKHOUSE_USER"],
+        }
+    )
+    args.outfile = testing_cfg_dir + args.outfile
+    session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
+    dashboard_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/dashboard/")
+
+    drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
+    dashboard_result = session.get(dashboard_url, headers=headers)
+    dashboard_json = dashboard_result.json()
+    assert dashboard_json["count"] == 0
+
+    main(args)
+    dashboard_display_test(args, session, headers, base_url=DEFAULT_SUPERSET_URL)
+    assert os.path.exists(args.outfile)
+    assert os.path.isfile(args.outfile)
+    assert os.path.getsize(args.outfile) > 2200
+    with ZipFile(args.outfile) as file:
+        file.extractall(testing_cfg_dir)
+    database = omegaconf.OmegaConf.load(os.path.join(testing_cfg_dir, "superset_dashboard/databases/dff_database.yaml"))
+    sqlalchemy_uri = omegaconf.OmegaConf.select(database, "sqlalchemy_uri")
+    arg_vars = vars(args)
+    driver, user, host, port, name = (
+        arg_vars["db.driver"],
+        arg_vars["db.user"],
+        arg_vars["db.host"],
+        arg_vars["db.port"],
+        arg_vars["db.name"],
+    )
+    assert sqlalchemy_uri == f"{driver}://{user}:XXXXXXXXXX@{host}:{port}/{name}"
 
 
 @pytest.mark.parametrize(["cmd"], [("dff.stats -h",), ("dff.stats --help",)])

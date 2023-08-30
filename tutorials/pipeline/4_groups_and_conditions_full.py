@@ -5,6 +5,7 @@
 The following tutorial shows `pipeline` service group usage and start conditions.
 """
 
+# %pip install dff
 
 # %%
 import logging
@@ -150,7 +151,8 @@ def never_running_service(_, __, info: ServiceRuntimeInfo):
 
 def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
     logger.info(
-        f"Service '{info.name}' runtime execution info:" f"{info.json(indent=4, default=str)}"
+        f"Service '{info.name}' runtime execution info:"
+        f"{info.model_dump_json(indent=4, default=str)}"
     )
 
 

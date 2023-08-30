@@ -5,10 +5,9 @@ import re
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import insert_installation_cell_into_py_tutorial  # noqa: E402
+from utils.notebook import py_percent_to_notebook  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
-from utils.pull_release_notes import pull_release_notes_from_github  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
@@ -88,7 +87,7 @@ html_show_sourcelink = False
 autosummary_generate_overwrite = False
 
 # Finding tutorials directories
-nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_tutorial()}
+nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
@@ -112,7 +111,7 @@ html_css_files = [
 
 # Theme options
 html_theme_options = {
-    "header_links_before_dropdown": 7,
+    "header_links_before_dropdown": 5,
     "logo": {
         "alt_text": "DFF logo (simple and nice)",
         "text": "Dialog Flow Framework",
@@ -184,4 +183,3 @@ def setup(_):
             ("dff.utils.testing", "Utils"),
         ]
     )
-    pull_release_notes_from_github()

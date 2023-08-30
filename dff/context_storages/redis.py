@@ -49,7 +49,7 @@ class RedisContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
-        await self._redis.set(str(key), value.json())
+        await self._redis.set(str(key), value.model_dump_json())
 
     @threadsafe_method
     async def get_item_async(self, key: Hashable) -> Context:

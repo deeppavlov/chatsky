@@ -13,11 +13,10 @@ import logging
 from urllib import parse
 from pathlib import Path
 from typing import Optional
-from zipfile import ZipFile, ZIP_DEFLATED
 
 try:
     from omegaconf import OmegaConf
-    from .utils import get_superset_session
+    from .utils import get_superset_session, drop_superset_assets
 except ImportError:
     raise ImportError("Some packages are not found. Run `pip install dff[stats]`")
 
@@ -27,12 +26,16 @@ logger.setLevel(logging.INFO)
 DFF_DIR = Path(__file__).absolute().parent.parent
 """
 Root directory of the local `dff` installation.
+
+:meta hide-value:
 """
 DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
 """
 Local path to superset dashboard files to import.
+
+:meta hide-value:
 """
-DASHBOARD_SLUG = "dff-node-stats"
+DASHBOARD_SLUG = "dff-stats"
 """
 This variable stores a slug used for building the http address of the DFF dashboard.
 """
@@ -50,40 +53,77 @@ TYPE_MAPPING_CH = {
 }
 """
 Mapping of standard sql column types to Clickhouse native types.
+
+:meta hide-value:
 """
 
 DFF_NODE_STATS_STATEMENT = """
-WITH main as (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
-{table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as start_time,\n
-otel_traces.SpanName as data_key,\n{table}.Body as data,\n
-{lblfield} as label,\n{flowfield} as flow_label,\n
-{nodefield} as node_label,\n{table}.TraceId as trace_id,\n
-otel_traces.TraceId\nFROM {table}, otel_traces \n
-WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label' \n
-ORDER BY context_id, request_id\n) SELECT context_id,\nrequest_id,\nstart_time,\n
-data_key,\ndata,\nlabel,\n{lag} as prev_label,\nflow_label,\n
-node_label\nFROM main\nWHERE label != ''
+WITH main AS (
+    SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
+    {table}.LogAttributes['request_id'] as request_id,
+    toDateTime(otel_traces.Timestamp) as start_time,
+    otel_traces.SpanName as data_key,
+    {table}.Body as data,
+    {lblfield} as label,
+    {flowfield} as flow_label,
+    {nodefield} as node_label,
+    {table}.TraceId as trace_id,
+    otel_traces.TraceId\nFROM {table}, otel_traces
+    WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label'
+    ORDER BY context_id, request_id
+) SELECT context_id,
+    request_id,
+    start_time,
+    data_key,
+    data,
+    label,
+    {lag} as prev_label,
+    flow_label,
+    node_label
+FROM main
+WHERE label != ''
 """
 DFF_ACYCLIC_NODES_STATEMENT = """
-WITH main AS (\nSELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
-{table}.LogAttributes['request_id'] as request_id, \n{table}.Timestamp as timestamp,\n
-{lblfield} as label\nFROM {table}\n
-INNER JOIN \n  (\n  WITH helper AS \n    (\n
-SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,\n
-{table}.LogAttributes['request_id'] as request_id,\n
-{lblfield} as label\n    FROM {table}\n    )\n
-SELECT context_id FROM helper\n  GROUP BY context_id\n  HAVING COUNT(context_id) = COUNT(DISTINCT label)\n
-) as plain_ctx\nON plain_ctx.context_id = context_id\n
-ORDER by context_id, request_id\n)\nSELECT * FROM main
+WITH main AS (
+    SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
+    {table}.LogAttributes['request_id'] as request_id,
+    {table}.Timestamp as timestamp,
+    {lblfield} as label\nFROM {table}
+    INNER JOIN
+(
+    WITH helper AS (
+        SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
+        {table}.LogAttributes['request_id'] as request_id,
+        {lblfield} as label
+        FROM {table}
+    )
+    SELECT context_id FROM helper
+    GROUP BY context_id
+    HAVING COUNT(context_id) = COUNT(DISTINCT label)
+) as plain_ctx
+ON plain_ctx.context_id = context_id
+ORDER by context_id, request_id
+)
+SELECT * FROM main
 """
 DFF_FINAL_NODES_STATEMENT = """
-WITH main AS\n(\nSELECT LogAttributes['context_id'] AS context_id,\nmax(LogAttributes['request_id']) AS max_history\n
-FROM {table}\nGROUP BY context_id\n)\nSELECT DISTINCT LogAttributes['context_id'] AS context_id,\n
-LogAttributes['request_id'] AS request_id,\n{table}.Timestamp AS start_time,\n
-{lblfield} AS label,\n{flowfield} AS flow_label,\n
-{nodefield} AS node_label\n FROM {table} \n
-INNER JOIN main\nON context_id  = main.context_id \nAND request_id = main.max_history\n
-INNER JOIN otel_traces\nON {table}.TraceId = otel_traces.TraceId\n
+WITH main AS (
+    SELECT LogAttributes['context_id'] AS context_id,
+    max(LogAttributes['request_id']) AS max_history
+    FROM {table}\nGROUP BY context_id
+)
+SELECT DISTINCT LogAttributes['context_id'] AS context_id,
+LogAttributes['request_id'] AS request_id,
+{table}.Timestamp AS start_time,
+{lblfield} AS label,
+{flowfield} AS flow_label,
+{nodefield} AS node_label
+FROM {table}
+INNER JOIN main
+ON context_id  = main.context_id
+AND request_id = main.max_history
+INNER JOIN otel_traces
+ON {table}.TraceId = otel_traces.TraceId
 WHERE otel_traces.SpanName = 'get_current_label'
 """
 
@@ -95,43 +135,30 @@ SQL_STATEMENT_MAPPING = {
 """
 Select statements for dashboard configuration with names and types represented as placeholders.
 The placeholder system makes queries database agnostic, required values are set during the import phase.
+
+:meta hide-value:
 """
 
 
-def add_to_zip(zip_file: ZipFile, path: str, zippath: str):
-    """
-    Recursively add files from a folder to a zip-archive. Recreates the standard
-    library function of the same name.
-
-    :param zip_file: File descriptor for source zip file.
-    :param path: Path to target file or directory.
-    :param zippath: Path to output zip file.
-    """
-    if os.path.isfile(path):
-        zip_file.write(path, zippath, ZIP_DEFLATED)
-    elif os.path.isdir(path):
-        if zippath:
-            zip_file.write(path, zippath)
-        for nm in sorted(os.listdir(path)):
-            add_to_zip(zip_file, os.path.join(path, nm), os.path.join(zippath, nm))
-
-
-def import_dashboard(
-    parsed_args: Optional[argparse.Namespace] = None,
-):
+def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file: Optional[str] = None):
     """
     Import an Apache Superset dashboard to a local instance with specified arguments.
     Before using the command, make sure you have your Superset instance
     up and running: `ghcr.io/deeppavlov/superset_df_dashboard:latest`.
+    The import will override existing dashboard configurations if present.
 
     :param parsed_args: Command line arguments produced by `argparse`.
+    :param zip_file: Zip archived dashboard config.
     """
-    zip_file = parsed_args.infile
+    host = parsed_args.host if hasattr(parsed_args, "host") else "localhost"
+    port = parsed_args.port if hasattr(parsed_args, "port") else "8088"
+    superset_url = parse.urlunsplit(("http", f"{host}:{port}", "/", "", ""))
     zip_filename = os.path.basename(zip_file)
     db_password = getattr(parsed_args, "db.password")
 
-    session, headers = get_superset_session(parsed_args, DEFAULT_SUPERSET_URL)
-    import_dashboard_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/dashboard/import/")
+    session, headers = get_superset_session(parsed_args, superset_url)
+    drop_superset_assets(session, headers, superset_url)
+    import_dashboard_url = parse.urljoin(superset_url, "/api/v1/dashboard/import/")
     # upload files
     with open(zip_file, "rb") as f:
         response = session.request(
@@ -143,27 +170,28 @@ def import_dashboard(
                 "overwrite": "true",
             },
             files=[("formData", (zip_filename, f, "application/zip"))],
-            timeout=10,
         )
         response.raise_for_status()
         logger.info(f"Upload finished with status {response.status_code}.")
 
 
-def make_zip_config(parsed_args: argparse.Namespace):
+def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     """
     Make a zip-archived Apache Superset dashboard config, using specified arguments.
 
     :param parsed_args: Command line arguments produced by `argparse`.
     """
-    outfile_name = parsed_args.outfile
-
-    if hasattr(parsed_args, "file") and parsed_args.file is not None:  # parse yaml input
-        cli_conf = OmegaConf.load(parsed_args.file)
+    if hasattr(parsed_args, "outfile") and parsed_args.outfile:
+        outfile_name = parsed_args.outfile
     else:
-        sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items()]
-        cli_conf = OmegaConf.from_cli()
+        outfile_name = "temp.zip"
 
-    if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
+    file_conf = OmegaConf.load(parsed_args.file)
+    sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items() if value]
+    cmd_conf = OmegaConf.from_cli()
+    cli_conf = OmegaConf.merge(file_conf, cmd_conf)
+
+    if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
         params = dict(
             table="${db.table}",
             lag="neighbor(label, -1)",
@@ -173,14 +201,7 @@ def make_zip_config(parsed_args: argparse.Namespace):
             nodefield="JSON_VALUE(${db.table}.Body, '$.node')",
         )
     else:
-        params = dict(
-            table="${db.table}",
-            lag="LAG(label,1) OVER (ORDER BY context_id, request_id)",
-            texttype="TEXT",
-            lblfield="data -> 'label'",
-            flowfield="data -> 'flow'",
-            nodefield="data -> 'node'",
-        )
+        raise ValueError("The only supported database driver is 'clickhousedb+connect'.")
 
     conf = SQL_STATEMENT_MAPPING.copy()
     for key in conf.keys():
@@ -190,7 +211,7 @@ def make_zip_config(parsed_args: argparse.Namespace):
     resolve_conf = OmegaConf.create(
         {
             "database": {
-                "sqlalchemy_uri": "${db.type}://${db.user}:XXXXXXXXXX@${db.host}:${db.port}/${db.name}",
+                "sqlalchemy_uri": "${db.driver}://${db.user}:XXXXXXXXXX@${db.host}:${db.port}/${db.name}",
             },
             **conf,
         }
@@ -218,21 +239,14 @@ def make_zip_config(parsed_args: argparse.Namespace):
         for filepath in dataset_dir.iterdir():
             file_config = OmegaConf.load(filepath)
             new_file_config = OmegaConf.merge(file_config, getattr(user_config, filepath.name))
-            if OmegaConf.select(cli_conf, "db.type") == "clickhousedb+connect":
+            if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
                 for col in OmegaConf.select(new_file_config, "columns"):
                     col.type = TYPE_MAPPING_CH.get(col.type, col.type)
             OmegaConf.save(new_file_config, filepath)
 
+        if ".zip" not in outfile_name:
+            raise ValueError(f"Outfile name missing .zip extension: {outfile_name}.")
         logger.info(f"Saving the archive to {outfile_name}.")
+        shutil.make_archive(outfile_name[: outfile_name.rindex(".zip")], format="zip", root_dir=temp_config_dir)
 
-        zip_args = {}
-        if sys.version >= "3.8":
-            zip_args["strict_timestamps"] = False
-
-        with ZipFile(outfile_name, "w", **zip_args) as zf:
-            zippath = os.path.basename(nested_temp_dir)
-            if not zippath:
-                zippath = os.path.basename(os.path.dirname(nested_temp_dir))
-            if zippath in ("", os.curdir, os.pardir):
-                zippath = ""
-            add_to_zip(zf, nested_temp_dir, zippath)
+    return Path(outfile_name)

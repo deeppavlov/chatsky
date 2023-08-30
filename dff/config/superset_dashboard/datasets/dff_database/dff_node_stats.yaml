@@ -5,15 +5,16 @@ default_endpoint: null
 offset: 0
 cache_timeout: null
 schema: test
-sql: "\nWITH main as (\nSELECT DISTINCT otel_logs.LogAttributes['context_id'] as context_id,\n\
-  \notel_logs.LogAttributes['request_id'] as request_id, \notel_logs.Timestamp as\
-  \ start_time,\n\notel_traces.SpanName as data_key,\notel_logs.Body as data,\n\n\
-  JSON_VALUE(otel_logs.Body, '$.label') as label,\nJSON_VALUE(otel_logs.Body, '$.flow')\
-  \ as flow_label,\n\nJSON_VALUE(otel_logs.Body, '$.node') as node_label,\notel_logs.TraceId\
-  \ as trace_id,\n\notel_traces.TraceId\nFROM otel_logs, otel_traces \n\nWHERE otel_logs.TraceId\
-  \ = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label' \n\nORDER\
-  \ BY context_id, request_id\n) SELECT context_id,\nrequest_id,\nstart_time,\n\n\
-  data_key,\ndata,\nlabel,\nneighbor(label, -1) as prev_label,\nflow_label,\n\nnode_label\n\
+sql: "\nWITH main AS (\n    SELECT DISTINCT otel_logs.LogAttributes['context_id']\
+  \ as context_id,\n    otel_logs.LogAttributes['request_id'] as request_id,\n   \
+  \ otel_traces.Timestamp as start_time,\n    otel_traces.SpanName as data_key,\n\
+  \    otel_logs.Body as data,\n    JSON_VALUE(otel_logs.Body, '$.label') as label,\n\
+  \    JSON_VALUE(otel_logs.Body, '$.flow') as flow_label,\n    JSON_VALUE(otel_logs.Body,\
+  \ '$.node') as node_label,\n    otel_logs.TraceId as trace_id,\n    otel_traces.TraceId\n\
+  FROM otel_logs, otel_traces\n    WHERE otel_logs.TraceId = otel_traces.TraceId and\
+  \ otel_traces.SpanName = 'get_current_label'\n    ORDER BY context_id, request_id\n\
+  ) SELECT context_id,\n    request_id,\n    start_time,\n    data_key,\n    data,\n\
+  \    label,\n    neighbor(label, -1) as prev_label,\n    flow_label,\n    node_label\n\
   FROM main\nWHERE label != ''\n"
 params: null
 template_params: null
@@ -28,15 +29,14 @@ metrics:
   expression: count(*)
   description: null
   d3format: null
-  extra:
-    warning_markdown: ''
+  extra: {}
   warning_text: null
 columns:
-- column_name: start_time
+- column_name: data_key
   verbose_name: null
-  is_dttm: true
+  is_dttm: false
   is_active: true
-  type: DateTime64(9)
+  type: LowCardinality(String)
   advanced_data_type: null
   groupby: true
   filterable: true
@@ -44,11 +44,11 @@ columns:
   description: null
   python_date_format: null
   extra: {}
-- column_name: data_key
+- column_name: start_time
   verbose_name: null
-  is_dttm: false
+  is_dttm: true
   is_active: true
-  type: LowCardinality(String)
+  type: DateTime
   advanced_data_type: null
   groupby: true
   filterable: true

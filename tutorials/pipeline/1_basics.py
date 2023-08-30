@@ -6,9 +6,10 @@ The following tutorial shows basic usage of `pipeline`
 module as an extension to `dff.script.core`.
 """
 
+# %pip install dff
 
 # %%
-from dff.script import Context
+from dff.script import Context, Message
 
 from dff.pipeline import Pipeline
 
@@ -74,5 +75,6 @@ if __name__ == "__main__":
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
-            ctx: Context = pipeline(input("Send request: "), ctx_id)
+            message = Message(text=input("Send request: "))
+            ctx: Context = pipeline(message, ctx_id)
             print(ctx.last_response)

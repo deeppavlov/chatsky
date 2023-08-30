@@ -1,7 +1,7 @@
-dashboard_title: DFF Node Stats
+dashboard_title: DFF Stats
 description: null
 css: ''
-slug: dff-node-stats
+slug: dff-stats
 uuid: 68bce374-99bc-4890-b8c2-cb172409b894
 position:
   CHART-Af3zvLsiKV:
@@ -24,7 +24,7 @@ position:
     children: []
     id: CHART-CuCYDOlGEu
     meta:
-      chartId: 11
+      chartId: 10
       height: 50
       sliceName: Table
       sliceNameOverride: Stats table
@@ -57,7 +57,7 @@ position:
     children: []
     id: CHART-explore-10-1
     meta:
-      chartId: 14
+      chartId: 13
       height: 73
       sliceName: Transition layout
       sliceNameOverride: Dialogue layout
@@ -90,7 +90,7 @@ position:
     children: []
     id: CHART-explore-13-1
     meta:
-      chartId: 15
+      chartId: 14
       height: 74
       sliceName: Transition ratio [chord]
       uuid: 388d2359-8d13-4795-8dc9-1cb5dfa92ee1
@@ -117,22 +117,6 @@ position:
     - TABS-Xoi5oUBxZI
     - TAB-Gw0Ffh1lG
     - ROW-ZcN9G9RL5
-    type: CHART
-  CHART-explore-17-1:
-    children: []
-    id: CHART-explore-17-1
-    meta:
-      chartId: 9
-      height: 50
-      sliceName: Service load [max dialogue length]
-      uuid: 276c3aa7-89bc-49ff-91b6-6232ae35c854
-      width: 12
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - TABS-Xoi5oUBxZI
-    - TAB-6zE8noCIsx
-    - ROW-8mDf9VqR4
     type: CHART
   CHART-explore-20-1:
     children: []
@@ -170,7 +154,7 @@ position:
     children: []
     id: CHART-explore-22-1
     meta:
-      chartId: 12
+      chartId: 11
       height: 61
       sliceName: Terminal labels
       sliceNameOverride: Terminal labels monitor
@@ -203,7 +187,7 @@ position:
     children: []
     id: CHART-mYC2udeF3a
     meta:
-      chartId: 10
+      chartId: 9
       height: 50
       sliceName: Service load [users]
       uuid: b5d43314-514c-464e-9fcc-f897e3ae0963
@@ -219,7 +203,7 @@ position:
     children: []
     id: CHART-wci7CHiza6
     meta:
-      chartId: 13
+      chartId: 12
       height: 66
       sliceName: Transition counts
       uuid: 9fcc7cc1-9257-4c0d-b377-b3a60a8bf3df
@@ -272,7 +256,7 @@ position:
     meta:
       background: BACKGROUND_TRANSPARENT
       headerSize: LARGE_HEADER
-      text: DFF Node Stats
+      text: DFF Stats
     parents:
     - ROOT_ID
     - GRID_ID
@@ -280,7 +264,7 @@ position:
   HEADER_ID:
     id: HEADER_ID
     meta:
-      text: DFF Node Stats
+      text: DFF Stats
     type: HEADER
   ROOT_ID:
     children:
@@ -291,18 +275,6 @@ position:
     children:
     - CHART-Af3zvLsiKV
     id: ROW-7g6_n72hZ
-    meta:
-      background: BACKGROUND_TRANSPARENT
-    parents:
-    - ROOT_ID
-    - GRID_ID
-    - TABS-Xoi5oUBxZI
-    - TAB-6zE8noCIsx
-    type: ROW
-  ROW-8mDf9VqR4:
-    children:
-    - CHART-explore-17-1
-    id: ROW-8mDf9VqR4
     meta:
       background: BACKGROUND_TRANSPARENT
     parents:
@@ -450,7 +422,6 @@ position:
   TAB-6zE8noCIsx:
     children:
     - ROW-Ae7v1prsp2
-    - ROW-8mDf9VqR4
     - ROW-ksepbeQu6
     - ROW-ZTVWOu2o0
     - ROW-7g6_n72hZ
@@ -561,4 +532,24 @@ metadata:
   - '#546570'
   - '#c4ccd3'
   cross_filters_enabled: false
+  native_filter_configuration:
+  - id: NATIVE_FILTER-5vyW3SgU5
+    controlValues:
+      enableEmptyFilter: false
+    name: Time grain
+    filterType: filter_timegrain
+    targets:
+    - datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-6zE8noCIsx
+      excluded:
+      - 7
+    type: NATIVE_FILTER
+    description: ''
 version: 1.0.0
