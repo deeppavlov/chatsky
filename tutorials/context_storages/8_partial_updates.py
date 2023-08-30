@@ -5,6 +5,7 @@
 The following tutorial shows the advanced usage of context storage and context storage schema.
 """
 
+# %pip install dff
 
 # %%
 import pathlib
@@ -23,7 +24,7 @@ from dff.utils.testing.common import (
 from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
-db = context_storage_factory("pickle://dbs/partly.pkl")
+db = context_storage_factory("shelve://dbs/partly.shlv")
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 
