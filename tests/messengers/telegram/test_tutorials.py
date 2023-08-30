@@ -27,9 +27,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
         "3_buttons_with_callback",
     ],
 )
-@pytest.mark.telegram
 def test_client_tutorials_without_telegram(tutorial_module_name, env_vars):
-    assert "TG_BOT_TOKEN" in env_vars
     tutorial_module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
     pipeline = tutorial_module.pipeline
     happy_path = tutorial_module.happy_path
