@@ -1,15 +1,11 @@
 # %% [markdown]
-"""
-# Web API: 5. Streamlit chat interface
-
-This tutorial shows how to use an API endpoint created in the FastAPI tutorial
-in a Streamlit chat.
-
-A demonstration of the chat:
-![demo](
-https://user-images.githubusercontent.com/61429541/238721597-ef88261d-e9e6-497d-ba68-0bcc9a765808.png
-)
-"""
+# # Web API: 5. Streamlit chat interface
+#
+# This tutorial shows how to use an API endpoint created in the FastAPI tutorial
+# in a Streamlit chat.
+#
+# A demonstration of the chat:
+# ![demo](https://user-images.githubusercontent.com/61429541/238721597-ef88261d-e9e6-497d-ba68-0bcc9a765808.png)
 
 # %pip install dff streamlit streamlit-chat
 
