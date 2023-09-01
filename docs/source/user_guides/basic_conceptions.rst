@@ -301,3 +301,154 @@ Happy building!
 .. _tutorial on pre-response processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.7_pre_response_processing.html
 .. _tutorial on pre-transition processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.9_pre_transitions_processing.html
 .. _tutorial on script MISC: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.8_misc.html
+
+
+Basic Concepts
+--------------
+
+============
+Introduction
+============
+
+The Dialog Flow Framework (DFF) is a modern tool for designing conversational services.
+
+DFF helps users create conversational services by defining a specialized dialog graph that dictates the behavior of the dialog service. 
+This dialog graph represents the dialog script that guides the conversation between the chat-bot and the user and covers one or several scenarios.
+
+This tutorial walks you through the process of creating and maintaining a service with the help of DFF.
+
+
+===========================================
+Creating Conversational Services with DFF
+===========================================
+
+Installation
+------------
+
+To get started with DFF, you need to install its core dependencies, which can be done using the following command:
+
+   .. code-block:: shell
+
+      pip3 install dff
+
+
+Defining Dialogue Goals and User Scenarios
+------------------------------------------
+
+To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
+and breaking down the dialogue into scenarios based on the user needs that you intend to cover.
+DFF leverages a specialized Domain-Specific Language (DSL) that makes it easy to break down the dialog into the parts
+that you lay down at this stage.
+
+Creating Dialogue Flows for User Scenarios
+-------------------------------------------
+
+Once you have DFF installed, you can begin creating dialogue flows for various user scenarios. Let's consider an example of a simple chat-bot that plays a virtual ping-pong game with users and handles exceptions. Here's a snippet of the chat-bot graph:
+
+.. code-block:: python
+
+   from dff.pipeline import Pipeline
+   from dff.script import TRANSITIONS, RESPONSE, Message
+   import dff.script.conditions as cnd
+
+   ping_pong_script = {
+       "ping_pong_flow": {
+           "start_node": {
+               RESPONSE: Message(),
+               TRANSITIONS: {
+                   "greeting_node": cnd.exact_match(Message(text="Hello!")),
+               },
+           },
+           "greeting_node": {
+               RESPONSE: Message(text="Hi! Let's play ping-pong!"),
+               TRANSITIONS: {
+                   "response_node": cnd.exact_match(Message(text="Ping!")),
+               },
+           },
+           "response_node": {
+               RESPONSE: Message(text="Pong!"),
+               TRANSITIONS: {
+                   "response_node": cnd.exact_match(Message(text="Ping!")),
+               },
+           },
+           "fallback_node": {
+               RESPONSE: Message(text="That was against the rules!"),
+               TRANSITIONS: {
+                   "greeting_node": cnd.true(),
+               },
+           },
+       },
+   }
+
+   pipeline = Pipeline.from_script(
+       ping_pong_script,
+       start_label=("ping_pong_flow", "start_node"),
+       fallback_label=("ping_pong_flow", "fallback_node"),
+   )
+
+In this code, we define a script with a single dialogue flow that emulates a ping-pong game.
+Likewise, if additional scenarios need to be covered, additional flow objects can be embedded into the same script object.
+
+The flow consists of several nodes, including a start node, a greeting node, a response node, and a fallback node. 
+Each node has a defined response and transitions based on user input. 
+
+Request Handler Definition
+--------------------------
+
+The request handler definition in DFF involves deciding how user requests will be processed to extract additional parameters. This may include writing code to execute SQL queries or accessing an external API. For example, if the user wants to know the schedule, parameters could be the date and location. After retrieving data from the database or API, you need to process it and ensure it meets expectations. If the data is incorrect or missing, provide error handling logic.
+
+Generating a Response to the User
+----------------------------------
+
+Creating a response to the user in DFF involves creating a text or multimedia response from the bot that will be delivered to the user. This response may include data from a database or API, as shown in the previous code example.
+
+Handling Fallbacks and Errors
+-------------------------------
+
+In DFF, you should provide handling for situations where the user makes requests that the bot cannot answer. Create friendly error messages and, if possible, suggest alternative options. This ensures a smoother user experience even when the bot encounters unexpected inputs.
+
+Testing and Debugging
+----------------------
+
+Periodically testing the intent is crucial to ensure it works correctly. You should also be prepared to debug the code and dialogue logic if problems are discovered during testing. This step is essential to iron out any issues and make the bot more reliable.
+
+Monitoring and Analytics
+-------------------------
+
+Setting up bot performance monitoring and usage analytics is essential to monitor its operation and identify potential issues. Monitoring helps you understand how users are interacting with the bot and whether any improvements are needed.
+
+Iterative Improvement
+----------------------
+
+To continually enhance your chat-bot's performance, monitor user feedback and analyze data on bot usage. Gradually improve the dialogue logic and functionality based on the data received. This iterative approach ensures that the bot becomes more effective over time.
+
+Data Protection
+----------------
+
+Data protection is a critical consideration in bot development, especially when handling sensitive information.
+The DFF framework helps ensure the safety of your application by storing the history and other user data present
+in the `Context` object under unique ids and abstracting the storage logic away from the user interface.
+As a result, it offers the basic level of data protection making it impossible to gain unlawful access to personal information.
+
+Documentation
+--------------
+
+Creating documentation is essential for teamwork and future bot maintenance. 
+Document how the intent works, its parameters, and expected outcomes. 
+This documentation serves as a reference for developers and stakeholders involved in the project.
+
+Scaling
+-------
+
+If your bot becomes popular and requires scaling, consider scalability during development.
+Scalability ensures that the bot can handle a growing user base without performance issues.
+While having only one application instance will suffice in most cases, there are many ways
+how you can adapt the application to a high load environment.
+
+* With the database connection support that DFF offers out of the box, DFF projects
+can be easily scaled through sharing the same database between multiple application instances.
+However, using an external database is required due to the fact that this is the only kind of storage
+that can be efficiently shared between processes.
+* Likewise, using multiple database instances to ensure the availability of data is also an option.
+* The structure of the `Context` object makes it easy to shard the data storing different subsets
+of data across multiple database instances.
