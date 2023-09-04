@@ -1,0 +1,328 @@
+Basic Concepts
+--------------
+
+Introduction
+~~~~~~~~~~~~
+
+The Dialog Flow Framework (DFF) is a modern tool for designing conversational services.
+
+DFF helps users create conversational services by defining a specialized dialog graph that dictates the behavior of the dialog service. 
+This dialog graph represents the dialog script that guides the conversation between the chat-bot and the user and covers one or several scenarios.
+
+This tutorial walks you through the process of creating and maintaining a service with the help of DFF.
+
+=========================================
+Creating Conversational Services with DFF
+=========================================
+
+Installation
+~~~~~~~~~~~~
+
+To get started with DFF, you need to install its core dependencies, which can be done using the following command:
+
+   .. code-block:: shell
+
+      pip3 install dff
+
+Defining Dialogue Goals and User Scenarios
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
+and breaking down the dialogue into scenarios based on the user intents that you want to cover.
+DFF leverages a specialized Domain-Specific Language (DSL) that makes it easy to break down the dialog
+(also referred to as `script`) into the parts that you specify at this stage, aka `flows`.
+
+Creating Dialogue Flows for User Scenarios
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Once you have DFF installed, you can begin creating dialogue flows for various user scenarios. 
+The flow consists of nodes that represent the states of the dialog, making the whole dialog script
+identical to a final state automaton. 
+
+.. note::
+
+    In other words, the script object has 3 levels of nestedness:
+    **script - flow - node**
+
+Let's assume that the only scenario of the service is the chat bot playing ping pong with the user.
+I.E. the bot is supposed to reply 'pong' to messages that say 'ping' and handle any other messages as exceptions.
+The pseudo-code for the said flow is as follows:
+
+.. code-block:: text
+
+    If user writes "Hello!":
+        Respond with "Hi! Let's play ping-pong!"
+
+        If user afterwards writes "Ping" or "ping" or "Ping!" or "ping!":
+            Respond with "Pong!"
+            Repeat this behaviour
+
+    If user writes something else:
+        Respond with "That was against the rules"
+        Go to responding with "Hi! Let's play ping-pong!" if user writes anything
+
+This leaves us with a single dialog flow in the dialog graph that we lay down below, with the annotations for
+each part of the graph available under the code snippet.
+
+Example flow & script
+~~~~~~~~~~~~~~~~~~~~~
+
+.. code-block:: python
+
+    from dff.pipeline import Pipeline
+    from dff.script import TRANSITIONS, RESPONSE, Message
+    import dff.script.conditions as cnd
+
+    ping_pong_script = {
+        "ping_pong_flow": {
+            "start_node": {
+                RESPONSE: Message(text=""), # the response of the initial node is skipped
+                TRANSITIONS: {
+                    "greeting_node": cnd.exact_match(Message(text="Hello!")),
+                },
+            },
+            "greeting_node": {
+                RESPONSE: Message(text="Hi! Let's play ping-pong!"),
+                TRANSITIONS: {
+                    "response_node": cnd.exact_match(Message(text="Ping!")),
+                },
+            },
+            "response_node": {
+                RESPONSE: Message(text="Pong!"),
+                TRANSITIONS: {
+                    "response_node": cnd.exact_match(Message(text="Ping!")),
+                },
+            },
+            "fallback_node": {
+                RESPONSE: Message(text="That was against the rules!"),
+                TRANSITIONS: {
+                    "greeting_node": cnd.true(),
+                },
+            },
+        },
+    }
+
+    pipeline = Pipeline.from_script(
+        ping_pong_script,
+        start_label=("ping_pong_flow", "start_node"),
+        fallback_label=("ping_pong_flow", "fallback_node"),
+    )
+
+The code snippet above defines a script with a single dialogue flow that emulates a ping-pong game.
+Likewise, if additional scenarios need to be covered, additional flow objects can be embedded into the same script object.
+
+* ``ping_pong_script``: in order to create a dialog agent, a dialog **script** is needed;
+  a script is a dictionary, where the keys are the names of the flows (that are "sub-dialogs",
+  used to separate the whole dialog into multiple sub-dialogs).
+
+* ``ping_pong_flow`` is our behaviour flow; a flow is a separated dialog, containing linked
+  conversation nodes and possibly some extra data, transitions, etc.
+
+* ``start_node`` is the initial node, contains no response, only transfers user to an other node
+  according to the first message user sends.
+  It transfers user to ``greeting_node`` if user writes text message exactly equal to "Hello!".
+
+* Each node contains "RESPONSE" and "TRANSITIONS" elements.
+
+* ``TRANSITIONS`` value should be a dict, containing node names and conditions,
+  that should be met in order to go to the node specified.
+  Here, we can see two different types of transitions: ``exact_match`` requires user message text to
+  match the provided text exactly, while ``true`` allowes unconditional transition.
+
+* ``greeting_node`` is the node that will greet user and propose him a ping-pong game.
+  It transfers user to ``response_node`` if user writes text message exactly equal to "Ping!".
+
+* ``response_node`` is the node that will play ping-pong game with the user.
+  It transfers user to ``response_node`` if user writes text message exactly equal to "Ping!".
+
+* ``fallback_node`` is an "exception handling node"; user will be transferred here if in any node
+  no transition for the message given by user is found.
+  It transfers user to ``greeting_node`` no matter what user writes.
+
+* ``pipeline`` is a special object that processes user requests according to provided script.
+  In order to create a pipeline, the script should be provided and two two-string tuples:
+  the first specifies initial node flow and name and the second (optional) specifies fallback
+  node flow and name (if not provided it equals to the first one by default). 
+
+.. note::
+
+    See `tutorial on basic dialog structure`_.
+
+Processing Definition
+~~~~~~~~~~~~~~~~~~~~~
+
+Processing user requests and extracting additional parameters is a crucial part of building a conversational bot. 
+DFF allows you to define how user requests will be processed to extract additional parameters.
+This is done by passing callbacks to special ``PROCESSING`` fields in the Node object.
+
+* User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation.
+    See `tutorial on pre-response processing`_.
+* Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation.
+    See `tutorial on pre-transition processing`_.
+
+Depending on your bot's requirements and the goal of the dialog, you may need to interact with external databases or APIs to retrieve data. 
+For instance, if a user wants to know a schedule, you may need to access a database and extract parameters such as date and location.
+
+.. code-block:: python
+
+    import requests
+    ...
+    def use_api_processing(ctx: Context, _: Pipeline) -> Context:
+        ctx.misc["api_call_results"] = requests.get("http://schedule.api/day1")
+        return ctx
+    ...
+    node = {
+        RESPONSE: ...
+        TRANSITIONS: ...
+        PRE_TRANSITIONS_PROCESSING: {"use_api": use_api_processing}
+    }
+
+If you retrieve data from the database or API, it's important to validate it to ensure it meets expectations. 
+Since DFF extensively leverages pydantic, you can resort to the validation tools of this feature-rich library.
+For instance, given that each processing routine is a callback, you can use tools like pydantic's `validate_call`
+to ensure that the returned values match the function signature.
+Error handling logic can also be incorporated into the callbacks.
+
+Generating a bot Response
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Generating a bot response involves creating a text or multimedia response that will be delivered to the user.
+Response is defined in the ``RESPONSE`` section of each node and should be either a ``Message`` object,
+that can contain text, images, audios, attachments, etc., or a callback that returns a ``Message``.
+The latter allows you to customize the response based on the specific scenario and user input.
+
+.. code-block:: python
+
+    def sample_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+        if ctx.misc["user"] == 'vegan':
+            return Message(text="Here is a list of vegan cafes.")
+        return Message(text="Here is a list of cafes.")
+
+Handling Fallbacks
+~~~~~~~~~~~~~~~~~~
+
+In DFF, you should provide handling for situations where the user makes requests
+that do not trigger any of the specified transitions. 
+To cover that use case, DFF requires you to define a fallback node that the agent will move to
+when no adequate transition has been found.
+
+Like other nodes, the fallback node can either use a callback to produce a response
+which gives you a lot of freedom in creating situationally appropriate error messages.
+Create friendly error messages and, if possible, suggest alternative options. 
+This ensures a smoother user experience even when the bot encounters unexpected inputs.
+
+.. code-block:: python
+
+    def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+        """
+        Generate a special fallback response if the initial user utterance is not 'Hi'.
+        """
+        last_flow, last_node = ctx.last_label
+        if ctx.last_request.text != "Hi" and last_node == "start_node":
+            return Message(text="You should've started the dialog with 'Hello!'")
+        else:
+            raise RuntimeError("Error occurred: last request is None!")
+
+Testing and Debugging
+~~~~~~~~~~~~~~~~~~~~~
+
+Periodically testing the conversational services is crucial to ensure it works correctly.
+You should also be prepared to debug the code and dialogue logic if problems are discovered during testing. 
+Thorough testing helps identify and resolve any potential problems in the conversation flow.
+
+The basic testing procedure offered by DFF is the end-to-end testing of the pipeline and the script
+that ensures that the pipeline yields correct responses at any given moment.
+It requires a sequence of user request - bot response pairs that form the happy path of your
+conversational service.
+
+.. code-block:: python
+
+    happy_path = (
+        (Message(text="Hi"), Message(text="Hi! Let's play ping-pong!")),
+        (Message(text="Ping!"), Message(text="Pong!"))
+    )
+
+A special function is then used to ascertain complete identity of the messages taken from
+the happy path and the pipeline.
+
+.. code-block:: python
+
+    from dff.testing.common import check_happy_path
+
+    check_happy_path(pipeline, happy_path)
+
+Monitoring and Analytics
+~~~~~~~~~~~~~~~~~~~~~~~~
+
+Setting up bot performance monitoring and usage analytics is essential to monitor its operation and identify potential issues. 
+Monitoring helps you understand how users are interacting with the bot and whether any improvements are needed.
+Analytics data can provide valuable insights for refining the bot's behavior and responses.
+
+DFF provides a `statistics` module as an out-of-the-box solution for collecting arbitrary statistical metrics
+from your service. Setting up the data collection is as easy as instantiating the relevant class in the same
+context with the pipeline. 
+What's more, the data you obtain can be visualized right away using Apache Superset as a charting engine.
+
+.. note::
+
+    More information is available in the respective tutorial.
+    TODO: insert link
+
+Iterative Improvement
+~~~~~~~~~~~~~~~~~~~~~
+
+To continually enhance your chat-bot's performance, monitor user feedback and analyze data on bot usage.
+For instance, the statistics or the charts may reveal that some flow is visited by users more frequently or
+less frequently than planned. This would mean that adjustments to the transition structure
+of the graph need to be made.
+
+Gradually improve the transition logic and response content based on the data received. 
+This iterative approach ensures that the bot becomes more effective over time.
+
+Data Protection
+~~~~~~~~~~~~~~~
+
+Data protection is a critical consideration in bot development, especially when handling sensitive information.
+
+.. note::
+
+    The DFF framework helps ensure the safety of your application by storing the history and other user data present
+    in the `Context` object under unique ids and abstracting the storage logic away from the user interface.
+    As a result, it offers the basic level of data protection making it impossible to gain unlawful access to personal information.
+
+Documentation
+~~~~~~~~~~~~~
+
+Creating documentation is essential for teamwork and future bot maintenance. 
+Document how the intent works, its parameters, and expected outcomes. 
+This documentation serves as a reference for developers and stakeholders involved in the project.
+
+Scaling
+~~~~~~~
+
+If your bot becomes popular and requires scaling, consider scalability during development.
+Scalability ensures that the bot can handle a growing user base without performance issues.
+While having only one application instance will suffice in most cases, there are many ways
+how you can adapt the application to a high load environment.
+
+* With the database connection support that DFF offers out of the box, DFF projects
+    can be easily scaled through sharing the same database between multiple application instances.
+    However, using an external database is required due to the fact that this is the only kind of storage
+    that can be efficiently shared between processes.
+* Likewise, using multiple database instances to ensure the availability of data is also an option.
+* The structure of the `Context` object makes it easy to shard the data storing different subsets
+    of data across multiple database instances.
+
+Further reading
+~~~~~~~~~~~~~~~
+
+.. _tutorial on basic dialog structure: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.1_basics.html
+.. _tutorial on response functions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.3_responses.html
+.. _documentation of Context object: https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html
+.. _tutorial on transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.4_transitions.html
+.. _tutorial on conditions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.2_conditions.html
+.. _tutorial on global transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.5_global_transitions.html
+.. _tutorial on context serialization: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.6_context_serialization.html
+.. _tutorial on pre-response processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.7_pre_response_processing.html
+.. _tutorial on pre-transition processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.9_pre_transitions_processing.html
+.. _tutorial on script MISC: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.8_misc.html
