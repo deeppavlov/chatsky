@@ -35,8 +35,8 @@ DFF leverages a specialized Domain-Specific Language (DSL) that makes it easy to
 Creating Dialogue Flows for User Scenarios
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have DFF installed, you can begin creating dialogue flows for various user scenarios. 
-The flow consists of nodes that represent the states of the dialog, making the whole dialog script
+Once you have DFF installed, you can begin creating dialogue flows in your script targeting various user scenarios. 
+A flow consists of nodes that represent the states of the dialog, making the whole dialog script
 identical to a final state automaton. 
 
 .. note::
@@ -155,10 +155,8 @@ Processing user requests and extracting additional parameters is a crucial part 
 DFF allows you to define how user requests will be processed to extract additional parameters.
 This is done by passing callbacks to special ``PROCESSING`` fields in the Node object.
 
-* User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation.
-    See `tutorial on pre-response processing`_.
-* Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation.
-    See `tutorial on pre-transition processing`_.
+* User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation. See `tutorial on pre-response processing`_.
+* Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation. See `tutorial on pre-transition processing`_.
 
 Depending on your bot's requirements and the goal of the dialog, you may need to interact with external databases or APIs to retrieve data. 
 For instance, if a user wants to know a schedule, you may need to access a database and extract parameters such as date and location.
@@ -305,24 +303,20 @@ Scalability ensures that the bot can handle a growing user base without performa
 While having only one application instance will suffice in most cases, there are many ways
 how you can adapt the application to a high load environment.
 
-* With the database connection support that DFF offers out of the box, DFF projects
-    can be easily scaled through sharing the same database between multiple application instances.
-    However, using an external database is required due to the fact that this is the only kind of storage
-    that can be efficiently shared between processes.
+* With the database connection support that DFF offers out of the box, DFF projects can be easily scaled through sharing the same database between multiple application instances. However, using an external database is required due to the fact that this is the only kind of storage that can be efficiently shared between processes.
 * Likewise, using multiple database instances to ensure the availability of data is also an option.
-* The structure of the `Context` object makes it easy to shard the data storing different subsets
-    of data across multiple database instances.
+* The structure of the `Context` object makes it easy to shard the data storing different subsets of data across multiple database instances.
 
 Further reading
 ~~~~~~~~~~~~~~~
 
 .. _tutorial on basic dialog structure: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.1_basics.html
-.. _tutorial on response functions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.3_responses.html
-.. _documentation of Context object: https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html
 .. _tutorial on transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.4_transitions.html
 .. _tutorial on conditions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.2_conditions.html
-.. _tutorial on global transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.5_global_transitions.html
-.. _tutorial on context serialization: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.6_context_serialization.html
+.. _tutorial on response functions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.3_responses.html
 .. _tutorial on pre-response processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.7_pre_response_processing.html
 .. _tutorial on pre-transition processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.9_pre_transitions_processing.html
+.. _documentation of Context object: https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html
+.. _tutorial on global transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.5_global_transitions.html
+.. _tutorial on context serialization: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.6_context_serialization.html
 .. _tutorial on script MISC: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.8_misc.html
