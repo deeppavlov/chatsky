@@ -58,8 +58,8 @@ services:
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
     volumes:
-      - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml
-      - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml
+      - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
+      - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
     ports:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
