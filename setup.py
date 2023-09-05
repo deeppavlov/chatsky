@@ -157,7 +157,7 @@ doc = merge_req_lists(
     [
         "sphinx==7.2.2",
         "pydata-sphinx-theme==0.13.3",
-        "sphinxcontrib-apidoc==0.3.0",
+        "sphinxcontrib-apidoc==0.4.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon==1.0.1",
