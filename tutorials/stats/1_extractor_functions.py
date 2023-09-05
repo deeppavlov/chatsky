@@ -72,7 +72,7 @@ that the output is logged by OpenTelemetry.
 
 
 # %%
-# decorated by an OTLP Instrumentor instace
+# decorated by an OTLP Instrumentor instance
 @dff_instrumentor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
