@@ -6,10 +6,13 @@ Introduction
 
 The Dialog Flow Framework (DFF) is a modern tool for designing conversational services.
 
-DFF helps users create conversational services by defining a specialized dialog graph that dictates the behavior of the dialog service. 
-This dialog graph represents the dialog script that guides the conversation between the chat-bot and the user and covers one or several scenarios.
+DFF introduces a specialized Domain-Specific Language (DSL) based on standard Python functions and data structures
+which makes it very easy for developers with any level of expertise to design a script for user - bot interaction. 
+The script comes in a form of the *dialog graph* structure that includes the majority of the conversation logic,
+and covers one or several user scenarios, all in a single Python dict.
 
-This tutorial walks you through the process of creating and maintaining a service with the help of DFF.
+In this tutorial, we describe the basics of DFF API,
+and walk you through the process of creating and maintaining a conversational service with the help of DFF.
 
 =========================================
 Creating Conversational Services with DFF
@@ -28,23 +31,21 @@ Defining Dialogue Goals and User Scenarios
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
-and breaking down the dialogue into scenarios based on the user intents that you want to cover.
-DFF leverages a specialized Domain-Specific Language (DSL) that makes it easy to break down the dialog
-(also referred to as `script`) into the parts that you specify at this stage, aka `flows`.
+and breaking down the dialogue into smaller scenarios based on the user intents or actions that you want to cover.
+DFF's Domain-Specific Language makes it easy to break down the dialog script into small parts that you specify at this stage, aka `flows`.
 
 Creating Dialogue Flows for User Scenarios
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have DFF installed, you can begin creating dialogue flows in your script targeting various user scenarios. 
-A flow consists of nodes that represent the states of the dialog, making the whole dialog script
-identical to a final state automaton. 
+Once you have DFF installed, you can define dialogue flows targeting various user scenarios
+and to combine them in a global script object. A flow consists of one or more nodes that represent the states of the dialog.
 
 .. note::
 
     In other words, the script object has 3 levels of nestedness:
     **script - flow - node**
 
-Let's assume that the only scenario of the service is the chat bot playing ping pong with the user.
+Let's assume that the only user scenario of the service is the chat bot playing ping pong with the user.
 I.E. the bot is supposed to reply 'pong' to messages that say 'ping' and handle any other messages as exceptions.
 The pseudo-code for the said flow is as follows:
 
@@ -139,7 +140,8 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
   no transition for the message given by user is found.
   It transfers user to ``greeting_node`` no matter what user writes.
 
-* ``pipeline`` is a special object that processes user requests according to provided script.
+* ``pipeline`` is a special object that traverses the script graph based on the values of user input.
+  It is also capable of executing custom actions that you want to run on every turn of the conversation.
   In order to create a pipeline, the script should be provided and two two-string tuples:
   the first specifies initial node flow and name and the second (optional) specifies fallback
   node flow and name (if not provided it equals to the first one by default). 
@@ -153,7 +155,7 @@ Processing Definition
 
 Processing user requests and extracting additional parameters is a crucial part of building a conversational bot. 
 DFF allows you to define how user requests will be processed to extract additional parameters.
-This is done by passing callbacks to special ``PROCESSING`` fields in the Node object.
+This is done by passing callbacks to a special ``PROCESSING`` fields in a Node dict.
 
 * User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation. See `tutorial on pre-response processing`_.
 * Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation. See `tutorial on pre-transition processing`_.
@@ -224,12 +226,12 @@ This ensures a smoother user experience even when the bot encounters unexpected 
 Testing and Debugging
 ~~~~~~~~~~~~~~~~~~~~~
 
-Periodically testing the conversational services is crucial to ensure it works correctly.
+Periodically testing the conversational service is crucial to ensure it works correctly.
 You should also be prepared to debug the code and dialogue logic if problems are discovered during testing. 
 Thorough testing helps identify and resolve any potential problems in the conversation flow.
 
-The basic testing procedure offered by DFF is the end-to-end testing of the pipeline and the script
-that ensures that the pipeline yields correct responses at any given moment.
+The basic testing procedure offered by DFF is end-to-end testing of the pipeline and the script
+which ensures that the pipeline yields correct responses for any given input.
 It requires a sequence of user request - bot response pairs that form the happy path of your
 conversational service.
 

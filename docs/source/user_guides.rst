@@ -1,7 +1,7 @@
 User guides
 -----------
 
-:doc:`Basic concepts <./user_guides/basic_concepts>`
+:doc:`Basic concepts <./user_guides/basic_conceptions>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 In the ``basic concepts`` tutorial the basics of DFF are described,
@@ -13,4 +13,4 @@ about current script execution.
 .. toctree::
    :hidden:
 
-   user_guides/basic_concepts
+   user_guides/basic_conceptions
