@@ -73,7 +73,11 @@ class ShelveContextStorage(DBContextStorage):
         }
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
-        timed = sorted(self.context_db.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)
+        timed = sorted(
+            self.context_db.items(),
+            key=lambda v: v[1][ExtraFields.updated_at.value] * int(v[1][ExtraFields.active_ctx.value]),
+            reverse=True,
+        )
         for key, value in timed:
             if value[ExtraFields.storage_key.value] == storage_key and value[ExtraFields.active_ctx.value]:
                 return key
