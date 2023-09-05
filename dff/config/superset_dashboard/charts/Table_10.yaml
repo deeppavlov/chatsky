@@ -1,0 +1,34 @@
+slice_name: Table
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  adhoc_filters: []
+  all_columns: []
+  color_pn: true
+  datasource: 3__table
+  extra_form_data: {}
+  granularity_sqla: start_time
+  groupby:
+  - context_id
+  - start_time
+  - data_key
+  - data
+  order_by_cols: []
+  order_desc: false
+  percent_metrics: []
+  query_mode: aggregate
+  row_limit: 10000
+  server_page_length: 10
+  show_cell_bars: true
+  slice_id: 14
+  table_timestamp_format: smart_date
+  time_grain_sqla: null
+  time_range: No filter
+  viz_type: table
+query_context: null
+cache_timeout: null
+uuid: 38d353dc-c0ef-41a0-97c7-3dcbebab9e02
+version: 1.0.0
+dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

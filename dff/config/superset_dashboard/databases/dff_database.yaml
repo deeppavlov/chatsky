@@ -1,0 +1,13 @@
+database_name: dff_database
+sqlalchemy_uri: clickhousedb+connect://username:XXXXXXXXXX@clickhouse:8123/test
+cache_timeout: null
+expose_in_sqllab: true
+allow_run_async: false
+allow_ctas: false
+allow_cvas: false
+allow_dml: false
+allow_file_upload: false
+extra:
+  allows_virtual_table_explore: true
+uuid: ee32f76e-55e3-483a-935a-22d03072db23
+version: 1.0.0
