@@ -8,8 +8,9 @@ The Dialog Flow Framework (DFF) is a modern tool for designing conversational se
 
 DFF introduces a specialized Domain-Specific Language (DSL) based on standard Python functions and data structures
 which makes it very easy for developers with any level of expertise to design a script for user - bot interaction. 
-The script comes in a form of the *dialog graph* structure that includes the majority of the conversation logic,
-and covers one or several user scenarios, all in a single Python dict.
+The script comes in a form of the *dialog graph* structure that works like a finite state automaton with
+each node equal to a specific state of the dialog, i.e. to a conversation turn.
+The graph includes the majority of the conversation logic, and covers one or several user scenarios, all in a single Python dict.
 
 In this tutorial, we describe the basics of DFF API,
 and walk you through the process of creating and maintaining a conversational service with the help of DFF.
@@ -32,7 +33,8 @@ Defining Dialogue Goals and User Scenarios
 
 To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
 and breaking down the dialogue into smaller scenarios based on the user intents or actions that you want to cover.
-DFF's Domain-Specific Language makes it easy to break down the dialog script into small parts that you specify at this stage, aka `flows`.
+DFF's Domain-Specific Language makes it easy to break down the dialog script into `flows`, i.e. named node groups,
+unified by a specific purpose.
 
 Creating Dialogue Flows for User Scenarios
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -202,11 +204,11 @@ Handling Fallbacks
 ~~~~~~~~~~~~~~~~~~
 
 In DFF, you should provide handling for situations where the user makes requests
-that do not trigger any of the specified transitions. 
+that do not trigger any of the transitions specified in the script graph. 
 To cover that use case, DFF requires you to define a fallback node that the agent will move to
 when no adequate transition has been found.
 
-Like other nodes, the fallback node can either use a callback to produce a response
+Like other nodes, the fallback node can either use a message or a callback to produce a response
 which gives you a lot of freedom in creating situationally appropriate error messages.
 Create friendly error messages and, if possible, suggest alternative options. 
 This ensures a smoother user experience even when the bot encounters unexpected inputs.
