@@ -91,7 +91,7 @@ otl_dependencies = [
     "opentelemetry-instrumentation==0.38b0",
     "opentelemetry-proto==1.17.0",
     "opentelemetry-sdk==1.17.0",
-    "opentelemetry-semantic-conventions==0.38b0",
+    "opentelemetry-semantic-conventions==0.41b0",
 ]
 
 stats_dependencies = merge_req_lists(
