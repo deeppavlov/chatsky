@@ -100,7 +100,7 @@ stats_dependencies = merge_req_lists(
     otl_dependencies,
     [
         "wrapt==1.15.0",
-        "tqdm==4.62.3",
+        "tqdm==4.66.1",
         "omegaconf>=2.2.2",
     ],
 )
