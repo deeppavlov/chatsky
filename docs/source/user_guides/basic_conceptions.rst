@@ -40,7 +40,7 @@ Creating Dialogue Flows for User Scenarios
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Once you have DFF installed, you can define dialogue flows targeting various user scenarios
-and to combine them in a global script object. A flow consists of one or more nodes that represent the states of the dialog.
+and to combine them in a global script object. A flow consists of one or more nodes that represent conversation turns.
 
 .. note::
 
@@ -121,16 +121,22 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
 * ``ping_pong_flow`` is our behaviour flow; a flow is a separated dialog, containing linked
   conversation nodes and possibly some extra data, transitions, etc.
 
-* ``start_node`` is the initial node, contains no response, only transfers user to an other node
+* A node object is an atomic part of the script.
+  The required fields of a node object are ``RESPONSE`` and ``TRANSITIONS``.
+
+* The ``RESPONSE`` field specifies the response that the dialog agent gives to the user in the current turn.
+
+* The ``TRANSITIONS`` field specifies the edges of the dialog graph that link the dialog states.
+  This is a dictionary that maps labels of other nodes to conditions, i.e. to callback functions that
+  return `True` or `False`. These conditions determine whether respective nodes can be visited
+  in the next turn.
+  In the example script, we use standard transitions: ``exact_match`` requires the user request to
+  fully match the provided text, while ``true`` always allows a transition. However, passing custom
+  callbacks that implement arbitrary logic is also an option.
+
+* ``start_node`` is the initial node, which contains an empty response and only transfers user to an other node
   according to the first message user sends.
   It transfers user to ``greeting_node`` if user writes text message exactly equal to "Hello!".
-
-* Each node contains "RESPONSE" and "TRANSITIONS" elements.
-
-* ``TRANSITIONS`` value should be a dict, containing node names and conditions,
-  that should be met in order to go to the node specified.
-  Here, we can see two different types of transitions: ``exact_match`` requires user message text to
-  match the provided text exactly, while ``true`` allowes unconditional transition.
 
 * ``greeting_node`` is the node that will greet user and propose him a ping-pong game.
   It transfers user to ``response_node`` if user writes text message exactly equal to "Ping!".
@@ -144,9 +150,9 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
 
 * ``pipeline`` is a special object that traverses the script graph based on the values of user input.
   It is also capable of executing custom actions that you want to run on every turn of the conversation.
-  In order to create a pipeline, the script should be provided and two two-string tuples:
-  the first specifies initial node flow and name and the second (optional) specifies fallback
-  node flow and name (if not provided it equals to the first one by default). 
+  The pipeline can be initialized with a script, and with labels of two nodes:
+  the entrypoint of the graph, aka the 'start node', and the fallback node
+  (if not provided it equals the former per default).
 
 .. note::
 
