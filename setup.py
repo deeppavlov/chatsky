@@ -84,7 +84,7 @@ requests_requirements = [
 ]
 
 otl_dependencies = [
-    "opentelemetry-api==1.17.0",
+    "opentelemetry-api==1.20.0",
     "opentelemetry-exporter-otlp==1.17.0",
     "opentelemetry-exporter-otlp-proto-grpc==1.17.0",
     "opentelemetry-exporter-otlp-proto-http==1.17.0",
