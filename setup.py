@@ -88,7 +88,7 @@ otl_dependencies = [
     "opentelemetry-exporter-otlp==1.17.0",
     "opentelemetry-exporter-otlp-proto-grpc==1.17.0",
     "opentelemetry-exporter-otlp-proto-http==1.17.0",
-    "opentelemetry-instrumentation==0.38b0",
+    "opentelemetry-instrumentation==0.40b0",
     "opentelemetry-proto==1.17.0",
     "opentelemetry-sdk==1.17.0",
     "opentelemetry-semantic-conventions==0.38b0",
