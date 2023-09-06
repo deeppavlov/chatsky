@@ -129,7 +129,7 @@ test_requirements = merge_req_lists(
         "black==23.7.0",
         "isort==5.12.0",
         "aiochclient>=2.2.0",
-        "httpx<=0.23.0",
+        "httpx<=0.24.1",
         "sqlparse==0.4.4",
     ],
     requests_requirements,
