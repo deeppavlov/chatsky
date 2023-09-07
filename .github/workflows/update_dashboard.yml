@@ -46,6 +46,7 @@ jobs:
         - name: Build and upload image
           uses: docker/build-push-action@v4
           with:
-            file: dff/utils/docker/dockerfile_stats
+            context: dff/utils/docker
+            file: dockerfile_stats
             tags: ${{ steps.meta.outputs.tags }}
             labels: ${{ steps.meta.outputs.labels }}
