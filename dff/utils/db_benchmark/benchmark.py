@@ -26,6 +26,7 @@ import json
 import importlib
 from statistics import mean
 import abc
+from traceback import extract_tb, StackSummary
 
 from pydantic import BaseModel, Field
 from tqdm.auto import tqdm
@@ -300,11 +301,13 @@ class BenchmarkCase(BaseModel):
                 },
             }
         except Exception as e:
-            exception_message = getattr(e, "message", repr(e))
-            print(exception_message)
             return {
                 "success": False,
-                "result": exception_message,
+                "result": {
+                    "type": e.__class__.__name__,
+                    "msg": getattr(e, "message", str(e)),
+                    "traceback": "\n".join(StackSummary.from_list(extract_tb(e.__traceback__)).format()),
+                },
             }
 
     def run(self):

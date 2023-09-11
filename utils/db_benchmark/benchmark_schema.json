@@ -63,7 +63,7 @@
             "type": "object"
           },
           "result": {
-            "description": "Raw benchmark results or error message",
+            "description": "Raw benchmark results or exception info",
             "oneOf": [
               {
                 "type": "object",
@@ -93,7 +93,22 @@
                 "required": ["write_times", "read_times", "update_times"]
               },
               {
-                "type": "string"
+                "type": "object",
+                "properties": {
+                  "type": {
+                    "description": "Class name of the exception",
+                    "type": "string"
+                  },
+                  "msg": {
+                    "description": "Exception message",
+                    "type": "string"
+                  },
+                  "traceback": {
+                    "description": "String representation of exception traceback",
+                    "type": "string"
+                  }
+                },
+                "required": ["type", "msg", "traceback"]
               }
             ]
 

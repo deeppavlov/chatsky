@@ -273,7 +273,9 @@ with view_tab:
         st.json(benchmark_stats)
 
     if not selected_benchmark["success"]:
-        st.warning(selected_benchmark["result"])
+        exc_info = selected_benchmark["result"]
+
+        st.warning(f"**{exc_info['type']}**: {exc_info['msg']}\n\nTraceback:\n\n```\n{exc_info['traceback']}\n```")
     else:
         add_metrics(st.container(), selected_benchmark)
 
