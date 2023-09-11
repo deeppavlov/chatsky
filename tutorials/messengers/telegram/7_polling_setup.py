@@ -33,7 +33,7 @@ that are used in the `pytelegrambotapi` library, specifically:
 
 # %%
 interface = PollingTelegramInterface(
-    token=os.getenv("TG_BOT_TOKEN", ""),
+    token=os.environ["TG_BOT_TOKEN"],
     interval=2,
     allowed_updates=update_types,
     timeout=30,
@@ -53,8 +53,6 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

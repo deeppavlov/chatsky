@@ -88,6 +88,32 @@ benchmark_dependencies = [
     "streamlit",
 ]
 
+requests_requirements = [
+    "requests==2.31.0",
+]
+
+otl_dependencies = [
+    "opentelemetry-api==1.17.0",
+    "opentelemetry-exporter-otlp==1.17.0",
+    "opentelemetry-exporter-otlp-proto-grpc==1.17.0",
+    "opentelemetry-exporter-otlp-proto-http==1.17.0",
+    "opentelemetry-instrumentation==0.38b0",
+    "opentelemetry-proto==1.17.0",
+    "opentelemetry-sdk==1.17.0",
+    "opentelemetry-semantic-conventions==0.38b0",
+]
+
+stats_dependencies = merge_req_lists(
+    _sql_dependencies,
+    requests_requirements,
+    otl_dependencies,
+    [
+        "wrapt==1.15.0",
+        "tqdm==4.62.3",
+        "omegaconf>=2.2.2",
+    ],
+)
+
 full = merge_req_lists(
     core,
     async_files_dependencies,
@@ -97,13 +123,10 @@ full = merge_req_lists(
     mysql_dependencies,
     postgresql_dependencies,
     ydb_dependencies,
+    stats_dependencies,
     telegram_dependencies,
     benchmark_dependencies,
 )
-
-requests_requirements = [
-    "requests==2.31.0",
-]
 
 test_requirements = merge_req_lists(
     [
@@ -116,6 +139,9 @@ test_requirements = merge_req_lists(
         "black==23.7.0",
         "isort==5.12.0",
         "jsonschema==4.17.3",
+        "aiochclient>=2.2.0",
+        "httpx<=0.23.0",
+        "sqlparse==0.4.4",
     ],
     requests_requirements,
 )
@@ -124,11 +150,11 @@ tutorial_dependencies = [
     "flask[async]==2.3.2",
     "psutil==5.9.5",
     "telethon==1.29.1",
-    "fastapi==0.101.0",
+    "fastapi==0.103.1",
     "uvicorn==0.23.1",
     "websockets==11.0.2",
     "locust==2.16.1",
-    "streamlit==1.25.0",
+    "streamlit==1.26.0",
     "streamlit-chat==0.1.1",
 ]
 
@@ -142,7 +168,7 @@ doc = merge_req_lists(
     [
         "sphinx==7.2.2",
         "pydata-sphinx-theme==0.13.3",
-        "sphinxcontrib-apidoc==0.3.0",
+        "sphinxcontrib-apidoc==0.4.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
         "sphinx-favicon==1.0.1",
@@ -158,7 +184,7 @@ doc = merge_req_lists(
 
 devel = [
     "bump2version==1.0.1",
-    "build==0.10.0",
+    "build==1.0.0",
     "twine==4.0.0",
 ]
 
@@ -173,6 +199,7 @@ devel_full = merge_req_lists(
     mypy_dependencies,
 )
 
+
 EXTRA_DEPENDENCIES = {
     "core": core,  # minimal dependencies (by default)
     "json": async_files_dependencies,  # dependencies for using JSON
@@ -183,6 +210,7 @@ EXTRA_DEPENDENCIES = {
     "mysql": mysql_dependencies,  # dependencies for using MySQL
     "postgresql": postgresql_dependencies,  # dependencies for using PostgreSQL
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
+    "stats": stats_dependencies,  # dependencies for statistics collection
     "telegram": telegram_dependencies,  # dependencies for using Telegram
     "benchmark": benchmark_dependencies,  # dependencies for benchmarking
     "full": full,  # full dependencies including all options above
@@ -222,4 +250,5 @@ setup(
     install_requires=core,
     test_suite="tests",
     extras_require=EXTRA_DEPENDENCIES,
+    entry_points={"console_scripts": ["dff.stats=dff.stats.__main__:main"]},
 )
