@@ -138,7 +138,7 @@ test_requirements = merge_req_lists(
 tutorial_dependencies = [
     "flask[async]==2.3.2",
     "psutil==5.9.5",
-    "telethon==1.29.1",
+    "telethon==1.30.0",
     "fastapi==0.103.1",
     "uvicorn==0.23.1",
     "websockets==11.0.2",
