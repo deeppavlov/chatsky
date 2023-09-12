@@ -59,7 +59,7 @@ wait_db: docker_up
 .PHONY: wait_db
 
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
 test_all: venv wait_db test lint

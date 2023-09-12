@@ -170,6 +170,7 @@ def setup(_):
                 ],
             ),
             ("tutorials.utils", "Utils"),
+            ("tutorials.stats", "Stats"),
         ]
     )
     regenerate_apiref(
@@ -178,6 +179,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.stats", "Stats"),
             ("dff.utils.testing", "Utils"),
         ]
     )
