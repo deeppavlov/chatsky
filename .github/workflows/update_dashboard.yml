@@ -7,7 +7,6 @@ on:
     paths:
       - 'dff/utils/docker/dockerfile_stats'
       - 'dff/utils/docker/entrypoint_stats.sh'
-  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
@@ -37,7 +36,6 @@ jobs:
             flavor: |
               latest=auto
             tags: |
-              type=ref,event=tag
               type=raw,value=latest,enable={{is_default_branch}}
 
         - name: Build and upload image
