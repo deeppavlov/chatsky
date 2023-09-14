@@ -62,7 +62,7 @@ class OtelInstrumentor(BaseInstrumentor):
     .. code-block::
 
         @dff_instrumentor
-        def function(context, pipeline, runtime_info):
+        async def function(context, pipeline, runtime_info):
             ...
 
     :param logger_provider: Opentelemetry logger provider. Used to construct a logger instance.
