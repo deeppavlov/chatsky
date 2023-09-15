@@ -69,7 +69,7 @@ WITH main AS (
     {nodefield} as node_label,
     {table}.TraceId as trace_id,
     otel_traces.TraceId\nFROM {table}, otel_traces
-    WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label'
+    WHERE {table}.TraceId = otel_traces.TraceId
     ORDER BY context_id, request_id
 ) SELECT context_id,
     request_id,
@@ -81,7 +81,6 @@ WITH main AS (
     flow_label,
     node_label
 FROM main
-WHERE label != ''
 """
 DFF_ACYCLIC_NODES_STATEMENT = """
 WITH main AS (

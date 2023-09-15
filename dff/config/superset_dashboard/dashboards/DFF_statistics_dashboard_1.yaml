@@ -4,11 +4,27 @@ css: ''
 slug: dff-stats
 uuid: 68bce374-99bc-4890-b8c2-cb172409b894
 position:
+  CHART-91whs_IaiF:
+    children: []
+    id: CHART-91whs_IaiF
+    meta:
+      chartId: 17
+      height: 50
+      sliceName: Requests
+      uuid: 45ef67db-d33d-49f5-8d46-1f0fa518eaac
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-oXaTD35jB
+    type: CHART
   CHART-Af3zvLsiKV:
     children: []
     id: CHART-Af3zvLsiKV
     meta:
-      chartId: 2
+      chartId: 8
       height: 66
       sliceName: Node visit ratio monitor
       uuid: 6fafe59c-0fec-4cd8-a8b3-c0bfaffb2135
@@ -41,7 +57,7 @@ position:
     children: []
     id: CHART-DxY0c3RnIv
     meta:
-      chartId: 9
+      chartId: 3
       height: 61
       sliceName: Node counts
       sliceNameOverride: General node visit distribution
@@ -58,7 +74,7 @@ position:
     children: []
     id: CHART-cxqeW2rGoV
     meta:
-      chartId: 6
+      chartId: 7
       height: 50
       sliceName: Node Visits
       sliceNameOverride: Node per dialog turn distribution
@@ -71,11 +87,27 @@ position:
     - TAB-Gw0Ffh1lG
     - ROW-hNOZdWZpw
     type: CHART
+  CHART-eZttETxtot:
+    children: []
+    id: CHART-eZttETxtot
+    meta:
+      chartId: 16
+      height: 50
+      sliceName: Responses
+      uuid: 7844eb6d-4fce-44cf-8994-fb61a221a2ab
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-lvxd9vvnS5
+    type: CHART
   CHART-explore-10-1:
     children: []
     id: CHART-explore-10-1
     meta:
-      chartId: 8
+      chartId: 10
       height: 73
       sliceName: Transition layout
       sliceNameOverride: Weighted transition graph
@@ -92,7 +124,7 @@ position:
     children: []
     id: CHART-explore-13-1
     meta:
-      chartId: 12
+      chartId: 11
       height: 74
       sliceName: Transition ratio [chord]
       sliceNameOverride: Weighted transition graph [chord plot]
@@ -109,7 +141,7 @@ position:
     children: []
     id: CHART-explore-14-1
     meta:
-      chartId: 10
+      chartId: 5
       height: 105
       sliceName: Node visits [sunburst]
       sliceNameOverride: Node visit distribution [sunburst]
@@ -126,7 +158,7 @@ position:
     children: []
     id: CHART-explore-15-1
     meta:
-      chartId: 15
+      chartId: 2
       height: 50
       sliceName: Current topic [time series bar chart]
       sliceNameOverride: Current topic slot [time series bar chart]
@@ -143,7 +175,7 @@ position:
     children: []
     id: CHART-explore-16-1
     meta:
-      chartId: 16
+      chartId: 4
       height: 50
       sliceName: Current topic slot [bar chart]
       uuid: a70c05d0-770b-4068-a55d-934283f5b1bb
@@ -159,7 +191,7 @@ position:
     children: []
     id: CHART-explore-17-1
     meta:
-      chartId: 17
+      chartId: 1
       height: 50
       sliceName: Rating slot [line chart]
       uuid: 128e1da2-1efd-433d-9b93-a07de175e2bc
@@ -191,7 +223,7 @@ position:
     children: []
     id: CHART-explore-22-1
     meta:
-      chartId: 7
+      chartId: 15
       height: 61
       sliceName: Terminal labels
       sliceNameOverride: Terminal labels monitor
@@ -208,7 +240,7 @@ position:
     children: []
     id: CHART-explore-9-1
     meta:
-      chartId: 3
+      chartId: 6
       height: 105
       sliceName: Node visits [ratio]
       sliceNameOverride: Node visit distribution [ratio]
@@ -225,7 +257,7 @@ position:
     children: []
     id: CHART-mYC2udeF3a
     meta:
-      chartId: 4
+      chartId: 9
       height: 50
       sliceName: Service load [users]
       uuid: b5d43314-514c-464e-9fcc-f897e3ae0963
@@ -241,7 +273,7 @@ position:
     children: []
     id: CHART-wci7CHiza6
     meta:
-      chartId: 1
+      chartId: 12
       height: 66
       sliceName: Transition counts
       sliceNameOverride: General transitions distribution
@@ -508,6 +540,30 @@ position:
     - TAB-Gw0Ffh1lG
     - ROW-y6AC1wLv1j
     type: MARKDOWN
+  MARKDOWN-i9daMe46XY:
+    children: []
+    id: MARKDOWN-i9daMe46XY
+    meta:
+      code: '## Requests and responses
+
+
+        The table charts below make it possible to explore the user requests and bot
+        responses produced in the scope of your conversational service. You can also
+        use the `Dialog turn` and `User ID` filters on the left to only consider the
+        requests produced by a particular user, etc.
+
+
+        Functions `get_last_request` and `get_last_response` need to be used to collect
+        the data.'
+      height: 26
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-DKYV2zUmwU
+    type: MARKDOWN
   MARKDOWN-pmSRDxroDW:
     children: []
     id: MARKDOWN-pmSRDxroDW
@@ -634,6 +690,18 @@ position:
     - GRID_ID
     - TABS-Xoi5oUBxZI
     - TAB-JCU6rANFP
+    type: ROW
+  ROW-DKYV2zUmwU:
+    children:
+    - MARKDOWN-i9daMe46XY
+    id: ROW-DKYV2zUmwU
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
     type: ROW
   ROW-EaYAQjv4W:
     children:
@@ -815,6 +883,30 @@ position:
     - TABS-Xoi5oUBxZI
     - TAB-6zE8noCIsx
     type: ROW
+  ROW-lvxd9vvnS5:
+    children:
+    - CHART-eZttETxtot
+    id: ROW-lvxd9vvnS5
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-oXaTD35jB:
+    children:
+    - CHART-91whs_IaiF
+    id: ROW-oXaTD35jB
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
   ROW-s_aeCbvt3:
     children:
     - CHART-explore-15-1
@@ -917,6 +1009,9 @@ position:
     - ROW-UiCWq3ix1
     - ROW-tzfO7Zd-dD
     - ROW-hNOZdWZpw
+    - ROW-DKYV2zUmwU
+    - ROW-oXaTD35jB
+    - ROW-lvxd9vvnS5
     id: TAB-Gw0Ffh1lG
     meta:
       defaultText: Tab title
@@ -990,49 +1085,39 @@ metadata:
     '10': '#61a0a8'
     '11': '#d48265'
     '12': '#91c7ae'
-    '13': '#749f83'
-    '14': '#ca8622'
-    '15': '#bda29a'
-    '16': '#6e7074'
-    animals: '#c23531'
-    news: '#2f4554'
-    root: '#61a0a8'
-    small_talk: '#d48265'
-    animals, ask_about_breed: '#c23531'
-    animals, ask_about_color: '#2f4554'
-    animals, what_animal: '#61a0a8'
-    news, ask_about_science: '#d48265'
-    news, science_news: '#91c7ae'
-    news, what_news: '#749f83'
-    root, fallback: '#ca8622'
-    small_talk, ask_talk_about: '#bda29a'
-    animals, ask_about_training: '#61a0a8'
-    animals, have_pets: '#d48265'
-    animals, like_animals: '#91c7ae'
-    animals, tell_fact_about_breed: '#749f83'
-    news, ask_about_sport: '#6e7074'
-    news, sport_news: '#c4ccd3'
-    small_talk, ask_some_questions: '#61a0a8'
     AVG(CAST(JSON_VALUE(data, '$.rating') AS...: '#c23531'
     books: '#c23531'
     films: '#2f4554'
     games: '#61a0a8'
     smalltalk: '#d48265'
-    'news: what_news': '#c23531'
-    'small_talk: ask_talk_about': '#2f4554'
-    'animals: tell_fact_about_breed': '#61a0a8'
-    'news: sport_news': '#d48265'
-    'animals: have_pets': '#91c7ae'
-    'animals: ask_about_color': '#749f83'
-    'small_talk: ask_some_questions': '#ca8622'
-    'animals: what_animal': '#bda29a'
-    'animals: ask_about_breed': '#6e7074'
-    'root: fallback': '#546570'
-    'news: science_news': '#c4ccd3'
-    'animals: like_animals': '#c23531'
-    'news: ask_about_science': '#2f4554'
-    'animals: ask_about_training': '#61a0a8'
-    'news: ask_about_sport': '#6e7074'
+    animals, ask_about_breed: '#c23531'
+    animals, what_animal: '#61a0a8'
+    greeting_flow, node1: '#61a0a8'
+    news, what_news: '#749f83'
+    root, fallback: '#ca8622'
+    small_talk, ask_some_questions: '#61a0a8'
+    animals: '#c23531'
+    greeting_flow: '#2f4554'
+    news: '#2f4554'
+    root: '#61a0a8'
+    small_talk: '#d48265'
+    animals, ask_about_color: '#2f4554'
+    animals, ask_about_training: '#61a0a8'
+    animals, have_pets: '#d48265'
+    animals, like_animals: '#91c7ae'
+    animals, tell_fact_about_breed: '#749f83'
+    greeting_flow, node2: '#6e7074'
+    greeting_flow, node3: '#546570'
+    greeting_flow, node4: '#c4ccd3'
+    news, ask_about_science: '#d48265'
+    news, ask_about_sport: '#6e7074'
+    news, science_news: '#91c7ae'
+    news, sport_news: '#c4ccd3'
+    small_talk, ask_talk_about: '#bda29a'
+    node2: '#61a0a8'
+    node4: '#d48265'
+    node3: '#91c7ae'
+    node1: '#749f83'
     fallback: '#2f4554'
     ask_about_breed: '#d48265'
     what_animal: '#91c7ae'
@@ -1048,6 +1133,25 @@ metadata:
     ask_about_sport: '#91c7ae'
     ask_some_questions: '#ca8622'
     ask_talk_about: '#bda29a'
+    'animals: ask_about_breed': '#6e7074'
+    'animals: ask_about_color': '#749f83'
+    'animals: ask_about_training': '#61a0a8'
+    'animals: have_pets': '#91c7ae'
+    'animals: like_animals': '#c23531'
+    'animals: tell_fact_about_breed': '#61a0a8'
+    'animals: what_animal': '#bda29a'
+    'greeting_flow: node1': '#bda29a'
+    'greeting_flow: node2': '#6e7074'
+    'greeting_flow: node3': '#546570'
+    'greeting_flow: node4': '#c4ccd3'
+    'news: ask_about_science': '#2f4554'
+    'news: ask_about_sport': '#6e7074'
+    'news: science_news': '#c4ccd3'
+    'news: sport_news': '#d48265'
+    'news: what_news': '#c23531'
+    'root: fallback': '#546570'
+    'small_talk: ask_some_questions': '#ca8622'
+    'small_talk: ask_talk_about': '#2f4554'
   timed_refresh_immune_slices: []
   expanded_slices: {}
   refresh_frequency: 1800
@@ -1087,7 +1191,7 @@ metadata:
       rootPath:
       - TAB-6zE8noCIsx
       excluded:
-      - 10
+      - 5
     type: NATIVE_FILTER
     description: ''
     chartsInScope:
@@ -1114,7 +1218,7 @@ metadata:
       rootPath:
       - TAB-6zE8noCIsx
       excluded:
-      - 7
+      - 15
     type: NATIVE_FILTER
     description: ''
     chartsInScope:
