@@ -2,7 +2,8 @@
 """
 # 3. Sample data provider
 
-This script provides data for the dashboard emulating simultaneous queries
+This script demonstrates various instrumentation capabilities.
+It also provides data for the dashboard emulating simultaneous queries
 to the service by multiple users.
 
 """
@@ -67,6 +68,8 @@ pipeline = Pipeline.from_dict(
                 after_handler=[
                     default_extractors.get_timing_after,
                     default_extractors.get_current_label,
+                    default_extractors.get_last_request,
+                    default_extractors.get_last_response,
                 ],
             ),
         ],

@@ -53,3 +53,28 @@ async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # n
     start_time = ctx.framework_states[get_wrapper_field(info, "time")]
     data = {"execution_time": str(datetime.now() - start_time)}
     return data
+
+
+async def get_last_response(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    """
+    Extract the last response in the current context.
+    This handler is best used together with the `ACTOR` component.
+
+    This function is required to enable charts that aggregate requests and responses.
+    """
+    data = {"last_response": ctx.last_response}
+    return data
+
+
+async def get_last_request(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+    """
+    Extract the last request in the current context.
+    This handler is best used together with the `ACTOR` component.
+
+    This function is required to enable charts that aggregate requests and responses.
+    """
+    data = {"last_request": ctx.last_request}
+    return data
+
+
+__all__ = [get_current_label, get_timing_before, get_timing_after, get_last_request, get_last_response]
