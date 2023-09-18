@@ -9,10 +9,13 @@ that report the state of one or more pipeline components. The `stats` module
 provides several default extractors, but users are free to define their own
 extractor functions.
 
-It is required that the extractors have the following uniform signature:
+It is a preferred practice to define extractors as asynchronous functions.
+Extractors need to have the following uniform signature:
 the expected arguments are always `Context`, `Pipeline`, and `ExtraHandlerRuntimeInfo`,
-while the expected return value is an arbitrary `dict` or a `None`. It is a preferred practice
-to define extractors as asynchronous functions.
+while the expected return value is an arbitrary `dict` or a `None`.
+The returned value gets persisted to Clickhouse as JSON
+which is why it can contain arbitrarily nested dictionaries,
+but it cannot contain any complex objects that cannot be trivially serialized.
 
 The output of these functions will be captured by an OpenTelemetry instrumentor and directed to
 the Opentelemetry collector server which in its turn batches and persists data
@@ -49,8 +52,9 @@ allowing you to only pass the url of the OTLP Collector server.
 an appropriate Opentelemetry exporter instance and bind it to provider classes.
 
 * Nextly, the `OtelInstrumentor` class should be constructed to log the output
-of extractor functions. Custom extractors can be decorated with the `OtelInstrumentor` instance.
-Default extractors are instrumented by calling the `instrument` method.
+of extractor functions. Custom extractors need to be decorated
+with the `OtelInstrumentor` instance. Default extractors are instrumented
+by calling the `instrument` method.
 
 * The entirety of the process is illustrated in the example below.
 

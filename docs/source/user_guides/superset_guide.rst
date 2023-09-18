@@ -19,18 +19,20 @@ Collection procedure
 **Installation**
 
 .. code-block:: shell
+    :linenos:
 
-    pip install dff[stats]
+    # clone the original repository to access the docker-compose file
+    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    # install with the stats extra
+    cd dialog_flow_framework
+    pip install .[stats]
 
 **Launching services**
 
 .. code-block:: shell
     :linenos:
 
-    # clone the original repository to access the docker-compose file
-    git clone https://github.com/deeppavlov/dialog_flow_framework.git
-    # launch the required services
-    cd dialog_flow_framework
+    # When at the working directory, launch the services
     docker-compose up otelcol clickhouse dashboard
 
 **Collecting data**
@@ -42,7 +44,7 @@ in order to obtain sample data points to visualize.
 
 .. code-block:: shell
 
-    export DISABLE_INTERACTIVE_MODE=1 && python tutorials/stats/1_extractor_functions.py
+    export DISABLE_INTERACTIVE_MODE=1 && python tutorials/stats/3_sample_data_provider.py
 
 Displaying the data
 ~~~~~~~~~~~~~~~~~~~
@@ -84,7 +86,7 @@ Using Superset
 
 | In order to view the imported dashboard, log into `Superset <http://localhost:8088/>`_ using your username and password (which are both `superset` by default and can be configured via `.env_file`).
 | The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
-| The dashboard has four sections, each one of them containing different kind of data.
+| The dashboard is split into four sections based on the types of charts and on the chart topic.
 
 *  The **Overview** section summarizes the information about user interaction with your script. And displays a weighted graph of transitions from one node to another. The data is also shown in the form of a table for better introspection capabilities.
 
@@ -92,23 +94,19 @@ Using Superset
 
     Overview plots.
 
-* The data displayed in the **General stats** section reports, how frequent each of the nodes in your script was visited by users. The information is aggregated in several forms for better interpretability.
+* The data displayed in the **Node stats** section reports, how frequent each of the nodes in your script was visited by users. The information is aggregated in several forms for better interpretability.
 
 .. figure:: ../_static/images/general_stats.png
 
-    General stats plots.
-
-* The **Additional stats** section includes charts for node visit counts aggregated over various specific variables.
-
-.. figure:: ../_static/images/additional_stats.png
-
-    Additional stats plots.
+    Node stats plots.
 
 * General service load data aggregated over time can be found in the **Service stats** section.
 
 .. figure:: ../_static/images/service_stats.png
 
     Service stats plots.
+
+* The `Annotations` section contains example charts that show how annotations from supplemental pipeline services can be viewed and analyzed.
 
 On some occasions, Superset can show warnings about the database connection being faulty.
 In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.
