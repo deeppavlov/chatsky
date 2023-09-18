@@ -126,11 +126,11 @@ class OtelInstrumentor(BaseInstrumentor):
             self._configure_providers(
                 logger_provider=logger_provider, tracer_provider=tracer_provider, meter_provider=meter_provider
             )
-        for func_name in [func.__name__ for func in default_extractors.__all__]:
+        for func_name in default_extractors.__all__:
             wrap_function_wrapper(default_extractors, func_name, self.__call__.__wrapped__)
 
     def _uninstrument(self, **kwargs):
-        for func_name in [func.__name__ for func in default_extractors.__all__]:
+        for func_name in default_extractors.__all__:
             unwrap(default_extractors, func_name)
 
     def _configure_providers(self, logger_provider, tracer_provider, meter_provider):

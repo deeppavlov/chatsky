@@ -77,4 +77,9 @@ async def get_last_request(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return data
 
 
-__all__ = [get_current_label, get_timing_before, get_timing_after, get_last_request, get_last_response]
+__all__ = ["get_current_label", "get_timing_before", "get_timing_after", "get_last_request", "get_last_response"]
+"""
+List of exported functions.
+
+:meta hide-avlue:
+"""
