@@ -1,6 +1,7 @@
 include CONTRIBUTING.md
 include LICENSE
 include README.md
+graft dff/config/superset_dashboard
 include dff/context_storages/protocols.json
 
 exclude makefile
