@@ -19,9 +19,10 @@ As mentioned in that tutorial,
 # %pip install dff uvicorn fastapi
 
 # %%
+from dff.messengers.common.interface import CallbackMessengerInterface
 from dff.script import Message
 from dff.pipeline import Pipeline
-from dff.utils.testing import TOY_SCRIPT, is_interactive_mode
+from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
 
 import uvicorn
 from fastapi import FastAPI, WebSocket, WebSocketDisconnect
@@ -29,9 +30,8 @@ from fastapi.responses import HTMLResponse
 
 
 # %%
-pipeline = Pipeline.from_script(
-    TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node")
-)
+messenger_interface = CallbackMessengerInterface()
+pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, messenger_interface=messenger_interface)
 
 
 # %%
@@ -86,7 +86,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
             request = Message(text=data)
-            context = await pipeline._run_pipeline(request, client_id)
+            context = messenger_interface.on_request(request, client_id)
             response = context.last_response.text
             if response is not None:
                 await websocket.send_text(f"Bot: {response}")
@@ -99,6 +99,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
 # %%
 if __name__ == "__main__":
     if is_interactive_mode():  # do not run this during doc building
+        pipeline.run()
         uvicorn.run(
             app,
             host="127.0.0.1",
