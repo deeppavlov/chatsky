@@ -1,3 +1,13 @@
+"""
+Serializer
+----------
+Serializer is an interface that will be used for data storing in various databases.
+Many libraries already support this interface (built-in jsin, pickle and other 3rd party libs).
+All other libraries will have to implement the two (loads and dumps) required methods.
+A custom serializer class can be created using :py:class:`~.DefaultSerializer` as a template or parent.
+Default serializer uses built-in `pickle` module.
+"""
+
 from typing import Any, Optional
 from inspect import signature
 

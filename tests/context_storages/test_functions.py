@@ -36,7 +36,13 @@ def basic_test(db: DBContextStorage, testing_context: Context, context_id: str):
     assert context_id in db
     assert len(db) == 1
 
+    # Here we have to sleep because of timestamp calculations limitations:
+    # On some platforms, current time can not be calculated with accuracy less than microsecond,
+    # so the contexts added won't be stored in the correct order.
+    # We sleep for a microsecond to ensure that new contexts' timestamp will be surely more than
+    # the previous ones'.
     sleep(0.001)
+
     db[context_id] = testing_context  # overwriting a key
     assert len(db) == 1
     assert db.keys() == {context_id}
@@ -81,7 +87,7 @@ def partial_storage_test(db: DBContextStorage, testing_context: Context, context
 
     # Patch context to use with dict context storage, that doesn't follow read limits
     if not isinstance(db, dict):
-        for i in sorted(write_context["requests"].keys())[:2]:
+        for i in sorted(write_context["requests"].keys())[:-3]:
             del write_context["requests"][i]
 
     # Write and read updated context
@@ -94,7 +100,7 @@ def midair_subscript_change_test(db: DBContextStorage, testing_context: Context,
     # Set all appended request to be written
     db.context_schema.append_single_log = False
 
-    # Add new requestgs to context
+    # Add new requests to context
     for i in range(1, 10):
         testing_context.add_request(Message(text=f"new message: {i}"))
 
@@ -163,6 +169,7 @@ def many_ctx_test(db: DBContextStorage, _: Context, context_id: str):
         read_ctx = db[f"{context_id}_{i}"]
         assert read_ctx.misc[f"key_{i}"] == f"ctx misc value {i}"
         assert read_ctx.requests[0].text == "useful message"
+        assert read_ctx.requests[i].text == "some message"
 
     # Check clear
     db.clear()

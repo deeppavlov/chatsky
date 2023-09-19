@@ -247,7 +247,10 @@ class DBContextStorage(ABC):
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         """
         Method for reading context data from `CONTEXT` table for given key.
-        See :py:class:`~.ContextSchema` for details.
+
+        :param storage_key: Hashable key used to retrieve Context instance.
+        :return: Tuple of context dictionary and its primary ID,
+        if no context is found dictionary will be empty and ID will be None.
         """
         raise NotImplementedError
 
@@ -255,7 +258,11 @@ class DBContextStorage(ABC):
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         """
         Method for reading context data from `LOGS` table for given key.
-        See :py:class:`~.ContextSchema` for details.
+
+        :param keys_limit: Integer, how many latest entries to read, if None all keys will be read.
+        :param field_name: Field name for that the entries will be read.
+        :param primary_id: Primary ID of the context whose entries will be read.
+        :return: Dictionary of read entries.
         """
         raise NotImplementedError
 
@@ -263,7 +270,12 @@ class DBContextStorage(ABC):
     async def _write_pac_ctx(self, data: Dict, created: int, updated: int, storage_key: str, primary_id: str):
         """
         Method for writing context data to `CONTEXT` table for given key.
-        See :py:class:`~.ContextSchema` for details.
+
+        :param data: Data that will be written.
+        :param created: Timestamp of the context creation (integer, nanoseconds).
+        :param updated: Timestamp of the context updated (integer, nanoseconds).
+        :param storage_key: Storage key to store the context under.
+        :param primary_id: Primary ID of the context that will be stored.
         """
         raise NotImplementedError
 
@@ -271,7 +283,10 @@ class DBContextStorage(ABC):
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
         """
         Method for writing context data to `LOGS` table for given key.
-        See :py:class:`~.ContextSchema` for details.
+
+        :param data: Data entries list that will be written (tuple of field name, key number and value dict).
+        :param updated: Timestamp of the context updated (integer, nanoseconds).
+        :param primary_id: Primary ID of the context whose entries will be stored.
         """
         raise NotImplementedError
 

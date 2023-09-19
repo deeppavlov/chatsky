@@ -3,7 +3,7 @@ Context Schema
 --------------
 The `ContextSchema` module provides class for managing context storage rules.
 The :py:class:`~.Context` will be stored in two instances, `CONTEXT` and `LOGS`,
-that can be either files, databases or namespaces. The context itself alongsode with
+that can be either files, databases or namespaces. The context itself alongside with
 several latest requests, responses and labels are stored in `CONTEXT` table,
 while the older ones are kept in `LOGS` table and not accessed too often.
 """
@@ -12,7 +12,7 @@ import time
 from asyncio import gather
 from uuid import uuid4
 from enum import Enum
-from pydantic import BaseModel, Field
+from pydantic import BaseModel, Field, PositiveInt
 from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
@@ -20,9 +20,8 @@ from dff.script import Context
 
 ALL_ITEMS = "__all__"
 """
-The default value for all `DictSchemaField`:
+The default value for `subscript` parameter of :py:class:`~.SchemaField`:
 it means that all keys of the dictionary or list will be read or written.
-Can be used as a value of `subscript` parameter for `DictSchemaField` and `ListSchemaField`.
 """
 
 _ReadPackedContextFunction = Callable[[str], Awaitable[Tuple[Dict, Optional[str]]]]
@@ -66,7 +65,7 @@ class SchemaField(BaseModel, validate_assignment=True):
     """
     `subscript` is used for limiting keys for reading and writing.
     It can be a string `__all__` meaning all existing keys or number,
-    positive for first **N** keys and negative for last **N** keys.
+    negative for first **N** keys and positive for last **N** keys.
     Keys should be sorted as numbers.
     Default: 3.
     """
@@ -76,6 +75,7 @@ class ExtraFields(str, Enum):
     """
     Enum, conaining special :py:class:`~.Context` field names.
     These fields only can be used for data manipulation within context storage.
+    `active_ctx` is a special field that is populated for internal DB usage only.
     """
 
     active_ctx = "active_ctx"
@@ -89,9 +89,9 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
     """
     Schema, describing how :py:class:`~.Context` fields should be stored and retrieved from storage.
     The default behaviour is the following: All the context data except for the fields that are
-    dictionaries with numeric keys is serialized and stored in `CONTEXT` **table** (that is a table
-    for SQL context storages only, it can also be a file or a namespace for different backends).
-    For the dictionaries with numeric keys, their entries are sorted according by key and the last
+    dictionaries with numeric keys is serialized and stored in `CONTEXT` **table** (this instance
+    is a table for SQL context storages only, it can also be a file or a namespace for different backends).
+    For the dictionaries with numeric keys, their entries are sorted according to the key and the last
     few are included into `CONTEXT` table, while the rest are stored in `LOGS` table.
 
     That behaviour allows context storage to minimize the operation number for context reading and
@@ -100,17 +100,17 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
 
     requests: SchemaField = Field(default_factory=lambda: SchemaField(name="requests"), frozen=True)
     """
-    Field for storing Context field `requests`.
+    `SchemaField` for storing Context field `requests`.
     """
 
     responses: SchemaField = Field(default_factory=lambda: SchemaField(name="responses"), frozen=True)
     """
-    Field for storing Context field `responses`.
+    `SchemaField` for storing Context field `responses`.
     """
 
     labels: SchemaField = Field(default_factory=lambda: SchemaField(name="labels"), frozen=True)
     """
-    Field for storing Context field `labels`.
+    `SchemaField` for storing Context field `labels`.
     """
 
     append_single_log: bool = True
@@ -148,7 +148,7 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
     If set will try to perform *some* operations asynchronously.
 
     WARNING! Be careful with this flag. Some databases support asynchronous reads and writes,
-    and some do not. For all `DFF` context storages it will be set automatically.
+    and some do not. For all `DFF` context storages it will be set automatically during `__init__`.
     Change it only if you implement a custom context storage.
     """
 
@@ -182,10 +182,12 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
             if isinstance(field_props.subscript, int):
                 sorted_dict = sorted(list(nest_dict.keys()))
                 last_read_key = sorted_dict[-1] if len(sorted_dict) > 0 else 0
+                # If whole context is stored in `CONTEXTS` table - no further reads needed.
                 if len(nest_dict) > field_props.subscript:
                     limit = -field_props.subscript
                     last_keys = sorted(nest_dict.keys())[limit:]
                     ctx_dict[field_name] = {k: v for k, v in nest_dict.items() if k in last_keys}
+                # If there is a need to read somethig from `LOGS` table - create reading tasks.
                 elif len(nest_dict) < field_props.subscript and last_read_key > field_props.subscript:
                     limit = field_props.subscript - len(nest_dict)
                     tasks[field_name] = log_reader(limit, field_name, primary_id)
@@ -197,8 +199,7 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
         else:
             tasks = {key: await task for key, task in tasks.items()}
 
-        for field_name in tasks.keys():
-            log_dict = {k: v for k, v in tasks[field_name].items()}
+        for field_name, log_dict in tasks.items():
             ctx_dict[field_name].update(log_dict)
 
         ctx = Context.cast(ctx_dict)
@@ -212,7 +213,7 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
         pac_writer: _WritePackedContextFunction,
         log_writer: _WriteLogContextFunction,
         storage_key: str,
-        chunk_size: Union[Literal[False], int] = False,
+        chunk_size: Union[Literal[False], PositiveInt] = False,
     ):
         """
         Write context to storage.

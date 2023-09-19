@@ -65,7 +65,7 @@ class Context(BaseModel):
     """
     _updated_at: int = PrivateAttr(default_factory=time.time_ns)
     """
-    Timestamp when the context was last time saved to database_.
+    Timestamp when the context was _last time saved to database_.
     It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
     """
     labels: Dict[int, NodeLabel2Type] = {}
