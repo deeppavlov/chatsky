@@ -198,7 +198,7 @@ MULTIFLOW_REQUEST_OPTIONS = {
     },
 }
 """
-Request options for automated client requests.
+Request options for automated client requests for :py:data:`~.MULTIFLOW_SCRIPT`.
 
 :meta hide-value:
 """
