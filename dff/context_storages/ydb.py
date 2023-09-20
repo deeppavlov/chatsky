@@ -299,6 +299,14 @@ class YDBContextStorage(DBContextStorage):
 
 
 async def _init_drive(timeout: int, endpoint: str, database: str, table_name_prefix: str):
+    """
+    Initialize YDB drive if it doesn't exist and connect to it.
+
+    :param timeout: timeout to wait for driver.
+    :param endpoint: endpoint to connect to.
+    :param database: database to connect to.
+    :param table_name_prefix: prefix for all table names.
+    """
     driver = Driver(endpoint=endpoint, database=database)
     client_settings = driver.table_client._table_client_settings.with_allow_truncated_result(True)
     driver.table_client._table_client_settings = client_settings
@@ -318,6 +326,14 @@ async def _init_drive(timeout: int, endpoint: str, database: str, table_name_pre
 
 
 async def _does_table_exist(pool, path, table_name) -> bool:
+    """
+    Check if table exists.
+
+    :param pool: driver session pool.
+    :param path: path to table being checked.
+    :param table_name: the table name.
+    :returns: True if table exists, False otherwise.
+    """
     async def callee(session):
         await session.describe_table(join(path, table_name))
 
@@ -329,6 +345,13 @@ async def _does_table_exist(pool, path, table_name) -> bool:
 
 
 async def _create_contexts_table(pool, path, table_name):
+    """
+    Create CONTEXTS table.
+
+    :param pool: driver session pool.
+    :param path: path to table being checked.
+    :param table_name: the table name.
+    """
     async def callee(session):
         await session.create_table(
             "/".join([path, table_name]),
@@ -348,6 +371,13 @@ async def _create_contexts_table(pool, path, table_name):
 
 
 async def _create_logs_table(pool, path, table_name):
+    """
+    Create CONTEXTS table.
+
+    :param pool: driver session pool.
+    :param path: path to table being checked.
+    :param table_name: the table name.
+    """
     async def callee(session):
         await session.create_table(
             "/".join([path, table_name]),

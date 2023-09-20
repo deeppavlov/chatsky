@@ -100,11 +100,21 @@ class PickleContextStorage(DBContextStorage):
         }
 
     async def _save(self, table: Tuple[Path, Dict]):
+        """
+        Flush internal storage to disk.
+
+        :param table: tuple of path to save the storage and the storage itself.
+        """
         await makedirs(table[0].parent, exist_ok=True)
         async with open(table[0], "wb+") as file:
             await file.write(self.serializer.dumps(table[1]))
 
     async def _load(self, table: Tuple[Path, Dict]) -> Tuple[Path, Dict]:
+        """
+        Load internal storage to disk.
+
+        :param table: tuple of path to save the storage and the storage itself.
+        """
         if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
             storage = dict()
             await self._save((table[0], storage))
@@ -114,6 +124,12 @@ class PickleContextStorage(DBContextStorage):
         return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+        """
+        Get the last (active) context `_primary_id` for given storage key.
+
+        :param storage_key: the key the context is associated with.
+        :return: Context `_primary_id` or None if not found.
+        """
         timed = sorted(self.context_table[1].items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True)
         for key, value in timed:
             if value[ExtraFields.storage_key.value] == storage_key and value[ExtraFields.active_ctx.value]:

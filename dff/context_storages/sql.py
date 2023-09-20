@@ -254,12 +254,20 @@ class SQLContextStorage(DBContextStorage):
             return set() if result is None else {res[0] for res in result}
 
     async def _create_self_tables(self):
+        """
+        Create tables required for context storing, if they do not exist yet.
+        """
         async with self.engine.begin() as conn:
             for table in self.tables.values():
                 if not await conn.run_sync(lambda sync_conn: inspect(sync_conn).has_table(table.name)):
                     await conn.run_sync(table.create, self.engine)
 
     def _check_availability(self, custom_driver: bool):
+        """
+        Chech availability of the specified backend, raise error if not available.
+
+        :param custom_driver: custom driver is requested - no checks will be performed.
+        """
         if not custom_driver:
             if self.full_path.startswith("postgresql") and not postgres_available:
                 install_suggestion = get_protocol_install_suggestion("postgresql")

@@ -115,11 +115,21 @@ class JSONContextStorage(DBContextStorage):
         }
 
     async def _save(self, table: Tuple[Path, SerializableStorage]):
+        """
+        Flush internal storage to disk.
+
+        :param table: tuple of path to save the storage and the storage itself.
+        """
         await makedirs(table[0].parent, exist_ok=True)
         async with open(table[0], "w+", encoding="utf-8") as file_stream:
             await file_stream.write(table[1].model_dump_json())
 
     async def _load(self, table: Tuple[Path, SerializableStorage]) -> Tuple[Path, SerializableStorage]:
+        """
+        Load internal storage to disk.
+
+        :param table: tuple of path to save the storage and the storage itself.
+        """
         if not await isfile(table[0]) or (await stat(table[0])).st_size == 0:
             storage = SerializableStorage()
             await self._save((table[0], storage))
@@ -129,6 +139,12 @@ class JSONContextStorage(DBContextStorage):
         return table[0], storage
 
     async def _get_last_ctx(self, storage_key: str) -> Optional[str]:
+        """
+        Get the last (active) context `_primary_id` for given storage key.
+
+        :param storage_key: the key the context is associated with.
+        :return: Context `_primary_id` or None if not found.
+        """
         timed = sorted(
             self.context_table[1].model_extra.items(), key=lambda v: v[1][ExtraFields.updated_at.value], reverse=True
         )
