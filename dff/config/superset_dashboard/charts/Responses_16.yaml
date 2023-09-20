@@ -35,7 +35,7 @@ params:
   row_limit: 1000
   server_page_length: 10
   order_desc: true
-  table_timestamp_format: smart_date
+  table_timestamp_format: '%d-%m-%Y %H:%M:%S'
   show_cell_bars: true
   color_pn: true
   column_config:
@@ -48,7 +48,7 @@ query_context: '{"datasource":{"id":2,"type":"table"},"force":false,"queries":[{
   filter","granularity":"start_time","filters":[{"col":"data_key","op":"==","val":"get_last_response"}],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["context_id","request_id","start_time",{"label":"data","sqlExpression":"JSON_VALUE(data,
   ''$.last_response'')","expressionType":"SQL"}],"orderby":[],"annotation_layers":[],"row_limit":1000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[]}],"form_data":{"datasource":"2__table","viz_type":"table","granularity_sqla":"start_time","time_grain_sqla":"P1D","time_range":"No
   filter","query_mode":"raw","groupby":[],"all_columns":["context_id","request_id","start_time",{"label":"data","sqlExpression":"JSON_VALUE(data,
-  ''$.last_response'')","expressionType":"SQL"}],"percent_metrics":[],"adhoc_filters":[{"expressionType":"SIMPLE","subject":"data_key","operator":"==","operatorId":"EQUALS","comparator":"get_last_response","clause":"WHERE","sqlExpression":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_m3nzyr545di_lxjaivcal1"}],"order_by_cols":[],"row_limit":1000,"server_page_length":10,"include_time":false,"order_desc":true,"table_timestamp_format":"smart_date","show_cell_bars":true,"color_pn":true,"column_config":{"data":{"truncateLongCells":true,"columnWidth":150}},"extra_form_data":{},"dashboards":[],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+  ''$.last_response'')","expressionType":"SQL"}],"percent_metrics":[],"adhoc_filters":[{"expressionType":"SIMPLE","subject":"data_key","operator":"==","operatorId":"EQUALS","comparator":"get_last_response","clause":"WHERE","sqlExpression":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_m3nzyr545di_lxjaivcal1"}],"order_by_cols":[],"row_limit":1000,"server_page_length":10,"include_time":false,"order_desc":true,"table_timestamp_format":"%d-%m-%Y %H:%M:%S","show_cell_bars":true,"color_pn":true,"column_config":{"data":{"truncateLongCells":true,"columnWidth":150}},"extra_form_data":{},"dashboards":[],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
 cache_timeout: null
 uuid: 7844eb6d-4fce-44cf-8994-fb61a221a2ab
 version: 1.0.0

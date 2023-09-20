@@ -524,10 +524,7 @@ position:
         Based on this information, you can determine which transitions inside the
         dialog graph function
 
-        as intended. If some edge has never been traversed, it is safe to draw the
-        conclusion that transition
-
-        conditions need to be adjusted.'
+        as intended.'
       height: 24
       width: 12
     parents:
@@ -1082,73 +1079,6 @@ metadata:
     '10': '#61a0a8'
     '11': '#d48265'
     '12': '#91c7ae'
-    AVG(CAST(JSON_VALUE(data, '$.rating') AS...: '#c23531'
-    books: '#c23531'
-    films: '#2f4554'
-    games: '#61a0a8'
-    smalltalk: '#d48265'
-    animals, ask_about_breed: '#c23531'
-    animals, what_animal: '#61a0a8'
-    greeting_flow, node1: '#61a0a8'
-    news, what_news: '#749f83'
-    root, fallback: '#ca8622'
-    small_talk, ask_some_questions: '#61a0a8'
-    animals: '#c23531'
-    greeting_flow: '#2f4554'
-    news: '#2f4554'
-    root: '#61a0a8'
-    small_talk: '#d48265'
-    animals, ask_about_color: '#2f4554'
-    animals, ask_about_training: '#61a0a8'
-    animals, have_pets: '#d48265'
-    animals, like_animals: '#91c7ae'
-    animals, tell_fact_about_breed: '#749f83'
-    greeting_flow, node2: '#6e7074'
-    greeting_flow, node3: '#546570'
-    greeting_flow, node4: '#c4ccd3'
-    news, ask_about_science: '#d48265'
-    news, ask_about_sport: '#6e7074'
-    news, science_news: '#91c7ae'
-    news, sport_news: '#c4ccd3'
-    small_talk, ask_talk_about: '#bda29a'
-    node2: '#61a0a8'
-    node4: '#d48265'
-    node3: '#91c7ae'
-    node1: '#749f83'
-    fallback: '#2f4554'
-    ask_about_breed: '#d48265'
-    what_animal: '#91c7ae'
-    ask_about_color: '#749f83'
-    tell_fact_about_breed: '#ca8622'
-    like_animals: '#bda29a'
-    ask_about_training: '#6e7074'
-    have_pets: '#546570'
-    sport_news: '#c23531'
-    what_news: '#2f4554'
-    science_news: '#61a0a8'
-    ask_about_science: '#d48265'
-    ask_about_sport: '#91c7ae'
-    ask_some_questions: '#ca8622'
-    ask_talk_about: '#bda29a'
-    'animals: ask_about_breed': '#6e7074'
-    'animals: ask_about_color': '#749f83'
-    'animals: ask_about_training': '#61a0a8'
-    'animals: have_pets': '#91c7ae'
-    'animals: like_animals': '#c23531'
-    'animals: tell_fact_about_breed': '#61a0a8'
-    'animals: what_animal': '#bda29a'
-    'greeting_flow: node1': '#bda29a'
-    'greeting_flow: node2': '#6e7074'
-    'greeting_flow: node3': '#546570'
-    'greeting_flow: node4': '#c4ccd3'
-    'news: ask_about_science': '#2f4554'
-    'news: ask_about_sport': '#6e7074'
-    'news: science_news': '#c4ccd3'
-    'news: sport_news': '#d48265'
-    'news: what_news': '#c23531'
-    'root: fallback': '#546570'
-    'small_talk: ask_some_questions': '#ca8622'
-    'small_talk: ask_talk_about': '#2f4554'
   timed_refresh_immune_slices: []
   expanded_slices: {}
   refresh_frequency: 1800
@@ -1307,6 +1237,55 @@ metadata:
     tabsInScope:
     - TAB-Gw0Ffh1lG
     - TAB-JCU6rANFP
+    - TAB-q4CdGUDlq
+  - id: NATIVE_FILTER-BU7iNmYAX
+    adhoc_filters:
+    - expressionType: SQL
+      sqlExpression: label <> ''
+      clause: WHERE
+      subject: null
+      operator: null
+      comparator: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_68jo660l3a3_xn0lv9ghc2i
+    time_range: No filter
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+    name: Node
+    filterType: filter_select
+    targets:
+    - column:
+        name: label
+      datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-Gw0Ffh1lG
+      - TAB-q4CdGUDlq
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 1
+    - 3
+    - 6
+    - 9
+    - 10
+    - 15
+    - 16
+    - 17
+    tabsInScope:
+    - TAB-Gw0Ffh1lG
     - TAB-q4CdGUDlq
   stagger_refresh: true
 version: 1.0.0

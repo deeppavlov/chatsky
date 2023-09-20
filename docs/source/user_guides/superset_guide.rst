@@ -108,6 +108,10 @@ Using Superset
 
 * The **Annotations** section contains example charts that show how annotations from supplemental pipeline services can be viewed and analyzed.
 
+.. figure:: ../_static/images/annotations.png
+
+    Plots for pipeline-produced dialog annotations.
+
 On some occasions, Superset can show warnings about the database connection being faulty.
 In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.
 
