@@ -326,7 +326,7 @@ position:
       code: '## Flow visit ratio monitor
 
 
-        Thus chart aggregates the ratio of visits for each flow over the whole period
+        This chart aggregates the ratio of visits for each flow over the whole period
         of service uptime. The aggregation period can be set to shorter time spans
         using the filters on the left.'
       height: 17

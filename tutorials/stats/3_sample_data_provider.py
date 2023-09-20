@@ -20,7 +20,6 @@ from dff.stats import (
     default_extractors,
     OtelInstrumentor,
 )
-from dff.utils.testing import is_interactive_mode
 from dff.utils.testing.toy_script import MULTIFLOW_SCRIPT, MULTIFLOW_REQUEST_OPTIONS
 
 # %%
@@ -43,12 +42,12 @@ async def get_slots(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 def confidence_processor(ctx: Context):
-    ctx.framework_states["response_confidence"] = random.random()
+    ctx.misc["response_confidence"] = random.random()
 
 
 @dff_instrumentor
 async def get_confidence(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    data = {"response_confidence": ctx.framework_states["response_confidence"]}
+    data = {"response_confidence": ctx.misc["response_confidence"]}
     return data
 
 
@@ -61,17 +60,19 @@ pipeline = Pipeline.from_dict(
         "components": [
             Service(slot_processor_1, after_handler=[get_slots]),
             Service(slot_processor_2, after_handler=[get_slots]),
-            Service(confidence_processor, after_handler=[get_confidence]),
             Service(
                 handler=ACTOR,
-                before_handler=[default_extractors.get_timing_before],
+                before_handler=[
+                    default_extractors.get_timing_before,
+                    default_extractors.get_current_label,
+                ],
                 after_handler=[
                     default_extractors.get_timing_after,
-                    default_extractors.get_current_label,
                     default_extractors.get_last_request,
                     default_extractors.get_last_response,
                 ],
             ),
+            Service(confidence_processor, after_handler=[get_confidence]),
         ],
     }
 )
@@ -81,6 +82,11 @@ pipeline = Pipeline.from_dict(
 async def worker(queue: asyncio.Queue):
     """
     Worker function for dispatching one client message.
+    The client message is chosen randomly from a predetermined set of options.
+    It simulates pauses in between messages by calling the sleep function.
+
+    The function also starts a new dialog as a new user, if the current dialog
+    ended in the fallback_node.
 
     :param queue: Queue for sharing context variables.
     """
@@ -95,10 +101,9 @@ async def worker(queue: asyncio.Queue):
     answers = list(MULTIFLOW_REQUEST_OPTIONS.get(flow, {}).get(node, []))
     in_text = random.choice(answers) if answers else "go to fallback"
     in_message = Message(text=in_text)
-    await asyncio.sleep(random.random() * 2)
+    await asyncio.sleep(random.random() * 3)
     ctx = await pipeline._run_pipeline(in_message, ctx.id)
-    rand_interval = float(random.randint(0, 1)) + random.random()
-    await asyncio.sleep(rand_interval)
+    await asyncio.sleep(random.random() * 3)
     await queue.put(ctx)
 
 
@@ -106,7 +111,7 @@ async def worker(queue: asyncio.Queue):
 # main loop
 async def main(n_iterations: int = 100, n_workers: int = 4):
     """
-    Main loop that runs one or more worker coroutines in parallel.
+    The main loop that runs one or more worker coroutines in parallel.
 
     :param n_iterations: Total number of coroutine runs.
     :param n_workers: Number of parallelized coroutine runs.
@@ -120,5 +125,4 @@ async def main(n_iterations: int = 100, n_workers: int = 4):
 
 
 if __name__ == "__main__":
-    if is_interactive_mode():
-        asyncio.run(main())
+    asyncio.run(main())

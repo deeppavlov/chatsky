@@ -44,7 +44,7 @@ in order to obtain sample data points to visualize.
 
 .. code-block:: shell
 
-    export DISABLE_INTERACTIVE_MODE=1 && python tutorials/stats/3_sample_data_provider.py
+    python tutorials/stats/3_sample_data_provider.py
 
 Displaying the data
 ~~~~~~~~~~~~~~~~~~~
@@ -106,7 +106,7 @@ Using Superset
 
     Service stats plots.
 
-* The `Annotations` section contains example charts that show how annotations from supplemental pipeline services can be viewed and analyzed.
+* The **Annotations** section contains example charts that show how annotations from supplemental pipeline services can be viewed and analyzed.
 
 On some occasions, Superset can show warnings about the database connection being faulty.
 In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.

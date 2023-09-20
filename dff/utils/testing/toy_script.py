@@ -179,7 +179,7 @@ MULTIFLOW_REQUEST_OPTIONS = {
         "have_pets": ["yes"],
         "like_animals": ["yes"],
         "what_animal": ["bird", "dog"],
-        "ask_about_breed": ["pereat", "bulldog", "i do not known"],
+        "ask_about_breed": ["pereat", "bulldog", "I don't know"],
     },
     "news": {
         "what_news": ["science", "sport"],
