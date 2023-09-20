@@ -327,8 +327,7 @@ position:
 
 
         This chart aggregates the ratio of visits for each flow over the whole period
-        of service uptime. The aggregation period can be set to shorter time spans
-        using the filters on the left.'
+        of service uptime. The aggregation period can be set using the filters on the left.'
       height: 17
       width: 12
     parents:
@@ -351,9 +350,7 @@ position:
 
 
         This can reveal characteristic features of user behavior given the current
-        dialog structure
-
-        that call for changes.
+        dialog structure.
 
 
         <br />
@@ -550,7 +547,7 @@ position:
         The table charts below make it possible to explore the user requests and bot
         responses produced in the scope of your conversational service. You can also
         use the `Dialog turn` and `User ID` filters on the left to only consider the
-        requests produced by a particular user, etc.
+        requests produced by a particular user or requests sent on a specific dialog turn.
 
 
         Functions `get_last_request` and `get_last_response` need to be used to collect
