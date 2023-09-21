@@ -118,3 +118,66 @@ In that case, you can navigate to the `Database Connections` section through the
 .. figure:: ../_static/images/databases.png
 
     Locate the database settings in the right corner of the screen.
+
+Custom dashboard elements
+~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The most notable advantage of using Superset as a visualization tool is that it provides
+an easy and intuitive way to create your own charts and to customize the dashboard.
+
+**Datasets**
+
+If you aim to create your own chart, Superset will prompt you to select a dataset to draw data from.
+The current configuration provides two datasets `dff-node-stats` and `dff-final-nodes`. In most cases,
+you will need to use `dff-node-stats`, since `dff-final-nodes` contains the same information, but only
+aggregates terminal nodes.
+
+`dff-nodes-stats` uses the following variables to store the data:
+
+* The `context_id` field can be used to distinguish dialog contexts from each other and serves
+as a user identifier.
+* `request_id` is the number of the dialog turn at which the data record was emitted. The data points
+can be aggregated over this field, showing the distribution of a variable over the dialog history.
+* The `data_key` field contains the name of the extractor function that emitted the given record.
+Since in most cases you will only need the output of one extractor, you can filter out all the other
+records using filters.
+* Finally, the `data` field is a set of JSON-encoded key-value pairs. The keys and values differ depending
+on the extractor function that emitted the data (you can essentially save arbitrary data under arbitrary keys),
+which makes filtering the data rows by their `data_key` all the more important. The JSON format implies
+that individual values need to be extracted using the Superset SQL functions (see below).
+
+.. code-block::
+
+    JSON_VALUE(data, '$.key')
+    JSON_VALUE(data, '$.outer_key.nested_key')
+
+**Chart creation**
+
+.. note::
+
+    Chart creation is described in detail in the official Superset documentation.
+    We suggest that you consult it in addition to this section:
+    `link <https://superset.apache.org/docs/creating-charts-dashboards/exploring-data/#pivot-table>`_.
+
+Creating your own chart is as easy as navigating to the `Charts` section of the Superset app
+and pressing the `Create` button.
+
+Initially, you will be prompted for the dataset that you want to use as well as for the chart type.
+The Superset GUI provides comprehensive previews of each chart type making it very easy
+to find the exact chart that you need.
+
+At the next step you will be redirected to the chart creation interface.
+Depending on the kind of chat that you have chosen previously, there will be menus available
+to choose a column for the x-axis and, optionally, a column for the y-axis. As mentioned above,
+a separate menu for data filters will also be available. If you need to draw data
+from the `data` column, you will need to find the `custom_sql` option when adding the column
+and put in the extraction expression, as shown in the examples above.
+
+**Persisting the chart configuration**
+
+If you define your own charts, it's important to save their configuration to the file system of your
+host machine, so that no information is lost when the Superset container or the Docker process is restarted.
+
+The most convenient way to do that is to export the dashboard configuration as a whole. Navigate to the
+`Dashboards` section of the Superset application, locate your dashboard (named `DFF statistics` per default).
+Then press the `export` button on the right and save the zip file to any convenient location.
