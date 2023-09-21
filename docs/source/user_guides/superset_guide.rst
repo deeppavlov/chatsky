@@ -134,17 +134,11 @@ aggregates terminal nodes.
 
 `dff-nodes-stats` uses the following variables to store the data:
 
-* The `context_id` field can be used to distinguish dialog contexts from each other and serves
-as a user identifier.
-* `request_id` is the number of the dialog turn at which the data record was emitted. The data points
-can be aggregated over this field, showing the distribution of a variable over the dialog history.
-* The `data_key` field contains the name of the extractor function that emitted the given record.
-Since in most cases you will only need the output of one extractor, you can filter out all the other
-records using filters.
-* Finally, the `data` field is a set of JSON-encoded key-value pairs. The keys and values differ depending
-on the extractor function that emitted the data (you can essentially save arbitrary data under arbitrary keys),
-which makes filtering the data rows by their `data_key` all the more important. The JSON format implies
-that individual values need to be extracted using the Superset SQL functions (see below).
+* The `context_id` field can be used to distinguish dialog contexts from each other and serves as a user identifier.
+* `request_id` is the number of the dialog turn at which the data record was emitted. The data points can be aggregated over this field, showing the distribution of a variable over the dialog history.
+* The `data_key` field contains the name of the extractor function that emitted the given record. Since in most cases you will only need the output of one extractor, you can filter out all the other records using filters.
+* Finally, the `data` field is a set of JSON-encoded key-value pairs. The keys and values differ depending on the extractor function that emitted the data (you can essentially save arbitrary data under arbitrary keys), which makes filtering the data rows by their `data_key` all the more important. The JSON format implies that individual values need to be extracted using the Superset SQL functions (see below).
+
 
 .. code-block::
 

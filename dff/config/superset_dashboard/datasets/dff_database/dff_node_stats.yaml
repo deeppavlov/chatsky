@@ -14,7 +14,7 @@ sql: "\nWITH main AS (\n    SELECT DISTINCT otel_logs.LogAttributes['context_id'
   FROM otel_logs, otel_traces\n    WHERE otel_logs.TraceId = otel_traces.TraceId\n\
   \    ORDER BY context_id, request_id\n) SELECT context_id,\n    request_id,\n  \
   \  start_time,\n    data_key,\n    data,\n    label,\n    neighbor(label, -1) as\
-  \ prev_label,\n    flow_label,\n    node_label\nFROM main\n"
+  \ prev_label,\n,    neighbor(flow_label, -1) as prev_flow,    flow_label,\n    node_label\nFROM main\n"
 params: null
 template_params: null
 filter_select_enabled: false
@@ -68,6 +68,18 @@ columns:
   python_date_format: null
   extra: {}
 - column_name: prev_label
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
+- column_name: prev_flow
   verbose_name: null
   is_dttm: false
   is_active: true

@@ -29,11 +29,14 @@ dff_instrumentor.instrument()
 
 
 def slot_processor_1(ctx: Context):
-    ctx.misc["slots"] = {"rating": random.randint(1, 10)}
+    ctx.misc["slots"] = {**ctx.misc.get("slots", {}), "rating": random.randint(1, 10)}
 
 
 def slot_processor_2(ctx: Context):
-    ctx.misc["slots"] = {"current_topic": random.choice(["films", "games", "books", "smalltalk"])}
+    ctx.misc["slots"] = {
+        **ctx.misc.get("slots", {}),
+        "current_topic": random.choice(["films", "games", "books", "smalltalk"]),
+    }
 
 
 @dff_instrumentor

@@ -77,7 +77,8 @@ WITH main AS (
     data_key,
     data,
     label,
-    {lag} as prev_label,
+    {label_lag} as prev_label,
+    {flow_lag} as prev_flow,
     flow_label,
     node_label
 FROM main
@@ -193,7 +194,8 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
         params = dict(
             table="${db.table}",
-            lag="neighbor(label, -1)",
+            label_lag="neighbor(label, -1)",
+            flow_lag="neighbor(flow_label, -1)",
             texttype="String",
             lblfield="JSON_VALUE(${db.table}.Body, '$.label')",
             flowfield="JSON_VALUE(${db.table}.Body, '$.flow')",
