@@ -156,7 +156,7 @@ tests_full = merge_req_lists(
 doc = merge_req_lists(
     [
         "sphinx==7.2.2",
-        "pydata-sphinx-theme==0.13.3",
+        "pydata-sphinx-theme==0.14.1",
         "sphinxcontrib-apidoc==0.4.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
