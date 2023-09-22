@@ -38,7 +38,7 @@ Collection procedure
 **Collecting data**
 
 Collecting data is done by means of instrumenting your conversational service before you run it.
-DFF tutorials (`1<https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html>`_, `2<https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.2_pipeline_integration.html>`_)
+DFF tutorials (`1 <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html>`_, `2 <https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.2_pipeline_integration.html>`_)
 showcase all the steps needed to achieve that. We will run 
 a special script in order to obtain richly-annotated sample data points to visualize.
 
