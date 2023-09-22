@@ -38,13 +38,13 @@ Collection procedure
 **Collecting data**
 
 Collecting data is done by means of instrumenting your conversational service before you run it.
-DFF tutorials showcase all the necessary steps, needed to achieve that. We will run
-`one of those files <../tutorials/tutorials.stats.1_extractor_functions.py>`_ 
-in order to obtain sample data points to visualize.
+DFF tutorials (`1<https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html>`_, `2<https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.2_pipeline_integration.html>`_)
+showcase all the steps needed to achieve that. We will run 
+a special script in order to obtain richly-annotated sample data points to visualize.
 
 .. code-block:: shell
 
-    python tutorials/stats/3_sample_data_provider.py
+    python utils/stats/sample_data_provider.py
 
 Displaying the data
 ~~~~~~~~~~~~~~~~~~~
@@ -119,7 +119,7 @@ In that case, you can navigate to the `Database Connections` section through the
 
     Locate the database settings in the right corner of the screen.
 
-Custom dashboard elements
+Customizing the dashboard
 ~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The most notable advantage of using Superset as a visualization tool is that it provides
@@ -158,12 +158,12 @@ and pressing the `Create` button.
 
 Initially, you will be prompted for the dataset that you want to use as well as for the chart type.
 The Superset GUI provides comprehensive previews of each chart type making it very easy
-to find the exact chart that you need.
+to find the exact kind that you need.
 
-At the next step you will be redirected to the chart creation interface.
-Depending on the kind of chat that you have chosen previously, there will be menus available
+At the next step, you will be redirected to the chart creation interface.
+Depending on the kind of chat that you have chosen previously, menus will be available
 to choose a column for the x-axis and, optionally, a column for the y-axis. As mentioned above,
-a separate menu for data filters will also be available. If you need to draw data
+a separate menu for data filters will also be available. If you need to use the data
 from the `data` column, you will need to find the `custom_sql` option when adding the column
 and put in the extraction expression, as shown in the examples above.
 

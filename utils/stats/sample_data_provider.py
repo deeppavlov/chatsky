@@ -1,14 +1,11 @@
+#!/usr/bin/env python
 # %% [markdown]
 """
-# 3. Sample data provider
-
 This script demonstrates various instrumentation capabilities.
 It also provides data for the dashboard emulating simultaneous queries
 to the service by multiple users.
 
 """
-
-# %pip install dff[stats]
 
 # %%
 import random
