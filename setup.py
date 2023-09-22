@@ -143,7 +143,7 @@ tutorial_dependencies = [
     "uvicorn==0.23.1",
     "websockets==11.0.2",
     "locust==2.16.1",
-    "streamlit==1.26.0",
+    "streamlit==1.27.0",
     "streamlit-chat==0.1.1",
 ]
 
