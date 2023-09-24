@@ -67,7 +67,7 @@ test_all: venv wait_db test lint
 
 build_drawio:
 	docker run --rm --name="drawio-convert" -v $(PWD)/docs/source/diagrams:/data rlespinasse/drawio-export -f png --on-changes --remove-page-suffix
-	docker run --rm --name="drawio-reperm" -v $(PWD)/docs/source/diagrams:/data --entrypoint chown rlespinasse/drawio-export -R "$(shell id -u):$(shell id -g)" /data
+	docker run --rm --name="drawio-chown" -v $(PWD)/docs/source/diagrams:/data --entrypoint chown rlespinasse/drawio-export -R "$(shell id -u):$(shell id -g)" /data
 	for folder in docs/source/diagrams/*; do
 		foldername=`basename $${folder}`
 		for file in $${folder}/*; do
