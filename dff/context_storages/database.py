@@ -197,6 +197,8 @@ class DBContextStorage(ABC):
     def clear(self, prune_history: bool = False):
         """
         Synchronous method for clearing context storage, removing all the stored Contexts.
+
+        :param prune_history: also delete the history from the storage.
         """
         return asyncio.run(self.clear_async(prune_history))
 

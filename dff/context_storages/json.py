@@ -94,8 +94,6 @@ class JSONContextStorage(DBContextStorage):
 
     @threadsafe_method
     async def clear_async(self, prune_history: bool = False):
-        assert self.context_table[1].model_extra is not None
-        assert self.log_table[1].model_extra is not None
         if prune_history:
             self.context_table[1].model_extra.clear()
             self.log_table[1].model_extra.clear()
@@ -155,7 +153,6 @@ class JSONContextStorage(DBContextStorage):
 
     async def _read_pac_ctx(self, storage_key: str) -> Tuple[Dict, Optional[str]]:
         self.context_table = await self._load(self.context_table)
-        assert self.context_table[1].model_extra is not None
         primary_id = await self._get_last_ctx(storage_key)
         if primary_id is not None:
             return self.serializer.loads(self.context_table[1].model_extra[primary_id][self._PACKED_COLUMN]), primary_id
@@ -164,7 +161,8 @@ class JSONContextStorage(DBContextStorage):
 
     async def _read_log_ctx(self, keys_limit: Optional[int], field_name: str, primary_id: str) -> Dict:
         self.log_table = await self._load(self.log_table)
-        key_set = [int(k) for k in sorted(self.log_table[1].model_extra[primary_id][field_name].keys(), reverse=True)]
+        key_set = [int(k) for k in self.log_table[1].model_extra[primary_id][field_name].keys()]
+        key_set = [int(k) for k in sorted(key_set, reverse=True)]
         keys = key_set if keys_limit is None else key_set[:keys_limit]
         return {
             k: self.serializer.loads(self.log_table[1].model_extra[primary_id][field_name][str(k)][self._VALUE_COLUMN])
@@ -182,7 +180,6 @@ class JSONContextStorage(DBContextStorage):
         await self._save(self.context_table)
 
     async def _write_log_ctx(self, data: List[Tuple[str, int, Dict]], updated: int, primary_id: str):
-        assert self.log_table[1].model_extra is not None
         for field, key, value in data:
             self.log_table[1].model_extra.setdefault(primary_id, dict()).setdefault(field, dict()).setdefault(
                 key,

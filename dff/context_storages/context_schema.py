@@ -42,7 +42,7 @@ Type alias of asynchronous function that should be called in order to write cont
 data to `CONTEXT` table. Matches type of :py:func:`DBContextStorage._write_pac_ctx` method.
 """
 
-_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], int, str], Coroutine]
+_WriteLogContextFunction = Callable[[List[Tuple[str, int, Any]], int, str], Awaitable]
 """
 Type alias of asynchronous function that should be called in order to write context
 data to `LOGS` table. Matches type of :py:func:`DBContextStorage._write_log_ctx` method.
