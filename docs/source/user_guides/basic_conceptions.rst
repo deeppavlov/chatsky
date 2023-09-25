@@ -33,18 +33,20 @@ Defining Dialogue Goals and User Scenarios
 
 To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
 and breaking down the dialogue into smaller scenarios based on the user intents or actions that you want to cover.
-DFF's Domain-Specific Language makes it easy to break down the dialog script into `flows`, i.e. named node groups,
+DFF's Domain-Specific Language makes it easy to break down the dialog script into `flows`, i.e. named groups of nodes
 unified by a specific purpose.
 
 For instance, if one of the dialog options that we provide to the user is to play a game,
-the bot can have a 'game' node group that targets this subject, while other flows
-cover other topics, like telling the time, telling the weather, etc.
+the bot can have a 'game' flow that contains dialog states related to this subject, while other flows
+cover other topics, e.g. 'time' flow can include questions and answers related to telling the time,
+'weather' to telling the weather, etc.
 
 Creating Dialogue Flows for User Scenarios
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Once you have DFF installed, you can define dialogue flows targeting various user scenarios
-and to combine them in a global script object. A flow consists of one or more nodes that represent conversation turns.
+Once you have DFF installed, you can define dialog flows targeting various user scenarios
+and combine them in a global script object. A flow consists of one or more nodes
+that represent conversation turns.
 
 .. note::
 
@@ -52,8 +54,8 @@ and to combine them in a global script object. A flow consists of one or more no
     **script - flow - node**
 
 Let's assume that the only user scenario of the service is the chat bot playing ping pong with the user.
-I.E. the bot is supposed to reply 'pong' to messages that say 'ping' and handle any other messages as exceptions.
-The pseudo-code for the said flow is as follows:
+The practical implementation of this is that the bot is supposed to reply 'pong' to messages that say 'ping'
+and handle any other messages as exceptions. The pseudo-code for the said flow would be as follows:
 
 .. code-block:: text
 
@@ -121,14 +123,13 @@ Example flow & script
     if __name__ == "__main__":
         pipeline.run()
 
-The code snippet above defines a script with a single dialogue flow that emulates a ping-pong game.
+The code snippet defines a script with a single dialogue flow that emulates a ping-pong game.
 Likewise, if additional scenarios need to be covered, additional flow objects can be embedded into the same script object.
 
-* ``ping_pong_script``: in order to create a dialog agent, a dialog **script** is needed;
-  a script is a dictionary, where the keys are the names of the flows (that are "sub-dialogs",
-  used to separate the whole dialog into multiple sub-dialogs).
+* ``ping_pong_script``: The dialog **script** mentioned above is a dictionary that has one or more
+  dialog flows as its values.
 
-* ``ping_pong_flow`` is our behaviour flow; a flow is a separated dialog, containing linked
+* ``ping_pong_flow`` is the game emulation flow; it contains linked
   conversation nodes and possibly some extra data, transitions, etc.
 
 * A node object is an atomic part of the script.
@@ -185,7 +186,7 @@ This is done by passing callbacks to a special ``PROCESSING`` fields in a Node d
 * User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation. See `tutorial on pre-response processing`_.
 * Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation, but **before** transition to the next node. See `tutorial on pre-transition processing`_.
 
-Depending on your bot's requirements and the goal of the dialog, you may need to interact with external databases or APIs to retrieve data. 
+Depending on the requirements of your bot and the dialog goal, you may need to interact with external databases or APIs to retrieve data. 
 For instance, if a user wants to know a schedule, you may need to access a database and extract parameters such as date and location.
 
 .. code-block:: python
@@ -207,12 +208,12 @@ If you retrieve data from the database or API, it's important to validate it to 
 
 .. warning::
 
-    The logic of DFF implies that the `Context` object must be trivially convertible to JSON. This puts certain limits on the kind of objects that you can store inside the `Context`.
+    The logic of DFF implies that the `Context` object must be trivially serializable to JSON. This puts certain limits on the kind of objects that you can store inside the `Context`.
 
 Since DFF extensively leverages pydantic, you can resort to the validation tools of this feature-rich library.
 For instance, given that each processing routine is a callback, you can use tools like pydantic's `validate_call`
 to ensure that the returned values match the function signature.
-Error handling logic can also be incorporated into the callbacks.
+Error handling logic can also be incorporated into these callbacks.
 
 Generating a bot Response
 ~~~~~~~~~~~~~~~~~~~~~~~~~
