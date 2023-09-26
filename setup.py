@@ -79,10 +79,6 @@ telegram_dependencies = [
     "pytelegrambotapi",
 ]
 
-requests_requirements = [
-    "requests==2.31.0",
-]
-
 otl_dependencies = [
     "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
     "opentelemetry-instrumentation",
@@ -109,6 +105,10 @@ full = merge_req_lists(
     stats_dependencies,
     telegram_dependencies,
 )
+
+requests_requirements = [
+    "requests==2.31.0",
+]
 
 test_requirements = merge_req_lists(
     [
