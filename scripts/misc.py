@@ -29,17 +29,17 @@ def help():
     print(
         f"{Fore.BLUE}poetry run version_major{Style.RESET_ALL}:"
         + " Increment version major in metadata files"
-        + " ({Fore.RED}8.8.1{Style.RESET_ALL} -> {Fore.GREEN}9.0.0{Style.RESET_ALL})"
+        + f" ({Fore.RED}8.8.1{Style.RESET_ALL} -> {Fore.GREEN}9.0.0{Style.RESET_ALL})"
     )
     print(
         f"{Fore.BLUE}poetry run version_minor{Style.RESET_ALL}:"
         + " Increment version minor in metadata files"
-        + " ({Fore.RED}9.1.1{Style.RESET_ALL} -> {Fore.GREEN}9.2.0{Style.RESET_ALL})"
+        + f" ({Fore.RED}9.1.1{Style.RESET_ALL} -> {Fore.GREEN}9.2.0{Style.RESET_ALL})"
     )
     print(
         f"{Fore.BLUE}poetry run version_patch{Style.RESET_ALL}:"
         + " Increment patch number in metadata files"
-        + " ({Fore.RED}9.9.1{Style.RESET_ALL} -> {Fore.GREEN}9.9.2{Style.RESET_ALL})"
+        + f" ({Fore.RED}9.9.1{Style.RESET_ALL} -> {Fore.GREEN}9.9.2{Style.RESET_ALL})"
     )
     print(f"{Fore.BLUE}poetry run clean_docs{Style.RESET_ALL}:" + " Remove all documentation build roots")
     print(f"{Fore.BLUE}poetry run clean{Style.RESET_ALL}:" + " Clean all build artifacts\n")

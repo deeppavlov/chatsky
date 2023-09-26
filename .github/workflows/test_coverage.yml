@@ -50,6 +50,4 @@ jobs:
 
       - name: run tests
         run: |
-          # poetry run doesn't work without dff for some reason + TEST_ALLOW_SKIP=telegram
-          source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           pydantic run test
