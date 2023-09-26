@@ -91,8 +91,6 @@ otl_dependencies = [
 stats_dependencies = merge_req_lists(
     otl_dependencies,
     [
-        "protobuf",
-        "requests",
         "wrapt",
         "tqdm",
         "omegaconf",
