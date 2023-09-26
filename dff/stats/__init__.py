@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 # flake8: noqa: F401
 
-from . import exporter_patch
 from opentelemetry.sdk.trace.export.in_memory_span_exporter import InMemorySpanExporter
 from opentelemetry.sdk.trace.export import ConsoleSpanExporter
 from opentelemetry.sdk._logs.export import InMemoryLogExporter, ConsoleLogExporter
