@@ -63,8 +63,8 @@ pipeline = Pipeline.from_dict(
             Service(
                 handler=ACTOR,
                 before_handler=[
-                    default_extractors.get_timing_before,
                     default_extractors.get_current_label,
+                    default_extractors.get_timing_before,
                 ],
                 after_handler=[
                     default_extractors.get_timing_after,
@@ -94,8 +94,7 @@ async def worker(queue: asyncio.Queue):
     label = ctx.last_label if ctx.last_label else pipeline.actor.fallback_label
     flow, node = label[:2]
     if [flow, node] == ["root", "fallback"]:
-        rand_interval = float(random.randint(0, 1)) + random.random()
-        await asyncio.sleep(rand_interval)
+        await asyncio.sleep(random.random() * 3)
         ctx = Context()
         flow, node = ["root", "start"]
     answers = list(MULTIFLOW_REQUEST_OPTIONS.get(flow, {}).get(node, []))

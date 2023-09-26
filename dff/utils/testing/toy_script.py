@@ -98,7 +98,7 @@ MULTIFLOW_SCRIPT = {
             TRANSITIONS: {
                 "ask_about_breed": exact_match(Message(text="pereat")),
                 "tell_fact_about_breed": exact_match(Message(text="bulldog")),
-                "ask_about_training": exact_match(Message(text="i do not known")),
+                "ask_about_training": exact_match(Message(text="I don't know")),
             },
         },
         "tell_fact_about_breed": {

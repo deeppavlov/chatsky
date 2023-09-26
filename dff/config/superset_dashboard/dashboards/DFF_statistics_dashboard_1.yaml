@@ -434,6 +434,9 @@ position:
         whether or not the path that users take on average deviates from the happy
         path that you plan for the users.
 
+        You can use the Dialog turn and User ID filters on the left
+        to only consider the requests produced by a particular user
+        or requests sent on a specific dialog turn.
 
         <br />
 
@@ -523,12 +526,13 @@ position:
 
         The chart below shows, how frequently each of the graph edges was traversed
         by various users.
-
-
         Based on this information, you can determine which transitions inside the
-        dialog graph function
+        dialog graph function as intended.
 
-        as intended.'
+        You can use the Dialog turn filter on the left
+        to only select a slice of transitions that only target a specific node.
+
+        <br/>'
       height: 24
       width: 12
     parents:
