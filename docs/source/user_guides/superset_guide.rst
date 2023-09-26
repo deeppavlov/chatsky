@@ -176,3 +176,12 @@ host machine, so that no information is lost when the Superset container or the 
 The most convenient way to do that is to export the dashboard configuration as a whole. Navigate to the
 `Dashboards` section of the Superset application, locate your dashboard (named `DFF statistics` per default).
 Then press the `export` button on the right and save the zip file to any convenient location.
+
+**Importing existing configuration files**
+
+If you need to restore your dashboard or update the configuration, you can import a configuration archive
+that has been saved in the manner described above.
+
+Log in to Superset, open the `Dashboards` tab and press the import button on the right of the screen.
+You will be prompted for the database password. If the database credentials match,
+the updated dashboard will appear in the dashboard list.
