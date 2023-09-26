@@ -89,7 +89,6 @@ otl_dependencies = [
 ]
 
 stats_dependencies = merge_req_lists(
-    _sql_dependencies,
     otl_dependencies,
     [
         "protobuf",
