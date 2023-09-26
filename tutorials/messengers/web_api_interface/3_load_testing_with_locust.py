@@ -5,6 +5,7 @@
 This tutorial shows how to use an API endpoint created in the FastAPI tutorial in load testing.
 """
 
+# %pip install dff locust
 
 # %% [markdown]
 """
@@ -92,8 +93,7 @@ class DFFUser(FastHttpUser):
                 data=request.json(),
                 catch_response=True,
             ) as candidate_response:
-
-                text_response = Message.parse_obj(candidate_response.json().get("response"))
+                text_response = Message.model_validate(candidate_response.json().get("response"))
 
                 if response is not None:
                     if callable(response):
@@ -102,7 +102,7 @@ class DFFUser(FastHttpUser):
                             candidate_response.failure(error_message)
                     elif text_response != response:
                         candidate_response.failure(
-                            f"Expected: {response.json()}\nGot: {text_response.json()}"
+                            f"Expected: {response.model_dump_json()}\nGot: {text_response.model_dump_json()}"
                         )
 
             time.sleep(self.wait_time())
@@ -115,9 +115,9 @@ class DFFUser(FastHttpUser):
     def dialog_2(self):
         def check_first_message(msg: Message) -> str | None:
             if msg.text is None:
-                return f"Message does not contain text: {msg.json()}"
+                return f"Message does not contain text: {msg.model_dump_json()}"
             if "Hi" not in msg.text:
-                return f'"Hi" is not in the response message: {msg.json()}'
+                return f'"Hi" is not in the response message: {msg.model_dump_json()}'
             return None
 
         self.check_happy_path(

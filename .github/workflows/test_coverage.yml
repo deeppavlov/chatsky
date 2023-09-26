@@ -41,18 +41,15 @@ jobs:
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials .env_file .coveragerc scripts pyproject.toml )
+          export backup_files=( tests tutorials .env_file .coveragerc scripts pyproject.toml pytest.ini docs )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
           for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
 
-      - name: set up mutex
-        uses: ben-z/gh-action-mutex@v1.0-alpha-6
-
       - name: run tests
         run: |
-          # poetry run doesn't work without dff for some reason
+          # poetry run doesn't work without dff for some reason + TEST_ALLOW_SKIP=telegram
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-          pytest --cov-fail-under=95 --cov-report html --cov-report term --cov=dff tests/
+          pydantic run test

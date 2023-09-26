@@ -6,6 +6,7 @@ The following tutorial shows `pipeline` creation from dict
 and most important pipeline components.
 """
 
+# %pip install dff
 
 # %%
 import json
@@ -93,7 +94,7 @@ def prepreprocess(ctx: Context):
 def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
     logger.info(
         f"another preprocession web-based annotator Service"
-        f"(defined as a callable), named '{info['name']}'"
+        f"(defined as a callable), named '{info.name}'"
     )
     with urllib.request.urlopen("https://example.com/") as webpage:
         web_content = webpage.read().decode(webpage.headers.get_content_charset())

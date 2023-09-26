@@ -4,6 +4,7 @@
 
 """
 
+# %pip install dff
 
 # %%
 from typing import NamedTuple

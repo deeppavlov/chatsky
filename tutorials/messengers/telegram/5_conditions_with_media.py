@@ -5,6 +5,8 @@
 This tutorial shows how to use media-related logic in your script.
 """
 
+# %pip install dff[telegram]
+
 # %%
 import os
 

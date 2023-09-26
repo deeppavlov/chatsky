@@ -5,7 +5,7 @@ on:
     branches:
     - dev
     - test/**
-  pull_request_target:
+  pull_request:
     branches:
     - dev
   workflow_dispatch:
@@ -26,15 +26,16 @@ jobs:
         with:
           python-version: 3.9
 
+      - name: install dependencies
+        run: |
+          sudo apt install pandoc
+
       - name: setup poetry and install dependencies
         run: |
-          pip install --upgrade pip
-          pip install poetry
+          pip install --upgrade pip poetry
           poetry install --all-extras --no-ansi --no-interaction
 
       - name: build documentation
-        env:
-          GITHUB_API_TOKEN: ${{ secrets.READ_ONLY_GITHUB_API_TOKEN }}
         run: |
             poetry run docs
 

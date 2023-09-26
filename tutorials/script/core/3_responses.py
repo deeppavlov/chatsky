@@ -6,6 +6,7 @@ This tutorial shows different options for setting responses.
 Let's do all the necessary imports from DFF.
 """
 
+# %pip install dff
 
 # %%
 import re

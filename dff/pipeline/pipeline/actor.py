@@ -107,7 +107,6 @@ class Actor:
     def __call__(
         self, pipeline: Pipeline, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs
     ) -> Union[Context, dict, str]:
-
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
         self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT, *args, **kwargs)
@@ -156,10 +155,10 @@ class Actor:
         del ctx.framework_states["actor"]
         return ctx
 
-    def _context_init(self, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
+    @staticmethod
+    def _context_init(ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         ctx = Context.cast(ctx)
         if not ctx.requests:
-            ctx.add_label(self.start_label[:2])
             ctx.add_request(Message())
         ctx.framework_states["actor"] = {}
         return ctx
@@ -307,8 +306,8 @@ class Actor:
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
 
-    def _run_handlers(self, ctx, pipeline: Pipeline, actor_stade: ActorStage, *args, **kwargs):
-        [handler(ctx, pipeline, *args, **kwargs) for handler in self.handlers.get(actor_stade, [])]
+    def _run_handlers(self, ctx, pipeline: Pipeline, actor_stage: ActorStage, *args, **kwargs):
+        [handler(ctx, pipeline, *args, **kwargs) for handler in self.handlers.get(actor_stage, [])]
 
     def _choose_label(
         self, specific_label: Optional[NodeLabel3Type], general_label: Optional[NodeLabel3Type]

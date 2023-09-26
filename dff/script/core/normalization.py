@@ -9,19 +9,18 @@ import logging
 
 from typing import Union, Callable, Any, Dict, Optional, ForwardRef
 
-from .keywords import GLOBAL, Keywords
+from .keywords import Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
-from pydantic import validate_arguments
+from pydantic import validate_call
 
 logger = logging.getLogger(__name__)
 
 Pipeline = ForwardRef("Pipeline")
 
 
-@validate_arguments
 def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") -> Union[Callable, NodeLabel3Type]:
     """
     The function that is used for normalization of
@@ -43,6 +42,8 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
                 node = pipeline.script.get(flow_label, {}).get(node_label)
                 if not node:
                     raise Exception(f"Unknown transitions {new_label} for pipeline.script={pipeline.script}")
+                if node_label in [Keywords.LOCAL, Keywords.GLOBAL]:
+                    raise Exception(f"Invalid transition: can't transition to {flow_label}:{node_label}")
             except Exception as exc:
                 new_label = None
                 logger.error(f"Exception {exc} of function {label}", exc_info=exc)
@@ -61,7 +62,6 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
         return (flow_label, label[1], label[2])
 
 
-@validate_arguments
 def normalize_condition(condition: ConditionType) -> Callable:
     """
     The function that is used to normalize `condition`
@@ -81,21 +81,7 @@ def normalize_condition(condition: ConditionType) -> Callable:
         return callable_condition_handler
 
 
-@validate_arguments
-def normalize_transitions(
-    transitions: Dict[NodeLabelType, ConditionType]
-) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
-    """
-    The function which is used to normalize transitions and returns normalized dict.
-
-    :param transitions: Transitions to normalize.
-    :return: Transitions with normalized label and condition.
-    """
-    transitions = {normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()}
-    return transitions
-
-
-@validate_arguments
+@validate_call
 def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
     """
     This function is used to normalize response, if response Callable, it is returned, otherwise
@@ -120,7 +106,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         return response_handler
 
 
-@validate_arguments
+@validate_call
 def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
     """
     This function is used to normalize processing.
@@ -144,58 +130,3 @@ def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
             return ctx
 
         return processing_handler
-
-
-@validate_arguments
-def map_deprecated_key(key: str) -> str:
-    """
-    This function is used to map deprecated keyword to new one.
-
-    :param key: A keyword of a node.
-    :return: A mapped keyword of a node.
-    """
-    if key == "processing":
-        logger.warning(
-            "Use the new key 'PRE_RESPONSE_PROCESSING instead of the deprecated key 'PROCESSING',"
-            " which will be removed in future versions."
-        )
-        return "pre_response_processing"
-    return key
-
-
-@validate_arguments
-def normalize_keywords(
-    script: Dict[LabelType, Dict[LabelType, Dict[Keywords, Any]]]
-) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
-    """
-    This function is used to normalize keywords in the script.
-
-    :param script: :py:class:`.Script`, containing all transitions between states based in the keywords.
-    :return: :py:class:`.Script` with the normalized keywords.
-    """
-
-    script = {
-        flow_label: {
-            node_label: {map_deprecated_key(key.name.lower()): val for key, val in node.items()}
-            for node_label, node in flow.items()
-        }
-        for flow_label, flow in script.items()
-    }
-    return script
-
-
-@validate_arguments
-def normalize_script(script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
-    """
-    This function normalizes :py:class:`.Script`: it returns dict where the GLOBAL node is moved
-    into the flow with the GLOBAL name. The function returns the structure
-
-    `{GLOBAL: {...NODE...}, ...}` -> `{GLOBAL: {GLOBAL: {...NODE...}}, ...}`.
-
-    :param script: :py:class:`.Script` that describes the dialog scenario.
-    :return: Normalized :py:class:`.Script`.
-    """
-    if isinstance(script, dict):
-        if GLOBAL in script and all([isinstance(item, Keywords) for item in script[GLOBAL].keys()]):
-            script[GLOBAL] = {GLOBAL: script[GLOBAL]}
-    return normalize_keywords(script)

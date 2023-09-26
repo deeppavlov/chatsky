@@ -43,7 +43,6 @@ def test_node_creation():
 
 
 def node_creation(pre_response_proc):
-
     samples = {
         "transition": [std_func, "node", ("flow", "node"), ("node", 2.0), ("flow", "node", 2.0)],
         "condition": [std_func],

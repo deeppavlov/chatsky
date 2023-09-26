@@ -113,12 +113,11 @@ class ServiceGroup(PipelineComponent):
 
         if self.asynchronous:
             service_futures = [service(ctx, pipeline) for service in self.components]
-            for service, future in zip(self.components, asyncio.as_completed(service_futures)):
-                try:
-                    service_result = await future
-                    if service.asynchronous and isinstance(service_result, Awaitable):
-                        await service_result
-                except asyncio.TimeoutError:
+            for service, future in zip(self.components, await asyncio.gather(*service_futures, return_exceptions=True)):
+                service_result = future
+                if service.asynchronous and isinstance(service_result, Awaitable):
+                    await service_result
+                elif isinstance(service_result, asyncio.TimeoutError):
                     logger.warning(f"{type(service).__name__} '{service.name}' timed out!")
 
         else:
@@ -244,7 +243,7 @@ class ServiceGroup(PipelineComponent):
         :type services: :py:data:`~.ServiceGroupBuilder`
         :return: List of services and service groups.
         """
-        handled_services = []
+        handled_services: List[Union[Service, "ServiceGroup"]] = []
         for service in services:
             if isinstance(service, List) or isinstance(service, ServiceGroup):
                 handled_services.append(ServiceGroup(service))

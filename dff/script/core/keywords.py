@@ -5,10 +5,10 @@ Keywords are used to define the dialog graph, which is the structure of a conver
 They are used to determine all nodes in the script and to assign python objects and python functions for nodes.
 
 """
-from enum import Enum, auto
+from enum import Enum
 
 
-class Keywords(Enum):
+class Keywords(str, Enum):
     """
     Keywords used to define the dialog script (:py:class:`~dff.script.Script`).
     The data type `dict` is used to describe the scenario.
@@ -80,13 +80,14 @@ class Keywords(Enum):
 
     """
 
-    GLOBAL = auto()
-    LOCAL = auto()
-    TRANSITIONS = auto()
-    RESPONSE = auto()
-    MISC = auto()
-    PRE_RESPONSE_PROCESSING = auto()
-    PRE_TRANSITIONS_PROCESSING = auto()
+    GLOBAL = "global"
+    LOCAL = "local"
+    TRANSITIONS = "transitions"
+    RESPONSE = "response"
+    MISC = "misc"
+    PRE_RESPONSE_PROCESSING = "pre_response_processing"
+    PRE_TRANSITIONS_PROCESSING = "pre_transitions_processing"
+    PROCESSING = "pre_transitions_processing"
 
 
 # Redefine shortcuts
