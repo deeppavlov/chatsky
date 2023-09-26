@@ -126,7 +126,7 @@ test_requirements = merge_req_lists(
         "pytest_virtualenv==1.7.0",
         "flake8==6.1.0",
         "click==8.1.3",
-        "black==23.7.0",
+        "black==23.9.1",
         "isort==5.12.0",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
@@ -138,7 +138,7 @@ test_requirements = merge_req_lists(
 tutorial_dependencies = [
     "flask[async]==2.3.2",
     "psutil==5.9.5",
-    "telethon==1.29.1",
+    "telethon==1.30.0",
     "fastapi==0.103.1",
     "uvicorn==0.23.1",
     "websockets==11.0.2",
