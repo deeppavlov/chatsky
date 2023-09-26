@@ -411,8 +411,8 @@ position:
 
 
         **Note that the charts below will only display meaningful figures if the respective
-        annotation values have been collected. To get those, run the [Sample data
-        provider script](#).**'
+        annotation values have been collected. To get those, run the sample data
+        provider script located in the `utils/stats/` folder.**'
       height: 63
       width: 12
     parents:

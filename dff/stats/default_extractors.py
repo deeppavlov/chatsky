@@ -13,18 +13,18 @@ Detailed examples can be found in the `tutorials` section.
 from datetime import datetime
 
 from dff.script import Context
-from dff.pipeline import ExtraHandlerRuntimeInfo
+from dff.pipeline import ExtraHandlerRuntimeInfo, Pipeline
 from .utils import get_wrapper_field
 
 
-async def get_current_label(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
+async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandlerRuntimeInfo):
     """
     Extract the current label on each turn.
     This function is required for running the dashboard with the default configuration.
     """
     last_label = ctx.last_label
     if last_label is None:
-        return {"flow": None, "node": None, "label": None}
+        last_label = pipeline.actor.start_label[:2]
     return {"flow": last_label[0], "node": last_label[1], "label": ": ".join(last_label)}
 
 
