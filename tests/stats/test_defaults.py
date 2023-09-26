@@ -21,7 +21,7 @@ from dff.stats import default_extractors
     ],
 )
 async def test_get_current_label(context: Context, expected: set):
-    example_module = importlib.import_module(f"tutorials.stats.1_extractor_functions")
+    example_module = importlib.import_module("tutorials.stats.1_extractor_functions")
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
@@ -44,7 +44,7 @@ async def test_get_current_label(context: Context, expected: set):
 async def test_otlp_integration(context, expected, tracer_exporter_and_provider, log_exporter_and_provider):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
-    example_module = importlib.import_module(f"tutorials.stats.1_extractor_functions")
+    example_module = importlib.import_module("tutorials.stats.1_extractor_functions")
     instrumentor = OtelInstrumentor()
     if instrumentor.is_instrumented_by_opentelemetry:
         instrumentor.uninstrument()
