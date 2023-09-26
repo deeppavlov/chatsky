@@ -84,25 +84,19 @@ requests_requirements = [
 ]
 
 otl_dependencies = [
-    "opentelemetry-api>=1.20.0",  # latest api required
-    "opentelemetry-exporter-otlp>=1.20.0",  # latest api required
-    "opentelemetry-exporter-otlp-proto-grpc>=1.20.0",  # latest api required
-    "opentelemetry-exporter-otlp-proto-http>=1.20.0",  # latest api required
-    "opentelemetry-instrumentation>=0.38b0",
-    "opentelemetry-proto>=1.20.0",  # latest api required
-    "opentelemetry-sdk>=1.20.0",  # latest api required
-    "opentelemetry-semantic-conventions>=0.41b0",
+    "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
+    "opentelemetry-instrumentation",
 ]
 
 stats_dependencies = merge_req_lists(
     _sql_dependencies,
     otl_dependencies,
     [
-        "protobuf==3.20.3",  # required by ydb & otlp
+        "protobuf",
         "requests",
         "wrapt",
         "tqdm",
-        "omegaconf>=2.2.2",  # latest api required
+        "omegaconf",
     ],
 )
 
