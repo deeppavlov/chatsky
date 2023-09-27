@@ -66,6 +66,6 @@ def test_no_deps():
 
 
 def test_all():
-    with docker_client(lambda: _test(False, True)) as _:
-        _test(True, True)
+    with docker_client() as docker:
+        _test(True, docker is not None)
     lint()
