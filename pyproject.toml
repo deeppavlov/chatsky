@@ -148,7 +148,7 @@ help = { callable = "scripts.misc:help", extras = ["devel"] }
 lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
 format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
 test_no_cov = { callable = "scripts.test:test_no_cov", extras = ["tests", "devel"] }
-test_no_deps = { callable = "scripts.test:test_no_deps", extras = ["devel"] }
+test_no_deps = { callable = "scripts.test:test_no_deps", extras = ["tests", "devel"] }
 test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial", "stats"] }
 docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel", "stats"] }
 pre_commit = { callable = "scripts.misc:pre_commit", extras = ["devel"] }

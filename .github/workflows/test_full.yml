@@ -58,7 +58,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install --upgrade pip poetry
-          poetry install --extras "devel" --no-ansi --no-interaction
+          poetry install --extras "tests devel" --no-ansi --no-interaction
 
       - name: run pytest
         env:
