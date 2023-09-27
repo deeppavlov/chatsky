@@ -18,7 +18,7 @@ jobs:
 
       - name: setup poetry
         run: |
-          pip install poetry
+          pip install --upgrade pip poetry
 
       - name: build wheels and upload to pypi
         env:

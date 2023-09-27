@@ -33,9 +33,8 @@ jobs:
 
       - name: install dependencies
         run: |
-          pip install --upgrade pip
-          pip install poetry
-          poetry install --extras "full tests devel" --no-ansi --no-interaction
+          pip install --upgrade pip poetry
+          poetry install --extras "tests devel full" --no-ansi --no-interaction
 
       - name: run pytest
         env:
@@ -44,16 +43,12 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          poetry run test_no_cov
+          poetry run test_all
 
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
-
-      - name: Build images
-        run: |
-          docker-compose up -d
 
       - name: set up python 3.8
         uses: actions/setup-python@v4
@@ -62,9 +57,8 @@ jobs:
 
       - name: install dependencies
         run: |
-          pip install --upgrade pip
-          pip install poetry
-          poetry install --extras "tests devel" --no-ansi --no-interaction
+          pip install --upgrade pip poetry
+          poetry install --extras "devel" --no-ansi --no-interaction
 
       - name: run pytest
         env:

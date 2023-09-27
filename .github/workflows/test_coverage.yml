@@ -35,13 +35,13 @@ jobs:
 
       - name: setup poetry and install dependencies
         run: |
-          pip install poetry
+          pip install --upgrade pip poetry
           poetry build
           find . -name "*.whl" -exec python -m pip install {}[tests,full] ';'
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials .env_file .coveragerc scripts pyproject.toml pytest.ini docs )
+          export backup_files=( tests tutorials .env_file .coveragerc scripts pyproject.toml docs )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
