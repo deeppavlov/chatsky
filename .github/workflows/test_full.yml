@@ -35,7 +35,7 @@ jobs:
         run: |
           pip install --upgrade pip poetry
           poetry self add setuptools
-          poetry install --extras "tests devel full" --no-ansi --no-interaction
+          poetry install --extras "tests devel full tutorial stats" --no-ansi --no-interaction
 
       - name: run pytest
         env:
