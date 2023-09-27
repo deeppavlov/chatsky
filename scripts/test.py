@@ -58,14 +58,14 @@ def _test(coverage: bool, dependencies: bool):
 
 
 def test_no_cov():
-    return _test(coverage=False, dependencies=True)
+    return _test(False, True)
 
 
 def test_no_deps():
-    return _test(coverage=False, dependencies=False)
+    return _test(False, False)
 
 
 def test_all():
-    with docker_client() as _:
-        _test(coverage=True, dependencies=True)
+    with docker_client(lambda: _test(False, True)) as _:
+        _test(True, True)
     lint()

@@ -10,7 +10,7 @@ from .clean import clean_docs
 
 
 def docs():
-    with docker_client() as _:
+    with docker_client(lambda: exit(1)) as _:
         clean_docs()
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
