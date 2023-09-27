@@ -14,7 +14,7 @@ def docker_client(alternative: Callable[[], None]):
         docker.compose.up(detach=True, wait=True)
     else:
         print(f"{Fore.RED}Docker can't (shouldn't) be run on platforms other than linux!{Style.RESET_ALL}")
-        alternative()
+        return alternative()
     try:
         yield docker
     finally:
