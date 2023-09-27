@@ -54,10 +54,6 @@ def _test(coverage: bool, dependencies: bool):
     pytest.main(args)
 
 
-def test():
-    return _test(coverage=True, dependencies=True)
-
-
 def test_no_cov():
     return _test(coverage=False, dependencies=True)
 
@@ -68,5 +64,5 @@ def test_no_deps():
 
 def test_all():
     with docker_client() as _:
-        test()
+        _test(coverage=True, dependencies=True)
     lint()

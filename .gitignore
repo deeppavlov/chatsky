@@ -24,3 +24,4 @@ _globals.py
 htmlcov
 tutorials/context_storages/dbs
 poetry.lock
+.coverage.*

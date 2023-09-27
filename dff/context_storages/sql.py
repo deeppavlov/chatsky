@@ -93,7 +93,7 @@ class SQLContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
-        self.engine = create_async_engine(self.full_path)
+        self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
         self.dialect: str = self.engine.dialect.name
 
         id_column_args = {"primary_key": True}

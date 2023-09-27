@@ -86,7 +86,7 @@ jupyter = { version = "1.0.0", optional = true }
 asyncpg = { version = "*", optional = true }
 uvicorn = { version = "0.23.1", optional = true }
 fastapi = { version = "0.101.0", optional = true }
-aioredis = { version = "*", optional = true }
+redis = { version = "*", optional = true }
 nbsphinx = { version = "0.9.2", optional = true }
 colorama = { version = "0.4.6", optional = true }
 telethon = { version = "1.29.1", optional = true }
@@ -121,13 +121,13 @@ streamlit-chat = { version = "0.1.1", optional = true}
 json = ["aiofiles"]
 pickle = ["aiofiles"]
 sqlite = ["sqlalchemy", "aiosqlite"]
-redis = ["aioredis"]
+redis = ["redis"]
 mongodb = ["motor"]
 mysql = ["sqlalchemy", "asyncmy", "cryptography"]
 postgresql = ["sqlalchemy", "asyncpg"]
 ydb = ["ydb", "six"]
 telegram = ["pytelegrambotapi"]
-full = ["aiofiles", "sqlalchemy", "aiosqlite", "aioredis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
+full = ["aiofiles", "sqlalchemy", "aiosqlite", "redis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
 tests = ["requests", "pytest", "pytest-cov", "pytest-asyncio", "pytest-virtualenv", "flake8", "click", "black", "isort", "anyio", "idna", "sniffio", "h11"]
 devel = ["colorama", "python-on-whales", "python-dotenv", "mypy", "bump2version"]
 doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sphinxcontrib-httpdomain", "sphinxcontrib-katex", "sphinx-favicon", "sphinx-copybutton", "sphinx-gallery", "sphinx-autodoc-typehints", "nbsphinx", "jupytext", "jupyter"]
@@ -139,7 +139,6 @@ tutorial = ["flask", "psutil", "telethon", "fastapi", "uvicorn", "websockets", "
 help = { callable = "scripts.misc:help", extras = ["devel"] }
 lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
 format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
-test = { callable = "scripts.test:test", extras = ["tests", "devel"] }
 test_no_cov = { callable = "scripts.test:test_no_cov", extras = ["tests", "devel"] }
 test_no_deps = { callable = "scripts.test:test_no_deps", extras = ["devel"] }
 test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial"] }
