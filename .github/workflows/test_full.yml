@@ -24,7 +24,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -38,13 +38,18 @@ jobs:
           poetry install --extras "full tests devel" --no-ansi --no-interaction
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           poetry run test_no_cov
 
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: |
@@ -62,5 +67,10 @@ jobs:
           poetry install --extras "tests devel" --no-ansi --no-interaction
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           poetry run test_no_deps

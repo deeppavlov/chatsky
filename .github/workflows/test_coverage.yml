@@ -22,7 +22,7 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: |
@@ -49,5 +49,10 @@ jobs:
           rm -rf /tmp/backup
 
       - name: run tests
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           pydantic run test

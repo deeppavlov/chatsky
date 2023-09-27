@@ -1,0 +1,69 @@
+slice_name: Node visits [sunburst]
+description: null
+certified_by: null
+certification_details: null
+viz_type: sunburst
+params:
+  adhoc_filters:
+  - clause: WHERE
+    comparator: null
+    expressionType: SIMPLE
+    filterOptionName: filter_82x0yx6fkpv_6h8a2190nmh
+    isExtra: false
+    isNew: false
+    operator: IS NOT NULL
+    operatorId: IS_NOT_NULL
+    sqlExpression: null
+    subject: flow_label
+  - clause: WHERE
+    comparator: null
+    expressionType: SIMPLE
+    filterOptionName: filter_653tn7jqmox_x65gwtz29gc
+    isExtra: false
+    isNew: false
+    operator: IS NOT NULL
+    operatorId: IS_NOT_NULL
+    sqlExpression: null
+    subject: node_label
+  color_scheme: supersetColors
+  datasource: 3__table
+  extra_form_data: {}
+  granularity_sqla: start_time
+  groupby:
+  - flow_label
+  - node_label
+  linear_color_scheme: superset_seq_1
+  metric:
+    aggregate: COUNT
+    column:
+      advanced_data_type: null
+      certification_details: null
+      certified_by: null
+      column_name: context_id
+      description: null
+      expression: null
+      filterable: true
+      groupby: true
+      id: 1
+      is_certified: false
+      is_dttm: false
+      python_date_format: null
+      type: STRING
+      type_generic: 1
+      verbose_name: null
+      warning_markdown: null
+    expressionType: SIMPLE
+    hasCustomLabel: false
+    isNew: false
+    label: COUNT(context_id)
+    optionName: metric_7mo9cnw40ph_rzxhx01jm0c
+    sqlExpression: null
+  row_limit: 10000
+  slice_id: 8
+  time_range: No filter
+  viz_type: sunburst
+query_context: null
+cache_timeout: null
+uuid: e955f48c-824c-423c-a11c-5b5dca162927
+version: 1.0.0
+dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

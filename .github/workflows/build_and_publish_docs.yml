@@ -19,7 +19,7 @@ jobs:
     name: build and publish docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: set up python 3.9
         uses: actions/setup-python@v4
@@ -36,6 +36,11 @@ jobs:
           poetry install --all-extras --no-ansi --no-interaction
 
       - name: build documentation
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
             poetry run docs
 

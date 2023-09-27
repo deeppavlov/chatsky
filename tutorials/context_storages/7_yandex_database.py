@@ -31,8 +31,8 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 # db_uri="grpc://localhost:2136/local"
 
 db_uri = "{}{}".format(
-    os.getenv("YDB_ENDPOINT"),
-    os.getenv("YDB_DATABASE"),
+    os.environ["YDB_ENDPOINT"],
+    os.environ["YDB_DATABASE"],
 )
 db = context_storage_factory(db_uri)
 
