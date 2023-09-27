@@ -15,6 +15,7 @@ def _test(coverage: bool, dependencies: bool):
     if dependencies and coverage:
         args = [
             "--allow-skip=telegram",
+            "-m \"not no_coverage\"",
             *args,
         ]
     elif dependencies:
