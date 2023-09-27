@@ -1,4 +1,4 @@
-from wrapt import wrap_function_wrapper, register_post_import_hook
+from wrapt import wrap_function_wrapper, wrap_object, register_post_import_hook
 
 
 def _extract_summary_wrapper(wrapped, instance, args, kwargs):
@@ -30,5 +30,20 @@ def patch_nbsphinx(module):
     wrap_function_wrapper(module, "depart_gallery_html", _depart_gallery_html_wrapper)
 
 
+def patch_sphinx_autodoc_typehints(module):
+    print("patching", module.__name__)
+
+    class SuppressedLogger:
+        def __init__(self, _original_logger):
+            pass
+
+        @staticmethod
+        def warning(message, *args):
+            print(f"Warning suppressed: {message % args}")
+
+    wrap_object(module, "_LOGGER", SuppressedLogger)
+
+
 register_post_import_hook(patch_autosummary, "sphinx.ext.autosummary")
 register_post_import_hook(patch_nbsphinx, "nbsphinx")
+register_post_import_hook(patch_sphinx_autodoc_typehints, "sphinx_autodoc_typehints")
