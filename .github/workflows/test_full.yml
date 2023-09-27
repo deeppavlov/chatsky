@@ -34,6 +34,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install --upgrade pip poetry
+          poetry self add setuptools
           poetry install --extras "tests devel full" --no-ansi --no-interaction
 
       - name: run pytest
