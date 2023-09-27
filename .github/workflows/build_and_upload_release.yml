@@ -23,9 +23,8 @@ jobs:
       - name: build wheels and upload to pypi
         env:
           TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
-          # TODO: poetry --build publish -u USERNAME -p PASSWORD
         run: |
-          true
+          false # TODO: poetry --build publish -u USERNAME -p PASSWORD
 
       - name: upload binaries into release
         uses: svenstaro/upload-release-action@v2
