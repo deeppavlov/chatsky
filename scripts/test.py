@@ -1,6 +1,8 @@
 import sys
+from typing import Optional
 import pytest
 import dotenv
+from python_on_whales import DockerClient
 
 from .codestyle import lint
 from .utils import docker_client
@@ -65,11 +67,11 @@ def test_no_deps():
     return _test(False, False)
 
 
-def test_all():
-    with docker_client() as docker:
-        _test(True, docker is not None)
+@docker_client
+def test_all(docker: Optional[DockerClient]):
+    _test(True, docker is not None)
     lint()
 
 
 if __name__ == "__main__":
-    test_all()
+    test_all(None)

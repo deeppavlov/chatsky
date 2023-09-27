@@ -1,17 +1,17 @@
-from contextlib import contextmanager
 import sys
+from typing import Callable, Optional
 
-import python_on_whales
+from python_on_whales import DockerClient
+from wrapt import decorator
 
 
-@contextmanager
-def docker_client():
+@decorator
+def docker_client(wrapped: Callable[[Optional[DockerClient]], None], _, __, ___):
     if "linux" in sys.platform:
-        docker = python_on_whales.DockerClient(compose_files=["docker-compose.yml"])
+        docker = DockerClient(compose_files=["docker-compose.yml"])
         docker.compose.up(detach=True, wait=True)
-        try:
-            yield docker
-        finally:
-            docker.compose.down(remove_orphans=False)
+        result = wrapped(docker)
+        docker.compose.down(remove_orphans=False)
     else:
-        yield None
+        result = wrapped(None)
+    return result
