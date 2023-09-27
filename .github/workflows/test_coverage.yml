@@ -36,7 +36,7 @@ jobs:
       - name: setup poetry and install dependencies
         run: |
           pip install --upgrade pip poetry
-          poetry install && poetry build
+          poetry build
           find . -name "*.whl" -exec python -m pip install {}[tests,devel,full,tutorial,stats] ';'
 
       - name: clean environment
@@ -55,4 +55,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          poetry run test_all
+          python -m scripts.test

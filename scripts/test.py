@@ -69,3 +69,7 @@ def test_all():
     with docker_client() as docker:
         _test(True, docker is not None)
     lint()
+
+
+if __name__ == "__main__":
+    test_all()
