@@ -30,7 +30,7 @@ def _test(coverage: bool, dependencies: bool):
 
     if "linux" not in sys.platform:
         args = [
-            "-m \"not docker\"",
+            '-m "not docker"',
             *args,
         ]
     if coverage:
@@ -60,6 +60,7 @@ def test():
 
 def test_no_cov():
     return _test(coverage=False, dependencies=True)
+
 
 def test_no_deps():
     return _test(coverage=False, dependencies=False)
