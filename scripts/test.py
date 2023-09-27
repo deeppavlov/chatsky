@@ -14,8 +14,9 @@ def _test(coverage: bool, dependencies: bool):
 
     if dependencies and coverage:
         args = [
+            "-m",
+            "not no_coverage",
             "--allow-skip=telegram",
-            "-m \"not no_coverage\"",
             *args,
         ]
     elif dependencies:
@@ -31,7 +32,8 @@ def _test(coverage: bool, dependencies: bool):
 
     if "linux" not in sys.platform:
         args = [
-            '-m "not docker"',
+            "-m",
+            "not docker",
             *args,
         ]
     if coverage:
