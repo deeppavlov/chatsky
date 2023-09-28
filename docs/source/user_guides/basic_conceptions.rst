@@ -88,8 +88,14 @@ Example flow & script
             "start_node": {
                 RESPONSE: Message(),  # the response of the initial node is skipped
                 TRANSITIONS: {
-                    ("ping_pong_flow", "greeting_node"): cnd.exact_match(Message(text="Hello!")),
+                    ("greeting_flow", "greeting_node"): cnd.exact_match(Message(text="Hello!")),
                 },
+            },
+            "greeting_node": {
+                RESPONSE: Message(text="Hi!"),
+                TRANSITIONS: {
+                    ("ping_pong_flow", "game_start_node"): cnd.true()
+                }
             },
             "fallback_node": {
                 RESPONSE: Message(text="That was against the rules!"),
@@ -99,8 +105,8 @@ Example flow & script
             },
         },
         "ping_pong_flow": {
-            "greeting_node": {
-                RESPONSE: Message(text="Hi! Let's play ping-pong!"),
+            "game_start_node": {
+                RESPONSE: Message(text="Let's play ping-pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"): cnd.exact_match(Message(text="Ping!")),
                 },
@@ -274,7 +280,8 @@ conversational service.
 .. code-block:: python
 
     happy_path = (
-        (Message(text="Hello!"), Message(text="Hi! Let's play ping-pong!")),
+        (Message(text="Hello!"), Message(text="Hi!")),
+        (Message(text="hi"), Message(text="Let's play ping-pong!")),
         (Message(text="Ping!"), Message(text="Pong!"))
     )
 
