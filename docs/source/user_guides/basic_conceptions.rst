@@ -175,6 +175,7 @@ Processing Definition
 .. note::
 
     The topic of this section is explained in greater detail in the following tutorials:
+
     * `Pre-response processing <../tutorials/tutorials.script.core.7_pre_response_processing.html>`_
     * `Pre-transitions processing <../tutorials/tutorials.script.core.9_pre_transitions_processing.html>`_
     * `Pipeline processors <../tutorials/tutorials.pipeline.2_pre_and_post_processors.html>`_
@@ -184,7 +185,7 @@ DFF allows you to define how user requests will be processed to extract addition
 This is done by passing callbacks to a special ``PROCESSING`` fields in a Node dict.
 
 * User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation. See `tutorial on pre-response processing`_.
-* Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation, but **before** transition to the next node. See `tutorial on pre-transition processing`_.
+* Node response can be modified with ``PRE_TRANSITIONS_PROCESSING`` and will happen **after** response generation but **before** transition to the next node. See `tutorial on pre-transition processing`_.
 
 Depending on the requirements of your bot and the dialog goal, you may need to interact with external databases or APIs to retrieve data. 
 For instance, if a user wants to know a schedule, you may need to access a database and extract parameters such as date and location.
@@ -193,7 +194,7 @@ For instance, if a user wants to know a schedule, you may need to access a datab
 
     import requests
     ...
-    def use_api_processing(ctx: Context, _: Pipeline) -> Context:
+    def use_api_processing(ctx: Context, _: Pipeline, *args, **kwargs) -> Context:
         # save to the context field for custom info
         ctx.misc["api_call_results"] = requests.get("http://schedule.api/day1").json()
         return ctx
@@ -201,7 +202,7 @@ For instance, if a user wants to know a schedule, you may need to access a datab
     node = {
         RESPONSE: ...
         TRANSITIONS: ...
-        PRETRANSITIONS_PROCESSING: {"use_api": use_api_processing}
+        PRE_TRANSITIONS_PROCESSING: {"use_api": use_api_processing}
     }
 
 If you retrieve data from the database or API, it's important to validate it to ensure it meets expectations.
@@ -247,10 +248,10 @@ This ensures a smoother user experience even when the bot encounters unexpected 
 
     def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
         """
-        Generate a special fallback response if the initial user utterance is not 'Hi'.
+        Generate a special fallback response if the initial user utterance is not 'Hello!'.
         """
         last_flow, last_node = ctx.last_label
-        if ctx.last_request.text != "Hi" and last_node == "start_node":
+        if ctx.last_request.text != "Hello!" and last_node == "start_node":
             return Message(text="You should've started the dialog with 'Hello!'")
         elif ctx.last_request is not None:
             note = f"You should've written 'Ping', not '{ctx.last_request.text}'!"
@@ -273,7 +274,7 @@ conversational service.
 .. code-block:: python
 
     happy_path = (
-        (Message(text="Hi"), Message(text="Hi! Let's play ping-pong!")),
+        (Message(text="Hello!"), Message(text="Hi! Let's play ping-pong!")),
         (Message(text="Ping!"), Message(text="Pong!"))
     )
 
@@ -328,13 +329,13 @@ Documentation
 ~~~~~~~~~~~~~
 
 Creating documentation is essential for teamwork and future bot maintenance. 
-Document how different parts of the script work and how the bot convers the expected interaction scenarios.
+Document how different parts of the script work and how the bot covers the expected interaction scenarios.
 It is especially important to document the purpose and functionality of callback functions and pipeline services
 that you may have in your project, using Python docstrings.
 
 .. code-block:: python
 
-    def kitchen_preference_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+    def fav_kitchen_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
         """
         This function returns a user-targeted response depending on the value
         of the 'kitchen preference' slot.
@@ -359,12 +360,12 @@ Further reading
 ~~~~~~~~~~~~~~~
 
 * `Tutorial on basic dialog structure <../tutorials/tutorials.script.core.1_basics.html>`_
-* `Tutorial on transitions <../tutorials/tutorials.script.core.4Transitions.html>`_
+* `Tutorial on transitions <../tutorials/tutorials.script.core.4_transitions.html>`_
 * `Tutorial on conditions <../tutorials/tutorials.script.core.2_conditions.html>`_
 * `Tutorial on response functions <../tutorials/tutorials.script.core.3_responses.html>`_
 * `Tutorial on pre-response processing <../tutorials/tutorials.script.core.7_pre_response_processing.html>`_
-* `Tutorial on pre-transition processing <../tutorials/tutorials.script.core.9_preTransitions_processing.html>`_
+* `Tutorial on pre-transition processing <../tutorials/tutorials.script.core.9_pre_transitions_processing.html>`_
 * `Documentation of Context object <../apiref/dff.script.core.context.html>`_
-* `Tutorial on global transitions <../tutorials/tutorials.script.core.5_globalTransitions.html>`_
+* `Tutorial on global transitions <../tutorials/tutorials.script.core.5_global_transitions.html>`_
 * `Tutorial on context serialization <../tutorials/tutorials.script.core.6_context_serialization.html>`_
 * `Tutorial on script MISC <../tutorials/tutorials.script.core.8_misc.html>`_
