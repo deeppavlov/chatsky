@@ -17,9 +17,14 @@ for exploring the telemetry data collected from your conversational services.
 We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
+:doc:`Profiling guide <./user_guides/profiling_guide>`
+
+The ``profiling guide`` demonstrates various tools provided by the library
+that you can use to profile your conversational service and locate performance bottlenecks.
 
 .. toctree::
    :hidden:
 
    user_guides/basic_conceptions
    user_guides/superset_guide
+   user_guides/profiling_guide

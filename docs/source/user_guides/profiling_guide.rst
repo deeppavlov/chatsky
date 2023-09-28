@@ -107,4 +107,4 @@ You'll need to define three methods:
 .. note::
 
     The exact instructions of how the testing can be carried out are available in the
-    `load testing tutorial <../tutorials/tutorials.context_storages.8_db_benchmarking.py>`_.
+    `DB benchmarking tutorial <../tutorials/tutorials.context_storages.8_db_benchmarking.py>`_.
