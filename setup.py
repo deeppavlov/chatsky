@@ -88,29 +88,18 @@ benchmark_dependencies = [
     "streamlit",
 ]
 
-requests_requirements = [
-    "requests==2.31.0",
-]
-
 otl_dependencies = [
-    "opentelemetry-api==1.17.0",
-    "opentelemetry-exporter-otlp==1.17.0",
-    "opentelemetry-exporter-otlp-proto-grpc==1.17.0",
-    "opentelemetry-exporter-otlp-proto-http==1.17.0",
-    "opentelemetry-instrumentation==0.38b0",
-    "opentelemetry-proto==1.17.0",
-    "opentelemetry-sdk==1.17.0",
-    "opentelemetry-semantic-conventions==0.38b0",
+    "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
+    "opentelemetry-instrumentation",
 ]
 
 stats_dependencies = merge_req_lists(
-    _sql_dependencies,
-    requests_requirements,
     otl_dependencies,
     [
-        "wrapt==1.15.0",
-        "tqdm==4.62.3",
-        "omegaconf>=2.2.2",
+        "requests",
+        "wrapt",
+        "tqdm",
+        "omegaconf",
     ],
 )
 
@@ -128,6 +117,10 @@ full = merge_req_lists(
     benchmark_dependencies,
 )
 
+requests_requirements = [
+    "requests==2.31.0",
+]
+
 test_requirements = merge_req_lists(
     [
         "pytest==7.4.0",
@@ -136,7 +129,7 @@ test_requirements = merge_req_lists(
         "pytest_virtualenv==1.7.0",
         "flake8==6.1.0",
         "click==8.1.3",
-        "black==23.7.0",
+        "black==23.9.1",
         "isort==5.12.0",
         "jsonschema==4.17.3",
         "aiochclient>=2.2.0",
@@ -149,12 +142,12 @@ test_requirements = merge_req_lists(
 tutorial_dependencies = [
     "flask[async]==2.3.2",
     "psutil==5.9.5",
-    "telethon==1.29.1",
+    "telethon==1.30.0",
     "fastapi==0.103.1",
     "uvicorn==0.23.1",
     "websockets==11.0.2",
     "locust==2.16.1",
-    "streamlit==1.26.0",
+    "streamlit==1.27.0",
     "streamlit-chat==0.1.1",
 ]
 
@@ -223,7 +216,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.4.2",
+    version="0.5.0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",

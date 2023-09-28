@@ -18,7 +18,6 @@ from typing import Optional, Tuple
 from argparse import Namespace, Action
 
 import requests
-from . import exporter_patch  # noqa: F401
 from opentelemetry.sdk.resources import Resource
 from opentelemetry._logs import get_logger_provider, set_logger_provider
 from opentelemetry.trace import get_tracer_provider, set_tracer_provider
