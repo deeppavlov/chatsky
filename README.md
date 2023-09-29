@@ -36,6 +36,7 @@ pip install dff[postgresql]  # dependencies for using PostgreSQL
 pip install dff[sqlite]  # dependencies for using SQLite
 pip install dff[ydb]  # dependencies for using Yandex Database
 pip install dff[telegram]  # dependencies for using Telegram
+pip install dff[benchmark]  # dependencies for benchmarking
 pip install dff[full]  # full dependencies including all options above
 pip install dff[tests]  # dependencies for running tests
 pip install dff[tests,full]  # dependencies for running tutorials (all options above)
