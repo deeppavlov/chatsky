@@ -59,11 +59,14 @@ def _test(coverage: bool, dependencies: bool) -> int:
     return pytest.main(args)
 
 
-def test_no_cov() -> int:
-    return _test(False, True)
+@docker_client
+def test_no_cov(docker: Optional[DockerClient]) -> int:
+    result = _test(False, docker is not None)
+    return result or lint()
 
 
-def test_no_deps() -> int:
+@docker_client
+def test_no_deps(_: Optional[DockerClient]) -> int:
     return _test(False, False)
 
 
