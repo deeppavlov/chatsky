@@ -29,6 +29,10 @@ jobs:
         with:
           python-version: "3.10"
 
+      - name: Build images
+        run: |
+          docker-compose up -d
+
       - name: setup poetry and install dependencies
         run: |
           pip install --upgrade pip poetry
@@ -37,16 +41,12 @@ jobs:
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials utils .env_file .coveragerc scripts pyproject.toml docs docker-compose.yml utils/otel )
+          export backup_files=( tests tutorials utils .env_file .coveragerc scripts pyproject.toml docs docker-compose.yml )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
           for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
-
-      - name: Build images
-        run: |
-          docker-compose up -d
 
       - name: run tests
         env:
