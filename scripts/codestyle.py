@@ -2,7 +2,7 @@ import pathlib
 from typing import List
 
 import black
-from flake8.api import legacy as flake8
+from flake8.main.cli import main as flake_main
 
 
 _STANDARD_PATHS = ["dff", "scripts", "tests"]
@@ -15,23 +15,16 @@ def _get_paths(paths: List[str]) -> List[pathlib.Path]:
     return [path for dir in paths for path in pathlib.Path(dir).glob("**/*.py")]
 
 
-def _lint_result(selector: List[str], report: flake8.Report) -> int:
-    return sum(len(report.get_statistics(sel)) for sel in selector)
-
-
 def lint() -> int:
     lint_result = 0
-    selector = ["E", "W", "F"]
-    ignore = ["E24", "W503"]
-    standard_style_guide = flake8.get_style_guide(select=selector, ignore=ignore, max_line_length=_STANDARD_PATHS_LEN)
-    lint_result += _lint_result(selector, standard_style_guide.check_files(_STANDARD_PATHS))
-    short_style_guide = flake8.get_style_guide(select=selector, ignore=ignore, max_line_length=_SHORT_PATHS_LEN)
-    lint_result += _lint_result(selector, short_style_guide.check_files(_SHORT_PATHS))
+    flake8_configs = ["--select=E,W,F", "--ignore=E24,W503"]
+    lint_result += flake_main([f"--max-line-length={_STANDARD_PATHS_LEN}"] + flake8_configs + _STANDARD_PATHS)
+    lint_result += flake_main([f"--max-line-length={_SHORT_PATHS_LEN}"] + flake8_configs + _SHORT_PATHS)
 
     would_format = format(False)
     if would_format == 1:
         print(
-            "================================\nBad formatting? Run: poetry run format\n================================"
+            ("=" * 38) + "\nBad formatting? Run: poetry run format\n" + ("=" * 38)
         )
 
     # TODO: Add mypy testing
