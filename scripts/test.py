@@ -8,7 +8,7 @@ from .codestyle import lint
 from .utils import docker_client
 
 
-def _test(coverage: bool, dependencies: bool):
+def _test(coverage: bool, dependencies: bool) -> int:
     test_coverage_threshold = 95
 
     dotenv.load_dotenv(".env_file")
@@ -56,22 +56,22 @@ def _test(coverage: bool, dependencies: bool):
             *args,
         ]
 
-    pytest.main(args)
+    return pytest.main(args)
 
 
-def test_no_cov():
+def test_no_cov() -> int:
     return _test(False, True)
 
 
-def test_no_deps():
+def test_no_deps() -> int:
     return _test(False, False)
 
 
 @docker_client
-def test_all(docker: Optional[DockerClient]):
-    _test(True, docker is not None)
-    lint()
+def test_all(docker: Optional[DockerClient]) -> int:
+    result = _test(True, docker is not None)
+    return result or lint()
 
 
 if __name__ == "__main__":
-    test_all(None)
+    exit(test_all(None))
