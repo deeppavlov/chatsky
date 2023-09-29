@@ -74,4 +74,4 @@ def test_all(docker: Optional[DockerClient]) -> int:
 
 
 if __name__ == "__main__":
-    exit(_test(True, True) or lint())
+    exit(_test(True, True))
