@@ -23,9 +23,7 @@ def lint() -> int:
 
     would_format = format(False)
     if would_format == 1:
-        print(
-            ("=" * 38) + "\nBad formatting? Run: poetry run format\n" + ("=" * 38)
-        )
+        print(("=" * 38) + "\nBad formatting? Run: poetry run format\n" + ("=" * 38))
 
     # TODO: Add mypy testing
     # @mypy . --exclude venv*,build
