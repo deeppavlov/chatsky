@@ -7,6 +7,7 @@ def clean_docs():
     shutil.rmtree("docs/build", ignore_errors=True)
     shutil.rmtree("docs/tutorials", ignore_errors=True)
     shutil.rmtree("docs/source/apiref", ignore_errors=True)
+    shutil.rmtree("docs/source/_misc", ignore_errors=True)
     shutil.rmtree("docs/source/tutorials", ignore_errors=True)
 
 

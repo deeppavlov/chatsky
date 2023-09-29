@@ -123,6 +123,11 @@ sphinx-autodoc-typehints = { version = "1.24.0", optional = true }
 opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras=["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }
+jsonschema = { version = "4.17.3", optional = true }
+pympler = { version = "*", optional = true }
+humanize = { version = "*", optional = true }
+pandas = { version = "*", optional = true }
+altair = { version = "*", optional = true }
 
 [tool.poetry.extras]
 json = ["aiofiles"]
@@ -135,11 +140,12 @@ postgresql = ["sqlalchemy", "asyncpg"]
 ydb = ["ydb", "six"]
 telegram = ["pytelegrambotapi"]
 full = ["aiofiles", "sqlalchemy", "aiosqlite", "redis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
-tests = ["requests", "pytest", "pytest-cov", "pytest-asyncio", "pytest-virtualenv", "flake8", "click", "black", "isort", "idna", "sniffio", "h11", "aiochclient", "httpx", "sqlparse"]
+tests = ["requests", "pytest", "pytest-cov", "pytest-asyncio", "pytest-virtualenv", "flake8", "click", "black", "isort", "idna", "sniffio", "h11", "aiochclient", "httpx", "sqlparse", "jsonschema"]
 devel = ["colorama", "python-on-whales", "python-dotenv", "mypy", "bump2version"]
 doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sphinxcontrib-httpdomain", "sphinxcontrib-katex", "sphinx-favicon", "sphinx-copybutton", "sphinx-gallery", "sphinx-autodoc-typehints", "nbsphinx", "jupytext", "jupyter"]
 tutorial = ["flask", "psutil", "telethon", "fastapi", "uvicorn", "websockets", "locust", "streamlit", "streamlit-chat"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
+benchmark = ["pympler", "humanize", "pandas", "altair"]
 
 
 
@@ -149,8 +155,8 @@ lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
 format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
 test_no_cov = { callable = "scripts.test:test_no_cov", extras = ["tests", "devel"] }
 test_no_deps = { callable = "scripts.test:test_no_deps", extras = ["tests", "devel"] }
-test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial", "stats"] }
-docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel", "stats"] }
+test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial", "stats", "benchmark"] }
+docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel", "stats", "benchmark"] }
 pre_commit = { callable = "scripts.misc:pre_commit", extras = ["devel"] }
 version_patch = { callable = "scripts.misc:version_patch", extras = ["devel"] }
 version_minor = { callable = "scripts.misc:version_minor", extras = ["devel"] }
