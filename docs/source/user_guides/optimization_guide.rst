@@ -1,8 +1,5 @@
-Profiling Guide
-----------------
-
-Profiling dialog services
--------------------------
+Optimization Guide
+------------------
 
 Introduction
 ~~~~~~~~~~~~
@@ -18,32 +15,60 @@ as the number of callbacks in the script and pipeline increases.
 As a result, it becomes necessary to locate the part of the pipeline that is causing issues, so that
 further optimization steps can be taken. DFF provides several tools that address the need for
 profiling individual system components. This guide will walk you through the process
-of using these tools in practice.
+of using these tools in practice and optimizing the profiled application.
 
-Load testing with Locust
-~~~~~~~~~~~~~~~~~~~~~~~~
+Profiling with Locust testing
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 [Locust](https://locust.io/) is a tool for load testing web applications that
 simultaneously spawns several user agents that execute a pre-determined behavior
 against the target application. Assuming that your pipeline is integrated into a web
 server application, like Flask or FastAPI, that is not strongly impacted by the load,
-the load testing reveals how well your pipeline scales to a highly loaded environment.
+the load testing reveals how well your pipeline would scale to a highly loaded environment.
+Using this approach, you can also measure the scalability of each component in your pipeline,
+if you take advantage of the Opentelemetry package bundled with the library (`stats` extra required)
+as described below.
+
+Since Locust testing can only target web apps, you will need to integrate your dialog pipeline into a web application.
+At this stage, you will also need to instrument the pipeline components that you want to additionally profile
+using `extractor functions`. Put simply, you are decorating the components of the pipeline
+with functions that can report their performance, e.g. their execution time or the CPU load.
 
 .. note::
 
-    The exact instructions of how the testing can be carried out are available in the
+    You can get more info on how instrumentation is done and statistics are collected
+    in the `stats tutorial <../tutorials/tutorials.stats.1_extractor_functions.py>`_.
+
+When you are done setting up the instrumentation, you can launch the web server to accept connections from locust.
+
+The final step is to run a Locust file which will result in artificial load traffic being generated and sent to your server.
+A Locust file is a script that implements the behavior of artificial users,
+i.e. the requests to the server that will be made during testing.
+
+.. note::
+
+    An example Locust script along with instructions on how to run it can be found in the
     `load testing tutorial <../tutorials/tutorials.messengers.web_api_inference.3_load_testing_with_locust.py>`_.
+    The simplest way, however, is to pass a locust file to the Python interpreter.
 
-In general, the process involves launching your web application and Locust simultaneously. Once Locust is running, you can access its GUI, where you can configure the number of users to simulate. After configuring this parameter, the testing begins, and the results are displayed on an interactive dashboard. These results include timing data, such as the average response time of your service, allowing you to assess the performance's reasonableness and impact on user experience.
+Once Locust is running, you can access its GUI, where you can set the number of users to emulate.
+After configuring this parameter, the active phase of testing will begin,
+and the results will become accessible on an interactive dashboard.
+These reported values include timing data, such as the average response time of your service,
+allowing you to assess the performance's reasonableness and impact on user experience.
 
-Additionally, you can leverage the Opentelemetry package bundled with the stats extra. Configure logging for every component of your web app to measure execution times under high-load conditions. This approach helps reveal the source of performance issues, if any.
+The data provided by extractor functions will be available in the Clickhouse database;
+you can view it using the Superset dashboard (see `instructions <./superset_guide.html>`_)
+or analyze it with your own queries using the Clickhouse client.
 
-Context storage benchmarking
+Profiling context storages
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Benchmarking the performance of context storage is crucial to understanding
 how different storage methods impact your dialog service's efficiency.
 This process involves running tests to measure the speed and reliability of various context storage solutions.
+Given the exact configuration of your system, one or the other database type may be performing more efficiently,
+so you may prefer to change your database depending on the testing results.
 In the following sections, we will guide you through setting up and running context storage benchmarks.
 
 **Context Storage Setup**
@@ -108,3 +133,17 @@ You'll need to define three methods:
 
     The exact instructions of how the testing can be carried out are available in the
     `DB benchmarking tutorial <../tutorials/tutorials.context_storages.8_db_benchmarking.py>`_.
+
+Optimization techniques
+~~~~~~~~~~~~~~~~~~~~~~~
+
+Aside from choosing an appropriate database type, there exists a number of other recommendations
+that may help you improve the efficiency of your service.
+
+* Firstly, follow the DRY principle not only with regard to your code, but also with regard to
+operations being made. In other words,
+* It's also essential to use caching for resource-consuming callbacks and actions. In this manner,
+you can make your pipeline way more efficient, while making very few changes to the code itself.
+* Secondly, be mindful about the use of computationally expensive algorithms, like NLU classifiers
+or LLM-based generative networks, since those require a great deal of time and resources
+to produce an answer. 
