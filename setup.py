@@ -79,6 +79,15 @@ telegram_dependencies = [
     "pytelegrambotapi",
 ]
 
+benchmark_dependencies = [
+    "pympler",
+    "tqdm",
+    "humanize",
+    "pandas",
+    "altair",
+    "streamlit",
+]
+
 otl_dependencies = [
     "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
     "opentelemetry-instrumentation",
@@ -105,6 +114,7 @@ full = merge_req_lists(
     ydb_dependencies,
     stats_dependencies,
     telegram_dependencies,
+    benchmark_dependencies,
 )
 
 requests_requirements = [
@@ -121,6 +131,7 @@ test_requirements = merge_req_lists(
         "click==8.1.3",
         "black==23.9.1",
         "isort==5.12.0",
+        "jsonschema==4.17.3",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
@@ -194,6 +205,7 @@ EXTRA_DEPENDENCIES = {
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
     "stats": stats_dependencies,  # dependencies for statistics collection
     "telegram": telegram_dependencies,  # dependencies for using Telegram
+    "benchmark": benchmark_dependencies,  # dependencies for benchmarking
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
