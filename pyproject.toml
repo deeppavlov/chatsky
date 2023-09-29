@@ -145,7 +145,7 @@ devel = ["colorama", "python-on-whales", "python-dotenv", "mypy", "bump2version"
 doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sphinxcontrib-httpdomain", "sphinxcontrib-katex", "sphinx-favicon", "sphinx-copybutton", "sphinx-gallery", "sphinx-autodoc-typehints", "nbsphinx", "jupytext", "jupyter"]
 tutorial = ["flask", "psutil", "telethon", "fastapi", "uvicorn", "websockets", "locust", "streamlit", "streamlit-chat"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
-benchmark = ["pympler", "humanize", "pandas", "altair"]
+benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 
 
 
