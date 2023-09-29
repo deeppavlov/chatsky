@@ -37,7 +37,7 @@ jobs:
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials utils .env_file .coveragerc scripts pyproject.toml docs docker-compose.yml dff/utils/otel )
+          export backup_files=( tests tutorials utils .env_file .coveragerc scripts pyproject.toml docs docker-compose.yml utils/otel )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
