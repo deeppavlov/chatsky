@@ -256,12 +256,12 @@ This ensures a smoother user experience even when the bot encounters unexpected 
         """
         Generate a special fallback response if the initial user utterance is not 'Hello!'.
         """
-        last_flow, last_node = ctx.last_label
-        if ctx.last_request.text != "Hello!" and last_node == "start_node":
-            return Message(text="You should've started the dialog with 'Hello!'")
-        elif ctx.last_request is not None:
-            note = f"You should've written 'Ping', not '{ctx.last_request.text}'!"
-            return Message(text=f"That was against the rules! {note}")
+        if ctx.last_request is not None:
+            if ctx.last_request.text != "Hello!" and ctx.last_label is None: # start node
+                return Message(text="You should've started the dialog with 'Hello!'")
+            else:
+                note = f"You should've written 'Ping', not '{ctx.last_request.text}'!"
+                return Message(text=f"That was against the rules! {note}")
         else:
             raise RuntimeError("Error occurred: last request is None!")
 
