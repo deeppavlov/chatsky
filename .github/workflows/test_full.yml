@@ -35,7 +35,7 @@ jobs:
         run: |
           pip install --upgrade pip poetry
           poetry self add setuptools
-          poetry install --extras "tests devel full tutorial stats" --no-ansi --no-interaction
+          poetry install --all-extras --no-ansi --no-interaction
 
       - name: run pytest
         env:
@@ -62,10 +62,5 @@ jobs:
           poetry install --extras "tests devel" --no-ansi --no-interaction
 
       - name: run pytest
-        env:
-          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
-          TG_API_ID: ${{ secrets.TG_API_ID }}
-          TG_API_HASH: ${{ secrets.TG_API_HASH }}
-          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
-        run: |
+        run:
           poetry run test_no_deps
