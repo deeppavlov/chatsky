@@ -111,7 +111,7 @@ clean_docs:
 	rm -rf docs/source/_misc
 	rm -rf docs/source/tutorials
 	rm -rf docs/source/_static/drawio
-	rm -rf docs/source/diagrams/**/export
+	rm -rf docs/source/drawio_src/**/export
 .PHONY: clean_docs
 
 clean: clean_docs

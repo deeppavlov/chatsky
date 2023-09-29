@@ -8,7 +8,7 @@ docs/source/_misc
 docs/source/release_notes.rst
 docs/source/tutorials
 docs/source/_static/drawio
-docs/source/diagrams/**/export
+docs/source/drawio_src/**/export
 *__pycache__*
 *.idea/*
 .idea/*
