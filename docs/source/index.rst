@@ -25,9 +25,9 @@ allowing developers to easily adapt it to their specific needs and requirements.
    :maxdepth: 1
 
    get_started
+   user_guides
    tutorials
    examples
-   user_guides
    reference
    development
    community

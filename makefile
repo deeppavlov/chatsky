@@ -3,7 +3,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.4.2
+CURRENT_VERSION = 0.5.0
 TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
@@ -56,7 +56,7 @@ wait_db: docker_up
 .PHONY: wait_db
 
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
 test_all: venv wait_db test lint
@@ -90,6 +90,7 @@ clean_docs:
 	rm -rf docs/build
 	rm -rf docs/tutorials
 	rm -rf docs/source/apiref
+	rm -rf docs/source/_misc
 	rm -rf docs/source/tutorials
 .PHONY: clean_docs
 

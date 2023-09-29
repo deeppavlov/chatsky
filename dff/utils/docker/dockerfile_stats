@@ -1,0 +1,6 @@
+FROM apache/superset:2.1.0rc1
+USER root
+RUN cd /app && pip install .[clickhouse]
+COPY entrypoint_stats.sh /app/docker/
+USER superset
+ENTRYPOINT ["/bin/bash","/app/docker/entrypoint_stats.sh"]
