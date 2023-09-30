@@ -3,7 +3,7 @@
 # 2. LRU Cache
 
 In this tutorial use of
-%mddoclink(dff,utils.turn_caching.singleton_turn_caching,lru_cache)
+%mddoclink(api,utils.turn_caching.singleton_turn_caching,lru_cache)
 function is demonstrated.
 This function is used a lot like :py:func:`~functools.lru_cache` function and
 helps saving results of heavy function execution and avoiding recalculation.
