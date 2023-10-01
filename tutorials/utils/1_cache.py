@@ -5,10 +5,12 @@
 In this tutorial use of
 %mddoclink(api,utils.turn_caching.singleton_turn_caching,cache)
 function is demonstrated.
-This function is used a lot like :py:func:`~functools.cache` function and
-helps saving results of heavy function execution and avoiding recalculation.
+
+This function is used a lot like `functools.cache` function and
+helps by saving results of heavy function execution and avoiding recalculation.
+
 Caches are kept in a library-wide singleton
-and cleared in the end of each turn.
+and are cleared at the end of each turn.
 """
 
 # %pip install dff
