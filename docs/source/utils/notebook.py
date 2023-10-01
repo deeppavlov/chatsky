@@ -77,35 +77,22 @@ class DocumentationLink(ReplacePattern):
     USAGE EXAMPLES
     --------------
 
-    [index_pipeline](%doclink(api,index_pipeline)) -> [index_pipeline](
-        ../apiref/index_pipeline.rst
-    )
+    %doclink(api,index_pipeline)) -> ../apiref/index_pipeline.rst
 
-    [script](%doclink(api,script.core.script)) -> [script](
-        ../apiref/dff.script.core.script.rst
-    )
+    %doclink(api,script.core.script) -> ../apiref/dff.script.core.script.rst
 
-    [Node](%doclink(api,script.core.script,Node)) -> [Node](
-        ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
-    )
+    %doclink(api,script.core.script,Node) -> ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
 
-    [4_streamlit_chat](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) -> [4_streamlit_chat](
-        ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py
-    )
+    %doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) ->
+    ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py
 
-    [API-configuration](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration))
-        -> [API-configuration](
-        ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py#API-configuration
-    )
+    %doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration) ->
+    ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py#API-configuration
 
-    [basic_conceptions](%doclink(guide,basic_conceptions)) -> [basic_conceptions](
-        ../user_guides/basic_conceptions.rst
-    )
+    %doclink(guide,basic_conceptions) -> ../user_guides/basic_conceptions.rst
 
-    [example-conversational-chat-bot](%doclink(guide,basic_conceptions,example-conversational-chat-bot))
-        -> [example-conversational-chat-bot](
-        ../user_guides/basic_conceptions.rst#example-conversational-chat-bot
-    )
+    %doclink(guide,basic_conceptions,example-conversational-chat-bot) ->
+    ../user_guides/basic_conceptions.rst#example-conversational-chat-bot
 
     """
 
