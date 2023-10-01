@@ -135,6 +135,9 @@ class DocumentationLink(ReplacePattern):
             To link to the basic script tutorial, pass "script.core.1_basics" (without the "tutorials" prefix).
 
             To link to the basic concepts guide, pass "basic_conceptions".
+
+            API index pages are also supported.
+            Passing "index_pipeline" will link to the "apiref/index_pipeline.html" page.
         :param anchor:
             An anchor on the page. (optional)
 
