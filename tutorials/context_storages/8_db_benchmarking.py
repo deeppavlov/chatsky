@@ -50,34 +50,28 @@ storages = {
 Benchmark results are saved to files.
 
 For that there exist two functions:
-[benchmark_all](
-%doclink(api,utils.db_benchmark.benchmark,benchmark_all)
-)
+%mddoclink(api,utils.db_benchmark.benchmark,benchmark_all)
 and
-[save_results_to_file](
-%doclink(api,utils.db_benchmark.benchmark,save_results_to_file)
-).
+%mddoclink(api,utils.db_benchmark.benchmark,save_results_to_file).
 
 Note: context storages passed into these functions will be cleared.
 
 ### Configuration
 
 The first one is a higher-level wrapper of the second one.
-The first function accepts [BenchmarkCases](
-%doclink(api,utils.db_benchmark.benchmark,BenchmarkCase)
-) which configure databases that are being benchmark and configurations of the benchmarks.
+The first function accepts
+%mddoclink(api,utils.db_benchmark.benchmark,BenchmarkCase)
+which configure databases that are being benchmark and configurations of the benchmarks.
 The second function accepts only a single URI for the database and several benchmark configurations.
 So, the second function is simpler to use, while the first function allows for more configuration
 (e.g. having different databases benchmarked in a single file).
 
-Both function use [BenchmarkConfig](
-%doclink(api,utils.db_benchmark.benchmark,BenchmarkConfig)
-) to configure benchmark behaviour.
+Both function use
+%mddoclink(api,utils.db_benchmark.benchmark,BenchmarkConfig)
+to configure benchmark behaviour.
 `BenchmarkConfig` is only an interface for benchmark configurations.
 Its most basic implementation is
-[BasicBenchmarkConfig](
-%doclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig)
-).
+%mddoclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig).
 
 It has several parameters:
 
@@ -125,9 +119,9 @@ list(tutorial_dir.iterdir())
 """
 ## Viewing benchmark results
 
-Now that the results are saved to a file you can either view them using [report](
-%doclink(api,utils.db_benchmark.report,report)
-) function or [our streamlit app](
+Now that the results are saved to a file you can either view them using the
+%mddoclink(api,utils.db_benchmark.report,report)
+function or [our streamlit app](
 ../_misc/benchmark_streamlit.py
 ).
 """
@@ -187,21 +181,24 @@ to compare every benchmark result from a single file.
 
 ### Configuration presets
 
-The [dff.utils.db_benchmarks.basic_config](
-%doclink(api,utils.db_benchmark.basic_config)
-) module also includes a dictionary containing configuration presets.
+The
+%mddoclink(api,utils.db_benchmark.basic_config)
+module also includes a dictionary containing configuration presets.
 Those cover various contexts and messages as well as some edge cases.
-
-To use configuration presets, simply pass them to benchmark functions.
 """
 
 # %%
-print(benchmark.basic_configurations.keys())
+print(benchmark.basic_config.basic_configurations.keys())
 
-# benchmark.benchmark_all(
-#     ...,
-#     benchmark_configs=benchmark.basic_configurations
-# )
+# %% [markdown]
+"""
+To use configuration presets, simply pass them to benchmark functions:
+
+    benchmark.benchmark_all(
+        ...,
+        benchmark_configs=benchmark.basic_configurations
+    )
+"""
 
 # %% [markdown]
 """
@@ -209,9 +206,9 @@ print(benchmark.basic_configurations.keys())
 
 If the basic configuration is not enough for you, you can create your own.
 
-To do so, inherit from the [dff.utils.db_benchmark.benchmark.BenchmarkConfig](
-%doclink(api,utils.db_benchmark.benchmark,BenchmarkConfig)
-) class. You need to define three methods:
+To do so, inherit from the
+%mddoclink(api,utils.db_benchmark.benchmark,BenchmarkConfig)
+class. You need to define three methods:
 
 - `get_context` -- method to get initial contexts.
 - `info` -- method for getting display info representing the configuration.
