@@ -31,7 +31,10 @@ from fastapi.responses import HTMLResponse
 
 # %%
 messenger_interface = CallbackMessengerInterface()
-pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, messenger_interface=messenger_interface)
+pipeline = Pipeline.from_script(
+    *TOY_SCRIPT_ARGS,
+    messenger_interface=messenger_interface
+)
 
 
 # %%
