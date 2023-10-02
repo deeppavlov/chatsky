@@ -79,29 +79,27 @@ telegram_dependencies = [
     "pytelegrambotapi",
 ]
 
-requests_requirements = [
-    "requests==2.31.0",
+benchmark_dependencies = [
+    "pympler",
+    "tqdm",
+    "humanize",
+    "pandas",
+    "altair",
+    "streamlit",
 ]
 
 otl_dependencies = [
-    "opentelemetry-api==1.17.0",
-    "opentelemetry-exporter-otlp==1.17.0",
-    "opentelemetry-exporter-otlp-proto-grpc==1.17.0",
-    "opentelemetry-exporter-otlp-proto-http==1.17.0",
-    "opentelemetry-instrumentation==0.38b0",
-    "opentelemetry-proto==1.17.0",
-    "opentelemetry-sdk==1.17.0",
-    "opentelemetry-semantic-conventions==0.38b0",
+    "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
+    "opentelemetry-instrumentation",
 ]
 
 stats_dependencies = merge_req_lists(
-    _sql_dependencies,
-    requests_requirements,
     otl_dependencies,
     [
-        "wrapt==1.15.0",
-        "tqdm==4.62.3",
-        "omegaconf>=2.2.2",
+        "requests",
+        "wrapt",
+        "tqdm",
+        "omegaconf",
     ],
 )
 
@@ -116,7 +114,12 @@ full = merge_req_lists(
     ydb_dependencies,
     stats_dependencies,
     telegram_dependencies,
+    benchmark_dependencies,
 )
+
+requests_requirements = [
+    "requests==2.31.0",
+]
 
 test_requirements = merge_req_lists(
     [
@@ -128,6 +131,7 @@ test_requirements = merge_req_lists(
         "click==8.1.3",
         "black==23.9.1",
         "isort==5.12.0",
+        "jsonschema==4.19.1",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
@@ -143,7 +147,7 @@ tutorial_dependencies = [
     "uvicorn==0.23.1",
     "websockets==11.0.2",
     "locust==2.16.1",
-    "streamlit==1.26.0",
+    "streamlit==1.27.0",
     "streamlit-chat==0.1.1",
 ]
 
@@ -201,6 +205,7 @@ EXTRA_DEPENDENCIES = {
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
     "stats": stats_dependencies,  # dependencies for statistics collection
     "telegram": telegram_dependencies,  # dependencies for using Telegram
+    "benchmark": benchmark_dependencies,  # dependencies for benchmarking
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
@@ -211,7 +216,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.4.2",
+    version="0.5.0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",

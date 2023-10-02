@@ -3,6 +3,10 @@
 # 6. Extra Handlers (basic)
 
 The following tutorial shows extra handlers possibilities and use cases.
+
+Here, extra handlers %mddoclink(api,pipeline.service.extra,BeforeHandler)
+and %mddoclink(api,pipeline.service.extra,AfterHandler)
+are shown as additional means of data processing, attached to services.
 """
 
 # %pip install dff

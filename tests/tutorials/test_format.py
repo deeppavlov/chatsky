@@ -13,7 +13,7 @@ patterns = [
     re.compile(r"# %%\n"),  # check python block
 ]
 
-docstring_start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n(?:\n[\S\s]*)?"""\n')
+docstring_start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n(?:\n[\S\s]*)?"""(?:  # .*)?\n')
 comment_start_pattern = re.compile(r'# %% \[markdown\]\n# #(?: .*:)? \d+\. .*\n#(?:\n# [\S\s]*)?')
 
 
