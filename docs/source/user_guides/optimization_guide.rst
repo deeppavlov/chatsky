@@ -141,9 +141,17 @@ Aside from choosing an appropriate database type, there exists a number of other
 that may help you improve the efficiency of your service.
 
 * Firstly, follow the DRY principle not only with regard to your code, but also with regard to
-operations being made. In other words,
-* It's also essential to use caching for resource-consuming callbacks and actions. In this manner,
-you can make your pipeline way more efficient, while making very few changes to the code itself.
-* Secondly, be mindful about the use of computationally expensive algorithms, like NLU classifiers
+computational operations. In other words, you have to make sure that your callback functions work only once
+during a dialog turn and only when needed. E.g. you can take note of the `conditions` api available as a part
+of the `Pipeline` module: while normally a pipeline service runs every turn, you can restrict it
+to only run on turns when a particular condition is satisfied, greatly reducing
+the number of performed actions `<../tutorials/tutorials.pipeline.4_groups_and_conditions_full.py>`_.
+* Using caching for resource-consuming callbacks and actions may also prove to be a helpful strategy.
+In this manner, you can improve the computational efficiency of your pipeline,
+while making very few changes to the code itself. DFF includes a caching mechanism
+for response functions: `<../tutorials/tutorials.utils.1_cache.py>`_. However, the simplicity
+of the DFF API makes it easy to integrate any custom caching solutions that you may come up with.
+* Finally, be mindful about the use of computationally expensive algorithms, like NLU classifiers
 or LLM-based generative networks, since those require a great deal of time and resources
-to produce an answer. 
+to produce an answer. In case you need to use one, take full advantage of caching along with
+other means to relieve the computational load imposed by neural networks.
