@@ -133,7 +133,7 @@ test_requirements = merge_req_lists(
         "isort==5.12.0",
         "jsonschema==4.19.1",
         "aiochclient>=2.2.0",
-        "httpx<=0.23.0",
+        "httpx<=0.25.0",
         "sqlparse==0.4.4",
     ],
     requests_requirements,
