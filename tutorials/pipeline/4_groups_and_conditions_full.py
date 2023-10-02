@@ -3,6 +3,9 @@
 # 4. Groups and conditions (full)
 
 The following tutorial shows `pipeline` service group usage and start conditions.
+
+This tutorial is a more advanced version of the
+[previous tutorial](%doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 """
 
 # %pip install dff

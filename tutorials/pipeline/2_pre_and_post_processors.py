@@ -4,6 +4,9 @@
 
 The following tutorial shows more advanced usage of `pipeline`
 module as an extension to `dff.script.core`.
+
+Here, %mddoclink(api,script.core.context,Context.misc)
+dictionary of context is used for storing additional data.
 """
 
 # %pip install dff
