@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Web API: 4. Load testing with Locust
+# Web API: 3. Load testing with Locust
 
 This tutorial shows how to use an API endpoint created in the FastAPI tutorial in load testing.
 """

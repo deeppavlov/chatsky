@@ -1,5 +1,5 @@
 # %% [markdown]
-# # Web API: 5. Streamlit chat interface
+# # Web API: 4. Streamlit chat interface
 #
 # This tutorial shows how to use an API endpoint created in the FastAPI tutorial
 # in a Streamlit chat.

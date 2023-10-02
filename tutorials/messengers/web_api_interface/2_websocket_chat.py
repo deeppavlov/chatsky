@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Web API: 3. WebSocket Chat
+# Web API: 2. WebSocket Chat
 
 This tutorial shows how to create a Web chat on FastAPI using websockets.
 
