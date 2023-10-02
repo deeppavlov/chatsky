@@ -90,6 +90,7 @@ clean_docs:
 	rm -rf docs/build
 	rm -rf docs/tutorials
 	rm -rf docs/source/apiref
+	rm -rf docs/source/_misc
 	rm -rf docs/source/tutorials
 .PHONY: clean_docs
 
