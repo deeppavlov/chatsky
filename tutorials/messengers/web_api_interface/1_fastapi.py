@@ -27,8 +27,9 @@ as well as pipeline execution on every user request.
 There are two built-in messenger interface types (that may be overridden):
 
 * `PollingMessengerInterface` - Starts polling for user requests
-        in a loop upon initialization,
-        it has following methods:
+    in a loop upon initialization,
+    it has following methods:
+    
     * `_request()` - Method that is executed in a loop,
         should return list of tuples: (user request, unique dialog id).
     * `_respond(responses)` - Method that is executed in a loop
@@ -39,22 +40,23 @@ There are two built-in messenger interface types (that may be overridden):
         should catch the exception
         (it is also called on pipeline termination).
     * `connect(pipeline_runner, loop, timeout)` -
-            Method that is called on connection to message channel,
-            accepts pipeline_runner (a callback, running pipeline).
+        Method that is called on connection to message channel,
+        accepts pipeline_runner (a callback, running pipeline).
     * loop - A function to be called on each loop
-            execution (should return True to continue polling).
+        execution (should return True to continue polling).
     * timeout - Time in seconds to wait between loop executions.
 
 * `CallbackMessengerInterface` - Creates message channel
-        and provides a callback for pipeline execution,
-        it has following method:
+    and provides a callback for pipeline execution,
+    it has following method:
+    
     * `on_request(request, ctx_id)` - Method that should be called each time
         user provides new input to pipeline,
         returns dialog Context.
 
 `CLIMessengerInterface` is also
-    a messenger interface that overrides `PollingMessengerInterface` and
-    provides default message channel between pipeline and console/file IO.
+a messenger interface that overrides `PollingMessengerInterface` and
+provides default message channel between pipeline and console/file IO.
 
 Here the default `CallbackMessengerInterface` is used to setup
 communication between the pipeline on the server side and the messenger client.
