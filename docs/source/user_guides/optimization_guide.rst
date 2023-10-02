@@ -73,18 +73,17 @@ In the following sections, we will guide you through setting up and running cont
 
 **Context Storage Setup**
 
-Before you can begin benchmarking, you need to set up the context storage options you want to test.
-The following storage methods are available for benchmarking:
-
-    JSON: Uses JSON files for storage.
-    Pickle: Utilizes Python's Pickle format for storage.
-    Shelve: Utilizes Python's Shelve format for storage.
-    PostgreSQL: A PostgreSQL database for storage.
-    MongoDB: A MongoDB database for storage.
-    Redis: A Redis database for storage.
-    MySQL: A MySQL database for storage.
-    SQLite: An SQLite database for storage.
-    YDB: Utilizes YDB (Yandex Database) for storage.
+Before you can begin benchmarking, you need to set up the context storage options you want to test,
+the available options including
+* JSON: Uses JSON files for storage.
+* Pickle: Utilizes Python's Pickle format for storage.
+* Shelve: Utilizes Python's Shelve format for storage.
+* PostgreSQL: A PostgreSQL database for storage.
+* MongoDB: A MongoDB database for storage.
+* Redis: A Redis database for storage.
+* MySQL: A MySQL database for storage.
+* SQLite: An SQLite database for storage.
+* YDB: Utilizes YDB (Yandex Database) for storage.
 
 For some storage methods like Pickle, Shelve, and SQLite, you may need to create temporary directories or files
 to perform the benchmarking.
@@ -118,7 +117,7 @@ Once the benchmark results are saved to a file, you can view and analyze them us
 
 **Additional Information**
 
-DFF provides configuration presets in the dff.utils.db_benchmarks.basic_config module,
+DFF provides configuration presets in the `basic config <../apiref/dff.utils.db_benchmarks.basic_config.py>`_ module,
 covering various contexts, messages, and edge cases.
 You can use these presets by passing them to the benchmark functions.
 
