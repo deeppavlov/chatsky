@@ -1,4 +1,3 @@
-import glob
 import os
 from pathlib import Path
 import shutil
@@ -34,12 +33,14 @@ def _build_drawio(docker: DockerClient):
         volumes=[(f"{os.getcwd()}/docs/source/drawio_src", "/data", "rw")],
     )
 
+    drawio_root = Path("docs/source/drawio_src/")
     destination = Path("docs/source/_static/drawio/")
     destination.mkdir(parents=True, exist_ok=True)
-    for path in glob.glob("docs/source/drawio_src/**/export"):
-        target = destination / Path(path).relative_to("docs/source/drawio_src").parent
+    for path in drawio_root.glob("./**/export"):
+        target = destination / path.relative_to(drawio_root).parent
         target.mkdir(parents=True, exist_ok=True)
         shutil.copytree(path, target, dirs_exist_ok=True)
+        print(f"Drawio images built from {path.parent} to {target}")
 
 
 @docker_client

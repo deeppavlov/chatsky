@@ -28,7 +28,7 @@ jobs:
 
       - name: install dependencies
         run: |
-          sudo apt install pandoc
+          sudo apt-get install pandoc
 
       - name: setup poetry and install dependencies
         run: |

@@ -1,5 +1,4 @@
-import glob
-import pathlib
+from pathlib import Path
 import shutil
 
 
@@ -18,9 +17,9 @@ def clean():
     shutil.rmtree(".pytest_cache", ignore_errors=True)
     shutil.rmtree("htmlcov", ignore_errors=True)
     shutil.rmtree("build", ignore_errors=True)
-    pathlib.Path(".coverage").unlink(missing_ok=True)
-    pathlib.Path("poetry.lock").unlink(missing_ok=True)
-    for path in glob.glob("*.egg-info"):
+    Path(".coverage").unlink(missing_ok=True)
+    Path("poetry.lock").unlink(missing_ok=True)
+    for path in Path.cwd().glob("./*.egg-info"):
         shutil.rmtree(path, ignore_errors=True)
-    for path in glob.glob("**/__pycache__", recursive=True):
+    for path in Path.cwd().glob("./**/__pycache__"):
         shutil.rmtree(path, ignore_errors=True)
