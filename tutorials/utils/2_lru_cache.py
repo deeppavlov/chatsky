@@ -2,6 +2,17 @@
 """
 # 2. LRU Cache
 
+In this tutorial use of
+%mddoclink(api,utils.turn_caching.singleton_turn_caching,lru_cache)
+function is demonstrated.
+
+This function is used a lot like `functools.lru_cache` function and
+helps by saving results of heavy function execution and avoiding recalculation.
+
+Caches are kept in a library-wide singleton
+and are cleared at the end of each turn.
+
+Maximum size parameter limits the amount of function execution results cached.
 """
 
 # %pip install dff

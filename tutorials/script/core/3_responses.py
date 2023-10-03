@@ -3,6 +3,10 @@
 # Core: 3. Responses
 
 This tutorial shows different options for setting responses.
+
+Here, [responses](%doclink(api,script.responses.std_responses))
+that allow giving custom answers to users are shown.
+
 Let's do all the necessary imports from DFF.
 """
 

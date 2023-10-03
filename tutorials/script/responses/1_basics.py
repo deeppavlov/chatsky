@@ -2,6 +2,10 @@
 """
 # Responses: 1. Basics
 
+Here, the process of response forming is shown.
+Special keywords %mddoclink(api,script.core.keywords,Keywords.RESPONSE)
+and %mddoclink(api,script.core.keywords,Keywords.TRANSITIONS)
+are used for that.
 """
 
 # %pip install dff

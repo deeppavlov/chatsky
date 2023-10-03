@@ -3,6 +3,10 @@
 # 6. Custom messenger interface
 
 The following tutorial shows messenger interfaces usage.
+
+Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
+and %mddoclink(api,messengers.common.interface,PollingMessengerInterface)
+are shown as alternatives for connection to custom user messenger backends.
 """
 
 # %pip install dff flask

@@ -4,6 +4,8 @@
 
 The following tutorial shows how to configure `PollingTelegramInterface`.
 
+See %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+for more information.
 """
 
 # %pip install dff[telegram]
