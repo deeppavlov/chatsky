@@ -39,7 +39,7 @@ def _build_drawio(docker: DockerClient):
     for path in glob.glob("docs/source/drawio_src/**/export"):
         target = destination / Path(path).relative_to("docs/source/drawio_src").parent
         target.mkdir(parents=True, exist_ok=True)
-        shutil.copytree(path, target)
+        shutil.copytree(path, target, dirs_exist_ok=True)
 
 
 @docker_client
