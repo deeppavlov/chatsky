@@ -9,6 +9,8 @@ def clean_docs():
     shutil.rmtree("docs/source/apiref", ignore_errors=True)
     shutil.rmtree("docs/source/_misc", ignore_errors=True)
     shutil.rmtree("docs/source/tutorials", ignore_errors=True)
+    shutil.rmtree("docs/source/_static/drawio", ignore_errors=True)
+    shutil.rmtree("docs/source/drawio_src/**/export", ignore_errors=True)
 
 
 def clean():
