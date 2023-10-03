@@ -19,7 +19,12 @@ from dff.script import Context, Message
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, HAPPY_PATH, TOY_SCRIPT_ARGS
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    HAPPY_PATH,
+    TOY_SCRIPT_ARGS,
+)
 
 logger = logging.getLogger(__name__)
 
@@ -81,6 +86,10 @@ if __name__ == "__main__":
             message = Message(text=input("Send request: "))
             ctx: Context = pipeline(message, ctx_id)
             print(f"Response: {ctx.last_response}")
-            ping_pong = ctx.misc.get("ping", False) and ctx.misc.get("pong", False)
-            print(f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}.")
+            ping_pong = ctx.misc.get("ping", False) and ctx.misc.get(
+                "pong", False
+            )
+            print(
+                f"Ping-pong exchange: {'completed' if ping_pong else 'failed'}."
+            )
             logger.info(f"Context misc: {ctx.misc}")

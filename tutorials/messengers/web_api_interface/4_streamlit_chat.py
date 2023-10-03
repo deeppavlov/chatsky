@@ -58,7 +58,10 @@ API_URL = "http://localhost:8000/chat"
 def query(payload, user_id) -> requests.Response:
     response = requests.post(
         API_URL + f"?user_id={user_id}",
-        headers={"accept": "application/json", "Content-Type": "application/json"},
+        headers={
+            "accept": "application/json",
+            "Content-Type": "application/json",
+        },
         json=payload,
     )
     return response
@@ -117,7 +120,8 @@ def send_and_receive():
     st.session_state["user_requests"].append(user_request)
 
     bot_response = query(
-        Message(text=user_request).model_dump(), user_id=st.session_state["user_id"]
+        Message(text=user_request).model_dump(),
+        user_id=st.session_state["user_id"],
     )
     bot_response.raise_for_status()
 

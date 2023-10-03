@@ -70,7 +70,9 @@ assert TOY_SCRIPT_ARGS == (
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
+    check_happy_path(
+        pipeline, HAPPY_PATH
+    )  # This is a function for automatic tutorial running
     # (testing) with HAPPY_PATH
 
     # This runs tutorial in interactive mode if not in IPython env

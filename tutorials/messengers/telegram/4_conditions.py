@@ -58,23 +58,37 @@ For more information see tutorial `3_buttons_with_callback.py`.
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
+            TRANSITIONS: {
+                "node1": telegram_condition(commands=["start", "restart"])
+            },
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi, how are you?"),
             TRANSITIONS: {
-                "node2": telegram_condition(update_type=UpdateType.MESSAGE, regexp="fine")
+                "node2": telegram_condition(
+                    update_type=UpdateType.MESSAGE, regexp="fine"
+                )
             },
             # this is the same as
             # TRANSITIONS: {"node2": telegram_condition(regexp="fine")},
         },
         "node2": {
-            RESPONSE: TelegramMessage(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": telegram_condition(func=lambda msg: "music" in msg.text)},
+            RESPONSE: TelegramMessage(
+                text="Good. What do you want to talk about?"
+            ),
+            TRANSITIONS: {
+                "node3": telegram_condition(
+                    func=lambda msg: "music" in msg.text
+                )
+            },
         },
         "node3": {
-            RESPONSE: TelegramMessage(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": telegram_condition(update_type=UpdateType.ALL)},
+            RESPONSE: TelegramMessage(
+                text="Sorry, I can not talk about music now."
+            ),
+            TRANSITIONS: {
+                "node4": telegram_condition(update_type=UpdateType.ALL)
+            },
             # This condition is true for any type of update
         },
         "node4": {
@@ -84,7 +98,9 @@ script = {
         },
         "fallback_node": {
             RESPONSE: TelegramMessage(text="Ooops"),
-            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
+            TRANSITIONS: {
+                "node1": telegram_condition(commands=["start", "restart"])
+            },
         },
     }
 }
@@ -122,5 +138,7 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if (
+    __name__ == "__main__" and is_interactive_mode()
+):  # prevent run during doc building
     main()

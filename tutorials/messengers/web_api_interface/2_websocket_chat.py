@@ -35,7 +35,9 @@ from fastapi.responses import HTMLResponse
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node")
+    TOY_SCRIPT,
+    ("greeting_flow", "start_node"),
+    ("greeting_flow", "fallback_node"),
 )
 
 

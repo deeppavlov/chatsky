@@ -43,19 +43,27 @@ There are `GLOBAL` node and three flows:
 toy_script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("greeting_flow", "node1", 1.1): cnd.regexp(r"\b(hi|hello)\b", re.I),  # first check
-            ("music_flow", "node1", 1.1): cnd.regexp(r"talk about music"),  # second check
+            ("greeting_flow", "node1", 1.1): cnd.regexp(
+                r"\b(hi|hello)\b", re.I
+            ),  # first check
+            ("music_flow", "node1", 1.1): cnd.regexp(
+                r"talk about music"
+            ),  # second check
             lbl.to_fallback(0.1): cnd.true(),  # fifth check
             lbl.forward(): cnd.all(
                 [
                     cnd.regexp(r"next\b"),
-                    cnd.has_last_labels(labels=[("music_flow", i) for i in ["node2", "node3"]]),
+                    cnd.has_last_labels(
+                        labels=[("music_flow", i) for i in ["node2", "node3"]]
+                    ),
                 ]  # third check
             ),
             lbl.repeat(0.2): cnd.all(
                 [
                     cnd.regexp(r"repeat", re.I),
-                    cnd.negation(cnd.has_last_labels(flow_labels=["global_flow"])),
+                    cnd.negation(
+                        cnd.has_last_labels(flow_labels=["global_flow"])
+                    ),
                 ]  # fourth check
             ),
         }
@@ -126,14 +134,21 @@ toy_script = {
 # testing
 happy_path = (
     (Message(text="hi"), Message(text="Hi, how are you?")),
-    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (
         Message(text="talk about music."),
-        Message(text="I love `System of a Down` group, would you like to talk about it?"),
+        Message(
+            text="I love `System of a Down` group, would you like to talk about it?"
+        ),
     ),
     (
         Message(text="yes"),
-        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="next"),
@@ -143,11 +158,15 @@ happy_path = (
     ),
     (
         Message(text="back"),
-        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="repeat"),
-        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="next"),
@@ -156,7 +175,10 @@ happy_path = (
         ),
     ),
     (Message(text="next"), Message(text="That's all what I know.")),
-    (Message(text="next"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="next"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (Message(text="previous"), Message(text="That's all what I know.")),
     (Message(text="next time"), Message(text="bye")),
     (Message(text="stop"), Message(text="Ooops")),
@@ -166,7 +188,10 @@ happy_path = (
     (Message(text="hi"), Message(text="Hi, how are you?")),
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="previous"), Message(text="Hi, how are you?")),
-    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (
         Message(text="let's talk about something."),
         Message(text="Sorry, I can not talk about that now."),

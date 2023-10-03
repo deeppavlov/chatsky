@@ -34,13 +34,13 @@ venv:
 
 format: venv
 	black --line-length=120 --exclude='venv|build|tutorials' .
-	black --line-length=100 tutorials
+	black --line-length=80 tutorials
 .PHONY: format
 
 lint: venv
 	flake8 --max-line-length=120 --exclude venv,build,tutorials .
-	flake8 --max-line-length=100 tutorials
-	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=100 --check tutorials || ( \
+	flake8 --max-line-length=80 tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=80 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \

@@ -55,11 +55,15 @@ defined in 4 different ways with different signatures.
 
 # %%
 def prepreprocess(_):
-    logger.info("preprocession intent-detection Service running (defined as a dict)")
+    logger.info(
+        "preprocession intent-detection Service running (defined as a dict)"
+    )
 
 
 def preprocess(_):
-    logger.info("another preprocession web-based annotator Service (defined as a callable)")
+    logger.info(
+        "another preprocession web-based annotator Service (defined as a callable)"
+    )
 
 
 def postprocess(_):

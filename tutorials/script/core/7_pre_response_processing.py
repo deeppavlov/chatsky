@@ -39,15 +39,21 @@ from dff.utils.testing.common import (
 # %%
 def add_label_processing(ctx: Context, _: Pipeline, *args, **kwargs) -> Context:
     processed_node = ctx.current_node
-    processed_node.response = Message(text=f"{ctx.last_label}: {processed_node.response.text}")
+    processed_node.response = Message(
+        text=f"{ctx.last_label}: {processed_node.response.text}"
+    )
     ctx.overwrite_current_node_in_processing(processed_node)
     return ctx
 
 
 def add_prefix(prefix):
-    def add_prefix_processing(ctx: Context, _: Pipeline, *args, **kwargs) -> Context:
+    def add_prefix_processing(
+        ctx: Context, _: Pipeline, *args, **kwargs
+    ) -> Context:
         processed_node = ctx.current_node
-        processed_node.response = Message(text=f"{prefix}: {processed_node.response.text}")
+        processed_node.response = Message(
+            text=f"{prefix}: {processed_node.response.text}"
+        )
         ctx.overwrite_current_node_in_processing(processed_node)
         return ctx
 
@@ -64,7 +70,10 @@ can be used in `GLOBAL`, `LOCAL` or nodes.
 # %%
 toy_script = {
     "root": {
-        "start": {RESPONSE: Message(), TRANSITIONS: {("flow", "step_0"): cnd.true()}},
+        "start": {
+            RESPONSE: Message(),
+            TRANSITIONS: {("flow", "step_0"): cnd.true()},
+        },
         "fallback": {RESPONSE: Message(text="the end")},
     },
     GLOBAL: {
@@ -80,7 +89,10 @@ toy_script = {
                 "proc_name_3": add_prefix("l3_local"),
             }
         },
-        "step_0": {RESPONSE: Message(text="first"), TRANSITIONS: {lbl.forward(): cnd.true()}},
+        "step_0": {
+            RESPONSE: Message(text="first"),
+            TRANSITIONS: {lbl.forward(): cnd.true()},
+        },
         "step_1": {
             PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
             RESPONSE: Message(text="second"),
@@ -111,7 +123,10 @@ happy_path = (
     (Message(), Message(text="l3_local: l2_local: l1_step_1: second")),
     (Message(), Message(text="l3_local: l2_step_2: l1_global: third")),
     (Message(), Message(text="l3_step_3: l2_local: l1_global: fourth")),
-    (Message(), Message(text="l4_step_4: l3_local: l2_local: l1_global: fifth")),
+    (
+        Message(),
+        Message(text="l4_step_4: l3_local: l2_local: l1_global: fifth"),
+    ),
     (Message(), Message(text="l3_local: l2_local: l1_global: first")),
 )
 

@@ -50,15 +50,19 @@ script = {
         "start": {
             TRANSITIONS: {
                 ("general", "native_keyboard"): (
-                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text
+                    in ("/start", "/restart")
                 ),
             },
         },
         "fallback": {
-            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
+            RESPONSE: TelegramMessage(
+                text="Finishing test, send /restart command to restart"
+            ),
             TRANSITIONS: {
                 ("general", "native_keyboard"): (
-                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text
+                    in ("/start", "/restart")
                 ),
             },
         },
@@ -80,12 +84,16 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success"): cnd.exact_match(TelegramMessage(text="4")),
+                ("general", "success"): cnd.exact_match(
+                    TelegramMessage(text="4")
+                ),
                 ("general", "fail"): cnd.true(),
             },
         },
         "success": {
-            RESPONSE: TelegramMessage(**{"text": "Success!", "ui": RemoveKeyboard()}),
+            RESPONSE: TelegramMessage(
+                **{"text": "Success!", "ui": RemoveKeyboard()}
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
@@ -120,7 +128,10 @@ happy_path = (
     ),
     (
         TelegramMessage(text="5"),
-        TelegramMessage(text="Incorrect answer, type anything to try again", ui=RemoveKeyboard()),
+        TelegramMessage(
+            text="Incorrect answer, type anything to try again",
+            ui=RemoveKeyboard(),
+        ),
     ),
     (
         TelegramMessage(text="ok"),
@@ -136,10 +147,15 @@ happy_path = (
             ),
         ),
     ),
-    (TelegramMessage(text="4"), TelegramMessage(text="Success!", ui=RemoveKeyboard())),
+    (
+        TelegramMessage(text="4"),
+        TelegramMessage(text="Success!", ui=RemoveKeyboard()),
+    ),
     (
         TelegramMessage(text="Yay!"),
-        TelegramMessage(text="Finishing test, send /restart command to restart"),
+        TelegramMessage(
+            text="Finishing test, send /restart command to restart"
+        ),
     ),
     (
         TelegramMessage(text="/start"),
@@ -171,5 +187,7 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if (
+    __name__ == "__main__" and is_interactive_mode()
+):  # prevent run during doc building
     main()

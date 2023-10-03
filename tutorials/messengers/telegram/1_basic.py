@@ -44,7 +44,9 @@ to the DFF `Pipeline` instance.
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message(text="/start"))},
+            TRANSITIONS: {
+                "greeting_node": cnd.exact_match(Message(text="/start"))
+            },
         },
         "greeting_node": {
             RESPONSE: Message(text="Hi"),
@@ -52,7 +54,9 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message(text="Please, repeat the request"),
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message(text="/start"))},
+            TRANSITIONS: {
+                "greeting_node": cnd.exact_match(Message(text="/start"))
+            },
         },
     }
 }
@@ -82,5 +86,7 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if (
+    __name__ == "__main__" and is_interactive_mode()
+):  # prevent run during doc building
     main()

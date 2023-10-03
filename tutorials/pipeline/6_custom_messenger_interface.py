@@ -74,7 +74,9 @@ Two services are used to process request:
 # %%
 app = Flask(__name__)
 
-messenger_interface = CallbackMessengerInterface()  # For this simple case of Flask,
+messenger_interface = (
+    CallbackMessengerInterface()
+)  # For this simple case of Flask,
 # CallbackMessengerInterface may not be overridden
 
 
@@ -112,7 +114,9 @@ def purify_request(ctx: Context):
     elif isinstance(last_request, Message):
         logger.info("Capturing request from CLI")
     else:
-        raise Exception(f"Request of type {type(last_request)} can not be purified!")
+        raise Exception(
+            f"Request of type {type(last_request)} can not be purified!"
+        )
 
 
 def cat_response2webpage(ctx: Context):
