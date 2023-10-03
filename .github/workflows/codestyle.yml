@@ -4,15 +4,17 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
     - dev
+    - master
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   lint:

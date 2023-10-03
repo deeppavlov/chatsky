@@ -102,7 +102,7 @@ nbsphinx_thumbnails = {
 html_context = {
     "github_user": "deeppavlov",
     "github_repo": "dialog_flow_framework",
-    "github_version": "dev",
+    "github_version": "master",
     "doc_path": "docs/source",
 }
 
