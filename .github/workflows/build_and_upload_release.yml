@@ -30,18 +30,16 @@ jobs:
       - name: build wheels and upload to pypi
         if: startsWith(github.ref, 'refs/tags/v') != true
         env:
-          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
-          poetry --build publish --dry-run -u ${{ env.PYPI_USERNAME }} -p ${{ env.PYPI_PASSWORD }}
+          poetry --build publish --dry-run
 
       - name: build wheels and upload to pypi
         if: startsWith(github.ref, 'refs/tags/v')
         env:
-          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
-          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
-          poetry --build publish -u ${{ env.PYPI_USERNAME }} -p ${{ env.PYPI_PASSWORD }}
+          poetry --build publish
 
       - name: upload binaries into release
         if: startsWith(github.ref, 'refs/tags/v')
