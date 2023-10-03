@@ -4,6 +4,13 @@ on:
   push:
     tags:
       - '*'
+    branches:
+      - dev
+      - test/**
+  pull_request:
+    branches:
+      - dev
+  workflow_dispatch:
 
 jobs:
   build:
@@ -21,12 +28,23 @@ jobs:
           pip install --upgrade pip poetry
 
       - name: build wheels and upload to pypi
+        if: startsWith(github.ref, 'refs/tags/v') != true
         env:
-          TWINE_PASSWORD: ${{ secrets.PYPI_TOKEN }}
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
         run: |
-          false # TODO: poetry --build publish -u USERNAME -p PASSWORD
+          poetry --build publish --dry-run -u ${{ env.PYPI_USERNAME }} -p ${{ env.PYPI_PASSWORD }}
+
+      - name: build wheels and upload to pypi
+        if: startsWith(github.ref, 'refs/tags/v')
+        env:
+          PYPI_USERNAME: ${{ secrets.PYPI_USERNAME }}
+          PYPI_PASSWORD: ${{ secrets.PYPI_PASSWORD }}
+        run: |
+          poetry --build publish -u ${{ env.PYPI_USERNAME }} -p ${{ env.PYPI_PASSWORD }}
 
       - name: upload binaries into release
+        if: startsWith(github.ref, 'refs/tags/v')
         uses: svenstaro/upload-release-action@v2
         with:
           repo_token: ${{ secrets.GITHUB_TOKEN }}
