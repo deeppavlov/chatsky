@@ -23,7 +23,7 @@ def _build_drawio(docker: DockerClient):
         ["-f", "png", "--remove-page-suffix"],
         remove=True,
         name="drawio-convert",
-        volumes=[(f"{os.getcwd()}/docs/source/drawio_src", "/data", "rw")]
+        volumes=[(f"{os.getcwd()}/docs/source/drawio_src", "/data", "rw")],
     )
     docker.container.run(
         "rlespinasse/drawio-export",
@@ -31,7 +31,7 @@ def _build_drawio(docker: DockerClient):
         entrypoint="chown",
         remove=True,
         name="drawio-chown",
-        volumes=[(f"{os.getcwd()}/docs/source/drawio_src", "/data", "rw")]
+        volumes=[(f"{os.getcwd()}/docs/source/drawio_src", "/data", "rw")],
     )
 
     destination = Path("docs/source/_static/drawio/")

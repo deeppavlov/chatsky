@@ -32,7 +32,8 @@ jobs:
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
-          poetry --build publish --dry-run
+          poetry build
+          poetry publish --dry-run
 
       - name: build wheels and upload to pypi
         if: startsWith(github.ref, 'refs/tags/v')
