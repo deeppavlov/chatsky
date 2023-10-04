@@ -6,62 +6,102 @@ Introduction
 
 The `Context` class is a backbone component of the DFF API. 
 Like the name suggests, this data structure is used to store information
-about the current state of a particular conversation,
-i.e. each individual user has their own context instance and can be identified by it.
+about the current state, or context, of a particular conversation.
+Each individual user has their own `Context` instance and can be identified by it.
 
 `Context` is used to keep track of the user's requests, bot's replies,
 user-related and request-related annotations, and any other information
 that is relevant to the conversation with the user.
 
-.. warning::
+.. note::
 
     Since most callback functions used in DFF script and DFF pipeline (see the `basic guide <./basic_conceptions>`_)
     need to either read or update the current dialog state,
     the framework-level convention is that all functions of this kind
     use `Context` as their first parameter. This dependency is being
-    injected by the pipeline during its run. Thus, understanding
-    the `Context` class is essential for developing custom conversation logic
-    that is mostly made up by the said functions.
+    injected by the pipeline during its run. 
+    Thus, understanding the `Context` class is essential for developing custom conversation logic
+    which is mostly made up by the said functions.
 
-`Context` provides a convenient interface for working with data,
+As a callback parameter, `Context` provides a convenient interface for working with data,
 allowing developers to easily add, retrieve,
 and manipulate data as the conversation progresses.
+
+Let's consider some of the builtin callback instances to see how the context can be leveraged:
+
+.. code-block:: python
+    :linenos:
+
+      pattern = re.compile("[a-zA-Z]+")
+
+      def regexp_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+          # retrieve the current request
+          request = ctx.last_request
+          if request.text is None:
+              return False
+          return bool(pattern.search(request.text))
+
+The code above is a condition (see the `basic guide <./basic_conceptions>`_)
+that belongs to the `TRANSITIONS` section of the script and returns `True` or `False`
+depending on whether the current user request matches the given pattern.
+As can be seen from the code block, the current
+request can be easily retrieved as one of the attributes of the `Context` object.
+Likewise, the `last_response` (bot's current reply) or the `last_label`
+(the name of the currently visited node) attributes can be used in the same manner.
 
 Attributes
 ~~~~~~~~~~~
 
-* `id`: This attribute represents the unique context identifier. By default, it is randomly generated using uuid4. The id can be used for tracing user behavior and collecting statistical data.
+* `id`: This attribute represents the unique context identifier. By default, it is randomly generated using uuid4.
+  In most cases, this attribute will be used to identify a user
 
-* `labels`: The labels attribute stores the history of all passed labels within the conversation. It maps turn IDs to labels.
+* `labels`: The labels attribute stores the history of all passed labels within the conversation.
+  It maps turn IDs to labels. The collection is ordered, so getting the last item of the mapping
+  always shows the last visited node.
 
-* `requests`: The requests attribute maintains the history of all received requests by the agent. It also maps turn IDs to requests.
+* `requests`: The requests attribute maintains the history of all received requests by the agent.
+  It also maps turn IDs to requests. Like labels, it stores the requests in-order.
 
-* `responses`: This attribute keeps a record of all agent responses, mapping turn IDs to responses.
+* `responses`: This attribute keeps a record of all agent responses, mapping turn IDs to responses
+  stores the responses in-order.
 
-* `misc`: The misc attribute is a dictionary for storing custom data. The scripting in DFF doesn't use this dictionary by default.
+* `misc`: The misc attribute is a dictionary for storing custom data. This field is not used by any of the
+  built-in DFF classes or functions, so the values that you write there are guaranteed to persist
+  throughout the lifetime of the `Context` object.
 
-* `validation`: A flag that signals whether validation of the script is required during pipeline initialization. Some functions that may produce invalid data must consider this flag for successful validation.
+* `validation`: A flag that signals whether validation of the script is required during pipeline initialization.
+  It's important to validate custom scripts to ensure that no synthax errors have been made.
 
-* `framework_states`: This attribute is used for storing addon or pipeline states. Pipeline records all its intermediate conditions into framework_states, and after context processing is completed, it resets the framework_states and returns the context.
+* `framework_states`: This attribute is used for storing addon or pipeline states.
+  Each turn, the DFF pipeline records the intermediary states of its components into this field,
+  clearing it at the end of the turn.
 
-Key Methods
-~~~~~~~~~~~~
+Methods
+~~~~~~~
 
-The `Context` class provides essential methods for working with data:
+The methods of the `Context` class can be divided into two categories:
+
+* Public methods that get called manually in custom callbacks and in functions that depend on the context.
+* Methods that are not designed for manual calls and get called automatically during pipeline runs,
+  i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying DFF.
+
+**Public methods**
+
+* **`last_label`**: Returns the last label of the context, or `None` if the `labels` dictionary is empty.
+
+* **`last_response`**: Returns the last response of the context, or `None` if the `responses` dictionary is empty.
+
+* **`set_last_response` and `set_last_request`**: These methods allow you to set the last response or request for the current context, which is useful for working with response and request wrappers.
+
+* **`clear(hold_last_n_indices: int, field_names: Union[Set[str], List[str]])`**: Clears all recordings from the context, except for the last `hold_last_n_indices` turns. You can specify which fields to clear using the `field_names` parameter.
+
+**Private methods**
 
 * **`add_request(request: Message)`**: Adds a request to the context for the next turn, where `request` is the request message to be added. It updates the `requests` dictionary.
 
 * **`add_response(response: Message)`**: Adds a response to the context for the next turn, where `response` is the response message to be added. It updates the `responses` dictionary.
 
 * **`add_label(label: NodeLabel2Type)`**: Adds a label to the context for the next turn, where `label` is the label to be added. It updates the `labels` dictionary.
-
-* **`clear(hold_last_n_indices: int, field_names: Union[Set[str], List[str]])`**: Clears all recordings from the context, except for the last `hold_last_n_indices` turns. You can specify which fields to clear using the `field_names` parameter.
-
-* **`last_label`**: Returns the last label of the context, or `None` if the `labels` dictionary is empty.
-
-* **`last_response`**: Returns the last response of the context, or `None` if the `responses` dictionary is empty.
-
-* **`last_response` (setter) and `last_request` (setter)**: These methods allow you to set the last response or request for the current context, which is useful for working with response and request wrappers.
 
 * **`current_node`**: Returns the current node of the context. This is particularly useful for tracking the node during the conversation flow.
 
