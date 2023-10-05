@@ -49,6 +49,21 @@ request can be easily retrieved as one of the attributes of the `Context` object
 Likewise, the `last_response` (bot's current reply) or the `last_label`
 (the name of the currently visited node) attributes can be used in the same manner.
 
+Another use case is leveraging the `misc` field (see below for a detailed description):
+pipeline functions or ``PROCESSING`` callbacks can write arbitrary values to the misc field,
+making those available for other context-dependent functions
+(see the `pre transitions processing tutorial <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`_).
+
+.. code-block:: python
+    :linenos:
+
+    def save_previous_node_response_to_ctx_processing(
+        ctx: Context, _: Pipeline, *args, **kwargs
+    ) -> Context:
+        processed_node = ctx.current_node
+        ctx.misc["previous_node_response"] = processed_node.response
+        return ctx
+
 Attributes
 ~~~~~~~~~~~
 
@@ -91,11 +106,18 @@ The methods of the `Context` class can be divided into two categories:
 
 * **`last_response`**: Returns the last response of the context, or `None` if the `responses` dictionary is empty.
 
-* **`set_last_response` and `set_last_request`**: These methods allow you to set the last response or request for the current context, which is useful for working with response and request wrappers.
+* **`clear(hold_last_n_indices: int, field_names: Union[Set[str], List[str]])`**: Clears all items from context fields, optionally keeping the data from `hold_last_n_indices` turns.
+  You can specify which fields to clear using the `field_names` parameter. This method is designed for cases
+  when contexts are shared over high latency networks.
 
-* **`clear(hold_last_n_indices: int, field_names: Union[Set[str], List[str]])`**: Clears all recordings from the context, except for the last `hold_last_n_indices` turns. You can specify which fields to clear using the `field_names` parameter.
+* **`overwrite_current_node_in_processing(processed_node: Node)`**: This method allows you to overwrite the current node with a processed node,
+  but it can only be used within processing functions. This may be required when you need to temporarily substitute the current node:
+  see `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`_
 
 **Private methods**
+
+* **`set_last_response` and `set_last_request`**: These methods allow you to set the last response or request for the current context.
+  This functionality can prove useful if you want to create a middleware component that overrides the pipeline functionality.
 
 * **`add_request(request: Message)`**: Adds a request to the context for the next turn, where `request` is the request message to be added. It updates the `requests` dictionary.
 
@@ -104,8 +126,6 @@ The methods of the `Context` class can be divided into two categories:
 * **`add_label(label: NodeLabel2Type)`**: Adds a label to the context for the next turn, where `label` is the label to be added. It updates the `labels` dictionary.
 
 * **`current_node`**: Returns the current node of the context. This is particularly useful for tracking the node during the conversation flow.
-
-* **`overwrite_current_node_in_processing(processed_node: Node)`**: This method allows you to overwrite the current node with a processed node, but it can only be used within processing functions.
 
 Serialization
 ~~~~~~~~~~~~~
