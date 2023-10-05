@@ -129,7 +129,7 @@ an easy and intuitive way to create your own charts and to customize the dashboa
 
 If you aim to create your own chart, Superset will prompt you to select a dataset to draw data from.
 The current configuration provides two datasets `dff-node-stats` and `dff-final-nodes`.
-However, in most cases, you will need to use `dff-node-stats`, since `dff-final-nodes` contains the same information, but only
+However, in most cases, you would use `dff-node-stats` since `dff-final-nodes` contains the same information, but only
 aggregates the labels of nodes visited at the end of dialog graph traversal,
 i.e. nodes that terminate the dialog.
 
@@ -180,7 +180,7 @@ Then press the `export` button on the right and save the zip file to any conveni
 **Importing existing configuration files**
 
 If you need to restore your dashboard or update the configuration, you can import a configuration archive
-that has been saved in the manner described above.
+that has been saved in the manner described below.
 
 Log in to Superset, open the `Dashboards` tab and press the import button on the right of the screen.
 You will be prompted for the database password. If the database credentials match,

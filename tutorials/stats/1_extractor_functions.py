@@ -7,7 +7,8 @@ The following example covers the basics of using the `stats` module.
 Statistics are collected from pipeline services by extractor functions
 that report the state of one or more pipeline components. The `stats` module
 provides several default extractors, but users are free to define their own
-extractor functions.
+extractor functions. You can find API reference for default extractors
+[here](%doclink(api,stats.default_extractors)).
 
 It is a preferred practice to define extractors as asynchronous functions.
 Extractors need to have the following uniform signature:
