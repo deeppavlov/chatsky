@@ -41,7 +41,7 @@ Let's consider some of the builtin callback instances to see how the context can
               return False
           return bool(pattern.search(request.text))
 
-The code above is a condition (see the `basic guide <./basic_conceptions>`_)
+The code above is a condition function (see the `basic guide <./basic_conceptions>`_)
 that belongs to the `TRANSITIONS` section of the script and returns `True` or `False`
 depending on whether the current user request matches the given pattern.
 As can be seen from the code block, the current
@@ -51,8 +51,7 @@ Likewise, the `last_response` (bot's current reply) or the `last_label`
 
 Another use case is leveraging the `misc` field (see below for a detailed description):
 pipeline functions or ``PROCESSING`` callbacks can write arbitrary values to the misc field,
-making those available for other context-dependent functions
-(see the `pre transitions processing tutorial <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`_).
+making those available for other context-dependent functions.
 
 .. code-block:: python
     :linenos:
@@ -63,6 +62,10 @@ making those available for other context-dependent functions
         processed_node = ctx.current_node
         ctx.misc["previous_node_response"] = processed_node.response
         return ctx
+
+.. note::
+
+  See more in the `pre transitions processing tutorial <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`_.
 
 Attributes
 ~~~~~~~~~~~
@@ -111,8 +114,10 @@ The methods of the `Context` class can be divided into two categories:
   when contexts are shared over high latency networks.
 
 * **`overwrite_current_node_in_processing(processed_node: Node)`**: This method allows you to overwrite the current node with a processed node,
-  but it can only be used within processing functions. This may be required when you need to temporarily substitute the current node:
-  see `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`_
+  but it can only be used within processing functions. This may be required when you need to temporarily substitute the current node.
+  .. note::
+
+    see `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`_.
 
 **Private methods**
 
