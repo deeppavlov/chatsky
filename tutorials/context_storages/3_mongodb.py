@@ -3,6 +3,12 @@
 # 3. MongoDB
 
 This is a tutorial on using MongoDB.
+
+See %mddoclink(api,context_storages.mongo,MongoContextStorage) class
+for storing you users' contexts in Mongo database.
+
+DFF uses [motor](https://motor.readthedocs.io/en/stable/)
+library for asynchronous access to MongoDB.
 """
 
 # %pip install dff[mongodb]

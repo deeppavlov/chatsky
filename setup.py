@@ -131,7 +131,7 @@ test_requirements = merge_req_lists(
         "click==8.1.3",
         "black==23.9.1",
         "isort==5.12.0",
-        "jsonschema==4.17.3",
+        "jsonschema==4.19.1",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
@@ -216,7 +216,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.5.0",
+    version="0.6.0",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",

@@ -1,13 +1,16 @@
+.ONESHELL:
+
 SHELL = /bin/bash
 
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.5.0
+CURRENT_VERSION = 0.6.0
 TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
 PATH := $(VENV_PATH)/bin:$(PATH)
+PWD := $(shell pwd)
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -62,7 +65,22 @@ test: venv
 test_all: venv wait_db test lint
 .PHONY: test_all
 
-doc: venv clean_docs
+build_drawio:
+	docker run --rm --name="drawio-convert" -v $(PWD)/docs/source/drawio_src:/data rlespinasse/drawio-export -f png --on-changes --remove-page-suffix
+	docker run --rm --name="drawio-chown" -v $(PWD)/docs/source/drawio_src:/data --entrypoint chown rlespinasse/drawio-export -R "$(shell id -u):$(shell id -g)" /data
+	for folder in docs/source/drawio_src/*; do
+		foldername=`basename $${folder}`
+		for file in $${folder}/*; do
+			filename=`basename $${file}`
+			if [[ -d $${file} && $${filename} == "export" ]]; then
+				mkdir -p docs/source/_static/drawio/$${foldername}
+				cp -r $${file}/* docs/source/_static/drawio/$${foldername}
+			fi
+		done
+	done
+.PHONY: build_drawio
+
+doc: venv clean_docs build_drawio
 	python3 docs/source/utils/patching.py
 	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
@@ -92,6 +110,8 @@ clean_docs:
 	rm -rf docs/source/apiref
 	rm -rf docs/source/_misc
 	rm -rf docs/source/tutorials
+	rm -rf docs/source/_static/drawio
+	rm -rf docs/source/drawio_src/**/export
 .PHONY: clean_docs
 
 clean: clean_docs

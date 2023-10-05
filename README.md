@@ -107,7 +107,7 @@ Okey
 ```
 
 To get more advanced examples, take a look at
-[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials) on GitHub.
 
 # Context Storages
 ## Description
@@ -150,8 +150,8 @@ def handle_request(request):
 ```
 
 To get more advanced examples, take a look at
-[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/context_storages) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials/context_storages) on GitHub.
 
 # Contributing to the Dialog Flow Framework
 
-Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md).
+Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/master/CONTRIBUTING.md).

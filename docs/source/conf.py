@@ -17,7 +17,7 @@ copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.5.0"
+release = "0.6.0"
 
 
 # -- General configuration ---------------------------------------------------
@@ -102,7 +102,7 @@ nbsphinx_thumbnails = {
 html_context = {
     "github_user": "deeppavlov",
     "github_repo": "dialog_flow_framework",
-    "github_version": "dev",
+    "github_version": "master",
     "doc_path": "docs/source",
 }
 
@@ -146,7 +146,7 @@ favicons = [
 ]
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
+autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
 
 
 def setup(_):
