@@ -50,7 +50,7 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose up -d
+	docker-compose --profile context_storage --profile stats up -d
 .PHONY: docker_up
 
 wait_db: docker_up
