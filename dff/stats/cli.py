@@ -70,7 +70,7 @@ WITH main AS (
     {table}.TraceId as trace_id,
     otel_traces.TraceId\nFROM {table}, otel_traces
     WHERE {table}.TraceId = otel_traces.TraceId
-    ORDER BY context_id, request_id
+    ORDER BY data_key, context_id, request_id
 ) SELECT context_id,
     request_id,
     start_time,
@@ -114,7 +114,7 @@ WITH main AS (
 )
 SELECT DISTINCT LogAttributes['context_id'] AS context_id,
 LogAttributes['request_id'] AS request_id,
-{table}.Timestamp AS start_time,
+otel_traces.Timestamp AS start_time,
 {lblfield} AS label,
 {flowfield} AS flow_label,
 {nodefield} AS node_label
