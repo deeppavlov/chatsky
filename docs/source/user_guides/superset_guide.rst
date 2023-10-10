@@ -128,9 +128,12 @@ an easy and intuitive way to create your own charts and to customize the dashboa
 **Datasets**
 
 If you aim to create your own chart, Superset will prompt you to select a dataset to draw data from.
-The current configuration provides two datasets `dff-node-stats` and `dff-final-nodes`.
-However, in most cases, you would use `dff-node-stats` since `dff-final-nodes` contains the same information, but only
-aggregates the labels of nodes visited at the end of dialog graph traversal,
+The current configuration provides three datasets `dff-node-stats`, `dff-stats`, and `dff-final-nodes`.
+However, in most cases, you would use `dff-stats` or `dff-node-stats`. The former contains all data points,
+while the latter only includes the logs produced by `get_current_label` extractor
+(`see the API reference <../apiref/dff.stats.default_extractors.html#dff.stats.default_extractors.get_current_label>`_).
+`dff-final-nodes` contains the same information as the said datasources,
+but only aggregates the labels of nodes visited at the end of dialog graph traversal,
 i.e. nodes that terminate the dialog.
 
 `dff-nodes-stats` uses the following variables to store the data:

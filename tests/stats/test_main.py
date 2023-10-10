@@ -76,12 +76,13 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     assert dashboard_json["result"]["dashboard_title"] == "DFF statistics dashboard"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
-    assert datasets_json["count"] == 2
-    assert datasets_json["ids"] == [1, 2]
-    assert [item["id"] for item in datasets_json["result"]] == [1, 2]
+    assert datasets_json["count"] == 3
+    assert datasets_json["ids"] == [1, 2, 3]
+    assert [item["id"] for item in datasets_json["result"]] == [1, 2, 3]
     assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
         "dff_final_nodes",
         "dff_node_stats",
+        "dff_stats"
     ]
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
