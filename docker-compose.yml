@@ -40,6 +40,9 @@ services:
       context: ./dff/utils/docker
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
+    depends_on:
+      - 'psql'
+      - 'clickhouse'
     ports:
       - "8088:8088"
   clickhouse:
@@ -57,6 +60,8 @@ services:
     container_name: otel-col
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
+    depends_on:
+     - 'clickhouse'
     volumes:
       - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
       - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
