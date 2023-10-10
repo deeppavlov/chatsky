@@ -82,7 +82,7 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
         "dff_final_nodes",
         "dff_node_stats",
-        "dff_stats"
+        "dff_stats",
     ]
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
