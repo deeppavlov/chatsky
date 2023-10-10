@@ -21,6 +21,11 @@ async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandler
     """
     Extract the current label on each turn.
     This function is required for running the dashboard with the default configuration.
+
+    .. note::
+
+        Preferrably, it needs to be invoked as `after_handler` of the `Actor` service.
+
     """
     last_label = ctx.last_label
     if last_label is None:

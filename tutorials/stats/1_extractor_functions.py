@@ -104,7 +104,7 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             heavy_service,
-            Service(handler=ACTOR, before_handler=[default_extractors.get_current_label]),
+            Service(handler=ACTOR, after_handler=[default_extractors.get_current_label]),
         ],
     }
 )
