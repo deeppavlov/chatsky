@@ -7,7 +7,7 @@ This module contains a basic set of functions for normalizing data in a dialog s
 """
 import logging
 
-from typing import Union, Callable, Any, Dict, Optional, ForwardRef
+from typing import Union, Callable, Optional, ForwardRef
 
 from .keywords import Keywords
 from .context import Context
@@ -100,7 +100,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         else:
             raise TypeError(type(response))
 
-        def response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
+        async def response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
             return result
 
         return response_handler

@@ -144,9 +144,9 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
 
         # create response
-        ctx.framework_states["actor"]["response"] = ctx.framework_states["actor"][
-            "pre_response_processed_node"
-        ].run_response(ctx, pipeline, *args, **kwargs)
+        ctx.framework_states["actor"]["response"] = await self.run_response(
+            ctx.framework_states["actor"]["pre_response_processed_node"].response, ctx, pipeline, *args, **kwargs
+        )
         await self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.framework_states["actor"]["response"])
 
@@ -259,9 +259,26 @@ class Actor:
             overwritten_node.transitions = current_node.transitions
         return overwritten_node
 
-    async def _run_processing_parallel(self, processing: dict, ctx: Context, pipeline: Pipeline) -> Context:
+    async def run_response(
+        self,
+        response: Optional[Union[Message, Callable[..., Message]]],
+        ctx: Context,
+        pipeline: Pipeline,
+        *args,
+        **kwargs,
+    ) -> Context:
+        """
+        Executes the normalized response.
+        See details in the :py:func:`~normalize_response` function of `normalization.py`.
+        """
+        response = normalize_response(response)
+        return await wrap_sync_function_in_async(response, ctx, pipeline, *args, **kwargs)
+
+    async def _run_processing_parallel(
+        self, processing: dict, ctx: Context, pipeline: Pipeline, *args, **kwargs
+    ) -> Context:
         results = await asyncio.gather(
-            *[wrap_sync_function_in_async(func, ctx, pipeline) for func in processing.values()],
+            *[wrap_sync_function_in_async(func, ctx, pipeline, *args, **kwargs) for func in processing.values()],
             return_exceptions=True,
         )
         for exc, (processing_name, processing_func) in zip(results, processing.items()):
@@ -272,10 +289,12 @@ class Actor:
                 )
         return ctx
 
-    async def _run_processing_sequential(self, processing: dict, ctx: Context, pipeline: Pipeline) -> Context:
+    async def _run_processing_sequential(
+        self, processing: dict, ctx: Context, pipeline: Pipeline, *args, **kwargs
+    ) -> Context:
         for processing_name, processing_func in processing.items():
             try:
-                ctx = await wrap_sync_function_in_async(processing_func, ctx, pipeline)
+                ctx = await wrap_sync_function_in_async(processing_func, ctx, pipeline, *args, **kwargs)
             except Exception as exc:
                 logger.error(
                     f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
@@ -393,7 +412,7 @@ class Actor:
             # validate responsing
             response_func = normalize_response(node.response)
             try:
-                response_result = response_func(ctx, pipeline)
+                response_result = asyncio.run(wrap_sync_function_in_async(response_func, ctx, pipeline))
                 if not isinstance(response_result, Message):
                     msg = (
                         "Expected type of response_result is `Message`.\n"
