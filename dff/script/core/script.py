@@ -15,7 +15,7 @@ from pydantic import BaseModel, field_validator
 from .types import LabelType, NodeLabelType, ConditionType, NodeLabel3Type
 from .message import Message
 from .keywords import Keywords
-from .normalization import normalize_response, normalize_processing, normalize_condition, normalize_label, validate_call
+from .normalization import normalize_response, normalize_condition, normalize_label, validate_call
 from typing import ForwardRef
 
 logger = logging.getLogger(__name__)
@@ -60,28 +60,6 @@ class Node(BaseModel, extra="forbid"):
         """
         response = normalize_response(self.response)
         return response(ctx, pipeline, *args, **kwargs)
-
-    def run_pre_response_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        """
-        Executes pre-processing of responses.
-        """
-        return self.run_processing(self.pre_response_processing, ctx, pipeline, *args, **kwargs)
-
-    def run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        """
-        Executes pre-processing of transitions.
-        """
-        return self.run_processing(self.pre_transitions_processing, ctx, pipeline, *args, **kwargs)
-
-    def run_processing(
-        self, processing: Dict[Any, Callable], ctx: Context, pipeline: Pipeline, *args, **kwargs
-    ) -> Context:
-        """
-        Executes the normalized processing.
-        See details in the :py:func:`~normalize_processing` function of `normalization.py`.
-        """
-        processing = normalize_processing(processing)
-        return processing(ctx, pipeline, *args, **kwargs)
 
 
 class Script(BaseModel, extra="forbid"):

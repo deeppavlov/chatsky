@@ -16,13 +16,9 @@ and determine the next step in the conversation.
 
 Overall, the actor acts as a bridge between the user's input and the dialog graph,
 making sure that the conversation follows the expected flow and providing a personalized experience to the user.
-
-Below you can see a diagram of user request processing with Actor.
-Both `request` and `response` are saved to :py:class:`.Context`.
-
-.. figure:: /_static/drawio/dfe/user_actor.png
 """
 import logging
+import asyncio
 from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
 import copy
 
@@ -34,6 +30,7 @@ from dff.script.core.context import Context
 from dff.script.core.script import Script, Node
 from dff.script.core.normalization import normalize_label, normalize_response
 from dff.script.core.keywords import GLOBAL, LOCAL
+from ..service.utils import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
@@ -109,51 +106,51 @@ class Actor:
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-    def __call__(
+    async def __call__(
         self, pipeline: Pipeline, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs
     ) -> Union[Context, dict, str]:
         # context init
         ctx = self._context_init(ctx, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT, *args, **kwargs)
 
         # get previous node
         ctx = self._get_previous_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.GET_PREVIOUS_NODE, *args, **kwargs)
 
         # rewrite previous node
         ctx = self._rewrite_previous_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
 
         # run pre transitions processing
-        ctx = self._run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
+        ctx = await self._run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
         ctx = self._get_true_labels(ctx, pipeline, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
 
         # get next node
         ctx = self._get_next_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.GET_NEXT_NODE, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.GET_NEXT_NODE, *args, **kwargs)
 
         ctx.add_label(ctx.framework_states["actor"]["next_label"][:2])
 
         # rewrite next node
         ctx = self._rewrite_next_node(ctx, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
 
         # run pre response processing
-        ctx = self._run_pre_response_processing(ctx, pipeline, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
+        ctx = await self._run_pre_response_processing(ctx, pipeline, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
 
         # create response
         ctx.framework_states["actor"]["response"] = ctx.framework_states["actor"][
             "pre_response_processed_node"
         ].run_response(ctx, pipeline, *args, **kwargs)
-        self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE, *args, **kwargs)
         ctx.add_response(ctx.framework_states["actor"]["response"])
 
-        self._run_handlers(ctx, pipeline, ActorStage.FINISH_TURN, *args, **kwargs)
+        await self._run_handlers(ctx, pipeline, ActorStage.FINISH_TURN, *args, **kwargs)
         if self._clean_turn_cache:
             cache_clear()
 
@@ -262,20 +259,54 @@ class Actor:
             overwritten_node.transitions = current_node.transitions
         return overwritten_node
 
-    def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
-        ctx = ctx.framework_states["actor"]["previous_node"].run_pre_transitions_processing(
-            ctx, pipeline, *args, **kwargs
+    async def _run_processing_parallel(self, processing: dict, ctx: Context, pipeline: Pipeline) -> Context:
+        results = await asyncio.gather(
+            *[wrap_sync_function_in_async(func, ctx, pipeline) for func in processing.values()],
+            return_exceptions=True,
         )
+        for exc, (processing_name, processing_func) in zip(results, processing.items()):
+            if isinstance(exc, Exception):
+                logger.error(
+                    f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
+                    exc_info=exc,
+                )
+        return ctx
+
+    async def _run_processing_sequential(self, processing: dict, ctx: Context, pipeline: Pipeline) -> Context:
+        for processing_name, processing_func in processing.items():
+            try:
+                ctx = await wrap_sync_function_in_async(processing_func, ctx, pipeline)
+            except Exception as exc:
+                logger.error(
+                    f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
+                    exc_info=exc,
+                )
+        return ctx
+
+    async def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
+        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
+        pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
+
+        if pipeline.parallelize_processing:
+            ctx = await self._run_processing_parallel(pre_transitions_processing, ctx, pipeline)
+        else:
+            ctx = await self._run_processing_sequential(pre_transitions_processing, ctx, pipeline)
+
         ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
             "processed_node"
         ]
         del ctx.framework_states["actor"]["processed_node"]
         return ctx
 
-    def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
+    async def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
-        ctx = ctx.framework_states["actor"]["next_node"].run_pre_response_processing(ctx, pipeline, *args, **kwargs)
+        pre_response_processing = ctx.framework_states["actor"]["next_node"].pre_response_processing
+
+        if pipeline.parallelize_processing:
+            ctx = await self._run_processing_parallel(pre_response_processing, ctx, pipeline)
+        else:
+            ctx = await self._run_processing_sequential(pre_response_processing, ctx, pipeline)
+
         ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
         del ctx.framework_states["actor"]["processed_node"]
         return ctx
@@ -311,8 +342,10 @@ class Actor:
         logger.debug(f"{transition_info} transitions sorted by priority = {true_labels}")
         return true_label
 
-    def _run_handlers(self, ctx, pipeline: Pipeline, actor_stage: ActorStage, *args, **kwargs):
-        [handler(ctx, pipeline, *args, **kwargs) for handler in self.handlers.get(actor_stage, [])]
+    async def _run_handlers(self, ctx, pipeline: Pipeline, actor_stage: ActorStage):
+        stage_handlers = self.handlers.get(actor_stage, [])
+        async_handlers = [wrap_sync_function_in_async(handler, ctx, pipeline) for handler in stage_handlers]
+        await asyncio.gather(*async_handlers)
 
     def _choose_label(
         self, specific_label: Optional[NodeLabel3Type], general_label: Optional[NodeLabel3Type]
