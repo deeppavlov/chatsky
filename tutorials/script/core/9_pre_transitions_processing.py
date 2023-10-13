@@ -39,7 +39,6 @@ def save_previous_node_response_to_ctx_processing(
 ) -> Context:
     processed_node = ctx.current_node
     ctx.misc["previous_node_response"] = processed_node.response
-    return ctx
 
 
 def get_previous_node_response_for_response_processing(
@@ -51,7 +50,6 @@ def get_previous_node_response_for_response_processing(
         f" current={processed_node.response.text}"
     )
     ctx.overwrite_current_node_in_processing(processed_node)
-    return ctx
 
 
 # %%

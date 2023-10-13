@@ -84,8 +84,8 @@ def normalize_condition(condition: ConditionType) -> Callable:
 @validate_call
 def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
     """
-    This function is used to normalize response, if response Callable, it is returned, otherwise
-    response is wrapped to the function and this function is returned.
+    This function is used to normalize response. If the response is a Callable, it is returned, otherwise
+    the response is wrapped in an asynchronous function and this function is returned.
 
     :param response: Response to normalize.
     :return: Function that returns callable response.

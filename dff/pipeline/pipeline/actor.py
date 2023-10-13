@@ -122,7 +122,7 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
 
         # run pre transitions processing
-        ctx = await self._run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
+        await self._run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
@@ -140,7 +140,7 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
 
         # run pre response processing
-        ctx = await self._run_pre_response_processing(ctx, pipeline, *args, **kwargs)
+        await self._run_pre_response_processing(ctx, pipeline, *args, **kwargs)
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
 
         # create response
@@ -268,15 +268,21 @@ class Actor:
         **kwargs,
     ) -> Context:
         """
-        Executes the normalized response.
-        See details in the :py:func:`~normalize_response` function of `normalization.py`.
+        Executes the normalized response as an asynchronous function.
+        See the details in the :py:func:`~normalize_response` function of `normalization.py`.
         """
         response = normalize_response(response)
         return await wrap_sync_function_in_async(response, ctx, pipeline, *args, **kwargs)
 
     async def _run_processing_parallel(
         self, processing: dict, ctx: Context, pipeline: Pipeline, *args, **kwargs
-    ) -> Context:
+    ) -> None:
+        """
+        Execute the processing functions for a particular node simultaneously,
+        independent of the order.
+
+        Picked depending on the value of the :py:class:`.Pipeline`'s `parallelize_processing` flag.
+        """
         results = await asyncio.gather(
             *[wrap_sync_function_in_async(func, ctx, pipeline, *args, **kwargs) for func in processing.values()],
             return_exceptions=True,
@@ -287,48 +293,65 @@ class Actor:
                     f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
                     exc_info=exc,
                 )
-        return ctx
 
     async def _run_processing_sequential(
         self, processing: dict, ctx: Context, pipeline: Pipeline, *args, **kwargs
-    ) -> Context:
+    ) -> None:
+        """
+        Execute the processing functions for a particular node in-order.
+
+        Picked depending on the value of the :py:class:`.Pipeline`'s `parallelize_processing` flag.
+        """
         for processing_name, processing_func in processing.items():
             try:
-                ctx = await wrap_sync_function_in_async(processing_func, ctx, pipeline, *args, **kwargs)
+                await wrap_sync_function_in_async(processing_func, ctx, pipeline, *args, **kwargs)
             except Exception as exc:
                 logger.error(
                     f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
                     exc_info=exc,
                 )
-        return ctx
 
-    async def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
+    async def _run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline) -> None:
+        """
+        Run `PRE_TRANSITIONS_PROCESSING` functions for a particular node.
+        Pre-transition processing functions can modify the context state
+        before the direction of the next transition is determined depending on that state.
+
+        The execution order depends on the value of the :py:class:`.Pipeline`'s
+        `parallelize_processing` flag.
+        """
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
         pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
 
         if pipeline.parallelize_processing:
-            ctx = await self._run_processing_parallel(pre_transitions_processing, ctx, pipeline)
+            await self._run_processing_parallel(pre_transitions_processing, ctx, pipeline)
         else:
-            ctx = await self._run_processing_sequential(pre_transitions_processing, ctx, pipeline)
+            await self._run_processing_sequential(pre_transitions_processing, ctx, pipeline)
 
         ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
             "processed_node"
         ]
         del ctx.framework_states["actor"]["processed_node"]
-        return ctx
 
-    async def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline) -> Context:
+    async def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline) -> None:
+        """
+        Run `PRE_RESPONSE_PROCESSING` functions for a particular node.
+        Pre-response processing functions can modify the response before it is
+        returned to the user.
+
+        The execution order depends on the value of the :py:class:`.Pipeline`'s
+        `parallelize_processing` flag.
+        """
         ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
         pre_response_processing = ctx.framework_states["actor"]["next_node"].pre_response_processing
 
         if pipeline.parallelize_processing:
-            ctx = await self._run_processing_parallel(pre_response_processing, ctx, pipeline)
+            await self._run_processing_parallel(pre_response_processing, ctx, pipeline)
         else:
-            ctx = await self._run_processing_sequential(pre_response_processing, ctx, pipeline)
+            await self._run_processing_sequential(pre_response_processing, ctx, pipeline)
 
         ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
         del ctx.framework_states["actor"]["processed_node"]
-        return ctx
 
     def _get_true_label(
         self,
