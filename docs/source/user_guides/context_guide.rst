@@ -15,7 +15,7 @@ that is relevant to the conversation with the user.
 
 .. note::
 
-    Since most callback functions used in DFF script and DFF pipeline (see the `basic guide <./basic_conceptions>`_)
+    Since most callback functions used in DFF script and DFF pipeline (see the `basic guide <./basic_conceptions.rst>`__)
     need to either read or update the current dialog state,
     the framework-level convention is that all functions of this kind
     use ``Context`` as their first parameter. This dependency is being
@@ -27,21 +27,23 @@ As a callback parameter, ``Context`` provides a convenient interface for working
 allowing developers to easily add, retrieve,
 and manipulate data as the conversation progresses.
 
-Let's consider some of the builtin callback instances to see how the context can be leveraged:
+Let's consider some of the built-in callback instances to see how the context can be leveraged:
 
 .. code-block:: python
     :linenos:
 
       pattern = re.compile("[a-zA-Z]+")
 
-      def regexp_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+      def regexp_condition_handler(
+          ctx: Context, pipeline: Pipeline, *args, **kwargs
+      ) -> bool:
           # retrieve the current request
           request = ctx.last_request
           if request.text is None:
               return False
           return bool(pattern.search(request.text))
 
-The code above is a condition function (see the `basic guide <./basic_conceptions>`_)
+The code above is a condition function (see the `basic guide <./basic_conceptions.rst>`__)
 that belongs to the ``TRANSITIONS`` section of the script and returns `True` or `False`
 depending on whether the current user request matches the given pattern.
 As can be seen from the code block, the current
@@ -49,39 +51,54 @@ request (``last_request``) can be easily retrieved as one of the attributes of t
 Likewise, the ``last_response`` (bot's current reply) or the ``last_label``
 (the name of the currently visited node) attributes can be used in the same manner.
 
-Another use case is leveraging the ``misc`` field (see below for a detailed description):
+Another common use case is leveraging the ``misc`` field (see below for a detailed description):
 pipeline functions or ``PROCESSING`` callbacks can write arbitrary values to the misc field,
 making those available for other context-dependent functions.
 
 .. code-block:: python
     :linenos:
 
-    def save_previous_node_response_to_ctx_processing(
-        ctx: Context, _: Pipeline, *args, **kwargs
-    ) -> Context:
-        processed_node = ctx.current_node
-        ctx.misc["previous_node_response"] = processed_node.response
-        return ctx
+    import urllib.request
+    import urllib.error
 
-.. note::
+    def ping_example_com(
+        ctx: Context, *_, **__
+    ):
+        try:
+            with urllib.request.urlopen("https://example.com/") as webpage:
+                web_content = webpage.read().decode(
+                    webpage.headers.get_content_charset()
+                )
+                result = "Example Domain" in web_content
+        except urllib.error.URLError:
+            result = False
+        ctx.misc["can_ping_example_com"] = result
 
-  See more in the `pre transitions processing tutorial <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`_.
+..
+    todo: link to the user defined functions tutorial
+
+    .. note::
+        For more information about user-defined functions see the `user functions guide <./user_functions.rst>`__.
+
 
 Attributes
 ~~~~~~~~~~~
 
 * **id**: This attribute represents the unique context identifier. By default, it is randomly generated using uuid4.
-  In most cases, this attribute will be used to identify a user
+  In most cases, this attribute will be used to identify a user.
 
 * **labels**: The labels attribute stores the history of all passed labels within the conversation.
   It maps turn IDs to labels. The collection is ordered, so getting the last item of the mapping
   always shows the last visited node.
 
+  Note that `labels` only stores the nodes that were transitioned to
+  so `start_label` will not be in this attribute.
+
 * **requests**: The requests attribute maintains the history of all received requests by the agent.
   It also maps turn IDs to requests. Like labels, it stores the requests in-order.
 
-* **responses**: This attribute keeps a record of all agent responses, mapping turn IDs to responses
-  stores the responses in-order.
+* **responses**: This attribute keeps a record of all agent responses, mapping turn IDs to responses.
+  Stores the responses in-order.
 
 * **misc**: The misc attribute is a dictionary for storing custom data. This field is not used by any of the
   built-in DFF classes or functions, so the values that you write there are guaranteed to persist
@@ -106,13 +123,24 @@ The methods of the ``Context`` class can be divided into two categories:
 
 **Public methods**
 
-* **last_request**: Returns the last label of the context, or `None` if the ``requests`` field is empty.
+* **last_request**: Return the last request of the context, or `None` if the ``requests`` field is empty.
 
-* **last_response**: Returns the last response of the context, or `None` if the ``responses`` field is empty.
+  Note that a request is added right after the context is created/retrieved from db,
+  so an empty ``requests`` field usually indicates an issue with the messenger interface.
 
-* **last_label**: Returns the last label of the context, or `None` if the ``labels`` field is empty.
+* **last_response**: Return the last response of the context, or `None` if the ``responses`` field is empty.
 
-* **clear**: Clears all items from context fields, optionally keeping the data from `hold_last_n_indices` turns.
+  Responses are added at the end of each turn, so an empty ``response`` field is something you should definitely consider.
+
+* **last_label**: Return the last label of the context, or `None` if the ``labels`` field is empty.
+  Last label is always the name of the current node but not vice versa:
+
+  Since ``start_label`` is not added to the ``labels`` field,
+  empty ``labels`` usually indicates that the current node is the `start_node`.
+  After a transition is made from the `start_node`
+  the label of that transition is added to the field.
+
+* **clear**: Clear all items from context fields, optionally keeping the data from `hold_last_n_indices` turns.
   You can specify which fields to clear using the `field_names` parameter. This method is designed for cases
   when contexts are shared over high latency networks.
 
@@ -121,27 +149,33 @@ The methods of the ``Context`` class can be divided into two categories:
 
 .. note::
 
-  see the `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`_.
+  See the `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__.
 
 **Private methods**
 
 * **set_last_response, set_last_request**: These methods allow you to set the last response or request for the current context.
   This functionality can prove useful if you want to create a middleware component that overrides the pipeline functionality.
 
-* **add_request**: Adds a request to the context for the next turn, where `request` is the request message to be added.
+* **add_request**: Add a request to the context.
   It updates the `requests` dictionary. This method is called by the `Pipeline` component
-  before any of the `pipeline services <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_basic.py>`_ are executed,
-  including `Actor <../apiref/dff.pipeline.pipeline.actor.html>`_.
+  before any of the `pipeline services <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_basic.py>`__ are executed,
+  including `Actor <../apiref/dff.pipeline.pipeline.actor.html>`__.
 
-* **add_response**: Adds a response to the context for the next turn, where `response` is the response message to be added.
-  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`_ pipeline component at the end of the turn, after it has run
-  the `PRE_RESPONSE_PROCESSING <../tutorials/tutorials.script.core.7_pre_response_processing.py>`_ functions.
+* **add_response**: Add a response to the context.
+  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`__ pipeline component at the end of the turn, after it has run
+  the `PRE_RESPONSE_PROCESSING <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__ functions.
 
-* **add_label**: Adds a label to the context for the next turn, where `label` is the label to be added.
+  To be more precise, this method is called between the ``CREATE_RESPONSE`` and ``FINISH_TURN`` stages.
+  For more information about stages, see `ActorStages <../apiref/dff.script.core.types.html#dff.script.core.types.ActorStage>`__.
+
+* **add_label**: Add a label to the context.
   It updates the `labels` field. This method is called by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`_ component when transition conditions
-  have been resolved, and when `PRE_TRANSITIONS_PROCESSING <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`_ callbacks have been run.
+  have been resolved, and when `PRE_TRANSITIONS_PROCESSING <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`__ callbacks have been run.
 
-* **current_node**: Returns the current node of the context. This is particularly useful for tracking the node during the conversation flow.
+  To be more precise, this method is called between the ``GET_NEXT_NODE`` and ``REWRITE_NEXT_NODE`` stages.
+  For more information about stages, see `ActorStages <../apiref/dff.script.core.types.html#dff.script.core.types.ActorStage>`__.
+
+* **current_node**: Return the current node of the context. This is particularly useful for tracking the node during the conversation flow.
   This method only returns a node inside ``PROCESSING`` callbacks yielding ``None`` in other contexts.
 
 Serialization

@@ -12,7 +12,7 @@ about current script execution.
 :doc:`Context guide <./user_guides/context_guide>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``context tutorial`` walks you through the details of working with the
+The ``context guide`` walks you through the details of working with the
 ``Context`` object, the backbone of the DFF API, including most of the relevant fields and methods.
 
 :doc:`Superset guide <./user_guides/superset_guide>`
