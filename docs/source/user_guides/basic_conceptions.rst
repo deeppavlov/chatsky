@@ -241,7 +241,7 @@ That's what we've changed:
 
 .. note::
 
-    See `documentation of Context object`_.
+    See `guide on Context objects`_.
 
 * Transitions were changed: transitions to next, previous and current node were replaced with special
   standard transitions.
@@ -268,7 +268,7 @@ For example:
 
 * You can serialize context (available on every transition and response)
   to json or dictionary in order to debug it or extract some values.
-  See `tutorial on context serialization`_.
+  See `guide on context serialization`_.
 
 * You can alter user input and modify generated responses.
   User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation.
@@ -293,11 +293,11 @@ Happy building!
 
 .. _tutorial on basic dialog structure: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.1_basics.html
 .. _tutorial on response functions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.3_responses.html
-.. _documentation of Context object: https://deeppavlov.github.io/dialog_flow_framework/apiref/dff.script.core.context.html
+.. _guide on Context objects: ../user_guides/context_guide.html
 .. _tutorial on transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.4_transitions.html
 .. _tutorial on conditions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.2_conditions.html
 .. _tutorial on global transitions: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.5_global_transitions.html
-.. _tutorial on context serialization: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.6_context_serialization.html
+.. _guide on context serialization: ../user_guides/context_guide.html#serialization
 .. _tutorial on pre-response processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.7_pre_response_processing.html
 .. _tutorial on pre-transition processing: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.9_pre_transitions_processing.html
 .. _tutorial on script MISC: https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.script.core.8_misc.html
