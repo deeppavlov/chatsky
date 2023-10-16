@@ -15,12 +15,12 @@ The graph includes the majority of the conversation logic, and covers one or sev
 In this tutorial, we describe the basics of DFF API,
 and walk you through the process of creating and maintaining a conversational service with the help of DFF.
 
-=========================================
+
 Creating Conversational Services with DFF
-=========================================
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Installation
-~~~~~~~~~~~~
+============
 
 To get started with DFF, you need to install its core dependencies, which can be done using the following command:
 
@@ -29,7 +29,7 @@ To get started with DFF, you need to install its core dependencies, which can be
     pip3 install dff
 
 Defining Dialogue Goals and User Scenarios
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================================
 
 To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
 and breaking down the dialogue into smaller scenarios based on the user intents or actions that you want to cover.
@@ -42,7 +42,7 @@ cover other topics, e.g. 'time' flow can include questions and answers related t
 'weather' to telling the weather, etc.
 
 Creating Dialogue Flows for User Scenarios
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+==========================================
 
 Once you have DFF installed, you can define dialog flows targeting various user scenarios
 and combine them in a global script object. A flow consists of one or more nodes
@@ -74,7 +74,7 @@ This leaves us with a single dialog flow in the dialog graph that we lay down be
 each part of the graph available under the code snippet.
 
 Example flow & script
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 .. code-block:: python
     :linenos:
@@ -176,7 +176,7 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
     See `tutorial on basic dialog structure <../tutorials/tutorials.script.core.1_basics.html>`_.
 
 Processing Definition
-~~~~~~~~~~~~~~~~~~~~~
+=====================
 
 .. note::
 
@@ -223,7 +223,7 @@ to ensure that the returned values match the function signature.
 Error handling logic can also be incorporated into these callbacks.
 
 Generating a bot Response
-~~~~~~~~~~~~~~~~~~~~~~~~~
+=========================
 
 Generating a bot response involves creating a text or multimedia response that will be delivered to the user.
 Response is defined in the ``RESPONSE`` section of each node and should be either a ``Message`` object,
@@ -238,7 +238,7 @@ The latter allows you to customize the response based on the specific scenario a
         return Message(text="Here is a list of cafes.")
 
 Handling Fallbacks
-~~~~~~~~~~~~~~~~~~
+==================
 
 In DFF, you should provide handling for situations where the user makes requests
 that do not trigger any of the transitions specified in the script graph. 
