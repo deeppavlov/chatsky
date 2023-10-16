@@ -187,11 +187,11 @@ Context storages
 Since context instances contain all the information, relevant for a particular user, there needs to be a way
 to persistently store that information and to make it accessible in different user sessions.
 This functionality is implemented by the ``context storages`` module that provides 
-the uniform ``DBContextStorage`` interface as well as child classes thereof, that integrate
+the uniform ``DBContextStorage`` interface as well as child classes thereof that integrate
 various database types (see the
 `api reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.DBContextStorage>`_).
 
-The supported storage options and are as follows:
+The supported storage options are as follows:
 
 * `JSON <https://www.json.org/json-en.html>`_
 * `pickle <https://docs.python.org/3/library/pickle.html>`_
@@ -205,8 +205,8 @@ The supported storage options and are as follows:
 
 ``DBContextStorage`` instances can be uniformly constructed using the ``context_storage_factory`` function.
 The function's only parameter is a connection string that specifies both the database type
-and the connection parameters, as in *mongodb://admin:pass@localhost:27016/admin*.
-(`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.DBContextStorage>`_)
+and the connection parameters, for example, *mongodb://admin:pass@localhost:27016/admin*.
+(`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory>`_)
 
 The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
@@ -227,7 +227,7 @@ also available in the distribution. Consult these files for more options.
 
 .. warning::
 
-  The data transmission protocols require the data to be JSON-serializeable. DFF tackles this problem
+  The data transmission protocols require the data to be JSON-serializable. DFF tackles this problem
   through utilization of ``pydantic`` as described in the next section.
 
 Serialization
