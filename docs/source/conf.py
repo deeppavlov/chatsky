@@ -146,7 +146,13 @@ favicons = [
 ]
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": False,
+    "private-members": True,
+    "member-order": "bysource",
+    "exclude-members": "_abc_impl, model_fields",
+}
 
 
 def setup(_):
