@@ -88,13 +88,13 @@ Example flow & script
             "start_node": {
                 RESPONSE: Message(),  # the response of the initial node is skipped
                 TRANSITIONS: {
-                    ("greeting_flow", "greeting_node"): cnd.exact_match(Message(text="Hello!")),
+                    ("greeting_flow", "greeting_node"): cnd.exact_match(Message(text="/start")),
                 },
             },
             "greeting_node": {
                 RESPONSE: Message(text="Hi!"),
                 TRANSITIONS: {
-                    ("ping_pong_flow", "game_start_node"): cnd.true()
+                    ("ping_pong_flow", "game_start_node"): cnd.exact_match(Message(text="Hello!"))
                 }
             },
             "fallback_node": {
@@ -254,11 +254,11 @@ This ensures a smoother user experience even when the bot encounters unexpected 
 
     def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
         """
-        Generate a special fallback response if the initial user utterance is not 'Hello!'.
+        Generate a special fallback response if the initial user utterance is not '/start'.
         """
         if ctx.last_request is not None:
-            if ctx.last_request.text != "Hello!" and ctx.last_label is None: # start node
-                return Message(text="You should've started the dialog with 'Hello!'")
+            if ctx.last_request.text != "/start" and ctx.last_label is None: # start node
+                return Message(text="You should've started the dialog with '/start'")
             else:
                 note = f"You should've written 'Ping', not '{ctx.last_request.text}'!"
                 return Message(text=f"That was against the rules! {note}")
@@ -280,8 +280,8 @@ conversational service.
 .. code-block:: python
 
     happy_path = (
-        (Message(text="Hello!"), Message(text="Hi!")),
-        (Message(text="hi"), Message(text="Let's play ping-pong!")),
+        (Message(text="/start"), Message(text="Hi!")),
+        (Message(text="Hello!"), Message(text="Let's play ping-pong!")),
         (Message(text="Ping!"), Message(text="Pong!"))
     )
 
