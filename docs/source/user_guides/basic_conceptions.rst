@@ -88,19 +88,21 @@ Example flow & script
             "start_node": {
                 RESPONSE: Message(),  # the response of the initial node is skipped
                 TRANSITIONS: {
-                    ("greeting_flow", "greeting_node"): cnd.exact_match(Message(text="/start")),
+                    ("greeting_flow", "greeting_node"):
+                        cnd.exact_match(Message(text="/start")),
                 },
             },
             "greeting_node": {
                 RESPONSE: Message(text="Hi!"),
                 TRANSITIONS: {
-                    ("ping_pong_flow", "game_start_node"): cnd.exact_match(Message(text="Hello!"))
+                    ("ping_pong_flow", "game_start_node"):
+                        cnd.exact_match(Message(text="Hello!"))
                 }
             },
             "fallback_node": {
-                RESPONSE: Message(text="That was against the rules!"),
+                RESPONSE: fallback_response,
                 TRANSITIONS: {
-                    ("ping_pong_flow", "greeting_node"): cnd.true(),
+                    ("greeting_flow", "greeting_node"): cnd.true(),
                 },
             },
         },
@@ -108,13 +110,15 @@ Example flow & script
             "game_start_node": {
                 RESPONSE: Message(text="Let's play ping-pong!"),
                 TRANSITIONS: {
-                    ("ping_pong_flow", "response_node"): cnd.exact_match(Message(text="Ping!")),
+                    ("ping_pong_flow", "response_node"):
+                        cnd.exact_match(Message(text="Ping!")),
                 },
             },
             "response_node": {
                 RESPONSE: Message(text="Pong!"),
                 TRANSITIONS: {
-                    ("ping_pong_flow", "response_node"): cnd.exact_match(Message(text="Ping!")),
+                    ("ping_pong_flow", "response_node"):
+                        cnd.exact_match(Message(text="Ping!")),
                 },
             },
         },
@@ -122,8 +126,8 @@ Example flow & script
 
     pipeline = Pipeline.from_script(
         ping_pong_script,
-        start_label=("ping_pong_flow", "start_node"),
-        fallback_label=("ping_pong_flow", "fallback_node"),
+        start_label=("greeting_flow", "start_node"),
+        fallback_label=("greeting_flow", "fallback_node"),
     )
 
     if __name__ == "__main__":
@@ -257,14 +261,17 @@ This ensures a smoother user experience even when the bot encounters unexpected 
 
     def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
         """
-        Generate a special fallback response if the initial user utterance is not '/start'.
+        Generate a special fallback response depending on the situation.
         """
         if ctx.last_request is not None:
-            if ctx.last_request.text != "/start" and ctx.last_label is None: # start node
+            if ctx.last_request.text != "/start" and ctx.last_label is None:
+                # an empty last_label indicates start_node
                 return Message(text="You should've started the dialog with '/start'")
             else:
-                note = f"You should've written 'Ping', not '{ctx.last_request.text}'!"
-                return Message(text=f"That was against the rules! {note}")
+                return Message(
+                    text=f"That was against the rules!\n"
+                         f"You should've written 'Ping', not '{ctx.last_request.text}'!"
+                )
         else:
             raise RuntimeError("Error occurred: last request is None!")
 
@@ -293,7 +300,7 @@ the happy path and the pipeline. The function will play out a dialog with the pi
 
 .. code-block:: python
 
-    from dff.testing.common import check_happy_path
+    from dff.utils.testing.common import check_happy_path
 
     check_happy_path(pipeline, happy_path)
 
