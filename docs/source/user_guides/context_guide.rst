@@ -104,9 +104,6 @@ Attributes
   built-in DFF classes or functions, so the values that you write there are guaranteed to persist
   throughout the lifetime of the ``Context`` object.
 
-* **validation**: A flag that signals whether validation of the script is required during pipeline initialization.
-  It's important to validate custom scripts to ensure that no synthax errors have been made.
-
 * **framework_states**: This attribute is used for storing addon or pipeline states.
   Each turn, the DFF pipeline records the intermediary states of its components into this field,
   and clears it at the end of the turn. For this reason, developers are discouraged from storing
@@ -143,9 +140,6 @@ The methods of the ``Context`` class can be divided into two categories:
 * **clear**: Clear all items from context fields, optionally keeping the data from `hold_last_n_indices` turns.
   You can specify which fields to clear using the `field_names` parameter. This method is designed for cases
   when contexts are shared over high latency networks.
-
-* **overwrite_current_node_in_processing**: This method allows you to overwrite the current node with a processed node,
-  but it can only be used within processing functions. This may be required when you need to temporarily substitute the current node.
 
 .. note::
 
