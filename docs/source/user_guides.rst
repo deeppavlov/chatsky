@@ -9,6 +9,13 @@ those include but are not limited to: dialog graph creation, specifying start an
 setting transitions and conditions, using ``Context`` object in order to receive information
 about current script execution.
 
+:doc:`Slot extraction <./user_guides/slot_extraction>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``slot extraction`` tutorial demonstrates the slot extraction functionality
+currently integrated in the library. ``DFF`` only provides basic building blocks for this task,
+which can be trivially extended to support any NLU engine or slot extraction model
+of your liking.
 
 .. toctree::
    :hidden:

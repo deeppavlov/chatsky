@@ -13,11 +13,13 @@ for slot extraction or any other logic you might want to integrate.
 API overview
 ~~~~~~~~~~~~
 
-The basic building block of the API is the `Slot` class and its descendants
-that vary depending on the value extraction logic. Each slot has a name
-by which it can be accessed and a method for extracting values.
+The basic building block of the API is the
+`BaseSlot class <../apiref/dff.script.slots.types.html#dff.script.slots.types.BaseSlot>`_
+and its descendants that vary depending on the value extraction logic.
+Each slot has a name by which it can be accessed and a method for extracting values.
 Below, we demonstrate the most basic class that extracts values
-from user utterances using a regular expression.
+from user utterances using a regular expression and the
+`RegexpSlot class <../apiref/dff.script.slots.types.html#dff.script.slots.types.RegexpSlot>`_.
 
 .. code-block:: python
 
@@ -27,7 +29,9 @@ from user utterances using a regular expression.
 
 The slots can implement arbitrary logic including requests to external services.
 For instance, Deeppavlov library includes a number of models that may be of use for slot
-extraction task. In particular, we will demonstrate the use of the NER model.
+extraction task. In particular, we will demonstrate the use of the following
+`NER model <https://docs.deeppavlov.ai/en/master/features/models/NER.html>`_
+that was trained and validated on the conll_2003 dataset.
 
 .. code-block:: shell
 
@@ -48,17 +52,23 @@ full advantage of its predictions.
     from dff.script.slots import FunctionSlot
     ...
     # we assume that there is a 'NER' service running on port 5000 
-    def use_deeppavlov_ner(utterance: str) -> str:
-        ner_tuple = requests.post("http://localhost:5000/model", json={"x": [utterance]}).json()
+    def extract_first_name(utterance: str) -> str:
+        """Return the first entity of type B-PER (first name) found in the utterance."""
+        ner_request = requests.post(
+            "http://localhost:5000/model",
+            json={"x": [utterance]}
+        )
+        ner_tuple = ner_request.json()
         if "B-PER" not in ner_tuple[1][0]:
-            return None
+            return ""
         return ner_tuple[0][0][ner_tuple[1][0].index("B-PER")]
 
-    name_slot = FunctionSlot(name="first_name", func=use_deeppavlov_ner)
+    name_slot = FunctionSlot(name="first_name", func=extract_first_name)
 
 Individual slots can be grouped allowing the developer to access them together
-as a namespace. This can be achieved using the `GroupSlot` component
-that can be initialized with a list of other slot instances as its children.
+as a namespace. This can be achieved using the
+`GroupSlot <../apiref/dff.script.slots.types.html#dff.script.slots.types.GroupSlot>`_
+component that can be initialized with a list of other slot instances as its children.
 The group slots also allow for arbitrary nesting, i.e. it is possible to include
 group slots in other group slots.
 
@@ -69,8 +79,10 @@ group slots in other group slots.
     profile_slot = slots.GroupSlot(name="profile", children=[name_slot, email_slot])
 
 When all slots have been defined, you can refer to them in your script.
-Slots can be extracted at the `PRE_TRANSITIONS_PROCESSING` stage, the appropriate
-function being provided by the `processing` submodule.
+Slots can be extracted at the `PRE_TRANSITIONS_PROCESSING` stage
+using the `extract <../apiref/dff.script.slots.processing.html#dff.script.slots.processing.extract>`_
+function from the ``processing`` submodule, which looks up a slot by name and uses
+associated method to extract values.
 The only argument is the list of names of the slots that you want to extract
 from user utterances.
 
@@ -101,7 +113,7 @@ with slot values.
     RESPONSE: Message(text="Your first name: {first_name}")
 
 Some real examples of scripts that leverage slot extraction can be found in the
-`tutorials` section.
+`tutorials section <../tutorials/tutorials.slots.1_basic_example.html>`_.
 
 Form Policy
 ~~~~~~~~~~~
@@ -109,8 +121,9 @@ Form Policy
 On some occasions, we need to collect some specific information from the user, like
 the details of the purchase they want to make. In such cases, we want the chatbot
 to ask questions, until it has all the necessary info.
-Dialog Flow Framework provides the means to achieve that,
-namely a special policy component that can be integrated in your script.
+Dialog Flow Framework provides the means to achieve that, namely a special
+`policy component <../apiref/dff.script.slots.forms.html#dff.script.slots.forms.FormPolicy>`_
+that can be integrated in your script.
 This class checks on the state of a set of slots, and,
 as long as any of them is still missing a value,
 it enables transitions to the nodes that fill them.
@@ -130,8 +143,9 @@ it enables transitions to the nodes that fill them.
         },
     )
 
-The form policy class includes several methods that need to be used in the script.
-Most importantly, `to_next_label` method needs to be used as a transition target.
+The form policy class includes several methods that need to be used in the script. Most importantly,
+`to_next_label <../apiref/dff.script.slots.types.html#dff.script.slots.types.GroupSlot.to_next_label>`_
+method needs to be used as a transition target.
 This will lead to the policy suggesting one of the nodes in the mapping
 given that the respective slot is not set.
 
@@ -140,7 +154,7 @@ given that the respective slot is not set.
     form_policy.to_next_label(1.1): cnd.true(),
 
 The form is also a stateful object which requires the user to leverage the methods
-for state management. States should be updated at the `PRE_TRANSITIONS_PROCESSING` stage,
+for state management. States should be updated at the `PRE_TRANSITIONS_PROCESSING` stage
 which can be done at the `GLOBAL` level.
 
 .. code-block:: python
@@ -153,3 +167,6 @@ of a form policy.
 .. code-block:: python
 
     TRANSITIONS: {("flow", "node"): form_policy.has_state(FormState.ACTIVE)}
+
+An interactive example can be found in the
+`form tutorial <../tutorials/tutorials.slots.2_form_example.html>`_.
