@@ -80,9 +80,16 @@ making those available for other context-dependent functions.
     .. note::
         For more information about user-defined functions see the `user functions guide <./user_functions.rst>`__.
 
+API
+~~~
+
+This sections describes the API of the ``Context`` class.
+
+For more information, such as method signatures, see
+`API reference <./apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
 
 Attributes
-~~~~~~~~~~~
+==========
 
 * **id**: This attribute represents the unique context identifier. By default, it is randomly generated using uuid4.
   In most cases, this attribute will be used to identify a user.
@@ -110,7 +117,7 @@ Attributes
   their own data in this field.
 
 Methods
-~~~~~~~
+=======
 
 The methods of the ``Context`` class can be divided into two categories:
 
@@ -118,7 +125,8 @@ The methods of the ``Context`` class can be divided into two categories:
 * Methods that are not designed for manual calls and get called automatically during pipeline runs,
   i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying DFF.
 
-**Public methods**
+Public methods
+^^^^^^^^^^^^^^
 
 * **last_request**: Return the last request of the context, or `None` if the ``requests`` field is empty.
 
@@ -145,7 +153,8 @@ The methods of the ``Context`` class can be divided into two categories:
 
   See the `preprocessing tutorial <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__.
 
-**Private methods**
+Private methods
+^^^^^^^^^^^^^^^
 
 * **set_last_response, set_last_request**: These methods allow you to set the last response or request for the current context.
   This functionality can prove useful if you want to create a middleware component that overrides the pipeline functionality.
