@@ -120,16 +120,36 @@ make format
 Tests are configured via [`.env_file`](.env_file).
 
 ### Docker
-For integration tests, DFF uses Docker images of supported databases as well as docker-compose configuration.
-The following images are required for complete integration testing:
-1. `mysql`
-2. `postgres`
-3. `redis`
-4. `mongo`
-5. `cr.yandex/yc/yandex-docker-local-ydb`
+DFF uses docker images for two purposes:
+1. Database images for integration testing.
+2. Images for statistics collection.
 
-All of them will be downloaded, launched and awaited upon running integration test make command (`make test_all`).
-However, they can be downloaded separately with `make docker_up` and awaited with `make wait_db` commands.
+The first group can be launched via
+
+```bash
+docker-compose --profile context_storage up
+```
+
+This will download and run all the databases (`mysql`, `postgres`, `redis`, `mongo`, `ydb`).
+
+The second group can be launched via
+
+```bash
+docker-compose --profile stats up
+```
+
+This will download and launch Superset Dashboard, Clickhouse, OpenTelemetry Collector.
+
+To launch both groups run
+```bash
+docker-compose --profile context_storage --profile stats up
+```
+or
+```bash
+make docker_up
+```
+
+This will be done automatically when running `make test_all`.
 
 ### Other provided features 
 You can get more info about `make` commands by `help`:
