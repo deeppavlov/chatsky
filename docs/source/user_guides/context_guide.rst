@@ -178,6 +178,55 @@ The methods of the ``Context`` class can be divided into two categories:
 * **current_node**: Return the current node of the context. This is particularly useful for tracking the node during the conversation flow.
   This method only returns a node inside ``PROCESSING`` callbacks yielding ``None`` in other contexts.
 
+Context storages
+~~~~~~~~~~~~~~~~
+
+Since context instances contain all the information, relevant for a particular user, there needs to be a way
+to persistently store that information and to make it accessible in different user sessions.
+This functionality is implemented by the ``context storages`` module that provides 
+the uniform ``DBContextStorage`` interface as well as child classes thereof, that integrate
+various database types (see the
+`api reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.DBContextStorage>`_).
+
+The supported storage options and are as follows:
+
+* `JSON <https://www.json.org/json-en.html>`_
+* `pickle <https://docs.python.org/3/library/pickle.html>`_
+* `shelve <https://docs.python.org/3/library/shelve.html>`_
+* `SQLite <https://www.sqlite.org/index.html>`_
+* `PostgreSQL <https://www.postgresql.org/>`_
+* `MySQL <https://www.mysql.com/>`_
+* `MongoDB <https://www.mongodb.com/>`_
+* `Redis <https://redis.io/>`_
+* `Yandex DataBase <https://ydb.tech/>`_
+
+``DBContextStorage`` instances can be uniformly constructed using the ``context_storage_factory`` function.
+The function's only parameter is a connection string that specifies both the database type
+and the connection parameters, as in *mongodb://admin:pass@localhost:27016/admin*.
+(`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.DBContextStorage>`_)
+
+The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
+Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
+distribution and to take advantage of the packaged
+`docker-compose file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/docker-compose.yml>`_.
+
+.. code-block:: shell
+  :linenos:
+
+  git clone https://github.com/deeppavlov/dialog_flow_framework.git
+  cd dialog_flow_framework
+  # assuming we need to deploy mongodb
+  docker-compose up mongo
+
+The images can be configured using the docker-compose file or the
+`environment file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/.env_file>`_,
+also available in the distribution. Consult these files for more options.
+
+.. warning::
+
+  The data transmission protocols require the data to be JSON-serializeable. DFF tackles this problem
+  through utilization of ``pydantic`` as described in the next section.
+
 Serialization
 ~~~~~~~~~~~~~
 
