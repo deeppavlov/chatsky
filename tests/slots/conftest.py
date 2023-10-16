@@ -21,6 +21,7 @@ def testing_context(testing_pipeline: Pipeline):
     yield ctx
 
 
-@pytest.fixture(scope="session")
+@pytest.fixture(scope="function")
 def root():
+    root_slot.children.clear()
     yield root_slot

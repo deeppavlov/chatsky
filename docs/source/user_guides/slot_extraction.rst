@@ -59,7 +59,7 @@ full advantage of its predictions.
 Individual slots can be grouped allowing the developer to access them together
 as a namespace. This can be achieved using the `GroupSlot` component
 that can be initialized with a list of other slot instances as its children.
-The group slots also allow for arbitrary nesting, e. g. it is possible to include
+The group slots also allow for arbitrary nesting, i.e. it is possible to include
 group slots in other group slots.
 
 .. code-block:: python
@@ -78,7 +78,7 @@ from user utterances.
 
     from dff.script.slots.processing import extract
     ...
-    PRE_TRANSITIONS_PROCESSING: {"extract_action": extract(["slot_name"])}
+    PRE_TRANSITIONS_PROCESSING: {"extract_first_name": extract(["first_name"])}
 
 If you need to use slot values as conditions for dialog script traversal,
 you can use functions from the `conditions` module.
@@ -87,8 +87,8 @@ you can use functions from the `conditions` module.
     
     from dff.script.slots.conditions import is_set_all, is_set_any
     ...
-    TRANSITIONS: {("flow", "node", 1.2): is_set_all(["slot_name"])}
-    TRANSITIONS: {("flow", "node", 1.2): is_set_any(["slot_name"])}
+    TRANSITIONS: {"all_information": is_set_all(["first_name", "email"])}
+    TRANSITIONS: {"partial_information": is_set_any(["first_name", "email"])}
 
 The `processing` module also provides functions that fill templates
 with slot values.
@@ -97,8 +97,8 @@ with slot values.
     
     from dff.script.slots.processing import fill_template
     ...
-    PRE_RESPONSE_PROCESSING: {"fill_action": slot_procs.fill_template()}
-    RESPONSE: Message(text="Here is a value of slot 1: {slot_1}")
+    PRE_RESPONSE_PROCESSING: {"fill_response_slots": slot_procs.fill_template()}
+    RESPONSE: Message(text="Your first name: {first_name}")
 
 Some real examples of scripts that leverage slot extraction can be found in the
 `tutorials` section.
