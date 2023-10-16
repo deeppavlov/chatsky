@@ -30,7 +30,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose up -d
+            make docker_up
 
       - uses: r-lib/actions/setup-pandoc@v2
         with:

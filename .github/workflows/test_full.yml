@@ -31,7 +31,7 @@ jobs:
       - name: Build images
         if: matrix.os == 'ubuntu-latest'
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -65,7 +65,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python 3.8
         uses: actions/setup-python@v4
