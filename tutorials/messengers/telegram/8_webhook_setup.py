@@ -4,6 +4,9 @@
 
 The following tutorial shows how to use `CallbackTelegramInterface`
 that makes your bot accessible through a public webhook.
+
+See %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
+for more information.
 """
 
 # %pip install dff[telegram] flask
@@ -35,7 +38,7 @@ This class can be configured with the following parameters:
 
 
 # %%
-interface = CallbackTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = CallbackTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -49,8 +52,6 @@ happy_path = HAPPY_PATH
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

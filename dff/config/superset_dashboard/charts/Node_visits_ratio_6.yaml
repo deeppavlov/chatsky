@@ -1,0 +1,65 @@
+slice_name: Node visits [ratio]
+description: null
+certified_by: null
+certification_details: null
+viz_type: pie
+params:
+  adhoc_filters: []
+  color_scheme: supersetColors
+  datasource: 1__table
+  date_format: smart_date
+  donut: true
+  extra_form_data: {}
+  granularity_sqla: start_time
+  groupby:
+  - flow_label
+  - node_label
+  innerRadius: 36
+  label_line: false
+  label_type: key
+  labels_outside: true
+  legendMargin: 100
+  legendOrientation: top
+  legendType: plain
+  metric:
+    aggregate: COUNT
+    column:
+      advanced_data_type: null
+      certification_details: null
+      certified_by: null
+      column_name: context_id
+      description: null
+      expression: null
+      filterable: true
+      groupby: true
+      id: 1
+      is_certified: false
+      is_dttm: false
+      python_date_format: null
+      type: STRING
+      type_generic: 1
+      verbose_name: null
+      warning_markdown: null
+    expressionType: SIMPLE
+    hasCustomLabel: false
+    isNew: false
+    label: COUNT(context_id)
+    optionName: metric_lk827d91wws_mq94n624y6
+    sqlExpression: null
+  number_format: SMART_NUMBER
+  outerRadius: 70
+  row_limit: 100
+  show_labels: true
+  show_labels_threshold: 5
+  show_legend: true
+  show_total: true
+  sort_by_metric: true
+  time_range: No filter
+  viz_type: pie
+query_context: '{"datasource":{"id":2,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"start_time","filters":[],"extras":{"having":"","where":""},"applied_time_extras":{},"columns":["flow_label","node_label"],"metrics":[{"aggregate":"COUNT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"context_id","description":null,"expression":null,"filterable":true,"groupby":true,"id":1,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"STRING","type_generic":1,"verbose_name":null,"warning_markdown":null},"expressionType":"SIMPLE","hasCustomLabel":false,"isNew":false,"label":"COUNT(context_id)","optionName":"metric_lk827d91wws_mq94n624y6","sqlExpression":null}],"orderby":[[{"aggregate":"COUNT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"context_id","description":null,"expression":null,"filterable":true,"groupby":true,"id":1,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"STRING","type_generic":1,"verbose_name":null,"warning_markdown":null},"expressionType":"SIMPLE","hasCustomLabel":false,"isNew":false,"label":"COUNT(context_id)","optionName":"metric_lk827d91wws_mq94n624y6","sqlExpression":null},false]],"annotation_layers":[],"row_limit":100,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"adhoc_filters":[],"color_scheme":"supersetColors","datasource":"2__table","date_format":"smart_date","donut":true,"extra_form_data":{},"granularity_sqla":"start_time","groupby":["flow_label","node_label"],"innerRadius":36,"label_line":false,"label_type":"key","labels_outside":true,"legendMargin":100,"legendOrientation":"top","legendType":"plain","metric":{"aggregate":"COUNT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"context_id","description":null,"expression":null,"filterable":true,"groupby":true,"id":1,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"STRING","type_generic":1,"verbose_name":null,"warning_markdown":null},"expressionType":"SIMPLE","hasCustomLabel":false,"isNew":false,"label":"COUNT(context_id)","optionName":"metric_lk827d91wws_mq94n624y6","sqlExpression":null},"number_format":"SMART_NUMBER","outerRadius":70,"row_limit":100,"show_labels":true,"show_labels_threshold":5,"show_legend":true,"show_total":true,"slice_id":6,"sort_by_metric":true,"time_range":"No
+  filter","viz_type":"pie","force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: f9fb7893-3533-4519-bbc4-1f4853f380e1
+version: 1.0.0
+dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

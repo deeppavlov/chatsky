@@ -4,7 +4,11 @@
 
 This tutorial shows how to process Telegram updates in your script
 and reuse handler triggers from the `pytelegrambotapi` library.
+
+Here, %mddoclink(api,messengers.telegram.messenger,telegram_condition)
+function is used for graph navigation according to Telegram events.
 """
+
 
 # %pip install dff[telegram]
 
@@ -102,7 +106,7 @@ happy_path = (
 
 
 # %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -115,8 +119,6 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

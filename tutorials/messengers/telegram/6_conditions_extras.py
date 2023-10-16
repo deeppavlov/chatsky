@@ -4,7 +4,12 @@
 
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
+
+%mddoclink(api,messengers.telegram.messenger,telegram_condition)
+function and different types of %mddoclink(api,messengers.telegram.messenger,UpdateType)
+are used for telegram message type checking.
 """
+
 
 # %pip install dff[telegram]
 
@@ -93,7 +98,7 @@ script = {
 
 
 # %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -106,8 +111,6 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

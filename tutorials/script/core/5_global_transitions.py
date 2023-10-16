@@ -3,8 +3,13 @@
 # Core: 5. Global transitions
 
 This tutorial shows the global setting of transitions.
+
+Here, global [conditions](%doclink(api,script.conditions.std_conditions))
+for default transition between many different script steps are shown.
+
 First of all, let's do all the necessary imports from DFF.
 """
+
 
 # %pip install dff
 

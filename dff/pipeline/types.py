@@ -110,19 +110,18 @@ Accepts str (component path), returns boolean (whether wrapper should be applied
 
 
 class ServiceRuntimeInfo(BaseModel):
+    """
+    Type of object, that is passed to components in runtime.
+    Contains current component info (`name`, `path`, `timeout`, `asynchronous`).
+    Also contains `execution_state` - a dictionary,
+    containing execution states of other components mapped to their paths.
+    """
+
     name: str
     path: str
     timeout: Optional[float]
     asynchronous: bool
     execution_state: Dict[str, ComponentExecutionState]
-
-
-"""
-Type of object, that is passed to components in runtime.
-Contains current component info (`name`, `path`, `timeout`, `asynchronous`).
-Also contains `execution_state` - a dictionary,
-containing execution states of other components mapped to their paths.
-"""
 
 
 ExtraHandlerFunction: TypeAlias = Union[

@@ -16,6 +16,11 @@ and determine the next step in the conversation.
 
 Overall, the actor acts as a bridge between the user's input and the dialog graph,
 making sure that the conversation follows the expected flow and providing a personalized experience to the user.
+
+Below you can see a diagram of user request processing with Actor.
+Both `request` and `response` are saved to :py:class:`.Context`.
+
+.. figure:: /_static/drawio/dfe/user_actor.png
 """
 import logging
 from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef

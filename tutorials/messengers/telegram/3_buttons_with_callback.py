@@ -2,10 +2,20 @@
 """
 # Telegram: 3. Buttons with Callback
 
-
 This tutorial demonstrates, how to add an inline keyboard and utilize
 inline queries.
+
+Here, %mddoclink(api,messengers.telegram.message,TelegramMessage)
+class is used to represent telegram message,
+%mddoclink(api,messengers.telegram.message,TelegramUI) and
+%mddoclink(api,messengers.telegram.message,RemoveKeyboard)
+classes are used for configuring additional telegram message features.
+
+Different %mddoclink(api,script.core.message,message)
+classes are used for representing different common message features,
+like Attachment, Audio, Button, Image, etc.
 """
+
 
 # %pip install dff[telegram]
 
@@ -138,7 +148,7 @@ happy_path = (
     ),
 )
 
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -151,8 +161,6 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

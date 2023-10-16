@@ -3,6 +3,12 @@
 # 4. Redis
 
 This is a tutorial on using Redis.
+
+See %mddoclink(api,context_storages.redis,RedisContextStorage) class
+for storing you users' contexts in Redis database.
+
+DFF uses [redis.asyncio](https://redis.readthedocs.io/en/latest/)
+library for asynchronous access to Redis DB.
 """
 
 # %pip install dff[redis]
@@ -22,7 +28,7 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 
 # %%
-db_uri = "redis://{}:{}@localhost:6379/{}".format("", os.getenv("REDIS_PASSWORD"), "0")
+db_uri = "redis://{}:{}@localhost:6379/{}".format("", os.environ["REDIS_PASSWORD"], "0")
 db = context_storage_factory(db_uri)
 
 

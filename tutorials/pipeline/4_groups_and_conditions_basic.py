@@ -3,6 +3,10 @@
 # 4. Groups and conditions (basic)
 
 The following example shows `pipeline` service group usage and start conditions.
+
+Here, %mddoclink(api,pipeline.service.service,Service)s
+and %mddoclink(api,pipeline.service.group,ServiceGroup)s
+are shown for advanced data pre- and postprocessing based on conditions.
 """
 
 # %pip install dff

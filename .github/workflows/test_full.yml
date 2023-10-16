@@ -4,15 +4,17 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
     - dev
+    - master
   workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   test_full:
@@ -24,7 +26,7 @@ jobs:
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         if: matrix.os == 'ubuntu-latest'
@@ -43,6 +45,11 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
@@ -54,7 +61,7 @@ jobs:
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: |
@@ -72,6 +79,11 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
