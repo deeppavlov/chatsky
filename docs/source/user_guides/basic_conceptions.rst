@@ -211,11 +211,14 @@ For instance, if a user wants to know a schedule, you may need to access a datab
         PRE_TRANSITIONS_PROCESSING: {"use_api": use_api_processing}
     }
 
+.. note::
+
+    This function uses ``Context`` to store the result of a request for other functions to use.
+    Context is a data structure that keeps all the information about a specific conversation.
+
+    To learn more about ``Context`` see the `relevant guide <../user_guides/context_guide.html>`__.
+
 If you retrieve data from the database or API, it's important to validate it to ensure it meets expectations.
-
-.. warning::
-
-    The logic of DFF implies that the `Context` object must be trivially serializable to JSON. This puts certain limits on the kind of objects that you can store inside the `Context`.
 
 Since DFF extensively leverages pydantic, you can resort to the validation tools of this feature-rich library.
 For instance, given that each processing routine is a callback, you can use tools like pydantic's `validate_call`
@@ -308,7 +311,7 @@ What's more, the data you obtain can be visualized right away using Apache Super
 
 .. note::
 
-    More information is available in the respective `tutorial <../tutorials/tutorials.stats.1_extractor_functions.html>`_.
+    More information is available in the respective `guide <../user_guides/superset_guide.html>`__.
 
 Iterative Improvement
 ~~~~~~~~~~~~~~~~~~~~~
@@ -329,7 +332,7 @@ Data protection is a critical consideration in bot development, especially when 
 .. note::
 
     The DFF framework helps ensure the safety of your application by storing the history and other user data present
-    in the `Context` object under unique ids and abstracting the storage logic away from the user interface.
+    in the ``Context`` object under unique ids and abstracting the storage logic away from the user interface.
     As a result, it offers the basic level of data protection making it impossible to gain unlawful access to personal information.
 
 Documentation
@@ -372,7 +375,7 @@ Further reading
 * `Tutorial on response functions <../tutorials/tutorials.script.core.3_responses.html>`_
 * `Tutorial on pre-response processing <../tutorials/tutorials.script.core.7_pre_response_processing.html>`_
 * `Tutorial on pre-transition processing <../tutorials/tutorials.script.core.9_pre_transitions_processing.html>`_
-* `Documentation of Context object <../apiref/dff.script.core.context.html>`_
+* `Guide on Context <../user_guides/context_guide.html>`_
 * `Tutorial on global transitions <../tutorials/tutorials.script.core.5_global_transitions.html>`_
 * `Tutorial on context serialization <../tutorials/tutorials.script.core.6_context_serialization.html>`_
 * `Tutorial on script MISC <../tutorials/tutorials.script.core.8_misc.html>`_
