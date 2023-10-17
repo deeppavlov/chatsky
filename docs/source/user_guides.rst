@@ -17,9 +17,17 @@ for exploring the telemetry data collected from your conversational services.
 We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
+:doc:`User defined functions guide <./user_guides/user_functions>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``user defined functions guide`` tutorial describes useage of all user-defined functions
+that can be used for framework extension.
+For each of these functions use cases are defined, execution orser is specified
+and also signature and return value types are highlighted.
+
 
 .. toctree::
    :hidden:
+   :glob:
 
-   user_guides/basic_conceptions
-   user_guides/superset_guide
+   user_guides/*

@@ -392,7 +392,7 @@ class Actor:
 
 def default_condition_handler(
     condition: Callable, ctx: Context, pipeline: Pipeline, *args, **kwargs
-) -> Callable[[Context, Pipeline, Any, Any], bool]:
+) -> bool:
     """
     The simplest and quickest condition handler for trivial condition handling returns the callable condition:
 
