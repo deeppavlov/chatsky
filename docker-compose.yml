@@ -3,18 +3,24 @@ services:
   mysql:
     env_file: [.env_file]
     image: mysql:latest
+    profiles:
+      - context_storage
     restart: unless-stopped
     ports:
       - 3307:3306
   psql:
     env_file: [.env_file]
     image: postgres:latest
+    profiles:
+      - context_storage
     restart: unless-stopped
     ports:
       - 5432:5432
   redis:
     env_file: [.env_file]
     image: redis:latest
+    profiles:
+      - context_storage
     restart: unless-stopped
     command: --requirepass pass
     ports:
@@ -22,12 +28,16 @@ services:
   mongo:
     env_file: [.env_file]
     image: mongo:latest
+    profiles:
+      - context_storage
     restart: unless-stopped
     ports:
       - 27017:27017
   ydb:
     env_file: [.env_file]
     image: cr.yandex/yc/yandex-docker-local-ydb:latest
+    profiles:
+      - context_storage
     restart: unless-stopped
     ports:
       - 8765:8765
@@ -40,11 +50,15 @@ services:
       context: ./dff/utils/docker
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
+    profiles:
+      - stats
     ports:
       - "8088:8088"
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
+    profiles:
+      - stats
     restart: unless-stopped
     ports:
       - '8123:8123'
@@ -54,6 +68,8 @@ services:
       - ch-data:/var/lib/clickhouse/
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
+    profiles:
+      - stats
     container_name: otel-col
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]

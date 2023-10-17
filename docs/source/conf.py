@@ -17,7 +17,7 @@ copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.6.0"
+release = "0.6.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -146,7 +146,13 @@ favicons = [
 ]
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": True}
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": False,
+    "private-members": True,
+    "member-order": "bysource",
+    "exclude-members": "_abc_impl, model_fields",
+}
 
 
 def setup(_):
