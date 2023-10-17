@@ -86,7 +86,7 @@ API
 This sections describes the API of the ``Context`` class.
 
 For more information, such as method signatures, see
-`API reference <./apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
+`API reference <../apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
 
 Attributes
 ==========
