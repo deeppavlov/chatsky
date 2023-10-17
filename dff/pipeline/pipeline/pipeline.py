@@ -74,6 +74,9 @@ class Pipeline:
 
         - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         - `actor` is a pipeline actor, found among services.
+    :param parallelize_processing: This flag determines whether or not the functions
+        defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+        of the script should be parallelized over respective groups.
 
     """
 

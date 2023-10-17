@@ -270,20 +270,5 @@ class Context(BaseModel):
 
         return node
 
-    def overwrite_current_node_in_processing(self, processed_node: Node):
-        """
-        Overwrites the current node with a processed node. This method only works in processing functions.
-
-        :param processed_node: `node` that we need to overwrite current node.
-        """
-        is_processing = self.framework_states.get("actor", {}).get("processed_node")
-        if is_processing:
-            self.framework_states["actor"]["processed_node"] = Node.model_validate(processed_node)
-        else:
-            logger.warning(
-                f"The `{self.overwrite_current_node_in_processing.__name__}` "
-                "function can only be run during processing functions."
-            )
-
 
 Context.model_rebuild()

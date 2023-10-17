@@ -49,7 +49,6 @@ def get_previous_node_response_for_response_processing(
         text=f"previous={ctx.misc['previous_node_response'].text}:"
         f" current={processed_node.response.text}"
     )
-    ctx.overwrite_current_node_in_processing(processed_node)
 
 
 # %%
