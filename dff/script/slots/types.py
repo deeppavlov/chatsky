@@ -12,7 +12,7 @@ from typing import Callable, Any, Tuple, Dict, Union, Optional
 from pydantic import Field, BaseModel, field_validator
 
 from dff.script import Context
-from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY, FORM_STORAGE_KEY  # noqa: F401
+from dff.pipeline.pipeline.pipeline import Pipeline, SLOT_STORAGE_KEY
 from .utils import singleton
 
 
