@@ -1,7 +1,7 @@
 """
 Forms
 ---------------------------
-This module holds the :class:`~Form` class that can be used to create a global form-filling policy.
+This module holds the :class:`~.Form` class that can be used to create a global form-filling policy.
 """
 from typing import Optional, Callable, List, Dict, Union
 from enum import Enum, auto
@@ -32,7 +32,7 @@ class FormPolicy(BaseModel):
     """
     This class holds a mapping between slots and nodes that are required to set them.
     To make this policy affect the dialogue and enforce transitions to required nodes,
-    you should include `to_next_slot` method into `GLOBAL` `TRANSITIONS` of your :py:class:`~Script`,
+    you should include `to_next_slot` method into `GLOBAL` `TRANSITIONS` of your :py:class:`~.Script`,
     while `update_form_state` should be included into `GLOBAL` `PRE_TRANSITION_PROCESSING`.
     Check out the method documentation for details.
 
@@ -49,7 +49,7 @@ class FormPolicy(BaseModel):
                 },
                 PRE_TRANSITION_PROCESSING: {
                     "extract_1": slot_procs.extract([slot_1.name])
-                    "proc_1": form_1.update_form_state()
+                    "proc_1": form_1.update_state()
                 }
             }
             "flow_1": {
@@ -91,7 +91,7 @@ class FormPolicy(BaseModel):
         if there remain any. Returns an always ignored transition otherwise.
 
         :param priority: The weight that will be assigned to the transition.
-            Defaults to 1 (default priority in dff.core.engine :py:class:`~Pipeline`).
+            Defaults to 1 (default priority in dff.core.engine :py:class:`~.Pipeline`).
         """
 
         def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
@@ -126,7 +126,7 @@ class FormPolicy(BaseModel):
     def has_state(self, state: FormState):
         """
         This method produces a dff.core.engine condition that yields `True` if the state of the form
-        equals the passed :class:`~FormState` or `False` otherwise.
+        equals the passed :class:`~.FormState` or `False` otherwise.
 
         :param state: Target state to check for.
         """

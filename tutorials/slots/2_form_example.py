@@ -25,7 +25,7 @@ from dff.script.slots import conditions as slot_cnd
 
 # %% [markdown]
 """
-As an initial step, all the slots that belong to the form need to be istantiated.
+As an initial step, all the slots that belong to the form need to be instantiated.
 """
 # %%
 restaurant_cuisine = slots.RegexpSlot(

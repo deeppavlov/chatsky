@@ -45,7 +45,7 @@ def unset(slots: Optional[List[str]] = None):
 def fill_template(slots: Optional[List[str]] = None):
     """
     Fill the response template in the current node.
-    Response should be an instance of :py:class:`~Message`.
+    Response should be an instance of :py:class:`~.Message`.
     Names of slots to be used should be placed in curly braces: 'Username is {profile/username}'.
 
     :param slots: Slot names to use. If this parameter is omitted, all slots will be used.

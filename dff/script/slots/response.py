@@ -18,7 +18,7 @@ from .handlers import get_filled_template
 def fill_template(template: Message, slots: Optional[List[str]] = None):
     """
     Fill a template with slot values.
-    Response should be an instance of :py:class:`~Message` class.
+    Response should be an instance of :py:class:`~.Message` class.
 
     :param template: Template message with placeholders enclosed by curly brackets {profile/username}'.
     :param slots: Slot names to use. If this parameter is omitted, all slots will be used.

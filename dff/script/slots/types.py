@@ -19,7 +19,7 @@ from .utils import singleton
 class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
     """
     BaseSlot is a base class for all slots.
-    Not meant for direct subclassing, unlike :py:class:`~ValueSlot` and :py:class:`~_GroupSlot`.
+    Not meant for direct subclassing, unlike :py:class:`~.ValueSlot` and :py:class:`~._GroupSlot`.
     """
 
     name: str
@@ -71,7 +71,7 @@ class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
 
 class _GroupSlot(BaseSlot):
     """
-    Base class for :py:class:`~RootSlot` and :py:class:`~GroupSlot`.
+    Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
 
     """
 
@@ -168,7 +168,7 @@ class ChildSlot(BaseSlot):
 
 class GroupSlot(_GroupSlot, ChildSlot):
     """
-    This class defines a slot group that includes one or more :py:class:`~ValueSlot` instances.
+    This class defines a slot group that includes one or more :py:class:`~.ValueSlot` instances.
     When a slot has been included to a group, it should further be referenced as a part of that group.
     E. g. when slot 'name' is included to a group 'person',
     from that point on it should be referenced as 'person/name'.
