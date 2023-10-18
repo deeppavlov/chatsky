@@ -156,11 +156,82 @@ and the return value is an instance of `Message <../api/dff.script.core.message#
 Extra handlers
 ~~~~~~~~~~~~~~
 
+For some (or all) services in a `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_ special
+extra handler functions can be added.
+These functions can handle statistics collection, input data transformation
+or other pipeline functionality extension.
+
+These functions can be either added to `pipeline dict <../api/dff.pipeline.types#PipelineBuilder>`_
+or added to all services at once with `add_global_handler <../api/dff.pipeline.pipeline.pipeline#add_global_handler>`_
+function.
+The handlers can be executed before or after pipeline services.
+Each of them has one of the following signatures:
+
+.. code-block:: python
+
+    async def handler(ctx: Context) -> Any:
+        ...
+
+    async def handler(ctx: Context, pipeline: Pipeline) -> Any:
+        ...
+
+    async def handler(ctx: Context, pipeline: Pipeline, runtime_info: Dict) -> Any:
+        ...
+
+where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`_,
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_,
+where ``runtime_info`` is a `runtime info dictionary <../api/dff.pipeline.types#ExtraHandlerRuntimeInfo>`_
+and the return value can be anything (it is not used).
+
 Service handlers
 ~~~~~~~~~~~~~~~~
 
+`Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_ services (other than `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`_)
+should be represented as functions.
+These functions can be run sequentially or combined into several asynchronous groups.
+The handlers can, for instance, process data, make web requests, read and write files, etc.
+
+The services are executed on every `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_ run,
+they can happen before or after `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`_ execution.
+Each of them has one of the following signatures:
+
+.. code-block:: python
+
+    async def handler(ctx: Context) -> Any:
+        ...
+
+    async def handler(ctx: Context, pipeline: Pipeline) -> Any:
+        ...
+
+    async def handler(ctx: Context, pipeline: Pipeline, runtime_info: Dict) -> Any:
+        ...
+
+where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`_,
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_,
+where ``runtime_info`` is a `runtime info dictionary <../api/dff.pipeline.types#ExtraHandlerRuntimeInfo>`_
+and the return value can be anything (it is not used).
+
 Service conditions
 ~~~~~~~~~~~~~~~~~~
+
+`Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_ services (other than `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`_)
+can be executed conditionally.
+For that some special conditions should be used (that are in a way similar to `Script conditions and condition handlers`_).
+However, there is no such thing as ``condition handler`` function in pipeline.
+
+These conditions are only run before services they are related to, that can be any services **except for Actor**.
+Each of these functions has the following signature:
+
+.. code-block:: python
+
+    def condition(ctx: Context, pipeline: Pipeline) -> bool:
+        ...
+
+where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`_,
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_
+and the return value is ``True`` if the service should be run and ``False`` otherwise.
+
+There is a set of `standard condition functions <../api/dff.pipeline.conditions>`_ defined.
 
 Statistics extractors
 ~~~~~~~~~~~~~~~~~~~~~
