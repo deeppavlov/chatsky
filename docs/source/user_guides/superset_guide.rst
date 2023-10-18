@@ -31,7 +31,7 @@ Collection procedure
     git clone https://github.com/deeppavlov/dialog_flow_framework.git
     # launch the required services
     cd dialog_flow_framework
-    docker-compose up otelcol clickhouse dashboard
+    docker-compose --profile stats up
 
 **Collecting data**
 

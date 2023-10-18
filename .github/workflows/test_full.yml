@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
@@ -12,7 +13,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   test_full:
@@ -29,7 +30,7 @@ jobs:
       - name: Build images
         if: matrix.os == 'ubuntu-latest'
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python ${{ matrix.python-version }}
         uses: actions/setup-python@v4
@@ -63,7 +64,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python 3.8
         uses: actions/setup-python@v4
