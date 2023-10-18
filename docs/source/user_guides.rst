@@ -23,6 +23,12 @@ for exploring the telemetry data collected from your conversational services.
 We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
+:doc:`Advanced features guide <./user_guides/advanced_features>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``Advanced features guide`` demonstrates the advanced capabilities of the DFF library.
+Not strictly necessary for starter projects, these features come into play when
+scaling the project up or improving performance is desired.
 
 .. toctree::
    :hidden:
@@ -30,3 +36,4 @@ Superset dashboard shipped with DFF.
    user_guides/basic_conceptions
    user_guides/context_guide
    user_guides/superset_guide
+   user_guides/advanced_features
