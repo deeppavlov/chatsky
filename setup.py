@@ -79,6 +79,15 @@ telegram_dependencies = [
     "pytelegrambotapi",
 ]
 
+benchmark_dependencies = [
+    "pympler",
+    "tqdm",
+    "humanize",
+    "pandas",
+    "altair",
+    "streamlit",
+]
+
 otl_dependencies = [
     "opentelemetry-exporter-otlp>=1.20.0",  # log body serialization is required
     "opentelemetry-instrumentation",
@@ -105,6 +114,7 @@ full = merge_req_lists(
     ydb_dependencies,
     stats_dependencies,
     telegram_dependencies,
+    benchmark_dependencies,
 )
 
 requests_requirements = [
@@ -121,6 +131,7 @@ test_requirements = merge_req_lists(
         "click==8.1.3",
         "black==23.9.1",
         "isort==5.12.0",
+        "jsonschema==4.19.1",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
@@ -129,13 +140,13 @@ test_requirements = merge_req_lists(
 )
 
 tutorial_dependencies = [
-    "flask[async]==2.3.2",
+    "flask[async]==3.0.0",
     "psutil==5.9.5",
-    "telethon==1.30.0",
+    "telethon==1.31.0",
     "fastapi==0.103.1",
     "uvicorn==0.23.1",
     "websockets==11.0.2",
-    "locust==2.16.1",
+    "locust==2.17.0",
     "streamlit==1.27.0",
     "streamlit-chat==0.1.1",
 ]
@@ -149,7 +160,7 @@ tests_full = merge_req_lists(
 doc = merge_req_lists(
     [
         "sphinx==7.2.2",
-        "pydata-sphinx-theme==0.13.3",
+        "pydata-sphinx-theme==0.14.1",
         "sphinxcontrib-apidoc==0.4.0",
         "sphinxcontrib-httpdomain==1.8.0",
         "sphinxcontrib-katex==0.9.0",
@@ -171,7 +182,7 @@ devel = [
 ]
 
 mypy_dependencies = [
-    "mypy==1.5.0",
+    "mypy==1.6.0",
 ]
 
 devel_full = merge_req_lists(
@@ -194,6 +205,7 @@ EXTRA_DEPENDENCIES = {
     "ydb": ydb_dependencies,  # dependencies for using Yandex Database
     "stats": stats_dependencies,  # dependencies for statistics collection
     "telegram": telegram_dependencies,  # dependencies for using Telegram
+    "benchmark": benchmark_dependencies,  # dependencies for benchmarking
     "full": full,  # full dependencies including all options above
     "tests": test_requirements,  # dependencies for running tests
     "test_full": tests_full,  # full dependencies for running all tests (all options above)
@@ -204,7 +216,7 @@ EXTRA_DEPENDENCIES = {
 
 setup(
     name="dff",
-    version="0.5.0",
+    version="0.6.1",
     description=description,
     long_description=long_description,
     long_description_content_type="text/markdown",

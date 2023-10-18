@@ -32,8 +32,11 @@ Collection procedure
 .. code-block:: shell
     :linenos:
 
-    # When at the working directory, launch the services
-    docker-compose up otelcol clickhouse dashboard
+    # clone the original repository to access the docker-compose file
+    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    # launch the required services
+    cd dialog_flow_framework
+    docker-compose --profile stats up
 
 **Collecting data**
 

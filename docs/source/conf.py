@@ -7,6 +7,7 @@ import re
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
+from utils.link_misc_files import link_misc_files  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
@@ -16,7 +17,7 @@ copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.5.0"
+release = "0.6.1"
 
 
 # -- General configuration ---------------------------------------------------
@@ -62,7 +63,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["*.py", "utils/*.py", "**/_*.py"]
+exclude_patterns = ["*.py", "utils/*.py", "**/_*.py", "_misc/*.py"]
 
 html_short_title = "None"
 
@@ -101,7 +102,7 @@ nbsphinx_thumbnails = {
 html_context = {
     "github_user": "deeppavlov",
     "github_repo": "dialog_flow_framework",
-    "github_version": "dev",
+    "github_version": "master",
     "doc_path": "docs/source",
 }
 
@@ -145,10 +146,22 @@ favicons = [
 ]
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": False,
+    "private-members": True,
+    "member-order": "bysource",
+    "exclude-members": "_abc_impl, model_fields",
+}
 
 
 def setup(_):
+    link_misc_files(
+        [
+            "utils/db_benchmark/benchmark_schema.json",
+            "utils/db_benchmark/benchmark_streamlit.py",
+        ]
+    )
     generate_tutorial_links_for_notebook_creation(
         [
             ("tutorials.context_storages", "Context Storages"),
@@ -180,6 +193,8 @@ def setup(_):
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
             ("dff.stats", "Stats"),
-            ("dff.utils.testing", "Utils"),
+            ("dff.utils.testing", "Testing Utils"),
+            ("dff.utils.turn_caching", "Caching"),
+            ("dff.utils.db_benchmark", "DB Benchmark"),
         ]
     )

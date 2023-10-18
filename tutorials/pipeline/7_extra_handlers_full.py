@@ -3,6 +3,9 @@
 # 7. Extra Handlers (full)
 
 The following tutorial shows extra handlers possibilities and use cases.
+
+This tutorial is a more advanced version of the
+[previous tutorial](%doclink(tutorial,pipeline.7_extra_handlers_basic)).
 """
 
 # %pip install dff psutil

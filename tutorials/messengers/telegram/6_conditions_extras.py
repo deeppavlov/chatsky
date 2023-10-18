@@ -4,7 +4,12 @@
 
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
+
+%mddoclink(api,messengers.telegram.messenger,telegram_condition)
+function and different types of %mddoclink(api,messengers.telegram.messenger,UpdateType)
+are used for telegram message type checking.
 """
+
 
 # %pip install dff[telegram]
 

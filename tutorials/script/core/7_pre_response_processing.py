@@ -3,6 +3,13 @@
 # Core: 7. Pre-response processing
 
 This tutorial shows pre-response processing feature.
+
+Here, %mddoclink(api,script.core.keywords,Keywords.PRE_RESPONSE_PROCESSING)
+is demonstrated which can be used for additional context processing before response handlers.
+
+There are also some other %mddoclink(api,script.core.keywords,Keywords)
+worth attention used in this tutorial.
+
 First of all, let's do all the necessary imports from DFF.
 """
 
@@ -30,13 +37,6 @@ from dff.utils.testing.common import (
 
 
 # %%
-def add_label_processing(ctx: Context, _: Pipeline, *args, **kwargs) -> Context:
-    processed_node = ctx.current_node
-    processed_node.response = Message(text=f"{ctx.last_label}: {processed_node.response.text}")
-    ctx.overwrite_current_node_in_processing(processed_node)
-    return ctx
-
-
 def add_prefix(prefix):
     def add_prefix_processing(ctx: Context, _: Pipeline, *args, **kwargs) -> Context:
         processed_node = ctx.current_node

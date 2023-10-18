@@ -57,7 +57,9 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
             ready_response = response
         elif isinstance(response, str):
             ready_response = TelegramMessage(text=response)
-        elif isinstance(response, dict) or isinstance(response, Message):
+        elif isinstance(response, Message):
+            ready_response = TelegramMessage.model_validate(response.model_dump())
+        elif isinstance(response, dict):
             ready_response = TelegramMessage.model_validate(response)
         else:
             raise TypeError(

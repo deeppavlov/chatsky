@@ -36,6 +36,7 @@ pip install dff[postgresql]  # dependencies for using PostgreSQL
 pip install dff[sqlite]  # dependencies for using SQLite
 pip install dff[ydb]  # dependencies for using Yandex Database
 pip install dff[telegram]  # dependencies for using Telegram
+pip install dff[benchmark]  # dependencies for benchmarking
 pip install dff[full]  # full dependencies including all options above
 pip install dff[tests]  # dependencies for running tests
 pip install dff[test_full]  # full dependencies for running all tests (all options above)
@@ -106,7 +107,7 @@ Okey
 ```
 
 To get more advanced examples, take a look at
-[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials) on GitHub.
 
 # Context Storages
 ## Description
@@ -149,8 +150,8 @@ def handle_request(request):
 ```
 
 To get more advanced examples, take a look at
-[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/dev/tutorials/context_storages) on GitHub.
+[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials/context_storages) on GitHub.
 
 # Contributing to the Dialog Flow Framework
 
-Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/dev/CONTRIBUTING.md).
+Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/master/CONTRIBUTING.md).
