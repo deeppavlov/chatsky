@@ -235,3 +235,21 @@ There is a set of `standard condition functions <../api/dff.pipeline.conditions>
 
 Statistics extractors
 ~~~~~~~~~~~~~~~~~~~~~
+
+`OtelInstrumentor <../api/dff.stats.instrumentor#OtelInstrumentor>`_ has some wrapper functions,
+added to it on ``instrument`` call.
+These functions can extract and process telemetry statistics.
+
+The extractors are run upon ``__call__`` of the instrumentor.
+They have the following signature:
+
+.. code-block:: python
+
+    def extractor(ctx: Context, _: ???, runtime_info: Dict) -> None:
+        ...
+
+where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`_,
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`_
+and ``runtime_info`` is a `runtime info dictionary <../api/dff.pipeline.types#ExtraHandlerRuntimeInfo>`_.
+
+There is a set of `standard statistics extractors <../api/dff.stats.default_extractors>`_ defined.
