@@ -1,6 +1,13 @@
 Best practices guide
 -----------------------
 
+Introduction
+~~~~~~~~~~~~
+
+When developing a conversational service with DFF, there are certain practices you
+can follow to make the development process more efficient. In this guide,
+we name some of the steps you can take to make the most of the DFF framework.
+
 Setting up a Virtual Environment
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -9,6 +16,17 @@ and ensuring consistency across different setups.
 
 - If you already have a virtual environment and just need DFF as a component, install DFF using pip. If you need specific dependencies, install them using pip as well.
 - If you prefer, you can clone the DFF GitHub repository and set up a virtual environment using the `make venv` command. This virtual environment will have all the necessary requirements for working with DFF.
+
+.. warning::
+
+    The code below is relevant for Linux-based systems or for Windows with Cygwin installed.
+
+.. code-block:: bash
+
+    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    cd dialog_flow_framework
+    make venv
+    source venv/bin/activate
 
 Script Design
 ~~~~~~~~~~~~~
@@ -48,7 +66,49 @@ In the context of DFF, models may help in processing data and generating non-har
   The model is constructed during image build, so that the weights that the Huggingface library
   fetches from the web are downloaded in advance. At runtime, the fetched weights will be quickly read from the disk.
 
+.. code-block:: dockerfile
+
+    # cache mfaq model
+    RUN ["python3", "-c", "from sentence_transformers import SentenceTransformer; _ = SentenceTransformer('clips/mfaq')"]
+
 - Use persistent context storages to hold the necessary information that your bot will need.
+
+
+Directory Structure
+~~~~~~~~~~~~~~~~~~~
+
+A well-organized directory structure is crucial for managing your bot's code, assets, and other resources effectively. The demo provided in the DFF repository serves as a good template.
+
+- Organize your scripts, models, and other resources in a logical, hierarchical manner.
+  For instance, since DFF provides three types of standard callback functions,
+  conditions, responses, and processing functions,
+  it may be beneficial to use three separate files for those, i.e. ``conditions.py``,
+  ``processing.py``, and ``responses.py``.
+
+- Maintain a clean and well-documented codebase to facilitate maintenance and collaboration.
+
+- You can create a directory for your bot project following the structure outlined
+  in the `demo project <https://github.com/deeppavlov/dialog_flow_demo/tree/main/customer_service_bot>`_.
+
+- Below is a simplified project tree that shows a minimal example of how files can be structured.
+
+.. code-block:: shell
+
+    project/
+    ├── myapp
+    │   ├── dialog_graph
+    │   │   ├── __init__.py
+    │   │   ├── conditions.py # Condition callbacks
+    │   │   ├── processing.py # Processing callbacks
+    │   │   ├── response.py # Response callbacks
+    │   │   └── script.py # DFF script and pipeline are constructed here
+    │   ├── dockerfile
+    │   ├── requirements.txt
+    │   ├── web_app.py # the web app imports the DFF pipeline from dialog_graph
+    │   └── test.py # End-to-end testing happy path is defined here
+    ├── ...Folders for other docker-based services, if applicable
+    ├── venv/
+    └── docker-compose.yml
 
 Using Docker
 ~~~~~~~~~~~~
@@ -69,46 +129,38 @@ The `docker-compose` file in the DFF repository provides a solid base for settin
   2) Container for a database image. You can add the web app image to the docker-compose file and, optionally, add both containers
   to a single docker profile. 
   
-.. code-block::
+.. code-block:: yaml
 
-  web:
-    build:
-      context: web/
-    volumes:
-      - ./web/:/app:ro
-    ports:
-      - 8000:8000
-    env_file:
-      - ./.env
-    depends_on:
-      - psql
-    profiles:
-      - 'myapp'
-  psql:
-    # ... other options
-    profiles:
-      - 'myapp'
+    web:
+      build:
+        # source folder
+        context: myapp/
+      volumes:
+        # folder forwarding
+        - ./web/:/app:ro
+      ports:
+        # port forwarding
+        - 8000:8000
+      env_file:
+        # environment variables
+        - ./.env_file
+      depends_on:
+        - psql
+      profiles:
+        - 'myapp'
+    psql:
+      # ... other options
+      profiles:
+        - 'myapp'
 
 - This allows you to control both containers with a single docker command.
   
-.. code-block::
+.. code-block:: shell
 
-  docker-compose --profile myapp up
+    docker-compose --profile myapp up
 
 
 - Use Docker Compose commands to build and run your bot.
-
-Directory Structure
-~~~~~~~~~~~~~~~~~~~
-
-A well-organized directory structure is crucial for managing your bot's code, assets, and other resources effectively. The demo provided in the DFF repository serves as a good template.
-
-- Organize your scripts, models, and other resources in a logical, hierarchical manner.
-
-- Maintain a clean and well-documented codebase to facilitate maintenance and collaboration.
-
-- You can create a directory for your bot project following the structure outlined
-  in the `demo project <https://github.com/deeppavlov/dialog_flow_demo/tree/main/customer_service_bot>`_.
 
 Testing and Load Testing
 ~~~~~~~~~~~~~~~~~~~~~~~~
@@ -116,26 +168,26 @@ Testing and Load Testing
 Testing ensures that your bot functions as expected under various conditions, while load testing gauges its performance under high traffic.
 
 - Regular bot functionality can be covered by simple end-to-end tests that include user requests and bot replies.
-  Tests of this kind can be automated using the Pytest framework.
+  Tests of this kind can be automated using the `Pytest framework <https://docs.pytest.org/en/7.4.x/>`_.
   The demo project includes an `example <https://github.com/deeppavlov/dialog_flow_demo/blob/main/frequently_asked_question_bot/telegram/bot/test.py>`_ of such a testing suite.
 
 - Optimize your bot's performance by identifying bottlenecks during I/O operations and other levels.
-  Utilize tools like Locust for load testing to ensure your bot scales well under high load conditions.
+  Utilize tools like `Locust <https://locust.io/>`_ for load testing to ensure your bot scales well under high load conditions.
   Additionally, profile and benchmark different context storages to choose the most efficient one for your dialog service.
 
 .. note::
 
     More in the `profiling user guide <#>`_.
 
-- Profiling with Locust: DFF recommends using Locust for load testing to measure the scalability of each component in your pipeline,
+- Profiling with Locust: DFF recommends using `Locust <https://locust.io/>`_ for load testing to measure the scalability of each component in your pipeline,
   especially when integrated into a web server application like Flask or FastAPI.
 
 - Profiling Context Storages: Benchmarking the performance of database bindings is crucial.
   DFF provides tools for measuring the speed and reliability of various context storage solutions like JSON,
   Pickle, PostgreSQL, MongoDB, Redis, MySQL, SQLite, and YDB.
 
-Make use of telemetry
-~~~~~~~~~~~~~~~~~~~~~
+Making Use of Telemetry
+~~~~~~~~~~~~~~~~~~~~~~~
 
 Another great way to measure the efficiency of your bot is to employ the telemetry mechanisms
 that come packaged with DFF's GitHub distribution. Telemetry data can then be viewed
@@ -143,9 +195,9 @@ and played with by means of the integrated Superset dashboard.
 
 .. note::
 
-  For more information on working with Telemetry data, you can consult
-  the `Stats Tutorial <../tutorials/tutorials.stats.1_extractor_functions.py>`_ 
-  and the `Superset Guide <./superset_guide.rst>`__.
+    For more information on how to set up the telemetry and work with the data afterwards, you can consult
+    the `Stats Tutorial <../tutorials/tutorials.stats.1_extractor_functions.py>`_ 
+    and the `Superset Guide <./superset_guide.rst>`__.
 
 Choosing a Database
 ~~~~~~~~~~~~~~~~~~~
