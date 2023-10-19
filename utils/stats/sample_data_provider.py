@@ -63,11 +63,11 @@ pipeline = Pipeline.from_dict(
             Service(
                 handler=ACTOR,
                 before_handler=[
-                    default_extractors.get_current_label,
                     default_extractors.get_timing_before,
                 ],
                 after_handler=[
                     default_extractors.get_timing_after,
+                    default_extractors.get_current_label,
                     default_extractors.get_last_request,
                     default_extractors.get_last_response,
                 ],
