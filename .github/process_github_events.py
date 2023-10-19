@@ -22,17 +22,12 @@ for arg in GITHUB_ARGS:
 
 def on_opened_pull_request(event_info: dict):
     print("Opened pr")
-    with open(".github/PULL_REQUEST_TEMPLATE.md", "r", encoding="utf-8") as fd:
-        contents = fd.read()
-    template_body = re.escape(contents).replace("\-\ \[\ \]", "\-\ \[[ x]\]").replace("\\\n", "(\n|\r|\r\n)")
-    template_body_pattern = re.compile(template_body)
-    # this matches any string that equals PULL_REQUEST_TEMPLATE with checklist items checked or unchecked
-    # (i.e. if instead of `- [ ]` string has `- [x]` it also counts)
+    description_placeholder = "*Please describe here what changes are made and why.*"
 
     pr_number = event_info["pull_request"]["number"]
     pr_body = event_info["pull_request"]["body"]
 
-    if pr_body is None or pr_body == "" or template_body_pattern.match(pr_body) is not None:
+    if pr_body is None or pr_body == "" or description_placeholder in pr_body:
         print("Match found")
         headers = {
             "Accept": "application/vnd.github+json",
