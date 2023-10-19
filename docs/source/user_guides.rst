@@ -26,8 +26,8 @@ Superset dashboard shipped with DFF.
 :doc:`Advanced features guide <./user_guides/advanced_features>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-``Advanced features guide`` demonstrates the advanced capabilities of the DFF library.
-Not strictly necessary for starter projects, these features come into play when
+``Best practices guide`` demonstrates the best practices of development with the DFF library.
+Not strictly necessary for starter projects, these practices come into play when
 scaling the project up or improving performance is desired.
 
 .. toctree::
