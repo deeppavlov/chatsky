@@ -1,7 +1,6 @@
 # flake8: noqa
 import os
 import json
-import re
 import requests
 
 GITHUB_ARGS = {
