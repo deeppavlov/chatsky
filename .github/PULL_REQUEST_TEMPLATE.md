@@ -6,6 +6,8 @@
 
 - [ ] I have performed a self-review of the changes
 
+*List here tasks to do in order to complete this PR.*
+
 # To Consider
 
 - Add tests (if functionality is changed)
