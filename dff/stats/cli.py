@@ -198,8 +198,8 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
         params = dict(
             table="${db.table}",
-            label_lag="neighbor(label, -1)",
-            flow_lag="neighbor(flow_label, -1)",
+            label_lag="(request_id != '0' ? neighbor(label, -1) : '')",
+            flow_lag="(request_id != '0' ? neighbor(flow_label, -1) : '')",
             texttype="String",
             lblfield="JSON_VALUE(${db.table}.Body, '$.label')",
             flowfield="JSON_VALUE(${db.table}.Body, '$.flow')",

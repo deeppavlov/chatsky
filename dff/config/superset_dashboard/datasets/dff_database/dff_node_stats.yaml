@@ -14,7 +14,7 @@ sql: "\nWITH main AS (\n    SELECT DISTINCT otel_logs.LogAttributes['context_id'
   FROM otel_logs, otel_traces\n    WHERE otel_logs.TraceId = otel_traces.TraceId and\
   \ data_key = 'get_current_label'\n    ORDER BY context_id, request_id\n) SELECT\
   \ context_id,\n    request_id,\n    start_time,\n    data_key,\n    data,\n    label,\n\
-  \    neighbor(label, -1) as prev_label,\n    neighbor(flow_label, -1) as prev_flow,\n\
+  \    (request_id != '0' ? neighbor(label, -1) : '') as prev_label,\n    (request_id != '0' ? neighbor(flow_label, -1) : '') as prev_flow,\n\
   \    flow_label,\n    node_label\nFROM main\n"
 params: null
 template_params: null
