@@ -52,8 +52,10 @@ services:
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
     depends_on:
-      - 'psql'
-      - 'clickhouse'
+      psql:
+        condition: service_started
+      clickhouse:
+        condition: service_started
     profiles:
       - stats
     ports:
@@ -70,6 +72,11 @@ services:
       - '9000:9000'
     volumes:
       - ch-data:/var/lib/clickhouse/
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 2s
+      timeout: 2s
+      retries: 5
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     profiles:
@@ -78,7 +85,8 @@ services:
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
     depends_on:
-     - 'clickhouse'
+      clickhouse:
+        condition: service_healthy
     volumes:
       - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
       - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro

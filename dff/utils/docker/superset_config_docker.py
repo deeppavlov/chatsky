@@ -25,6 +25,6 @@
 import os
 
 SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{0}:{1}@psql:5432/{2}".format(
-    os.getenv("POSTGRES_USERNAME"), os.getenv("POSTGRES_PASSWORD"), os.getenv("POSTGRES_DB")
+    os.getenv("POSTGRES_USERNAME"), os.getenv("POSTGRES_PASSWORD"), os.getenv("SUPERSET_METADATA_DB")
 )
 SQLALCHEMY_ECHO = True

@@ -174,12 +174,10 @@ a separate menu for data filters will also be available. If you need to use the 
 from the `data` column, you will need to find the `custom_sql` option when adding the column
 and put in the extraction expression, as shown in the examples above.
 
-**Persisting the chart configuration**
+**Exporting the chart configuration**
 
-If you define your own charts, it's important to save their configuration to the file system of your
-host machine, so that no information is lost when the Superset container or the Docker process is restarted.
-
-The most convenient way to do that is to export the dashboard configuration as a whole. Navigate to the
+The configuration of a Superset dashboard can be easily exported and then reused
+in other Superset instances. This can be done using the GUI: navigate to the
 `Dashboards` section of the Superset application, locate your dashboard (named `DFF statistics` per default).
 Then press the `export` button on the right and save the zip file to any convenient location.
 
