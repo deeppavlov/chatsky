@@ -4,7 +4,7 @@ User functions guide
 Overview
 ~~~~~~~~
 
-Dialog flow franework allows user to define custom functions for implementaing custom behavior
+Dialog flow framework allows user to define custom functions for implementing custom behavior
 in several aspects.
 This tutorial summarizes the custom functions use cases, specifies their arguments and return
 types, warns about several common exception handling.
@@ -37,7 +37,7 @@ and the return value can be anything (it is not used).
 Exceptions
 ==========
 
-If an exception occurs during this function execution, it will be handeled on pipeline level,
+If an exception occurs during this function execution, it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 These exceptions **are not raised** during script validation.
@@ -68,7 +68,7 @@ and the return value is the modified Context value.
 Exceptions
 ==========
 
-If an exception occurs during this function execution, it will be handeled internally,
+If an exception occurs during this function execution, it will be handled internally,
 only an exception message will be printed to ``stdout``.
 These exceptions **are not raised** during script validation.
 
@@ -98,7 +98,7 @@ and the return value is the modified Context value.
 Exceptions
 ==========
 
-If an exception occurs during this function execution, it will be handeled internally,
+If an exception occurs during this function execution, it will be handled internally,
 only an exception message will be printed to ``stdout``.
 These exceptions **are not raised** during script validation.
 
@@ -137,7 +137,7 @@ Exceptions in conditions
 ========================
 
 If an exception occurs during this function execution, it will be reported during script validation stage
-(if any) and also will be handeled on pipeline level,
+(if any) and also will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
@@ -167,11 +167,11 @@ Standard condition handler
 The simplest `default condition handler <../api/dff.pipeline.pipeline.actor#default_condition_handler>`__
 just invokes the condition function and returns the result.
 
-Exceptions in condrition handler
+Exceptions in condition handler
 ================================
 
 If an exception occurs during this function execution, it will be reported during script validation stage
-(if any), otherwise it will be handeled on pipeline level,
+(if any), otherwise it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
@@ -213,7 +213,7 @@ Exceptions
 ==========
 
 If an exception occurs during this function execution, it will be reported during script validation stage
-(if any), otherwise it will be handeled internally, only an exception message will be printed to ``stdout``.
+(if any), otherwise it will be handled internally, only an exception message will be printed to ``stdout``.
 
 Responses
 ~~~~~~~~~
@@ -245,7 +245,7 @@ Exceptions
 ==========
 
 If an exception occurs during this function execution, it will be reported during script validation stage
-(if any), otherwise it will be handeled on pipeline level,
+(if any), otherwise it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
@@ -289,7 +289,7 @@ Exceptions
 
 If this function exceeds timeout (that implies that ``TimeoutError`` is thrown), it will be interrupted
 and an exception message will be printed to ``stdout``.
-If any other exception occures during this function execution, it **will not** be handeled on pipeline level,
+If any other exception occurs during this function execution, it **will not** be handled on pipeline level,
 it will either be reported in parent `ServiceGroup <../api/dff.pipeline.service.group#ServiceGroup>`__ or interrupt pipeline execution.
 
 Service handlers
@@ -330,7 +330,7 @@ Exceptions
 
 If this function exceeds timeout (that implies that ``TimeoutError`` is thrown), it will be interrupted
 in parent `ServiceGroup <../api/dff.pipeline.service.group#ServiceGroup>`__ and an exception message will be printed to ``stdout``.
-If any other exception occures during this function execution, it will be handeled on pipeline level,
+If any other exception occurs during this function execution, it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
@@ -367,7 +367,7 @@ There is a set of `standard service condition functions <../api/dff.pipeline.con
 Exceptions
 ==========
 
-If any other exception occures during this function execution, it will be handeled on pipeline level,
+If any other exception occurs during this function execution, it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
@@ -403,6 +403,6 @@ There is a set of `standard statistics extractors <../api/dff.stats.default_extr
 Exceptions
 ==========
 
-If an exception occures during this function execution, it is not hangled and will be thrown
+If an exception occurs during this function execution, it is not handled and will be thrown
 during `OtelInstrumentor <../api/dff.stats.instrumentor#OtelInstrumentor>`__ ``__call__``
 function execution.
