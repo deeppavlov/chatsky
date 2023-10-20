@@ -131,7 +131,7 @@ and the return value is ``True`` if transition should be made and ``False`` othe
 Standard conditions
 ===================
 
-There is a set of `standard condition functions <../api/dff.script.conditions.std_conditions>`_ defined.
+There is a set of `standard script condition functions <../api/dff.script.conditions.std_conditions>`_ defined.
 
 Exceptions in conditions
 ========================
@@ -362,7 +362,7 @@ and the return value is ``True`` if the service should be run and ``False`` othe
 Standard
 ========
 
-There is a set of `standard condition functions <../api/dff.pipeline.conditions>`_ defined.
+There is a set of `standard service condition functions <../api/dff.pipeline.conditions>`_ defined.
 
 Exceptions
 ==========
@@ -388,7 +388,7 @@ Signature
 
 .. code-block:: python
 
-    def extractor(ctx: Context, _: ???, runtime_info: Dict) -> None:
+    def extractor(ctx: Context, _: TODO, runtime_info: Dict) -> None:
         ...
 
 where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`_,
