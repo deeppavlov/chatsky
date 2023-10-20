@@ -388,7 +388,7 @@ Signature
 
 .. code-block:: python
 
-    def extractor(ctx: Context, _: TODO, runtime_info: Dict) -> None:
+    def extractor(ctx: Context, pipeline: Pipeline, runtime_info: Dict) -> None:
         ...
 
 where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
