@@ -9,7 +9,6 @@ on:
   pull_request:
     branches:
     - dev
-    - master
   workflow_dispatch:
 
 concurrency:
@@ -28,7 +27,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python 3.10
         uses: actions/setup-python@v4
