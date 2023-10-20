@@ -24,7 +24,7 @@ We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
 :doc:`User defined functions guide <./user_guides/user_functions>`
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 The ``user defined functions guide`` tutorial describes useage of all user-defined functions
 that can be used for framework extension.
