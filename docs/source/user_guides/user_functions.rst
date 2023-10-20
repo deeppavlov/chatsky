@@ -201,7 +201,7 @@ Signature
 
 where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
 where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
-and the return value is an instance of `NodeLabel3Type <../api/dff.script.core.types#NodeLabel3Type>`,
+and the return value is an instance of `NodeLabel3Type <../api/dff.script.core.types#NodeLabel3Type>`__,
 that is a tuple of target flow name (``str``), node name (``str``) and priority (``float``).
 
 Standard
@@ -239,7 +239,7 @@ Signature
 
 where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
 where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
-and the return value is an instance of `Message <../api/dff.script.core.message#Message>`.
+and the return value is an instance of `Message <../api/dff.script.core.message#Message>`__.
 
 Exceptions
 ==========
@@ -342,7 +342,7 @@ Description
 
 `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ services (other than `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`__)
 can be executed conditionally.
-For that some special conditions should be used (that are in a way similar to `Script conditions and condition handlers`__).
+For that some special conditions should be used (that are in a way similar to `Script conditions and condition handlers`_).
 However, there is no such thing as ``condition handler`` function in pipeline.
 
 These conditions are only run before services they are related to, that can be any services **except for Actor**.
