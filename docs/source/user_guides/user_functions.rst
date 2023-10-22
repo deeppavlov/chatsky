@@ -9,79 +9,18 @@ in several aspects.
 This tutorial summarizes the custom functions use cases, specifies their arguments and return
 types, warns about several common exception handling.
 
-``Actor`` handlers
-~~~~~~~~~~~~~~~~~~
+Pre-transition and pre-response processors
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Description
 ===========
 
-`Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ constructor accepts ``handlers``
-parameter, that is either ``None`` or dictionary attributing lists of functions to different
-`ActorStage <../api/dff.script.core.types#ActorStage>`__ values.
-
-These functions are run at specific point in `Actor <../api/dff.pipeline.pipeline.actor#Actor>`__
-lifecycle.
-
-Signature
-=========
-
-.. code-block:: python
-
-    def handler(ctx: Context, pipeline: Pipeline) -> Any:
-        ...
-
-where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
-where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
-and the return value can be anything (it is not used).
-
-Exceptions
-==========
-
-If an exception occurs during this function execution, it will be handled on pipeline level,
-exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
-will be set to ``FAILED``.
-These exceptions **are not raised** during script validation.
-
-Pre-transition processors
-~~~~~~~~~~~~~~~~~~~~~~~~~
-
-Description
-===========
-
-Each script `Node <../api/dff.script.core.script#Node>`__ has a property called ``pre_transitions_processing``.
+Each script `Node <../api/dff.script.core.script#Node>`__ has a properties called
+``pre_transitions_processing`` and ``pre_response_processing``.
 That is a dictionary, associating functions to their names (that can be any hashable object).
 
-These functions are run before transition from the previous node to the current node.
-
-Signature
-=========
-
-.. code-block:: python
-
-    def handler(ctx: Context, pipeline: Pipeline) -> Context:
-        ...
-
-where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
-where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
-and the return value is the modified Context value.
-
-Exceptions
-==========
-
-If an exception occurs during this function execution, it will be handled internally,
-only an exception message will be printed to ``stdout``.
-These exceptions **are not raised** during script validation.
-
-Pre-response processors
-~~~~~~~~~~~~~~~~~~~~~~~
-
-Description
-===========
-
-Each script `Node <../api/dff.script.core.script#Node>`__ has a property called ``pre_response_processing``.
-That is a dictionary, associating functions to their names (that can be any hashable object).
-
-These functions are run before acquiring the response, after the current node is processed.
+Pre-transition proccessors are run before transition from the previous node to the current node.
+Pre-response proccessors are run before acquiring the response, after the current node is processed.
 
 Signature
 =========
@@ -249,48 +188,38 @@ If an exception occurs during this function execution, it will be reported durin
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
-Extra handlers
-~~~~~~~~~~~~~~
+``Actor`` handlers
+~~~~~~~~~~~~~~~~~~
 
 Description
 ===========
 
-For some (or all) services in a `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ special
-extra handler functions can be added.
-These functions can handle statistics collection, input data transformation
-or other pipeline functionality extension.
+`Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ constructor accepts ``handlers``
+parameter, that is either ``None`` or dictionary attributing lists of functions to different
+`ActorStage <../api/dff.script.core.types#ActorStage>`__ values.
 
-These functions can be either added to `pipeline dict <../api/dff.pipeline.types#PipelineBuilder>`__
-or added to all services at once with `add_global_handler <../api/dff.pipeline.pipeline.pipeline#add_global_handler>`__
-function.
-The handlers can be executed before or after pipeline services.
+These functions are run at specific point in `Actor <../api/dff.pipeline.pipeline.actor#Actor>`__
+lifecycle.
 
-Signatures
-==========
+Signature
+=========
 
 .. code-block:: python
 
-    async def handler(ctx: Context) -> Any:
-        ...
-
-    async def handler(ctx: Context, pipeline: Pipeline) -> Any:
-        ...
-
-    async def handler(ctx: Context, pipeline: Pipeline, runtime_info: Dict) -> Any:
+    def handler(ctx: Context, pipeline: Pipeline) -> Any:
         ...
 
 where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
-where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__,
-where ``runtime_info`` is a `runtime info dictionary <../api/dff.pipeline.types#ExtraHandlerRuntimeInfo>`__
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
 and the return value can be anything (it is not used).
 
 Exceptions
 ==========
 
-If this function exceeds timeout (that implies that ``TimeoutError`` is thrown), it will be interrupted
-and an exception message will be printed to ``stdout``.
-If any other exception occurs during this function execution, it **will not** be handled on pipeline level,
-it will either be reported in parent `ServiceGroup <../api/dff.pipeline.service.group#ServiceGroup>`__ or interrupt pipeline execution.
+If an exception occurs during this function execution, it will be handled on pipeline level,
+exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
+will be set to ``FAILED``.
+These exceptions **are not raised** during script validation.
 
 Service handlers
 ~~~~~~~~~~~~~~~~
@@ -370,6 +299,49 @@ Exceptions
 If any other exception occurs during this function execution, it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
+
+Extra handlers
+~~~~~~~~~~~~~~
+
+Description
+===========
+
+For some (or all) services in a `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ special
+extra handler functions can be added.
+These functions can handle statistics collection, input data transformation
+or other pipeline functionality extension.
+
+These functions can be either added to `pipeline dict <../api/dff.pipeline.types#PipelineBuilder>`__
+or added to all services at once with `add_global_handler <../api/dff.pipeline.pipeline.pipeline#add_global_handler>`__
+function.
+The handlers can be executed before or after pipeline services.
+
+Signatures
+==========
+
+.. code-block:: python
+
+    async def handler(ctx: Context) -> Any:
+        ...
+
+    async def handler(ctx: Context, pipeline: Pipeline) -> Any:
+        ...
+
+    async def handler(ctx: Context, pipeline: Pipeline, runtime_info: Dict) -> Any:
+        ...
+
+where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__,
+where ``runtime_info`` is a `runtime info dictionary <../api/dff.pipeline.types#ExtraHandlerRuntimeInfo>`__
+and the return value can be anything (it is not used).
+
+Exceptions
+==========
+
+If this function exceeds timeout (that implies that ``TimeoutError`` is thrown), it will be interrupted
+and an exception message will be printed to ``stdout``.
+If any other exception occurs during this function execution, it **will not** be handled on pipeline level,
+it will either be reported in parent `ServiceGroup <../api/dff.pipeline.service.group#ServiceGroup>`__ or interrupt pipeline execution.
 
 Statistics extractors
 ~~~~~~~~~~~~~~~~~~~~~
