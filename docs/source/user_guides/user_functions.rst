@@ -22,6 +22,9 @@ That is a dictionary, associating functions to their names (that can be any hash
 Pre-transition proccessors are run before transition from the previous node to the current node.
 Pre-response proccessors are run before acquiring the response, after the current node is processed.
 
+Use-cases
+=========
+
 Signature
 =========
 
