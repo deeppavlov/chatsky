@@ -145,7 +145,7 @@ tutorial_dependencies = [
     "telethon==1.31.0",
     "fastapi==0.103.1",
     "uvicorn==0.23.1",
-    "websockets==11.0.2",
+    "websockets==12.0",
     "locust==2.17.0",
     "streamlit==1.27.0",
     "streamlit-chat==0.1.1",
