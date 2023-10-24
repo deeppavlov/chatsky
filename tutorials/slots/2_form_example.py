@@ -37,7 +37,7 @@ restaurant_address = slots.RegexpSlot(
 number_of_people = slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
 # %% [markdown]
 """
-Secondly, the `FormPolicy` object is instantiated where slot names are
+Secondly, the ``FormPolicy`` object is instantiated where slot names are
 mapped to lists of node names. This allows the form component to manage
 the dialog ensuring that the user traverses the nodes used for slot extraction.
 
@@ -76,7 +76,6 @@ script = {
             "extract_cuisine": slot_procs.extract([restaurant_cuisine.name]),
             "extract_address": slot_procs.extract([restaurant_address.name]),
             "extract_number": slot_procs.extract([number_of_people.name]),
-            "update_form_state": restaurant_form.update_state(),
         },
     },
     "restaurant": {

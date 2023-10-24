@@ -32,8 +32,7 @@ class FormPolicy(BaseModel):
     """
     This class holds a mapping between slots and nodes that are required to set them.
     To make this policy affect the dialogue and enforce transitions to required nodes,
-    you should include `to_next_slot` method into `GLOBAL` `TRANSITIONS` of your :py:class:`~.Script`,
-    while `update_form_state` should be included into `GLOBAL` `PRE_TRANSITION_PROCESSING`.
+    you should include `to_next_slot` method into `GLOBAL` `TRANSITIONS` of your :py:class:`~.Script`.
     Check out the method documentation for details.
 
     .. code-block::
@@ -49,7 +48,6 @@ class FormPolicy(BaseModel):
                 },
                 PRE_TRANSITION_PROCESSING: {
                     "extract_1": slot_procs.extract([slot_1.name])
-                    "proc_1": form_1.update_state()
                 }
             }
             "flow_1": {
@@ -131,7 +129,8 @@ class FormPolicy(BaseModel):
         :param state: Target state to check for.
         """
 
-        def is_active_inner(ctx: Context, _: Pipeline) -> bool:
+        def is_active_inner(ctx: Context, pipeline: Pipeline) -> bool:
+            self.update_state()(ctx, pipeline)
             true_state = ctx.framework_states.get(FORM_STORAGE_KEY, {}).get(self.name, FormState.INACTIVE)
             return true_state == state
 
@@ -141,13 +140,11 @@ class FormPolicy(BaseModel):
     def update_state(self, state: Optional[FormState] = None):
         """
         This method updates the form state that is stored in the context.
-        It has a twofold application.
 
-        Firstly, it should be called in `GLOBAL` `PRE_TRANSITION_PROCESSING` without any arguments
-        to keep track of the form state.
-
-        Secondly, it should be called in `PRE_TRANSITION_PROCESSING of any node
-        with `FormState.active` as an argument to activate the form.
+        It can be called in  the ``PRE_TRANSITION_PROCESSING`` section of any node
+        to explicitly set its state to a specific :class:`~.FormState` value.
+        The :py:meth:`~.has_state` method also calls it before every check
+        ensuring that the state is up to date.
 
         """
 
