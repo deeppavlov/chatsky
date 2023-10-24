@@ -7,7 +7,7 @@ Overview
 Dialog flow framework allows user to define custom functions for implementing custom behavior
 in several aspects.
 This tutorial summarizes the custom functions use cases, specifies their arguments and return
-types, warns about several common exception handling.
+types, warns about several common exception handling cases.
 
 Pre-transition and pre-response processors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -189,9 +189,9 @@ Responses
 Description
 ===========
 
-For some of the nodes in `Script <../api/dff.script.core.script#Script>`__ returning constant values
+For some of the nodes in `Script <../api/dff.script.core.script#Script>`__ yielding constant response values
 might be not enough.
-For these cases each return value can be represented as a Python function.
+For these cases each response can be represented as a Python function.
 
 These functions are executed on pipeline startup if ``validation_stage`` parameter of
 `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ is ``True`` and in the end
@@ -274,7 +274,7 @@ These functions can be run sequentially or combined into several asynchronous gr
 The handlers can, for instance, process data, make web requests, read and write files, etc.
 
 The services are executed on every `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ run,
-they can happen before or after `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`__ execution.
+they can run before or after `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`__ execution.
 
 Use-cases
 =========
@@ -369,7 +369,7 @@ Extra handlers
 Description
 ===========
 
-For some (or all) services in a `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ special
+For any service in a `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ special
 extra handler functions can be added.
 These functions can handle statistics collection, input data transformation
 or other pipeline functionality extension.
@@ -423,11 +423,12 @@ Statistics extractors
 Description
 ===========
 
-`OtelInstrumentor <../api/dff.stats.instrumentor#OtelInstrumentor>`__ has some wrapper functions,
-added to it on ``instrument`` call.
-These functions can extract and process telemetry statistics.
+Statistics module introduces the concept of extractor functions.
+These are equivalent to pipeline's regular extra handlers (described above) except that
+they have to be decorated by Opentelemetry's `OtelInstrumentor <../api/dff.stats.instrumentor#OtelInstrumentor>`_
+class that proxies the output of these handlers and redirects it to Opentelemetry services.
 
-The extractors are run upon ``__call__`` of the instrumentor.
+See the `extractor function tutorial <../tutorials/tutorials.stats.1_extractor_functions.py>`__ for reference.
 
 Use-cases
 =========
