@@ -9,7 +9,7 @@ params:
   slice_id: 2
   granularity_sqla: start_time
   time_grain_sqla: PT1M
-  time_range: 'DATEADD(DATETIME("now"), -1, day) : now'
+  time_range: No filter
   metrics:
   - aggregate: COUNT
     column:

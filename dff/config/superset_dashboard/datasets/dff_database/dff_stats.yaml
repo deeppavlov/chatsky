@@ -5,16 +5,7 @@ default_endpoint: null
 offset: 0
 cache_timeout: null
 schema: test
-sql: "WITH main AS (\n    SELECT DISTINCT otel_logs.LogAttributes['context_id'] as\
-  \ context_id,\n    otel_logs.LogAttributes['request_id'] as request_id,\n    toDateTime(otel_traces.Timestamp)\
-  \ as start_time,\n    otel_traces.SpanName as data_key,\n    otel_logs.Body as data,\n\
-  \    JSON_VALUE(otel_logs.Body, '$.label') as label,\n    JSON_VALUE(otel_logs.Body,\
-  \ '$.flow') as flow_label,\n    JSON_VALUE(otel_logs.Body, '$.node') as node_label,\n\
-  \    otel_logs.TraceId as trace_id,\n    otel_traces.TraceId\nFROM otel_logs, otel_traces\n\
-  \    WHERE otel_logs.TraceId = otel_traces.TraceId\n    ORDER BY data_key, context_id,\
-  \ request_id\n) SELECT context_id,\n    request_id,\n    start_time,\n    data_key,\n\
-  \    data,\n    label,\n    neighbor(label, -1) as prev_label,\n    neighbor(flow_label,\
-  \ -1) as prev_flow,\n    flow_label,\n    node_label\nFROM main"
+sql: null
 params: null
 template_params: null
 filter_select_enabled: false

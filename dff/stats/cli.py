@@ -199,11 +199,11 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
         params = dict(
             table="${db.table}",
             label_lag="lagInFrame(label) OVER "
-                      "(PARTITION BY context_id ORDER BY request_id ASC "
-                      "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
+            "(PARTITION BY context_id ORDER BY request_id ASC "
+            "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
             flow_lag="lagInFrame(flow_label) OVER "
-                     "(PARTITION BY context_id ORDER BY request_id ASC "
-                     "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
+            "(PARTITION BY context_id ORDER BY request_id ASC "
+            "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
             texttype="String",
             lblfield="JSON_VALUE(${db.table}.Body, '$.label')",
             flowfield="JSON_VALUE(${db.table}.Body, '$.flow')",

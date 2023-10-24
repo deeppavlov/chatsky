@@ -84,8 +84,8 @@ services:
       - ch-data:/var/lib/clickhouse/
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
-      interval: 2s
-      timeout: 2s
+      interval: 5s
+      timeout: 4s
       retries: 5
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
