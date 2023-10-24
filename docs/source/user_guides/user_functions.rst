@@ -25,6 +25,13 @@ Pre-response proccessors are run before acquiring the response, after the curren
 Use-cases
 =========
 
+TODO
+
+See tutorials:
+
+#. `About pre-transition processors <../tutorials/tutorials.script.core.9_pre_transitions_processing>`__
+#. `About pre-response processors <../tutorials/tutorials.script.core.7_pre_response_processing>`__
+
 Signature
 =========
 
@@ -58,6 +65,13 @@ These functions are executed on pipeline startup if ``validation_stage`` paramet
 `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ is ``True`` and before transition
 from the corresponding node in script in runtime.
 
+Use-cases
+=========
+
+TODO
+
+See `tutorial about conditions <../tutorials/tutorials.script.core.2_conditions>`__.
+
 Signature of condition
 ======================
 
@@ -90,6 +104,11 @@ Description of condition handler
 condition handler - that is a special function that executes conditions.
 
 This function is invoked every time condition should be checked, it launches and checks condition.
+
+Use-cases
+=========
+
+TODO
 
 Signature of condition handler
 ==============================
@@ -133,6 +152,13 @@ These functions are executed on pipeline startup if ``validation_stage`` paramet
 `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ is ``True`` and before transition
 from the corresponding node in script in runtime.
 
+Use-cases
+=========
+
+TODO
+
+See `tutorial about transition functions <../tutorials/tutorials.script.core.4_transitions>`__.
+
 Signature
 =========
 
@@ -171,6 +197,13 @@ These functions are executed on pipeline startup if ``validation_stage`` paramet
 `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ is ``True`` and in the end
 of any node processing in runtime.
 
+Use-cases
+=========
+
+TODO
+
+See `tutorial about response functions <../tutorials/tutorials.script.core.3_responses>`__.
+
 Signature
 =========
 
@@ -203,6 +236,11 @@ parameter, that is either ``None`` or dictionary attributing lists of functions 
 
 These functions are run at specific point in `Actor <../api/dff.pipeline.pipeline.actor#Actor>`__
 lifecycle.
+
+Use-cases
+=========
+
+TODO
 
 Signature
 =========
@@ -237,6 +275,18 @@ The handlers can, for instance, process data, make web requests, read and write 
 
 The services are executed on every `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ run,
 they can happen before or after `Actor <../api/dff.pipeline.pipeline.pipeline#ACTOR>`__ execution.
+
+Use-cases
+=========
+
+TODO
+
+See tutorials:
+
+#. `About synchronous services (basic) <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_basic>`__
+#. `About synchronous services (advanced) <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_full>`__
+#. `About asynchronous services (basic) <../tutorials/tutorials.pipeline.5_asynchronous_groups_and_services_basic>`__
+#. `About asynchronous services (advanced) <../tutorials/tutorials.pipeline.5_asynchronous_groups_and_services_full>`__
 
 Signatures
 ==========
@@ -279,6 +329,16 @@ However, there is no such thing as ``condition handler`` function in pipeline.
 
 These conditions are only run before services they are related to, that can be any services **except for Actor**.
 
+Use-cases
+=========
+
+TODO
+
+See tutorials:
+
+#. `About service groups and conditions (basic) <../tutorials/tutorials.pipeline.4_groups_and_conditions_basic>`__
+#. `About service groups and conditions (advanced) <../tutorials/tutorials.pipeline.4_groups_and_conditions_full>`__
+
 Signature
 =========
 
@@ -319,6 +379,17 @@ or added to all services at once with `add_global_handler <../api/dff.pipeline.p
 function.
 The handlers can be executed before or after pipeline services.
 
+Use-cases
+=========
+
+TODO
+
+See tutorials:
+
+#. `About extra handlers (basic) <../tutorials/tutorials.pipeline.7_extra_handlers_basic>`__
+#. `About extra handlers (advanced) <../tutorials/tutorials.pipeline.7_extra_handlers_full>`__
+#. `About extra handlers and extensions <../tutorials/tutorials.pipeline.8_extra_handlers_and_extensions>`__
+
 Signatures
 ==========
 
@@ -357,6 +428,13 @@ added to it on ``instrument`` call.
 These functions can extract and process telemetry statistics.
 
 The extractors are run upon ``__call__`` of the instrumentor.
+
+Use-cases
+=========
+
+TODO
+
+See `tutorial about extractor functions <../tutorials/tutorials.stats.1_extractor_functions>`__.
 
 Signature
 =========
