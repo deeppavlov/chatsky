@@ -4,6 +4,9 @@
 
 The following tutorial shows basic usage of `pipeline`
 module as an extension to `dff.script.core`.
+
+Here, `__call__` (same as %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.run))
+method is used to execute pipeline once.
 """
 
 # %pip install dff

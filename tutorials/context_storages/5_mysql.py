@@ -3,6 +3,13 @@
 # 5. MySQL
 
 This is a tutorial on using MySQL.
+
+See %mddoclink(api,context_storages.sql,SQLContextStorage) class
+for storing you users' contexts in SQL databases.
+
+DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+and [asyncmy](https://github.com/long2ice/asyncmy)
+libraries for asynchronous access to MySQL DB.
 """
 
 # %pip install dff[mysql]
@@ -23,9 +30,9 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 db_uri = "mysql+asyncmy://{}:{}@localhost:3307/{}".format(
-    os.getenv("MYSQL_USERNAME"),
-    os.getenv("MYSQL_PASSWORD"),
-    os.getenv("MYSQL_DATABASE"),
+    os.environ["MYSQL_USERNAME"],
+    os.environ["MYSQL_PASSWORD"],
+    os.environ["MYSQL_DATABASE"],
 )
 db = context_storage_factory(db_uri)
 

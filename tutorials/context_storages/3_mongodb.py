@@ -3,6 +3,12 @@
 # 3. MongoDB
 
 This is a tutorial on using MongoDB.
+
+See %mddoclink(api,context_storages.mongo,MongoContextStorage) class
+for storing you users' contexts in Mongo database.
+
+DFF uses [motor](https://motor.readthedocs.io/en/stable/)
+library for asynchronous access to MongoDB.
 """
 
 # %pip install dff[mongodb]
@@ -23,9 +29,9 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 db_uri = "mongodb://{}:{}@localhost:27017/{}".format(
-    os.getenv("MONGO_INITDB_ROOT_USERNAME"),
-    os.getenv("MONGO_INITDB_ROOT_PASSWORD"),
-    os.getenv("MONGO_INITDB_ROOT_USERNAME"),
+    os.environ["MONGO_INITDB_ROOT_USERNAME"],
+    os.environ["MONGO_INITDB_ROOT_PASSWORD"],
+    os.environ["MONGO_INITDB_ROOT_USERNAME"],
 )
 db = context_storage_factory(db_uri)
 

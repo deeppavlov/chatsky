@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
@@ -12,14 +13,14 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   publish:
     name: build and publish docs
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: set up python 3.9
         uses: actions/setup-python@v4
@@ -28,7 +29,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose up -d
+            make docker_up
 
       - uses: r-lib/actions/setup-pandoc@v2
         with:
@@ -39,6 +40,11 @@ jobs:
             make venv
 
       - name: build documentation
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
             make doc
 
@@ -46,7 +52,7 @@ jobs:
         run: touch docs/build/.nojekyll
 
       - name: save branch name without slashes
-        if: ${{ github.ref != 'refs/heads/dev' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
@@ -55,7 +61,7 @@ jobs:
           echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
 
       - name: save artifact
-        if: ${{ github.ref != 'refs/heads/dev' }}
+        if: ${{ github.ref != 'refs/heads/master' }}
         uses: actions/upload-artifact@v3
         with:
           name: ${{ format('github-pages-for-branch-{0}', env.BRANCH_NAME) }}
@@ -63,7 +69,7 @@ jobs:
           retention-days: 3
 
       - name: deploy website
-        if: ${{ github.ref == 'refs/heads/dev' }}
+        if: ${{ github.ref == 'refs/heads/master' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages

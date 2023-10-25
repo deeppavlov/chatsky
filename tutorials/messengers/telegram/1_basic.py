@@ -4,6 +4,12 @@
 
 The following tutorial shows how to run a regular DFF script in Telegram.
 It asks users for the '/start' command and then loops in one place.
+
+Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+class and [telebot](https://pytba.readthedocs.io/en/latest/index.html)
+library are used for accessing telegram API in polling mode.
+
+Telegram API token is required to access telegram API.
 """
 
 # %pip install dff[telegram]
@@ -60,7 +66,7 @@ happy_path = (
 
 
 # %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -73,8 +79,6 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

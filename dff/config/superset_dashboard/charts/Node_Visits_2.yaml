@@ -1,0 +1,59 @@
+slice_name: Node Visits
+description: null
+certified_by: null
+certification_details: null
+viz_type: dist_bar
+params:
+  adhoc_filters: []
+  bottom_margin: auto
+  color_scheme: supersetColors
+  columns:
+  - label
+  datasource: 3__table
+  extra_form_data: {}
+  granularity_sqla: start_time
+  groupby:
+  - request_id
+  metrics:
+  - aggregate: COUNT
+    column:
+      advanced_data_type: null
+      certification_details: null
+      certified_by: null
+      column_name: context_id
+      description: null
+      expression: null
+      filterable: true
+      groupby: true
+      id: 20
+      is_certified: false
+      is_dttm: false
+      python_date_format: null
+      type: STRING
+      type_generic: 1
+      verbose_name: null
+      warning_markdown: null
+    expressionType: SIMPLE
+    hasCustomLabel: false
+    isNew: false
+    label: COUNT(context_id)
+    optionName: metric_l2mle87zvnb_nfqzdxmig1d
+    sqlExpression: null
+  order_desc: true
+  rich_tooltip: true
+  row_limit: 10000
+  show_legend: true
+  time_range: No filter
+  viz_type: dist_bar
+  x_axis_label: History id
+  x_ticks_layout: auto
+  y_axis_bounds:
+  - null
+  - null
+  y_axis_format: SMART_NUMBER
+  y_axis_label: Node visits
+query_context: null
+cache_timeout: null
+uuid: 44f4ab9d-5072-4926-a6ed-8615fb81b3d0
+version: 1.0.0
+dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

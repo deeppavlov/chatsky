@@ -3,7 +3,15 @@
 # Telegram: 5. Conditions with Media
 
 This tutorial shows how to use media-related logic in your script.
+
+Here, %mddoclink(api,messengers.telegram.messenger,telegram_condition)
+function is used for graph navigation according to Telegram events.
+
+Different %mddoclink(api,script.core.message,message)
+classes are used for representing different common message features,
+like Attachment, Audio, Button, Image, etc.
 """
+
 
 # %pip install dff[telegram]
 
@@ -41,7 +49,7 @@ you can use the `content_types` parameter of the `telegram_condition`.
 
 
 # %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -167,8 +175,6 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 

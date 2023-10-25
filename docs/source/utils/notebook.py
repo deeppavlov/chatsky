@@ -77,17 +77,22 @@ class DocumentationLink(ReplacePattern):
     USAGE EXAMPLES
     --------------
 
-    [link](%doclink(api,script.core.script))
+    %doclink(api,index_pipeline)) -> ../apiref/index_pipeline.rst
 
-    [link](%doclink(api,script.core.script,Node))
+    %doclink(api,script.core.script) -> ../apiref/dff.script.core.script.rst
 
-    [link](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat))
+    %doclink(api,script.core.script,Node) -> ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
 
-    [link](%doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration))
+    %doclink(tutorial,messengers.web_api_interface.4_streamlit_chat)) ->
+    ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py
 
-    [link](%doclink(guide,basic_conceptions))
+    %doclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration) ->
+    ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py#API-configuration
 
-    [link](%doclink(guide,basic_conceptions,example-conversational-chat-bot))
+    %doclink(guide,basic_conceptions) -> ../user_guides/basic_conceptions.rst
+
+    %doclink(guide,basic_conceptions,example-conversational-chat-bot) ->
+    ../user_guides/basic_conceptions.rst#example-conversational-chat-bot
 
     """
 
@@ -117,6 +122,9 @@ class DocumentationLink(ReplacePattern):
             To link to the basic script tutorial, pass "script.core.1_basics" (without the "tutorials" prefix).
 
             To link to the basic concepts guide, pass "basic_conceptions".
+
+            API index pages are also supported.
+            Passing "index_pipeline" will link to the "apiref/index_pipeline.html" page.
         :param anchor:
             An anchor on the page. (optional)
 
@@ -129,7 +137,8 @@ class DocumentationLink(ReplacePattern):
             A link to the corresponding documentation part.
         """
         if page_type == "api":
-            return f"../apiref/dff.{page}.rst" + (f"#dff.{page}.{anchor}" if anchor is not None else "")
+            prefix = "" if page.startswith("index") else "dff."
+            return f"../apiref/{prefix}{page}.rst" + (f"#{prefix}{page}.{anchor}" if anchor is not None else "")
         elif page_type == "tutorial":
             return f"../tutorials/tutorials.{page}.py" + (f"#{anchor}" if anchor is not None else "")
         elif page_type == "guide":
@@ -141,8 +150,58 @@ class DocumentationLink(ReplacePattern):
         return DocumentationLink.link_to_doc_page(*args)
 
 
+class MarkdownDocumentationLink(DocumentationLink):
+    """
+    Replace documentation linking directives with markdown-style links.
+
+    Replace strings of the `%mddoclink({args})` format with corresponding links to local files.
+
+    `args` is a comma-separated string of arguments to pass to the :py:meth:`.DocumentationLink.link_to_doc_page`.
+
+    So, `%mddoclink(arg1,arg2,arg3)` will be replaced with `[text](link_to_doc_page(arg1, arg2, arg3))`, and
+    `%doclink(arg1,arg2)` will be replaced with `[text](link_to_doc_page(arg1, arg2))` with `text` being the last
+    path segment of the last argument.
+
+    USAGE EXAMPLES
+    --------------
+
+    %mddoclink(api,index_pipeline) -> [index_pipeline](
+        ../apiref/index_pipeline.rst
+    )
+
+    %mddoclink(api,script.core.script,Node) -> [Node](
+        ../apiref/dff.script.core.script.rst#dff.script.core.script.Node
+    )
+
+    %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat) -> [4_streamlit_chat](
+        ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py
+    )
+
+    %mddoclink(tutorial,messengers.web_api_interface.4_streamlit_chat,API-configuration) -> [API-configuration](
+        ../tutorials/tutorials.messengers.web_api_interface.4_streamlit_chat.py#API-configuration
+    )
+
+    %mddoclink(guide,basic_conceptions) -> [basic_conceptions](
+        ../user_guides/basic_conceptions.rst
+    )
+
+    %mddoclink(guide,basic_conceptions,example-conversational-chat-bot) -> [example-conversational-chat-bot](
+        ../user_guides/basic_conceptions.rst#example-conversational-chat-bot
+    )
+
+    """
+
+    pattern: ClassVar[re.Pattern] = re.compile(r"%mddoclink\((.+?)\)")
+
+    @staticmethod
+    def replacement_string(matchobj: re.Match) -> str:
+        args = matchobj.group(1).split(",")
+        link_text = args[-1].split(".")[-1]
+        return f"[{link_text}]({DocumentationLink.link_to_doc_page(*args)})"
+
+
 def apply_replace_patterns(text: str) -> str:
-    for cls in (InstallationCell, DocumentationLink):
+    for cls in (InstallationCell, DocumentationLink, MarkdownDocumentationLink):
         text = cls.replace(text)
 
     return text

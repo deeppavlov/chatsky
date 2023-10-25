@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
@@ -12,7 +13,7 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   test_coverage:
@@ -22,11 +23,11 @@ jobs:
     runs-on: ubuntu-latest
 
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python 3.10
         uses: actions/setup-python@v4
@@ -41,7 +42,7 @@ jobs:
 
       - name: clean environment
         run: |
-          export backup_files=( tests tutorials .env_file makefile .coveragerc pytest.ini docs )
+          export backup_files=( tests tutorials utils .env_file makefile .coveragerc pytest.ini docs )
           mkdir /tmp/backup
           for i in "${backup_files[@]}" ; do mv "$i"  /tmp/backup ; done
           rm -rf ..?* .[!.]* *
@@ -50,5 +51,10 @@ jobs:
           touch venv  # disable venv target
 
       - name: run tests
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           make test TEST_ALLOW_SKIP=telegram

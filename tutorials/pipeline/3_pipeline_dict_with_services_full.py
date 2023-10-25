@@ -4,6 +4,9 @@
 
 The following tutorial shows `pipeline` creation from dict
 and most important pipeline components.
+
+This tutorial is a more advanced version of the
+[previous tutorial](%doclink(tutorial,pipeline.3_pipeline_dict_with_services_basic)).
 """
 
 # %pip install dff

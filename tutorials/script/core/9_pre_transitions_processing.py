@@ -3,6 +3,11 @@
 # Core: 9. Pre-transitions processing
 
 This tutorial shows pre-transitions processing feature.
+
+Here, %mddoclink(api,script.core.keywords,Keywords.PRE_TRANSITIONS_PROCESSING)
+is demonstrated which can be used for additional context
+processing before transitioning to the next step.
+
 First of all, let's do all the necessary imports from DFF.
 """
 

@@ -14,6 +14,11 @@ As mentioned in that tutorial,
 > ... for this example, we'll use a very simple HTML document with some JavaScript,
 > all inside a long string.
 > This, of course, is not optimal and you wouldn't use it for production.
+
+Here, `_run_pipeline` (same as %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.run))
+method is used to execute pipeline once.
+
+%mddoclink(api,script.core.message,Message) is used to represent text messages.
 """
 
 # %pip install dff uvicorn fastapi
