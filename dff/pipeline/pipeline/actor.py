@@ -126,7 +126,7 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
-        ctx = self._get_true_labels(ctx, pipeline, *args, **kwargs)
+        ctx = await self._get_true_labels(ctx, pipeline, *args, **kwargs)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_TRUE_LABELS, *args, **kwargs)
 
         # get next node
@@ -174,12 +174,12 @@ class Actor:
         ).get(ctx.framework_states["actor"]["previous_label"][1], Node())
         return ctx
 
-    def _get_true_labels(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
+    async def _get_true_labels(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
         # GLOBAL
         ctx.framework_states["actor"]["global_transitions"] = (
             self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
         )
-        ctx.framework_states["actor"]["global_true_label"] = self._get_true_label(
+        global_transitions_coro = self._get_true_label(
             ctx.framework_states["actor"]["global_transitions"], ctx, pipeline, GLOBAL, "global"
         )
 
@@ -187,7 +187,7 @@ class Actor:
         ctx.framework_states["actor"]["local_transitions"] = (
             self.script.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
         )
-        ctx.framework_states["actor"]["local_true_label"] = self._get_true_label(
+        local_transitions_coro = self._get_true_label(
             ctx.framework_states["actor"]["local_transitions"],
             ctx,
             pipeline,
@@ -199,13 +199,18 @@ class Actor:
         ctx.framework_states["actor"]["node_transitions"] = ctx.framework_states["actor"][
             "pre_transitions_processed_node"
         ].transitions
-        ctx.framework_states["actor"]["node_true_label"] = self._get_true_label(
+        node_transitions_coro = self._get_true_label(
             ctx.framework_states["actor"]["node_transitions"],
             ctx,
             pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
             "node",
         )
+        (
+            ctx.framework_states["actor"]["global_true_label"],
+            ctx.framework_states["actor"]["local_true_label"],
+            ctx.framework_states["actor"]["node_true_label"],
+        ) = await asyncio.gather(*[global_transitions_coro, local_transitions_coro, node_transitions_coro])
         return ctx
 
     def _get_next_node(self, ctx: Context, *args, **kwargs) -> Context:
@@ -353,7 +358,7 @@ class Actor:
         ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
         del ctx.framework_states["actor"]["processed_node"]
 
-    def _get_true_label(
+    async def _get_true_label(
         self,
         transitions: dict,
         ctx: Context,
@@ -364,10 +369,17 @@ class Actor:
         **kwargs,
     ) -> Optional[NodeLabel3Type]:
         true_labels = []
-        for label, condition in transitions.items():
-            if self.condition_handler(condition, ctx, pipeline, *args, **kwargs):
+
+        cond_booleans = await asyncio.gather(
+            *(
+                self.condition_handler(transition[1], ctx, pipeline, *args, **kwargs)
+                for transition in transitions.items()
+            )
+        )
+        for label, cond_is_true in zip(transitions, cond_booleans):
+            if cond_is_true:
                 if callable(label):
-                    label = label(ctx, pipeline, *args, **kwargs)
+                    label = await wrap_sync_function_in_async(label, ctx, pipeline, *args, **kwargs)
                     # TODO: explicit handling of errors
                     if label is None:
                         continue
@@ -465,7 +477,7 @@ class Actor:
         return error_msgs
 
 
-def default_condition_handler(
+async def default_condition_handler(
     condition: Callable, ctx: Context, pipeline: Pipeline, *args, **kwargs
 ) -> Callable[[Context, Pipeline, Any, Any], bool]:
     """
@@ -475,4 +487,4 @@ def default_condition_handler(
     :param ctx: Context of current condition.
     :param pipeline: Pipeline we use in this condition.
     """
-    return condition(ctx, pipeline, *args, **kwargs)
+    return await wrap_sync_function_in_async(condition, ctx, pipeline, *args, **kwargs)
