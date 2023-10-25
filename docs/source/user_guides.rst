@@ -9,7 +9,6 @@ those include but are not limited to: dialog graph creation, specifying start an
 setting transitions and conditions, using ``Context`` object in order to receive information
 about current script execution.
 
-<<<<<<< HEAD
 :doc:`Slot extraction <./user_guides/slot_extraction>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -17,7 +16,6 @@ The ``slot extraction`` tutorial demonstrates the slot extraction functionality
 currently integrated in the library. ``DFF`` only provides basic building blocks for this task,
 which can be trivially extended to support any NLU engine or slot extraction model
 of your liking.
-=======
 :doc:`Context guide <./user_guides/context_guide>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -32,15 +30,11 @@ for exploring the telemetry data collected from your conversational services.
 We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
->>>>>>> dev
 
 .. toctree::
    :hidden:
 
    user_guides/basic_conceptions
-<<<<<<< HEAD
    user_guides/slot_extraction
-=======
    user_guides/context_guide
    user_guides/superset_guide
->>>>>>> dev
