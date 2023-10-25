@@ -30,4 +30,3 @@ SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{0}:{1}@dashboard-metadata:{2}/
     os.getenv("SUPERSET_METADATA_PORT"),
     os.getenv("POSTGRES_DB"),
 )
-SQLALCHEMY_ECHO = True

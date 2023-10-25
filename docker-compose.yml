@@ -52,7 +52,7 @@ services:
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
     depends_on:
       dashboard-metadata:
-        condition: service_started
+        condition: service_healthy
       clickhouse:
         condition: service_started
     profiles:
@@ -70,6 +70,11 @@ services:
     ports:
       - 5433:5433
     command: -p 5433
+    healthcheck:
+      test: pg_isready -p 5433
+      interval: 4s
+      timeout: 3s
+      retries: 3
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
