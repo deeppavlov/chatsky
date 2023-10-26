@@ -1148,8 +1148,7 @@ metadata:
     scope:
       rootPath:
       - TAB-6zE8noCIsx
-      excluded:
-      - 15
+      excluded: []
     type: NATIVE_FILTER
     description: ''
     chartsInScope:
@@ -1164,6 +1163,7 @@ metadata:
     - 12
     - 13
     - 14
+    - 15
     tabsInScope:
     - TAB-6zE8noCIsx
     - TAB-Gw0Ffh1lG

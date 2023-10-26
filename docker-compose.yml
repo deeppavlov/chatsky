@@ -71,10 +71,12 @@ services:
       - 5433:5433
     command: -p 5433
     healthcheck:
-      test: pg_isready -p 5433
+      test: pg_isready -p 5433 --username=$${POSTGRES_USERNAME}
       interval: 4s
       timeout: 3s
       retries: 3
+    volumes:
+      - dashboard-data:/var/lib/postgresql/data
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
@@ -111,3 +113,5 @@ services:
 volumes:
   ch-data:
     name: "ch-data"
+  dashboard-data:
+    name: "dashboard-data"

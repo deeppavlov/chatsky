@@ -61,7 +61,7 @@ Mapping of standard sql column types to Clickhouse native types.
 DFF_NODE_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-    {table}.LogAttributes['request_id'] as request_id,
+    toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
     toDateTime(otel_traces.Timestamp) as start_time,
     otel_traces.SpanName as data_key,
     {table}.Body as data,

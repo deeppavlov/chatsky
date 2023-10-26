@@ -110,7 +110,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: String
+  type: Nullable(UInt64)
   advanced_data_type: null
   groupby: true
   filterable: true

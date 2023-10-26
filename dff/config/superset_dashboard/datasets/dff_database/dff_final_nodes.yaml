@@ -33,7 +33,7 @@ columns:
   verbose_name: null
   is_dttm: true
   is_active: true
-  type: DateTime64(9)
+  type: DateTime
   advanced_data_type: null
   groupby: true
   filterable: true
