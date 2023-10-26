@@ -1171,16 +1171,12 @@ metadata:
   - id: NATIVE_FILTER-Q_v9J5gqV
     controlValues:
       enableEmptyFilter: false
-      defaultToFirstItem: false
-      multiSelect: true
-      searchAllOptions: false
-      inverseSelection: false
     name: History
-    filterType: filter_select
+    filterType: filter_range
     targets:
     - column:
         name: request_id
-      datasetUuid: d7f6546e-1e3a-479d-8531-05b5e73e5c05
+      datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
     defaultDataMask:
       extraFormData: {}
       filterState: {}
