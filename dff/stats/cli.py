@@ -113,11 +113,11 @@ FROM main
 DFF_FINAL_NODES_STATEMENT = """
 WITH main AS (
     SELECT LogAttributes['context_id'] AS context_id,
-    max(LogAttributes['request_id']) AS max_history
+    max(toUInt64OrNull(LogAttributes['request_id'])) AS max_history
     FROM {table}\nGROUP BY context_id
 )
 SELECT DISTINCT LogAttributes['context_id'] AS context_id,
-LogAttributes['request_id'] AS request_id,
+toUInt64OrNull({table}.LogAttributes['request_id']) AS request_id,
 toDateTime(otel_traces.Timestamp) AS start_time,
 {lblfield} AS label,
 {flowfield} AS flow_label,
