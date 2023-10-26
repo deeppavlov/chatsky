@@ -87,7 +87,7 @@ FROM main
 DFF_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-    {table}.LogAttributes['request_id'] as request_id,
+    toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
     toDateTime(otel_traces.Timestamp) as start_time,
     otel_traces.SpanName as data_key,
     {table}.Body as data,
@@ -118,7 +118,7 @@ WITH main AS (
 )
 SELECT DISTINCT LogAttributes['context_id'] AS context_id,
 LogAttributes['request_id'] AS request_id,
-otel_traces.Timestamp AS start_time,
+toDateTime(otel_traces.Timestamp) AS start_time,
 {lblfield} AS label,
 {flowfield} AS flow_label,
 {nodefield} AS node_label
