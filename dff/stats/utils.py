@@ -109,6 +109,8 @@ def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088
 
     :return: Authorized session - authorization headers tuple.
     """
+    username = args.username
+    password = args.password
     healthcheck_url = parse.urljoin(base_url, "/healthcheck")
     login_url = parse.urljoin(base_url, "/api/v1/security/login")
     csrf_url = parse.urljoin(base_url, "/api/v1/security/csrf_token/")
@@ -121,7 +123,7 @@ def get_superset_session(args: Namespace, base_url: str = "http://localhost:8088
     access_request = session.post(
         login_url,
         headers={"Content-Type": "application/json", "Accept": "*/*"},
-        data=json.dumps({"username": args.username, "password": args.password, "refresh": True, "provider": "db"}),
+        data=json.dumps({"username": username, "password": password, "refresh": True, "provider": "db"}),
     )
     access_token = access_request.json()["access_token"]
     # get csrf_token

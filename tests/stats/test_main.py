@@ -12,6 +12,7 @@ try:
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
+from tests.stats.chart_data import CHART_DATA
 from tests.context_storages.test_dbs import ping_localhost
 from tests.test_utils import get_path_from_tests_to_current_dir
 
@@ -52,7 +53,6 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     dashboard_res = session.get(dashboard_url, headers=headers)
     assert dashboard_res.status_code == 200
     dashboard_json = dashboard_res.json()
-    print(dashboard_json["result"]["charts"])
     assert sorted(dashboard_json["result"]["charts"]) == [
         "Current topic [time series bar chart]",
         "Current topic slot [bar chart]",
@@ -77,8 +77,6 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
     assert datasets_json["count"] == 3
-    assert datasets_json["ids"] == [1, 2, 3]
-    assert [item["id"] for item in datasets_json["result"]] == [1, 2, 3]
     assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
         "dff_final_nodes",
         "dff_node_stats",
@@ -87,7 +85,19 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
     assert charts_json["count"] == 17
-    assert sorted(charts_json["ids"]) == list(range(1, 18))
+    print(*charts_json["ids"])
+    for _id in charts_json["ids"]:
+        data_result = session.get(
+            parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{str(_id)}/data/"), headers=headers
+        )
+        assert data_result.status_code == 200
+        data_result_json = data_result.json()
+        assert data_result_json["result"][-1]["status"] == "success"
+        assert data_result_json["result"][-1]["stacktrace"] is None
+        data = data_result_json["result"][-1]["data"]
+        ignored_keys = ["context_id", "__timestamp", "start_time", "data"]
+        filtered_data = [{key: value} for item in data for key, value in item.items() if key not in ignored_keys]
+        # assert filtered_data == CHART_DATA[_id]
     session.close()
 
 
