@@ -50,10 +50,33 @@ services:
       context: ./dff/utils/docker
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
+    depends_on:
+      dashboard-metadata:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
     profiles:
       - stats
     ports:
       - "8088:8088"
+  dashboard-metadata:
+    env_file: [.env_file]
+    image: postgres:latest
+    profiles:
+      - stats
+    restart: unless-stopped
+    expose:
+      - "5433"
+    ports:
+      - 5433:5433
+    command: -p 5433
+    healthcheck:
+      test: pg_isready -p 5433 --username=$${POSTGRES_USERNAME}
+      interval: 4s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - dashboard-data:/var/lib/postgresql/data
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
@@ -66,6 +89,11 @@ services:
       - '9000:9000'
     volumes:
       - ch-data:/var/lib/clickhouse/
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 4s
+      retries: 5
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     profiles:
@@ -73,6 +101,9 @@ services:
     container_name: otel-col
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
     volumes:
       - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
       - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
@@ -82,3 +113,5 @@ services:
 volumes:
   ch-data:
     name: "ch-data"
+  dashboard-data:
+    name: "dashboard-data"
