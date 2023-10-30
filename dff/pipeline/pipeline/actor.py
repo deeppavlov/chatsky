@@ -35,7 +35,7 @@ from dff.script.core.context import Context
 from dff.script.core.script import Script, Node
 from dff.script.core.normalization import normalize_label, normalize_response
 from dff.script.core.keywords import GLOBAL, LOCAL
-from ..service.utils import wrap_sync_function_in_async
+from dff.pipeline.service.utils import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
