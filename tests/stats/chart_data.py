@@ -1,3 +1,4 @@
+# flake8: noqa: E501
 CHART_DATA = {
     1: [
         {
