@@ -90,7 +90,9 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
         data_result = session.get(
             parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{str(_id)}/data/"), headers=headers
         )
-        assert data_result.status_code == 200
+        print(data_result.reason)
+        print(data_result.text)
+        data_result.raise_for_status()
         data_result_json = data_result.json()
         assert data_result_json["result"][-1]["status"] == "success"
         assert data_result_json["result"][-1]["stacktrace"] is None
