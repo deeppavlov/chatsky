@@ -85,7 +85,7 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
     assert charts_json["count"] == 17
-    for _id in charts_json["ids"]:
+    for _id in sorted(charts_json["ids"]):
         print(str(_id))
         data_result = session.get(
             parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{str(_id)}/data/"), headers=headers
