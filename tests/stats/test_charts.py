@@ -11,6 +11,7 @@ try:
     from aiochclient import ChClient
     from httpx import AsyncClient
     import omegaconf  # noqa: F401
+    import tqdm  # noqa: F401
     from dff.stats.utils import get_superset_session
     from dff.stats.cli import DEFAULT_SUPERSET_URL
 except ImportError:
@@ -83,7 +84,7 @@ async def test_charts(example_module_name, otlp_log_exp_provider, otlp_trace_exp
     await ch_client.execute(f"TRUNCATE {table}")
     module.dff_instrumentor.uninstrument()
     module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
-    module.main(40)
+    await module.main(40)
     await asyncio.sleep(1)
 
     args = Namespace(
