@@ -1,4 +1,19 @@
 # flake8: noqa: E501
+from typing import List
+
+ignored_keys = ["context_id", "__timestamp", "start_time", "data"]
+
+
+def filter_data(data: List[dict]):
+    """
+    Exclude random and time-dependent fields from a superset chart data item.
+
+    :param data: The data item: list of arbitrary dicts.
+
+    """
+    return [{key: value} for item in data for key, value in item.items() if key not in ignored_keys]
+
+
 CHART_DATA = {
     1: [],
     2: [

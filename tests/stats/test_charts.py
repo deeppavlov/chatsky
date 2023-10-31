@@ -17,7 +17,7 @@ try:
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
-from tests.stats.chart_data import CHART_DATA  # noqa: F401
+from tests.stats.chart_data import CHART_DATA, filter_data
 from tests.context_storages.test_dbs import ping_localhost
 from tests.test_utils import get_path_from_tests_to_current_dir
 
@@ -51,9 +51,8 @@ def charts_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
         assert data_result_json["result"][-1]["status"] == "success"
         assert data_result_json["result"][-1]["stacktrace"] is None
         data = data_result_json["result"][-1]["data"]
-        ignored_keys = ["context_id", "__timestamp", "start_time", "data"]
-        _ = [{key: value} for item in data for key, value in item.items() if key not in ignored_keys]
-        # assert _ == CHART_DATA[_id]
+        filtered_data = filter_data(data)
+        assert filtered_data == filter_data(CHART_DATA[_id])
     session.close()
 
 
