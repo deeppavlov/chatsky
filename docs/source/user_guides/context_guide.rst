@@ -208,6 +208,9 @@ The function's only parameter is a connection string that specifies both the dat
 and the connection parameters, for example, *mongodb://admin:pass@localhost:27016/admin*.
 (`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory>`_)
 
+.. note::
+    To learn how to use ``context_storage_factory`` in your pipeline, see our `Context Storage Tutorials <../tutorials/index_context_storages.html>`__.
+
 The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
 distribution and to take advantage of the packaged
