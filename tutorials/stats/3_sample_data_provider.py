@@ -20,6 +20,7 @@ from dff.stats import (
 )
 from dff.utils.testing.toy_script import MULTIFLOW_SCRIPT, MULTIFLOW_REQUEST_OPTIONS
 
+random.seed(42)
 # %%
 # instrumentation code
 dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
@@ -109,7 +110,7 @@ async def worker(queue: asyncio.Queue):
 
 # %%
 # main loop
-async def main(n_iterations: int = 100, n_workers: int = 4):
+async def main(n_iterations: int = 40, n_workers: int = 4):
     """
     The main loop that runs one or more worker coroutines in parallel.
 
