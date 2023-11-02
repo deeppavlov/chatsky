@@ -276,7 +276,7 @@ class Actor:
         pipeline: Pipeline,
         *args,
         **kwargs,
-    ) -> Context:
+    ) -> Message:
         """
         Executes the normalized response as an asynchronous function.
         See the details in the :py:func:`~normalize_response` function of `normalization.py`.
@@ -377,11 +377,11 @@ class Actor:
 
         cond_booleans = await asyncio.gather(
             *(
-                self.condition_handler(transition[1], ctx, pipeline, *args, **kwargs)
-                for transition in transitions.items()
+                self.condition_handler(condition, ctx, pipeline, *args, **kwargs)
+                for condition in transitions.values()
             )
         )
-        for label, cond_is_true in zip(transitions, cond_booleans):
+        for label, cond_is_true in zip(transitions.keys(), cond_booleans):
             if cond_is_true:
                 if callable(label):
                     label = await wrap_sync_function_in_async(label, ctx, pipeline, *args, **kwargs)
