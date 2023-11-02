@@ -12,7 +12,8 @@ try:
     from httpx import AsyncClient
     import omegaconf  # noqa: F401
     import tqdm  # noqa: F401
-    from dff.stats.utils import get_superset_session
+    from dff.stats.__main__ import main
+    from dff.stats.utils import get_superset_session, drop_superset_assets
     from dff.stats.cli import DEFAULT_SUPERSET_URL
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
@@ -64,15 +65,37 @@ def charts_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
 )
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
+    ["example_module_name", "args"],
     [
-        "example_module_name",
-    ],
-    [
-        ("3_sample_data_provider",),
+        (
+            "3_sample_data_provider",
+            Namespace(
+                **{
+                    "outfile": "1.zip",
+                    "db.driver": "clickhousedb+connect",
+                    "db.host": "clickhouse",
+                    "db.port": "8123",
+                    "db.name": "test",
+                    "db.table": "otel_logs",
+                    "host": "localhost",
+                    "port": "8088",
+                    "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
+                }
+            ),
+        ),
     ],
 )
 @pytest.mark.docker
-async def test_charts(example_module_name, otlp_log_exp_provider, otlp_trace_exp_provider):
+async def test_charts(example_module_name, args, otlp_log_exp_provider, otlp_trace_exp_provider):
+    args.__dict__.update(
+        {
+            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
+            "username": os.environ["SUPERSET_USERNAME"],
+            "password": os.environ["SUPERSET_PASSWORD"],
+            "db.user": os.environ["CLICKHOUSE_USER"],
+        }
+    )
+    session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
     module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
@@ -86,11 +109,15 @@ async def test_charts(example_module_name, otlp_log_exp_provider, otlp_trace_exp
     await module.main(40)
     await asyncio.sleep(1)
 
-    args = Namespace(
-        **{
+    args.__dict__.update(
+        {
+            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
             "username": os.environ["SUPERSET_USERNAME"],
             "password": os.environ["SUPERSET_PASSWORD"],
+            "db.user": os.environ["CLICKHOUSE_USER"],
         }
     )
     session, headers = get_superset_session(args)
+    main(args)
     charts_data_test(session, headers)
+    drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
