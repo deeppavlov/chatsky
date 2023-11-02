@@ -123,14 +123,11 @@ class ServiceGroup(PipelineComponent):
         else:
             for service in self.components:
                 service_result = await service(ctx, pipeline)
-                if not service.asynchronous and isinstance(service_result, Context):
-                    ctx = service_result
-                elif service.asynchronous and isinstance(service_result, Awaitable):
+                if service.asynchronous and isinstance(service_result, Awaitable):
                     await service_result
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
-        return ctx
 
     async def _run(
         self,
@@ -149,7 +146,7 @@ class ServiceGroup(PipelineComponent):
 
         try:
             if self.start_condition(ctx, pipeline):
-                ctx = await self._run_services_group(ctx, pipeline)
+                await self._run_services_group(ctx, pipeline)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
 

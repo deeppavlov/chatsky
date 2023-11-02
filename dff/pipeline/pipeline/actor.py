@@ -376,10 +376,7 @@ class Actor:
         true_labels = []
 
         cond_booleans = await asyncio.gather(
-            *(
-                self.condition_handler(condition, ctx, pipeline, *args, **kwargs)
-                for condition in transitions.values()
-            )
+            *(self.condition_handler(condition, ctx, pipeline, *args, **kwargs) for condition in transitions.values())
         )
         for label, cond_is_true in zip(transitions.keys(), cond_booleans):
             if cond_is_true:
