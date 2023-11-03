@@ -1,6 +1,7 @@
 import os
 import time
 import importlib
+import subprocess
 import random
 import asyncio
 from argparse import Namespace
@@ -121,3 +122,26 @@ async def test_charts(example_module_name, args, otlp_log_exp_provider, otlp_tra
     main(args)
     charts_data_test(session, headers)
     drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
+    id_reset_cmd = """sh -c "psql --user={} --password -p {} --db=test -c \'
+    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
+    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
+    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
+    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
+    \'"
+    """
+    command = [
+        "docker-compose",
+        "exec",
+        "dashboard-metadata",
+        id_reset_cmd.format(
+            os.getenv("POSTGRES_USERNAME"),
+            os.getenv("SUPERSET_METADATA_PORT"),
+            "dashboards",
+            "slices",
+            "tables",
+            "dbs",
+        ),
+    ]
+    output, error = subprocess.Popen(
+        command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
+    ).communicate(os.getenv("POSGTRES_PASSWORD"))
