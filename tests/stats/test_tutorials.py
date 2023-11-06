@@ -54,7 +54,7 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
         module.dff_instrumentor.uninstrument()
         module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
         check_happy_path(pipeline, HAPPY_PATH)
-        await asyncio.sleep(1)
+        await asyncio.sleep(3)
         count = await ch_client.fetchval(f"SELECT COUNT (*) FROM {table}")
         assert count == expected_logs
 
