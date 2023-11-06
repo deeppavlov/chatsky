@@ -79,8 +79,10 @@ script = {
             TRANSITIONS: {
                 ("pics", "send_one"): cnd.any(
                     [
-                        # Telegram can put photos both in 'photo' and 'document' fields.
-                        # We should consider both cases when we check the message for media.
+                        # Telegram can put photos
+                        # both in 'photo' and 'document' fields.
+                        # We should consider both cases
+                        # when we check the message for media.
                         telegram_condition(content_types=["photo"]),
                         telegram_condition(
                             func=lambda message: (
@@ -120,7 +122,10 @@ script = {
 
 # testing
 happy_path = (
-    (TelegramMessage(text="/start"), TelegramMessage(text="Send me a picture")),
+    (
+        TelegramMessage(text="/start"),
+        TelegramMessage(text="Send me a picture"),
+    ),
     (
         TelegramMessage(
             attachments=Attachments(files=[Image(source=picture_url)])

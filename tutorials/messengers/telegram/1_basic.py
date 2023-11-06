@@ -78,7 +78,8 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
-    messenger_interface=interface,  # The interface can be passed as a pipeline argument.
+    messenger_interface=interface,
+    # The interface can be passed as a pipeline argument.
 )
 
 

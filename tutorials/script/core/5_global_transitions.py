@@ -105,19 +105,22 @@ toy_script = {
     "music_flow": {
         "node1": {
             RESPONSE: Message(
-                text="I love `System of a Down` group, would you like to talk about it?"
+                text="I love `System of a Down` group, "
+                "would you like to talk about it?"
             ),
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"yes|yep|ok", re.I)},
         },
         "node2": {
             RESPONSE: Message(
-                text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+                text="System of a Down is "
+                "an Armenian-American heavy metal band formed in 1994."
             )
             # Only the global transitions setting are used in this node.
         },
         "node3": {
             RESPONSE: Message(
-                text="The band achieved commercial success with the release of five studio albums."
+                text="The band achieved commercial success "
+                "with the release of five studio albums."
             ),
             TRANSITIONS: {lbl.backward(): cnd.regexp(r"back", re.I)},
         },
@@ -141,37 +144,43 @@ happy_path = (
     (
         Message(text="talk about music."),
         Message(
-            text="I love `System of a Down` group, would you like to talk about it?"
+            text="I love `System of a Down` group, "
+            "would you like to talk about it?"
         ),
     ),
     (
         Message(text="yes"),
         Message(
-            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+            text="System of a Down is "
+            "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
         Message(text="next"),
         Message(
-            text="The band achieved commercial success with the release of five studio albums."
+            text="The band achieved commercial success "
+            "with the release of five studio albums."
         ),
     ),
     (
         Message(text="back"),
         Message(
-            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+            text="System of a Down is "
+            "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
         Message(text="repeat"),
         Message(
-            text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+            text="System of a Down is "
+            "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
         Message(text="next"),
         Message(
-            text="The band achieved commercial success with the release of five studio albums."
+            text="The band achieved commercial success "
+            "with the release of five studio albums."
         ),
     ),
     (Message(text="next"), Message(text="That's all what I know.")),

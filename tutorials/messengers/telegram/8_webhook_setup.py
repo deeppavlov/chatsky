@@ -44,7 +44,8 @@ interface = CallbackTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 # %%
 pipeline = Pipeline.from_script(
     *TOY_SCRIPT_ARGS,
-    messenger_interface=interface,  # The interface can be passed as a pipeline argument.
+    messenger_interface=interface,
+    # The interface can be passed as a pipeline argument
 )
 
 # testing

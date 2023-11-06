@@ -29,8 +29,6 @@ import asyncio
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-
-# flake8: noqa: E402
 ###########################################################
 
 
@@ -110,7 +108,8 @@ def send_and_receive():
     Add both the request and response to `user_requests` and `bot_responses`.
 
     We do not call this function inside the `text_input.on_change` because then
-    we'd call it whenever the text field loses focus (e.g. when a browser tab is switched).
+    we'd call it whenever the text field loses focus
+    (e.g. when a browser tab is switched).
     """
     user_request = st.session_state["input"]
 
@@ -128,7 +127,10 @@ def send_and_receive():
     bot_message = Message.model_validate(bot_response.json()["response"]).text
 
     # # Implementation without using Message:
-    # bot_response = query({"text": user_request}, user_id=st.session_state["user_id"])
+    # bot_response = query(
+    #     {"text": user_request},
+    #     user_id=st.session_state["user_id"]
+    # )
     # bot_response.raise_for_status()
     #
     # bot_message = bot_response.json()["response"]["text"]

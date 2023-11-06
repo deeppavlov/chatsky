@@ -49,7 +49,8 @@ its `last_response` property will be actors response.
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
+    TOY_SCRIPT,
+    # Pipeline script object, defined in `dff.utils.testing.toy_script`
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
