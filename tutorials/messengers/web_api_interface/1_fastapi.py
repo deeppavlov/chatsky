@@ -42,9 +42,7 @@ async def respond(
     user_id: str,
     user_message: Message,
 ):
-    context = await pipeline._run_pipeline(
-        user_message, user_id
-    )  # run in async
+    context = await pipeline._run_pipeline(user_message, user_id)
     return {"user_id": user_id, "response": context.last_response}
 
 

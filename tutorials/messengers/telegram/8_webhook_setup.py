@@ -56,7 +56,6 @@ def main():
     pipeline.run()
 
 
-if (
-    __name__ == "__main__" and is_interactive_mode()
-):  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()
