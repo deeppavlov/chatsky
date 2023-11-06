@@ -144,7 +144,7 @@ tutorial_dependencies = [
     "psutil==5.9.5",
     "telethon==1.31.0",
     "fastapi==0.103.1",
-    "uvicorn==0.23.1",
+    "uvicorn==0.24.0.post1",
     "websockets==11.0.2",
     "locust==2.17.0",
     "streamlit==1.27.0",
