@@ -123,9 +123,7 @@ services:
       - "4318:4318"    # OTLP over HTTP receiver
 volumes:
   ch-data:
-    name: "ch-data"
   dashboard-data:
-    name: "dashboard-data"
   mysql-data:
   postgres-data:
   redis-data:
