@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
     ports:
       - 3307:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
   psql:
     env_file: [.env_file]
     image: postgres:latest
@@ -16,6 +18,8 @@ services:
     restart: unless-stopped
     ports:
       - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
   redis:
     env_file: [.env_file]
     image: redis:latest
@@ -25,6 +29,8 @@ services:
     command: --requirepass pass
     ports:
       - 6379:6379
+    volumes:
+      - redis-data:/data
   mongo:
     env_file: [.env_file]
     image: mongo:latest
@@ -33,6 +39,8 @@ services:
     restart: unless-stopped
     ports:
       - 27017:27017
+    volumes:
+      - mongo-data:/data/db
   ydb:
     env_file: [.env_file]
     image: cr.yandex/yc/yandex-docker-local-ydb:latest
@@ -44,6 +52,9 @@ services:
       # - 2135:2135
       - 2136:2136
     hostname: localhost
+    volumes:
+      - ydb-data:/ydb_data
+      - ydb-certs:/ydb_certs
   dashboard:
     env_file: [.env_file]
     build:
@@ -115,3 +126,9 @@ volumes:
     name: "ch-data"
   dashboard-data:
     name: "dashboard-data"
+  mysql-data:
+  postgres-data:
+  redis-data:
+  mongo-data:
+  ydb-data:
+  ydb-certs:
