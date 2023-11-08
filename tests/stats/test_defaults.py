@@ -46,9 +46,9 @@ async def test_get_current_label(context: Context, expected: set):
 async def test_otlp_integration(context, expected, tracer_exporter_and_provider, log_exporter_and_provider):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
-    example_module = importlib.import_module("tutorials.stats.1_extractor_functions")
-    example_module.dff_instrumentor.uninstrument()
-    example_module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
+    tutorial_module.dff_instrumentor.uninstrument()
+    tutorial_module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
@@ -56,7 +56,7 @@ async def test_otlp_integration(context, expected, tracer_exporter_and_provider,
             path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
         ),
     )
-    _ = await default_extractors.get_current_label(context, example_module.pipeline, runtime_info)
+    _ = await default_extractors.get_current_label(context, tutorial_module.pipeline, runtime_info)
     tracer_provider.force_flush()
     logger_provider.force_flush()
     assert len(log_exporter.get_finished_logs()) > 0
