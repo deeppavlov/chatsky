@@ -27,10 +27,8 @@ jobs:
         run: |
           pip install --upgrade pip poetry
 
-      - name: build wheels and upload to pypi
+      - name: build wheels and test uploading to pypi
         if: startsWith(github.ref, 'refs/tags/v') != true
-        env:
-          POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
           poetry --build publish --dry-run
 

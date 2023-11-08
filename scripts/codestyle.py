@@ -5,7 +5,7 @@ import black
 from flake8.main.cli import main as flake_main
 
 
-_STANDARD_PATHS = ["dff", "scripts", "tests"]
+_STANDARD_PATHS = ["dff", "scripts", "tests", ".github", "docs/source", "utils"]
 _STANDARD_PATHS_LEN = 120
 _SHORT_PATHS = ["tutorials"]
 _SHORT_PATHS_LEN = 100

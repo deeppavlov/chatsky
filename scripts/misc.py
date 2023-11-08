@@ -56,14 +56,6 @@ def help():
     print(f"{Fore.BLUE}poetry run clean{Style.RESET_ALL}:" + " Clean all build artifacts\n")
 
 
-def pre_commit():
-    pre_commit_file = ".git/hooks/pre-commit"
-    with open(pre_commit_file, "w") as file:
-        file.write(r"#!/bin/sh\n\nmake test_all")
-    if "linux" in sys.platform:
-        os.chmod(pre_commit_file, stat.S_IEXEC)
-
-
 def _update_version(type: str):
     return bumpversion.main(["--current-version", _CURRENT_VERSION, type, *_VERSION_FILES])
 

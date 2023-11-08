@@ -10,7 +10,6 @@ maintainers = [
     "Roman Zlobin <email>",
     "Aleksandr Sergeev <email>",
     "Daniil Ignatiev <email>",
-    "Aleksandr Sakharov <email>",
 ]
 
 readme = "README.md"
@@ -25,7 +24,6 @@ classifiers = [
     "License :: OSI Approved :: Apache Software License",
     "Operating System :: OS Independent",
     "Programming Language :: Python :: 3",
-    "Programming Language :: Python :: 3.7",
     "Programming Language :: Python :: 3.8",
     "Programming Language :: Python :: 3.9",
     "Programming Language :: Python :: 3.10",
@@ -50,6 +48,8 @@ exclude = [
     { path = "*.py[co]" },
     { path = "docs" },
     { path = "scripts" },
+    { path = "dff/utils/docker" },
+    { path = "dff/utils/otel" },
 ]
 
 
@@ -159,7 +159,6 @@ test_no_cov = { callable = "scripts.test:test_no_cov", extras = ["tests", "devel
 test_no_deps = { callable = "scripts.test:test_no_deps", extras = ["tests", "devel"] }
 test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial", "stats", "benchmark"] }
 docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel", "stats", "benchmark"] }
-pre_commit = { callable = "scripts.misc:pre_commit", extras = ["devel"] }
 version_patch = { callable = "scripts.misc:version_patch", extras = ["devel"] }
 version_minor = { callable = "scripts.misc:version_minor", extras = ["devel"] }
 version_major = { callable = "scripts.misc:version_major", extras = ["devel"] }
