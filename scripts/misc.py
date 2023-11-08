@@ -1,4 +1,3 @@
-import bumpversion.cli as bumpversion
 from colorama import init, Fore, Style
 
 
@@ -6,7 +5,7 @@ _CURRENT_VERSION = "0.6.0"
 _VERSION_FILES = ["scripts/misc.py", "docs/source/conf.py", "dff/__init__.py", "pyproject.toml"]
 
 
-def help():
+def info():
     init()
     print(f"\nThanks for your interest in {Fore.YELLOW}Dialog Flow Framework{Style.RESET_ALL}!\n")
     print(f"{Fore.BLUE}poetry install --all-extras{Style.RESET_ALL}: Install development-ready version of framework")
@@ -51,19 +50,3 @@ def help():
     )
     print(f"{Fore.BLUE}poetry run clean_docs{Style.RESET_ALL}:" + " Remove all documentation build roots")
     print(f"{Fore.BLUE}poetry run clean{Style.RESET_ALL}:" + " Clean all build artifacts\n")
-
-
-def _update_version(type: str):
-    return bumpversion.main(["--current-version", _CURRENT_VERSION, type, *_VERSION_FILES])
-
-
-def version_patch():
-    return _update_version("patch")
-
-
-def version_minor():
-    return _update_version("minor")
-
-
-def version_major():
-    return _update_version("major")

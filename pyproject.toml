@@ -141,9 +141,9 @@ mysql = ["sqlalchemy", "asyncmy", "cryptography"]
 postgresql = ["sqlalchemy", "asyncpg"]
 ydb = ["ydb", "six"]
 telegram = ["pytelegrambotapi"]
-full = ["aiofiles", "sqlalchemy", "aiosqlite", "redis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi"]
+full = ["aiofiles", "sqlalchemy", "aiosqlite", "redis", "motor", "asyncmy", "cryptography", "asyncpg", "ydb", "six", "pytelegrambotapi", "opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf", "pympler", "humanize", "pandas", "altair", "tqdm"]
 tests = ["requests", "pytest", "pytest-cov", "pytest-asyncio", "pytest-virtualenv", "flake8", "click", "black", "isort", "idna", "sniffio", "h11", "aiochclient", "httpx", "sqlparse", "jsonschema"]
-devel = ["colorama", "python-on-whales", "python-dotenv", "mypy", "bump2version"]
+devel = ["colorama", "python-on-whales", "python-dotenv", "mypy"]
 doc = ["requests", "sphinx", "pydata-sphinx-theme", "sphinxcontrib-apidoc", "sphinxcontrib-httpdomain", "sphinxcontrib-katex", "sphinx-favicon", "sphinx-copybutton", "sphinx-gallery", "sphinx-autodoc-typehints", "nbsphinx", "jupytext", "jupyter"]
 tutorial = ["flask", "psutil", "telethon", "fastapi", "uvicorn", "websockets", "locust", "streamlit", "streamlit-chat"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
@@ -152,16 +152,13 @@ benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 
 
 [tool.poetry.scripts]
-help = { callable = "scripts.misc:help", extras = ["devel"] }
+info = { callable = "scripts.misc:info", extras = ["devel"] }
 lint = { callable = "scripts.codestyle:lint", extras = ["tests", "devel"] }
 format = { callable = "scripts.codestyle:format", extras = ["tests", "devel"] }
 test_no_cov = { callable = "scripts.test:test_no_cov", extras = ["tests", "devel"] }
 test_no_deps = { callable = "scripts.test:test_no_deps", extras = ["tests", "devel"] }
-test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial", "stats", "benchmark"] }
-docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel", "stats", "benchmark"] }
-version_patch = { callable = "scripts.misc:version_patch", extras = ["devel"] }
-version_minor = { callable = "scripts.misc:version_minor", extras = ["devel"] }
-version_major = { callable = "scripts.misc:version_major", extras = ["devel"] }
+test_all = { callable = "scripts.test:test_all", extras = ["tests", "devel", "full", "tutorial"] }
+docs = { callable = "scripts.doc:docs", extras = ["tests", "full", "doc", "devel"] }
 clean_docs = { callable = "scripts.clean:clean_docs", extras = ["devel"] }
 clean = { callable = "scripts.clean:clean", extras = ["devel"] }
 

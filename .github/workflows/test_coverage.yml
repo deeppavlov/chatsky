@@ -38,7 +38,7 @@ jobs:
         run: |
           pip install --upgrade pip poetry
           poetry build
-          find . -name "*.whl" -exec python -m pip install {}[tests,devel,full,tutorial,stats,benchmark] ';'
+          find . -name "*.whl" -exec python -m pip install {}[tests,devel,full,tutorial] ';'
 
       - name: clean environment
         run: |
