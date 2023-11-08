@@ -1,16 +1,13 @@
 name: build_and_upload_release
 
 on:
-  push:
-    tags:
-      - '*'
-    branches:
-      - dev
-      - test/**
+  release:
+    types:
+      - published
   pull_request:
     branches:
       - dev
-  workflow_dispatch:
+      - master
 
 jobs:
   build:
