@@ -37,13 +37,13 @@ async def test_get_current_label(context: Context, expected: set):
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    "context,expected",
+    "context",
     [
-        (Context(), set()),
-        (Context(labels={0: ("a", "b")}), {("flow", "a"), ("node", "b"), ("label", "a: b")}),
+        Context(),
+        Context(labels={0: ("a", "b")}),
     ],
 )
-async def test_otlp_integration(context, expected, tracer_exporter_and_provider, log_exporter_and_provider):
+async def test_otlp_integration(context, tracer_exporter_and_provider, log_exporter_and_provider):
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
