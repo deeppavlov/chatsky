@@ -8,6 +8,7 @@ except ImportError:
 
 import importlib
 from dff.script import Context
+from dff.pipeline import Pipeline
 from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 from dff.stats import default_extractors
 
@@ -16,12 +17,16 @@ from dff.stats import default_extractors
 @pytest.mark.parametrize(
     "context,expected",
     [
-        (Context(), set()),
-        (Context(labels={0: ("a", "b")}), {("flow", "a"), ("node", "b"), ("label", "a: b")}),
+        (Context(), {"flow": "greeting_flow", "label": "greeting_flow: start_node", "node": "start_node"}),
+        (Context(labels={0: ("a", "b")}), {"flow": "a", "node": "b", "label": "a: b"}),
     ],
 )
 async def test_get_current_label(context: Context, expected: set):
-    example_module = importlib.import_module("tutorials.stats.1_extractor_functions")
+    pipeline = Pipeline.from_script(
+        {"greeting_flow": {"start_node": {}}},
+        ("greeting_flow", "start_node"),
+        validation_stage=False
+    )
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
@@ -29,8 +34,8 @@ async def test_get_current_label(context: Context, expected: set):
             path=".", name=".", timeout=None, asynchronous=False, execution_state={".": "FINISHED"}
         ),
     )
-    result = await default_extractors.get_current_label(context, example_module.pipeline, runtime_info)
-    assert expected.intersection(set(result.items())) == expected
+    result = await default_extractors.get_current_label(context, pipeline, runtime_info)
+    assert result == expected
 
 
 @pytest.mark.asyncio
