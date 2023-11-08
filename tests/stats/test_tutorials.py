@@ -12,6 +12,7 @@ try:
     from aiochclient import ChClient
     from httpx import AsyncClient
     from dff import stats  # noqa: F401
+    from utils.stats.utils import cleanup_clickhouse
 except ImportError:
     pytest.skip(allow_module_level=True, reason="There are dependencies missing.")
 
@@ -49,7 +50,7 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
     ch_client = ChClient(http_client, user=CLICKHOUSE_USER, password=CLICKHOUSE_PASSWORD, database=CLICKHOUSE_DB)
 
     try:
-        await ch_client.execute(f"TRUNCATE {table}")
+        await cleanup_clickhouse(table, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
         pipeline = module.pipeline
         module.dff_instrumentor.uninstrument()
         module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)

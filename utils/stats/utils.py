@@ -1,5 +1,13 @@
 import os
 import subprocess
+from aiochclient import ChClient
+from httpx import AsyncClient
+
+
+async def cleanup_clickhouse(table: str, user: str, password: str, database: str):
+    http_client = AsyncClient()
+    ch_client = ChClient(http_client, user=user, password=password, database=database)
+    await ch_client.execute(f"TRUNCATE {table}")
 
 
 def restart_pk():
