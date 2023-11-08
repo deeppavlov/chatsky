@@ -32,7 +32,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose up -d
+          docker-compose --profile context_storage --profile stats up
 
       - name: setup poetry and install dependencies
         run: |
