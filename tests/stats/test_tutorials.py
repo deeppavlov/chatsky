@@ -56,7 +56,8 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
         check_happy_path(pipeline, HAPPY_PATH)
         await asyncio.sleep(3)
         count = await ch_client.fetchval(f"SELECT COUNT (*) FROM {table}")
-        assert count == expected_logs
+        if count != expected_logs:
+            raise Exception(await ch_client.fetchval(f"SELECT COUNT (*) FROM {table}"))
 
     except Exception as exc:
         raise Exception(f"model_name=tutorials.{dot_path_to_addon}.{example_module_name}") from exc
