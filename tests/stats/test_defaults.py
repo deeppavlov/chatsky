@@ -50,10 +50,8 @@ async def test_otlp_integration(context, expected, tracer_exporter_and_provider,
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     example_module = importlib.import_module("tutorials.stats.1_extractor_functions")
-    instrumentor = OtelInstrumentor()
-    if instrumentor.is_instrumented_by_opentelemetry:
-        instrumentor.uninstrument()
-    instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    example_module.dff_instrumentor.uninstrument()
+    example_module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",
