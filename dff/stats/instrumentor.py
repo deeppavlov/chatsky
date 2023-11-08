@@ -62,7 +62,7 @@ class OtelInstrumentor(BaseInstrumentor):
     .. code-block::
 
         @dff_instrumentor
-        def function(context, pipeline, runtime_info):
+        async def function(context, pipeline, runtime_info):
             ...
 
     :param logger_provider: Opentelemetry logger provider. Used to construct a logger instance.
@@ -126,14 +126,12 @@ class OtelInstrumentor(BaseInstrumentor):
             self._configure_providers(
                 logger_provider=logger_provider, tracer_provider=tracer_provider, meter_provider=meter_provider
             )
-        wrap_function_wrapper(default_extractors, "get_current_label", self.__call__.__wrapped__)
-        wrap_function_wrapper(default_extractors, "get_timing_before", self.__call__.__wrapped__)
-        wrap_function_wrapper(default_extractors, "get_timing_after", self.__call__.__wrapped__)
+        for func_name in default_extractors.__all__:
+            wrap_function_wrapper(default_extractors, func_name, self.__call__.__wrapped__)
 
     def _uninstrument(self, **kwargs):
-        unwrap(default_extractors, "get_current_label")
-        unwrap(default_extractors, "get_timing_before")
-        unwrap(default_extractors, "get_timing_after")
+        for func_name in default_extractors.__all__:
+            unwrap(default_extractors, func_name)
 
     def _configure_providers(self, logger_provider, tracer_provider, meter_provider):
         self._logger_provider = logger_provider or get_logger_provider()

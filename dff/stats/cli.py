@@ -4,6 +4,7 @@ Command Line Interface
 This modules defines commands that can be called via the command line interface.
 
 """
+from uuid import uuid4
 import tempfile
 import shutil
 import sys
@@ -60,7 +61,7 @@ Mapping of standard sql column types to Clickhouse native types.
 DFF_NODE_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-    {table}.LogAttributes['request_id'] as request_id,
+    toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
     toDateTime(otel_traces.Timestamp) as start_time,
     otel_traces.SpanName as data_key,
     {table}.Body as data,
@@ -69,7 +70,7 @@ WITH main AS (
     {nodefield} as node_label,
     {table}.TraceId as trace_id,
     otel_traces.TraceId\nFROM {table}, otel_traces
-    WHERE {table}.TraceId = otel_traces.TraceId and otel_traces.SpanName = 'get_current_label'
+    WHERE {table}.TraceId = otel_traces.TraceId and data_key = 'get_current_label'
     ORDER BY context_id, request_id
 ) SELECT context_id,
     request_id,
@@ -77,44 +78,47 @@ WITH main AS (
     data_key,
     data,
     label,
-    {lag} as prev_label,
+    {label_lag} as prev_label,
+    {flow_lag} as prev_flow,
     flow_label,
     node_label
 FROM main
-WHERE label != ''
 """
-DFF_ACYCLIC_NODES_STATEMENT = """
+DFF_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-    {table}.LogAttributes['request_id'] as request_id,
-    {table}.Timestamp as timestamp,
-    {lblfield} as label\nFROM {table}
-    INNER JOIN
-(
-    WITH helper AS (
-        SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
-        {table}.LogAttributes['request_id'] as request_id,
-        {lblfield} as label
-        FROM {table}
-    )
-    SELECT context_id FROM helper
-    GROUP BY context_id
-    HAVING COUNT(context_id) = COUNT(DISTINCT label)
-) as plain_ctx
-ON plain_ctx.context_id = context_id
-ORDER by context_id, request_id
-)
-SELECT * FROM main
+    toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
+    toDateTime(otel_traces.Timestamp) as start_time,
+    otel_traces.SpanName as data_key,
+    {table}.Body as data,
+    {lblfield} as label,
+    {flowfield} as flow_label,
+    {nodefield} as node_label,
+    {table}.TraceId as trace_id,
+    otel_traces.TraceId\nFROM {table}, otel_traces
+    WHERE {table}.TraceId = otel_traces.TraceId
+    ORDER BY data_key, context_id, request_id
+) SELECT context_id,
+    request_id,
+    start_time,
+    data_key,
+    data,
+    label,
+    {label_lag} as prev_label,
+    {flow_lag} as prev_flow,
+    flow_label,
+    node_label
+FROM main
 """
 DFF_FINAL_NODES_STATEMENT = """
 WITH main AS (
     SELECT LogAttributes['context_id'] AS context_id,
-    max(LogAttributes['request_id']) AS max_history
+    max(toUInt64OrNull(LogAttributes['request_id'])) AS max_history
     FROM {table}\nGROUP BY context_id
 )
 SELECT DISTINCT LogAttributes['context_id'] AS context_id,
-LogAttributes['request_id'] AS request_id,
-{table}.Timestamp AS start_time,
+toUInt64OrNull({table}.LogAttributes['request_id']) AS request_id,
+toDateTime(otel_traces.Timestamp) AS start_time,
 {lblfield} AS label,
 {flowfield} AS flow_label,
 {nodefield} AS node_label
@@ -128,7 +132,7 @@ WHERE otel_traces.SpanName = 'get_current_label'
 """
 
 SQL_STATEMENT_MAPPING = {
-    "dff_acyclic_nodes.yaml": DFF_ACYCLIC_NODES_STATEMENT,
+    "dff_stats.yaml": DFF_STATS_STATEMENT,
     "dff_node_stats.yaml": DFF_NODE_STATS_STATEMENT,
     "dff_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
 }
@@ -184,7 +188,7 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     if hasattr(parsed_args, "outfile") and parsed_args.outfile:
         outfile_name = parsed_args.outfile
     else:
-        outfile_name = "temp.zip"
+        outfile_name = f"config_{str(uuid4())}.zip"
 
     file_conf = OmegaConf.load(parsed_args.file)
     sys.argv = [__file__] + [f"{key}={value}" for key, value in parsed_args.__dict__.items() if value]
@@ -194,7 +198,12 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
     if OmegaConf.select(cli_conf, "db.driver") == "clickhousedb+connect":
         params = dict(
             table="${db.table}",
-            lag="neighbor(label, -1)",
+            label_lag="lagInFrame(label) OVER "
+            "(PARTITION BY context_id ORDER BY request_id ASC "
+            "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
+            flow_lag="lagInFrame(flow_label) OVER "
+            "(PARTITION BY context_id ORDER BY request_id ASC "
+            "ROWS BETWEEN UNBOUNDED PRECEDING AND UNBOUNDED FOLLOWING)",
             texttype="String",
             lblfield="JSON_VALUE(${db.table}.Body, '$.label')",
             flowfield="JSON_VALUE(${db.table}.Body, '$.flow')",

@@ -73,6 +73,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     parser.add_argument("-dn", "--db.name", help="Name of the database.")
     parser.add_argument("-dt", "--db.table", default="otel_logs", help="Name of the table.")
     parser.add_argument("-o", "--outfile", help="Optionally persist the configuration as a zip file.")
+    parser.add_argument("-i", "--infile", help="Configuration zip file to import.")
     parser.add_argument("-H", "--host", default="localhost", help="Superset host")
     parser.add_argument("-p", "--port", default="8088", help="Superset port.")
     parser.add_argument("-U", "--username", required=True, help="Superset user.")
@@ -100,11 +101,18 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
     if parsed_args is None:
         parsed_args = parser.parse_args(sys.argv[1:])
 
-    outfile = make_zip_config(parsed_args)
-    import_dashboard(parsed_args, zip_file=str(outfile))
+    file = None
+    use_infile = hasattr(parsed_args, "infile") and parsed_args.infile is not None
+    use_outfile = hasattr(parsed_args, "outfile") and parsed_args.outfile is not None
+    if not use_infile:
+        file = make_zip_config(parsed_args)
+    else:
+        file = parsed_args.infile
 
-    if not hasattr(parsed_args, "outfile") or parsed_args.outfile is None:
-        outfile.unlink()
+    import_dashboard(parsed_args, zip_file=str(file))
+
+    if not use_infile and not use_outfile:
+        file.unlink()
 
 
 if __name__ == "__main__":
