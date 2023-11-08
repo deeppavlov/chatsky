@@ -2,12 +2,53 @@ User functions guide
 --------------------
 
 Overview
-~~~~~~~~
+++++++++
 
 Dialog flow framework allows user to define custom functions for implementing custom behavior
 in several aspects.
 This tutorial summarizes the custom functions use cases, specifies their arguments and return
 types, warns about several common exception handling cases.
+
+``Actor`` handlers
+++++++++++++++++++
+
+Description
+===========
+
+`Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ constructor accepts ``handlers``
+parameter, that is either ``None`` or dictionary attributing lists of functions to different
+`ActorStage <../api/dff.script.core.types#ActorStage>`__ values.
+
+These functions are run at specific point in `Actor <../api/dff.pipeline.pipeline.actor#Actor>`__
+lifecycle.
+
+Use-cases
+=========
+
+TODO
+
+Signature
+=========
+
+.. code-block:: python
+
+    def handler(ctx: Context, pipeline: Pipeline) -> Any:
+        ...
+
+where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
+where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
+and the return value can be anything (it is not used).
+
+Exceptions
+==========
+
+If an exception occurs during this function execution, it will be handled on pipeline level,
+exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
+will be set to ``FAILED``.
+These exceptions **are not raised** during script validation.
+
+Script functions
+++++++++++++++++
 
 Pre-transition and pre-response processors
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
@@ -224,43 +265,8 @@ If an exception occurs during this function execution, it will be reported durin
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
 will be set to ``FAILED``.
 
-``Actor`` handlers
-~~~~~~~~~~~~~~~~~~
-
-Description
-===========
-
-`Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ constructor accepts ``handlers``
-parameter, that is either ``None`` or dictionary attributing lists of functions to different
-`ActorStage <../api/dff.script.core.types#ActorStage>`__ values.
-
-These functions are run at specific point in `Actor <../api/dff.pipeline.pipeline.actor#Actor>`__
-lifecycle.
-
-Use-cases
-=========
-
-TODO
-
-Signature
-=========
-
-.. code-block:: python
-
-    def handler(ctx: Context, pipeline: Pipeline) -> Any:
-        ...
-
-where ``ctx`` is the current instance of `Context <../api/dff.script.core.context#Context>`__,
-where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__
-and the return value can be anything (it is not used).
-
-Exceptions
-==========
-
-If an exception occurs during this function execution, it will be handled on pipeline level,
-exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
-will be set to ``FAILED``.
-These exceptions **are not raised** during script validation.
+Service functions
++++++++++++++++++
 
 Service handlers
 ~~~~~~~~~~~~~~~~
