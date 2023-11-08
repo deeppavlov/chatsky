@@ -1,6 +1,3 @@
-import os
-import stat
-import sys
 import bumpversion.cli as bumpversion
 from colorama import init, Fore, Style
 
