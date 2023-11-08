@@ -20,37 +20,33 @@ We ask that you adhere to the following
 [commit message format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716).
 
 ## Managing your workflow
-We use `make` as handy automation tool, which reads `makefile` to get specification for commands.
-`make` is a tool for command running automatization. Usage signature of the `make` is `make COMMAND`.
-If your environment supports `make` autocompletions you can use Tab to complete the `COMMAND`.
+We use `poetry` as handy automation tool, which reads `pyproject.toml` to get specification for commands.
+`poetry` is a tool for command running automatization. Usage signature of the `poetry` is `poetry run COMMAND`.
+If your environment does not support `poetry`, it can be installed as a regular python package with `pip install poetry`.
 
 ### Platforms
 
 We suggest using a linux-based platform for addon development.
 While the repository can be cloned to any platforms that can run `python`,
-the `make` and `docker` functionality will not be available for Windows out of the box.
+the `docker` functionality will not be available for Windows out of the box.
 
 ### Virtual Environment
 The most essential part is setting up the virtual environment.
-The following command create `venv` dir and installs all the dependencies, which are required for development.
+`poetry` automatically creates and manages it upon any command execution.
+By default, it will try using current virtual environment if there is any in the current directory or it will create a new one.
+You can display information about the current environment using `poetry env info` command.
+You can also switch to system-wide python environment with `poetry env use system` command.
+
+The following command creates a virtual environment dir and installs all the dependencies, which are required for development.
 ```bash
-make venv
+poetry install --all-extraas
 ```
 
-If you need to update the dependencies, run
-```bash
-make clean && make venv
-```
+The environment will be activated automatically.
 
-Do not forget to activate the environment, if you aim to install any other dependencies.
+If you want to delete all the virtual environments, run
 ```bash
-source venv/bin/activate
-```
-
-### Pre-commit
-We also provide a simple pre-commit hook for `git` that prevents you from committing unformatted code. To use it, run
-```bash
-make pre_commit
+poetry env remove --all
 ```
 
 ### Documentation
@@ -59,13 +55,10 @@ to annotate your modules and objects. You can easily build the Sphinx documentat
 by activating the virtual environment and then running
 
 ```bash
-make doc
+poetry run docs
 ```
 
-After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.  
-WARNING! Because of the current patching solution, `make doc` modifies some of the source library code (`nbsphinx` and `autosummary`),
-so it is strongly advised to use it carefully and in virtual environment only.
-However, this behavior is likely to be changed in the future.
+After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
 
 ### Style
 For style supporting we propose `black`, which is a PEP 8 compliant opinionated formatter.
@@ -73,28 +66,28 @@ It doesn't take previous formatting into account. See more about [black](https:/
 To format your code, run
 
 ```bash
-make format
+poetry run format
 ```
 
 ### Test
 We use `black`, `mypy`, `flake8` as code style checkers and `pytest` as unit-test runner.
 To run unit-tests only, use
 ```bash
-make test
+poetry run test_no_cov
 ```
 To execute all tests, including integration with DBs and APIs tests, run
 ```bash
-make test_all
+poetry run test_all
 ```
 for successful execution of this command `Docker` and `docker-compose` are required.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash
-make lint
+poetry run lint
 ```
 And if it doesn't, to automatically fix whatever is possible with `black`, run
 ```bash
-make format
+poetry run format
 ```
 
 Tests are configured via [`.env_file`](.env_file).
@@ -108,12 +101,11 @@ The following images are required for complete integration testing:
 4. `mongo`
 5. `cr.yandex/yc/yandex-docker-local-ydb`
 
-All of them will be downloaded, launched and awaited upon running integration test make command (`make test_all`).
-However, they can be downloaded separately with `make docker_up` and awaited with `make wait_db` commands.
+All of them will be downloaded, launched and awaited upon running integration test command (`poetry run test_all`).
 
 ### Other provided features 
-You can get more info about `make` commands by `help`:
+You can get more info about `poetry` commands by `help`:
 
 ```bash
-make help
+poetry run help
 ```
