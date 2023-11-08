@@ -1,402 +1,124 @@
-# flake8: noqa: E501
-from typing import List
+# %%
+import random
+import asyncio
+from tqdm import tqdm
+from dff.script import Context, Message, RESPONSE, TRANSITIONS
+from dff.script import conditions as cnd
+from dff.pipeline import Pipeline, ACTOR
+from dff.stats import (
+    OtelInstrumentor,
+)
 
-ignored_keys = ["context_id", "__timestamp", "start_time", "data"]
+# %%
+# instrumentation code
+dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
+dff_instrumentor.instrument()
 
 
-def filter_data(data: List[dict]):
-    """
-    Exclude random and time-dependent fields from a superset chart data item.
+def numbered_flow_factory(number: int):
+    return {
+        f"node_{str(n)}": {
+            RESPONSE: Message(text=f"node_{str(number)}_{str(n)}"),
+            TRANSITIONS: {f"node_{str(n+1)}": cnd.true()} if n != 4 else {("root", "fallback"): cnd.true()},
+        }
+        for n in range(5)
+    }
 
-    :param data: The data item: list of arbitrary dicts.
 
-    """
-    return [{key: value} for item in data for key, value in item.items() if key not in ignored_keys]
-
-
-CHART_DATA = {
-    1: [],
-    2: [
-        {
-            "__timestamp": 1698741640000,
-            "animals, have_pets": None,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": 1,
+numbered_script = {
+    "root": {
+        "start": {
+            RESPONSE: Message(text="Hi"),
+            TRANSITIONS: {
+                lambda ctx, pipeline: (f"flow_{random.choice(range(1, 11))}", "node_1"): cnd.exact_match(
+                    Message(text="hi")
+                ),
+            },
         },
-        {
-            "__timestamp": 1698741642000,
-            "animals, have_pets": None,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": 2,
-        },
-        {
-            "__timestamp": 1698741647000,
-            "animals, have_pets": None,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": 1,
-        },
-        {
-            "__timestamp": 1698741663000,
-            "animals, have_pets": None,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": 1,
-        },
-        {
-            "__timestamp": 1698741667000,
-            "animals, have_pets": None,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": 2,
-        },
-        {
-            "__timestamp": 1698741673000,
-            "animals, have_pets": None,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": 1,
-        },
-        {
-            "__timestamp": 1698741674000,
-            "animals, have_pets": None,
-            "animals, like_animals": 1,
-            "animals, what_animal": 1,
-            "root, fallback": None,
-        },
-        {
-            "__timestamp": 1698741678000,
-            "animals, have_pets": 1,
-            "animals, like_animals": None,
-            "animals, what_animal": None,
-            "root, fallback": None,
-        },
-    ],
-    3: [
-        {"flow_label": "animals", "node_label": "what_animal", "COUNT(context_id)": 9},
-        {"flow_label": "root", "node_label": "fallback", "COUNT(context_id)": 8},
-        {"flow_label": "animals", "node_label": "ask_about_color", "COUNT(context_id)": 6},
-        {"flow_label": "animals", "node_label": "have_pets", "COUNT(context_id)": 6},
-        {"flow_label": "animals", "node_label": "like_animals", "COUNT(context_id)": 5},
-        {"flow_label": "animals", "node_label": "ask_about_breed", "COUNT(context_id)": 3},
-        {"flow_label": "animals", "node_label": "ask_about_training", "COUNT(context_id)": 2},
-        {"flow_label": "small_talk", "node_label": "ask_some_questions", "COUNT(context_id)": 1},
-    ],
-    4: [{"__timestamp": 1698741600000, "COUNT_DISTINCT(context_id)": 11}],
-    5: [
-        {"request_id": 4, "label": "animals: ask_about_training", "COUNT(context_id)": 1},
-        {"request_id": 1, "label": "animals: like_animals", "COUNT(context_id)": 1},
-        {"request_id": 2, "label": "animals: ask_about_breed", "COUNT(context_id)": 2},
-        {"request_id": 0, "label": "animals: like_animals", "COUNT(context_id)": 4},
-        {"request_id": 5, "label": "root: fallback", "COUNT(context_id)": 1},
-        {"request_id": 3, "label": "animals: ask_about_training", "COUNT(context_id)": 1},
-        {"request_id": 0, "label": "animals: have_pets", "COUNT(context_id)": 6},
-        {"request_id": 3, "label": "animals: ask_about_breed", "COUNT(context_id)": 1},
-        {"request_id": 2, "label": "animals: what_animal", "COUNT(context_id)": 1},
-        {"request_id": 3, "label": "root: fallback", "COUNT(context_id)": 5},
-        {"request_id": 0, "label": "small_talk: ask_some_questions", "COUNT(context_id)": 1},
-        {"request_id": 2, "label": "animals: ask_about_color", "COUNT(context_id)": 5},
-        {"request_id": 4, "label": "root: fallback", "COUNT(context_id)": 2},
-        {"request_id": 1, "label": "animals: what_animal", "COUNT(context_id)": 8},
-        {"request_id": 3, "label": "animals: ask_about_color", "COUNT(context_id)": 1},
-    ],
-    6: [],
-    7: [],
-    8: [],
-    9: [
-        {"label": "root: fallback", "flow_label": "root", "COUNT_DISTINCT(context_id)": 8},
-        {"label": "small_talk: ask_some_questions", "flow_label": "small_talk", "COUNT_DISTINCT(context_id)": 1},
-        {"label": "animals: have_pets", "flow_label": "animals", "COUNT_DISTINCT(context_id)": 6},
-        {"label": "animals: ask_about_color", "flow_label": "animals", "COUNT_DISTINCT(context_id)": 6},
-        {"label": "animals: ask_about_breed", "flow_label": "animals", "COUNT_DISTINCT(context_id)": 2},
-        {"label": "animals: like_animals", "flow_label": "animals", "COUNT_DISTINCT(context_id)": 5},
-        {"label": "animals: ask_about_training", "flow_label": "animals", "COUNT_DISTINCT(context_id)": 2},
-        {"label": "animals: what_animal", "flow_label": "animals", "COUNT_DISTINCT(context_id)": 9},
-    ],
-    10: [],
-    11: [],
-    12: [],
-    13: [
-        {"__timestamp": 1698741600000, "animals": 0.7419354838709677, "root": 0.5, "small_talk": 1},
-        {"__timestamp": 1698741660000, "animals": 0.25806451612903225, "root": 0.5, "small_talk": 0},
-    ],
-    14: [
-        {
-            "__timestamp": 1698741600000,
-            "animals, ask_about_breed": 0.6666666666666666,
-            "animals, ask_about_color": 0.8333333333333334,
-            "animals, ask_about_training": 0,
-            "animals, have_pets": 0.6666666666666666,
-            "animals, like_animals": 0.8,
-            "animals, what_animal": 0.8888888888888888,
-            "root, fallback": 0.5,
-            "small_talk, ask_some_questions": 1,
-        },
-        {
-            "__timestamp": 1698741660000,
-            "animals, ask_about_breed": 0.3333333333333333,
-            "animals, ask_about_color": 0.16666666666666666,
-            "animals, ask_about_training": 1,
-            "animals, have_pets": 0.3333333333333333,
-            "animals, like_animals": 0.2,
-            "animals, what_animal": 0.1111111111111111,
-            "root, fallback": 0.5,
-            "small_talk, ask_some_questions": 0,
-        },
-    ],
-    15: [],
-    16: [
-        {
-            "context_id": "b06847b3-511c-4acd-ba13-7c62a3f0a571",
-            "start_time": 1698741637000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_color","node":"ask_about_color"}',
-        },
-        {
-            "context_id": "212ba36e-3d1e-466a-94b3-c307a3d73e3b",
-            "start_time": 1698741637000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_color","node":"ask_about_color"}',
-        },
-        {
-            "context_id": "a99852e7-60c7-4c92-aaee-3d6ee5658eac",
-            "start_time": 1698741640000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "b53c28cf-52b5-4201-99e8-4b360754aa55",
-            "start_time": 1698741649000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: have_pets","node":"have_pets"}',
-        },
-        {
-            "context_id": "a5311796-0417-4023-a36e-ce0456c28ee4",
-            "start_time": 1698741633000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: like_animals","node":"like_animals"}',
-        },
-        {
-            "context_id": "b06847b3-511c-4acd-ba13-7c62a3f0a571",
-            "start_time": 1698741626000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: like_animals","node":"like_animals"}',
-        },
-        {
-            "context_id": "b53c28cf-52b5-4201-99e8-4b360754aa55",
-            "start_time": 1698741654000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "b53c28cf-52b5-4201-99e8-4b360754aa55",
-            "start_time": 1698741663000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_training","node":"ask_about_training"}',
-        },
-        {
-            "context_id": "212ba36e-3d1e-466a-94b3-c307a3d73e3b",
-            "start_time": 1698741632000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "e9fdd58e-58db-403c-a965-1336c7f05501",
-            "start_time": 1698741674000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "a5311796-0417-4023-a36e-ce0456c28ee4",
-            "start_time": 1698741647000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "6f311fc7-fb9b-48ee-9dcb-d1a80a40ece5",
-            "start_time": 1698741674000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: like_animals","node":"like_animals"}',
-        },
-        {
-            "context_id": "a99852e7-60c7-4c92-aaee-3d6ee5658eac",
-            "start_time": 1698741628000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: have_pets","node":"have_pets"}',
-        },
-        {
-            "context_id": "be839804-d0a4-4071-a83d-d2fba4716540",
-            "start_time": 1698741669000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_training","node":"ask_about_training"}',
-        },
-        {
-            "context_id": "b53c28cf-52b5-4201-99e8-4b360754aa55",
-            "start_time": 1698741667000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "b06847b3-511c-4acd-ba13-7c62a3f0a571",
-            "start_time": 1698741634000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "be839804-d0a4-4071-a83d-d2fba4716540",
-            "start_time": 1698741650000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: have_pets","node":"have_pets"}',
-        },
-        {
-            "context_id": "be839804-d0a4-4071-a83d-d2fba4716540",
-            "start_time": 1698741662000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_breed","node":"ask_about_breed"}',
-        },
-        {
-            "context_id": "7603ee18-a04f-4f2f-bb7e-56156f84dd11",
-            "start_time": 1698741659000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_color","node":"ask_about_color"}',
-        },
-        {
-            "context_id": "e9fdd58e-58db-403c-a965-1336c7f05501",
-            "start_time": 1698741670000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: have_pets","node":"have_pets"}',
-        },
-        {
-            "context_id": "be839804-d0a4-4071-a83d-d2fba4716540",
-            "start_time": 1698741673000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "7603ee18-a04f-4f2f-bb7e-56156f84dd11",
-            "start_time": 1698741647000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: like_animals","node":"like_animals"}',
-        },
-        {
-            "context_id": "a99852e7-60c7-4c92-aaee-3d6ee5658eac",
-            "start_time": 1698741635000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_color","node":"ask_about_color"}',
-        },
-        {
-            "context_id": "7603ee18-a04f-4f2f-bb7e-56156f84dd11",
-            "start_time": 1698741663000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "26d11ea4-81e6-4e97-9520-384f82b006e4",
-            "start_time": 1698741678000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: have_pets","node":"have_pets"}',
-        },
-        {
-            "context_id": "b06847b3-511c-4acd-ba13-7c62a3f0a571",
-            "start_time": 1698741642000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "212ba36e-3d1e-466a-94b3-c307a3d73e3b",
-            "start_time": 1698741642000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "deb71840-af8e-48b1-a491-c79c2ccced7b",
-            "start_time": 1698741667000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"root","label":"root: fallback","node":"fallback"}',
-        },
-        {
-            "context_id": "be839804-d0a4-4071-a83d-d2fba4716540",
-            "start_time": 1698741659000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_breed","node":"ask_about_breed"}',
-        },
-        {
-            "context_id": "be839804-d0a4-4071-a83d-d2fba4716540",
-            "start_time": 1698741653000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "a99852e7-60c7-4c92-aaee-3d6ee5658eac",
-            "start_time": 1698741633000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "212ba36e-3d1e-466a-94b3-c307a3d73e3b",
-            "start_time": 1698741627000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: like_animals","node":"like_animals"}',
-        },
-        {
-            "context_id": "deb71840-af8e-48b1-a491-c79c2ccced7b",
-            "start_time": 1698741658000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "a5311796-0417-4023-a36e-ce0456c28ee4",
-            "start_time": 1698741636000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "7603ee18-a04f-4f2f-bb7e-56156f84dd11",
-            "start_time": 1698741654000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: what_animal","node":"what_animal"}',
-        },
-        {
-            "context_id": "deb71840-af8e-48b1-a491-c79c2ccced7b",
-            "start_time": 1698741664000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_color","node":"ask_about_color"}',
-        },
-        {
-            "context_id": "deb71840-af8e-48b1-a491-c79c2ccced7b",
-            "start_time": 1698741657000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: have_pets","node":"have_pets"}',
-        },
-        {
-            "context_id": "a5311796-0417-4023-a36e-ce0456c28ee4",
-            "start_time": 1698741629000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"small_talk","label":"small_talk: ask_some_questions","node":"ask_some_questions"}',
-        },
-        {
-            "context_id": "a5311796-0417-4023-a36e-ce0456c28ee4",
-            "start_time": 1698741642000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_color","node":"ask_about_color"}',
-        },
-        {
-            "context_id": "b53c28cf-52b5-4201-99e8-4b360754aa55",
-            "start_time": 1698741658000,
-            "data_key": "get_current_label",
-            "data": '{"flow":"animals","label":"animals: ask_about_breed","node":"ask_about_breed"}',
-        },
-    ],
-    17: [
-        {"flow_label": "root", "node_label": "fallback", "COUNT(context_id)": 8},
-        {"flow_label": "animals", "node_label": "ask_about_breed", "COUNT(context_id)": 3},
-        {"flow_label": "animals", "node_label": "what_animal", "COUNT(context_id)": 9},
-        {"flow_label": "animals", "node_label": "ask_about_color", "COUNT(context_id)": 6},
-        {"flow_label": "animals", "node_label": "like_animals", "COUNT(context_id)": 5},
-        {"flow_label": "small_talk", "node_label": "ask_some_questions", "COUNT(context_id)": 1},
-        {"flow_label": "animals", "node_label": "ask_about_training", "COUNT(context_id)": 2},
-        {"flow_label": "animals", "node_label": "have_pets", "COUNT(context_id)": 6},
-    ],
+        "fallback": {RESPONSE: Message(text="Oops")},
+    },
+    **{f"flow_{str(n)}": numbered_flow_factory(n) for n in range(1, 11)},
 }
+
+transitions_script = {
+    "root": {
+        "start": {
+            RESPONSE: Message(text="Hi"),
+            TRANSITIONS: {
+                ("flow_1", "node"): cnd.exact_match(Message(text="hi")),
+            },
+        },
+        "fallback": {RESPONSE: Message(text="Oops")},
+    },
+    **{
+        f"flow_{str(num)}": {
+            "node": {
+                RESPONSE: Message(text="Message."),
+                TRANSITIONS: {(f"flow_{str(num+1)}", "node"): cnd.true()}
+                if num != 100
+                else {("root", "fallback"): cnd.true()},
+            }
+        }
+        for num in range(1, 101)
+    },
+}
+
+
+transition_test_pipeline = Pipeline.from_dict(
+    {
+        "script": transitions_script,
+        "start_label": ("root", "start"),
+        "fallback_label": ("root", "fallback"),
+        "components": [ACTOR],
+    }
+)
+
+numbered_test_pipeline = Pipeline.from_dict(
+    {
+        "script": numbered_script,
+        "start_label": ("root", "start"),
+        "fallback_label": ("root", "fallback"),
+        "components": [ACTOR],
+    }
+)
+
+
+# %%
+async def worker(pipeline: Pipeline, queue: asyncio.Queue):
+    """
+    Worker function for dispatching one client message.
+    The client message is chosen randomly from a predetermined set of options.
+    It simulates pauses in between messages by calling the sleep function.
+
+    The function also starts a new dialog as a new user, if the current dialog
+    ended in the fallback_node.
+
+    :param queue: Queue for sharing context variables.
+    """
+    ctx: Context = await queue.get()
+    in_message = Message(text="Hi")
+    await asyncio.sleep(random.random() * 3)
+    ctx = await pipeline._run_pipeline(in_message, ctx.id)
+    await asyncio.sleep(random.random() * 3)
+    await queue.put(ctx)
+
+
+# %%
+# main loop
+async def loop(pipeline: Pipeline, n_iterations: int = 10, n_workers: int = 10):
+    """
+    The main loop that runs one or more worker coroutines in parallel.
+
+    :param n_iterations: Total number of coroutine runs.
+    :param n_workers: Number of parallelized coroutine runs.
+    """
+    ctxs = asyncio.Queue()
+    parallel_iterations = n_iterations // n_workers
+    for _ in range(n_workers):
+        await ctxs.put(Context())
+    for _ in tqdm(range(parallel_iterations)):
+        await asyncio.gather(*(worker(pipeline, ctxs) for _ in range(n_workers)))
+
+
+if __name__ == "__main__":
+    asyncio.run(loop(numbered_test_pipeline))

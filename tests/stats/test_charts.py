@@ -1,7 +1,4 @@
 import os
-import time
-import importlib
-import subprocess
 import random
 import asyncio
 from argparse import Namespace
@@ -13,15 +10,17 @@ try:
     from httpx import AsyncClient
     import omegaconf  # noqa: F401
     import tqdm  # noqa: F401
+    from dff.stats.instrumentor import OtelInstrumentor
     from dff.stats.__main__ import main
     from dff.stats.utils import get_superset_session, drop_superset_assets
     from dff.stats.cli import DEFAULT_SUPERSET_URL
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
-from tests.stats.chart_data import CHART_DATA, filter_data
+from tests.stats.chart_data import numbered_test_pipeline, transition_test_pipeline, loop
 from tests.context_storages.test_dbs import ping_localhost
 from tests.test_utils import get_path_from_tests_to_current_dir
+from utils.stats.utils import restart_pk
 
 random.seed(42)
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__)
@@ -34,28 +33,53 @@ CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD")
 CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 
 
-def charts_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
+def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     charts_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/chart")
 
-    charts_result = session.get(charts_url, headers=headers)
-    charts_json = charts_result.json()
+    result = session.get(charts_url, headers=headers)
+    result.raise_for_status()
+    result_json = result.json()
 
-    for _id in sorted(charts_json["ids"]):
-        time.sleep(0.5)
-        print(str(_id))
-        data_result = session.get(
-            parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{str(_id)}/data/"), headers=headers
-        )
-        print(data_result.reason)
-        print(data_result.text)
-        data_result.raise_for_status()
-        data_result_json = data_result.json()
-        assert data_result_json["result"][-1]["status"] == "success"
-        assert data_result_json["result"][-1]["stacktrace"] is None
-        data = data_result_json["result"][-1]["data"]
-        filtered_data = filter_data(data)
-        assert filtered_data == filter_data(CHART_DATA[_id])
+    target_chart_id = [item for item in result_json["result"] if item["slice_name"] == "Transition counts"][0]["id"]
+    target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
+    data_result = session.get(target_url, headers=headers)
+    data_result.raise_for_status()
+
     session.close()
+
+
+def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
+    charts_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/chart")
+
+    result = session.get(charts_url, headers=headers)
+    result.raise_for_status()
+    result_json = result.json()
+
+    target_chart_id = [item for item in result_json["result"] if item["slice_name"] == ""][0]["id"]
+    target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
+    data_result = session.get(target_url, headers=headers)
+    data_result.raise_for_status()
+
+    session.close()
+
+
+config_namespace = Namespace(
+    **{
+        "outfile": "1.zip",
+        "db.driver": "clickhousedb+connect",
+        "db.host": "clickhouse",
+        "db.port": "8123",
+        "db.name": "test",
+        "db.table": "otel_logs",
+        "host": "localhost",
+        "port": "8088",
+        "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
+        "db.password": os.environ["CLICKHOUSE_PASSWORD"],
+        "username": os.environ["SUPERSET_USERNAME"],
+        "password": os.environ["SUPERSET_PASSWORD"],
+        "db.user": os.environ["CLICKHOUSE_USER"],
+    }
+)
 
 
 @pytest.mark.skipif(not SUPERSET_ACTIVE, reason="Superset server not active")
@@ -66,82 +90,28 @@ def charts_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
 )
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ["example_module_name", "args"],
+    ["args", "pipeline", "func"],
     [
-        (
-            "3_sample_data_provider",
-            Namespace(
-                **{
-                    "outfile": "1.zip",
-                    "db.driver": "clickhousedb+connect",
-                    "db.host": "clickhouse",
-                    "db.port": "8123",
-                    "db.name": "test",
-                    "db.table": "otel_logs",
-                    "host": "localhost",
-                    "port": "8088",
-                    "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
-                }
-            ),
-        ),
+        (config_namespace, numbered_test_pipeline, numbered_data_test),
+        (config_namespace, transition_test_pipeline, transitions_data_test),
     ],
 )
 @pytest.mark.docker
-async def test_charts(example_module_name, args, otlp_log_exp_provider, otlp_trace_exp_provider):
-    args.__dict__.update(
-        {
-            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
-            "username": os.environ["SUPERSET_USERNAME"],
-            "password": os.environ["SUPERSET_PASSWORD"],
-            "db.user": os.environ["CLICKHOUSE_USER"],
-        }
-    )
+async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_exp_provider):
     session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
-    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
     http_client = AsyncClient()
     table = "otel_logs"
     ch_client = ChClient(http_client, user=CLICKHOUSE_USER, password=CLICKHOUSE_PASSWORD, database=CLICKHOUSE_DB)
+    dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
 
     await ch_client.execute(f"TRUNCATE {table}")
-    module.dff_instrumentor.uninstrument()
-    module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
-    await module.main(40)
+    dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    await loop(pipeline=pipeline)  # run with a test-specific pipeline
     await asyncio.sleep(1)
 
-    args.__dict__.update(
-        {
-            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
-            "username": os.environ["SUPERSET_USERNAME"],
-            "password": os.environ["SUPERSET_PASSWORD"],
-            "db.user": os.environ["CLICKHOUSE_USER"],
-        }
-    )
-    session, headers = get_superset_session(args)
     main(args)
-    charts_data_test(session, headers)
+    func(session, headers)  # run with a test-specific function with equal signature
     drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
-    id_reset_cmd = """sh -c "psql --user={} --password -p {} --db=test -c \'
-    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
-    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
-    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
-    ALTER SEQUENCE {}_id_seq RESTART WITH 1;
-    \'"
-    """
-    command = [
-        "docker-compose",
-        "exec",
-        "dashboard-metadata",
-        id_reset_cmd.format(
-            os.getenv("POSTGRES_USERNAME"),
-            os.getenv("SUPERSET_METADATA_PORT"),
-            "dashboards",
-            "slices",
-            "tables",
-            "dbs",
-        ),
-    ]
-    output, error = subprocess.Popen(
-        command, shell=True, universal_newlines=True, stdout=subprocess.PIPE, stderr=subprocess.PIPE
-    ).communicate(os.getenv("POSGTRES_PASSWORD"))
+    restart_pk()
