@@ -5,8 +5,8 @@ import bumpversion.cli as bumpversion
 from colorama import init, Fore, Style
 
 
-_CURRENT_VERSION = "0.4.1"
-_VERSION_FILES = ["scripts/utilities.py", "docs/source/conf.py", "dff/__init__.py"]
+_CURRENT_VERSION = "0.6.0"
+_VERSION_FILES = ["scripts/misc.py", "docs/source/conf.py", "dff/__init__.py", "pyproject.toml"]
 
 
 def help():
@@ -65,7 +65,7 @@ def pre_commit():
 
 
 def _update_version(type: str):
-    return bumpversion.main(["--current-version", _CURRENT_VERSION, type, " ".join(_VERSION_FILES)])
+    return bumpversion.main(["--current-version", _CURRENT_VERSION, type, *_VERSION_FILES])
 
 
 def version_patch():
