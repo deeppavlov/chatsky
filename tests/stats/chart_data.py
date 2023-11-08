@@ -4,9 +4,10 @@ import asyncio
 from tqdm import tqdm
 from dff.script import Context, Message, RESPONSE, TRANSITIONS
 from dff.script import conditions as cnd
-from dff.pipeline import Pipeline, ACTOR
+from dff.pipeline import Pipeline, ACTOR, Service
 from dff.stats import (
     OtelInstrumentor,
+    default_extractors
 )
 
 # %%
@@ -69,7 +70,14 @@ transition_test_pipeline = Pipeline.from_dict(
         "script": transitions_script,
         "start_label": ("root", "start"),
         "fallback_label": ("root", "fallback"),
-        "components": [ACTOR],
+        "components": [
+            Service(
+                handler=ACTOR,
+                after_handler=[
+                    default_extractors.get_current_label,
+                ],
+            ),
+        ],
     }
 )
 
@@ -78,7 +86,14 @@ numbered_test_pipeline = Pipeline.from_dict(
         "script": numbered_script,
         "start_label": ("root", "start"),
         "fallback_label": ("root", "fallback"),
-        "components": [ACTOR],
+        "components": [
+            Service(
+                handler=ACTOR,
+                after_handler=[
+                    default_extractors.get_current_label,
+                ],
+            ),
+        ],
     }
 )
 

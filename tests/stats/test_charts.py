@@ -42,8 +42,9 @@ def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
     data_result = session.get(target_url, headers=headers)
     data_result.raise_for_status()
-
+    print(data_result.json())
     session.close()
+    assert False
 
 
 def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
@@ -57,8 +58,9 @@ def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
     data_result = session.get(target_url, headers=headers)
     data_result.raise_for_status()
-
+    print(data_result.json())
     session.close()
+    assert False
 
 
 config_namespace = Namespace(
@@ -107,12 +109,11 @@ async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_ex
     table = "otel_logs"
     await cleanup_clickhouse(table, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
     dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
-
+    dff_instrumentor.uninstrument()
     dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     await loop(pipeline=pipeline)  # run with a test-specific pipeline
-    await asyncio.sleep(1)
+    await asyncio.sleep(5)
 
     drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
     main(args)
     func(session, headers)  # run with a test-specific function with equal signature
-    # restart_pk()
