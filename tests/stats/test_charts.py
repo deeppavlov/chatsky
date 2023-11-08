@@ -8,7 +8,6 @@ import pytest
 try:
     import omegaconf  # noqa: F401
     import tqdm  # noqa: F401
-    from dff.stats.instrumentor import OtelInstrumentor
     from dff.stats.__main__ import main
     from dff.stats.utils import get_superset_session, drop_superset_assets
     from dff.stats.cli import DEFAULT_SUPERSET_URL
@@ -42,9 +41,9 @@ def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
     data_result = session.get(target_url, headers=headers)
     data_result.raise_for_status()
-    print(data_result.json())
+    data_result_json = data_result.json()
+    assert len(data_result_json["result"]["data"]) == 10
     session.close()
-    assert False
 
 
 def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
@@ -58,9 +57,9 @@ def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
     data_result = session.get(target_url, headers=headers)
     data_result.raise_for_status()
-    print(data_result.json())
+    data_result_json = data_result.json()
+    assert len(data_result_json) == 1
     session.close()
-    assert False
 
 
 config_namespace = Namespace(
@@ -106,11 +105,7 @@ async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_ex
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
 
-    table = "otel_logs"
-    await cleanup_clickhouse(table, CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
-    dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
-    dff_instrumentor.uninstrument()
-    dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    await cleanup_clickhouse("otel_logs", CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
     await loop(pipeline=pipeline)  # run with a test-specific pipeline
     await asyncio.sleep(5)
 

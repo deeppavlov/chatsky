@@ -5,10 +5,7 @@ from tqdm import tqdm
 from dff.script import Context, Message, RESPONSE, TRANSITIONS
 from dff.script import conditions as cnd
 from dff.pipeline import Pipeline, ACTOR, Service
-from dff.stats import (
-    OtelInstrumentor,
-    default_extractors
-)
+from dff.stats import OtelInstrumentor, default_extractors
 
 # %%
 # instrumentation code
