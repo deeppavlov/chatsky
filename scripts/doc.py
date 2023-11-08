@@ -43,7 +43,7 @@ def _build_drawio(docker: DockerClient):
         print(f"Drawio images built from {path.parent} to {target}")
 
 
-@docker_client(True)
+@docker_client
 def docs(docker: Optional[DockerClient]) -> int:
     init()
     if docker is not None:
