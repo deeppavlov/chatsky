@@ -10,7 +10,7 @@ try:
     import omegaconf  # noqa: F401
     import tqdm  # noqa: F401
     from dff.stats.__main__ import main
-    from dff.stats.utils import get_superset_session, drop_superset_assets
+    from dff.stats.utils import get_superset_session
     from dff.stats.cli import DEFAULT_SUPERSET_URL
     from utils.stats.utils import cleanup_clickhouse
 except ImportError:
@@ -63,7 +63,9 @@ def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     data_result.raise_for_status()
     data_result_json = data_result.json()
     grouped_dict = dict()
-    for item in data_result_json["result"][0]["data"]:
+    data = data_result_json["result"][0]["data"]
+    assert len(data) > 0
+    for item in data:
         if item["context_id"] not in grouped_dict:
             grouped_dict[item["context_id"]] = [item]
         else:
@@ -75,7 +77,6 @@ def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
 
 config_namespace = Namespace(
     **{
-        "outfile": "1.zip",
         "db.driver": "clickhousedb+connect",
         "db.host": "clickhouse",
         "db.port": "8123",
@@ -112,14 +113,15 @@ async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_ex
             "db.user": os.environ["CLICKHOUSE_USER"],
         }
     )
-    session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
 
     await cleanup_clickhouse("otel_logs", CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
     await loop(pipeline=pipeline)  # run with a test-specific pipeline
-    await asyncio.sleep(5)
+    tracer_provider.force_flush()
+    logger_provider.force_flush()
+    await asyncio.sleep(6)
 
-    drop_superset_assets(session, headers, DEFAULT_SUPERSET_URL)
     main(args)
+    session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
     func(session, headers)  # run with a test-specific function with equal signature
