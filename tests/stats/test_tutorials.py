@@ -33,15 +33,15 @@ CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 )
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ["example_module_name", "expected_logs"],
+    ["tutorial_module_name", "expected_logs"],
     [
         ("1_extractor_functions", 10),
         ("2_pipeline_integration", 35),
     ],
 )
 @pytest.mark.docker
-async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp_provider, otlp_trace_exp_provider):
-    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
+async def test_tutorials_ch(tutorial_module_name: str, expected_logs, otlp_log_exp_provider, otlp_trace_exp_provider):
+    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
     http_client = AsyncClient()
@@ -59,21 +59,21 @@ async def test_examples_ch(example_module_name: str, expected_logs, otlp_log_exp
         assert count == expected_logs
 
     except Exception as exc:
-        raise Exception(f"model_name=tutorials.{dot_path_to_addon}.{example_module_name}") from exc
+        raise Exception(f"model_name=tutorials.{dot_path_to_addon}.{tutorial_module_name}") from exc
 
 
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ["example_module_name", "expected_logs"],
+    ["tutorial_module_name", "expected_logs"],
     [
         ("1_extractor_functions", 10),
         ("2_pipeline_integration", 35),
     ],
 )
-async def test_examples_memory(
-    example_module_name: str, expected_logs, tracer_exporter_and_provider, log_exporter_and_provider
+async def test_tutorials_memory(
+    tutorial_module_name: str, expected_logs, tracer_exporter_and_provider, log_exporter_and_provider
 ):
-    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
+    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     try:
@@ -87,4 +87,4 @@ async def test_examples_memory(
         assert len(log_exporter.get_finished_logs()) == expected_logs
 
     except Exception as exc:
-        raise Exception(f"model_name=tutorials.{dot_path_to_addon}.{example_module_name}") from exc
+        raise Exception(f"model_name=tutorials.{dot_path_to_addon}.{tutorial_module_name}") from exc
