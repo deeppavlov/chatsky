@@ -28,9 +28,7 @@ numbered_script = {
         "start": {
             RESPONSE: Message(text="Hi"),
             TRANSITIONS: {
-                lambda ctx, pipeline: (f"flow_{random.choice(range(1, 11))}", "node_1"): cnd.exact_match(
-                    Message(text="hi")
-                ),
+                lambda ctx, pipeline: (f"flow_{random.choice(range(1, 11))}", "node_1", 1): cnd.true(),
             },
         },
         "fallback": {RESPONSE: Message(text="Oops")},
@@ -43,7 +41,7 @@ transitions_script = {
         "start": {
             RESPONSE: Message(text="Hi"),
             TRANSITIONS: {
-                ("flow_1", "node"): cnd.exact_match(Message(text="hi")),
+                ("flow_1", "node"): cnd.true(),
             },
         },
         "fallback": {RESPONSE: Message(text="Oops")},

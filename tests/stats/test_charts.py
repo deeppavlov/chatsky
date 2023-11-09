@@ -1,5 +1,6 @@
 import os
 import random
+import json
 import asyncio
 from argparse import Namespace
 from urllib import parse
@@ -42,7 +43,10 @@ def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     data_result = session.get(target_url, headers=headers)
     data_result.raise_for_status()
     data_result_json = data_result.json()
-    assert len(data_result_json["result"]["data"]) == 10
+    data = data_result_json["result"][0]["data"]
+    assert (len(data)) > 0
+    assert "COUNT_DISTINCT(context_id)" in data[0]
+    assert data[0]["COUNT_DISTINCT(context_id)"] == 10
     session.close()
 
 
@@ -58,7 +62,14 @@ def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     data_result = session.get(target_url, headers=headers)
     data_result.raise_for_status()
     data_result_json = data_result.json()
-    assert len(data_result_json) == 1
+    grouped_dict = dict()
+    for item in data_result_json["result"][0]["data"]:
+        if item["context_id"] not in grouped_dict:
+            grouped_dict[item["context_id"]] = [item]
+        else:
+            grouped_dict[item["context_id"]].append(item)
+    unique_flows = list(map(lambda x: set(map(lambda y: json.loads(y["data"])["flow"], x)), grouped_dict.values()))
+    assert all(map(lambda x: len(x) == 1, unique_flows))
     session.close()
 
 
