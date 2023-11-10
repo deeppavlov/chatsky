@@ -4,7 +4,10 @@ from colorama import init, Fore, Style
 def info():
     init()
     print(f"\nThanks for your interest in {Fore.YELLOW}Dialog Flow Framework{Style.RESET_ALL}!\n")
-    print(f"{Fore.BLUE}poetry install --with lint,test,devel,tutorials,docs --all-extras{Style.RESET_ALL}: Install development-ready version of framework")
+    print(
+        f"{Fore.BLUE}poetry install --with lint,test,devel,tutorials,docs --all-extras{Style.RESET_ALL}:"
+        + "Install development-ready version of framework"
+    )
     print(f"{Fore.BLUE}poetry env remove --all{Style.RESET_ALL}: Remove all virtual environments\n")
     print(f"{Fore.BLUE}poetry run info{Style.RESET_ALL}: Display this message again")
     print(f"{Fore.BLUE}poetry run lint{Style.RESET_ALL}: Run linters")
@@ -26,5 +29,5 @@ def info():
         f"{Fore.BLUE}poetry run docs{Style.RESET_ALL}:"
         + " Build Sphinx docs; activate your virtual environment before execution"
     )
-    print(f"{Fore.BLUE}poetry run clean_docs{Style.RESET_ALL}:" + " Remove all documentation build roots")
-    print(f"{Fore.BLUE}poetry run clean{Style.RESET_ALL}:" + " Clean all build artifacts\n")
+    print(f"{Fore.BLUE}poetry run clean_docs{Style.RESET_ALL}: Remove all documentation build roots")
+    print(f"{Fore.BLUE}poetry run clean{Style.RESET_ALL}: Clean all build artifacts\n")
