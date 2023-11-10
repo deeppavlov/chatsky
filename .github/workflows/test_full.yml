@@ -44,7 +44,7 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          poetry run test_no_cov
+          poe test_no_cov
 
   test_no_deps:
     runs-on: "ubuntu-latest"
@@ -68,4 +68,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          poetry run test_no_deps
+          poe test_no_deps

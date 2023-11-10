@@ -139,6 +139,7 @@ optional = true
 [tool.poetry.group.devel.dependencies]
 python-on-whales = "0.64.3"
 python-dotenv = "0.21.1"
+poethepoet = "0.24.2"
 
 
 [tool.poetry.group.tutorials]
@@ -176,6 +177,11 @@ jupyter = "1.0.0"
 
 
 [tool.poetry.scripts]
+"dff.stats" = { callable = "dff.stats.__main__:main", extras = ["stats"] }
+
+
+
+[tool.poe.tasks]
 info = "scripts.misc:info"
 lint = "scripts.codestyle:lint"
 format = "scripts.codestyle:format"
@@ -185,8 +191,6 @@ test_no_cov = "scripts.test:test_no_cov"
 test_no_deps = "scripts.test:test_no_deps"
 test_all = "scripts.test:test_all"
 docs = "scripts.doc:docs"
-
-"dff.stats" = { callable = "dff.stats.__main__:main", extras = ["stats"] }
 
 
 

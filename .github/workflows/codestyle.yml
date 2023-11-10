@@ -33,4 +33,4 @@ jobs:
 
       - name: run codestyle
         run: |
-          poetry run lint
+          poe lint
