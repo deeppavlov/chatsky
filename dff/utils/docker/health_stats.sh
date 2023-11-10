@@ -1,7 +1,8 @@
 #!/bin/bash
+if [[ $# = 0 ]] ; then printf "Specify healthcheck url;\n"; exit 1; fi;
 for itr in {1..10}
 do
-healthcheck=$(curl -X GET http://localhost:8088/health | grep "OK")
+healthcheck=$(curl -X GET "${1}" | grep "OK")
 healthcheck=$?
 if [ "$healthcheck" -ne 0 ] ; then
 echo "Healthcheck failed. sleeping for 5 secs"

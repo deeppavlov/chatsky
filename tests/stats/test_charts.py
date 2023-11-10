@@ -7,12 +7,14 @@ from urllib import parse
 import pytest
 
 try:
+    from requests import Session
     import omegaconf  # noqa: F401
     import tqdm  # noqa: F401
     from dff.stats.__main__ import main
     from dff.stats.utils import get_superset_session
     from dff.stats.cli import DEFAULT_SUPERSET_URL
-    from utils.stats.utils import cleanup_clickhouse
+    from aiochclient import ChClient
+    from httpx import AsyncClient
 except ImportError:
     pytest.skip(reason="`OmegaConf` dependency missing.", allow_module_level=True)
 
@@ -31,7 +33,7 @@ CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD")
 CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
 
 
-def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
+async def transitions_data_test(session: Session, headers: dict, base_url=DEFAULT_SUPERSET_URL):
     charts_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/chart")
 
     result = session.get(charts_url, headers=headers)
@@ -40,8 +42,14 @@ def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
 
     target_chart_id = [item for item in result_json["result"] if item["slice_name"] == "Transition counts"][0]["id"]
     target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
-    data_result = session.get(target_url, headers=headers)
-    data_result.raise_for_status()
+    result_status = 404
+    attempts = 0
+    while result_status != 200 and attempts < 10:
+        attempts += 1
+        data_result = session.get(target_url, headers=headers)
+        result_status = data_result.status_code
+        await asyncio.sleep(1)
+
     data_result_json = data_result.json()
     data = data_result_json["result"][0]["data"]
     assert (len(data)) > 0
@@ -50,7 +58,7 @@ def transitions_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
     session.close()
 
 
-def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
+async def numbered_data_test(session: Session, headers: dict, base_url=DEFAULT_SUPERSET_URL):
     charts_url = parse.urljoin(DEFAULT_SUPERSET_URL, "/api/v1/chart")
 
     result = session.get(charts_url, headers=headers)
@@ -59,8 +67,14 @@ def numbered_data_test(session, headers, base_url=DEFAULT_SUPERSET_URL):
 
     target_chart_id = [item for item in result_json["result"] if item["slice_name"] == "Table"][0]["id"]
     target_url = parse.urljoin(DEFAULT_SUPERSET_URL, f"api/v1/chart/{target_chart_id}/data/")
-    data_result = session.get(target_url, headers=headers)
-    data_result.raise_for_status()
+    result_status = 404
+    attempts = 0
+    while result_status != 200 and attempts < 10:
+        attempts += 1
+        data_result = session.get(target_url, headers=headers)
+        result_status = data_result.status_code
+        await asyncio.sleep(2)
+
     data_result_json = data_result.json()
     grouped_dict = dict()
     data = data_result_json["result"][0]["data"]
@@ -116,12 +130,21 @@ async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_ex
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
 
-    await cleanup_clickhouse("otel_logs", CLICKHOUSE_USER, CLICKHOUSE_PASSWORD, CLICKHOUSE_DB)
+    table = "otel_logs"
+    http_client = AsyncClient()
+    ch_client = ChClient(http_client, user=CLICKHOUSE_USER, password=CLICKHOUSE_PASSWORD, database=CLICKHOUSE_DB)
+    await ch_client.execute(f"TRUNCATE {table}")
     await loop(pipeline=pipeline)  # run with a test-specific pipeline
     tracer_provider.force_flush()
     logger_provider.force_flush()
-    await asyncio.sleep(6)
+    num_records = 0
+
+    attempts = 0
+    while num_records == 0 and attempts < 10:
+        attempts += 1
+        await asyncio.sleep(2)
+        num_records = await ch_client.fetchval(f"SELECT COUNT (*) FROM {table}")
 
     main(args)
     session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
-    func(session, headers)  # run with a test-specific function with equal signature
+    await func(session, headers)  # run with a test-specific function with equal signature
