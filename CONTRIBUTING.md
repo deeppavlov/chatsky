@@ -21,7 +21,7 @@ We ask that you adhere to the following
 
 ## Managing your workflow
 We use `poetry` and `poethepoet` as handy automation tools, which reads `pyproject.toml` to get specification for commands.
-`poetry` is a tool for command running automatization. Usage signature of the `poetry` is `poe COMMAND`.
+`poetry` is a tool for command running automatization. Usage signature of the `poetry` is `poetry run poe COMMAND`.
 If your environment does not support `poetry`, it can be installed as a regular python package with `pip install poetry`.
 `poethepoet` will be automatically installed upon installation of `devel` dependency group.
 
@@ -56,7 +56,7 @@ to annotate your modules and objects. You can easily build the Sphinx documentat
 by activating the virtual environment and then running
 
 ```bash
-poe docs
+poetry run poe docs
 ```
 
 After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
@@ -107,28 +107,28 @@ It doesn't take previous formatting into account. See more about [black](https:/
 To format your code, run
 
 ```bash
-poe format
+poetry run poe format
 ```
 
 ### Test
 We use `black`, `mypy`, `flake8` as code style checkers and `pytest` as unit-test runner.
 To run unit-tests only, use
 ```bash
-poe test_no_cov
+poetry run poe test_no_cov
 ```
 To execute all tests, including integration with DBs and APIs tests, run
 ```bash
-poe test_all
+poetry run poe test_all
 ```
 for successful execution of this command `Docker` and `docker-compose` are required.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash
-poe lint
+poetry run poe lint
 ```
 And if it doesn't, to automatically fix whatever is possible with `black`, run
 ```bash
-poe format
+poetry run poe format
 ```
 
 Tests are configured via [`.env_file`](.env_file).
@@ -159,11 +159,11 @@ To launch both groups run
 docker-compose --profile context_storage --profile stats up
 ```
 
-This will be done automatically when running `poe test_all`.
+This will be done automatically when running `poetry run poe test_all`.
 
 ### Other provided features 
 You can get more info about `poetry` commands by `info`:
 
 ```bash
-poe info
+poetry run poe info
 ```

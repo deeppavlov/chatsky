@@ -43,7 +43,7 @@ def lint() -> int:
     lint_result = _run_lint_and_mypy()
     would_format = _run_black(False)
     if would_format == 1:
-        print(("=" * 38) + "\nBad formatting? Run: poe format\n" + ("=" * 38))
+        print(("=" * 38) + "\nBad formatting? Run: poetry run poe format\n" + ("=" * 38))
     return lint_result or would_format
 
 

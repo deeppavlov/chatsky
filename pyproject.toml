@@ -88,7 +88,7 @@ cryptography = { version = "*", optional = true }
 requests = { version = "2.31.0", optional = true }
 pytelegrambotapi = { version = "*", optional = true }
 opentelemetry-instrumentation = { version = "*", optional = true }
-sqlalchemy = { version = "*", extras=["asyncio"], optional = true }
+sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }
 
 [tool.poetry.extras]
@@ -139,14 +139,14 @@ optional = true
 [tool.poetry.group.devel.dependencies]
 python-on-whales = "0.64.3"
 python-dotenv = "0.21.1"
-poethepoet = "0.24.2"
+poethepoet = { version = "0.24.2", extras = ["poetry_plugin"] }
 
 
 [tool.poetry.group.tutorials]
 optional = true
 
 [tool.poetry.group.tutorials.dependencies]
-flask = { version = "3.0.0", extras=["async"] }
+flask = { version = "3.0.0", extras = ["async"] }
 psutil = "5.9.5"
 telethon = "1.31.0"
 fastapi = "0.103.1"
