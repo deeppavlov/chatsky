@@ -1,0 +1,38 @@
+slice_name: Table
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 3__table
+  viz_type: table
+  slice_id: 16
+  granularity_sqla: start_time
+  time_grain_sqla: null
+  time_range: No filter
+  query_mode: aggregate
+  groupby:
+  - context_id
+  - start_time
+  - data_key
+  - data
+  all_columns: []
+  percent_metrics: []
+  adhoc_filters: []
+  order_by_cols: []
+  row_limit: 10000
+  server_page_length: 10
+  order_desc: false
+  table_timestamp_format: smart_date
+  show_cell_bars: true
+  color_pn: true
+  extra_form_data: {}
+  dashboards:
+  - 1
+query_context: '{"datasource":{"id":3,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"start_time","filters":[],"extras":{"time_grain_sqla":null,"having":"","where":""},"applied_time_extras":{},"columns":["context_id","start_time","data_key","data"],"metrics":[],"orderby":[],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":false,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[]}],"form_data":{"datasource":"3__table","viz_type":"table","slice_id":16,"granularity_sqla":"start_time","time_grain_sqla":null,"time_range":"No
+  filter","query_mode":"aggregate","groupby":["context_id","start_time","data_key","data"],"all_columns":[],"percent_metrics":[],"adhoc_filters":[],"order_by_cols":[],"row_limit":10000,"server_page_length":10,"order_desc":false,"table_timestamp_format":"smart_date","show_cell_bars":true,"color_pn":true,"extra_form_data":{},"dashboards":[1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 38d353dc-c0ef-41a0-97c7-3dcbebab9e02
+version: 1.0.0
+dataset_uuid: 8ba2e188-2bf8-4809-a5ee-2477a539d493

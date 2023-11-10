@@ -72,6 +72,10 @@ to run either before or after the target service. As a result, you can compare
 the pre-service and post-service states of the context to measure the performance
 of various components, etc.
 
+Some extractors, like `get_current_label`, have restrictions in terms of their run stage:
+for instance, `get_current_label` needs to only be used as an `after_handler`
+to function correctly.
+
 """
 # %%
 pipeline = Pipeline.from_dict(
@@ -90,11 +94,13 @@ pipeline = Pipeline.from_dict(
             ),
             Service(
                 handler=ACTOR,
-                before_handler=[default_extractors.get_timing_before],
+                before_handler=[
+                    default_extractors.get_timing_before,
+                ],
                 after_handler=[
                     get_service_state,
-                    default_extractors.get_timing_after,
                     default_extractors.get_current_label,
+                    default_extractors.get_timing_after,
                 ],
             ),
         ],

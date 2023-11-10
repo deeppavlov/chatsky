@@ -86,7 +86,7 @@ API
 This sections describes the API of the ``Context`` class.
 
 For more information, such as method signatures, see
-`API reference <./apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
+`API reference <../apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
 
 Attributes
 ==========
@@ -207,6 +207,9 @@ The supported storage options are as follows:
 The function's only parameter is a connection string that specifies both the database type
 and the connection parameters, for example, *mongodb://admin:pass@localhost:27016/admin*.
 (`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory>`_)
+
+.. note::
+    To learn how to use ``context_storage_factory`` in your pipeline, see our `Context Storage Tutorials <../tutorials/index_context_storages.html>`__.
 
 The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
