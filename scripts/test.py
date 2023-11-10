@@ -12,7 +12,7 @@ def _test(coverage: bool, dependencies: bool) -> int:
     """
     Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
     Please keep in mind that:
-    
+
     1. Skipping `telegram` tests is **always** allowed.
     2. Enabling dependencies is effectively same as enabling docker
         (docker containers **should** be running in that case).

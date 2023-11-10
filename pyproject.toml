@@ -181,6 +181,9 @@ jupyter = "1.0.0"
 
 
 
+[tool.poe]
+default_task_type = "script"
+
 [tool.poe.tasks]
 info = "scripts.misc:info"
 lint = "scripts.codestyle:lint"
