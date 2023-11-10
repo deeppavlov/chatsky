@@ -9,6 +9,15 @@ from .utils import docker_client
 
 
 def _test(coverage: bool, dependencies: bool) -> int:
+    """
+    Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
+    Please keep in mind that:
+    
+    1. Skipping `telegram` tests is **always** allowed.
+    2. Enabling dependencies is effectively same as enabling docker
+        (docker containers **should** be running in that case).
+    3. Coverage requires all dependencies and docker (will have no effect otherwise).
+    """
     test_coverage_threshold = 95
 
     dotenv.load_dotenv(".env_file")
