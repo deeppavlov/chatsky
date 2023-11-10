@@ -34,12 +34,6 @@ jobs:
         run: |
           docker-compose --profile context_storage --profile stats up
 
-      - name: setup poetry and install dependencies
-        run: |
-          pip install --upgrade pip poetry
-          poetry build
-          find . -name "*.whl" -exec python -m pip install {}[tests,devel,full,tutorial] ';'
-
       - name: clean environment
         run: |
           export backup_files=( tests tutorials utils .env_file .coveragerc scripts pyproject.toml docs docker-compose.yml )
@@ -49,6 +43,11 @@ jobs:
           for i in "${backup_files[@]}" ; do mv  "/tmp/backup/$i"  .  ; done
           rm -rf /tmp/backup
 
+      - name: setup poetry and install dependencies
+        run: |
+          pip install --upgrade pip poetry
+          poetry install --with lint,test,devel,tutorials --all-extras
+
       - name: run tests
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
@@ -56,4 +55,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          python -m scripts.test
+          poetry run test_all

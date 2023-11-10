@@ -39,7 +39,7 @@ You can also switch to system-wide python environment with `poetry env use syste
 
 The following command creates a virtual environment dir and installs all the dependencies, which are required for development.
 ```bash
-poetry install --all-extraas
+poetry install --with lint,test,devel,tutorials,docs --all-extras
 ```
 
 The environment will be activated automatically.

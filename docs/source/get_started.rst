@@ -28,12 +28,6 @@ The installation process allows the user to choose from different packages based
    pip install dff[ydb]  # dependencies for using Yandex Database
    pip install dff[telegram]  # dependencies for using Telegram
    pip install dff[benchmark]  # dependencies for benchmarking
-   pip install dff[full]  # full dependencies including all options above
-   pip install dff[tests]  # dependencies for running tests
-   pip install dff[tests,full]  # dependencies for running tutorials (all options above)
-   pip install dff[devel]  # dependencies for development
-   pip install dff[doc]  # dependencies for documentation
-   pip install dff[devel,doc,tests,full]  # full dependencies for development (all options above)
 
 For example, if you are going to use one of the database backends,
 you can specify the corresponding requirements yourself.

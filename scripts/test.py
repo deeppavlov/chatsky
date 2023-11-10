@@ -74,7 +74,3 @@ def test_no_deps(_: Optional[DockerClient]) -> int:
 def test_all(docker: Optional[DockerClient]) -> int:
     result = _test(True, docker is not None)
     return result or lint()
-
-
-if __name__ == "__main__":
-    exit(_test(True, True))
