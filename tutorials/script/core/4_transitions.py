@@ -41,7 +41,9 @@ with flow name, node name and priority.
 
 
 # %%
-def greeting_flow_n2_transition(_: Context, __: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+def greeting_flow_n2_transition(
+    _: Context, __: Pipeline, *args, **kwargs
+) -> NodeLabel3Type:
     return ("greeting_flow", "node2", 1.0)
 
 
@@ -93,8 +95,12 @@ toy_script = {
             # it doesn't need a `RESPONSE`.
             RESPONSE: Message(),
             TRANSITIONS: {
-                ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
-                ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
+                ("music_flow", "node1"): cnd.regexp(
+                    r"talk about music"
+                ),  # first check
+                ("greeting_flow", "node1"): cnd.regexp(
+                    r"hi|hello", re.IGNORECASE
+                ),  # second check
                 "fallback_node": cnd.true(),  # third check
                 # "fallback_node" is equivalent to
                 # ("global_flow", "fallback_node").
@@ -104,9 +110,15 @@ toy_script = {
             # an error occurred while the agent was running.
             RESPONSE: Message(text="Ooops"),
             TRANSITIONS: {
-                ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
-                ("greeting_flow", "node1"): cnd.regexp(r"hi|hello", re.IGNORECASE),  # second check
-                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
+                ("music_flow", "node1"): cnd.regexp(
+                    r"talk about music"
+                ),  # first check
+                ("greeting_flow", "node1"): cnd.regexp(
+                    r"hi|hello", re.IGNORECASE
+                ),  # second check
+                lbl.previous(): cnd.regexp(
+                    r"previous", re.IGNORECASE
+                ),  # third check
                 # lbl.previous() is equivalent
                 # to ("previous_flow", "previous_node")
                 lbl.repeat(): cnd.true(),  # fourth check
@@ -137,10 +149,14 @@ toy_script = {
                 lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
                 # lbl.forward(0.5) is equivalent
                 # to ("greeting_flow", "node3", 0.5)
-                ("music_flow", "node1"): cnd.regexp(r"talk about music"),  # first check
+                ("music_flow", "node1"): cnd.regexp(
+                    r"talk about music"
+                ),  # first check
                 # ("music_flow", "node1") is equivalent
                 # to ("music_flow", "node1", 1.0)
-                lbl.previous(): cnd.regexp(r"previous", re.IGNORECASE),  # third check
+                lbl.previous(): cnd.regexp(
+                    r"previous", re.IGNORECASE
+                ),  # third check
             },
         },
         "node3": {
@@ -158,7 +174,8 @@ toy_script = {
     "music_flow": {
         "node1": {
             RESPONSE: Message(
-                text="I love `System of a Down` group, would you like to talk about it?"
+                text="I love `System of a Down` group, "
+                "would you like to talk about it?"
             ),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"yes|yep|ok", re.IGNORECASE),
@@ -167,7 +184,8 @@ toy_script = {
         },
         "node2": {
             RESPONSE: Message(
-                text="System of a Down is an Armenian-American heavy metal band formed in 1994."
+                text="System of a Down is "
+                "an Armenian-American heavy metal band formed in 1994."
             ),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
@@ -177,7 +195,8 @@ toy_script = {
         },
         "node3": {
             RESPONSE: Message(
-                text="The band achieved commercial success with the release of five studio albums."
+                text="The band achieved commercial success "
+                "with the release of five studio albums."
             ),
             TRANSITIONS: {
                 lbl.forward(): cnd.regexp(r"next", re.IGNORECASE),
@@ -189,8 +208,12 @@ toy_script = {
         "node4": {
             RESPONSE: Message(text="That's all what I know."),
             TRANSITIONS: {
-                greeting_flow_n2_transition: cnd.regexp(r"next", re.IGNORECASE),  # second check
-                high_priority_node_transition("greeting_flow", "node4"): cnd.regexp(
+                greeting_flow_n2_transition: cnd.regexp(
+                    r"next", re.IGNORECASE
+                ),  # second check
+                high_priority_node_transition(
+                    "greeting_flow", "node4"
+                ): cnd.regexp(
                     r"next time", re.IGNORECASE
                 ),  # first check
                 lbl.to_fallback(): cnd.true(),  # third check
@@ -202,37 +225,57 @@ toy_script = {
 # testing
 happy_path = (
     (Message(text="hi"), Message(text="Hi, how are you?")),
-    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (
         Message(text="talk about music."),
-        Message(text="I love `System of a Down` group, would you like to talk about it?"),
+        Message(
+            text="I love `System of a Down` group, "
+            "would you like to talk about it?"
+        ),
     ),
     (
         Message(text="yes"),
-        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is "
+            "an Armenian-American heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="next"),
         Message(
-            text="The band achieved commercial success with the release of five studio albums."
+            text="The band achieved commercial success "
+            "with the release of five studio albums."
         ),
     ),
     (
         Message(text="back"),
-        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is "
+            "an Armenian-American heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="repeat"),
-        Message(text="System of a Down is an Armenian-American heavy metal band formed in 1994."),
+        Message(
+            text="System of a Down is "
+            "an Armenian-American heavy metal band formed in 1994."
+        ),
     ),
     (
         Message(text="next"),
         Message(
-            text="The band achieved commercial success with the release of five studio albums."
+            text="The band achieved commercial success "
+            "with the release of five studio albums."
         ),
     ),
     (Message(text="next"), Message(text="That's all what I know.")),
-    (Message(text="next"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="next"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (Message(text="previous"), Message(text="That's all what I know.")),
     (Message(text="next time"), Message(text="Bye")),
     (Message(text="stop"), Message(text="Ooops")),
@@ -242,7 +285,10 @@ happy_path = (
     (Message(text="hi"), Message(text="Hi, how are you?")),
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="previous"), Message(text="Hi, how are you?")),
-    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (
         Message(text="let's talk about something."),
         Message(text="Sorry, I can not talk about that now."),

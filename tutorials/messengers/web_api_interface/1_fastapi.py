@@ -6,6 +6,10 @@ This tutorial shows how to create an API for DFF using FastAPI and
 introduces messenger interfaces.
 
 You can see the result at http://127.0.0.1:8000/docs.
+
+Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface) is used to process requests.
+
+%mddoclink(api,script.core.message,Message) is used in creating a JSON Schema for the endpoint.
 """
 
 # %pip install dff uvicorn fastapi

@@ -3,10 +3,10 @@ name: update_dashboard
 on:
   push:
     branches:
-      - 'dev'
+      - 'master'
     paths:
-      - 'dff/utils/docker/dockerfile_stats'
-      - 'dff/utils/docker/entrypoint_stats.sh'
+      - 'dff/utils/docker/**'
+  workflow_dispatch:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
