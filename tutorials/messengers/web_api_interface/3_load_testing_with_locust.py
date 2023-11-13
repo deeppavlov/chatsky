@@ -32,14 +32,13 @@ Make sure that your POST endpoint is also running (run the FastAPI tutorial).
 
 
 # %%
-########################################################################################
-# this patch is only needed to run this file in IPython kernel and can be safely removed
+################################################################################
+# this patch is only needed to run this file in IPython kernel
+# and can be safely removed
 import gevent.monkey
 
 gevent.monkey.patch_all()
-
-# flake8: noqa: E402
-########################################################################################
+################################################################################
 
 
 # %%
@@ -87,13 +86,18 @@ class DFFUser(FastHttpUser):
         for request, response in happy_path:
             with self.client.post(
                 f"/chat?user_id={user_id}",
-                headers={"accept": "application/json", "Content-Type": "application/json"},
+                headers={
+                    "accept": "application/json",
+                    "Content-Type": "application/json",
+                },
                 # Name is the displayed name of the request.
                 name=f"/chat?user_message={request.json()}",
                 data=request.json(),
                 catch_response=True,
             ) as candidate_response:
-                text_response = Message.model_validate(candidate_response.json().get("response"))
+                text_response = Message.model_validate(
+                    candidate_response.json().get("response")
+                )
 
                 if response is not None:
                     if callable(response):
@@ -102,7 +106,8 @@ class DFFUser(FastHttpUser):
                             candidate_response.failure(error_message)
                     elif text_response != response:
                         candidate_response.failure(
-                            f"Expected: {response.model_dump_json()}\nGot: {text_response.model_dump_json()}"
+                            f"Expected: {response.model_dump_json()}\n"
+                            f"Got: {text_response.model_dump_json()}"
                         )
 
             time.sleep(self.wait_time())
@@ -117,7 +122,10 @@ class DFFUser(FastHttpUser):
             if msg.text is None:
                 return f"Message does not contain text: {msg.model_dump_json()}"
             if "Hi" not in msg.text:
-                return f'"Hi" is not in the response message: {msg.model_dump_json()}'
+                return (
+                    f'"Hi" is not in the response message: '
+                    f"{msg.model_dump_json()}"
+                )
             return None
 
         self.check_happy_path(

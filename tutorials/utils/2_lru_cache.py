@@ -56,7 +56,9 @@ def response(ctx: Context, _, *__, **___) -> Message:
 
 
 # %%
-toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
+toy_script = {
+    "flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}
+}
 
 happy_path = (
     (Message(), Message(text="1-2-3-2-4")),
