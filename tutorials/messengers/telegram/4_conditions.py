@@ -4,7 +4,11 @@
 
 This tutorial shows how to process Telegram updates in your script
 and reuse handler triggers from the `pytelegrambotapi` library.
+
+Here, %mddoclink(api,messengers.telegram.messenger,telegram_condition)
+function is used for graph navigation according to Telegram events.
 """
+
 
 # %pip install dff[telegram]
 

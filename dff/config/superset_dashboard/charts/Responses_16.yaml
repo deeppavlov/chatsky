@@ -1,0 +1,59 @@
+slice_name: Responses
+description: null
+certified_by: null
+certification_details: null
+viz_type: table
+params:
+  datasource: 3__table
+  viz_type: table
+  slice_id: 15
+  granularity_sqla: start_time
+  time_grain_sqla: P1D
+  time_range: No filter
+  query_mode: raw
+  groupby: []
+  all_columns:
+  - context_id
+  - request_id
+  - start_time
+  - expressionType: SQL
+    label: data
+    sqlExpression: JSON_VALUE(data, '$.last_response')
+    datasourceWarning: false
+  percent_metrics: []
+  adhoc_filters:
+  - clause: WHERE
+    comparator: get_last_response
+    datasourceWarning: false
+    expressionType: SIMPLE
+    filterOptionName: filter_m3nzyr545di_lxjaivcal1
+    isExtra: false
+    isNew: false
+    operator: ==
+    operatorId: EQUALS
+    sqlExpression: null
+    subject: data_key
+  order_by_cols: []
+  row_limit: 1000
+  server_page_length: 10
+  order_desc: true
+  table_timestamp_format: '%d-%m-%Y %H:%M:%S'
+  show_cell_bars: true
+  color_pn: true
+  column_config:
+    data:
+      columnWidth: 150
+      truncateLongCells: true
+  extra_form_data: {}
+  dashboards:
+  - 1
+query_context: '{"datasource":{"id":3,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"start_time","filters":[{"col":"data_key","op":"==","val":"get_last_response"}],"extras":{"time_grain_sqla":"P1D","having":"","where":""},"applied_time_extras":{},"columns":["context_id","request_id","start_time",{"expressionType":"SQL","label":"data","sqlExpression":"JSON_VALUE(data,
+  ''$.last_response'')","datasourceWarning":false}],"orderby":[],"annotation_layers":[],"row_limit":1000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"post_processing":[]}],"form_data":{"datasource":"3__table","viz_type":"table","slice_id":15,"granularity_sqla":"start_time","time_grain_sqla":"P1D","time_range":"No
+  filter","query_mode":"raw","groupby":[],"all_columns":["context_id","request_id","start_time",{"expressionType":"SQL","label":"data","sqlExpression":"JSON_VALUE(data,
+  ''$.last_response'')","datasourceWarning":false}],"percent_metrics":[],"adhoc_filters":[{"clause":"WHERE","comparator":"get_last_response","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_m3nzyr545di_lxjaivcal1","isExtra":false,"isNew":false,"operator":"==","operatorId":"EQUALS","sqlExpression":null,"subject":"data_key"}],"order_by_cols":[],"row_limit":1000,"server_page_length":10,"include_time":false,"order_desc":true,"table_timestamp_format":"%d-%m-%Y
+  %H:%M:%S","show_cell_bars":true,"color_pn":true,"column_config":{"data":{"columnWidth":150,"truncateLongCells":true}},"extra_form_data":{},"dashboards":[1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 7844eb6d-4fce-44cf-8994-fb61a221a2ab
+version: 1.0.0
+dataset_uuid: 8ba2e188-2bf8-4809-a5ee-2477a539d493

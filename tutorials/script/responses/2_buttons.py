@@ -2,7 +2,13 @@
 """
 # Responses: 2. Buttons
 
+In this tutorial %mddoclink(api,script.core.message,Button)
+class is demonstrated.
+Buttons are one of %mddoclink(api,script.core.message,Message) fields.
+They can be attached to any message but will only work if the chosen
+[messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
 """
+
 
 # %pip install dff
 

@@ -3,6 +3,15 @@
 # Core: 1. Basics
 
 This notebook shows basic tutorial of creating a simple dialog bot (agent).
+
+Here, basic usege of %mddoclink(api,pipeline.pipeline.pipeline,Pipeline)
+primitive is shown: its' creation with
+%mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_script)
+and execution.
+
+Additionally, function %mddoclink(api,utils.testing.common,check_happy_path)
+that can be used for Pipeline testing is presented.
+
 Let's do all the necessary imports from DFF:
 """
 
