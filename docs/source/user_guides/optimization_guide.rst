@@ -20,7 +20,7 @@ of using these tools in practice and optimizing the profiled application.
 Profiling with Locust testing
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-[Locust](https://locust.io/) is a tool for load testing web applications that
+`Locust <https://locust.io/>`__ is a tool for load testing web applications that
 simultaneously spawns several user agents that execute a pre-determined behavior
 against the target application. Assuming that your pipeline is integrated into a web
 server application, like Flask or FastAPI, that is not strongly impacted by the load,
@@ -37,7 +37,7 @@ with functions that can report their performance, e.g. their execution time or t
 .. note::
 
     You can get more info on how instrumentation is done and statistics are collected
-    in the `stats tutorial <../tutorials/tutorials.stats.1_extractor_functions.py>`_.
+    in the `stats tutorial <../tutorials/tutorials.stats.1_extractor_functions.py>`__.
 
 When you are done setting up the instrumentation, you can launch the web server to accept connections from locust.
 
@@ -48,7 +48,7 @@ i.e. the requests to the server that will be made during testing.
 .. note::
 
     An example Locust script along with instructions on how to run it can be found in the
-    `load testing tutorial <../tutorials/tutorials.messengers.web_api_inference.3_load_testing_with_locust.py>`_.
+    `load testing tutorial <../tutorials/tutorials.messengers.web_api_interface.3_load_testing_with_locust.py>`__.
     The simplest way, however, is to pass a locust file to the Python interpreter.
 
 Once Locust is running, you can access its GUI, where you can set the number of users to emulate.
@@ -58,7 +58,7 @@ These reported values include timing data, such as the average response time of 
 allowing you to assess the performance's reasonableness and impact on user experience.
 
 The data provided by extractor functions will be available in the Clickhouse database;
-you can view it using the Superset dashboard (see `instructions <./superset_guide.html>`_)
+you can view it using the Superset dashboard (see `instructions <./superset_guide.html>`__)
 or analyze it with your own queries using the Clickhouse client.
 
 Profiling context storages
@@ -73,8 +73,9 @@ In the following sections, we will guide you through setting up and running cont
 
 **Context Storage Setup**
 
-Before you can begin benchmarking, you need to set up the context storage options you want to test,
-the available options including
+Before you can begin benchmarking, you need to set up the context storage options you want to test.
+The available options include
+
 * JSON: Uses JSON files for storage.
 * Pickle: Utilizes Python's Pickle format for storage.
 * Shelve: Utilizes Python's Shelve format for storage.
@@ -117,7 +118,7 @@ Once the benchmark results are saved to a file, you can view and analyze them us
 
 **Additional Information**
 
-DFF provides configuration presets in the `basic config <../apiref/dff.utils.db_benchmarks.basic_config.py>`_ module,
+DFF provides configuration presets in the `basic config <../apiref/dff.utils.db_benchmarks.basic_config.py>`__ module,
 covering various contexts, messages, and edge cases.
 You can use these presets by passing them to the benchmark functions.
 
@@ -131,7 +132,7 @@ You'll need to define three methods:
 .. note::
 
     The exact instructions of how the testing can be carried out are available in the
-    `DB benchmarking tutorial <../tutorials/tutorials.context_storages.8_db_benchmarking.py>`_.
+    `DB benchmarking tutorial <../tutorials/tutorials.context_storages.8_db_benchmarking.py>`__.
 
 Optimization techniques
 ~~~~~~~~~~~~~~~~~~~~~~~
@@ -144,15 +145,20 @@ that may help you improve the efficiency of your service.
   during a dialog turn and only when needed. E.g. you can take note of the `conditions` api available as a part
   of the `Pipeline` module: while normally a pipeline service runs every turn, you can restrict it
   to only run on turns when a particular condition is satisfied, greatly reducing
-  the number of performed actions `<../tutorials/tutorials.pipeline.4_groups_and_conditions_full.py>`_.
+  the number of performed actions (see the
+  `Groups and Conditions tutorial <../tutorials/tutorials.pipeline.4_groups_and_conditions_full.py>`__).
 
 * Using caching for resource-consuming callbacks and actions may also prove to be a helpful strategy.
   In this manner, you can improve the computational efficiency of your pipeline,
   while making very few changes to the code itself. DFF includes a caching mechanism
-  for response functions: `<../tutorials/tutorials.utils.1_cache.py>`_. However, the simplicity
+  for response functions. However, the simplicity
   of the DFF API makes it easy to integrate any custom caching solutions that you may come up with.
+  See the `Cache tutorial <../tutorials/tutorials.utils.1_cache.py>`__.
 
 * Finally, be mindful about the use of computationally expensive algorithms, like NLU classifiers
   or LLM-based generative networks, since those require a great deal of time and resources
   to produce an answer. In case you need to use one, take full advantage of caching along with
-  other means to relieve the computational load imposed by neural networks.
+  other means to relieve the computational load imposed by neural networks such as message queueing.
+
+..
+    todo: add a link to a user guide about using message queueing.
