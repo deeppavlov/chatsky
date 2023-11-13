@@ -5,7 +5,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.6.1
+CURRENT_VERSION = 0.6.2
 TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
@@ -50,7 +50,7 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose --profile context_storage --profile stats up -d
+	docker-compose --profile context_storage --profile stats up -d --build
 .PHONY: docker_up
 
 wait_db: docker_up
