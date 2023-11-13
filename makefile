@@ -50,19 +50,14 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose --profile context_storage --profile stats up -d --build
+	docker-compose --profile context_storage --profile stats up -d --build --wait
 .PHONY: docker_up
-
-wait_db: docker_up
-	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
-.PHONY: wait_db
 
 test: venv
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
-test_all: venv wait_db test lint
+test_all: venv test lint
 .PHONY: test_all
 
 build_drawio:
