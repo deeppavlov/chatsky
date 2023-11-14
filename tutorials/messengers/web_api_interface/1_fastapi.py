@@ -7,7 +7,8 @@ introduces messenger interfaces.
 
 You can see the result at http://127.0.0.1:8000/docs.
 
-Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface) is used to process requests.
+Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
+is used to process requests.
 
 %mddoclink(api,script.core.message,Message) is used in creating a JSON Schema for the endpoint.
 """
@@ -77,8 +78,7 @@ communication between the pipeline on the server side and the messenger client.
 messenger_interface = CallbackMessengerInterface()
 # CallbackMessengerInterface instantiating the dedicated messenger interface
 pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS,
-    messenger_interface=messenger_interface
+    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
 )
 
 

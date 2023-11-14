@@ -15,7 +15,8 @@ As mentioned in that tutorial,
 > all inside a long string.
 > This, of course, is not optimal and you wouldn't use it for production.
 
-Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface) is used to process requests.
+Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
+is used to process requests.
 
 %mddoclink(api,script.core.message,Message) is used to represent text messages.
 """
@@ -36,8 +37,7 @@ from fastapi.responses import HTMLResponse
 # %%
 messenger_interface = CallbackMessengerInterface()
 pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS,
-    messenger_interface=messenger_interface
+    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
 )
 
 
@@ -93,7 +93,9 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
             request = Message(text=data)
-            context = await messenger_interface.on_request_async(request, client_id)
+            context = await messenger_interface.on_request_async(
+                request, client_id
+            )
             response = context.last_response.text
             if response is not None:
                 await websocket.send_text(f"Bot: {response}")

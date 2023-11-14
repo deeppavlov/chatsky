@@ -126,7 +126,8 @@ class CallbackMessengerInterface(MessengerInterface):
 
     async def on_request_async(self, request: Any, ctx_id: Hashable) -> Context:
         """
-        Method invoked on user input. This method works just like :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline`,
+        Method invoked on user input. This method works just like
+        :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline`,
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Return context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
@@ -139,7 +140,8 @@ class CallbackMessengerInterface(MessengerInterface):
 
     def on_request(self, request: Any, ctx_id: Hashable) -> Context:
         """
-        Method invoked on user input. This method works just like :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline`,
+        Method invoked on user input. This method works just like
+        :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline`,
         however callback message interface may contain additional functionality (e.g. for external API accessing).
         Return context that represents dialog with the user;
         `last_response`, `id` and some dialog info can be extracted from there.
