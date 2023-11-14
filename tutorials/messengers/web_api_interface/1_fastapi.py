@@ -96,7 +96,7 @@ async def respond(
     user_id: str,
     user_message: Message,
 ):
-    context = messenger_interface.on_request(user_message, user_id)
+    context = await messenger_interface.on_request_async(user_message, user_id)
     return {"user_id": user_id, "response": context.last_response}
 
 
