@@ -60,7 +60,8 @@ There are two built-in messenger interface types (that may be overridden):
     and provides a callback for pipeline execution,
     it has following methods:
 
-    * `on_request(request, ctx_id)` - Method that should be called each time
+    * `on_request(request, ctx_id)` or `on_request_async(request, ctx_id)` -
+        Method that should be called each time
         user provides new input to pipeline,
         returns dialog Context.
     * `connect(pipeline_runner)` - Method that sets `pipeline_runner` as
