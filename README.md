@@ -3,7 +3,7 @@
 
 The Dialog Flow Framework (DFF) allows you to write conversational services.
 The service is written by defining a special dialog graph that describes the behavior of the dialog service.
-The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs.
+The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs in pure Python, making it accessible for both beginners and experienced developers.
 You can use it in services such as writing skills for Amazon Alexa, etc., chatbots for social networks, website call centers, etc.
 
 [![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
@@ -109,6 +109,17 @@ Okey
 To get more advanced examples, take a look at
 [tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials) on GitHub.
 
+## Further steps
+
+To further explore the API of the framework, you can make use of the detailed documentation. 
+Broken down into several sections to highlight all the aspects of development with DFF,
+the documentation for the library is constantly available online.
+
+* [API reference](https://deeppavlov.github.io/dialog_flow_framework/reference.html)
+* [Tutorials: interactive jupyter notebooks](https://deeppavlov.github.io/dialog_flow_framework/tutorials.html)
+* [User guides: code-supplemented instructions](https://deeppavlov.github.io/dialog_flow_framework/user_guides.html)
+
 # Contributing to the Dialog Flow Framework
 
+We are open to accepting pull requests and bug reports.
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/master/CONTRIBUTING.md).
