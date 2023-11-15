@@ -30,7 +30,8 @@ from fastapi import FastAPI
 Messenger interfaces establish communication between users and the pipeline.
 They manage message channel initialization and termination
 as well as pipeline execution on every user request.
-There are two built-in messenger interface types (that may be overridden):
+There are two built-in messenger interface types that can be extended
+through inheritance:
 
 * `PollingMessengerInterface` - Starts polling for user requests
     in a loop upon initialization,
