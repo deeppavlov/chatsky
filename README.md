@@ -109,49 +109,6 @@ Okey
 To get more advanced examples, take a look at
 [tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials) on GitHub.
 
-# Context Storages
-## Description
-
-Context Storages allow you to save and retrieve user dialogue states
-(in the form of a `Context` object) using various database backends. 
-
-The following backends are currently supported:
-* [JSON](https://www.json.org/json-en.html)
-* [pickle](https://docs.python.org/3/library/pickle.html)
-* [shelve](https://docs.python.org/3/library/shelve.html)
-* [SQLite](https://www.sqlite.org/index.html)
-* [PostgreSQL](https://www.postgresql.org/)
-* [MySQL](https://www.mysql.com/)
-* [MongoDB](https://www.mongodb.com/)
-* [Redis](https://redis.io/)
-* [Yandex DataBase](https://ydb.tech/)
-
-Aside from this, we offer some interfaces for saving data to your local file system.
-These are not meant to be used in production, but can be helpful for prototyping your application.
-
-## Basic example
-
-```python
-from dff.script import Context
-from dff.pipeline import Pipeline
-from dff.context_storages import SQLContextStorage
-from .script import some_df_script
-
-db = SQLContextStorage("postgresql+asyncpg://user:password@host:port/dbname")
-
-pipeline = Pipeline.from_script(some_df_script, start_label=("root", "start"), fallback_label=("root", "fallback"))
-
-
-def handle_request(request):
-    user_id = request.args["user_id"]
-    new_context = pipeline(request, user_id)
-    return new_context.last_response
-
-```
-
-To get more advanced examples, take a look at
-[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials/context_storages) on GitHub.
-
 # Contributing to the Dialog Flow Framework
 
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/master/CONTRIBUTING.md).

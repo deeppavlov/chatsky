@@ -21,7 +21,60 @@ It allows developers to easily create and manage complex dialog flows, integrate
 and handle user input in a flexible and efficient manner. Additionally, the framework is highly customizable,
 allowing developers to easily adapt it to their specific needs and requirements.
 
+DFF documentation includes the following sections:
+
+:doc:`Getting started <./get_started>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Essential information about installing and using the library
+for beginners can be found in the ``Getting started`` part
+of the documentation. For deeper understanding of the API,
+consult the documentation sections described below.
+
+:doc:`User guides <./user_guides>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``User guides`` section provides comprehensive explanations
+of how your conversational service should be set up and function.
+
+:doc:`Tutorials <./tutorials>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Additional capabilities of DFF can be explored in the ``Tutorials``
+section. These interactive files dynamically showcase both the basic
+and the complex aspects of the functionality.
+
+:doc:`Examples <./examples>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+Links to demonsration projects that use the library and serve as examples
+can be found in this section.
+
+:doc:`API reference <./reference>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The API reference contains documentation for classes and abstractions
+used in the library which can be used to determine the exact typing
+and behavior of all the functions involved.
+
+:doc:`Development <./development>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Development section shows the current development status and specifies the contribution rules.
+
+:doc:`Community <./community>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The Community section links you to useful resources where you can find supplemental information
+about the framework and ask questions.
+
+:doc:`About us <./about_us>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+You can get more info about the development team in the ``About us`` section.
+
 .. toctree::
+   :hidden:
    :maxdepth: 1
 
    get_started
