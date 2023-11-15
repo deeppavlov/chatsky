@@ -92,7 +92,8 @@ toy_script = {
         "question_3": {
             RESPONSE: Message(
                 **{
-                    "text": "What's 114 + 115? (type in the index of the correct option)",
+                    "text": "What's 114 + 115? "
+                    "(type in the index of the correct option)",
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
@@ -120,7 +121,8 @@ happy_path = (
         Message(text="Hi"),
         Message(
             **{
-                "text": "Starting test! What's 2 + 2? (type in the index of the correct option)",
+                "text": "Starting test! What's 2 + 2? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -136,7 +138,8 @@ happy_path = (
         Message(text="0"),
         Message(
             **{
-                "text": "Starting test! What's 2 + 2? (type in the index of the correct option)",
+                "text": "Starting test! What's 2 + 2? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -152,7 +155,8 @@ happy_path = (
         Message(text="1"),
         Message(
             **{
-                "text": "Next question: what's 6 * 8? (type in the index of the correct option)",
+                "text": "Next question: what's 6 * 8? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -168,7 +172,8 @@ happy_path = (
         Message(text="0"),
         Message(
             **{
-                "text": "Next question: what's 6 * 8? (type in the index of the correct option)",
+                "text": "Next question: what's 6 * 8? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -184,7 +189,8 @@ happy_path = (
         Message(text="1"),
         Message(
             **{
-                "text": "What's 114 + 115? (type in the index of the correct option)",
+                "text": "What's 114 + 115? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -200,7 +206,8 @@ happy_path = (
         Message(text="1"),
         Message(
             **{
-                "text": "What's 114 + 115? (type in the index of the correct option)",
+                "text": "What's 114 + 115? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -218,12 +225,19 @@ happy_path = (
 
 
 def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.misc and ctx.last_response.misc.get("ui")
+    ui = (
+        ctx.last_response
+        and ctx.last_response.misc
+        and ctx.last_response.misc.get("ui")
+    )
     if ui and ui.buttons:
         try:
             chosen_button = ui.buttons[int(ctx.last_request.text)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+            raise ValueError(
+                "Type in the index of the correct option "
+                "to choose from the buttons."
+            )
         ctx.last_request = Message(misc={"payload": chosen_button.payload})
 
 

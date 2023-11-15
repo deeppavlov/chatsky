@@ -105,8 +105,12 @@ def after(_, __, info: ExtraHandlerRuntimeInfo):
 
 
 def after_all(_, __, info: ExtraHandlerRuntimeInfo):
-    pipeline_info.update({"total_time": datetime.now() - start_times[info.component.path]})
-    logger.info(f"Pipeline stats: {json.dumps(pipeline_info, indent=4, default=str)}")
+    pipeline_info.update(
+        {"total_time": datetime.now() - start_times[info.component.path]}
+    )
+    logger.info(
+        f"Pipeline stats: {json.dumps(pipeline_info, indent=4, default=str)}"
+    )
 
 
 async def long_service(_, __, info: ServiceRuntimeInfo):

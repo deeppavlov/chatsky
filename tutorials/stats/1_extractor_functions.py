@@ -34,7 +34,13 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 import asyncio
 
 from dff.script import Context
-from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.pipeline import (
+    Pipeline,
+    ACTOR,
+    Service,
+    ExtraHandlerRuntimeInfo,
+    to_service,
+)
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.stats import OtelInstrumentor, default_extractors
 from dff.utils.testing import is_interactive_mode, check_happy_path
@@ -104,7 +110,10 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             heavy_service,
-            Service(handler=ACTOR, after_handler=[default_extractors.get_current_label]),
+            Service(
+                handler=ACTOR,
+                after_handler=[default_extractors.get_current_label],
+            ),
         ],
     }
 )

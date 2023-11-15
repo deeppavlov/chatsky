@@ -57,13 +57,19 @@ script = {
     "root": {
         "start": {
             TRANSITIONS: {
-                ("pics", "ask_picture"): telegram_condition(commands=["start", "restart"])
+                ("pics", "ask_picture"): telegram_condition(
+                    commands=["start", "restart"]
+                )
             },
         },
         "fallback": {
-            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
+            RESPONSE: TelegramMessage(
+                text="Finishing test, send /restart command to restart"
+            ),
             TRANSITIONS: {
-                ("pics", "ask_picture"): telegram_condition(commands=["start", "restart"])
+                ("pics", "ask_picture"): telegram_condition(
+                    commands=["start", "restart"]
+                )
             },
         },
     },
@@ -73,8 +79,10 @@ script = {
             TRANSITIONS: {
                 ("pics", "send_one"): cnd.any(
                     [
-                        # Telegram can put photos both in 'photo' and 'document' fields.
-                        # We should consider both cases when we check the message for media.
+                        # Telegram can put photos
+                        # both in 'photo' and 'document' fields.
+                        # We should consider both cases
+                        # when we check the message for media.
                         telegram_condition(content_types=["photo"]),
                         telegram_condition(
                             func=lambda message: (
@@ -86,7 +94,9 @@ script = {
                         ),
                     ]
                 ),
-                ("pics", "send_many"): telegram_condition(content_types=["text"]),
+                ("pics", "send_many"): telegram_condition(
+                    content_types=["text"]
+                ),
                 ("pics", "ask_picture"): cnd.true(),
             },
         },
@@ -112,9 +122,14 @@ script = {
 
 # testing
 happy_path = (
-    (TelegramMessage(text="/start"), TelegramMessage(text="Send me a picture")),
     (
-        TelegramMessage(attachments=Attachments(files=[Image(source=picture_url)])),
+        TelegramMessage(text="/start"),
+        TelegramMessage(text="Send me a picture"),
+    ),
+    (
+        TelegramMessage(
+            attachments=Attachments(files=[Image(source=picture_url)])
+        ),
         TelegramMessage(
             text="Here's my picture!",
             attachments=Attachments(files=[Image(source=picture_url)]),
@@ -122,9 +137,14 @@ happy_path = (
     ),
     (
         TelegramMessage(text="ok"),
-        TelegramMessage(text="Finishing test, send /restart command to restart"),
+        TelegramMessage(
+            text="Finishing test, send /restart command to restart"
+        ),
     ),
-    (TelegramMessage(text="/restart"), TelegramMessage(text="Send me a picture")),
+    (
+        TelegramMessage(text="/restart"),
+        TelegramMessage(text="Send me a picture"),
+    ),
     (
         TelegramMessage(text="No"),
         TelegramMessage(
@@ -134,9 +154,14 @@ happy_path = (
     ),
     (
         TelegramMessage(text="ok"),
-        TelegramMessage(text="Finishing test, send /restart command to restart"),
+        TelegramMessage(
+            text="Finishing test, send /restart command to restart"
+        ),
     ),
-    (TelegramMessage(text="/restart"), TelegramMessage(text="Send me a picture")),
+    (
+        TelegramMessage(text="/restart"),
+        TelegramMessage(text="Send me a picture"),
+    ),
 )
 
 
@@ -178,5 +203,6 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()
