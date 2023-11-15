@@ -10,7 +10,6 @@ try:
     from requests import Session
     import omegaconf  # noqa: F401
     import tqdm  # noqa: F401
-    from dff.stats.__main__ import main
     from dff.stats.utils import get_superset_session
     from dff.stats.cli import DEFAULT_SUPERSET_URL
     from aiochclient import ChClient
@@ -31,6 +30,8 @@ CLICKHOUSE_AVAILABLE = ping_localhost(8123)
 CLICKHOUSE_USER = os.getenv("CLICKHOUSE_USER")
 CLICKHOUSE_PASSWORD = os.getenv("CLICKHOUSE_PASSWORD")
 CLICKHOUSE_DB = os.getenv("CLICKHOUSE_DB")
+SUPERSET_USERNAME = os.getenv("SUPERSET_USERNAME")
+SUPERSET_PASSWORD = os.getenv("SUPERSET_PASSWORD")
 
 
 async def transitions_data_test(session: Session, headers: dict, base_url=DEFAULT_SUPERSET_URL):
@@ -89,20 +90,6 @@ async def numbered_data_test(session: Session, headers: dict, base_url=DEFAULT_S
     session.close()
 
 
-config_namespace = Namespace(
-    **{
-        "db.driver": "clickhousedb+connect",
-        "db.host": "clickhouse",
-        "db.port": "8123",
-        "db.name": "test",
-        "db.table": "otel_logs",
-        "host": "localhost",
-        "port": "8088",
-        "file": f"tutorials/{dot_path_to_addon}/example_config.yaml",
-    }
-)
-
-
 @pytest.mark.skipif(not SUPERSET_ACTIVE, reason="Superset server not active")
 @pytest.mark.skipif(not CLICKHOUSE_AVAILABLE, reason="Clickhouse unavailable.")
 @pytest.mark.skipif(not COLLECTOR_AVAILABLE, reason="OTLP collector unavailable.")
@@ -111,22 +98,14 @@ config_namespace = Namespace(
 )
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
-    ["args", "pipeline", "func"],
+    ["pipeline", "func"],
     [
-        (config_namespace, numbered_test_pipeline, numbered_data_test),
-        (config_namespace, transition_test_pipeline, transitions_data_test),
+        (numbered_test_pipeline, numbered_data_test),
+        (transition_test_pipeline, transitions_data_test),
     ],
 )
 @pytest.mark.docker
-async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_exp_provider):
-    args.__dict__.update(
-        {
-            "db.password": os.environ["CLICKHOUSE_PASSWORD"],
-            "username": os.environ["SUPERSET_USERNAME"],
-            "password": os.environ["SUPERSET_PASSWORD"],
-            "db.user": os.environ["CLICKHOUSE_USER"],
-        }
-    )
+async def test_charts(pipeline, func, otlp_log_exp_provider, otlp_trace_exp_provider):
     _, tracer_provider = otlp_trace_exp_provider
     _, logger_provider = otlp_log_exp_provider
 
@@ -140,11 +119,18 @@ async def test_charts(args, pipeline, func, otlp_log_exp_provider, otlp_trace_ex
     num_records = 0
 
     attempts = 0
-    while num_records == 0 and attempts < 10:
+    while num_records < 10 and attempts < 10:
         attempts += 1
         await asyncio.sleep(2)
         num_records = await ch_client.fetchval(f"SELECT COUNT (*) FROM {table}")
 
-    main(args)
-    session, headers = get_superset_session(args, DEFAULT_SUPERSET_URL)
+    os.system(
+        f"dff.stats tutorials/stats/example_config.yaml \
+            -U {SUPERSET_USERNAME} \
+            -P {SUPERSET_PASSWORD} \
+            -dP {CLICKHOUSE_PASSWORD}"
+    )
+    session, headers = get_superset_session(
+        Namespace(**{"username": SUPERSET_USERNAME, "password": SUPERSET_PASSWORD}), DEFAULT_SUPERSET_URL
+    )
     await func(session, headers)  # run with a test-specific function with equal signature
