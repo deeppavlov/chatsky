@@ -24,9 +24,10 @@
 #
 import os
 
-SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{0}:{1}@dashboard-metadata:{2}/{3}".format(
-    os.getenv("POSTGRES_USERNAME"),
-    os.getenv("POSTGRES_PASSWORD"),
-    os.getenv("SUPERSET_METADATA_PORT"),
-    os.getenv("POSTGRES_DB"),
-)
+if os.getenv("ENVIRONMENT") == "prod":
+    SQLALCHEMY_DATABASE_URI = "postgresql+psycopg2://{0}:{1}@dashboard-metadata:{2}/{3}".format(
+        os.getenv("POSTGRES_USERNAME"),
+        os.getenv("POSTGRES_PASSWORD"),
+        os.getenv("SUPERSET_METADATA_PORT"),
+        os.getenv("POSTGRES_DB"),
+    )

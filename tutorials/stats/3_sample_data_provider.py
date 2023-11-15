@@ -1,11 +1,14 @@
-#!/usr/bin/env python
 # %% [markdown]
 """
+# 3. Sample data provider
+
 This script demonstrates various instrumentation capabilities.
 It also provides data for the dashboard emulating simultaneous queries
 to the service by multiple users.
 
 """
+
+# %pip install dff[stats]
 
 # %%
 import random
@@ -17,22 +20,32 @@ from dff.stats import (
     default_extractors,
     OtelInstrumentor,
 )
-from dff.utils.testing.toy_script import MULTIFLOW_SCRIPT, MULTIFLOW_REQUEST_OPTIONS
+from dff.utils.testing.toy_script import (
+    MULTIFLOW_SCRIPT,
+    MULTIFLOW_REQUEST_OPTIONS,
+)
 
 # %%
 # instrumentation code
-dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
+dff_instrumentor = OtelInstrumentor.from_url(
+    "grpc://localhost:4317", insecure=True
+)
 dff_instrumentor.instrument()
 
 
 def slot_processor_1(ctx: Context):
-    ctx.misc["slots"] = {**ctx.misc.get("slots", {}), "rating": random.randint(1, 10)}
+    ctx.misc["slots"] = {
+        **ctx.misc.get("slots", {}),
+        "rating": random.randint(1, 10),
+    }
 
 
 def slot_processor_2(ctx: Context):
     ctx.misc["slots"] = {
         **ctx.misc.get("slots", {}),
-        "current_topic": random.choice(["films", "games", "books", "smalltalk"]),
+        "current_topic": random.choice(
+            ["films", "games", "books", "smalltalk"]
+        ),
     }
 
 
