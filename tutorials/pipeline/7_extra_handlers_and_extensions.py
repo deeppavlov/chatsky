@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 8. Extra Handlers and Extensions
+# 7. Extra Handlers and Extensions
 
 The following tutorial shows how pipeline can be extended
 by global extra handlers and custom functions.
