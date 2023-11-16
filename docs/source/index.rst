@@ -27,27 +27,31 @@ DFF documentation includes the following sections:
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Essential information about installing and using the library
-for beginners can be found in the ``Getting started`` part
-of the documentation. For deeper understanding of the API,
-consult the documentation sections described below.
+aimed at beginners can be found in the ``Getting started`` part
+of the documentation. This section also introduces the basic terms
+that form the principles of the framework.
+For deeper understanding of the API, consult the documentation sections described below.
 
 :doc:`User guides <./user_guides>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``User guides`` section provides comprehensive explanations
+The ``User guides`` section provides comprehensive human-readable explanations
 of how your conversational service should be set up and function.
+It specifically highlights the aspects that are not covered by the API reference,
+e.g. deployment, optimization techniques, etc.
 
 :doc:`Tutorials <./tutorials>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Additional capabilities of DFF can be explored in the ``Tutorials``
+Most capabilities of DFF can also be explored in the ``Tutorials``
 section. These interactive files dynamically showcase both the basic
 and the complex aspects of the functionality.
 
 :doc:`Examples <./examples>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-Links to demonsration projects that use the library and serve as examples
+Links to demonsration projects that leverage the library
+integrating it with external services and models and serve as examples
 can be found in this section.
 
 :doc:`API reference <./reference>`
@@ -60,12 +64,12 @@ and behavior of all the functions involved.
 :doc:`Development <./development>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Development section shows the current development status and specifies the contribution rules.
+The ``Development`` section shows the library's current development status and specifies the contribution rules.
 
 :doc:`Community <./community>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The Community section links you to useful resources where you can find supplemental information
+The ``Community`` section links you to useful resources where you can find supplemental information
 about the framework and ask questions.
 
 :doc:`About us <./about_us>`

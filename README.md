@@ -54,6 +54,11 @@ pip install dff[postgresql, mysql]
 
 ## Basic example
 
+The following code snippet builds a simplistic chat bot that replies with messages
+``Hi!!!`` and ``Okey`` depending on user input, which only takes a few lines of code.
+Annotations for all the abstractions used in this examples can be found in the dedicated
+[user guide](https://deeppavlov.github.io/dialog_flow_framework/user_guides/basic_conceptions.html).
+
 ```python
 from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Message
 from dff.pipeline import Pipeline
@@ -106,8 +111,8 @@ type your answer: ok
 Okey
 ```
 
-To get more advanced examples, take a look at
-[tutorials](https://github.com/deeppavlov/dialog_flow_framework/tree/master/tutorials) on GitHub.
+More advanced examples are available as a part of documentation:
+[tutorials](https://deeppavlov.github.io/dialog_flow_framework/tutorials.html).
 
 ## Further steps
 
@@ -118,6 +123,11 @@ the documentation for the library is constantly available online.
 * [API reference](https://deeppavlov.github.io/dialog_flow_framework/reference.html)
 * [Tutorials: interactive jupyter notebooks](https://deeppavlov.github.io/dialog_flow_framework/tutorials.html)
 * [User guides: code-supplemented instructions](https://deeppavlov.github.io/dialog_flow_framework/user_guides.html)
+
+You can also take a look at demonstration projects that showcase how DFF pipelines
+can be integrated into web applications and leverage external APIs.
+
+* [Project repository](https://github.com/deeppavlov/dialog_flow_demo)
 
 # Contributing to the Dialog Flow Framework
 
