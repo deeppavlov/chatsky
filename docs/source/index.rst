@@ -44,8 +44,8 @@ e.g. deployment, optimization techniques, etc.
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Most capabilities of DFF can also be explored in the ``Tutorials``
-section. These interactive files dynamically showcase both the basic
-and the complex aspects of the functionality.
+section. These interactive files dynamically showcase how different
+modules and classes of the framework interact.
 
 :doc:`Examples <./examples>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~

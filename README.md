@@ -1,10 +1,16 @@
 
 # Dialog Flow Framework
 
-The Dialog Flow Framework (DFF) allows you to write conversational services.
-The service is written by defining a special dialog graph that describes the behavior of the dialog service.
-The dialog graph contains the dialog script. DFF offers a specialized language (DSL) for quickly writing dialog graphs in pure Python, making it accessible for both beginners and experienced developers.
-You can use it in services such as writing skills for Amazon Alexa, etc., chatbots for social networks, website call centers, etc.
+The Dialog Flow Framework (DFF) allows you to develop conversational services.
+DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
+You can use the framework in various services, such as Amazon Alexa skills, chatbots for social networks, call centers, etc.
+
+## Why choose DFF
+
+* Written in pure Python, the framework is easily accessible for both beginners and experienced developers.
+* For the same reason, all the abstractions used in DFF can be easily customized and extended using regular language synthax.
+* DFF offers easy and straightforward tools for state management which is as easy as setting values of a Python dictionary.
+* The framework is being actively maintained and thoroughly tested. The team is open to suggestions and quickly reacts to bug reports.
 
 [![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
 [![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
@@ -56,7 +62,7 @@ pip install dff[postgresql, mysql]
 
 The following code snippet builds a simplistic chat bot that replies with messages
 ``Hi!!!`` and ``Okey`` depending on user input, which only takes a few lines of code.
-Annotations for all the abstractions used in this examples can be found in the dedicated
+All the abstractions used in this example are thoroughly explained in the dedicated
 [user guide](https://deeppavlov.github.io/dialog_flow_framework/user_guides/basic_conceptions.html).
 
 ```python
