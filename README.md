@@ -1,5 +1,12 @@
-
 # Dialog Flow Framework
+
+[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
+[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
+[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
+[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
+![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
+[![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
+[![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
 The Dialog Flow Framework (DFF) allows you to develop conversational services.
 DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
@@ -11,14 +18,6 @@ You can use the framework in various services, such as Amazon Alexa skills, chat
 * For the same reason, all the abstractions used in DFF can be easily customized and extended using regular language synthax.
 * DFF offers easy and straightforward tools for state management which is as easy as setting values of a Python dictionary.
 * The framework is being actively maintained and thoroughly tested. The team is open to suggestions and quickly reacts to bug reports.
-
-[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
-[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
-[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
-[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
-![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
-[![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
-[![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
 
 # Quick Start
 ## Installation
