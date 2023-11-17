@@ -52,15 +52,14 @@ pip install dff[postgresql, mysql]
 ## Basic example
 
 The following code snippet builds a simplistic chat bot that replies with messages
-``Hi!!!`` and ``Okey`` depending on user input, which only takes a few lines of code.
+``Hi!`` and ``OK`` depending on user input, which only takes a few lines of code.
 All the abstractions used in this example are thoroughly explained in the dedicated
 [user guide](https://deeppavlov.github.io/dialog_flow_framework/user_guides/basic_conceptions.html).
 
 ```python
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Context, Message
+from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Message
 from dff.pipeline import Pipeline
 import dff.script.conditions.std_conditions as cnd
-from typing import Tuple
 
 # create a dialog script
 script = {
@@ -71,8 +70,8 @@ script = {
         }
     },
     "flow": {
-        "node_hi": {RESPONSE: Message(text="Hi!!!")},
-        "node_ok": {RESPONSE: Message(text="Okey")},
+        "node_hi": {RESPONSE: Message(text="Hi!")},
+        "node_ok": {RESPONSE: Message(text="OK")},
     },
 }
 
@@ -80,32 +79,31 @@ script = {
 pipeline = Pipeline.from_script(script, start_label=("flow", "node_hi"))
 
 
-# handler requests
-def turn_handler(in_request: Message, pipeline: Pipeline) -> Tuple[Message, Context]:
-    # Pass the next request of user into pipeline and it returns updated context with actor response
+def turn_handler(in_request: Message, pipeline: Pipeline) -> Message:
+    # Pass user request into pipeline and get dialog context (message history)
+    # The pipeline will automatically choose the correct response using script
     ctx = pipeline(in_request, 0)
-    # Get last actor response from the context
+    # Get last response from the context
     out_response = ctx.last_response
-    # The next condition branching needs for testing
-    return out_response, ctx
+    return out_response
 
 
 while True:
-    in_request = input("type your answer: ")
-    out_response, ctx = turn_handler(Message(text=in_request), pipeline)
-    print(out_response.text)
+    in_request = input("Your message: ")
+    out_response = turn_handler(Message(text=in_request), pipeline)
+    print("Response: ", out_response.text)
 ```
 
 When you run this code, you get similar output:
 ```
-type your answer: hi
-Okey
-type your answer: Hi
-Hi!!!
-type your answer: ok
-Okey
-type your answer: ok
-Okey
+Your message: hi
+Response:  OK
+Your message: Hi
+Response:  Hi!
+Your message: ok
+Response:  OK
+Your message: ok
+Response:  OK
 ```
 
 More advanced examples are available as a part of documentation:
