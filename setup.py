@@ -131,7 +131,7 @@ test_requirements = merge_req_lists(
         "click==8.1.3",
         "black==23.9.1",
         "isort==5.12.0",
-        "jsonschema==4.19.1",
+        "jsonschema==4.20.0",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
