@@ -111,7 +111,7 @@ More advanced examples are available as a part of documentation:
 
 ## Further steps
 
-To further explore the API of the framework, you can make use of the detailed documentation. 
+To further explore the API of the framework, you can make use of the [detailed documentation](https://deeppavlov.github.io/dialog_flow_framework/index.html). 
 Broken down into several sections to highlight all the aspects of development with DFF,
 the documentation for the library is constantly available online.
 
@@ -122,7 +122,7 @@ the documentation for the library is constantly available online.
 You can also take a look at demonstration projects that showcase how DFF pipelines
 can be integrated into web applications and leverage external APIs.
 
-* [Project repository](https://github.com/deeppavlov/dialog_flow_demo)
+* [Examples: applications that use DFF](https://deeppavlov.github.io/dialog_flow_framework/examples.html)
 
 # Contributing to the Dialog Flow Framework
 
