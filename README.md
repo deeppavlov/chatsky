@@ -128,3 +128,7 @@ can be integrated into web applications and leverage external APIs.
 
 We are open to accepting pull requests and bug reports.
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/master/CONTRIBUTING.md).
+
+# License
+
+DFF is distributed under the terms of the [Apache License 2.0](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE).
