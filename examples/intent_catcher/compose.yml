@@ -1,0 +1,23 @@
+version: "3.9"
+services:
+
+  intent_catcher:
+    build:
+      args:
+        SERVICE_PORT: 4999
+        IC_WEIGHTS: https://huggingface.co/ruthenian8/deeppavlov-intent-catcher-transformers/resolve/main/model.pth.tar
+        IC_CLASSES: https://huggingface.co/ruthenian8/deeppavlov-intent-catcher-transformers/raw/main/classes.dict
+      context: ./
+      dockerfile: Dockerfile.server
+    ports:
+      - 4999:4999
+
+  intent_client:
+    build:
+      args:
+        SERVICE_HOST: intent_catcher
+        SERVICE_PORT: 4999
+      context: ./
+      dockerfile: Dockerfile.client
+    depends_on:
+      - intent_catcher
