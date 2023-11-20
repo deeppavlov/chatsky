@@ -234,6 +234,7 @@ PipelineBuilder: TypeAlias = TypedDict(
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
+        "parallelize_processing": NotRequired[bool],
         "script": Union[Script, Dict],
         "start_label": NodeLabel2Type,
         "fallback_label": NotRequired[Optional[NodeLabel2Type]],

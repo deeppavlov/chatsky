@@ -36,7 +36,7 @@ The global node is defined above the flow level as opposed to regular nodes.
 This node allows to define default global values for all nodes.
 
 There are `GLOBAL` node and three flows:
-`global_flow`, `greeting_flow`, `music_flow`.
+`root`, `greeting_flow`, `music_flow`.
 """
 
 # %%
@@ -61,18 +61,16 @@ toy_script = {
             lbl.repeat(0.2): cnd.all(
                 [
                     cnd.regexp(r"repeat", re.I),
-                    cnd.negation(
-                        cnd.has_last_labels(flow_labels=["global_flow"])
-                    ),
+                    cnd.negation(cnd.has_last_labels(flow_labels=["root"])),
                 ]  # fourth check
             ),
         }
     },
-    "global_flow": {
-        "start_node": {
+    "root": {
+        "start": {
             RESPONSE: Message()
         },  # This is an initial node, it doesn't need a `RESPONSE`.
-        "fallback_node": {  # We get to this node
+        "fallback": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: Message(text="Ooops"),
             TRANSITIONS: {lbl.previous(): cnd.regexp(r"previous", re.I)},
@@ -211,8 +209,8 @@ happy_path = (
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("global_flow", "start_node"),
-    fallback_label=("global_flow", "fallback_node"),
+    start_label=("root", "start"),
+    fallback_label=("root", "fallback"),
 )
 
 if __name__ == "__main__":

@@ -213,6 +213,7 @@ class Pipeline:
         validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
+        parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
@@ -236,6 +237,9 @@ class Pipeline:
             It is executed by default. Defaults to `None`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
+        :param parallelize_processing: This flag determines whether or not the functions
+            defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+            of the script should be parallelized over respective groups.
         :param handlers: This variable is responsible for the usage of external handlers on
             the certain stages of work of :py:class:`~dff.script.Actor`.
 
@@ -263,6 +267,7 @@ class Pipeline:
             validation_stage=validation_stage,
             condition_handler=condition_handler,
             verbose=verbose,
+            parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
             context_storage=context_storage,
