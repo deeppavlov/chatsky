@@ -186,6 +186,8 @@ class PipelineComponent(abc.ABC):
             asynchronous services shouldn't modify :py:class:`~.Context`.
         """
         if self.asynchronous:
+            if self.name == "pipeline":
+                return await self._run(ctx, pipeline)
             task = asyncio.create_task(self._run(ctx, pipeline))
             return asyncio.wait_for(task, timeout=self.timeout)
         else:

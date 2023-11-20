@@ -155,7 +155,7 @@ class ServiceGroup(PipelineComponent):
             logger.error(f"ServiceGroup '{self.name}' execution failed!\n{e}")
 
         await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-        return ctx if not self.asynchronous else None
+        return ctx if not self.asynchronous or self.name == "pipeline" else None
 
     def log_optimization_warnings(self):
         """

@@ -7,12 +7,9 @@ Pipeline consists of services and service groups.
 Service group can be synchronous or asynchronous.
 Service is an atomic part of a pipeline.
 Service can be asynchronous only if its handler is a coroutine.
-Actor wrapping service can be synchronous only.
+Actor wrapping service is asynchronous.
 """
-# TODO: change last sentence, when actor will be asynchronous
-
 import logging
-import asyncio
 import inspect
 from typing import Optional, ForwardRef
 
@@ -91,8 +88,8 @@ class Service(PipelineComponent):
                 before_handler,
                 after_handler,
                 timeout,
-                asynchronous,
-                asyncio.iscoroutinefunction(handler),
+                True,
+                True,
                 start_condition,
                 name,
             )
