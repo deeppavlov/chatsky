@@ -10,7 +10,7 @@
 
 The Dialog Flow Framework (DFF) allows you to develop conversational services.
 DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
-You can use the framework in various services, such as Amazon Alexa skills, chatbots for social networks, call centers, etc.
+You can use the framework in various services such as social networks, call centers, websites, personal assistants, etc.
 
 ## Why choose DFF
 
