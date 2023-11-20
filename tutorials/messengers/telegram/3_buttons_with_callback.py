@@ -53,15 +53,19 @@ script = {
         "start": {
             TRANSITIONS: {
                 ("general", "keyboard"): (
-                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text
+                    in ("/start", "/restart")
                 ),
             },
         },
         "fallback": {
-            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
+            RESPONSE: TelegramMessage(
+                text="Finishing test, send /restart command to restart"
+            ),
             TRANSITIONS: {
                 ("general", "keyboard"): (
-                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text
+                    in ("/start", "/restart")
                 )
             },
         },
@@ -81,8 +85,12 @@ script = {
                 }
             ),
             TRANSITIONS: {
-                ("general", "success"): cnd.exact_match(TelegramMessage(callback_query="correct")),
-                ("general", "fail"): cnd.exact_match(TelegramMessage(callback_query="wrong")),
+                ("general", "success"): cnd.exact_match(
+                    TelegramMessage(callback_query="correct")
+                ),
+                ("general", "fail"): cnd.exact_match(
+                    TelegramMessage(callback_query="wrong")
+                ),
             },
         },
         "success": {
@@ -90,7 +98,9 @@ script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
-            RESPONSE: TelegramMessage(text="Incorrect answer, type anything to try again"),
+            RESPONSE: TelegramMessage(
+                text="Incorrect answer, type anything to try again"
+            ),
             TRANSITIONS: {("general", "keyboard"): cnd.true()},
         },
     },
@@ -132,7 +142,9 @@ happy_path = (
     ),
     (
         TelegramMessage(text="Yay!"),
-        TelegramMessage(text="Finishing test, send /restart command to restart"),
+        TelegramMessage(
+            text="Finishing test, send /restart command to restart"
+        ),
     ),
     (
         TelegramMessage(text="/restart"),
@@ -164,5 +176,6 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

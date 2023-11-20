@@ -50,7 +50,8 @@ happy_path = HAPPY_PATH
 # %%
 pipeline = Pipeline.from_script(
     *TOY_SCRIPT_ARGS,
-    messenger_interface=interface,  # The interface can be passed as a pipeline argument.
+    messenger_interface=interface,
+    # The interface can be passed as a pipeline argument
 )
 
 
@@ -58,5 +59,6 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

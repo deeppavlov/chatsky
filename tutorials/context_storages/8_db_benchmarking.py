@@ -136,7 +136,9 @@ By default it prints the name and average metrics for each case.
 """
 
 # %%
-benchmark.report(file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"})
+benchmark.report(
+    file=tutorial_dir / "Shelve.json", display={"name", "config", "metrics"}
+)
 
 # %% [markdown]
 """

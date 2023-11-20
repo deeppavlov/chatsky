@@ -5,7 +5,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.6.1
+CURRENT_VERSION = 0.6.2
 TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
@@ -34,13 +34,13 @@ venv:
 
 format: venv
 	black --line-length=120 --exclude='venv|build|tutorials' .
-	black --line-length=100 tutorials
+	black --line-length=80 tutorials
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length=120 --exclude venv,build,tutorials .
-	flake8 --max-line-length=100 tutorials
-	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=100 --check tutorials || ( \
+	flake8 --max-line-length=120 --exclude venv,build,tutorials --per-file-ignores='**/__init__.py:F401' .
+	flake8 --max-line-length=100 --per-file-ignores='**/3_load_testing_with_locust.py:E402 **/4_streamlit_chat.py:E402'  tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=80 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -50,7 +50,7 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose --profile context_storage --profile stats up -d
+	docker-compose --profile context_storage --profile stats up -d --build
 .PHONY: docker_up
 
 wait_db: docker_up

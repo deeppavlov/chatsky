@@ -1,0 +1,86 @@
+slice_name: Transition ratio [chord]
+description: null
+certified_by: null
+certification_details: null
+viz_type: chord
+params:
+  datasource: 2__table
+  viz_type: chord
+  slice_id: 12
+  granularity_sqla: start_time
+  time_range: No filter
+  groupby: label
+  columns: prev_label
+  metric:
+    aggregate: COUNT_DISTINCT
+    column:
+      advanced_data_type: null
+      certification_details: null
+      certified_by: null
+      column_name: context_id
+      description: null
+      expression: null
+      filterable: true
+      groupby: true
+      id: 1
+      is_certified: false
+      is_dttm: false
+      python_date_format: null
+      type: STRING
+      type_generic: 1
+      verbose_name: null
+      warning_markdown: null
+    expressionType: SIMPLE
+    hasCustomLabel: false
+    isNew: false
+    label: COUNT_DISTINCT(context_id)
+    optionName: metric_97lz5hqft8j_aqofzpt1ma5
+    sqlExpression: null
+  adhoc_filters:
+  - expressionType: SIMPLE
+    subject: data_key
+    operator: ==
+    operatorId: EQUALS
+    comparator: get_current_label
+    clause: WHERE
+    sqlExpression: null
+    isExtra: false
+    isNew: false
+    datasourceWarning: false
+    filterOptionName: filter_ug6txpdjuzj_znl0zrda72n
+  - expressionType: SQL
+    sqlExpression: label <> ''
+    clause: WHERE
+    subject: null
+    operator: null
+    comparator: null
+    isExtra: false
+    isNew: false
+    datasourceWarning: false
+    filterOptionName: filter_a4j5xkh81f5_k2i0586j12h
+  - expressionType: SQL
+    sqlExpression: prev_label <> ''
+    clause: WHERE
+    subject: null
+    operator: null
+    comparator: null
+    isExtra: false
+    isNew: false
+    datasourceWarning: false
+    filterOptionName: filter_p4zwr1yr4v9_avka1ppurai
+  row_limit: 10000
+  y_axis_format: ~g
+  color_scheme: echarts4Colors
+  extra_form_data: {}
+  dashboards:
+  - 1
+query_context: '{"datasource":{"id":2,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"start_time","filters":[{"col":"data_key","op":"==","val":"get_current_label"}],"extras":{"having":"","where":"(label
+  <> '''') AND (prev_label <> '''')"},"applied_time_extras":{},"columns":["label","prev_label"],"metrics":[{"aggregate":"COUNT_DISTINCT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"context_id","description":null,"expression":null,"filterable":true,"groupby":true,"id":1,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"STRING","type_generic":1,"verbose_name":null,"warning_markdown":null},"expressionType":"SIMPLE","hasCustomLabel":false,"isNew":false,"label":"COUNT_DISTINCT(context_id)","optionName":"metric_97lz5hqft8j_aqofzpt1ma5","sqlExpression":null}],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"2__table","viz_type":"chord","slice_id":12,"granularity_sqla":"start_time","time_range":"No
+  filter","groupby":"label","columns":"prev_label","metric":{"aggregate":"COUNT_DISTINCT","column":{"advanced_data_type":null,"certification_details":null,"certified_by":null,"column_name":"context_id","description":null,"expression":null,"filterable":true,"groupby":true,"id":1,"is_certified":false,"is_dttm":false,"python_date_format":null,"type":"STRING","type_generic":1,"verbose_name":null,"warning_markdown":null},"expressionType":"SIMPLE","hasCustomLabel":false,"isNew":false,"label":"COUNT_DISTINCT(context_id)","optionName":"metric_97lz5hqft8j_aqofzpt1ma5","sqlExpression":null},"adhoc_filters":[{"expressionType":"SIMPLE","subject":"data_key","operator":"==","operatorId":"EQUALS","comparator":"get_current_label","clause":"WHERE","sqlExpression":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_ug6txpdjuzj_znl0zrda72n"},{"expressionType":"SQL","sqlExpression":"label
+  <> ''''","clause":"WHERE","subject":null,"operator":null,"comparator":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_a4j5xkh81f5_k2i0586j12h"},{"expressionType":"SQL","sqlExpression":"prev_label
+  <> ''''","clause":"WHERE","subject":null,"operator":null,"comparator":null,"isExtra":false,"isNew":false,"datasourceWarning":false,"filterOptionName":"filter_p4zwr1yr4v9_avka1ppurai"}],"row_limit":10000,"y_axis_format":"~g","color_scheme":"echarts4Colors","extra_form_data":{},"dashboards":[1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 388d2359-8d13-4795-8dc9-1cb5dfa92ee1
+version: 1.0.0
+dataset_uuid: fda98ab8-f550-45f1-9ded-0113f3e67260

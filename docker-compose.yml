@@ -8,6 +8,8 @@ services:
     restart: unless-stopped
     ports:
       - 3307:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
   psql:
     env_file: [.env_file]
     image: postgres:latest
@@ -16,6 +18,8 @@ services:
     restart: unless-stopped
     ports:
       - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
   redis:
     env_file: [.env_file]
     image: redis:latest
@@ -25,6 +29,8 @@ services:
     command: --requirepass pass
     ports:
       - 6379:6379
+    volumes:
+      - redis-data:/data
   mongo:
     env_file: [.env_file]
     image: mongo:latest
@@ -33,6 +39,8 @@ services:
     restart: unless-stopped
     ports:
       - 27017:27017
+    volumes:
+      - mongo-data:/data/db
   ydb:
     env_file: [.env_file]
     image: cr.yandex/yc/yandex-docker-local-ydb:latest
@@ -44,16 +52,42 @@ services:
       # - 2135:2135
       - 2136:2136
     hostname: localhost
+    volumes:
+      - ydb-data:/ydb_data
+      - ydb-certs:/ydb_certs
   dashboard:
     env_file: [.env_file]
     build:
       context: ./dff/utils/docker
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
+    depends_on:
+      dashboard-metadata:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
     profiles:
       - stats
     ports:
       - "8088:8088"
+  dashboard-metadata:
+    env_file: [.env_file]
+    image: postgres:latest
+    profiles:
+      - stats
+    restart: unless-stopped
+    expose:
+      - "5433"
+    ports:
+      - 5433:5433
+    command: -p 5433
+    healthcheck:
+      test: pg_isready -p 5433 --username=$${POSTGRES_USERNAME}
+      interval: 4s
+      timeout: 3s
+      retries: 3
+    volumes:
+      - dashboard-data:/var/lib/postgresql/data
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
@@ -66,6 +100,11 @@ services:
       - '9000:9000'
     volumes:
       - ch-data:/var/lib/clickhouse/
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      interval: 5s
+      timeout: 4s
+      retries: 5
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     profiles:
@@ -73,6 +112,9 @@ services:
     container_name: otel-col
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
     volumes:
       - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
       - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
@@ -81,4 +123,10 @@ services:
       - "4318:4318"    # OTLP over HTTP receiver
 volumes:
   ch-data:
-    name: "ch-data"
+  dashboard-data:
+  mysql-data:
+  postgres-data:
+  redis-data:
+  mongo-data:
+  ydb-data:
+  ydb-certs:
