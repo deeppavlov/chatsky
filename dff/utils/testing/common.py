@@ -56,6 +56,14 @@ def check_happy_path(
         if printout_enable:
             print(f"(user) >>> {repr(request)}")
             print(f" (bot) <<< {repr(candidate_response)}")
+        if candidate_response is None:
+            raise Exception(
+                f"\n\npipeline = {pipeline.info_dict}\n\n"
+                f"ctx = {ctx}\n\n"
+                f"step_id = {step_id}\n"
+                f"request = {repr(request)}\n"
+                "Candidate response is None."
+            )
         parsed_response_with_deviation = response_comparer(candidate_response, reference_response, ctx)
         if parsed_response_with_deviation is not None:
             raise Exception(

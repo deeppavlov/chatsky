@@ -127,7 +127,7 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_PREVIOUS_NODE, *args, **kwargs)
 
         # run pre transitions processing
-        await self._run_pre_transitions_processing(ctx, pipeline, *args, **kwargs)
+        await self._run_pre_transitions_processing(ctx, pipeline)
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING, *args, **kwargs)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
@@ -145,7 +145,7 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_NEXT_NODE, *args, **kwargs)
 
         # run pre response processing
-        await self._run_pre_response_processing(ctx, pipeline, *args, **kwargs)
+        await self._run_pre_response_processing(ctx, pipeline)
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING, *args, **kwargs)
 
         # create response
@@ -385,7 +385,6 @@ class Actor:
                     # TODO: explicit handling of errors
                     if label is None:
                         continue
-                label = normalize_label(label, flow_label)
                 true_labels += [label]
         true_labels = [
             ((label[0] if label[0] else flow_label),)

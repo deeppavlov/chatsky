@@ -25,7 +25,7 @@ Pipeline = ForwardRef("Pipeline")
 Context = ForwardRef("Context")
 
 
-class Node(BaseModel, extra="forbid"):
+class Node(BaseModel, extra="forbid", validate_assignment=True):
     """
     The class for the `Node` object.
     """
