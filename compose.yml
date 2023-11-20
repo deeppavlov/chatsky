@@ -120,9 +120,10 @@ services:
     command: -p 5433
     healthcheck:
       test: pg_isready -p 5433 --username=$${POSTGRES_USERNAME}
-      interval: 4s
-      timeout: 3s
-      retries: 3
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     volumes:
       - dashboard-data:/var/lib/postgresql/data
 
@@ -141,8 +142,9 @@ services:
     healthcheck:
       test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
       interval: 5s
-      timeout: 4s
+      timeout: 10s
       retries: 5
+      start_period: 30s
 
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
