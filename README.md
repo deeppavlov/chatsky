@@ -115,15 +115,6 @@ To further explore the API of the framework, you can make use of the [detailed d
 Broken down into several sections to highlight all the aspects of development with DFF,
 the documentation for the library is constantly available online.
 
-* [API reference](https://deeppavlov.github.io/dialog_flow_framework/reference.html)
-* [Tutorials: interactive jupyter notebooks](https://deeppavlov.github.io/dialog_flow_framework/tutorials.html)
-* [User guides: code-supplemented instructions](https://deeppavlov.github.io/dialog_flow_framework/user_guides.html)
-
-You can also take a look at demonstration projects that showcase how DFF pipelines
-can be integrated into web applications and leverage external APIs.
-
-* [Examples: applications that use DFF](https://deeppavlov.github.io/dialog_flow_framework/examples.html)
-
 # Contributing to the Dialog Flow Framework
 
 We are open to accepting pull requests and bug reports.
