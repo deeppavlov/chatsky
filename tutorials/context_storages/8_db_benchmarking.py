@@ -58,10 +58,12 @@ Note: context storages passed into these functions will be cleared.
 
 Once the benchmark results are saved to a file, you can view and analyze them using two methods:
 
-* Using the Report Function: This function can display specified information from a given file.
+* [Using the Report Function](#Using-the-report-function): This function
+    can display specified information from a given file.
     By default, it prints the name and average metrics for each benchmark case.
 
-* Using the Streamlit App: A Streamlit app is available for viewing and comparing benchmark results.
+* [Using the Streamlit App](#Using-Streamlit-app): A Streamlit app
+    is available for viewing and comparing benchmark results.
     You can upload benchmark result files using the app's "Benchmark sets" tab,
     inspect individual results in the "View" tab, and compare metrics in the "Compare" tab.
 
@@ -87,10 +89,12 @@ Its most basic implementation is
 %mddoclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig).
 
 DFF provides configuration presets in the
-`basic config <../apiref/dff.utils.db_benchmarks.basic_config.py>`_ module,
+%mddoclink(api,utils.db_benchmark.basic_config) module,
 covering various contexts, messages, and edge cases.
 You can use these presets by passing them to the benchmark functions or create
 your own configuration.
+
+To learn more about using presets see [Configuration presets](#Configuration-presets)
 
 Benchmark configs have several parameters:
 
