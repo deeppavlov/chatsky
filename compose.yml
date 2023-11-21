@@ -64,7 +64,7 @@ services:
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      test: mongosh --norc --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
+      test: mongosh --norc --quiet --logpath /dev/null --eval 'db.runCommand("ping").ok' localhost:27017/test
       interval: 5s
       timeout: 10s
       retries: 5
