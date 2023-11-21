@@ -10,6 +10,11 @@ service groups and the pipeline as a whole, to obtain the statistics
 specific for that component. Some examples of this functionality
 are showcased in this tutorial.
 
+:warning: Both the Opentelemetry collector and the Clickhouse instance must be running
+during statistics collection. If you cloned the DFF repo, launch them using `docker-compose`:
+```bash
+docker-compose up otelcol clickhouse
+```
 """
 
 # %pip install dff[stats]
