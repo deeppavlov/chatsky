@@ -7,6 +7,7 @@ include dff/context_storages/protocols.json
 exclude makefile
 
 recursive-exclude tests *
+recursive-exclude examples *
 recursive-exclude tutorials *
 recursive-exclude * __pycache__
 recursive-exclude * *.py[co]

@@ -1,0 +1,6 @@
+dff[telegram, tests] >= 0.4
+itsdangerous==2.0.1
+gunicorn==19.9.0
+sentry-sdk[flask]==0.14.1
+healthcheck==1.3.3
+openai==0.27.3

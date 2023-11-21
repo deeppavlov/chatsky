@@ -32,3 +32,4 @@ dbs
 benchmarks
 benchmark_results_files.json
 uploaded_benchmarks
+**/.env
