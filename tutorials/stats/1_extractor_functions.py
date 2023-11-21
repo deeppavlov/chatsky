@@ -22,11 +22,15 @@ The output of these functions will be captured by an OpenTelemetry instrumentor 
 the Opentelemetry collector server which in its turn batches and persists data
 to Clickhouse or other OLAP storages.
 
-:warning: Both the Opentelemetry collector and the Clickhouse instance must be running
-during statistics collection. If you cloned the DFF repo, launch them using `docker-compose`:
+<div class="alert alert-info">
+
+Both the Opentelemetry collector and the Clickhouse instance must be running
+during statistics collection. If you cloned the DFF repo, launch them using `docker compose`:
 ```bash
-docker-compose up otelcol clickhouse
+docker compose --profile stats up
 ```
+
+</div>
 
 For more information on OpenTelemetry instrumentation,
 refer to the body of this tutorial as well as [OpenTelemetry documentation](
