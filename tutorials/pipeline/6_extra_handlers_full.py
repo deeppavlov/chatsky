@@ -1,11 +1,11 @@
 # %% [markdown]
 """
-# 7. Extra Handlers (full)
+# 6. Extra Handlers (full)
 
 The following tutorial shows extra handlers possibilities and use cases.
 
 This tutorial is a more advanced version of the
-[previous tutorial](%doclink(tutorial,pipeline.7_extra_handlers_basic)).
+[previous tutorial](%doclink(tutorial,pipeline.6_extra_handlers_basic)).
 """
 
 # %pip install dff psutil
@@ -95,7 +95,9 @@ def get_extra_handler_misc_field(
 
 
 def time_measure_before_handler(ctx, _, info):
-    ctx.misc.update({get_extra_handler_misc_field(info, "time"): datetime.now()})
+    ctx.misc.update(
+        {get_extra_handler_misc_field(info, "time"): datetime.now()}
+    )
 
 
 def time_measure_after_handler(ctx, _, info):
@@ -108,7 +110,13 @@ def time_measure_after_handler(ctx, _, info):
 
 
 def ram_measure_before_handler(ctx, _, info):
-    ctx.misc.update({get_extra_handler_misc_field(info, "ram"): psutil.virtual_memory().available})
+    ctx.misc.update(
+        {
+            get_extra_handler_misc_field(
+                info, "ram"
+            ): psutil.virtual_memory().available
+        }
+    )
 
 
 def ram_measure_after_handler(ctx, _, info):
@@ -124,7 +132,11 @@ def ram_measure_after_handler(ctx, _, info):
 
 def json_converter_before_handler(ctx, _, info):
     ctx.misc.update(
-        {get_extra_handler_misc_field(info, "str"): json.dumps(ctx.misc, indent=4, default=str)}
+        {
+            get_extra_handler_misc_field(info, "str"): json.dumps(
+                ctx.misc, indent=4, default=str
+            )
+        }
     )
 
 
@@ -141,7 +153,9 @@ memory_heap = dict()  # This object plays part of some memory heap
     after_handler=[time_measure_after_handler, ram_measure_after_handler],
 )
 def heavy_service(ctx: Context):
-    memory_heap[ctx.last_request.text] = [random.randint(0, num) for num in range(0, 1000)]
+    memory_heap[ctx.last_request.text] = [
+        random.randint(0, num) for num in range(0, 1000)
+    ]
 
 
 @to_service(

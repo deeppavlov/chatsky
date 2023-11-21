@@ -34,13 +34,13 @@ venv:
 
 format: venv
 	black --line-length=120 --exclude='venv|build|tutorials' .
-	black --line-length=100 tutorials
+	black --line-length=80 tutorials
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length=120 --exclude venv,build,tutorials .
-	flake8 --max-line-length=100 tutorials
-	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=100 --check tutorials || ( \
+	flake8 --max-line-length=120 --exclude venv,build,tutorials --per-file-ignores='**/__init__.py:F401' .
+	flake8 --max-line-length=100 --per-file-ignores='**/3_load_testing_with_locust.py:E402 **/4_streamlit_chat.py:E402'  tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=80 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \

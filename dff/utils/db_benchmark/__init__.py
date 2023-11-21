@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# flake8: noqa: F401
 from dff.utils.db_benchmark.benchmark import (
     time_context_read_write,
     DBFactory,

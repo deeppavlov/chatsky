@@ -49,7 +49,8 @@ its `last_response` property will be actors response.
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
+    TOY_SCRIPT,
+    # Pipeline script object, defined in `dff.utils.testing.toy_script`
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
@@ -70,8 +71,8 @@ assert TOY_SCRIPT_ARGS == (
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
-    # (testing) with HAPPY_PATH
+    check_happy_path(pipeline, HAPPY_PATH)
+    # a function for automatic tutorial running (testing) with HAPPY_PATH
 
     # This runs tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set

@@ -58,14 +58,19 @@ def get_previous_node_response_for_response_processing(
 # a dialog script
 toy_script = {
     "root": {
-        "start": {RESPONSE: Message(), TRANSITIONS: {("flow", "step_0"): cnd.true()}},
+        "start": {
+            RESPONSE: Message(),
+            TRANSITIONS: {("flow", "step_0"): cnd.true()},
+        },
         "fallback": {RESPONSE: Message(text="the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
             "proc_name_1": get_previous_node_response_for_response_processing
         },
-        PRE_TRANSITIONS_PROCESSING: {"proc_name_1": save_previous_node_response_to_ctx_processing},
+        PRE_TRANSITIONS_PROCESSING: {
+            "proc_name_1": save_previous_node_response_to_ctx_processing
+        },
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
     "flow": {

@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 8. Extra Handlers and Extensions
+# 7. Extra Handlers and Extensions
 
 The following tutorial shows how pipeline can be extended
 by global extra handlers and custom functions.
@@ -105,8 +105,12 @@ def after(_, __, info: ExtraHandlerRuntimeInfo):
 
 
 def after_all(_, __, info: ExtraHandlerRuntimeInfo):
-    pipeline_info.update({"total_time": datetime.now() - start_times[info.component.path]})
-    logger.info(f"Pipeline stats: {json.dumps(pipeline_info, indent=4, default=str)}")
+    pipeline_info.update(
+        {"total_time": datetime.now() - start_times[info.component.path]}
+    )
+    logger.info(
+        f"Pipeline stats: {json.dumps(pipeline_info, indent=4, default=str)}"
+    )
 
 
 async def long_service(_, __, info: ServiceRuntimeInfo):
