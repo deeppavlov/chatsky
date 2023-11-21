@@ -12,7 +12,7 @@ services:
     volumes:
       - mysql-data:/var/lib/mysql
     healthcheck:
-      test: ["CMD-SHELL", "mysql -u $${MYSQL_USERNAME} -p$${MYSQL_PASSWORD} -e \"select 1;\""]
+      test: mysql -u $${MYSQL_USERNAME} -p$${MYSQL_PASSWORD} -e "select 1;"
       interval: 5s
       timeout: 10s
       retries: 5
@@ -29,7 +29,7 @@ services:
     volumes:
       - postgres-data:/var/lib/postgresql/data
     healthcheck:
-      test: ["CMD-SHELL", "psql pg_isready -U $${POSTGRES_USERNAME} -d $${POSTGRES_DB}"]
+      test: psql pg_isready -U $${POSTGRES_USERNAME} -d $${POSTGRES_DB}
       interval: 5s
       timeout: 10s
       retries: 5
@@ -47,7 +47,7 @@ services:
     volumes:
       - redis-data:/data
     healthcheck:
-      test: ["CMD-SHELL", "redis-cli --raw incr ping"]
+      test: redis-cli --raw incr ping
       interval: 5s
       timeout: 10s
       retries: 5
@@ -64,7 +64,7 @@ services:
     volumes:
       - mongo-data:/data/db
     healthcheck:
-      test: ["CMD-SHELL", "mongosh --norc --quiet --eval 'db.runCommand(\"ping\").ok' localhost:27017/test"]
+      test: mongosh --norc --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
       interval: 5s
       timeout: 10s
       retries: 5
@@ -85,7 +85,7 @@ services:
       - ydb-data:/ydb_data
       - ydb-certs:/ydb_certs
     healthcheck:
-      test: ["CMD-SHELL", "sh ./health_check"]
+      test: sh ./health_check
       interval: 5s
       timeout: 10s
       retries: 5
