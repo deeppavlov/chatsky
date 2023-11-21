@@ -56,6 +56,19 @@ and
 
 Note: context storages passed into these functions will be cleared.
 
+Once the benchmark results are saved to a file, you can view and analyze them using two methods:
+
+* Using the Report Function: This function can display specified information from a given file.
+    By default, it prints the name and average metrics for each benchmark case.
+
+* Using the Streamlit App: A Streamlit app is available for viewing and comparing benchmark results.
+    You can upload benchmark result files using the app's "Benchmark sets" tab,
+    inspect individual results in the "View" tab, and compare metrics in the "Compare" tab.
+
+Benchmark results are saved according to a specific schema,
+which can be found in the benchmark schema documentation.
+Each database being benchmarked will have its own result file.
+
 ### Configuration
 
 The first one is a higher-level wrapper of the second one.
@@ -73,7 +86,13 @@ to configure benchmark behaviour.
 Its most basic implementation is
 %mddoclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig).
 
-It has several parameters:
+DFF provides configuration presets in the
+`basic config <../apiref/dff.utils.db_benchmarks.basic_config.py>`_ module,
+covering various contexts, messages, and edge cases.
+You can use these presets by passing them to the benchmark functions or create
+your own configuration.
+
+Benchmark configs have several parameters:
 
 Setting `context_num` to 50 means that we'll run fifty cycles of writing and reading context.
 This way we'll be able to get a more accurate average read/write time as well as

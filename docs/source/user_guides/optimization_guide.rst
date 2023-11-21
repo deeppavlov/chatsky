@@ -9,8 +9,8 @@ it's essential to identify and address performance issues.
 Similar to any complex system, a dialog service can have performance bottlenecks at various levels.
 These bottlenecks can occur during I/O operations like receiving and sending messages,
 as well as when synchronizing service states with a database.
-Even the efficiency of DFF classes can degrade
-as the number of callbacks in the script and pipeline increases.
+As the number of callbacks in the script and pipeline increases,
+the performance of DFF classes can degrade leading to longer response time.
 
 As a result, it becomes necessary to locate the part of the pipeline that is causing issues, so that
 further optimization steps can be taken. DFF provides several tools that address the need for
@@ -29,7 +29,10 @@ Using this approach, you can also measure the scalability of each component in y
 if you take advantage of the Opentelemetry package bundled with the library (`stats` extra required)
 as described below.
 
-Since Locust testing can only target web apps, you will need to integrate your dialog pipeline into a web application.
+Since Locust testing can only target web apps,
+this approach only applies if you integrate your dialog pipeline into a web application.
+The `FastAPI integration tutorial <../tutorials/tutorials.messengers.web_api_interface.1_fastapi.py>`_
+shows the most straightforward way to do this.
 At this stage, you will also need to instrument the pipeline components that you want to additionally profile
 using `extractor functions`. Put simply, you are decorating the components of the pipeline
 with functions that can report their performance, e.g. their execution time or the CPU load.
@@ -48,7 +51,7 @@ i.e. the requests to the server that will be made during testing.
 .. note::
 
     An example Locust script along with instructions on how to run it can be found in the
-    `load testing tutorial <../tutorials/tutorials.messengers.web_api_interface.3_load_testing_with_locust.py>`__.
+    `load testing tutorial <../tutorials/tutorials.messengers.web_api_interface.3_load_testing_with_locust.py>`_.
     The simplest way, however, is to pass a locust file to the Python interpreter.
 
 Once Locust is running, you can access its GUI, where you can set the number of users to emulate.
@@ -69,68 +72,8 @@ how different storage methods impact your dialog service's efficiency.
 This process involves running tests to measure the speed and reliability of various context storage solutions.
 Given the exact configuration of your system, one or the other database type may be performing more efficiently,
 so you may prefer to change your database depending on the testing results.
-In the following sections, we will guide you through setting up and running context storage benchmarks.
-
-**Context Storage Setup**
-
-Before you can begin benchmarking, you need to set up the context storage options you want to test.
-The available options include
-
-* JSON: Uses JSON files for storage.
-* Pickle: Utilizes Python's Pickle format for storage.
-* Shelve: Utilizes Python's Shelve format for storage.
-* PostgreSQL: A PostgreSQL database for storage.
-* MongoDB: A MongoDB database for storage.
-* Redis: A Redis database for storage.
-* MySQL: A MySQL database for storage.
-* SQLite: An SQLite database for storage.
-* YDB: Utilizes YDB (Yandex Database) for storage.
-
-For some storage methods like Pickle, Shelve, and SQLite, you may need to create temporary directories or files
-to perform the benchmarking.
-
-**Saving Benchmark Results to a File**
-
-Benchmark results are saved to files for analysis and comparison.
-There are two functions available for this purpose:
-
-* benchmark_all: This function is a higher-level wrapper that accepts benchmark cases and configurations for multiple databases in a single file.
-* save_results_to_file: This function accepts a single URI for the database and multiple benchmark configurations.
-
-Both functions use a `BenchmarkConfig` to configure benchmark behavior.
-The `BenchmarkConfig` allows you to set parameters
-like the number of contexts that will be saved and retrieved from the storage during testing (context_num)
-and the dimensions of messages and other components,
-allowing for fine-grained control over the benchmarks.
-
-**File Structure**
-
-Benchmark results are saved according to a specific schema,
-which can be found in the benchmark schema documentation.
-Each database being benchmarked will have its own result file.
-
-**Viewing Benchmark Results**
-
-Once the benchmark results are saved to a file, you can view and analyze them using two methods:
-
-* Using the Report Function: The report function can display specified information from a given file. By default, it prints the name and average metrics for each benchmark case.
-* Using the Streamlit App: A Streamlit app is available for viewing and comparing benchmark results. You can upload benchmark result files using the app's "Benchmark sets" tab, inspect individual results in the "View" tab, and compare metrics in the "Compare" tab.
-
-**Additional Information**
-
-DFF provides configuration presets in the `basic config <../apiref/dff.utils.db_benchmarks.basic_config.py>`__ module,
-covering various contexts, messages, and edge cases.
-You can use these presets by passing them to the benchmark functions.
-
-If the basic configurations are not sufficient for your needs, you can create custom configurations by inheriting from the BenchmarkConfig class.
-You'll need to define three methods:
-
-* `get_context` for getting initial contexts,
-* `info` for getting display information representing the configuration,
-* and `context_updater` for updating contexts.
 
 .. note::
-
     The exact instructions of how the testing can be carried out are available in the
     `DB benchmarking tutorial <../tutorials/tutorials.context_storages.8_db_benchmarking.py>`__.
 
