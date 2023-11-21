@@ -57,7 +57,7 @@ test: venv
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
-test_all: venv test lint
+test_all: venv docker_up test lint
 .PHONY: test_all
 
 build_drawio:
