@@ -364,7 +364,7 @@ class Actor:
                 # validate labeling
                 for label in node.transitions.keys():
                     if callable(label):
-                        validate_callable(label, "label", flow_name, node_name, error_msgs, verbose, [Context, Pipeline])
+                        validate_callable(label, "label", flow_name, node_name, error_msgs, verbose, [Context, Pipeline, Any, Any])
                     else:
                         norm_label = normalize_label(label, flow_name)
                         if norm_label is None:
@@ -392,10 +392,10 @@ class Actor:
 
                 # validate responses
                 if callable(node.response):
-                    validate_callable(node.response, "response", flow_name, node_name, error_msgs, verbose, [Context, Pipeline], Message)
-                elif node.response is not None and type(node.response) != Message:
+                    validate_callable(node.response, "response", flow_name, node_name, error_msgs, verbose, [Context, Pipeline, Any, Any], Message)
+                elif node.response is not None and not issubclass(type(node.response), Message):
                     msg = (
-                        f"Expected type of response is {Message}, got type(response)={type(node.response)}, "
+                        f"Expected type of response is subclass of {Message}, got type(response)={type(node.response)}, "
                         f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
@@ -403,7 +403,7 @@ class Actor:
                 # validate conditions
                 for label, condition in node.transitions.items():
                     if callable(condition):
-                        validate_callable(condition, "condition", flow_name, node_name, error_msgs, verbose, [Context, Pipeline], bool)
+                        validate_callable(condition, "condition", flow_name, node_name, error_msgs, verbose, [Context, Pipeline, Any, Any], bool)
                     else:
                         msg = (
                             f"Expected type of condition for label={label} is {Callable}, "
@@ -416,7 +416,7 @@ class Actor:
                 for place, functions in zip(("transitions", "response"), (node.pre_transitions_processing, node.pre_response_processing)):
                     for name, function in functions.items():
                         if callable(function):
-                            validate_callable(function, f"pre_{place}_processing {name}", flow_name, node_name, error_msgs, verbose, [Context, Pipeline], Context)
+                            validate_callable(function, f"pre_{place}_processing {name}", flow_name, node_name, error_msgs, verbose, [Context, Pipeline, Any, Any], Context)
                         else:
                             msg = (
                                 f"Expected type of pre_{place}_processing {name} is {Callable}, "
