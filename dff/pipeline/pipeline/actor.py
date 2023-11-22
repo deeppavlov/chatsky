@@ -22,6 +22,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 
 .. figure:: /_static/drawio/dfe/user_actor.png
 """
+import inspect
 import logging
 from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
 import copy
@@ -54,6 +55,36 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     error_msgs.append(msg)
     if logging_flag:
         logger.error(msg, exc_info=exception)
+
+
+def validate_callable(callable: Callable, name: str, flow_label: str, node_label: str, error_msgs: list, verbose: bool, expected: Optional[list] = None, rtrn = None):
+    signature = inspect.signature(callable)
+    if expected is not None:
+        params = list(signature.parameters.values())
+        if len(params) != len(expected):
+            msg = (
+                f"Incorrect parameter number of {name}={callable.__name__}: "
+                f"should be {len(expected)}, found {len(params)}, "
+                f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+            )
+            error_handler(error_msgs, msg, None, verbose)
+        for idx, param in enumerate(params):
+            if param.annotation != inspect.Parameter.empty and param.annotation != expected[idx]:
+                msg = (
+                    f"Incorrect {idx} parameter annotation of {name}={callable.__name__}: "
+                    f"should be {expected[idx]}, found {param.annotation}, "
+                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                )
+                error_handler(error_msgs, msg, None, verbose)
+    if rtrn is not None:
+        rtrn_type = signature.return_annotation
+        if rtrn_type != inspect.Parameter.empty and rtrn_type != rtrn:
+            msg = (
+                f"Incorrect return type annotation of {name}={callable.__name__}: "
+                f"should be {len(rtrn)}, found {len(rtrn_type)}, "
+                f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+            )
+            error_handler(error_msgs, msg, None, verbose)
 
 
 class Actor:
@@ -325,68 +356,74 @@ class Actor:
             chosen_label = self.fallback_label
         return chosen_label
 
-    def validate_script(self, pipeline: Pipeline, verbose: bool = True):
+    def validate_script(self, verbose: bool = True):
         # TODO: script has to not contain priority == -inf, because it uses for miss values
-        flow_labels = []
-        node_labels = []
-        labels = []
-        conditions = []
+        error_msgs = []
         for flow_name, flow in self.script.items():
             for node_name, node in flow.items():
-                flow_labels += [flow_name] * len(node.transitions)
-                node_labels += [node_name] * len(node.transitions)
-                labels += list(node.transitions.keys())
-                conditions += list(node.transitions.values())
+                # validate labeling
+                for label in node.transitions.keys():
+                    if callable(label):
+                        validate_callable(label, "label", flow_name, node_name, error_msgs, verbose, [Context, Pipeline])
+                    else:
+                        norm_label = normalize_label(label, flow_name)
+                        if norm_label is None:
+                            msg = (
+                                f"Label can not be normalized for label={label}, "
+                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                            )
+                            error_handler(error_msgs, msg, None, verbose)
+                            continue
+                        norm_fl, norm_nl, _ = norm_label
+                        if norm_fl not in self.script.keys():
+                            msg = (
+                                f"Flow label {norm_fl} can not be found for label={label}, "
+                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                            )
+                        elif norm_nl not in flow.keys() or norm_nl not in self.script[norm_fl].keys():
+                            msg = (
+                                f"Node label {norm_nl} can not be found for label={label}, "
+                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                            )
+                        else:
+                            msg = None
+                        if msg is not None:
+                            error_handler(error_msgs, msg, None, verbose)
 
-        error_msgs = []
-        for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
-            ctx = Context()
-            ctx.validation = True
-            ctx.add_request(Message(text="text"))
-
-            label = label(ctx, pipeline) if callable(label) else normalize_label(label, flow_label)
-
-            # validate labeling
-            try:
-                node = self.script[label[0]][label[1]]
-            except Exception as exc:
-                msg = (
-                    f"Could not find node with label={label}, "
-                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                )
-                error_handler(error_msgs, msg, exc, verbose)
-                break
-
-            # validate responsing
-            response_func = normalize_response(node.response)
-            try:
-                response_result = response_func(ctx, pipeline)
-                if not isinstance(response_result, Message):
+                # validate responses
+                if callable(node.response):
+                    validate_callable(node.response, "response", flow_name, node_name, error_msgs, verbose, [Context, Pipeline], Message)
+                elif node.response is not None and type(node.response) != Message:
                     msg = (
-                        "Expected type of response_result is `Message`.\n"
-                        + f"Got type(response_result)={type(response_result)}"
-                        f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                        f"Expected type of response is {Message}, got type(response)={type(node.response)}, "
+                        f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                     )
                     error_handler(error_msgs, msg, None, verbose)
-                    continue
-            except Exception as exc:
-                msg = (
-                    f"Got exception '''{exc}''' during response execution "
-                    f"for label={label} and node.response={node.response}"
-                    f", error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                )
-                error_handler(error_msgs, msg, exc, verbose)
-                continue
 
-            # validate conditioning
-            try:
-                condition_result = condition(ctx, pipeline)
-                if not isinstance(condition(ctx, pipeline), bool):
-                    raise Exception(f"Returned condition_result={condition_result}, but expected bool type")
-            except Exception as exc:
-                msg = f"Got exception '''{exc}''' during condition execution for label={label}"
-                error_handler(error_msgs, msg, exc, verbose)
-                continue
+                # validate conditions
+                for label, condition in node.transitions.items():
+                    if callable(condition):
+                        validate_callable(condition, "condition", flow_name, node_name, error_msgs, verbose, [Context, Pipeline], bool)
+                    else:
+                        msg = (
+                            f"Expected type of condition for label={label} is {Callable}, "
+                            f"got type(condition)={type(condition)}, "
+                            f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                        )
+                        error_handler(error_msgs, msg, None, verbose)
+
+                # validate pre_transitions- and pre_response_processing
+                for place, functions in zip(("transitions", "response"), (node.pre_transitions_processing, node.pre_response_processing)):
+                    for name, function in functions.items():
+                        if callable(function):
+                            validate_callable(function, f"pre_{place}_processing {name}", flow_name, node_name, error_msgs, verbose, [Context, Pipeline], Context)
+                        else:
+                            msg = (
+                                f"Expected type of pre_{place}_processing {name} is {Callable}, "
+                                f"got type(pre_{place}_processing)={type(function)}, "
+                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                            )
+                            error_handler(error_msgs, msg, None, verbose)
         return error_msgs
 
 
