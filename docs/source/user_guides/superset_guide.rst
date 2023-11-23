@@ -21,7 +21,7 @@ Collection procedure
 .. code-block:: shell
     :linenos:
 
-    # clone the original repository to access the docker-compose file
+    # clone the original repository to access the docker compose file
     git clone https://github.com/deeppavlov/dialog_flow_framework.git
     # install with the stats extra
     cd dialog_flow_framework
@@ -32,11 +32,11 @@ Collection procedure
 .. code-block:: shell
     :linenos:
 
-    # clone the original repository to access the docker-compose file
+    # clone the original repository to access the docker compose file
     git clone https://github.com/deeppavlov/dialog_flow_framework.git
     # launch the required services
     cd dialog_flow_framework
-    docker-compose --profile stats up
+    docker compose --profile stats up
 
 **Collecting data**
 

@@ -120,7 +120,7 @@ To execute all tests, including integration with DBs and APIs tests, run
 ```bash
 poetry run poe test_all
 ```
-for successful execution of this command `Docker` and `docker-compose` are required.
+for successful execution of this command `Docker` and `docker compose` are required.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash
@@ -141,7 +141,7 @@ DFF uses docker images for two purposes:
 The first group can be launched via
 
 ```bash
-docker-compose --profile context_storage up
+docker compose --profile context_storage up
 ```
 
 This will download and run all the databases (`mysql`, `postgres`, `redis`, `mongo`, `ydb`).
@@ -149,14 +149,14 @@ This will download and run all the databases (`mysql`, `postgres`, `redis`, `mon
 The second group can be launched via
 
 ```bash
-docker-compose --profile stats up
+docker compose --profile stats up
 ```
 
 This will download and launch Superset Dashboard, Clickhouse, OpenTelemetry Collector.
 
 To launch both groups run
 ```bash
-docker-compose --profile context_storage --profile stats up
+docker compose --profile context_storage --profile stats up
 ```
 
 This will be done automatically when running `poetry run poe test_all`.

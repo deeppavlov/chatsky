@@ -98,11 +98,15 @@ def meta_web_querying_service(
         with urllib.request.urlopen(
             f"https://jsonplaceholder.typicode.com/photos/{photo_number}"
         ) as webpage:
-            web_content = webpage.read().decode(webpage.headers.get_content_charset())
+            web_content = webpage.read().decode(
+                webpage.headers.get_content_charset()
+            )
             ctx.misc["web_query"].update(
                 {
                     f"{ctx.last_request}"
-                    f":photo_number_{photo_number}": json.loads(web_content)["title"]
+                    f":photo_number_{photo_number}": json.loads(web_content)[
+                        "title"
+                    ]
                 }
             )
         logger.info(f"Service '{info.name}' has completed HTTPS request")

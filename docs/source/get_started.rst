@@ -17,7 +17,6 @@ The installation process allows the user to choose from different packages based
 
 .. code-block:: console
 
-   pip install dff  # minimal dependencies (by default)
    pip install dff[json]  # dependencies for using JSON
    pip install dff[pickle] # dependencies for using Pickle
    pip install dff[redis]  # dependencies for using Redis
@@ -51,7 +50,7 @@ It allows developers to easily write and manage dialog systems by defining a spe
 dialog graph that describes the behavior of the service.
 DFF offers a specialized language (DSL) for quickly writing dialog graphs,
 making it easy for developers to create chatbots for a wide
-range of applications such as social networks, call centers, websites, skills for Amazon Alexa, etc.
+range of applications, such as social networks, call centers, websites, personal assistants, etc.
 
 DFF has several important concepts:
 
