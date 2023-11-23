@@ -5,11 +5,9 @@ description = "Dialog Flow Framework is a free and open-source software stack fo
 license = "Apache-2.0"
 authors = [
     "Denis Kuznetsov <kuznetsov.den.p@gmail.com>",
-]
-maintainers = [
-    "Roman Zlobin <email>",
-    "Aleksandr Sergeev <email>",
-    "Daniil Ignatiev <email>",
+    "Roman Zlobin <RLKRo@proton.me>",
+    "Aleksandr Sergeev <shveitsar215@gmail.com>",
+    "Daniil Ignatiev <ruthenian8@gmail.com>",
 ]
 
 readme = "README.md"
