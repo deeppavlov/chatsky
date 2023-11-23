@@ -24,7 +24,7 @@ def question_processor(ctx: Context):
         else:
             last_request.annotations["similar_question"] = find_similar_question(last_request.text)
 
-    ctx.set_last_request(last_request)
+    ctx.last_request = last_request
 
 
 services = [question_processor]  # pre-services run before bot sends a response

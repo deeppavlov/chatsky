@@ -11,11 +11,17 @@ services:
     env_file:
       - ./.env
     depends_on:
-      - db
+      db:
+        condition: service_healthy
   db:
     env_file: [.env]
     image: postgres:latest
     restart: unless-stopped
+    healthcheck:
+      test: pg_isready --username=$${POSTGRES_USERNAME}
+      interval: 4s
+      timeout: 3s
+      retries: 3
     volumes:
       - postgres_data:/var/lib/postgresql/data/
   nginx:

@@ -5,17 +5,17 @@
 Customer service bot built on `DFF`. Uses telegram as an interface.
 This bot is designed to answer any type of user questions in a limited business domain (book shop).
 
-* [DeepPavlov Intent Catcher](#) force is used for intent retrieval.
+* [DeepPavlov Intent Catcher](#) is used for intent retrieval.
 * [ChatGPT](https://openai.com/pricing#language-models) is used for context based question answering.
 
 ### Intent Catcher
 
 Intent catcher is a DistilBERT-based classifier for user intent classes.
-We use DeepPavlov library for seamless training and inference.
+We use the DeepPavlov library for a seamless training and inference experience.
 Sample code for training the model can be found in `Training_intent_catcher.ipynb`.
 The model is deployed as a separate microservice running at port 4999.
 
-Service bot interacts with the container via `/respond` endpoint.
+The bot interacts with the container via `/respond` endpoint.
 The API expects a json object with the dialog history passed as an array and labeled 'dialog_contexts'. Intents will be extracted from the last utterance.
 
 ```json
@@ -38,27 +38,29 @@ docker compose up --build --abort-on-container-exit --exit-code-from intent_clie
 ## Run the bot
 
 ### Run with Docker & Docker-Compose environment
-In order for the bot to work, set the bot token via [.env](.env.example). You should start by creating your own `.env` file:
+To interact with external APIs, the bot requires API tokens that can be set through [.env](.env.example). You should start by creating your own `.env` file:
 ```
 echo TG_BOT_TOKEN=*** >> .env
 echo OPENAI_API_TOKEN=*** >> .env
 ```
 
-Build the bot:
-```commandline
-docker-compose build
-```
-Testing the bot:
-```commandline
-docker-compose run assistant pytest test.py
-```
+*The commands below need to be run from the /examples/customer_service_bot directory*
 
-Running the bot:
-```commandline
-docker-compose run assistant python run.py
-```
-
-Running in background
+Building the bot and launching it in the background can be done with a single command given that the environment variables have been configured correctly. Then you can immediately interact with your bot in Telegram.
 ```commandline
 docker-compose up -d
+```
+
+If any of the source files have received updates, you can rebuild and sync the bot using the docker-compose build command.
+```commandline
+docker compose build
+```
+In case of bugs, you can test whether the bot correctly handles basic functionality using the following command:
+```commandline
+docker compose run assistant pytest test.py
+```
+
+The bot can also be run as a self-standing service, i.e. without the intent catcher for a less resource-demanding workflow:
+```commandline
+docker compose run assistant python run.py
 ```
