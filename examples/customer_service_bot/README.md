@@ -35,15 +35,16 @@ Run the intent catcher:
 docker compose up --build --abort-on-container-exit --exit-code-from intent_client
 ```
 
-## Run the bot
+## Running the bot
 
-### Run with Docker & Docker-Compose environment
+### Step 1: Configuring the docker services
 To interact with external APIs, the bot requires API tokens that can be set through the [.env](.env) file. Update it replacing templates with actual token values.
 ```
 TG_BOT_TOKEN=***
 OPENAI_API_TOKEN=***
 ```
 
+### Step 2: Launching the project
 *The commands below need to be run from the /examples/customer_service_bot directory*
 
 Building the bot and launching it in the background can be done with a single command given that the environment variables have been configured correctly. Then you can immediately interact with your bot in Telegram.
