@@ -11,13 +11,18 @@ An example of bot usage:
 
 ![image](https://user-images.githubusercontent.com/61429541/219064505-20e67950-cb88-4cff-afa5-7ce608e1282c.png)
 
-### Run with Docker & Docker-Compose environment
+## Running the bot in docker
+
+### Step 1: Configuring the docker services
 
 In order for the bot to work, update the [.env](.env) file replacing the template with the actual value of your Telegram token.
 
 ```
 TG_BOT_TOKEN=***
 ```
+
+## Step 2: Launching the docker project
+*The commands below should be run from the /examples/frequently_asked_question_bot/telegram directory.*
 
 Build the bot:
 ```commandline
@@ -37,22 +42,29 @@ Running in background
 ```commandline
 docker-compose up -d
 ```
-### Run with Python environment
-In order for the bot to work, set the bot token, example is in [.env](.env.example). First step is setting environment variables:
+## Running the bot in the local Python environment
+
+### Step 1: Configuring the service
+
+In order for the bot to work, update the [.env](.env) file replacing the template with the actual value of your Telegram token.
+
 ```
-export TG_BOT_TOKEN=*******
+TG_BOT_TOKEN=***
 ```
+### Step 2: Installing dependencies
 
 Build the bot:
 ```commandline
 pip3 install -r requirements.txt
 ```
-Testing the bot:
-```commandline
-pytest test.py
-```
+### Step 3: Runnig with CLI
 
 Running the bot:
 ```commandline
 python run.py
+```
+
+To launch the test suite, run:
+```commandline
+pytest test.py
 ```
