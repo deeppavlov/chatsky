@@ -35,5 +35,5 @@ from .dialog_graph.responses import get_bot_answer, FALLBACK_ANSWER, FIRST_MESSA
 async def test_happy_path(happy_path):
     check_happy_path(
         pipeline=Pipeline.from_script(**script.pipeline_kwargs, pre_services=pre_services.services),
-        happy_path=happy_path
+        happy_path=happy_path,
     )

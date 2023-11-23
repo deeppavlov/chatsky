@@ -16,20 +16,15 @@ def get_bot_answer(question: str) -> Message:
 
 
 FALLBACK_ANSWER = Message(
-    text='I don\'t have an answer to that question. '
-         'You can find FAQ <a href="https://wiki.archlinux.org/title/Frequently_asked_questions">here</a>.',
+    text="I don't have an answer to that question. "
+    'You can find FAQ <a href="https://wiki.archlinux.org/title/Frequently_asked_questions">here</a>.',
 )
 """Fallback answer that the bot returns if user's query is not similar to any of the questions."""
 
 
-FIRST_MESSAGE = Message(
-    text="Welcome! Ask me questions about Arch Linux."
-)
+FIRST_MESSAGE = Message(text="Welcome! Ask me questions about Arch Linux.")
 
-FALLBACK_NODE_MESSAGE = Message(
-    text="Something went wrong.\n"
-         "You may continue asking me questions about Arch Linux."
-)
+FALLBACK_NODE_MESSAGE = Message(text="Something went wrong.\n" "You may continue asking me questions about Arch Linux.")
 
 
 def answer_similar_question(ctx: Context, _: Pipeline):

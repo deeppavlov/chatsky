@@ -35,10 +35,10 @@ try:
     else:
         no_cuda = True
     model = AutoModelForSequenceClassification.from_config(DistilBertConfig(num_labels=23))
-    state = torch.load(MODEL_PATH, map_location = "cpu" if no_cuda else "gpu")
+    state = torch.load(MODEL_PATH, map_location="cpu" if no_cuda else "gpu")
     model.load_state_dict(state["model_state_dict"])
     tokenizer = AutoTokenizer.from_pretrained("distilbert-base-uncased")
-    pipe = pipeline('text-classification', model=model, tokenizer=tokenizer)
+    pipe = pipeline("text-classification", model=model, tokenizer=tokenizer)
     logger.info("predictor is ready")
 except Exception as e:
     sentry_sdk.capture_exception(e)
@@ -71,9 +71,9 @@ def respond():
 
     try:
         results = pipe(contexts)
-        indices = [int(''.join(filter(lambda x: x.isdigit(), result['label']))) for result in results]
+        indices = [int("".join(filter(lambda x: x.isdigit(), result["label"]))) for result in results]
         responses = [list(label2id.keys())[idx] for idx in indices]
-        confidences = [result['score'] for result in results]
+        confidences = [result["score"] for result in results]
     except Exception as exc:
         logger.exception(exc)
         sentry_sdk.capture_exception(exc)

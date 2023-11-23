@@ -28,12 +28,11 @@ pipeline_kwargs = {
         },
         "service_flow": {
             "start_node": {},  # this is the start node, it simply redirects to welcome node
-
             "fallback_node": {  # this node will only be used if something goes wrong (e.g. an exception is raised)
                 RESPONSE: FALLBACK_NODE_MESSAGE,
             },
         },
     },
     "start_label": ("service_flow", "start_node"),
-    "fallback_label": ("service_flow", "fallback_node")
+    "fallback_label": ("service_flow", "fallback_node"),
 }

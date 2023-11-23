@@ -38,10 +38,10 @@ docker compose up --build --abort-on-container-exit --exit-code-from intent_clie
 ## Run the bot
 
 ### Run with Docker & Docker-Compose environment
-To interact with external APIs, the bot requires API tokens that can be set through [.env](.env.example). You should start by creating your own `.env` file:
+To interact with external APIs, the bot requires API tokens that can be set through the [.env](.env) file. Update it replacing templates with actual token values.
 ```
-echo TG_BOT_TOKEN=*** >> .env
-echo OPENAI_API_TOKEN=*** >> .env
+TG_BOT_TOKEN=***
+OPENAI_API_TOKEN=***
 ```
 
 *The commands below need to be run from the /examples/customer_service_bot directory*

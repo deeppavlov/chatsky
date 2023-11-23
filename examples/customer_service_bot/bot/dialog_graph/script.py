@@ -61,7 +61,7 @@ script = {
         },
         "ask_item": {
             RESPONSE: Message(
-                text="Which books would you like to order? Please, separate the titles by commas (type 'abort' to cancel)."
+                text="Which books would you like to order? Separate the titles by commas (type 'abort' to cancel)"
             ),
             PRE_TRANSITIONS_PROCESSING: {"1": loc_prc.extract_item()},
             TRANSITIONS: {("form_flow", "ask_delivery"): loc_cnd.slots_filled(["items"]), lbl.repeat(0.8): cnd.true()},

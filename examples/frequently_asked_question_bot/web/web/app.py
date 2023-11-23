@@ -11,7 +11,7 @@ app = FastAPI()
 
 @app.get("/")
 async def index():
-    return FileResponse('static/index.html', media_type='text/html')
+    return FileResponse("static/index.html", media_type="text/html")
 
 
 @app.websocket("/ws/{client_id}")
@@ -20,11 +20,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
     # store user info in the dialogue context
     await pipeline.context_storage.set_item_async(
-        client_id,
-        Context(
-            id=client_id,
-            misc={"ip": websocket.client.host, "headers": websocket.headers.raw}
-        )
+        client_id, Context(id=client_id, misc={"ip": websocket.client.host, "headers": websocket.headers.raw})
     )
 
     async def respond(request: Message):
@@ -41,6 +37,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
             await respond(Message(text=data))
     except WebSocketDisconnect:  # ignore disconnects
         pass
+
 
 if __name__ == "__main__":
     uvicorn.run(

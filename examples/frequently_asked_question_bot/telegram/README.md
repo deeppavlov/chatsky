@@ -12,9 +12,11 @@ An example of bot usage:
 ![image](https://user-images.githubusercontent.com/61429541/219064505-20e67950-cb88-4cff-afa5-7ce608e1282c.png)
 
 ### Run with Docker & Docker-Compose environment
-In order for the bot to work, set the bot token via [.env](.env.example). First step is creating your `.env` file:
+
+In order for the bot to work, update the [.env](.env) file replacing the template with the actual value of your Telegram token.
+
 ```
-echo TG_BOT_TOKEN=******* >> .env
+TG_BOT_TOKEN=***
 ```
 
 Build the bot:
