@@ -34,18 +34,8 @@ def negative_test(samples, custom_class):
         raise Exception(f"sample={sample} can not be passed")
 
 
-def std_func(ctx, actor, *args, **kwargs):
-    pass
-
-
 def fake_label(ctx: Context, actor, *args, **kwargs):
-    if not ctx.validation:
-        return ("123", "123", 0)
     return ("flow", "node1", 1)
-
-
-def raised_response(ctx: Context, actor, *args, **kwargs):
-    raise Exception("")
 
 
 def test_actor():
@@ -68,12 +58,6 @@ def test_actor():
     except ValueError:
         pass
     try:
-        # fail of condition returned type
-        Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {"node1": std_func}}}}, start_label=("flow", "node1"))
-        raise Exception("can not be passed: fail of condition returned type")
-    except ValueError:
-        pass
-    try:
         # fail of response returned Callable
         pipeline = Pipeline.from_script(
             {"flow": {"node1": {RESPONSE: lambda c, a: lambda x: 1, TRANSITIONS: {repeat(): true()}}}},
@@ -84,15 +68,6 @@ def test_actor():
         raise Exception("can not be passed: fail of response returned Callable")
     except ValueError:
         pass
-    try:
-        # failed response
-        Pipeline.from_script(
-            {"flow": {"node1": {RESPONSE: raised_response, TRANSITIONS: {repeat(): true()}}}},
-            start_label=("flow", "node1"),
-        )
-        raise Exception("can not be passed: failed response")
-    except ValueError:
-        pass
 
     # empty ctx stability
     pipeline = Pipeline.from_script(
@@ -101,7 +76,7 @@ def test_actor():
     ctx = Context()
     pipeline.actor(pipeline, ctx)
 
-    # fake label stability
+    # fake label stability # TODO: what does it mean?
     pipeline = Pipeline.from_script(
         {"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
     )
@@ -210,7 +185,7 @@ def test_call_limit():
     }
     # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
     ctx = Context()
-    pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"), validation_stage=False)
+    pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"))
     for i in range(4):
         ctx.add_request(Message(text="req1"))
         ctx = pipeline.actor(pipeline, ctx)

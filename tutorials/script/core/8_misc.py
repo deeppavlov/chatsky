@@ -34,8 +34,6 @@ from dff.utils.testing.common import (
 
 # %%
 def custom_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
-    if ctx.validation:
-        return Message()
     current_node = ctx.current_node
     return Message(text=f"ctx.last_label={ctx.last_label}: current_node.misc={current_node.misc}")
 

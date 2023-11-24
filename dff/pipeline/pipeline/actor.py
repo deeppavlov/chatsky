@@ -24,7 +24,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 """
 import inspect
 import logging
-from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
+from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef, Type
 import copy
 
 from dff.utils.turn_caching import cache_clear
@@ -33,7 +33,7 @@ from dff.script.core.message import Message
 
 from dff.script.core.context import Context
 from dff.script.core.script import Script, Node
-from dff.script.core.normalization import normalize_label, normalize_response
+from dff.script.core.normalization import normalize_label
 from dff.script.core.keywords import GLOBAL, LOCAL
 
 logger = logging.getLogger(__name__)
@@ -57,31 +57,42 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
         logger.error(msg, exc_info=exception)
 
 
-def validate_callable(callable: Callable, name: str, flow_label: str, node_label: str, error_msgs: list, verbose: bool, expected: Optional[list] = None, rtrn = None):
+def types_match(type1: Type, type2: Type) -> bool:
+    if type1 == type2:
+        return True
+    elif type(type1) == ForwardRef or type(type2) == ForwardRef:
+        type1_name = type1.__forward_arg__ if type(type1) == ForwardRef else type1.__name__
+        type2_name = type2.__forward_arg__ if type(type2) == ForwardRef else type2.__name__
+        return type1_name == type2_name
+    else:
+        return False
+
+
+def validate_callable(callable: Callable, name: str, flow_label: str, node_label: str, error_msgs: list, verbose: bool, expected_types: Optional[List[Type]] = None, return_type: Optional[Type] = None):
     signature = inspect.signature(callable)
-    if expected is not None:
+    if expected_types is not None:
         params = list(signature.parameters.values())
-        if len(params) != len(expected):
+        if len(params) != len(expected_types):
             msg = (
                 f"Incorrect parameter number of {name}={callable.__name__}: "
-                f"should be {len(expected)}, found {len(params)}, "
+                f"should be {len(expected_types)}, found {len(params)}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None, verbose)
         for idx, param in enumerate(params):
-            if param.annotation != inspect.Parameter.empty and param.annotation != expected[idx]:
+            if param.annotation != inspect.Parameter.empty and not types_match(param.annotation, expected_types[idx]):
                 msg = (
                     f"Incorrect {idx} parameter annotation of {name}={callable.__name__}: "
-                    f"should be {expected[idx]}, found {param.annotation}, "
+                    f"should be {expected_types[idx]}, found {param.annotation}, "
                     f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
                 )
                 error_handler(error_msgs, msg, None, verbose)
-    if rtrn is not None:
-        rtrn_type = signature.return_annotation
-        if rtrn_type != inspect.Parameter.empty and rtrn_type != rtrn:
+    if return_type is not None:
+        retrun_annotation = signature.return_annotation
+        if retrun_annotation != inspect.Parameter.empty and not types_match(retrun_annotation, return_type):
             msg = (
                 f"Incorrect return type annotation of {name}={callable.__name__}: "
-                f"should be {len(rtrn)}, found {len(rtrn_type)}, "
+                f"should be {return_type}, found {retrun_annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None, verbose)
@@ -118,11 +129,11 @@ class Actor:
         condition_handler: Optional[Callable] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
-        # script validation
+        # script evaluation
         self.script = script if isinstance(script, Script) else Script(script=script)
         self.label_priority = label_priority
 
-        # node labels validation
+        # node labels evaluation
         self.start_label = normalize_label(start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
@@ -374,15 +385,15 @@ class Actor:
                             )
                             error_handler(error_msgs, msg, None, verbose)
                             continue
-                        norm_fl, norm_nl, _ = norm_label
-                        if norm_fl not in self.script.keys():
+                        norm_flow_label, norm_node_label, _ = norm_label
+                        if norm_flow_label not in self.script.keys():
                             msg = (
-                                f"Flow label {norm_fl} can not be found for label={label}, "
+                                f"Flow label {norm_flow_label} can not be found for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
-                        elif norm_nl not in flow.keys() or norm_nl not in self.script[norm_fl].keys():
+                        elif norm_node_label not in self.script[norm_flow_label].keys():
                             msg = (
-                                f"Node label {norm_nl} can not be found for label={label}, "
+                                f"Node label {norm_node_label} can not be found for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
                         else:
