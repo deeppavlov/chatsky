@@ -61,7 +61,7 @@ In the context of DFF, models may help in processing data and generating non-har
   You can straightforwardly cache the output of functions that leverage calls to NLU models
   or use more complex solutions, like `GPTcache <https://github.com/zilliztech/gptcache>`_
 
-- The `Dockerfile <https://raw.githubusercontent.com/deeppavlov/dialog_flow_demo/main/frequently_asked_question_bot/telegram/bot/Dockerfile>`_ in the DFF demo
+- The `Dockerfile <https://raw.githubusercontent.com/deeppavlov/dialog_flow_framework/dev/examples/frequently_asked_question_bot/telegram/bot/Dockerfile>`_ in the DFF demo
   illustrates caching a model using SentenceTransformer in a Docker container.
   The model is constructed during image build, so that the weights that the Huggingface library
   fetches from the web are downloaded in advance. At runtime, the fetched weights will be quickly read from the disk.
@@ -88,7 +88,7 @@ A well-organized directory structure is crucial for managing your bot's code, as
 - Maintain a clean and well-documented codebase to facilitate maintenance and collaboration.
 
 - You can create a directory for your bot project following the structure outlined
-  in the `demo project <https://github.com/deeppavlov/dialog_flow_demo/tree/main/customer_service_bot>`_.
+  in the `demo project <../examples/customer_service_bot>`_.
 
 - Below is a simplified project tree that shows a minimal example of how files can be structured.
 
@@ -169,7 +169,7 @@ Testing ensures that your bot functions as expected under various conditions, wh
 
 - Regular bot functionality can be covered by simple end-to-end tests that include user requests and bot replies.
   Tests of this kind can be automated using the `Pytest framework <https://docs.pytest.org/en/7.4.x/>`_.
-  The demo project includes an `example <https://github.com/deeppavlov/dialog_flow_demo/blob/main/frequently_asked_question_bot/telegram/bot/test.py>`_ of such a testing suite.
+  The demo project includes an `example <https://github.com/deeppavlov/dialog_flow_framework/blob/dev/examples/frequently_asked_question_bot/telegram/bot/test.py>`_ of such a testing suite.
 
 - Optimize your bot's performance by identifying bottlenecks during I/O operations and other levels.
   Utilize tools like `Locust <https://locust.io/>`_ for load testing to ensure your bot scales well under high load conditions.

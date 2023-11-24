@@ -14,8 +14,8 @@ The Script section covers the basics of the script concept, including conditions
 and serialization. It also includes tutorials on pre-response and pre-transitions processing.
 Finally, the Utils section covers the cache and LRU cache utilities in DFF.
 
-The main difference between Tutorials and Examples is that Examples typically show how to implement
-a specific feature or solve a particular problem, whereas Tutorials provide a more
+The main difference between Tutorials and Examples is that Tutorials typically show how to implement
+a specific feature or solve a particular problem, whereas Examples provide a more
 comprehensive overview of how to build a complete application.
 
 | To understand the basics of DFF, read the following tutorials:

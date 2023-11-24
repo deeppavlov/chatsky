@@ -65,10 +65,14 @@ script = {
                 [
                     # say hi when invited to a chat
                     telegram_condition(
-                        update_type=UpdateType.CHAT_JOIN_REQUEST, func=lambda x: True
+                        update_type=UpdateType.CHAT_JOIN_REQUEST,
+                        func=lambda x: True,
                     ),
                     # say hi when someone enters the chat
-                    telegram_condition(update_type=UpdateType.MY_CHAT_MEMBER, func=lambda x: True),
+                    telegram_condition(
+                        update_type=UpdateType.MY_CHAT_MEMBER,
+                        func=lambda x: True,
+                    ),
                 ]
             ),
             # send a message when inline query is received
@@ -80,7 +84,9 @@ script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: TelegramMessage(text="Bot running"),
-            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
+            TRANSITIONS: {
+                "node1": telegram_condition(commands=["start", "restart"])
+            },
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi"),
@@ -114,5 +120,6 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

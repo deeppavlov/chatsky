@@ -23,6 +23,13 @@ for exploring the telemetry data collected from your conversational services.
 We show how to plug in the telemetry collection and configure the pre-built
 Superset dashboard shipped with DFF.
 
+:doc:`Optimization guide <./user_guides/optimization_guide>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``optimization guide`` demonstrates various tools provided by the library
+that you can use to profile your conversational service,
+and to locate and remove performance bottlenecks.
+
 :doc:`Advanced features guide <./user_guides/advanced_features>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
@@ -36,4 +43,5 @@ scaling the project up or improving performance is desired.
    user_guides/basic_conceptions
    user_guides/context_guide
    user_guides/superset_guide
+   user_guides/optimization_guide
    user_guides/advanced_features

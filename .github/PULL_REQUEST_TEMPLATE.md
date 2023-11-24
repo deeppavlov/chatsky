@@ -1,10 +1,17 @@
 # Description
 
-*Please describe here what changes are made and why. If this pull request fixes a GitHub issue, reference it.*
+*Please describe here what changes are made and why.*
 
 # Checklist
 
-- [ ] I have covered the code with tests
-- [ ] I have added comments to my code to help others understand it
-- [ ] I have updated the documentation to reflect the changes
 - [ ] I have performed a self-review of the changes
+
+*List here tasks to complete in order to mark this PR as ready for review.*
+
+# To Consider
+
+- Add tests (if functionality is changed)
+- Update API reference / tutorials / guides
+- Update CONTRIBUTING.md (if devel workflow is changed)
+- Update `.ignore` files, scripts (such as `lint`), distribution manifest (if files are added/deleted)
+- Search for references to changed entities in the codebase

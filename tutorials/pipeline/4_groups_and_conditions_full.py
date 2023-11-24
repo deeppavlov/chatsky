@@ -179,8 +179,12 @@ pipeline_dict = {
                 Service(
                     handler=simple_service,
                     start_condition=all_condition(
-                        service_successful_condition(".pipeline.service_group_0.simple_service_0"),
-                        service_successful_condition(".pipeline.service_group_0.simple_service_1"),
+                        service_successful_condition(
+                            ".pipeline.service_group_0.simple_service_0"
+                        ),
+                        service_successful_condition(
+                            ".pipeline.service_group_0.simple_service_1"
+                        ),
                     ),  # Alternative:
                     # service_successful_condition(".pipeline.service_group_0")
                     name="running_service",
@@ -189,7 +193,9 @@ pipeline_dict = {
                 Service(
                     handler=never_running_service,
                     start_condition=not_condition(
-                        service_successful_condition(".pipeline.named_group.running_service")
+                        service_successful_condition(
+                            ".pipeline.named_group.running_service"
+                        )
                     ),
                 ),
             ],

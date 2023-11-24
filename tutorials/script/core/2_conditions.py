@@ -84,7 +84,9 @@ def hi_lower_case_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
     return "hi" in request.text.lower()
 
 
-def complex_user_answer_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
+def complex_user_answer_condition(
+    ctx: Context, _: Pipeline, *args, **kwargs
+) -> bool:
     request = ctx.last_request
     # The user request can be anything.
     if request is None or request.misc is None:
@@ -94,7 +96,9 @@ def complex_user_answer_condition(ctx: Context, _: Pipeline, *args, **kwargs) ->
 
 def predetermined_condition(condition: bool):
     # Wrapper for internal condition function.
-    def internal_condition_function(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
+    def internal_condition_function(
+        ctx: Context, _: Pipeline, *args, **kwargs
+    ) -> bool:
         # It always returns `condition`.
         return condition
 
@@ -117,7 +121,11 @@ toy_script = {
         },
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
+            TRANSITIONS: {
+                "node3": cnd.all(
+                    [cnd.regexp(r"talk"), cnd.regexp(r"about.*music")]
+                )
+            },
             # Mix sequence of conditions by `cnd.all`.
             # `all` is alias `aggregate` with
             # `aggregate_func` == `all`.
@@ -130,7 +138,12 @@ toy_script = {
         "node4": {
             RESPONSE: Message(text="bye"),
             TRANSITIONS: {
-                "node1": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text="hello"))])
+                "node1": cnd.any(
+                    [
+                        hi_lower_case_condition,
+                        cnd.exact_match(Message(text="hello")),
+                    ]
+                )
             },
             # Mix sequence of conditions by `cnd.any`.
             # `any` is alias `aggregate` with
@@ -147,7 +160,9 @@ toy_script = {
                 # If the value is `True` then we will go to `node1`.
                 # If the value is `False` then we will check a result of
                 # `predetermined_condition(True)` for `fallback_node`.
-                "fallback_node": predetermined_condition(True),  # or you can use `cnd.true()`
+                "fallback_node": predetermined_condition(
+                    True
+                ),  # or you can use `cnd.true()`
                 # Last condition function will return
                 # `true` and will repeat `fallback_node`
                 # if `complex_user_answer_condition` return `false`.
@@ -158,7 +173,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="Hi"), Message(text="Hi, how are you?")),  # start_node -> node1
+    (
+        Message(text="Hi"),
+        Message(text="Hi, how are you?"),
+    ),  # start_node -> node1
     (
         Message(text="i'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -170,9 +188,18 @@ happy_path = (
     (Message(text="Ok, goodbye."), Message(text="bye")),  # node3 -> node4
     (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
     (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
-    (Message(text="one"), Message(text="Ooops")),  # fallback_node -> fallback_node
-    (Message(text="help"), Message(text="Ooops")),  # fallback_node -> fallback_node
-    (Message(text="nope"), Message(text="Ooops")),  # fallback_node -> fallback_node
+    (
+        Message(text="one"),
+        Message(text="Ooops"),
+    ),  # fallback_node -> fallback_node
+    (
+        Message(text="help"),
+        Message(text="Ooops"),
+    ),  # fallback_node -> fallback_node
+    (
+        Message(text="nope"),
+        Message(text="Ooops"),
+    ),  # fallback_node -> fallback_node
     (
         Message(misc={"some_key": "some_value"}),
         Message(text="Hi, how are you?"),

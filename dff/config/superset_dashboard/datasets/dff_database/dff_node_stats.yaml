@@ -5,17 +5,7 @@ default_endpoint: null
 offset: 0
 cache_timeout: null
 schema: test
-sql: "\nWITH main AS (\n    SELECT DISTINCT otel_logs.LogAttributes['context_id']\
-  \ as context_id,\n    otel_logs.LogAttributes['request_id'] as request_id,\n   \
-  \ otel_traces.Timestamp as start_time,\n    otel_traces.SpanName as data_key,\n\
-  \    otel_logs.Body as data,\n    JSON_VALUE(otel_logs.Body, '$.label') as label,\n\
-  \    JSON_VALUE(otel_logs.Body, '$.flow') as flow_label,\n    JSON_VALUE(otel_logs.Body,\
-  \ '$.node') as node_label,\n    otel_logs.TraceId as trace_id,\n    otel_traces.TraceId\n\
-  FROM otel_logs, otel_traces\n    WHERE otel_logs.TraceId = otel_traces.TraceId and\
-  \ otel_traces.SpanName = 'get_current_label'\n    ORDER BY context_id, request_id\n\
-  ) SELECT context_id,\n    request_id,\n    start_time,\n    data_key,\n    data,\n\
-  \    label,\n    neighbor(label, -1) as prev_label,\n    flow_label,\n    node_label\n\
-  FROM main\nWHERE label != ''\n"
+sql: null
 params: null
 template_params: null
 filter_select_enabled: false
@@ -80,6 +70,18 @@ columns:
   description: null
   python_date_format: null
   extra: {}
+- column_name: prev_flow
+  verbose_name: null
+  is_dttm: false
+  is_active: true
+  type: String
+  advanced_data_type: null
+  groupby: true
+  filterable: true
+  expression: null
+  description: null
+  python_date_format: null
+  extra: {}
 - column_name: flow_label
   verbose_name: null
   is_dttm: false
@@ -108,7 +110,7 @@ columns:
   verbose_name: null
   is_dttm: false
   is_active: true
-  type: String
+  type: Nullable(UInt64)
   advanced_data_type: null
   groupby: true
   filterable: true

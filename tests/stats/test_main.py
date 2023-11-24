@@ -52,14 +52,19 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
     dashboard_res = session.get(dashboard_url, headers=headers)
     assert dashboard_res.status_code == 200
     dashboard_json = dashboard_res.json()
+    print(dashboard_json["result"]["charts"])
     assert sorted(dashboard_json["result"]["charts"]) == [
+        "Current topic [time series bar chart]",
+        "Current topic slot [bar chart]",
         "Flow visit ratio monitor",
         "Node Visits",
         "Node counts",
         "Node visit ratio monitor",
-        "Node visits [cloud]",
         "Node visits [ratio]",
         "Node visits [sunburst]",
+        "Rating slot [line chart]",
+        "Requests",
+        "Responses",
         "Service load [users]",
         "Table",
         "Terminal labels",
@@ -68,20 +73,21 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
         "Transition ratio [chord]",
     ]
     assert dashboard_json["result"]["url"] == "/superset/dashboard/dff-stats/"
-    assert dashboard_json["result"]["dashboard_title"] == "DFF Stats"
+    assert dashboard_json["result"]["dashboard_title"] == "DFF statistics dashboard"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
-    assert datasets_json["count"] == 2
-    assert datasets_json["ids"] == [1, 2]
-    assert [item["id"] for item in datasets_json["result"]] == [1, 2]
+    assert datasets_json["count"] == 3
+    assert datasets_json["ids"] == [1, 2, 3]
+    assert [item["id"] for item in datasets_json["result"]] == [1, 2, 3]
     assert sorted([item["table_name"] for item in datasets_json["result"]]) == [
         "dff_final_nodes",
         "dff_node_stats",
+        "dff_stats",
     ]
     charts_result = session.get(charts_url, headers=headers)
     charts_json = charts_result.json()
-    assert charts_json["count"] == 14
-    assert sorted(charts_json["ids"]) == list(range(1, 15))
+    assert charts_json["count"] == 17
+    assert sorted(charts_json["ids"]) == list(range(1, 18))
     session.close()
 
 

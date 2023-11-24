@@ -17,7 +17,11 @@ from dff.script import Message
 from dff.script.conditions import exact_match
 from dff.script import RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
-from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 
 
 # %%
@@ -29,11 +33,15 @@ toy_script = {
         },
         "node1": {
             RESPONSE: Message(text="Hi, how are you?"),
-            TRANSITIONS: {"node2": exact_match(Message(text="i'm fine, how are you?"))},
+            TRANSITIONS: {
+                "node2": exact_match(Message(text="i'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": exact_match(Message(text="Let's talk about music."))},
+            TRANSITIONS: {
+                "node3": exact_match(Message(text="Let's talk about music."))
+            },
         },
         "node3": {
             RESPONSE: Message(text="Sorry, I can not talk about music now."),
@@ -52,7 +60,10 @@ toy_script = {
 
 happy_path = (
     (Message(text="Hi"), Message(text="Hi, how are you?")),
-    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (
         Message(text="Let's talk about music."),
         Message(text="Sorry, I can not talk about music now."),
@@ -62,7 +73,10 @@ happy_path = (
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="stop"), Message(text="Ooops")),
     (Message(text="Hi"), Message(text="Hi, how are you?")),
-    (Message(text="i'm fine, how are you?"), Message(text="Good. What do you want to talk about?")),
+    (
+        Message(text="i'm fine, how are you?"),
+        Message(text="Good. What do you want to talk about?"),
+    ),
     (
         Message(text="Let's talk about music."),
         Message(text="Sorry, I can not talk about music now."),

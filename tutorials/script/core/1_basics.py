@@ -61,17 +61,27 @@ toy_script = {
             # If "Hi" == request of the user then we make the transition.
         },
         "node1": {
-            RESPONSE: Message(text="Hi, how are you?"),  # When the agent enters node1,
+            RESPONSE: Message(
+                text="Hi, how are you?"
+            ),  # When the agent enters node1,
             # return "Hi, how are you?".
-            TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
+            TRANSITIONS: {
+                "node2": cnd.exact_match(Message(text="I'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.exact_match(Message(text="Let's talk about music."))},
+            TRANSITIONS: {
+                "node3": cnd.exact_match(
+                    Message(text="Let's talk about music.")
+                )
+            },
         },
         "node3": {
             RESPONSE: Message(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": cnd.exact_match(Message(text="Ok, goodbye."))},
+            TRANSITIONS: {
+                "node4": cnd.exact_match(Message(text="Ok, goodbye."))
+            },
         },
         "node4": {
             RESPONSE: Message(text="Bye"),
@@ -88,7 +98,10 @@ toy_script = {
 
 
 happy_path = (
-    (Message(text="Hi"), Message(text="Hi, how are you?")),  # start_node -> node1
+    (
+        Message(text="Hi"),
+        Message(text="Hi, how are you?"),
+    ),  # start_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -100,8 +113,14 @@ happy_path = (
     (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
     (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
     (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
-    (Message(text="stop"), Message(text="Ooops")),  # fallback_node -> fallback_node
-    (Message(text="Hi"), Message(text="Hi, how are you?")),  # fallback_node -> node1
+    (
+        Message(text="stop"),
+        Message(text="Ooops"),
+    ),  # fallback_node -> fallback_node
+    (
+        Message(text="Hi"),
+        Message(text="Hi, how are you?"),
+    ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -144,4 +163,5 @@ if __name__ == "__main__":
     # Run tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set.
     if is_interactive_mode():
-        run_interactive_mode(pipeline)  # This runs tutorial in interactive mode.
+        run_interactive_mode(pipeline)
+        # This runs tutorial in interactive mode.
