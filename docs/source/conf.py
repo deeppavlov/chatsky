@@ -17,7 +17,7 @@ copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.6.2"
+release = "0.6.3"
 
 
 # -- General configuration ---------------------------------------------------

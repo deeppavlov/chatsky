@@ -6,7 +6,7 @@
 
 - [ ] I have performed a self-review of the changes
 
-*List here tasks to do in order to complete this PR.*
+*List here tasks to complete in order to mark this PR as ready for review.*
 
 # To Consider
 

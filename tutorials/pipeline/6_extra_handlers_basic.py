@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# 7. Extra Handlers (basic)
+# 6. Extra Handlers (basic)
 
 The following tutorial shows extra handlers possibilities and use cases.
 
@@ -56,7 +56,12 @@ def collect_timestamp_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
 
 
 def collect_timestamp_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
-    ctx.misc.update({f"{info.component.name}": datetime.now() - ctx.misc[f"{info.component.name}"]})
+    ctx.misc.update(
+        {
+            f"{info.component.name}": datetime.now()
+            - ctx.misc[f"{info.component.name}"]
+        }
+    )
 
 
 async def heavy_service(_):

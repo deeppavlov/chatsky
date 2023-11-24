@@ -5,7 +5,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.6.2
+CURRENT_VERSION = 0.6.3
 TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
@@ -34,13 +34,13 @@ venv:
 
 format: venv
 	black --line-length=120 --exclude='venv|build|tutorials' .
-	black --line-length=100 tutorials
+	black --line-length=80 tutorials
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length=120 --exclude venv,build,tutorials .
-	flake8 --max-line-length=100 tutorials
-	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=100 --check tutorials || ( \
+	flake8 --max-line-length=120 --exclude venv,build,tutorials --per-file-ignores='**/__init__.py:F401' .
+	flake8 --max-line-length=100 --per-file-ignores='**/3_load_testing_with_locust.py:E402 **/4_streamlit_chat.py:E402'  tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=80 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -50,19 +50,14 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose --profile context_storage --profile stats up -d --build
+	docker compose --profile context_storage --profile stats up -d --build --wait
 .PHONY: docker_up
-
-wait_db: docker_up
-	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
-.PHONY: wait_db
 
 test: venv
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
-test_all: venv wait_db test lint
+test_all: venv docker_up test lint
 .PHONY: test_all
 
 build_drawio:

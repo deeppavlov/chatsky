@@ -44,7 +44,8 @@ interface = CallbackTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 # %%
 pipeline = Pipeline.from_script(
     *TOY_SCRIPT_ARGS,
-    messenger_interface=interface,  # The interface can be passed as a pipeline argument.
+    messenger_interface=interface,
+    # The interface can be passed as a pipeline argument
 )
 
 # testing
@@ -55,5 +56,6 @@ def main():
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

@@ -1,5 +1,6 @@
 version: "3.9"
 services:
+
   mysql:
     env_file: [.env_file]
     image: mysql:latest
@@ -10,6 +11,13 @@ services:
       - 3307:3306
     volumes:
       - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: mysql -u $${MYSQL_USERNAME} -p$${MYSQL_PASSWORD} -e "select 1;"
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   psql:
     env_file: [.env_file]
     image: postgres:latest
@@ -20,6 +28,13 @@ services:
       - 5432:5432
     volumes:
       - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: psql pg_isready -U $${POSTGRES_USERNAME} -d $${POSTGRES_DB}
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   redis:
     env_file: [.env_file]
     image: redis:latest
@@ -31,6 +46,13 @@ services:
       - 6379:6379
     volumes:
       - redis-data:/data
+    healthcheck:
+      test: redis-cli --raw incr ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   mongo:
     env_file: [.env_file]
     image: mongo:latest
@@ -41,6 +63,13 @@ services:
       - 27017:27017
     volumes:
       - mongo-data:/data/db
+    healthcheck:
+      test: mongosh --norc --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   ydb:
     env_file: [.env_file]
     image: cr.yandex/yc/yandex-docker-local-ydb:latest
@@ -55,6 +84,13 @@ services:
     volumes:
       - ydb-data:/ydb_data
       - ydb-certs:/ydb_certs
+    healthcheck:
+      test: sh ./health_check
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   dashboard:
     env_file: [.env_file]
     build:
@@ -70,6 +106,7 @@ services:
       - stats
     ports:
       - "8088:8088"
+
   dashboard-metadata:
     env_file: [.env_file]
     image: postgres:latest
@@ -83,11 +120,13 @@ services:
     command: -p 5433
     healthcheck:
       test: pg_isready -p 5433 --username=$${POSTGRES_USERNAME}
-      interval: 4s
-      timeout: 3s
-      retries: 3
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
     volumes:
       - dashboard-data:/var/lib/postgresql/data
+
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
@@ -101,10 +140,12 @@ services:
     volumes:
       - ch-data:/var/lib/clickhouse/
     healthcheck:
-      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping || exit 1
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping
       interval: 5s
-      timeout: 4s
+      timeout: 10s
       retries: 5
+      start_period: 30s
+
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     profiles:
@@ -121,6 +162,7 @@ services:
     ports:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
+
 volumes:
   ch-data:
   dashboard-data:
