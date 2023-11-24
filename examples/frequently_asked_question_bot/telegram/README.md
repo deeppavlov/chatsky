@@ -15,7 +15,7 @@ An example of bot usage:
 
 ### Step 1: Configuring the docker services
 
-In order for the bot to work, update the [.env](.env) file replacing the template with the actual value of your Telegram token.
+In order for the bot to work, update the [.env](.env) file replacing the placeholders with the actual value of your Telegram token.
 
 ```
 TG_BOT_TOKEN=***
@@ -46,7 +46,7 @@ docker-compose up -d
 
 ### Step 1: Configuring the service
 
-In order for the bot to work, update the [.env](.env) file replacing the template with the actual value of your Telegram token.
+In order for the bot to work, update the [.env](.env) file replacing the placeholders with the actual value of your Telegram token.
 
 ```
 TG_BOT_TOKEN=***

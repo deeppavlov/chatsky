@@ -17,7 +17,7 @@ A showcase of the website:
 
 ### Step 1: Configuring docker services
 
-The Postgresql image needs to be configured with variables that can be set through the [.env](.env) file. Update the file replacing templates with desired values.
+The Postgresql image needs to be configured with variables that can be set through the [.env](.env) file. Update the file replacing the placeholders with desired values.
 ```
 POSTGRES_USERNAME=***
 POSTGRES_PASSWORD=***
