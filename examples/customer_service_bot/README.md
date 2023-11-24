@@ -2,7 +2,7 @@
 
 ### Customer service bot
 
-Customer service bot built on `DFF`. Uses telegram as an interface.
+Customer service bot built using `DFF`. Uses Telegram as an interface.
 This bot is designed to answer any type of user questions in a limited business domain (book shop).
 
 * [DeepPavlov Intent Catcher](https://docs.deeppavlov.ai/en/0.14.1/features/models/intent_catcher.html) is used for intent retrieval.

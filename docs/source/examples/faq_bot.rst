@@ -1,6 +1,9 @@
 FAQ Bot
 -------
 
+FAQ bot for Arch Linux users built using `DFF`.
+Can be run with Telegram or with a web interface.
+
 .. code-block:: shell
 
     project/

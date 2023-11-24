@@ -1,6 +1,6 @@
 ## Description
 
-Example FAQ bot built on `dff`. Uses telegram as an interface.
+Example FAQ bot built using `dff`. Uses Telegram as an interface.
 
 This bot listens for user questions and finds similar questions in its database by using the `clips/mfaq` model.
 

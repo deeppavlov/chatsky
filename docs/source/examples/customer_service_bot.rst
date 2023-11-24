@@ -1,6 +1,10 @@
 Customer service bot
 --------------------
 
+Customer service bot built using `DFF`. 
+This bot is designed to answer any type of user questions in a limited business domain (book shop).
+Uses a Telegram interface.
+
 .. code-block:: shell
 
     project/
