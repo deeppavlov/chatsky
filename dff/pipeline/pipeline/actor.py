@@ -24,7 +24,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 """
 import inspect
 import logging
-from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef, Type
+from typing import Tuple, Union, Callable, Optional, Dict, List, Any, ForwardRef, Type
 import copy
 
 from dff.utils.turn_caching import cache_clear
@@ -58,6 +58,14 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
 
 
 def types_match(type1: Type, type2: Type) -> bool:
+    """
+    This function compares types with assumption that one of the types might be a :py:class:`typing.ForwardRef`.
+    If it is so, it compares type and forward reference by name.
+    
+    :param type1: First type to compare.
+    :param type2: Second type to compare.
+    :return: True if types are equal, False otherwise.
+    """
     if type1 == type2:
         return True
     elif type(type1) is ForwardRef or type(type2) is ForwardRef:
@@ -74,10 +82,25 @@ def validate_callable(
     flow_label: str,
     node_label: str,
     error_msgs: list,
-    verbose: bool,
+    logging_flag: bool = True,
     expected_types: Optional[List[Type]] = None,
-    return_type: Optional[Type] = None,
+    return_type: Optional[Tuple[Type]] = None,
 ):
+    """
+    This function validates a function during :py:class:`~dff.script.Script` validation.
+    It checks parameter number (unconditionally), parameter types (if specified) and return type (if specified).
+
+    :param callable: Function to validate.
+    :param name: Type of the function (label, condition, response, etc.).
+    :param flow_label: Flow label this function is related to (used for error localization only).
+    :param node_label: Node label this function is related to (used for error localization only).
+    :param error_msgs: List that contains error messages. All the error message will be added to that list.
+    :param logging_flag: The flag which defines whether logging is necessary. Defaults to `True`.
+    :param expected_types: List of types that correspond to expected function parameter types.
+        Also used for parameter number check. If `None`, parameter check is skipped. Defaults to `None`.
+    :param return_type: Tuple, containing expected function return type.
+        If `None` or contains more or less than 1 element, return type check is skipped. Defaults to `None`.
+    """
     signature = inspect.signature(callable)
     if expected_types is not None:
         params = list(signature.parameters.values())
@@ -87,7 +110,7 @@ def validate_callable(
                 f"should be {len(expected_types)}, found {len(params)}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
-            error_handler(error_msgs, msg, None, verbose)
+            error_handler(error_msgs, msg, None, logging_flag)
         for idx, param in enumerate(params):
             if param.annotation != inspect.Parameter.empty and not types_match(param.annotation, expected_types[idx]):
                 msg = (
@@ -95,16 +118,16 @@ def validate_callable(
                     f"should be {expected_types[idx]}, found {param.annotation}, "
                     f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
                 )
-                error_handler(error_msgs, msg, None, verbose)
-    if return_type is not None:
+                error_handler(error_msgs, msg, None, logging_flag)
+    if return_type is not None and len(return_type) == 1:
         retrun_annotation = signature.return_annotation
-        if retrun_annotation != inspect.Parameter.empty and not types_match(retrun_annotation, return_type):
+        if retrun_annotation != inspect.Parameter.empty and not types_match(retrun_annotation, return_type[0]):
             msg = (
                 f"Incorrect return type annotation of {name}={callable.__name__}: "
-                f"should be {return_type}, found {retrun_annotation}, "
+                f"should be {return_type[0]}, found {retrun_annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
-            error_handler(error_msgs, msg, None, verbose)
+            error_handler(error_msgs, msg, None, logging_flag)
 
 
 class Actor:
@@ -422,7 +445,7 @@ class Actor:
                         error_msgs,
                         verbose,
                         [Context, Pipeline, Any, Any],
-                        Message,
+                        (Message,),
                     )
                 elif node.response is not None and not issubclass(type(node.response), Message):
                     msg = (
@@ -443,7 +466,7 @@ class Actor:
                             error_msgs,
                             verbose,
                             [Context, Pipeline, Any, Any],
-                            bool,
+                            (bool,),
                         )
                     else:
                         msg = (
@@ -467,7 +490,7 @@ class Actor:
                                 error_msgs,
                                 verbose,
                                 [Context, Pipeline, Any, Any],
-                                Context,
+                                (Context,),
                             )
                         else:
                             msg = (
