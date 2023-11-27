@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 Pipeline = ForwardRef("Pipeline")
 
 
-def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") -> Optional[Union[Callable, NodeLabel3Type]]:
+def normalize_label(
+    label: NodeLabelType, default_flow_label: LabelType = ""
+) -> Optional[Union[Callable, NodeLabel3Type]]:
     """
     The function that is used for normalization of
     :py:const:`default_flow_label <dff.script.NodeLabelType>`.
