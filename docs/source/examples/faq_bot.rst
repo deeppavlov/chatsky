@@ -4,6 +4,8 @@ FAQ Bot
 FAQ bot for Arch Linux users built using `DFF`.
 Can be run with Telegram or with a web interface.
 
+You can read more about deploying the project in its README file.
+
 Project structure
 ~~~~~~~~~~~~~~~~~
 
@@ -44,3 +46,11 @@ Project structure
         ├── run.py # the web app imports the DFF pipeline from dialog_graph
         └── test.py # End-to-end testing happy path is defined here
     
+Models
+~~~~~~~
+
+The project makes use of the `clips/mfaq <https://huggingface.co/clips/mfaq>`__ model that powers the bot's ability to understand queries in multiple languages.
+A number of techniques is employed to make the usage more efficient.
+
+* The project's Dockerfile illustrates caching a model using SentenceTransformer in a Docker container.
+    The model is constructed during image build, so that the weights that the Huggingface library fetches from the web are downloaded in advance. At runtime, the fetched weights will be quickly read from the disk.

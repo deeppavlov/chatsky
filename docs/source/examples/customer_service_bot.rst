@@ -5,6 +5,8 @@ Customer service bot built using `DFF`.
 This bot is designed to answer any type of user questions in a limited business domain (book shop).
 Uses a Telegram interface.
 
+You can read more about deploying the project in its README file.
+
 Project structure
 ~~~~~~~~~~~~~~~~~
 
@@ -22,7 +24,7 @@ into services and modules.
 
 * In the main service directory, we make a separate package for all DFF-related abstractions.
     There, we put the script into a separate module, also creating modules for
-    `processing, condition, and response functions <#>`__.
+    `processing, condition, and response functions <../user_guides/basic_conceptions#>`__.
 
 * The rest of the project-related Python code is factored out into other packages.
 
@@ -54,3 +56,12 @@ into services and modules.
         ├── requirements.txt
         ├── server.py
         └── test_server.py
+
+Models
+~~~~~~
+
+Two differently designed models are used to power the customer service bot: an intent classifier and a generative model.
+The classifier is being deployed as a separate service while ChatGPT is being interacted with via API.
+
+* [DeepPavlov Intent Catcher](https://docs.deeppavlov.ai/en/0.14.1/features/models/intent_catcher.html) is used for intent retrieval.
+* [ChatGPT](https://openai.com/pricing#language-models) is used for context based question answering.
