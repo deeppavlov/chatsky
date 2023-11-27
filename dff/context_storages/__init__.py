@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# flake8: noqa: F401
 
 from .database import DBContextStorage, threadsafe_method, context_storage_factory
 from .json import JSONContextStorage, json_available

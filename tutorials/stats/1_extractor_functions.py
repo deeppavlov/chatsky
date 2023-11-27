@@ -21,6 +21,17 @@ but it cannot contain any complex objects that cannot be trivially serialized.
 The output of these functions will be captured by an OpenTelemetry instrumentor and directed to
 the Opentelemetry collector server which in its turn batches and persists data
 to Clickhouse or other OLAP storages.
+
+<div class="alert alert-info">
+
+Both the Opentelemetry collector and the Clickhouse instance must be running
+during statistics collection. If you cloned the DFF repo, launch them using `docker compose`:
+```bash
+docker compose --profile stats up
+```
+
+</div>
+
 For more information on OpenTelemetry instrumentation,
 refer to the body of this tutorial as well as [OpenTelemetry documentation](
 https://opentelemetry.io/docs/instrumentation/python/manual/
@@ -34,7 +45,13 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 import asyncio
 
 from dff.script import Context
-from dff.pipeline import Pipeline, ACTOR, Service, ExtraHandlerRuntimeInfo, to_service
+from dff.pipeline import (
+    Pipeline,
+    ACTOR,
+    Service,
+    ExtraHandlerRuntimeInfo,
+    to_service,
+)
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 from dff.stats import OtelInstrumentor, default_extractors
 from dff.utils.testing import is_interactive_mode, check_happy_path
@@ -104,7 +121,10 @@ pipeline = Pipeline.from_dict(
         "fallback_label": ("greeting_flow", "fallback_node"),
         "components": [
             heavy_service,
-            Service(handler=ACTOR, after_handler=[default_extractors.get_current_label]),
+            Service(
+                handler=ACTOR,
+                after_handler=[default_extractors.get_current_label],
+            ),
         ],
     }
 )

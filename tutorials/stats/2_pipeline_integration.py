@@ -3,13 +3,22 @@
 # 2. Pipeline Integration
 
 In the DFF ecosystem, extractor functions act as regular extra handlers (
-[see the pipeline module documentation](%doclink(tutorial,pipeline.7_extra_handlers_basic))
+[see the pipeline module documentation](%doclink(tutorial,pipeline.6_extra_handlers_basic))
 ).
 Hence, you can decorate any part of your pipeline, including services,
 service groups and the pipeline as a whole, to obtain the statistics
 specific for that component. Some examples of this functionality
 are showcased in this tutorial.
 
+<div class="alert alert-info">
+
+Both the Opentelemetry collector and the Clickhouse instance must be running
+during statistics collection. If you cloned the DFF repo, launch them using `docker compose`:
+```bash
+docker compose --profile stats up
+```
+
+</div>
 """
 
 # %pip install dff[stats]
@@ -27,7 +36,11 @@ from dff.pipeline import (
     GlobalExtraHandlerType,
 )
 from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.stats import OtelInstrumentor, set_logger_destination, set_tracer_destination
+from dff.stats import (
+    OtelInstrumentor,
+    set_logger_destination,
+    set_tracer_destination,
+)
 from dff.stats import OTLPLogExporter, OTLPSpanExporter
 from dff.stats import default_extractors
 from dff.utils.testing import is_interactive_mode, check_happy_path
@@ -90,7 +103,10 @@ pipeline = Pipeline.from_dict(
                     get_service_state,
                     default_extractors.get_timing_after,
                 ],
-                components=[{"handler": heavy_service}, {"handler": heavy_service}],
+                components=[
+                    {"handler": heavy_service},
+                    {"handler": heavy_service},
+                ],
             ),
             Service(
                 handler=ACTOR,
@@ -106,8 +122,12 @@ pipeline = Pipeline.from_dict(
         ],
     }
 )
-pipeline.add_global_handler(GlobalExtraHandlerType.BEFORE_ALL, default_extractors.get_timing_before)
-pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, default_extractors.get_timing_after)
+pipeline.add_global_handler(
+    GlobalExtraHandlerType.BEFORE_ALL, default_extractors.get_timing_before
+)
+pipeline.add_global_handler(
+    GlobalExtraHandlerType.AFTER_ALL, default_extractors.get_timing_after
+)
 pipeline.add_global_handler(GlobalExtraHandlerType.AFTER_ALL, get_service_state)
 
 if __name__ == "__main__":
