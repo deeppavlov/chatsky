@@ -30,6 +30,7 @@ core = [
     "pydantic>=2.0.3,<3.0",
     "nest-asyncio",
     "typing-extensions",
+    "deprecation",
 ]
 
 async_files_dependencies = [
