@@ -182,7 +182,10 @@ happy_path = (
             }
         ),
     ),  # f_n->f_n
-    (Message(text="Hi"), Message(text="Hi, what is up?")),  # fallback_node -> node1
+    (
+        Message(text="Hi"),
+        Message(text="Hi, what is up?"),
+    ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
