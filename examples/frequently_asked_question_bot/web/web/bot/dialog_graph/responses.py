@@ -22,9 +22,9 @@ FALLBACK_ANSWER = Message(
 """Fallback answer that the bot returns if user's query is not similar to any of the questions."""
 
 
-FIRST_MESSAGE = Message(text="Welcome! Ask me questions about Arch Linux.")
+FIRST_MESSAGE = Message(text="Welcome! Ask me questions about Deeppavlov.")
 
-FALLBACK_NODE_MESSAGE = Message(text="Something went wrong.\n" "You may continue asking me questions about Arch Linux.")
+FALLBACK_NODE_MESSAGE = Message(text="Something went wrong.\n" "You may continue asking me questions about Deeppavlov.")
 
 
 def answer_similar_question(ctx: Context, _: Pipeline):

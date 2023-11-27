@@ -1,7 +1,7 @@
 FAQ Bot
 -------
 
-FAQ bot for Arch Linux users built using `DFF`.
+FAQ bot for Deeppavlov users built using `DFF`.
 Can be run with Telegram or with a web interface.
 
 You can read more about deploying the project in its README file.

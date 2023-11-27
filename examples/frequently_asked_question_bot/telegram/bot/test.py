@@ -16,33 +16,28 @@ from faq_model.model import faq
         (
             (TelegramMessage(text="/start"), script.script["qa_flow"]["welcome_node"][RESPONSE]),
             (
-                TelegramMessage(text="Why use arch?"),
+                TelegramMessage(text="Why use Deeppavlov?"),
                 TelegramMessage(
                     text="I found similar questions in my database:",
-                    ui=TelegramUI(
-                        buttons=[
-                            Button(text=q, payload=q)
-                            for q in ["Why would I want to use Arch?", "Why would I not want to use Arch?"]
-                        ]
-                    ),
+                    ui=TelegramUI(buttons=[Button(text=q, payload=q) for q in ["Why would I want to use Deeppavlov?"]]),
                 ),
             ),
             (
-                TelegramMessage(callback_query="Why would I want to use Arch?"),
-                TelegramMessage(text=faq["Why would I want to use Arch?"]),
+                TelegramMessage(callback_query="Why would I want to use Deeppavlov?"),
+                TelegramMessage(text=faq["Why would I want to use Deeppavlov?"]),
             ),
             (
-                TelegramMessage(callback_query="Why would I not want to use Arch?"),
-                TelegramMessage(text=faq["Why would I not want to use Arch?"]),
+                TelegramMessage(callback_query="What can the Deeppavlov library do?"),
+                TelegramMessage(text=faq["What can the Deeppavlov library do?"]),
             ),
             (
-                TelegramMessage(text="What is arch linux?"),
+                TelegramMessage(text="What is deeppavlov?"),
                 TelegramMessage(
                     text="I found similar questions in my database:",
-                    ui=TelegramUI(buttons=[Button(text=q, payload=q) for q in ["What is Arch Linux?"]]),
+                    ui=TelegramUI(buttons=[Button(text=q, payload=q) for q in ["What is Deeppavlov?"]]),
                 ),
             ),
-            (TelegramMessage(callback_query="What is Arch Linux?"), TelegramMessage(text=faq["What is Arch Linux?"])),
+            (TelegramMessage(callback_query="What is Deeppavlov?"), TelegramMessage(text=faq["What is Deeppavlov?"])),
             (
                 TelegramMessage(text="where am I?"),
                 TelegramMessage(
@@ -51,8 +46,8 @@ from faq_model.model import faq
                 ),
             ),
             (
-                TelegramMessage(callback_query="What architectures does Arch support?"),
-                TelegramMessage(text=faq["What architectures does Arch support?"]),
+                TelegramMessage(callback_query="How do I learn more about Deeppavlov?"),
+                TelegramMessage(text=faq["How do I learn more about Deeppavlov?"]),
             ),
         )
     ],

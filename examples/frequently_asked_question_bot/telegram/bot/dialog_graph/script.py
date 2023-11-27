@@ -28,7 +28,7 @@ script = {
             },
         },
         "welcome_node": {
-            RESPONSE: TelegramMessage(text="Welcome! Ask me questions about Arch Linux."),
+            RESPONSE: TelegramMessage(text="Welcome! Ask me questions about Deeppavlov."),
         },
         "suggest_questions": {
             RESPONSE: suggest_similar_questions,

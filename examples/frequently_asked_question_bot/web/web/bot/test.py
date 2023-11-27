@@ -18,12 +18,12 @@ from .dialog_graph.responses import get_bot_answer, FALLBACK_ANSWER, FIRST_MESSA
                 FIRST_MESSAGE,
             ),
             (
-                Message(text="Why use arch?"),
-                get_bot_answer("Why would I want to use Arch?"),
+                Message(text="Why use Deeppavlov?"),
+                get_bot_answer("Why would I want to use Deeppavlov?"),
             ),
             (
-                Message(text="What is arch linux?"),
-                get_bot_answer("What is Arch Linux?"),
+                Message(text="What is deeppavlov?"),
+                get_bot_answer("What is Deeppavlov?"),
             ),
             (
                 Message(text="where am I?"),

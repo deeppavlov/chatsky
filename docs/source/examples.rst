@@ -4,7 +4,7 @@ Examples
 :doc:`FAQ bot <./examples/faq_bot>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-FAQ bot for Arch Linux users built using `DFF`.
+FAQ bot for Deeppavlov users built using `DFF`.
 Can be run with Telegram or with a web interface.
 
 :doc:`Customer service bot <./examples/customer_service_bot>`
