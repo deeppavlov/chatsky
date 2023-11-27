@@ -61,7 +61,7 @@ def types_match(type1: Type, type2: Type) -> bool:
     """
     This function compares types with assumption that one of the types might be a :py:class:`typing.ForwardRef`.
     If it is so, it compares type and forward reference by name.
-    
+
     :param type1: First type to compare.
     :param type2: Second type to compare.
     :return: True if types are equal, False otherwise.
