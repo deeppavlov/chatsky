@@ -22,7 +22,7 @@ def find_similar_question(question: str) -> str | None:
 
     emb_with_scores = tuple(zip(questions, map(lambda x: np.linalg.norm(x - q_emb), faq_emb)))
 
-    sorted_embeddings = tuple(sorted(filter(lambda x: x[1] < 10, emb_with_scores), key=lambda x: x[1]))
+    sorted_embeddings = tuple(sorted(filter(lambda x: x[1] < 5, emb_with_scores), key=lambda x: x[1]))
 
     if len(sorted_embeddings) > 0:
         return sorted_embeddings[0][0].removeprefix("<Q>")

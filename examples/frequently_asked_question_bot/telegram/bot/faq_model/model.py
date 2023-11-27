@@ -22,7 +22,7 @@ def find_similar_questions(question: str):
 
     emb_with_scores = tuple(zip(questions, map(lambda x: np.linalg.norm(x - q_emb), faq_emb)))
 
-    filtered_embeddings = tuple(sorted(filter(lambda x: x[1] < 10, emb_with_scores), key=lambda x: x[1]))
+    filtered_embeddings = tuple(sorted(filter(lambda x: x[1] < 5, emb_with_scores), key=lambda x: x[1]))
 
     result = []
     for question, score in filtered_embeddings:
