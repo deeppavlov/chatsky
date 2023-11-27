@@ -1,7 +1,6 @@
 import importlib
 import logging
 
-import random
 import pytest
 
 from tests.test_utils import get_path_from_tests_to_current_dir
@@ -30,7 +29,6 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 def test_tutorials(tutorial_module_name: str):
     tutorial_module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
     check_happy_path(tutorial_module.pipeline, tutorial_module.happy_path)
-    random.seed(31415)
     async_pipeline = Pipeline.from_script(
         tutorial_module.toy_script,
         start_label=("root", "start"),

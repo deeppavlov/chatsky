@@ -133,7 +133,7 @@ toy_script = {
 happy_path = (
     (
         Message(text="Hi"),
-        Message(text="Hello, how are you?"),
+        Message(text="Hi, what is up?"),
     ),  # start -> node1
     (
         Message(text="I'm fine, how are you?"),
@@ -184,7 +184,7 @@ happy_path = (
     ),  # f_n->f_n
     (
         Message(text="Hi"),
-        Message(text="Hello, how are you?"),
+        Message(text="Hi, what is up?"),
     ),  # fallback -> node1
     (
         Message(text="I'm fine, how are you?"),
@@ -198,7 +198,7 @@ happy_path = (
 )
 
 # %%
-random.seed(31415)  # predestination of choice
+random.seed(42)  # predestination of choice
 
 
 pipeline = Pipeline.from_script(
