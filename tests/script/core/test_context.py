@@ -1,6 +1,7 @@
 # %%
 import random
 
+import deprecation
 from dff.script import Context, Message
 
 
@@ -8,6 +9,7 @@ def shuffle_dict_keys(dictionary: dict) -> dict:
     return {key: dictionary[key] for key in sorted(dictionary, key=lambda k: random.random())}
 
 
+@deprecation.fail_if_not_removed
 def test_context():
     ctx = Context()
     for index in range(0, 30, 2):

@@ -282,12 +282,12 @@ class Context(BaseModel):
     @deprecation.deprecated(
         deprecated_in="0.6.4",
         removed_in="1.0.0",
-        details="This method is deprecated and will be removed in future versions.",
+        details="This method is deprecated and will be removed in future versions.\n"
+        "The earlier implementation was not functional due to typing issues.",
     )
     def overwrite_current_node_in_processing(self, processed_node: Node):
         """
-        This method has been deprecated and will be removed in future versions.
-        The initial functionality of the method was to replace the current node
+        The intended functionality of the method is to replace the current node
         with the `processed_node` parameter.
 
         :param processed_node: `node` to set as the current node.
