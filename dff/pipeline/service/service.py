@@ -96,7 +96,7 @@ class Service(PipelineComponent):
         else:
             raise Exception(f"Unknown type of service handler: {handler}")
 
-    async def _run_handler(self, ctx: Context, pipeline: Pipeline):
+    async def _run_handler(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for service `handler` execution.
         Handler has three possible signatures, so this method picks the right one to invoke.
@@ -121,7 +121,7 @@ class Service(PipelineComponent):
         else:
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
 
-    async def _run_as_actor(self, ctx: Context, pipeline: Pipeline):
+    async def _run_as_actor(self, ctx: Context, pipeline: Pipeline) -> Context:
         """
         Method for running this service if its handler is an `Actor`.
         Catches runtime exceptions.
@@ -137,7 +137,7 @@ class Service(PipelineComponent):
             logger.error(f"Actor '{self.name}' execution failed!\n{exc}")
         return ctx
 
-    async def _run_as_service(self, ctx: Context, pipeline: Pipeline):
+    async def _run_as_service(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service if its handler is not an Actor.
         Checks start condition and catches runtime exceptions.

@@ -97,7 +97,7 @@ class ServiceGroup(PipelineComponent):
         else:
             raise Exception(f"Unknown type for ServiceGroup {components}")
 
-    async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> Context:
+    async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service group.
         It doesn't include wrappers execution, start condition checking or error handling - pure execution only.
