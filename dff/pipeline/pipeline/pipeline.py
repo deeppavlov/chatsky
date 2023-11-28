@@ -113,7 +113,7 @@ class Pipeline:
         self._services_pipeline.path = ".pipeline"
         actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
         if not actor_exists:
-            raise Exception("Actor not found in pipeline!")
+            raise Exception("Actor not found in the pipeline!")
         else:
             self.set_actor(
                 script,
