@@ -282,7 +282,7 @@ class Context(BaseModel):
     @deprecation.deprecated(
         deprecated_in="0.6.4",
         removed_in="1.0.0",
-        details="This method is deprecated and will be removed in future versions.\n"
+        details="This method is deprecated and will be removed in future versions. "
         "The earlier implementation was not functional due to typing issues.",
     )
     def overwrite_current_node_in_processing(self, processed_node: Node):
