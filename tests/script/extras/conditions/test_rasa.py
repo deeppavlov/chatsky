@@ -27,6 +27,7 @@ def testing_async_model():
 
 @pytest.mark.skipif(not RASA_ACTIVE, reason="RASA inactive.")
 @pytest.mark.skipif(not os.getenv("RASA_API_KEY"), reason="No RASA API key.")
+@pytest.mark.docker
 def test_predict(testing_model: RasaModel):
     request = "Hello there"
     result = testing_model.predict(request=request)

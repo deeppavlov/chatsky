@@ -55,11 +55,10 @@ jobs:
           TG_API_ID: ${{ secrets.TG_API_ID }}
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
-        run: |
-            make doc
-        env:
           GDF_ACCOUNT_JSON: ${{ env.GDF_ACCOUNT_JSON }}
           HF_API_KEY: ${{ secrets.HF_API_KEY }}
+        run: |
+            make doc
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
