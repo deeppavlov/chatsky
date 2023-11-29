@@ -21,7 +21,7 @@ from uuid import UUID, uuid4
 
 from typing import Any, Optional, Union, Dict, List, Set
 
-from pydantic import BaseModel, validate_arguments, Field, validator
+from pydantic import BaseModel, Field, field_validator
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
@@ -30,22 +30,9 @@ logger = logging.getLogger(__name__)
 Node = BaseModel
 
 
-@validate_arguments
-def sort_dict_keys(dictionary: dict) -> dict:
-    """
-    Sorting the keys in the `dictionary`. This needs to be done after deserialization,
-    since the keys are deserialized in a random order.
-
-    :param dictionary: Dictionary with unsorted keys.
-    :return: Dictionary with sorted keys.
-    """
-    return {key: dictionary[key] for key in sorted(dictionary)}
-
-
-@validate_arguments
 def get_last_index(dictionary: dict) -> int:
     """
-    Obtaining the last index from the `dictionary`. Functions returns `-1` if the `dict` is empty.
+    Obtain the last index from the `dictionary`. Return `-1` if the `dict` is empty.
 
     :param dictionary: Dictionary with unsorted keys.
     :return: Last index from the `dictionary`.
@@ -57,13 +44,10 @@ def get_last_index(dictionary: dict) -> int:
 class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
-    """
 
-    class Config:
-        property_set_methods = {
-            "last_response": "set_last_response",
-            "last_request": "set_last_request",
-        }
+    Avoid storing unserializable data in the fields of this class in order for
+    context storages to work.
+    """
 
     id: Union[UUID, int, str] = Field(default_factory=uuid4)
     """
@@ -96,13 +80,15 @@ class Context(BaseModel):
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
     so storage of any data won't reflect on the work on the internal Dialog Flow Scripting functions.
 
+    Avoid storing unserializable data in order for context storages to work.
+
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
     validation: bool = False
     """
-    `validation` is a flag that signals that :py:class:`~dff.script.Actor`,
-    while being initialized, checks the :py:class:`~dff.script.Script`.
+    `validation` is a flag that signals that :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`,
+    while being initialized, checks the :py:class:`~dff.script.core.script.Script`.
     The functions that can give not valid data
     while being validated must use this flag to take the validation mode into account.
     Otherwise the validation will not be passed.
@@ -110,96 +96,100 @@ class Context(BaseModel):
     framework_states: Dict[ModuleName, Dict[str, Any]] = {}
     """
     `framework_states` is used for addons states or for
-    :py:class:`~dff.script.Actor`'s states.
-    :py:class:`~dff.script.Actor`
+    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`'s states.
+    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`
     records all its intermediate conditions into the `framework_states`.
-    After :py:class:`~dff.script.Context` processing is finished,
-    :py:class:`~dff.script.Actor` resets `framework_states` and
-    returns :py:class:`~dff.script.Context`.
+    After :py:class:`~.Context` processing is finished,
+    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline` resets `framework_states` and
+    returns :py:class:`~.Context`.
 
         - key - Temporary variable name.
         - value - Temporary variable data.
     """
 
-    # validators
-    _sort_labels = validator("labels", allow_reuse=True)(sort_dict_keys)
-    _sort_requests = validator("requests", allow_reuse=True)(sort_dict_keys)
-    _sort_responses = validator("responses", allow_reuse=True)(sort_dict_keys)
+    @field_validator("labels", "requests", "responses")
+    @classmethod
+    def sort_dict_keys(cls, dictionary: dict) -> dict:
+        """
+        Sort the keys in the `dictionary`. This needs to be done after deserialization,
+        since the keys are deserialized in a random order.
+
+        :param dictionary: Dictionary with unsorted keys.
+        :return: Dictionary with sorted keys.
+        """
+        return {key: dictionary[key] for key in sorted(dictionary)}
 
     @classmethod
     def cast(cls, ctx: Optional[Union["Context", dict, str]] = None, *args, **kwargs) -> "Context":
         """
-        Transforms different data types to the objects of
-        :py:class:`~dff.script.Context` class.
-        Returns an object of :py:class:`~dff.script.Context`
+        Transform different data types to the objects of the
+        :py:class:`~.Context` class.
+        Return an object of the :py:class:`~.Context`
         type that is initialized by the input data.
 
-        :param ctx: Different data types, that are used to initialize object of
-            :py:class:`~dff.script.Context` type.
-            The empty object of :py:class:`~dff.script.Context`
-            type is created if no data are given.
-        :return: Object of :py:class:`~dff.script.Context`
+        :param ctx: Data that is used to initialize an object of the
+            :py:class:`~.Context` type.
+            An empty :py:class:`~.Context` object is returned if no data is given.
+        :return: Object of the :py:class:`~.Context`
             type that is initialized by the input data.
         """
         if not ctx:
             ctx = Context(*args, **kwargs)
         elif isinstance(ctx, dict):
-            ctx = Context.parse_obj(ctx)
+            ctx = Context.model_validate(ctx)
         elif isinstance(ctx, str):
-            ctx = Context.parse_raw(ctx)
+            ctx = Context.model_validate_json(ctx)
         elif not issubclass(type(ctx), Context):
             raise ValueError(
-                f"context expected as sub class of Context class or object of dict/str(json) type, but got {ctx}"
+                f"Context expected to be an instance of the Context class "
+                f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
             )
         return ctx
 
-    @validate_arguments
     def add_request(self, request: Message):
         """
-        Adds to the context the next `request` corresponding to the next turn.
-        The addition takes place in the `requests` and `new_index = last_index + 1`.
+        Add a new `request` to the context.
+        The new `request` is added with the index of `last_index + 1`.
 
         :param request: `request` to be added to the context.
         """
+        request_message = Message.model_validate(request)
         last_index = get_last_index(self.requests)
-        self.requests[last_index + 1] = request
+        self.requests[last_index + 1] = request_message
 
-    @validate_arguments
     def add_response(self, response: Message):
         """
-        Adds to the context the next `response` corresponding to the next turn.
-        The addition takes place in the `responses`, and `new_index = last_index + 1`.
+        Add a new `response` to the context.
+        The new `response` is added with the index of `last_index + 1`.
 
         :param response: `response` to be added to the context.
         """
+        response_message = Message.model_validate(response)
         last_index = get_last_index(self.responses)
-        self.responses[last_index + 1] = response
+        self.responses[last_index + 1] = response_message
 
-    @validate_arguments
     def add_label(self, label: NodeLabel2Type):
         """
-        Adds to the context the next :py:const:`label <dff.script.NodeLabel2Type>`,
-        corresponding to the next turn.
-        The addition takes place in the `labels`, and `new_index = last_index + 1`.
+        Add a new :py:data:`~.NodeLabel2Type` to the context.
+        The new `label` is added with the index of `last_index + 1`.
 
         :param label: `label` that we need to add to the context.
         """
         last_index = get_last_index(self.labels)
         self.labels[last_index + 1] = label
 
-    @validate_arguments
     def clear(
         self,
         hold_last_n_indices: int,
         field_names: Union[Set[str], List[str]] = {"requests", "responses", "labels"},
     ):
         """
-        Deletes all recordings from the `requests`/`responses`/`labels` except for
+        Delete all records from the `requests`/`responses`/`labels` except for
         the last `hold_last_n_indices` turns.
         If `field_names` contains `misc` field, `misc` field is fully cleared.
 
-        :param hold_last_n_indices: Number of last turns that remain under clearing.
-        :param field_names: Properties of :py:class:`~dff.script.Context` we need to clear.
+        :param hold_last_n_indices: Number of last turns to keep.
+        :param field_names: Properties of :py:class:`~.Context` to clear.
             Defaults to {"requests", "responses", "labels"}
         """
         field_names = field_names if isinstance(field_names, set) else set(field_names)
@@ -220,9 +210,12 @@ class Context(BaseModel):
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
         """
-        Returns the last :py:const:`~dff.script.NodeLabel2Type` of
-        the :py:class:`~dff.script.Context`.
-        Returns `None` if `labels` is empty.
+        Return the last :py:data:`~.NodeLabel2Type` of
+        the :py:class:`~.Context`.
+        Return `None` if `labels` is empty.
+
+        Since `start_label` is not added to the `labels` field,
+        empty `labels` usually indicates that the current node is the `start_node`.
         """
         last_index = get_last_index(self.labels)
         return self.labels.get(last_index)
@@ -230,41 +223,43 @@ class Context(BaseModel):
     @property
     def last_response(self) -> Optional[Message]:
         """
-        Returns the last `response` of the current :py:class:`~dff.script.Context`.
-        Returns `None` if `responses` is empty.
+        Return the last `response` of the current :py:class:`~.Context`.
+        Return `None` if `responses` is empty.
         """
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
-    def set_last_response(self, response: Optional[Message]):
+    @last_response.setter
+    def last_response(self, response: Optional[Message]):
         """
-        Sets the last `response` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Set the last `response` of the current :py:class:`~.Context`.
         Required for use with various response wrappers.
         """
         last_index = get_last_index(self.responses)
-        self.responses[last_index] = Message() if response is None else response
+        self.responses[last_index] = Message() if response is None else Message.model_validate(response)
 
     @property
     def last_request(self) -> Optional[Message]:
         """
-        Returns the last `request` of the current :py:class:`~dff.script.Context`.
-        Returns `None` if `requests` is empty.
+        Return the last `request` of the current :py:class:`~.Context`.
+        Return `None` if `requests` is empty.
         """
         last_index = get_last_index(self.requests)
         return self.requests.get(last_index)
 
-    def set_last_request(self, request: Optional[Message]):
+    @last_request.setter
+    def last_request(self, request: Optional[Message]):
         """
-        Sets the last `request` of the current :py:class:`~dff.core.engine.core.context.Context`.
+        Set the last `request` of the current :py:class:`~.Context`.
         Required for use with various request wrappers.
         """
         last_index = get_last_index(self.requests)
-        self.requests[last_index] = Message() if request is None else request
+        self.requests[last_index] = Message() if request is None else Message.model_validate(request)
 
     @property
     def current_node(self) -> Optional[Node]:
         """
-        Returns current :py:class:`~dff.script.Node`.
+        Return current :py:class:`~dff.script.core.script.Node`.
         """
         actor = self.framework_states.get("actor", {})
         node = (
@@ -276,34 +271,30 @@ class Context(BaseModel):
         )
         if node is None:
             logger.warning(
-                "The `current_node` exists when an actor is running between `ActorStage.GET_PREVIOUS_NODE`"
-                " and `ActorStage.FINISH_TURN`"
+                "The `current_node` method should be called "
+                "when an actor is running between the "
+                "`ActorStage.GET_PREVIOUS_NODE` and `ActorStage.FINISH_TURN` stages."
             )
 
         return node
 
-    @validate_arguments
     def overwrite_current_node_in_processing(self, processed_node: Node):
         """
-        Overwrites the current node with a processed node. This method only works in processing functions.
+        Set the current node to be `processed_node`.
+        This method only works in processing functions (pre-response and pre-transition).
 
-        :param processed_node: `node` that we need to overwrite current node.
+        The actual current node is not changed.
+
+        :param processed_node: `node` to set as the current node.
         """
         is_processing = self.framework_states.get("actor", {}).get("processed_node")
         if is_processing:
-            self.framework_states["actor"]["processed_node"] = processed_node
+            self.framework_states["actor"]["processed_node"] = Node.model_validate(processed_node)
         else:
             logger.warning(
                 f"The `{self.overwrite_current_node_in_processing.__name__}` "
-                "function can only be run during processing functions."
+                "method can only be called from processing functions (either pre-response or pre-transition)."
             )
 
-    def __setattr__(self, key, val):
-        method = self.__config__.property_set_methods.get(key, None)
-        if method is None:
-            super().__setattr__(key, val)
-        else:
-            getattr(self, method)(val)
 
-
-Context.update_forward_refs()
+Context.model_rebuild()

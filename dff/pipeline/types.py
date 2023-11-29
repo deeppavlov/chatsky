@@ -6,24 +6,27 @@ The classes and special types in this module can include data models,
 data structures, and other types that are defined for type hinting.
 """
 from abc import ABC
-from enum import unique, Enum, auto
-from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable
+from enum import unique, Enum
+from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable, Any
 
 from dff.context_storages import DBContextStorage
-from dff.script import Context, Actor
+from dff.script import Context, ActorStage, NodeLabel2Type, Script
 from typing_extensions import NotRequired, TypedDict, TypeAlias
+from pydantic import BaseModel
 
 
-_ForwardPipelineComponent = NewType("PipelineComponent", None)
+_ForwardPipeline = NewType("Pipeline", Any)
+_ForwardPipelineComponent = NewType("PipelineComponent", Any)
 _ForwardService = NewType("Service", _ForwardPipelineComponent)
+_ForwardServiceBuilder = NewType("ServiceBuilder", Any)
 _ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
-_ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", None)
+_ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", Any)
 _ForwardProvider = NewType("ABCProvider", ABC)
-_ForwardExtraHandlerFunction = NewType("ExtraHandlerFunction", None)
+_ForwardExtraHandlerRuntimeInfo = NewType("ExtraHandlerRuntimeInfo", Any)
 
 
 @unique
-class ComponentExecutionState(Enum):
+class ComponentExecutionState(str, Enum):
     """
     Enum, representing pipeline component execution state.
     These states are stored in `ctx.framework_keys[PIPELINE_STATE_KEY]`,
@@ -36,14 +39,14 @@ class ComponentExecutionState(Enum):
     - FAILED: component execution failed.
     """
 
-    NOT_RUN = auto()
-    RUNNING = auto()
-    FINISHED = auto()
-    FAILED = auto()
+    NOT_RUN = "NOT_RUN"
+    RUNNING = "RUNNING"
+    FINISHED = "FINISHED"
+    FAILED = "FAILED"
 
 
 @unique
-class GlobalExtraHandlerType(Enum):
+class GlobalExtraHandlerType(str, Enum):
     """
     Enum, representing types of global wrappers, that can be set applied for a pipeline.
     The following types are supported:
@@ -54,25 +57,26 @@ class GlobalExtraHandlerType(Enum):
     - AFTER_ALL: function called after each pipeline call.
     """
 
-    BEFORE_ALL = auto()
-    BEFORE = auto()
-    AFTER = auto()
-    AFTER_ALL = auto()
+    BEFORE_ALL = "BEFORE_ALL"
+    BEFORE = "BEFORE"
+    AFTER = "AFTER"
+    AFTER_ALL = "AFTER_ALL"
 
 
 @unique
-class ExtraHandlerType(Enum):
+class ExtraHandlerType(str, Enum):
     """
-    Enum, representing wrapper type, pre- or postprocessing.
+    Enum, representing wrapper execution stage: before or after the wrapped function.
     The following types are supported:
 
-    - PREPROCESSING: wrapper function called before component,
-    - POSTPROCESSING: wrapper function called after component.
+    - UNDEFINED: wrapper function with undetermined execution stage,
+    - BEFORE: wrapper function called before component,
+    - AFTER: wrapper function called after component.
     """
 
-    UNDEFINED = auto()
-    BEFORE = auto()
-    AFTER = auto()
+    UNDEFINED = "UNDEFINED"
+    BEFORE = "BEFORE"
+    AFTER = "AFTER"
 
 
 PIPELINE_STATE_KEY = "PIPELINE"
@@ -82,10 +86,10 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 """
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[[Context, Actor], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[[Context, _ForwardPipeline], bool]
 """
 A function type for components `start_conditions`.
-Accepts context and actor (current pipeline state), returns boolean (whether service can be launched).
+Accepts context and pipeline, returns boolean (whether service can be launched).
 """
 
 
@@ -105,61 +109,56 @@ Accepts str (component path), returns boolean (whether wrapper should be applied
 """
 
 
-ServiceRuntimeInfo: TypeAlias = TypedDict(
-    "ServiceRuntimeInfo",
-    {
-        "name": str,
-        "path": str,
-        "timeout": Optional[float],
-        "asynchronous": bool,
-        "execution_state": Dict[str, ComponentExecutionState],
-    },
-)
-"""
-Type of dictionary, that is passed to components in runtime.
-Contains current component info (`name`, `path`, `timeout`, `asynchronous`).
-Also contains `execution_state` - a dictionary,
-containing other pipeline components execution stats mapped to their paths.
-"""
+class ServiceRuntimeInfo(BaseModel):
+    """
+    Type of object, that is passed to components in runtime.
+    Contains current component info (`name`, `path`, `timeout`, `asynchronous`).
+    Also contains `execution_state` - a dictionary,
+    containing execution states of other components mapped to their paths.
+    """
 
-
-ExtraHandlerRuntimeInfo: TypeAlias = TypedDict(
-    "ExtraHandlerRuntimeInfo",
-    {
-        "function": _ForwardExtraHandlerFunction,
-        "stage": ExtraHandlerType,
-        "component": ServiceRuntimeInfo,
-    },
-)
-"""
-Type of dictionary, that is passed to wrappers in runtime.
-Contains current wrapper info (`name`, `stage`).
-Also contains `component` - runtime info dictionary of the component this wrapper is attached to.
-"""
+    name: str
+    path: str
+    timeout: Optional[float]
+    asynchronous: bool
+    execution_state: Dict[str, ComponentExecutionState]
 
 
 ExtraHandlerFunction: TypeAlias = Union[
-    Callable[[Context], None],
-    Callable[[Context, Actor], None],
-    Callable[[Context, Actor, ExtraHandlerRuntimeInfo], None],
+    Callable[[Context], Any],
+    Callable[[Context, _ForwardPipeline], Any],
+    Callable[[Context, _ForwardPipeline, _ForwardExtraHandlerRuntimeInfo], Any],
 ]
 """
 A function type for creating wrappers (before and after functions).
-Can accept current dialog context, actor, attached to the pipeline, and current wrapper info dictionary.
+Can accept current dialog context, pipeline, and current wrapper info.
+"""
+
+
+class ExtraHandlerRuntimeInfo(BaseModel):
+    func: ExtraHandlerFunction
+    stage: ExtraHandlerType
+    component: ServiceRuntimeInfo
+
+
+"""
+Type of object, that is passed to wrappers in runtime.
+Contains current wrapper info (`name`, `stage`).
+Also contains `component` - runtime info of the component this wrapper is attached to.
 """
 
 
 ServiceFunction: TypeAlias = Union[
     Callable[[Context], None],
     Callable[[Context], Awaitable[None]],
-    Callable[[Context, Actor], None],
-    Callable[[Context, Actor], Awaitable[None]],
-    Callable[[Context, Actor, ServiceRuntimeInfo], None],
-    Callable[[Context, Actor, ServiceRuntimeInfo], Awaitable[None]],
+    Callable[[Context, _ForwardPipeline], None],
+    Callable[[Context, _ForwardPipeline], Awaitable[None]],
+    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], None],
+    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], Awaitable[None]],
 ]
 """
 A function type for creating service handlers.
-Can accept current dialog context, actor, attached to the pipeline, and current service info dictionary.
+Can accept current dialog context, pipeline, and current service info.
 Can be both synchronous and asynchronous.
 """
 
@@ -188,11 +187,11 @@ It can be:
 ServiceBuilder: TypeAlias = Union[
     ServiceFunction,
     _ForwardService,
-    Actor,
+    str,
     TypedDict(
         "ServiceDict",
         {
-            "handler": "ServiceBuilder",
+            "handler": _ForwardServiceBuilder,
             "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "timeout": NotRequired[Optional[float]],
@@ -208,7 +207,7 @@ It can be:
 
 - ServiceFunction (will become handler)
 - Service object (will be spread and recreated)
-- Actor (will be wrapped in a Service as a handler)
+- String 'ACTOR' - the pipeline Actor will be placed there
 - Dictionary, containing keys that are present in Service constructor parameters
 """
 
@@ -235,6 +234,14 @@ PipelineBuilder: TypeAlias = TypedDict(
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
+        "script": Union[Script, Dict],
+        "start_label": NodeLabel2Type,
+        "fallback_label": NotRequired[Optional[NodeLabel2Type]],
+        "label_priority": NotRequired[float],
+        "validation_stage": NotRequired[Optional[bool]],
+        "condition_handler": NotRequired[Optional[Callable]],
+        "verbose": NotRequired[bool],
+        "handlers": NotRequired[Optional[Dict[ActorStage, List[Callable]]]],
     },
 )
 """

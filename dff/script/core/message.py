@@ -2,33 +2,51 @@
 Message
 -------
 The :py:class:`.Message` class is a universal data model for representing a message that should be supported by
-`DFF`. It only contains types and properties that are compatible with most messaging services.
+DFF. It only contains types and properties that are compatible with most messaging services.
 """
 from typing import Any, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 
-from pydantic import Extra, Field, ValidationError, FilePath, HttpUrl, BaseModel
-from pydantic import validator, root_validator
+from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
 
 
 class Session(Enum):
+    """
+    An enumeration that defines two possible states of a session.
+    """
+
     ACTIVE = auto()
     FINISHED = auto()
 
 
-class DataModel(BaseModel):
-    class Config:
-        extra = Extra.allow
-        arbitrary_types_allowed = True
+class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
+    """
+    This class is a Pydantic BaseModel that serves as a base class for all DFF models.
+    """
+
+    ...
 
 
 class Command(DataModel):
+    """
+    This class is a subclass of DataModel and represents
+    a command that can be executed in response to a user input.
+    """
+
     ...
 
 
 class Location(DataModel):
+    """
+    This class is a data model that represents a geographical
+    location on the Earth's surface.
+    It has two attributes, longitude and latitude, both of which are float values.
+    If the absolute difference between the latitude and longitude values of the two
+    locations is less than 0.00004, they are considered equal.
+    """
+
     longitude: float
     latitude: float
 
@@ -39,6 +57,11 @@ class Location(DataModel):
 
 
 class Attachment(DataModel):
+    """
+    This class represents an attachment that can be either
+    a file or a URL, along with an optional ID and title.
+    """
+
     source: Optional[Union[HttpUrl, FilePath]] = None
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
@@ -46,11 +69,11 @@ class Attachment(DataModel):
     def get_bytes(self) -> Optional[bytes]:
         if self.source is None:
             return None
-        if isinstance(self.source, HttpUrl):
-            with urlopen(self.source) as file:
+        if isinstance(self.source, Path):
+            with open(self.source, "rb") as file:
                 return file.read()
         else:
-            with open(self.source, "rb") as file:
+            with urlopen(self.source.unicode_string()) as file:
                 return file.read()
 
     def __eq__(self, other):
@@ -62,13 +85,17 @@ class Attachment(DataModel):
             return self.get_bytes() == other.get_bytes()
         return NotImplemented
 
-    @root_validator
-    def validate_source_or_id(cls, values):
+    @model_validator(mode="before")
+    @classmethod
+    def validate_source_or_id(cls, values: dict):
+        if not isinstance(values, dict):
+            raise AssertionError(f"Invalid constructor parameters: {str(values)}")
         if bool(values.get("source")) == bool(values.get("id")):
-            raise ValidationError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
+            raise AssertionError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
         return values
 
-    @validator("source")
+    @field_validator("source", mode="before")
+    @classmethod
     def validate_source(cls, value):
         if isinstance(value, Path):
             return Path(value)
@@ -76,22 +103,32 @@ class Attachment(DataModel):
 
 
 class Audio(Attachment):
+    """Represents an audio file attachment."""
+
     pass
 
 
 class Video(Attachment):
+    """Represents a video file attachment."""
+
     pass
 
 
 class Image(Attachment):
+    """Represents an image file attachment."""
+
     pass
 
 
 class Document(Attachment):
+    """Represents a document file attachment."""
+
     pass
 
 
 class Attachments(DataModel):
+    """This class is a data model that represents a list of attachments."""
+
     files: List[Attachment] = Field(default_factory=list)
 
     def __eq__(self, other):
@@ -101,6 +138,8 @@ class Attachments(DataModel):
 
 
 class Link(DataModel):
+    """This class is a DataModel representing a hyperlink."""
+
     source: HttpUrl
     title: Optional[str] = None
 
@@ -110,6 +149,11 @@ class Link(DataModel):
 
 
 class Button(DataModel):
+    """
+    This class allows for the creation of a button object
+    with a source URL, a text description, and a payload.
+    """
+
     source: Optional[HttpUrl] = None
     text: str
     payload: Optional[Any] = None
@@ -127,7 +171,12 @@ class Button(DataModel):
 
 
 class Keyboard(DataModel):
-    buttons: List[Button] = Field(default_factory=list, min_items=1)
+    """
+    This class is a DataModel that represents a keyboard object
+    that can be used for a chatbot or messaging application.
+    """
+
+    buttons: List[Button] = Field(default_factory=list, min_length=1)
 
     def __eq__(self, other):
         if isinstance(other, Keyboard):
@@ -137,7 +186,8 @@ class Keyboard(DataModel):
 
 class Message(DataModel):
     """
-    Class representing a message and contains several class level variables to store message information.
+    Class representing a message and contains several
+    class level variables to store message information.
     """
 
     text: Optional[str] = None
@@ -152,8 +202,8 @@ class Message(DataModel):
 
     def __eq__(self, other):
         if isinstance(other, Message):
-            for field in self.__fields__:
-                if field not in other.__fields__:
+            for field in self.model_fields:
+                if field not in other.model_fields:
                     return False
                 if self.__getattribute__(field) != other.__getattribute__(field):
                     return False
@@ -161,8 +211,10 @@ class Message(DataModel):
         return NotImplemented
 
     def __repr__(self) -> str:
-        return " ".join([f"{key}='{value}'" for key, value in self.dict(exclude_none=True).items()])
+        return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
 
 
 class MultiMessage(Message):
+    """This class represents a message that contains multiple sub-messages."""
+
     messages: Optional[List[Message]] = None

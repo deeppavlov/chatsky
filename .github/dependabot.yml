@@ -1,0 +1,32 @@
+version: 2
+updates:
+
+  - package-ecosystem: "docker"
+    directory: "/"
+    target-branch: dev
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 99
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "github-actions"
+    directory: "/"
+    target-branch: dev
+    schedule:
+      interval: "weekly"
+    open-pull-requests-limit: 99
+    labels:
+      - "dependencies"
+
+  - package-ecosystem: "pip"
+    directory: "/"
+    target-branch: dev
+    schedule:
+      interval: "daily"
+    open-pull-requests-limit: 99
+    ignore:
+      - dependency-name: "*"
+        update-types: ["version-update:semver-patch"]
+    labels:
+      - "dependencies"

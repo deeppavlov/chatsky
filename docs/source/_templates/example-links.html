@@ -1,5 +1,6 @@
 {% if meta is defined and meta is not none and 'tutorial_name' in meta %}
-    {% set github_link = 'https://github.com/deeppavlov/dialog_flow_framework/blob/dev/' ~ meta['tutorial_name'] ~ '.py' %}
+    {% set repo_path = "/".join(meta['tutorial_name'].split("/")[-1].split(".")) %}
+    {% set github_link = 'https://github.com/deeppavlov/dialog_flow_framework/blob/master/' ~ repo_path ~ '.py' %}
     {% set notebook_link = '../' ~ meta['tutorial_name'] ~ '.ipynb' %}
     {% set colab_link = 'https://colab.research.google.com/github/deeppavlov/dialog_flow_framework/blob/gh-pages/' ~ meta['tutorial_name'] ~ '.ipynb' %}
 

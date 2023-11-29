@@ -59,7 +59,7 @@ class TelegramTesting:  # pragma: no cover
     :param pipeline:
         Pipeline with the telegram messenger interface.
         Required for :py:meth:`~dff.utils.testing.telegram.TelegramTesting.send_and_check` and
-        :py:meth`~dff.utils.testing.telegram.TelegramTesting.check_happy_path` with `run_bot=True`
+        :py:meth:`~dff.utils.testing.telegram.TelegramTesting.check_happy_path` with `run_bot=True`
     :param api_credentials:
         Telegram API id and hash.
         Obtainable via https://core.telegram.org/api/obtaining_api_id.
@@ -260,7 +260,7 @@ class TelegramTesting:  # pragma: no cover
                 last_message = None
                 for request, response in happy_path:
                     logging.info(f"Sending request {request}")
-                    user_message = await self.send_message(TelegramMessage.parse_obj(request), bot_messages)
+                    user_message = await self.send_message(TelegramMessage.model_validate(request), bot_messages)
                     if user_message is not None:
                         last_message = user_message
                     logging.info("Request sent")
@@ -275,4 +275,4 @@ class TelegramTesting:  # pragma: no cover
                         last_message = bot_messages[0]
                     logging.info("Got responses")
                     result = await self.parse_responses(bot_messages, file_download_destination)
-                    assert result == TelegramMessage.parse_obj(response)
+                    assert result == TelegramMessage.model_validate(response)

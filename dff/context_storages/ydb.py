@@ -37,7 +37,6 @@ class YDBContextStorage(DBContextStorage):
         When using sqlite backend in Windows, keep in mind that you have to use double backslashes '\\'
         instead of forward slashes '/' in the file path.
     :param table_name: The name of the table to use.
-    :type table_name: str
     """
 
     def __init__(self, path: str, table_name: str = "contexts", timeout=5):
@@ -73,9 +72,9 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            await (session.transaction(ydb.SerializableReadWrite())).execute(
+            await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
-                {"$queryId": str(key), "$queryContext": value.json()},
+                {"$queryId": str(key), "$queryContext": value.model_dump_json()},
                 commit_tx=True,
             )
 
@@ -96,7 +95,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
+            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
                     "$queryId": str(key),
@@ -125,7 +124,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            await (session.transaction(ydb.SerializableReadWrite())).execute(
+            await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {"$queryId": str(key)},
                 commit_tx=True,
@@ -151,7 +150,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
+            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {
                     "$queryId": str(key),
@@ -174,7 +173,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            result_sets = await (session.transaction(ydb.SerializableReadWrite())).execute(
+            result_sets = await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 commit_tx=True,
             )
@@ -195,7 +194,7 @@ class YDBContextStorage(DBContextStorage):
             )
             prepared_query = await session.prepare(query)
 
-            await (session.transaction(ydb.SerializableReadWrite())).execute(
+            await session.transaction(ydb.SerializableReadWrite()).execute(
                 prepared_query,
                 {},
                 commit_tx=True,

@@ -12,7 +12,8 @@ from enum import Enum
 
 from telebot import types, TeleBot
 
-from dff.script import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 
 from .utils import batch_open_io
 from .message import TelegramMessage, TelegramUI, RemoveKeyboard
@@ -56,8 +57,10 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
             ready_response = response
         elif isinstance(response, str):
             ready_response = TelegramMessage(text=response)
-        elif isinstance(response, dict) or isinstance(response, Message):
-            ready_response = TelegramMessage.parse_obj(response)
+        elif isinstance(response, Message):
+            ready_response = TelegramMessage.model_validate(response.model_dump())
+        elif isinstance(response, dict):
+            ready_response = TelegramMessage.model_validate(response)
         else:
             raise TypeError(
                 "Type of the response argument should be one of the following:"
@@ -228,7 +231,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, actor: Actor, *args, **kwargs):  # pragma: no cover
+    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False

@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
@@ -12,27 +13,27 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   test_full:
     strategy:
       fail-fast: false
       matrix:
-        python-version: ["3.7", "3.8", "3.9", "3.10"]
+        python-version: ["3.8", "3.9", "3.10", "3.11"]
         os: [macOS-latest, windows-latest, ubuntu-latest]
 
     runs-on: ${{ matrix.os }}
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Build images
         if: matrix.os == 'ubuntu-latest'
         run: |
-          docker-compose up -d
+          make docker_up
 
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v2
+        uses: actions/setup-python@v4
         with:
           python-version: ${{ matrix.python-version }}
 
@@ -43,26 +44,33 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
+              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
+          else
+              pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
           fi
-          pytest --tb=long -vv --cache-clear --no-cov tests/
         shell: bash
 
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:
-      - uses: actions/checkout@v2
+      - uses: actions/checkout@v4
 
       - name: Build images
         run: |
-          docker-compose up -d
+          make docker_up
 
-      - name: set up python 3.7
-        uses: actions/setup-python@v2
+      - name: set up python 3.8
+        uses: actions/setup-python@v4
         with:
-          python-version: 3.7
+          python-version: 3.8
 
       - name: install dependencies
         run: |
@@ -71,7 +79,12 @@ jobs:
         shell: bash
 
       - name: run pytest
+        env:
+          TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
+          TG_API_ID: ${{ secrets.TG_API_ID }}
+          TG_API_HASH: ${{ secrets.TG_API_HASH }}
+          TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-          pytest --tb=long -vv --cache-clear --no-cov tests/
+          pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
         shell: bash

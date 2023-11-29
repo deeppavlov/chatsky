@@ -4,33 +4,29 @@ Getting started
 Installation
 ~~~~~~~~~~~~
 
-`DFF` can be easily installed on your system using the ``pip`` package manager:
+DFF can be easily installed on your system using the ``pip`` package manager:
 
 .. code-block:: console
    
    pip install dff
 
-This framework is compatible with Python 3.7 and newer versions.
+This framework is compatible with Python 3.8 and newer versions.
 
 The above command will set the minimum dependencies to start working with DFF. 
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 
 .. code-block:: console
-   
-   pip install dff[core]  # minimal dependencies (by default)
+
+   pip install dff[json]  # dependencies for using JSON
+   pip install dff[pickle] # dependencies for using Pickle
    pip install dff[redis]  # dependencies for using Redis
    pip install dff[mongodb]  # dependencies for using MongoDB
    pip install dff[mysql]  # dependencies for using MySQL
    pip install dff[postgresql]  # dependencies for using PostgreSQL
    pip install dff[sqlite]  # dependencies for using SQLite
    pip install dff[ydb]  # dependencies for using Yandex Database
-   pip install dff[full]  # full dependencies including all options above
-   pip install dff[tests]  # dependencies for running tests
-   pip install dff[test_full]  # full dependencies for running all tests (all options above)
-   pip install dff[examples]  # dependencies for running examples (all options above)
-   pip install dff[devel]  # dependencies for development
-   pip install dff[doc]  # dependencies for documentation
-   pip install dff[devel_full]  # full dependencies for development (all options above)
+   pip install dff[telegram]  # dependencies for using Telegram
+   pip install dff[benchmark]  # dependencies for benchmarking
 
 For example, if you are going to use one of the database backends,
 you can specify the corresponding requirements yourself.
@@ -54,7 +50,7 @@ It allows developers to easily write and manage dialog systems by defining a spe
 dialog graph that describes the behavior of the service.
 DFF offers a specialized language (DSL) for quickly writing dialog graphs,
 making it easy for developers to create chatbots for a wide
-range of applications such as social networks, call centers, websites, skills for Amazon Alexa, etc.
+range of applications, such as social networks, call centers, websites, personal assistants, etc.
 
 DFF has several important concepts:
 

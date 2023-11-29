@@ -5,8 +5,9 @@ import re
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
-from utils.notebook import insert_installation_cell_into_py_example  # noqa: E402
-from utils.generate_notebook_links import generate_example_links_for_notebook_creation  # noqa: E402
+from utils.notebook import py_percent_to_notebook  # noqa: E402
+from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
+from utils.link_misc_files import link_misc_files  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
@@ -16,7 +17,7 @@ copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
 
 # The full version, including alpha/beta/rc tags
-release = "0.3.2"
+release = "0.6.3"
 
 
 # -- General configuration ---------------------------------------------------
@@ -27,6 +28,7 @@ release = "0.3.2"
 
 extensions = [
     "sphinx.ext.autodoc",
+    "sphinx.ext.autosummary",
     "sphinx.ext.doctest",
     "sphinx.ext.intersphinx",
     "sphinx.ext.todo",
@@ -36,6 +38,7 @@ extensions = [
     "sphinx.ext.extlinks",
     "sphinxcontrib.katex",
     "sphinx_copybutton",
+    "sphinx_favicon",
     "sphinx_autodoc_typehints",
     "nbsphinx",
     "sphinx_gallery.load_style",
@@ -60,7 +63,7 @@ templates_path = ["_templates"]
 # List of patterns, relative to source directory, that match files and
 # directories to ignore when looking for source files.
 # This pattern also affects html_static_path and html_extra_path.
-exclude_patterns = ["*.py", "utils/*.py", "**/_*.py"]
+exclude_patterns = ["*.py", "utils/*.py", "**/_*.py", "_misc/*.py"]
 
 html_short_title = "None"
 
@@ -82,17 +85,24 @@ html_static_path = ["_static"]
 
 html_show_sourcelink = False
 
+autosummary_generate_overwrite = False
 
-# Finding examples directories
-nbsphinx_custom_formats = {".py": insert_installation_cell_into_py_example()}
+# Finding tutorials directories
+nbsphinx_custom_formats = {".py": py_percent_to_notebook}
 nbsphinx_prolog = """
 :tutorial_name: {{ env.docname }}
 """
 
+html_logo = "_static/images/logo-simple.svg"
+
+nbsphinx_thumbnails = {
+    "tutorials/*": "_static/images/logo-simple.svg",
+}
+
 html_context = {
     "github_user": "deeppavlov",
     "github_repo": "dialog_flow_framework",
-    "github_version": "dev",
+    "github_version": "master",
     "doc_path": "docs/source",
 }
 
@@ -102,7 +112,11 @@ html_css_files = [
 
 # Theme options
 html_theme_options = {
-    "header_links_before_dropdown": 7,
+    "header_links_before_dropdown": 5,
+    "logo": {
+        "alt_text": "DFF logo (simple and nice)",
+        "text": "Dialog Flow Framework",
+    },
     "icon_links": [
         {
             "name": "DeepPavlov Forum",
@@ -123,28 +137,53 @@ html_theme_options = {
             "type": "fontawesome",
         },
     ],
-    "favicons": [
-        {
-            "rel": "icon",
-            "sizes": "32x32",
-            "href": "images/logo-dff.svg",
-        },
-    ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
 }
 
 
-autodoc_default_options = {"members": True, "undoc-members": False, "private-members": False}
+favicons = [
+    {"href": "images/logo-dff.svg"},
+]
+
+
+autodoc_default_options = {
+    "members": True,
+    "undoc-members": False,
+    "private-members": True,
+    "member-order": "bysource",
+    "exclude-members": "_abc_impl, model_fields",
+}
 
 
 def setup(_):
-    generate_example_links_for_notebook_creation(
+    link_misc_files(
         [
-            "examples/context_storages/*.py",
-            "examples/messengers/*.py",
-            "examples/pipeline/*.py",
-            "examples/script/*.py",
-            "examples/utils/*.py",
+            "utils/db_benchmark/benchmark_schema.json",
+            "utils/db_benchmark/benchmark_streamlit.py",
+        ]
+    )
+    generate_tutorial_links_for_notebook_creation(
+        [
+            ("tutorials.context_storages", "Context Storages"),
+            (
+                "tutorials.messengers",
+                "Interfaces",
+                [
+                    ("telegram", "Telegram"),
+                    ("web_api_interface", "Web API"),
+                ],
+            ),
+            ("tutorials.pipeline", "Pipeline"),
+            (
+                "tutorials.script",
+                "Script",
+                [
+                    ("core", "Core"),
+                    ("responses", "Responses"),
+                ],
+            ),
+            ("tutorials.utils", "Utils"),
+            ("tutorials.stats", "Stats"),
         ]
     )
     regenerate_apiref(
@@ -153,5 +192,9 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.stats", "Stats"),
+            ("dff.utils.testing", "Testing Utils"),
+            ("dff.utils.turn_caching", "Caching"),
+            ("dff.utils.db_benchmark", "DB Benchmark"),
         ]
     )

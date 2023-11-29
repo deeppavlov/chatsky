@@ -1,12 +1,16 @@
+.ONESHELL:
+
 SHELL = /bin/bash
 
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.3.2
-TEST_COVERAGE_THRESHOLD=97
+CURRENT_VERSION = 0.6.3
+TEST_COVERAGE_THRESHOLD=95
+TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
 PATH := $(VENV_PATH)/bin:$(PATH)
+PWD := $(shell pwd)
 
 help:
 	@echo "Thanks for your interest in Dialog Flow Framework!"
@@ -29,14 +33,14 @@ venv:
 	pip install -e .[devel_full]
 
 format: venv
-	black --line-length=120 --exclude='venv|build|examples' .
-	black --line-length=100 examples
+	black --line-length=120 --exclude='venv|build|tutorials' .
+	black --line-length=80 tutorials
 .PHONY: format
 
 lint: venv
-	flake8 --max-line-length=120 --exclude venv,build,examples .
-	flake8 --max-line-length=100 examples
-	@set -e && black --line-length=120 --check --exclude='venv|build|examples' . && black --line-length=100 --check examples || ( \
+	flake8 --max-line-length=120 --exclude venv,build,tutorials --per-file-ignores='**/__init__.py:F401' .
+	flake8 --max-line-length=100 --per-file-ignores='**/3_load_testing_with_locust.py:E402 **/4_streamlit_chat.py:E402'  tutorials
+	@set -e && black --line-length=120 --check --exclude='venv|build|tutorials' . && black --line-length=80 --check tutorials || ( \
 		echo "================================"; \
 		echo "Bad formatting? Run: make format"; \
 		echo "================================"; \
@@ -46,22 +50,33 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose up -d
+	docker compose --profile context_storage --profile stats up -d --build --wait
 .PHONY: docker_up
 
-wait_db: docker_up
-	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
-.PHONY: wait_db
-
 test: venv
-	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff tests/
+	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
-test_all: venv wait_db test lint
+test_all: venv docker_up test lint
 .PHONY: test_all
 
-doc: venv clean_docs
+build_drawio:
+	docker run --rm --name="drawio-convert" -v $(PWD)/docs/source/drawio_src:/data rlespinasse/drawio-export -f png --on-changes --remove-page-suffix
+	docker run --rm --name="drawio-chown" -v $(PWD)/docs/source/drawio_src:/data --entrypoint chown rlespinasse/drawio-export -R "$(shell id -u):$(shell id -g)" /data
+	for folder in docs/source/drawio_src/*; do
+		foldername=`basename $${folder}`
+		for file in $${folder}/*; do
+			filename=`basename $${file}`
+			if [[ -d $${file} && $${filename} == "export" ]]; then
+				mkdir -p docs/source/_static/drawio/$${foldername}
+				cp -r $${file}/* docs/source/_static/drawio/$${foldername}
+			fi
+		done
+	done
+.PHONY: build_drawio
+
+doc: venv clean_docs build_drawio
+	python3 docs/source/utils/patching.py
 	sphinx-apidoc -e -E -f -o docs/source/apiref dff
 	sphinx-build -M clean docs/source docs/build
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && export DISABLE_INTERACTIVE_MODE=1 && sphinx-build -b html -W --keep-going docs/source docs/build
@@ -86,9 +101,12 @@ version_major: venv
 
 clean_docs:
 	rm -rf docs/build
-	rm -rf docs/examples
+	rm -rf docs/tutorials
 	rm -rf docs/source/apiref
-	rm -rf docs/source/examples
+	rm -rf docs/source/_misc
+	rm -rf docs/source/tutorials
+	rm -rf docs/source/_static/drawio
+	rm -rf docs/source/drawio_src/**/export
 .PHONY: clean_docs
 
 clean: clean_docs

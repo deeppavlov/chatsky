@@ -1,27 +1,27 @@
 """
 Utility Functions
 -----------------
-The Utility Functions module contains several utility functions that are commonly used throughout the `DFF`.
+The Utility Functions module contains several utility functions that are commonly used throughout the DFF.
 These functions provide a variety of utility functionality.
 """
 import asyncio
 from typing import Callable, Any, Optional, Tuple, Mapping
 
 
-async def wrap_sync_function_in_async(function: Callable, *args, **kwargs) -> Any:
+async def wrap_sync_function_in_async(func: Callable, *args, **kwargs) -> Any:
     """
     Utility function, that wraps both functions and coroutines in coroutines.
-    Invokes `function` if it is just a callable and awaits, if this is a coroutine.
+    Invokes `func` if it is just a callable and awaits, if this is a coroutine.
 
-    :param function: Callable to wrap.
+    :param func: Callable to wrap.
     :param \\*args: Function args.
     :param \\**kwargs: Function kwargs.
-    :return: What `function` returns.
+    :return: What function returns.
     """
-    if asyncio.iscoroutinefunction(function):
-        return await function(*args, **kwargs)
+    if asyncio.iscoroutinefunction(func):
+        return await func(*args, **kwargs)
     else:
-        return function(*args, **kwargs)
+        return func(*args, **kwargs)
 
 
 def _get_attrs_with_updates(

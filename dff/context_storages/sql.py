@@ -3,7 +3,7 @@ SQL
 ---
 The SQL module provides a SQL-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data from SQL databases.
-It allows the `DFF` to easily store and retrieve context data in a format that is highly scalable
+It allows the DFF to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
 The SQL module provides the ability to choose the backend of your choice from
@@ -115,7 +115,7 @@ class SQLContextStorage(DBContextStorage):
     @threadsafe_method
     async def set_item_async(self, key: Hashable, value: Context):
         value = value if isinstance(value, Context) else Context.cast(value)
-        value = json.loads(value.json())
+        value = json.loads(value.model_dump_json())
 
         insert_stmt = insert(self.table).values(id=str(key), context=value)
         update_stmt = await self._get_update_stmt(insert_stmt)

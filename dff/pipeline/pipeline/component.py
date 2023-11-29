@@ -12,9 +12,9 @@ import logging
 import abc
 import asyncio
 import copy
-from typing import Optional, Union, Awaitable
+from typing import Optional, Union, Awaitable, ForwardRef
 
-from dff.script import Context, Actor
+from dff.script import Context
 
 from ..service.extra import BeforeHandler, AfterHandler
 from ..conditions import always_start_condition
@@ -30,6 +30,8 @@ from ..types import (
 )
 
 logger = logging.getLogger(__name__)
+
+Pipeline = ForwardRef("Pipeline")
 
 
 class PipelineComponent(abc.ABC):
@@ -68,21 +70,30 @@ class PipelineComponent(abc.ABC):
         name: Optional[str] = None,
         path: Optional[str] = None,
     ):
-        #: Maximum component execution time (in seconds),
-        #: if it exceeds this time, it is interrupted (for asynchronous only!).
         self.timeout = timeout
-        #: Requested asynchronous property; if not defined, :py:attr:`~requested_async_flag` is used instead.
+        """
+        Maximum component execution time (in seconds),
+        if it exceeds this time, it is interrupted (for asynchronous only!).
+        """
         self.requested_async_flag = requested_async_flag
-        #: Calculated asynchronous property, whether the component can be asynchronous or not.
+        """Requested asynchronous property; if not defined, :py:attr:`~requested_async_flag` is used instead."""
         self.calculated_async_flag = calculated_async_flag
-        #: Component start condition that is invoked before each component execution;
-        #: component is executed only if it returns `True`.
+        """Calculated asynchronous property, whether the component can be asynchronous or not."""
         self.start_condition = always_start_condition if start_condition is None else start_condition
-        #: Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
-        #: should not be blank or contain '.' symbol.
+        """
+        Component start condition that is invoked before each component execution;
+        component is executed only if it returns `True`.
+        """
         self.name = name
-        #: Вot-separated path to component (should be is universally unique).
+        """
+        Component name (should be unique in single :py:class:`~pipeline.service.group.ServiceGroup`),
+        should not be blank or contain '.' symbol.
+        """
         self.path = path
+        """
+        Dot-separated path to component (is universally unique).
+        This attribute is set in :py:func:`~dff.pipeline.pipeline.utils.finalize_service_group`.
+        """
 
         self.before_handler = BeforeHandler([] if before_handler is None else before_handler)
         self.after_handler = AfterHandler([] if after_handler is None else after_handler)
@@ -104,7 +115,7 @@ class PipelineComponent(abc.ABC):
         """
         if PIPELINE_STATE_KEY not in ctx.framework_states:
             ctx.framework_states[PIPELINE_STATE_KEY] = {}
-        ctx.framework_states[PIPELINE_STATE_KEY][self.path] = value.name
+        ctx.framework_states[PIPELINE_STATE_KEY][self.path] = value
 
     def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
         """
@@ -116,9 +127,7 @@ class PipelineComponent(abc.ABC):
             (usually it's :py:attr:`~.pipeline.types.ComponentExecutionState.NOT_RUN`).
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
         """
-        return ComponentExecutionState[
-            ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
-        ]
+        return ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
 
     @property
     def asynchronous(self) -> bool:
@@ -138,7 +147,7 @@ class PipelineComponent(abc.ABC):
         """
         return self.calculated_async_flag if self.requested_async_flag is None else self.requested_async_flag
 
-    async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context, actor: Actor):
+    async def run_extra_handler(self, stage: ExtraHandlerType, ctx: Context, pipeline: Pipeline):
         extra_handler = None
         if stage == ExtraHandlerType.BEFORE:
             extra_handler = self.before_handler
@@ -147,42 +156,40 @@ class PipelineComponent(abc.ABC):
         if extra_handler is None:
             return
         try:
-            extra_handler_result = await extra_handler(ctx, actor, self._get_runtime_info(ctx))
+            extra_handler_result = await extra_handler(ctx, pipeline, self._get_runtime_info(ctx))
             if extra_handler.asynchronous and isinstance(extra_handler_result, Awaitable):
                 await extra_handler_result
         except asyncio.TimeoutError:
-            logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage.name} extra handler timed out!")
+            logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
-    async def _run(self, ctx: Context, actor: Optional[Actor] = None) -> Optional[Context]:
+    async def _run(self, ctx: Context, pipeline: Optional[Pipeline] = None) -> Optional[Context]:
         """
         A method for running pipeline component, it is overridden in all its children.
         This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param actor: This :py:class:`~.Pipeline` :py:class:`~.Actor` or
-            `None` if this is a service, that wraps :py:class:`~.Actor`.
+        :param pipeline: This :py:class:`~.Pipeline`.
         :return: :py:class:`~.Context` if this is a synchronous service or `None`,
             asynchronous services shouldn't modify :py:class:`~.Context`.
         """
         raise NotImplementedError
 
-    async def __call__(self, ctx: Context, actor: Optional[Actor] = None) -> Optional[Union[Context, Awaitable]]:
+    async def __call__(self, ctx: Context, pipeline: Optional[Pipeline] = None) -> Optional[Union[Context, Awaitable]]:
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`~._run` method.
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :param actor: This :py:class:`~.Pipeline` :py:class:`~.Actor` or
-            `None` if this is a service, that wraps :py:class:`~.Actor`.
+        :param pipeline: This :py:class:`~.Pipeline`.
         :return: :py:class:`~.Context` if this is a synchronous service or :py:class:`~.typing.const.Awaitable`,
             asynchronous services shouldn't modify :py:class:`~.Context`.
         """
         if self.asynchronous:
-            task = asyncio.create_task(self._run(ctx, actor))
+            task = asyncio.create_task(self._run(ctx, pipeline))
             return asyncio.wait_for(task, timeout=self.timeout)
         else:
-            return await self._run(ctx, actor)
+            return await self._run(ctx, pipeline)
 
     def add_extra_handler(self, global_extra_handler_type: GlobalExtraHandlerType, extra_handler: ExtraHandlerFunction):
         """
@@ -204,15 +211,15 @@ class PipelineComponent(abc.ABC):
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :return: :py:class:`~.dff.script.typing.ServiceRuntimeInfo`
-            dict where all not set fields are replaced with `[None]`.
+            object where all not set fields are replaced with `[None]`.
         """
-        return {
-            "name": self.name if self.name is not None else "[None]",
-            "path": self.path if self.path is not None else "[None]",
-            "timeout": self.timeout,
-            "asynchronous": self.asynchronous,
-            "execution_state": copy.deepcopy(ctx.framework_states[PIPELINE_STATE_KEY]),
-        }
+        return ServiceRuntimeInfo(
+            name=self.name if self.name is not None else "[None]",
+            path=self.path if self.path is not None else "[None]",
+            timeout=self.timeout,
+            asynchronous=self.asynchronous,
+            execution_state=copy.deepcopy(ctx.framework_states[PIPELINE_STATE_KEY]),
+        )
 
     @property
     def info_dict(self) -> dict:

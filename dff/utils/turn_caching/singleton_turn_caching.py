@@ -1,3 +1,8 @@
+"""
+Singleton Turn Caching
+----------------------
+This module contains functions for caching function results on each dialog turn.
+"""
 import functools
 from typing import Callable, List, Optional
 
@@ -8,11 +13,7 @@ USED_CACHES: List[Callable] = list()
 
 def cache_clear():
     """
-    Function for cache singleton clearing, it is called in the end of:
-
-    1. Actor execution turn (except for actor inside pipeline)
-
-    2. Pipeline execution turn
+    Function for cache singleton clearing, it is called in the end of pipeline execution turn.
     """
     for used_cache in USED_CACHES:
         used_cache.cache_clear()
