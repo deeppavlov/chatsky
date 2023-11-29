@@ -33,7 +33,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 def test_examples(example_module_name: str, skip_condition):
     if skip_condition:
         pytest.skip()
-    module = importlib.import_module(f"examples.{dot_path_to_addon}.{example_module_name}")
+    module = importlib.import_module(f"tutorials.{dot_path_to_addon}.{example_module_name}")
     pipeline = getattr(module, "pipeline")
     happy_path = getattr(module, "happy_path")
     check_happy_path(pipeline, happy_path)

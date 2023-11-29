@@ -7,9 +7,10 @@ and parse requests and responses to and from various APIs.
 
 """
 from pathlib import Path
+import json
 from typing import List, Dict, Union
 
-from pydantic import BaseModel, Field, PrivateAttr, parse_file_as, parse_obj_as, validator, root_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
 
 try:
     from yaml import load, SafeLoader
@@ -19,7 +20,7 @@ except ImportError:
     pyyaml_available = False
 
 
-class DatasetItem(BaseModel):
+class DatasetItem(BaseModel, arbitrary_types_allowed=True):
     """
     Data structure for storing labeled utterances.
 
@@ -32,7 +33,7 @@ class DatasetItem(BaseModel):
     _categorical_code = PrivateAttr(default=0)
 
 
-class Dataset(BaseModel):
+class Dataset(BaseModel, arbitrary_types_allowed=True):
     """
     Data structure for storing multiple :py:class:`~DatasetItem` objects.
 
@@ -62,47 +63,47 @@ class Dataset(BaseModel):
         return file_path
 
     @classmethod
-    def parse_json(cls, file: Union[str, Path]) -> None:
+    def parse_json(cls, file: Union[str, Path]):
         file_path = cls._get_path(file)
-        items = parse_file_as(List[DatasetItem], file_path)
-        return cls(items=items)
+        items = json.load(file_path.open())
+        return cls(items=[DatasetItem.model_validate(item) for item in items])
 
     @classmethod
-    def parse_jsonl(cls, file: Union[str, Path]) -> None:
+    def parse_jsonl(cls, file: Union[str, Path]):
         file_path = cls._get_path(file)
         lines = file_path.open("r", encoding="utf-8").readlines()
-        items = [DatasetItem.parse_raw(line) for line in lines]
+        items = [DatasetItem.model_validate_json(line) for line in lines]
         return cls(items=items)
 
     @classmethod
-    def parse_yaml(cls, file: Union[str, Path]) -> None:
+    def parse_yaml(cls, file: Union[str, Path]):
         if not pyyaml_available:
             raise ImportError("`pyyaml` package missing. Try `pip install dff[ext].`")
         file_path = cls._get_path(file)
-        raw_intents = load(file_path.open("r", encoding="utf-8").read(), SafeLoader)["items"]
-        items = parse_obj_as(List[DatasetItem], raw_intents)
+        raw_items = load(file_path.open("r", encoding="utf-8").read(), SafeLoader)["items"]
+        items = [DatasetItem.model_validate(item) for item in raw_items]
         return cls(items=items)
 
-    @validator("items", pre=True)
+    @field_validator("items", mode="before")
+    @classmethod
     def pre_validate_items(cls, value: Union[Dict[str, DatasetItem], List[DatasetItem]]):
         if isinstance(value, list):  # if items were passed as a list, cast them to a dict
             new_value = [DatasetItem.parse_obj(item) for item in value]
             item_labels = [item.label for item in new_value]
-            return {label: item for label, item in zip(item_labels, new_value)}
-        return value
+            value = {label: item for label, item in zip(item_labels, new_value)}
 
-    @validator("items")
-    def validate_items(cls, value: Dict[str, DatasetItem]):
         for idx, key in enumerate(value.keys()):
             value[key]._categorical_code = idx
+
         return value
 
-    @root_validator
-    def validate_flat_items(cls, values: dict):
-        items: Dict[str, DatasetItem] = values.get("items")
+    # @root_validator
+    @model_validator(mode="after")
+    def validate_flat_items(self):
+        items: Dict[str, DatasetItem] = self.items
         sentences = [sentence for dataset_item in items.values() for sentence in dataset_item.samples]
         pred_labels = [
             label for dataset_item in items.values() for label in [dataset_item.label] * len(dataset_item.samples)
         ]
-        values["flat_items"] = list(zip(sentences, pred_labels))
-        return values
+        self.flat_items = list(zip(sentences, pred_labels))
+        return self

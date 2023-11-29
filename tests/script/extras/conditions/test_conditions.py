@@ -1,7 +1,4 @@
-from typing import List
-
 import pytest
-from pydantic import parse_obj_as
 from dff.script import Context, Message
 from dff.script.extras.conditions.utils import LABEL_KEY
 from dff.script.extras.conditions.dataset import DatasetItem, Dataset
@@ -25,19 +22,19 @@ def standard_model(testing_dataset):
         ([DatasetItem(label="a", samples=["a"]), DatasetItem(label="b", samples=["b"])],),
     ],
 )
-def test_conditions(input, testing_actor):
+def test_conditions(input, testing_pipeline):
     ctx = Context(framework_states={LABEL_KEY: {"model_a": {"a": 1, "b": 1}, "model_b": {"b": 1, "c": 1}}})
-    assert has_cls_label(input)(ctx, testing_actor) is True
-    assert has_cls_label(input, namespace="model_a")(ctx, testing_actor) is True
-    assert has_cls_label(input, threshold=1.1)(ctx, testing_actor) is False
+    assert has_cls_label(input)(ctx, testing_pipeline) is True
+    assert has_cls_label(input, namespace="model_a")(ctx, testing_pipeline) is True
+    assert has_cls_label(input, threshold=1.1)(ctx, testing_pipeline) is False
     ctx2 = Context()
-    assert has_cls_label(input)(ctx2, testing_actor) is False
+    assert has_cls_label(input)(ctx2, testing_pipeline) is False
 
 
 @pytest.mark.parametrize(["input"], [(1,), (3.3,), ({"a", "b"},)])
-def test_conds_invalid(input, testing_actor):
+def test_conds_invalid(input, testing_pipeline):
     with pytest.raises(NotImplementedError):
-        _ = has_cls_label(input)(Context(), testing_actor)
+        _ = has_cls_label(input)(Context(), testing_pipeline)
 
 
 @pytest.mark.skipif(not sklearn_available, reason="Sklearn package missing.")
@@ -55,14 +52,14 @@ def test_conds_invalid(input, testing_actor):
         ),
     ],
 )
-def test_has_match(_input: dict, testing_actor, thresh, standard_model, last_request):
+def test_has_match(_input: dict, testing_pipeline, thresh, standard_model, last_request):
     ctx = Context()
     ctx.add_request(Message(text=last_request))
     # Per default, we assume that the model has already been fit.
     # For this test case we fit it manually.
     collection = Dataset(
-        items=parse_obj_as(List[DatasetItem], [{"label": key, "samples": values} for key, values in _input.items()])
+        items=[DatasetItem.model_validate({"label": key, "samples": values}) for key, values in _input.items()]
     )
     standard_model.fit(collection)
-    result = has_match(standard_model, threshold=thresh, **_input)(ctx, testing_actor)
+    result = has_match(standard_model, threshold=thresh, **_input)(ctx, testing_pipeline)
     assert result

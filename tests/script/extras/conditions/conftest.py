@@ -1,6 +1,6 @@
 import pytest
 
-from dff.script import Actor
+from dff.pipeline import Pipeline
 from dff.script.extras.conditions.dataset import Dataset
 from dff.utils.testing.toy_script import TOY_SCRIPT
 
@@ -8,11 +8,11 @@ from tests.test_utils import get_path_from_tests_to_current_dir
 
 
 @pytest.fixture(scope="session")
-def testing_actor():
-    actor = Actor(
+def testing_pipeline():
+    pipeline = Pipeline.from_script(
         TOY_SCRIPT, start_label=("greeting_flow", "start_node"), fallback_label=("greeting_flow", "fallback_node")
     )
-    yield actor
+    yield pipeline
 
 
 @pytest.fixture(scope="session")

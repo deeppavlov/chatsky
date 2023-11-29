@@ -30,7 +30,7 @@ from dff.utils.testing.common import is_interactive_mode
 
 
 # %%
-common_label_collection = Dataset.parse_obj(
+common_label_collection = Dataset.model_validate(
     {
         "items": [
             {

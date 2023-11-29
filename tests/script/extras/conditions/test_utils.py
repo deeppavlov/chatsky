@@ -12,9 +12,9 @@ path = get_path_from_tests_to_current_dir(__file__)
 @pytest.mark.parametrize(
     ["file", "method_name", "skip_condition"],
     [
-        (f"examples/{path}/data/example.json", "parse_json", None),
-        (f"examples/{path}/data/example.jsonl", "parse_jsonl", None),
-        (f"examples/{path}/data/example.yaml", "parse_yaml", not pyyaml_available),
+        (f"tutorials/{path}/data/example.json", "parse_json", None),
+        (f"tutorials/{path}/data/example.jsonl", "parse_jsonl", None),
+        (f"tutorials/{path}/data/example.yaml", "parse_yaml", not pyyaml_available),
     ],
 )
 def test_file_parsing(file, method_name, skip_condition):
@@ -49,7 +49,7 @@ def test_dataset_exceptions(file, method_name, skip_condition):
 
 
 @pytest.mark.asyncio
-async def test_mixin(testing_actor):
+async def test_mixin(testing_pipeline):
     REQUEST = "request"
     RESULT = "result"
     NAMESPACE = "namespace"
@@ -64,6 +64,6 @@ async def test_mixin(testing_actor):
     ctx = Context()
     ctx.add_request(Message(text=REQUEST))
     model = Model(namespace_key=NAMESPACE)
-    new_ctx: Context = await model(ctx, testing_actor)
+    new_ctx: Context = await model(ctx, testing_pipeline)
     assert isinstance(new_ctx.framework_states[LABEL_KEY], dict)
     assert new_ctx.framework_states[LABEL_KEY][NAMESPACE] == RESULT

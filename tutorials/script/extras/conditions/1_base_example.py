@@ -38,7 +38,7 @@ you should instantiate a `Matcher` or a `Classifier`.
 
 Sometimes, a dataset is required to construct the instance.
 In those cases, you should import a dataset from a file or define it as a dictionary
-and then use the `parse_obj` method of the `Dataset` class.
+and then use the `model_validate` method of the `Dataset` class.
 Examples of well-formed dataset files can be found in the 'data' directory.
 
 The manner of instantiating models is uniform across all types
@@ -51,7 +51,7 @@ inside the `Context` object.
 
 
 # %%
-dataset = Dataset.parse_obj(
+dataset = Dataset.model_validate(
     {
         "items": [
             {

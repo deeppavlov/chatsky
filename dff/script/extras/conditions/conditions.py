@@ -13,7 +13,8 @@ try:
     sklearn_available = True
 except ImportError:
     sklearn_available = False
-from dff.script import Context, Actor
+from dff.script import Context
+from dff.pipeline import Pipeline
 
 from .dataset import DatasetItem
 from .utils import LABEL_KEY
@@ -50,7 +51,7 @@ def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
 
 
 @has_cls_label.register(DatasetItem)
-def _(label, namespace: Optional[str] = None, threshold: float = 0.9) -> Callable[[Context, Actor], bool]:
+def _(label, namespace: Optional[str] = None, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
     def has_cls_label_innner(ctx: Context, _) -> bool:
         if LABEL_KEY not in ctx.framework_states:
             return False
@@ -65,10 +66,10 @@ def _(label, namespace: Optional[str] = None, threshold: float = 0.9) -> Callabl
 
 @has_cls_label.register(list)
 def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
-    def has_cls_label_innner(ctx: Context, actor: Actor) -> bool:
+    def has_cls_label_innner(ctx: Context, pipeline: Pipeline) -> bool:
         if LABEL_KEY not in ctx.framework_states:
             return False
-        scores = [has_cls_label(item, namespace, threshold)(ctx, actor) for item in label]
+        scores = [has_cls_label(item, namespace, threshold)(ctx, pipeline) for item in label]
         for score in scores:
             if score >= threshold:
                 return True

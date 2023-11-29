@@ -46,7 +46,7 @@ Then, the model can be used in the script for annotating user input.
 logger = logging.getLogger(__name__)
 
 # load dataset
-dataset = Dataset.parse_obj(
+dataset = Dataset.model_validate(
     {
         "items": [
             {

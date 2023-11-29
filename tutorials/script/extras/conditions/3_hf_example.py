@@ -55,7 +55,7 @@ model = AutoModelForSequenceClassification.from_pretrained(
     "obsei-ai/sell-buy-intent-classifier-bert-mini"
 )
 
-common_label_collection = Dataset.parse_obj(
+common_label_collection = Dataset.model_validate(
     {
         "items": [
             {
