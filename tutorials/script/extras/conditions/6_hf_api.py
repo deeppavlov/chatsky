@@ -24,7 +24,11 @@ from dff.script.extras.conditions.models.remote_api.hf_api_model import (
 from dff.script.extras.conditions import conditions as i_cnd
 from dff.pipeline import Pipeline
 from dff.messengers.common import CLIMessengerInterface
-from dff.utils.testing.common import is_interactive_mode
+from dff.utils.testing.common import (
+    is_interactive_mode,
+    check_happy_path,
+    run_interactive_mode,
+)
 
 
 # %% [markdown]
@@ -128,5 +132,15 @@ happy_path = [
 
 
 # %%
-if __name__ == "__main__" and is_interactive_mode():
-    pipeline.run()
+if __name__ == "__main__":
+    check_happy_path(
+        pipeline,
+        happy_path,
+    )  # This is a function for automatic tutorial
+    # running (testing tutorial) with `happy_path`.
+
+    # Run tutorial in interactive mode if not in IPython env
+    # and if `DISABLE_INTERACTIVE_MODE` is not set.
+    if is_interactive_mode():
+        run_interactive_mode(pipeline)
+        # This runs tutorial in interactive mode.

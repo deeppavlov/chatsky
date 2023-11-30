@@ -11,6 +11,9 @@ from dff.script.extras.conditions.models.local.cosine_matchers.gensim import gen
 from dff.script.extras.conditions.models.local.classifiers.sklearn import sklearn_available
 
 from dff.utils.testing.common import check_happy_path
+from tests.context_storages.test_dbs import ping_localhost
+
+RASA_ACTIVE = ping_localhost(5005)
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 
@@ -19,7 +22,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
     ["example_module_name", "skip_condition"],
     [
         ("1_base_example", None),
-        ("7_rasa", os.getenv("RASA_API_KEY") is None or not rasa_available),
+        ("7_rasa", os.getenv("RASA_API_KEY") is None or not rasa_available or not RASA_ACTIVE),
         (
             "5_dialogflow",
             not (os.getenv("GDF_ACCOUNT_JSON") and os.path.exists(os.getenv("GDF_ACCOUNT_JSON")))

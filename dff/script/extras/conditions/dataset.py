@@ -10,7 +10,7 @@ from pathlib import Path
 import json
 from typing import List, Dict, Union
 
-from pydantic import BaseModel, Field, PrivateAttr, field_validator, model_validator
+from pydantic import BaseModel, Field, field_validator, model_validator
 
 try:
     from yaml import load, SafeLoader
@@ -29,8 +29,8 @@ class DatasetItem(BaseModel, arbitrary_types_allowed=True):
     """
 
     label: str
-    samples: List[Union[List[str], Dict[str, str], str]] = Field(default_factory=list, min_items=1)
-    _categorical_code = PrivateAttr(default=0)
+    samples: List[Union[List[str], Dict[str, str], str]] = Field(default_factory=list, min_length=1)
+    categorical_code: int = Field(default=0)
 
 
 class Dataset(BaseModel, arbitrary_types_allowed=True):
@@ -88,12 +88,12 @@ class Dataset(BaseModel, arbitrary_types_allowed=True):
     @classmethod
     def pre_validate_items(cls, value: Union[Dict[str, DatasetItem], List[DatasetItem]]):
         if isinstance(value, list):  # if items were passed as a list, cast them to a dict
-            new_value = [DatasetItem.parse_obj(item) for item in value]
+            new_value = [DatasetItem.model_validate(item) for item in value]
             item_labels = [item.label for item in new_value]
             value = {label: item for label, item in zip(item_labels, new_value)}
 
         for idx, key in enumerate(value.keys()):
-            value[key]._categorical_code = idx
+            value[key].categorical_code = idx
 
         return value
 

@@ -86,7 +86,7 @@ class RasaModel(AbstractRasaModel):
                 raise requests.HTTPError(str(response.status_code) + " " + response.text)
 
         json_response = response.json()
-        parsed = RasaResponse.parse_obj(json_response)
+        parsed = RasaResponse.model_validate(json_response)
         result = {item.name: item.confidence for item in parsed.intent_ranking} if parsed.intent_ranking else dict()
         return result
 
@@ -139,7 +139,7 @@ class AsyncRasaModel(AsyncMixin, AbstractRasaModel):
                 raise httpx.HTTPStatusError(str(response.status_code) + " " + response.text)
 
         json_response = response.json()
-        parsed = RasaResponse.parse_obj(json_response)
+        parsed = RasaResponse.model_validate(json_response)
         result = {item.name: item.confidence for item in parsed.intent_ranking} if parsed.intent_ranking else dict()
 
         await client.aclose()

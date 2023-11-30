@@ -62,7 +62,7 @@ class HFMatcher(CosineMatcherMixin, BaseHFModel):
         self.model.save_pretrained(saving_path, **kwargs)
         self.tokenizer.save_pretrained(saving_path)
         with (saving_path / f"{self.namespace_key}.json").open("w+", encoding="utf-8") as file:
-            file.write(self.dataset.json())
+            file.write(self.dataset.model_dump_json())
 
     @classmethod
     def load(cls, path: str, namespace_key: str) -> __qualname__:
@@ -76,6 +76,6 @@ class HFMatcher(CosineMatcherMixin, BaseHFModel):
         saving_path = Path(path)
         model = AutoModelForSequenceClassification.from_pretrained(path)
         tokenizer = AutoTokenizer.from_pretrained(path)
-        dataset = Dataset.parse_file(saving_path / f"{namespace_key}.json")
+        dataset = Dataset.model_validate_json((saving_path / f"{namespace_key}.json").open().read())
         device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
         return cls(model=model, tokenizer=tokenizer, device=device, dataset=dataset, namespace_key=namespace_key)

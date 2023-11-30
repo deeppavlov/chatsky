@@ -25,11 +25,11 @@ def test_file_parsing(file, method_name, skip_condition):
     assert len(collection.flat_items) == 10
     assert len(collection) == 10
     assert collection[0]
-    prev_categorical_code = -1
+    prevcategorical_code = -1
     for intent in collection.items.values():
         assert len(intent.samples) >= 3
-        assert intent._categorical_code != prev_categorical_code
-        prev_categorical_code = intent._categorical_code
+        assert intent.categorical_code != prevcategorical_code
+        prevcategorical_code = intent.categorical_code
 
 
 @pytest.mark.parametrize(
