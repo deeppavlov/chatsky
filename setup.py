@@ -155,6 +155,11 @@ full = merge_req_lists(
     stats_dependencies,
     telegram_dependencies,
     benchmark_dependencies,
+    extended_conditions_dependencies,
+    httpx_dependencies,
+    huggingface_dependencies,
+    gensim_dependencies,
+    dialogflow_dependencies,
 )
 
 requests_requirements = [
