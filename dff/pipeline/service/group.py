@@ -40,7 +40,6 @@ class ServiceGroup(PipelineComponent):
     Components in synchronous groups are executed consequently (no matter is they are synchronous or asynchronous).
     Components in asynchronous groups are executed simultaneously.
     Group can be asynchronous only if all components in it are asynchronous.
-    Group containing actor can be synchronous only.
 
     :param components: A `ServiceGroupBuilder` object, that will be added to the group.
     :type components: :py:data:`~.ServiceGroupBuilder`
@@ -107,7 +106,6 @@ class ServiceGroup(PipelineComponent):
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
-        :return: Current dialog context.
         """
         self._set_state(ctx, ComponentExecutionState.RUNNING)
 
@@ -132,15 +130,14 @@ class ServiceGroup(PipelineComponent):
     async def _run(
         self,
         ctx: Context,
-        pipeline: Pipeline = None,
-    ) -> Optional[Context]:
+        pipeline: Pipeline,
+    ) -> None:
         """
         Method for handling this group execution.
         Executes before and after execution wrappers, checks start condition and catches runtime exceptions.
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
-        :return: Current dialog context if synchronous, else `None`.
         """
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
@@ -155,7 +152,6 @@ class ServiceGroup(PipelineComponent):
             logger.error(f"ServiceGroup '{self.name}' execution failed!\n{e}")
 
         await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-        return ctx if not self.asynchronous or self.name == "pipeline" else None
 
     def log_optimization_warnings(self):
         """

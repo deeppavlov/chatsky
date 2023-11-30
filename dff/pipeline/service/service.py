@@ -36,7 +36,6 @@ class Service(PipelineComponent):
     Service can be included into pipeline as object or a dictionary.
     Service group can be synchronous or asynchronous.
     Service can be asynchronous only if its handler is a coroutine.
-    Actor wrapping service can be synchronous only.
 
     :param handler: A service function or an actor.
     :type handler: :py:data:`~.ServiceBuilder`
@@ -121,21 +120,19 @@ class Service(PipelineComponent):
         else:
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
 
-    async def _run_as_actor(self, ctx: Context, pipeline: Pipeline) -> Context:
+    async def _run_as_actor(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service if its handler is an `Actor`.
         Catches runtime exceptions.
 
         :param ctx: Current dialog context.
-        :return: Context, mutated by actor.
         """
         try:
-            ctx = await pipeline.actor(pipeline, ctx)
+            await pipeline.actor(pipeline, ctx)
             self._set_state(ctx, ComponentExecutionState.FINISHED)
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Actor '{self.name}' execution failed!\n{exc}")
-        return ctx
 
     async def _run_as_service(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -144,7 +141,6 @@ class Service(PipelineComponent):
 
         :param ctx: Current dialog context.
         :param pipeline: Current pipeline.
-        :return: `None`
         """
         try:
             if self.start_condition(ctx, pipeline):
@@ -157,27 +153,22 @@ class Service(PipelineComponent):
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!\n{e}")
 
-    async def _run(self, ctx: Context, pipeline: Optional[Pipeline] = None) -> Optional[Context]:
+    async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for handling this service execution.
         Executes before and after execution wrappers, launches `_run_as_actor` or `_run_as_service` method.
 
         :param ctx: (required) Current dialog context.
         :param pipeline: the current pipeline.
-        :return: `Context` if this service's handler is an `Actor` else `None`.
         """
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
         if isinstance(self.handler, str) and self.handler == "ACTOR":
-            ctx = await self._run_as_actor(ctx, pipeline)
+            await self._run_as_actor(ctx, pipeline)
         else:
             await self._run_as_service(ctx, pipeline)
 
         await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-
-        if isinstance(self.handler, str) and self.handler == "ACTOR":
-            return ctx
-        return None
 
     @property
     def info_dict(self) -> dict:

@@ -340,7 +340,11 @@ class Pipeline:
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.add_request(request)
-        ctx = await self._services_pipeline(ctx, self)
+        result = await self._services_pipeline(ctx, self)
+
+        if asyncio.iscoroutine(result):
+            await result
+
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
         if isinstance(self.context_storage, DBContextStorage):
