@@ -77,7 +77,7 @@ ydb_dependencies = [
 
 sklearn_dependencies = ["scikit-learn<=1.1.1", "joblib==1.2.0"]
 
-extended_conditions_dependencies = merge_req_lists(sklearn_dependencies, ["requests==2.28.1", "pyyaml==6.0"])
+extended_conditions_dependencies = merge_req_lists(sklearn_dependencies, ["pyyaml==6.0"])
 
 httpx_dependencies = [
     "httpx==0.23.0",
@@ -100,19 +100,6 @@ gensim_dependencies = merge_req_lists(
 
 dialogflow_dependencies = [
     "google-cloud-dialogflow==2.15.0",
-]
-
-test_requirements = [
-    "pytest >=6.2.4,<7.0.0",
-    "pytest-cov >=2.12.0,<3.0.0",
-    "pytest-asyncio >=0.14.0,<0.15.0",
-    "flake8 >=3.8.3,<4.0.0",
-    "click<=8.0.4",
-    "black ==20.8b1",
-    "isort >=5.0.6,<6.0.0",
-    "flask[async]>=2.1.2",
-    "psutil>=5.9.1",
-    "requests==2.28.1",
 ]
 
 telegram_dependencies = [
