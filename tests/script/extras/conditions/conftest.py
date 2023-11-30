@@ -17,7 +17,7 @@ def testing_pipeline():
 
 @pytest.fixture(scope="session")
 def testing_dataset():
-    yield Dataset.parse_json(f"examples/{get_path_from_tests_to_current_dir(__file__)}/data/example.json")
+    yield Dataset.parse_json(f"tutorials/{get_path_from_tests_to_current_dir(__file__)}/data/example.json")
 
 
 @pytest.fixture(scope="session")
