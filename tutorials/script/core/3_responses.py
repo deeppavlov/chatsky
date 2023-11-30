@@ -84,8 +84,8 @@ def fallback_trace_response(
 
 # %%
 toy_script = {
-    "root": {
-        "start": {  # This is an initial node,
+    "greeting_flow": {
+        "start_node": {  # This is an initial node,
             # it doesn't need a `RESPONSE`.
             RESPONSE: Message(),
             TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
@@ -121,7 +121,7 @@ toy_script = {
             RESPONSE: upper_case_response(Message(text="bye")),
             TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
         },
-        "fallback": {  # We get to this node
+        "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: fallback_trace_response,
             TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
@@ -133,8 +133,8 @@ toy_script = {
 happy_path = (
     (
         Message(text="Hi"),
-        Message(text="Hi, what is up?"),
-    ),  # start -> node1
+        Message(text="Hello, how are you?"),
+    ),  # start_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -149,17 +149,17 @@ happy_path = (
         Message(text="stop"),
         Message(
             misc={
-                "previous_node": ("root", "node1"),
+                "previous_node": ("greeting_flow", "node1"),
                 "last_request": Message(text="stop"),
             }
         ),
     ),
-    # node1 -> fallback
+    # node1 -> fallback_node
     (
         Message(text="one"),
         Message(
             misc={
-                "previous_node": ("root", "fallback"),
+                "previous_node": ("greeting_flow", "fallback_node"),
                 "last_request": Message(text="one"),
             }
         ),
@@ -168,7 +168,7 @@ happy_path = (
         Message(text="help"),
         Message(
             misc={
-                "previous_node": ("root", "fallback"),
+                "previous_node": ("greeting_flow", "fallback_node"),
                 "last_request": Message(text="help"),
             }
         ),
@@ -177,15 +177,15 @@ happy_path = (
         Message(text="nope"),
         Message(
             misc={
-                "previous_node": ("root", "fallback"),
+                "previous_node": ("greeting_flow", "fallback_node"),
                 "last_request": Message(text="nope"),
             }
         ),
     ),  # f_n->f_n
     (
         Message(text="Hi"),
-        Message(text="Hi, what is up?"),
-    ),  # fallback -> node1
+        Message(text="Hello, how are you?"),
+    ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -198,13 +198,13 @@ happy_path = (
 )
 
 # %%
-random.seed(42)  # predestination of choice
+random.seed(31415)  # predestination of choice
 
 
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":

@@ -37,7 +37,7 @@ A script is a dictionary, where the keys are the names of the flows.
 A script can contain multiple scripts, which is needed in order to divide
 a dialog into sub-dialogs and process them separately.
 For example, the separation can be tied to the topic of the dialog.
-In this tutorial there is one flow called `root`.
+In this tutorial there is one flow called `greeting_flow`.
 
 Flow describes a sub-dialog using linked nodes.
 Each node has the keywords `RESPONSE` and `TRANSITIONS`.
@@ -53,8 +53,8 @@ Each node has the keywords `RESPONSE` and `TRANSITIONS`.
 
 # %%
 toy_script = {
-    "root": {
-        "start": {  # This is the initial node,
+    "greeting_flow": {
+        "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
             TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
@@ -87,7 +87,7 @@ toy_script = {
             RESPONSE: Message(text="Bye"),
             TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
         },
-        "fallback": {
+        "fallback_node": {
             # We get to this node if the conditions
             # for switching to other nodes are not performed.
             RESPONSE: Message(text="Ooops"),
@@ -101,7 +101,7 @@ happy_path = (
     (
         Message(text="Hi"),
         Message(text="Hi, how are you?"),
-    ),  # start -> node1
+    ),  # start_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -112,15 +112,15 @@ happy_path = (
     ),  # node2 -> node3
     (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
     (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
-    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback
+    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
     (
         Message(text="stop"),
         Message(text="Ooops"),
-    ),  # fallback -> fallback
+    ),  # fallback_node -> fallback_node
     (
         Message(text="Hi"),
         Message(text="Hi, how are you?"),
-    ),  # fallback -> node1
+    ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -149,8 +149,8 @@ then its value becomes equal to `start_label`.
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":

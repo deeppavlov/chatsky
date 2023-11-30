@@ -107,8 +107,8 @@ def predetermined_condition(condition: bool):
 
 # %%
 toy_script = {
-    "root": {
-        "start": {  # This is the initial node,
+    "greeting_flow": {
+        "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
             TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
@@ -149,7 +149,7 @@ toy_script = {
             # `any` is alias `aggregate` with
             # `aggregate_func` == `any`.
         },
-        "fallback": {  # We get to this node
+        "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: Message(text="Ooops"),
             TRANSITIONS: {
@@ -159,12 +159,12 @@ toy_script = {
                 # `complex_user_answer_condition`.
                 # If the value is `True` then we will go to `node1`.
                 # If the value is `False` then we will check a result of
-                # `predetermined_condition(True)` for `fallback`.
-                "fallback": predetermined_condition(
+                # `predetermined_condition(True)` for `fallback_node`.
+                "fallback_node": predetermined_condition(
                     True
                 ),  # or you can use `cnd.true()`
                 # Last condition function will return
-                # `true` and will repeat `fallback`
+                # `true` and will repeat `fallback_node`
                 # if `complex_user_answer_condition` return `false`.
             },
         },
@@ -176,7 +176,7 @@ happy_path = (
     (
         Message(text="Hi"),
         Message(text="Hi, how are you?"),
-    ),  # start -> node1
+    ),  # start_node -> node1
     (
         Message(text="i'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -187,23 +187,23 @@ happy_path = (
     ),  # node2 -> node3
     (Message(text="Ok, goodbye."), Message(text="bye")),  # node3 -> node4
     (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
-    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback
+    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
     (
         Message(text="one"),
         Message(text="Ooops"),
-    ),  # fallback -> fallback
+    ),  # fallback_node -> fallback_node
     (
         Message(text="help"),
         Message(text="Ooops"),
-    ),  # fallback -> fallback
+    ),  # fallback_node -> fallback_node
     (
         Message(text="nope"),
         Message(text="Ooops"),
-    ),  # fallback -> fallback
+    ),  # fallback_node -> fallback_node
     (
         Message(misc={"some_key": "some_value"}),
         Message(text="Hi, how are you?"),
-    ),  # fallback -> node1
+    ),  # fallback_node -> node1
     (
         Message(text="i'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -218,8 +218,8 @@ happy_path = (
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":

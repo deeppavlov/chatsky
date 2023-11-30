@@ -36,10 +36,10 @@ def response_handler(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
 # %%
 # a dialog script
 toy_script = {
-    "root": {
-        "start": {
+    "flow_start": {
+        "node_start": {
             RESPONSE: response_handler,
-            TRANSITIONS: {("root", "start"): cnd.true()},
+            TRANSITIONS: {("flow_start", "node_start"): cnd.true()},
         }
     }
 }
@@ -79,7 +79,7 @@ def process_response(ctx: Context):
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("root", "start"),
+    start_label=("flow_start", "node_start"),
     post_services=[process_response],
 )
 

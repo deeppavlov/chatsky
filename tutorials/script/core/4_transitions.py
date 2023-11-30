@@ -85,13 +85,13 @@ offers the following methods:
 * `lbl.backward()` returns transition handler
     which returns `NodeLabelType` to the backward node.
 
-There are three flows here: `root`, `greeting_flow`, `music_flow`.
+There are three flows here: `global_flow`, `greeting_flow`, `music_flow`.
 """
 
 # %%
 toy_script = {
-    "root": {
-        "start": {  # This is an initial node,
+    "global_flow": {
+        "start_node": {  # This is an initial node,
             # it doesn't need a `RESPONSE`.
             RESPONSE: Message(),
             TRANSITIONS: {
@@ -101,12 +101,12 @@ toy_script = {
                 ("greeting_flow", "node1"): cnd.regexp(
                     r"hi|hello", re.IGNORECASE
                 ),  # second check
-                "fallback": cnd.true(),  # third check
-                # "fallback" is equivalent to
-                # ("root", "fallback").
+                "fallback_node": cnd.true(),  # third check
+                # "fallback_node" is equivalent to
+                # ("global_flow", "fallback_node").
             },
         },
-        "fallback": {  # We get to this node if
+        "fallback_node": {  # We get to this node if
             # an error occurred while the agent was running.
             RESPONSE: Message(text="Ooops"),
             TRANSITIONS: {
@@ -122,7 +122,7 @@ toy_script = {
                 # lbl.previous() is equivalent
                 # to ("previous_flow", "previous_node")
                 lbl.repeat(): cnd.true(),  # fourth check
-                # lbl.repeat() is equivalent to ("root", "fallback")
+                # lbl.repeat() is equivalent to ("global_flow", "fallback_node")
             },
         },
     },
@@ -132,8 +132,8 @@ toy_script = {
             # When the agent goes to node1, we return "Hi, how are you?"
             TRANSITIONS: {
                 (
-                    "root",
-                    "fallback",
+                    "global_flow",
+                    "fallback_node",
                     0.1,
                 ): cnd.true(),  # second check
                 "node2": cnd.regexp(r"how are you"),  # first check
@@ -145,7 +145,7 @@ toy_script = {
             TRANSITIONS: {
                 lbl.to_fallback(0.1): cnd.true(),  # third check
                 # lbl.to_fallback(0.1) is equivalent
-                # to ("root", "fallback", 0.1)
+                # to ("global_flow", "fallback_node", 0.1)
                 lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
                 # lbl.forward(0.5) is equivalent
                 # to ("greeting_flow", "node3", 0.5)
@@ -299,8 +299,8 @@ happy_path = (
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("root", "start"),
-    fallback_label=("root", "fallback"),
+    start_label=("global_flow", "start_node"),
+    fallback_label=("global_flow", "fallback_node"),
 )
 
 if __name__ == "__main__":
