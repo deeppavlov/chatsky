@@ -75,7 +75,7 @@ ydb_dependencies = [
     "six",
 ]
 
-sklearn_dependencies = ["scikit-learn=>1.1.3", "joblib==1.2.0"]
+sklearn_dependencies = ["scikit-learn>=1.1.3", "joblib==1.2.0"]
 
 extended_conditions_dependencies = merge_req_lists(sklearn_dependencies, ["pyyaml==6.0"])
 
