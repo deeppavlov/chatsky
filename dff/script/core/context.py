@@ -18,11 +18,10 @@ This allows developers to save the context data and resume the conversation late
 """
 import logging
 from uuid import UUID, uuid4
-
 from typing import Any, Optional, Union, Dict, List, Set
 
-import deprecation
 from pydantic import BaseModel, Field, field_validator
+
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
@@ -278,21 +277,6 @@ class Context(BaseModel):
             )
 
         return node
-
-    @deprecation.deprecated(
-        deprecated_in="0.6.4",
-        removed_in="1.0.0",
-        details="This method is deprecated and will be removed in future versions. "
-        "The earlier implementation was not functional due to typing issues.",
-    )
-    def overwrite_current_node_in_processing(self, processed_node: Node):
-        """
-        The intended functionality of the method is to replace the current node
-        with the `processed_node` parameter.
-
-        :param processed_node: `node` to set as the current node.
-        """
-        pass
 
 
 Context.model_rebuild()
