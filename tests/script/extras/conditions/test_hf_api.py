@@ -25,6 +25,7 @@ def testing_async_model(hf_model_name):
 
 
 @pytest.mark.skipif(not os.getenv("HF_API_KEY"), reason="No HF API key")
+@pytest.mark.huggingface
 def test_predict(testing_model: HFAPIModel):
     print(testing_model.api_key, "- api key", sep=" ")
     result = testing_model.predict("we are looking for x.")
@@ -34,6 +35,7 @@ def test_predict(testing_model: HFAPIModel):
 
 @pytest.mark.skipif(not hf_api_available, reason="Async deps missing.")
 @pytest.mark.skipif(not os.getenv("HF_API_KEY"), reason="No HF API key")
+@pytest.mark.huggingface
 @pytest.mark.asyncio
 async def test_async_predict(testing_async_model: AsyncHFAPIModel):
     result = await testing_async_model.predict("we are looking for x.")

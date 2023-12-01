@@ -50,7 +50,7 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker compose --profile context_storage --profile stats up -d --build --wait
+	docker compose --profile context_storage --profile stats --profile ext up -d --build --wait
 .PHONY: docker_up
 
 test: venv

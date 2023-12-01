@@ -33,6 +33,9 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
         ("4_sklearn_example", not sklearn_available),
     ],
 )
+@pytest.mark.rasa
+@pytest.mark.dialogflow
+@pytest.mark.huggingface
 @pytest.mark.docker
 def test_examples(example_module_name: str, skip_condition):
     if skip_condition:

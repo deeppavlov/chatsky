@@ -92,15 +92,15 @@ class Dataset(BaseModel, arbitrary_types_allowed=True):
             item_labels = [item.label for item in new_value]
             value = {label: item for label, item in zip(item_labels, new_value)}
 
-        for idx, key in enumerate(value.keys()):
-            value[key].categorical_code = idx
-
         return value
 
     # @root_validator
     @model_validator(mode="after")
-    def validate_flat_items(self):
+    def post_validation(self):
         items: Dict[str, DatasetItem] = self.items
+        for idx, key in enumerate(items.keys()):
+            items[key].categorical_code = idx
+
         sentences = [sentence for dataset_item in items.values() for sentence in dataset_item.samples]
         pred_labels = [
             label for dataset_item in items.values() for label in [dataset_item.label] * len(dataset_item.samples)

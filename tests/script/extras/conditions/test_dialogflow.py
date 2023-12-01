@@ -31,6 +31,7 @@ def testing_async_model():
     not os.getenv("GDF_ACCOUNT_JSON") or not os.path.exists(os.getenv("GDF_ACCOUNT_JSON")),
     reason="GDF_ACCOUNT_JSON missing.",
 )
+@pytest.mark.dialogflow
 def test_predict(testing_model: GoogleDialogFlowModel):
     test_phrase = "I would like some food"  # no matching intent in test project
     result = testing_model.predict(test_phrase)
@@ -47,7 +48,7 @@ def test_predict(testing_model: GoogleDialogFlowModel):
     not os.getenv("GDF_ACCOUNT_JSON") or not os.path.exists(os.getenv("GDF_ACCOUNT_JSON")),
     reason="GDF_ACCOUNT_JSON missing.",
 )
-@pytest.mark.docker
+@pytest.mark.dialogflow
 @pytest.mark.asyncio
 async def test_async_predict(testing_async_model: AsyncGoogleDialogFlowModel):
     test_phrase = "I would like some food"  # no matching intent in test project
