@@ -6,6 +6,7 @@ The following example show how to use Sklearn models
 for annotating user phrases.
 """
 
+# %pip install dff[ext]
 
 # %%
 from dff.script import (

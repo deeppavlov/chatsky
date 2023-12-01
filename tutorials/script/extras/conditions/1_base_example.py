@@ -8,6 +8,7 @@ Examples for other models can be found in the same section.
 
 """
 
+# %pip install dff[ext]
 
 # %%
 from dff.script import (

@@ -5,6 +5,7 @@
 The example below demonstrates, how to integrate Google Dialogflow into your script logic.
 """
 
+# %pip install dff[ext,dialogflow]
 
 # %%
 import os

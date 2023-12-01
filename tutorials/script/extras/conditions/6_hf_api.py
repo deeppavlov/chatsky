@@ -5,6 +5,7 @@
 This module explains, how to use web-hosted huggingface models in your conversational services.
 """
 
+# %pip install dff[ext,async]
 
 # %%
 import os
