@@ -111,9 +111,7 @@ class Actor:
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-    async def __call__(
-        self, pipeline: Pipeline, ctx: Context, *args, **kwargs
-    ):
+    async def __call__(self, pipeline: Pipeline, ctx: Context, *args, **kwargs):
         # context init
         self._context_init(ctx, *args, **kwargs)
         await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT)

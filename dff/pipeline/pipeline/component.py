@@ -12,7 +12,7 @@ import logging
 import abc
 import asyncio
 import copy
-from typing import Optional, Union, Awaitable, ForwardRef
+from typing import Optional, Awaitable, ForwardRef
 
 from dff.script import Context
 
