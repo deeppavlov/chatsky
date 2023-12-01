@@ -212,15 +212,9 @@ async def test_call_limit():
         },
     }
     # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
-    ctx = Context()
     pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"), validation_stage=False)
     for i in range(4):
-        ctx.add_request(Message(text="req1"))
-        ctx = await pipeline.actor(pipeline, ctx)
+        await pipeline._run_pipeline(Message(text="req1"), 0)
     if limit_errors:
         error_msg = repr(limit_errors)
         raise Exception(error_msg)
-
-
-if __name__ == "__main__":
-    test_call_limit()
