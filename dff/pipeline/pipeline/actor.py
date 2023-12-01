@@ -83,7 +83,7 @@ def validate_callable(
     node_label: str,
     error_msgs: list,
     logging_flag: bool = True,
-    expected_types: Optional[List[Type]] = None,
+    expected_types: Optional[Tuple[Type, ...]] = None,
     return_type: Optional[Tuple[Type]] = None,
 ):
     """
@@ -96,7 +96,7 @@ def validate_callable(
     :param node_label: Node label this function is related to (used for error localization only).
     :param error_msgs: List that contains error messages. All the error message will be added to that list.
     :param logging_flag: The flag which defines whether logging is necessary. Defaults to `True`.
-    :param expected_types: List of types that correspond to expected function parameter types.
+    :param expected_types: Tuple of types that correspond to expected function parameter types.
         Also used for parameter number check. If `None`, parameter check is skipped. Defaults to `None`.
     :param return_type: Tuple, containing expected function return type.
         If `None` or contains more or less than 1 element, return type check is skipped. Defaults to `None`.
@@ -120,11 +120,11 @@ def validate_callable(
                 )
                 error_handler(error_msgs, msg, None, logging_flag)
     if return_type is not None and len(return_type) == 1:
-        retrun_annotation = signature.return_annotation
-        if retrun_annotation != inspect.Parameter.empty and not types_match(retrun_annotation, return_type[0]):
+        return_annotation = signature.return_annotation
+        if return_annotation != inspect.Parameter.empty and not types_match(return_annotation, return_type[0]):
             msg = (
                 f"Incorrect return type annotation of {name}={callable.__name__}: "
-                f"should be {return_type[0]}, found {retrun_annotation}, "
+                f"should be {return_type[0]}, found {return_annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None, logging_flag)
@@ -399,7 +399,7 @@ class Actor:
             chosen_label = self.fallback_label
         return chosen_label
 
-    def validate_script(self, verbose: bool = True):
+    def validate_script(self, logging_flag: bool = True):
         # TODO: script has to not contain priority == -inf, because it uses for miss values
         error_msgs = []
         for flow_name, flow in self.script.items():
@@ -408,7 +408,13 @@ class Actor:
                 for label in node.transitions.keys():
                     if callable(label):
                         validate_callable(
-                            label, "label", flow_name, node_name, error_msgs, verbose, [Context, Pipeline, Any, Any]
+                            label,
+                            "label",
+                            flow_name,
+                            node_name,
+                            error_msgs,
+                            logging_flag,
+                            (Context, Pipeline, Any, Any),
                         )
                     else:
                         norm_label = normalize_label(label, flow_name)
@@ -417,7 +423,7 @@ class Actor:
                                 f"Label can not be normalized for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
-                            error_handler(error_msgs, msg, None, verbose)
+                            error_handler(error_msgs, msg, None, logging_flag)
                             continue
                         norm_flow_label, norm_node_label, _ = norm_label
                         if norm_flow_label not in self.script.keys():
@@ -433,7 +439,7 @@ class Actor:
                         else:
                             msg = None
                         if msg is not None:
-                            error_handler(error_msgs, msg, None, verbose)
+                            error_handler(error_msgs, msg, None, logging_flag)
 
                 # validate responses
                 if callable(node.response):
@@ -443,17 +449,17 @@ class Actor:
                         flow_name,
                         node_name,
                         error_msgs,
-                        verbose,
-                        [Context, Pipeline, Any, Any],
+                        logging_flag,
+                        (Context, Pipeline, Any, Any),
                         (Message,),
                     )
-                elif node.response is not None and not issubclass(type(node.response), Message):
+                elif node.response is not None and not isinstance(node.response, Message):
                     msg = (
                         f"Expected type of response is subclass of {Message}, "
                         f"got type(response)={type(node.response)}, "
                         f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                     )
-                    error_handler(error_msgs, msg, None, verbose)
+                    error_handler(error_msgs, msg, None, logging_flag)
 
                 # validate conditions
                 for label, condition in node.transitions.items():
@@ -464,8 +470,8 @@ class Actor:
                             flow_name,
                             node_name,
                             error_msgs,
-                            verbose,
-                            [Context, Pipeline, Any, Any],
+                            logging_flag,
+                            (Context, Pipeline, Any, Any),
                             (bool,),
                         )
                     else:
@@ -474,7 +480,7 @@ class Actor:
                             f"got type(condition)={type(condition)}, "
                             f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                         )
-                        error_handler(error_msgs, msg, None, verbose)
+                        error_handler(error_msgs, msg, None, logging_flag)
 
                 # validate pre_transitions- and pre_response_processing
                 for place, functions in zip(
@@ -488,8 +494,8 @@ class Actor:
                                 flow_name,
                                 node_name,
                                 error_msgs,
-                                verbose,
-                                [Context, Pipeline, Any, Any],
+                                logging_flag,
+                                (Context, Pipeline, Any, Any),
                                 (Context,),
                             )
                         else:
@@ -498,7 +504,7 @@ class Actor:
                                 f"got type(pre_{place}_processing)={type(function)}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
-                            error_handler(error_msgs, msg, None, verbose)
+                            error_handler(error_msgs, msg, None, logging_flag)
         return error_msgs
 
 

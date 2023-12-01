@@ -131,7 +131,7 @@ class Context(BaseModel):
             ctx = Context.model_validate(ctx)
         elif isinstance(ctx, str):
             ctx = Context.model_validate_json(ctx)
-        elif not issubclass(type(ctx), Context):
+        elif not isinstance(ctx, Context):
             raise ValueError(
                 f"Context expected to be an instance of the Context class "
                 f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
