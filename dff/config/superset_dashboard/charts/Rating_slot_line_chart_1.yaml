@@ -1,0 +1,92 @@
+slice_name: Rating slot [line chart]
+description: null
+certified_by: null
+certification_details: null
+viz_type: echarts_timeseries_line
+params:
+  datasource: 3__table
+  viz_type: echarts_timeseries_line
+  slice_id: 7
+  granularity_sqla: start_time
+  time_grain_sqla: PT1M
+  time_range: No filter
+  metrics:
+  - aggregate: null
+    column: null
+    datasourceWarning: false
+    expressionType: SQL
+    hasCustomLabel: false
+    label: AVG(CAST(JSON_VALUE(data, '$.rating') AS...
+    optionName: metric_00oy6lz4f1x8m_ogwvyq0hxx
+    sqlExpression: AVG(CAST(JSON_VALUE(data, '$.rating') AS Int16))
+  groupby: []
+  adhoc_filters:
+  - clause: WHERE
+    comparator: get_slots
+    datasourceWarning: false
+    expressionType: SIMPLE
+    filterOptionName: filter_7obcf0exa9_1e58m260tq5
+    isExtra: false
+    isNew: false
+    operator: ==
+    operatorId: EQUALS
+    sqlExpression: null
+    subject: data_key
+  - clause: WHERE
+    comparator: null
+    datasourceWarning: false
+    expressionType: SQL
+    filterOptionName: filter_0sg816yobyac_obqceo13prc
+    isExtra: false
+    isNew: false
+    operator: null
+    sqlExpression: JSON_VALUE(data, '$.rating') <> ''
+    subject: null
+  order_desc: true
+  row_limit: 10000
+  truncate_metric: true
+  show_empty_columns: true
+  comparison_type: values
+  annotation_layers: []
+  forecastPeriods: 10
+  forecastInterval: 0.8
+  x_axis_title: Time axis
+  x_axis_title_margin: 30
+  y_axis_title: Average rating
+  y_axis_title_margin: 30
+  y_axis_title_position: Left
+  color_scheme: echarts4Colors
+  seriesType: line
+  only_total: true
+  opacity: 0.2
+  markerSize: 6
+  show_legend: true
+  legendType: scroll
+  legendOrientation: top
+  x_axis_time_format: smart_date
+  rich_tooltip: true
+  tooltipTimeFormat: smart_date
+  y_axis_format: SMART_NUMBER
+  y_axis_bounds:
+  - null
+  - null
+  extra_form_data: {}
+  dashboards:
+  - 1
+query_context: '{"datasource":{"id":3,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"start_time","filters":[{"col":"data_key","op":"==","val":"get_slots"}],"extras":{"time_grain_sqla":"PT1M","having":"","where":"(JSON_VALUE(data,
+  ''$.rating'') <> '''')"},"applied_time_extras":{},"columns":[],"metrics":[{"aggregate":null,"column":null,"datasourceWarning":false,"expressionType":"SQL","hasCustomLabel":false,"label":"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS...","optionName":"metric_00oy6lz4f1x8m_ogwvyq0hxx","sqlExpression":"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS Int16))"}],"orderby":[[{"aggregate":null,"column":null,"datasourceWarning":false,"expressionType":"SQL","hasCustomLabel":false,"label":"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS...","optionName":"metric_00oy6lz4f1x8m_ogwvyq0hxx","sqlExpression":"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS Int16))"},false]],"annotation_layers":[],"row_limit":10000,"series_columns":[],"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{},"is_timeseries":true,"time_offsets":[],"post_processing":[{"operation":"pivot","options":{"index":["__timestamp"],"columns":[],"aggregates":{"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS...":{"operator":"mean"}},"drop_missing_columns":false}},{"operation":"flatten"}]}],"form_data":{"datasource":"3__table","viz_type":"echarts_timeseries_line","slice_id":7,"granularity_sqla":"start_time","time_grain_sqla":"PT1M","time_range":"No
+  filter","metrics":[{"aggregate":null,"column":null,"datasourceWarning":false,"expressionType":"SQL","hasCustomLabel":false,"label":"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS...","optionName":"metric_00oy6lz4f1x8m_ogwvyq0hxx","sqlExpression":"AVG(CAST(JSON_VALUE(data,
+  ''$.rating'') AS Int16))"}],"groupby":[],"adhoc_filters":[{"clause":"WHERE","comparator":"get_slots","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_7obcf0exa9_1e58m260tq5","isExtra":false,"isNew":false,"operator":"==","operatorId":"EQUALS","sqlExpression":null,"subject":"data_key"},{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SQL","filterOptionName":"filter_0sg816yobyac_obqceo13prc","isExtra":false,"isNew":false,"operator":null,"sqlExpression":"JSON_VALUE(data,
+  ''$.rating'') <> ''''","subject":null}],"order_desc":true,"row_limit":10000,"truncate_metric":true,"show_empty_columns":true,"comparison_type":"values","annotation_layers":[],"forecastPeriods":10,"forecastInterval":0.8,"x_axis_title":"Time
+  axis","x_axis_title_margin":30,"y_axis_title":"Average rating","y_axis_title_margin":30,"y_axis_title_position":"Left","color_scheme":"echarts4Colors","seriesType":"line","only_total":true,"opacity":0.2,"markerSize":6,"show_legend":true,"legendType":"scroll","legendOrientation":"top","x_axis_time_format":"smart_date","rich_tooltip":true,"tooltipTimeFormat":"smart_date","y_axis_format":"SMART_NUMBER","y_axis_bounds":[null,null],"extra_form_data":{},"dashboards":[1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: 128e1da2-1efd-433d-9b93-a07de175e2bc
+version: 1.0.0
+dataset_uuid: 8ba2e188-2bf8-4809-a5ee-2477a539d493

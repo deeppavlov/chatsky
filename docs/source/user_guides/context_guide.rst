@@ -208,10 +208,13 @@ The function's only parameter is a connection string that specifies both the dat
 and the connection parameters, for example, *mongodb://admin:pass@localhost:27016/admin*.
 (`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory>`_)
 
+.. note::
+    To learn how to use ``context_storage_factory`` in your pipeline, see our `Context Storage Tutorials <../tutorials/index_context_storages.html>`__.
+
 The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
 distribution and to take advantage of the packaged
-`docker-compose file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/docker-compose.yml>`_.
+`docker compose file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/compose.yml>`_.
 
 .. code-block:: shell
   :linenos:
@@ -219,9 +222,9 @@ distribution and to take advantage of the packaged
   git clone https://github.com/deeppavlov/dialog_flow_framework.git
   cd dialog_flow_framework
   # assuming we need to deploy mongodb
-  docker-compose up mongo
+  docker compose up mongo
 
-The images can be configured using the docker-compose file or the
+The images can be configured using the docker compose file or the
 `environment file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/.env_file>`_,
 also available in the distribution. Consult these files for more options.
 

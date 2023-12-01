@@ -1,0 +1,1291 @@
+dashboard_title: DFF statistics dashboard
+description: null
+css: ''
+slug: dff-stats
+uuid: 68bce374-99bc-4890-b8c2-cb172409b894
+position:
+  CHART-91whs_IaiF:
+    children: []
+    id: CHART-91whs_IaiF
+    meta:
+      chartId: 17
+      height: 50
+      sliceName: Requests
+      uuid: 45ef67db-d33d-49f5-8d46-1f0fa518eaac
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-oXaTD35jB
+    type: CHART
+  CHART-Af3zvLsiKV:
+    children: []
+    id: CHART-Af3zvLsiKV
+    meta:
+      chartId: 8
+      height: 66
+      sliceName: Node visit ratio monitor
+      uuid: 6fafe59c-0fec-4cd8-a8b3-c0bfaffb2135
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-7g6_n72hZ
+    type: CHART
+  CHART-CuCYDOlGEu:
+    children: []
+    id: CHART-CuCYDOlGEu
+    meta:
+      chartId: 14
+      height: 42
+      sliceName: Table
+      sliceNameOverride: Raw data
+      uuid: 38d353dc-c0ef-41a0-97c7-3dcbebab9e02
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    - ROW-EaYAQjv4W
+    type: CHART
+  CHART-DxY0c3RnIv:
+    children: []
+    id: CHART-DxY0c3RnIv
+    meta:
+      chartId: 3
+      height: 61
+      sliceName: Node counts
+      sliceNameOverride: General node visit distribution
+      uuid: 0c47c7b5-f500-46cb-97e3-9ebb637f0c8a
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-WirNNBBom
+    type: CHART
+  CHART-cxqeW2rGoV:
+    children: []
+    id: CHART-cxqeW2rGoV
+    meta:
+      chartId: 7
+      height: 50
+      sliceName: Node Visits
+      sliceNameOverride: Node per dialog turn distribution
+      uuid: 44f4ab9d-5072-4926-a6ed-8615fb81b3d0
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-hNOZdWZpw
+    type: CHART
+  CHART-eZttETxtot:
+    children: []
+    id: CHART-eZttETxtot
+    meta:
+      chartId: 16
+      height: 50
+      sliceName: Responses
+      uuid: 7844eb6d-4fce-44cf-8994-fb61a221a2ab
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-lvxd9vvnS5
+    type: CHART
+  CHART-explore-10-1:
+    children: []
+    id: CHART-explore-10-1
+    meta:
+      chartId: 10
+      height: 73
+      sliceName: Transition layout
+      sliceNameOverride: Weighted transition graph
+      uuid: 801e8c66-f693-46e3-a9a5-7b2b0b08a4a7
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    - ROW-Ccs1FbcI-
+    type: CHART
+  CHART-explore-13-1:
+    children: []
+    id: CHART-explore-13-1
+    meta:
+      chartId: 11
+      height: 74
+      sliceName: Transition ratio [chord]
+      sliceNameOverride: Weighted transition graph [chord plot]
+      uuid: 388d2359-8d13-4795-8dc9-1cb5dfa92ee1
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    - ROW-Ccs1FbcI-
+    type: CHART
+  CHART-explore-14-1:
+    children: []
+    id: CHART-explore-14-1
+    meta:
+      chartId: 5
+      height: 105
+      sliceName: Node visits [sunburst]
+      sliceNameOverride: Node visit distribution [sunburst]
+      uuid: e955f48c-824c-423c-a11c-5b5dca162927
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-uSb7snkjI
+    type: CHART
+  CHART-explore-15-1:
+    children: []
+    id: CHART-explore-15-1
+    meta:
+      chartId: 2
+      height: 50
+      sliceName: Current topic [time series bar chart]
+      sliceNameOverride: Current topic slot [time series bar chart]
+      uuid: f8215b4d-cdaf-489a-90b2-040da840ab35
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    - ROW-s_aeCbvt3
+    type: CHART
+  CHART-explore-16-1:
+    children: []
+    id: CHART-explore-16-1
+    meta:
+      chartId: 4
+      height: 50
+      sliceName: Current topic slot [bar chart]
+      uuid: a70c05d0-770b-4068-a55d-934283f5b1bb
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    - ROW-IsV-8cS3Z
+    type: CHART
+  CHART-explore-17-1:
+    children: []
+    id: CHART-explore-17-1
+    meta:
+      chartId: 1
+      height: 50
+      sliceName: Rating slot [line chart]
+      uuid: 128e1da2-1efd-433d-9b93-a07de175e2bc
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    - ROW-TZwRV0tZy
+    type: CHART
+  CHART-explore-21-1:
+    children: []
+    id: CHART-explore-21-1
+    meta:
+      chartId: 13
+      height: 60
+      sliceName: Flow visit ratio monitor
+      uuid: ba02528b-184b-4304-b027-f2b7d9011ab0
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-ZTVWOu2o0
+    type: CHART
+  CHART-explore-22-1:
+    children: []
+    id: CHART-explore-22-1
+    meta:
+      chartId: 15
+      height: 61
+      sliceName: Terminal labels
+      sliceNameOverride: Terminal labels monitor
+      uuid: cf066e41-a9e8-4f54-a875-ebf4da350b59
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-LhKWfqM7V
+    type: CHART
+  CHART-explore-9-1:
+    children: []
+    id: CHART-explore-9-1
+    meta:
+      chartId: 6
+      height: 105
+      sliceName: Node visits [ratio]
+      sliceNameOverride: Node visit distribution [ratio]
+      uuid: f9fb7893-3533-4519-bbc4-1f4853f380e1
+      width: 6
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-uSb7snkjI
+    type: CHART
+  CHART-mYC2udeF3a:
+    children: []
+    id: CHART-mYC2udeF3a
+    meta:
+      chartId: 9
+      height: 50
+      sliceName: Service load [users]
+      uuid: b5d43314-514c-464e-9fcc-f897e3ae0963
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-Ae7v1prsp2
+    type: CHART
+  CHART-wci7CHiza6:
+    children: []
+    id: CHART-wci7CHiza6
+    meta:
+      chartId: 12
+      height: 66
+      sliceName: Transition counts
+      sliceNameOverride: General transitions distribution
+      uuid: 9fcc7cc1-9257-4c0d-b377-b3a60a8bf3df
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-UiCWq3ix1
+    type: CHART
+  DASHBOARD_VERSION_KEY: v2
+  GRID_ID:
+    children:
+    - TABS-Xoi5oUBxZI
+    id: GRID_ID
+    parents:
+    - ROOT_ID
+    type: GRID
+  HEADER_ID:
+    id: HEADER_ID
+    meta:
+      text: DFF statistics dashboard
+    type: HEADER
+  MARKDOWN-8Q9BhcEwva:
+    children: []
+    id: MARKDOWN-8Q9BhcEwva
+    meta:
+      code: '## Current topic
+
+
+        Assuming that we extract the current topic as a slot on each dialog turn,
+        we can build a bar chart to see how various dialog topics are distributed.
+        The first of the two charts below aggregates the counts over dialog turns,
+        while the second one displays the distribution over time.'
+      height: 20
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    - ROW-K0fThyfqJq
+    type: MARKDOWN
+  MARKDOWN-HncT4Y_WmV:
+    children: []
+    id: MARKDOWN-HncT4Y_WmV
+    meta:
+      code: '## Flow visit ratio monitor
+
+
+        This chart aggregates the ratio of visits for each flow over the whole period
+        of service uptime. The aggregation period can be set using the filters on the left.'
+      height: 17
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-klrE6Idjlp
+    type: MARKDOWN
+  MARKDOWN-LyRuvHp-7m:
+    children: []
+    id: MARKDOWN-LyRuvHp-7m
+    meta:
+      code: '## Weighted transition graph
+
+
+        The two weighted transition graphs emphasize the most frequently visited nodes
+        and transitions, effectively demonstrating the most popular routes inside
+        the dialog graph.
+
+
+        This can reveal characteristic features of user behavior given the current
+        dialog structure.
+
+
+        <br />
+
+        '
+      height: 24
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    - ROW-FMNDn-yXPC
+    type: MARKDOWN
+  MARKDOWN-NXluIKVHl5:
+    children: []
+    id: MARKDOWN-NXluIKVHl5
+    meta:
+      code: '# Annotations
+
+
+        Annotations are values that your conversational service derives from user
+        requests and stores in the `Context` object. They are produced by `PROCESSING`
+        functions and by some supplemental services in the `Pipeline`.
+
+
+        To make them available in the dashboard, you need to define a custom extractor
+        function for them (see the [Extractor functions](https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html) ).
+        The output of that function will then be persisted to the `data` column of
+        the logs table, while the name of the function will be available in the `data
+        key` column. That makes it easy to filter the relevant log entries and use
+        them to build a Superset chart.
+
+
+        If you need custom charts, consult the official Superset documentation for
+        instructions on how to create those: [link](https://superset.apache.org/docs/creating-charts-dashboards/exploring-data/#pivot-table).
+
+
+        It''s important to keep in mind that `data` is a JSON column, which is why
+        you need to specify your own `custom sql` expression to get the relevant value.
+
+
+        ```sql
+
+        JSON_VALUE(data, ''$.key.nested_key'')
+
+        ```
+
+
+        Additionally, you may need to cast the extracted string to a numeric datatype
+        like below to use certain aggregation functions.
+
+        ```sql
+
+        AVG(CAST(JSON_VALUE(data, ''$.key'') AS Int16))
+
+        ```
+
+
+        **Note that the charts below will only display meaningful figures if the respective
+        annotation values have been collected. To get those, run the sample data
+        provider script located in the `utils/stats/` folder.**'
+      height: 63
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    - ROW-efGgRzySlP
+    type: MARKDOWN
+  MARKDOWN-Ne7griq2wJ:
+    children: []
+    id: MARKDOWN-Ne7griq2wJ
+    meta:
+      code: '## Node per dialog turn distribution
+
+
+        This bar chart aggregates node labels over dialog turns. Not only does this
+        show the average dialog length, but it also allows you to observe
+        whether the path that users take on average deviates from the happy
+        path that you plan for the users.
+
+        <br />
+
+        '
+      height: 24
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-tzfO7Zd-dD
+    type: MARKDOWN
+  MARKDOWN-OCNK7Q0hyn:
+    children: []
+    id: MARKDOWN-OCNK7Q0hyn
+    meta:
+      code: "## Rating slot\n\nLet's assume that you have a service that extracts\
+        \ ratings from user requests as a numeric variable. Much like the previous\
+        \ example, you can employ a variety of charts to analyze this data, such as\
+        \ line charts or box plots. \n\nNote that to reproduce the chart below the\
+        \ value will have to be cast to Int16 or to some other numeric datatype to\
+        \ find the average.\n\n```sql\nAVG(CAST(JSON_VALUE(data, '$.key') AS Int16))\n\
+        ```"
+      height: 33
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    - ROW-Hcn9FCMH6a
+    type: MARKDOWN
+  MARKDOWN-PY70BXaRGq:
+    children: []
+    id: MARKDOWN-PY70BXaRGq
+    meta:
+      code: "# Overview\n\nThe `overview` section is a generalized representation\
+        \ of the data related to your service. It allows you to inspect raw data entries\
+        \ or to observe some general trends using weighted charts based on the dialog\
+        \ graph.\n\n## Raw data\n\nRaw data shows unaggregated data points as a table.\
+        \ \nThe `data` column offers a closer view of the collected keys and labels\
+        \ in the form of JSON objects.\n\n<br />\n"
+      height: 33
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    - ROW-R1SOLtdPpz
+    type: MARKDOWN
+  MARKDOWN-XuW-kEED70:
+    children: []
+    id: MARKDOWN-XuW-kEED70
+    meta:
+      code: '# Node statistics
+
+
+        The `Node statistics` section mostly contains data related to how frequently
+        individual nodes are visited with the aim of providing you insights on how
+        well distinct parts of the graph function.
+
+
+        ## Node visits distribution
+
+
+        The charts below display the number of times that the flows and nodes of the
+        dialog graph were visited during graph traversal. These statistics are supposed
+        to help the developers better understand the importance of any particular
+        node inside the graph.'
+      height: 35
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-t7PnH6oKHU
+    type: MARKDOWN
+  MARKDOWN-aXRTn3gE5x:
+    children: []
+    id: MARKDOWN-aXRTn3gE5x
+    meta:
+      code: '## Transitions distribution
+
+
+        The chart below shows how frequently each of the graph edges is traversed
+        by various users.
+        Based on this information, you can determine which transitions inside the
+        dialog graph function as intended.
+
+        You can use the `Node` filter on the left
+        to select a slice of transitions that target a specific node.
+
+        <br/>'
+      height: 24
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-y6AC1wLv1j
+    type: MARKDOWN
+  MARKDOWN-i9daMe46XY:
+    children: []
+    id: MARKDOWN-i9daMe46XY
+    meta:
+      code: '## Requests and responses
+
+
+        The table charts below make it possible to explore the user requests and bot
+        responses produced in the scope of your conversational service. You can also
+        use the `Dialog turn` and `User ID` filters on the left to only consider the
+        requests produced by a particular user or requests sent on a specific dialog turn.
+
+
+        Functions `get_last_request` and `get_last_response` need to be used to collect
+        the data.'
+      height: 26
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    - ROW-DKYV2zUmwU
+    type: MARKDOWN
+  MARKDOWN-pmSRDxroDW:
+    children: []
+    id: MARKDOWN-pmSRDxroDW
+    meta:
+      code: '## Terminal labels monitor
+
+
+        The following chart dynamically measures which nodes appear the most as a
+        finishing point in the dialog, e.g. what are the dialog turns, after which
+        the users quit the conversation. This chart is very useful, since it allows
+        you to trace potentially unwanted behavior and see if any of the bot messages
+        is discouraging users from further interaction.'
+      height: 21
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-j6eWWjqran
+    type: MARKDOWN
+  MARKDOWN-w66E2L3xdo:
+    children: []
+    id: MARKDOWN-w66E2L3xdo
+    meta:
+      code: '## Node visit ratio monitor
+
+
+        Like the `Flow visit ratio monitor`, the node visit ratio monitor aggregates
+        node visits over time, showing the proportion of unique users visiting each
+        node of the graph at a given moment in time. For instance, this can demonstrate
+        how the dynamics of user load change after some changes are made to the graph,
+        e.g. nodes are added or deleted. The length of time spans can be regulated
+        using filters.'
+      height: 26
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-CBSQJNAfEV
+    type: MARKDOWN
+  MARKDOWN-zISK-3R8Ta:
+    children: []
+    id: MARKDOWN-zISK-3R8Ta
+    meta:
+      code: '# Service statistics
+
+
+        This section contains charts that aggregate statistics over time, covering
+        the whole uptime of the service. They can be of big help, when the task is
+        to trace the changes in user behavior when new features or fixes are being
+        introduced.
+
+
+        ## Service users
+
+
+        This plot aggregates the count of unique users querying the DFF service at
+        any given point in time. The time periods to aggregate over can be changed
+        using the filter on the left.
+
+        '
+      height: 35
+      width: 12
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    - ROW-zC6DVrW4wu
+    type: MARKDOWN
+  ROOT_ID:
+    children:
+    - GRID_ID
+    id: ROOT_ID
+    type: ROOT
+  ROW-7g6_n72hZ:
+    children:
+    - CHART-Af3zvLsiKV
+    id: ROW-7g6_n72hZ
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-Ae7v1prsp2:
+    children:
+    - CHART-mYC2udeF3a
+    id: ROW-Ae7v1prsp2
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-CBSQJNAfEV:
+    children:
+    - MARKDOWN-w66E2L3xdo
+    id: ROW-CBSQJNAfEV
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-Ccs1FbcI-:
+    children:
+    - CHART-explore-10-1
+    - CHART-explore-13-1
+    id: ROW-Ccs1FbcI-
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    type: ROW
+  ROW-DKYV2zUmwU:
+    children:
+    - MARKDOWN-i9daMe46XY
+    id: ROW-DKYV2zUmwU
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-EaYAQjv4W:
+    children:
+    - CHART-CuCYDOlGEu
+    id: ROW-EaYAQjv4W
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    type: ROW
+  ROW-FMNDn-yXPC:
+    children:
+    - MARKDOWN-LyRuvHp-7m
+    id: ROW-FMNDn-yXPC
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    type: ROW
+  ROW-Hcn9FCMH6a:
+    children:
+    - MARKDOWN-OCNK7Q0hyn
+    id: ROW-Hcn9FCMH6a
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    type: ROW
+  ROW-IsV-8cS3Z:
+    children:
+    - CHART-explore-16-1
+    id: ROW-IsV-8cS3Z
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    type: ROW
+  ROW-K0fThyfqJq:
+    children:
+    - MARKDOWN-8Q9BhcEwva
+    id: ROW-K0fThyfqJq
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    type: ROW
+  ROW-LhKWfqM7V:
+    children:
+    - CHART-explore-22-1
+    id: ROW-LhKWfqM7V
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-R1SOLtdPpz:
+    children:
+    - MARKDOWN-PY70BXaRGq
+    id: ROW-R1SOLtdPpz
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-JCU6rANFP
+    type: ROW
+  ROW-TZwRV0tZy:
+    children:
+    - CHART-explore-17-1
+    id: ROW-TZwRV0tZy
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    type: ROW
+  ROW-UiCWq3ix1:
+    children:
+    - CHART-wci7CHiza6
+    id: ROW-UiCWq3ix1
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-WirNNBBom:
+    children:
+    - CHART-DxY0c3RnIv
+    id: ROW-WirNNBBom
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-ZTVWOu2o0:
+    children:
+    - CHART-explore-21-1
+    id: ROW-ZTVWOu2o0
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-efGgRzySlP:
+    children:
+    - MARKDOWN-NXluIKVHl5
+    id: ROW-efGgRzySlP
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    type: ROW
+  ROW-hNOZdWZpw:
+    children:
+    - CHART-cxqeW2rGoV
+    id: ROW-hNOZdWZpw
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-j6eWWjqran:
+    children:
+    - MARKDOWN-pmSRDxroDW
+    id: ROW-j6eWWjqran
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-klrE6Idjlp:
+    children:
+    - MARKDOWN-HncT4Y_WmV
+    id: ROW-klrE6Idjlp
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  ROW-lvxd9vvnS5:
+    children:
+    - CHART-eZttETxtot
+    id: ROW-lvxd9vvnS5
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-oXaTD35jB:
+    children:
+    - CHART-91whs_IaiF
+    id: ROW-oXaTD35jB
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-s_aeCbvt3:
+    children:
+    - CHART-explore-15-1
+    id: ROW-s_aeCbvt3
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-q4CdGUDlq
+    type: ROW
+  ROW-t7PnH6oKHU:
+    children:
+    - MARKDOWN-XuW-kEED70
+    id: ROW-t7PnH6oKHU
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-tzfO7Zd-dD:
+    children:
+    - MARKDOWN-Ne7griq2wJ
+    id: ROW-tzfO7Zd-dD
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-uSb7snkjI:
+    children:
+    - CHART-explore-9-1
+    - CHART-explore-14-1
+    id: ROW-uSb7snkjI
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-y6AC1wLv1j:
+    children:
+    - MARKDOWN-aXRTn3gE5x
+    id: ROW-y6AC1wLv1j
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-Gw0Ffh1lG
+    type: ROW
+  ROW-zC6DVrW4wu:
+    children:
+    - MARKDOWN-zISK-3R8Ta
+    id: ROW-zC6DVrW4wu
+    meta:
+      background: BACKGROUND_TRANSPARENT
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    - TAB-6zE8noCIsx
+    type: ROW
+  TAB-6zE8noCIsx:
+    children:
+    - ROW-zC6DVrW4wu
+    - ROW-Ae7v1prsp2
+    - ROW-klrE6Idjlp
+    - ROW-ZTVWOu2o0
+    - ROW-CBSQJNAfEV
+    - ROW-7g6_n72hZ
+    - ROW-j6eWWjqran
+    - ROW-LhKWfqM7V
+    id: TAB-6zE8noCIsx
+    meta:
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Service statistics
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    type: TAB
+  TAB-Gw0Ffh1lG:
+    children:
+    - ROW-t7PnH6oKHU
+    - ROW-uSb7snkjI
+    - ROW-WirNNBBom
+    - ROW-y6AC1wLv1j
+    - ROW-UiCWq3ix1
+    - ROW-tzfO7Zd-dD
+    - ROW-hNOZdWZpw
+    - ROW-DKYV2zUmwU
+    - ROW-oXaTD35jB
+    - ROW-lvxd9vvnS5
+    id: TAB-Gw0Ffh1lG
+    meta:
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Node statistics
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    type: TAB
+  TAB-JCU6rANFP:
+    children:
+    - ROW-R1SOLtdPpz
+    - ROW-EaYAQjv4W
+    - ROW-FMNDn-yXPC
+    - ROW-Ccs1FbcI-
+    id: TAB-JCU6rANFP
+    meta:
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Overview
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    type: TAB
+  TAB-q4CdGUDlq:
+    children:
+    - ROW-efGgRzySlP
+    - ROW-K0fThyfqJq
+    - ROW-IsV-8cS3Z
+    - ROW-s_aeCbvt3
+    - ROW-Hcn9FCMH6a
+    - ROW-TZwRV0tZy
+    id: TAB-q4CdGUDlq
+    meta:
+      defaultText: Tab title
+      placeholder: Tab title
+      text: Annotations
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    - TABS-Xoi5oUBxZI
+    type: TAB
+  TABS-Xoi5oUBxZI:
+    children:
+    - TAB-JCU6rANFP
+    - TAB-Gw0Ffh1lG
+    - TAB-6zE8noCIsx
+    - TAB-q4CdGUDlq
+    id: TABS-Xoi5oUBxZI
+    meta: {}
+    parents:
+    - ROOT_ID
+    - GRID_ID
+    type: TABS
+metadata:
+  color_scheme: echarts4Colors
+  label_colors: {}
+  shared_label_colors:
+    '0': '#c23531'
+    '1': '#2f4554'
+    '2': '#546570'
+    '3': '#c4ccd3'
+    '4': '#c23531'
+    '5': '#2f4554'
+    '6': '#61a0a8'
+    '7': '#d48265'
+    '8': '#91c7ae'
+    '9': '#749f83'
+    '10': '#61a0a8'
+    '11': '#d48265'
+    '12': '#91c7ae'
+  timed_refresh_immune_slices: []
+  expanded_slices: {}
+  refresh_frequency: 1800
+  show_native_filters: true
+  default_filters: '{}'
+  chart_configuration: {}
+  color_scheme_domain:
+  - '#c23531'
+  - '#2f4554'
+  - '#61a0a8'
+  - '#d48265'
+  - '#91c7ae'
+  - '#749f83'
+  - '#ca8622'
+  - '#bda29a'
+  - '#6e7074'
+  - '#546570'
+  - '#c4ccd3'
+  cross_filters_enabled: false
+  native_filter_configuration:
+  - id: NATIVE_FILTER-5vyW3SgU5
+    controlValues:
+      enableEmptyFilter: false
+    name: Time grain
+    filterType: filter_timegrain
+    targets:
+    - datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData:
+        time_grain_sqla: PT1M
+      filterState:
+        label: Minute
+        value:
+        - PT1M
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-6zE8noCIsx
+      excluded:
+      - 5
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 2
+    - 4
+    - 7
+    - 13
+    tabsInScope:
+    - TAB-6zE8noCIsx
+  - id: NATIVE_FILTER-k81Ybg31L
+    controlValues:
+      enableEmptyFilter: false
+    name: Time range
+    filterType: filter_time
+    targets:
+    - {}
+    defaultDataMask:
+      extraFormData:
+        time_range: 'DATEADD(DATETIME("now"), -1, day) : now'
+      filterState:
+        value: 'DATEADD(DATETIME("now"), -1, day) : now'
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-6zE8noCIsx
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 1
+    - 2
+    - 3
+    - 4
+    - 6
+    - 8
+    - 9
+    - 10
+    - 12
+    - 13
+    - 14
+    - 15
+    tabsInScope:
+    - TAB-6zE8noCIsx
+    - TAB-Gw0Ffh1lG
+    - TAB-JCU6rANFP
+  - id: NATIVE_FILTER-Q_v9J5gqV
+    controlValues:
+      enableEmptyFilter: false
+    name: History
+    filterType: filter_range
+    targets:
+    - column:
+        name: request_id
+      datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-Gw0Ffh1lG
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 1
+    - 3
+    - 6
+    - 9
+    - 10
+    tabsInScope:
+    - TAB-Gw0Ffh1lG
+  - id: NATIVE_FILTER-EGnz5obeE
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+    name: User id
+    filterType: filter_select
+    targets:
+    - column:
+        name: context_id
+      datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-Gw0Ffh1lG
+      - TAB-q4CdGUDlq
+      - TAB-JCU6rANFP
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 1
+    - 3
+    - 6
+    - 8
+    - 9
+    - 10
+    - 12
+    - 14
+    - 15
+    - 16
+    - 17
+    tabsInScope:
+    - TAB-Gw0Ffh1lG
+    - TAB-JCU6rANFP
+    - TAB-q4CdGUDlq
+  - id: NATIVE_FILTER-BU7iNmYAX
+    adhoc_filters:
+    - expressionType: SQL
+      sqlExpression: label <> ''
+      clause: WHERE
+      subject: null
+      operator: null
+      comparator: null
+      isExtra: false
+      isNew: false
+      datasourceWarning: false
+      filterOptionName: filter_68jo660l3a3_xn0lv9ghc2i
+    time_range: No filter
+    controlValues:
+      enableEmptyFilter: false
+      defaultToFirstItem: false
+      multiSelect: true
+      searchAllOptions: false
+      inverseSelection: false
+    name: Node
+    filterType: filter_select
+    targets:
+    - column:
+        name: label
+      datasetUuid: fda98ab8-f550-45f1-9ded-0113f3e67260
+    defaultDataMask:
+      extraFormData: {}
+      filterState: {}
+      ownState: {}
+    cascadeParentIds: []
+    scope:
+      rootPath:
+      - TAB-Gw0Ffh1lG
+      - TAB-q4CdGUDlq
+      excluded: []
+    type: NATIVE_FILTER
+    description: ''
+    chartsInScope:
+    - 1
+    - 3
+    - 6
+    - 9
+    - 10
+    - 15
+    - 16
+    - 17
+    tabsInScope:
+    - TAB-Gw0Ffh1lG
+    - TAB-q4CdGUDlq
+  stagger_refresh: true
+version: 1.0.0

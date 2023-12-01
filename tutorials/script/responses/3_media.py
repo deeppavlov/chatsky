@@ -36,7 +36,9 @@ toy_script = {
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
-            RESPONSE: Message(text="Final node reached, send any message to restart."),
+            RESPONSE: Message(
+                text="Final node reached, send any message to restart."
+            ),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
     },
@@ -45,13 +47,16 @@ toy_script = {
             RESPONSE: Message(text="Please, send me a picture url"),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
-                ("pics", "send_many", 1.0): cnd.regexp(f"{img_url} repeat 10 times"),
+                ("pics", "send_many", 1.0): cnd.regexp(
+                    f"{img_url} repeat 10 times"
+                ),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
         "send_one": {
             RESPONSE: Message(
-                text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])
+                text="here's my picture!",
+                attachments=Attachments(files=[Image(source=img_url)]),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -63,10 +68,14 @@ toy_script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: Message(text="I cannot find the picture. Please, try again."),
+            RESPONSE: Message(
+                text="I cannot find the picture. Please, try again."
+            ),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
-                ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.png repeat 10 times"),
+                ("pics", "send_many", 1.0): cnd.regexp(
+                    r"^http.+\.png repeat 10 times"
+                ),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
@@ -75,12 +84,21 @@ toy_script = {
 
 happy_path = (
     (Message(text="Hi"), Message(text="Please, send me a picture url")),
-    (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
+    (
+        Message(text="no"),
+        Message(text="I cannot find the picture. Please, try again."),
+    ),
     (
         Message(text=img_url),
-        Message(text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])),
+        Message(
+            text="here's my picture!",
+            attachments=Attachments(files=[Image(source=img_url)]),
+        ),
     ),
-    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
+    (
+        Message(text="ok"),
+        Message(text="Final node reached, send any message to restart."),
+    ),
     (Message(text="ok"), Message(text="Please, send me a picture url")),
     (
         Message(text=f"{img_url} repeat 10 times"),
@@ -89,7 +107,10 @@ happy_path = (
             attachments=Attachments(files=[Image(source=img_url)] * 10),
         ),
     ),
-    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
+    (
+        Message(text="ok"),
+        Message(text="Final node reached, send any message to restart."),
+    ),
 )
 
 

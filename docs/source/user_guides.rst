@@ -31,6 +31,12 @@ that can be used for framework extension.
 For each of these functions use cases are defined, execution orser is specified
 and also signature and return value types are highlighted.
 
+:doc:`Optimization guide <./user_guides/optimization_guide>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+The ``optimization guide`` demonstrates various tools provided by the library
+that you can use to profile your conversational service,
+and to locate and remove performance bottlenecks.
 
 .. toctree::
    :hidden:
