@@ -20,6 +20,15 @@ You can use the framework in various services such as social networks, call cent
 * The framework is being actively maintained and thoroughly tested. The team is open to suggestions and quickly reacts to bug reports.
 
 # Quick Start
+
+## System Requirements
+
+- Supported operating systems include Ubuntu 18.04+, Windows 10+ (partial support), and MacOS Big Sur (partial support);
+- Python version 3.8 or higher is necessary for proper functionality;
+- A minimum of 1 GB of RAM is required for optimal performance;
+- If analytics collection or database integration is intended, Docker version 20 or higher may be necessary.
+
+
 ## Installation
 
 DFF can be installed via pip:
