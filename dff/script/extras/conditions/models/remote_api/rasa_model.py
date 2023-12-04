@@ -21,9 +21,9 @@ except ImportError:
     rasa_available = False
 
 from http import HTTPStatus
-from ...utils import RasaResponse
-from ..base_model import ExtrasBaseModel
-from .async_mixin import AsyncMixin
+from dff.script.extras.conditions.utils import RasaResponse
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.models.remote_api.async_mixin import AsyncMixin
 
 
 class AbstractRasaModel(ExtrasBaseModel):

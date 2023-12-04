@@ -7,7 +7,7 @@ Use Sklearn classifiers to achieve great results on a limited set of data.
 """
 from typing import Optional
 
-from ...sklearn import BaseSklearnModel, sklearn_available
+from dff.script.extras.conditions.models.sklearn import BaseSklearnModel, sklearn_available
 
 
 class SklearnClassifier(BaseSklearnModel):

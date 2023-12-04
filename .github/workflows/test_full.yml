@@ -49,6 +49,10 @@ jobs:
           name: "gdf_account.json"
           json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
+      - name: write realpath to env
+        run: |
+            echo "GDF_ACCOUNT_JSON=$(realpath ./gdf_account.json)" >> $GITHUB_ENV
+
       - name: run pytest
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}

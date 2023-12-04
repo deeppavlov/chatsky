@@ -6,9 +6,8 @@ This module provides the mixin that overrides the :py:meth:`__call__` method
 in all the descendants making them asynchronous.
 """
 from dff.script import Context
-
-from ..base_model import ExtrasBaseModel
-from ...utils import LABEL_KEY
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.utils import LABEL_KEY
 
 
 class AsyncMixin(ExtrasBaseModel):

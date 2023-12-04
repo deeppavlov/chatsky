@@ -7,9 +7,9 @@ It uses Sklearn BOW representations and other features to compute distances betw
 """
 from typing import Optional
 
-from ...sklearn import BaseSklearnModel, sklearn_available
-from ....dataset import Dataset
-from .cosine_matcher_mixin import CosineMatcherMixin
+from dff.script.extras.conditions.models.sklearn import BaseSklearnModel, sklearn_available
+from dff.script.extras.conditions.dataset import Dataset
+from dff.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
 
 class SklearnMatcher(CosineMatcherMixin, BaseSklearnModel):

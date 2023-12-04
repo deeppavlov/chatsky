@@ -8,8 +8,8 @@ Initialize it with a :py:class:`~Dataset` with regex-compliant examples.
 import re
 from typing import Optional, Union
 
-from ...base_model import ExtrasBaseModel
-from ....dataset import Dataset
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.dataset import Dataset
 
 
 class RegexModel:

@@ -13,7 +13,7 @@ except ImportError:
     numpy_available = False
 
 
-from ....dataset import Dataset
+from dff.script.extras.conditions.dataset import Dataset
 
 
 class CosineMatcherMixin:

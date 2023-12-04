@@ -9,8 +9,8 @@ from abc import ABC, abstractmethod
 
 from dff.script import Context
 
-from ..dataset import Dataset
-from ..utils import LABEL_KEY
+from dff.script.extras.conditions.dataset import Dataset
+from dff.script.extras.conditions.utils import LABEL_KEY
 
 
 class ExtrasBaseModel(ABC):

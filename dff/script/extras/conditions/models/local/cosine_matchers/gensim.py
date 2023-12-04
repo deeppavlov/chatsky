@@ -18,10 +18,10 @@ except ImportError:
     gensim_available = False
     ALL_MODELS = []
 
-from ...base_model import ExtrasBaseModel
-from ....dataset import Dataset
-from ....utils import DefaultTokenizer
-from .cosine_matcher_mixin import CosineMatcherMixin
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.dataset import Dataset
+from dff.script.extras.conditions.utils import DefaultTokenizer
+from dff.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
 
 class GensimMatcher(CosineMatcherMixin, ExtrasBaseModel):

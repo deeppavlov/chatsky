@@ -15,10 +15,9 @@ except ImportError:
     sklearn_available = False
 from dff.script import Context
 from dff.pipeline import Pipeline
-
-from .dataset import DatasetItem
-from .utils import LABEL_KEY
-from .models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.dataset import DatasetItem
+from dff.script.extras.conditions.utils import LABEL_KEY
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
 
 
 @singledispatch

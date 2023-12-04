@@ -21,8 +21,8 @@ try:
 except ImportError:
     hf_api_available = False
 
-from ..base_model import ExtrasBaseModel
-from .async_mixin import AsyncMixin
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.models.remote_api.async_mixin import AsyncMixin
 
 
 class AbstractHFAPIModel(ExtrasBaseModel):

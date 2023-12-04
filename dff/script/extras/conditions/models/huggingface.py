@@ -16,8 +16,8 @@ try:
 except ImportError:
     hf_available = False
 
-from .base_model import ExtrasBaseModel
-from ..dataset import Dataset
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.dataset import Dataset
 
 
 class BaseHFModel(ExtrasBaseModel):

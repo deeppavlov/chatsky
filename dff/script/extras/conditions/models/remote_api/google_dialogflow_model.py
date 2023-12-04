@@ -10,8 +10,8 @@ import uuid
 import json
 from pathlib import Path
 
-from ..base_model import ExtrasBaseModel
-from .async_mixin import AsyncMixin
+from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
+from dff.script.extras.conditions.models.remote_api.async_mixin import AsyncMixin
 
 try:
     from google.cloud import dialogflow_v2

@@ -8,7 +8,7 @@ It leverages transformer embeddings to compute distances between utterances.
 from typing import Optional
 from pathlib import Path
 
-from ...huggingface import BaseHFModel, hf_available
+from dff.script.extras.conditions.models.huggingface import BaseHFModel, hf_available
 
 try:
     from transformers import AutoModelForSequenceClassification, AutoTokenizer
@@ -18,8 +18,8 @@ try:
 except ImportError:
     hf_available = hf_available and False
 
-from ....dataset import Dataset
-from .cosine_matcher_mixin import CosineMatcherMixin
+from dff.script.extras.conditions.dataset import Dataset
+from dff.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import CosineMatcherMixin
 
 
 class HFMatcher(CosineMatcherMixin, BaseHFModel):
