@@ -8,7 +8,7 @@ Initialize it with a :py:class:`~Dataset` with regex-compliant examples.
 import re
 from typing import Optional, Union
 
-from ...base_model import BaseModel
+from ...base_model import ExtrasBaseModel
 from ....dataset import Dataset
 
 
@@ -34,7 +34,7 @@ class RegexModel:
         return result
 
 
-class RegexClassifier(BaseModel):
+class RegexClassifier(ExtrasBaseModel):
     """
     RegexClassifier wraps a :py:class:`~RegexModel` for label annotation.
 

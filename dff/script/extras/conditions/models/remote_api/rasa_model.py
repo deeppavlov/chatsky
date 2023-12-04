@@ -22,11 +22,11 @@ except ImportError:
 
 from http import HTTPStatus
 from ...utils import RasaResponse
-from ..base_model import BaseModel
+from ..base_model import ExtrasBaseModel
 from .async_mixin import AsyncMixin
 
 
-class AbstractRasaModel(BaseModel):
+class AbstractRasaModel(ExtrasBaseModel):
     """
     Abstract class for a RASA annotator.
     """

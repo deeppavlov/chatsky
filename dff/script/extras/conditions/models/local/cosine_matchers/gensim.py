@@ -18,13 +18,13 @@ except ImportError:
     gensim_available = False
     ALL_MODELS = []
 
-from ...base_model import BaseModel
+from ...base_model import ExtrasBaseModel
 from ....dataset import Dataset
 from ....utils import DefaultTokenizer
 from .cosine_matcher_mixin import CosineMatcherMixin
 
 
-class GensimMatcher(CosineMatcherMixin, BaseModel):
+class GensimMatcher(CosineMatcherMixin, ExtrasBaseModel):
     """
     GensimMatcher utilizes embeddings from Gensim models to measure
     proximity between utterances and pre-defined labels.
@@ -47,7 +47,7 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
         if not gensim_available:
             raise ImportError("Required packages missing. Try `pip install dff[ext,gensim]`")
         CosineMatcherMixin.__init__(self, dataset=dataset)
-        BaseModel.__init__(self, namespace_key=namespace_key)
+        ExtrasBaseModel.__init__(self, namespace_key=namespace_key)
         self.model = model
         self.tokenizer = tokenizer or DefaultTokenizer()
         # self.fit(self.dataset, **kwargs)

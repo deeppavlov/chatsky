@@ -21,11 +21,11 @@ try:
 except ImportError:
     hf_api_available = False
 
-from ..base_model import BaseModel
+from ..base_model import ExtrasBaseModel
 from .async_mixin import AsyncMixin
 
 
-class AbstractHFAPIModel(BaseModel):
+class AbstractHFAPIModel(ExtrasBaseModel):
     """
     Abstract class for an HF API annotator.
     """

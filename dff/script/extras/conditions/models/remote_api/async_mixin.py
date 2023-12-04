@@ -7,11 +7,11 @@ in all the descendants making them asynchronous.
 """
 from dff.script import Context
 
-from ..base_model import BaseModel
+from ..base_model import ExtrasBaseModel
 from ...utils import LABEL_KEY
 
 
-class AsyncMixin(BaseModel):
+class AsyncMixin(ExtrasBaseModel):
     """
     This class overrides the :py:meth:`~__call__` method
     allowing for asynchronous calls to annotator models.

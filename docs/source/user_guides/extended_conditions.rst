@@ -102,10 +102,10 @@ The following code snippets demonstrate how you can write a connector for an ext
     from dff.script.extras.conditions.models.remote_api.async_mixin import (
         AsyncMixin,
     )
-    from dff.script.extras.conditions.models.base_model import BaseModel
+    from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
 
 
-To create a synchronous connector to an API, we recommend you to inherit the class from ``BaseModel``.
+To create a synchronous connector to an API, we recommend you to inherit the class from ``ExtrasBaseModel``.
 The only method that you have to override is the ``predict`` method.
 It takes a request string and returns a {label: probability} dictionary.
 In case the request has not been successful, an empty dictionary can be returned.
@@ -118,7 +118,7 @@ We use `httpx` as an asynchronous http client.
 
 .. code-block:: python
 
-    class CustomAPIConnector(BaseModel):
+    class CustomAPIConnector(ExtrasBaseModel):
         def __init__(self, url: str, namespace_key: str = "default") -> None:
             super().__init__(namespace_key)
             self.url = url
@@ -156,12 +156,12 @@ In this section, we show the way you can adapt a classifier model to DFF's class
 
     import pickle
 
-    from dff.script.extras.conditions.models.base_model import BaseModel
+    from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
 
 
-In order to create your own classifier, create a child class of the ``BaseModel`` abstract type.
+In order to create your own classifier, create a child class of the ``ExtrasBaseModel`` abstract type.
 
-``BaseModel`` only has one abstract method, ``predict``, that should necessarily be overridden.
+``ExtrasBaseModel`` only has one abstract method, ``predict``, that should necessarily be overridden.
 The method takes a request string and returns a dictionary of class labels
 and their respective probabilities.
 
@@ -174,7 +174,7 @@ at your own convenience, e.g. lack of those will not raise an error.
 
 .. code-block:: python
 
-    class MyCustomClassifier(BaseModel):
+    class MyCustomClassifier(ExtrasBaseModel):
         def __init__(
             self, swear_words: list, namespace_key: str = "default"
         ) -> None:
@@ -207,13 +207,13 @@ The following code snippets demonstrate the way in which a custom matcher can be
 
 .. code-block:: python
 
-    from dff.script.extras.conditions.models.base_model import BaseModel
+    from dff.script.extras.conditions.models.base_model import ExtrasBaseModel
     from dff.script.extras.conditions.models.local.cosine_matchers.cosine_matcher_mixin import (
         CosineMatcherMixin,
     )
 
 To build  your own cosine matcher, you should inherit
-from the ``CosineMatcherMixin`` and from the ``BaseModel``,
+from the ``CosineMatcherMixin`` and from the ``ExtrasBaseModel``,
 with the former taking precedence.
 This requires the ``__init__`` method to take ``dataset`` argument.
 
@@ -233,10 +233,10 @@ e.g. lack of those will not raise an error.
 
 .. code-block:: python
 
-    class MyCustomMatcher(CosineMatcherMixin, BaseModel):
+    class MyCustomMatcher(CosineMatcherMixin, ExtrasBaseModel):
         def __init__(self, model, dataset, namespace_key) -> None:
             CosineMatcherMixin.__init__(self, dataset)
-            BaseModel.__init__(self, namespace_key)
+            ExtrasBaseModel.__init__(self, namespace_key)
             self.model = model
 
         def transform(self, request: str):

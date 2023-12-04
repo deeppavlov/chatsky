@@ -1,7 +1,7 @@
 """
 Base Model
 -----------
-This module defines an abstract interface for label-scoring models, :py:class:`~BaseModel`.
+This module defines an abstract interface for label-scoring models, :py:class:`~ExtrasBaseModel`.
 When defining custom label-scoring models, always inherit from this class.
 """
 from copy import copy
@@ -13,7 +13,7 @@ from ..dataset import Dataset
 from ..utils import LABEL_KEY
 
 
-class BaseModel(ABC):
+class ExtrasBaseModel(ABC):
     """
     Base class for label-scoring models.
     Namespace key should be declared, if you want the scores of your model

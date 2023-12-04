@@ -16,11 +16,11 @@ try:
 except ImportError:
     hf_available = False
 
-from .base_model import BaseModel
+from .base_model import ExtrasBaseModel
 from ..dataset import Dataset
 
 
-class BaseHFModel(BaseModel):
+class BaseHFModel(ExtrasBaseModel):
     """
     Base class for Hugging Face-based annotator models.
 

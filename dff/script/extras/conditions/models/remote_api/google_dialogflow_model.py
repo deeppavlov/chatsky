@@ -10,7 +10,7 @@ import uuid
 import json
 from pathlib import Path
 
-from ..base_model import BaseModel
+from ..base_model import ExtrasBaseModel
 from .async_mixin import AsyncMixin
 
 try:
@@ -24,7 +24,7 @@ except ImportError:
     dialogflow_available = False
 
 
-class AbstractGDFModel(BaseModel):
+class AbstractGDFModel(ExtrasBaseModel):
     """
     Abstract class for a Google Dialogflow model.
     """

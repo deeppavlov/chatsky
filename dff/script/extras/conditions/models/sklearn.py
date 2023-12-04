@@ -23,10 +23,10 @@ except ImportError:
     joblib = object
     sklearn_available = False
 
-from .base_model import BaseModel
+from .base_model import ExtrasBaseModel
 
 
-class BaseSklearnModel(BaseModel):
+class BaseSklearnModel(ExtrasBaseModel):
     """
     Base class for Sklearn-based annotator models.
 

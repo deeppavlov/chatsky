@@ -18,7 +18,7 @@ from dff.pipeline import Pipeline
 
 from .dataset import DatasetItem
 from .utils import LABEL_KEY
-from .models.base_model import BaseModel
+from .models.base_model import ExtrasBaseModel
 
 
 @singledispatch
@@ -79,7 +79,7 @@ def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
 
 
 def has_match(
-    model: BaseModel,
+    model: ExtrasBaseModel,
     positive_examples: Optional[List[str]],
     negative_examples: Optional[List[str]] = None,
     threshold: float = 0.9,
