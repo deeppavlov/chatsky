@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 2. Gensim Example
+# 2. Gensim Tutorial
 
-The following example demonstrates how to employ Gensim models
+The following tutorial demonstrates how to employ Gensim models
 for annotating user phrases.
 """
 

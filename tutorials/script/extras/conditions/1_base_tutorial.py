@@ -1,10 +1,10 @@
 # %% [markdown]
 """
-# 1. Base Example
+# 1. Base Tutorial
 
-This example demonstrates how to annotate user phrases using a simple regex model.
+This tutorial demonstrates how to annotate user phrases using a simple regex model.
 The way of using this class is similar to that of other models.
-Examples for other models can be found in the same section.
+Tutorials for other models can be found in the same section.
 
 """
 

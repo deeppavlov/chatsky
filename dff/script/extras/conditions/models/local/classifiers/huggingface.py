@@ -33,11 +33,11 @@ class HFClassifier(BaseHFModel):
         super().__init__(*args, **kwargs)
         if not torch_available:
             raise ImportError("`torch` missing. Try `pip install dff[huggingface].`.")
-        self.sofmax = Softmax(dim=0)
+        self.softmax = Softmax(dim=1)
 
     def predict(self, request: str) -> dict:
         model_output = self.call_model(request)
-        logits_list = self.sofmax.forward(model_output.logits).squeeze(0)
+        logits_list = self.softmax.forward(model_output.logits).squeeze(0)
         result = {}
         for idx in range(logits_list.shape[0]):
             label = self.model.config.id2label[idx]

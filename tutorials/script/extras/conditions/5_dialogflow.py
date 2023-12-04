@@ -2,7 +2,7 @@
 """
 # 5. Dialogflow
 
-The example below demonstrates, how to integrate Google Dialogflow into your script logic.
+The tutorial below demonstrates, how to integrate Google Dialogflow into your script logic.
 """
 
 # %pip install dff[ext,dialogflow]

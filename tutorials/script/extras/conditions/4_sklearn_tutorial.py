@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 4. Sklearn Example
+# 4. Sklearn Tutorial
 
-The following example show how to use Sklearn models
+The following tutorial shows how to use Sklearn models
 for annotating user phrases.
 """
 

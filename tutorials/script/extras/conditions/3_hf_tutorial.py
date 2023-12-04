@@ -1,8 +1,8 @@
 # %% [markdown]
 """
-# 3. HF Example
+# 3. HF Tutorial
 
-The following example show how to use HuggingFace models
+The following tutorial shows how to use HuggingFace models
 for annotating user phrases.
 """
 

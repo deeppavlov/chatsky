@@ -21,7 +21,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 @pytest.mark.parametrize(
     ["example_module_name", "skip_condition"],
     [
-        ("1_base_example", not sklearn_available),
+        ("1_base_tutorial", not sklearn_available),
         ("7_rasa", os.getenv("RASA_API_KEY") is None or not rasa_available or not RASA_ACTIVE),
         (
             "5_dialogflow",
@@ -29,8 +29,8 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
             or not dialogflow_available,
         ),
         ("6_hf_api", os.getenv("HF_API_KEY") is None or not hf_api_available),
-        ("2_gensim_example", not gensim_available),
-        ("4_sklearn_example", not sklearn_available),
+        ("2_gensim_tutorial", not gensim_available),
+        ("4_sklearn_tutorial", not sklearn_available),
     ],
 )
 @pytest.mark.rasa
