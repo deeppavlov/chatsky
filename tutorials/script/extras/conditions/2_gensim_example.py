@@ -6,7 +6,7 @@ The following example demonstrates how to employ Gensim models
 for annotating user phrases.
 """
 
-# %pip install dff[gensim]
+# %pip install dff[ext,gensim]
 
 # %%
 import os

@@ -32,6 +32,10 @@ core = [
     "typing-extensions",
 ]
 
+requests_dependencies = [
+    "requests==2.31.0",
+]
+
 async_files_dependencies = [
     "aiofiles",
 ]
@@ -77,7 +81,7 @@ ydb_dependencies = [
 
 sklearn_dependencies = ["scikit-learn>=1.1.3", "joblib==1.2.0"]
 
-extended_conditions_dependencies = merge_req_lists(sklearn_dependencies, ["pyyaml==6.0"])
+extended_conditions_dependencies = merge_req_lists(requests_dependencies, sklearn_dependencies, ["pyyaml==6.0"])
 
 httpx_dependencies = [
     "httpx==0.23.0",
@@ -122,8 +126,8 @@ otl_dependencies = [
 
 stats_dependencies = merge_req_lists(
     otl_dependencies,
+    requests_dependencies,
     [
-        "requests",
         "wrapt",
         "tqdm",
         "omegaconf",
@@ -149,10 +153,6 @@ full = merge_req_lists(
     dialogflow_dependencies,
 )
 
-requests_requirements = [
-    "requests==2.31.0",
-]
-
 test_requirements = merge_req_lists(
     [
         "pytest==7.4.0",
@@ -168,7 +168,7 @@ test_requirements = merge_req_lists(
         "httpx<=0.23.0",
         "sqlparse==0.4.4",
     ],
-    requests_requirements,
+    requests_dependencies,
 )
 
 tutorial_dependencies = [
@@ -204,7 +204,7 @@ doc = merge_req_lists(
         "jupytext==1.15.0",
         "jupyter==1.0.0",
     ],
-    requests_requirements,
+    requests_dependencies,
 )
 
 devel = [

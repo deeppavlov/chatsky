@@ -11,10 +11,9 @@ import json
 from urllib.parse import urljoin
 from typing import Optional
 
-import requests
-
 try:
     import httpx
+    import requests
 
     rasa_available = True
 except ImportError:

@@ -6,7 +6,7 @@ The following example show how to use HuggingFace models
 for annotating user phrases.
 """
 
-# %pip install dff[huggingface]
+# %pip install dff[ext,huggingface]
 
 # %%
 from transformers import AutoTokenizer, AutoModelForSequenceClassification
