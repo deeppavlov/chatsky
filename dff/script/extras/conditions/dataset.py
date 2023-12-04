@@ -65,7 +65,7 @@ class Dataset(BaseModel, arbitrary_types_allowed=True):
     @classmethod
     def parse_json(cls, file: Union[str, Path]):
         file_path = cls._get_path(file)
-        items = json.load(file_path.open())
+        items = json.load(file_path.open("r", encoding="utf-8"))
         return cls(items=[DatasetItem.model_validate(item) for item in items])
 
     @classmethod

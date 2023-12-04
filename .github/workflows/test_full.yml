@@ -57,7 +57,6 @@ jobs:
               pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker,huggingface,rasa,dialogflow tests/
           fi
         shell: bash
-
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:

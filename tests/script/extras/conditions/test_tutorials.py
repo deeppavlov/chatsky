@@ -21,7 +21,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 @pytest.mark.parametrize(
     ["example_module_name", "skip_condition"],
     [
-        ("1_base_example", None),
+        ("1_base_example", not sklearn_available),
         ("7_rasa", os.getenv("RASA_API_KEY") is None or not rasa_available or not RASA_ACTIVE),
         (
             "5_dialogflow",

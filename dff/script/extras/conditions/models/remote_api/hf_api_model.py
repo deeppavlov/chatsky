@@ -10,17 +10,17 @@ import json
 import asyncio
 from typing import Optional
 from urllib.parse import urljoin
+from http import HTTPStatus
 
-import requests
 
 try:
+    import requests
     import httpx
 
     hf_api_available = True
 except ImportError:
     hf_api_available = False
 
-from ...utils import STATUS_SUCCESS, STATUS_UNAVAILABLE
 from ..base_model import BaseModel
 from .async_mixin import AsyncMixin
 
@@ -48,7 +48,7 @@ class AbstractHFAPIModel(BaseModel):
         self.retries = retries
         self.url = urljoin("https://api-inference.huggingface.co/models/", model)
         test_response = requests.get(self.url, headers=self.headers)  # assert that the model exists
-        if not test_response.status_code == STATUS_SUCCESS:
+        if not test_response.status_code == HTTPStatus.OK:
             raise requests.HTTPError(test_response.text)
 
 
@@ -71,9 +71,9 @@ class HFAPIModel(AbstractHFAPIModel):
         while retries < self.retries:
             retries += 1
             response: requests.Response = requests.post(self.url, headers=self.headers, data=json.dumps(request))
-            if response.status_code == STATUS_UNAVAILABLE:  # Wait for model to warm up
+            if response.status_code == HTTPStatus.SERVICE_UNAVAILABLE:  # Wait for model to warm up
                 time.sleep(1)
-            elif response.status_code == STATUS_SUCCESS:
+            elif response.status_code == HTTPStatus.OK:
                 break
             else:
                 raise requests.HTTPError(str(response.status_code) + " " + response.text)
@@ -118,9 +118,9 @@ class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
         while retries < self.retries:
             retries += 1
             response = await client.post(self.url, headers=self.headers, data=json.dumps(request))
-            if response.status_code == STATUS_UNAVAILABLE:  # Wait for model to warm up
+            if response.status_code == HTTPStatus.SERVICE_UNAVAILABLE:  # Wait for model to warm up
                 await asyncio.sleep(1)
-            elif response.status_code == STATUS_SUCCESS:
+            elif response.status_code == HTTPStatus.OK:
                 break
             else:
                 raise httpx.HTTPStatusError(str(response.status_code) + " " + response.text)

@@ -45,7 +45,7 @@ class BaseSklearnModel(BaseModel):
         namespace_key: Optional[str] = None,
     ) -> None:
         if not sklearn_available:
-            raise ImportError("`sklearn` package missing. Try `pip install dff[ext].`.")
+            raise ImportError("Required packages missing. Try `pip install dff[ext].`.")
         assert tokenizer is not None, "tokenizer parameter is required."
         super().__init__(namespace_key=namespace_key)
         self.model = model

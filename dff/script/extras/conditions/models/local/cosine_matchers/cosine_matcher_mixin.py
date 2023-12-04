@@ -26,7 +26,7 @@ class CosineMatcherMixin:
 
     def __init__(self, dataset: Dataset):
         if not numpy_available:
-            raise ImportError("`numpy` package missing. Try `pip install dff[ext]`")
+            raise ImportError("Required packages missing. Try `pip install dff[ext]`")
         self.dataset = dataset
 
     def predict(self, request: str) -> dict:

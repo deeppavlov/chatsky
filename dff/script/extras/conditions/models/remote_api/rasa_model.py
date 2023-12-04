@@ -21,9 +21,9 @@ except ImportError:
     htppx = object()
     rasa_available = False
 
+from http import HTTPStatus
 from ...utils import RasaResponse
 from ..base_model import BaseModel
-from ...utils import STATUS_SUCCESS, STATUS_UNAVAILABLE
 from .async_mixin import AsyncMixin
 
 
@@ -78,9 +78,9 @@ class RasaModel(AbstractRasaModel):
         while retries < self.retries:
             retries += 1
             response: requests.Response = requests.post(self.parse_url, headers=self.headers, data=json.dumps(message))
-            if response.status_code == STATUS_UNAVAILABLE:
+            if response.status_code == HTTPStatus.SERVICE_UNAVAILABLE:
                 time.sleep(1)
-            elif response.status_code == STATUS_SUCCESS:
+            elif response.status_code == HTTPStatus.OK:
                 break
             else:
                 raise requests.HTTPError(str(response.status_code) + " " + response.text)
@@ -131,9 +131,9 @@ class AsyncRasaModel(AsyncMixin, AbstractRasaModel):
         while retries < self.retries:
             retries += 1
             response: httpx.Response = await client.post(self.parse_url, headers=self.headers, data=json.dumps(message))
-            if response.status_code == STATUS_UNAVAILABLE:  # Wait for model to warm up
+            if response.status_code == HTTPStatus.SERVICE_UNAVAILABLE:  # Wait for model to warm up
                 await asyncio.sleep(1)
-            elif response.status_code == STATUS_SUCCESS:
+            elif response.status_code == HTTPStatus.OK:
                 break
             else:
                 raise httpx.HTTPStatusError(str(response.status_code) + " " + response.text)

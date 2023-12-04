@@ -9,9 +9,6 @@ from typing import Optional, List
 
 from pydantic import BaseModel
 
-STATUS_UNAVAILABLE = 503
-STATUS_SUCCESS = 200
-
 LABEL_KEY = "labels"
 
 

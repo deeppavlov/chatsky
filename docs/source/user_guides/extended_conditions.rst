@@ -30,7 +30,7 @@ The library provides a number of wrappers for different model types. All these c
 However, some of the parameters are class-specific.
 
  - The ``tokenizer`` parameter is only required for Sklearn, Gensim, and HuggingFace models. See the signature of the corresponding classes for more information.
- - ``device`` parameter is only required for Hugging Face models. Use torch.device("cpu") or torch.device("cuda").
+ - ``device`` parameter is only required for Hugging Face models. Use ``torch.device("cpu")`` or ``torch.device("cuda")``.
  - ``dataset`` should be passed to all cosine matchers, so that they have a pre-defined set of labels and examples, against which user utterances will be compared.
 
 Using the library, you can deploy models locally.
@@ -89,11 +89,12 @@ We provide several such functions that can be leveraged as transition conditions
 Custom API Connector
 ~~~~~~~~~~~~~~~~~~~~
 
-This code snippet demonstrates how you can write a connector for an external web API.
+The following code snippets demonstrate how you can write a connector for an external web API.
 
 .. code-block:: python
 
     import json
+    from http import HTTPStatus
 
     import requests
     import httpx
@@ -102,17 +103,16 @@ This code snippet demonstrates how you can write a connector for an external web
         AsyncMixin,
     )
     from dff.script.extras.conditions.models.base_model import BaseModel
-    from dff.script.extras.conditions.utils import STATUS_SUCCESS
 
 
-To create a synchronous connector to an API, we recommend you to inherit the class from `BaseModel`.
-The only method that you have to override is the `predict` method.
+To create a synchronous connector to an API, we recommend you to inherit the class from ``BaseModel``.
+The only method that you have to override is the ``predict`` method.
 It takes a request string and returns a {label: probability} dictionary.
 In case the request has not been successful, an empty dictionary can be returned.
 
 The same applies to asynchronous connectors,
-although they should also inherit from `AsyncMixin` class
-in order to make the `__call__` method asynchronous.
+although they should also inherit from ``AsyncMixin`` class
+in order to make the ``__call__`` method asynchronous.
 We use `httpx` as an asynchronous http client.
 
 
@@ -125,7 +125,7 @@ We use `httpx` as an asynchronous http client.
 
         def predict(self, request: str) -> dict:
             result = requests.post(self.url, data=json.dumps({"data": request}))
-            if result.status_code != STATUS_SUCCESS:
+            if result.status_code != HTTPStatus.OK:
                 return {}
             json_response = result.json()
             return {
@@ -140,7 +140,7 @@ We use `httpx` as an asynchronous http client.
             client = httpx.AsyncClient()
             result = await client.post(self.url, data=json.dumps({"data": request}))
             await client.aclose()
-            if result.status_code != STATUS_SUCCESS:
+            if result.status_code != HTTPStatus.OK:
                 return {}
             json_response = result.json()
             return {
@@ -150,7 +150,7 @@ We use `httpx` as an asynchronous http client.
 Custom Classifier
 ~~~~~~~~~~~~~~~~~
 
-In this code snippet, we show how you can implement a classifier.
+In this section, we show the way you can adapt a classifier model to DFF's class system.
 
 .. code-block:: python
 
@@ -159,18 +159,18 @@ In this code snippet, we show how you can implement a classifier.
     from dff.script.extras.conditions.models.base_model import BaseModel
 
 
-In order to create your own classifier, create a child class of the `BaseModel` abstract type.
+In order to create your own classifier, create a child class of the ``BaseModel`` abstract type.
 
-`BaseModel` only has one abstract method, `predict`, that should necessarily be overridden.
+``BaseModel`` only has one abstract method, ``predict``, that should necessarily be overridden.
 The method takes a request string and returns a dictionary of class labels
 and their respective probabilities.
 
-You can override the rest of the methods, namely `save`, `load`, `fit` and `transform`
+You can override the rest of the methods, namely ``save``, ``load``, ``fit`` and ``transform``
 at your own convenience, e.g. lack of those will not raise an error.
 
-* `fit` should take a new dataset and retrain / update the underlying model.
-* `transform` should take a request string and produce a vector.
-* `save` and `load` are self-explanatory.
+* ``fit`` should take a new dataset and retrain / update the underlying model.
+* ``transform`` should take a request string and produce a vector.
+* ``save`` and ``load`` are self-explanatory.
 
 .. code-block:: python
 
@@ -202,7 +202,7 @@ at your own convenience, e.g. lack of those will not raise an error.
 Custom Matcher
 ~~~~~~~~~~~~~~
 
-This snippet demonstrates the way in which a custom matcher can be implemented.
+The following code snippets demonstrate the way in which a custom matcher can be implemented.
 
 
 .. code-block:: python
@@ -213,22 +213,22 @@ This snippet demonstrates the way in which a custom matcher can be implemented.
     )
 
 To build  your own cosine matcher, you should inherit
-from the `CosineMatcherMixin` and from the `BaseModel`,
+from the ``CosineMatcherMixin`` and from the ``BaseModel``,
 with the former taking precedence.
-This requires the `__init__` method to take `dataset` argument.
+This requires the ``__init__`` method to take ``dataset`` argument.
 
-In your class, override the `transform` method
+In your class, override the ``transform`` method
 that is used to obtain a two-dimensional vector (optimally, a Numpy array) from a string.
 
-Unlike the classifier case, the `predict` method is already implemented for you,
+Unlike the classifier case, the ``predict`` method is already implemented for you,
 so you don't have to tamper with it.
 
 Those two steps should suffice to get your matcher up and running.
-You can override the rest of the methods, namely `save`, `load`, and `fit` at your own convenience,
+You can override the rest of the methods, namely ``save``, ``load``, and ``fit`` at your own convenience,
 e.g. lack of those will not raise an error.
 
-* `fit` should take a new dataset and retrain / update the underlying model.
-* `save` and `load` are self-explanatory.
+* ``fit`` should take a new dataset and retrain / update the underlying model.
+* ``save`` and ``load`` are self-explanatory.
     You may use pickle, utils from joblib, or any other serializer.
 
 .. code-block:: python

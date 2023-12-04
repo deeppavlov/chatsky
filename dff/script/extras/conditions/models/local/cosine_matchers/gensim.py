@@ -45,7 +45,7 @@ class GensimMatcher(CosineMatcherMixin, BaseModel):
         **kwargs,
     ) -> None:
         if not gensim_available:
-            raise ImportError("`gensim` missing. Try `pip install dff[ext,gensim]`")
+            raise ImportError("Required packages missing. Try `pip install dff[ext,gensim]`")
         CosineMatcherMixin.__init__(self, dataset=dataset)
         BaseModel.__init__(self, namespace_key=namespace_key)
         self.model = model
