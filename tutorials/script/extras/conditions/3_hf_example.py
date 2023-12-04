@@ -119,7 +119,7 @@ script = {
         },
         "finish": {
             RESPONSE: Message(text="Ok, see you soon!"),
-            TRANSITIONS: {("root", "start", 1.3): cnd.true()},
+            TRANSITIONS: {("service", "offer", 1.3): cnd.true()},
         },
     },
     "service": {
@@ -131,10 +131,12 @@ script = {
         "buy": {
             RESPONSE: Message(
                 text="Unfortunately, the item is out of stock at the moment."
-            )
+            ),
+            TRANSITIONS: {("root", "finish", 1.3): cnd.true()},
         },
         "sell": {
-            RESPONSE: Message(text="Your advertisement has been registered.")
+            RESPONSE: Message(text="Your advertisement has been registered."),
+            TRANSITIONS: {("root", "finish", 1.3): cnd.true()},
         },
     },
 }
@@ -161,7 +163,7 @@ happy_path = [
         Message(text="I would like to buy a car"),
         Message(text="Unfortunately, the item is out of stock at the moment."),
     ),
-    (Message(text="ok"), Message(text="I can't quite get what you mean.")),
+    (Message(text="ok"), Message(text="Ok, see you soon!")),
     (
         Message(text="ok"),
         Message(

@@ -37,6 +37,7 @@ class AbstractHFAPIModel(ExtrasBaseModel):
         namespace_key: Optional[str] = None,
         *,
         retries: int = 60,
+        base_url: str = "https://api-inference.huggingface.co/models/",
         headers: Optional[dict] = None,
     ) -> None:
         super().__init__(namespace_key=namespace_key)
@@ -46,7 +47,7 @@ class AbstractHFAPIModel(ExtrasBaseModel):
             headers if headers else {"Authorization": "Bearer " + api_key, "Content-Type": "application/json"}
         )
         self.retries = retries
-        self.url = urljoin("https://api-inference.huggingface.co/models/", model)
+        self.url = urljoin(base_url, model)
         test_response = requests.get(self.url, headers=self.headers)  # assert that the model exists
         if not test_response.status_code == HTTPStatus.OK:
             raise requests.HTTPError(test_response.text)
@@ -62,6 +63,8 @@ class HFAPIModel(AbstractHFAPIModel):
     :param model: Hosted model name, e. g. 'bert-base-uncased', etc.
     :param api_key: Huggingface inference API token.
     :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param base_url: Base URL address of the inference API.
+        Can be adjusted to use self-hosted models.
     :param retries: Number of retries in case of request failure.
     :param headers: A dictionary that overrides a standard set of headers.
     """
@@ -95,6 +98,8 @@ class AsyncHFAPIModel(AsyncMixin, AbstractHFAPIModel):
     :param model: Hosted model name, e. g. 'bert-base-uncased', etc.
     :param api_key: Huggingface inference API token.
     :param namespace_key: Name of the namespace in framework states that the model will be using.
+    :param base_url: Base URL address of the inference API.
+        Can be adjusted to use self-hosted models.
     :param retries: Number of retries in case of request failure.
     :param headers: A dictionary that overrides a standard set of headers.
     """
