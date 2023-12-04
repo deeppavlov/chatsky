@@ -176,7 +176,7 @@ class Actor:
         ctx.framework_states["actor"]["global_transitions"] = (
             self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
         )
-        global_transitions_coro = self._get_true_label(
+        ctx.framework_states["actor"]["global_true_label"] = await self._get_true_label(
             ctx.framework_states["actor"]["global_transitions"], ctx, pipeline, GLOBAL, "global"
         )
 
@@ -184,7 +184,7 @@ class Actor:
         ctx.framework_states["actor"]["local_transitions"] = (
             self.script.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
         )
-        local_transitions_coro = self._get_true_label(
+        ctx.framework_states["actor"]["local_true_label"] = await self._get_true_label(
             ctx.framework_states["actor"]["local_transitions"],
             ctx,
             pipeline,
@@ -196,18 +196,13 @@ class Actor:
         ctx.framework_states["actor"]["node_transitions"] = ctx.framework_states["actor"][
             "pre_transitions_processed_node"
         ].transitions
-        node_transitions_coro = self._get_true_label(
+        ctx.framework_states["actor"]["node_true_label"] = await self._get_true_label(
             ctx.framework_states["actor"]["node_transitions"],
             ctx,
             pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
             "node",
         )
-        (
-            ctx.framework_states["actor"]["global_true_label"],
-            ctx.framework_states["actor"]["local_true_label"],
-            ctx.framework_states["actor"]["node_true_label"],
-        ) = await asyncio.gather(*[global_transitions_coro, local_transitions_coro, node_transitions_coro])
 
     def _get_next_node(self, ctx: Context, *args, **kwargs):
         # choose next label
