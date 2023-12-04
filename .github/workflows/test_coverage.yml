@@ -56,9 +56,6 @@ jobs:
           name: "gdf_account.json"
           json: ${{ secrets.GDF_ACCOUNT_JSON }}
 
-      - name: set up mutex
-        uses: ben-z/gh-action-mutex@v1.0-alpha-6
-
       - name: run tests
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}

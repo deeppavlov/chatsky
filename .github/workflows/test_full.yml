@@ -43,12 +43,20 @@ jobs:
           python -m pip install -e .[test_full]
         shell: bash
 
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
+
       - name: run pytest
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_API_ID: ${{ secrets.TG_API_ID }}
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
+          GDF_ACCOUNT_JSON: ./gdf_account.json
         run: |
           if [ "$RUNNER_OS" == "Linux" ]; then
               source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
@@ -77,12 +85,20 @@ jobs:
           python -m pip install -e .[tests]
         shell: bash
 
+      - name: Create gdf_account.json
+        uses: jsdaniell/create-json@v1.2.1
+        with:
+          name: "gdf_account.json"
+          json: ${{ secrets.GDF_ACCOUNT_JSON }}
+
       - name: run pytest
         env:
           TG_BOT_TOKEN: ${{ secrets.TG_BOT_TOKEN }}
           TG_API_ID: ${{ secrets.TG_API_ID }}
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+          HF_API_KEY: ${{ secrets.HF_API_KEY }}
+          GDF_ACCOUNT_JSON: ./gdf_account.json
         run: |
           source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
           pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
