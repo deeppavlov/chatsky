@@ -90,8 +90,7 @@ httpx_dependencies = [
 huggingface_dependencies = merge_req_lists(
     sklearn_dependencies,
     [
-        "transformers>=4.16.2",
-        "torch>=1.7.0",
+        "transformers[torch]<=4.16.2",
     ],
 )
 
