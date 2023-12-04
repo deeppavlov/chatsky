@@ -169,7 +169,7 @@ doc = merge_req_lists(
         "sphinx-gallery==0.14.0",
         "sphinx-autodoc-typehints==1.24.0",
         "nbsphinx==0.9.2",
-        "jupytext==1.15.0",
+        "jupytext==1.16.0",
         "jupyter==1.0.0",
     ],
     requests_requirements,
