@@ -174,7 +174,7 @@ happy_path = [
         Message(text="sell a bike"),
         Message(text="Your advertisement has been registered."),
     ),
-    (Message(text="goodbye"), Message(text="I can't quite get what you mean.")),
+    (Message(text="goodbye"), Message(text="Ok, see you soon!")),
 ]
 
 
