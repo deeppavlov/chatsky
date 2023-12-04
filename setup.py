@@ -125,7 +125,7 @@ test_requirements = merge_req_lists(
     [
         "pytest==7.4.0",
         "pytest-cov==4.1.0",
-        "pytest-asyncio==0.21.0",
+        "pytest-asyncio==0.23.1",
         "pytest_virtualenv==1.7.0",
         "flake8==6.1.0",
         "click==8.1.3",
