@@ -13,7 +13,7 @@ types, warns about several common exception handling cases.
 ++++++++++++++++++
 
 Description
-###########
+~~~~~~~~~~~
 
 `Pipeline <../api/dff.pipeline.pipeline.pipeline#Pipeline>`__ constructor accepts ``handlers``
 parameter, that is either ``None`` or dictionary attributing lists of functions to different
@@ -23,12 +23,12 @@ These functions are run at specific point in `Actor <../api/dff.pipeline.pipelin
 lifecycle.
 
 Use-cases
-#########
+~~~~~~~~~
 
 TODO
 
 Signature
-#########
+~~~~~~~~~
 
 .. code-block:: python
 
@@ -40,7 +40,7 @@ where ``pipeline`` is the current instance of `Pipeline <../api/dff.pipeline.pip
 and the return value can be anything (it is not used).
 
 Exceptions
-##########
+~~~~~~~~~~
 
 If an exception occurs during this function execution, it will be handled on pipeline level,
 exception message will be printed to ``stdout`` and the actor service `state <../api/dff.pipeline.types#ComponentExecutionState>`__
