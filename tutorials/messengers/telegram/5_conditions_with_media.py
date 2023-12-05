@@ -35,9 +35,7 @@ from dff.utils.testing.common import is_interactive_mode
 # %%
 
 picture_url = (
-    "https://gist.githubusercontent.com/scotthaleen/"
-    "32f76a413e0dfd4b4d79c2a534d49c0b/raw"
-    "/6c1036b1eca90b341caf06d4056d36f64fc11e88/tiny.jpg"
+    "https://avatars.githubusercontent.com/u/29918795?s=200&v=4"
 )
 
 
