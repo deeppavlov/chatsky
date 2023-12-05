@@ -21,6 +21,17 @@ but it cannot contain any complex objects that cannot be trivially serialized.
 The output of these functions will be captured by an OpenTelemetry instrumentor and directed to
 the Opentelemetry collector server which in its turn batches and persists data
 to Clickhouse or other OLAP storages.
+
+<div class="alert alert-info">
+
+Both the Opentelemetry collector and the Clickhouse instance must be running
+during statistics collection. If you cloned the DFF repo, launch them using `docker compose`:
+```bash
+docker compose --profile stats up
+```
+
+</div>
+
 For more information on OpenTelemetry instrumentation,
 refer to the body of this tutorial as well as [OpenTelemetry documentation](
 https://opentelemetry.io/docs/instrumentation/python/manual/

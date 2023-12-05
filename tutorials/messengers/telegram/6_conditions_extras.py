@@ -83,7 +83,6 @@ script = {
     },
     "greeting_flow": {
         "start_node": {
-            RESPONSE: TelegramMessage(text="Bot running"),
             TRANSITIONS: {
                 "node1": telegram_condition(commands=["start", "restart"])
             },

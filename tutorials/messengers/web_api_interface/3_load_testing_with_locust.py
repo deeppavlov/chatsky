@@ -19,8 +19,11 @@ This tutorial shows how to use an API endpoint created in the FastAPI tutorial i
    ```bash
    locust -f {file_name}
    ```
-3. Run in interactive mode:
+3. Run from python:
    ```python
+   import sys
+   from locust import main
+
    sys.argv = ["locust", "-f", {file_name}]
    main.main()
    ```

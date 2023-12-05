@@ -333,7 +333,9 @@ class Pipeline:
         :param ctx_id: Current dialog id; if `None`, new dialog will be created.
         :return: Dialog `Context`.
         """
-        if isinstance(self.context_storage, DBContextStorage):
+        if ctx_id is None:
+            ctx = Context()
+        elif isinstance(self.context_storage, DBContextStorage):
             ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
         else:
             ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
