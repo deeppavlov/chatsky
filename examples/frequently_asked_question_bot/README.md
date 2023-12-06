@@ -2,9 +2,13 @@
 
 Example FAQ bot built on `dff` with a web interface.
 
-This example contains a website with a chat interface using `WebSockets`. Chat history is stored inside a `postgresql` database.
+This example serves bot responses either through Telegram or through a website with a chat interface using `WebSockets`. You can configure the service to use either of those using the
+"INTERFACE" environment variable by setting it to "telegram" or "web", respectively. 
+Chat history is stored inside a `postgresql` database.
 
-The website is accessible via http://localhost:80.
+
+The web interface is accessible via http://localhost:80. In case with Telegram,
+the service will power the bot the token of which you pass at the configuration stage.
 
 The bot itself works in a following manner:
 
@@ -17,11 +21,16 @@ A showcase of the website:
 
 ### Step 1: Configuring docker services
 
-The Postgresql image needs to be configured with variables that can be set through the [.env](.env) file. Update the file replacing the placeholders with desired values.
-```
+The project services need to be configured with variables that can be set through the [.env](.env) file. Update the file replacing the placeholders with desired values.
+
+```shell
 POSTGRES_USERNAME=***
 POSTGRES_PASSWORD=***
 POSTGRES_DB=***
+TELEGRAM_TOKEN=***
+INTERFACE=telegram
+# or INTERFACE=web
+# or INTERFACE=cli
 ```
 
 ### Step 2: Launching the docker project

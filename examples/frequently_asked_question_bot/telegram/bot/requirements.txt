@@ -1,2 +1,0 @@
-dff[telegram, tests]>=0.6.3
-sentence_transformers==2.2.2

@@ -1,3 +1,4 @@
+import os
 from bot.pipeline import pipeline
 
 import uvicorn
@@ -40,8 +41,12 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
 
 
 if __name__ == "__main__":
-    uvicorn.run(
-        app,
-        host="0.0.0.0",
-        port=8000,
-    )
+    interface_type = os.getenv("INTERFACE")
+    if interface_type == "web":
+        uvicorn.run(
+            app,
+            host="0.0.0.0",
+            port=8000,
+        )
+    else:
+        pipeline.run()
