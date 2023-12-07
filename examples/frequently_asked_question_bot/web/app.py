@@ -1,11 +1,19 @@
 import os
+import asyncio
 from bot.pipeline import pipeline
 
 import uvicorn
-from fastapi import FastAPI, WebSocket, WebSocketDisconnect
+from telebot import types
+from dff.messengers.telegram.messenger import TelegramMessenger
+from dff.messengers.telegram.interface import extract_telegram_request_and_id
+from fastapi import FastAPI, WebSocket, WebSocketDisconnect, Request
 from fastapi.responses import FileResponse
 from dff.script import Message, Context
 
+HOST = os.getenv("HOST", "0.0.0.0")
+PORT = 8000
+FULL_URI = f"https://{HOST}:{PORT}/telegram"
+telegram_token = os.getenv("TELEGRAM_TOKEN")
 
 app = FastAPI()
 
@@ -40,13 +48,24 @@ async def websocket_endpoint(websocket: WebSocket, client_id: str):
         pass
 
 
+if telegram_token is not None:
+    messenger = TelegramMessenger(telegram_token)
+    messenger.remove_webhook()
+    messenger.set_webhook(FULL_URI)
+
+    @app.post("/telegram")
+    async def endpoint(request: Request):
+        json_string = (await request.body()).decode("utf-8")
+        update = types.Update.de_json(json_string)
+        request, ctx_id = extract_telegram_request_and_id(update, messenger)
+        resp = asyncio.run(pipeline(request, ctx_id))
+        messenger.send_response(resp.id, resp.last_response)
+        return ""
+
+
 if __name__ == "__main__":
-    interface_type = os.getenv("INTERFACE")
-    if interface_type == "web":
-        uvicorn.run(
-            app,
-            host="0.0.0.0",
-            port=8000,
-        )
-    else:
-        pipeline.run()
+    uvicorn.run(
+        app,
+        host="0.0.0.0",
+        port=PORT,
+    )

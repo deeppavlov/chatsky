@@ -10,7 +10,9 @@ Chat history is stored inside a `postgresql` database.
 The web interface is accessible via http://localhost:80. In case with Telegram,
 the service will power the bot the token of which you pass at the configuration stage.
 
-The bot itself works in a following manner:
+**Note that Telegram needs to configure a web hook, so you'll only be able to launch it using an SSL-protected url which needs to be passed through the HOST environment variable.**
+
+The bot itself works as follows:
 
 Whenever a user asks a question it searches for the most similar question in its database using `clips/mfaq` an answer to which is sent to the user.
 
@@ -31,6 +33,7 @@ TELEGRAM_TOKEN=***
 INTERFACE=telegram
 # or INTERFACE=web
 # or INTERFACE=cli
+HOST=*** # required for telegram
 ```
 
 ### Step 2: Launching the docker project
