@@ -10,7 +10,8 @@ from typing import Any, Optional, List, Tuple, Callable
 from telebot import types, logger
 
 from dff.script import Context
-from dff.messengers.common import PollingMessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
+from dff.messengers.common import PollingMessengerInterface, CallbackMessengerInterface
+from dff.pipeline.types import PipelineRunnerFunction
 from .messenger import TelegramMessenger
 from .message import TelegramMessage, Message
 

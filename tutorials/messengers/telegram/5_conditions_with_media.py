@@ -165,24 +165,24 @@ happy_path = (
 def extract_data(ctx: Context, _: Pipeline):  # A function to extract data with
     message = ctx.last_request
     if message is None:
-        return ctx
+        return
     update = getattr(message, "update", None)
     if update is None:
-        return ctx
+        return
     if not isinstance(update, Message):
-        return ctx
+        return
     if (
         # check attachments in update properties
         not update.photo
         and not (update.document and update.document.mime_type == "image/jpeg")
     ):
-        return ctx
+        return
     photo = update.document or update.photo[-1]
     file = interface.messenger.get_file(photo.file_id)
     result = interface.messenger.download_file(file.file_path)
     with open("photo.jpg", "wb+") as new_file:
         new_file.write(result)
-    return ctx
+    return
 
 
 # %%

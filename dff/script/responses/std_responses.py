@@ -23,7 +23,7 @@ def choice(responses: List[Message]):
     :param responses: A list of responses for random sampling.
     """
 
-    def choice_response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
+    def choice_response_handler(ctx: Context, pipeline: Pipeline):
         return random.choice(responses)
 
     return choice_response_handler

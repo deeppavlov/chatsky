@@ -39,7 +39,7 @@ from dff.utils.testing.common import (
 # %%
 def add_prefix(prefix):
     def add_prefix_processing(
-        ctx: Context, _: Pipeline, *args, **kwargs
+        ctx: Context, _: Pipeline
     ) -> Context:
         processed_node = ctx.current_node
         processed_node.response = Message(

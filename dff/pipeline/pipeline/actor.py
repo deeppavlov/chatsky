@@ -24,7 +24,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 """
 import logging
 import asyncio
-from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
+from typing import Union, Callable, Optional, Dict, List, ForwardRef
 import copy
 
 from dff.utils.turn_caching import cache_clear
@@ -111,17 +111,17 @@ class Actor:
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-    async def __call__(self, pipeline: Pipeline, ctx: Context, *args, **kwargs):
+    async def __call__(self, pipeline: Pipeline, ctx: Context):
         # context init
-        self._context_init(ctx, *args, **kwargs)
+        self._context_init(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT)
 
         # get previous node
-        self._get_previous_node(ctx, *args, **kwargs)
+        self._get_previous_node(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_PREVIOUS_NODE)
 
         # rewrite previous node
-        self._rewrite_previous_node(ctx, *args, **kwargs)
+        self._rewrite_previous_node(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_PREVIOUS_NODE)
 
         # run pre transitions processing
@@ -129,17 +129,17 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
-        await self._get_true_labels(ctx, pipeline, *args, **kwargs)
+        await self._get_true_labels(ctx, pipeline)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_TRUE_LABELS)
 
         # get next node
-        self._get_next_node(ctx, *args, **kwargs)
+        self._get_next_node(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_NEXT_NODE)
 
         ctx.add_label(ctx.framework_states["actor"]["next_label"][:2])
 
         # rewrite next node
-        self._rewrite_next_node(ctx, *args, **kwargs)
+        self._rewrite_next_node(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.REWRITE_NEXT_NODE)
 
         # run pre response processing
@@ -148,7 +148,7 @@ class Actor:
 
         # create response
         ctx.framework_states["actor"]["response"] = await self.run_response(
-            ctx.framework_states["actor"]["pre_response_processed_node"].response, ctx, pipeline, *args, **kwargs
+            ctx.framework_states["actor"]["pre_response_processed_node"].response, ctx, pipeline
         )
         await self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE)
         ctx.add_response(ctx.framework_states["actor"]["response"])
@@ -160,10 +160,10 @@ class Actor:
         del ctx.framework_states["actor"]
 
     @staticmethod
-    def _context_init(ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs):
+    def _context_init(ctx: Optional[Union[Context, dict, str]] = None):
         ctx.framework_states["actor"] = {}
 
-    def _get_previous_node(self, ctx: Context, *args, **kwargs):
+    def _get_previous_node(self, ctx: Context):
         ctx.framework_states["actor"]["previous_label"] = (
             normalize_label(ctx.last_label) if ctx.last_label else self.start_label
         )
@@ -171,7 +171,7 @@ class Actor:
             ctx.framework_states["actor"]["previous_label"][0], {}
         ).get(ctx.framework_states["actor"]["previous_label"][1], Node())
 
-    async def _get_true_labels(self, ctx: Context, pipeline: Pipeline, *args, **kwargs):
+    async def _get_true_labels(self, ctx: Context, pipeline: Pipeline):
         # GLOBAL
         ctx.framework_states["actor"]["global_transitions"] = (
             self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
@@ -204,7 +204,7 @@ class Actor:
             "node",
         )
 
-    def _get_next_node(self, ctx: Context, *args, **kwargs):
+    def _get_next_node(self, ctx: Context):
         # choose next label
         ctx.framework_states["actor"]["next_label"] = self._choose_label(
             ctx.framework_states["actor"]["node_true_label"], ctx.framework_states["actor"]["local_true_label"]
@@ -217,7 +217,7 @@ class Actor:
             ctx.framework_states["actor"]["next_label"][0], {}
         ).get(ctx.framework_states["actor"]["next_label"][1])
 
-    def _rewrite_previous_node(self, ctx: Context, *args, **kwargs):
+    def _rewrite_previous_node(self, ctx: Context):
         node = ctx.framework_states["actor"]["previous_node"]
         flow_label = ctx.framework_states["actor"]["previous_label"][0]
         ctx.framework_states["actor"]["previous_node"] = self._overwrite_node(
@@ -226,7 +226,7 @@ class Actor:
             only_current_node_transitions=True,
         )
 
-    def _rewrite_next_node(self, ctx: Context, *args, **kwargs):
+    def _rewrite_next_node(self, ctx: Context):
         node = ctx.framework_states["actor"]["next_node"]
         flow_label = ctx.framework_states["actor"]["next_label"][0]
         ctx.framework_states["actor"]["next_node"] = self._overwrite_node(node, flow_label)
@@ -235,9 +235,7 @@ class Actor:
         self,
         current_node: Node,
         flow_label: LabelType,
-        *args,
         only_current_node_transitions: bool = False,
-        **kwargs,
     ) -> Node:
         overwritten_node = copy.deepcopy(self.script.get(GLOBAL, {}).get(GLOBAL, Node()))
         local_node = self.script.get(flow_label, {}).get(LOCAL, Node())
@@ -257,18 +255,16 @@ class Actor:
         response: Optional[Union[Message, Callable[..., Message]]],
         ctx: Context,
         pipeline: Pipeline,
-        *args,
-        **kwargs,
     ) -> Message:
         """
         Executes the normalized response as an asynchronous function.
         See the details in the :py:func:`~normalize_response` function of `normalization.py`.
         """
         response = normalize_response(response)
-        return await wrap_sync_function_in_async(response, ctx, pipeline, *args, **kwargs)
+        return await wrap_sync_function_in_async(response, ctx, pipeline)
 
     async def _run_processing_parallel(
-        self, processing: dict, ctx: Context, pipeline: Pipeline, *args, **kwargs
+        self, processing: dict, ctx: Context, pipeline: Pipeline
     ) -> None:
         """
         Execute the processing functions for a particular node simultaneously,
@@ -277,7 +273,7 @@ class Actor:
         Picked depending on the value of the :py:class:`.Pipeline`'s `parallelize_processing` flag.
         """
         results = await asyncio.gather(
-            *[wrap_sync_function_in_async(func, ctx, pipeline, *args, **kwargs) for func in processing.values()],
+            *[wrap_sync_function_in_async(func, ctx, pipeline) for func in processing.values()],
             return_exceptions=True,
         )
         for exc, (processing_name, processing_func) in zip(results, processing.items()):
@@ -288,7 +284,7 @@ class Actor:
                 )
 
     async def _run_processing_sequential(
-        self, processing: dict, ctx: Context, pipeline: Pipeline, *args, **kwargs
+        self, processing: dict, ctx: Context, pipeline: Pipeline
     ) -> None:
         """
         Execute the processing functions for a particular node in-order.
@@ -297,7 +293,7 @@ class Actor:
         """
         for processing_name, processing_func in processing.items():
             try:
-                await wrap_sync_function_in_async(processing_func, ctx, pipeline, *args, **kwargs)
+                await wrap_sync_function_in_async(processing_func, ctx, pipeline)
             except Exception as exc:
                 logger.error(
                     f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
@@ -353,18 +349,16 @@ class Actor:
         pipeline: Pipeline,
         flow_label: LabelType,
         transition_info: str = "",
-        *args,
-        **kwargs,
     ) -> Optional[NodeLabel3Type]:
         true_labels = []
 
         cond_booleans = await asyncio.gather(
-            *(self.condition_handler(condition, ctx, pipeline, *args, **kwargs) for condition in transitions.values())
+            *(self.condition_handler(condition, ctx, pipeline) for condition in transitions.values())
         )
         for label, cond_is_true in zip(transitions.keys(), cond_booleans):
             if cond_is_true:
                 if callable(label):
-                    label = await wrap_sync_function_in_async(label, ctx, pipeline, *args, **kwargs)
+                    label = await wrap_sync_function_in_async(label, ctx, pipeline)
                     # TODO: explicit handling of errors
                     if label is None:
                         continue
@@ -462,8 +456,8 @@ class Actor:
 
 
 async def default_condition_handler(
-    condition: Callable, ctx: Context, pipeline: Pipeline, *args, **kwargs
-) -> Callable[[Context, Pipeline, Any, Any], bool]:
+    condition: Callable, ctx: Context, pipeline: Pipeline
+) -> Callable[[Context, Pipeline], bool]:
     """
     The simplest and quickest condition handler for trivial condition handling returns the callable condition:
 
@@ -471,4 +465,4 @@ async def default_condition_handler(
     :param ctx: Context of current condition.
     :param pipeline: Pipeline we use in this condition.
     """
-    return await wrap_sync_function_in_async(condition, ctx, pipeline, *args, **kwargs)
+    return await wrap_sync_function_in_async(condition, ctx, pipeline)

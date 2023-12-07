@@ -13,16 +13,17 @@ The Pipeline class is designed to be used in conjunction with the :py:class:`.Pi
 class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
 to structure and manage the messages processing flow.
 """
+from __future__ import annotations
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable, Callable
+from typing import Union, List, Dict, Optional, Hashable, Callable, TYPE_CHECKING
 
 from dff.context_storages import DBContextStorage
 from dff.script import Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
-from dff.messengers.common import MessengerInterface, CLIMessengerInterface
+import dff.messengers.common
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
@@ -35,6 +36,9 @@ from ..types import (
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
 from dff.pipeline.pipeline.actor import Actor
+
+if TYPE_CHECKING:
+    from dff.messengers.common import MessengerInterface
 
 logger = logging.getLogger(__name__)
 
@@ -100,7 +104,7 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
-        self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
+        self.messenger_interface = dff.messengers.common.CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
             components,
@@ -325,13 +329,15 @@ class Pipeline:
         """
         return cls(**dictionary)
 
-    async def _run_pipeline(self, request: Message, ctx_id: Optional[Hashable] = None) -> Context:
+    async def _run_pipeline(
+            self,
+            request: Message,
+            ctx_id: Optional[Hashable] = None,
+            update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         """
-        Method that runs pipeline once for user request.
-
-        :param request: (required) Any user request.
-        :param ctx_id: Current dialog id; if `None`, new dialog will be created.
-        :return: Dialog `Context`.
+        Method that should be invoked on user input.
+        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
         """
         if ctx_id is None:
             ctx = Context()
@@ -339,6 +345,9 @@ class Pipeline:
             ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
         else:
             ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
+
+        if update_ctx_misc is not None:
+            ctx.misc.update(update_ctx_misc)
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.add_request(request)
@@ -368,17 +377,20 @@ class Pipeline:
         """
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
-    def __call__(self, request: Message, ctx_id: Hashable) -> Context:
+    def __call__(
+            self,
+            request: Message,
+            ctx_id: Optional[Hashable] = None,
+            update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         """
         Method that executes pipeline once.
         Basically, it is a shortcut for `_run_pipeline`.
         NB! When pipeline is executed this way, `messenger_interface` won't be initiated nor connected.
 
-        :param request: Any user request.
-        :param ctx_id: Current dialog id.
-        :return: Dialog `Context`.
+        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
         """
-        return asyncio.run(self._run_pipeline(request, ctx_id))
+        return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))
 
     @property
     def script(self) -> Script:
