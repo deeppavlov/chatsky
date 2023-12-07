@@ -41,9 +41,7 @@ with flow name, node name and priority.
 
 
 # %%
-def greeting_flow_n2_transition(
-    _: Context, __: Pipeline
-) -> NodeLabel3Type:
+def greeting_flow_n2_transition(_: Context, __: Pipeline) -> NodeLabel3Type:
     return ("greeting_flow", "node2", 1.0)
 
 

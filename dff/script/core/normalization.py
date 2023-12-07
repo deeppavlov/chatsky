@@ -22,8 +22,7 @@ Pipeline = ForwardRef("Pipeline")
 
 
 def normalize_label(
-        label: NodeLabelType,
-        default_flow_label: LabelType = ""
+    label: NodeLabelType, default_flow_label: LabelType = ""
 ) -> Union[Callable[[Context, Pipeline], NodeLabel3Type], NodeLabel3Type]:
     """
     The function that is used for normalization of
@@ -86,7 +85,7 @@ def normalize_condition(condition: ConditionType) -> Callable[[Context, Pipeline
 
 @validate_call
 def normalize_response(
-        response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]]
+    response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]]
 ) -> Callable[[Context, Pipeline], Message]:
     """
     This function is used to normalize response. If the response is a Callable, it is returned, otherwise

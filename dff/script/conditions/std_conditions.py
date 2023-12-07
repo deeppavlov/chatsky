@@ -50,9 +50,7 @@ def exact_match(match: Message, skip_none: bool = True) -> Callable[[Context, Pi
 
 
 @validate_call
-def regexp(
-    pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0
-) -> Callable[[Context, Pipeline], bool]:
+def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0) -> Callable[[Context, Pipeline], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase contains
     :py:const:`pattern <Union[str, Pattern]>` with :py:const:`flags <Union[int, re.RegexFlag]>`.

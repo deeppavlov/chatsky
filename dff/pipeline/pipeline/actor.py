@@ -263,9 +263,7 @@ class Actor:
         response = normalize_response(response)
         return await wrap_sync_function_in_async(response, ctx, pipeline)
 
-    async def _run_processing_parallel(
-        self, processing: dict, ctx: Context, pipeline: Pipeline
-    ) -> None:
+    async def _run_processing_parallel(self, processing: dict, ctx: Context, pipeline: Pipeline) -> None:
         """
         Execute the processing functions for a particular node simultaneously,
         independent of the order.
@@ -283,9 +281,7 @@ class Actor:
                     exc_info=exc,
                 )
 
-    async def _run_processing_sequential(
-        self, processing: dict, ctx: Context, pipeline: Pipeline
-    ) -> None:
+    async def _run_processing_sequential(self, processing: dict, ctx: Context, pipeline: Pipeline) -> None:
         """
         Execute the processing functions for a particular node in-order.
 

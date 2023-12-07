@@ -122,10 +122,7 @@ class CallbackMessengerInterface(MessengerInterface):
         self._pipeline_runner = pipeline_runner
 
     async def on_request_async(
-            self,
-            request: Message,
-            ctx_id: Optional[Hashable] = None,
-            update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -134,10 +131,7 @@ class CallbackMessengerInterface(MessengerInterface):
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
     def on_request(
-            self,
-            request: Any,
-            ctx_id: Optional[Hashable] = None,
-            update_ctx_misc: Optional[dict] = None
+        self, request: Any, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.

@@ -29,11 +29,9 @@ class PipelineRunnerFunction(Protocol):
     """
     Protocol for pipeline running.
     """
+
     def __call__(
-            self,
-            message: Message,
-            ctx_id: Optional[Hashable] = None,
-            update_ctx_misc: Optional[dict] = None
+        self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         :param message: User request for pipeline to process.

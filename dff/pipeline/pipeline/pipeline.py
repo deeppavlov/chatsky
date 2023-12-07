@@ -104,7 +104,9 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
-        self.messenger_interface = dff.messengers.common.CLIMessengerInterface() if messenger_interface is None else messenger_interface
+        self.messenger_interface = (
+            dff.messengers.common.CLIMessengerInterface() if messenger_interface is None else messenger_interface
+        )
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
             components,
@@ -330,10 +332,7 @@ class Pipeline:
         return cls(**dictionary)
 
     async def _run_pipeline(
-            self,
-            request: Message,
-            ctx_id: Optional[Hashable] = None,
-            update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that should be invoked on user input.
@@ -378,10 +377,7 @@ class Pipeline:
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
     def __call__(
-            self,
-            request: Message,
-            ctx_id: Optional[Hashable] = None,
-            update_ctx_misc: Optional[dict] = None
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
         Method that executes pipeline once.

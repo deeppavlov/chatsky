@@ -84,9 +84,7 @@ def hi_lower_case_condition(ctx: Context, _: Pipeline) -> bool:
     return "hi" in request.text.lower()
 
 
-def complex_user_answer_condition(
-    ctx: Context, _: Pipeline
-) -> bool:
+def complex_user_answer_condition(ctx: Context, _: Pipeline) -> bool:
     request = ctx.last_request
     # The user request can be anything.
     if request is None or request.misc is None:
@@ -96,9 +94,7 @@ def complex_user_answer_condition(
 
 def predetermined_condition(condition: bool):
     # Wrapper for internal condition function.
-    def internal_condition_function(
-        ctx: Context, _: Pipeline
-    ) -> bool:
+    def internal_condition_function(ctx: Context, _: Pipeline) -> bool:
         # It always returns `condition`.
         return condition
 
