@@ -4,15 +4,18 @@ Message Interfaces
 The Message Interfaces module contains several basic classes that define the message interfaces.
 These classes provide a way to define the structure of the messengers that are used to communicate with the DFF.
 """
+from __future__ import annotations
 import abc
 import asyncio
 import logging
 import uuid
-from typing import Optional, Any, List, Tuple, TextIO, Hashable
+from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
 from dff.script import Context, Message
-from dff.pipeline.types import PipelineRunnerFunction
 from dff.messengers.common.types import PollingInterfaceLoopFunction
+
+if TYPE_CHECKING:
+    from dff.pipeline.types import PipelineRunnerFunction
 
 logger = logging.getLogger(__name__)
 

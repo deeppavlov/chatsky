@@ -13,17 +13,16 @@ The Pipeline class is designed to be used in conjunction with the :py:class:`.Pi
 class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
 to structure and manage the messages processing flow.
 """
-from __future__ import annotations
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable, Callable, TYPE_CHECKING
+from typing import Union, List, Dict, Optional, Hashable, Callable
 
 from dff.context_storages import DBContextStorage
 from dff.script import Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
-import dff.messengers.common
+from dff.messengers.common import MessengerInterface, CLIMessengerInterface
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
@@ -36,9 +35,6 @@ from ..types import (
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
 from dff.pipeline.pipeline.actor import Actor
-
-if TYPE_CHECKING:
-    from dff.messengers.common import MessengerInterface
 
 logger = logging.getLogger(__name__)
 
@@ -104,9 +100,7 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
-        self.messenger_interface = (
-            dff.messengers.common.CLIMessengerInterface() if messenger_interface is None else messenger_interface
-        )
+        self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
             components,
