@@ -34,7 +34,7 @@ The response can be set by Callable or *Message:
 
 * Callable objects. If the object is callable it must have a special signature:
 
-        func(ctx: Context, pipeline: Pipeline) -> Any
+        func(ctx: Context, pipeline: Pipeline) -> Message
 
 * *Message objects. If the object is *Message
     it will be returned by the agent as a response.
