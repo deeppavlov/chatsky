@@ -34,16 +34,12 @@ from dff.utils.testing.common import (
 
 
 # %%
-def save_previous_node_response_to_ctx_processing(
-    ctx: Context, _: Pipeline
-) -> Context:
+def save_previous_node_response(ctx: Context, _: Pipeline):
     processed_node = ctx.current_node
     ctx.misc["previous_node_response"] = processed_node.response
 
 
-def get_previous_node_response_for_response_processing(
-    ctx: Context, _: Pipeline
-) -> Context:
+def prepend_previous_node_response(ctx: Context, _: Pipeline):
     processed_node = ctx.current_node
     processed_node.response = Message(
         text=f"previous={ctx.misc['previous_node_response'].text}:"
@@ -63,10 +59,10 @@ toy_script = {
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
-            "proc_name_1": get_previous_node_response_for_response_processing
+            "proc_name_1": prepend_previous_node_response
         },
         PRE_TRANSITIONS_PROCESSING: {
-            "proc_name_1": save_previous_node_response_to_ctx_processing
+            "proc_name_1": save_previous_node_response
         },
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
