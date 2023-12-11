@@ -130,7 +130,7 @@ test_requirements = merge_req_lists(
         "flake8==6.1.0",
         "click==8.1.3",
         "black==23.9.1",
-        "isort==5.12.0",
+        "isort==5.13.0",
         "jsonschema==4.19.1",
         "aiochclient>=2.2.0",
         "httpx<=0.23.0",
