@@ -5,7 +5,7 @@ SHELL = /bin/bash
 PYTHON = python3
 VENV_PATH = venv
 VERSIONING_FILES = setup.py makefile docs/source/conf.py dff/__init__.py
-CURRENT_VERSION = 0.6.3
+CURRENT_VERSION = 0.6.4
 TEST_COVERAGE_THRESHOLD=95
 TEST_ALLOW_SKIP=all  # for more info, see tests/conftest.py
 
@@ -50,19 +50,14 @@ lint: venv
 .PHONY: lint
 
 docker_up:
-	docker-compose --profile context_storage --profile stats up -d --build
+	docker compose --profile context_storage --profile stats up -d --build --wait
 .PHONY: docker_up
-
-wait_db: docker_up
-	while ! docker-compose exec psql pg_isready; do sleep 1; done > /dev/null
-	while ! docker-compose exec mysql bash -c 'mysql -u $$MYSQL_USERNAME -p$$MYSQL_PASSWORD -e "select 1;"'; do sleep 1; done &> /dev/null
-.PHONY: wait_db
 
 test: venv
 	source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /') && pytest -m "not no_coverage" --cov-fail-under=$(TEST_COVERAGE_THRESHOLD) --cov-report html --cov-report term --cov=dff --allow-skip=$(TEST_ALLOW_SKIP) tests/
 .PHONY: test
 
-test_all: venv wait_db test lint
+test_all: venv docker_up test lint
 .PHONY: test_all
 
 build_drawio:
