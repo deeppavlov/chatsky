@@ -21,30 +21,35 @@ Project structure
 
 * The rest of the project-related Python code is factored out into other packages.
 
-* We also create 'run.py' and 'test.py' at the project root. These files import the ready pipeline
-    and execute it to test or run the service.
 
 .. code-block:: shell
 
-    examples/frequently_asked_question_bot/telegram/
-    ├── docker-compose.yml # docker-compose orchestrates the services
-    └── bot # main docker service
-        ├── Dockerfile # The dockerfile takes care of setting up the project. View the dockerfile for more detail
-        ├── dialog_graph # Separate module for DFF-related abstractions
-        │   ├── __init__.py
-        │   ├── conditions.py # Condition callbacks
-        │   ├── responses.py # Response callbacks
-        │   └── script.py # DFF script and pipeline are constructed here
-        ├── faq_model
-        │   ├── __init__.py
-        │   ├── faq_dataset_sample.json
-        │   └── model.py
-        ├── pipeline_services
-        │   ├── __init__.py
-        │   └── pre_services.py
+    examples/frequently_asked_question_bot/
+    ├── README.md
+    ├── compose.yml # docker compose file orchestrates the services
+    ├── nginx.conf # web service proxy configurations
+    └── web
+        ├── Dockerfile
+        ├── app.py
+        ├── bot
+        │   ├── dialog_graph # A separate module for DFF-related abstractions
+        │   │   ├── responses.py
+        │   │   └── script.py # DFF script is constructed here
+        │   ├── faq_model # model-related code
+        │   │   ├── faq_dataset_sample.json
+        │   │   ├── model.py
+        │   │   ├── request_translations.json
+        │   │   └── response_translations.json
+        │   ├── pipeline.py
+        │   ├── pipeline_services # Separately stored pipeline service functions
+        │   │   └── pre_services.py
+        │   └── test.py
         ├── requirements.txt
-        ├── run.py # the web app imports the DFF pipeline from dialog_graph
-        └── test.py # End-to-end testing happy path is defined here
+        └── static
+            ├── LICENSE.txt
+            ├── index.css
+            ├── index.html
+            └── index.js
     
 Models
 ~~~~~~~

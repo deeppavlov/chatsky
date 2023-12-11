@@ -5,7 +5,7 @@ from dff.pipeline import Pipeline
 
 from .dialog_graph import script
 from .pipeline_services import pre_services
-from .dialog_graph.responses import get_bot_answer, FALLBACK_ANSWER, FIRST_MESSAGE
+from .dialog_graph.responses import get_bot_answer, get_fallback_answer, FIRST_MESSAGE
 
 
 @pytest.mark.asyncio
@@ -27,7 +27,7 @@ from .dialog_graph.responses import get_bot_answer, FALLBACK_ANSWER, FIRST_MESSA
             ),
             (
                 Message(text="where am I?"),
-                FALLBACK_ANSWER,
+                get_fallback_answer("en"),
             ),
         )
     ],
