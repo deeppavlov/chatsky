@@ -19,11 +19,11 @@ from .dialog_graph.responses import get_bot_answer, get_fallback_answer, FIRST_M
             ),
             (
                 Message(text="Why use Deeppavlov?"),
-                get_bot_answer("Why would I want to use Deeppavlov?"),
+                get_bot_answer("Why would I want to use Deeppavlov?", "en"),
             ),
             (
                 Message(text="What is deeppavlov?"),
-                get_bot_answer("What is Deeppavlov?"),
+                get_bot_answer("What is Deeppavlov?", "en"),
             ),
             (
                 Message(text="where am I?"),

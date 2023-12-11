@@ -29,6 +29,6 @@ def find_similar_question(question: str, lang: str) -> str | None:
     scores = list(map(lambda x: np.linalg.norm(x - q_emb), faq_emb))
 
     argmin = scores.index(min(scores))
-    if argmin < 5:
+    if scores[argmin] < 5:
         return list(faq.keys())[argmin]
     return None

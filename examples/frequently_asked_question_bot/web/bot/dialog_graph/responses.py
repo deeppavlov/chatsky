@@ -7,13 +7,14 @@ This module defines different responses the bot gives.
 from dff.script import Context
 from dff.script import Message
 from dff.pipeline import Pipeline
-from ..faq_model.model import faq, response_translations
+from ..faq_model.model import faq, response_translations, request_translations
 
 
 def get_bot_answer(question: str, language: str) -> Message:
     """The Message the bot will return as an answer if the most similar question is `question`."""
     index = list(faq.keys()).index(question)
-    return Message(text=f"A: {response_translations[language][index]}")
+    request = list(request_translations[language])[index]
+    return Message(text=f"Q: {request}\nA: {response_translations[language][index]}")
 
 
 def get_fallback_answer(language: str):
