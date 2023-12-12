@@ -1,7 +1,7 @@
 # %%
 import random
 
-from dff.script import Context, Node, Message
+from dff.script import Context, Message
 
 
 def shuffle_dict_keys(dictionary: dict) -> dict:
@@ -51,7 +51,6 @@ def test_context():
     }
     assert ctx.misc == {"1001": "11111"}
     assert ctx.current_node is None
-    ctx.overwrite_current_node_in_processing(Node(**{"response": Message(text="text")}))
     ctx.model_dump_json()
 
     try:

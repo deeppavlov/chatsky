@@ -7,10 +7,10 @@ data structures, and other types that are defined for type hinting.
 """
 from abc import ABC
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable, Any
+from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable, Any, Protocol, Hashable
 
 from dff.context_storages import DBContextStorage
-from dff.script import Context, ActorStage, NodeLabel2Type, Script
+from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 from pydantic import BaseModel
 
@@ -23,6 +23,32 @@ _ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
 _ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", Any)
 _ForwardProvider = NewType("ABCProvider", ABC)
 _ForwardExtraHandlerRuntimeInfo = NewType("ExtraHandlerRuntimeInfo", Any)
+
+
+class PipelineRunnerFunction(Protocol):
+    """
+    Protocol for pipeline running.
+    """
+
+    def __call__(
+        self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
+        """
+        :param message: User request for pipeline to process.
+        :param ctx_id:
+            ID of the context that the new request belongs to.
+            Optional, None by default.
+            If set to `None`, a new context will be created with `message` being the first request.
+        :param update_ctx_misc:
+            Dictionary to be passed as an argument to `ctx.misc.update`.
+            This argument can be used to store values in the `misc` dictionary before anything else runs.
+            Optional; None by default.
+            If set to `None`, `ctx.misc.update` will not be called.
+        :return:
+            Context instance that pipeline processed.
+            The context instance has the id of `ctx_id`.
+            If `ctx_id` is `None`, context instance has an id generated with `uuid.uuid4`.
+        """
 
 
 @unique
@@ -234,6 +260,7 @@ PipelineBuilder: TypeAlias = TypedDict(
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
+        "parallelize_processing": NotRequired[bool],
         "script": Union[Script, Dict],
         "start_label": NodeLabel2Type,
         "fallback_label": NotRequired[Optional[NodeLabel2Type]],
