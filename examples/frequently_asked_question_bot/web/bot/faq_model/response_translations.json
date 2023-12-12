@@ -1,0 +1,38 @@
+{
+    "en": [
+        "Deeppavlov is an open-source stack of technologies in Conversational AI that facilitate the development of the complex dialog systems.\n Find more info at the official <a href=\"https://deeppavlov.ai/about-us\" class=\"extiw\" title=\"deeppavlov\">website</a>.",
+        "Deeppavlov is designed for natural language understanding and handles various NLP tasks, like intent recognition or named entity detection.\n A powerful demonstration app is available <a href=\"https://demo.deeppavlov.ai/#/examples/text_intent\" class=\"extiw\" title=\"deeppavlov demo\">here</a>.\n",
+        "Deeppavlov is the technology behind some of the award-winning solutions for the Amazon Alexa chat bot competition.\n It's employed by the <a href=\"http://dream.deeppavlov.ai/\" class=\"extiw\" title=\"Dream\">Dream architecture</a>.",
+        "<a href=\"https://docs.deeppavlov.ai/en/master/\" class=\"extiw\" title=\"deeppavlov docs\">Here</a>, you can find the documentation to the latest version of the Deeppavlov library,\n including installation and usage instructions.\n"
+    ],
+    "es": [
+        "Deeppavlov es un conjunto de tecnologías de código abierto en Inteligencia Artificial Conversacional que facilitan el desarrollo de sistemas de diálogo complejos.\n Encuentra más información en el <a href=\"https://deeppavlov.ai/about-us\" class=\"extiw\" title=\"deeppavlov\">sitio web oficial</a>.",
+        "Deeppavlov está diseñado para la comprensión del lenguaje natural y maneja diversas tareas de PLN, como el reconocimiento de intenciones o la detección de entidades nombradas.\n Una potente aplicación de demostración está disponible <a href=\"https://demo.deeppavlov.ai/#/examples/text_intent\" class=\"extiw\" title=\"demostración de deeppavlov\">aquí</a>.\n",
+        "Deeppavlov es la tecnología detrás de algunas de las soluciones ganadoras de premios para la competición de chatbots de Amazon Alexa.\n Está empleada por la <a href=\"http://dream.deeppavlov.ai/\" class=\"extiw\" title=\"Arquitectura Dream\">arquitectura Dream</a>.",
+        "<a href=\"https://docs.deeppavlov.ai/en/master/\" class=\"extiw\" title=\"documentación de deeppavlov\">Aquí</a>, puedes encontrar la documentación de la última versión de la biblioteca Deeppavlov,\n incluyendo instrucciones de instalación y uso.\n"
+    ],
+    "fr": [
+        "Deeppavlov est une pile de technologies open-source en IA Conversationnelle qui facilite le développement de systèmes de dialogues complexes.\n Trouvez plus d'infos sur le <a href=\"https://deeppavlov.ai/about-us\" class=\"extiw\" title=\"deeppavlov\">site officiel</a>.",
+        "Deeppavlov est conçu pour la compréhension du langage naturel et gère diverses tâches de TAL, comme la reconnaissance d'intentions ou la détection d'entités nommées.\n Une application de démonstration puissante est disponible <a href=\"https://demo.deeppavlov.ai/#/examples/text_intent\" class=\"extiw\" title=\"démo deeppavlov\">ici</a>.\n",
+        "Deeppavlov est la technologie derrière certaines des solutions primées pour le concours de chatbot Amazon Alexa.\n Elle est utilisée par l'<a href=\"http://dream.deeppavlov.ai/\" class=\"extiw\" title=\"Dream\">architecture Dream</a>.",
+        "<a href=\"https://docs.deeppavlov.ai/en/master/\" class=\"extiw\" title=\"docs deeppavlov\">Ici</a>, vous pouvez trouver la documentation sur la dernière version de la bibliothèque Deeppavlov,\n incluant les instructions d'installation et d'utilisation.\n"
+    ],
+    "de": [
+        "Deeppavlov ist ein Open-Source-Technologiestack in Conversational AI, der die Entwicklung komplexer Dialogsysteme erleichtert.\n Weitere Informationen finden Sie auf der offiziellen <a href=\"https://deeppavlov.ai/about-us\" class=\"extiw\" title=\"deeppavlov\">Website</a>.",
+        "Deeppavlov ist für das Verständnis natürlicher Sprache konzipiert und bewältigt verschiedene NLP-Aufgaben, wie die Erkennung von Absichten oder die Erkennung benannter Entitäten.\n Eine leistungsfähige Demonstrations-App ist <a href=\"https://demo.deeppavlov.ai/#/examples/text_intent\" class=\"extiw\" title=\"deeppavlov Demo\">hier</a> verfügbar.\n",
+        "Deeppavlov ist die Technologie hinter einigen der preisgekrönten Lösungen für den Amazon Alexa Chatbot-Wettbewerb.\n Es wird von der <a href=\"http://dream.deeppavlov.ai/\" class=\"extiw\" title=\"Dream\">Dream-Architektur</a> verwendet.",
+        "<a href=\"https://docs.deeppavlov.ai/en/master/\" class=\"extiw\" title=\"deeppavlov Dokumentation\">Hier</a> finden Sie die Dokumentation zur neuesten Version der Deeppavlov-Bibliothek,\n einschließlich Installations- und Gebrauchsanweisungen.\n"
+    ],
+    "zh-cn": [
+        "Deeppavlov是一个开源的对话人工智能技术堆栈，促进了复杂对话系统的开发。\n 在官方<a href=\"https://deeppavlov.ai/about-us\" class=\"extiw\" title=\"deeppavlov\">网站</a>上找到更多信息。",
+        "Deeppavlov被设计用于自然语言理解，并处理各种自然语言处理任务，如意图识别或命名实体检测。\n 一个强大的演示应用程序可在<a href=\"https://demo.deeppavlov.ai/#/examples/text_intent\" class=\"extiw\" title=\"deeppavlov演示\">这里</a>找到。\n",
+        "Deeppavlov是亚马逊Alexa聊天机器人比赛中一些获奖解决方案背后的技术。\n 它被<a href=\"http://dream.deeppavlov.ai/\" class=\"extiw\" title=\"Dream\">Dream架构</a>所采用。",
+        "<a href=\"https://docs.deeppavlov.ai/en/master/\" class=\"extiw\" title=\"deeppavlov文档\">这里</a>可以找到Deeppavlov库的最新版本文档，\n 包括安装和使用说明。\n"
+    ],
+    "ru": [
+        "Deeppavlov - это открытый стек технологий в разговорном ИИ, который облегчает разработку сложных диалоговых систем.\n Больше информации на официальном <a href=\"https://deeppavlov.ai/about-us\" class=\"extiw\" title=\"deeppavlov\">сайте</a>.",
+        "Deeppavlov предназначен для понимания естественного языка и обрабатывает различные задачи NLP, такие как распознавание интентов или именованных сущностей.\n Демо библиотеки доступно <a href=\"https://demo.deeppavlov.ai/#/examples/text_intent\" class=\"extiw\" title=\"демо deeppavlov\">по ссылке</a>.\n",
+        "Deeppavlov - это технология, стоящая за некоторыми из призовых решений для соревнований чат-ботов Amazon Alexa.\n Она используется в <a href=\"http://dream.deeppavlov.ai/\" class=\"extiw\" title=\"Dream\">архитектуре Dream</a>.",
+        "<a href=\"https://docs.deeppavlov.ai/en/master/\" class=\"extiw\" title=\"документация deeppavlov\">Здесь</a> вы можете найти документацию к последней версии библиотеки."
+    ]
+}

@@ -1,0 +1,38 @@
+{
+    "en": [
+        "What is Deeppavlov?",
+        "What can the Deeppavlov library do?",
+        "Why would I want to use Deeppavlov?",
+        "How do I learn more about Deeppavlov?"
+    ],
+    "es": [
+        "¿Qué es Deeppavlov?",
+        "¿Qué puede hacer la biblioteca Deeppavlov?",
+        "¿Por qué querría usar Deeppavlov?",
+        "¿Cómo aprendo más sobre Deeppavlov?"
+    ],
+    "fr": [
+        "Qu'est-ce que Deeppavlov?",
+        "Que peut faire la bibliothèque Deeppavlov?",
+        "Pourquoi voudrais-je utiliser Deeppavlov?",
+        "Comment en savoir plus sur Deeppavlov?"
+    ],
+    "de": [
+        "Was ist Deeppavlov?",
+        "Was kann die Deeppavlov-Bibliothek tun?",
+        "Warum sollte ich Deeppavlov verwenden wollen?",
+        "Wie erfahre ich mehr über Deeppavlov?"
+    ],
+    "zh-cn": [
+        "什么是Deeppavlov？",
+        "Deeppavlov图书馆能做什么？",
+        "我为什么要使用Deeppavlov？",
+        "我如何了解更多关于Deeppavlov的信息？"
+    ],
+    "ru": [
+        "Что такое Deeppavlov?",
+        "Что может делать библиотека Deeppavlov?",
+        "Зачем мне использовать Deeppavlov?",
+        "Как мне узнать больше о Deeppavlov?"
+    ]
+}

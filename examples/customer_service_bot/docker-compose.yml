@@ -1,0 +1,24 @@
+version: "2"
+services:
+    assistant:
+      env_file: [ .env ]
+      build:
+        args:
+          SERVICE_NAME: assistant
+          SERVICE_PORT: 5000
+        context: bot/
+      volumes:
+        - ./bot/:/app:ro
+      ports:
+        - 5000:5000
+
+    intent_catcher:
+      env_file: [ .env ]
+      build:
+        args:
+          SERVICE_PORT: 4999
+          IC_WEIGHTS: https://huggingface.co/ruthenian8/deeppavlov-intent-catcher-transformers/resolve/main/model.pth.tar
+          IC_CLASSES: https://huggingface.co/ruthenian8/deeppavlov-intent-catcher-transformers/raw/main/classes.dict
+        context: ./intent_catcher/
+      ports:
+        - 4999:4999
