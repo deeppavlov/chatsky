@@ -85,7 +85,7 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
                     with open(attachment.source, "rb") as file:
                         method(chat_id, file, **params)
                 else:
-                    method(chat_id, attachment.source or attachment.id, **params)
+                    method(chat_id, str(attachment.source or attachment.id), **params)
             else:
 
                 def cast(file):
@@ -99,7 +99,7 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
                         cast_to_media_type = types.InputMediaVideo
                     else:
                         raise TypeError(type(file))
-                    return cast_to_media_type(media=file.source or file.id, caption=file.title)
+                    return cast_to_media_type(media=str(file.source or file.id), caption=file.title)
 
                 files = map(cast, ready_response.attachments.files)
                 with batch_open_io(files) as media:

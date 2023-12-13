@@ -1,4 +1,5 @@
 # %%
+import pytest
 from dff.pipeline import Pipeline
 from dff.script import (
     TRANSITIONS,
@@ -34,21 +35,22 @@ def negative_test(samples, custom_class):
         raise Exception(f"sample={sample} can not be passed")
 
 
-def std_func(ctx, actor, *args, **kwargs):
+def std_func(ctx, pipeline):
     pass
 
 
-def fake_label(ctx: Context, actor, *args, **kwargs):
+def fake_label(ctx: Context, pipeline):
     if not ctx.validation:
         return ("123", "123", 0)
     return ("flow", "node1", 1)
 
 
-def raised_response(ctx: Context, actor, *args, **kwargs):
+def raised_response(ctx: Context, pipeline):
     raise Exception("")
 
 
-def test_actor():
+@pytest.mark.asyncio
+async def test_actor():
     try:
         # fail of start label
         Pipeline.from_script({"flow": {"node1": {}}}, start_label=("flow1", "node1"))
@@ -80,7 +82,7 @@ def test_actor():
             start_label=("flow", "node1"),
         )
         ctx = Context()
-        pipeline.actor(pipeline, ctx)
+        await pipeline.actor(pipeline, ctx)
         raise Exception("can not be passed: fail of response returned Callable")
     except ValueError:
         pass
@@ -99,14 +101,14 @@ def test_actor():
         {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}, start_label=("flow", "node1")
     )
     ctx = Context()
-    pipeline.actor(pipeline, ctx)
+    await pipeline.actor(pipeline, ctx)
 
     # fake label stability
     pipeline = Pipeline.from_script(
         {"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
     )
     ctx = Context()
-    pipeline.actor(pipeline, ctx)
+    await pipeline.actor(pipeline, ctx)
 
 
 limit_errors = {}
@@ -115,7 +117,7 @@ limit_errors = {}
 def check_call_limit(limit: int = 1, default_value=None, label=""):
     counter = 0
 
-    def call_limit_handler(ctx: Context, actor, *args, **kwargs):
+    def call_limit_handler(ctx: Context, pipeline):
         nonlocal counter
         counter += 1
         if counter > limit:
@@ -128,7 +130,8 @@ def check_call_limit(limit: int = 1, default_value=None, label=""):
     return call_limit_handler
 
 
-def test_call_limit():
+@pytest.mark.asyncio
+async def test_call_limit():
     script = {
         GLOBAL: {
             TRANSITIONS: {
@@ -209,15 +212,9 @@ def test_call_limit():
         },
     }
     # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
-    ctx = Context()
     pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"), validation_stage=False)
     for i in range(4):
-        ctx.add_request(Message(text="req1"))
-        ctx = pipeline.actor(pipeline, ctx)
+        await pipeline._run_pipeline(Message(text="req1"), 0)
     if limit_errors:
         error_msg = repr(limit_errors)
         raise Exception(error_msg)
-
-
-if __name__ == "__main__":
-    test_call_limit()

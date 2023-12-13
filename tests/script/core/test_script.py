@@ -34,7 +34,7 @@ def negative_test(samples, custom_class):
         raise Exception(f"sample={sample} can not be passed")
 
 
-def std_func(ctx, actor, *args, **kwargs):
+def std_func(ctx, pipeline):
     pass
 
 

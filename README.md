@@ -46,7 +46,7 @@ pip install dff[benchmark]  # dependencies for benchmarking
 For example, if you are going to use one of the database backends,
 you can specify the corresponding requirements yourself. Multiple dependencies can be installed at once, e.g.
 ```bash
-pip install dff[postgresql, mysql]
+pip install dff[postgresql,mysql]
 ```
 
 ## Basic example

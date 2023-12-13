@@ -52,7 +52,7 @@ If the parameter is not set,
 the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
-NB! ACTOR service is always synchronous.
+ACTOR service is asynchronous.
 
 The timeout field only works for asynchronous services and service groups.
 If service execution takes more time than timeout,

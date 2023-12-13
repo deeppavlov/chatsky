@@ -27,7 +27,7 @@ def repeat(priority: Optional[float] = None) -> Callable:
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def repeat_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def repeat_transition_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         if len(ctx.labels) >= 1:
             flow_label, label = list(ctx.labels.values())[-1]
@@ -50,7 +50,7 @@ def previous(priority: Optional[float] = None) -> Callable:
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def previous_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def previous_transition_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         if len(ctx.labels) >= 2:
             flow_label, label = list(ctx.labels.values())[-2]
@@ -74,7 +74,7 @@ def to_start(priority: Optional[float] = None) -> Callable:
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def to_start_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def to_start_transition_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         return (*pipeline.actor.start_label[:2], current_priority)
 
@@ -92,7 +92,7 @@ def to_fallback(priority: Optional[float] = None) -> Callable:
     :param priority: Priority of transition. Uses `Pipeline.actor.label_priority` if priority not defined.
     """
 
-    def to_fallback_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def to_fallback_transition_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         current_priority = pipeline.actor.label_priority if priority is None else priority
         return (*pipeline.actor.fallback_label[:2], current_priority)
 
@@ -105,8 +105,6 @@ def _get_label_by_index_shifting(
     priority: Optional[float] = None,
     increment_flag: bool = True,
     cyclicality_flag: bool = True,
-    *args,
-    **kwargs,
 ) -> NodeLabel3Type:
     """
     Function that returns node label from the context and pipeline after shifting the index.
@@ -121,7 +119,7 @@ def _get_label_by_index_shifting(
     :return: The tuple that consists of `(flow_label, label, priority)`.
         If fallback is executed `(flow_fallback_label, fallback_label, priority)` are returned.
     """
-    flow_label, node_label, current_priority = repeat(priority)(ctx, pipeline, *args, **kwargs)
+    flow_label, node_label, current_priority = repeat(priority)(ctx, pipeline)
     labels = list(pipeline.script.get(flow_label, {}))
 
     if node_label not in labels:
@@ -149,9 +147,9 @@ def forward(priority: Optional[float] = None, cyclicality_flag: bool = True) -> 
         (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
     """
 
-    def forward_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def forward_transition_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         return _get_label_by_index_shifting(
-            ctx, pipeline, priority, increment_flag=True, cyclicality_flag=cyclicality_flag, *args, **kwargs
+            ctx, pipeline, priority, increment_flag=True, cyclicality_flag=cyclicality_flag
         )
 
     return forward_transition_handler
@@ -170,9 +168,9 @@ def backward(priority: Optional[float] = None, cyclicality_flag: bool = True) ->
         (e.g the element with `index = len(labels)` has `index = 0`). Defaults to `True`.
     """
 
-    def back_transition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def back_transition_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         return _get_label_by_index_shifting(
-            ctx, pipeline, priority, increment_flag=False, cyclicality_flag=cyclicality_flag, *args, **kwargs
+            ctx, pipeline, priority, increment_flag=False, cyclicality_flag=cyclicality_flag
         )
 
     return back_transition_handler

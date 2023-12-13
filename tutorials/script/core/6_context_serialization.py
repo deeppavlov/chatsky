@@ -29,7 +29,7 @@ This function returns the user request number.
 
 
 # %%
-def response_handler(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+def response_handler(ctx: Context, _: Pipeline) -> Message:
     return Message(text=f"answer {len(ctx.requests)}")
 
 
