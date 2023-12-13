@@ -4,15 +4,18 @@ Message Interfaces
 The Message Interfaces module contains several basic classes that define the message interfaces.
 These classes provide a way to define the structure of the messengers that are used to communicate with the DFF.
 """
+from __future__ import annotations
 import abc
 import asyncio
 import logging
 import uuid
-from typing import Optional, Any, List, Tuple, TextIO, Hashable
+from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
 from dff.script import Context, Message
+from dff.messengers.common.types import PollingInterfaceLoopFunction
 
-from .types import PipelineRunnerFunction, PollingInterfaceLoopFunction
+if TYPE_CHECKING:
+    from dff.pipeline.types import PipelineRunnerFunction
 
 logger = logging.getLogger(__name__)
 
@@ -29,9 +32,8 @@ class MessengerInterface(abc.ABC):
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
 
-        :param pipeline_runner: A function that should return pipeline response to user request;
-            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
-        :type pipeline_runner: PipelineRunnerFunction
+        :param pipeline_runner: A function that should process user request and return context;
+            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         """
         raise NotImplementedError
 
@@ -96,12 +98,10 @@ class PollingMessengerInterface(MessengerInterface):
         The looping behavior is determined by `loop` and `timeout`,
         for most cases the loop itself shouldn't be overridden.
 
-        :param pipeline_runner: A function that should return pipeline response to user request;
-            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
-        :type pipeline_runner: PipelineRunnerFunction
+        :param pipeline_runner: A function that should process user request and return context;
+            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return `True` to continue polling or `False` to stop.
-        :type loop: PollingInterfaceLoopFunction
         :param timeout: a time interval between polls (in seconds).
         """
         while loop():
@@ -124,18 +124,23 @@ class CallbackMessengerInterface(MessengerInterface):
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         self._pipeline_runner = pipeline_runner
 
-    def on_request(self, request: Any, ctx_id: Hashable) -> Context:
+    async def on_request_async(
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         """
-        Method invoked on user input. This method works just like :py:meth:`.__call__(request, ctx_id)`,
-        however callback message interface may contain additional functionality (e.g. for external API accessing).
-        Returns context that represents dialog with the user;
-        `last_response`, `id` and some dialog info can be extracted from there.
+        Method that should be invoked on user input.
+        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
+        """
+        return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
-        :param request: User input.
-        :param ctx_id: Any unique id that will be associated with dialog between this user and pipeline.
-        :return: Context that represents dialog with the user.
+    def on_request(
+        self, request: Any, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         """
-        return asyncio.run(self._pipeline_runner(request, ctx_id))
+        Method that should be invoked on user input.
+        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
+        """
+        return asyncio.run(self.on_request_async(request, ctx_id, update_ctx_misc))
 
 
 class CLIMessengerInterface(PollingMessengerInterface):
@@ -168,9 +173,8 @@ class CLIMessengerInterface(PollingMessengerInterface):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
-        :param pipeline_runner: A function that should return pipeline response to user request;
-            usually it's a :py:meth:`~Pipeline._run_pipeline(request, ctx_id)` function.
-        :type pipeline_runner: PipelineRunnerFunction
+        :param pipeline_runner: A function that should process user request and return context;
+            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid.uuid4()

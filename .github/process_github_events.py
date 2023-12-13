@@ -1,7 +1,6 @@
 # flake8: noqa
 import os
 import json
-import re
 import requests
 
 GITHUB_ARGS = {
@@ -16,40 +15,58 @@ for arg in GITHUB_ARGS:
 
     if GITHUB_ARGS[arg] is None:
         raise RuntimeError(f"`{arg}` is not set")
-    else:
-        print(arg, GITHUB_ARGS[arg])
+
+
+def post_comment_on_pr(comment: str, pr_number: int):
+    """
+    Leave a comment as `github-actions` bot on a PR.
+    """
+    headers = {
+        "Accept": "application/vnd.github+json",
+        "Authorization": f'Bearer {GITHUB_ARGS["GITHUB_TOKEN"]}',
+        "X-GitHub-Api-Version": "2022-11-28",
+    }
+
+    escaped_comment = comment.replace("\n", "\\n")
+
+    data = f'{{"body": "{escaped_comment}","event": "COMMENT","comments": []}}'
+
+    response = requests.post(
+        f'https://api.github.com/repos/{GITHUB_ARGS["GITHUB_REPOSITORY"]}/pulls/{pr_number}/reviews',
+        headers=headers,
+        data=data,
+    )
+
+    if not response.status_code == 200:
+        raise RuntimeError(response.__dict__)
+
+
+RELEASE_CHECKLIST = """It appears this PR is a release PR (change its base from `master` if that is not the case).
+
+Here's a release checklist:
+
+- [ ] Update package version
+- [ ] Change PR merge option
+- [ ] Test modules without automated testing:
+  - [ ] Requiring telegram `api_id` and `api_hash`
+  - [ ] Requiring `HF_API_KEY`
+- [ ] Search for objects to be deprecated
+"""
+
+
+def post_release_checklist(pr_payload: dict):
+    pr_number = pr_payload["number"]
+    pr_base = pr_payload["base"]
+
+    if pr_base["ref"] == "master":
+        print("post_release_checklist")
+        post_comment_on_pr(RELEASE_CHECKLIST, pr_number)
 
 
 def on_opened_pull_request(event_info: dict):
-    print("Opened pr")
-    with open(".github/PULL_REQUEST_TEMPLATE.md", "r", encoding="utf-8") as fd:
-        contents = fd.read()
-    template_body = re.escape(contents).replace("\-\ \[\ \]", "\-\ \[[ x]\]").replace("\\\n", "(\n|\r|\r\n)")
-    template_body_pattern = re.compile(template_body)
-    # this matches any string that equals PULL_REQUEST_TEMPLATE with checklist items checked or unchecked
-    # (i.e. if instead of `- [ ]` string has `- [x]` it also counts)
+    print("on_opened_pull_request")
 
-    pr_number = event_info["pull_request"]["number"]
-    pr_body = event_info["pull_request"]["body"]
-
-    if pr_body is None or pr_body == "" or template_body_pattern.match(pr_body) is not None:
-        print("Match found")
-        headers = {
-            "Accept": "application/vnd.github+json",
-            "Authorization": f'Bearer {GITHUB_ARGS["GITHUB_TOKEN"]}',
-            "X-GitHub-Api-Version": "2022-11-28",
-        }
-
-        data = '{"body": "Please provide a description: what is changed and why.","event": "COMMENT","comments": []}'
-
-        response = requests.post(
-            f'https://api.github.com/repos/{GITHUB_ARGS["GITHUB_REPOSITORY"]}/pulls/{pr_number}/reviews',
-            headers=headers,
-            data=data,
-        )
-
-        if not response.status_code == 200:
-            raise RuntimeError(response.__dict__)
+    post_release_checklist(event_info["pull_request"])
 
 
 def main():

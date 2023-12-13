@@ -1,5 +1,6 @@
 version: "3.9"
 services:
+
   mysql:
     env_file: [.env_file]
     image: mysql:latest
@@ -8,6 +9,15 @@ services:
     restart: unless-stopped
     ports:
       - 3307:3306
+    volumes:
+      - mysql-data:/var/lib/mysql
+    healthcheck:
+      test: mysql -u $${MYSQL_USERNAME} -p$${MYSQL_PASSWORD} -e "select 1;"
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   psql:
     env_file: [.env_file]
     image: postgres:latest
@@ -16,6 +26,15 @@ services:
     restart: unless-stopped
     ports:
       - 5432:5432
+    volumes:
+      - postgres-data:/var/lib/postgresql/data
+    healthcheck:
+      test: psql pg_isready -U $${POSTGRES_USERNAME} -d $${POSTGRES_DB}
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   redis:
     env_file: [.env_file]
     image: redis:latest
@@ -25,6 +44,15 @@ services:
     command: --requirepass pass
     ports:
       - 6379:6379
+    volumes:
+      - redis-data:/data
+    healthcheck:
+      test: redis-cli --raw incr ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   mongo:
     env_file: [.env_file]
     image: mongo:latest
@@ -33,6 +61,15 @@ services:
     restart: unless-stopped
     ports:
       - 27017:27017
+    volumes:
+      - mongo-data:/data/db
+    healthcheck:
+      test: mongosh --norc --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   ydb:
     env_file: [.env_file]
     image: cr.yandex/yc/yandex-docker-local-ydb:latest
@@ -44,8 +81,20 @@ services:
       # - 2135:2135
       - 2136:2136
     hostname: localhost
+    volumes:
+      - ydb-data:/ydb_data
+      - ydb-certs:/ydb_certs
+    healthcheck:
+      test: sh ./health_check
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   ner:
     image: deeppavlov/deeppavlov:latest
+    profiles:
+      - extras
     environment:
       - CONFIG=ner_conll2003_bert
     restart: unless-stopped
@@ -60,10 +109,36 @@ services:
       context: ./dff/utils/docker
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
+    depends_on:
+      dashboard-metadata:
+        condition: service_healthy
+      clickhouse:
+        condition: service_started
     profiles:
       - stats
     ports:
       - "8088:8088"
+
+  dashboard-metadata:
+    env_file: [.env_file]
+    image: postgres:latest
+    profiles:
+      - stats
+    restart: unless-stopped
+    expose:
+      - "5433"
+    ports:
+      - 5433:5433
+    command: -p 5433
+    healthcheck:
+      test: pg_isready -p 5433 --username=$${POSTGRES_USERNAME}
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+    volumes:
+      - dashboard-data:/var/lib/postgresql/data
+
   clickhouse:
     env_file: [.env_file]
     image: clickhouse/clickhouse-server:latest
@@ -76,6 +151,13 @@ services:
       - '9000:9000'
     volumes:
       - ch-data:/var/lib/clickhouse/
+    healthcheck:
+      test: wget --no-verbose --tries=1 --spider http://localhost:8123/ping
+      interval: 5s
+      timeout: 10s
+      retries: 5
+      start_period: 30s
+
   otelcol:
     image: otel/opentelemetry-collector-contrib:latest
     profiles:
@@ -83,12 +165,22 @@ services:
     container_name: otel-col
     restart: unless-stopped
     command: [ "--config=/etc/otelcol-config.yml", "--config=/etc/otelcol-config-extras.yml" ]
+    depends_on:
+      clickhouse:
+        condition: service_healthy
     volumes:
       - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
       - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
     ports:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver
+
 volumes:
   ch-data:
-    name: "ch-data"
+  dashboard-data:
+  mysql-data:
+  postgres-data:
+  redis-data:
+  mongo-data:
+  ydb-data:
+  ydb-certs:

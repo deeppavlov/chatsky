@@ -18,14 +18,10 @@ from dff.script import (
 from dff.script.labels import repeat
 from dff.script.conditions import true
 
-from dff.script.core.normalization import (
-    normalize_condition,
-    normalize_label,
-    normalize_response,
-)
+from dff.script.core.normalization import normalize_condition, normalize_label, normalize_response
 
 
-def std_func(ctx, actor, *args, **kwargs):
+def std_func(ctx, pipeline):
     pass
 
 
@@ -40,10 +36,10 @@ def create_env() -> Tuple[Context, Pipeline]:
 def test_normalize_label():
     ctx, actor = create_env()
 
-    def true_label_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def true_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         return ("flow", "node1", 1)
 
-    def false_label_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+    def false_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         return ("flow", "node2", 1)
 
     n_f = normalize_label(true_label_func)
@@ -61,10 +57,10 @@ def test_normalize_label():
 def test_normalize_condition():
     ctx, actor = create_env()
 
-    def true_condition_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+    def true_condition_func(ctx: Context, pipeline: Pipeline) -> bool:
         return True
 
-    def false_condition_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+    def false_condition_func(ctx: Context, pipeline: Pipeline) -> bool:
         raise Exception("False condition")
 
     n_f = normalize_condition(true_condition_func)

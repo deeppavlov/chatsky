@@ -15,7 +15,7 @@ from pydantic import BaseModel, field_validator
 from .types import LabelType, NodeLabelType, ConditionType, NodeLabel3Type
 from .message import Message
 from .keywords import Keywords
-from .normalization import normalize_response, normalize_condition, normalize_label, validate_call
+from .normalization import normalize_condition, normalize_label, validate_call
 from typing import ForwardRef
 
 logger = logging.getLogger(__name__)
@@ -25,7 +25,7 @@ Pipeline = ForwardRef("Pipeline")
 Context = ForwardRef("Context")
 
 
-class Node(BaseModel, extra="forbid"):
+class Node(BaseModel, extra="forbid", validate_assignment=True):
     """
     The class for the `Node` object.
     """
@@ -52,14 +52,6 @@ class Node(BaseModel, extra="forbid"):
             normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()
         }
         return transitions
-
-    def run_response(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        """
-        Executes the normalized response.
-        See details in the :py:func:`~normalize_response` function of `normalization.py`.
-        """
-        response = normalize_response(self.response)
-        return response(ctx, pipeline, *args, **kwargs)
 
 
 class Script(BaseModel, extra="forbid"):

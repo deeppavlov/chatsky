@@ -76,6 +76,9 @@ class Pipeline:
 
         - `_services_pipeline` is a pipeline root :py:class:`~.ServiceGroup` object,
         - `actor` is a pipeline actor, found among services.
+    :param parallelize_processing: This flag determines whether or not the functions
+        defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+        of the script should be parallelized over respective groups.
 
     """
 
@@ -112,7 +115,7 @@ class Pipeline:
         self._services_pipeline.path = ".pipeline"
         actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
         if not actor_exists:
-            raise Exception("Actor not found in pipeline!")
+            raise Exception("Actor not found in the pipeline!")
         else:
             self.set_actor(
                 script,
@@ -212,6 +215,7 @@ class Pipeline:
         validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
+        parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
@@ -235,6 +239,9 @@ class Pipeline:
             It is executed by default. Defaults to `None`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
+        :param parallelize_processing: This flag determines whether or not the functions
+            defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
+            of the script should be parallelized over respective groups.
         :param handlers: This variable is responsible for the usage of external handlers on
             the certain stages of work of :py:class:`~dff.script.Actor`.
 
@@ -262,6 +269,7 @@ class Pipeline:
             validation_stage=validation_stage,
             condition_handler=condition_handler,
             verbose=verbose,
+            parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
             context_storage=context_storage,
@@ -319,24 +327,32 @@ class Pipeline:
         """
         return cls(**dictionary)
 
-    async def _run_pipeline(self, request: Message, ctx_id: Optional[Hashable] = None) -> Context:
+    async def _run_pipeline(
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         """
-        Method that runs pipeline once for user request.
-
-        :param request: (required) Any user request.
-        :param ctx_id: Current dialog id; if `None`, new dialog will be created.
-        :return: Dialog `Context`.
+        Method that should be invoked on user input.
+        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
         """
-        if isinstance(self.context_storage, DBContextStorage):
+        if ctx_id is None:
+            ctx = Context()
+        elif isinstance(self.context_storage, DBContextStorage):
             ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
         else:
             ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
+
+        if update_ctx_misc is not None:
+            ctx.misc.update(update_ctx_misc)
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.framework_states.setdefault(SLOT_STORAGE_KEY, {})
         ctx.framework_states.setdefault(SLOT_STORAGE_KEY, {})
         ctx.add_request(request)
-        ctx = await self._services_pipeline(ctx, self)
+        result = await self._services_pipeline(ctx, self)
+
+        if asyncio.iscoroutine(result):
+            await result
+
         del ctx.framework_states[PIPELINE_STATE_KEY]
 
         if isinstance(self.context_storage, DBContextStorage):
@@ -358,17 +374,17 @@ class Pipeline:
         """
         asyncio.run(self.messenger_interface.connect(self._run_pipeline))
 
-    def __call__(self, request: Message, ctx_id: Hashable) -> Context:
+    def __call__(
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         """
         Method that executes pipeline once.
         Basically, it is a shortcut for `_run_pipeline`.
         NB! When pipeline is executed this way, `messenger_interface` won't be initiated nor connected.
 
-        :param request: Any user request.
-        :param ctx_id: Current dialog id.
-        :return: Dialog `Context`.
+        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
         """
-        return asyncio.run(self._run_pipeline(request, ctx_id))
+        return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))
 
     @property
     def script(self) -> Script:

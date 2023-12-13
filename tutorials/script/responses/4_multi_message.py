@@ -34,18 +34,28 @@ toy_script = {
             RESPONSE: MultiMessage(
                 messages=[
                     Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                    Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+                    Message(
+                        text="Hello, how are you?", misc={"confidences": 0.9}
+                    ),
                 ]
             ),
-            TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
+            TRANSITIONS: {
+                "node2": cnd.exact_match(Message(text="I'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.exact_match(Message(text="Let's talk about music."))},
+            TRANSITIONS: {
+                "node3": cnd.exact_match(
+                    Message(text="Let's talk about music.")
+                )
+            },
         },
         "node3": {
             RESPONSE: Message(text="Sorry, I can not talk about that now."),
-            TRANSITIONS: {"node4": cnd.exact_match(Message(text="Ok, goodbye."))},
+            TRANSITIONS: {
+                "node4": cnd.exact_match(Message(text="Ok, goodbye."))
+            },
         },
         "node4": {
             RESPONSE: Message(text="bye"),

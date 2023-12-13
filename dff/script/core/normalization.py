@@ -7,7 +7,7 @@ This module contains a basic set of functions for normalizing data in a dialog s
 """
 import logging
 
-from typing import Union, Callable, Any, Dict, Optional, ForwardRef
+from typing import Union, Callable, Optional, ForwardRef
 
 from .keywords import Keywords
 from .context import Context
@@ -21,7 +21,9 @@ logger = logging.getLogger(__name__)
 Pipeline = ForwardRef("Pipeline")
 
 
-def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") -> Union[Callable, NodeLabel3Type]:
+def normalize_label(
+    label: NodeLabelType, default_flow_label: LabelType = ""
+) -> Union[Callable[[Context, Pipeline], NodeLabel3Type], NodeLabel3Type]:
     """
     The function that is used for normalization of
     :py:const:`default_flow_label <dff.script.NodeLabelType>`.
@@ -34,9 +36,9 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
     """
     if callable(label):
 
-        def get_label_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+        def get_label_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
             try:
-                new_label = label(ctx, pipeline, *args, **kwargs)
+                new_label = label(ctx, pipeline)
                 new_label = normalize_label(new_label, default_flow_label)
                 flow_label, node_label, _ = new_label
                 node = pipeline.script.get(flow_label, {}).get(node_label)
@@ -62,7 +64,7 @@ def normalize_label(label: NodeLabelType, default_flow_label: LabelType = "") ->
         return (flow_label, label[1], label[2])
 
 
-def normalize_condition(condition: ConditionType) -> Callable:
+def normalize_condition(condition: ConditionType) -> Callable[[Context, Pipeline], bool]:
     """
     The function that is used to normalize `condition`
 
@@ -71,9 +73,9 @@ def normalize_condition(condition: ConditionType) -> Callable:
     """
     if callable(condition):
 
-        def callable_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+        def callable_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
             try:
-                return condition(ctx, pipeline, *args, **kwargs)
+                return condition(ctx, pipeline)
             except Exception as exc:
                 logger.error(f"Exception {exc} of function {condition}", exc_info=exc)
                 return False
@@ -82,10 +84,12 @@ def normalize_condition(condition: ConditionType) -> Callable:
 
 
 @validate_call
-def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
+def normalize_response(
+    response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]]
+) -> Callable[[Context, Pipeline], Message]:
     """
-    This function is used to normalize response, if response Callable, it is returned, otherwise
-    response is wrapped to the function and this function is returned.
+    This function is used to normalize response. If the response is a Callable, it is returned, otherwise
+    the response is wrapped in an asynchronous function and this function is returned.
 
     :param response: Response to normalize.
     :return: Function that returns callable response.
@@ -100,24 +104,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         else:
             raise TypeError(type(response))
 
-        def response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
+        async def response_handler(ctx: Context, pipeline: Pipeline):
             return result
 
         return response_handler
-
-
-@validate_call
-def normalize_script(script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
-    """
-    This function normalizes :py:class:`.Script`: it returns dict where the GLOBAL node is moved
-    into the flow with the GLOBAL name. The function returns the structure
-
-    `{GLOBAL: {...NODE...}, ...}` -> `{GLOBAL: {GLOBAL: {...NODE...}}, ...}`.
-
-    :param script: :py:class:`.Script` that describes the dialog scenario.
-    :return: Normalized :py:class:`.Script`.
-    """
-    if isinstance(script, dict):
-        if Keywords.GLOBAL in script and all([isinstance(item, Keywords) for item in script[Keywords.GLOBAL].keys()]):
-            script[Keywords.GLOBAL] = {Keywords.GLOBAL: script[Keywords.GLOBAL]}
-    return script

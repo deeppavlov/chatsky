@@ -52,7 +52,7 @@ If the parameter is not set,
 the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
-NB! ACTOR service is always synchronous.
+ACTOR service is asynchronous.
 
 The timeout field only works for asynchronous services and service groups.
 If service execution takes more time than timeout,
@@ -98,11 +98,15 @@ def meta_web_querying_service(
         with urllib.request.urlopen(
             f"https://jsonplaceholder.typicode.com/photos/{photo_number}"
         ) as webpage:
-            web_content = webpage.read().decode(webpage.headers.get_content_charset())
+            web_content = webpage.read().decode(
+                webpage.headers.get_content_charset()
+            )
             ctx.misc["web_query"].update(
                 {
                     f"{ctx.last_request}"
-                    f":photo_number_{photo_number}": json.loads(web_content)["title"]
+                    f":photo_number_{photo_number}": json.loads(web_content)[
+                        "title"
+                    ]
                 }
             )
         logger.info(f"Service '{info.name}' has completed HTTPS request")

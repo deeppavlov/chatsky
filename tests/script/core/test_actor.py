@@ -35,17 +35,17 @@ def negative_test(samples, custom_class):
         raise Exception(f"sample={sample} can not be passed")
 
 
-def std_func(ctx, actor, *args, **kwargs):
+def std_func(ctx, pipeline):
     pass
 
 
-def fake_label(ctx: Context, actor, *args, **kwargs):
+def fake_label(ctx: Context, pipeline):
     if not ctx.validation:
         return ("123", "123", 0)
     return ("flow", "node1", 1)
 
 
-def raised_response(ctx: Context, actor, *args, **kwargs):
+def raised_response(ctx: Context, pipeline):
     raise Exception("")
 
 
@@ -117,7 +117,7 @@ limit_errors = {}
 def check_call_limit(limit: int = 1, default_value=None, label=""):
     counter = 0
 
-    def call_limit_handler(ctx: Context, actor, *args, **kwargs):
+    def call_limit_handler(ctx: Context, pipeline):
         nonlocal counter
         counter += 1
         if counter > limit:
@@ -212,15 +212,9 @@ async def test_call_limit():
         },
     }
     # script = {"flow": {"node1": {TRANSITIONS: {"node1": true()}}}}
-    ctx = Context()
     pipeline = Pipeline.from_script(script=script, start_label=("flow1", "node1"), validation_stage=False)
     for i in range(4):
-        ctx.add_request(Message(text="req1"))
-        ctx = await pipeline.actor(pipeline, ctx)
+        await pipeline._run_pipeline(Message(text="req1"), 0)
     if limit_errors:
         error_msg = repr(limit_errors)
         raise Exception(error_msg)
-
-
-if __name__ == "__main__":
-    test_call_limit()

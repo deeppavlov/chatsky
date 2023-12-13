@@ -34,7 +34,7 @@ The response can be set by Callable or *Message:
 
 * Callable objects. If the object is callable it must have a special signature:
 
-        func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Any
+        func(ctx: Context, pipeline: Pipeline) -> Message
 
 * *Message objects. If the object is *Message
     it will be returned by the agent as a response.
@@ -45,7 +45,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def cannot_talk_about_topic_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+def cannot_talk_about_topic_response(ctx: Context, _: Pipeline) -> Message:
     request = ctx.last_request
     if request is None or request.text is None:
         topic = None
@@ -61,7 +61,7 @@ def cannot_talk_about_topic_response(ctx: Context, _: Pipeline, *args, **kwargs)
 
 def upper_case_response(response: Message):
     # wrapper for internal response function
-    def func(_: Context, __: Pipeline, *args, **kwargs) -> Message:
+    def func(_: Context, __: Pipeline) -> Message:
         if response.text is not None:
             response.text = response.text.upper()
         return response
@@ -69,7 +69,7 @@ def upper_case_response(response: Message):
     return func
 
 
-def fallback_trace_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+def fallback_trace_response(ctx: Context, _: Pipeline) -> Message:
     return Message(
         misc={
             "previous_node": list(ctx.labels.values())[-2],
@@ -89,18 +89,29 @@ toy_script = {
         },
         "node1": {
             RESPONSE: rsp.choice(
-                [Message(text="Hi, what is up?"), Message(text="Hello, how are you?")]
+                [
+                    Message(text="Hi, what is up?"),
+                    Message(text="Hello, how are you?"),
+                ]
             ),
             # Random choice from candidate list.
-            TRANSITIONS: {"node2": cnd.exact_match(Message(text="I'm fine, how are you?"))},
+            TRANSITIONS: {
+                "node2": cnd.exact_match(Message(text="I'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.exact_match(Message(text="Let's talk about music."))},
+            TRANSITIONS: {
+                "node3": cnd.exact_match(
+                    Message(text="Let's talk about music.")
+                )
+            },
         },
         "node3": {
             RESPONSE: cannot_talk_about_topic_response,
-            TRANSITIONS: {"node4": cnd.exact_match(Message(text="Ok, goodbye."))},
+            TRANSITIONS: {
+                "node4": cnd.exact_match(Message(text="Ok, goodbye."))
+            },
         },
         "node4": {
             RESPONSE: upper_case_response(Message(text="bye")),
@@ -116,7 +127,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="Hi"), Message(text="Hello, how are you?")),  # start_node -> node1
+    (
+        Message(text="Hi"),
+        Message(text="Hello, how are you?"),
+    ),  # start_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),
@@ -130,7 +144,10 @@ happy_path = (
     (
         Message(text="stop"),
         Message(
-            misc={"previous_node": ("greeting_flow", "node1"), "last_request": Message(text="stop")}
+            misc={
+                "previous_node": ("greeting_flow", "node1"),
+                "last_request": Message(text="stop"),
+            }
         ),
     ),
     # node1 -> fallback_node
@@ -161,7 +178,10 @@ happy_path = (
             }
         ),
     ),  # f_n->f_n
-    (Message(text="Hi"), Message(text="Hello, how are you?")),  # fallback_node -> node1
+    (
+        Message(text="Hi"),
+        Message(text="Hello, how are you?"),
+    ),  # fallback_node -> node1
     (
         Message(text="I'm fine, how are you?"),
         Message(text="Good. What do you want to talk about?"),

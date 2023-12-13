@@ -34,38 +34,36 @@ from dff.utils.testing.common import (
 
 
 # %%
-def save_previous_node_response_to_ctx_processing(
-    ctx: Context, _: Pipeline, *args, **kwargs
-) -> Context:
+def save_previous_node_response(ctx: Context, _: Pipeline):
     processed_node = ctx.current_node
     ctx.misc["previous_node_response"] = processed_node.response
-    return ctx
 
 
-def get_previous_node_response_for_response_processing(
-    ctx: Context, _: Pipeline, *args, **kwargs
-) -> Context:
+def prepend_previous_node_response(ctx: Context, _: Pipeline):
     processed_node = ctx.current_node
     processed_node.response = Message(
         text=f"previous={ctx.misc['previous_node_response'].text}:"
         f" current={processed_node.response.text}"
     )
-    ctx.overwrite_current_node_in_processing(processed_node)
-    return ctx
 
 
 # %%
 # a dialog script
 toy_script = {
     "root": {
-        "start": {RESPONSE: Message(), TRANSITIONS: {("flow", "step_0"): cnd.true()}},
+        "start": {
+            RESPONSE: Message(),
+            TRANSITIONS: {("flow", "step_0"): cnd.true()},
+        },
         "fallback": {RESPONSE: Message(text="the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
-            "proc_name_1": get_previous_node_response_for_response_processing
+            "proc_name_1": prepend_previous_node_response
         },
-        PRE_TRANSITIONS_PROCESSING: {"proc_name_1": save_previous_node_response_to_ctx_processing},
+        PRE_TRANSITIONS_PROCESSING: {
+            "proc_name_1": save_previous_node_response
+        },
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
     "flow": {
