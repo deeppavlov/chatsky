@@ -25,18 +25,18 @@ def extract(slots: Optional[List[str]]) -> Callable:
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
 
-    async def extract_inner(ctx: Context, pipeline: Pipeline) -> Context:
+    async def extract_inner(ctx: Context, pipeline: Pipeline):
         _ = extract_handler(ctx, pipeline, slots)
-        return ctx
+        return
 
     return extract_inner
 
 
 @validate_call
 def unset(slots: Optional[List[str]] = None):
-    def unset_inner(ctx: Context, pipeline: Pipeline) -> Context:
+    def unset_inner(ctx: Context, pipeline: Pipeline):
         unset_handler(ctx, pipeline, slots)
-        return ctx
+        return
 
     return unset_inner
 
@@ -51,7 +51,7 @@ def fill_template(slots: Optional[List[str]] = None):
     :param slots: Slot names to use. If this parameter is omitted, all slots will be used.
     """
 
-    def fill_inner(ctx: Context, pipeline: Pipeline) -> Message:
+    def fill_inner(ctx: Context, pipeline: Pipeline):
         # get current node response
         response = ctx.current_node.response
         if callable(response):
@@ -62,6 +62,6 @@ def fill_template(slots: Optional[List[str]] = None):
         response.text = new_text
         ctx.current_node.response = response
 
-        return ctx
+        return
 
     return fill_inner

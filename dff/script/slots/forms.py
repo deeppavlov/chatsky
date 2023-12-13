@@ -148,20 +148,20 @@ class FormPolicy(BaseModel):
 
         """
 
-        def update_inner(ctx: Context, pipeline: Pipeline) -> Context:
+        def update_inner(ctx: Context, pipeline: Pipeline):
             ctx.framework_states.setdefault(FORM_STORAGE_KEY, {})
 
             if state:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = state
-                return ctx
+                return
 
             if self.name not in ctx.framework_states[FORM_STORAGE_KEY]:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.INACTIVE
-                return ctx
+                return
 
             if all([slot_extracted_condition(slot)(ctx, pipeline) for slot in self.mapping.keys()]) is True:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.COMPLETE
-            return ctx
+            return
 
         return update_inner
 
