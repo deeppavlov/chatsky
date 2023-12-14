@@ -68,17 +68,17 @@ def _test(coverage: bool, dependencies: bool) -> int:
 
 
 @docker_client
-def test_no_cov(docker: Optional[DockerClient]) -> int:
+def test_no_cov(docker: Optional[DockerClient]):
     result = _test(False, docker is not None)
-    return result
+    exit(result)
 
 
 @docker_client
-def test_no_deps(_: Optional[DockerClient]) -> int:
-    return _test(False, False)
+def test_no_deps(_: Optional[DockerClient]):
+    exit(_test(False, False))
 
 
 @docker_client
-def test_all(docker: Optional[DockerClient]) -> int:
+def test_all(docker: Optional[DockerClient]):
     result = _test(True, docker is not None)
-    return result
+    exit(result)

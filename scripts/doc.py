@@ -44,7 +44,7 @@ def _build_drawio(docker: DockerClient):
 
 
 @docker_client
-def docs(docker: Optional[DockerClient]) -> int:
+def docs(docker: Optional[DockerClient]):
     init()
     if docker is not None:
         clean_docs()
@@ -54,7 +54,7 @@ def docs(docker: Optional[DockerClient]) -> int:
         result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "dff"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
         result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
-        return result
+        exit(result)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
-        return 1
+        exit(1)
