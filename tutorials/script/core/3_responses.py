@@ -34,7 +34,7 @@ The response can be set by Callable or *Message:
 
 * Callable objects. If the object is callable it must have a special signature:
 
-        func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Any
+        func(ctx: Context, pipeline: Pipeline) -> Message
 
 * *Message objects. If the object is *Message
     it will be returned by the agent as a response.
@@ -45,9 +45,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def cannot_talk_about_topic_response(
-    ctx: Context, _: Pipeline, *args, **kwargs
-) -> Message:
+def cannot_talk_about_topic_response(ctx: Context, _: Pipeline) -> Message:
     request = ctx.last_request
     if request is None or request.text is None:
         topic = None
@@ -63,7 +61,7 @@ def cannot_talk_about_topic_response(
 
 def upper_case_response(response: Message):
     # wrapper for internal response function
-    def func(_: Context, __: Pipeline, *args, **kwargs) -> Message:
+    def func(_: Context, __: Pipeline) -> Message:
         if response.text is not None:
             response.text = response.text.upper()
         return response
@@ -71,9 +69,7 @@ def upper_case_response(response: Message):
     return func
 
 
-def fallback_trace_response(
-    ctx: Context, _: Pipeline, *args, **kwargs
-) -> Message:
+def fallback_trace_response(ctx: Context, _: Pipeline) -> Message:
     return Message(
         misc={
             "previous_node": list(ctx.labels.values())[-2],

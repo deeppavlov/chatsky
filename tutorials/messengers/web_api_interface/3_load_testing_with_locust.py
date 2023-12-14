@@ -23,7 +23,7 @@ This tutorial shows how to use an API endpoint created in the FastAPI tutorial i
    ```python
    import sys
    from locust import main
-   
+
    sys.argv = ["locust", "-f", {file_name}]
    main.main()
    ```
