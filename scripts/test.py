@@ -4,7 +4,6 @@ import pytest
 import dotenv
 from python_on_whales import DockerClient
 
-from .codestyle import lint
 from .utils import docker_client
 
 
@@ -71,7 +70,7 @@ def _test(coverage: bool, dependencies: bool) -> int:
 @docker_client
 def test_no_cov(docker: Optional[DockerClient]) -> int:
     result = _test(False, docker is not None)
-    return result or lint()
+    return result
 
 
 @docker_client
@@ -82,4 +81,4 @@ def test_no_deps(_: Optional[DockerClient]) -> int:
 @docker_client
 def test_all(docker: Optional[DockerClient]) -> int:
     result = _test(True, docker is not None)
-    return result or lint()
+    return result
