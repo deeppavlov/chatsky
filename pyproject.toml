@@ -209,3 +209,22 @@ markers = [
     "all: reserved by allow-skip",
     "none: reserved by allow-skip",
 ]
+
+
+[tool.coverage.run]
+concurrency = [
+    "thread",
+    "greenlet",
+    ]
+
+
+[tool.coverage.report]
+# Regexes for lines to exclude from consideration
+exclude_lines = [
+    # Have to re-enable the standard pragma
+    "pragma: no cover",
+    # Don't complain if tests don't cover raising errors:
+    "raise .*",
+    # Don't complain if tests don't cover error handling:
+    "except .*",
+    ]
