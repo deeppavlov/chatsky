@@ -33,7 +33,7 @@ jobs:
       - name: setup poetry and install dependencies
         run: |
           pip install --upgrade pip poetry
-          poetry install --with test,devel,tutorials --all-extras --no-ansi --no-interaction
+          poetry install --with test,tutorials --all-extras --no-ansi --no-interaction
 
       - name: run tests
         env:

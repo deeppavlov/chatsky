@@ -34,7 +34,7 @@ jobs:
       - name: setup poetry and install dependencies
         run: |
           pip install --upgrade pip poetry
-          poetry install --with lint,test,devel,tutorials,docs --all-extras --no-ansi --no-interaction
+          poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
       - name: build documentation
         env:

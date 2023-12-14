@@ -35,7 +35,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install --upgrade pip poetry
-          poetry install --with lint,test,devel,tutorials --all-extras --no-ansi --no-interaction
+          poetry install --with test,tutorials --all-extras --no-ansi --no-interaction
 
       - name: run pytest
         env:
@@ -59,7 +59,7 @@ jobs:
       - name: install dependencies
         run: |
           pip install --upgrade pip poetry
-          poetry install --with lint,test,devel --no-ansi --no-interaction
+          poetry install --with test --no-ansi --no-interaction
 
       - name: run pytest
         env:
