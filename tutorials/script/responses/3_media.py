@@ -4,7 +4,8 @@
 
 Here, %mddoclink(api,script.core.message,Attachments) class is shown.
 Attachments can be used for attaching different media elements
-(such as %mddoclink(api,script.core.message,Image), %mddoclink(api,script.core.message,Document)
+(such as %mddoclink(api,script.core.message,Image),
+%mddoclink(api,script.core.message,Document)
 or %mddoclink(api,script.core.message,Audio)).
 
 They can be attached to any message but will only work if the chosen

@@ -6,7 +6,9 @@ The following tutorial shows `pipeline`
 asynchronous service and service group usage.
 
 This tutorial is a more advanced version of the
-[previous tutorial](%doclink(tutorial,pipeline.5_asynchronous_groups_and_services_basic)).
+[previous tutorial](
+%doclink(tutorial,pipeline.5_asynchronous_groups_and_services_basic)
+).
 """
 
 # %pip install dff

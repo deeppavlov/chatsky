@@ -11,8 +11,8 @@ https://fastapi.tiangolo.com/advanced/websockets/.
 
 As mentioned in that tutorial,
 
-> ... for this example, we'll use a very simple HTML document with some JavaScript,
-> all inside a long string.
+> ... for this example, we'll use a very simple HTML document
+> with some JavaScript, all inside a long string.
 > This, of course, is not optimal and you wouldn't use it for production.
 
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)

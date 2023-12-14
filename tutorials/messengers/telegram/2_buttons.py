@@ -36,11 +36,12 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
-To display or hide a keyboard, you can utilize the `ui` field of the `TelegramMessage` class.
-It can be initialized either with a `TelegramUI` instance or with a custom telebot keyboard.
+To display or hide a keyboard, you can utilize the `ui` field of the
+`TelegramMessage` class. It can be initialized either with
+a `TelegramUI` instance or with a custom telebot keyboard.
 
-Passing an instance of `RemoveKeyboard` to the `ui` field will indicate that the keyboard
-should be removed.
+Passing an instance of `RemoveKeyboard` to the `ui` field
+will indicate that the keyboard should be removed.
 """
 
 

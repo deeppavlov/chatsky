@@ -93,10 +93,13 @@ if "user_requests" not in st.session_state:
 # %% [markdown]
 # ## UI setup
 #
-# Here we configure elements that will be used in Streamlit to interact with the API.
+# Here we configure elements that will be used
+# in Streamlit to interact with the API.
 #
-# First we define a text input field which a user is supposed to type his requests into.
-# Then we define a button that sends a query to the API, logs requests and responses,
+# First we define a text input field which
+# a user is supposed to type his requests into.
+# Then we define a button that sends a query
+# to the API, logs requests and responses,
 # and clears the text field.
 
 
@@ -148,7 +151,8 @@ st.button("Send", on_click=send_and_receive)
 # %% [markdown]
 # ### Component patch
 #
-# Here we add a component that presses the `Send` button whenever user presses the `Enter` key.
+# Here we add a component that presses the
+# `Send` button whenever user presses the `Enter` key.
 
 
 # %%
@@ -175,7 +179,8 @@ doc.addEventListener('keypress', function(e) {
 # %% [markdown]
 # ### Message display
 #
-# Here we use the `streamlit-chat` package to display user requests and bot responses.
+# Here we use the `streamlit-chat` package to
+# display user requests and bot responses.
 
 
 # %%

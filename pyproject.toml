@@ -184,8 +184,11 @@ default_task_type = "script"
 
 [tool.poe.tasks]
 info = "scripts.misc:info"
-lint = "scripts.codestyle:lint"
-format = "scripts.codestyle:format"
+flake = "scripts.codestyle:_run_flake"
+black = "scripts.codestyle:_run_black(modify=False)"
+lint.sequence = ["flake", "black"]
+lint.ignore_fail = "return_non_zero"
+format = "scripts.codestyle:_run_black(modify=True)"
 clean_docs = "scripts.clean:clean_docs"
 clean = "scripts.clean:clean"
 test_no_cov = "scripts.test:test_no_cov"
