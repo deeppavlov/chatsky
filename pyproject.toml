@@ -33,21 +33,11 @@ classifiers = [
 
 include = [
     { path = "CONTRIBUTING.md" },
-    { path = "LICENSE" },
-    { path = "README.md" },
-    { path = "dff/context_storages/protocols.json" },
-    { path = "dff/config/superset_dashboard" },
+    { path = "dff/" },
 ]
 exclude = [
-    { path = "makefile" },
     { path = "tests" },
-    { path = "tutorials" },
-    { path = "__pycache__" },
-    { path = "*.py[co]" },
-    { path = "docs" },
     { path = "scripts" },
-    { path = "dff/utils/docker" },
-    { path = "dff/utils/otel" },
 ]
 
 
