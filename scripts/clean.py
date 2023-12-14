@@ -18,7 +18,6 @@ def clean():
     shutil.rmtree("htmlcov", ignore_errors=True)
     shutil.rmtree("build", ignore_errors=True)
     Path(".coverage").unlink(missing_ok=True)
-    Path("poetry.lock").unlink(missing_ok=True)
     for path in Path.cwd().glob("./*.egg-info"):
         shutil.rmtree(path, ignore_errors=True)
     for path in Path.cwd().glob("./**/__pycache__"):
