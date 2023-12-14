@@ -124,7 +124,7 @@ jsonschema = "4.19.1"
 
 
 [tool.poetry.group.devel]
-optional = true
+optional = false
 
 [tool.poetry.group.devel.dependencies]
 python-on-whales = "0.64.3"
