@@ -23,6 +23,7 @@ opening_database*
 _globals.py
 .vscode
 .coverage
+.coverage.*
 .pytest_cache
 htmlcov
 tutorials/context_storages/dbs
@@ -30,4 +31,3 @@ dbs
 benchmarks
 benchmark_results_files.json
 uploaded_benchmarks
-.coverage.*
