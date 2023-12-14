@@ -50,6 +50,16 @@ If you want to delete all the virtual environments, run
 poetry env remove --all
 ```
 
+### Updating Dependencies
+
+We use `poetry.lock` to ensure that all builds with the same lock file have the same 3rd-party library versions.
+This lets us know whether workflow fails due to our part or because a dependency update breaks something.
+
+In order to update versions specified in `poetry.lock`, run
+```bash
+poetry update
+```
+
 ### Documentation
 Assuming you use [reStructuredText (reST) format docstrings](https://sphinx-rtd-tutorial.readthedocs.io/en/latest/docstrings.html)
 to annotate your modules and objects. You can easily build the Sphinx documentation for your module 
