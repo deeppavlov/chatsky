@@ -9,7 +9,7 @@ from wrapt import decorator
 def docker_client(wrapped: Callable[[Optional[DockerClient]], int], _, __, ___) -> int:
     if "linux" in sys.platform:
         docker = DockerClient(
-            compose_files=["docker-compose.yml"],
+            compose_files=["compose.yml"],
             compose_profiles=["context_storage", "stats"],
         )
         docker.compose.up(detach=True, wait=True, quiet=True)

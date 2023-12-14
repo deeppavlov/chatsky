@@ -32,7 +32,7 @@ jobs:
 
       - name: Build images
         run: |
-          docker-compose --profile context_storage --profile stats up
+          docker compose --profile context_storage --profile stats up
 
       - name: clean environment
         run: |
