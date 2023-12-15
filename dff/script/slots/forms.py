@@ -64,7 +64,9 @@ class FormPolicy(BaseModel):
     allowed_repeats: int = Field(default=0, gt=-1)
     node_cache: Dict[NodeLabel2Type, int] = Field(default_factory=Counter)
 
-    def __init__(self, name: str, mapping: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data):
+    def __init__(
+        self, name: str, mapping: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data
+    ) -> None:
         """
         Create a new form.
 
@@ -121,7 +123,7 @@ class FormPolicy(BaseModel):
         return to_next_label_inner
 
     @validate_call
-    def has_state(self, state: FormState):
+    def has_state(self, state: FormState) -> Callable[[Context, Pipeline], bool]:
         """
         This method produces a dff.core.engine condition that yields `True` if the state of the form
         equals the passed :class:`~.FormState` or `False` otherwise.
@@ -137,7 +139,7 @@ class FormPolicy(BaseModel):
         return is_active_inner
 
     @validate_call
-    def update_state(self, state: Optional[FormState] = None):
+    def update_state(self, state: Optional[FormState] = None) -> Callable[[Context, Pipeline], None]:
         """
         This method updates the form state that is stored in the context.
 
@@ -148,7 +150,7 @@ class FormPolicy(BaseModel):
 
         """
 
-        def update_inner(ctx: Context, pipeline: Pipeline):
+        def update_inner(ctx: Context, pipeline: Pipeline) -> None:
             ctx.framework_states.setdefault(FORM_STORAGE_KEY, {})
 
             if state:
@@ -165,8 +167,8 @@ class FormPolicy(BaseModel):
 
         return update_inner
 
-    def get_values(self):
-        def get_values_inner(ctx: Context, pipeline: Pipeline):
+    def get_values(self) -> Callable[[Context, Pipeline], List[Dict[str, Union[str, None]]]]:
+        def get_values_inner(ctx: Context, pipeline: Pipeline) -> List[Dict[str, Union[str, None]]]:
             slots = list(self.mapping.keys())
             return get_values(ctx, pipeline, slots)
 

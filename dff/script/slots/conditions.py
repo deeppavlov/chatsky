@@ -21,11 +21,9 @@ def slot_extracted_condition(path: str) -> StartConditionCheckerFunction:
     return check_slot_state
 
 
-def is_set_all(paths: list):
-    cond = all_condition(*[slot_extracted_condition(path) for path in paths])
-    return cond
+def is_set_all(paths: list) -> StartConditionCheckerFunction:
+    return all_condition(*[slot_extracted_condition(path) for path in paths])
 
 
-def is_set_any(paths: list):
-    cond = any_condition(*[slot_extracted_condition(path) for path in paths])
-    return cond
+def is_set_any(paths: list) -> StartConditionCheckerFunction:
+    return any_condition(*[slot_extracted_condition(path) for path in paths])

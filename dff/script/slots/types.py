@@ -26,19 +26,19 @@ class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
     children: Optional[Dict[str, "BaseSlot"]]
 
     @field_validator("name", mode="before")
-    def validate_name(cls, name: str):
+    def validate_name(cls, name: str) -> str:
         if "/" in name:
             raise ValueError("Character `/` cannot be used in slot names.")
         return name
 
-    def __init__(self, name: str, **data):
+    def __init__(self, name: str, **data) -> None:
         super().__init__(name=name, **data)
 
-    def __deepcopy__(self, *args, **kwargs):
+    def __deepcopy__(self) -> "BaseSlot":
         return copy(self)
 
-    def __eq__(self, other: "BaseSlot"):
-        return self.dict(exclude={"name"}) == other.dict(exclude={"name"})
+    def __eq__(self, other: "BaseSlot") -> bool:
+        return self.model_dump(exclude={"name"}) == other.model_dump(exclude={"name"})
 
     def has_children(self) -> bool:
         return self.children is not None and len(self.children) > 0
@@ -79,7 +79,7 @@ class _GroupSlot(BaseSlot):
     children: Dict[str, BaseSlot] = Field(default_factory=dict)
 
     @field_validator("children", mode="before")
-    def validate_children(cls, children, values: dict):
+    def validate_children(cls, children: Iterable, values: Dict[str, Any]) -> Dict[str, BaseSlot]:
         if not isinstance(children, dict) and isinstance(children, Iterable):
             children = {child.name: child for child in children}
         if len(children) == 0:
@@ -87,8 +87,8 @@ class _GroupSlot(BaseSlot):
             raise ValueError(f"Error in slot {name}: group slot should have at least one child or more.")
         return children
 
-    def is_set(self):
-        def is_set_inner(ctx: Context, pipeline: Pipeline):
+    def is_set(self) -> Callable[[Context, Pipeline], bool]:
+        def is_set_inner(ctx: Context, pipeline: Pipeline) -> bool:
             return all([child.is_set()(ctx, pipeline) for child in self.children.values()])
 
         return is_set_inner
@@ -105,14 +105,14 @@ class _GroupSlot(BaseSlot):
 
         return get_inner
 
-    def unset_value(self):
-        def unset_inner(ctx: Context, pipeline: Pipeline):
+    def unset_value(self) -> Callable[[Context, Pipeline], None]:
+        def unset_inner(ctx: Context, pipeline: Pipeline) -> None:
             for child in self.children.values():
                 child.unset_value()(ctx, pipeline)
 
         return unset_inner
 
-    def fill_template(self, template: str) -> Callable:
+    def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
         def fill_inner(ctx: Context, pipeline: Pipeline) -> str:
             new_template = template
             for _, child in self.children.items():
@@ -122,7 +122,7 @@ class _GroupSlot(BaseSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, pipeline: Pipeline):
+    def extract_value(self, ctx: Context, pipeline: Pipeline) -> Any:
         for child in self.children.values():
             _ = child.extract_value(ctx, pipeline)
         return self.get_value()(ctx, pipeline)
@@ -133,6 +133,7 @@ class RootSlot(_GroupSlot):
     """
     Root slot is a universally unique slot group that automatically
     registers all the other slots and makes them globally available.
+
     """
 
     @staticmethod
@@ -148,7 +149,7 @@ class RootSlot(_GroupSlot):
                 remove_nodes.update(child_remove_nodes)
         return add_nodes, remove_nodes
 
-    def add_slots(self, slots: Union[BaseSlot, Iterable]):
+    def add_slots(self, slots: Union[BaseSlot, Iterable]) -> None:
         if isinstance(slots, BaseSlot):
             add_nodes, _ = self.flatten_slot_tree(slots)
             self.children.update(add_nodes)
@@ -161,7 +162,7 @@ root_slot: RootSlot = RootSlot(name="root")
 
 
 class ChildSlot(BaseSlot):
-    def __init__(self, *, name, **kwargs):
+    def __init__(self, *, name, **kwargs) -> None:
         super().__init__(name=name, **kwargs)
         root_slot.add_slots(self)
 
@@ -188,8 +189,8 @@ class ValueSlot(ChildSlot):
     children: None = Field(None)
     value: Any = None
 
-    def is_set(self):
-        def is_set_inner(ctx: Context, _: Pipeline):
+    def is_set(self) -> Callable[[Context, Pipeline], bool]:
+        def is_set_inner(ctx: Context, _: Pipeline) -> bool:
             return bool(ctx.framework_states.get(SLOT_STORAGE_KEY, {}).get(self.name))
 
         return is_set_inner
@@ -200,14 +201,14 @@ class ValueSlot(ChildSlot):
 
         return get_inner
 
-    def unset_value(self):
-        def unset_inner(ctx: Context, _: Pipeline):
+    def unset_value(self) -> Callable[[Context, Pipeline], None]:
+        def unset_inner(ctx: Context, _: Pipeline) -> None:
             ctx.framework_states.setdefault(SLOT_STORAGE_KEY, {})
             ctx.framework_states[SLOT_STORAGE_KEY][self.name] = None
 
         return unset_inner
 
-    def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
+    def fill_template(self, template: str) -> Callable[[Context, Pipeline], Union[str, None]]:
         """
         Value Slot's `fill_template` method does not perform template filling on its own, but allows you
         to cut corners on some standard operations. E. g., if you include the following snippet in
@@ -258,8 +259,8 @@ class RegexpSlot(ValueSlot):
     regexp: str
     match_group_idx: int = 0
 
-    def fill_template(self, template: str) -> Callable:
-        def fill_inner(ctx: Context, pipeline: Pipeline):
+    def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
+        def fill_inner(ctx: Context, pipeline: Pipeline) -> str:
             checked_template = super(RegexpSlot, self).fill_template(template)(ctx, pipeline)
             if checked_template is None:  # the check returning None means that an error has occured.
                 return template
@@ -269,7 +270,7 @@ class RegexpSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, _: Pipeline):
+    def extract_value(self, ctx: Context, _: Pipeline) -> Any:
         search = re.search(self.regexp, ctx.last_request.text)
         self.value = search.group(self.match_group_idx) if search else None
         return self.value
@@ -284,8 +285,8 @@ class FunctionSlot(ValueSlot):
 
     func: Callable[[str], str]
 
-    def fill_template(self, template: str) -> Callable:
-        def fill_inner(ctx: Context, pipeline: Pipeline):
+    def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
+        def fill_inner(ctx: Context, pipeline: Pipeline) -> str:
             checked_template = super(FunctionSlot, self).fill_template(template)(ctx, pipeline)
             if not checked_template:  # the check returning None means that an error has occured.
                 return template
@@ -295,6 +296,6 @@ class FunctionSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, _: Pipeline):
+    def extract_value(self, ctx: Context, _: Pipeline) -> Any:
         self.value = self.func(ctx.last_request.text)
         return self.value

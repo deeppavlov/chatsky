@@ -4,11 +4,11 @@ Processing
 This module encapsulates operations that can be done to slots during the processing stage.
 """
 import logging
-from typing import Optional, List, Callable
+from typing import Awaitable, Optional, List, Callable
 
 from pydantic import validate_call
 
-from dff.script import Context, Message
+from dff.script import Context
 from dff.pipeline import Pipeline
 
 from .handlers import get_filled_template, extract as extract_handler, unset as unset_handler
@@ -17,7 +17,7 @@ logger = logging.getLogger(__name__)
 
 
 @validate_call
-def extract(slots: Optional[List[str]]) -> Callable:
+def extract(slots: Optional[List[str]]) -> Callable[[Context, Pipeline], Awaitable[None]]:
     """
     Extract slots from a specified list.
 
@@ -25,7 +25,7 @@ def extract(slots: Optional[List[str]]) -> Callable:
         Names of slots inside groups should be prefixed with group names, separated by '/': profile/username.
     """
 
-    async def extract_inner(ctx: Context, pipeline: Pipeline):
+    async def extract_inner(ctx: Context, pipeline: Pipeline) -> None:
         _ = extract_handler(ctx, pipeline, slots)
         return
 
@@ -33,8 +33,8 @@ def extract(slots: Optional[List[str]]) -> Callable:
 
 
 @validate_call
-def unset(slots: Optional[List[str]] = None):
-    def unset_inner(ctx: Context, pipeline: Pipeline):
+def unset(slots: Optional[List[str]] = None) -> Callable[[Context, Pipeline], None]:
+    def unset_inner(ctx: Context, pipeline: Pipeline) -> None:
         unset_handler(ctx, pipeline, slots)
         return
 
@@ -42,7 +42,7 @@ def unset(slots: Optional[List[str]] = None):
 
 
 @validate_call
-def fill_template(slots: Optional[List[str]] = None):
+def fill_template(slots: Optional[List[str]] = None) -> Callable[[Context, Pipeline], None]:
     """
     Fill the response template in the current node.
     Response should be an instance of :py:class:`~.Message`.
@@ -51,7 +51,7 @@ def fill_template(slots: Optional[List[str]] = None):
     :param slots: Slot names to use. If this parameter is omitted, all slots will be used.
     """
 
-    def fill_inner(ctx: Context, pipeline: Pipeline):
+    def fill_inner(ctx: Context, pipeline: Pipeline) -> None:
         # get current node response
         response = ctx.current_node.response
         if callable(response):

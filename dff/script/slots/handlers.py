@@ -4,7 +4,7 @@ Handlers
 This module is for general functions that can be used in processing, conditions, or responses.
 """
 import logging
-from typing import Dict, Optional, List
+from typing import Any, Dict, Optional, List, Union
 
 from dff.script import Context
 from dff.pipeline import Pipeline
@@ -14,7 +14,7 @@ from .types import BaseSlot, GroupSlot, SLOT_STORAGE_KEY, root_slot as root
 logger = logging.getLogger(__name__)
 
 
-def extract(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> list:
+def extract(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> List[Optional[Any]]:
     """
     Extract the specified slots and return the received values as a list.
     If the value of a particular slot cannot be extracted, None is included instead.
@@ -56,7 +56,9 @@ def extract(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None)
     return results
 
 
-def get_values(ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None) -> list:
+def get_values(
+    ctx: Context, pipeline: Pipeline, slots: Optional[List[str]] = None
+) -> List[Dict[str, Union[str, None]]]:
     """
     Get values of the specified slots, assuming that they have been extracted beforehand.
     If slot argument is omitted, values of all slots will be returned.

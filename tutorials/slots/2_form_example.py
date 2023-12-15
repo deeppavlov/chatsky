@@ -10,11 +10,22 @@ to enhance the dialog with a greedy form-filling strategy.
 
 # %%
 from dff.script import labels as lbl
-from dff.script import RESPONSE, TRANSITIONS, PRE_TRANSITIONS_PROCESSING, GLOBAL, LOCAL, Message
+from dff.script import (
+    RESPONSE,
+    TRANSITIONS,
+    PRE_TRANSITIONS_PROCESSING,
+    GLOBAL,
+    LOCAL,
+    Message,
+)
 
 from dff.pipeline import Pipeline
 
-from dff.utils.testing import check_happy_path, is_interactive_mode, run_interactive_mode
+from dff.utils.testing import (
+    check_happy_path,
+    is_interactive_mode,
+    run_interactive_mode,
+)
 from dff.script import conditions as cnd
 
 from dff.script import slots
@@ -70,7 +81,9 @@ when multiple transition options are possible.
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            restaurant_form.to_next_label(1.1): restaurant_form.has_state(FormState.ACTIVE),
+            restaurant_form.to_next_label(1.1): restaurant_form.has_state(
+                FormState.ACTIVE
+            ),
         },
         PRE_TRANSITIONS_PROCESSING: {
             "extract_cuisine": slot_procs.extract([restaurant_cuisine.name]),
@@ -87,36 +100,52 @@ script = {
                         restaurant_form.has_state(FormState.INACTIVE),
                     ]
                 ),  # this transition ensures the form loop can be left
-                ("restaurant", "form_filled", 0.9): restaurant_form.has_state(FormState.COMPLETE),
+                ("restaurant", "form_filled", 0.9): restaurant_form.has_state(
+                    FormState.COMPLETE
+                ),
             }
         },
         "offer": {
             RESPONSE: slot_rsp.fill_template(
-                Message(text="Would you like me to find a {cuisine} cuisine restaurant?")
+                Message(
+                    text="Would you like me to find a {cuisine} cuisine restaurant?"
+                )
             ),
-            TRANSITIONS: {lbl.forward(1.1): cnd.regexp(r"[yY]es|[yY]eah|[Oo][Kk]|[Ff]ine")},
+            TRANSITIONS: {
+                lbl.forward(1.1): cnd.regexp(r"[yY]es|[yY]eah|[Oo][Kk]|[Ff]ine")
+            },
             PRE_TRANSITIONS_PROCESSING: {
                 "reset_form": restaurant_form.update_state(FormState.INACTIVE),
-                "reset_slots": slot_procs.unset([restaurant_address.name, number_of_people.name]),
+                "reset_slots": slot_procs.unset(
+                    [restaurant_address.name, number_of_people.name]
+                ),
             },  # Explicitly resetting form and slot states
         },
         "offer_accepted": {
             RESPONSE: Message(text="Very well then, processing your request."),
             PRE_TRANSITIONS_PROCESSING: {
-                "activate_form": restaurant_form.update_state(slots.FormState.ACTIVE),
+                "activate_form": restaurant_form.update_state(
+                    slots.FormState.ACTIVE
+                ),
             },
         },
         "form_filled": {
             RESPONSE: slot_rsp.fill_template(
-                Message(text="All done, a table for {numberofpeople} has been reserved")
+                Message(
+                    text="All done, a table for {numberofpeople} has been reserved"
+                )
             ),
             TRANSITIONS: {("chitchat", "chat_3", 1.1): cnd.true()},
         },
         "cuisine": {
-            RESPONSE: Message(text="What kind of cuisine would you like to have?"),
+            RESPONSE: Message(
+                text="What kind of cuisine would you like to have?"
+            ),
         },
         "address": {
-            RESPONSE: Message(text="In what area would you like to find a restaurant?"),
+            RESPONSE: Message(
+                text="In what area would you like to find a restaurant?"
+            ),
         },
         "number": {
             RESPONSE: Message(text="How many people would you like to invite?"),
@@ -136,10 +165,17 @@ script = {
             RESPONSE: Message(text="Did you like the latest Star Wars film?"),
             TRANSITIONS: {lbl.to_fallback(1.1): cnd.true()},
         },
-        "chat_4": {RESPONSE: Message(text="Who do you think will win the Champions League?")},
+        "chat_4": {
+            RESPONSE: Message(
+                text="Who do you think will win the Champions League?"
+            )
+        },
     },
     "root": {
-        "start": {RESPONSE: Message(text=""), TRANSITIONS: {("chitchat", "chat_1", 2): cnd.true()}},
+        "start": {
+            RESPONSE: Message(text=""),
+            TRANSITIONS: {("chitchat", "chat_1", 2): cnd.true()},
+        },
         "fallback": {
             RESPONSE: Message(text="Nice chatting with you!"),
             TRANSITIONS: {("chitchat", "chat_1", 2): cnd.true()},
@@ -150,7 +186,10 @@ script = {
 HAPPY_PATH = [
     (Message(text="hi"), Message(text="How's life?")),
     (Message(text="good"), Message(text="What kind of cuisine do you like?")),
-    (Message(text="none"), Message(text="Did you like the latest Star Wars film?")),
+    (
+        Message(text="none"),
+        Message(text="Did you like the latest Star Wars film?"),
+    ),
     (Message(text="yes"), Message(text="Nice chatting with you!")),
     (Message(text="hi"), Message(text="How's life?")),
     (Message(text="good"), Message(text="What kind of cuisine do you like?")),
@@ -158,14 +197,26 @@ HAPPY_PATH = [
         Message(text="french cuisine"),
         Message(text="Would you like me to find a french cuisine restaurant?"),
     ),
-    (Message(text="yes"), Message(text="Very well then, processing your request.")),
-    (Message(text="ok"), Message(text="In what area would you like to find a restaurant?")),
-    (Message(text="in London"), Message(text="How many people would you like to invite?")),
+    (
+        Message(text="yes"),
+        Message(text="Very well then, processing your request."),
+    ),
+    (
+        Message(text="ok"),
+        Message(text="In what area would you like to find a restaurant?"),
+    ),
+    (
+        Message(text="in London"),
+        Message(text="How many people would you like to invite?"),
+    ),
     (
         Message(text="3 people"),
         Message(text="All done, a table for 3 has been reserved"),
     ),
-    (Message(text="ok"), Message(text="Did you like the latest Star Wars film?")),
+    (
+        Message(text="ok"),
+        Message(text="Did you like the latest Star Wars film?"),
+    ),
     (Message(text="yes"), Message(text="Nice chatting with you!")),
 ]
 
