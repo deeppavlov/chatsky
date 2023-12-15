@@ -56,7 +56,6 @@ pydantic = ">=2.0"  # `pydantic` version more than 2 required
 nest-asyncio = "*"
 typing-extensions = "*"
 wrapt = "*"
-urllib3 = "<2.0"  # ensure dff doesn't update urllib which breaks poetry
 colorama = "*"
 ydb = { version = "*", optional = true }
 six = { version = "*", optional = true }
@@ -127,6 +126,7 @@ jsonschema = "*"
 optional = false
 
 [tool.poetry.group.devel.dependencies]
+urllib3 = "<2.0"  # ensure dff doesn't update urllib which breaks poetry
 python-on-whales = "*"
 python-dotenv = "*"
 poethepoet = { version = "*", extras = ["poetry_plugin"] }
