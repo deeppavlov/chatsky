@@ -5,24 +5,22 @@ The Types module contains several classes and special types that are used throug
 The classes and special types in this module can include data models,
 data structures, and other types that are defined for type hinting.
 """
+from __future__ import annotations
 from abc import ABC
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable, Any, Protocol, Hashable
+from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
 
 from dff.context_storages import DBContextStorage
 from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 from pydantic import BaseModel
 
-
-_ForwardPipeline = NewType("Pipeline", Any)
-_ForwardPipelineComponent = NewType("PipelineComponent", Any)
-_ForwardService = NewType("Service", _ForwardPipelineComponent)
-_ForwardServiceBuilder = NewType("ServiceBuilder", Any)
-_ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
-_ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", Any)
-_ForwardProvider = NewType("ABCProvider", ABC)
-_ForwardExtraHandlerRuntimeInfo = NewType("ExtraHandlerRuntimeInfo", Any)
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
+    from dff.pipeline.service.service import Service
+    from dff.pipeline.service.group import ServiceGroup
+    from dff.pipeline.service.extra import _ComponentExtraHandler
+    from dff.messengers.common.interface import MessengerInterface
 
 
 class PipelineRunnerFunction(Protocol):
@@ -112,7 +110,7 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 """
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[[Context, _ForwardPipeline], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[[Context, "Pipeline"], bool]
 """
 A function type for components `start_conditions`.
 Accepts context and pipeline, returns boolean (whether service can be launched).
@@ -152,8 +150,8 @@ class ServiceRuntimeInfo(BaseModel):
 
 ExtraHandlerFunction: TypeAlias = Union[
     Callable[[Context], Any],
-    Callable[[Context, _ForwardPipeline], Any],
-    Callable[[Context, _ForwardPipeline, _ForwardExtraHandlerRuntimeInfo], Any],
+    Callable[[Context, "Pipeline"], Any],
+    Callable[[Context, "Pipeline", "ExtraHandlerRuntimeInfo"], Any],
 ]
 """
 A function type for creating wrappers (before and after functions).
@@ -177,10 +175,10 @@ Also contains `component` - runtime info of the component this wrapper is attach
 ServiceFunction: TypeAlias = Union[
     Callable[[Context], None],
     Callable[[Context], Awaitable[None]],
-    Callable[[Context, _ForwardPipeline], None],
-    Callable[[Context, _ForwardPipeline], Awaitable[None]],
-    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], None],
-    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], Awaitable[None]],
+    Callable[[Context, "Pipeline"], None],
+    Callable[[Context, "Pipeline"], Awaitable[None]],
+    Callable[[Context, "Pipeline", ServiceRuntimeInfo], None],
+    Callable[[Context, "Pipeline", ServiceRuntimeInfo], Awaitable[None]],
 ]
 """
 A function type for creating service handlers.
@@ -190,7 +188,7 @@ Can be both synchronous and asynchronous.
 
 
 ExtraHandlerBuilder: TypeAlias = Union[
-    _ForwardComponentExtraHandler,
+    "_ComponentExtraHandler",
     TypedDict(
         "WrapperDict",
         {
@@ -205,19 +203,19 @@ ExtraHandlerBuilder: TypeAlias = Union[
 A type, representing anything that can be transformed to ExtraHandlers.
 It can be:
 
-- _ForwardComponentExtraHandler object
+- ExtraHandlerFunction object
 - Dictionary, containing keys `timeout`, `asynchronous`, `functions`
 """
 
 
 ServiceBuilder: TypeAlias = Union[
     ServiceFunction,
-    _ForwardService,
+    "Service",
     str,
     TypedDict(
         "ServiceDict",
         {
-            "handler": _ForwardServiceBuilder,
+            "handler": "ServiceBuilder",
             "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "timeout": NotRequired[Optional[float]],
@@ -239,8 +237,8 @@ It can be:
 
 
 ServiceGroupBuilder: TypeAlias = Union[
-    List[Union[ServiceBuilder, List[ServiceBuilder], _ForwardServiceGroup]],
-    _ForwardServiceGroup,
+    List[Union[ServiceBuilder, List[ServiceBuilder], "ServiceGroup"]],
+    "ServiceGroup",
 ]
 """
 A type, representing anything that can be transformed to service group.
@@ -254,7 +252,7 @@ It can be:
 PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
-        "messenger_interface": NotRequired[Optional[_ForwardProvider]],
+        "messenger_interface": NotRequired[Optional["MessengerInterface"]],
         "context_storage": NotRequired[Optional[Union[DBContextStorage, Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],

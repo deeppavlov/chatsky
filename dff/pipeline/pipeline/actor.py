@@ -22,9 +22,10 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 
 .. figure:: /_static/drawio/dfe/user_actor.png
 """
+from __future__ import annotations
 import logging
 import asyncio
-from typing import Union, Callable, Optional, Dict, List, ForwardRef
+from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
 import copy
 
 from dff.utils.turn_caching import cache_clear
@@ -39,7 +40,8 @@ from dff.pipeline.service.utils import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
