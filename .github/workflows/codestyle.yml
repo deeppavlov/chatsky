@@ -28,9 +28,9 @@ jobs:
 
       - name: setup poetry and install dependencies
         run: |
-          pip install --upgrade pip poetry
-          poetry install --with lint --no-ansi --no-interaction
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with lint --no-ansi --no-interaction
 
       - name: run codestyle
         run: |
-          poetry run poe lint
+          python -m poetry run poe lint

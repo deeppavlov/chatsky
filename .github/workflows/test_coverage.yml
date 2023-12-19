@@ -32,8 +32,8 @@ jobs:
 
       - name: setup poetry and install dependencies
         run: |
-          pip install --upgrade pip poetry
-          poetry install --with test,tutorials --all-extras --no-ansi --no-interaction
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with test,tutorials --all-extras --no-ansi --no-interaction
 
       - name: run tests
         env:
@@ -42,4 +42,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          poetry run poe test_all
+          python -m poetry run poe test_all

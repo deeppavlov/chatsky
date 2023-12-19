@@ -33,8 +33,8 @@ jobs:
 
       - name: setup poetry and install dependencies
         run: |
-          pip install --upgrade pip poetry
-          poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
       - name: build documentation
         env:
@@ -43,7 +43,7 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          poetry run poe docs
+          python -m poetry run poe docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll

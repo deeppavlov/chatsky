@@ -22,19 +22,19 @@ jobs:
 
       - name: setup poetry
         run: |
-          pip install --upgrade pip poetry
+          python -m pip install --upgrade pip poetry
 
       - name: build wheels and test uploading to pypi
         if: startsWith(github.ref, 'refs/tags/v') != true
         run: |
-          poetry --build publish --dry-run
+          python -m poetry --build publish --dry-run
 
       - name: build wheels and upload to pypi
         if: startsWith(github.ref, 'refs/tags/v')
         env:
           POETRY_PYPI_TOKEN_PYPI: ${{ secrets.PYPI_TOKEN }}
         run: |
-          poetry --build publish
+          python -m poetry --build publish
 
       - name: upload binaries into release
         if: startsWith(github.ref, 'refs/tags/v')
