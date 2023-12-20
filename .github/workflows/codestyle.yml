@@ -26,10 +26,11 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: install dependencies
+      - name: setup poetry and install dependencies
         run: |
-            make venv
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with lint --no-ansi --no-interaction
 
       - name: run codestyle
         run: |
-            make lint
+          python -m poetry run poe lint

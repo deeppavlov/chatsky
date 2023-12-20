@@ -27,17 +27,14 @@ jobs:
         with:
           python-version: 3.9
 
-      - name: Build images
-        run: |
-            make docker_up
-
       - uses: r-lib/actions/setup-pandoc@v2
         with:
           pandoc-version: '3.1.6'
 
-      - name: install dependencies
+      - name: setup poetry and install dependencies
         run: |
-            make venv
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with tutorials,docs --all-extras --no-ansi --no-interaction
 
       - name: build documentation
         env:
@@ -46,7 +43,7 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-            make doc
+          python -m poetry run poe docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll

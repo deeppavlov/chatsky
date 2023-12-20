@@ -7,7 +7,7 @@ This tutorial shows how to benchmark context storages.
 For more info see [API reference](%doclink(api,utils.db_benchmark.benchmark)).
 """
 
-# %pip install dff[benchmark,json,pickle,postgresql,mongodb,redis,mysql,sqlite,ydb]
+# %pip install dff[benchmark,postgresql,mongodb,redis,mysql,sqlite,ydb]
 
 # %%
 from pathlib import Path
@@ -22,7 +22,7 @@ import dff.utils.db_benchmark as benchmark
 """
 
 # %%
-# this cell is only required for pickle, shelve and sqlite databases
+# this cell is only required for shelve and sqlite databases
 tutorial_dir = Path(tempfile.mkdtemp())
 db_path = tutorial_dir / "dbs"
 db_path.mkdir()
@@ -32,8 +32,6 @@ sqlite_separator = "///" if system() == "Windows" else "////"
 
 # %%
 storages = {
-    "JSON": f"json://{db_path}/json.json",
-    "Pickle": f"pickle://{db_path}/pickle.pkl",
     "Shelve": f"shelve://{db_path}/shelve",
     "PostgreSQL": "postgresql+asyncpg://postgres:pass@localhost:5432/test",
     "MongoDB": "mongodb://admin:pass@localhost:27017/admin",
@@ -56,7 +54,8 @@ and
 
 Note: context storages passed into these functions will be cleared.
 
-Once the benchmark results are saved to a file, you can view and analyze them using two methods:
+Once the benchmark results are saved to a file,
+you can view and analyze them using two methods:
 
 * [Using the Report Function](#Using-the-report-function): This function
     can display specified information from a given file.
@@ -65,7 +64,8 @@ Once the benchmark results are saved to a file, you can view and analyze them us
 * [Using the Streamlit App](#Using-Streamlit-app): A Streamlit app
     is available for viewing and comparing benchmark results.
     You can upload benchmark result files using the app's "Benchmark sets" tab,
-    inspect individual results in the "View" tab, and compare metrics in the "Compare" tab.
+    inspect individual results in the "View" tab,
+    and compare metrics in the "Compare" tab.
 
 Benchmark results are saved according to a specific schema,
 which can be found in the benchmark schema documentation.
@@ -76,9 +76,10 @@ Each database being benchmarked will have its own result file.
 The first one is a higher-level wrapper of the second one.
 The first function accepts
 %mddoclink(api,utils.db_benchmark.benchmark,BenchmarkCase)
-which configure databases that are being benchmark and configurations of the benchmarks.
-The second function accepts only a single URI for the database and several benchmark configurations.
-So, the second function is simpler to use, while the first function allows for more configuration
+which configures databases to be benchmarked and parameters of the benchmarks.
+The second function accepts only a single URI for the database
+and several benchmark configurations. So, the second function is simpler to use,
+while the first function allows for more configuration
 (e.g. having different databases benchmarked in a single file).
 
 Both function use
@@ -94,16 +95,19 @@ covering various contexts, messages, and edge cases.
 You can use these presets by passing them to the benchmark functions or create
 your own configuration.
 
-To learn more about using presets see [Configuration presets](#Configuration-presets)
+To learn more about using presets see
+[Configuration presets](#Configuration-presets)
 
 Benchmark configs have several parameters:
 
-Setting `context_num` to 50 means that we'll run fifty cycles of writing and reading context.
-This way we'll be able to get a more accurate average read/write time as well as
-check if read/write times are dependent on the number of contexts in the storage.
+Setting `context_num` to 50 means that we'll run fifty cycles of
+writing and reading context. This way we'll be able to get a more accurate
+average read/write time as well as check if read/write times are dependent
+on the number of contexts in the storage.
 
-You can also configure the `dialog_len`, `message_dimensions` and `misc_dimensions` parameters.
-This allows you to set the contexts you want your database to be benchmarked with.
+You can also configure the `dialog_len`, `message_dimensions` and
+`misc_dimensions` parameters. This allows you to set the contexts
+you want your database to be benchmarked with.
 
 ### File structure
 
@@ -132,7 +136,8 @@ for db_name, db_uri in storages.items():
 
 # %% [markdown]
 """
-Running the cell above will create a file with benchmark results for every benchmarked DB:
+Running the cell above will create a file
+with benchmark results for every benchmarked DB:
 """
 
 # %%
@@ -171,15 +176,16 @@ To run the app, execute:
 
 ```
 # download file
-curl https://deeppavlov.github.io/dialog_flow_framework/_misc/benchmark_streamlit.py \
--o benchmark_streamlit.py
+curl "https://deeppavlov.github.io/dialog_flow_framework/"\
+"_misc/benchmark_streamlit.py" -o benchmark_streamlit.py
 # install dependencies
 pip install dff[benchmark]
 # run
 streamlit run benchmark_streamlit.py
 ```
 
-You can upload files with benchmark results using the first tab of the app ("Benchmark sets"):
+You can upload files with benchmark results
+using the first tab of the app ("Benchmark sets"):
 
 .. figure:: ../_static/images/benchmark_sets.png
 
@@ -189,8 +195,8 @@ to the "Compare" tab via the button in the top-right corner.
 
 .. figure:: ../_static/images/benchmark_view.png
 
-In the "Compare" tab you can view main metrics (write, read, update, read+update)
-of previously added benchmark results:
+In the "Compare" tab you can view main metrics
+(write, read, update, read+update) of previously added benchmark results:
 
 .. figure:: ../_static/images/benchmark_compare.png
 

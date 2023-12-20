@@ -12,20 +12,22 @@ extractor functions. You can find API reference for default extractors
 
 It is a preferred practice to define extractors as asynchronous functions.
 Extractors need to have the following uniform signature:
-the expected arguments are always `Context`, `Pipeline`, and `ExtraHandlerRuntimeInfo`,
+the expected arguments are always `Context`,
+`Pipeline`, and `ExtraHandlerRuntimeInfo`,
 while the expected return value is an arbitrary `dict` or a `None`.
 The returned value gets persisted to Clickhouse as JSON
 which is why it can contain arbitrarily nested dictionaries,
 but it cannot contain any complex objects that cannot be trivially serialized.
 
-The output of these functions will be captured by an OpenTelemetry instrumentor and directed to
-the Opentelemetry collector server which in its turn batches and persists data
-to Clickhouse or other OLAP storages.
+The output of these functions will be captured by an OpenTelemetry
+instrumentor and directed to the Opentelemetry collector server which
+in its turn batches and persists data to Clickhouse or other OLAP storages.
 
 <div class="alert alert-info">
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
-during statistics collection. If you cloned the DFF repo, launch them using `docker compose`:
+during statistics collection.
+If you cloned the DFF repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```
@@ -65,9 +67,11 @@ The cells below configure log export with the help of OTLP instrumentation.
 `from_url` method of the `OtelInstrumentor` class simplifies this task
 allowing you to only pass the url of the OTLP Collector server.
 
-* Alternatively, you can use the utility functions provided by the `stats` module:
-`set_logger_destination`, `set_tracer_destination`, or `set_meter_destination`. These accept
-an appropriate Opentelemetry exporter instance and bind it to provider classes.
+* Alternatively, you can use the utility functions
+provided by the `stats` module:
+`set_logger_destination`, `set_tracer_destination`, or `set_meter_destination`.
+These accept an appropriate Opentelemetry exporter instance
+and bind it to provider classes.
 
 * Nextly, the `OtelInstrumentor` class should be constructed to log the output
 of extractor functions. Custom extractors need to be decorated

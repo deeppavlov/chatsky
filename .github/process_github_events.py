@@ -46,6 +46,7 @@ RELEASE_CHECKLIST = """It appears this PR is a release PR (change its base from 
 Here's a release checklist:
 
 - [ ] Update package version
+- [ ] Update `poetry.lock`
 - [ ] Change PR merge option
 - [ ] Test modules without automated testing:
   - [ ] Requiring telegram `api_id` and `api_hash`

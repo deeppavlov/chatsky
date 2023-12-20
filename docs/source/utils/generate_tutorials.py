@@ -30,9 +30,7 @@ def generate_nb_gallery(package: str, files: List[Path]) -> str:
 
 
 def create_index_file(
-    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]],
-    files: List[Path],
-    destination: Path
+    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]], files: List[Path], destination: Path
 ):
     """
     Create a package index file.
