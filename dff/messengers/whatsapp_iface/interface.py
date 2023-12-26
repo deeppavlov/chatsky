@@ -30,18 +30,19 @@ def extract_message_from_whatsapp(message: WhatsAppMessage) -> Message:  # pragm
 def cast_message_to_whatsapp_and_send(messenger: WhatsApp, to: Any, message: Message) -> None:  # pragma: no cover
     if message.attachments is not None:
         attachment = next(message.attachments.files)
-        if isinstance(attachment.source, SourcePath):
-            media_id = messenger.upload_media(media=attachment.source)["id"]
-        else:
+        is_link = isinstance(attachment.source, HttpUrl)
+        if is_link:
             media_id = attachment.source
+        else:
+            media_id = messenger.upload_media(media=attachment.source)["id"]
         if isinstance(attachment, Audio):
-            messenger.send_audio(audio=media_id, recipient_id=to, link=False)
+            messenger.send_audio(audio=media_id, recipient_id=to, link=is_link)
         elif isinstance(attachment, Video):
-            messenger.send_video(video=media_id, recipient_id=to, caption=message.text, link=False) 
+            messenger.send_video(video=media_id, recipient_id=to, caption=message.text, link=is_link) 
         elif isinstance(attachment, Image):
-            messenger.send_image(image=media_id, recipient_id=to, caption=message.text, link=False)
+            messenger.send_image(image=media_id, recipient_id=to, caption=message.text, link=is_link)
         elif isinstance(attachment, Document):
-            messenger.send_document(document=media_id, recipient_id=to, caption=message.text, link=False)
+            messenger.send_document(document=media_id, recipient_id=to, caption=message.text, link=is_link)
     else:
         reply = messenger.create_message(content=message.text, to=to)
         reply.send(True)
