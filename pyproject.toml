@@ -126,7 +126,7 @@ jsonschema = "*"
 optional = false
 
 [tool.poetry.group.devel.dependencies]
-urllib3 = "<2.0"  # ensure dff doesn't update urllib which breaks poetry
+urllib3 = "<3.0"  # ensure dff doesn't update urllib which breaks poetry
 python-on-whales = "*"
 python-dotenv = "*"
 poethepoet = { version = "*", extras = ["poetry_plugin"] }
