@@ -1,8 +1,8 @@
 # Dialog Flow Framework
 
-[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
-[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
-[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
+[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/dialog_flow_framework)
+[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
+[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
 ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
