@@ -7,9 +7,10 @@ This class provides a way to organize and manage multiple services as a single u
 allowing for easier management and organization of the services within the pipeline.
 The :py:class:`~.ServiceGroup` serves the important function of grouping services to work together in parallel.
 """
+from __future__ import annotations
 import asyncio
 import logging
-from typing import Optional, List, Union, Awaitable, ForwardRef
+from typing import Optional, List, Union, Awaitable, TYPE_CHECKING
 
 from dff.script import Context
 
@@ -29,7 +30,8 @@ from .service import Service
 
 logger = logging.getLogger(__name__)
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 class ServiceGroup(PipelineComponent):

@@ -5,20 +5,19 @@ Normalization module is used to normalize all python objects and functions to a 
 that is suitable for script and actor execution process.
 This module contains a basic set of functions for normalizing data in a dialog script.
 """
+from __future__ import annotations
 import logging
-
-from typing import Union, Callable, Optional, ForwardRef
+from typing import Union, Callable, Optional, TYPE_CHECKING
 
 from .keywords import Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
-from pydantic import validate_call
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
-
-Pipeline = ForwardRef("Pipeline")
 
 
 def normalize_label(
@@ -83,10 +82,9 @@ def normalize_condition(condition: ConditionType) -> Callable[[Context, Pipeline
         return callable_condition_handler
 
 
-@validate_call
 def normalize_response(
-    response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]]
-) -> Callable[[Context, Pipeline], Message]:
+    response: Optional[Union[Message, Callable[[Context, "Pipeline"], Message]]]
+) -> Callable[[Context, "Pipeline"], Message]:
     """
     This function is used to normalize response. If the response is a Callable, it is returned, otherwise
     the response is wrapped in an asynchronous function and this function is returned.

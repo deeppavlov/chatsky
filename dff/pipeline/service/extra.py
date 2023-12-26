@@ -5,10 +5,11 @@ The Extra Handler module contains additional functionality that extends the capa
 beyond the core functionality. Extra handlers is an input converting addition to :py:class:`.PipelineComponent`.
 For example, it is used to grep statistics from components, timing, logging, etc.
 """
+from __future__ import annotations
 import asyncio
 import logging
 import inspect
-from typing import Optional, List, ForwardRef
+from typing import Optional, List, TYPE_CHECKING
 
 from dff.script import Context
 
@@ -23,7 +24,8 @@ from ..types import (
 
 logger = logging.getLogger(__name__)
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 class _ComponentExtraHandler:

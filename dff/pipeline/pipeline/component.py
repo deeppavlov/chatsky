@@ -8,11 +8,12 @@ step in a processing pipeline, and is responsible for performing a specific task
 The PipelineComponent class can be a group or a service. It is designed to be reusable and composable,
 allowing developers to create complex processing pipelines by combining multiple components.
 """
+from __future__ import annotations
 import logging
 import abc
 import asyncio
 import copy
-from typing import Optional, Awaitable, ForwardRef
+from typing import Optional, Awaitable, TYPE_CHECKING
 
 from dff.script import Context
 
@@ -31,7 +32,8 @@ from ..types import (
 
 logger = logging.getLogger(__name__)
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 class PipelineComponent(abc.ABC):
