@@ -1,5 +1,5 @@
 from typing import Optional, Any
-from pydantic import SourcePath, HttpUrl
+from pydantic import HttpUrl
 
 from whatsapp import WhatsApp, Message as WhatsAppMessage
 
@@ -69,7 +69,7 @@ class WhatsappInterface(CallbackMessengerInterface):  # pragma: no cover
     async def on_message(self, message: WhatsAppMessage):
         message.mark_as_read()
         resp = await self.on_request_async(extract_message_from_whatsapp(message), message.sender)
-        cast_message_to_whatsapp_and_send(self.whatsapp, message.sender, resp.last_response)
+        cast_message_to_whatsapp_and_send(self.messenger, message.sender, resp.last_response)
 
 
     async def connect(self, callback: PipelineRunnerFunction):
