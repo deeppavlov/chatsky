@@ -12,7 +12,18 @@ The Dialog Flow Framework (DFF) allows you to develop conversational services.
 DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
 You can use the framework in various services such as social networks, call centers, websites, personal assistants, etc.
 
-DFF, a versatile Python-based conversational service framework, can be deployed across a spectrum of platforms, ensuring flexibility for both novice and seasoned developers. Cloud platforms like AWS, Azure, and GCP offer scalable environments for DFF, with options such as AWS Lambda and Azure Functions providing serverless execution. For containerized deployment, Docker and Kubernetes streamline the orchestration of DFF applications. Furthermore, the framework's adaptability extends to IoT ecosystems, making it suitable for integration with edge devices in scenarios like smart homes or industrial automation. Whether deployed on cloud platforms, containerized environments, or directly on IoT devices, DFF's accessibility and customization options make it a robust choice for developing conversational services in the evolving landscape of Python applications and IoT connectivity.
+DFF, a versatile Python-based conversational service framework, can be deployed across a spectrum of platforms,
+ensuring flexibility for both novice and seasoned developers:
+
+- Cloud platforms like AWS, Azure, and GCP offer scalable environments for DFF,
+  with options such as AWS Lambda and Azure Functions providing serverless execution.
+- For containerized deployment, Docker and Kubernetes streamline the orchestration of DFF applications.
+- Furthermore, the framework's adaptability extends to IoT ecosystems,
+  making it suitable for integration with edge devices in scenarios like smart homes or industrial automation.
+
+Whether deployed on cloud platforms, containerized environments, or directly on IoT devices,
+DFF's accessibility and customization options make it a robust choice for developing conversational services
+in the evolving landscape of Python applications and IoT connectivity.
 
 ## Why choose DFF
 
