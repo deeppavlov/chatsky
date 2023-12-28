@@ -2,7 +2,7 @@
 """
 # Core: 10. Multiple fallback nodes
 
-This tutorial shows basics of creating a separate fallback node for every flow. In this case it is done via local transitions (LINK).
+This tutorial shows basics of creating a separate fallback node for every flow. In this case it is done via `LOCAL` nodes.
 
 Let's do all the necessary imports from DFF:
 """
@@ -14,7 +14,7 @@ Let's do all the necessary imports from DFF:
 
 # %%
 from dff.pipeline import Pipeline
-from dff.script import TRANSITIONS, RESPONSE, Message
+from dff.script import TRANSITIONS, RESPONSE, Message, LOCAL
 import dff.script.conditions as cnd
 
 # %% [markdown]
@@ -36,8 +36,7 @@ toy_script = {
             RESPONSE: Message(text="Hello, how can I help you?"),
             TRANSITIONS: {
                 ("authorization_flow", "response_node"): cnd.exact_match(Message(text="auth")),
-                ("information_flow", "response_node"): cnd.exact_match(Message(text="info")),
-                ("fallback_node"): cnd.true()
+                ("information_flow", "response_node"): cnd.exact_match(Message(text="info"))
             }
         },
 
@@ -48,13 +47,17 @@ toy_script = {
         }
     },
     "authorization_flow": {
+        LOCAL: {
+            TRANSITIONS: {
+                ("authorization_fallback_node"):
+                    cnd.true()
+            }
+        },
         "response_node": {
             RESPONSE: Message(text="Write your name, please."),
             TRANSITIONS: {
                 ("authorization_flow", "auth_success_node"):
-                    cnd.exact_match(Message(text="admin")),
-                ("authorization_fallback_node"):
-                    cnd.true()
+                    cnd.exact_match(Message(text="admin"))
             }
         },
 
@@ -76,15 +79,19 @@ toy_script = {
     },
 
     "information_flow": {
+        LOCAL: {
+            TRANSITIONS: {
+                ("information_fallback_node"):
+                    cnd.true()
+            }
+        },
         "response_node": {
             RESPONSE: Message(text="What information you would like to know?"),
             TRANSITIONS: {
                 ("information_flow", "weather_node"):
                     cnd.exact_match(Message(text="weather")),
                 ("information_flow", "time_node"):
-                    cnd.exact_match(Message(text="time")),
-                ("information_fallback_node"):
-                    cnd.true()
+                    cnd.exact_match(Message(text="time"))
             }
         },
         "weather_node": {
@@ -113,14 +120,16 @@ toy_script = {
 
 # %% [markdown]
 """
-As you can see, we've created specific fallback node for each individual flow (e.g. `authorization_fallback_node` for `authorization_flow`). We define transition to them in response node of the flow (actually it can be defined in any node in the flow) using `("information_fallback_node"): cnd.true()`. Due to the low priority this condition will trigger automatically if no other condition was triggered.
+As you can see, we've created specific fallback node for each individual flow using `LOCAL` node. Due to the low priority this condition will trigger automatically if no other condition in any node in the flow was triggered.
+Also we defined `fallback_label` in our `Pipeline` which is being overwritten with `LOCAL` nodes in flows they defined in.
 
 And now let's run our script:
 """
 # %%
 pipeline = Pipeline.from_script(
     toy_script,
-    start_label=("greeting_flow", "start_node")
+    start_label=("greeting_flow", "start_node"),
+    fallback_label=("greeting_flow", "fallback_node")
     )
 
 if __name__ == "__main__":
