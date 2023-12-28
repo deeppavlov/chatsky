@@ -49,15 +49,17 @@ toy_script = {
     "authorization_flow": {
         LOCAL: {
             TRANSITIONS: {
-                ("authorization_fallback_node"):
+                ("auth_fallback_node"):
                     cnd.true()
             }
         },
         "response_node": {
             RESPONSE: Message(text="Write your name, please."),
             TRANSITIONS: {
+                ("authorization_flow", "auth_password_node"):
+                    cnd.exact_match(Message(text="admin")),
                 ("authorization_flow", "auth_success_node"):
-                    cnd.exact_match(Message(text="admin"))
+                    cnd.exact_match(Message(text="John Doe"))
             }
         },
 
@@ -69,7 +71,15 @@ toy_script = {
             }
         },
 
-        "authorization_fallback_node": {
+        "auth_password_node": {
+            RESPONSE: Message(text="Password required. Enter your password."),
+            TRANSITIONS: {
+                ("authorization_flow", "auth_success_node"):
+                    cnd.exact_match(Message(text="123"))
+            }
+        },
+
+        "auth_fallback_node": {
             RESPONSE: Message(text="User not found."),
             TRANSITIONS: {
                 ("authorization_flow", "response_node"):
@@ -88,18 +98,32 @@ toy_script = {
         "response_node": {
             RESPONSE: Message(text="What information you would like to know?"),
             TRANSITIONS: {
-                ("information_flow", "weather_node"):
+                ("information_flow", "weather_city_node"):
                     cnd.exact_match(Message(text="weather")),
                 ("information_flow", "time_node"):
                     cnd.exact_match(Message(text="time"))
             }
         },
-        "weather_node": {
-            RESPONSE: Message(text="It's sunny now!"),
+        "weather_city_node": {
+            RESPONSE: Message(text="What city are interested in?"),
             TRANSITIONS: {
-                ("information_flow", "response_node"):
-                    cnd.true()
+                ("information_flow", "weather_moscow_node"):
+                    cnd.exact_match(Message(text="Moscow")),
+                ("information_flow", "weather_new_york_node"):
+                    cnd.exact_match(Message(text="New York"))
             }
+        },
+        "weather_moscow_node": {
+            RESPONSE: Message(text="It's -5 Celsius"),
+            TRANSITIONS: {
+                ("response_node"): cnd.true()
+                }
+        },
+        "weather_new_york_node": {
+            RESPONSE: Message(text="It's +14 Celsius"),
+            TRANSITIONS: {
+                ("response_node"): cnd.true()
+                }
         },
         "time_node": {
             RESPONSE: Message(text="It's tea time!"),
