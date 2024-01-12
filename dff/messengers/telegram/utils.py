@@ -8,10 +8,10 @@ from contextlib import contextmanager
 from pathlib import Path
 from io import IOBase
 
-from telebot import types
+from dff.messengers.common.modules import telegram
 
 
-def open_io(item: types.InputMedia):
+def open_io(item: telegram.types.InputMedia):
     """
     Returns `InputMedia` with an opened file descriptor instead of path.
 
@@ -22,7 +22,7 @@ def open_io(item: types.InputMedia):
     return item
 
 
-def close_io(item: types.InputMedia):
+def close_io(item: telegram.types.InputMedia):
     """
     Closes an IO in an `InputMedia` object to perform the cleanup.
 
@@ -33,7 +33,7 @@ def close_io(item: types.InputMedia):
 
 
 @contextmanager
-def batch_open_io(item: Union[types.InputMedia, Iterable[types.InputMedia]]):
+def batch_open_io(item: Union[telegram.types.InputMedia, Iterable[telegram.types.InputMedia]]):
     """
     Context manager that controls the state of file descriptors inside `InputMedia`.
     Can be used both for single objects and collections.

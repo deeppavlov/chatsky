@@ -13,7 +13,7 @@ import os
 from dff.script import conditions as cnd
 from dff.script import labels as lbl
 from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.discord_iface import DiscordInterface
+from dff.messengers.discord import DiscordInterface
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
 

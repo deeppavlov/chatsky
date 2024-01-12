@@ -10,7 +10,7 @@ from pathlib import Path
 from typing import Union, List, Optional, Callable
 from enum import Enum
 
-from telebot import types, TeleBot
+from dff.messengers.common.modules import telegram
 
 from dff.script import Context
 from dff.pipeline import Pipeline
@@ -22,7 +22,7 @@ from dff.script import Message
 from dff.script.core.message import Audio, Video, Image, Document
 
 
-class TelegramMessenger(TeleBot):  # pragma: no cover
+class TelegramMessenger(telegram.TeleBot):  # pragma: no cover
     """
     This class inherits from `Telebot` and implements framework-specific functionality
     like sending generic responses.
@@ -90,13 +90,13 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
 
                 def cast(file):
                     if isinstance(file, Image):
-                        cast_to_media_type = types.InputMediaPhoto
+                        cast_to_media_type = telegram.types.InputMediaPhoto
                     elif isinstance(file, Audio):
-                        cast_to_media_type = types.InputMediaAudio
+                        cast_to_media_type = telegram.types.InputMediaAudio
                     elif isinstance(file, Document):
-                        cast_to_media_type = types.InputMediaDocument
+                        cast_to_media_type = telegram.types.InputMediaDocument
                     elif isinstance(file, Video):
-                        cast_to_media_type = types.InputMediaVideo
+                        cast_to_media_type = telegram.types.InputMediaVideo
                     else:
                         raise TypeError(type(file))
                     return cast_to_media_type(media=str(file.source or file.id), caption=file.title)
@@ -114,12 +114,12 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
 
         if ready_response.ui is not None:
             if isinstance(ready_response.ui, RemoveKeyboard):
-                keyboard = types.ReplyKeyboardRemove()
+                keyboard = telegram.types.ReplyKeyboardRemove()
             elif isinstance(ready_response.ui, TelegramUI):
                 if ready_response.ui.is_inline:
-                    keyboard = types.InlineKeyboardMarkup(row_width=ready_response.ui.row_width)
+                    keyboard = telegram.types.InlineKeyboardMarkup(row_width=ready_response.ui.row_width)
                     buttons = [
-                        types.InlineKeyboardButton(
+                        telegram.types.InlineKeyboardButton(
                             text=item.text,
                             url=item.source,
                             callback_data=item.payload,
@@ -127,9 +127,9 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
                         for item in ready_response.ui.buttons
                     ]
                 else:
-                    keyboard = types.ReplyKeyboardMarkup(row_width=ready_response.ui.row_width)
+                    keyboard = telegram.types.ReplyKeyboardMarkup(row_width=ready_response.ui.row_width)
                     buttons = [
-                        types.KeyboardButton(
+                        telegram.types.KeyboardButton(
                             text=item.text,
                         )
                         for item in ready_response.ui.buttons
@@ -156,7 +156,7 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
             )
 
 
-_default_messenger = TeleBot("")
+_default_messenger = telegram.TeleBot("")
 
 
 class UpdateType(Enum):
@@ -184,7 +184,7 @@ class UpdateType(Enum):
 
 
 def telegram_condition(
-    messenger: TeleBot = _default_messenger,
+    messenger: telegram.TeleBot = _default_messenger,
     update_type: UpdateType = UpdateType.MESSAGE,
     commands: Optional[List[str]] = None,
     regexp: Optional[str] = None,

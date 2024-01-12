@@ -7,7 +7,7 @@ that can be used to interact with the Telegram API.
 import asyncio
 from typing import Any, Optional, List, Tuple, Callable
 
-from telebot import types, apihelper
+from dff.messengers.common.modules import telegram
 
 from dff.messengers.common import MessengerInterface, CallbackMessengerInterface
 from dff.pipeline.types import PipelineRunnerFunction
@@ -24,11 +24,11 @@ except ImportError:
     request, abort = None, None
 
 
-apihelper.ENABLE_MIDDLEWARE = True
+telegram.apihelper.ENABLE_MIDDLEWARE = True
 
 
 def extract_telegram_request_and_id(
-    update: types.Update, messenger: Optional[TelegramMessenger] = None
+    update: telegram.types.Update, messenger: Optional[TelegramMessenger] = None
 ) -> Tuple[TelegramMessage, int]:  # pragma: no cover
     """
     Utility function that extracts parameters from a telegram update.
@@ -62,10 +62,10 @@ def extract_telegram_request_and_id(
                 raise RuntimeError(f"Two update fields. First: {message.update_type}; second: {update_field}")
             message.update_type = update_field
             message.update = update_value
-            if isinstance(update_value, types.Message):
+            if isinstance(update_value, telegram.types.Message):
                 message.text = update_value.text
 
-            if isinstance(update_value, types.CallbackQuery):
+            if isinstance(update_value, telegram.types.CallbackQuery):
                 data = update_value.data
                 if data is not None:
                     message.callback_query = data
@@ -204,7 +204,7 @@ class CallbackTelegramInterface(CallbackMessengerInterface):  # pragma: no cover
                 abort(403)
 
             json_string = request.get_data().decode("utf-8")
-            update = types.Update.de_json(json_string)
+            update = telegram.types.Update.de_json(json_string)
             resp = await self.on_request_async(*extract_telegram_request_and_id(update, self.messenger))
             self.messenger.send_response(resp.id, resp.last_response)
             return ""

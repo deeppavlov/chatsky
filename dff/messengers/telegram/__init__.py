@@ -1,8 +1,7 @@
 # -*- coding: utf-8 -*-
 
-try:
-    import telebot
-except ImportError:
+from dff.messengers.common.modules import telegram
+if telegram is None:
     raise ImportError("telebot is not installed. Run `pip install dff[telegram]`")
 
 from .messenger import TelegramMessenger

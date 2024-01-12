@@ -6,21 +6,7 @@ This module implements inherited classes :py:mod:`dff.script.core.message` modif
 from typing import Optional, Union
 from enum import Enum
 
-from telebot.types import (
-    ReplyKeyboardRemove,
-    ReplyKeyboardMarkup,
-    InlineKeyboardMarkup,
-    Message as tlMessage,
-    InlineQuery,
-    ChosenInlineResult,
-    CallbackQuery as tlCallbackQuery,
-    ShippingQuery,
-    PreCheckoutQuery,
-    Poll,
-    PollAnswer,
-    ChatMemberUpdated,
-    ChatJoinRequest,
-)
+from dff.messengers.common.modules import telegram
 
 from dff.script.core.message import Message, Location, Keyboard, DataModel
 from pydantic import model_validator
@@ -68,22 +54,22 @@ class ParseMode(Enum):
 
 class TelegramMessage(Message):
     ui: Optional[
-        Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
+        Union[TelegramUI, RemoveKeyboard, telegram.types.ReplyKeyboardRemove, telegram.types.ReplyKeyboardMarkup, telegram.types.InlineKeyboardMarkup]
     ] = None
     location: Optional[Location] = None
     callback_query: Optional[Union[str, _ClickButton]] = None
     update: Optional[
         Union[
-            tlMessage,
-            InlineQuery,
-            ChosenInlineResult,
-            tlCallbackQuery,
-            ShippingQuery,
-            PreCheckoutQuery,
-            Poll,
-            PollAnswer,
-            ChatMemberUpdated,
-            ChatJoinRequest,
+            telegram.types.Message,
+            telegram.types.InlineQuery,
+            telegram.types.ChosenInlineResult,
+            telegram.types.CallbackQuery,
+            telegram.types.ShippingQuery,
+            telegram.types.PreCheckoutQuery,
+            telegram.types.Poll,
+            telegram.types.PollAnswer,
+            telegram.types.ChatMemberUpdated,
+            telegram.types.ChatJoinRequest,
         ]
     ] = None
     """This field stores an update representing this message."""
