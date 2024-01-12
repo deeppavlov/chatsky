@@ -2,7 +2,7 @@ from io import BytesIO
 from logging import getLogger
 
 from discord import Intents, Client, File, Message as DiscordMessage
-from discord.abc import MessageableChannel
+from discord.abc import Messageable
 from pydantic import HttpUrl
 
 from dff.messengers.common import CallbackMessengerInterface
@@ -34,7 +34,7 @@ def extract_message_from_discord(message: DiscordMessage) -> Message:  # pragma:
     return inn_mess
 
 
-async def cast_message_to_discord_and_send(channel: MessageableChannel, message: Message) -> None:  # pragma: no cover
+async def cast_message_to_discord_and_send(channel: Messageable, message: Message) -> None:  # pragma: no cover
     files = list()
     if message.attachments is not None:
         for file in message.attachments.files[:10]:
