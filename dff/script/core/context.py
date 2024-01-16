@@ -16,18 +16,20 @@ Another important feature of the context is data serialization.
 The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
 This allows developers to save the context data and resume the conversation later.
 """
+from __future__ import annotations
 import logging
 from uuid import UUID, uuid4
-from typing import Any, Optional, Union, Dict, List, Set
+from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from dff.script.core.script import Node
 
-Node = BaseModel
+logger = logging.getLogger(__name__)
 
 
 def get_last_index(dictionary: dict) -> int:
@@ -120,7 +122,7 @@ class Context(BaseModel):
         return {key: dictionary[key] for key in sorted(dictionary)}
 
     @classmethod
-    def cast(cls, ctx: Optional[Union["Context", dict, str]] = None, *args, **kwargs) -> "Context":
+    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         """
         Transform different data types to the objects of the
         :py:class:`~.Context` class.
@@ -277,6 +279,3 @@ class Context(BaseModel):
             )
 
         return node
-
-
-Context.model_rebuild()

@@ -6,23 +6,22 @@ These models are used to define the conversation flow, and to determine the appr
 the user's input and the current state of the conversation.
 """
 # %%
-
+from __future__ import annotations
 import logging
-from typing import Callable, Optional, Any, Dict, Union
+from typing import Callable, Optional, Any, Dict, Union, TYPE_CHECKING
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, validate_call
 
 from .types import LabelType, NodeLabelType, ConditionType, NodeLabel3Type
 from .message import Message
 from .keywords import Keywords
-from .normalization import normalize_condition, normalize_label, validate_call
-from typing import ForwardRef
+from .normalization import normalize_condition, normalize_label
+
+if TYPE_CHECKING:
+    from dff.script.core.context import Context
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
-
-
-Pipeline = ForwardRef("Pipeline")
-Context = ForwardRef("Context")
 
 
 class Node(BaseModel, extra="forbid", validate_assignment=True):
