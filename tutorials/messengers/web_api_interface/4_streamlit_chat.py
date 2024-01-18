@@ -1,21 +1,23 @@
 # %% [markdown]
-# # Web API: 4. Streamlit chat interface
-#
-# This tutorial shows how to use an API endpoint created in the FastAPI tutorial
-# in a Streamlit chat.
-#
-# A demonstration of the chat:
-# ![demo](https://user-images.githubusercontent.com/61429541/238721597-ef88261d-e9e6-497d-ba68-0bcc9a765808.png)
+# Web API: 4. Streamlit chat interface
+"""
+This tutorial shows how to use an API endpoint that we created in the FastAPI tutorial
+in a Streamlit chat.
 
+A demonstration of the chat:
+![demo](https://user-images.githubusercontent.com/61429541/238721597-ef88261d-e9e6-497d-ba68-0bcc9a765808.png)
+
+<div class="alert alert-{primary/secondary/success/danger/warning/info/light/dark}">
+Note! You will need an API running to test this tutorial.
+You can run Web API Interface from tutorial 1 using this command:
+```bash
+python model.py
+```
+Make sure that ports you specify in `API_URL` here are the same as in your API file (e.g. 8000). 
+</div>
+
+"""
 # %pip install dff streamlit streamlit-chat
-
-# %% [markdown]
-# ## Running Streamlit:
-#
-# ```bash
-# streamlit run {file_name}
-# ```
-
 
 # %% [markdown]
 # ## Module and package import
@@ -38,7 +40,6 @@ import itertools
 
 import requests
 import streamlit as st
-from streamlit_chat import message
 import streamlit.components.v1 as components
 from dff.script import Message
 
@@ -101,17 +102,13 @@ if "user_requests" not in st.session_state:
 
 
 # %%
-def send_and_receive():
+def get_bot_response(user_request: str):
     """
-    Send text inside the input field. Receive response from API endpoint.
+    Get request from user as an argument. Receive response from API endpoint.
 
+    Ensure that request is not empty.
     Add both the request and response to `user_requests` and `bot_responses`.
-
-    We do not call this function inside the `text_input.on_change` because then
-    we'd call it whenever the text field loses focus
-    (e.g. when a browser tab is switched).
     """
-    user_request = st.session_state["input"]
 
     if user_request == "":
         return
@@ -141,8 +138,8 @@ def send_and_receive():
 
 
 # %%
-st.text_input("You: ", key="input")
-st.button("Send", on_click=send_and_receive)
+if prompt := st.chat_input("Enter your message"):
+    get_bot_response(prompt)
 
 
 # %% [markdown]
@@ -175,7 +172,7 @@ doc.addEventListener('keypress', function(e) {
 # %% [markdown]
 # ### Message display
 #
-# Here we use the `streamlit-chat` package to display user requests and bot responses.
+# Here we use the `st.chat_message` to display user requests and bot responses.
 
 
 # %%
@@ -184,5 +181,14 @@ for i, bot_response, user_request in zip(
     st.session_state.get("bot_responses", []),
     st.session_state.get("user_requests", []),
 ):
-    message(user_request, key=f"{i}_user", is_user=True)
-    message(bot_response, key=f"{i}_bot")
+    with st.chat_message("user"):
+        st.markdown(user_request)
+    with st.chat_message("ai"):
+        st.markdown(bot_response)
+
+# %% [markdown]
+# ## Running Streamlit:
+#
+# ```bash
+# streamlit run {file_name}
+# ```
