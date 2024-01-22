@@ -35,8 +35,8 @@ toy_script = {
         "say_hi_node": {
             RESPONSE: Message(text="Hello, how can I help you?"),
             TRANSITIONS: {
-                ("authorization_flow", "response_node"): cnd.exact_match(Message(text="auth")),
-                ("information_flow", "response_node"): cnd.exact_match(Message(text="info"))
+                ("authorization_flow", "response_node"): cnd.exact_match(Message(text="/auth")),
+                ("information_flow", "response_node"): cnd.exact_match(Message(text="/info"))
             }
         },
 
@@ -49,7 +49,7 @@ toy_script = {
     "authorization_flow": {
         LOCAL: {
             TRANSITIONS: {
-                ("auth_fallback_node"):
+                ("auth_fallback_node", 0.1):
                     cnd.true()
             }
         },
@@ -66,8 +66,8 @@ toy_script = {
         "auth_success_node": {
             RESPONSE: Message(text="Authentication successful."),
             TRANSITIONS: {
-                ("authorization_flow", "response_node"):
-                    cnd.exact_match(Message(text=""))
+                ("greeting_flow", "start_node"):
+                    cnd.true()
             }
         },
 
@@ -80,10 +80,10 @@ toy_script = {
         },
 
         "auth_fallback_node": {
-            RESPONSE: Message(text="User not found."),
+            RESPONSE: Message(text="User is not found or password is incorrect."),
             TRANSITIONS: {
-                ("authorization_flow", "response_node"):
-                    cnd.exact_match(Message(text=""))
+                ("greeting_flow", "say_hi_node"):
+                    cnd.true()
             }
         }
     },
@@ -91,7 +91,7 @@ toy_script = {
     "information_flow": {
         LOCAL: {
             TRANSITIONS: {
-                ("information_fallback_node"):
+                ("information_fallback_node", 0.1):
                     cnd.true()
             }
         },
@@ -116,19 +116,19 @@ toy_script = {
         "weather_moscow_node": {
             RESPONSE: Message(text="It's -5 Celsius"),
             TRANSITIONS: {
-                ("response_node"): cnd.true()
+                ("greeting_flow", "start_node"): cnd.true()
                 }
         },
         "weather_new_york_node": {
             RESPONSE: Message(text="It's +14 Celsius"),
             TRANSITIONS: {
-                ("response_node"): cnd.true()
+                ("greeting_flow", "start_node"): cnd.true()
                 }
         },
         "time_node": {
             RESPONSE: Message(text="It's tea time!"),
             TRANSITIONS: {
-                ("information_flow", "response_node"):
+                ("greeting_flow", "start_node"):
                     cnd.true()
             }
         },
@@ -144,7 +144,7 @@ toy_script = {
 
 # %% [markdown]
 """
-As you can see, we've created specific fallback node for each individual flow using `LOCAL` node. Due to the low priority this condition will trigger automatically if no other condition in any node in the flow was triggered.
+As you can see, we've created specific fallback node for each individual flow using `LOCAL` node. Due to the low priority (explicitly set as `0.1`) this condition will trigger automatically if no other condition in any node in the flow was triggered.
 Also we defined `fallback_label` in our `Pipeline` which is being overwritten with `LOCAL` nodes in flows they defined in.
 
 And now let's run our script:
