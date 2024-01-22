@@ -26,7 +26,7 @@ class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
     This class is a Pydantic BaseModel that serves as a base class for all DFF models.
     """
 
-    ...
+    pass
 
 
 class Command(DataModel):
@@ -35,10 +35,15 @@ class Command(DataModel):
     a command that can be executed in response to a user input.
     """
 
-    ...
+    pass
 
 
-class Location(DataModel):
+class Attachment(DataModel):
+
+    pass
+
+
+class Location(Attachment):
     """
     This class is a data model that represents a geographical
     location on the Earth's surface.
@@ -56,7 +61,39 @@ class Location(DataModel):
         return NotImplemented
 
 
-class Attachment(DataModel):
+class Venue(Location):
+
+    title: str
+
+
+class Contact(Attachment):
+
+    phone_number: str
+    first_name: str
+    last_name: Optional[str]
+
+
+class Invoice(Attachment):
+
+    title: str
+    description: str
+    currency: str
+    amount: int
+
+
+class PollOption(DataModel):
+
+    text: str
+    votes: int
+
+
+class Poll(Attachment):
+
+    question: str
+    options: List[PollOption]
+
+
+class DataAttachment(Attachment):
     """
     This class represents an attachment that can be either
     a file or a URL, along with an optional ID and title.
@@ -77,7 +114,7 @@ class Attachment(DataModel):
                 return file.read()
 
     def __eq__(self, other):
-        if isinstance(other, Attachment):
+        if isinstance(other, DataAttachment):
             if self.title != other.title:
                 return False
             if self.id != other.id:
@@ -102,39 +139,46 @@ class Attachment(DataModel):
         return value
 
 
-class Audio(Attachment):
+class Audio(DataAttachment):
     """Represents an audio file attachment."""
 
     pass
 
 
-class Video(Attachment):
+class Video(DataAttachment):
     """Represents a video file attachment."""
 
     pass
 
 
-class Image(Attachment):
+class Animation(DataAttachment):
+    """Represents an animation file attachment."""
+
+    pass
+
+
+class Image(DataAttachment):
     """Represents an image file attachment."""
 
     pass
 
 
-class Document(Attachment):
-    """Represents a document file attachment."""
+class Story(DataAttachment):
+    """Represents an story attachment."""
 
     pass
 
 
-class Attachments(DataModel):
-    """This class is a data model that represents a list of attachments."""
+class Sticker(DataAttachment):
+    """Represents an sticker attachment."""
 
-    files: List[Attachment] = Field(default_factory=list)
+    pass
 
-    def __eq__(self, other):
-        if isinstance(other, Attachments):
-            return self.files == other.files
-        return NotImplemented
+
+class Document(DataAttachment):
+    """Represents a document file attachment."""
+
+    pass
 
 
 class Link(DataModel):
@@ -192,9 +236,10 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
-    attachments: Optional[Attachments] = None
+    attachments: Optional[List[Attachment]] = None
     annotations: Optional[dict] = None
     misc: Optional[dict] = None
+    original_message: Optional[Any] = None
     # commands and state options are required for integration with services
     # that use an intermediate backend server, like Yandex's Alice
     # state: Optional[Session] = Session.ACTIVE

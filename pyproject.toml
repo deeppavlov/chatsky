@@ -73,7 +73,7 @@ aiosqlite = { version = "*", optional = true }
 omegaconf = { version = "*", optional = true }
 cryptography = { version = "*", optional = true }
 requests = { version = "*", optional = true }
-pytelegrambotapi = { version = "*", optional = true }
+python-telegram-bot = { version = "*", optional = true }
 opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required
@@ -87,7 +87,7 @@ mongodb = ["motor"]
 mysql = ["sqlalchemy", "asyncmy", "cryptography"]
 postgresql = ["sqlalchemy", "asyncpg"]
 ydb = ["ydb", "six"]
-telegram = ["pytelegrambotapi"]
+telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
 
