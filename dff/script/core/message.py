@@ -61,11 +61,6 @@ class Location(Attachment):
         return NotImplemented
 
 
-class Venue(Location):
-
-    title: str
-
-
 class Contact(Attachment):
 
     phone_number: str
@@ -159,18 +154,6 @@ class Animation(DataAttachment):
 
 class Image(DataAttachment):
     """Represents an image file attachment."""
-
-    pass
-
-
-class Story(DataAttachment):
-    """Represents an story attachment."""
-
-    pass
-
-
-class Sticker(DataAttachment):
-    """Represents an sticker attachment."""
 
     pass
 
