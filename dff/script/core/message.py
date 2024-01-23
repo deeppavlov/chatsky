@@ -164,46 +164,13 @@ class Document(DataAttachment):
     pass
 
 
-class Link(DataModel):
-    """This class is a DataModel representing a hyperlink."""
-
-    source: HttpUrl
-    title: Optional[str] = None
-
-    @property
-    def html(self):
-        return f'<a href="{self.source}">{self.title if self.title else self.source}</a>'
-
-
-class Button(DataModel):
-    """
-    This class allows for the creation of a button object
-    with a source URL, a text description, and a payload.
-    """
-
-    source: Optional[HttpUrl] = None
-    text: str
-    payload: Optional[Any] = None
-
-    def __eq__(self, other):
-        if isinstance(other, Button):
-            if self.source != other.source:
-                return False
-            if self.text != other.text:
-                return False
-            first_payload = bytes(self.payload, encoding="utf-8") if isinstance(self.payload, str) else self.payload
-            second_payload = bytes(other.payload, encoding="utf-8") if isinstance(other.payload, str) else other.payload
-            return first_payload == second_payload
-        return NotImplemented
-
-
 class Keyboard(DataModel):
     """
     This class is a DataModel that represents a keyboard object
     that can be used for a chatbot or messaging application.
     """
 
-    buttons: List[Button] = Field(default_factory=list, min_length=1)
+    buttons: List[List[str]] = Field(default_factory=list, min_length=1)
 
     def __eq__(self, other):
         if isinstance(other, Keyboard):

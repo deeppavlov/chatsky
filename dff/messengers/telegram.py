@@ -4,15 +4,16 @@ Interface
 This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
+from typing import Optional, Sequence
 from pydantic import HttpUrl
 
-from telegram import InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, Update, Message as TelegramMessage
+from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, Update, Message as TelegramMessage
 from telegram.ext import Application, MessageHandler, ContextTypes
 from telegram.ext.filters import ALL
 
 from dff.messengers.common import MessengerInterface
 from dff.pipeline.types import PipelineRunnerFunction
-from dff.script.core.message import Animation, Audio, Contact, Document, Image, Invoice, Location, Message, Poll, PollOption, Video
+from dff.script.core.message import Animation, Audio, Contact, Document, Image, Invoice, Keyboard, Location, Message, Poll, PollOption, Video
 
 
 def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma: no cover
@@ -44,16 +45,27 @@ def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma
     return message
 
 
+def _create_keyboard(buttons: Sequence[Sequence[str]]) -> Optional[InlineKeyboardMarkup]:
+    button_list = None
+    if len(buttons) > 0:
+        button_list = [[InlineKeyboardButton(button) for button in row] for row in buttons]
+    if button_list is None:
+        return None
+    else:
+        return InlineKeyboardMarkup(button_list)
+
+
 async def cast_message_to_telegram_and_send(update: TelegramMessage, message: Message) -> None:  # pragma: no cover
+    buttons = list()
     if message.attachments is not None:
         files = list()
         for attachment in message.attachments:
             if isinstance(attachment, Location):
-                await update.reply_location(attachment.latitude, attachment.longitude)
+                await update.reply_location(attachment.latitude, attachment.longitude, reply_markup=_create_keyboard(buttons))
             if isinstance(attachment, Contact):
-                await update.reply_contact(attachment.phone_number, attachment.first_name, attachment.last_name)
+                await update.reply_contact(attachment.phone_number, attachment.first_name, attachment.last_name, reply_markup=_create_keyboard(buttons))
             if isinstance(attachment, Poll):
-                await update.reply_poll(attachment.question, [option.text for option in attachment.options])
+                await update.reply_poll(attachment.question, [option.text for option in attachment.options], reply_markup=_create_keyboard(buttons))
             if isinstance(attachment, Audio):
                 attachment_bytes = attachment.get_bytes()
                 if attachment_bytes is not None:
@@ -74,9 +86,12 @@ async def cast_message_to_telegram_and_send(update: TelegramMessage, message: Me
                 attachment_bytes = attachment.get_bytes()
                 if attachment_bytes is not None:
                     files += [InputMediaDocument(attachment_bytes)]
-        await update.reply_media_group(files, caption=message.text)
+            if isinstance(attachment, Keyboard):
+                buttons = attachment.buttons
+        if len(files > 0):
+            await update.reply_media_group(files, caption=message.text)
     elif message.text is not None:
-        await update.reply_text(message.text)
+        await update.reply_text(message.text, reply_markup=_create_keyboard(buttons))
 
 
 class AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
