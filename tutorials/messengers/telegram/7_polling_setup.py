@@ -13,12 +13,11 @@ for more information.
 # %%
 import os
 
-from dff.messengers.telegram.interface import PollingTelegramInterface
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
 
 from dff.utils.testing.common import is_interactive_mode
 from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
-from telebot.util import update_types
 
 
 # %% [markdown]
@@ -37,9 +36,7 @@ that are used in the `pytelegrambotapi` library, specifically:
 interface = PollingTelegramInterface(
     token=os.environ["TG_BOT_TOKEN"],
     interval=2,
-    allowed_updates=update_types,
     timeout=30,
-    long_polling_timeout=30,
 )
 
 

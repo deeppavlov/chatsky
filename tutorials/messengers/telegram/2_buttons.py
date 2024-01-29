@@ -23,14 +23,9 @@ import os
 
 import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
-from dff.script.core.message import Button
+from dff.script.core.message import Button, Keyboard, Message
 from dff.pipeline import Pipeline
-from dff.messengers.telegram import (
-    PollingTelegramInterface,
-    TelegramUI,
-    TelegramMessage,
-    RemoveKeyboard,
-)
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -57,7 +52,7 @@ script = {
             },
         },
         "fallback": {
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Finishing test, send /restart command to restart"
             ),
             TRANSITIONS: {
@@ -70,40 +65,30 @@ script = {
     },
     "general": {
         "native_keyboard": {
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Question: What's 2 + 2?",
-                # In this case, we use telegram-specific classes.
-                # They derive from the generic ones and include more options,
-                # e.g. simple keyboard or inline keyboard.
-                ui=TelegramUI(
-                    buttons=[
-                        Button(text="5"),
-                        Button(text="4"),
-                    ],
-                    is_inline=False,
-                    row_width=4,
-                ),
+                attachments=[
+                    Keyboard(
+                        buttons=[
+                            [
+                                Button(text="5"),
+                                Button(text="4"),
+                            ],
+                        ],
+                    ),
+                ]
             ),
             TRANSITIONS: {
-                ("general", "success"): cnd.exact_match(
-                    TelegramMessage(text="4")
-                ),
+                ("general", "success"): cnd.exact_match(Message(text="4")),
                 ("general", "fail"): cnd.true(),
             },
         },
         "success": {
-            RESPONSE: TelegramMessage(
-                **{"text": "Success!", "ui": RemoveKeyboard()}
-            ),
+            RESPONSE: Message(text="Success!"),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
-            RESPONSE: TelegramMessage(
-                **{
-                    "text": "Incorrect answer, type anything to try again",
-                    "ui": RemoveKeyboard(),
-                }
-            ),
+            RESPONSE: Message(text="Incorrect answer, type anything to try again"),
             TRANSITIONS: {("general", "native_keyboard"): cnd.true()},
         },
     },
@@ -114,62 +99,65 @@ interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 # this variable is only for testing
 happy_path = (
     (
-        TelegramMessage(text="/start"),
-        TelegramMessage(
+        Message(text="/start"),
+        Message(
             text="Question: What's 2 + 2?",
-            ui=TelegramUI(
-                buttons=[
-                    Button(text="5"),
-                    Button(text="4"),
-                ],
-                is_inline=False,
-                row_width=4,
-            ),
+            attachments= [
+                Keyboard(
+                    buttons=[
+                        [
+                            Button(text="5"),
+                            Button(text="4"),
+                        ],
+                    ],
+                ),
+            ],
         ),
     ),
     (
-        TelegramMessage(text="5"),
-        TelegramMessage(
-            text="Incorrect answer, type anything to try again",
-            ui=RemoveKeyboard(),
-        ),
+        Message(text="5"),
+        Message(text="Incorrect answer, type anything to try again"),
     ),
     (
-        TelegramMessage(text="ok"),
-        TelegramMessage(
+        Message(text="ok"),
+        Message(
             text="Question: What's 2 + 2?",
-            ui=TelegramUI(
-                buttons=[
-                    Button(text="5"),
-                    Button(text="4"),
-                ],
-                is_inline=False,
-                row_width=4,
-            ),
+            attachments= [
+                Keyboard(
+                    buttons=[
+                        [
+                            Button(text="5"),
+                            Button(text="4"),
+                        ],
+                    ],
+                ),
+            ],
         ),
     ),
     (
-        TelegramMessage(text="4"),
-        TelegramMessage(text="Success!", ui=RemoveKeyboard()),
+        Message(text="4"),
+        Message(text="Success!"),
     ),
     (
-        TelegramMessage(text="Yay!"),
-        TelegramMessage(
+        Message(text="Yay!"),
+        Message(
             text="Finishing test, send /restart command to restart"
         ),
     ),
     (
-        TelegramMessage(text="/start"),
-        TelegramMessage(
+        Message(text="/start"),
+        Message(
             text="Question: What's 2 + 2?",
-            ui=TelegramUI(
-                buttons=[
-                    Button(text="5"),
-                    Button(text="4"),
-                ],
-                is_inline=False,
-                row_width=4,
-            ),
+            attachments= [
+                Keyboard(
+                    buttons=[
+                        [
+                            Button(text="5"),
+                            Button(text="4"),
+                        ],
+                    ],
+                ),
+            ],
         ),
     ),
 )

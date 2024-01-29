@@ -17,13 +17,10 @@ import os
 
 from dff.script import TRANSITIONS, RESPONSE
 
-from dff.messengers.telegram import (
-    PollingTelegramInterface,
-    telegram_condition,
-    UpdateType,
-)
+import dff.script.conditions as cnd
+from dff.messengers.telegram import PollingTelegramInterface, telegram_condition
 from dff.pipeline import Pipeline
-from dff.messengers.telegram import TelegramMessage
+from dff.script.core.message import Message
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -63,47 +60,59 @@ script = {
     "greeting_flow": {
         "start_node": {
             TRANSITIONS: {
-                "node1": telegram_condition(commands=["start", "restart"])
+                "node1": cnd.any(
+                    [
+                        cnd.exact_match(Message(text="start")),
+                        cnd.exact_match(Message(text="restart")),
+                    ]
+                )
             },
         },
         "node1": {
-            RESPONSE: TelegramMessage(text="Hi, how are you?"),
+            RESPONSE: Message(text="Hi, how are you?"),
             TRANSITIONS: {
-                "node2": telegram_condition(
-                    update_type=UpdateType.MESSAGE, regexp="fine"
-                )
+                "node2": cnd.regexp("fine")
             },
             # this is the same as
             # TRANSITIONS: {"node2": telegram_condition(regexp="fine")},
         },
         "node2": {
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Good. What do you want to talk about?"
             ),
             TRANSITIONS: {
                 "node3": telegram_condition(
-                    func=lambda msg: "music" in msg.text
+                    func=lambda upd: (
+                        upd.message is not None
+                        and upd.message.text is not None
+                        and "music" in upd.message.text
+                    )
                 )
             },
         },
         "node3": {
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Sorry, I can not talk about music now."
             ),
             TRANSITIONS: {
-                "node4": telegram_condition(update_type=UpdateType.ALL)
+                "node4": telegram_condition(func=lambda _: True)
             },
             # This condition is true for any type of update
         },
         "node4": {
-            RESPONSE: TelegramMessage(text="bye"),
-            TRANSITIONS: {"node1": telegram_condition()},
+            RESPONSE: Message(text="bye"),
+            TRANSITIONS: {"node1": telegram_condition(func=lambda _: True)},
             # This condition is true if the last update is of type `message`
         },
         "fallback_node": {
-            RESPONSE: TelegramMessage(text="Ooops"),
+            RESPONSE: Message(text="Ooops"),
             TRANSITIONS: {
-                "node1": telegram_condition(commands=["start", "restart"])
+                "node1": cnd.any(
+                    [
+                        cnd.exact_match(Message(text="start")),
+                        cnd.exact_match(Message(text="restart")),
+                    ]
+                )
             },
         },
     }
@@ -111,17 +120,17 @@ script = {
 
 # this variable is only for testing
 happy_path = (
-    (TelegramMessage(text="/start"), TelegramMessage(text="Hi, how are you?")),
+    (Message(text="/start"), Message(text="Hi, how are you?")),
     (
-        TelegramMessage(text="I'm fine"),
-        TelegramMessage(text="Good. What do you want to talk about?"),
+        Message(text="I'm fine"),
+        Message(text="Good. What do you want to talk about?"),
     ),
     (
-        TelegramMessage(text="About music"),
-        TelegramMessage(text="Sorry, I can not talk about music now."),
+        Message(text="About music"),
+        Message(text="Sorry, I can not talk about music now."),
     ),
-    (TelegramMessage(text="ok"), TelegramMessage(text="bye")),
-    (TelegramMessage(text="bye"), TelegramMessage(text="Hi, how are you?")),
+    (Message(text="ok"), Message(text="bye")),
+    (Message(text="bye"), Message(text="Hi, how are you?")),
 )
 
 

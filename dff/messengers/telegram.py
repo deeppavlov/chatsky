@@ -4,16 +4,18 @@ Interface
 This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
-from typing import Optional, Sequence
+from typing import Callable, Optional, Sequence, cast
 from pydantic import HttpUrl
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, Update, Message as TelegramMessage
-from telegram.ext import Application, MessageHandler, ContextTypes
+from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
 from telegram.ext.filters import ALL
 
 from dff.messengers.common import MessengerInterface
+from dff.pipeline import Pipeline
 from dff.pipeline.types import PipelineRunnerFunction
-from dff.script.core.message import Animation, Audio, Contact, Document, Image, Invoice, Keyboard, Location, Message, Poll, PollOption, Video
+from dff.script.core.context import Context
+from dff.script.core.message import Animation, Audio, Button, Contact, Document, Image, Invoice, Keyboard, Location, Message, Poll, PollOption, Video
 
 
 def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma: no cover
@@ -41,31 +43,30 @@ def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma
     if update.document is not None:
         message.attachments += [Document(source=HttpUrl(update.document.file_id))]
 
-    message.original_message = update
     return message
 
 
-def _create_keyboard(buttons: Sequence[Sequence[str]]) -> Optional[InlineKeyboardMarkup]:
+def _create_keyboard(buttons: Sequence[Sequence[Button]]) -> Optional[InlineKeyboardMarkup]:
     button_list = None
     if len(buttons) > 0:
-        button_list = [[InlineKeyboardButton(button) for button in row] for row in buttons]
+        button_list = [[InlineKeyboardButton(text=button.text, callback_data=button.data) for button in row] for row in buttons]
     if button_list is None:
         return None
     else:
         return InlineKeyboardMarkup(button_list)
 
 
-async def cast_message_to_telegram_and_send(update: TelegramMessage, message: Message) -> None:  # pragma: no cover
+async def cast_message_to_telegram_and_send(bot: ExtBot, chat_id: int, message: Message) -> None:  # pragma: no cover
     buttons = list()
     if message.attachments is not None:
         files = list()
         for attachment in message.attachments:
             if isinstance(attachment, Location):
-                await update.reply_location(attachment.latitude, attachment.longitude, reply_markup=_create_keyboard(buttons))
+                await bot.send_location(chat_id, attachment.latitude, attachment.longitude, reply_markup=_create_keyboard(buttons))
             if isinstance(attachment, Contact):
-                await update.reply_contact(attachment.phone_number, attachment.first_name, attachment.last_name, reply_markup=_create_keyboard(buttons))
+                await bot.send_contact(chat_id, attachment.phone_number, attachment.first_name, attachment.last_name, reply_markup=_create_keyboard(buttons))
             if isinstance(attachment, Poll):
-                await update.reply_poll(attachment.question, [option.text for option in attachment.options], reply_markup=_create_keyboard(buttons))
+                await bot.send_poll(chat_id, attachment.question, [option.text for option in attachment.options], reply_markup=_create_keyboard(buttons))
             if isinstance(attachment, Audio):
                 attachment_bytes = attachment.get_bytes()
                 if attachment_bytes is not None:
@@ -89,28 +90,38 @@ async def cast_message_to_telegram_and_send(update: TelegramMessage, message: Me
             if isinstance(attachment, Keyboard):
                 buttons = attachment.buttons
         if len(files > 0):
-            await update.reply_media_group(files, caption=message.text)
+            await bot.send_media_group(chat_id, files, caption=message.text)
     elif message.text is not None:
-        await update.reply_text(message.text, reply_markup=_create_keyboard(buttons))
+        await bot.send_message(chat_id, message.text, reply_markup=_create_keyboard(buttons))
 
 
-class AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
+class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
     def __init__(self, token: str) -> None:
         self.application = Application.builder().token(token).build()
         self.application.add_handler(MessageHandler(ALL, self.on_message))
+        self.application.add_handler(CallbackQueryHandler(self.on_callback))
 
     async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        if update.effective_user is not None and update.message is not None:
+        if update.effective_chat is not None and update.message is not None:
             message = extract_message_from_telegram(update.message)
-            resp = self.callback(message, update.effective_user.id)
+            message.original_message = update
+            resp = self.callback(message, update.effective_chat.id)
             if resp.last_response is not None:
-                await cast_message_to_telegram_and_send(update.message, resp.last_response)
+                await cast_message_to_telegram_and_send(self.application.bot, update.effective_chat.id, resp.last_response)
+
+    async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        if update.effective_chat is not None and update.callback_query is not None:
+            message = Message(text=update.callback_query.data)
+            message.original_message = update
+            resp = self.callback(message, update.effective_chat.id)
+            if resp.last_response is not None:
+                await cast_message_to_telegram_and_send(self.application.bot, update.effective_chat.id, resp.last_response)
 
     async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
         self.callback = callback
 
 
-class PollingTelegramInterface(AbstractTelegramInterface):  # pragma: no cover
+class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
     def __init__(self, token: str, interval: int = 2, timeout: int = 20) -> None:
         super().__init__(token)
         self.interval = interval
@@ -121,7 +132,7 @@ class PollingTelegramInterface(AbstractTelegramInterface):  # pragma: no cover
         self.application.run_polling(poll_interval=self.interval, timeout=self.timeout, allowed_updates=Update.ALL_TYPES)
 
 
-class CallbackTelegramInterface(AbstractTelegramInterface):  # pragma: no cover
+class CallbackTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
     def __init__(self, token: str, host: str = "localhost", port: int = 844):
         super().__init__(token)
         self.listen = host
@@ -130,3 +141,15 @@ class CallbackTelegramInterface(AbstractTelegramInterface):  # pragma: no cover
     async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
         await super().connect(callback, *args, **kwargs)
         self.application.run_webhook(listen=self.listen, port=self.port, allowed_updates=Update.ALL_TYPES)
+
+
+def telegram_condition(func: Callable[[Update], bool]):
+
+    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
+        last_request = ctx.last_request
+        if last_request is None:
+            return False
+        original_message = cast(Update, last_request.original_message)
+        return func(original_message)
+
+    return condition

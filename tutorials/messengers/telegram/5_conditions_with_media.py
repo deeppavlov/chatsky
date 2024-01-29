@@ -17,24 +17,22 @@ like Attachment, Audio, Button, Image, etc.
 
 # %%
 import os
+from typing import cast
 
-from telebot.types import Message
+from pydantic import HttpUrl
+from telegram import Update, Message as TelegramMessage
 
 import dff.script.conditions as cnd
 from dff.script import Context, TRANSITIONS, RESPONSE
-from dff.script.core.message import Image, Attachments
-from dff.messengers.telegram import (
-    PollingTelegramInterface,
-    TelegramMessage,
-    telegram_condition,
-)
+from dff.script.core.message import Message, Image
+from dff.messengers.telegram import PollingTelegramInterface, telegram_condition
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
 
 
 # %%
 
-picture_url = "https://avatars.githubusercontent.com/u/29918795?s=200&v=4"
+picture_url = HttpUrl("https://avatars.githubusercontent.com/u/29918795?s=200&v=4")
 
 
 # %% [markdown]
@@ -53,25 +51,31 @@ script = {
     "root": {
         "start": {
             TRANSITIONS: {
-                ("pics", "ask_picture"): telegram_condition(
-                    commands=["start", "restart"]
+                ("pics", "ask_picture"): cnd.any(
+                    [
+                        cnd.exact_match(Message(text="start")),
+                        cnd.exact_match(Message(text="restart")),
+                    ]
                 )
             },
         },
         "fallback": {
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Finishing test, send /restart command to restart"
             ),
             TRANSITIONS: {
-                ("pics", "ask_picture"): telegram_condition(
-                    commands=["start", "restart"]
+                ("pics", "ask_picture"): cnd.any(
+                    [
+                        cnd.exact_match(Message(text="start")),
+                        cnd.exact_match(Message(text="restart")),
+                    ]
                 )
             },
         },
     },
     "pics": {
         "ask_picture": {
-            RESPONSE: TelegramMessage(text="Send me a picture"),
+            RESPONSE: Message(text="Send me a picture"),
             TRANSITIONS: {
                 ("pics", "send_one"): cnd.any(
                     [
@@ -79,36 +83,41 @@ script = {
                         # both in 'photo' and 'document' fields.
                         # We should consider both cases
                         # when we check the message for media.
-                        telegram_condition(content_types=["photo"]),
                         telegram_condition(
-                            func=lambda message: (
+                            func=lambda update: (
+                                update.message is not None
+                                and len(update.message.photo) > 0
+                            )
+                        ),
+                        telegram_condition(
+                            func=lambda update: (
                                 # check attachments in message properties
-                                message.document
-                                and message.document.mime_type == "image/jpeg"
-                            ),
-                            content_types=["document"],
+                                update.message is not None
+                                and update.message.document is not None
+                                and update.message.document.mime_type == "image/jpeg"
+                            )
                         ),
                     ]
                 ),
                 ("pics", "send_many"): telegram_condition(
-                    content_types=["text"]
+                    func=lambda upd: upd.message is not None and upd.message.text is not None
                 ),
                 ("pics", "ask_picture"): cnd.true(),
             },
         },
         "send_one": {
             # An HTTP path or a path to a local file can be used here.
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Here's my picture!",
-                attachments=Attachments(files=[Image(source=picture_url)]),
+                attachments=[Image(source=picture_url)],
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
-            RESPONSE: TelegramMessage(
+            RESPONSE: Message(
                 text="Look at my pictures!",
                 # An HTTP path or a path to a local file can be used here.
-                attachments=Attachments(files=[Image(source=picture_url)] * 2),
+                attachments=list(tuple([Image(source=picture_url)] * 2)),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -119,69 +128,71 @@ script = {
 # testing
 happy_path = (
     (
-        TelegramMessage(text="/start"),
-        TelegramMessage(text="Send me a picture"),
+        Message(text="/start"),
+        Message(text="Send me a picture"),
     ),
     (
-        TelegramMessage(
-            attachments=Attachments(files=[Image(source=picture_url)])
+        Message(
+            attachments=[Image(source=picture_url)]
         ),
-        TelegramMessage(
+        Message(
             text="Here's my picture!",
-            attachments=Attachments(files=[Image(source=picture_url)]),
+            attachments=[Image(source=picture_url)],
         ),
     ),
     (
-        TelegramMessage(text="ok"),
-        TelegramMessage(
+        Message(text="ok"),
+        Message(
             text="Finishing test, send /restart command to restart"
         ),
     ),
     (
-        TelegramMessage(text="/restart"),
-        TelegramMessage(text="Send me a picture"),
+        Message(text="/restart"),
+        Message(text="Send me a picture"),
     ),
     (
-        TelegramMessage(text="No"),
-        TelegramMessage(
+        Message(text="No"),
+        Message(
             text="Look at my pictures!",
-            attachments=Attachments(files=[Image(source=picture_url)] * 2),
+            attachments=list(tuple([Image(source=picture_url)] * 2)),
         ),
     ),
     (
-        TelegramMessage(text="ok"),
-        TelegramMessage(
+        Message(text="ok"),
+        Message(
             text="Finishing test, send /restart command to restart"
         ),
     ),
     (
-        TelegramMessage(text="/restart"),
-        TelegramMessage(text="Send me a picture"),
+        Message(text="/restart"),
+        Message(text="Send me a picture"),
     ),
 )
 
 
 # %%
-def extract_data(ctx: Context, _: Pipeline):  # A function to extract data with
+async def extract_data(ctx: Context, _: Pipeline):  # A function to extract data with
     message = ctx.last_request
     if message is None:
         return
-    update = getattr(message, "update", None)
-    if update is None:
+    original_update = cast(Update, message.original_message)
+    if original_update is None:
         return
-    if not isinstance(update, Message):
+    if not isinstance(original_update, Update):
+        return
+    original_message = original_update.message
+    if not isinstance(original_message, TelegramMessage):
+        return
+    if original_message is None:
         return
     if (
         # check attachments in update properties
-        not update.photo
-        and not (update.document and update.document.mime_type == "image/jpeg")
+        len(original_message.photo) > 0
+        and not (original_message.document is not None and original_message.document.mime_type == "image/jpeg")
     ):
         return
-    photo = update.document or update.photo[-1]
-    file = interface.messenger.get_file(photo.file_id)
-    result = interface.messenger.download_file(file.file_path)
-    with open("photo.jpg", "wb+") as new_file:
-        new_file.write(result)
+    photo = original_message.document or original_message.photo[-1]
+    await (await photo.get_file()).download_to_drive("photo.jpg")
     return
 
 

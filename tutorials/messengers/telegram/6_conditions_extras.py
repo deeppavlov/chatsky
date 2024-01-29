@@ -19,13 +19,9 @@ import os
 
 from dff.script import TRANSITIONS, RESPONSE, GLOBAL
 import dff.script.conditions as cnd
-from dff.messengers.telegram import (
-    PollingTelegramInterface,
-    TelegramMessage,
-    telegram_condition,
-    UpdateType,
-)
+from dff.messengers.telegram import PollingTelegramInterface, telegram_condition
 from dff.pipeline import Pipeline
+from dff.script.core.message import Message
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -67,38 +63,41 @@ script = {
                 [
                     # say hi when invited to a chat
                     telegram_condition(
-                        update_type=UpdateType.CHAT_JOIN_REQUEST,
-                        func=lambda x: True,
+                        func=lambda x: x.chat_join_request is not None,
                     ),
                     # say hi when someone enters the chat
                     telegram_condition(
-                        update_type=UpdateType.MY_CHAT_MEMBER,
-                        func=lambda x: True,
+                        func=lambda x: x.my_chat_member is not None,
                     ),
                 ]
             ),
             # send a message when inline query is received
             ("greeting_flow", "node2"): telegram_condition(
-                update_type=UpdateType.INLINE_QUERY,
+                func=lambda x: x.inline_query is not None,
             ),
         },
     },
     "greeting_flow": {
         "start_node": {
             TRANSITIONS: {
-                "node1": telegram_condition(commands=["start", "restart"])
+                "node1": cnd.any(
+                    [
+                        cnd.exact_match(Message(text="start")),
+                        cnd.exact_match(Message(text="restart")),
+                    ]
+                )
             },
         },
         "node1": {
-            RESPONSE: TelegramMessage(text="Hi"),
+            RESPONSE: Message(text="Hi"),
             TRANSITIONS: {"start_node": cnd.true()},
         },
         "node2": {
-            RESPONSE: TelegramMessage(text="Inline query received."),
+            RESPONSE: Message(text="Inline query received."),
             TRANSITIONS: {"start_node": cnd.true()},
         },
         "fallback_node": {
-            RESPONSE: TelegramMessage(text="Ooops"),
+            RESPONSE: Message(text="Ooops"),
         },
     },
 }

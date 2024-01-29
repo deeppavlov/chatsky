@@ -164,13 +164,31 @@ class Document(DataAttachment):
     pass
 
 
-class Keyboard(DataModel):
+class Button(DataModel):
+    """Represents a button of an inline keyboard."""
+
+    text: str
+    data: Optional[str] = None
+
+    @field_validator("data")
+    @classmethod
+    def data_length_should_be_constrained(cls, value: Optional[str]) -> Optional[str]:
+        if value is None:
+            return value
+        value_size = len(value.encode("utf-8"))
+        if 1 >= value_size >= 64 and value:
+            return value
+        else:
+            raise ValueError(f"Unexpected data length: {value_size} bytes")
+
+
+class Keyboard(Attachment):
     """
-    This class is a DataModel that represents a keyboard object
+    This class is an Attachment that represents a keyboard object
     that can be used for a chatbot or messaging application.
     """
 
-    buttons: List[List[str]] = Field(default_factory=list, min_length=1)
+    buttons: List[List[Button]] = Field(default_factory=list, min_length=1)
 
     def __eq__(self, other):
         if isinstance(other, Keyboard):

@@ -14,9 +14,7 @@ for more information.
 # %%
 import os
 
-from dff.messengers.telegram import (
-    CallbackTelegramInterface,
-)
+from dff.messengers.telegram import CallbackTelegramInterface
 from dff.pipeline import Pipeline
 from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 from dff.utils.testing.common import is_interactive_mode
