@@ -4,12 +4,15 @@ Interface
 This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
+from pathlib import Path
+from tempfile import gettempdir
 from typing import Callable, Optional, Sequence, cast
-from pydantic import HttpUrl
+from pydantic import FilePath
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, Update, Message as TelegramMessage
 from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
 from telegram.ext.filters import ALL
+from telegram._files._basemedium import _BaseMedium
 
 from dff.messengers.common import MessengerInterface
 from dff.pipeline import Pipeline
@@ -18,7 +21,14 @@ from dff.script.core.context import Context
 from dff.script.core.message import Animation, Audio, Button, Contact, Document, Image, Invoice, Keyboard, Location, Message, Poll, PollOption, Video
 
 
-def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma: no cover
+async def _download_telegram_file(file: _BaseMedium) -> FilePath:  # pragma: no cover
+    file_name = Path(gettempdir()) / file.file_unique_id
+    if not file_name.exists():
+        await (await file.get_file()).download_to_drive(file_name)
+    return FilePath(file_name)
+
+
+async def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma: no cover
     message = Message()
     message.attachments = list()
 
@@ -33,23 +43,23 @@ def extract_message_from_telegram(update: TelegramMessage) -> Message:  # pragma
     if update.poll is not None:
         message.attachments += [Poll(question=update.poll.question, options=[PollOption(text=option.text, votes=option.voter_count) for option in update.poll.options])]
     if update.audio is not None:
-        message.attachments += [Audio(source=HttpUrl(update.audio.file_id))]
+        message.attachments += [Audio(source=await _download_telegram_file(update.audio))]
     if update.video is not None:
-        message.attachments += [Video(source=HttpUrl(update.video.file_id))]
+        message.attachments += [Video(source=await _download_telegram_file(update.video))]
     if update.animation is not None:
-        message.attachments += [Animation(source=HttpUrl(update.animation.file_id))]
+        message.attachments += [Animation(source=await _download_telegram_file(update.animation))]
     if len(update.photo) > 0:
-        message.attachments += [Image(source=HttpUrl(photo.file_id)) for photo in update.photo]
+        message.attachments += [Image(source=await _download_telegram_file(photo)) for photo in update.photo]
     if update.document is not None:
-        message.attachments += [Document(source=HttpUrl(update.document.file_id))]
+        message.attachments += [Document(source=await _download_telegram_file(update.document))]
 
     return message
 
 
-def _create_keyboard(buttons: Sequence[Sequence[Button]]) -> Optional[InlineKeyboardMarkup]:
+def _create_keyboard(buttons: Sequence[Sequence[Button]]) -> Optional[InlineKeyboardMarkup]:  # pragma: no cover
     button_list = None
     if len(buttons) > 0:
-        button_list = [[InlineKeyboardButton(text=button.text, callback_data=button.data) for button in row] for row in buttons]
+        button_list = [[InlineKeyboardButton(text=button.text, callback_data=button.data if button.data is not None else button.text) for button in row] for row in buttons]
     if button_list is None:
         return None
     else:
@@ -63,10 +73,13 @@ async def cast_message_to_telegram_and_send(bot: ExtBot, chat_id: int, message: 
         for attachment in message.attachments:
             if isinstance(attachment, Location):
                 await bot.send_location(chat_id, attachment.latitude, attachment.longitude, reply_markup=_create_keyboard(buttons))
+                return
             if isinstance(attachment, Contact):
                 await bot.send_contact(chat_id, attachment.phone_number, attachment.first_name, attachment.last_name, reply_markup=_create_keyboard(buttons))
+                return
             if isinstance(attachment, Poll):
                 await bot.send_poll(chat_id, attachment.question, [option.text for option in attachment.options], reply_markup=_create_keyboard(buttons))
+                return
             if isinstance(attachment, Audio):
                 attachment_bytes = attachment.get_bytes()
                 if attachment_bytes is not None:
@@ -89,9 +102,10 @@ async def cast_message_to_telegram_and_send(bot: ExtBot, chat_id: int, message: 
                     files += [InputMediaDocument(attachment_bytes)]
             if isinstance(attachment, Keyboard):
                 buttons = attachment.buttons
-        if len(files > 0):
+        if len(files) > 0:
             await bot.send_media_group(chat_id, files, caption=message.text)
-    elif message.text is not None:
+            return
+    if message.text is not None:
         await bot.send_message(chat_id, message.text, reply_markup=_create_keyboard(buttons))
 
 
@@ -103,9 +117,9 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
 
     async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         if update.effective_chat is not None and update.message is not None:
-            message = extract_message_from_telegram(update.message)
+            message = await extract_message_from_telegram(update.message)
             message.original_message = update
-            resp = self.callback(message, update.effective_chat.id)
+            resp = await self.callback(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await cast_message_to_telegram_and_send(self.application.bot, update.effective_chat.id, resp.last_response)
 
@@ -113,7 +127,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.effective_chat is not None and update.callback_query is not None:
             message = Message(text=update.callback_query.data)
             message.original_message = update
-            resp = self.callback(message, update.effective_chat.id)
+            resp = await self.callback(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await cast_message_to_telegram_and_send(self.application.bot, update.effective_chat.id, resp.last_response)
 
@@ -143,11 +157,11 @@ class CallbackTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
         self.application.run_webhook(listen=self.listen, port=self.port, allowed_updates=Update.ALL_TYPES)
 
 
-def telegram_condition(func: Callable[[Update], bool]):
+def telegram_condition(func: Callable[[Update], bool]):  # pragma: no cover
 
     def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
         last_request = ctx.last_request
-        if last_request is None:
+        if last_request is None or last_request.original_message is None:
             return False
         original_message = cast(Update, last_request.original_message)
         return func(original_message)

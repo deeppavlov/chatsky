@@ -176,7 +176,7 @@ class Button(DataModel):
         if value is None:
             return value
         value_size = len(value.encode("utf-8"))
-        if 1 >= value_size >= 64 and value:
+        if 1 <= value_size <= 64 and value:
             return value
         else:
             raise ValueError(f"Unexpected data length: {value_size} bytes")

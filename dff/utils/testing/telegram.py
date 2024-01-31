@@ -11,16 +11,9 @@ from tempfile import TemporaryDirectory
 from pathlib import Path
 from copy import deepcopy
 
-from telethon.tl.types import ReplyKeyboardHide
-from telethon import TelegramClient
-from telethon.types import User
-from telethon.custom import Message as TlMessage
-from telebot import types
-
 from dff.pipeline.pipeline.pipeline import Pipeline
-from dff.script.core.message import Message, Attachments, Attachment, Button, Location
-from dff.messengers.telegram.interface import PollingTelegramInterface
-from dff.messengers.telegram.message import TelegramMessage, TelegramUI, RemoveKeyboard, _ClickButton
+from dff.script.core.message import Message, Attachment, Location
+from dff.messengers.telegram import PollingTelegramInterface
 
 
 def replace_click_button(happy_path):
@@ -34,12 +27,12 @@ def replace_click_button(happy_path):
     result = deepcopy(happy_path)
     for index in range(len(happy_path)):
         user_request = happy_path[index][0]
-        if not isinstance(user_request, TelegramMessage):
+        if not isinstance(user_request, Message):
             continue
         if isinstance(user_request.callback_query, _ClickButton):
             callback_query = None
             for _, bot_response in reversed(happy_path[:index]):
-                if isinstance(bot_response, TelegramMessage) and bot_response.ui is not None and callback_query is None:
+                if isinstance(bot_response, Message) and bot_response.ui is not None and callback_query is None:
                     callback_query = bot_response.ui.buttons[user_request.callback_query.button_index].payload
             if callback_query is None:
                 raise RuntimeError("Bot response with buttons not found.")
@@ -98,7 +91,7 @@ class TelegramTesting:  # pragma: no cover
         self.bot = bot
         """Bot user (to know whom to send messages to from client)."""
 
-    async def send_message(self, message: TelegramMessage, last_bot_messages: List[TlMessage]):
+    async def send_message(self, message: Message, last_bot_messages: List[TlMessage]):
         """
         Send a message from client to bot.
         If the message contains `callback_query`, only press the button, ignore other fields.

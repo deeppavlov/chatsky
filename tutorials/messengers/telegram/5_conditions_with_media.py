@@ -53,8 +53,8 @@ script = {
             TRANSITIONS: {
                 ("pics", "ask_picture"): cnd.any(
                     [
-                        cnd.exact_match(Message(text="start")),
-                        cnd.exact_match(Message(text="restart")),
+                        cnd.exact_match(Message(text="/start")),
+                        cnd.exact_match(Message(text="/restart")),
                     ]
                 )
             },
@@ -66,8 +66,8 @@ script = {
             TRANSITIONS: {
                 ("pics", "ask_picture"): cnd.any(
                     [
-                        cnd.exact_match(Message(text="start")),
-                        cnd.exact_match(Message(text="restart")),
+                        cnd.exact_match(Message(text="/start")),
+                        cnd.exact_match(Message(text="/restart")),
                     ]
                 )
             },
@@ -171,38 +171,11 @@ happy_path = (
 
 
 # %%
-async def extract_data(ctx: Context, _: Pipeline):  # A function to extract data with
-    message = ctx.last_request
-    if message is None:
-        return
-    original_update = cast(Update, message.original_message)
-    if original_update is None:
-        return
-    if not isinstance(original_update, Update):
-        return
-    original_message = original_update.message
-    if not isinstance(original_message, TelegramMessage):
-        return
-    if original_message is None:
-        return
-    if (
-        # check attachments in update properties
-        len(original_message.photo) > 0
-        and not (original_message.document is not None and original_message.document.mime_type == "image/jpeg")
-    ):
-        return
-    photo = original_message.document or original_message.photo[-1]
-    await (await photo.get_file()).download_to_drive("photo.jpg")
-    return
-
-
-# %%
 pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
     messenger_interface=interface,
-    pre_services=[extract_data],
 )
 
 

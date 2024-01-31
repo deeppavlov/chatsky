@@ -62,8 +62,8 @@ script = {
             TRANSITIONS: {
                 "node1": cnd.any(
                     [
-                        cnd.exact_match(Message(text="start")),
-                        cnd.exact_match(Message(text="restart")),
+                        cnd.exact_match(Message(text="/start")),
+                        cnd.exact_match(Message(text="/restart")),
                     ]
                 )
             },
@@ -109,8 +109,8 @@ script = {
             TRANSITIONS: {
                 "node1": cnd.any(
                     [
-                        cnd.exact_match(Message(text="start")),
-                        cnd.exact_match(Message(text="restart")),
+                        cnd.exact_match(Message(text="/start")),
+                        cnd.exact_match(Message(text="/restart")),
                     ]
                 )
             },

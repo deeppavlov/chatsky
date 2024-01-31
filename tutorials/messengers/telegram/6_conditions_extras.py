@@ -59,17 +59,9 @@ or in the docs for the `telebot` library.
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("greeting_flow", "node1"): cnd.any(
-                [
-                    # say hi when invited to a chat
-                    telegram_condition(
-                        func=lambda x: x.chat_join_request is not None,
-                    ),
-                    # say hi when someone enters the chat
-                    telegram_condition(
-                        func=lambda x: x.my_chat_member is not None,
-                    ),
-                ]
+            # say hi when someone enters the chat
+            ("greeting_flow", "node1"): telegram_condition(
+                func=lambda x: x.message is not None and x.message.new_chat_members is not None,
             ),
             # send a message when inline query is received
             ("greeting_flow", "node2"): telegram_condition(
@@ -82,8 +74,8 @@ script = {
             TRANSITIONS: {
                 "node1": cnd.any(
                     [
-                        cnd.exact_match(Message(text="start")),
-                        cnd.exact_match(Message(text="restart")),
+                        cnd.exact_match(Message(text="/start")),
+                        cnd.exact_match(Message(text="/restart")),
                     ]
                 )
             },
