@@ -22,26 +22,19 @@ from dff.script.core.message import Animation, Audio, Button, Contact, DataAttac
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
-    def __init__(self, token: str, download_all_attachments: bool) -> None:
+    def __init__(self, token: str) -> None:
         self.application = Application.builder().token(token).build()
         self.application.add_handler(MessageHandler(ALL, self.on_message))
         self.application.add_handler(CallbackQueryHandler(self.on_callback))
-        self.download_all = download_all_attachments
 
-    async def download_telegram_file(self, file: DataAttachment) -> Optional[FilePath]:  # pragma: no cover
-        if file.title is not None and file.id is not None:
-            file_name = Path(gettempdir()) / str(file.title)
+    async def populate_attachment(self, attachment: DataAttachment) -> None:  # pragma: no cover
+        if attachment.title is not None and attachment.id is not None:
+            file_name = Path(gettempdir()) / str(attachment.title)
             if not file_name.exists():
-                await (await self.application.bot.get_file(file.id)).download_to_drive(file_name)
-            return FilePath(file_name)
+                await (await self.application.bot.get_file(attachment.id)).download_to_drive(file_name)
+            attachment.source = FilePath(file_name)
         else:
-            return None
-
-    async def _process_attachment(self, attachment: _BaseMedium, download: bool, cls: Type[DataAttachment]) -> DataAttachment:  # pragma: no cover
-        data_attachment = cls(id=attachment.file_id, title=attachment.file_unique_id)
-        if download:
-            data_attachment.source = await self.download_telegram_file(data_attachment)
-        return data_attachment
+            raise ValueError(f"For attachment {attachment} title or id is not defined!")
 
     async def extract_message_from_telegram(self, update: TelegramMessage) -> Message:  # pragma: no cover
         message = Message()
@@ -58,15 +51,15 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.poll is not None:
             message.attachments += [Poll(question=update.poll.question, options=[PollOption(text=option.text, votes=option.voter_count) for option in update.poll.options])]
         if update.audio is not None:
-            message.attachments += [await self._process_attachment(update.audio, self.download_all, Audio)]
+            message.attachments += [Audio(id=update.audio.file_id, title=update.audio.file_unique_id)]
         if update.video is not None:
-            message.attachments += [await self._process_attachment(update.video, self.download_all, Video)]
+            message.attachments += [Video(id=update.video.file_id, title=update.video.file_unique_id)]
         if update.animation is not None:
-            message.attachments += [await self._process_attachment(update.animation, self.download_all, Animation)]
+            message.attachments += [Animation(id=update.animation.file_id, title=update.animation.file_unique_id)]
         if len(update.photo) > 0:
-            message.attachments += [await self._process_attachment(picture, self.download_all, Image) for picture in update.photo]
+            message.attachments += [Image(id=picture.file_id, title=picture.file_unique_id) for picture in update.photo]
         if update.document is not None:
-            message.attachments += [await self._process_attachment(update.document, self.download_all, Document)]
+            message.attachments += [Document(id=update.document.file_id, title=update.document.file_unique_id)]
 
         return message
 
@@ -94,23 +87,23 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                     await bot.send_poll(chat_id, attachment.question, [option.text for option in attachment.options], reply_markup=self._create_keyboard(buttons))
                     return
                 if isinstance(attachment, Audio):
-                    attachment_bytes = attachment.get_bytes()
+                    attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         files += [InputMediaAudio(attachment_bytes)]
                 if isinstance(attachment, Video):
-                    attachment_bytes = attachment.get_bytes()
+                    attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         files += [InputMediaVideo(attachment_bytes)]
                 if isinstance(attachment, Animation):
-                    attachment_bytes = attachment.get_bytes()
+                    attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         files += [InputMediaAnimation(attachment_bytes)]
                 if isinstance(attachment, Image):
-                    attachment_bytes = attachment.get_bytes()
+                    attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         files += [InputMediaPhoto(attachment_bytes)]
                 if isinstance(attachment, Document):
-                    attachment_bytes = attachment.get_bytes()
+                    attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         files += [InputMediaDocument(attachment_bytes)]
                 if isinstance(attachment, Keyboard):
@@ -142,8 +135,8 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
 
 
 class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
-    def __init__(self, token: str, download_all_attachments: bool = False, interval: int = 2, timeout: int = 20) -> None:
-        super().__init__(token, download_all_attachments)
+    def __init__(self, token: str, interval: int = 2, timeout: int = 20) -> None:
+        super().__init__(token)
         self.interval = interval
         self.timeout = timeout
 
@@ -153,8 +146,8 @@ class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
 
 
 class CallbackTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
-    def __init__(self, token: str, download_all_attachments: bool = False, host: str = "localhost", port: int = 844):
-        super().__init__(token, download_all_attachments)
+    def __init__(self, token: str, host: str = "localhost", port: int = 844):
+        super().__init__(token)
         self.listen = host
         self.port = port
     

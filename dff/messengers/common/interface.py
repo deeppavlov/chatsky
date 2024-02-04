@@ -13,6 +13,7 @@ from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
 from dff.script import Context, Message
 from dff.messengers.common.types import PollingInterfaceLoopFunction
+from dff.script.core.message import DataAttachment
 
 if TYPE_CHECKING:
     from dff.pipeline.types import PipelineRunnerFunction
@@ -35,6 +36,10 @@ class MessengerInterface(abc.ABC):
         :param pipeline_runner: A function that should process user request and return context;
             usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         """
+        raise NotImplementedError
+
+    @abc.abstractmethod
+    async def populate_attachment(self, attachment: DataAttachment) -> None:
         raise NotImplementedError
 
 

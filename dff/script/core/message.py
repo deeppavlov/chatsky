@@ -11,6 +11,8 @@ from urllib.request import urlopen
 
 from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
 
+from dff.messengers.common.interface import MessengerInterface
+
 
 class Session(Enum):
     """
@@ -98,23 +100,24 @@ class DataAttachment(Attachment):
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
 
-    def get_bytes(self) -> Optional[bytes]:
+    async def get_bytes(self, interface: MessengerInterface) -> Optional[bytes]:
         if self.source is None:
-            return None
+            await interface.populate_attachment(self)
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
-        else:
+        elif isinstance(self.source, HttpUrl):
             with urlopen(self.source.unicode_string()) as file:
                 return file.read()
+        else:
+            return None
 
     def __eq__(self, other):
         if isinstance(other, DataAttachment):
-            if self.title != other.title:
-                return False
             if self.id != other.id:
                 return False
-            return self.get_bytes() == other.get_bytes()
+            if self.title != other.title:
+                return False
         return NotImplemented
 
     @model_validator(mode="before")

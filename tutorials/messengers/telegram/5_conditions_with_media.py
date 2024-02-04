@@ -43,7 +43,7 @@ you can use the `content_types` parameter of the `telegram_condition`.
 
 
 # %%
-interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"], download_all_attachments=True)
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
