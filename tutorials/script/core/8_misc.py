@@ -37,7 +37,7 @@ def custom_response(ctx: Context, _: Pipeline) -> Message:
     current_node = ctx.current_node
     return Message(
         text=f"ctx.last_label={ctx.last_label}: "
-        f"current_node.misc={current_node.misc}"
+        f"current_node.misc={current_node.misc if current_node is not None else None}"
     )
 
 

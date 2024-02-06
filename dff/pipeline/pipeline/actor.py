@@ -22,11 +22,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 
 .. figure:: /_static/drawio/dfe/user_actor.png
 """
-<<<<<<< HEAD
-import inspect
-=======
 from __future__ import annotations
->>>>>>> dev
 import logging
 import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
@@ -38,22 +34,22 @@ from dff.script.core.message import Message
 
 from dff.script.core.context import Context
 from dff.script.core.script import Script, Node
-from dff.script.core.normalization import normalize_label
+from dff.script.core.normalization import normalize_label, normalize_response
 from dff.script.core.keywords import GLOBAL, LOCAL
 from dff.pipeline.service.utils import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
+    import inspect
     from dff.pipeline.pipeline.pipeline import Pipeline
 
-
-USER_FUNCTION_TYPES = {
-    "label": ((Context, Pipeline, Any, Any), None),
-    "response": ((Context, Pipeline, Any, Any), Message),
-    "condition": ((Context, Pipeline, Any, Any), bool),
-    "processing": ((Context, Pipeline, Any, Any), Context),
-}
+    USER_FUNCTION_TYPES = {
+        "label": ((Context, Pipeline), None),
+        "response": ((Context, Pipeline), Message),
+        "condition": ((Context, Pipeline), bool),
+        "processing": ((Context, Pipeline), Context),
+    }
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """
@@ -106,22 +102,23 @@ def validate_callable(
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
         error_handler(error_msgs, msg, None, logging_flag)
-    for idx, param in enumerate(params):
-        if param.annotation != inspect.Parameter.empty and param.annotation != arguments_type[idx]:
+    if TYPE_CHECKING:
+        for idx, param in enumerate(params):
+            if param.annotation != inspect.Parameter.empty and param.annotation != arguments_type[idx]:
+                msg = (
+                    f"Incorrect {idx} parameter annotation of {name}={callable.__name__}: "
+                    f"should be {arguments_type[idx]}, found {param.annotation}, "
+                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                )
+                error_handler(error_msgs, msg, None, logging_flag)
+        return_annotation = signature.return_annotation
+        if return_annotation != inspect.Parameter.empty and return_annotation != return_type:
             msg = (
-                f"Incorrect {idx} parameter annotation of {name}={callable.__name__}: "
-                f"should be {arguments_type[idx]}, found {param.annotation}, "
+                f"Incorrect return type annotation of {name}={callable.__name__}: "
+                f"should be {return_type}, found {return_annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None, logging_flag)
-    return_annotation = signature.return_annotation
-    if return_annotation != inspect.Parameter.empty and return_annotation != return_type:
-        msg = (
-            f"Incorrect return type annotation of {name}={callable.__name__}: "
-            f"should be {return_type}, found {return_annotation}, "
-            f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-        )
-        error_handler(error_msgs, msg, None, logging_flag)
     return error_msgs
 
 
@@ -493,7 +490,6 @@ class Actor:
                         if msg is not None:
                             error_handler(error_msgs, msg, None, logging_flag)
 
-<<<<<<< HEAD
                 # validate responses
                 if callable(node.response):
                     error_msgs += validate_callable(
@@ -502,36 +498,6 @@ class Actor:
                         flow_name,
                         node_name,
                         logging_flag,
-=======
-        error_msgs = []
-        for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
-            ctx = Context()
-            ctx.validation = True
-            ctx.add_request(Message(text="text"))
-
-            label = label(ctx, pipeline) if callable(label) else normalize_label(label, flow_label)
-
-            # validate labeling
-            try:
-                node = self.script[label[0]][label[1]]
-            except Exception as exc:
-                msg = (
-                    f"Could not find node with label={label}, "
-                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                )
-                error_handler(error_msgs, msg, exc, verbose)
-                break
-
-            # validate responsing
-            response_func = normalize_response(node.response)
-            try:
-                response_result = asyncio.run(wrap_sync_function_in_async(response_func, ctx, pipeline))
-                if not isinstance(response_result, Message):
-                    msg = (
-                        "Expected type of response_result is `Message`.\n"
-                        + f"Got type(response_result)={type(response_result)}"
-                        f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
->>>>>>> dev
                     )
                 elif node.response is not None and not isinstance(node.response, Message):
                     msg = (
