@@ -5,25 +5,24 @@ Normalization module is used to normalize all python objects and functions to a 
 that is suitable for script and actor execution process.
 This module contains a basic set of functions for normalizing data in a dialog script.
 """
+from __future__ import annotations
 import logging
-
-from typing import Union, Callable, Any, Dict, Optional, ForwardRef
+from typing import Union, Callable, Optional, TYPE_CHECKING
 
 from .keywords import Keywords
 from .context import Context
 from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
-from pydantic import validate_call
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
-
-Pipeline = ForwardRef("Pipeline")
 
 
 def normalize_label(
     label: NodeLabelType, default_flow_label: LabelType = ""
-) -> Optional[Union[Callable, NodeLabel3Type]]:
+) -> Optional[Union[Callable[[Context, Pipeline], NodeLabel3Type], NodeLabel3Type]]:
     """
     The function that is used for normalization of
     :py:const:`default_flow_label <dff.script.NodeLabelType>`.
@@ -37,9 +36,9 @@ def normalize_label(
     """
     if callable(label):
 
-        def get_label_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> NodeLabel3Type:
+        def get_label_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
             try:
-                new_label = label(ctx, pipeline, *args, **kwargs)
+                new_label = label(ctx, pipeline)
                 new_label = normalize_label(new_label, default_flow_label)
                 flow_label, node_label, _ = new_label
                 node = pipeline.script.get(flow_label, {}).get(node_label)
@@ -67,7 +66,7 @@ def normalize_label(
         return None
 
 
-def normalize_condition(condition: ConditionType) -> Callable:
+def normalize_condition(condition: ConditionType) -> Callable[[Context, Pipeline], bool]:
     """
     The function that is used to normalize `condition`
 
@@ -76,9 +75,9 @@ def normalize_condition(condition: ConditionType) -> Callable:
     """
     if callable(condition):
 
-        def callable_condition_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+        def callable_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
             try:
-                return condition(ctx, pipeline, *args, **kwargs)
+                return condition(ctx, pipeline)
             except Exception as exc:
                 logger.error(f"Exception {exc} of function {condition}", exc_info=exc)
                 return False
@@ -86,11 +85,12 @@ def normalize_condition(condition: ConditionType) -> Callable:
         return callable_condition_handler
 
 
-@validate_call
-def normalize_response(response: Optional[Union[Message, Callable[..., Message]]]) -> Callable[..., Message]:
+def normalize_response(
+    response: Optional[Union[Message, Callable[[Context, "Pipeline"], Message]]]
+) -> Callable[[Context, "Pipeline"], Message]:
     """
-    This function is used to normalize response, if response Callable, it is returned, otherwise
-    response is wrapped to the function and this function is returned.
+    This function is used to normalize response. If the response is a Callable, it is returned, otherwise
+    the response is wrapped in an asynchronous function and this function is returned.
 
     :param response: Response to normalize.
     :return: Function that returns callable response.
@@ -105,33 +105,7 @@ def normalize_response(response: Optional[Union[Message, Callable[..., Message]]
         else:
             raise TypeError(type(response))
 
-        def response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
+        async def response_handler(ctx: Context, pipeline: Pipeline):
             return result
 
         return response_handler
-
-
-@validate_call
-def normalize_processing(processing: Dict[Any, Callable]) -> Callable:
-    """
-    This function is used to normalize processing.
-    It returns function that consecutively applies all preprocessing stages from dict.
-
-    :param processing: Processing which contains all preprocessing stages in a format "PROC_i" -> proc_func_i.
-    :return: Function that consequentially applies all preprocessing stages from dict.
-    """
-    if isinstance(processing, dict):
-
-        def processing_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-            for processing_name, processing_func in processing.items():
-                try:
-                    if processing_func is not None:
-                        ctx = processing_func(ctx, pipeline, *args, **kwargs)
-                except Exception as exc:
-                    logger.error(
-                        f"Exception {exc} for processing_name={processing_name} and processing_func={processing_func}",
-                        exc_info=exc,
-                    )
-            return ctx
-
-        return processing_handler

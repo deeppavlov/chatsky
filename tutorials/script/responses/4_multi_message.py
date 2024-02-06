@@ -4,7 +4,8 @@
 
 This tutorial shows Multi Message usage.
 
-The %mddoclink(api,script.core.message,MultiMessage) represents a combination of several messages.
+The %mddoclink(api,script.core.message,MultiMessage)
+represents a combination of several messages.
 
 Let's do all the necessary imports from DFF.
 """

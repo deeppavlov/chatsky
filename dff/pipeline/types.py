@@ -5,24 +5,47 @@ The Types module contains several classes and special types that are used throug
 The classes and special types in this module can include data models,
 data structures, and other types that are defined for type hinting.
 """
-from abc import ABC
+from __future__ import annotations
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, List, Optional, NewType, Iterable, Any
+from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
 
 from dff.context_storages import DBContextStorage
-from dff.script import Context, ActorStage, NodeLabel2Type, Script
+from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 from pydantic import BaseModel
 
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
+    from dff.pipeline.service.service import Service
+    from dff.pipeline.service.group import ServiceGroup
+    from dff.pipeline.service.extra import _ComponentExtraHandler
+    from dff.messengers.common.interface import MessengerInterface
 
-_ForwardPipeline = NewType("Pipeline", Any)
-_ForwardPipelineComponent = NewType("PipelineComponent", Any)
-_ForwardService = NewType("Service", _ForwardPipelineComponent)
-_ForwardServiceBuilder = NewType("ServiceBuilder", Any)
-_ForwardServiceGroup = NewType("ServiceGroup", _ForwardPipelineComponent)
-_ForwardComponentExtraHandler = NewType("_ComponentExtraHandler", Any)
-_ForwardProvider = NewType("ABCProvider", ABC)
-_ForwardExtraHandlerRuntimeInfo = NewType("ExtraHandlerRuntimeInfo", Any)
+
+class PipelineRunnerFunction(Protocol):
+    """
+    Protocol for pipeline running.
+    """
+
+    def __call__(
+        self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
+        """
+        :param message: User request for pipeline to process.
+        :param ctx_id:
+            ID of the context that the new request belongs to.
+            Optional, None by default.
+            If set to `None`, a new context will be created with `message` being the first request.
+        :param update_ctx_misc:
+            Dictionary to be passed as an argument to `ctx.misc.update`.
+            This argument can be used to store values in the `misc` dictionary before anything else runs.
+            Optional; None by default.
+            If set to `None`, `ctx.misc.update` will not be called.
+        :return:
+            Context instance that pipeline processed.
+            The context instance has the id of `ctx_id`.
+            If `ctx_id` is `None`, context instance has an id generated with `uuid.uuid4`.
+        """
 
 
 @unique
@@ -86,7 +109,7 @@ Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
 """
 
 
-StartConditionCheckerFunction: TypeAlias = Callable[[Context, _ForwardPipeline], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[[Context, "Pipeline"], bool]
 """
 A function type for components `start_conditions`.
 Accepts context and pipeline, returns boolean (whether service can be launched).
@@ -126,8 +149,8 @@ class ServiceRuntimeInfo(BaseModel):
 
 ExtraHandlerFunction: TypeAlias = Union[
     Callable[[Context], Any],
-    Callable[[Context, _ForwardPipeline], Any],
-    Callable[[Context, _ForwardPipeline, _ForwardExtraHandlerRuntimeInfo], Any],
+    Callable[[Context, "Pipeline"], Any],
+    Callable[[Context, "Pipeline", "ExtraHandlerRuntimeInfo"], Any],
 ]
 """
 A function type for creating wrappers (before and after functions).
@@ -151,10 +174,10 @@ Also contains `component` - runtime info of the component this wrapper is attach
 ServiceFunction: TypeAlias = Union[
     Callable[[Context], None],
     Callable[[Context], Awaitable[None]],
-    Callable[[Context, _ForwardPipeline], None],
-    Callable[[Context, _ForwardPipeline], Awaitable[None]],
-    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], None],
-    Callable[[Context, _ForwardPipeline, ServiceRuntimeInfo], Awaitable[None]],
+    Callable[[Context, "Pipeline"], None],
+    Callable[[Context, "Pipeline"], Awaitable[None]],
+    Callable[[Context, "Pipeline", ServiceRuntimeInfo], None],
+    Callable[[Context, "Pipeline", ServiceRuntimeInfo], Awaitable[None]],
 ]
 """
 A function type for creating service handlers.
@@ -164,7 +187,7 @@ Can be both synchronous and asynchronous.
 
 
 ExtraHandlerBuilder: TypeAlias = Union[
-    _ForwardComponentExtraHandler,
+    "_ComponentExtraHandler",
     TypedDict(
         "WrapperDict",
         {
@@ -179,19 +202,19 @@ ExtraHandlerBuilder: TypeAlias = Union[
 A type, representing anything that can be transformed to ExtraHandlers.
 It can be:
 
-- _ForwardComponentExtraHandler object
+- ExtraHandlerFunction object
 - Dictionary, containing keys `timeout`, `asynchronous`, `functions`
 """
 
 
 ServiceBuilder: TypeAlias = Union[
     ServiceFunction,
-    _ForwardService,
+    "Service",
     str,
     TypedDict(
         "ServiceDict",
         {
-            "handler": _ForwardServiceBuilder,
+            "handler": "ServiceBuilder",
             "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
             "timeout": NotRequired[Optional[float]],
@@ -213,8 +236,8 @@ It can be:
 
 
 ServiceGroupBuilder: TypeAlias = Union[
-    List[Union[ServiceBuilder, List[ServiceBuilder], _ForwardServiceGroup]],
-    _ForwardServiceGroup,
+    List[Union[ServiceBuilder, List[ServiceBuilder], "ServiceGroup"]],
+    "ServiceGroup",
 ]
 """
 A type, representing anything that can be transformed to service group.
@@ -228,12 +251,13 @@ It can be:
 PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
-        "messenger_interface": NotRequired[Optional[_ForwardProvider]],
+        "messenger_interface": NotRequired[Optional["MessengerInterface"]],
         "context_storage": NotRequired[Optional[Union[DBContextStorage, Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
+        "parallelize_processing": NotRequired[bool],
         "script": Union[Script, Dict],
         "start_label": NodeLabel2Type,
         "fallback_label": NotRequired[Optional[NodeLabel2Type]],

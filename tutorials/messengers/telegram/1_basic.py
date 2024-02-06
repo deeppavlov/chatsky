@@ -31,9 +31,9 @@ In order to integrate your script with Telegram, you need an instance of
 `TelegramMessenger` class and one of the following interfaces:
 `PollingMessengerInterface` or `WebhookMessengerInterface`.
 
-`TelegramMessenger` encapsulates the bot logic.
-Like Telebot, `TelegramMessenger` only requires a token to run.
-However, all parameters from the Telebot class can be passed as keyword arguments.
+`TelegramMessenger` encapsulates the bot logic. Like Telebot,
+`TelegramMessenger` only requires a token to run. However, all parameters
+from the Telebot class can be passed as keyword arguments.
 
 The two interfaces connect the bot to Telegram. They can be passed directly
 to the DFF `Pipeline` instance.

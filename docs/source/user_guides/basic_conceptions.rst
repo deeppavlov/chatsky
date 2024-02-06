@@ -204,10 +204,9 @@ For instance, if a user wants to know a schedule, you may need to access a datab
 
     import requests
     ...
-    def use_api_processing(ctx: Context, _: Pipeline, *args, **kwargs) -> Context:
+    def use_api_processing(ctx: Context, _: Pipeline):
         # save to the context field for custom info
         ctx.misc["api_call_results"] = requests.get("http://schedule.api/day1").json()
-        return ctx
     ...
     node = {
         RESPONSE: ...
@@ -239,7 +238,7 @@ The latter allows you to customize the response based on the specific scenario a
 
 .. code-block:: python
 
-    def sample_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+    def sample_response(ctx: Context, _: Pipeline) -> Message:
         if ctx.misc["user"] == 'vegan':
             return Message(text="Here is a list of vegan cafes.")
         return Message(text="Here is a list of cafes.")
@@ -259,7 +258,7 @@ This ensures a smoother user experience even when the bot encounters unexpected 
 
 .. code-block:: python
 
-    def fallback_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+    def fallback_response(ctx: Context, _: Pipeline) -> Message:
         """
         Generate a special fallback response depending on the situation.
         """
@@ -352,7 +351,7 @@ that you may have in your project, using Python docstrings.
 
 .. code-block:: python
 
-    def fav_kitchen_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+    def fav_kitchen_response(ctx: Context, _: Pipeline) -> Message:
         """
         This function returns a user-targeted response depending on the value
         of the 'kitchen preference' slot.

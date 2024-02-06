@@ -1,6 +1,7 @@
 import os
 import sys
 import re
+import importlib.metadata
 
 # -- Path setup --------------------------------------------------------------
 
@@ -12,12 +13,12 @@ from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-project = "DFF"
+_distribution_metadata = importlib.metadata.metadata('dff')
+
+project = _distribution_metadata["Name"]
 copyright = "2023, DeepPavlov"
 author = "DeepPavlov"
-
-# The full version, including alpha/beta/rc tags
-release = "0.6.3"
+release = _distribution_metadata["Version"]
 
 
 # -- General configuration ---------------------------------------------------

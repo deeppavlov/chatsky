@@ -4,7 +4,7 @@ Common
 This module contains several functions which are used to run demonstrations in tutorials.
 """
 from os import getenv
-from typing import Callable, Tuple, Any, Optional
+from typing import Callable, Tuple, Optional
 from uuid import uuid4
 
 from dff.script import Context, Message
@@ -31,9 +31,9 @@ def is_interactive_mode() -> bool:  # pragma: no cover
 
 def check_happy_path(
     pipeline: Pipeline,
-    happy_path: Tuple[Tuple[Any, Any], ...],
+    happy_path: Tuple[Tuple[Message, Message], ...],
     # This optional argument is used for additional processing of candidate responses and reference responses
-    response_comparer: Callable[[Any, Any, Context], Optional[str]] = default_comparer,
+    response_comparer: Callable[[Message, Message, Context], Optional[str]] = default_comparer,
     printout_enable: bool = True,
 ):
     """
@@ -56,6 +56,14 @@ def check_happy_path(
         if printout_enable:
             print(f"(user) >>> {repr(request)}")
             print(f" (bot) <<< {repr(candidate_response)}")
+        if candidate_response is None:
+            raise Exception(
+                f"\n\npipeline = {pipeline.info_dict}\n\n"
+                f"ctx = {ctx}\n\n"
+                f"step_id = {step_id}\n"
+                f"request = {repr(request)}\n"
+                "Candidate response is None."
+            )
         parsed_response_with_deviation = response_comparer(candidate_response, reference_response, ctx)
         if parsed_response_with_deviation is not None:
             raise Exception(

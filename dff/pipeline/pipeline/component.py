@@ -8,11 +8,12 @@ step in a processing pipeline, and is responsible for performing a specific task
 The PipelineComponent class can be a group or a service. It is designed to be reusable and composable,
 allowing developers to create complex processing pipelines by combining multiple components.
 """
+from __future__ import annotations
 import logging
 import abc
 import asyncio
 import copy
-from typing import Optional, Union, Awaitable, ForwardRef
+from typing import Optional, Awaitable, TYPE_CHECKING
 
 from dff.script import Context
 
@@ -31,7 +32,8 @@ from ..types import (
 
 logger = logging.getLogger(__name__)
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 class PipelineComponent(abc.ABC):
@@ -163,27 +165,24 @@ class PipelineComponent(abc.ABC):
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
     @abc.abstractmethod
-    async def _run(self, ctx: Context, pipeline: Optional[Pipeline] = None) -> Optional[Context]:
+    async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         A method for running pipeline component, it is overridden in all its children.
         This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
-        :return: :py:class:`~.Context` if this is a synchronous service or `None`,
-            asynchronous services shouldn't modify :py:class:`~.Context`.
         """
         raise NotImplementedError
 
-    async def __call__(self, ctx: Context, pipeline: Optional[Pipeline] = None) -> Optional[Union[Context, Awaitable]]:
+    async def __call__(self, ctx: Context, pipeline: Pipeline) -> Optional[Awaitable]:
         """
         A method for calling pipeline components.
         It sets up timeout if this component is asynchronous and executes it using :py:meth:`~._run` method.
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
-        :return: :py:class:`~.Context` if this is a synchronous service or :py:class:`~.typing.const.Awaitable`,
-            asynchronous services shouldn't modify :py:class:`~.Context`.
+        :return: `None` if the service is synchronous; an `Awaitable` otherwise.
         """
         if self.asynchronous:
             task = asyncio.create_task(self._run(ctx, pipeline))

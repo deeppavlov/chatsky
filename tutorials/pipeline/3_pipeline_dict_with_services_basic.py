@@ -39,7 +39,7 @@ see tutorial 4.
 
 On pipeline execution services from `services`
 list are run without difference between pre- and postprocessors.
-Actor constant "ACTOR" should also be present among services.
+Actor constant "ACTOR" is required to be passed as one of the services.
 ServiceBuilder object can be defined either with callable
 (see tutorial 2) or with dict / object.
 It should contain `handler` - a ServiceBuilder object.
@@ -48,7 +48,7 @@ Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.
 It starts pipeline asynchronously and connects to provided messenger interface.
 
-Here pipeline contains 4 services,
+Here, the pipeline contains 4 services,
 defined in 4 different ways with different signatures.
 """
 

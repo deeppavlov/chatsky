@@ -51,7 +51,7 @@ def test_conditions():
     except TypeError:
         pass
 
-    def failed_cond_func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+    def failed_cond_func(ctx: Context, pipeline: Pipeline) -> bool:
         raise ValueError("Failed cnd")
 
     assert not cnd.any([failed_cond_func])(ctx, pipeline)
