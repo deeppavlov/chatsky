@@ -23,6 +23,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 .. figure:: /_static/drawio/dfe/user_actor.png
 """
 from __future__ import annotations
+import inspect
 import logging
 import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
@@ -41,7 +42,6 @@ from dff.pipeline.service.utils import wrap_sync_function_in_async
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    import inspect
     from dff.pipeline.pipeline.pipeline import Pipeline
 
     USER_FUNCTION_TYPES = {
