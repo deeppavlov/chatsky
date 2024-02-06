@@ -50,6 +50,13 @@ if TYPE_CHECKING:
         "condition": ((Context, Pipeline), bool),
         "processing": ((Context, Pipeline), Context),
     }
+else:
+    USER_FUNCTION_TYPES = {
+        "label": ((Any, Any), Any),
+        "response": ((Any, Any), Any),
+        "condition": ((Any, Any), Any),
+        "processing": ((Any, Any), Any),
+    }
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """
