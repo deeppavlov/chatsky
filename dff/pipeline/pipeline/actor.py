@@ -51,6 +51,8 @@ if TYPE_CHECKING:
         "processing": ((Context, Pipeline), Context),
     }
 else:
+    from typing import Any
+
     USER_FUNCTION_TYPES = {
         "label": ((Any, Any), Any),
         "response": ((Any, Any), Any),
