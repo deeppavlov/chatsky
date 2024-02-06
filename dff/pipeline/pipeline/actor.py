@@ -24,7 +24,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 """
 import inspect
 import logging
-from typing import Tuple, Union, Callable, Optional, Dict, List, Any, ForwardRef, Type
+from typing import Union, Callable, Optional, Dict, List, Any, ForwardRef
 import copy
 
 from dff.utils.turn_caching import cache_clear
@@ -40,6 +40,13 @@ logger = logging.getLogger(__name__)
 
 Pipeline = ForwardRef("Pipeline")
 
+
+USER_FUNCTION_TYPES = {
+    "label": ((Context, Pipeline, Any, Any), None),
+    "response": ((Context, Pipeline, Any, Any), Message),
+    "condition": ((Context, Pipeline, Any, Any), bool),
+    "processing": ((Context, Pipeline, Any, Any), Context),
+}
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """
@@ -57,35 +64,13 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
         logger.error(msg, exc_info=exception)
 
 
-def types_match(type1: Type, type2: Type) -> bool:
-    """
-    This function compares types with assumption that one of the types might be a :py:class:`typing.ForwardRef`.
-    If it is so, it compares type and forward reference by name.
-
-    :param type1: First type to compare.
-    :param type2: Second type to compare.
-    :return: True if types are equal, False otherwise.
-    """
-    if type1 == type2:
-        return True
-    elif type(type1) is ForwardRef or type(type2) is ForwardRef:
-        type1_name = type1.__forward_arg__ if type(type1) is ForwardRef else type1.__name__
-        type2_name = type2.__forward_arg__ if type(type2) is ForwardRef else type2.__name__
-        return type1_name == type2_name
-    else:
-        return False
-
-
 def validate_callable(
     callable: Callable,
     name: str,
     flow_label: str,
     node_label: str,
-    error_msgs: list,
     logging_flag: bool = True,
-    expected_types: Optional[Tuple[Type, ...]] = None,
-    return_type: Optional[Tuple[Type]] = None,
-):
+) -> List:
     """
     This function validates a function during :py:class:`~dff.script.Script` validation.
     It checks parameter number (unconditionally), parameter types (if specified) and return type (if specified).
@@ -100,34 +85,37 @@ def validate_callable(
         Also used for parameter number check. If `None`, parameter check is skipped. Defaults to `None`.
     :param return_type: Tuple, containing expected function return type.
         If `None` or contains more or less than 1 element, return type check is skipped. Defaults to `None`.
+    :return: list of produced error messages.
     """
+    error_msgs = list()
     signature = inspect.signature(callable)
-    if expected_types is not None:
-        params = list(signature.parameters.values())
-        if len(params) != len(expected_types):
+    function_type = name if name in USER_FUNCTION_TYPES.keys() else "processing"
+    arguments_type, return_type = USER_FUNCTION_TYPES[function_type]
+    params = list(signature.parameters.values())
+    if len(params) != len(arguments_type):
+        msg = (
+            f"Incorrect parameter number of {name}={callable.__name__}: "
+            f"should be {len(arguments_type)}, found {len(params)}, "
+            f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+        )
+        error_handler(error_msgs, msg, None, logging_flag)
+    for idx, param in enumerate(params):
+        if param.annotation != inspect.Parameter.empty and param.annotation != arguments_type[idx]:
             msg = (
-                f"Incorrect parameter number of {name}={callable.__name__}: "
-                f"should be {len(expected_types)}, found {len(params)}, "
+                f"Incorrect {idx} parameter annotation of {name}={callable.__name__}: "
+                f"should be {arguments_type[idx]}, found {param.annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None, logging_flag)
-        for idx, param in enumerate(params):
-            if param.annotation != inspect.Parameter.empty and not types_match(param.annotation, expected_types[idx]):
-                msg = (
-                    f"Incorrect {idx} parameter annotation of {name}={callable.__name__}: "
-                    f"should be {expected_types[idx]}, found {param.annotation}, "
-                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                )
-                error_handler(error_msgs, msg, None, logging_flag)
-    if return_type is not None and len(return_type) == 1:
-        return_annotation = signature.return_annotation
-        if return_annotation != inspect.Parameter.empty and not types_match(return_annotation, return_type[0]):
-            msg = (
-                f"Incorrect return type annotation of {name}={callable.__name__}: "
-                f"should be {return_type[0]}, found {return_annotation}, "
-                f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-            )
-            error_handler(error_msgs, msg, None, logging_flag)
+    return_annotation = signature.return_annotation
+    if return_annotation != inspect.Parameter.empty and return_annotation != return_type:
+        msg = (
+            f"Incorrect return type annotation of {name}={callable.__name__}: "
+            f"should be {return_type}, found {return_annotation}, "
+            f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+        )
+        error_handler(error_msgs, msg, None, logging_flag)
+    return error_msgs
 
 
 class Actor:
@@ -407,14 +395,12 @@ class Actor:
                 # validate labeling
                 for label in node.transitions.keys():
                     if callable(label):
-                        validate_callable(
+                        error_msgs += validate_callable(
                             label,
                             "label",
                             flow_name,
                             node_name,
-                            error_msgs,
-                            logging_flag,
-                            (Context, Pipeline, Any, Any),
+                            logging_flag
                         )
                     else:
                         norm_label = normalize_label(label, flow_name)
@@ -443,15 +429,12 @@ class Actor:
 
                 # validate responses
                 if callable(node.response):
-                    validate_callable(
+                    error_msgs += validate_callable(
                         node.response,
                         "response",
                         flow_name,
                         node_name,
-                        error_msgs,
                         logging_flag,
-                        (Context, Pipeline, Any, Any),
-                        (Message,),
                     )
                 elif node.response is not None and not isinstance(node.response, Message):
                     msg = (
@@ -464,15 +447,12 @@ class Actor:
                 # validate conditions
                 for label, condition in node.transitions.items():
                     if callable(condition):
-                        validate_callable(
+                        error_msgs += validate_callable(
                             condition,
                             "condition",
                             flow_name,
                             node_name,
-                            error_msgs,
                             logging_flag,
-                            (Context, Pipeline, Any, Any),
-                            (bool,),
                         )
                     else:
                         msg = (
@@ -488,15 +468,12 @@ class Actor:
                 ):
                     for name, function in functions.items():
                         if callable(function):
-                            validate_callable(
+                            error_msgs += validate_callable(
                                 function,
                                 f"pre_{place}_processing {name}",
                                 flow_name,
                                 node_name,
-                                error_msgs,
                                 logging_flag,
-                                (Context, Pipeline, Any, Any),
-                                (Context,),
                             )
                         else:
                             msg = (
