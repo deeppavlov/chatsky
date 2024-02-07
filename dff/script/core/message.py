@@ -200,6 +200,18 @@ class Message(DataModel):
     # state: Optional[Session] = Session.ACTIVE
     # ui: Optional[Union[Keyboard, DataModel]] = None
 
+    def __init__(
+            self,
+            text: Optional[str] = None,
+            commands: Optional[List[Command]] = None,
+            attachments: Optional[Attachments] = None,
+            annotations: Optional[dict] = None,
+            misc: Optional[dict] = None,
+    ):
+        super().__init__(
+            text=text, commands=commands, attachments=attachments, annotations=annotations, misc=misc
+        )
+
     def __eq__(self, other):
         if isinstance(other, Message):
             for field in self.model_fields:
