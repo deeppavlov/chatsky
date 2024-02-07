@@ -164,7 +164,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(text=input(self._prompt_request)), self._ctx_id)]
+        return [(Message(input(self._prompt_request)), self._ctx_id)]
 
     def _respond(self, responses: List[Context]):
         print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)

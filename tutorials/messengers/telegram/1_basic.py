@@ -45,17 +45,17 @@ script = {
     "greeting_flow": {
         "start_node": {
             TRANSITIONS: {
-                "greeting_node": cnd.exact_match(Message(text="/start"))
+                "greeting_node": cnd.exact_match(Message("/start"))
             },
         },
         "greeting_node": {
-            RESPONSE: Message(text="Hi"),
+            RESPONSE: Message("Hi"),
             TRANSITIONS: {lbl.repeat(): cnd.true()},
         },
         "fallback_node": {
-            RESPONSE: Message(text="Please, repeat the request"),
+            RESPONSE: Message("Please, repeat the request"),
             TRANSITIONS: {
-                "greeting_node": cnd.exact_match(Message(text="/start"))
+                "greeting_node": cnd.exact_match(Message("/start"))
             },
         },
     }
@@ -63,9 +63,9 @@ script = {
 
 # this variable is only for testing
 happy_path = (
-    (Message(text="/start"), Message(text="Hi")),
-    (Message(text="Hi"), Message(text="Hi")),
-    (Message(text="Bye"), Message(text="Hi")),
+    (Message("/start"), Message("Hi")),
+    (Message("Hi"), Message("Hi")),
+    (Message("Bye"), Message("Hi")),
 )
 
 

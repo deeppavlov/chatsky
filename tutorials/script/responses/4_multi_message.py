@@ -28,44 +28,44 @@ from dff.utils.testing.common import (
 toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node,
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
             RESPONSE: MultiMessage(
                 messages=[
-                    Message(text="Hi, what is up?", misc={"confidences": 0.85}),
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
                     Message(
                         text="Hello, how are you?", misc={"confidences": 0.9}
                     ),
                 ]
             ),
             TRANSITIONS: {
-                "node2": cnd.exact_match(Message(text="I'm fine, how are you?"))
+                "node2": cnd.exact_match(Message("I'm fine, how are you?"))
             },
         },
         "node2": {
-            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
                 "node3": cnd.exact_match(
-                    Message(text="Let's talk about music.")
+                    Message("Let's talk about music.")
                 )
             },
         },
         "node3": {
-            RESPONSE: Message(text="Sorry, I can not talk about that now."),
+            RESPONSE: Message("Sorry, I can not talk about that now."),
             TRANSITIONS: {
-                "node4": cnd.exact_match(Message(text="Ok, goodbye."))
+                "node4": cnd.exact_match(Message("Ok, goodbye."))
             },
         },
         "node4": {
-            RESPONSE: Message(text="bye"),
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            RESPONSE: Message("bye"),
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
-            RESPONSE: Message(text="Ooops"),
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            RESPONSE: Message("Ooops"),
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
     }
 }
@@ -73,67 +73,67 @@ toy_script = {
 # testing
 happy_path = (
     (
-        Message(text="Hi"),
+        Message("Hi"),
         MultiMessage(
             messages=[
-                Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+                Message("Hi, what is up?", misc={"confidences": 0.85}),
+                Message("Hello, how are you?", misc={"confidences": 0.9}),
             ]
         ),
     ),  # start_node -> node1
     (
-        Message(text="I'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("I'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about that now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about that now."),
     ),  # node2 -> node3
-    (Message(text="Ok, goodbye."), Message(text="bye")),  # node3 -> node4
+    (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
     (
-        Message(text="Hi"),
+        Message("Hi"),
         MultiMessage(
             messages=[
-                Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+                Message("Hi, what is up?", misc={"confidences": 0.85}),
+                Message("Hello, how are you?", misc={"confidences": 0.9}),
             ]
         ),
     ),  # node4 -> node1
     (
-        Message(text="stop"),
-        Message(text="Ooops"),
+        Message("stop"),
+        Message("Ooops"),
     ),
     # node1 -> fallback_node
     (
-        Message(text="one"),
-        Message(text="Ooops"),
+        Message("one"),
+        Message("Ooops"),
     ),  # f_n->f_n
     (
-        Message(text="help"),
-        Message(text="Ooops"),
+        Message("help"),
+        Message("Ooops"),
     ),  # f_n->f_n
     (
-        Message(text="nope"),
-        Message(text="Ooops"),
+        Message("nope"),
+        Message("Ooops"),
     ),  # f_n->f_n
     (
-        Message(text="Hi"),
+        Message("Hi"),
         MultiMessage(
             messages=[
-                Message(text="Hi, what is up?", misc={"confidences": 0.85}),
-                Message(text="Hello, how are you?", misc={"confidences": 0.9}),
+                Message("Hi, what is up?", misc={"confidences": 0.85}),
+                Message("Hello, how are you?", misc={"confidences": 0.9}),
             ]
         ),
     ),  # fallback_node -> node1
     (
-        Message(text="I'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("I'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about that now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about that now."),
     ),  # node2 -> node3
-    (Message(text="Ok, goodbye."), Message(text="bye")),  # node3 -> node4
+    (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
 )
 
 # %%

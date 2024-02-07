@@ -41,12 +41,12 @@ def check_button_payload(value: str):
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Message(text=""),
+            RESPONSE: Message(""),
             TRANSITIONS: {
                 ("general", "question_1"): cnd.true(),
             },
         },
-        "fallback": {RESPONSE: Message(text="Finishing test")},
+        "fallback": {RESPONSE: Message("Finishing test")},
     },
     "general": {
         "question_1": {
@@ -110,7 +110,7 @@ toy_script = {
             },
         },
         "success": {
-            RESPONSE: Message(text="Success!"),
+            RESPONSE: Message("Success!"),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
     },
@@ -118,7 +118,7 @@ toy_script = {
 
 happy_path = (
     (
-        Message(text="Hi"),
+        Message("Hi"),
         Message(
             **{
                 "text": "Starting test! What's 2 + 2? "
@@ -135,7 +135,7 @@ happy_path = (
         ),
     ),
     (
-        Message(text="0"),
+        Message("0"),
         Message(
             **{
                 "text": "Starting test! What's 2 + 2? "
@@ -152,7 +152,7 @@ happy_path = (
         ),
     ),
     (
-        Message(text="1"),
+        Message("1"),
         Message(
             **{
                 "text": "Next question: what's 6 * 8? "
@@ -169,7 +169,7 @@ happy_path = (
         ),
     ),
     (
-        Message(text="0"),
+        Message("0"),
         Message(
             **{
                 "text": "Next question: what's 6 * 8? "
@@ -186,7 +186,7 @@ happy_path = (
         ),
     ),
     (
-        Message(text="1"),
+        Message("1"),
         Message(
             **{
                 "text": "What's 114 + 115? "
@@ -203,7 +203,7 @@ happy_path = (
         ),
     ),
     (
-        Message(text="1"),
+        Message("1"),
         Message(
             **{
                 "text": "What's 114 + 115? "
@@ -219,8 +219,8 @@ happy_path = (
             }
         ),
     ),
-    (Message(text="0"), Message(text="Success!")),
-    (Message(text="ok"), Message(text="Finishing test")),
+    (Message("0"), Message("Success!")),
+    (Message("ok"), Message("Finishing test")),
 )
 
 

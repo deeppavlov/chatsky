@@ -89,5 +89,5 @@ def run_interactive_mode(pipeline: Pipeline):  # pragma: no cover
     print("Start a dialogue with the bot")
     while True:
         request = input(">>> ")
-        ctx = pipeline(request=Message(text=request), ctx_id=ctx_id)
+        ctx = pipeline(request=Message(request), ctx_id=ctx_id)
         print(f"<<< {repr(ctx.last_response)}")
