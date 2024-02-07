@@ -165,7 +165,7 @@ def telegram_condition(func: Callable[[Update], bool]):  # pragma: no cover
     return condition
 
 
-def query_callback_condition_exact_match(expected: CallbackQuery):
+def has_callback_query(expected: str):
 
     def condition(ctx: Context, _: Pipeline, *__, **___) -> bool:  # pragma: no cover
         last_request = ctx.last_request
@@ -174,6 +174,6 @@ def query_callback_condition_exact_match(expected: CallbackQuery):
         callback_query = next((attachment for attachment in last_request.attachments if isinstance(attachment, CallbackQuery)), None)
         if callback_query is None:
             return False
-        return callback_query == expected
+        return callback_query.query_string == expected
 
     return condition

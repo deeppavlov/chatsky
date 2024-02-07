@@ -26,7 +26,7 @@ import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
 from dff.pipeline import Pipeline
 from dff.script.core.message import Button, Keyboard, Message, CallbackQuery
-from dff.messengers.telegram import PollingTelegramInterface, query_callback_condition_exact_match
+from dff.messengers.telegram import PollingTelegramInterface, has_callback_query
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -81,12 +81,8 @@ script = {
                 ],
             ),
             TRANSITIONS: {
-                ("general", "success"): query_callback_condition_exact_match(
-                    CallbackQuery(query_string="correct")
-                ),
-                ("general", "fail"): query_callback_condition_exact_match(
-                    CallbackQuery(query_string="wrong")
-                ),
+                ("general", "success"): has_callback_query("correct"),
+                ("general", "fail"): has_callback_query("wrong"),
             },
         },
         "success": {
