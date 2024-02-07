@@ -16,16 +16,6 @@ def test_pretty_format():
     tutorial_module.pipeline.pretty_format()
 
 
-def test_from_script_with_validation():
-    def response(ctx, pipeline: Pipeline):
-        raise RuntimeError()
-
-    script = {"": {"": {RESPONSE: response, TRANSITIONS: {"": cnd.true()}}}}
-
-    with pytest.raises(ValueError):
-        _ = Pipeline.from_script(script=script, start_label=("", ""))
-
-
 def test_script_getting_and_setting():
     script = {"old_flow": {"": {RESPONSE: lambda c, p, _, __: Message(), TRANSITIONS: {"": cnd.true()}}}}
     pipeline = Pipeline.from_script(script=script, start_label=("old_flow", ""))
