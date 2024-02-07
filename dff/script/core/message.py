@@ -45,6 +45,11 @@ class Attachment(DataModel):
     pass
 
 
+class CallbackQuery(Attachment):
+
+    query_string: Optional[str]
+
+
 class Location(Attachment):
     """
     This class is a data model that represents a geographical

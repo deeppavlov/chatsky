@@ -6,19 +6,18 @@ that can be used to interact with the Telegram API.
 """
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Callable, Optional, Sequence, Type, cast
+from typing import Callable, Optional, Sequence, cast
 from pydantic import FilePath
 
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup, InputMediaAnimation, InputMediaAudio, InputMediaDocument, InputMediaPhoto, InputMediaVideo, Update, Message as TelegramMessage
 from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
 from telegram.ext.filters import ALL
-from telegram._files._basemedium import _BaseMedium
 
 from dff.messengers.common import MessengerInterface
 from dff.pipeline import Pipeline
 from dff.pipeline.types import PipelineRunnerFunction
 from dff.script.core.context import Context
-from dff.script.core.message import Animation, Audio, Button, Contact, DataAttachment, Document, Image, Invoice, Keyboard, Location, Message, Poll, PollOption, Video
+from dff.script.core.message import Animation, Audio, Button, CallbackQuery, Contact, DataAttachment, Document, Image, Invoice, Keyboard, Location, Message, Poll, PollOption, Video
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
@@ -114,21 +113,19 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if message.text is not None:
             await bot.send_message(chat_id, message.text, reply_markup=self._create_keyboard(buttons))
 
-    async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    async def _on_event(self, update: Update, _: ContextTypes.DEFAULT_TYPE, create_message: Callable[[Update], Message]) -> None:
         if update.effective_chat is not None and update.message is not None:
-            message = await self.extract_message_from_telegram(update.message)
+            message = create_message(update)
             message.original_message = update
             resp = await self.callback(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(self.application.bot, update.effective_chat.id, resp.last_response)
 
+    async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        await self._on_event(update, _, lambda u: await self.extract_message_from_telegram(u.message))
+
     async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        if update.effective_chat is not None and update.callback_query is not None:
-            message = Message(text=update.callback_query.data)
-            message.original_message = update
-            resp = await self.callback(message, update.effective_chat.id)
-            if resp.last_response is not None:
-                await self.cast_message_to_telegram_and_send(self.application.bot, update.effective_chat.id, resp.last_response)
+        await self._on_event(update, _, lambda u: Message(attachments=[CallbackQuery(query_string=u.callback_query.data)]))
 
     async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
         self.callback = callback
@@ -164,5 +161,19 @@ def telegram_condition(func: Callable[[Update], bool]):  # pragma: no cover
             return False
         original_message = cast(Update, last_request.original_message)
         return func(original_message)
+
+    return condition
+
+
+def query_callback_condition_exact_match(expected: CallbackQuery):
+
+    def condition(ctx: Context, _: Pipeline, *__, **___) -> bool:  # pragma: no cover
+        last_request = ctx.last_request
+        if last_request is None or last_request.attachments is None or len(last_request.attachments) == 0:
+            return False
+        callback_query = next((attachment for attachment in last_request.attachments if isinstance(attachment, CallbackQuery)), None)
+        if callback_query is None:
+            return False
+        return callback_query == expected
 
     return condition
