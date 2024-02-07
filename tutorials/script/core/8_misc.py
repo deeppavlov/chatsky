@@ -35,9 +35,10 @@ from dff.utils.testing.common import (
 # %%
 def custom_response(ctx: Context, _: Pipeline) -> Message:
     current_node = ctx.current_node
+    current_misc = current_node.misc if current_node is not None else None
     return Message(
         text=f"ctx.last_label={ctx.last_label}: "
-        f"current_node.misc={current_node.misc if current_node is not None else None}"
+        f"current_node.misc={current_misc}"
     )
 
 

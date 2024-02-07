@@ -1,5 +1,4 @@
 import importlib
-import pytest
 
 from dff.script import Message
 from tests.test_utils import get_path_from_tests_to_current_dir

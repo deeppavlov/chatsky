@@ -60,6 +60,7 @@ else:
         "processing": ((Any, Any), Any),
     }
 
+
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
     """
     This function handles errors during :py:class:`~dff.script.Script` validation.
@@ -467,13 +468,7 @@ class Actor:
                 # validate labeling
                 for label in node.transitions.keys():
                     if callable(label):
-                        error_msgs += validate_callable(
-                            label,
-                            "label",
-                            flow_name,
-                            node_name,
-                            logging_flag
-                        )
+                        error_msgs += validate_callable(label, "label", flow_name, node_name, logging_flag)
                     else:
                         norm_label = normalize_label(label, flow_name)
                         if norm_label is None:
