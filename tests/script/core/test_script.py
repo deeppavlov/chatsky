@@ -46,7 +46,7 @@ def node_creation(pre_response_proc):
     samples = {
         "transition": [std_func, "node", ("flow", "node"), ("node", 2.0), ("flow", "node", 2.0)],
         "condition": [std_func],
-        RESPONSE.name.lower(): [Message(text="text"), std_func, None],
+        RESPONSE.name.lower(): [Message("text"), std_func, None],
         pre_response_proc.name.lower(): [{}, {1: std_func}, None],
         PRE_TRANSITIONS_PROCESSING.name.lower(): [{}, {1: std_func}, None],
         MISC.name.lower(): [{}, {1: "var"}, None],
@@ -110,7 +110,7 @@ def test_node_exec():
     node = Node(
         **{
             TRANSITIONS.name.lower(): {"node": std_func},
-            RESPONSE.name.lower(): Message(text="text"),
+            RESPONSE.name.lower(): Message("text"),
             PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
             PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
             MISC.name.lower(): {"key": "val"},
@@ -126,7 +126,7 @@ def test_script():
 def script_test(pre_response_proc):
     node_template = {
         TRANSITIONS: {"node": std_func},
-        RESPONSE: Message(text="text"),
+        RESPONSE: Message("text"),
         pre_response_proc: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},

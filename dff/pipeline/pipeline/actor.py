@@ -405,7 +405,7 @@ class Actor:
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
             ctx = Context()
             ctx.validation = True
-            ctx.add_request(Message(text="text"))
+            ctx.add_request(Message("text"))
 
             label = label(ctx, pipeline) if callable(label) else normalize_label(label, flow_label)
 

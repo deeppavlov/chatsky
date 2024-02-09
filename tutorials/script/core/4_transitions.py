@@ -106,7 +106,7 @@ toy_script = {
         },
         "fallback_node": {  # We get to this node if
             # an error occurred while the agent was running.
-            RESPONSE: Message(text="Ooops"),
+            RESPONSE: Message("Ooops"),
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(
                     r"talk about music"
@@ -126,7 +126,7 @@ toy_script = {
     },
     "greeting_flow": {
         "node1": {
-            RESPONSE: Message(text="Hi, how are you?"),
+            RESPONSE: Message("Hi, how are you?"),
             # When the agent goes to node1, we return "Hi, how are you?"
             TRANSITIONS: {
                 (
@@ -139,7 +139,7 @@ toy_script = {
             },
         },
         "node2": {
-            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
                 lbl.to_fallback(0.1): cnd.true(),  # third check
                 # lbl.to_fallback(0.1) is equivalent
@@ -158,11 +158,11 @@ toy_script = {
             },
         },
         "node3": {
-            RESPONSE: Message(text="Sorry, I can not talk about that now."),
+            RESPONSE: Message("Sorry, I can not talk about that now."),
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
         },
         "node4": {
-            RESPONSE: Message(text="Bye"),
+            RESPONSE: Message("Bye"),
             TRANSITIONS: {
                 "node1": cnd.regexp(r"hi|hello", re.IGNORECASE),  # first check
                 lbl.to_fallback(): cnd.true(),  # second check
@@ -204,7 +204,7 @@ toy_script = {
             },
         },
         "node4": {
-            RESPONSE: Message(text="That's all what I know."),
+            RESPONSE: Message("That's all what I know."),
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp(
                     r"next", re.IGNORECASE
@@ -222,76 +222,76 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="hi"), Message(text="Hi, how are you?")),
+    (Message("hi"), Message("Hi, how are you?")),
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),
     (
-        Message(text="talk about music."),
+        Message("talk about music."),
         Message(
             text="I love `System of a Down` group, "
             "would you like to talk about it?"
         ),
     ),
     (
-        Message(text="yes"),
+        Message("yes"),
         Message(
             text="System of a Down is "
             "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
-        Message(text="next"),
+        Message("next"),
         Message(
             text="The band achieved commercial success "
             "with the release of five studio albums."
         ),
     ),
     (
-        Message(text="back"),
+        Message("back"),
         Message(
             text="System of a Down is "
             "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
-        Message(text="repeat"),
+        Message("repeat"),
         Message(
             text="System of a Down is "
             "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
-        Message(text="next"),
+        Message("next"),
         Message(
             text="The band achieved commercial success "
             "with the release of five studio albums."
         ),
     ),
-    (Message(text="next"), Message(text="That's all what I know.")),
+    (Message("next"), Message("That's all what I know.")),
     (
-        Message(text="next"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("next"),
+        Message("Good. What do you want to talk about?"),
     ),
-    (Message(text="previous"), Message(text="That's all what I know.")),
-    (Message(text="next time"), Message(text="Bye")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="previous"), Message(text="Bye")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="nope"), Message(text="Ooops")),
-    (Message(text="hi"), Message(text="Hi, how are you?")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="previous"), Message(text="Hi, how are you?")),
+    (Message("previous"), Message("That's all what I know.")),
+    (Message("next time"), Message("Bye")),
+    (Message("stop"), Message("Ooops")),
+    (Message("previous"), Message("Bye")),
+    (Message("stop"), Message("Ooops")),
+    (Message("nope"), Message("Ooops")),
+    (Message("hi"), Message("Hi, how are you?")),
+    (Message("stop"), Message("Ooops")),
+    (Message("previous"), Message("Hi, how are you?")),
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),
     (
-        Message(text="let's talk about something."),
-        Message(text="Sorry, I can not talk about that now."),
+        Message("let's talk about something."),
+        Message("Sorry, I can not talk about that now."),
     ),
-    (Message(text="Ok, goodbye."), Message(text="Bye")),
+    (Message("Ok, goodbye."), Message("Bye")),
 )
 
 # %%
