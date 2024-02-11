@@ -10,7 +10,7 @@ from __future__ import annotations
 import logging
 from typing import Callable, Optional, Any, Dict, Union, TYPE_CHECKING
 
-from pydantic import BaseModel, field_validator, validate_call
+from pydantic import BaseModel, field_validator, validate_call, Field
 
 from .types import LabelType, NodeLabelType, ConditionType, NodeLabel3Type
 from .message import Message
@@ -29,11 +29,11 @@ class Node(BaseModel, extra="forbid", validate_assignment=True):
     The class for the `Node` object.
     """
 
-    transitions: Dict[NodeLabelType, ConditionType] = {}
-    response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]] = None
-    pre_transitions_processing: Dict[Any, Callable] = {}
-    pre_response_processing: Dict[Any, Callable] = {}
-    misc: dict = {}
+    transitions: Dict[NodeLabelType, ConditionType] = Field(default_factory=dict, alias="TRANSITIONS")
+    response: Union[Message, Callable[[Context, Pipeline], Message]] = Field(default_factory=Message, alias="RESPONSE")
+    pre_transitions_processing: Dict[Any, Callable] = Field(default_factory=dict, alias="PRE_TRANSITIONS_PROCESSING")
+    pre_response_processing: Dict[Any, Callable] = Field(default_factory=dict, alias="PRE_RESPONSE_PROCESSING")
+    misc: dict = Field(default_factory=dict, alias="MISC")
 
     @field_validator("transitions", mode="before")
     @classmethod

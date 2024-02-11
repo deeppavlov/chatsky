@@ -80,14 +80,13 @@ class Keywords(str, Enum):
 
     """
 
-    GLOBAL = "global"
-    LOCAL = "local"
-    TRANSITIONS = "transitions"
-    RESPONSE = "response"
-    MISC = "misc"
-    PRE_RESPONSE_PROCESSING = "pre_response_processing"
-    PRE_TRANSITIONS_PROCESSING = "pre_transitions_processing"
-    PROCESSING = "pre_transitions_processing"
+    GLOBAL = "GLOBAL"
+    LOCAL = "LOCAL"
+    TRANSITIONS = "TRANSITIONS"
+    RESPONSE = "RESPONSE"
+    MISC = "MISC"
+    PRE_RESPONSE_PROCESSING = "PRE_RESPONSE_PROCESSING"
+    PRE_TRANSITIONS_PROCESSING = "PRE_TRANSITIONS_PROCESSING"
 
 
 # Redefine shortcuts
