@@ -192,7 +192,7 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
-    attachments: Optional[Attachments] = None
+    attachments: Optional[List[DataModel]] = None
     annotations: Optional[dict] = None
     misc: Optional[dict] = None
     # commands and state options are required for integration with services
@@ -204,7 +204,7 @@ class Message(DataModel):
             self,
             text: Optional[str] = None,
             commands: Optional[List[Command]] = None,
-            attachments: Optional[Attachments] = None,
+            attachments: Optional[List[DataModel]] = None,
             annotations: Optional[dict] = None,
             misc: Optional[dict] = None,
     ):
