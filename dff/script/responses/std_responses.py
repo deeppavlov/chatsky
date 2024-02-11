@@ -15,7 +15,7 @@ from dff.pipeline import Pipeline
 from dff.script import Context, Message
 
 
-def choice(responses: List[Message]):
+def choice(*responses):
     """
     Function wrapper that takes the list of responses as an input
     and returns handler which outputs a response randomly chosen from that list.
