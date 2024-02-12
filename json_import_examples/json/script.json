@@ -1,0 +1,43 @@
+{
+  "CONFIG": {
+    "custom_dir": "custom",
+    "start_label": [
+      "flow",
+      "node"
+    ]
+  },
+  "flow": {
+    "node": {
+      "RESPONSE": {
+        "dff.rsp.choice": [
+          {
+            "dff.Message": {
+              "text": "Hi",
+              "attachments": [
+                {
+                  "dff.Link": {
+                    "source": "https://github.com/deeppavlov/dialog_flow_framework",
+                    "title": "DFF"
+                  }
+                }
+              ]
+            }
+          },
+          {
+            "dff.Message": "message"
+          }
+        ]
+      },
+      "TRANSITIONS": [
+        {
+          "lbl": [
+            "flow",
+            "node",
+            3
+          ],
+          "cnd": "custom.cnd.condition"
+        }
+      ]
+    }
+  }
+}
