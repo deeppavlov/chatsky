@@ -35,6 +35,7 @@ from ..types import (
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
 from dff.pipeline.pipeline.actor import Actor
+from dff.pipeline.pipeline.script_parsing import JSONImporter, Path
 
 logger = logging.getLogger(__name__)
 
@@ -264,6 +265,43 @@ class Pipeline:
             start_label=start_label,
             fallback_label=fallback_label,
             label_priority=label_priority,
+            validation_stage=validation_stage,
+            condition_handler=condition_handler,
+            verbose=verbose,
+            parallelize_processing=parallelize_processing,
+            handlers=handlers,
+            messenger_interface=messenger_interface,
+            context_storage=context_storage,
+            components=[*pre_services, ACTOR, *post_services],
+        )
+
+    @classmethod
+    def from_file(
+        cls,
+        file: Union[str, Path],
+        validation_stage: Optional[bool] = None,
+        condition_handler: Optional[Callable] = None,
+        verbose: bool = True,
+        parallelize_processing: bool = False,
+        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
+        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
+        messenger_interface: Optional[MessengerInterface] = None,
+        pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
+        post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
+    ):
+        pre_services = [] if pre_services is None else pre_services
+        post_services = [] if post_services is None else post_services
+        script = JSONImporter.from_file(file).import_script()
+
+        def to_tuple(i):
+            if isinstance(i, list):
+                return tuple(i)
+            return i
+        params = {param: to_tuple(script["CONFIG"].get(param)) for param in ("start_label", "fallback_label", "label_priority")}
+        del script["CONFIG"]  # todo: add support for CONFIG
+        return cls(
+            script=script,
+            **params,
             validation_stage=validation_stage,
             condition_handler=condition_handler,
             verbose=verbose,
