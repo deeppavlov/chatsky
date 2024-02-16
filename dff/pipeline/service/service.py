@@ -18,12 +18,14 @@ from dff.script import Context
 
 from .utils import wrap_sync_function_in_async, collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from ..types import (
+    PIPELINE_EXCEPTION_KEY,
     ServiceBuilder,
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ExtraHandlerBuilder,
     ExtraHandlerType,
 )
+from ..pipeline.actor import LATEST_EXCEPTION_KEY, LATEST_FAILED_NODE_KEY
 from ..pipeline.component import PipelineComponent
 
 logger = logging.getLogger(__name__)
@@ -133,6 +135,13 @@ class Service(PipelineComponent):
             await pipeline.actor(pipeline, ctx)
             self._set_state(ctx, ComponentExecutionState.FINISHED)
         except Exception as exc:
+            if "actor" in ctx.framework_states:
+                last_label = ctx.framework_states["actor"]["next_label"]
+                latest_node = f"{self.name}:{last_label[0]}:{last_label[1]}"
+            else:
+                latest_node = self.name
+            ctx.framework_states[PIPELINE_EXCEPTION_KEY][LATEST_EXCEPTION_KEY] = exc
+            ctx.framework_states[PIPELINE_EXCEPTION_KEY][LATEST_FAILED_NODE_KEY] = latest_node
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Actor '{self.name}' execution failed!\n{exc}")
 
@@ -152,6 +161,8 @@ class Service(PipelineComponent):
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
         except Exception as e:
+            ctx.framework_states[PIPELINE_EXCEPTION_KEY][LATEST_EXCEPTION_KEY] = e
+            ctx.framework_states[PIPELINE_EXCEPTION_KEY][LATEST_FAILED_NODE_KEY] = self.name
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"Service '{self.name}' execution failed!\n{e}")
 

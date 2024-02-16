@@ -25,7 +25,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 from __future__ import annotations
 import logging
 import asyncio
-from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
+from typing import Type, Union, Callable, Optional, Dict, List, TYPE_CHECKING
 import copy
 
 from dff.utils.turn_caching import cache_clear
@@ -37,6 +37,10 @@ from dff.script.core.script import Script, Node
 from dff.script.core.normalization import normalize_label, normalize_response
 from dff.script.core.keywords import GLOBAL, LOCAL
 from dff.pipeline.service.utils import wrap_sync_function_in_async
+from dff.pipeline.types import PIPELINE_EXCEPTION_KEY
+
+LATEST_EXCEPTION_KEY = "LATEST_EXCEPTION"
+LATEST_FAILED_NODE_KEY = "LATEST_FAILED_NODE"
 
 logger = logging.getLogger(__name__)
 
@@ -131,7 +135,7 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_TRANSITIONS_PROCESSING)
 
         # get true labels for scopes (GLOBAL, LOCAL, NODE)
-        await self._get_true_labels(ctx, pipeline)
+        await self._get_true_labels(ctx, pipeline, False)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_TRUE_LABELS)
 
         # get next node
@@ -161,6 +165,43 @@ class Actor:
 
         del ctx.framework_states["actor"]
 
+    async def process_exception(self, pipeline: Pipeline, ctx: Context):
+        # context init
+        self._context_init(ctx)
+
+        # get previous node
+        self._get_previous_node(ctx)
+
+        # rewrite previous node
+        self._rewrite_previous_node(ctx)
+
+        # run pre transitions processing
+        await self._run_pre_transitions_processing(ctx, pipeline)
+
+        # get true labels for scopes (GLOBAL, LOCAL, NODE)
+        await self._get_true_labels(ctx, pipeline, True)
+
+        # get next node
+        self._get_next_node(ctx)
+
+        ctx.add_label(ctx.framework_states["actor"]["next_label"][:2])
+
+        # rewrite next node
+        self._rewrite_next_node(ctx)
+
+        # run pre response processing
+        await self._run_pre_response_processing(ctx, pipeline)
+
+        # create response
+        ctx.framework_states["actor"]["response"] = await self.run_response(
+            ctx.framework_states["actor"]["pre_response_processed_node"].response, ctx, pipeline
+        )
+        ctx.add_response(ctx.framework_states["actor"]["response"])
+
+        if self._clean_turn_cache:
+            cache_clear()
+        del ctx.framework_states["actor"]
+
     @staticmethod
     def _context_init(ctx: Optional[Union[Context, dict, str]] = None):
         ctx.framework_states["actor"] = {}
@@ -173,13 +214,13 @@ class Actor:
             ctx.framework_states["actor"]["previous_label"][0], {}
         ).get(ctx.framework_states["actor"]["previous_label"][1], Node())
 
-    async def _get_true_labels(self, ctx: Context, pipeline: Pipeline):
+    async def _get_true_labels(self, ctx: Context, pipeline: Pipeline, is_exceptional: bool):
         # GLOBAL
         ctx.framework_states["actor"]["global_transitions"] = (
             self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
         )
         ctx.framework_states["actor"]["global_true_label"] = await self._get_true_label(
-            ctx.framework_states["actor"]["global_transitions"], ctx, pipeline, GLOBAL, "global"
+            ctx.framework_states["actor"]["global_transitions"], ctx, pipeline, GLOBAL, is_exceptional, "global"
         )
 
         # LOCAL
@@ -191,6 +232,7 @@ class Actor:
             ctx,
             pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
+            is_exceptional,
             "local",
         )
 
@@ -203,6 +245,7 @@ class Actor:
             ctx,
             pipeline,
             ctx.framework_states["actor"]["previous_label"][0],
+            is_exceptional,
             "node",
         )
 
@@ -346,14 +389,21 @@ class Actor:
         ctx: Context,
         pipeline: Pipeline,
         flow_label: LabelType,
+        is_exceptional: bool,
         transition_info: str = "",
     ) -> Optional[NodeLabel3Type]:
         true_labels = []
 
-        cond_booleans = await asyncio.gather(
-            *(self.condition_handler(condition, ctx, pipeline) for condition in transitions.values())
-        )
-        for label, cond_is_true in zip(transitions.keys(), cond_booleans):
+        cond_values = await asyncio.gather(*(self.condition_handler(condition, ctx, pipeline) for condition in transitions.values()))
+        cond_items = list(zip(transitions.keys(), cond_values))
+
+        if is_exceptional:
+            exception = ctx.framework_states[PIPELINE_EXCEPTION_KEY][LATEST_EXCEPTION_KEY]
+            cond_items = [(label, isinstance(exception, type(value))) for label, value in cond_items if issubclass(type(value), BaseException)]
+        else:
+            cond_items = [(label, value) for label, value in cond_items if isinstance(value, bool)]
+
+        for label, cond_is_true in cond_items:
             if cond_is_true:
                 if callable(label):
                     label = await wrap_sync_function_in_async(label, ctx, pipeline)

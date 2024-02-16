@@ -18,13 +18,13 @@ import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
 from dff.context_storages import DBContextStorage
-from dff.script import Script, Context, ActorStage
-from dff.script import NodeLabel2Type, Message
+from dff.script import Script, Context, ActorStage, NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
 from dff.messengers.common import MessengerInterface, CLIMessengerInterface
 from ..service.group import ServiceGroup
 from ..types import (
+    ComponentExecutionState,
     ServiceBuilder,
     ServiceGroupBuilder,
     PipelineBuilder,
@@ -32,7 +32,7 @@ from ..types import (
     ExtraHandlerFunction,
     ExtraHandlerBuilder,
 )
-from ..types import PIPELINE_STATE_KEY
+from ..types import PIPELINE_EXCEPTION_KEY, PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
 from dff.pipeline.pipeline.actor import Actor
 
@@ -343,13 +343,18 @@ class Pipeline:
             ctx.misc.update(update_ctx_misc)
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
+        ctx.framework_states[PIPELINE_EXCEPTION_KEY] = {}
         ctx.add_request(request)
         result = await self._services_pipeline(ctx, self)
 
         if asyncio.iscoroutine(result):
             await result
 
+        if self._services_pipeline.get_state(ctx) == ComponentExecutionState.FAILED:
+            await self.actor.process_exception(self, ctx)
+
         del ctx.framework_states[PIPELINE_STATE_KEY]
+        del ctx.framework_states[PIPELINE_EXCEPTION_KEY]
 
         if isinstance(self.context_storage, DBContextStorage):
             await self.context_storage.set_item_async(ctx_id, ctx)
