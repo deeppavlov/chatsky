@@ -142,3 +142,20 @@ class JSONImporter:
                 return cls(yaml.load(fd, Loader=Loader))
         else:
             raise JSONImportError("file should have a `.json`, `.yaml` or `.yml` extension")
+
+
+def get_dff_objects():
+    def get_objects_from_submodule(submodule_name: str, alias: Optional[str] = None):
+        module = importlib.import_module(submodule_name)
+
+        return {
+            ".".join([alias or submodule_name, name]): obj
+            for name, obj in module.__dict__.items() if not name.startswith("_") and not ismodule(obj)
+        }
+
+    return {
+        **get_objects_from_submodule("dff.cnd"),
+        **get_objects_from_submodule("dff.rsp"),
+        **get_objects_from_submodule("dff.lbl"),
+        **get_objects_from_submodule("dff.msg", "dff")
+    }
