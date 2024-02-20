@@ -39,19 +39,11 @@ class JSONImporter:
             raise JSONImportError(f"could not find directory {custom_dir}")
         self.custom_dir_prefix = custom_dir + "."
 
-    def resolve_target_object(self, obj: str):
-        obj_parts = obj.split(".")
-        if obj_parts[0] == self.DFF_NAMESPACE_PREFIX[:-1]:
-            module = importlib.import_module(obj_parts[0])
-            new_obj = module
-            for part in obj_parts[1:]:
-                new_obj = new_obj.__getattribute__(part)
-            return new_obj
-        elif obj_parts[0] == self.custom_dir_prefix[:-1]:
-            module = importlib.import_module(".".join(obj_parts[:-1]))
-            return module.__getattribute__(obj_parts[-1])
-        else:
-            raise RuntimeError(obj_parts)
+    @staticmethod
+    def resolve_target_object(obj: str):
+        module_name, object_name = obj.rsplit(".", maxsplit=1)
+        module = importlib.import_module(module_name)
+        return module.__getattribute__(object_name)
 
     def import_script(self):
         return self.replace_script_objects(self.script)
