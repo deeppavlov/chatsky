@@ -222,9 +222,3 @@ class Message(DataModel):
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
-
-
-class MultiMessage(Message):
-    """This class represents a message that contains multiple sub-messages."""
-
-    messages: Optional[List[Message]] = None

@@ -2,19 +2,18 @@
 """
 # Responses: 4. Multi Message
 
-This tutorial shows Multi Message usage.
+This tutorial shows how to store several messages inside a single one.
+This might be useful if you want DFF Pipeline to send `response` candidates
+to the messenger interface instead of a final response.
 
-The %mddoclink(api,script.core.message,MultiMessage)
-represents a combination of several messages.
-
-Let's do all the necessary imports from DFF.
+However, this approach is not recommended due to history incompleteness.
 """
 
 # %pip install dff
 
 # %%
 
-from dff.script import TRANSITIONS, RESPONSE, Message, MultiMessage
+from dff.script import TRANSITIONS, RESPONSE, Message
 import dff.script.conditions as cnd
 
 from dff.pipeline import Pipeline
@@ -32,13 +31,15 @@ toy_script = {
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: MultiMessage(
-                messages=[
-                    Message("Hi, what is up?", misc={"confidences": 0.85}),
-                    Message(
-                        text="Hello, how are you?", misc={"confidences": 0.9}
-                    ),
-                ]
+            RESPONSE: Message(
+                misc={
+                    "messages": [
+                        Message("Hi, what is up?", misc={"confidences": 0.85}),
+                        Message(
+                            text="Hello, how are you?", misc={"confidences": 0.9}
+                        ),
+                    ]
+                }
             ),
             TRANSITIONS: {
                 "node2": cnd.exact_match(Message("I'm fine, how are you?"))
@@ -74,11 +75,15 @@ toy_script = {
 happy_path = (
     (
         Message("Hi"),
-        MultiMessage(
-            messages=[
-                Message("Hi, what is up?", misc={"confidences": 0.85}),
-                Message("Hello, how are you?", misc={"confidences": 0.9}),
-            ]
+        Message(
+            misc={
+                "messages": [
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
+                    Message(
+                        text="Hello, how are you?", misc={"confidences": 0.9}
+                    ),
+                ]
+            }
         ),
     ),  # start_node -> node1
     (
@@ -92,11 +97,15 @@ happy_path = (
     (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
     (
         Message("Hi"),
-        MultiMessage(
-            messages=[
-                Message("Hi, what is up?", misc={"confidences": 0.85}),
-                Message("Hello, how are you?", misc={"confidences": 0.9}),
-            ]
+        Message(
+            misc={
+                "messages": [
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
+                    Message(
+                        text="Hello, how are you?", misc={"confidences": 0.9}
+                    ),
+                ]
+            }
         ),
     ),  # node4 -> node1
     (
@@ -118,11 +127,15 @@ happy_path = (
     ),  # f_n->f_n
     (
         Message("Hi"),
-        MultiMessage(
-            messages=[
-                Message("Hi, what is up?", misc={"confidences": 0.85}),
-                Message("Hello, how are you?", misc={"confidences": 0.9}),
-            ]
+        Message(
+            misc={
+                "messages": [
+                    Message("Hi, what is up?", misc={"confidences": 0.85}),
+                    Message(
+                        text="Hello, how are you?", misc={"confidences": 0.9}
+                    ),
+                ]
+            }
         ),
     ),  # fallback_node -> node1
     (
