@@ -1,8 +1,9 @@
-from typing import Union, Dict
+from typing import Union, Dict, Optional
 import importlib
 import logging
 from pathlib import Path
 import json
+from inspect import ismodule
 
 from pydantic import JsonValue
 import yaml
@@ -29,8 +30,8 @@ class JSONImporter:
     def __init__(self, script: Dict[str, JsonValue]):
         self.script = script
         config = self.script.get(self.CONFIG_KEY)
-        if config is None:
-            raise JSONImportError("config is not found")
+        if not isinstance(config, dict):
+            raise JSONImportError("config is not found -- your script has to define a CONFIG dictionary")
         self.config = config
         custom_dir = config.get(self.CUSTOM_DIR_CONFIG_OPTION, "custom_dir")
         if "." in custom_dir:
@@ -157,5 +158,5 @@ def get_dff_objects():
         **get_objects_from_submodule("dff.cnd"),
         **get_objects_from_submodule("dff.rsp"),
         **get_objects_from_submodule("dff.lbl"),
-        **get_objects_from_submodule("dff.msg", "dff")
+        **get_objects_from_submodule("dff.msg", "dff"),
     }
