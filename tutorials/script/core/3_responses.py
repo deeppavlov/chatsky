@@ -102,16 +102,12 @@ toy_script = {
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
-                "node3": cnd.exact_match(
-                    Message("Let's talk about music.")
-                )
+                "node3": cnd.exact_match(Message("Let's talk about music."))
             },
         },
         "node3": {
             RESPONSE: cannot_talk_about_topic_response,
-            TRANSITIONS: {
-                "node4": cnd.exact_match(Message("Ok, goodbye."))
-            },
+            TRANSITIONS: {"node4": cnd.exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
             RESPONSE: upper_case_response(Message("bye")),
