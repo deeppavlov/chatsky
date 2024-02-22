@@ -1,6 +1,7 @@
 import pytest
+from pydantic import ValidationError, HttpUrl, FilePath
 
-from dff.script.core.message import Location, Attachment
+from dff.script.core.message import Location, DataAttachment, Keyboard, Button
 
 
 def test_location():
@@ -19,31 +20,53 @@ def test_location():
     "attachment1,attachment2,equal",
     [
         (
-            Attachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
-            Attachment(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"),
+            DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
+            DataAttachment(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"),
             True,
         ),
         (
-            Attachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-            Attachment(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="2"),
+            DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
+            DataAttachment(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="2"),
             False,
         ),
         (
-            Attachment(source=__file__, title="File"),
-            Attachment(source=__file__, title="File"),
+            DataAttachment(source=__file__, title="File"),
+            DataAttachment(source=__file__, title="File"),
             True,
         ),
         (
-            Attachment(source=__file__, title="1"),
-            Attachment(source=__file__, title="2"),
+            DataAttachment(source=__file__, title="1"),
+            DataAttachment(source=__file__, title="2"),
             False,
         ),
         (
-            Attachment(id="1", title="File"),
-            Attachment(id="2", title="File"),
+            DataAttachment(id="1", title="File"),
+            DataAttachment(id="2", title="File"),
             False,
         ),
     ],
 )
 def test_attachment(attachment1, attachment2, equal):
     assert (attachment1 == attachment2) == equal
+
+
+def test_missing_error():
+    with pytest.raises(ValidationError) as e:
+        _ = DataAttachment(source=HttpUrl("http://google.com"), id="123")
+    assert e
+
+    with pytest.raises(ValidationError) as e:
+        _ = DataAttachment(source=FilePath("/etc/missing_file"))
+    assert e
+
+
+def test_empty_keyboard():
+    with pytest.raises(ValidationError) as e:
+        _ = Keyboard(buttons=[])
+    assert e
+
+
+def test_long_button_data():
+    with pytest.raises(ValidationError) as error:
+        Button(text="", data="test" * 64)
+    assert error
