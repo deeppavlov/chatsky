@@ -36,7 +36,8 @@ toy_script = {
                     "messages": [
                         Message("Hi, what is up?", misc={"confidences": 0.85}),
                         Message(
-                            text="Hello, how are you?", misc={"confidences": 0.9}
+                            text="Hello, how are you?",
+                            misc={"confidences": 0.9},
                         ),
                     ]
                 }
@@ -48,16 +49,12 @@ toy_script = {
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
-                "node3": cnd.exact_match(
-                    Message("Let's talk about music.")
-                )
+                "node3": cnd.exact_match(Message("Let's talk about music."))
             },
         },
         "node3": {
             RESPONSE: Message("Sorry, I can not talk about that now."),
-            TRANSITIONS: {
-                "node4": cnd.exact_match(Message("Ok, goodbye."))
-            },
+            TRANSITIONS: {"node4": cnd.exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
             RESPONSE: Message("bye"),
