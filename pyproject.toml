@@ -110,7 +110,7 @@ requests = "*"
 idna = "*"
 pytest = "*"
 pytest-cov = "*"
-coverage = { version = "<7.4.2", extras = ["toml"] }
+coverage = { version = "!=7.3.3", extras = ["toml"] }
 # Coverage 7.3.3 breaks pragma: no cover -- https://github.com/nedbat/coveragepy/issues/1713
 pytest-asyncio = "*"
 pytest-virtualenv = "*"
