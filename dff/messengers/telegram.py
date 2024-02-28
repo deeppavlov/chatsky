@@ -76,6 +76,9 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if message.attachments is not None:
             files = list()
             for attachment in message.attachments:
+                if isinstance(attachment, Keyboard):
+                    buttons = attachment.buttons
+            for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(chat_id, attachment.latitude, attachment.longitude, reply_markup=self._create_keyboard(buttons))
                     return
@@ -105,8 +108,6 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         files += [InputMediaDocument(attachment_bytes)]
-                if isinstance(attachment, Keyboard):
-                    buttons = attachment.buttons
             if len(files) > 0:
                 await bot.send_media_group(chat_id, files, caption=message.text)
                 return
