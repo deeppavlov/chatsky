@@ -200,6 +200,19 @@ class Message(DataModel):
     # state: Optional[Session] = Session.ACTIVE
     # ui: Optional[Union[Keyboard, DataModel]] = None
 
+    def __init__(
+        self,
+        text: Optional[str] = None,
+        commands: Optional[List[Command]] = None,
+        attachments: Optional[Attachments] = None,
+        annotations: Optional[dict] = None,
+        misc: Optional[dict] = None,
+        **kwargs,
+    ):
+        super().__init__(
+            text=text, commands=commands, attachments=attachments, annotations=annotations, misc=misc, **kwargs
+        )
+
     def __eq__(self, other):
         if isinstance(other, Message):
             for field in self.model_fields:
@@ -212,9 +225,3 @@ class Message(DataModel):
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
-
-
-class MultiMessage(Message):
-    """This class represents a message that contains multiple sub-messages."""
-
-    messages: Optional[List[Message]] = None

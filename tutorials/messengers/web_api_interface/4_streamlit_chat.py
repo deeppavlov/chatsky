@@ -122,7 +122,7 @@ def send_and_receive():
     st.session_state["user_requests"].append(user_request)
 
     bot_response = query(
-        Message(text=user_request).model_dump(),
+        Message(user_request).model_dump(),
         user_id=st.session_state["user_id"],
     )
     bot_response.raise_for_status()

@@ -50,7 +50,7 @@ toy_script = {
             RESPONSE: Message(),
             TRANSITIONS: {("flow", "step_0"): cnd.true()},
         },
-        "fallback": {RESPONSE: Message(text="the end")},
+        "fallback": {RESPONSE: Message("the end")},
     },
     GLOBAL: {
         MISC: {

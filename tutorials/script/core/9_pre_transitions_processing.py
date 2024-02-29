@@ -55,7 +55,7 @@ toy_script = {
             RESPONSE: Message(),
             TRANSITIONS: {("flow", "step_0"): cnd.true()},
         },
-        "fallback": {RESPONSE: Message(text="the end")},
+        "fallback": {RESPONSE: Message("the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
@@ -67,22 +67,22 @@ toy_script = {
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
     "flow": {
-        "step_0": {RESPONSE: Message(text="first")},
-        "step_1": {RESPONSE: Message(text="second")},
-        "step_2": {RESPONSE: Message(text="third")},
-        "step_3": {RESPONSE: Message(text="fourth")},
-        "step_4": {RESPONSE: Message(text="fifth")},
+        "step_0": {RESPONSE: Message("first")},
+        "step_1": {RESPONSE: Message("second")},
+        "step_2": {RESPONSE: Message("third")},
+        "step_3": {RESPONSE: Message("fourth")},
+        "step_4": {RESPONSE: Message("fifth")},
     },
 }
 
 
 # testing
 happy_path = (
-    (Message(text="1"), Message(text="previous=None: current=first")),
-    (Message(text="2"), Message(text="previous=first: current=second")),
-    (Message(text="3"), Message(text="previous=second: current=third")),
-    (Message(text="4"), Message(text="previous=third: current=fourth")),
-    (Message(text="5"), Message(text="previous=fourth: current=fifth")),
+    (Message("1"), Message("previous=None: current=first")),
+    (Message("2"), Message("previous=first: current=second")),
+    (Message("3"), Message("previous=second: current=third")),
+    (Message("4"), Message("previous=third: current=fourth")),
+    (Message("5"), Message("previous=fourth: current=fifth")),
 )
 
 
