@@ -5,6 +5,7 @@ The Extra Handler module contains additional functionality that extends the capa
 beyond the core functionality. Extra handlers is an input converting addition to :py:class:`.PipelineComponent`.
 For example, it is used to grep statistics from components, timing, logging, etc.
 """
+
 from __future__ import annotations
 import asyncio
 import logging

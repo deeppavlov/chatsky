@@ -3,6 +3,7 @@ Common
 ------
 This module contains several functions which are used to run demonstrations in tutorials.
 """
+
 from os import getenv
 from typing import Callable, Tuple, Optional
 from uuid import uuid4

@@ -8,6 +8,7 @@ This module contains a standard set of scripting conditions that can be used to 
 These conditions can be used to check the current context, the user's input,
 or other factors that may affect the conversation flow.
 """
+
 from typing import Callable, Pattern, Union, List, Optional
 import logging
 import re

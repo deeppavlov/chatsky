@@ -11,6 +11,7 @@ The functions below can be used to configure the opentelemetry destination.
     set_tracer_destination(OTLPSpanExporter("grpc://localhost:4317", insecure=True))
 
 """
+
 import json
 import getpass
 from urllib import parse
