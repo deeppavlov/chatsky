@@ -136,7 +136,7 @@ happy_path = (
         Message("Sorry, I can not talk about music now."),
     ),  # node2 -> node3
     (Message("Ok, goodbye."), Message("BYE")),  # node3 -> node4
-    (Message("Hi"), Message("Hi, what is up?")),  # node4 -> node1
+    (Message("Hi"), Message("Hello, how are you?")),  # node4 -> node1
     (
         Message("stop"),
         Message(
@@ -176,7 +176,7 @@ happy_path = (
     ),  # f_n->f_n
     (
         Message("Hi"),
-        Message("Hello, how are you?"),
+        Message("Hi, what is up?"),
     ),  # fallback_node -> node1
     (
         Message("I'm fine, how are you?"),
