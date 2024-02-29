@@ -7,6 +7,7 @@ This class provides a way to organize and manage multiple services as a single u
 allowing for easier management and organization of the services within the pipeline.
 The :py:class:`~.ServiceGroup` serves the important function of grouping services to work together in parallel.
 """
+
 from __future__ import annotations
 import asyncio
 import logging

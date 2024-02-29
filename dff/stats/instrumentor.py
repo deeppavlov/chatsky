@@ -8,6 +8,7 @@ e.g. for automated logging and log export.
 
 For detailed reference, see `~OtelInstrumentor` class.
 """
+
 import asyncio
 from typing import Collection, Optional
 

@@ -5,6 +5,7 @@ The conditions module contains functions that can be used to determine whether t
 are attached should be executed or not.
 The standard set of them allows user to setup dependencies between pipeline components.
 """
+
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
