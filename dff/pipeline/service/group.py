@@ -150,9 +150,9 @@ class ServiceGroup(PipelineComponent):
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
 
-        except Exception as e:
+        except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"ServiceGroup '{self.name}' execution failed!\n{e}")
+            logger.error(f"ServiceGroup '{self.name}' execution failed!", exc_info=exc)
 
         await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
 

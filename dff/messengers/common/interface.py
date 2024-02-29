@@ -71,7 +71,7 @@ class PollingMessengerInterface(MessengerInterface):
         :param e: The exception.
         """
         if isinstance(e, Exception):
-            logger.error(f"Exception in {type(self).__name__} loop!\n{str(e)}")
+            logger.error(f"Exception in {type(self).__name__} loop!", exc_info=e)
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
 
