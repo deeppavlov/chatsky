@@ -207,8 +207,11 @@ class Message(DataModel):
         attachments: Optional[Attachments] = None,
         annotations: Optional[dict] = None,
         misc: Optional[dict] = None,
+        **kwargs,
     ):
-        super().__init__(text=text, commands=commands, attachments=attachments, annotations=annotations, misc=misc)
+        super().__init__(
+            text=text, commands=commands, attachments=attachments, annotations=annotations, misc=misc, **kwargs
+        )
 
     def __eq__(self, other):
         if isinstance(other, Message):
