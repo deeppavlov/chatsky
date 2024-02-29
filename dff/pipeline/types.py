@@ -102,6 +102,9 @@ class ExtraHandlerType(str, Enum):
     AFTER = "AFTER"
 
 
+PIPELINE_EXCEPTION_KEY = "EXCEPTION"
+
+
 PIPELINE_STATE_KEY = "PIPELINE"
 """
 PIPELINE: storage for services and groups execution status.

@@ -13,6 +13,7 @@ from .types import (
     ComponentExecutionState,
     GlobalExtraHandlerType,
     ExtraHandlerType,
+    PIPELINE_EXCEPTION_KEY,
     PIPELINE_STATE_KEY,
     StartConditionCheckerFunction,
     StartConditionCheckerAggregationFunction,
@@ -27,6 +28,7 @@ from .types import (
     PipelineBuilder,
 )
 
+from .pipeline.actor import LATEST_EXCEPTION_KEY, LATEST_FAILED_NODE_KEY
 from .pipeline.pipeline import Pipeline, ACTOR
 
 from .service.extra import BeforeHandler, AfterHandler
