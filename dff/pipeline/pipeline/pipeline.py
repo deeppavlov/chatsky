@@ -310,7 +310,7 @@ class Pipeline:
         """
         old_actor = self.actor
         self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
-        errors = self.actor.validate_script(self, verbose) if validation_stage else []
+        errors = self.actor.validate_script(self, verbose) if validation_stage is not False else []
         if errors:
             self.actor = old_actor
             raise ValueError(
