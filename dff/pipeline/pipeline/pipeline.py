@@ -16,7 +16,8 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable, Callable
+from typing import Iterable, Union, List, Dict, Optional, Hashable, Callable
+from uuid import uuid4
 
 from dff.context_storages import DBContextStorage
 from dff.script import Script, Context, ActorStage
@@ -92,7 +93,7 @@ class Pipeline:
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
+        messenger_interfaces: Optional[Union[Iterable[MessengerInterface], Dict[str, MessengerInterface]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
@@ -101,7 +102,6 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
-        self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
             components,
@@ -109,6 +109,14 @@ class Pipeline:
             after_handler=after_handler,
             timeout=timeout,
         )
+
+        if messenger_interfaces is not None:
+            if isinstance(messenger_interfaces, dict):
+                self.messenger_interfaces = messenger_interfaces
+            else:
+                self.messenger_interfaces = {str(uuid4()): iface for iface in messenger_interfaces}
+        else:
+            self.messenger_interfaces = {"default": CLIMessengerInterface()}
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
@@ -188,7 +196,9 @@ class Pipeline:
         """
         return {
             "type": type(self).__name__,
-            "messenger_interface": f"Instance of {type(self.messenger_interface).__name__}",
+            "messenger_interfaces": {
+                k: f"Instance of {type(v).__name__}" for k, v in self.messenger_interfaces.items()
+            },
             "context_storage": f"Instance of {type(self.context_storage).__name__}",
             "services": [self._services_pipeline.info_dict],
         }
@@ -369,7 +379,7 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline) for iface in self.messenger_interfaces.values()]))
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
