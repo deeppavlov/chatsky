@@ -12,6 +12,8 @@ from urllib.request import urlopen
 
 from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
 
+from .types import DEFAULT_INTERFACE_ID
+
 
 class Session(Enum):
     """
@@ -196,6 +198,7 @@ class Message(DataModel):
     attachments: Optional[Attachments] = None
     annotations: Optional[dict] = None
     misc: Optional[dict] = None
+    interface: str = DEFAULT_INTERFACE_ID
     # commands and state options are required for integration with services
     # that use an intermediate backend server, like Yandex's Alice
     # state: Optional[Session] = Session.ACTIVE

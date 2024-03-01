@@ -30,7 +30,7 @@ from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
 import copy
 
 from dff.utils.turn_caching import cache_clear
-from dff.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
+from dff.script.core.types import DEFAULT_INTERFACE_ID, ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
 from dff.script.core.message import Message
 
 from dff.script.core.context import Context
@@ -149,10 +149,15 @@ class Actor:
         await self._run_pre_response_processing(ctx, pipeline)
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING)
 
+        last_interface = DEFAULT_INTERFACE_ID
+        if ctx.last_request is not None:
+            last_interface = ctx.last_request.interface
+
         # create response
         ctx.framework_states["actor"]["response"] = await self.run_response(
             ctx.framework_states["actor"]["pre_response_processed_node"].response, ctx, pipeline
         )
+        ctx.framework_states["actor"]["response"].interface = last_interface
         await self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE)
         ctx.add_response(ctx.framework_states["actor"]["response"])
 

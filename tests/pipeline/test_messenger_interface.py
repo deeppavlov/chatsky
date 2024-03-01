@@ -2,7 +2,7 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import RESPONSE, TRANSITIONS, Message
+from dff.script import DEFAULT_INTERFACE_ID, RESPONSE, TRANSITIONS, Message
 from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
@@ -42,7 +42,7 @@ def test_cli_messenger_interface(monkeypatch):
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
     interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
-    pipeline.messenger_interfaces = {"default": interface}
+    pipeline.messenger_interfaces = {DEFAULT_INTERFACE_ID: interface}
 
     def loop() -> bool:
         loop.runs_left -= 1
@@ -56,7 +56,7 @@ def test_cli_messenger_interface(monkeypatch):
 
 def test_callback_messenger_interface(monkeypatch):
     interface = CallbackMessengerInterface()
-    pipeline.messenger_interfaces = {"default": interface}
+    pipeline.messenger_interfaces = {DEFAULT_INTERFACE_ID: interface}
 
     pipeline.run()
 

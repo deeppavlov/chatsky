@@ -21,7 +21,7 @@ from uuid import uuid4
 
 from dff.context_storages import DBContextStorage
 from dff.script import Script, Context, ActorStage
-from dff.script import NodeLabel2Type, Message
+from dff.script import NodeLabel2Type, Message, DEFAULT_INTERFACE_ID
 from dff.utils.turn_caching import cache_clear
 
 from dff.messengers.common import MessengerInterface, CLIMessengerInterface
@@ -93,7 +93,7 @@ class Pipeline:
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        messenger_interfaces: Optional[Union[Iterable[MessengerInterface], Dict[str, MessengerInterface]]] = None,
+        messenger_interfaces: Optional[Union[MessengerInterface, Iterable[MessengerInterface], Dict[str, MessengerInterface]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
@@ -110,13 +110,15 @@ class Pipeline:
             timeout=timeout,
         )
 
-        if messenger_interfaces is not None:
-            if isinstance(messenger_interfaces, dict):
+        if messenger_interfaces is not None and not isinstance(messenger_interfaces, MessengerInterface):
+            if isinstance(messenger_interfaces, Iterable):
+                self.messenger_interfaces = {str(uuid4()): iface for iface in messenger_interfaces}
+            elif isinstance(messenger_interfaces, Iterable):
                 self.messenger_interfaces = messenger_interfaces
             else:
-                self.messenger_interfaces = {str(uuid4()): iface for iface in messenger_interfaces}
+                raise RuntimeError(f"Unexpected type of 'messenger_interfaces': {type(messenger_interfaces)}")
         else:
-            self.messenger_interfaces = {"default": CLIMessengerInterface()}
+            self.messenger_interfaces = {DEFAULT_INTERFACE_ID: CLIMessengerInterface()}
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
@@ -379,7 +381,7 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline) for iface in self.messenger_interfaces.values()]))
+        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline, id) for id, iface in self.messenger_interfaces.items()]))
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

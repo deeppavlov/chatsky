@@ -13,6 +13,7 @@ from .core.keywords import (
 )
 from .core.script import Node, Script
 from .core.types import (
+    DEFAULT_INTERFACE_ID,
     LabelType,
     NodeLabel1Type,
     NodeLabel2Type,
