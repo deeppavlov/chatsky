@@ -404,53 +404,19 @@ class Actor:
 
         error_msgs = []
         for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
-            ctx = Context()
-            ctx.validation = True
-            ctx.add_request(Message("text"))
+            if not callable(label):
+                label = normalize_label(label, flow_label)
 
-            label = label(ctx, pipeline) if callable(label) else normalize_label(label, flow_label)
-
-            # validate labeling
-            try:
-                node = self.script[label[0]][label[1]]
-            except Exception as exc:
-                msg = (
-                    f"Could not find node with label={label}, "
-                    f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                )
-                error_handler(error_msgs, msg, exc, verbose)
-                break
-
-            # validate responsing
-            response_func = normalize_response(node.response)
-            try:
-                response_result = asyncio.run(wrap_sync_function_in_async(response_func, ctx, pipeline))
-                if not isinstance(response_result, Message):
+                # validate labeling
+                try:
+                    node = self.script[label[0]][label[1]]
+                except Exception as exc:
                     msg = (
-                        "Expected type of response_result is `Message`.\n"
-                        + f"Got type(response_result)={type(response_result)}"
-                        f" for label={label} , error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                        f"Could not find node with label={label}, "
+                        f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
                     )
-                    error_handler(error_msgs, msg, None, verbose)
-                    continue
-            except Exception as exc:
-                msg = (
-                    f"Got exception '''{exc}''' during response execution "
-                    f"for label={label} and node.response={node.response}"
-                    f", error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                )
-                error_handler(error_msgs, msg, exc, verbose)
-                continue
-
-            # validate conditioning
-            try:
-                condition_result = condition(ctx, pipeline)
-                if not isinstance(condition(ctx, pipeline), bool):
-                    raise Exception(f"Returned condition_result={condition_result}, but expected bool type")
-            except Exception as exc:
-                msg = f"Got exception '''{exc}''' during condition execution for label={label}"
-                error_handler(error_msgs, msg, exc, verbose)
-                continue
+                    error_handler(error_msgs, msg, exc, verbose)
+                    break
         return error_msgs
 
 

@@ -69,32 +69,6 @@ async def test_actor():
         raise Exception("can not be passed: fail of missing node")
     except ValueError:
         pass
-    try:
-        # fail of condition returned type
-        Pipeline.from_script({"flow": {"node1": {TRANSITIONS: {"node1": std_func}}}}, start_label=("flow", "node1"))
-        raise Exception("can not be passed: fail of condition returned type")
-    except ValueError:
-        pass
-    try:
-        # fail of response returned Callable
-        pipeline = Pipeline.from_script(
-            {"flow": {"node1": {RESPONSE: lambda c, a: lambda x: 1, TRANSITIONS: {repeat(): true()}}}},
-            start_label=("flow", "node1"),
-        )
-        ctx = Context()
-        await pipeline.actor(pipeline, ctx)
-        raise Exception("can not be passed: fail of response returned Callable")
-    except ValueError:
-        pass
-    try:
-        # failed response
-        Pipeline.from_script(
-            {"flow": {"node1": {RESPONSE: raised_response, TRANSITIONS: {repeat(): true()}}}},
-            start_label=("flow", "node1"),
-        )
-        raise Exception("can not be passed: failed response")
-    except ValueError:
-        pass
 
     # empty ctx stability
     pipeline = Pipeline.from_script(
