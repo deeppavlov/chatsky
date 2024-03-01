@@ -29,8 +29,8 @@ This function returns the user request number.
 
 
 # %%
-def response_handler(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
-    return Message(text=f"answer {len(ctx.requests)}")
+def response_handler(ctx: Context, _: Pipeline) -> Message:
+    return Message(f"answer {len(ctx.requests)}")
 
 
 # %%
@@ -46,10 +46,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="hi"), Message(text="answer 1")),
-    (Message(text="how are you?"), Message(text="answer 2")),
-    (Message(text="ok"), Message(text="answer 3")),
-    (Message(text="good"), Message(text="answer 4")),
+    (Message("hi"), Message("answer 1")),
+    (Message("how are you?"), Message("answer 2")),
+    (Message("ok"), Message("answer 3")),
+    (Message("good"), Message("answer 4")),
 )
 
 # %% [markdown]

@@ -12,6 +12,7 @@ MySQL and PostgreSQL are widely used open-source relational databases that are k
 reliability and scalability. SQLite is a self-contained, high-reliability, embedded, full-featured,
 public-domain, SQL database engine.
 """
+
 import asyncio
 import importlib
 import json
@@ -93,7 +94,7 @@ class SQLContextStorage(DBContextStorage):
         DBContextStorage.__init__(self, path)
 
         self._check_availability(custom_driver)
-        self.engine = create_async_engine(self.full_path)
+        self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
         self.dialect: str = self.engine.dialect.name
 
         id_column_args = {"primary_key": True}

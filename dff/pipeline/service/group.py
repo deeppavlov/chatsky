@@ -7,9 +7,11 @@ This class provides a way to organize and manage multiple services as a single u
 allowing for easier management and organization of the services within the pipeline.
 The :py:class:`~.ServiceGroup` serves the important function of grouping services to work together in parallel.
 """
+
+from __future__ import annotations
 import asyncio
 import logging
-from typing import Optional, List, Union, Awaitable, ForwardRef
+from typing import Optional, List, Union, Awaitable, TYPE_CHECKING
 
 from dff.script import Context
 
@@ -29,7 +31,8 @@ from .service import Service
 
 logger = logging.getLogger(__name__)
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 class ServiceGroup(PipelineComponent):
@@ -40,7 +43,6 @@ class ServiceGroup(PipelineComponent):
     Components in synchronous groups are executed consequently (no matter is they are synchronous or asynchronous).
     Components in asynchronous groups are executed simultaneously.
     Group can be asynchronous only if all components in it are asynchronous.
-    Group containing actor can be synchronous only.
 
     :param components: A `ServiceGroupBuilder` object, that will be added to the group.
     :type components: :py:data:`~.ServiceGroupBuilder`
@@ -97,7 +99,7 @@ class ServiceGroup(PipelineComponent):
         else:
             raise Exception(f"Unknown type for ServiceGroup {components}")
 
-    async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> Context:
+    async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service group.
         It doesn't include wrappers execution, start condition checking or error handling - pure execution only.
@@ -107,7 +109,6 @@ class ServiceGroup(PipelineComponent):
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
-        :return: Current dialog context.
         """
         self._set_state(ctx, ComponentExecutionState.RUNNING)
 
@@ -123,42 +124,37 @@ class ServiceGroup(PipelineComponent):
         else:
             for service in self.components:
                 service_result = await service(ctx, pipeline)
-                if not service.asynchronous and isinstance(service_result, Context):
-                    ctx = service_result
-                elif service.asynchronous and isinstance(service_result, Awaitable):
+                if service.asynchronous and isinstance(service_result, Awaitable):
                     await service_result
 
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
-        return ctx
 
     async def _run(
         self,
         ctx: Context,
-        pipeline: Pipeline = None,
-    ) -> Optional[Context]:
+        pipeline: Pipeline,
+    ) -> None:
         """
         Method for handling this group execution.
         Executes before and after execution wrappers, checks start condition and catches runtime exceptions.
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
-        :return: Current dialog context if synchronous, else `None`.
         """
         await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
         try:
             if self.start_condition(ctx, pipeline):
-                ctx = await self._run_services_group(ctx, pipeline)
+                await self._run_services_group(ctx, pipeline)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
 
-        except Exception as e:
+        except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"ServiceGroup '{self.name}' execution failed!\n{e}")
+            logger.error(f"ServiceGroup '{self.name}' execution failed!", exc_info=exc)
 
         await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
-        return ctx if not self.asynchronous else None
 
     def log_optimization_warnings(self):
         """

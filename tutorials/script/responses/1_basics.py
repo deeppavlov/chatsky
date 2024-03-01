@@ -28,60 +28,60 @@ from dff.utils.testing import (
 toy_script = {
     "greeting_flow": {
         "start_node": {
-            RESPONSE: Message(text=""),
-            TRANSITIONS: {"node1": exact_match(Message(text="Hi"))},
+            RESPONSE: Message(""),
+            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
         },
         "node1": {
-            RESPONSE: Message(text="Hi, how are you?"),
+            RESPONSE: Message("Hi, how are you?"),
             TRANSITIONS: {
-                "node2": exact_match(Message(text="i'm fine, how are you?"))
+                "node2": exact_match(Message("i'm fine, how are you?"))
             },
         },
         "node2": {
-            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
-                "node3": exact_match(Message(text="Let's talk about music."))
+                "node3": exact_match(Message("Let's talk about music."))
             },
         },
         "node3": {
-            RESPONSE: Message(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": exact_match(Message(text="Ok, goodbye."))},
+            RESPONSE: Message("Sorry, I can not talk about music now."),
+            TRANSITIONS: {"node4": exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
-            RESPONSE: Message(text="bye"),
-            TRANSITIONS: {"node1": exact_match(Message(text="Hi"))},
+            RESPONSE: Message("bye"),
+            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
         },
         "fallback_node": {
-            RESPONSE: Message(text="Ooops"),
-            TRANSITIONS: {"node1": exact_match(Message(text="Hi"))},
+            RESPONSE: Message("Ooops"),
+            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
         },
     }
 }
 
 happy_path = (
-    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message("Hi"), Message("Hi, how are you?")),
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about music now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about music now."),
     ),
-    (Message(text="Ok, goodbye."), Message(text="bye")),
-    (Message(text="Hi"), Message(text="Hi, how are you?")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="Hi"), Message(text="Hi, how are you?")),
+    (Message("Ok, goodbye."), Message("bye")),
+    (Message("Hi"), Message("Hi, how are you?")),
+    (Message("stop"), Message("Ooops")),
+    (Message("stop"), Message("Ooops")),
+    (Message("Hi"), Message("Hi, how are you?")),
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about music now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about music now."),
     ),
-    (Message(text="Ok, goodbye."), Message(text="bye")),
+    (Message("Ok, goodbye."), Message("bye")),
 )
 
 

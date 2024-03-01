@@ -2,7 +2,8 @@
 """
 # Web API: 3. Load testing with Locust
 
-This tutorial shows how to use an API endpoint created in the FastAPI tutorial in load testing.
+This tutorial shows how to use an API endpoint
+created in the FastAPI tutorial in load testing.
 """
 
 # %pip install dff locust
@@ -134,11 +135,11 @@ class DFFUser(FastHttpUser):
         self.check_happy_path(
             [
                 # a function can be used to check the return message
-                (Message(text="Hi"), check_first_message),
+                (Message("Hi"), check_first_message),
                 # a None is used if return message should not be checked
-                (Message(text="i'm fine, how are you?"), None),
+                (Message("i'm fine, how are you?"), None),
                 # this should fail
-                (Message(text="Hi"), check_first_message),
+                (Message("Hi"), check_first_message),
             ]
         )
 

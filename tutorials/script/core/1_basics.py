@@ -57,7 +57,7 @@ toy_script = {
         "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
             # If "Hi" == request of the user then we make the transition.
         },
         "node1": {
@@ -66,32 +66,28 @@ toy_script = {
             ),  # When the agent enters node1,
             # return "Hi, how are you?".
             TRANSITIONS: {
-                "node2": cnd.exact_match(Message(text="I'm fine, how are you?"))
+                "node2": cnd.exact_match(Message("I'm fine, how are you?"))
             },
         },
         "node2": {
-            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
-                "node3": cnd.exact_match(
-                    Message(text="Let's talk about music.")
-                )
+                "node3": cnd.exact_match(Message("Let's talk about music."))
             },
         },
         "node3": {
-            RESPONSE: Message(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {
-                "node4": cnd.exact_match(Message(text="Ok, goodbye."))
-            },
+            RESPONSE: Message("Sorry, I can not talk about music now."),
+            TRANSITIONS: {"node4": cnd.exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
-            RESPONSE: Message(text="Bye"),
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            RESPONSE: Message("Bye"),
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
         "fallback_node": {
             # We get to this node if the conditions
             # for switching to other nodes are not performed.
-            RESPONSE: Message(text="Ooops"),
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            RESPONSE: Message("Ooops"),
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
     }
 }
@@ -99,37 +95,37 @@ toy_script = {
 
 happy_path = (
     (
-        Message(text="Hi"),
-        Message(text="Hi, how are you?"),
+        Message("Hi"),
+        Message("Hi, how are you?"),
     ),  # start_node -> node1
     (
-        Message(text="I'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("I'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about music now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about music now."),
     ),  # node2 -> node3
-    (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
-    (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
-    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
+    (Message("Ok, goodbye."), Message("Bye")),  # node3 -> node4
+    (Message("Hi"), Message("Hi, how are you?")),  # node4 -> node1
+    (Message("stop"), Message("Ooops")),  # node1 -> fallback_node
     (
-        Message(text="stop"),
-        Message(text="Ooops"),
+        Message("stop"),
+        Message("Ooops"),
     ),  # fallback_node -> fallback_node
     (
-        Message(text="Hi"),
-        Message(text="Hi, how are you?"),
+        Message("Hi"),
+        Message("Hi, how are you?"),
     ),  # fallback_node -> node1
     (
-        Message(text="I'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("I'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about music now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about music now."),
     ),  # node2 -> node3
-    (Message(text="Ok, goodbye."), Message(text="Bye")),  # node3 -> node4
+    (Message("Ok, goodbye."), Message("Bye")),  # node3 -> node4
 )
 
 

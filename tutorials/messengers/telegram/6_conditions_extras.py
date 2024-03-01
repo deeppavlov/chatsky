@@ -6,7 +6,8 @@ This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
 
 %mddoclink(api,messengers.telegram.messenger,telegram_condition)
-function and different types of %mddoclink(api,messengers.telegram.messenger,UpdateType)
+function and different types of
+%mddoclink(api,messengers.telegram.messenger,UpdateType)
 are used for telegram message type checking.
 """
 
@@ -53,7 +54,8 @@ The other available conditions are:
 * `poll`: poll is sent to the chat;
 * `poll_answer`: users answered the poll sent by the bot.
 
-You can read more on those in the Telegram documentation or in the docs for the `telebot` library.
+You can read more on those in the Telegram documentation
+or in the docs for the `telebot` library.
 """
 
 

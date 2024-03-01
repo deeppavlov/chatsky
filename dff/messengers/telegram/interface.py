@@ -4,12 +4,14 @@ Interface
 This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
+
 import asyncio
 from typing import Any, Optional, List, Tuple, Callable
 
 from telebot import types, apihelper
 
-from dff.messengers.common import MessengerInterface, PipelineRunnerFunction, CallbackMessengerInterface
+from dff.messengers.common import MessengerInterface, CallbackMessengerInterface
+from dff.pipeline.types import PipelineRunnerFunction
 from .messenger import TelegramMessenger
 from .message import TelegramMessage
 

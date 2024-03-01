@@ -12,6 +12,7 @@ a string containing the necessary installation commands for that protocol.
 The DFF supports a variety of communication protocols,
 which allows it to communicate with different types of databases.
 """
+
 import json
 import pathlib
 

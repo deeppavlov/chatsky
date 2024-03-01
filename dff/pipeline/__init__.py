@@ -32,3 +32,5 @@ from .pipeline.pipeline import Pipeline, ACTOR
 from .service.extra import BeforeHandler, AfterHandler
 from .service.group import ServiceGroup
 from .service.service import Service, to_service
+
+ExtraHandlerRuntimeInfo.model_rebuild()

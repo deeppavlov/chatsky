@@ -6,7 +6,9 @@ The following tutorial shows `pipeline`
 asynchronous service and service group usage.
 
 This tutorial is a more advanced version of the
-[previous tutorial](%doclink(tutorial,pipeline.5_asynchronous_groups_and_services_basic)).
+[previous tutorial](
+%doclink(tutorial,pipeline.5_asynchronous_groups_and_services_basic)
+).
 """
 
 # %pip install dff
@@ -52,7 +54,7 @@ If the parameter is not set,
 the service becomes asynchronous, and if set, it is used instead.
 If service can not be asynchronous,
 but is marked asynchronous, an exception is thrown.
-NB! ACTOR service is always synchronous.
+ACTOR service is asynchronous.
 
 The timeout field only works for asynchronous services and service groups.
 If service execution takes more time than timeout,

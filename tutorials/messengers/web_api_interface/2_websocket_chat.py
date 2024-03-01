@@ -11,8 +11,8 @@ https://fastapi.tiangolo.com/advanced/websockets/.
 
 As mentioned in that tutorial,
 
-> ... for this example, we'll use a very simple HTML document with some JavaScript,
-> all inside a long string.
+> ... for this example, we'll use a very simple HTML document
+> with some JavaScript, all inside a long string.
 > This, of course, is not optimal and you wouldn't use it for production.
 
 Here, %mddoclink(api,messengers.common.interface,CallbackMessengerInterface)
@@ -92,7 +92,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
         while True:
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
-            request = Message(text=data)
+            request = Message(data)
             context = await messenger_interface.on_request_async(
                 request, client_id
             )

@@ -27,21 +27,15 @@ jobs:
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build images
-        if: matrix.os == 'ubuntu-latest'
-        run: |
-          make docker_up
-
       - name: set up python ${{ matrix.python-version }}
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: ${{ matrix.python-version }}
 
       - name: install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[test_full]
-        shell: bash
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with test,tutorials --all-extras --no-ansi --no-interaction
 
       - name: run pytest
         env:
@@ -50,32 +44,22 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          if [ "$RUNNER_OS" == "Linux" ]; then
-              source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-              pytest --tb=long -vv --cache-clear --no-cov --allow-skip=telegram tests/
-          else
-              pytest -m "not docker" --tb=long -vv --cache-clear --no-cov --allow-skip=telegram,docker tests/
-          fi
-        shell: bash
+          python -m poetry run poe test_no_cov
+
   test_no_deps:
     runs-on: "ubuntu-latest"
     steps:
       - uses: actions/checkout@v4
 
-      - name: Build images
-        run: |
-          make docker_up
-
       - name: set up python 3.8
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.8
 
       - name: install dependencies
         run: |
-          python -m pip install --upgrade pip
-          python -m pip install -e .[tests]
-        shell: bash
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with test --no-ansi --no-interaction
 
       - name: run pytest
         env:
@@ -84,6 +68,4 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          source <(cat .env_file | sed 's/=/=/' | sed 's/^/export /')
-          pytest --tb=long -vv --cache-clear --no-cov --allow-skip=all tests/
-        shell: bash
+          python -m poetry run poe test_no_deps
