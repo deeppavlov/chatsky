@@ -63,7 +63,7 @@ class Pipeline:
         - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
 
-    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
+    :param messenger_interfaces: An `AbsMessagingInterface` instance for this pipeline.
     :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
     :param services: (required) A :py:data:`~.ServiceGroupBuilder` object,
@@ -229,7 +229,7 @@ class Pipeline:
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
+        messenger_interfaces: Optional[Union[MessengerInterface, Iterable[MessengerInterface], Dict[str, MessengerInterface]]] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
     ) -> "Pipeline":
@@ -261,7 +261,7 @@ class Pipeline:
 
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
             or a dict to store dialog :py:class:`~.Context`.
-        :param messenger_interface: An instance for this pipeline.
+        :param messenger_interfaces: An instance for this pipeline.
         :param pre_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
         :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
@@ -282,7 +282,7 @@ class Pipeline:
             verbose=verbose,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
-            messenger_interface=messenger_interface,
+            messenger_interfaces=messenger_interfaces,
             context_storage=context_storage,
             components=[*pre_services, ACTOR, *post_services],
         )

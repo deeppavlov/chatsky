@@ -131,7 +131,7 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "messenger_interface": CLIMessengerInterface(
+    "messenger_interfaces": CLIMessengerInterface(
         intro="Hi, this is a brand new Pipeline running!",
         prompt_request="Request: ",
         prompt_response="Response: ",
