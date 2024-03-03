@@ -33,16 +33,16 @@ logger = logging.getLogger(__name__)
 """
 When Pipeline is created using `from_dict` method,
 pipeline should be defined as a dictionary.
-It should contain `services` - a `ServiceGroupBuilder` object,
+It should contain `components` - a `ServiceGroupBuilder` object, 
 basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
 see tutorial 4.
 
-On pipeline execution services from `services`
+On pipeline execution services from `components`
 list are run without difference between pre- and postprocessors.
 Actor constant "ACTOR" is required to be passed as one of the services.
-ServiceBuilder object can be defined either with callable
+`ServiceBuilder` object can be defined either with callable
 (see tutorial 2) or with dict / object.
-It should contain `handler` - a ServiceBuilder object.
+It should contain `handler` - a `ServiceBuilder` object.
 
 Not only Pipeline can be run using `__call__` method,
 for most cases `run` method should be used.

@@ -102,7 +102,7 @@ class ServiceGroup(PipelineComponent):
     async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> None:
         """
         Method for running this service group.
-        It doesn't include wrappers execution, start condition checking or error handling - pure execution only.
+        It doesn't include extra handlers execution, start condition checking or error handling - pure execution only.
         Executes components inside the group based on its `asynchronous` property.
         Collects information about their execution state - group is finished successfully
         only if all components in it finished successfully.
@@ -137,7 +137,7 @@ class ServiceGroup(PipelineComponent):
     ) -> None:
         """
         Method for handling this group execution.
-        Executes before and after execution wrappers, checks start condition and catches runtime exceptions.
+        Executes extra handlers before and after execution, checks start condition and catches runtime exceptions.
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
@@ -198,13 +198,13 @@ class ServiceGroup(PipelineComponent):
         condition: ExtraHandlerConditionFunction = lambda _: True,
     ):
         """
-        Method for adding a global wrapper to this group.
-        Adds wrapper to itself and propagates it to all inner components.
-        Uses a special condition function to determine whether to add wrapper to any particular inner component or not.
+        Method for adding a global extra handler to this group.
+        Adds extra handler to itself and propagates it to all inner components.
+        Uses a special condition function to determine whether to add extra handler to any particular inner component or not.
         Condition checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
 
-        :param global_extra_handler_type: A type of wrapper to add.
-        :param extra_handler: A `WrapperFunction` to add as a wrapper.
+        :param global_extra_handler_type: A type of extra handler to add.
+        :param extra_handler: A `ExtraHandlerFunction` to add as an extra handler.
         :type extra_handler: :py:data:`~.ExtraHandlerFunction`
         :param condition: A condition function.
         :return: `None`

@@ -72,7 +72,7 @@ class ComponentExecutionState(str, Enum):
 @unique
 class GlobalExtraHandlerType(str, Enum):
     """
-    Enum, representing types of global wrappers, that can be set applied for a pipeline.
+    Enum, representing types of global extra handlers, that can be set applied for a pipeline.
     The following types are supported:
 
     - BEFORE_ALL: function called before each pipeline call,
@@ -93,9 +93,9 @@ class ExtraHandlerType(str, Enum):
     Enum, representing wrapper execution stage: before or after the wrapped function.
     The following types are supported:
 
-    - UNDEFINED: wrapper function with undetermined execution stage,
-    - BEFORE: wrapper function called before component,
-    - AFTER: wrapper function called after component.
+    - UNDEFINED: extra handler function with undetermined execution stage,
+    - BEFORE: extra handler function called before component,
+    - AFTER: extra handler function called after component.
     """
 
     UNDEFINED = "UNDEFINED"
@@ -126,10 +126,10 @@ Accepts list of functions (other start_conditions to aggregate), returns boolean
 
 ExtraHandlerConditionFunction: TypeAlias = Callable[[str], bool]
 """
-A function type used during global wrappers initialization to determine
-whether wrapper should be applied to component with given path or not.
+A function type used during global extra handler initialization to determine
+whether extra handler should be applied to component with given path or not.
 Checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
-Accepts str (component path), returns boolean (whether wrapper should be applied).
+Accepts str (component path), returns boolean (whether extra handler should be applied).
 """
 
 
@@ -154,8 +154,8 @@ ExtraHandlerFunction: TypeAlias = Union[
     Callable[[Context, "Pipeline", "ExtraHandlerRuntimeInfo"], Any],
 ]
 """
-A function type for creating wrappers (before and after functions).
-Can accept current dialog context, pipeline, and current wrapper info.
+A function type for creating extra handler (before and after functions).
+Can accept current dialog context, pipeline, and current extra handler info.
 """
 
 

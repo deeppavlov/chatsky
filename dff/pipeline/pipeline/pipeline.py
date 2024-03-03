@@ -47,6 +47,9 @@ class Pipeline:
     Class that automates service execution and creates service pipeline.
     It accepts constructor parameters:
 
+    :param components: (required) A :py:data:`~.ServiceGroupBuilder` object,
+        that will be transformed to root service group. It should include :py:class:`~.Actor`,
+        but only once (raises exception otherwise). It will always be named pipeline.
     :param script: (required) A :py:class:`~.Script` instance (object or dict).
     :param start_label: (required) Actor start label.
     :param fallback_label: Actor fallback label.
@@ -65,10 +68,10 @@ class Pipeline:
     :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
     :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
-    :param services: (required) A :py:data:`~.ServiceGroupBuilder` object,
-        that will be transformed to root service group. It should include :py:class:`~.Actor`,
-        but only once (raises exception otherwise). It will always be named pipeline.
-    :param wrappers: List of wrappers to add to pipeline root service group.
+    :param before_handler: List of `ExtraHandlerBuilder` to add to the group.
+    :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
+    :param after_handler: List of `ExtraHandlerBuilder` to add to the group.
+    :type after_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
     :param timeout: Timeout to add to pipeline root service group.
     :param optimization_warnings: Asynchronous pipeline optimization check request flag;
         warnings will be sent to logs. Additionally it has some calculated fields:

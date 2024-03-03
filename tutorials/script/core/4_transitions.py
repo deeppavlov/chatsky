@@ -141,10 +141,10 @@ toy_script = {
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
-                lbl.to_fallback(0.1): cnd.true(),  # third check
+                lbl.to_fallback(0.1): cnd.true(),  # fourth check
                 # lbl.to_fallback(0.1) is equivalent
                 # to ("global_flow", "fallback_node", 0.1)
-                lbl.forward(0.5): cnd.regexp(r"talk about"),  # second check
+                lbl.forward(0.5): cnd.regexp(r"talk about"),  # third check
                 # lbl.forward(0.5) is equivalent
                 # to ("greeting_flow", "node3", 0.5)
                 ("music_flow", "node1"): cnd.regexp(
@@ -154,7 +154,7 @@ toy_script = {
                 # to ("music_flow", "node1", 1.0)
                 lbl.previous(): cnd.regexp(
                     r"previous", re.IGNORECASE
-                ),  # third check
+                ),  # second check
             },
         },
         "node3": {
