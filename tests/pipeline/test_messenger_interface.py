@@ -51,7 +51,7 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(interface.connect(pipeline._run_pipeline, loop=loop))
+    asyncio.run(interface.connect(pipeline._run_pipeline, DEFAULT_INTERFACE_ID, loop=loop))
 
 
 def test_callback_messenger_interface(monkeypatch):
