@@ -14,12 +14,16 @@ def test_conditions():
     failed_ctx.add_label(label)
     pipeline = Pipeline.from_script(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 
-    assert cnd.has_text("text")(ctx, pipeline)
+    assert cnd.exact_match(Message("text"))(ctx, pipeline)
     assert cnd.exact_match(Message("text", misc={}))(ctx, pipeline)
     assert not cnd.exact_match(Message("text", misc={1: 1}))(ctx, pipeline)
-    assert not cnd.has_text("text1")(ctx, pipeline)
+    assert not cnd.exact_match(Message("text1"))(ctx, pipeline)
     assert cnd.exact_match(Message())(ctx, pipeline)
     assert not cnd.exact_match(Message(), skip_none=False)(ctx, pipeline)
+
+    assert cnd.has_text("text")(ctx, pipeline)
+    assert not cnd.has_text("text1")(ctx, pipeline)
+    assert cnd.has_text("")(ctx, pipeline)
 
     assert cnd.regexp("t.*t")(ctx, pipeline)
     assert not cnd.regexp("t.*t1")(ctx, pipeline)
