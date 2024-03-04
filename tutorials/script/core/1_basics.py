@@ -65,15 +65,11 @@ toy_script = {
                 text="Hi, how are you?"
             ),  # When the agent enters node1,
             # return "Hi, how are you?".
-            TRANSITIONS: {
-                "node2": cnd.has_text("I'm fine, how are you?")
-            },
+            TRANSITIONS: {"node2": cnd.has_text("I'm fine, how are you?")},
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {
-                "node3": cnd.has_text("Let's talk about music.")
-            },
+            TRANSITIONS: {"node3": cnd.has_text("Let's talk about music.")},
         },
         "node3": {
             RESPONSE: Message("Sorry, I can not talk about music now."),
