@@ -51,6 +51,20 @@ def exact_match(match: Message, skip_none: bool = True) -> Callable[[Context, Pi
 
 
 @validate_call
+def has_text(text: str) -> Callable[[Context, Pipeline], bool]:
+    """
+    Return function handler. This handler returns `True` only if the last user phrase
+    contains the phrase specified in :py:param:`text`. 
+    
+    :param text: A `str` variable to look for within the user request.
+    """
+    def has_text_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
+        request = ctx.last_request
+        return text in request.text
+    return has_text_condition_handler
+
+
+@validate_call
 def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0) -> Callable[[Context, Pipeline], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase contains

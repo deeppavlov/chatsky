@@ -5,7 +5,7 @@ This module contains a simple script and a dialog which are used
 in tutorials.
 """
 
-from dff.script.conditions import exact_match
+from dff.script.conditions import has_text
 from dff.script import TRANSITIONS, RESPONSE, Message
 
 TOY_SCRIPT = {

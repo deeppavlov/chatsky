@@ -14,7 +14,7 @@ are used for that.
 from typing import NamedTuple
 
 from dff.script import Message
-from dff.script.conditions import exact_match
+from dff.script.conditions import has_text
 from dff.script import RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
 from dff.utils.testing import (

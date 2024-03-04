@@ -151,7 +151,7 @@ Likewise, if additional scenarios need to be covered, additional flow objects ca
   This is a dictionary that maps labels of other nodes to conditions, i.e. callback functions that
   return `True` or `False`. These conditions determine whether respective nodes can be visited
   in the next turn.
-  In the example script, we use standard transitions: ``exact_match`` requires the user request to
+  In the example script, we use standard transitions: ``has_text`` requires the user request to
   fully match the provided text, while ``true`` always allows a transition. However, passing custom
   callbacks that implement arbitrary logic is also an option.
 

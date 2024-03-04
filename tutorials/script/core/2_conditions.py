@@ -43,6 +43,7 @@ Out of the box `dff.script.conditions` offers the
 
 * `exact_match` returns `True` if the user's request completely
     matches the value passed to the function.
+* `has_text` returns `True` if the specified text matches the user's request.
 * `regexp` returns `True` if the pattern matches the user's request,
     while the user's request must be a string.
     `regexp` has same signature as `re.compile` function.
