@@ -13,19 +13,19 @@ SCRIPT = {
             RESPONSE: {
                 "text": "",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: {"node1": cnd.has_text("Ping")},
         },
         "node1": {
             RESPONSE: {
                 "text": "Pong",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: {"node1": cnd.has_text("Ping")},
         },
         "fallback_node": {
             RESPONSE: {
                 "text": "Ooops",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
+            TRANSITIONS: {"node1": cnd.has_text("Ping")},
         },
     }
 }

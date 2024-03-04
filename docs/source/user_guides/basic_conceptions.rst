@@ -89,14 +89,14 @@ Example flow & script
                 RESPONSE: Message(),  # the response of the initial node is skipped
                 TRANSITIONS: {
                     ("greeting_flow", "greeting_node"):
-                        cnd.exact_match(Message("/start")),
+                        cnd.has_text("/start"),
                 },
             },
             "greeting_node": {
                 RESPONSE: Message("Hi!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "game_start_node"):
-                        cnd.exact_match(Message("Hello!"))
+                        cnd.has_text("Hello!")
                 }
             },
             "fallback_node": {
@@ -111,14 +111,14 @@ Example flow & script
                 RESPONSE: Message("Let's play ping-pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"):
-                        cnd.exact_match(Message("Ping!")),
+                        cnd.has_text("Ping!"),
                 },
             },
             "response_node": {
                 RESPONSE: Message("Pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"):
-                        cnd.exact_match(Message("Ping!")),
+                        cnd.has_text("Ping!"),
                 },
             },
         },
