@@ -224,7 +224,7 @@ class Context(BaseModel):
         return self.labels.get(last_index)
 
     def last_response_to(self, interface_id: Optional[str]) -> Optional[Message]:
-        for index in list(self.responses)[-1:0:-1]:
+        for index in list(self.responses)[::-1]:
             response = self.responses.get(index)
             if response is not None and response.interface == interface_id:
                 return response
