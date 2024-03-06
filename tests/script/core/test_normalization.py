@@ -53,6 +53,19 @@ def test_normalize_label():
     assert normalize_label(("flow", "node", 1.0), "flow") == ("flow", "node", 1.0)
     assert normalize_label(("node", 1.0), "flow") == ("flow", "node", 1.0)
 
+    def wrong_label_type_test(label) -> bool:
+        try:
+            normalize_label(label, "flow")
+            return False
+        except TypeError:
+            return True
+
+    assert wrong_label_type_test(None)
+    assert wrong_label_type_test(True)
+    assert wrong_label_type_test(0.7)
+    assert not wrong_label_type_test("node")
+    assert not wrong_label_type_test(("node", 1.0))
+
 
 def test_normalize_condition():
     ctx, actor = create_env()
