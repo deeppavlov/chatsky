@@ -12,7 +12,7 @@ from typing import Union, Callable, Optional, TYPE_CHECKING
 
 from .keywords import Keywords
 from .context import Context
-from .types import NodeLabel1Type, NodeLabel2Type, NodeLabel3Type, NodeLabelType, ConditionType, LabelType
+from .types import NodeLabel3Type, NodeLabelType, ConditionType, LabelType
 from .message import Message
 
 if TYPE_CHECKING:
