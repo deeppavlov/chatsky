@@ -43,7 +43,6 @@ Out of the box `dff.script.conditions` offers the
 
 * `exact_match` returns `True` if the user's request completely
     matches the value passed to the function.
-* `has_text` returns `True` if the specified text matches the user's request.
 * `regexp` returns `True` if the pattern matches the user's request,
     while the user's request must be a string.
     `regexp` has same signature as `re.compile` function.
@@ -108,7 +107,7 @@ toy_script = {
         "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -138,7 +137,7 @@ toy_script = {
                 "node1": cnd.any(
                     [
                         hi_lower_case_condition,
-                        cnd.has_text("hello"),
+                        cnd.exact_match(Message("hello")),
                     ]
                 )
             },

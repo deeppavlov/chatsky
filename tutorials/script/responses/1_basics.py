@@ -14,7 +14,7 @@ are used for that.
 from typing import NamedTuple
 
 from dff.script import Message
-from dff.script.conditions import has_text
+from dff.script.conditions import exact_match
 from dff.script import RESPONSE, TRANSITIONS
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
@@ -29,27 +29,31 @@ toy_script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: Message(""),
-            TRANSITIONS: {"node1": has_text("Hi")},
+            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
         },
         "node1": {
             RESPONSE: Message("Hi, how are you?"),
-            TRANSITIONS: {"node2": has_text("i'm fine, how are you?")},
+            TRANSITIONS: {
+                "node2": exact_match(Message("i'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": has_text("Let's talk about music.")},
+            TRANSITIONS: {
+                "node3": exact_match(Message("Let's talk about music."))
+            },
         },
         "node3": {
             RESPONSE: Message("Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": has_text("Ok, goodbye.")},
+            TRANSITIONS: {"node4": exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
             RESPONSE: Message("bye"),
-            TRANSITIONS: {"node1": has_text("Hi")},
+            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
         },
         "fallback_node": {
             RESPONSE: Message("Ooops"),
-            TRANSITIONS: {"node1": has_text("Hi")},
+            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
         },
     }
 }

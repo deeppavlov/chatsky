@@ -84,7 +84,7 @@ toy_script = {
         "start_node": {  # This is an initial node,
             # it doesn't need a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -95,24 +95,28 @@ toy_script = {
                 ]
             ),
             # Random choice from candidate list.
-            TRANSITIONS: {"node2": cnd.has_text("I'm fine, how are you?")},
+            TRANSITIONS: {
+                "node2": cnd.exact_match(Message("I'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.has_text("Let's talk about music.")},
+            TRANSITIONS: {
+                "node3": cnd.exact_match(Message("Let's talk about music."))
+            },
         },
         "node3": {
             RESPONSE: cannot_talk_about_topic_response,
-            TRANSITIONS: {"node4": cnd.has_text("Ok, goodbye.")},
+            TRANSITIONS: {"node4": cnd.exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
             RESPONSE: upper_case_response(Message("bye")),
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: fallback_trace_response,
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
     }
 }

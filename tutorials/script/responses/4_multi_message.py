@@ -27,7 +27,7 @@ from dff.utils.testing.common import (
 toy_script = {
     "greeting_flow": {
         "start_node": {  # This is an initial node,
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -42,24 +42,28 @@ toy_script = {
                     ]
                 }
             ),
-            TRANSITIONS: {"node2": cnd.has_text("I'm fine, how are you?")},
+            TRANSITIONS: {
+                "node2": cnd.exact_match(Message("I'm fine, how are you?"))
+            },
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.has_text("Let's talk about music.")},
+            TRANSITIONS: {
+                "node3": cnd.exact_match(Message("Let's talk about music."))
+            },
         },
         "node3": {
             RESPONSE: Message("Sorry, I can not talk about that now."),
-            TRANSITIONS: {"node4": cnd.has_text("Ok, goodbye.")},
+            TRANSITIONS: {"node4": cnd.exact_match(Message("Ok, goodbye."))},
         },
         "node4": {
             RESPONSE: Message("bye"),
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: Message("Ooops"),
-            TRANSITIONS: {"node1": cnd.has_text("Hi")},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
         },
     }
 }
