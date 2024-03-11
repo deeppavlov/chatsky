@@ -22,6 +22,7 @@ def test_conditions():
     assert not cnd.exact_match(Message(), skip_none=False)(ctx, pipeline)
 
     assert cnd.has_text("text")(ctx, pipeline)
+    assert cnd.has_text("te")(ctx, pipeline)
     assert not cnd.has_text("text1")(ctx, pipeline)
     assert cnd.has_text("")(ctx, pipeline)
 
