@@ -20,6 +20,8 @@ def test_conditions():
     assert not cnd.exact_match(Message("text1"))(ctx, pipeline)
     assert cnd.exact_match(Message())(ctx, pipeline)
     assert not cnd.exact_match(Message(), skip_none=False)(ctx, pipeline)
+    assert cnd.exact_match("text")(ctx, pipeline)
+    assert not cnd.exact_match("text1")(ctx, pipeline)
 
     assert cnd.regexp("t.*t")(ctx, pipeline)
     assert not cnd.regexp("t.*t1")(ctx, pipeline)
