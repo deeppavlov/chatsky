@@ -22,7 +22,7 @@ logger = logging.getLogger(__name__)
 
 
 @validate_call
-def exact_match(match: Message, skip_none: bool = True) -> Callable[[Context, Pipeline], bool]:
+def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[[Context, Pipeline], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase
     is the same Message as the :py:const:`match`.
@@ -34,6 +34,9 @@ def exact_match(match: Message, skip_none: bool = True) -> Callable[[Context, Pi
 
     def exact_match_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
         request = ctx.last_request
+        nonlocal match
+        if isinstance(match, str):
+            match = Message(text=match)
         if request is None:
             return False
         for field in match.model_fields:
