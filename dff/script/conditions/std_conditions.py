@@ -28,7 +28,7 @@ def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[
     is the same `Message` or `str` as the :py:const:`match`.
     If :py:const:`skip_none` the handler will not compare `None` fields of :py:const:`match`.
 
-    :param match: A Message variable to compare user request with. Can also accept string, which will be converted into a `Message` with it's text field equal to `match`
+    :param match: A `Message` variable to compare user request with. Can also accept `str`, which will be converted into a `Message` with it's text field equal to `match`
     :param skip_none: Whether fields should be compared if they are `None` in :py:const:`match`.
     """
 
