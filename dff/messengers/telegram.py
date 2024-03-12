@@ -127,8 +127,8 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
     async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         await self._on_event(update, _, lambda u: Message(attachments=[CallbackQuery(query_string=u.callback_query.data)]))
 
-    async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
-        self.callback = callback
+    async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
+        self.callback = pipeline_runner
 
 
 class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
@@ -137,8 +137,8 @@ class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
         self.interval = interval
         self.timeout = timeout
 
-    async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
-        await super().connect(callback, *args, **kwargs)
+    async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
+        await super().connect(pipeline_runner, *args, **kwargs)
         self.application.run_polling(poll_interval=self.interval, timeout=self.timeout, allowed_updates=Update.ALL_TYPES)
 
 
@@ -148,8 +148,8 @@ class CallbackTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
         self.listen = host
         self.port = port
     
-    async def connect(self, callback: PipelineRunnerFunction, *args, **kwargs):
-        await super().connect(callback, *args, **kwargs)
+    async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
+        await super().connect(pipeline_runner, *args, **kwargs)
         self.application.run_webhook(listen=self.listen, port=self.port, allowed_updates=Update.ALL_TYPES)
 
 
@@ -161,19 +161,5 @@ def telegram_condition(func: Callable[[Update], bool]):  # pragma: no cover
             return False
         original_message = cast(Update, last_request.original_message)
         return func(original_message)
-
-    return condition
-
-
-def has_callback_query(expected: str):
-
-    def condition(ctx: Context, _: Pipeline, *__, **___) -> bool:  # pragma: no cover
-        last_request = ctx.last_request
-        if last_request is None or last_request.attachments is None or len(last_request.attachments) == 0:
-            return False
-        callback_query = next((attachment for attachment in last_request.attachments if isinstance(attachment, CallbackQuery)), None)
-        if callback_query is None:
-            return False
-        return callback_query.query_string == expected
 
     return condition

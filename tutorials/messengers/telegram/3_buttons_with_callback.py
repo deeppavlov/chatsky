@@ -25,8 +25,9 @@ import os
 import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
 from dff.pipeline import Pipeline
-from dff.script.core.message import Button, Keyboard, Message, CallbackQuery
-from dff.messengers.telegram import PollingTelegramInterface, has_callback_query
+from dff.script.core.message import Button, Keyboard, Message
+from dff.messengers.common.conditions import has_callback_query
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.utils.testing.common import is_interactive_mode
 
 
