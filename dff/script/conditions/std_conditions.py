@@ -194,14 +194,16 @@ def has_last_labels(
     return has_last_labels_condition_handler
 
 
-def from_interface(iface: Type[MessengerInterface]) -> Callable[[Context, Pipeline], bool]:
+def from_interface(iface: Optional[Type[MessengerInterface]] = None, name: Optional[str] = None) -> Callable[[Context, Pipeline], bool]:
     def is_from_interface_type(ctx: Context, pipeline: Pipeline) -> bool:
         if ctx.last_request is None:
             return False
         latest_interface = ctx.last_request.interface
         for interface_name, interface_object in pipeline.messenger_interfaces.items():
             if interface_name == latest_interface:
-                return isinstance(interface_object, iface)
+                name_match = name is None or interface_name == name
+                type_match = iface is None or isinstance(interface_object, iface)
+                return name_match and type_match
         return False
 
     return is_from_interface_type

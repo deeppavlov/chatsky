@@ -20,6 +20,7 @@ is used in creating a JSON Schema for the endpoint.
 from dff.messengers.common.interface import CallbackMessengerInterface
 from dff.script import Message
 from dff.pipeline import Pipeline
+from dff.script.core.types import DEFAULT_INTERFACE_ID
 from dff.utils.testing import TOY_SCRIPT_ARGS, is_interactive_mode
 
 import uvicorn
@@ -81,10 +82,10 @@ communication between the pipeline on the server side and the messenger client.
 """
 
 # %%
-messenger_interfaces = CallbackMessengerInterface()
+messenger_interface = CallbackMessengerInterface()
 # CallbackMessengerInterface instantiating the dedicated messenger interface
 pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interfaces=messenger_interfaces
+    *TOY_SCRIPT_ARGS, messenger_interfaces=messenger_interface
 )
 
 
@@ -102,7 +103,7 @@ async def respond(
     user_id: str,
     user_message: Message,
 ):
-    context = await messenger_interfaces.on_request_async(user_message, user_id)
+    context = await pipeline.messenger_interfaces[DEFAULT_INTERFACE_ID].on_request_async(user_message, user_id)
     return {"user_id": user_id, "response": context.last_response}
 
 

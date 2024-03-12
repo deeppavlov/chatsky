@@ -239,6 +239,13 @@ class Context(BaseModel):
         last_index = get_last_index(self.responses)
         return self.responses.get(last_index)
 
+    def last_request_from(self, interface_id: Optional[str]) -> Optional[Message]:
+        for index in list(self.requests)[::-1]:
+            request = self.requests.get(index)
+            if request is not None and request.interface == interface_id:
+                return request
+        return None
+
     @last_response.setter
     def last_response(self, response: Optional[Message]):
         """

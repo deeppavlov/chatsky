@@ -113,7 +113,7 @@ class Pipeline:
         if messenger_interfaces is not None and not isinstance(messenger_interfaces, MessengerInterface):
             if isinstance(messenger_interfaces, Iterable):
                 self.messenger_interfaces = {str(uuid4()): iface for iface in messenger_interfaces}
-            elif isinstance(messenger_interfaces, Iterable):
+            elif isinstance(messenger_interfaces, Dict):
                 self.messenger_interfaces = messenger_interfaces
             else:
                 raise RuntimeError(f"Unexpected type of 'messenger_interfaces': {type(messenger_interfaces)}")
