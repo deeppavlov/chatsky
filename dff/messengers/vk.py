@@ -25,7 +25,10 @@ from dff.script.core.message import (
     Location,
     Message,
     Video,
+    Link
 )
+
+from dff.script.extra_types import Poll
 
 
 async def vk_api_call(method, payload={}, headers={}):
@@ -182,6 +185,7 @@ class PollingVKInterface(PollingMessengerInterface):
     def upload_attachment(
         self, peer_id, attachment, attachment_type: str
     ) -> str:
+        #returns json object with `owner_id` and `photo_id` needed to send it
         match attachment_type:
             case "photo":
                 upload_url = requests.post(
@@ -193,7 +197,6 @@ class PollingVKInterface(PollingMessengerInterface):
                     uploaded_photo_data = requests.post(upload_url, files=photo_files).json()
 
                 saved_photo_data = requests.post(f"https://api.vk.com/method/photos.saveMessagesPhoto?&group_id={self.group_id}&v=5.81&access_token={self.token}&photo={uploaded_photo_data['photo']}&server={uploaded_photo_data['server']}&hash={uploaded_photo_data['hash']}").json()
-                # returns json object with `owner_id` and `photo_id` needed to send it
 
                 return saved_photo_data["response"]
             
@@ -209,25 +212,58 @@ class PollingVKInterface(PollingMessengerInterface):
                 saved_doc_data = requests.post(f"https://api.vk.com/method/docs.save?file={uploaded_photo_data['file']}&group_id={self.group_id}&v=5.81&access_token={self.token}").json()
                 
                 return saved_doc_data["response"]
+            
+            case "audio":
+                upload_url = requests.post(
+                    f"https://api.vk.com/method/docs.getMessagesUploadServer?peer_id={peer_id}&group_id={self.group_id}&v=5.81&access_token={self.token}&type=audio_message"
+                ).json()["response"]["upload_url"]
+                attachment_path = str(attachment.source)
+                
+                with FilesOpener(attachment_path, key_format="file") as files:
+                    uploaded_photo_data = requests.post(upload_url, files=files).json()
+
+                saved_doc_data = requests.post(f"https://api.vk.com/method/docs.save?file={uploaded_photo_data['file']}&group_id={self.group_id}&v=5.81&access_token={self.token}").json()
+                
+                return saved_doc_data["response"]
+            
+            case "video":
+                vid = requests.post(f"https://api.vk.com/method/video.save?link={attachment.source}&group_id={self.group_id}&v=5.81&access_token={self.token}").json()["response"]
+                return vid
 
 
     def send_message(self, response, id):
         if response.attachments is not None:
-            for _ in response.attachments:
-                attachment_list = []
-                for attachment in _[1]:
-                    match attachment:
-                        case Image():
-                            data_to_send = self.upload_attachment(id, attachment, "photo")
-                            attachment_list.append(f"photo{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}")
-                            # requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachment=photo{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}&v=5.81&access_token={self.token}").json()
-                        case Document():
-                            data_to_send = self.upload_attachment(id, attachment, "doc")
-                            attachment_list.append(f"doc{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}")
+            attachment_list = []
+            for attachment in response.attachments:
+                match attachment:
+                    case Image():
+                        data_to_send = self.upload_attachment(id, attachment, "photo")
+                        attachment_list.append(f"photo{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}")
+                        # requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachment=photo{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}&v=5.81&access_token={self.token}").json()
+                    case Document():
+                        data_to_send = self.upload_attachment(id, attachment, "doc")
+                        attachment_list.append(f"doc{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}")
+                    case Video():
+                        data_to_send = self.upload_attachment(id, attachment, "video")
+                        attachment_list.append(f"video{data_to_send['owner_id']}_{data_to_send['id']}_{data_to_send['access_key']}")
+                    case Audio():
+                        data_to_send = self.upload_attachment(id, attachment, "audio")
+                        attachment_list.append(f"doc{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}")
+                    case Link():
+                        link_vk = {"type": "link", "link": {"url": attachment.source, "title": attachment.title}}
+                        # requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachments=[{link_vk}]&v=5.81&access_token={self.token}").json()
+                        attachment_list.append(link_vk)
+                        # attachment_list.append(str(link_vk))
+                    case Poll():
+                        poll_obj = requests.post(f"https://api.vk.com/method/polls.create?question={attachment.question}&is_anonymous={attachment.is_anonymous}&is_multiple={attachment.is_multiple}&end_date={attachment.end_date}&owner_id=-{self.group_id}&add_answers={attachment.add_answers}&photo_id={attachment.photo_id}&background_id={attachment.background_id}&disable_unvote={attachment.disable_unvote}&v=5.81&access_token={self.token}").json()["response"]
+                        attachment_list.append({
+                            "type": "poll",
+                            "poll": poll_obj
+                        })
 
                 attachment_string = ','.join(attachment_list).strip(',')
-                            
-            requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachment={attachment_string}&v=5.81&access_token={self.token}").json()
+            
+            requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachment={attachment_string}&group_id={self.group_id}&v=5.81&access_token={self.token}").json()
         else:
             requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&v=5.81&access_token={self.token}").json()
 
