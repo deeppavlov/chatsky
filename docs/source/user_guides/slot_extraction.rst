@@ -137,9 +137,9 @@ it enables transitions to the nodes that fill them.
     form_policy = slots.FormPolicy(
         "restaurant",
         {
-            "restaurant_cuisine": [("restaurant", "cuisine")],
-            "restaurant_address": [("restaurant", "address")],
-            "restaurant_number": [("restaurant", "number")],
+            "restaurant_cuisine": ("restaurant", "cuisine"),
+            "restaurant_address": ("restaurant", "address"),
+            "restaurant_number": ("restaurant", "number"),
         },
     )
 

@@ -5,7 +5,6 @@ This module holds the :class:`~.Form` class that can be used to create a global 
 """
 from typing import Optional, Callable, List, Dict, Union
 from enum import Enum, auto
-from random import choice
 from collections import Counter
 
 from dff.script import labels as lbl
@@ -38,7 +37,7 @@ class FormPolicy(BaseModel):
         :caption: Sample form class usage.
 
         slot_1 = RegexpSlot(...)
-        form_1 = FormPolicy(name=..., slot_extractor_nodes={slot_1.name: [("flow_1", "node_1")]})
+        form_1 = FormPolicy(name=..., slot_extractor_nodes={slot_1.name: ("flow_1", "node_1")})
 
         script = {
             GLOBAL: {
@@ -59,13 +58,13 @@ class FormPolicy(BaseModel):
     """
 
     name: str
-    slot_extractor_nodes: Dict[str, List[NodeLabel2Type]] = Field(default_factory=dict)
+    slot_extractor_nodes: Dict[str, NodeLabel2Type] = Field(default_factory=dict)
     allowed_repeats: int = Field(default=0, gt=-1)
     node_visit_counter: Dict[NodeLabel2Type, int] = Field(default_factory=Counter)
     "Store the number of times each node has been visited."
 
     def __init__(
-        self, name: str, slot_extractor_nodes: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data
+        self, name: str, slot_extractor_nodes: Dict[str, NodeLabel2Type], *, allowed_repeats: int = 0, **data
     ) -> None:
         """
         Create a new form.
@@ -96,22 +95,16 @@ class FormPolicy(BaseModel):
 
         def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
             current_priority = priority or pipeline.actor.label_priority
-            for slot_name, node_list in self.slot_extractor_nodes.items():
+            for slot_name, extractor_node in self.slot_extractor_nodes.items():
                 if root_slot.children[slot_name].is_set()(ctx, pipeline):
                     continue
 
-                visit_filtered_node_list = [
-                    node for node in node_list if self.node_visit_counter[node] <= self.allowed_repeats
-                ]
-
-                if len(visit_filtered_node_list) == 0:
+                if self.node_visit_counter[extractor_node] > self.allowed_repeats:
                     self.update_state(FormState.FAILED)(ctx, pipeline)
                     return fallback_node if fallback_node else lbl.to_fallback()(ctx, pipeline)
 
-                chosen_node = choice(visit_filtered_node_list)
-
-                self.node_visit_counter[chosen_node] += 1
-                return (*chosen_node, current_priority)
+                self.node_visit_counter[extractor_node] += 1
+                return *extractor_node, current_priority
 
             _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)
             return fallback_node if fallback_node else lbl.to_fallback()(ctx, pipeline)

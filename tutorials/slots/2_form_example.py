@@ -49,7 +49,7 @@ number_of_people = slots.RegexpSlot(name="numberofpeople", regexp=r"[0-9]+")
 # %% [markdown]
 """
 Secondly, the ``FormPolicy`` object is instantiated where slot names are
-mapped to lists of node names. This allows the form component to manage
+mapped to node names. This allows the form component to manage
 the dialog ensuring that the user traverses the nodes used for slot extraction.
 
 Slots will be iterated in order to determine the next transition.
@@ -60,9 +60,9 @@ If none is possible, the form policy will suggest a fallback transition.
 restaurant_form = slots.FormPolicy(
     "restaurant",
     {
-        restaurant_cuisine.name: [("restaurant", "cuisine")],
-        restaurant_address.name: [("restaurant", "address")],
-        number_of_people.name: [("restaurant", "number")],
+        restaurant_cuisine.name: ("restaurant", "cuisine"),
+        restaurant_address.name: ("restaurant", "address"),
+        number_of_people.name: ("restaurant", "number"),
     },
 )
 

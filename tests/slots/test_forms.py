@@ -9,7 +9,7 @@ from dff.script.slots import root_slot, RegexpSlot, FormPolicy, FormState, FORM_
 def testing_form(testing_pipeline: Pipeline):
     root_slot.children.clear()
     regexp_slot = RegexpSlot(name="tr", regexp=".+")
-    form_policy = FormPolicy(name="testing_form", slot_extractor_nodes={regexp_slot.name: [testing_pipeline.actor.start_label[:2]]})
+    form_policy = FormPolicy(name="testing_form", slot_extractor_nodes={regexp_slot.name: testing_pipeline.actor.start_label[:2]})
     yield form_policy
 
 
