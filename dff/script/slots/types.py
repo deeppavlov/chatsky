@@ -252,7 +252,7 @@ class RegexpSlot(ValueSlot):
     RegexpSlot is a slot type that extracts its value using a regular expression.
     You can pass a compiled or a non-compiled pattern to the `regexp` argument.
     If you want to extract a particular group, but not the full match,
-    change the `target_group` parameter.
+    change the `match_group_idx` parameter.
 
     """
 
@@ -279,11 +279,11 @@ class RegexpSlot(ValueSlot):
 class FunctionSlot(ValueSlot):
     """
     FunctionSlot employs user-defined callables to extract matches from a string.
-    The signature of a callable is fixed: it can only get and return strings.
-
+    The signature of a callable is fixed:
+    it can only get and return strings (or `None` if cannot extract slot).
     """
 
-    func: Callable[[str], str]
+    func: Callable[[str], Optional[str]]
 
     def fill_template(self, template: str) -> Callable[[Context, Pipeline], str]:
         def fill_inner(ctx: Context, pipeline: Pipeline) -> str:
@@ -296,6 +296,6 @@ class FunctionSlot(ValueSlot):
 
         return fill_inner
 
-    def extract_value(self, ctx: Context, _: Pipeline) -> Any:
+    def extract_value(self, ctx: Context, _: Pipeline) -> Optional[str]:
         self.value = self.func(ctx.last_request.text)
         return self.value

@@ -38,7 +38,7 @@ class FormPolicy(BaseModel):
         :caption: Sample form class usage.
 
         slot_1 = RegexpSlot(...)
-        form_1 = Form(name=..., slot_extractor_nodes={slot_1.name: [("flow_1", "node_1")]})
+        form_1 = FormPolicy(name=..., slot_extractor_nodes={slot_1.name: [("flow_1", "node_1")]})
 
         script = {
             GLOBAL: {
@@ -87,8 +87,8 @@ class FormPolicy(BaseModel):
         self, priority: Optional[float] = None, fallback_node: Optional[Union[NodeLabel2Type, NodeLabel3Type]] = None
     ) -> Callable[[Context, Pipeline], NodeLabel3Type]:
         """
-        This method checks, if all slots from the form have been set and returns transitions to required nodes,
-        if there remain any. Returns an always ignored transition otherwise.
+        Return a condition that checks if all slots from the form have been set and
+        returns transitions to required nodes if any remain and fallback otherwise.
 
         :param priority: The weight that will be assigned to the transition.
             Defaults to 1 (default priority in dff.core.engine :py:class:`~.Pipeline`).
