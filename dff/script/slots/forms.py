@@ -62,7 +62,8 @@ class FormPolicy(BaseModel):
     name: str
     slot_extractor_nodes: Dict[str, List[NodeLabel2Type]] = Field(default_factory=dict)
     allowed_repeats: int = Field(default=0, gt=-1)
-    node_cache: Dict[NodeLabel2Type, int] = Field(default_factory=Counter)
+    node_visit_counter: Dict[NodeLabel2Type, int] = Field(default_factory=Counter)
+    "Store the number of times each node has been visited."
 
     def __init__(
         self, name: str, slot_extractor_nodes: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data
@@ -102,7 +103,7 @@ class FormPolicy(BaseModel):
                     continue
 
                 filtered_node_list = [
-                    node for node in node_list if self.node_cache.get(node, 0) <= self.allowed_repeats
+                    node for node in node_list if self.node_visit_counter.get(node, 0) <= self.allowed_repeats
                 ]  # assert that the visit limit has not been reached for all of the nodes.
 
                 if len(filtered_node_list) == 0:
@@ -113,7 +114,7 @@ class FormPolicy(BaseModel):
                 chosen_node = choice(filtered_node_list)
 
                 if not ctx.validation:
-                    self.node_cache.update([chosen_node])  # update visit counts
+                    self.node_visit_counter.update([chosen_node])  # update visit counts
                 return (*chosen_node, current_priority)
 
             _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)
