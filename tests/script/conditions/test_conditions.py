@@ -14,10 +14,10 @@ def test_conditions():
     failed_ctx.add_label(label)
     pipeline = Pipeline.from_script(script={"flow": {"node": {}}}, start_label=("flow", "node"))
 
-    assert cnd.exact_match(Message("text"))(ctx, pipeline)
+    assert cnd.exact_match("text")(ctx, pipeline)
     assert cnd.exact_match(Message("text", misc={}))(ctx, pipeline)
     assert not cnd.exact_match(Message("text", misc={1: 1}))(ctx, pipeline)
-    assert not cnd.exact_match(Message("text1"))(ctx, pipeline)
+    assert not cnd.exact_match("text1")(ctx, pipeline)
     assert cnd.exact_match(Message())(ctx, pipeline)
     assert not cnd.exact_match(Message(), skip_none=False)(ctx, pipeline)
     assert cnd.exact_match("text")(ctx, pipeline)
@@ -27,17 +27,17 @@ def test_conditions():
     assert not cnd.regexp("t.*t1")(ctx, pipeline)
     assert not cnd.regexp("t.*t1")(failed_ctx, pipeline)
 
-    assert cnd.agg([cnd.regexp("t.*t"), cnd.exact_match(Message("text"))], aggregate_func=all)(ctx, pipeline)
-    assert not cnd.agg([cnd.regexp("t.*t1"), cnd.exact_match(Message("text"))], aggregate_func=all)(ctx, pipeline)
+    assert cnd.agg([cnd.regexp("t.*t"), cnd.exact_match("text")], aggregate_func=all)(ctx, pipeline)
+    assert not cnd.agg([cnd.regexp("t.*t1"), cnd.exact_match("text")], aggregate_func=all)(ctx, pipeline)
 
-    assert cnd.any([cnd.regexp("t.*t1"), cnd.exact_match(Message("text"))])(ctx, pipeline)
-    assert not cnd.any([cnd.regexp("t.*t1"), cnd.exact_match(Message("text1"))])(ctx, pipeline)
+    assert cnd.any([cnd.regexp("t.*t1"), cnd.exact_match("text")])(ctx, pipeline)
+    assert not cnd.any([cnd.regexp("t.*t1"), cnd.exact_match("text1")])(ctx, pipeline)
 
-    assert cnd.all([cnd.regexp("t.*t"), cnd.exact_match(Message("text"))])(ctx, pipeline)
-    assert not cnd.all([cnd.regexp("t.*t1"), cnd.exact_match(Message("text"))])(ctx, pipeline)
+    assert cnd.all([cnd.regexp("t.*t"), cnd.exact_match("text")])(ctx, pipeline)
+    assert not cnd.all([cnd.regexp("t.*t1"), cnd.exact_match("text")])(ctx, pipeline)
 
-    assert cnd.neg(cnd.exact_match(Message("text1")))(ctx, pipeline)
-    assert not cnd.neg(cnd.exact_match(Message("text")))(ctx, pipeline)
+    assert cnd.neg(cnd.exact_match("text1"))(ctx, pipeline)
+    assert not cnd.neg(cnd.exact_match("text"))(ctx, pipeline)
 
     assert cnd.has_last_labels(flow_labels=["flow"])(ctx, pipeline)
     assert not cnd.has_last_labels(flow_labels=["flow1"])(ctx, pipeline)
