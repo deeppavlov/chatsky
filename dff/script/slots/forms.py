@@ -6,7 +6,6 @@ This module holds the :class:`~.Form` class that can be used to create a global 
 from typing import Optional, Callable, List, Dict, Union
 from enum import Enum, auto
 from random import choice
-from math import inf
 from collections import Counter
 
 from dff.script import labels as lbl
@@ -98,28 +97,24 @@ class FormPolicy(BaseModel):
         def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
             current_priority = priority or pipeline.actor.label_priority
             for slot_name, node_list in self.slot_extractor_nodes.items():
-                is_set = root_slot.children[slot_name].is_set()(ctx, pipeline)
-                if is_set is True:
+                if root_slot.children[slot_name].is_set()(ctx, pipeline):
                     continue
 
-                filtered_node_list = [
-                    node for node in node_list if self.node_visit_counter.get(node, 0) <= self.allowed_repeats
-                ]  # assert that the visit limit has not been reached for all of the nodes.
+                visit_filtered_node_list = [
+                    node for node in node_list if self.node_visit_counter[node] <= self.allowed_repeats
+                ]
 
-                if len(filtered_node_list) == 0:
-                    _ = self.update_state(FormState.FAILED)(ctx, pipeline)
-                    fallback = fallback_node if fallback_node else lbl.to_fallback(-inf)(ctx, pipeline)
-                    return fallback
+                if len(visit_filtered_node_list) == 0:
+                    self.update_state(FormState.FAILED)(ctx, pipeline)
+                    return fallback_node if fallback_node else lbl.to_fallback()(ctx, pipeline)
 
-                chosen_node = choice(filtered_node_list)
+                chosen_node = choice(visit_filtered_node_list)
 
-                if not ctx.validation:
-                    self.node_visit_counter.update([chosen_node])  # update visit counts
+                self.node_visit_counter[chosen_node] += 1
                 return (*chosen_node, current_priority)
 
             _ = self.update_state(FormState.COMPLETE)(ctx, pipeline)
-            fallback = fallback_node if fallback_node else lbl.to_fallback(-inf)(ctx, pipeline)
-            return fallback
+            return fallback_node if fallback_node else lbl.to_fallback()(ctx, pipeline)
 
         return to_next_label_inner
 
