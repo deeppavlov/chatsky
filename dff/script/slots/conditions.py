@@ -8,12 +8,12 @@ they provide a feasible way of iterating the script graph depending on the statu
 
 """
 from dff.script import Context
-from dff.pipeline import Pipeline, StartConditionCheckerFunction, all_condition, any_condition
+from dff.pipeline import Pipeline, all_condition, any_condition
 
 from .types import SLOT_STORAGE_KEY
 
 
-def slot_extracted_condition(path: str) -> StartConditionCheckerFunction:
+def slot_extracted_condition(path: str):
     def check_slot_state(ctx: Context, _: Pipeline) -> bool:
         state = ctx.framework_states.get(SLOT_STORAGE_KEY, {}).get(path)
         return state is not None
@@ -21,9 +21,9 @@ def slot_extracted_condition(path: str) -> StartConditionCheckerFunction:
     return check_slot_state
 
 
-def is_set_all(paths: list) -> StartConditionCheckerFunction:
+def is_set_all(paths: list):
     return all_condition(*[slot_extracted_condition(path) for path in paths])
 
 
-def is_set_any(paths: list) -> StartConditionCheckerFunction:
+def is_set_any(paths: list):
     return any_condition(*[slot_extracted_condition(path) for path in paths])
