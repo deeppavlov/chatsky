@@ -39,7 +39,7 @@ class FormPolicy(BaseModel):
         :caption: Sample form class usage.
 
         slot_1 = RegexpSlot(...)
-        form_1 = Form(name=..., mapping={slot_1.name: [("flow_1", "node_1")]})
+        form_1 = Form(name=..., slot_extractor_nodes={slot_1.name: [("flow_1", "node_1")]})
 
         script = {
             GLOBAL: {
@@ -60,18 +60,18 @@ class FormPolicy(BaseModel):
     """
 
     name: str
-    mapping: Dict[str, List[NodeLabel2Type]] = Field(default_factory=dict)
+    slot_extractor_nodes: Dict[str, List[NodeLabel2Type]] = Field(default_factory=dict)
     allowed_repeats: int = Field(default=0, gt=-1)
     node_cache: Dict[NodeLabel2Type, int] = Field(default_factory=Counter)
 
     def __init__(
-        self, name: str, mapping: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data
+        self, name: str, slot_extractor_nodes: Dict[str, List[NodeLabel2Type]], *, allowed_repeats: int = 0, **data
     ) -> None:
         """
         Create a new form.
 
         :param name: The name of the form used for tracking the form state.
-        :param mapping: A dictionary that maps slot names to nodes.
+        :param slot_extractor_nodes: A dictionary that maps slot names to nodes.
             Nodes should be described with (flow_name, node_name) tuples.
             In case one node should set multiple slots, include them in a common group slot
             and use the name of the group slot as a key.
@@ -80,7 +80,7 @@ class FormPolicy(BaseModel):
         :param allowed_repeats: This parameter regulates, how many times a node can be revisited.
             If the limit on allowed repeats has been reached, the policy will stop to affect transitions.
         """
-        super().__init__(name=name, mapping=mapping, allowed_repeats=allowed_repeats, **data)
+        super().__init__(name=name, slot_extractor_nodes=slot_extractor_nodes, allowed_repeats=allowed_repeats, **data)
 
     @validate_call
     def to_next_label(
@@ -96,7 +96,7 @@ class FormPolicy(BaseModel):
 
         def to_next_label_inner(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
             current_priority = priority or pipeline.actor.label_priority
-            for slot_name, node_list in self.mapping.items():
+            for slot_name, node_list in self.slot_extractor_nodes.items():
                 is_set = root_slot.children[slot_name].is_set()(ctx, pipeline)
                 if is_set is True:
                     continue
@@ -161,7 +161,7 @@ class FormPolicy(BaseModel):
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.INACTIVE
                 return
 
-            if all([slot_extracted_condition(slot)(ctx, pipeline) for slot in self.mapping.keys()]) is True:
+            if all([slot_extracted_condition(slot)(ctx, pipeline) for slot in self.slot_extractor_nodes.keys()]) is True:
                 ctx.framework_states[FORM_STORAGE_KEY][self.name] = FormState.COMPLETE
             return
 
@@ -169,7 +169,7 @@ class FormPolicy(BaseModel):
 
     def get_values(self) -> Callable[[Context, Pipeline], List[Dict[str, Union[str, None]]]]:
         def get_values_inner(ctx: Context, pipeline: Pipeline) -> List[Dict[str, Union[str, None]]]:
-            slots = list(self.mapping.keys())
+            slots = list(self.slot_extractor_nodes.keys())
             return get_values(ctx, pipeline, slots)
 
         return get_values_inner
