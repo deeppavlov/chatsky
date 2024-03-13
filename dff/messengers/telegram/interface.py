@@ -114,7 +114,9 @@ class PollingTelegramInterface(MessengerInterface):  # pragma: no cover
         timeout: int = 20,
         long_polling_timeout: int = 20,
         messenger: Optional[TelegramMessenger] = None,
+        name: Optional[str] = None
     ):
+        super().__init__(name)
         self.messenger = (
             messenger if messenger is not None else TelegramMessenger(token, suppress_middleware_excepions=True)
         )

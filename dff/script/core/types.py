@@ -41,9 +41,6 @@ Module name names addon state, or your own module state. For example module name
 # TODO: change example
 
 
-DEFAULT_INTERFACE_ID = "default"
-
-
 class ActorStage(Enum):
     """
     The class which holds keys for the handlers. These keys are used

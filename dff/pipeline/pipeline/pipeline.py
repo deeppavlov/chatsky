@@ -21,7 +21,7 @@ from uuid import uuid4
 
 from dff.context_storages import DBContextStorage
 from dff.script import Script, Context, ActorStage
-from dff.script import NodeLabel2Type, Message, DEFAULT_INTERFACE_ID
+from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
 from dff.messengers.common import MessengerInterface, CLIMessengerInterface
@@ -93,7 +93,7 @@ class Pipeline:
         condition_handler: Optional[Callable] = None,
         verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        messenger_interfaces: Optional[Union[MessengerInterface, Iterable[MessengerInterface], Dict[str, MessengerInterface]]] = None,
+        messenger_interfaces: Optional[Iterable[MessengerInterface]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
@@ -110,15 +110,11 @@ class Pipeline:
             timeout=timeout,
         )
 
-        if messenger_interfaces is not None and not isinstance(messenger_interfaces, MessengerInterface):
-            if isinstance(messenger_interfaces, Iterable):
-                self.messenger_interfaces = {str(uuid4()): iface for iface in messenger_interfaces}
-            elif isinstance(messenger_interfaces, Dict):
-                self.messenger_interfaces = messenger_interfaces
-            else:
-                raise RuntimeError(f"Unexpected type of 'messenger_interfaces': {type(messenger_interfaces)}")
+        if self.messenger_interfaces is None:
+            interface = CLIMessengerInterface()
+            self.messenger_interfaces = {interface.name: interface}
         else:
-            self.messenger_interfaces = {DEFAULT_INTERFACE_ID: CLIMessengerInterface()}
+            self.messenger_interfaces = {iface.name: iface for iface in messenger_interfaces}
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
@@ -229,7 +225,7 @@ class Pipeline:
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
-        messenger_interfaces: Optional[Union[MessengerInterface, Iterable[MessengerInterface], Dict[str, MessengerInterface]]] = None,
+        messenger_interfaces: Optional[Iterable[MessengerInterface]] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
     ) -> "Pipeline":

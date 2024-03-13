@@ -27,6 +27,10 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
+    def __init__(self, name: Optional[str] = None):
+        self.name = name if name is not None else str(type(self))
+
+
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction, iface_id: str):
         """
@@ -121,8 +125,9 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self):
+    def __init__(self, name: Optional[str]):
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
+        MessengerInterface.__init__(self, name)
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, iface_id: str):
         self._pipeline_runner = pipeline_runner
@@ -159,8 +164,9 @@ class CLIMessengerInterface(PollingMessengerInterface):
         prompt_request: str = "request: ",
         prompt_response: str = "response: ",
         out_descriptor: Optional[TextIO] = None,
+        name: Optional[str] = None
     ):
-        super().__init__()
+        super().__init__(name)
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request

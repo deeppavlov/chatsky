@@ -42,7 +42,7 @@ def test_cli_messenger_interface(monkeypatch):
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
     interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
-    pipeline.messenger_interfaces = {DEFAULT_INTERFACE_ID: interface}
+    pipeline.messenger_interfaces = {interface.name: interface}
 
     def loop() -> bool:
         loop.runs_left -= 1
@@ -56,7 +56,7 @@ def test_cli_messenger_interface(monkeypatch):
 
 def test_callback_messenger_interface(monkeypatch):
     interface = CallbackMessengerInterface()
-    pipeline.messenger_interfaces = {DEFAULT_INTERFACE_ID: interface}
+    pipeline.messenger_interfaces = {interface.name: interface}
 
     pipeline.run()
 
