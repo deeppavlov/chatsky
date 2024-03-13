@@ -250,9 +250,10 @@ class PollingVKInterface(PollingMessengerInterface):
                         data_to_send = self.upload_attachment(id, attachment, "audio")
                         attachment_list.append(f"doc{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}")
                     case Link():
-                        link_vk = {"type": "link", "link": {"url": attachment.source, "title": attachment.title}}
+                        # link_vk = {"type": "link", "link": {"url": attachment.source, "title": attachment.title}}
+                        response.text += f"[{attachment.source}|{attachment.title}]"
                         # requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachments=[{link_vk}]&v=5.81&access_token={self.token}").json()
-                        attachment_list.append(link_vk)
+                        # attachment_list.append(link_vk)
                         # attachment_list.append(str(link_vk))
                     case Poll():
                         poll_obj = requests.post(f"https://api.vk.com/method/polls.create?question={attachment.question}&is_anonymous={attachment.is_anonymous}&is_multiple={attachment.is_multiple}&end_date={attachment.end_date}&owner_id=-{self.group_id}&add_answers={attachment.add_answers}&photo_id={attachment.photo_id}&background_id={attachment.background_id}&disable_unvote={attachment.disable_unvote}&v=5.81&access_token={self.token}").json()["response"]
