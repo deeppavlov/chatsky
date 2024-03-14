@@ -110,7 +110,7 @@ class Pipeline:
             timeout=timeout,
         )
 
-        if self.messenger_interfaces is None:
+        if messenger_interfaces is None:
             interface = CLIMessengerInterface()
             self.messenger_interfaces = {interface.name: interface}
         else:
