@@ -48,6 +48,9 @@ class PollingMessengerInterface(MessengerInterface):
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
 
+    def __init__(self, name: Optional[str] = None):
+        MessengerInterface.__init__(self, name)
+
     @abc.abstractmethod
     def _request(self) -> List[Tuple[Message, Hashable]]:
         """
@@ -125,7 +128,7 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self, name: Optional[str]):
+    def __init__(self, name: Optional[str] = None):
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
         MessengerInterface.__init__(self, name)
 
@@ -166,7 +169,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         out_descriptor: Optional[TextIO] = None,
         name: Optional[str] = None
     ):
-        super().__init__(name)
+        PollingMessengerInterface.__init__(self, name)
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request

@@ -84,7 +84,7 @@ communication between the pipeline on the server side and the messenger client.
 messenger_interface = CallbackMessengerInterface()
 # CallbackMessengerInterface instantiating the dedicated messenger interface
 pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interfaces=messenger_interface
+    *TOY_SCRIPT_ARGS, messenger_interfaces=[messenger_interface]
 )
 
 
