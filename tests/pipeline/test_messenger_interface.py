@@ -2,7 +2,7 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import DEFAULT_INTERFACE_ID, RESPONSE, TRANSITIONS, Message
+from dff.script import RESPONSE, TRANSITIONS, Message
 from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
@@ -51,7 +51,7 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(interface.connect(pipeline._run_pipeline, DEFAULT_INTERFACE_ID, loop=loop))
+    asyncio.run(interface.connect(pipeline._run_pipeline, interface.name, loop=loop))
 
 
 def test_callback_messenger_interface(monkeypatch):
