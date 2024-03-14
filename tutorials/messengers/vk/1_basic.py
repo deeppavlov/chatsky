@@ -46,7 +46,7 @@ script = {
             },
         },
         "greeting_node": {
-            RESPONSE: Message(text="Hi", attachments=[Image(source="/home/askatasuna/Documents/DeepPavlov/DFF/dialog_flow_framework/1.png")]),
+            RESPONSE: Message(text="Hi"),
             TRANSITIONS: {lbl.repeat(): cnd.true()},
         },
         "fallback_node": {
