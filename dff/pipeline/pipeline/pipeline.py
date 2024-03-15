@@ -346,7 +346,7 @@ class Pipeline:
 
         ctx.framework_states[PIPELINE_STATE_KEY] = {}
         ctx.framework_states.setdefault(SLOT_STORAGE_KEY, {})
-        ctx.framework_states.setdefault(SLOT_STORAGE_KEY, {})
+        ctx.framework_states.setdefault(FORM_STORAGE_KEY, {})
         ctx.add_request(request)
         result = await self._services_pipeline(ctx, self)
 

@@ -26,6 +26,7 @@ class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
     children: Optional[Dict[str, "BaseSlot"]]
 
     @field_validator("name", mode="before")
+    @classmethod
     def validate_name(cls, name: str) -> str:
         if "/" in name:
             raise ValueError("Character `/` cannot be used in slot names.")
@@ -72,13 +73,13 @@ class BaseSlot(BaseModel, ABC, arbitrary_types_allowed=True):
 class _GroupSlot(BaseSlot):
     """
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
-
     """
 
     value: None = Field(None)
     children: Dict[str, BaseSlot] = Field(default_factory=dict)
 
     @field_validator("children", mode="before")
+    @classmethod
     def validate_children(cls, children: Iterable, values: Dict[str, Any]) -> Dict[str, BaseSlot]:
         if not isinstance(children, dict) and isinstance(children, Iterable):
             children = {child.name: child for child in children}
@@ -171,7 +172,7 @@ class GroupSlot(_GroupSlot, ChildSlot):
     """
     This class defines a slot group that includes one or more :py:class:`~.ValueSlot` instances.
     When a slot has been included to a group, it should further be referenced as a part of that group.
-    E. g. when slot 'name' is included to a group 'person',
+    E.g. when slot 'name' is included to a group 'person',
     from that point on it should be referenced as 'person/name'.
 
     """
