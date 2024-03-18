@@ -12,6 +12,7 @@ from dff.script import (
     Message,
 )
 from dff.script.conditions import true
+from dff.script.labels import repeat
 
 
 def positive_test(samples, custom_class):
