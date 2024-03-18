@@ -108,9 +108,9 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
             webpage.headers.get_content_charset()
         )
         ctx.misc["another_detection"] = {
-            ctx.last_request.text: "online"
-            if "Example Domain" in web_content
-            else "offline"
+            ctx.last_request.text: (
+                "online" if "Example Domain" in web_content else "offline"
+            )
         }
 
 

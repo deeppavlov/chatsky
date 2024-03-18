@@ -5,6 +5,7 @@ The Types module contains several classes and special types that are used throug
 The classes and special types in this module can include data models,
 data structures, and other types that are defined for type hinting.
 """
+
 from __future__ import annotations
 from enum import unique, Enum
 from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING

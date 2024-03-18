@@ -8,6 +8,7 @@ or guide the conversation in a particular direction.
 This module provides only one predefined response function that can be used to quickly
 respond to the user and keep the conversation flowing.
 """
+
 import random
 from typing import List
 

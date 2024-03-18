@@ -13,6 +13,7 @@ The Pipeline class is designed to be used in conjunction with the :py:class:`.Pi
 class, which is defined in the Component module. Together, these classes provide a powerful and flexible way
 to structure and manage the messages processing flow.
 """
+
 import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable

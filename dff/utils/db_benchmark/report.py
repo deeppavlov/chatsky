@@ -3,6 +3,7 @@ Report
 --------
 This method contains a function to print benchmark results to console.
 """
+
 from pathlib import Path
 from typing import Union, Set, Literal
 import json
@@ -44,9 +45,11 @@ def report(
             "config": "\n".join(f"{k}: {v}" for k, v in benchmark["benchmark_config"].items()),
             "metrics": "".join(
                 [
-                    f"{metric.title() + ': ' + str(benchmark['average_results']['pretty_' + metric]):20}"
-                    if benchmark["success"]
-                    else benchmark["result"]
+                    (
+                        f"{metric.title() + ': ' + str(benchmark['average_results']['pretty_' + metric]):20}"
+                        if benchmark["success"]
+                        else benchmark["result"]
+                    )
                     for metric in ("write", "read", "update", "read+update")
                 ]
             ),

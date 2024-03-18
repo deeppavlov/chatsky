@@ -3,6 +3,7 @@ Benchmark DBs
 -------------
 This module contains config presets for benchmarks.
 """
+
 from pathlib import Path
 from platform import system
 

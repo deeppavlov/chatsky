@@ -27,9 +27,9 @@ def std_func(ctx, pipeline):
 
 def create_env() -> Tuple[Context, Pipeline]:
     ctx = Context()
-    script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: Message(text="response")}}}
+    script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: Message("response")}}}
     pipeline = Pipeline.from_script(script=script, start_label=("flow", "node1"), fallback_label=("flow", "node1"))
-    ctx.add_request(Message(text="text"))
+    ctx.add_request(Message("text"))
     return ctx, pipeline
 
 
@@ -82,20 +82,20 @@ def test_normalize_transitions():
 
 def test_normalize_response():
     assert callable(normalize_response(std_func))
-    assert callable(normalize_response(Message(text="text")))
+    assert callable(normalize_response(Message("text")))
 
 
 def test_normalize_keywords():
     node_template = {
         TRANSITIONS: {"node": std_func},
-        RESPONSE: Message(text="text"),
+        RESPONSE: Message("text"),
         PRE_RESPONSE_PROCESSING: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
-        RESPONSE.name.lower(): Message(text="text"),
+        RESPONSE.name.lower(): Message("text"),
         PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
         PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},
@@ -109,14 +109,14 @@ def test_normalize_script():
     # TODO: Add full check for functions
     node_template = {
         TRANSITIONS: {"node": std_func},
-        RESPONSE: Message(text="text"),
+        RESPONSE: Message("text"),
         PRE_RESPONSE_PROCESSING: {1: std_func},
         PRE_TRANSITIONS_PROCESSING: {1: std_func},
         MISC: {"key": "val"},
     }
     node_template_gold = {
         TRANSITIONS.name.lower(): {"node": std_func},
-        RESPONSE.name.lower(): Message(text="text"),
+        RESPONSE.name.lower(): Message("text"),
         PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
         PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
         MISC.name.lower(): {"key": "val"},

@@ -3,6 +3,7 @@ Telegram testing utils
 ----------------------
 This module defines functions used to test Telegram interface.
 """
+
 from typing import List, Optional, cast, Tuple
 from contextlib import asynccontextmanager, nullcontext
 import logging
@@ -244,8 +245,7 @@ class TelegramTesting:  # pragma: no cover
             bot = self.run_bot_loop()
         else:
 
-            async def null():
-                ...
+            async def null(): ...  # noqa: E704
 
             bot = nullcontext(null)
 

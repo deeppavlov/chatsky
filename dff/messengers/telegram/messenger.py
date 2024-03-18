@@ -6,6 +6,7 @@ The former inherits from the :py:class:`~TeleBot` class from the `pytelegrambota
 Using it, you can put Telegram update handlers inside your script and condition your transitions accordingly.
 
 """
+
 from pathlib import Path
 from typing import Union, List, Optional, Callable
 from enum import Enum
