@@ -12,13 +12,11 @@ import logging
 import uuid
 from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
-from dff.script import Message
-from dff.messengers.common.types import PollingInterfaceLoopFunction
-from dff.script.core.message import DataAttachment
-
 if TYPE_CHECKING:
-    from dff.script import Context
+    from dff.script import Context, Message
     from dff.pipeline.types import PipelineRunnerFunction
+    from dff.messengers.common.types import PollingInterfaceLoopFunction
+    from dff.script.core.message import DataAttachment
 
 logger = logging.getLogger(__name__)
 
@@ -174,10 +172,14 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Message, Any]]:
+        from dff.script import Message
         return [(Message(input(self._prompt_request)), self._ctx_id)]
 
     def _respond(self, responses: List[Context]):
         print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
+
+    async def populate_attachment(self, attachment: DataAttachment) -> None:  # pragma: no cover
+        pass
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """

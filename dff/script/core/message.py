@@ -105,11 +105,14 @@ class DataAttachment(Attachment):
     source: Optional[Union[HttpUrl, FilePath]] = None
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
-    from_messenger_interface: MessengerInterface = Field(exclude=True)
+    from_messenger_interface: Optional[MessengerInterface] = Field(exclude=True, default=None)
 
     async def get_bytes(self) -> Optional[bytes]:
         if self.source is None:
-            await self.from_messenger_interface.populate_attachment(self)
+            if self.from_messenger_interface is None:
+                return None
+            else:
+                await self.from_messenger_interface.populate_attachment(self)
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
@@ -227,7 +230,7 @@ class Message(DataModel):
         self,
         text: Optional[str] = None,
         commands: Optional[List[Command]] = None,
-        attachments: Optional[Attachments] = None,
+        attachments: Optional[Attachment] = None,
         annotations: Optional[dict] = None,
         misc: Optional[dict] = None,
         **kwargs,
