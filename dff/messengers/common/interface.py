@@ -12,11 +12,12 @@ import logging
 import uuid
 from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
-from dff.script import Context, Message
+from dff.script import Message
 from dff.messengers.common.types import PollingInterfaceLoopFunction
 from dff.script.core.message import DataAttachment
 
 if TYPE_CHECKING:
+    from dff.script import Context
     from dff.pipeline.types import PipelineRunnerFunction
 
 logger = logging.getLogger(__name__)

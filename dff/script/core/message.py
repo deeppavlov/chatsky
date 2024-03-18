@@ -5,15 +5,14 @@ The :py:class:`.Message` class is a universal data model for representing a mess
 DFF. It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import TYPE_CHECKING, Any, Optional, List, Union
+from typing import Any, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 
 from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
 
-if TYPE_CHECKING:
-    from dff.messengers.common.interface import MessengerInterface
+from dff.messengers.common.interface import MessengerInterface
 
 
 class Session(Enum):
