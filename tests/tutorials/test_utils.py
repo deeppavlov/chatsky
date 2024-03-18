@@ -9,7 +9,7 @@ from tests.pipeline.test_messenger_interface import pipeline
 
 def test_unhappy_path():
     with pytest.raises(Exception) as e:
-        check_happy_path(pipeline, ((Message("Hi"), Message("false_response")),))
+        check_happy_path(pipeline, (("Hi", "false_response"),))
     assert e
     msg = str(e)
     assert msg

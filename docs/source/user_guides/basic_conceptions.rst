@@ -289,9 +289,9 @@ conversational service.
 .. code-block:: python
 
     happy_path = (
-        (Message("/start"), Message("Hi!")),
-        (Message("Hello!"), Message("Let's play ping-pong!")),
-        (Message("Ping!"), Message("Pong!"))
+        ("/start", "Hi!"),
+        ("Hello!", "Let's play ping-pong!"),
+        ("Ping!", "Pong!")
     )
 
 A special function is then used to ascertain complete identity of the messages taken from

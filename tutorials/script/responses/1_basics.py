@@ -33,15 +33,11 @@ toy_script = {
         },
         "node1": {
             RESPONSE: Message("Hi, how are you?"),
-            TRANSITIONS: {
-                "node2": exact_match("i'm fine, how are you?")
-            },
+            TRANSITIONS: {"node2": exact_match("i'm fine, how are you?")},
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {
-                "node3": exact_match("Let's talk about music.")
-            },
+            TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
         },
         "node3": {
             RESPONSE: Message("Sorry, I can not talk about music now."),

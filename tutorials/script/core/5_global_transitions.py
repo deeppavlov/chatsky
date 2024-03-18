@@ -136,76 +136,63 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message("hi"), Message("Hi, how are you?")),
+    ("hi", "Hi, how are you?"),
     (
-        Message("i'm fine, how are you?"),
-        Message("Good. What do you want to talk about?"),
+        "i'm fine, how are you?",
+        "Good. What do you want to talk about?",
     ),
     (
-        Message("talk about music."),
-        Message(
-            text="I love `System of a Down` group, "
-            "would you like to talk about it?"
-        ),
+        "talk about music.",
+        "I love `System of a Down` group, " "would you like to talk about it?",
     ),
     (
-        Message("yes"),
-        Message(
-            text="System of a Down is "
-            "an Armenian-American heavy metal band formed in 1994."
-        ),
+        "yes",
+        "System of a Down is "
+        "an Armenian-American heavy metal band formed in 1994.",
     ),
     (
-        Message("next"),
-        Message(
-            text="The band achieved commercial success "
-            "with the release of five studio albums."
-        ),
+        "next",
+        "The band achieved commercial success "
+        "with the release of five studio albums.",
     ),
     (
-        Message("back"),
-        Message(
-            text="System of a Down is "
-            "an Armenian-American heavy metal band formed in 1994."
-        ),
+        "back",
+        "System of a Down is "
+        "an Armenian-American heavy metal band formed in 1994.",
     ),
     (
-        Message("repeat"),
-        Message(
-            text="System of a Down is "
-            "an Armenian-American heavy metal band formed in 1994."
-        ),
+        "repeat",
+        "System of a Down is "
+        "an Armenian-American heavy metal band formed in 1994.",
     ),
     (
-        Message("next"),
-        Message(
-            text="The band achieved commercial success "
-            "with the release of five studio albums."
-        ),
+        "next",
+        "The band achieved commercial success "
+        "with the release of five studio albums.",
     ),
-    (Message("next"), Message("That's all what I know.")),
+    ("next", "That's all what I know."),
     (
-        Message("next"),
-        Message("Good. What do you want to talk about?"),
+        "next",
+        "Good. What do you want to talk about?",
     ),
-    (Message("previous"), Message("That's all what I know.")),
-    (Message("next time"), Message("bye")),
-    (Message("stop"), Message("Ooops")),
-    (Message("previous"), Message("bye")),
-    (Message("stop"), Message("Ooops")),
-    (Message("nope"), Message("Ooops")),
-    (Message("hi"), Message("Hi, how are you?")),
-    (Message("stop"), Message("Ooops")),
-    (Message("previous"), Message("Hi, how are you?")),
+    ("previous", "That's all what I know."),
+    ("next time", "Bye"),
+    ("stop", "Ooops"),
+    ("previous", "Bye"),
+    ("stop", "Ooops"),
+    ("nope", "Ooops"),
+    ("hi", "Hi, how are you?"),
+    ("stop", "Ooops"),
+    ("previous", "Hi, how are you?"),
     (
-        Message("i'm fine, how are you?"),
-        Message("Good. What do you want to talk about?"),
+        "i'm fine, how are you?",
+        "Good. What do you want to talk about?",
     ),
     (
-        Message("let's talk about something."),
-        Message("Sorry, I can not talk about that now."),
+        "let's talk about something.",
+        "Sorry, I can not talk about that now.",
     ),
-    (Message("Ok, goodbye."), Message("bye")),
+    ("Ok, goodbye.", "Bye"),
 )
 
 # %%

@@ -52,11 +52,11 @@ use :py:data:`~.TOY_SCRIPT`:
 """
 
 HAPPY_PATH = (
-    (Message("Hi"), Message("Hi, how are you?")),
-    (Message("i'm fine, how are you?"), Message("Good. What do you want to talk about?")),
-    (Message("Let's talk about music."), Message("Sorry, I can not talk about music now.")),
-    (Message("Ok, goodbye."), Message("bye")),
-    (Message("Hi"), Message("Hi, how are you?")),
+    ("Hi", "Hi, how are you?"),
+    ("i'm fine, how are you?", "Good. What do you want to talk about?"),
+    ("Let's talk about music.", "Sorry, I can not talk about music now."),
+    ("Ok, goodbye.", "bye"),
+    ("Hi", "Hi, how are you?"),
 )
 """
 An example of a simple dialog.

@@ -62,9 +62,9 @@ toy_script = {
 }
 
 happy_path = (
-    (Message(), Message("1-2-1-2")),
-    (Message(), Message("3-4-3-4")),
-    (Message(), Message("5-6-5-6")),
+    (Message(), "1-2-1-2"),
+    (Message(), "3-4-3-4"),
+    (Message(), "5-6-5-6"),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))
