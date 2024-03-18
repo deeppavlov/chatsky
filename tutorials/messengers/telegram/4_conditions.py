@@ -5,7 +5,7 @@
 This tutorial shows how to process Telegram updates in your script
 and reuse handler triggers from the `pytelegrambotapi` library.
 
-Here, %mddoclink(api,messengers.telegram.messenger,telegram_condition)
+Here, %mddoclink(api,messengers.telegram.messenger)
 function is used for graph navigation according to Telegram events.
 """
 
@@ -18,7 +18,7 @@ import os
 from dff.script import TRANSITIONS, RESPONSE
 
 import dff.script.conditions as cnd
-from dff.messengers.telegram import PollingTelegramInterface, telegram_condition
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
 from dff.script.core.message import Message
 from dff.utils.testing.common import is_interactive_mode
@@ -29,15 +29,10 @@ from dff.utils.testing.common import is_interactive_mode
 In our Telegram module, we adopted the system of filters
 available in the `pytelegrambotapi` library.
 
-You can use `telegram_condition` to filter
-text messages from telegram in various ways.
-
 - Setting the `update_type` will allow filtering by update type:
   if you want the condition to trigger only on updates of the type
   `edited_message`, set it to `UpdateType.EDITED_MESSAGE`.
   The field defaults to `message`.
-- Setting the `command` argument will cause
-  the telegram_condition to only react to listed commands.
 - `func` argument on the other hand allows you to define arbitrary conditions.
 - `regexp` creates a regular expression filter, etc.
 
@@ -73,21 +68,16 @@ script = {
             TRANSITIONS: {
                 "node2": cnd.regexp("fine")
             },
-            # this is the same as
-            # TRANSITIONS: {"node2": telegram_condition(regexp="fine")},
         },
         "node2": {
             RESPONSE: Message(
                 text="Good. What do you want to talk about?"
             ),
             TRANSITIONS: {
-                "node3": telegram_condition(
-                    func=lambda upd: (
-                        upd.message is not None
-                        and upd.message.text is not None
-                        and "music" in upd.message.text
-                    )
-                )
+                "node3": lambda ctx, _, __, ___:
+                    ctx.last_request.original_message.message is not None
+                    and ctx.last_request.original_message.message.text is not None
+                    and "music" in ctx.last_request.original_message.message.text
             },
         },
         "node3": {
@@ -95,13 +85,13 @@ script = {
                 text="Sorry, I can not talk about music now."
             ),
             TRANSITIONS: {
-                "node4": telegram_condition(func=lambda _: True)
+                "node4": lambda _, __, ___, ____: True
             },
             # This condition is true for any type of update
         },
         "node4": {
             RESPONSE: Message(text="bye"),
-            TRANSITIONS: {"node1": telegram_condition(func=lambda _: True)},
+            TRANSITIONS: {"node1": lambda _, __, ___, ____: True},
             # This condition is true if the last update is of type `message`
         },
         "fallback_node": {

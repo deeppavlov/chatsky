@@ -21,6 +21,9 @@ from dff.script.core.message import Animation, Audio, Button, CallbackQuery, Con
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
+    accepts_attachments = (Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Document)
+    produces_attachments = (Location, Contact, Poll, Audio, Video, Animation, Image, Document, Keyboard)
+
     def __init__(self, token: str) -> None:
         self.application = Application.builder().token(token).build()
         self.application.add_handler(MessageHandler(ALL, self.on_message))
@@ -50,15 +53,15 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.poll is not None:
             message.attachments += [Poll(question=update.poll.question, options=[PollOption(text=option.text, votes=option.voter_count) for option in update.poll.options])]
         if update.audio is not None:
-            message.attachments += [Audio(id=update.audio.file_id, title=update.audio.file_unique_id)]
+            message.attachments += [Audio(id=update.audio.file_id, title=update.audio.file_unique_id, from_messenger_interface=self)]
         if update.video is not None:
-            message.attachments += [Video(id=update.video.file_id, title=update.video.file_unique_id)]
+            message.attachments += [Video(id=update.video.file_id, title=update.video.file_unique_id, from_messenger_interface=self)]
         if update.animation is not None:
-            message.attachments += [Animation(id=update.animation.file_id, title=update.animation.file_unique_id)]
+            message.attachments += [Animation(id=update.animation.file_id, title=update.animation.file_unique_id, from_messenger_interface=self)]
         if len(update.photo) > 0:
-            message.attachments += [Image(id=picture.file_id, title=picture.file_unique_id) for picture in update.photo]
+            message.attachments += [Image(id=picture.file_id, title=picture.file_unique_id, from_messenger_interface=self) for picture in update.photo]
         if update.document is not None:
-            message.attachments += [Document(id=update.document.file_id, title=update.document.file_unique_id)]
+            message.attachments += [Document(id=update.document.file_id, title=update.document.file_unique_id, from_messenger_interface=self)]
 
         return message
 
@@ -78,13 +81,10 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(chat_id, attachment.latitude, attachment.longitude, reply_markup=self._create_keyboard(buttons))
-                    return
                 if isinstance(attachment, Contact):
                     await bot.send_contact(chat_id, attachment.phone_number, attachment.first_name, attachment.last_name, reply_markup=self._create_keyboard(buttons))
-                    return
                 if isinstance(attachment, Poll):
                     await bot.send_poll(chat_id, attachment.question, [option.text for option in attachment.options], reply_markup=self._create_keyboard(buttons))
-                    return
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
@@ -151,15 +151,3 @@ class CallbackTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
         await super().connect(pipeline_runner, *args, **kwargs)
         self.application.run_webhook(listen=self.listen, port=self.port, allowed_updates=Update.ALL_TYPES)
-
-
-def telegram_condition(func: Callable[[Update], bool]):  # pragma: no cover
-
-    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
-        last_request = ctx.last_request
-        if last_request is None or last_request.original_message is None:
-            return False
-        original_message = cast(Update, last_request.original_message)
-        return func(original_message)
-
-    return condition

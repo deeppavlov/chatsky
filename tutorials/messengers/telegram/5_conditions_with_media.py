@@ -4,7 +4,7 @@
 
 This tutorial shows how to use media-related logic in your script.
 
-Here, %mddoclink(api,messengers.telegram.messenger,telegram_condition)
+Here, %mddoclink(api,messengers.telegram.messenger)
 function is used for graph navigation according to Telegram events.
 
 Different %mddoclink(api,script.core.message,message)
@@ -17,15 +17,13 @@ like Attachment, Audio, Button, Image, etc.
 
 # %%
 import os
-from typing import cast
 
 from pydantic import HttpUrl
-from telegram import Update, Message as TelegramMessage
 
 import dff.script.conditions as cnd
-from dff.script import Context, TRANSITIONS, RESPONSE
+from dff.script import TRANSITIONS, RESPONSE
 from dff.script.core.message import Message, Image
-from dff.messengers.telegram import PollingTelegramInterface, telegram_condition
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
 from dff.utils.testing.common import is_interactive_mode
 
@@ -38,7 +36,7 @@ picture_url = HttpUrl("https://avatars.githubusercontent.com/u/29918795?s=200&v=
 # %% [markdown]
 """
 To filter user messages depending on whether or not media files were sent,
-you can use the `content_types` parameter of the `telegram_condition`.
+you can use the `content_types` parameter of the `ctx.last_request.original_message.message.document`.
 """
 
 
@@ -83,25 +81,18 @@ script = {
                         # both in 'photo' and 'document' fields.
                         # We should consider both cases
                         # when we check the message for media.
-                        telegram_condition(
-                            func=lambda update: (
-                                update.message is not None
-                                and len(update.message.photo) > 0
-                            )
-                        ),
-                        telegram_condition(
-                            func=lambda update: (
-                                # check attachments in message properties
-                                update.message is not None
-                                and update.message.document is not None
-                                and update.message.document.mime_type == "image/jpeg"
-                            )
-                        ),
+                        lambda ctx, _, __, ___:
+                            ctx.last_request.original_message.message is not None
+                            and len(ctx.last_request.original_message.message.photo) > 0,
+                        lambda ctx, _, __, ___:
+                            ctx.last_request.original_message.message is not None
+                            and ctx.last_request.original_message.message.document is not None
+                            and ctx.last_request.original_message.message.document.mime_type == "image/jpeg",
                     ]
                 ),
-                ("pics", "send_many"): telegram_condition(
-                    func=lambda upd: upd.message is not None and upd.message.text is not None
-                ),
+                ("pics", "send_many"): lambda ctx, _, __, ___:
+                    ctx.last_request.original_message.message is not None
+                    and ctx.last_request.original_message.message.text is not None,
                 ("pics", "ask_picture"): cnd.true(),
             },
         },

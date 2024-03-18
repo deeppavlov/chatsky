@@ -5,7 +5,7 @@
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
 
-%mddoclink(api,messengers.telegram.messenger,telegram_condition)
+%mddoclink(api,messengers.telegram.messenger)
 function and different types of
 %mddoclink(api,messengers.telegram.messenger,UpdateType)
 are used for telegram message type checking.
@@ -19,7 +19,7 @@ import os
 
 from dff.script import TRANSITIONS, RESPONSE, GLOBAL
 import dff.script.conditions as cnd
-from dff.messengers.telegram import PollingTelegramInterface, telegram_condition
+from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
 from dff.script.core.message import Message
 from dff.utils.testing.common import is_interactive_mode
@@ -60,13 +60,12 @@ script = {
     GLOBAL: {
         TRANSITIONS: {
             # say hi when someone enters the chat
-            ("greeting_flow", "node1"): telegram_condition(
-                func=lambda x: x.message is not None and x.message.new_chat_members is not None,
-            ),
+            ("greeting_flow", "node1"): lambda ctx, _, __, ___:
+                ctx.last_request.original_message.message is not None
+                and ctx.last_request.original_message.message.new_chat_members is not None,
             # send a message when inline query is received
-            ("greeting_flow", "node2"): telegram_condition(
-                func=lambda x: x.inline_query is not None,
-            ),
+            ("greeting_flow", "node2"): lambda ctx, _, __, ___:
+                ctx.last_request.original_message.inline_query is not None,
         },
     },
     "greeting_flow": {
