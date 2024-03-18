@@ -82,6 +82,6 @@ if __name__ == "__main__":
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
-            message = Message(text=input("Send request: "))
+            message = Message(input("Send request: "))
             ctx: Context = pipeline(message, ctx_id)
             print(ctx.last_response)

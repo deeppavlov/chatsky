@@ -8,6 +8,7 @@ This module contains a standard set of scripting conditions that can be used to 
 These conditions can be used to check the current context, the user's input,
 or other factors that may affect the conversation flow.
 """
+
 from typing import Callable, Pattern, Union, List, Optional
 import logging
 import re
@@ -47,6 +48,22 @@ def exact_match(match: Message, skip_none: bool = True) -> Callable[[Context, Pi
         return True
 
     return exact_match_condition_handler
+
+
+@validate_call
+def has_text(text: str) -> Callable[[Context, Pipeline], bool]:
+    """
+    Return function handler. This handler returns `True` only if the last user phrase
+    contains the phrase specified in :py:param:`text`.
+
+    :param text: A `str` variable to look for within the user request.
+    """
+
+    def has_text_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
+        request = ctx.last_request
+        return text in request.text
+
+    return has_text_condition_handler
 
 
 @validate_call

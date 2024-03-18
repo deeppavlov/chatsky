@@ -1,8 +1,8 @@
 # Dialog Flow Framework
 
-[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg)](https://deeppavlov.github.io/dialog_flow_framework)
-[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
-[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
+[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/dialog_flow_framework)
+[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
+[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
 ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
@@ -12,6 +12,19 @@ The Dialog Flow Framework (DFF) allows you to develop conversational services.
 DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
 You can use the framework in various services such as social networks, call centers, websites, personal assistants, etc.
 
+DFF, a versatile Python-based conversational service framework, can be deployed across a spectrum of platforms,
+ensuring flexibility for both novice and seasoned developers:
+
+- Cloud platforms like AWS, Azure, and GCP offer scalable environments for DFF,
+  with options such as AWS Lambda and Azure Functions providing serverless execution.
+- For containerized deployment, Docker and Kubernetes streamline the orchestration of DFF applications.
+- Furthermore, the framework's adaptability extends to IoT ecosystems,
+  making it suitable for integration with edge devices in scenarios like smart homes or industrial automation.
+
+Whether deployed on cloud platforms, containerized environments, or directly on IoT devices,
+DFF's accessibility and customization options make it a robust choice for developing conversational services
+in the evolving landscape of Python applications and IoT connectivity.
+
 ## Why choose DFF
 
 * Written in pure Python, the framework is easily accessible for both beginners and experienced developers.
@@ -20,6 +33,15 @@ You can use the framework in various services such as social networks, call cent
 * The framework is being actively maintained and thoroughly tested. The team is open to suggestions and quickly reacts to bug reports.
 
 # Quick Start
+
+## System Requirements
+
+- Supported operating systems include Ubuntu 18.04+, Windows 10+ (partial support), and MacOS Big Sur (partial support);
+- Python version 3.8 or higher is necessary for proper functionality;
+- A minimum of 1 GB of RAM is required for optimal performance;
+- If analytics collection or database integration is intended, Docker version 20 or higher may be necessary.
+
+
 ## Installation
 
 DFF can be installed via pip:
@@ -65,13 +87,13 @@ import dff.script.conditions.std_conditions as cnd
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("flow", "node_hi"): cnd.exact_match(Message(text="Hi")),
+            ("flow", "node_hi"): cnd.exact_match(Message("Hi")),
             ("flow", "node_ok"): cnd.true()
         }
     },
     "flow": {
-        "node_hi": {RESPONSE: Message(text="Hi!")},
-        "node_ok": {RESPONSE: Message(text="OK")},
+        "node_hi": {RESPONSE: Message("Hi!")},
+        "node_ok": {RESPONSE: Message("OK")},
     },
 }
 
@@ -90,7 +112,7 @@ def turn_handler(in_request: Message, pipeline: Pipeline) -> Message:
 
 while True:
     in_request = input("Your message: ")
-    out_response = turn_handler(Message(text=in_request), pipeline)
+    out_response = turn_handler(Message(in_request), pipeline)
     print("Response: ", out_response.text)
 ```
 

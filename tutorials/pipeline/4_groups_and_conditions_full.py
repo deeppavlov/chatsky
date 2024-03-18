@@ -156,7 +156,7 @@ def never_running_service(_, __, info: ServiceRuntimeInfo):
 def runtime_info_printing_service(_, __, info: ServiceRuntimeInfo):
     logger.info(
         f"Service '{info.name}' runtime execution info:"
-        f"{info.model_dump_json(indent=4, default=str)}"
+        f"{info.model_dump_json(indent=4)}"
     )
 
 
@@ -209,6 +209,8 @@ pipeline_dict = {
 pipeline = Pipeline.from_dict(pipeline_dict)
 
 if __name__ == "__main__":
+    logging.basicConfig(level=logging.INFO)
+
     check_happy_path(pipeline, HAPPY_PATH)
     if is_interactive_mode():
         logger.info(f"Pipeline structure:\n{pipeline.pretty_format()}")

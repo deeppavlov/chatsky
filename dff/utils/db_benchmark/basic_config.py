@@ -7,6 +7,7 @@ It defines a simple configurations class (:py:class:`~.BasicBenchmarkConfig`)
 as well as a set of configurations that covers different dialogs a user might have and some edge-cases
 (:py:data:`~.basic_configurations`).
 """
+
 from typing import Tuple, Optional
 import string
 import random

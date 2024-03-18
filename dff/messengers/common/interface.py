@@ -4,6 +4,7 @@ Message Interfaces
 The Message Interfaces module contains several basic classes that define the message interfaces.
 These classes provide a way to define the structure of the messengers that are used to communicate with the DFF.
 """
+
 from __future__ import annotations
 import abc
 import asyncio
@@ -78,7 +79,7 @@ class PollingMessengerInterface(MessengerInterface):
         :param e: The exception.
         """
         if isinstance(e, Exception):
-            logger.error(f"Exception in {type(self).__name__} loop!\n{str(e)}")
+            logger.error(f"Exception in {type(self).__name__} loop!", exc_info=e)
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
 
@@ -172,7 +173,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(text=input(self._prompt_request)), self._ctx_id)]
+        return [(Message(input(self._prompt_request)), self._ctx_id)]
 
     def _respond(self, responses: List[Context]):
         print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)

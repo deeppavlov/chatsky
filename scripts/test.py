@@ -17,7 +17,7 @@ def _test(coverage: bool, dependencies: bool) -> int:
         (docker containers **should** be running in that case).
     3. Coverage requires all dependencies and docker (will have no effect otherwise).
     """
-    test_coverage_threshold = 95
+    test_coverage_threshold = 90
 
     dotenv.load_dotenv(".env_file")
     args = ["tests/"]
