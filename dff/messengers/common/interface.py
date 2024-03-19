@@ -41,9 +41,9 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
-    @abc.abstractmethod
     async def populate_attachment(self, attachment: DataAttachment) -> None:
-        raise NotImplementedError
+        if attachment.source is None:
+            raise NotImplementedError
 
 
 class PollingMessengerInterface(MessengerInterface):
@@ -177,9 +177,6 @@ class CLIMessengerInterface(PollingMessengerInterface):
 
     def _respond(self, responses: List[Context]):
         print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
-
-    async def populate_attachment(self, attachment: DataAttachment) -> None:  # pragma: no cover
-        pass
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """
