@@ -20,6 +20,7 @@ from dff.script import TRANSITIONS, RESPONSE
 import dff.script.conditions as cnd
 from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
+from dff.script.core.context import Context
 from dff.script.core.message import Message
 from dff.utils.testing.common import is_interactive_mode
 
@@ -51,6 +52,21 @@ For more information see tutorial `3_buttons_with_callback.py`.
 
 
 # %%
+def check_if_latest_message_test_has_music(
+    ctx: Context, _: Pipeline, __, ___
+) -> bool:
+    if ctx.last_request is None:
+        return False
+    if ctx.last_request.original_message is None:
+        return False
+    if ctx.last_request.original_message.message is None:
+        return False
+    if ctx.last_request.original_message.message.text is None:
+        return False
+    return "music" in ctx.last_request.original_message.message.text
+
+
+# %%
 script = {
     "greeting_flow": {
         "start_node": {
@@ -65,28 +81,15 @@ script = {
         },
         "node1": {
             RESPONSE: Message(text="Hi, how are you?"),
-            TRANSITIONS: {
-                "node2": cnd.regexp("fine")
-            },
+            TRANSITIONS: {"node2": cnd.regexp("fine")},
         },
         "node2": {
-            RESPONSE: Message(
-                text="Good. What do you want to talk about?"
-            ),
-            TRANSITIONS: {
-                "node3": lambda ctx, _, __, ___:
-                    ctx.last_request.original_message.message is not None
-                    and ctx.last_request.original_message.message.text is not None
-                    and "music" in ctx.last_request.original_message.message.text
-            },
+            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            TRANSITIONS: {"node3": check_if_latest_message_test_has_music},
         },
         "node3": {
-            RESPONSE: Message(
-                text="Sorry, I can not talk about music now."
-            ),
-            TRANSITIONS: {
-                "node4": lambda _, __, ___, ____: True
-            },
+            RESPONSE: Message(text="Sorry, I can not talk about music now."),
+            TRANSITIONS: {"node4": lambda _, __, ___, ____: True},
             # This condition is true for any type of update
         },
         "node4": {

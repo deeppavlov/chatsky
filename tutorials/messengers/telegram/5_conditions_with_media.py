@@ -22,6 +22,7 @@ from pydantic import HttpUrl
 
 import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
+from dff.script.core.context import Context
 from dff.script.core.message import Message, Image
 from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
@@ -30,18 +31,64 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %%
 
-picture_url = HttpUrl("https://avatars.githubusercontent.com/u/29918795?s=200&v=4")
+picture_url = HttpUrl(
+    "https://avatars.githubusercontent.com/u/29918795?s=200&v=4"
+)
 
 
 # %% [markdown]
 """
 To filter user messages depending on whether or not media files were sent,
-you can use the `content_types` parameter of the `ctx.last_request.original_message.message.document`.
+you can use the `content_types` parameter of the
+`Context.last_request.original_message.message.document`.
 """
 
 
 # %%
 interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
+
+
+def check_if_latest_message_has_photos(
+    ctx: Context, _: Pipeline, __, ___
+) -> bool:
+    if ctx.last_request is None:
+        return False
+    if ctx.last_request.original_message is None:
+        return False
+    if ctx.last_request.original_message.message is None:
+        return False
+    if ctx.last_request.original_message.message.photo is None:
+        return False
+    return len(ctx.last_request.original_message.message.photo) > 0
+
+
+def check_if_latest_message_has_image_documents(
+    ctx: Context, _: Pipeline, __, ___
+) -> bool:
+    if ctx.last_request is None:
+        return False
+    if ctx.last_request.original_message is None:
+        return False
+    if ctx.last_request.original_message.message is None:
+        return False
+    if ctx.last_request.original_message.message.document is None:
+        return False
+    return (
+        ctx.last_request.original_message.message.document.mime_type
+        == "image/jpeg"
+    )
+
+
+def check_if_latest_message_has_text(
+    ctx: Context, _: Pipeline, __, ___
+) -> bool:
+    if ctx.last_request is None:
+        return False
+    if ctx.last_request.original_message is None:
+        return False
+    if ctx.last_request.original_message.message is None:
+        return False
+    return ctx.last_request.original_message.message.text is None
 
 
 # %%
@@ -81,18 +128,14 @@ script = {
                         # both in 'photo' and 'document' fields.
                         # We should consider both cases
                         # when we check the message for media.
-                        lambda ctx, _, __, ___:
-                            ctx.last_request.original_message.message is not None
-                            and len(ctx.last_request.original_message.message.photo) > 0,
-                        lambda ctx, _, __, ___:
-                            ctx.last_request.original_message.message is not None
-                            and ctx.last_request.original_message.message.document is not None
-                            and ctx.last_request.original_message.message.document.mime_type == "image/jpeg",
+                        check_if_latest_message_has_photos,
+                        check_if_latest_message_has_image_documents,
                     ]
                 ),
-                ("pics", "send_many"): lambda ctx, _, __, ___:
-                    ctx.last_request.original_message.message is not None
-                    and ctx.last_request.original_message.message.text is not None,
+                (
+                    "pics",
+                    "send_many",
+                ): check_if_latest_message_has_text,
                 ("pics", "ask_picture"): cnd.true(),
             },
         },
@@ -123,9 +166,7 @@ happy_path = (
         Message(text="Send me a picture"),
     ),
     (
-        Message(
-            attachments=[Image(source=picture_url)]
-        ),
+        Message(attachments=[Image(source=picture_url)]),
         Message(
             text="Here's my picture!",
             attachments=[Image(source=picture_url)],
@@ -133,9 +174,7 @@ happy_path = (
     ),
     (
         Message(text="ok"),
-        Message(
-            text="Finishing test, send /restart command to restart"
-        ),
+        Message(text="Finishing test, send /restart command to restart"),
     ),
     (
         Message(text="/restart"),
@@ -150,9 +189,7 @@ happy_path = (
     ),
     (
         Message(text="ok"),
-        Message(
-            text="Finishing test, send /restart command to restart"
-        ),
+        Message(text="Finishing test, send /restart command to restart"),
     ),
     (
         Message(text="/restart"),

@@ -143,9 +143,7 @@ happy_path = (
     ),
     (
         Message(text="Yay!"),
-        Message(
-            text="Finishing test, send /restart command to restart"
-        ),
+        Message(text="Finishing test, send /restart command to restart"),
     ),
     (
         Message(text="/restart"),

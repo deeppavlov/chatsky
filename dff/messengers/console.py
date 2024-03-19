@@ -27,7 +27,6 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Message, Any]]:
-        from dff.script import Message
         return [(Message(input(self._prompt_request)), self._ctx_id)]
 
     def _respond(self, responses: List[Context]):

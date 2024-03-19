@@ -21,6 +21,7 @@ from dff.script import TRANSITIONS, RESPONSE, GLOBAL
 import dff.script.conditions as cnd
 from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
+from dff.script.core.context import Context
 from dff.script.core.message import Message
 from dff.utils.testing.common import is_interactive_mode
 
@@ -56,16 +57,44 @@ or in the docs for the `telebot` library.
 
 
 # %%
+def check_if_latest_message_is_new_chat_member(
+    ctx: Context, _: Pipeline, __, ___
+) -> bool:
+    if ctx.last_request is None:
+        return False
+    if ctx.last_request.original_message is None:
+        return False
+    if ctx.last_request.original_message.message is None:
+        return False
+    return (
+        ctx.last_request.original_message.message.new_chat_members is not None
+    )
+
+
+def check_if_latest_message_is_callback_query(
+    ctx: Context, _: Pipeline, __, ___
+) -> bool:
+    if ctx.last_request is None:
+        return False
+    if ctx.last_request.original_message is None:
+        return False
+    return ctx.last_request.original_message.inline_query is not None
+
+
+# %%
 script = {
     GLOBAL: {
         TRANSITIONS: {
             # say hi when someone enters the chat
-            ("greeting_flow", "node1"): lambda ctx, _, __, ___:
-                ctx.last_request.original_message.message is not None
-                and ctx.last_request.original_message.message.new_chat_members is not None,
+            (
+                "greeting_flow",
+                "node1",
+            ): check_if_latest_message_is_new_chat_member,
             # send a message when inline query is received
-            ("greeting_flow", "node2"): lambda ctx, _, __, ___:
-                ctx.last_request.original_message.inline_query is not None,
+            (
+                "greeting_flow",
+                "node2",
+            ): check_if_latest_message_is_callback_query,
         },
     },
     "greeting_flow": {

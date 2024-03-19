@@ -42,12 +42,10 @@ class Command(DataModel):
 
 
 class Attachment(DataModel):
-
     pass
 
 
 class CallbackQuery(Attachment):
-
     query_string: Optional[str]
 
 
@@ -70,14 +68,12 @@ class Location(Attachment):
 
 
 class Contact(Attachment):
-
     phone_number: str
     first_name: str
     last_name: Optional[str]
 
 
 class Invoice(Attachment):
-
     title: str
     description: str
     currency: str
@@ -85,13 +81,11 @@ class Invoice(Attachment):
 
 
 class PollOption(DataModel):
-
     text: str
     votes: int
 
 
 class Poll(Attachment):
-
     question: str
     options: List[PollOption]
 

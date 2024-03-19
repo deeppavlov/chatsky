@@ -77,7 +77,7 @@ script = {
                             ],
                         ],
                     ),
-                ]
+                ],
             ),
             TRANSITIONS: {
                 ("general", "success"): has_callback_query("4"),
@@ -89,7 +89,9 @@ script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
-            RESPONSE: Message(text="Incorrect answer, type anything to try again"),
+            RESPONSE: Message(
+                text="Incorrect answer, type anything to try again"
+            ),
             TRANSITIONS: {("general", "native_keyboard"): cnd.true()},
         },
     },
@@ -103,7 +105,7 @@ happy_path = (
         Message(text="/start"),
         Message(
             text="Question: What's 2 + 2?",
-            attachments= [
+            attachments=[
                 Keyboard(
                     buttons=[
                         [
@@ -123,7 +125,7 @@ happy_path = (
         Message(text="ok"),
         Message(
             text="Question: What's 2 + 2?",
-            attachments= [
+            attachments=[
                 Keyboard(
                     buttons=[
                         [
@@ -141,15 +143,13 @@ happy_path = (
     ),
     (
         Message(text="Yay!"),
-        Message(
-            text="Finishing test, send /restart command to restart"
-        ),
+        Message(text="Finishing test, send /restart command to restart"),
     ),
     (
         Message(text="/start"),
         Message(
             text="Question: What's 2 + 2?",
-            attachments= [
+            attachments=[
                 Keyboard(
                     buttons=[
                         [
