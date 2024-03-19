@@ -128,6 +128,9 @@ class DataAttachment(Attachment):
                 return False
             if self.title != other.title:
                 return False
+            if self.from_messenger_interface is not None and other.from_messenger_interface is not None:
+                return self.get_bytes() == other.get_bytes()
+            return True
         return NotImplemented
 
     @model_validator(mode="before")
