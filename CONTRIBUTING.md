@@ -69,6 +69,8 @@ by activating the virtual environment and then running
 poetry run poe docs
 ```
 
+Note that you'll need `pandoc` installed on your system in order to build docs.
+
 After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
 
 #### Documentation links
