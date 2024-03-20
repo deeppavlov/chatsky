@@ -1,5 +1,8 @@
-from typing import Union, Dict, Optional
+from typing import Union, Optional, Sequence
 import importlib
+import importlib.util
+import importlib.machinery
+import sys
 import logging
 from pathlib import Path
 import json
@@ -27,24 +30,76 @@ class JSONImporter:
     CONFIG_KEY = "CONFIG"
     TRANSITION_ITEM_KEYS = {"lbl", "cnd"}
 
-    def __init__(self, script: Dict[str, JsonValue]):
+    def __init__(self, file: Union[str, Path]):
+        if isinstance(file, str):
+            file = Path(file)
+
+        if file.suffix == ".json":
+            with open(file, "r") as fd:
+                script = json.load(fd)
+        elif file.suffix in (".yaml", ".yml"):
+            with open(file, "r") as fd:
+                script = yaml.load(fd, Loader=Loader)
+        else:
+            raise JSONImportError("File should have a `.json`, `.yaml` or `.yml` extension")
+        logger.info(f"Loaded file {file}")
+
         self.script = script
         config = self.script.get(self.CONFIG_KEY)
         if not isinstance(config, dict):
             raise JSONImportError("Config is not found -- your script has to define a CONFIG dictionary")
         self.config = config
-        custom_dir = config.get(self.CUSTOM_DIR_CONFIG_OPTION, "custom_dir")
-        if "." in custom_dir:
-            raise JSONImportError("custom dir cannot contain `.`")
-        if not Path(custom_dir).exists():
-            raise JSONImportError(f"could not find directory {custom_dir}")
-        self.custom_dir_prefix = custom_dir + "."
 
-    @staticmethod
-    def resolve_target_object(obj: str):
-        module_name, object_name = obj.rsplit(".", maxsplit=1)
-        module = importlib.import_module(module_name)
-        return module.__getattribute__(object_name)
+        custom_dir = config.get(self.CUSTOM_DIR_CONFIG_OPTION, "custom_dir")
+        if not isinstance(custom_dir, str):
+            raise JSONImportError("CUSTOM_DIR must be a string")
+        custom_dir_path = Path(custom_dir)
+        if not custom_dir_path.is_absolute():
+            custom_dir_path = (file.parent / custom_dir_path).resolve(strict=False)
+
+        if not custom_dir_path.exists():
+            raise JSONImportError(f"Could not find directory {custom_dir_path}. custom_dir: {custom_dir}")
+
+        logger.info(f"CUSTOM_DIR set to {custom_dir_path}")
+        self.custom_dir_prefix = custom_dir_path.stem + "."
+
+        self._custom_dir_location = str(custom_dir_path.parent)
+        self._custom_modules = {}
+
+    def import_custom_module(self, module_name: str, paths: Optional[Sequence[str]] = None):
+        if module_name in self._custom_modules:
+            return self._custom_modules[module_name]
+
+        if paths is None:
+            paths = [self._custom_dir_location]
+
+        parent_name, _, child_name = module_name.rpartition(".")
+
+        if parent_name:
+            parent_module = self.import_custom_module(parent_name, paths)
+
+            paths = parent_module.__spec__.submodule_search_locations
+
+        for finder in sys.meta_path:
+            spec = finder.find_spec(child_name, paths)
+            if spec is not None:
+                break
+        else:
+            raise ModuleNotFoundError(f"No module named {child_name!r} at {paths!r}")
+
+        module = importlib.util.module_from_spec(spec)
+        self._custom_modules[module_name] = module
+        spec.loader.exec_module(module)
+        return module
+
+    def resolve_target_object(self, obj: str):
+        module_name, _, obj_name = obj.rpartition(".")
+
+        if obj.startswith(self.DFF_NAMESPACE_PREFIX):
+            module = importlib.import_module(module_name)
+        else:
+            module = self.import_custom_module(module_name)
+        return getattr(module, obj_name)
 
     def import_script(self):
         return self.replace_script_objects(self.script)
@@ -129,20 +184,6 @@ class JSONImporter:
             if obj.startswith(self.DFF_NAMESPACE_PREFIX) or obj.startswith(self.custom_dir_prefix):
                 return self.replace_string_values(obj)
         return obj
-
-    @classmethod
-    def from_file(cls, file: Union[str, Path]):
-        if isinstance(file, str):
-            file = Path(file)
-
-        if file.suffix == ".json":
-            with open(file, "r") as fd:
-                return cls(json.load(fd))
-        elif file.suffix in (".yaml", ".yml"):
-            with open(file, "r") as fd:
-                return cls(yaml.load(fd, Loader=Loader))
-        else:
-            raise JSONImportError("file should have a `.json`, `.yaml` or `.yml` extension")
 
 
 def get_dff_objects():

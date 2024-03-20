@@ -291,7 +291,7 @@ class Pipeline:
     ):
         pre_services = [] if pre_services is None else pre_services
         post_services = [] if post_services is None else post_services
-        script = JSONImporter.from_file(file).import_script()
+        script = JSONImporter(file).import_script()
 
         def to_tuple(i):
             if isinstance(i, list):
