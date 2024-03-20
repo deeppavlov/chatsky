@@ -17,6 +17,7 @@ from pydantic import validate_call
 
 from dff.pipeline import Pipeline
 from dff.script import NodeLabel2Type, Context, Message
+from dff.script.core.message import CallbackQuery
 
 logger = logging.getLogger(__name__)
 
@@ -242,3 +243,16 @@ neg = negation
 """
 :py:func:`~neg` is an alias for :py:func:`~negation`.
 """
+
+
+def has_callback_query(expected_query_string: str):
+    """
+    Condition that checks if :py:attr:`~.CallbackQuery.query_string` of the last message matches `expected`.
+    """
+    def has_callback_query_handler(ctx: Context, _: Pipeline) -> bool:
+        last_request = ctx.last_request
+        if last_request is None or last_request.attachments is None:
+            return False
+        return CallbackQuery(query_string=expected_query_string) in last_request.attachments
+
+    return has_callback_query_handler
