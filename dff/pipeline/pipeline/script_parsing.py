@@ -31,7 +31,7 @@ class JSONImporter:
         self.script = script
         config = self.script.get(self.CONFIG_KEY)
         if not isinstance(config, dict):
-            raise JSONImportError("config is not found -- your script has to define a CONFIG dictionary")
+            raise JSONImportError("Config is not found -- your script has to define a CONFIG dictionary")
         self.config = config
         custom_dir = config.get(self.CUSTOM_DIR_CONFIG_OPTION, "custom_dir")
         if "." in custom_dir:
@@ -51,19 +51,19 @@ class JSONImporter:
 
     def replace_obj(self, obj: JsonValue):
         if not isinstance(obj, dict):
-            raise JSONImportError(f"obj {obj} has to be a dictionary")
+            raise JSONImportError(f"DFF object has to be a dictionary: {obj}")
         keys = obj.keys()
         if len(keys) != 1:
-            raise JSONImportError("obj has to have only 1 key")
+            raise JSONImportError(f"DFF object has to have only 1 key: {obj.keys()}")
         key = keys.__iter__().__next__()
-        logger.debug(f"obj: {key}")
+        logger.debug(f"Replacing object: {key}")
         target_obj = self.resolve_target_object(key)
 
         if target_obj is None:
             raise ImportError(f"Could not find object {key}")
 
         if not callable(target_obj):
-            raise JSONImportError(f"object `{key}` has to be callable")
+            raise JSONImportError(f"Object `{key}` has to be callable")
 
         args = []
         kwargs = {}
@@ -80,14 +80,14 @@ class JSONImporter:
 
     def process_transitions(self, transition_list: list):
         if not isinstance(transition_list, list):
-            raise JSONImportError(f"transitions value should be a list of dictionaries, not {transition_list}")
+            raise JSONImportError(f"Transitions value should be a list of dictionaries, not {transition_list}")
 
         transitions = {}
         for item in transition_list:
             if not isinstance(item, dict):
-                raise JSONImportError(f"transition items have to be dictionaries, not {item}")
+                raise JSONImportError(f"Transition items have to be dictionaries, not {item}")
             if item.keys() != self.TRANSITION_ITEM_KEYS:
-                raise JSONImportError(f"transition items' keys have to be `lbl` and `cnd`, not {item.keys()}")
+                raise JSONImportError(f"Transition items' keys have to be `lbl` and `cnd`, not {item.keys()}")
 
             lbl = self.replace_script_objects(item["lbl"])
             if isinstance(lbl, list):
@@ -95,14 +95,14 @@ class JSONImporter:
             cnd = self.replace_script_objects(item["cnd"])
 
             if isinstance(lbl, tuple) and lbl in transitions:
-                raise JSONImportError(f"label {lbl} already exists in {transitions}")
+                raise JSONImportError(f"Label {lbl} already exists in {transitions}")
 
             transitions[lbl] = cnd
         return transitions
 
     def replace_string_values(self, obj: JsonValue):
         if not isinstance(obj, str):
-            raise JSONImportError(f"obj {obj} has to be a string")
+            raise JSONImportError(f"Obj {obj} has to be a string")
         if obj.startswith(self.DFF_NAMESPACE_PREFIX) or obj.startswith(self.custom_dir_prefix):
             target_obj = self.resolve_target_object(obj)
 
