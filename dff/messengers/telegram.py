@@ -62,7 +62,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         else:
             raise ValueError(f"For attachment {attachment} title or id is not defined!")
 
-    async def extract_message_from_telegram(self, update: TelegramMessage) -> Message:  # pragma: no cover
+    def extract_message_from_telegram(self, update: TelegramMessage) -> Message:  # pragma: no cover
         message = Message()
         message.attachments = list()
 
@@ -208,7 +208,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 )
 
     async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        await self._on_event(update, _, lambda u: await self.extract_message_from_telegram(u.message))
+        await self._on_event(update, _, lambda u: self.extract_message_from_telegram(u.message))
 
     async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
         await self._on_event(
