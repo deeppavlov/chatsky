@@ -48,9 +48,7 @@ you can use the `content_types` parameter of the
 interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
-def check_if_latest_message_has_photos(
-    ctx: Context, _: Pipeline, __, ___
-) -> bool:
+def check_if_latest_message_has_photos(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -62,9 +60,7 @@ def check_if_latest_message_has_photos(
     return len(ctx.last_request.original_message.message.photo) > 0
 
 
-def check_if_latest_message_has_image_documents(
-    ctx: Context, _: Pipeline, __, ___
-) -> bool:
+def check_if_latest_message_has_image_documents(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -79,9 +75,7 @@ def check_if_latest_message_has_image_documents(
     )
 
 
-def check_if_latest_message_has_text(
-    ctx: Context, _: Pipeline, __, ___
-) -> bool:
+def check_if_latest_message_has_text(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:

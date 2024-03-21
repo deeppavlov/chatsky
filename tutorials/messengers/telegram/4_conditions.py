@@ -52,9 +52,7 @@ For more information see tutorial `3_buttons_with_callback.py`.
 
 
 # %%
-def check_if_latest_message_test_has_music(
-    ctx: Context, _: Pipeline, __, ___
-) -> bool:
+def check_if_latest_message_test_has_music(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
