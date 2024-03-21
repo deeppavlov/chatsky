@@ -5,7 +5,7 @@
 The following tutorial shows how to run a regular DFF script in Telegram.
 It asks users for the '/start' command and then loops in one place.
 
-Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+Here, %mddoclink(api,messengers.telegram,PollingTelegramInterface)
 class and [telebot](https://pytba.readthedocs.io/en/latest/index.html)
 library are used for accessing telegram API in polling mode.
 

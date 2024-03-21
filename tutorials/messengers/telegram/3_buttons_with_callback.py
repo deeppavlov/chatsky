@@ -26,7 +26,6 @@ import dff.script.conditions as cnd
 from dff.script import TRANSITIONS, RESPONSE
 from dff.pipeline import Pipeline
 from dff.script.core.message import Button, Keyboard, Message
-from dff.messengers.common.conditions import has_callback_query
 from dff.messengers.telegram import PollingTelegramInterface
 from dff.utils.testing.common import is_interactive_mode
 
@@ -82,8 +81,8 @@ script = {
                 ],
             ),
             TRANSITIONS: {
-                ("general", "success"): has_callback_query("correct"),
-                ("general", "fail"): has_callback_query("wrong"),
+                ("general", "success"): cnd.has_callback_query("correct"),
+                ("general", "fail"): cnd.has_callback_query("wrong"),
             },
         },
         "success": {

@@ -4,7 +4,7 @@
 
 The following tutorial shows how to configure `PollingTelegramInterface`.
 
-See %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+See %mddoclink(api,messengers.telegram,PollingTelegramInterface)
 for more information.
 """
 
