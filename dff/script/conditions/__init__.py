@@ -14,4 +14,5 @@ from .std_conditions import (
     false,
     agg,
     neg,
+    has_callback_query,
 )
