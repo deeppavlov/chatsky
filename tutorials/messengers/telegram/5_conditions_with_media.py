@@ -60,7 +60,7 @@ def check_if_latest_message_has_photos(ctx: Context, _: Pipeline) -> bool:
     return len(ctx.last_request.original_message.message.photo) > 0
 
 
-def check_if_latest_message_has_image_documents(ctx: Context, _: Pipeline) -> bool:
+def check_if_latest_message_has_images(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -123,7 +123,7 @@ script = {
                         # We should consider both cases
                         # when we check the message for media.
                         check_if_latest_message_has_photos,
-                        check_if_latest_message_has_image_documents,
+                        check_if_latest_message_has_images,
                     ]
                 ),
                 (

@@ -249,6 +249,7 @@ def has_callback_query(expected_query_string: str):
     """
     Condition that checks if :py:attr:`~.CallbackQuery.query_string` of the last message matches `expected`.
     """
+
     def has_callback_query_handler(ctx: Context, _: Pipeline) -> bool:
         last_request = ctx.last_request
         if last_request is None or last_request.attachments is None:
