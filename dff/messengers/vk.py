@@ -10,6 +10,7 @@ import aiohttp
 
 import requests
 import io
+import os
 
 from dff.messengers.common import MessengerInterface, PollingMessengerInterface
 from dff.pipeline import Pipeline
@@ -157,7 +158,8 @@ class FilesOpener(object):
                 self.opened_files.append(f)
 
             ext = filename.split('.')[-1]
-            files.append((self.key_format.format(x), (f'file{x}.{ext}', f)))
+            _, filename = os.path.split(filename)
+            files.append((self.key_format.format(x), (filename, f)))
 
         return files
 
