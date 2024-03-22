@@ -2,7 +2,13 @@
 """
 # Responses: 2. Buttons
 
+In this tutorial %mddoclink(api,script.core.message,Button)
+class is demonstrated.
+Buttons are one of %mddoclink(api,script.core.message,Message) fields.
+They can be attached to any message but will only work if the chosen
+[messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
 """
+
 
 # %pip install dff
 
@@ -35,12 +41,12 @@ def check_button_payload(value: str):
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Message(text=""),
+            RESPONSE: Message(""),
             TRANSITIONS: {
                 ("general", "question_1"): cnd.true(),
             },
         },
-        "fallback": {RESPONSE: Message(text="Finishing test")},
+        "fallback": {RESPONSE: Message("Finishing test")},
     },
     "general": {
         "question_1": {
@@ -86,7 +92,8 @@ toy_script = {
         "question_3": {
             RESPONSE: Message(
                 **{
-                    "text": "What's 114 + 115? (type in the index of the correct option)",
+                    "text": "What's 114 + 115? "
+                    "(type in the index of the correct option)",
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
@@ -103,7 +110,7 @@ toy_script = {
             },
         },
         "success": {
-            RESPONSE: Message(text="Success!"),
+            RESPONSE: Message("Success!"),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
     },
@@ -111,10 +118,11 @@ toy_script = {
 
 happy_path = (
     (
-        Message(text="Hi"),
+        Message("Hi"),
         Message(
             **{
-                "text": "Starting test! What's 2 + 2? (type in the index of the correct option)",
+                "text": "Starting test! What's 2 + 2? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -127,10 +135,11 @@ happy_path = (
         ),
     ),
     (
-        Message(text="0"),
+        Message("0"),
         Message(
             **{
-                "text": "Starting test! What's 2 + 2? (type in the index of the correct option)",
+                "text": "Starting test! What's 2 + 2? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -143,10 +152,11 @@ happy_path = (
         ),
     ),
     (
-        Message(text="1"),
+        Message("1"),
         Message(
             **{
-                "text": "Next question: what's 6 * 8? (type in the index of the correct option)",
+                "text": "Next question: what's 6 * 8? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -159,10 +169,11 @@ happy_path = (
         ),
     ),
     (
-        Message(text="0"),
+        Message("0"),
         Message(
             **{
-                "text": "Next question: what's 6 * 8? (type in the index of the correct option)",
+                "text": "Next question: what's 6 * 8? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -175,10 +186,11 @@ happy_path = (
         ),
     ),
     (
-        Message(text="1"),
+        Message("1"),
         Message(
             **{
-                "text": "What's 114 + 115? (type in the index of the correct option)",
+                "text": "What's 114 + 115? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -191,10 +203,11 @@ happy_path = (
         ),
     ),
     (
-        Message(text="1"),
+        Message("1"),
         Message(
             **{
-                "text": "What's 114 + 115? (type in the index of the correct option)",
+                "text": "What's 114 + 115? "
+                "(type in the index of the correct option)",
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
@@ -206,18 +219,25 @@ happy_path = (
             }
         ),
     ),
-    (Message(text="0"), Message(text="Success!")),
-    (Message(text="ok"), Message(text="Finishing test")),
+    (Message("0"), Message("Success!")),
+    (Message("ok"), Message("Finishing test")),
 )
 
 
 def process_request(ctx: Context):
-    ui = ctx.last_response and ctx.last_response.misc and ctx.last_response.misc.get("ui")
+    ui = (
+        ctx.last_response
+        and ctx.last_response.misc
+        and ctx.last_response.misc.get("ui")
+    )
     if ui and ui.buttons:
         try:
             chosen_button = ui.buttons[int(ctx.last_request.text)]
         except (IndexError, ValueError):
-            raise ValueError("Type in the index of the correct option to choose from the buttons.")
+            raise ValueError(
+                "Type in the index of the correct option "
+                "to choose from the buttons."
+            )
         ctx.last_request = Message(misc={"payload": chosen_button.payload})
 
 

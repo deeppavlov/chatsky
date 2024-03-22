@@ -30,9 +30,7 @@ def generate_nb_gallery(package: str, files: List[Path]) -> str:
 
 
 def create_index_file(
-    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]],
-    files: List[Path],
-    destination: Path
+    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]], files: List[Path], destination: Path
 ):
     """
     Create a package index file.
@@ -68,7 +66,16 @@ def sort_tutorial_file_tree(files: Set[Path]) -> List[Path]:
     :param files: Files list to sort.
     """
     tutorials = {file for file in files if file.stem.split("_")[0].isdigit()}
-    return sorted(tutorials, key=lambda file: int(file.stem.split("_")[0])) + sorted(files - tutorials)
+
+    def sort_key(tutorial_file_name: Path) -> float:
+        tutorial_number = float(tutorial_file_name.stem.split("_")[0])
+
+        # full tutorials should go after tutorials with the same number
+        if tutorial_file_name.stem.endswith("_full"):
+            return tutorial_number + 0.5
+        return tutorial_number
+
+    return sorted(tutorials, key=sort_key) + sorted(files - tutorials)
 
 
 def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) -> List[Path]:

@@ -2,9 +2,19 @@
 """
 # Telegram: 2. Buttons
 
-
 This tutorial shows how to display and hide a basic keyboard in Telegram.
+
+Here, %mddoclink(api,messengers.telegram.message,TelegramMessage)
+class is used to represent telegram message,
+%mddoclink(api,messengers.telegram.message,TelegramUI) and
+%mddoclink(api,messengers.telegram.message,RemoveKeyboard)
+classes are used for configuring additional telegram message features.
+
+Different %mddoclink(api,script.core.message,message)
+classes are used for representing different common message features,
+like Attachment, Audio, Button, Image, etc.
 """
+
 
 # %pip install dff[telegram]
 
@@ -26,11 +36,12 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
-To display or hide a keyboard, you can utilize the `ui` field of the `TelegramMessage` class.
-It can be initialized either with a `TelegramUI` instance or with a custom telebot keyboard.
+To display or hide a keyboard, you can utilize the `ui` field of the
+`TelegramMessage` class. It can be initialized either with
+a `TelegramUI` instance or with a custom telebot keyboard.
 
-Passing an instance of `RemoveKeyboard` to the `ui` field will indicate that the keyboard
-should be removed.
+Passing an instance of `RemoveKeyboard` to the `ui` field
+will indicate that the keyboard should be removed.
 """
 
 
@@ -40,15 +51,19 @@ script = {
         "start": {
             TRANSITIONS: {
                 ("general", "native_keyboard"): (
-                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text
+                    in ("/start", "/restart")
                 ),
             },
         },
         "fallback": {
-            RESPONSE: TelegramMessage(text="Finishing test, send /restart command to restart"),
+            RESPONSE: TelegramMessage(
+                text="Finishing test, send /restart command to restart"
+            ),
             TRANSITIONS: {
                 ("general", "native_keyboard"): (
-                    lambda ctx, _: ctx.last_request.text in ("/start", "/restart")
+                    lambda ctx, _: ctx.last_request.text
+                    in ("/start", "/restart")
                 ),
             },
         },
@@ -70,12 +85,16 @@ script = {
                 ),
             ),
             TRANSITIONS: {
-                ("general", "success"): cnd.exact_match(TelegramMessage(text="4")),
+                ("general", "success"): cnd.exact_match(
+                    TelegramMessage(text="4")
+                ),
                 ("general", "fail"): cnd.true(),
             },
         },
         "success": {
-            RESPONSE: TelegramMessage(**{"text": "Success!", "ui": RemoveKeyboard()}),
+            RESPONSE: TelegramMessage(
+                **{"text": "Success!", "ui": RemoveKeyboard()}
+            ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "fail": {
@@ -90,7 +109,7 @@ script = {
     },
 }
 
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 # this variable is only for testing
 happy_path = (
@@ -110,7 +129,10 @@ happy_path = (
     ),
     (
         TelegramMessage(text="5"),
-        TelegramMessage(text="Incorrect answer, type anything to try again", ui=RemoveKeyboard()),
+        TelegramMessage(
+            text="Incorrect answer, type anything to try again",
+            ui=RemoveKeyboard(),
+        ),
     ),
     (
         TelegramMessage(text="ok"),
@@ -126,10 +148,15 @@ happy_path = (
             ),
         ),
     ),
-    (TelegramMessage(text="4"), TelegramMessage(text="Success!", ui=RemoveKeyboard())),
+    (
+        TelegramMessage(text="4"),
+        TelegramMessage(text="Success!", ui=RemoveKeyboard()),
+    ),
     (
         TelegramMessage(text="Yay!"),
-        TelegramMessage(text="Finishing test, send /restart command to restart"),
+        TelegramMessage(
+            text="Finishing test, send /restart command to restart"
+        ),
     ),
     (
         TelegramMessage(text="/start"),
@@ -158,10 +185,9 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

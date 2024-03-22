@@ -2,6 +2,15 @@
 """
 # 1. Cache
 
+In this tutorial use of
+%mddoclink(api,utils.turn_caching.singleton_turn_caching,cache)
+function is demonstrated.
+
+This function is used a lot like `functools.cache` function and
+helps by saving results of heavy function execution and avoiding recalculation.
+
+Caches are kept in a library-wide singleton
+and are cleared at the end of each turn.
 """
 
 # %pip install dff
@@ -48,12 +57,14 @@ def response(ctx: Context, _, *__, **___) -> Message:
 
 
 # %%
-toy_script = {"flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}}
+toy_script = {
+    "flow": {"node1": {TRANSITIONS: {repeat(): true()}, RESPONSE: response}}
+}
 
 happy_path = (
-    (Message(), Message(text="1-2-1-2")),
-    (Message(), Message(text="3-4-3-4")),
-    (Message(), Message(text="5-6-5-6")),
+    (Message(), Message("1-2-1-2")),
+    (Message(), Message("3-4-3-4")),
+    (Message(), Message("5-6-5-6")),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))

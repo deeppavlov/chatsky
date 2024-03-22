@@ -13,8 +13,8 @@ patterns = [
     re.compile(r"# %%\n"),  # check python block
 ]
 
-docstring_start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n(?:\n[\S\s]*)?"""\n')
-comment_start_pattern = re.compile(r'# %% \[markdown\]\n# #(?: .*:)? \d+\. .*\n#(?:\n# [\S\s]*)?')
+docstring_start_pattern = re.compile(r'# %% \[markdown\]\n"""\n#(?: .*:)? \d+\. .*\n(?:\n[\S\s]*)?"""(?:  # .*)?\n')
+comment_start_pattern = re.compile(r"# %% \[markdown\]\n# #(?: .*:)? \d+\. .*\n#(?:\n# [\S\s]*)?")
 
 
 def regexp_format_checker(dff_tutorial_py_file: pathlib.Path):

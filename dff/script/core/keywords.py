@@ -5,6 +5,7 @@ Keywords are used to define the dialog graph, which is the structure of a conver
 They are used to determine all nodes in the script and to assign python objects and python functions for nodes.
 
 """
+
 from enum import Enum
 
 
@@ -64,8 +65,8 @@ class Keywords(str, Enum):
         `{"PRE_RESPONSE_PROC_0": pre_response_proc_func_0, ..., "PRE_RESPONSE_PROC_N": pre_response_proc__func_N}`,
 
         where `"PRE_RESPONSE_PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
-        The order of `pre_response_proc__func_i` calls is defined by the order
-        in which the preprocessing `dict` is defined.
+        Unless the :py:class:`~dff.pipeline.pipeline.Pipeline`'s `parallelize_processing` flag
+        is set to `True`, calls to `pre_response_proc__func_i` are made in-order.
 
     PRE_TRANSITIONS_PROCESSING: Enum(auto)
         The keyword specifying the preprocessing that is called before the transition.
@@ -75,8 +76,8 @@ class Keywords(str, Enum):
         "PRE_TRANSITIONS_PROC_N": pre_transitions_proc_func_N}`,
 
         where `"PRE_TRANSITIONS_PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
-        The order of `pre_transitions_proc_func_i` calls is defined by the order
-        in which the preprocessing `dict` is defined.
+        Unless the :py:class:`~dff.pipeline.pipeline.Pipeline`'s `parallelize_processing` flag
+        is set to `True`, calls to `pre_transitions_proc_func_i` are made in-order.
 
     """
 

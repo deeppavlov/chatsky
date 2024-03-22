@@ -4,6 +4,7 @@ on:
   push:
     branches:
     - dev
+    - master
     - test/**
   pull_request:
     branches:
@@ -12,23 +13,24 @@ on:
 
 concurrency:
   group: ${{ github.workflow }}-${{ github.ref }}
-  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' }}
+  cancel-in-progress: ${{ github.ref != 'refs/heads/dev' && github.ref != 'refs/heads/master' }}
 
 jobs:
   lint:
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v3
+      - uses: actions/checkout@v4
 
       - name: set up python 3.9
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v5
         with:
           python-version: 3.9
 
-      - name: install dependencies
+      - name: setup poetry and install dependencies
         run: |
-            make venv
+          python -m pip install --upgrade pip poetry
+          python -m poetry install --with lint --no-ansi --no-interaction
 
       - name: run codestyle
         run: |
-            make lint
+          python -m poetry run poe lint

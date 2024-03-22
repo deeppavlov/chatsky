@@ -29,8 +29,6 @@ import asyncio
 
 loop = asyncio.new_event_loop()
 asyncio.set_event_loop(loop)
-
-# flake8: noqa: E402
 ###########################################################
 
 
@@ -58,7 +56,10 @@ API_URL = "http://localhost:8000/chat"
 def query(payload, user_id) -> requests.Response:
     response = requests.post(
         API_URL + f"?user_id={user_id}",
-        headers={"accept": "application/json", "Content-Type": "application/json"},
+        headers={
+            "accept": "application/json",
+            "Content-Type": "application/json",
+        },
         json=payload,
     )
     return response
@@ -92,10 +93,13 @@ if "user_requests" not in st.session_state:
 # %% [markdown]
 # ## UI setup
 #
-# Here we configure elements that will be used in Streamlit to interact with the API.
+# Here we configure elements that will be used
+# in Streamlit to interact with the API.
 #
-# First we define a text input field which a user is supposed to type his requests into.
-# Then we define a button that sends a query to the API, logs requests and responses,
+# First we define a text input field which
+# a user is supposed to type his requests into.
+# Then we define a button that sends a query
+# to the API, logs requests and responses,
 # and clears the text field.
 
 
@@ -107,7 +111,8 @@ def send_and_receive():
     Add both the request and response to `user_requests` and `bot_responses`.
 
     We do not call this function inside the `text_input.on_change` because then
-    we'd call it whenever the text field loses focus (e.g. when a browser tab is switched).
+    we'd call it whenever the text field loses focus
+    (e.g. when a browser tab is switched).
     """
     user_request = st.session_state["input"]
 
@@ -117,14 +122,18 @@ def send_and_receive():
     st.session_state["user_requests"].append(user_request)
 
     bot_response = query(
-        Message(text=user_request).model_dump(), user_id=st.session_state["user_id"]
+        Message(user_request).model_dump(),
+        user_id=st.session_state["user_id"],
     )
     bot_response.raise_for_status()
 
     bot_message = Message.model_validate(bot_response.json()["response"]).text
 
     # # Implementation without using Message:
-    # bot_response = query({"text": user_request}, user_id=st.session_state["user_id"])
+    # bot_response = query(
+    #     {"text": user_request},
+    #     user_id=st.session_state["user_id"]
+    # )
     # bot_response.raise_for_status()
     #
     # bot_message = bot_response.json()["response"]["text"]
@@ -142,7 +151,8 @@ st.button("Send", on_click=send_and_receive)
 # %% [markdown]
 # ### Component patch
 #
-# Here we add a component that presses the `Send` button whenever user presses the `Enter` key.
+# Here we add a component that presses the
+# `Send` button whenever user presses the `Enter` key.
 
 
 # %%
@@ -169,7 +179,8 @@ doc.addEventListener('keypress', function(e) {
 # %% [markdown]
 # ### Message display
 #
-# Here we use the `streamlit-chat` package to display user requests and bot responses.
+# Here we use the `streamlit-chat` package to
+# display user requests and bot responses.
 
 
 # %%

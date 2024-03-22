@@ -4,6 +4,10 @@
 
 This tutorial shows different options for
 setting transition conditions from one node to another.
+
+Here, [conditions](%doclink(api,script.conditions.std_conditions))
+for script transitions are shown.
+
 First of all, let's do all the necessary imports from DFF.
 """
 
@@ -27,12 +31,12 @@ from dff.utils.testing.common import (
 The transition condition is set by the function.
 If this function returns the value `True`,
 then the actor performs the corresponding transition.
-Actor is responsible for processing user input and determining
-the appropriate response based on the current state of the conversation and the script.
+Actor is responsible for processing user input and determining the appropriate
+response based on the current state of the conversation and the script.
 See tutorial 1 of pipeline (pipeline/1_basics) to learn more about Actor.
 Condition functions have signature
 
-    def func(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool
+    def func(ctx: Context, pipeline: Pipeline) -> bool
 
 Out of the box `dff.script.conditions` offers the
     following options for setting conditions:
@@ -60,7 +64,7 @@ Out of the box `dff.script.conditions` offers the
 
 For example function
 ```
-def always_true_condition(ctx: Context, pipeline: Pipeline, *args, **kwargs) -> bool:
+def always_true_condition(ctx: Context, pipeline: Pipeline) -> bool:
     return True
 ```
 always returns `True` and `always_true_condition` function
@@ -71,7 +75,7 @@ The functions to be used in the `toy_script` are declared here.
 
 
 # %%
-def hi_lower_case_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
+def hi_lower_case_condition(ctx: Context, _: Pipeline) -> bool:
     request = ctx.last_request
     # Returns True if `hi` in both uppercase and lowercase
     # letters is contained in the user request.
@@ -80,7 +84,7 @@ def hi_lower_case_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
     return "hi" in request.text.lower()
 
 
-def complex_user_answer_condition(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
+def complex_user_answer_condition(ctx: Context, _: Pipeline) -> bool:
     request = ctx.last_request
     # The user request can be anything.
     if request is None or request.misc is None:
@@ -90,7 +94,7 @@ def complex_user_answer_condition(ctx: Context, _: Pipeline, *args, **kwargs) ->
 
 def predetermined_condition(condition: bool):
     # Wrapper for internal condition function.
-    def internal_condition_function(ctx: Context, _: Pipeline, *args, **kwargs) -> bool:
+    def internal_condition_function(ctx: Context, _: Pipeline) -> bool:
         # It always returns `condition`.
         return condition
 
@@ -103,30 +107,39 @@ toy_script = {
         "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: Message(text="Hi, how are you?"),
+            RESPONSE: Message("Hi, how are you?"),
             TRANSITIONS: {"node2": cnd.regexp(r".*how are you", re.IGNORECASE)},
             # pattern matching (precompiled)
         },
         "node2": {
-            RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": cnd.all([cnd.regexp(r"talk"), cnd.regexp(r"about.*music")])},
+            RESPONSE: Message("Good. What do you want to talk about?"),
+            TRANSITIONS: {
+                "node3": cnd.all(
+                    [cnd.regexp(r"talk"), cnd.regexp(r"about.*music")]
+                )
+            },
             # Mix sequence of conditions by `cnd.all`.
             # `all` is alias `aggregate` with
             # `aggregate_func` == `all`.
         },
         "node3": {
-            RESPONSE: Message(text="Sorry, I can not talk about music now."),
+            RESPONSE: Message("Sorry, I can not talk about music now."),
             TRANSITIONS: {"node4": cnd.regexp(re.compile(r"Ok, goodbye."))},
             # pattern matching by precompiled pattern
         },
         "node4": {
-            RESPONSE: Message(text="bye"),
+            RESPONSE: Message("bye"),
             TRANSITIONS: {
-                "node1": cnd.any([hi_lower_case_condition, cnd.exact_match(Message(text="hello"))])
+                "node1": cnd.any(
+                    [
+                        hi_lower_case_condition,
+                        cnd.exact_match(Message("hello")),
+                    ]
+                )
             },
             # Mix sequence of conditions by `cnd.any`.
             # `any` is alias `aggregate` with
@@ -134,7 +147,7 @@ toy_script = {
         },
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
-            RESPONSE: Message(text="Ooops"),
+            RESPONSE: Message("Ooops"),
             TRANSITIONS: {
                 "node1": complex_user_answer_condition,
                 # The user request can be more than just a string.
@@ -143,7 +156,9 @@ toy_script = {
                 # If the value is `True` then we will go to `node1`.
                 # If the value is `False` then we will check a result of
                 # `predetermined_condition(True)` for `fallback_node`.
-                "fallback_node": predetermined_condition(True),  # or you can use `cnd.true()`
+                "fallback_node": predetermined_condition(
+                    True
+                ),  # or you can use `cnd.true()`
                 # Last condition function will return
                 # `true` and will repeat `fallback_node`
                 # if `complex_user_answer_condition` return `false`.
@@ -154,34 +169,46 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="Hi"), Message(text="Hi, how are you?")),  # start_node -> node1
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("Hi"),
+        Message("Hi, how are you?"),
+    ),  # start_node -> node1
+    (
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about music now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about music now."),
     ),  # node2 -> node3
-    (Message(text="Ok, goodbye."), Message(text="bye")),  # node3 -> node4
-    (Message(text="Hi"), Message(text="Hi, how are you?")),  # node4 -> node1
-    (Message(text="stop"), Message(text="Ooops")),  # node1 -> fallback_node
-    (Message(text="one"), Message(text="Ooops")),  # fallback_node -> fallback_node
-    (Message(text="help"), Message(text="Ooops")),  # fallback_node -> fallback_node
-    (Message(text="nope"), Message(text="Ooops")),  # fallback_node -> fallback_node
+    (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
+    (Message("Hi"), Message("Hi, how are you?")),  # node4 -> node1
+    (Message("stop"), Message("Ooops")),  # node1 -> fallback_node
+    (
+        Message("one"),
+        Message("Ooops"),
+    ),  # fallback_node -> fallback_node
+    (
+        Message("help"),
+        Message("Ooops"),
+    ),  # fallback_node -> fallback_node
+    (
+        Message("nope"),
+        Message("Ooops"),
+    ),  # fallback_node -> fallback_node
     (
         Message(misc={"some_key": "some_value"}),
-        Message(text="Hi, how are you?"),
+        Message("Hi, how are you?"),
     ),  # fallback_node -> node1
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),  # node1 -> node2
     (
-        Message(text="Let's talk about music."),
-        Message(text="Sorry, I can not talk about music now."),
+        Message("Let's talk about music."),
+        Message("Sorry, I can not talk about music now."),
     ),  # node2 -> node3
-    (Message(text="Ok, goodbye."), Message(text="bye")),  # node3 -> node4
+    (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
 )
 
 # %%

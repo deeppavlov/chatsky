@@ -3,6 +3,7 @@ Telegram testing utils
 ----------------------
 This module defines functions used to test Telegram interface.
 """
+
 from typing import List, Optional, cast, Tuple
 from contextlib import asynccontextmanager, nullcontext
 import logging
@@ -59,7 +60,7 @@ class TelegramTesting:  # pragma: no cover
     :param pipeline:
         Pipeline with the telegram messenger interface.
         Required for :py:meth:`~dff.utils.testing.telegram.TelegramTesting.send_and_check` and
-        :py:meth`~dff.utils.testing.telegram.TelegramTesting.check_happy_path` with `run_bot=True`
+        :py:meth:`~dff.utils.testing.telegram.TelegramTesting.check_happy_path` with `run_bot=True`
     :param api_credentials:
         Telegram API id and hash.
         Obtainable via https://core.telegram.org/api/obtaining_api_id.
@@ -244,8 +245,7 @@ class TelegramTesting:  # pragma: no cover
             bot = self.run_bot_loop()
         else:
 
-            async def null():
-                ...
+            async def null(): ...  # noqa: E704
 
             bot = nullcontext(null)
 

@@ -4,7 +4,13 @@
 
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
+
+%mddoclink(api,messengers.telegram.messenger,telegram_condition)
+function and different types of
+%mddoclink(api,messengers.telegram.messenger,UpdateType)
+are used for telegram message type checking.
 """
+
 
 # %pip install dff[telegram]
 
@@ -48,7 +54,8 @@ The other available conditions are:
 * `poll`: poll is sent to the chat;
 * `poll_answer`: users answered the poll sent by the bot.
 
-You can read more on those in the Telegram documentation or in the docs for the `telebot` library.
+You can read more on those in the Telegram documentation
+or in the docs for the `telebot` library.
 """
 
 
@@ -60,10 +67,14 @@ script = {
                 [
                     # say hi when invited to a chat
                     telegram_condition(
-                        update_type=UpdateType.CHAT_JOIN_REQUEST, func=lambda x: True
+                        update_type=UpdateType.CHAT_JOIN_REQUEST,
+                        func=lambda x: True,
                     ),
                     # say hi when someone enters the chat
-                    telegram_condition(update_type=UpdateType.MY_CHAT_MEMBER, func=lambda x: True),
+                    telegram_condition(
+                        update_type=UpdateType.MY_CHAT_MEMBER,
+                        func=lambda x: True,
+                    ),
                 ]
             ),
             # send a message when inline query is received
@@ -74,8 +85,9 @@ script = {
     },
     "greeting_flow": {
         "start_node": {
-            RESPONSE: TelegramMessage(text="Bot running"),
-            TRANSITIONS: {"node1": telegram_condition(commands=["start", "restart"])},
+            TRANSITIONS: {
+                "node1": telegram_condition(commands=["start", "restart"])
+            },
         },
         "node1": {
             RESPONSE: TelegramMessage(text="Hi"),
@@ -93,7 +105,7 @@ script = {
 
 
 # %%
-interface = PollingTelegramInterface(token=os.getenv("TG_BOT_TOKEN", ""))
+interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%
@@ -106,10 +118,9 @@ pipeline = Pipeline.from_script(
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

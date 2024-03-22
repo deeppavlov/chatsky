@@ -8,6 +8,7 @@ or guide the conversation in a particular direction.
 This module provides only one predefined response function that can be used to quickly
 respond to the user and keep the conversation flowing.
 """
+
 import random
 from typing import List
 
@@ -23,7 +24,7 @@ def choice(responses: List[Message]):
     :param responses: A list of responses for random sampling.
     """
 
-    def choice_response_handler(ctx: Context, pipeline: Pipeline, *args, **kwargs):
+    def choice_response_handler(ctx: Context, pipeline: Pipeline):
         return random.choice(responses)
 
     return choice_response_handler

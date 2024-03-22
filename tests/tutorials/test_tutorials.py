@@ -1,6 +1,7 @@
 from typing import TYPE_CHECKING
 import re
 from pathlib import Path
+import os
 
 import pytest
 
@@ -31,7 +32,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
         fd.write(tutorial_source_code)
 
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        venv.run(f"python -m pip install {deps}", check_rc=True)
+        venv.run(f"python -m pip install {deps}".replace("dff", "."), check_rc=True, cd=os.getcwd())
 
     venv.run(f"python {tutorial_path}", check_rc=True)
 
@@ -39,6 +40,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
 @pytest.mark.parametrize("dff_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
 @pytest.mark.slow
 @pytest.mark.docker
+@pytest.mark.no_coverage
 def test_tutorials(dff_tutorial_py_file, virtualenv):
     with open(dff_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()

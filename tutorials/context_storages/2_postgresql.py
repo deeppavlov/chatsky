@@ -3,6 +3,13 @@
 # 2. PostgreSQL
 
 This is a tutorial on using PostgreSQL.
+
+See %mddoclink(api,context_storages.sql,SQLContextStorage) class
+for storing your users' contexts in SQL databases.
+
+DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+and [asyncpg](https://magicstack.github.io/asyncpg/current/)
+libraries for asynchronous access to PostgreSQL DB.
 """
 
 # %pip install dff[postgresql]
@@ -23,9 +30,9 @@ from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 db_uri = "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
-    os.getenv("POSTGRES_USERNAME"),
-    os.getenv("POSTGRES_PASSWORD"),
-    os.getenv("POSTGRES_DB"),
+    os.environ["POSTGRES_USERNAME"],
+    os.environ["POSTGRES_PASSWORD"],
+    os.environ["POSTGRES_DB"],
 )
 db = context_storage_factory(db_uri)
 

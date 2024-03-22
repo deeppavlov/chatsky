@@ -4,6 +4,10 @@
 
 The following tutorial shows basic usage of `pipeline`
 module as an extension to `dff.script.core`.
+
+Here, `__call__` (same as
+%mddoclink(api,pipeline.pipeline.pipeline,Pipeline.run))
+method is used to execute pipeline once.
 """
 
 # %pip install dff
@@ -29,9 +33,10 @@ from dff.utils.testing import (
 a pipeline of the most basic structure:
 "preprocessors -> actor -> postprocessors"
 as well as to define `context_storage` and `messenger_interface`.
-Actor is a component of :py:class:`.Pipeline`, that contains the :py:class:`.Script`
-and handles it. It is responsible for processing user input and determining
-the appropriate response based on the current state of the conversation and the script.
+Actor is a component of :py:class:`.Pipeline`, that contains the
+:py:class:`.Script` and handles it. It is responsible for processing
+user input and determining the appropriate response based on the
+current state of the conversation and the script.
 These parameters usage will be shown in tutorials 2, 3 and 6.
 
 Here only required parameters are provided to pipeline.
@@ -46,7 +51,8 @@ its `last_response` property will be actors response.
 
 # %%
 pipeline = Pipeline.from_script(
-    TOY_SCRIPT,  # Pipeline script object, defined in `dff.utils.testing.toy_script`.
+    TOY_SCRIPT,
+    # Pipeline script object, defined in `dff.utils.testing.toy_script`
     start_label=("greeting_flow", "start_node"),
     fallback_label=("greeting_flow", "fallback_node"),
 )
@@ -54,7 +60,8 @@ pipeline = Pipeline.from_script(
 
 # %% [markdown]
 """
-For the sake of brevity, other tutorials might use `TOY_SCRIPT_ARGS` to initialize pipeline:
+For the sake of brevity, other tutorials
+might use `TOY_SCRIPT_ARGS` to initialize pipeline:
 """
 
 # %%
@@ -67,14 +74,14 @@ assert TOY_SCRIPT_ARGS == (
 
 # %%
 if __name__ == "__main__":
-    check_happy_path(pipeline, HAPPY_PATH)  # This is a function for automatic tutorial running
-    # (testing) with HAPPY_PATH
+    check_happy_path(pipeline, HAPPY_PATH)
+    # a function for automatic tutorial running (testing) with HAPPY_PATH
 
     # This runs tutorial in interactive mode if not in IPython env
     # and if `DISABLE_INTERACTIVE_MODE` is not set
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
-            message = Message(text=input("Send request: "))
+            message = Message(input("Send request: "))
             ctx: Context = pipeline(message, ctx_id)
             print(ctx.last_response)

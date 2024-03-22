@@ -1,0 +1,72 @@
+slice_name: Current topic slot [bar chart]
+description: null
+certified_by: null
+certification_details: null
+viz_type: dist_bar
+params:
+  datasource: 3__table
+  viz_type: dist_bar
+  slice_id: 6
+  granularity_sqla: start_time
+  time_range: No filter
+  metrics:
+  - count
+  adhoc_filters:
+  - clause: WHERE
+    comparator: get_slots
+    datasourceWarning: false
+    expressionType: SIMPLE
+    filterOptionName: filter_sz14lhn7d1d_c0zqn5dpgk
+    isExtra: false
+    isNew: false
+    operator: ==
+    operatorId: EQUALS
+    sqlExpression: null
+    subject: data_key
+  - clause: WHERE
+    comparator: null
+    datasourceWarning: false
+    expressionType: SQL
+    filterOptionName: filter_945dhn41x2m_sci7gkxy7o
+    isExtra: false
+    isNew: false
+    operator: null
+    sqlExpression: JSON_VALUE(data, '$.current_topic') <> ''
+    subject: null
+  groupby:
+  - request_id
+  columns:
+  - expressionType: SQL
+    label: My column
+    sqlExpression: JSON_VALUE(data, '$.current_topic')
+    datasourceWarning: false
+  row_limit: 10000
+  order_desc: true
+  color_scheme: echarts4Colors
+  show_legend: true
+  rich_tooltip: true
+  bar_stacked: true
+  order_bars: false
+  y_axis_format: SMART_NUMBER
+  y_axis_label: Topic counts
+  y_axis_bounds:
+  - null
+  - null
+  x_axis_label: Dialog turn
+  bottom_margin: auto
+  x_ticks_layout: auto
+  extra_form_data: {}
+  dashboards:
+  - 1
+query_context: '{"datasource":{"id":3,"type":"table"},"force":false,"queries":[{"time_range":"No
+  filter","granularity":"start_time","filters":[{"col":"data_key","op":"==","val":"get_slots"}],"extras":{"having":"","where":"(JSON_VALUE(data,
+  ''$.current_topic'') <> '''')"},"applied_time_extras":{},"columns":["request_id",{"expressionType":"SQL","label":"My
+  column","sqlExpression":"JSON_VALUE(data, ''$.current_topic'')","datasourceWarning":false}],"metrics":["count"],"annotation_layers":[],"row_limit":10000,"series_limit":0,"order_desc":true,"url_params":{},"custom_params":{},"custom_form_data":{}}],"form_data":{"datasource":"3__table","viz_type":"dist_bar","slice_id":6,"granularity_sqla":"start_time","time_range":"No
+  filter","metrics":["count"],"adhoc_filters":[{"clause":"WHERE","comparator":"get_slots","datasourceWarning":false,"expressionType":"SIMPLE","filterOptionName":"filter_sz14lhn7d1d_c0zqn5dpgk","isExtra":false,"isNew":false,"operator":"==","operatorId":"EQUALS","sqlExpression":null,"subject":"data_key"},{"clause":"WHERE","comparator":null,"datasourceWarning":false,"expressionType":"SQL","filterOptionName":"filter_945dhn41x2m_sci7gkxy7o","isExtra":false,"isNew":false,"operator":null,"sqlExpression":"JSON_VALUE(data,
+  ''$.current_topic'') <> ''''","subject":null}],"groupby":["request_id"],"columns":[{"expressionType":"SQL","label":"My
+  column","sqlExpression":"JSON_VALUE(data, ''$.current_topic'')","datasourceWarning":false}],"row_limit":10000,"order_desc":true,"color_scheme":"echarts4Colors","show_legend":true,"rich_tooltip":true,"bar_stacked":true,"order_bars":false,"y_axis_format":"SMART_NUMBER","y_axis_label":"Topic
+  counts","y_axis_bounds":[null,null],"x_axis_label":"Dialog turn","bottom_margin":"auto","x_ticks_layout":"auto","extra_form_data":{},"dashboards":[1],"force":false,"result_format":"json","result_type":"full"},"result_format":"json","result_type":"full"}'
+cache_timeout: null
+uuid: a70c05d0-770b-4068-a55d-934283f5b1bb
+version: 1.0.0
+dataset_uuid: 8ba2e188-2bf8-4809-a5ee-2477a539d493

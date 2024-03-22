@@ -2,6 +2,14 @@
 """
 # Responses: 3. Media
 
+Here, %mddoclink(api,script.core.message,Attachments) class is shown.
+Attachments can be used for attaching different media elements
+(such as %mddoclink(api,script.core.message,Image),
+%mddoclink(api,script.core.message,Document)
+or %mddoclink(api,script.core.message,Audio)).
+
+They can be attached to any message but will only work if the chosen
+[messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
 """
 
 # %pip install dff
@@ -25,26 +33,31 @@ img_url = "https://www.python.org/static/img/python-logo.png"
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Message(text=""),
+            RESPONSE: Message(""),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
-            RESPONSE: Message(text="Final node reached, send any message to restart."),
+            RESPONSE: Message(
+                text="Final node reached, send any message to restart."
+            ),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
     },
     "pics": {
         "ask_picture": {
-            RESPONSE: Message(text="Please, send me a picture url"),
+            RESPONSE: Message("Please, send me a picture url"),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
-                ("pics", "send_many", 1.0): cnd.regexp(f"{img_url} repeat 10 times"),
+                ("pics", "send_many", 1.0): cnd.regexp(
+                    f"{img_url} repeat 10 times"
+                ),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
         "send_one": {
             RESPONSE: Message(
-                text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])
+                text="here's my picture!",
+                attachments=Attachments(files=[Image(source=img_url)]),
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -56,10 +69,14 @@ toy_script = {
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "repeat": {
-            RESPONSE: Message(text="I cannot find the picture. Please, try again."),
+            RESPONSE: Message(
+                text="I cannot find the picture. Please, try again."
+            ),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
-                ("pics", "send_many", 1.0): cnd.regexp(r"^http.+\.png repeat 10 times"),
+                ("pics", "send_many", 1.0): cnd.regexp(
+                    r"^http.+\.png repeat 10 times"
+                ),
                 ("pics", "repeat", 0.9): cnd.true(),
             },
         },
@@ -67,22 +84,34 @@ toy_script = {
 }
 
 happy_path = (
-    (Message(text="Hi"), Message(text="Please, send me a picture url")),
-    (Message(text="no"), Message(text="I cannot find the picture. Please, try again.")),
+    (Message("Hi"), Message("Please, send me a picture url")),
     (
-        Message(text=img_url),
-        Message(text="here's my picture!", attachments=Attachments(files=[Image(source=img_url)])),
+        Message("no"),
+        Message("I cannot find the picture. Please, try again."),
     ),
-    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
-    (Message(text="ok"), Message(text="Please, send me a picture url")),
     (
-        Message(text=f"{img_url} repeat 10 times"),
+        Message(img_url),
+        Message(
+            text="here's my picture!",
+            attachments=Attachments(files=[Image(source=img_url)]),
+        ),
+    ),
+    (
+        Message("ok"),
+        Message("Final node reached, send any message to restart."),
+    ),
+    (Message("ok"), Message("Please, send me a picture url")),
+    (
+        Message(f"{img_url} repeat 10 times"),
         Message(
             text="Look at my pictures",
             attachments=Attachments(files=[Image(source=img_url)] * 10),
         ),
     ),
-    (Message(text="ok"), Message(text="Final node reached, send any message to restart.")),
+    (
+        Message("ok"),
+        Message("Final node reached, send any message to restart."),
+    ),
 )
 
 

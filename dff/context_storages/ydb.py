@@ -9,6 +9,7 @@ The Yandex DB module uses the Yandex Cloud SDK, which is a python library that a
 with Yandex Cloud services using python. This allows the DFF to easily integrate with the Yandex DataBase and
 take advantage of the scalability and high-availability features provided by the service.
 """
+
 import asyncio
 from os.path import join
 from typing import Any, Set, Tuple, List, Dict, Optional

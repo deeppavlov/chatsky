@@ -4,6 +4,9 @@
 
 The following tutorial shows `pipeline` asynchronous
 service and service group usage.
+
+Here, %mddoclink(api,pipeline.service.group,ServiceGroup)s
+are shown for advanced and asynchronous data pre- and postprocessing.
 """
 
 # %pip install dff
@@ -34,7 +37,7 @@ Here there is an asynchronous service group, that contains 10 services,
 each of them should sleep for 0.01 of a second.
 However, as the group is asynchronous,
 it is being executed for 0.01 of a second in total.
-Service group `pipeline` can't be asynchronous because `actor` is synchronous.
+Service group can be synchronous or asynchronous.
 """
 
 

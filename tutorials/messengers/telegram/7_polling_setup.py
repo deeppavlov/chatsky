@@ -4,6 +4,8 @@
 
 The following tutorial shows how to configure `PollingTelegramInterface`.
 
+See %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+for more information.
 """
 
 # %pip install dff[telegram]
@@ -33,7 +35,7 @@ that are used in the `pytelegrambotapi` library, specifically:
 
 # %%
 interface = PollingTelegramInterface(
-    token=os.getenv("TG_BOT_TOKEN", ""),
+    token=os.environ["TG_BOT_TOKEN"],
     interval=2,
     allowed_updates=update_types,
     timeout=30,
@@ -48,15 +50,15 @@ happy_path = HAPPY_PATH
 # %%
 pipeline = Pipeline.from_script(
     *TOY_SCRIPT_ARGS,
-    messenger_interface=interface,  # The interface can be passed as a pipeline argument.
+    messenger_interface=interface,
+    # The interface can be passed as a pipeline argument
 )
 
 
 def main():
-    if not os.getenv("TG_BOT_TOKEN"):
-        print("`TG_BOT_TOKEN` variable needs to be set to use TelegramInterface.")
     pipeline.run()
 
 
-if __name__ == "__main__" and is_interactive_mode():  # prevent run during doc building
+if __name__ == "__main__" and is_interactive_mode():
+    # prevent run during doc building
     main()

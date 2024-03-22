@@ -6,6 +6,7 @@ The former inherits from the :py:class:`~TeleBot` class from the `pytelegrambota
 Using it, you can put Telegram update handlers inside your script and condition your transitions accordingly.
 
 """
+
 from pathlib import Path
 from typing import Union, List, Optional, Callable
 from enum import Enum
@@ -57,7 +58,9 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
             ready_response = response
         elif isinstance(response, str):
             ready_response = TelegramMessage(text=response)
-        elif isinstance(response, dict) or isinstance(response, Message):
+        elif isinstance(response, Message):
+            ready_response = TelegramMessage.model_validate(response.model_dump())
+        elif isinstance(response, dict):
             ready_response = TelegramMessage.model_validate(response)
         else:
             raise TypeError(
@@ -83,7 +86,7 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
                     with open(attachment.source, "rb") as file:
                         method(chat_id, file, **params)
                 else:
-                    method(chat_id, attachment.source or attachment.id, **params)
+                    method(chat_id, str(attachment.source or attachment.id), **params)
             else:
 
                 def cast(file):
@@ -97,7 +100,7 @@ class TelegramMessenger(TeleBot):  # pragma: no cover
                         cast_to_media_type = types.InputMediaVideo
                     else:
                         raise TypeError(type(file))
-                    return cast_to_media_type(media=file.source or file.id, caption=file.title)
+                    return cast_to_media_type(media=str(file.source or file.id), caption=file.title)
 
                 files = map(cast, ready_response.attachments.files)
                 with batch_open_io(files) as media:

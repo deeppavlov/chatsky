@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*-
-# flake8: noqa: F401
 
 from .core.context import Context
 from .core.keywords import (
@@ -24,4 +23,4 @@ from .core.types import (
     ModuleName,
     ActorStage,
 )
-from .core.message import Message, MultiMessage
+from .core.message import Message

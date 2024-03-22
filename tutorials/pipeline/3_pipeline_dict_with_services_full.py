@@ -4,6 +4,11 @@
 
 The following tutorial shows `pipeline` creation from dict
 and most important pipeline components.
+
+This tutorial is a more advanced version of the
+[previous tutorial](
+%doclink(tutorial,pipeline.3_pipeline_dict_with_services_basic)
+).
 """
 
 # %pip install dff
@@ -84,7 +89,9 @@ Final service logs `ctx.misc` dict.
 
 # %%
 def prepreprocess(ctx: Context):
-    logger.info("preprocession intent-detection Service running (defined as a dict)")
+    logger.info(
+        "preprocession intent-detection Service running (defined as a dict)"
+    )
     ctx.misc["preprocess_detection"] = {
         ctx.last_request.text: "some_intent"
     }  # Similar syntax can be used to access
@@ -97,15 +104,22 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
         f"(defined as a callable), named '{info.name}'"
     )
     with urllib.request.urlopen("https://example.com/") as webpage:
-        web_content = webpage.read().decode(webpage.headers.get_content_charset())
+        web_content = webpage.read().decode(
+            webpage.headers.get_content_charset()
+        )
         ctx.misc["another_detection"] = {
-            ctx.last_request.text: "online" if "Example Domain" in web_content else "offline"
+            ctx.last_request.text: (
+                "online" if "Example Domain" in web_content else "offline"
+            )
         }
 
 
 def postprocess(ctx: Context, pl: Pipeline):
     logger.info("postprocession Service (defined as an object)")
-    logger.info(f"resulting misc looks like:" f"{json.dumps(ctx.misc, indent=4, default=str)}")
+    logger.info(
+        f"resulting misc looks like:"
+        f"{json.dumps(ctx.misc, indent=4, default=str)}"
+    )
     fallback_flow, fallback_node, _ = pl.actor.fallback_label
     received_response = pl.script[fallback_flow][fallback_node].response
     responses_match = received_response == ctx.last_response
