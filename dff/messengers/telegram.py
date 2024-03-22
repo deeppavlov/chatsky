@@ -45,8 +45,8 @@ from dff.script.core.message import (
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
-    accepts_attachments = (Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Document)
-    produces_attachments = (Location, Contact, Poll, Audio, Video, Animation, Image, Document, Keyboard)
+    request_attachments = {Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Document}
+    response_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Keyboard}
 
     def __init__(self, token: str) -> None:
         self.application = Application.builder().token(token).build()

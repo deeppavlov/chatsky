@@ -12,6 +12,9 @@ class CLIMessengerInterface(PollingMessengerInterface):
     This message interface can maintain dialog with one user at a time only.
     """
 
+    request_attachments = set()
+    response_attachments = set()
+
     def __init__(
         self,
         intro: Optional[str] = None,
