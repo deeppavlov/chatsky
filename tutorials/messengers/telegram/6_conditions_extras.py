@@ -5,10 +5,9 @@
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
 
-%mddoclink(api,messengers.telegram.messenger)
-function and different types of
-%mddoclink(api,messengers.telegram.messenger,UpdateType)
-are used for telegram message type checking.
+Here, %mddoclink(api,messengers.telegram)
+message `original_message` component
+is used for telegram message type checking.
 """
 
 

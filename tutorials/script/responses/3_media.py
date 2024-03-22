@@ -2,7 +2,7 @@
 """
 # Responses: 3. Media
 
-Here, %mddoclink(api,script.core.message,Attachments) class is shown.
+Here, %mddoclink(api,script.core.message,Attachment) class is shown.
 Attachments can be used for attaching different media elements
 (such as %mddoclink(api,script.core.message,Image),
 %mddoclink(api,script.core.message,Document)

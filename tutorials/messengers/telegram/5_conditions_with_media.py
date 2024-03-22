@@ -4,8 +4,9 @@
 
 This tutorial shows how to use media-related logic in your script.
 
-Here, %mddoclink(api,messengers.telegram.messenger)
-function is used for graph navigation according to Telegram events.
+Here, %mddoclink(api,messengers.telegram)
+message `original_message` component used
+for graph navigation according to Telegram events.
 
 Different %mddoclink(api,script.core.message,message)
 classes are used for representing different common message features,
