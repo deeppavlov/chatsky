@@ -57,8 +57,10 @@ toy_script = {
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
-                                Button(text="5", payload="5"),
-                                Button(text="4", payload="4"),
+                                [
+                                    Button(text="5", data="5"),
+                                    Button(text="4", data="4"),
+                                ]
                             ]
                         ),
                     },
@@ -77,8 +79,10 @@ toy_script = {
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
-                                Button(text="38", payload="38"),
-                                Button(text="48", payload="48"),
+                                [
+                                    Button(text="38", data="38"),
+                                    Button(text="48", data="48"),
+                                ]
                             ]
                         ),
                     },
@@ -97,8 +101,10 @@ toy_script = {
                     "misc": {
                         "ui": Keyboard(
                             buttons=[
-                                Button(text="229", payload="229"),
-                                Button(text="283", payload="283"),
+                                [
+                                    Button(text="229", data="229"),
+                                    Button(text="283", data="283"),
+                                ]
                             ]
                         ),
                     },
@@ -126,8 +132,10 @@ happy_path = (
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
-                            Button(text="5", payload="5"),
-                            Button(text="4", payload="4"),
+                            [
+                                Button(text="5", data="5"),
+                                Button(text="4", data="4"),
+                            ]
                         ]
                     )
                 },
@@ -143,8 +151,10 @@ happy_path = (
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
-                            Button(text="5", payload="5"),
-                            Button(text="4", payload="4"),
+                            [
+                                Button(text="5", data="5"),
+                                Button(text="4", data="4"),
+                            ]
                         ]
                     ),
                 },
@@ -160,8 +170,10 @@ happy_path = (
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
-                            Button(text="38", payload="38"),
-                            Button(text="48", payload="48"),
+                            [
+                                Button(text="38", data="38"),
+                                Button(text="48", data="48"),
+                            ]
                         ]
                     ),
                 },
@@ -177,8 +189,10 @@ happy_path = (
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
-                            Button(text="38", payload="38"),
-                            Button(text="48", payload="48"),
+                            [
+                                Button(text="38", data="38"),
+                                Button(text="48", data="48"),
+                            ]
                         ]
                     ),
                 },
@@ -194,8 +208,10 @@ happy_path = (
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
-                            Button(text="229", payload="229"),
-                            Button(text="283", payload="283"),
+                            [
+                                Button(text="229", data="229"),
+                                Button(text="283", data="283"),
+                            ]
                         ]
                     ),
                 },
@@ -211,8 +227,10 @@ happy_path = (
                 "misc": {
                     "ui": Keyboard(
                         buttons=[
-                            Button(text="229", payload="229"),
-                            Button(text="283", payload="283"),
+                            [
+                                Button(text="229", data="229"),
+                                Button(text="283", data="283"),
+                            ]
                         ]
                     ),
                 },
@@ -230,15 +248,15 @@ def process_request(ctx: Context):
         and ctx.last_response.misc
         and ctx.last_response.misc.get("ui")
     )
-    if ui and ui.buttons:
+    if ui and ui.buttons[0]:
         try:
-            chosen_button = ui.buttons[int(ctx.last_request.text)]
+            chosen_button = ui.buttons[0][int(ctx.last_request.text)]
         except (IndexError, ValueError):
             raise ValueError(
                 "Type in the index of the correct option "
                 "to choose from the buttons."
             )
-        ctx.last_request = Message(misc={"payload": chosen_button.payload})
+        ctx.last_request = Message(misc={"payload": chosen_button.data})
 
 
 # %%
