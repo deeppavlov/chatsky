@@ -24,7 +24,8 @@ class JSONImportError(Exception):
 
 
 class JSONImporter:
-    DFF_NAMESPACE_PREFIX = "dff."
+    DFF_NAMESPACE_PREFIX = "dff"
+    CUSTOM_DIR_NAMESPACE_PREFIX = "custom_dir"
     CUSTOM_DIR_CONFIG_OPTION = "custom_dir"
     TRANSITIONS_KEY = "TRANSITIONS"
     CONFIG_KEY = "CONFIG"
@@ -50,27 +51,37 @@ class JSONImporter:
             raise JSONImportError("Config is not found -- your script has to define a CONFIG dictionary")
         self.config = config
 
-        custom_dir = config.get(self.CUSTOM_DIR_CONFIG_OPTION, "custom_dir")
-        if not isinstance(custom_dir, str):
-            raise JSONImportError("CUSTOM_DIR must be a string")
-        custom_dir_path = Path(custom_dir)
-        if not custom_dir_path.is_absolute():
-            custom_dir_path = (file.parent / custom_dir_path).resolve(strict=False)
+        custom_dir = config.get(self.CUSTOM_DIR_CONFIG_OPTION)
+        if custom_dir is not None:
+            if not isinstance(custom_dir, str):
+                raise JSONImportError("custom_dir must be a string")
+            custom_dir_path = Path(custom_dir)
+            if not custom_dir_path.is_absolute():
+                custom_dir_path = (file.parent / custom_dir_path).resolve(strict=False)
 
-        if not custom_dir_path.exists():
-            raise JSONImportError(f"Could not find directory {custom_dir_path}. custom_dir: {custom_dir}")
+            if not custom_dir_path.exists():
+                raise JSONImportError(f"Could not find directory {custom_dir_path}. custom_dir: {custom_dir}")
 
-        logger.info(f"CUSTOM_DIR set to {custom_dir_path}")
-        self.custom_dir_prefix = custom_dir_path.stem + "."
+            logger.info(f"custom_dir set to {custom_dir_path}")
 
-        self._custom_dir_location = str(custom_dir_path.parent)
+            self._custom_dir_stem = str(custom_dir_path.stem)
+            self._custom_dir_location = str(custom_dir_path.parent)
+        else:
+            self._custom_dir_location = None
         self._custom_modules = {}
+
+    @staticmethod
+    def is_resolvable(value: str) -> bool:
+        return value.startswith(JSONImporter.DFF_NAMESPACE_PREFIX + ".") or\
+               value.startswith(JSONImporter.CUSTOM_DIR_NAMESPACE_PREFIX + ".")
 
     def import_custom_module(self, module_name: str, paths: Optional[Sequence[str]] = None):
         if module_name in self._custom_modules:
             return self._custom_modules[module_name]
 
         if paths is None:
+            if self._custom_dir_location is None:
+                raise JSONImportError("custom_dir option must be set in order to use objects from it")
             paths = [self._custom_dir_location]
 
         parent_name, _, child_name = module_name.rpartition(".")
@@ -79,6 +90,11 @@ class JSONImporter:
             parent_module = self.import_custom_module(parent_name, paths)
 
             paths = parent_module.__spec__.submodule_search_locations
+        else:
+            # root level import; replace `custom_dir` with actual module name
+            if child_name != self.CUSTOM_DIR_NAMESPACE_PREFIX:
+                raise RuntimeError(f"Trying to import from custom_dir while using wrong module_name: {child_name!r}")
+            child_name = self._custom_dir_stem
 
         for finder in sys.meta_path:
             spec = finder.find_spec(child_name, paths)
@@ -158,7 +174,7 @@ class JSONImporter:
     def replace_string_values(self, obj: JsonValue):
         if not isinstance(obj, str):
             raise JSONImportError(f"Obj {obj} has to be a string")
-        if obj.startswith(self.DFF_NAMESPACE_PREFIX) or obj.startswith(self.custom_dir_prefix):
+        if self.is_resolvable(obj):
             target_obj = self.resolve_target_object(obj)
 
             if target_obj is None:
@@ -172,7 +188,7 @@ class JSONImporter:
             keys = obj.keys()
             if len(keys) == 1:
                 key = keys.__iter__().__next__()
-                if key.startswith(self.DFF_NAMESPACE_PREFIX) or key.startswith(self.custom_dir_prefix):
+                if self.is_resolvable(key):
                     return self.replace_obj(obj)
 
             return {k: (
@@ -181,7 +197,7 @@ class JSONImporter:
         elif isinstance(obj, list):
             return [self.replace_script_objects(item) for item in obj]
         elif isinstance(obj, str):
-            if obj.startswith(self.DFF_NAMESPACE_PREFIX) or obj.startswith(self.custom_dir_prefix):
+            if self.is_resolvable(obj):
                 return self.replace_string_values(obj)
         return obj
 

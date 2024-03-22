@@ -16,4 +16,4 @@ flow:
       - lbl:
           [flow, node, 3]
         cnd:
-          custom.cnd.condition
+          custom_dir.cnd.condition
