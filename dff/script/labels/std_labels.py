@@ -10,6 +10,7 @@ such as the current context or user data, to create more complex and dynamic con
 This module contains a standard set of scripting :py:const:`labels <dff.script.NodeLabelType>` that
 can be used by developers to define the conversation flow.
 """
+
 from __future__ import annotations
 from typing import Optional, Callable, TYPE_CHECKING
 from dff.script import Context, NodeLabel3Type

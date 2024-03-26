@@ -3,6 +3,7 @@ Response comparer
 -----------------
 This module defines function used to compare two response objects.
 """
+
 from typing import Any, Optional
 
 from dff.script import Context, Message

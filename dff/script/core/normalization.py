@@ -5,6 +5,7 @@ Normalization module is used to normalize all python objects and functions to a 
 that is suitable for script and actor execution process.
 This module contains a basic set of functions for normalizing data in a dialog script.
 """
+
 from __future__ import annotations
 import logging
 from typing import Union, Callable, Optional, TYPE_CHECKING

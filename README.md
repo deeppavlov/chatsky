@@ -87,13 +87,13 @@ import dff.script.conditions.std_conditions as cnd
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("flow", "node_hi"): cnd.exact_match(Message(text="Hi")),
+            ("flow", "node_hi"): cnd.exact_match(Message("Hi")),
             ("flow", "node_ok"): cnd.true()
         }
     },
     "flow": {
-        "node_hi": {RESPONSE: Message(text="Hi!")},
-        "node_ok": {RESPONSE: Message(text="OK")},
+        "node_hi": {RESPONSE: Message("Hi!")},
+        "node_ok": {RESPONSE: Message("OK")},
     },
 }
 
@@ -112,7 +112,7 @@ def turn_handler(in_request: Message, pipeline: Pipeline) -> Message:
 
 while True:
     in_request = input("Your message: ")
-    out_response = turn_handler(Message(text=in_request), pipeline)
+    out_response = turn_handler(Message(in_request), pipeline)
     print("Response: ", out_response.text)
 ```
 

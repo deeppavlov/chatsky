@@ -116,7 +116,7 @@ async def test_keyboard_remove(pipeline_instance, api_credentials, bot_user, ses
                 attachments=Attachments(files=[video]),
             ),
         ),
-        (Message(text="test", attachments=Attachments(files=[document])),),
+        (Message("test", attachments=Attachments(files=[document])),),
     ],
 )
 @pytest.mark.telegram
@@ -150,7 +150,7 @@ async def test_telegram_attachment(generic_response, pipeline_instance, api_cred
                 attachments=Attachments(files=2 * [video]),
             ),
         ),
-        (Message(text="test", attachments=Attachments(files=2 * [document])),),
+        (Message("test", attachments=Attachments(files=2 * [document])),),
     ],
 )
 @pytest.mark.telegram

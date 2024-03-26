@@ -5,6 +5,7 @@ The Script module provides a set of `pydantic` models for representing the dialo
 These models are used to define the conversation flow, and to determine the appropriate response based on
 the user's input and the current state of the conversation.
 """
+
 # %%
 from __future__ import annotations
 import inspect

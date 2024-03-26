@@ -22,6 +22,7 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 
 .. figure:: /_static/drawio/dfe/user_actor.png
 """
+
 from __future__ import annotations
 import inspect
 import logging

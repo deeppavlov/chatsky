@@ -8,6 +8,7 @@ step in a processing pipeline, and is responsible for performing a specific task
 The PipelineComponent class can be a group or a service. It is designed to be reusable and composable,
 allowing developers to create complex processing pipelines by combining multiple components.
 """
+
 from __future__ import annotations
 import logging
 import abc

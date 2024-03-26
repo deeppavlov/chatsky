@@ -3,6 +3,7 @@ Telegram Message
 ----------------
 This module implements inherited classes :py:mod:`dff.script.core.message` modified for usage with Telegram.
 """
+
 from typing import Optional, Union
 from enum import Enum
 
@@ -67,9 +68,9 @@ class ParseMode(Enum):
 
 
 class TelegramMessage(Message):
-    ui: Optional[
-        Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
-    ] = None
+    ui: Optional[Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]] = (
+        None
+    )
     location: Optional[Location] = None
     callback_query: Optional[Union[str, _ClickButton]] = None
     update: Optional[

@@ -9,6 +9,7 @@ Service is an atomic part of a pipeline.
 Service can be asynchronous only if its handler is a coroutine.
 Actor wrapping service is asynchronous.
 """
+
 from __future__ import annotations
 import logging
 import inspect
@@ -134,7 +135,7 @@ class Service(PipelineComponent):
             self._set_state(ctx, ComponentExecutionState.FINISHED)
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"Actor '{self.name}' execution failed!\n{exc}")
+            logger.error(f"Actor '{self.name}' execution failed!", exc_info=exc)
 
     async def _run_as_service(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -151,9 +152,9 @@ class Service(PipelineComponent):
                 self._set_state(ctx, ComponentExecutionState.FINISHED)
             else:
                 self._set_state(ctx, ComponentExecutionState.NOT_RUN)
-        except Exception as e:
+        except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"Service '{self.name}' execution failed!\n{e}")
+            logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """

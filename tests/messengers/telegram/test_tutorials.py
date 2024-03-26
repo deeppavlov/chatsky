@@ -1,6 +1,7 @@
 """
 These tests check that pipelines defined in tutorials follow `happy_path` defined in the same tutorials.
 """
+
 import importlib
 import logging
 
