@@ -297,14 +297,7 @@ class Pipeline:
             - key :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
             - value List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
         """
-        old_actor = self.actor
         self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
-        errors = self.actor.validate_script(verbose)
-        if errors:
-            self.actor = old_actor
-            raise ValueError(
-                f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
-            )
 
     @classmethod
     def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":
