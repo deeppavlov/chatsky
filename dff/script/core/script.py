@@ -23,22 +23,6 @@ if TYPE_CHECKING:
     from dff.script.core.context import Context
     from dff.pipeline.pipeline.pipeline import Pipeline
 
-    USER_FUNCTION_TYPES = {
-        "label": ((Context, Pipeline), None),
-        "response": ((Context, Pipeline), Message),
-        "condition": ((Context, Pipeline), bool),
-        "processing": ((Context, Pipeline), Context),
-    }
-else:
-    from typing import Any
-
-    USER_FUNCTION_TYPES = {
-        "label": ((Any, Any), Any),
-        "response": ((Any, Any), Any),
-        "condition": ((Any, Any), Any),
-        "processing": ((Any, Any), Any),
-    }
-
 logger = logging.getLogger(__name__)
 
 
@@ -74,6 +58,16 @@ def validate_callable(callable: Callable, name: str, flow_label: str, node_label
         If `None` or contains more or less than 1 element, return type check is skipped. Defaults to `None`.
     :return: list of produced error messages.
     """
+    from dff.script.core.context import Context
+    from dff.pipeline.pipeline.pipeline import Pipeline
+
+    USER_FUNCTION_TYPES = {
+        "label": ((Context, Pipeline), None),
+        "response": ((Context, Pipeline), Message),
+        "condition": ((Context, Pipeline), bool),
+        "processing": ((Context, Pipeline), Context),
+    }
+
     error_msgs = list()
     signature = inspect.signature(callable)
     function_type = name if name in USER_FUNCTION_TYPES.keys() else "processing"
