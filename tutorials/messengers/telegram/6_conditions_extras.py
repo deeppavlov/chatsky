@@ -5,10 +5,9 @@
 This tutorial shows how to use additional update filters
 inherited from the `pytelegrambotapi` library.
 
-%mddoclink(api,messengers.telegram.messenger)
-function and different types of
-%mddoclink(api,messengers.telegram.messenger,UpdateType)
-are used for telegram message type checking.
+Here, %mddoclink(api,messengers.telegram)
+message `original_message` component
+is used for telegram message type checking.
 """
 
 
@@ -57,7 +56,9 @@ or in the docs for the `telebot` library.
 
 
 # %%
-def check_if_latest_message_is_new_chat_member(ctx: Context, _: Pipeline) -> bool:
+def check_if_latest_message_is_new_chat_member(
+    ctx: Context, _: Pipeline
+) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -69,7 +70,9 @@ def check_if_latest_message_is_new_chat_member(ctx: Context, _: Pipeline) -> boo
     )
 
 
-def check_if_latest_message_is_callback_query(ctx: Context, _: Pipeline) -> bool:
+def check_if_latest_message_is_callback_query(
+    ctx: Context, _: Pipeline
+) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:

@@ -4,8 +4,9 @@
 
 This tutorial shows how to use media-related logic in your script.
 
-Here, %mddoclink(api,messengers.telegram.messenger)
-function is used for graph navigation according to Telegram events.
+Here, %mddoclink(api,messengers.telegram)
+message `original_message` component used
+for graph navigation according to Telegram events.
 
 Different %mddoclink(api,script.core.message,message)
 classes are used for representing different common message features,
@@ -60,7 +61,7 @@ def check_if_latest_message_has_photos(ctx: Context, _: Pipeline) -> bool:
     return len(ctx.last_request.original_message.message.photo) > 0
 
 
-def check_if_latest_message_has_image_documents(ctx: Context, _: Pipeline) -> bool:
+def check_if_latest_message_has_images(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -123,7 +124,7 @@ script = {
                         # We should consider both cases
                         # when we check the message for media.
                         check_if_latest_message_has_photos,
-                        check_if_latest_message_has_image_documents,
+                        check_if_latest_message_has_images,
                     ]
                 ),
                 (

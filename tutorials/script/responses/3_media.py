@@ -2,7 +2,7 @@
 """
 # Responses: 3. Media
 
-Here, %mddoclink(api,script.core.message,Attachments) class is shown.
+Here, %mddoclink(api,script.core.message,Attachment) class is shown.
 Attachments can be used for attaching different media elements
 (such as %mddoclink(api,script.core.message,Image),
 %mddoclink(api,script.core.message,Document)
@@ -18,7 +18,7 @@ They can be attached to any message but will only work if the chosen
 from dff.script import RESPONSE, TRANSITIONS
 from dff.script.conditions import std_conditions as cnd
 
-from dff.script.core.message import Attachments, Image, Message
+from dff.script.core.message import Image, Message
 
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
@@ -57,14 +57,14 @@ toy_script = {
         "send_one": {
             RESPONSE: Message(
                 text="here's my picture!",
-                attachments=Attachments(files=[Image(source=img_url)]),
+                attachments=[Image(source=img_url)],
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
             RESPONSE: Message(
                 text="Look at my pictures",
-                attachments=Attachments(files=[Image(source=img_url)] * 10),
+                attachments=[Image(source=img_url)],
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -93,7 +93,7 @@ happy_path = (
         Message(img_url),
         Message(
             text="here's my picture!",
-            attachments=Attachments(files=[Image(source=img_url)]),
+            attachments=[Image(source=img_url)],
         ),
     ),
     (
@@ -105,7 +105,7 @@ happy_path = (
         Message(f"{img_url} repeat 10 times"),
         Message(
             text="Look at my pictures",
-            attachments=Attachments(files=[Image(source=img_url)] * 10),
+            attachments=[Image(source=img_url)],
         ),
     ),
     (
