@@ -4,6 +4,7 @@ Interface
 This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
 that can be used to interact with the Telegram API.
 """
+
 from pathlib import Path
 from tempfile import gettempdir
 from typing import Callable, Optional, Sequence
