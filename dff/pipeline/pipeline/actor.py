@@ -24,7 +24,6 @@ Both `request` and `response` are saved to :py:class:`.Context`.
 """
 
 from __future__ import annotations
-import inspect
 import logging
 import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
@@ -43,7 +42,6 @@ from dff.pipeline.service.utils import wrap_sync_function_in_async
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from dff.script.core.context import Context
     from dff.pipeline.pipeline.pipeline import Pipeline
 
 
