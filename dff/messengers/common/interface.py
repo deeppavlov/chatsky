@@ -26,8 +26,8 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
-    accepts_attachments = tuple()
-    produces_attachments = tuple()
+    request_attachments = set()
+    response_attachments = set()
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
