@@ -4,7 +4,6 @@ import itertools
 import pytest
 
 from dff.script import (
-    GLOBAL,
     TRANSITIONS,
     RESPONSE,
     MISC,
@@ -112,10 +111,6 @@ def test_node_exec():
     node_test(node)
 
 
-def test_script():
-    script_test(PRE_RESPONSE_PROCESSING)
-
-
 @pytest.mark.parametrize(
     ["script"],
     [
@@ -123,5 +118,5 @@ def test_script():
         (MULTIFLOW_SCRIPT,),
     ],
 )
-def script_test(script):
+def test_script(script):
     Script(script=script)
