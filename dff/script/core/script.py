@@ -8,7 +8,7 @@ the user's input and the current state of the conversation.
 
 # %%
 from __future__ import annotations
-from enum import StrEnum
+from enum import Enum
 import inspect
 import logging
 from typing import Callable, List, Optional, Any, Dict, Union, TYPE_CHECKING
@@ -27,7 +27,7 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-class UserFunctionType(StrEnum):
+class UserFunctionType(str, Enum):
     LABEL = "label"
     RESPONSE = "response"
     CONDITION = "condition"
@@ -78,7 +78,7 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
     params = list(signature.parameters.values())
     if len(params) != len(arguments_type):
         msg = (
-            f"Incorrect parameter number of {func_type.name}={callable.__name__}: "
+            f"Incorrect parameter number of {func_type}={callable.__name__}: "
             f"should be {len(arguments_type)}, found {len(params)}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
@@ -86,7 +86,7 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
     for idx, param in enumerate(params):
         if param.annotation != inspect.Parameter.empty and param.annotation != arguments_type[idx]:
             msg = (
-                f"Incorrect {idx} parameter annotation of {func_type.name}={callable.__name__}: "
+                f"Incorrect {idx} parameter annotation of {func_type}={callable.__name__}: "
                 f"should be {arguments_type[idx]}, found {param.annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
@@ -94,7 +94,7 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
     return_annotation = signature.return_annotation
     if return_annotation != inspect.Parameter.empty and return_annotation != return_type:
         msg = (
-            f"Incorrect return type annotation of {func_type.name}={callable.__name__}: "
+            f"Incorrect return type annotation of {func_type}={callable.__name__}: "
             f"should be {return_type}, found {return_annotation}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
