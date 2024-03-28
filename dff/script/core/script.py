@@ -105,14 +105,16 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
         if types_equal(param.annotation, arguments_type[idx]):
             msg = (
                 f"Incorrect {idx} parameter annotation of {func_type}={callable.__name__}: "
-                f"should be {arguments_type[idx]}, found {param.annotation}, "
+                f"should be {arguments_type[idx]} ({type(arguments_type[idx])}), "
+                f"found {param.annotation} ({param.annotation}), "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None)
     if types_equal(signature.return_annotation, return_type):
         msg = (
             f"Incorrect return type annotation of {func_type}={callable.__name__}: "
-            f"should be {return_type}, found {signature.return_annotation}, "
+            f"should be {return_type} ({type(return_type)}), "
+            f"found {signature.return_annotation} ({type(signature.return_annotation)}), "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
         error_handler(error_msgs, msg, None)
