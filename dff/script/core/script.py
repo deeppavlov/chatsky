@@ -50,12 +50,6 @@ def validate_callable(callable: Callable, name: str, flow_label: str, node_label
     :param name: Type of the function (label, condition, response, etc.).
     :param flow_label: Flow label this function is related to (used for error localization only).
     :param node_label: Node label this function is related to (used for error localization only).
-    :param error_msgs: List that contains error messages. All the error message will be added to that list.
-    :param logging_flag: The flag which defines whether logging is necessary. Defaults to `True`.
-    :param expected_types: Tuple of types that correspond to expected function parameter types.
-        Also used for parameter number check. If `None`, parameter check is skipped. Defaults to `None`.
-    :param return_type: Tuple, containing expected function return type.
-        If `None` or contains more or less than 1 element, return type check is skipped. Defaults to `None`.
     :return: list of produced error messages.
     """
     from dff.script.core.context import Context
