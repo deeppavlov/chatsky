@@ -171,6 +171,8 @@ class Script(BaseModel, extra="forbid"):
                         error_msgs += validate_callable(label, UserFunctionType.LABEL, flow_name, node_name)
                     else:
                         flow_label, node_label, _ = label
+                        if flow_label == "":
+                            flow_label = flow_name
                         if flow_label not in script.keys():
                             msg = (
                                 f"Flow label {flow_label} can not be found for label={label}, "
