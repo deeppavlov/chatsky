@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def normalize_label(
     label: NodeLabelType, default_flow_label: LabelType = ""
-) -> Optional[Union[Callable[[Context, Pipeline], NodeLabel3Type], NodeLabel3Type]]:
+) -> Union[Callable[[Context, Pipeline], NodeLabel3Type], NodeLabel3Type]:
     """
     The function that is used for normalization of
     :py:const:`default_flow_label <dff.script.NodeLabelType>`.
@@ -31,9 +31,7 @@ def normalize_label(
     :param label: If label is Callable the function is wrapped into try/except
         and normalization is used on the result of the function call with the name label.
     :param default_flow_label: flow_label is used if label does not contain flow_label.
-    :return: Result of the label normalization,
-        if Callable is returned, the normalized result is returned
-        if label can not be normalized, None is returned.
+    :return: Result of the label normalization
     """
     if callable(label):
 
@@ -64,7 +62,8 @@ def normalize_label(
         flow_label = label[0] or default_flow_label
         return (flow_label, label[1], label[2])
     else:
-        return None
+        raise TypeError(f"Label '{label!r}' is of incorrect type. It has to follow the `NodeLabelType`:\n"
+                        f"{NodeLabelType!r}")
 
 
 def normalize_condition(condition: ConditionType) -> Callable[[Context, Pipeline], bool]:

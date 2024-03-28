@@ -168,23 +168,15 @@ class Script(BaseModel, extra="forbid"):
                     if callable(label):
                         error_msgs += validate_callable(label, "label", flow_name, node_name)
                     else:
-                        norm_label = normalize_label(label, flow_name)
-                        if norm_label is None:
+                        flow_label, node_label, _ = label
+                        if flow_label not in script.keys():
                             msg = (
-                                f"Label can not be normalized for label={label}, "
+                                f"Flow label {flow_label} can not be found for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
-                            error_handler(error_msgs, msg, None)
-                            continue
-                        norm_flow_label, norm_node_label, _ = norm_label
-                        if norm_flow_label not in script.keys():
+                        elif node_label not in script[flow_label].keys():
                             msg = (
-                                f"Flow label {norm_flow_label} can not be found for label={label}, "
-                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
-                            )
-                        elif norm_node_label not in script[norm_flow_label].keys():
-                            msg = (
-                                f"Node label {norm_node_label} can not be found for label={label}, "
+                                f"Node label {node_label} can not be found for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
                         else:
