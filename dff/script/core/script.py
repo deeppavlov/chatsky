@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import Enum
 import inspect
 import logging
-from typing import Callable, List, Optional, Any, Dict, Union, TYPE_CHECKING
+from typing import Callable, List, Optional, Any, Dict, Type, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, field_validator, validate_call
 
@@ -50,6 +50,24 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     logger.error(msg, exc_info=exception)
 
 
+def types_equal(signature_type: Any, expected_type: Type) -> bool:
+    """
+    This function checks equality of signature type with expected type.
+    Three cases are handled. If no signature is present, it is presumed that types are equal.
+    If signature is a type, it is compared with expected type as is.
+    If signature is a string, it is compared with expected type name.
+
+    :param signature_type: type received from function signature.
+    :param expected_type: expected type - a class.
+    :return: true if types are equal, false otherwise.
+    """
+    signature_empty = signature_type == inspect.Parameter.empty
+    types_match = signature_type == expected_type
+    expected_string = signature_type == expected_type.__name__
+    return signature_empty or types_match or expected_string
+
+
+
 def validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
     """
     This function validates a function during :py:class:`~dff.script.Script` validation.
@@ -84,18 +102,17 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
         )
         error_handler(error_msgs, msg, None)
     for idx, param in enumerate(params):
-        if param.annotation != inspect.Parameter.empty and param.annotation != arguments_type[idx]:
+        if types_equal(param.annotation, arguments_type[idx]):
             msg = (
                 f"Incorrect {idx} parameter annotation of {func_type}={callable.__name__}: "
                 f"should be {arguments_type[idx]}, found {param.annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_handler(error_msgs, msg, None)
-    return_annotation = signature.return_annotation
-    if return_annotation != inspect.Parameter.empty and return_annotation != return_type:
+    if types_equal(signature.return_annotation, return_type):
         msg = (
             f"Incorrect return type annotation of {func_type}={callable.__name__}: "
-            f"should be {return_type}, found {return_annotation}, "
+            f"should be {return_type}, found {signature.return_annotation}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
         error_handler(error_msgs, msg, None)
