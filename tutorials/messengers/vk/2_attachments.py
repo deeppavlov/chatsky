@@ -60,7 +60,7 @@ script = {
             },
         },
         "cat_image_node": {
-            RESPONSE: Message(text="Two cool cats sent.", attachments=[Image(source="cat.jpg"), Image(source="https://d2ph5fj80uercy.cloudfront.net/04/cat2634.jpg")]),
+            RESPONSE: Message(text="Two cool cats sent.", attachments=[Image(source="https://media.tenor.com/ff2BZlCK0SwAAAAM/gatin.gif"), Image(source="https://d2ph5fj80uercy.cloudfront.net/04/cat2634.jpg")]),
             TRANSITIONS: {
                 "greeting_node": cnd.true()
             }
