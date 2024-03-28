@@ -59,7 +59,7 @@ def validate_callable(callable: Callable, name: str, flow_label: str, node_label
         "label": ((Context, Pipeline), None),
         "response": ((Context, Pipeline), Message),
         "condition": ((Context, Pipeline), bool),
-        "processing": ((Context, Pipeline), Context),
+        "processing": ((Context, Pipeline), None),
     }
 
     error_msgs = list()
