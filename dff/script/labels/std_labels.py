@@ -137,7 +137,9 @@ def _get_label_by_index_shifting(
     return (flow_label, labels[label_index], current_priority)
 
 
-def forward(priority: Optional[float] = None, cyclicality_flag: bool = True) -> Callable[[Context, Pipeline], NodeLabel3Type]:
+def forward(
+    priority: Optional[float] = None, cyclicality_flag: bool = True
+) -> Callable[[Context, Pipeline], NodeLabel3Type]:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.
@@ -158,7 +160,9 @@ def forward(priority: Optional[float] = None, cyclicality_flag: bool = True) -> 
     return forward_transition_handler
 
 
-def backward(priority: Optional[float] = None, cyclicality_flag: bool = True) -> Callable[[Context, Pipeline], NodeLabel3Type]:
+def backward(
+    priority: Optional[float] = None, cyclicality_flag: bool = True
+) -> Callable[[Context, Pipeline], NodeLabel3Type]:
     """
     Returns transition handler that takes :py:class:`~dff.script.Context`,
     :py:class:`~dff.pipeline.Pipeline` and :py:const:`priority <float>`.

@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import Enum
 import inspect
 import logging
-from typing import Callable, List, Optional, Any, Dict, Type, Union, TYPE_CHECKING
+from typing import Callable, List, Optional, Any, Dict, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, field_validator, validate_call
 
@@ -34,6 +34,7 @@ class UserFunctionType(str, Enum):
     TRANSITION_PROCESSING = "pre_transitions_processing"
     RESPONSE_PROCESSING = "pre_response_processing"
 
+
 USER_FUNCTION_TYPES = {
     UserFunctionType.LABEL: (("Context", "Pipeline"), "NodeLabel3Type"),
     UserFunctionType.RESPONSE: (("Context", "Pipeline"), "Message"),
@@ -43,7 +44,7 @@ USER_FUNCTION_TYPES = {
 }
 
 
-def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None):
+def _error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None):
     """
     This function handles errors during :py:class:`~dff.script.Script` validation.
 
@@ -58,7 +59,7 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     logger.error(msg, exc_info=exception)
 
 
-def types_equal(signature_type: Any, expected_type: str) -> bool:
+def _types_equal(signature_type: Any, expected_type: str) -> bool:
     """
     This function checks equality of signature type with expected type.
     Three cases are handled. If no signature is present, it is presumed that types are equal.
@@ -75,8 +76,7 @@ def types_equal(signature_type: Any, expected_type: str) -> bool:
     return signature_empty or expected_string
 
 
-
-def validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
+def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
     """
     This function validates a function during :py:class:`~dff.script.Script` validation.
     It checks parameter number (unconditionally), parameter types (if specified) and return type (if specified).
@@ -98,24 +98,24 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
             f"should be {len(arguments_type)}, found {len(params)}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
-        error_handler(error_msgs, msg, None)
+        _error_handler(error_msgs, msg, None)
     for idx, param in enumerate(params):
-        if not types_equal(param.annotation, arguments_type[idx]):
+        if not _types_equal(param.annotation, arguments_type[idx]):
             msg = (
                 f"Incorrect {idx} parameter annotation of {func_type}={callable.__name__}: "
                 f"should be {arguments_type[idx]} ({type(arguments_type[idx])}), "
                 f"found {param.annotation} ({type(param.annotation)}), "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
-            error_handler(error_msgs, msg, None)
-    if not types_equal(signature.return_annotation, return_type):
+            _error_handler(error_msgs, msg, None)
+    if not _types_equal(signature.return_annotation, return_type):
         msg = (
             f"Incorrect return type annotation of {func_type}={callable.__name__}: "
             f"should be {return_type} ({type(return_type)}), "
             f"found {signature.return_annotation} ({type(signature.return_annotation)}), "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
-        error_handler(error_msgs, msg, None)
+        _error_handler(error_msgs, msg, None)
     return error_msgs
 
 
@@ -185,7 +185,7 @@ class Script(BaseModel, extra="forbid"):
                 # validate labeling
                 for label in node.transitions.keys():
                     if callable(label):
-                        error_msgs += validate_callable(label, UserFunctionType.LABEL, flow_name, node_name)
+                        error_msgs += _validate_callable(label, UserFunctionType.LABEL, flow_name, node_name)
                     else:
                         norm_label = normalize_label(label, flow_name)
                         if norm_label is None:
@@ -207,11 +207,11 @@ class Script(BaseModel, extra="forbid"):
                         else:
                             msg = None
                         if msg is not None:
-                            error_handler(error_msgs, msg, None)
+                            _error_handler(error_msgs, msg, None)
 
                 # validate responses
                 if callable(node.response):
-                    error_msgs += validate_callable(
+                    error_msgs += _validate_callable(
                         node.response,
                         UserFunctionType.RESPONSE,
                         flow_name,
@@ -223,12 +223,12 @@ class Script(BaseModel, extra="forbid"):
                         f"got type(response)={type(node.response)}, "
                         f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                     )
-                    error_handler(error_msgs, msg, None)
+                    _error_handler(error_msgs, msg, None)
 
                 # validate conditions
                 for label, condition in node.transitions.items():
                     if callable(condition):
-                        error_msgs += validate_callable(
+                        error_msgs += _validate_callable(
                             condition,
                             UserFunctionType.CONDITION,
                             flow_name,
@@ -240,16 +240,16 @@ class Script(BaseModel, extra="forbid"):
                             f"got type(condition)={type(condition)}, "
                             f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                         )
-                        error_handler(error_msgs, msg, None)
+                        _error_handler(error_msgs, msg, None)
 
                 # validate pre_transitions- and pre_response_processing
                 for place, functions in zip(
                     (UserFunctionType.TRANSITION_PROCESSING, UserFunctionType.RESPONSE_PROCESSING),
-                    (node.pre_transitions_processing, node.pre_response_processing)
+                    (node.pre_transitions_processing, node.pre_response_processing),
                 ):
                     for name, function in functions.items():
                         if callable(function):
-                            error_msgs += validate_callable(
+                            error_msgs += _validate_callable(
                                 function,
                                 place,
                                 flow_name,
@@ -261,7 +261,7 @@ class Script(BaseModel, extra="forbid"):
                                 f"got type(pre_{place}_processing)={type(function)}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
-                            error_handler(error_msgs, msg, None)
+                            _error_handler(error_msgs, msg, None)
         if error_msgs:
             raise ValueError(
                 f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
