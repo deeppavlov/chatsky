@@ -61,9 +61,10 @@ def types_equal(signature_type: Any, expected_type: Type) -> bool:
     :param expected_type: expected type - a class.
     :return: true if types are equal, false otherwise.
     """
+    expected_str = expected_type.__name__ if hasattr(expected_type, "__name__") else str(expected_type)
     signature_empty = signature_type == inspect.Parameter.empty
     types_match = signature_type == expected_type
-    expected_string = signature_type == expected_type.__name__
+    expected_string = signature_type == expected_str
     return signature_empty or types_match or expected_string
 
 
