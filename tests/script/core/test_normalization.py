@@ -12,7 +12,7 @@ from dff.script import (
     Context,
     Script,
     Node,
-    NodeLabelType,
+    NodeLabel3Type,
     Message,
 )
 from dff.script.labels import repeat
@@ -36,10 +36,10 @@ def create_env() -> Tuple[Context, Pipeline]:
 def test_normalize_label():
     ctx, actor = create_env()
 
-    def true_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabelType:
+    def true_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         return ("flow", "node1", 1)
 
-    def false_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabelType:
+    def false_label_func(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
         return ("flow", "node2", 1)
 
     n_f = normalize_label(true_label_func)
