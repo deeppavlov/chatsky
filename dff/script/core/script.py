@@ -34,6 +34,14 @@ class UserFunctionType(str, Enum):
     TRANSITION_PROCESSING = "pre_transitions_processing"
     RESPONSE_PROCESSING = "pre_response_processing"
 
+USER_FUNCTION_TYPES = {
+    UserFunctionType.LABEL: (("Context", "Pipeline"), "NodeLabel3Type"),
+    UserFunctionType.RESPONSE: (("Context", "Pipeline"), "Message"),
+    UserFunctionType.CONDITION: (("Context", "Pipeline"), "bool"),
+    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), "None"),
+    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), "None"),
+}
+
 
 def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None):
     """
@@ -50,7 +58,7 @@ def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = N
     logger.error(msg, exc_info=exception)
 
 
-def types_equal(signature_type: Any, expected_type: Type) -> bool:
+def types_equal(signature_type: Any, expected_type: str) -> bool:
     """
     This function checks equality of signature type with expected type.
     Three cases are handled. If no signature is present, it is presumed that types are equal.
@@ -61,11 +69,10 @@ def types_equal(signature_type: Any, expected_type: Type) -> bool:
     :param expected_type: expected type - a class.
     :return: true if types are equal, false otherwise.
     """
-    expected_str = expected_type.__name__ if hasattr(expected_type, "__name__") else str(expected_type)
+    signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
     signature_empty = signature_type == inspect.Parameter.empty
-    types_match = signature_type == expected_type
-    expected_string = signature_type == expected_str
-    return signature_empty or types_match or expected_string
+    expected_string = signature_str == expected_type
+    return signature_empty or expected_string
 
 
 
@@ -80,16 +87,6 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
     :param node_label: Node label this function is related to (used for error localization only).
     :return: list of produced error messages.
     """
-    from dff.script.core.context import Context
-    from dff.pipeline.pipeline.pipeline import Pipeline
-
-    USER_FUNCTION_TYPES = {
-        UserFunctionType.LABEL: ((Context, Pipeline), NodeLabel3Type),
-        UserFunctionType.RESPONSE: ((Context, Pipeline), Message),
-        UserFunctionType.CONDITION: ((Context, Pipeline), bool),
-        UserFunctionType.RESPONSE_PROCESSING: ((Context, Pipeline), None),
-        UserFunctionType.TRANSITION_PROCESSING: ((Context, Pipeline), None),
-    }
 
     error_msgs = list()
     signature = inspect.signature(callable)
