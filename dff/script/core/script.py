@@ -199,12 +199,12 @@ class Script(BaseModel, extra="forbid"):
                         norm_flow_label, norm_node_label, _ = norm_label
                         if norm_flow_label not in script.keys():
                             msg = (
-                                f"Flow label {norm_flow_label} can not be found for label={label}, "
+                                f"Flow label {norm_flow_label!r} can not be found for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
                         elif norm_node_label not in script[norm_flow_label].keys():
                             msg = (
-                                f"Node label {norm_node_label} can not be found for label={label}, "
+                                f"Node label {norm_node_label!r} can not be found for label={label}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
                         else:
@@ -267,7 +267,7 @@ class Script(BaseModel, extra="forbid"):
                             error_handler(error_msgs, msg, None)
         if error_msgs:
             raise ValueError(
-                f"Found {len(error_msgs)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
+                f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
             )
         else:
             return script
