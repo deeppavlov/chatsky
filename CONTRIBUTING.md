@@ -114,6 +114,11 @@ poetry run poe test_all
 ```
 for successful execution of this command `Docker` and `docker compose` are required.
 
+To do a quick sanity check without the need to up docker containers or wait for long tests, run
+```bash
+poetry run poe quick_test
+```
+
 To make sure that the code satisfies only the style requirements, run
 ```bash
 poetry run poe lint
