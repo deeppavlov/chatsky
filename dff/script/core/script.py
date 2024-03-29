@@ -84,7 +84,7 @@ def validate_callable(callable: Callable, func_type: UserFunctionType, flow_labe
     from dff.pipeline.pipeline.pipeline import Pipeline
 
     USER_FUNCTION_TYPES = {
-        UserFunctionType.LABEL: ((Context, Pipeline), None),
+        UserFunctionType.LABEL: ((Context, Pipeline), NodeLabelType),
         UserFunctionType.RESPONSE: ((Context, Pipeline), Message),
         UserFunctionType.CONDITION: ((Context, Pipeline), bool),
         UserFunctionType.RESPONSE_PROCESSING: ((Context, Pipeline), None),
