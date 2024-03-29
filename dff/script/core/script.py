@@ -267,7 +267,7 @@ class Script(BaseModel, extra="forbid"):
                             error_handler(error_msgs, msg, None)
         if error_msgs:
             raise ValueError(
-                f"Found {len(error_msgs)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
+                f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
             )
         else:
             return script
