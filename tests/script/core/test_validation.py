@@ -38,7 +38,7 @@ def correct_pre_transition_processor(_: Context, __: Pipeline) -> None:
 
 
 def function_signature_test(message: str, param_number: Dict, param_types: Dict, return_type: Dict):
-    for script, error in map(["param number", "param types", "return type"], [param_number, param_types, return_type]):
+    for script, error in zip([param_number, param_types, return_type], ["param number", "param types", "return type"]):
         try:
             Script(script=script)
             raise Exception(f"can not be passed: {message}: {error}")
