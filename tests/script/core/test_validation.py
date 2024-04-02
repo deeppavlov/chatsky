@@ -35,7 +35,7 @@ def wrong_return_type(_: Context, __: Pipeline) -> float:
     return 1.0
 
 
-def correct_label(_: Context, __: Pipeline) -> "NodeLabel3Type":
+def correct_label(_: Context, __: Pipeline) -> NodeLabel3Type:
     return ("root", "start", 1)
 
 
@@ -110,3 +110,10 @@ def test_processing():
 
     Script(script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": correct_pre_response_processor}}}})
     Script(script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": correct_pre_transition_processor}}}})
+
+
+if __name__ == "__main__":
+    test_labels()
+    test_responses()
+    test_conditions()
+    test_processing()

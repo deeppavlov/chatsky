@@ -73,7 +73,8 @@ def _types_equal(signature_type: Any, expected_type: str) -> bool:
     signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
     signature_empty = signature_type == inspect.Parameter.empty
     expected_string = signature_str == expected_type
-    return signature_empty or expected_string
+    expected_global = str(signature_type) == str(globals().get(expected_type))
+    return signature_empty or expected_string or expected_global
 
 
 def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
@@ -103,16 +104,14 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
         if not _types_equal(param.annotation, arguments_type[idx]):
             msg = (
                 f"Incorrect {idx} parameter annotation of {func_type}={callable.__name__}: "
-                f"should be {arguments_type[idx]} ({type(arguments_type[idx])}), "
-                f"found {param.annotation} ({type(param.annotation)}), "
+                f"should be {arguments_type[idx]} found {param.annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             _error_handler(error_msgs, msg, None)
     if not _types_equal(signature.return_annotation, return_type):
         msg = (
             f"Incorrect return type annotation of {func_type}={callable.__name__}: "
-            f"should be {return_type} ({type(return_type)}), "
-            f"found {signature.return_annotation} ({type(signature.return_annotation)}), "
+            f"should be {return_type} found {signature.return_annotation}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
         _error_handler(error_msgs, msg, None)
