@@ -72,27 +72,19 @@ def test_labels():
 
 
 def test_responses():
-    param_number_script = {"root": { "start": { RESPONSE: { repeat: wrong_param_number } } } }
-    param_types_script = {"root": { "start": { RESPONSE: { repeat: wrong_param_types } } } }
-    return_type_script = {"root": { "start": { RESPONSE: { repeat: wrong_return_type } } } }
+    param_number_script = {"root": { "start": { RESPONSE: wrong_param_number } } }
+    param_types_script = {"root": { "start": { RESPONSE: wrong_param_types } } }
+    return_type_script = {"root": { "start": { RESPONSE: wrong_return_type } } }
     function_signature_test(param_number_script, param_types_script, return_type_script)
-    
-    with pytest.raises(ValidationError, match=r"Expected type of response is") as e:
-        Script(script={"root": { "start": { RESPONSE: { repeat: 7 } } } })
-    assert e
 
-    Script(script={"root": { "start": { RESPONSE: { repeat: correct_response } } } })
+    Script(script={"root": { "start": { RESPONSE: correct_response } } })
 
 
 def test_conditions():
     param_number_script = {"root": { "start": { TRANSITIONS: { ("root", "start", 1): wrong_param_number } } } }
     param_types_script = {"root": { "start": { TRANSITIONS: { ("root", "start", 1): wrong_param_types } } } }
     return_type_script = {"root": { "start": { TRANSITIONS: { ("root", "start", 1): wrong_return_type } } } }
-    function_signature_test("wrong condition function signature", param_number_script, param_types_script, return_type_script)
-    
-    with pytest.raises(ValidationError, match=r"Expected type of condition") as e:
-        Script(script={"root": { "start": { TRANSITIONS: { ("root", "start", 1): 7 } } } })
-    assert e
+    function_signature_test(param_number_script, param_types_script, return_type_script)
 
     Script(script={"root": { "start": { TRANSITIONS: { ("root", "start", 1): correct_condition } } } })
 
@@ -107,14 +99,6 @@ def test_processing():
     param_types_script = {"root": { "start": { PRE_TRANSITIONS_PROCESSING: { "PTP": wrong_param_types } } } }
     return_type_script = {"root": { "start": { PRE_TRANSITIONS_PROCESSING: { "PTP": wrong_return_type } } } }
     function_signature_test(param_number_script, param_types_script, return_type_script)
-    
-    with pytest.raises(ValidationError, match=r"Expected type of pre_response_processing") as e:
-        Script(script={"root": { "start": { PRE_RESPONSE_PROCESSING: { "PRP": 42 } } } })
-    assert e
-
-    with pytest.raises(ValidationError, match=r"Expected type of pre_transitions_processing") as e:
-        Script(script={"root": { "start": { PRE_TRANSITIONS_PROCESSING: { "PTP": 42 } } } })
-    assert e
 
     Script(script={"root": { "start": { PRE_RESPONSE_PROCESSING: { "PRP": correct_pre_response_processor } } } })
     Script(script={"root": { "start": { PRE_TRANSITIONS_PROCESSING: { "PTP": correct_pre_transition_processor } } } })

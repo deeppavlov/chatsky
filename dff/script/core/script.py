@@ -178,7 +178,7 @@ class Script(BaseModel, extra="forbid"):
     @field_validator("script", mode="before")
     @classmethod
     @validate_call
-    def validate_script(cls, script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
+    def validate_script_before(cls, script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
         error_msgs = []
         for flow_name, flow in script.items():
             for node_name, node in flow.items():
@@ -187,7 +187,59 @@ class Script(BaseModel, extra="forbid"):
                 for label in transitions.keys():
                     if callable(label):
                         error_msgs += _validate_callable(label, UserFunctionType.LABEL, flow_name, node_name)
-                    else:
+
+                # validate responses
+                response = node.get("response", None)
+                if callable(response):
+                    error_msgs += _validate_callable(
+                        response,
+                        UserFunctionType.RESPONSE,
+                        flow_name,
+                        node_name,
+                    )
+
+                # validate conditions
+                for label, condition in transitions.items():
+                    if callable(condition):
+                        error_msgs += _validate_callable(
+                            condition,
+                            UserFunctionType.CONDITION,
+                            flow_name,
+                            node_name,
+                        )
+
+                # validate pre_transitions- and pre_response_processing
+                pre_transitions_processing = node.get("pre_transitions_processing", dict())
+                pre_response_processing = node.get("pre_response_processing", dict())
+                for place, functions in zip(
+                    (UserFunctionType.TRANSITION_PROCESSING, UserFunctionType.RESPONSE_PROCESSING),
+                    (pre_transitions_processing, pre_response_processing),
+                ):
+                    for function in functions.values():
+                        if callable(function):
+                            error_msgs += _validate_callable(
+                                function,
+                                place,
+                                flow_name,
+                                node_name,
+                            )
+        if error_msgs:
+            raise ValueError(
+                f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
+            )
+        else:
+            return script
+    
+    @field_validator("script", mode="after")
+    @classmethod
+    @validate_call
+    def validate_script_after(cls, script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
+        error_msgs = []
+        for flow_name, flow in script.items():
+            for node_name, node in flow.items():
+                # validate labeling
+                for label in node.transitions.keys():
+                    if not callable(label):
                         norm_flow_label, norm_node_label, _ = normalize_label(label, flow_name)
                         if norm_flow_label not in script.keys():
                             msg = (
@@ -204,62 +256,6 @@ class Script(BaseModel, extra="forbid"):
                         if msg is not None:
                             _error_handler(error_msgs, msg, None)
 
-                # validate responses
-                response = node.get("response", None)
-                if callable(response):
-                    error_msgs += _validate_callable(
-                        response,
-                        UserFunctionType.RESPONSE,
-                        flow_name,
-                        node_name,
-                    )
-                elif response is not None and not isinstance(response, Message):
-                    msg = (
-                        f"Expected type of response is subclass of {Message}, "
-                        f"got type(response)={type(response)}, "
-                        f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
-                    )
-                    _error_handler(error_msgs, msg, None)
-
-                # validate conditions
-                for label, condition in transitions.items():
-                    if callable(condition):
-                        error_msgs += _validate_callable(
-                            condition,
-                            UserFunctionType.CONDITION,
-                            flow_name,
-                            node_name,
-                        )
-                    else:
-                        msg = (
-                            f"Expected type of condition for label={label} is {Callable}, "
-                            f"got type(condition)={type(condition)}, "
-                            f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
-                        )
-                        _error_handler(error_msgs, msg, None)
-
-                # validate pre_transitions- and pre_response_processing
-                pre_transitions_processing = node.get("pre_transitions_processing", dict())
-                pre_response_processing = node.get("pre_response_processing", dict())
-                for place, functions in zip(
-                    (UserFunctionType.TRANSITION_PROCESSING, UserFunctionType.RESPONSE_PROCESSING),
-                    (pre_transitions_processing, pre_response_processing),
-                ):
-                    for name, function in functions.items():
-                        if callable(function):
-                            error_msgs += _validate_callable(
-                                function,
-                                place,
-                                flow_name,
-                                node_name,
-                            )
-                        else:
-                            msg = (
-                                f"Expected type of {place} {name} is {Callable}, "
-                                f"got type({place})={type(function)}, "
-                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
-                            )
-                            _error_handler(error_msgs, msg, None)
         if error_msgs:
             raise ValueError(
                 f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
