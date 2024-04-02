@@ -175,7 +175,7 @@ class Script(BaseModel, extra="forbid"):
                 script[Keywords.GLOBAL] = {Keywords.GLOBAL: script[Keywords.GLOBAL]}
         return script
 
-    @field_validator("script", mode="after")
+    @field_validator("script", mode="before")
     @classmethod
     @validate_call
     def validate_script(cls, script: Dict[LabelType, Any]) -> Dict[LabelType, Dict[LabelType, Dict[str, Any]]]:
@@ -183,7 +183,8 @@ class Script(BaseModel, extra="forbid"):
         for flow_name, flow in script.items():
             for node_name, node in flow.items():
                 # validate labeling
-                for label in node.transitions.keys():
+                transitions = node.get("transitions", dict())
+                for label in transitions.keys():
                     if callable(label):
                         error_msgs += _validate_callable(label, UserFunctionType.LABEL, flow_name, node_name)
                     else:
@@ -204,23 +205,24 @@ class Script(BaseModel, extra="forbid"):
                             _error_handler(error_msgs, msg, None)
 
                 # validate responses
-                if callable(node.response):
+                response = node.get("response", None)
+                if callable(response):
                     error_msgs += _validate_callable(
-                        node.response,
+                        response,
                         UserFunctionType.RESPONSE,
                         flow_name,
                         node_name,
                     )
-                elif node.response is not None and not isinstance(node.response, Message):
+                elif response is not None and not isinstance(response, Message):
                     msg = (
                         f"Expected type of response is subclass of {Message}, "
-                        f"got type(response)={type(node.response)}, "
+                        f"got type(response)={type(response)}, "
                         f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                     )
                     _error_handler(error_msgs, msg, None)
 
                 # validate conditions
-                for label, condition in node.transitions.items():
+                for label, condition in transitions.items():
                     if callable(condition):
                         error_msgs += _validate_callable(
                             condition,
@@ -237,9 +239,11 @@ class Script(BaseModel, extra="forbid"):
                         _error_handler(error_msgs, msg, None)
 
                 # validate pre_transitions- and pre_response_processing
+                pre_transitions_processing = node.get("pre_transitions_processing", dict())
+                pre_response_processing = node.get("pre_response_processing", dict())
                 for place, functions in zip(
                     (UserFunctionType.TRANSITION_PROCESSING, UserFunctionType.RESPONSE_PROCESSING),
-                    (node.pre_transitions_processing, node.pre_response_processing),
+                    (pre_transitions_processing, pre_response_processing),
                 ):
                     for name, function in functions.items():
                         if callable(function):

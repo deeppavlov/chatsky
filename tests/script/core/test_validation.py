@@ -17,7 +17,7 @@ def wrong_return_type(_: Context, __: Pipeline) -> float:
     return 1.0
 
 
-def correct_label(_: Context, __: Pipeline) -> NodeLabel3Type:
+def correct_label(_: Context, __: Pipeline) -> "NodeLabel3Type":
     return ("root", "start", 1)
 
 
@@ -40,8 +40,8 @@ def correct_pre_transition_processor(_: Context, __: Pipeline) -> None:
 def function_signature_test(message: str, param_number: Dict, param_types: Dict, return_type: Dict):
     for script, error in zip([param_number, param_types, return_type], ["param number", "param types", "return type"]):
         try:
-            Script(script=script)
-            raise Exception(f"can not be passed: {message}: {error}")
+            scr=Script(script=script)
+            raise Exception(f"can not be passed: {message}: {error}: {script} {scr}")
         except ValueError:
             pass
 
@@ -117,3 +117,8 @@ def test_processing():
         pass
     Script(script={"root": { "start": { PRE_RESPONSE_PROCESSING: { "PRP": correct_pre_response_processor } } } })
     Script(script={"root": { "start": { PRE_TRANSITIONS_PROCESSING: { "PTP": correct_pre_transition_processor } } } })
+
+
+
+if __name__ == "__main__":
+    test_labels()
