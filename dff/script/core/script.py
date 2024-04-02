@@ -229,7 +229,7 @@ class Script(BaseModel, extra="forbid"):
             )
         else:
             return script
-    
+
     @field_validator("script", mode="after")
     @classmethod
     @validate_call
