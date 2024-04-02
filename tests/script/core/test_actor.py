@@ -86,7 +86,7 @@ async def test_actor():
     ctx = Context()
     await pipeline.actor(pipeline, ctx)
 
-    # fake label stability # TODO: what does it mean?
+    # fake label stability
     pipeline = Pipeline.from_script(
         {"flow": {"node1": {TRANSITIONS: {fake_label: true()}}}}, start_label=("flow", "node1")
     )
