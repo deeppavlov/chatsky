@@ -255,8 +255,8 @@ class Script(BaseModel, extra="forbid"):
                             )
                         else:
                             msg = (
-                                f"Expected type of pre_{place}_processing {name} is {Callable}, "
-                                f"got type(pre_{place}_processing)={type(function)}, "
+                                f"Expected type of {place} {name} is {Callable}, "
+                                f"got type({place})={type(function)}, "
                                 f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
                             )
                             _error_handler(error_msgs, msg, None)
