@@ -68,9 +68,9 @@ class ParseMode(Enum):
 
 
 class TelegramMessage(Message):
-    ui: Optional[
-        Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]
-    ] = None
+    ui: Optional[Union[TelegramUI, RemoveKeyboard, ReplyKeyboardRemove, ReplyKeyboardMarkup, InlineKeyboardMarkup]] = (
+        None
+    )
     location: Optional[Location] = None
     callback_query: Optional[Union[str, _ClickButton]] = None
     update: Optional[

@@ -245,8 +245,7 @@ class TelegramTesting:  # pragma: no cover
             bot = self.run_bot_loop()
         else:
 
-            async def null():
-                ...  # noqa: E704
+            async def null(): ...  # noqa: E704
 
             bot = nullcontext(null)
 
