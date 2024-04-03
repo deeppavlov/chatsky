@@ -1,5 +1,3 @@
-from typing import Dict
-
 from pydantic import ValidationError
 import pytest
 
@@ -15,12 +13,6 @@ from dff.script import (
     NodeLabel3Type,
 )
 from dff.script.conditions import exact_match
-
-ERROR_MESSAGES = [
-    r"Incorrect parameter number",
-    r"Incorrect \d+ parameter annotation",
-    r"Incorrect return type annotation",
-]
 
 
 def wrong_param_number(number: int) -> float:
@@ -55,65 +47,109 @@ def correct_pre_transition_processor(_: Context, __: Pipeline) -> None:
     pass
 
 
-def function_signature_test(param_number: Dict, param_types: Dict, return_type: Dict):
-    for script, error in zip([param_number, param_types, return_type], ERROR_MESSAGES):
-        with pytest.raises(ValidationError, match=error) as e:
-            Script(script=script)
+class TestLabelValidation:
+    def test_param_number(self):
+        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {wrong_param_number: exact_match(Message("hi"))}}}})
         assert e
 
+    def test_param_types(self):
+        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {wrong_param_types: exact_match(Message("hi"))}}}})
+        assert e
 
-def test_labels():
-    param_number_script = {"root": {"start": {TRANSITIONS: {wrong_param_number: exact_match(Message("hi"))}}}}
-    param_types_script = {"root": {"start": {TRANSITIONS: {wrong_param_types: exact_match(Message("hi"))}}}}
-    return_type_script = {"root": {"start": {TRANSITIONS: {wrong_return_type: exact_match(Message("hi"))}}}}
-    function_signature_test(param_number_script, param_types_script, return_type_script)
+    def test_return_type(self):
+        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {wrong_return_type: exact_match(Message("hi"))}}}})
+        assert e
 
-    with pytest.raises(ValidationError, match=r"Flow label") as e:
-        Script(script={"root": {"start": {TRANSITIONS: {("other", "start", 1): exact_match(Message("hi"))}}}})
-    assert e
+    def test_flow_name(self):
+        with pytest.raises(ValidationError, match=r"Flow label") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {("other", "start", 1): exact_match(Message("hi"))}}}})
+        assert e
 
-    with pytest.raises(ValidationError, match=r"Node label") as e:
-        Script(script={"root": {"start": {TRANSITIONS: {("root", "other", 1): exact_match(Message("hi"))}}}})
-    assert e
+    def test_node_name(self):
+        with pytest.raises(ValidationError, match=r"Node label") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {("root", "other", 1): exact_match(Message("hi"))}}}})
+        assert e
 
-    Script(script={"root": {"start": {TRANSITIONS: {correct_label: exact_match(Message("hi"))}}}})
-
-
-def test_responses():
-    param_number_script = {"root": {"start": {RESPONSE: wrong_param_number}}}
-    param_types_script = {"root": {"start": {RESPONSE: wrong_param_types}}}
-    return_type_script = {"root": {"start": {RESPONSE: wrong_return_type}}}
-    function_signature_test(param_number_script, param_types_script, return_type_script)
-
-    Script(script={"root": {"start": {RESPONSE: correct_response}}})
+    def test_correct_script(self):
+        Script(script={"root": {"start": {TRANSITIONS: {correct_label: exact_match(Message("hi"))}}}})
 
 
-def test_conditions():
-    param_number_script = {"root": {"start": {TRANSITIONS: {("root", "start", 1): wrong_param_number}}}}
-    param_types_script = {"root": {"start": {TRANSITIONS: {("root", "start", 1): wrong_param_types}}}}
-    return_type_script = {"root": {"start": {TRANSITIONS: {("root", "start", 1): wrong_return_type}}}}
-    function_signature_test(param_number_script, param_types_script, return_type_script)
+class TestResponseValidation:
+    def test_param_number(self):
+        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+            Script(script={"root": {"start": {RESPONSE: wrong_param_number}}})
+        assert e
 
-    Script(script={"root": {"start": {TRANSITIONS: {("root", "start", 1): correct_condition}}}})
+    def test_param_types(self):
+        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+            Script(script={"root": {"start": {RESPONSE: wrong_param_types}}})
+        assert e
 
+    def test_return_type(self):
+        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+            Script(script={"root": {"start": {RESPONSE: wrong_return_type}}})
+        assert e
 
-def test_processing():
-    param_number_script = {"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": wrong_param_number}}}}
-    param_types_script = {"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": wrong_param_types}}}}
-    return_type_script = {"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": wrong_return_type}}}}
-    function_signature_test(param_number_script, param_types_script, return_type_script)
-
-    param_number_script = {"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": wrong_param_number}}}}
-    param_types_script = {"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": wrong_param_types}}}}
-    return_type_script = {"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": wrong_return_type}}}}
-    function_signature_test(param_number_script, param_types_script, return_type_script)
-
-    Script(script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": correct_pre_response_processor}}}})
-    Script(script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": correct_pre_transition_processor}}}})
+    def test_correct_script(self):
+        Script(script={"root": {"start": {RESPONSE: correct_response}}})
 
 
-if __name__ == "__main__":
-    test_labels()
-    test_responses()
-    test_conditions()
-    test_processing()
+class TestConditionValidation:
+    def test_param_number(self):
+        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {("root", "start", 1): wrong_param_number}}}})
+        assert e
+
+    def test_param_types(self):
+        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {("root", "start", 1): wrong_param_types}}}})
+        assert e
+
+    def test_return_type(self):
+        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+            Script(script={"root": {"start": {TRANSITIONS: {("root", "start", 1): wrong_return_type}}}})
+        assert e
+
+    def test_correct_script(self):
+        Script(script={"root": {"start": {TRANSITIONS: {("root", "start", 1): correct_condition}}}})
+
+
+class TestProcessingValidation:
+    def test_response_param_number(self):
+        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+            Script(script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": wrong_param_number}}}})
+        assert e
+
+    def test_response_param_types(self):
+        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+            Script(script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": wrong_param_types}}}})
+        assert e
+
+    def test_response_return_type(self):
+        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+            Script(script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": wrong_return_type}}}})
+        assert e
+
+    def test_response_correct_script(self):
+        Script(script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": correct_pre_response_processor}}}})
+
+    def test_transition_param_number(self):
+        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+            Script(script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": wrong_param_number}}}})
+        assert e
+
+    def test_transition_param_types(self):
+        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+            Script(script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": wrong_param_types}}}})
+        assert e
+
+    def test_transition_return_type(self):
+        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+            Script(script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": wrong_return_type}}}})
+        assert e
+
+    def test_transition_correct_script(self):
+        Script(script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": correct_pre_transition_processor}}}})
