@@ -119,6 +119,8 @@ To do a quick sanity check without the need to up docker containers or wait for 
 poetry run poe quick_test
 ```
 
+_There's also quick_test_coverage for quick htmlcov generation, though it is very likely to be incomplete due to deselection of some tests_
+
 To make sure that the code satisfies only the style requirements, run
 ```bash
 poetry run poe lint

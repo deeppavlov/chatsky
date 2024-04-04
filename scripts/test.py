@@ -84,6 +84,10 @@ def quick_test():
     exit(_test(quick=True))
 
 
+def quick_test_coverage():
+    exit(_test(coverage=True, quick=True))
+
+
 @docker_client
 def test_no_cov(docker: Optional[DockerClient]):
     result = _test(False, docker is not None)
