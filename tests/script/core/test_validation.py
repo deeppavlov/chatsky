@@ -55,7 +55,7 @@ class UserFunctionSamples:
 
 class TestLabelValidation:
     def test_param_number(self):
-        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter number") as e:
             Script(
                 script={
                     "root": {
@@ -66,7 +66,7 @@ class TestLabelValidation:
         assert e
 
     def test_param_types(self):
-        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
             Script(
                 script={
                     "root": {
@@ -77,7 +77,7 @@ class TestLabelValidation:
         assert e
 
     def test_return_type(self):
-        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Incorrect return type annotation") as e:
             Script(
                 script={
                     "root": {
@@ -88,12 +88,12 @@ class TestLabelValidation:
         assert e
 
     def test_flow_name(self):
-        with pytest.raises(ValidationError, match=r"Flow label") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Flow label") as e:
             Script(script={"root": {"start": {TRANSITIONS: {("other", "start", 1): exact_match(Message("hi"))}}}})
         assert e
 
     def test_node_name(self):
-        with pytest.raises(ValidationError, match=r"Node label") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Node label") as e:
             Script(script={"root": {"start": {TRANSITIONS: {("root", "other", 1): exact_match(Message("hi"))}}}})
         assert e
 
@@ -105,17 +105,17 @@ class TestLabelValidation:
 
 class TestResponseValidation:
     def test_param_number(self):
-        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter number") as e:
             Script(script={"root": {"start": {RESPONSE: UserFunctionSamples.wrong_param_number}}})
         assert e
 
     def test_param_types(self):
-        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
             Script(script={"root": {"start": {RESPONSE: UserFunctionSamples.wrong_param_types}}})
         assert e
 
     def test_return_type(self):
-        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Incorrect return type annotation") as e:
             Script(script={"root": {"start": {RESPONSE: UserFunctionSamples.wrong_return_type}}})
         assert e
 
@@ -125,7 +125,7 @@ class TestResponseValidation:
 
 class TestConditionValidation:
     def test_param_number(self):
-        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter number") as e:
             Script(
                 script={
                     "root": {"start": {TRANSITIONS: {("root", "start", 1): UserFunctionSamples.wrong_param_number}}}
@@ -134,14 +134,14 @@ class TestConditionValidation:
         assert e
 
     def test_param_types(self):
-        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
             Script(
                 script={"root": {"start": {TRANSITIONS: {("root", "start", 1): UserFunctionSamples.wrong_param_types}}}}
             )
         assert e
 
     def test_return_type(self):
-        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Incorrect return type annotation") as e:
             Script(
                 script={"root": {"start": {TRANSITIONS: {("root", "start", 1): UserFunctionSamples.wrong_return_type}}}}
             )
@@ -153,21 +153,21 @@ class TestConditionValidation:
 
 class TestProcessingValidation:
     def test_response_param_number(self):
-        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter number") as e:
             Script(
                 script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": UserFunctionSamples.wrong_param_number}}}}
             )
         assert e
 
     def test_response_param_types(self):
-        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
             Script(
                 script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": UserFunctionSamples.wrong_param_types}}}}
             )
         assert e
 
     def test_response_return_type(self):
-        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Incorrect return type annotation") as e:
             Script(
                 script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": UserFunctionSamples.wrong_return_type}}}}
             )
@@ -183,7 +183,7 @@ class TestProcessingValidation:
         )
 
     def test_transition_param_number(self):
-        with pytest.raises(ValidationError, match=r"Incorrect parameter number") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter number") as e:
             Script(
                 script={
                     "root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": UserFunctionSamples.wrong_param_number}}}
@@ -192,14 +192,14 @@ class TestProcessingValidation:
         assert e
 
     def test_transition_param_types(self):
-        with pytest.raises(ValidationError, match=r"Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
             Script(
                 script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": UserFunctionSamples.wrong_param_types}}}}
             )
         assert e
 
     def test_transition_return_type(self):
-        with pytest.raises(ValidationError, match=r"Incorrect return type annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Incorrect return type annotation") as e:
             Script(
                 script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": UserFunctionSamples.wrong_return_type}}}}
             )
