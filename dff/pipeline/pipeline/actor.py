@@ -76,11 +76,9 @@ class Actor:
         condition_handler: Optional[Callable] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
-        # script evaluation
         self.script = script if isinstance(script, Script) else Script(script=script)
         self.label_priority = label_priority
 
-        # node labels evaluation
         self.start_label = normalize_label(start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
