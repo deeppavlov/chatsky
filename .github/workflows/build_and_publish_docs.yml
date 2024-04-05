@@ -25,9 +25,7 @@ jobs:
           fetch-depth: 0
       - run: |
           git remote show origin
-          git pull origin dev
           git checkout dev
-          git pull origin master
           git checkout master
           git branch --all
 
