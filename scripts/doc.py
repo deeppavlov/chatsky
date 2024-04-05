@@ -7,13 +7,12 @@ import dotenv
 import scripts.patch_sphinx  # noqa: F401
 import sphinx.ext.apidoc as apidoc
 import sphinx.cmd.build as build
+from sphinx_polyversion.main import main as poly_main
 from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .utils import docker_client
 from .clean import clean_docs
-
-from sphinx_polyversion.main import main as poly_main
 
 
 def _build_drawio(docker: DockerClient):
