@@ -2,7 +2,6 @@ import os
 import sys
 import re
 import importlib.metadata
-import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
@@ -18,8 +17,6 @@ from sphinx_polyversion.git import GitRef
 
 data = load(globals())  # adds variables `current` and `revisions`
 current: GitRef = data['current']
-print("current is: ", current)
-print("current[0] is: ", current[0])
 
 _distribution_metadata = importlib.metadata.metadata('dff')
 
@@ -119,13 +116,7 @@ html_css_files = [
     "css/custom.css",
 ]
 
-
-# VERSIONING
-# Define the json_url for our version switcher.
-json_url = "https://raw.githubusercontent.com/ZergLev/dialog_flow_framework/sphinx_multiversion_test/docs/source/_static/switcher.json"
-# json_url = "docs/source/_static/switcher.json"
-# json_url = "/docs/source/_static/switcher.json"
-# json_url = "https://www.wikipedia.org/"
+switcher_url = "https://raw.githubusercontent.com/ZergLev/dialog_flow_framework/sphinx_multiversion_test/docs/source/_static/switcher.json"
 
 # Theme options
 html_theme_options = {
@@ -156,12 +147,12 @@ html_theme_options = {
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
     "switcher": {
-        "json_url": json_url,
-        # "version_match" : version,
+        "json_url": switcher_url,
         "version_match": current[0],
     },
     "navbar_start": ["navbar-logo", "version-switcher"],
 }
+
 
 favicons = [
     {"href": "images/logo-dff.svg"},

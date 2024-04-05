@@ -57,7 +57,6 @@ def docs(docker: Optional[DockerClient]):
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
         poly_path = "docs/source/poly.py"
         poly_main([poly_path, poly_path])
-        """Possible TO-DO: Add version dependent poly.py pathfile variable. Maybe in a separate file?"""
         exit(result)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
