@@ -116,7 +116,7 @@ html_css_files = [
     "css/custom.css",
 ]
 
-switcher_url = "https://raw.githubusercontent.com/ZergLev/dialog_flow_framework/feat/sphinx_multiversion/docs/source/_static/switcher.json"
+switcher_url = "https://raw.githubusercontent.com/ZergLev/dialog_flow_framework/master/docs/source/_static/switcher.json"
 
 # Theme options
 html_theme_options = {
