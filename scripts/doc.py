@@ -13,6 +13,8 @@ from python_on_whales import DockerClient
 from .utils import docker_client
 from .clean import clean_docs
 
+from sphinx_polyversion.main import main as poly_main
+
 
 def _build_drawio(docker: DockerClient):
     if len(docker.image.list("rlespinasse/drawio-export")) == 0:
@@ -53,7 +55,9 @@ def docs(docker: Optional[DockerClient]):
         _build_drawio(docker)
         result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "dff"])
         result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
-        result += build.build_main(["-b", "html", "-W", "--keep-going", "docs/source", "docs/build"])
+        poly_path = "docs/source/poly.py"
+        poly_main([poly_path, poly_path])
+        """Possible TO-DO: Add version dependent poly.py pathfile variable. Maybe in a separate file?"""
         exit(result)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")

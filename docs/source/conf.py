@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import importlib.metadata
+import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
@@ -10,8 +11,15 @@ from utils.notebook import py_percent_to_notebook  # noqa: E402
 from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
 from utils.link_misc_files import link_misc_files  # noqa: E402
 from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from sphinx_polyversion import load
+from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
+
+data = load(globals())  # adds variables `current` and `revisions`
+current: GitRef = data['current']
+print("current is: ", current)
+print("current[0] is: ", current[0])
 
 _distribution_metadata = importlib.metadata.metadata('dff')
 
@@ -111,6 +119,14 @@ html_css_files = [
     "css/custom.css",
 ]
 
+
+# VERSIONING
+# Define the json_url for our version switcher.
+json_url = "https://raw.githubusercontent.com/ZergLev/dialog_flow_framework/sphinx_multiversion_test/docs/source/_static/switcher.json"
+# json_url = "docs/source/_static/switcher.json"
+# json_url = "/docs/source/_static/switcher.json"
+# json_url = "https://www.wikipedia.org/"
+
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
@@ -139,8 +155,13 @@ html_theme_options = {
         },
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
+    "switcher": {
+        "json_url": json_url,
+        # "version_match" : version,
+        "version_match": current[0],
+    },
+    "navbar_start": ["navbar-logo", "version-switcher"],
 }
-
 
 favicons = [
     {"href": "images/logo-dff.svg"},

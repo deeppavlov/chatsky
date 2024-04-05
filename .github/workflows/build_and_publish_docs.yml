@@ -21,6 +21,15 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
+      - run: |
+          git remote show origin
+          git pull origin dev
+          git checkout dev
+          git pull origin master
+          git checkout master
+          git branch --all
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
@@ -43,8 +52,10 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
+          ls
+          git branch
           python -m poetry run poe docs
-
+        
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
@@ -66,7 +77,7 @@ jobs:
           retention-days: 3
 
       - name: deploy website
-        if: ${{ github.ref == 'refs/heads/master' }}
+        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages

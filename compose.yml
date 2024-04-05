@@ -63,12 +63,6 @@ services:
       - 27017:27017
     volumes:
       - mongo-data:/data/db
-    healthcheck:
-      test: mongosh --norc --quiet --eval 'db.runCommand("ping").ok' localhost:27017/test
-      interval: 5s
-      timeout: 10s
-      retries: 5
-      start_period: 30s
 
   ydb:
     env_file: [.env_file]

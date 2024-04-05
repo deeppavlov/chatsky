@@ -163,6 +163,7 @@ sphinxcontrib-httpdomain = "*"
 sphinx-autodoc-typehints = "*"
 jupytext = "*"
 jupyter = "*"
+sphinx-polyversion = {git = "https://github.com/ZergLev/sphinx-polyversion.git", branch = "main"}
 
 
 
