@@ -42,7 +42,7 @@ def env_vars():
     for arg in env_variables:
         env_variables[arg] = os.getenv(arg)
 
-        if env_variables[arg] is None:
+        if not env_variables[arg]:
             pytest.skip(f"`{arg}` is not set", allow_module_level=True)
 
     yield env_variables
