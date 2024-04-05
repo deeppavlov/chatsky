@@ -1,27 +1,12 @@
 [
     {
-        "name": "master(stable)",
-        "version": "2.1",
-        "url": "file:///home/sergey/DialogFlowFramework/SphinxMultiversioning/dialog_flow_framework/docs/build/master/index.html"
+        "name": "stable(master)",
+        "version": "master",
+        "url": "https://zerglev.github.io/dialog_flow_framework/master/index.html"
     },
     {
+        "name": "latest(dev)",
         "version": "dev",
-        "url": "file:///home/sergey/DialogFlowFramework/SphinxMultiversioning/dialog_flow_framework/docs/build/dev/index.html"
-    },
-    {
-        "version": "test_branch",
-        "url": "file:///home/sergey/DialogFlowFramework/SphinxMultiversioning/dialog_flow_framework/docs/build/test_branch_test/index.html"
-    },
-    {
-        "version": "test_branch_2",
-        "url": "file:///home/sergey/DialogFlowFramework/SphinxMultiversioning/dialog_flow_framework/docs/build/test_branch_2/index.html"
-    },
-    {
-        "version": "feat/sphinx_multiversion",
-        "url": "file:///home/sergey/DialogFlowFramework/SphinxMultiversioning/dialog_flow_framework/docs/build/feat/sphinx_multiversion/index.html"
-    },
-    {
-        "version": "sphinx_multiversion_test",
-        "url": "file:///home/sergey/DialogFlowFramework/SphinxMultiversioning/dialog_flow_framework/docs/build/sphinx_multiversion_test/index.html"
+        "url": "https://zerglev.github.io/dialog_flow_framework/dev/index.html"
     }
 ]
