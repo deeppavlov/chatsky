@@ -3,13 +3,15 @@ from datetime import datetime
 from sphinx_polyversion import *
 from sphinx_polyversion.git import *
 from sphinx_polyversion.pyvenv import Poetry
-from sphinx_polyversion.sphinx import SphinxBuilder
+# from sphinx_polyversion.sphinx import SphinxBuilder
+from .poly_builder import DffSphinxBuilder
 
 #: Regex matching the branches to build docs for
 BRANCH_REGEX = r"(dev|master|test_branch|test_branch_2|feat/sphinx_multiversion|sphinx_multiversion_test)"
 
 #: Regex matching the tags to build docs for
-TAG_REGEX = r"-"
+TAG_REGEX = r"(0\.\d*[7-9]\..*)|(\d*[1-9]\..*)"
+# That was just 0.7+, need to change that to 0.8 on release.
 
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
@@ -52,7 +54,7 @@ DefaultDriver(
         buffer_size=1 * 10**9,  # 1 GB
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
-    builder=SphinxBuilder(src, args=SPHINX_ARGS),
+    builder=DffSphinxBuilder(src, args=SPHINX_ARGS),
     env=Poetry.factory(args=POETRY_ARGS),
     template_dir=root / src / "templates",
     static_dir=root / src / "static",
