@@ -88,7 +88,7 @@ toy_script = {
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
-            RESPONSE: rsp.choice(
+            RESPONSE: rsp.random_choice(
                 [
                     Message("Hi, what is up?"),
                     Message("Hello, how are you?"),
