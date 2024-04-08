@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import Enum
 import inspect
 import logging
-from typing import Callable, List, Optional, Any, Dict, Union, TYPE_CHECKING
+from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, field_validator, validate_call
 
@@ -36,15 +36,15 @@ class UserFunctionType(str, Enum):
 
 
 USER_FUNCTION_TYPES = {
-    UserFunctionType.LABEL: (("Context", "Pipeline"), "NodeLabel3Type"),
-    UserFunctionType.RESPONSE: (("Context", "Pipeline"), "Message"),
-    UserFunctionType.CONDITION: (("Context", "Pipeline"), "bool"),
-    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), "None"),
-    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), "None"),
+    UserFunctionType.LABEL: (("Context", "Pipeline"), ("NodeLabel3Type", "NodeLabel2Type", "NodeLabel1Type", "str", "NodeLabelTupledType", "NodeLabelType")),
+    UserFunctionType.RESPONSE: (("Context", "Pipeline"), ("Message",)),
+    UserFunctionType.CONDITION: (("Context", "Pipeline"), ("bool",)),
+    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), ("None",)),
+    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), ("None",)),
 }
 
 
-def _types_equal(signature_type: Any, expected_type: str) -> bool:
+def _types_equal(signature_type: Any, expected_types: Tuple[str]) -> bool:
     """
     This function checks equality of signature type with expected type.
     Three cases are handled. If no signature is present, it is presumed that types are equal.
@@ -55,11 +55,14 @@ def _types_equal(signature_type: Any, expected_type: str) -> bool:
     :param expected_type: expected type - a class.
     :return: true if types are equal, false otherwise.
     """
-    signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
-    signature_empty = signature_type == inspect.Parameter.empty
-    expected_string = signature_str == expected_type
-    expected_global = str(signature_type) == str(globals().get(expected_type))
-    return signature_empty or expected_string or expected_global
+    for expected_type in expected_types:
+        signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
+        signature_empty = signature_type == inspect.Parameter.empty
+        expected_string = signature_str == expected_type
+        expected_global = str(signature_type) == str(globals().get(expected_type))
+        if signature_empty or expected_string or expected_global:
+            return True
+    return False
 
 
 def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
