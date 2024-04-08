@@ -126,7 +126,7 @@ def _get_label_by_index_shifting(
     labels = list(pipeline.script.get(flow_label, {}))
 
     if node_label not in labels:
-        return (*pipeline.actor.fallback_label[:2], current_priority)
+        raise RuntimeError()
 
     label_index = labels.index(node_label)
     label_index = label_index + 1 if increment_flag else label_index - 1
