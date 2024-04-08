@@ -4,7 +4,7 @@ from sphinx_polyversion import *
 from sphinx_polyversion.git import *
 from sphinx_polyversion.pyvenv import Poetry
 # from sphinx_polyversion.sphinx import SphinxBuilder
-from .poly_builder import DffSphinxBuilder
+from docs.source.builder import DffSphinxBuilder
 
 #: Regex matching the branches to build docs for
 BRANCH_REGEX = r"(dev|master|test_branch|test_branch_2|feat/sphinx_multiversion|sphinx_multiversion_test)"
@@ -40,6 +40,7 @@ MOCK = False
 
 # Load overrides read from commandline to global scope
 apply_overrides(globals())
+
 # Determine repository root directory
 root = Git.root(Path(__file__).parent)
 src = Path(SOURCE_DIR)

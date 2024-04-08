@@ -7,12 +7,13 @@ import dotenv
 import scripts.patch_sphinx  # noqa: F401
 import sphinx.ext.apidoc as apidoc
 import sphinx.cmd.build as build
-from sphinx_polyversion.main import main as poly_main
 from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .utils import docker_client
 from .clean import clean_docs
+
+from sphinx_polyversion.main import main as poly_main
 
 
 def _build_drawio(docker: DockerClient):
@@ -52,11 +53,15 @@ def docs(docker: Optional[DockerClient]):
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         _build_drawio(docker)
-        result = apidoc.main(["-e", "-E", "-f", "-o", "docs/source/apiref", "dff"])
-        result += build.make_main(["-M", "clean", "docs/source", "docs/build"])
+	#build_drawio should be called in all revisions and I don't know how yet
+        result = build.make_main(["-M", "clean", "docs/source", "docs/build"])
         poly_path = "docs/source/poly.py"
         poly_main([poly_path, poly_path])
         exit(result)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
         exit(1)
+# Functions to be called from DffSphinxBuilder before build
+def dff_funcs(source_dir: str):
+    apiref_dir = source_dir + "/apiref"
+    apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "dff"])
