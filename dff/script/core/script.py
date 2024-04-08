@@ -44,21 +44,6 @@ USER_FUNCTION_TYPES = {
 }
 
 
-def _error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None):
-    """
-    This function handles errors during :py:class:`~dff.script.Script` validation.
-
-    :param error_msgs: List that contains error messages. :py:func:`~dff.script.error_handler`
-        adds every next error message to that list.
-    :param msg: Error message which is to be added into `error_msgs`.
-    :param exception: Invoked exception. If it has been set, it is used to obtain logging traceback.
-        Defaults to `None`.
-    :param logging_flag: The flag which defines whether logging is necessary. Defaults to `True`.
-    """
-    error_msgs.append(msg)
-    logger.error(msg, exc_info=exception)
-
-
 def _types_equal(signature_type: Any, expected_type: str) -> bool:
     """
     This function checks equality of signature type with expected type.
@@ -99,22 +84,23 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
             f"should be {len(arguments_type)}, found {len(params)}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
-        _error_handler(error_msgs, msg, None)
+        error_msgs += msg
     for idx, param in enumerate(params):
         if not _types_equal(param.annotation, arguments_type[idx]):
             msg = (
-                f"Incorrect {idx} parameter annotation of {func_type}={callable.__name__}: "
+                f"Incorrect parameter annotation for parameter #{idx + 1} "
+                f" of {func_type}={callable.__name__}: "
                 f"should be {arguments_type[idx]} found {param.annotation}, "
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
-            _error_handler(error_msgs, msg, None)
+            error_msgs += msg
     if not _types_equal(signature.return_annotation, return_type):
         msg = (
             f"Incorrect return type annotation of {func_type}={callable.__name__}: "
             f"should be {return_type} found {signature.return_annotation}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
-        _error_handler(error_msgs, msg, None)
+        error_msgs += msg
     return error_msgs
 
 
@@ -253,7 +239,7 @@ class Script(BaseModel, extra="forbid"):
                         else:
                             msg = None
                         if msg is not None:
-                            _error_handler(error_msgs, msg, None)
+                            error_msgs += msg
 
         if error_msgs:
             raise ValueError(
