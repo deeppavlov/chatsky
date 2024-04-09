@@ -62,6 +62,6 @@ def docs(docker: Optional[DockerClient]):
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
         exit(1)
 # Functions to be called from DffSphinxBuilder before build
-def dff_funcs(source_dir: str):
-    apiref_dir = source_dir + "/apiref"
+def dff_funcs(root_dir: str):
+    apiref_dir = root_dir + "/docs/source/apiref"
     apidoc.main(["-e", "-E", "-f", "-o", apiref_dir, "dff"])
