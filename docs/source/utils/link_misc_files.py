@@ -14,7 +14,7 @@ def create_file_link(source: Path, destination: Path):
     destination.symlink_to(source.resolve(), False)
 
 
-def link_misc_files(files: Iterable[str]):
+def link_misc_files(files: Iterable[str], root_dir: Path):
     """
     Create links inside the `docs/source/_misc` directory.
 
@@ -22,4 +22,4 @@ def link_misc_files(files: Iterable[str]):
     """
     for file_name in files:
         file = Path(file_name)
-        create_file_link(file, Path("docs/source/_misc") / file.name)
+        create_file_link(root_dir / file, root_dir / Path("docs/source/_misc") / file.name)
