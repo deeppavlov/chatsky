@@ -43,15 +43,6 @@ from dff.script.core.message import (
     PollOption,
     Video,
 )
-from .attachments import (
-    TelegramContact,
-    TelegramPoll,
-    TelegramAudio,
-    TelegramVideo,
-    TelegramAnimation,
-    TelegramImage,
-    TelegramDocument,
-)
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
@@ -82,7 +73,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
             message.attachments += [Location(latitude=update.location.latitude, longitude=update.location.longitude)]
         if update.contact is not None:
             message.attachments += [
-                TelegramContact(
+                Contact(
                     phone_number=update.contact.phone_number,
                     first_name=update.contact.first_name,
                     last_name=update.contact.last_name,
@@ -100,7 +91,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
             ]
         if update.poll is not None:
             message.attachments += [
-                TelegramPoll(
+                Poll(
                     question=update.poll.question,
                     options=[PollOption(text=option.text, votes=option.voter_count) for option in update.poll.options],
                     is_closed=update.poll.is_closed,
@@ -115,7 +106,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.audio is not None:
             thumbnail = Image(id=update.audio.thumbnail.file_id, title=update.audio.thumbnail.file_unique_id) if update.audio.thumbnail is not None else None
             message.attachments += [
-                TelegramAudio(
+                Audio(
                     id=update.audio.file_id,
                     title=update.audio.file_unique_id,
                     duration=update.audio.duration,
@@ -128,7 +119,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.video is not None:
             thumbnail = Image(id=update.video.thumbnail.file_id, title=update.video.thumbnail.file_unique_id) if update.video.thumbnail is not None else None
             message.attachments += [
-                TelegramVideo(
+                Video(
                     id=update.video.file_id,
                     title=update.video.file_unique_id,
                     width=update.video.width,
@@ -142,7 +133,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.animation is not None:
             thumbnail = Image(id=update.animation.thumbnail.file_id, title=update.animation.thumbnail.file_unique_id) if update.animation.thumbnail is not None else None
             message.attachments += [
-                TelegramAnimation(
+                Animation(
                     id=update.animation.file_id,
                     title=update.animation.file_unique_id,
                     width=update.animation.width,
@@ -155,7 +146,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
             ]
         if len(update.photo) > 0:
             message.attachments += [
-                TelegramImage(
+                Image(
                     id=picture.file_id,
                     title=picture.file_unique_id,
                     width=picture.width,
@@ -165,7 +156,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.document is not None:
             thumbnail = Image(id=update.document.thumbnail.file_id, title=update.document.thumbnail.file_unique_id) if update.document.thumbnail is not None else None
             message.attachments += [
-                TelegramDocument(
+                Document(
                     id=update.document.file_id,
                     title=update.document.file_unique_id,
                     file_name=update.document.file_name,
