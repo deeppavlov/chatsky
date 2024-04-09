@@ -53,5 +53,5 @@ def setup(root_dir: str, output_dir: str):
             ("dff.utils.turn_caching", "Caching"),
             ("dff.utils.db_benchmark", "DB Benchmark"),
         ],
-        root_dir=root_dir,
+        source_dir=(root_dir + "/docs/source"),
     )
