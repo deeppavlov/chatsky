@@ -119,9 +119,7 @@ class TestLabelValidation:
 
     def test_correct_script(self):
         for correct_label in UserFunctionSamples.CorrectLabels.correct_labels():
-            Script(
-                script={"root": {"start": {TRANSITIONS: {correct_label: exact_match(Message("hi"))}}}}
-            )
+            Script(script={"root": {"start": {TRANSITIONS: {correct_label: exact_match(Message("hi"))}}}})
 
 
 class TestResponseValidation:
