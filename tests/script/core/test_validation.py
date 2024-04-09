@@ -78,8 +78,8 @@ class TestLabelValidation:
 
     def test_return_type(self):
         with pytest.raises(
-                ValidationError,
-                match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': should be one of"
+            ValidationError,
+            match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': should be one of",
         ) as e:
             Script(
                 script={
@@ -119,9 +119,9 @@ class TestResponseValidation:
 
     def test_return_type(self):
         with pytest.raises(
-                ValidationError,
-                match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
-                      r"should be (?!one of)"
+            ValidationError,
+            match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
+            r"should be (?!one of)",
         ) as e:
             Script(script={"root": {"start": {RESPONSE: UserFunctionSamples.wrong_return_type}}})
         assert e
@@ -149,9 +149,9 @@ class TestConditionValidation:
 
     def test_return_type(self):
         with pytest.raises(
-                ValidationError,
-                match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
-                      r"should be (?!one of)"
+            ValidationError,
+            match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
+            r"should be (?!one of)",
         ) as e:
             Script(
                 script={"root": {"start": {TRANSITIONS: {("root", "start", 1): UserFunctionSamples.wrong_return_type}}}}
@@ -179,9 +179,9 @@ class TestProcessingValidation:
 
     def test_response_return_type(self):
         with pytest.raises(
-                ValidationError,
-                match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
-                      r"should be (?!one of)"
+            ValidationError,
+            match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
+            r"should be (?!one of)",
         ) as e:
             Script(
                 script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": UserFunctionSamples.wrong_return_type}}}}
@@ -215,9 +215,9 @@ class TestProcessingValidation:
 
     def test_transition_return_type(self):
         with pytest.raises(
-                ValidationError,
-                match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
-                      r"should be (?!one of)"
+            ValidationError,
+            match=r"Found 1 error:[\w\W]*Incorrect return type annotation of 'wrong_return_type': "
+            r"should be (?!one of)",
         ) as e:
             Script(
                 script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": UserFunctionSamples.wrong_return_type}}}}
