@@ -44,7 +44,7 @@ USER_FUNCTION_TYPES = {
 }
 
 
-def _types_equal(signature_type: Any, expected_types: Tuple[str]) -> bool:
+def _types_equal(signature_type: Any, expected_type: str) -> bool:
     """
     This function checks equality of signature type with expected type.
     Three cases are handled. If no signature is present, it is presumed that types are equal.
@@ -55,14 +55,11 @@ def _types_equal(signature_type: Any, expected_types: Tuple[str]) -> bool:
     :param expected_type: expected type - a class.
     :return: true if types are equal, false otherwise.
     """
-    for expected_type in expected_types:
-        signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
-        signature_empty = signature_type == inspect.Parameter.empty
-        expected_string = signature_str == expected_type
-        expected_global = str(signature_type) == str(globals().get(expected_type))
-        if signature_empty or expected_string or expected_global:
-            return True
-    return False
+    signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
+    signature_empty = signature_type == inspect.Parameter.empty
+    expected_string = signature_str == expected_type
+    expected_global = str(signature_type) == str(globals().get(expected_type))
+    return signature_empty or expected_string or expected_global
 
 
 def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
@@ -79,7 +76,7 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
 
     error_msgs = list()
     signature = inspect.signature(callable)
-    arguments_type, return_type = USER_FUNCTION_TYPES[func_type]
+    arguments_type, return_types = USER_FUNCTION_TYPES[func_type]
     params = list(signature.parameters.values())
     if len(params) != len(arguments_type):
         msg = (
@@ -97,10 +94,13 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
                 f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
             )
             error_msgs.append(msg)
-    if not _types_equal(signature.return_annotation, return_type):
+    for potential_type in return_types:
+        if _types_equal(signature.return_annotation, potential_type):
+            break
+    else:
         msg = (
             f"Incorrect return type annotation of {func_type}={callable.__name__}: "
-            f"should be {return_type} found {signature.return_annotation}, "
+            f"should be one of {return_types} found {signature.return_annotation}, "
             f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
         )
         error_msgs.append(msg)
