@@ -38,7 +38,7 @@ class UserFunctionType(str, Enum):
 USER_FUNCTION_TYPES = {
     UserFunctionType.LABEL: (
         ("Context", "Pipeline"),
-        ("NodeLabel3Type", "NodeLabel2Type", "NodeLabel1Type", "str", "NodeLabelTupledType", "NodeLabelType"),
+        ("NodeLabel3Type", "NodeLabel2Type", "NodeLabel1Type", "str", "NodeLabelTupledType", "NodeLabelType", "Tuple[str, str, float]", "Tuple[str, str]", "Tuple[str, float]"),
     ),
     UserFunctionType.RESPONSE: (("Context", "Pipeline"), ("Message",)),
     UserFunctionType.CONDITION: (("Context", "Pipeline"), ("bool",)),

@@ -1,3 +1,5 @@
+from typing import Tuple
+
 from pydantic import ValidationError
 import pytest
 
@@ -32,9 +34,24 @@ class UserFunctionSamples:
     def wrong_return_type(_: Context, __: Pipeline) -> float:
         return 1.0
 
-    @staticmethod
-    def correct_label(_: Context, __: Pipeline) -> NodeLabel3Type:
-        return ("root", "start", 1)
+    class CorrectLabels:
+        @staticmethod
+        def correct_labels():
+            for method in UserFunctionSamples.CorrectLabels.__dict__:
+                if method.startswith("correct_label_"):
+                    yield getattr(UserFunctionSamples.CorrectLabels, method)
+
+        @staticmethod
+        def correct_label_1(_: Context, __: Pipeline) -> str:
+            return "start"
+
+        @staticmethod
+        def correct_label_2(_: Context, __: Pipeline) -> NodeLabel3Type:
+            return ("root", "start", 1)
+
+        @staticmethod
+        def correct_label_3(_: Context, __: Pipeline) -> Tuple[str, str]:
+            return ("root", "start")
 
     @staticmethod
     def correct_response(_: Context, __: Pipeline) -> Message:
@@ -101,9 +118,10 @@ class TestLabelValidation:
         assert e
 
     def test_correct_script(self):
-        Script(
-            script={"root": {"start": {TRANSITIONS: {UserFunctionSamples.correct_label: exact_match(Message("hi"))}}}}
-        )
+        for correct_label in UserFunctionSamples.CorrectLabels.correct_labels():
+            Script(
+                script={"root": {"start": {TRANSITIONS: {correct_label: exact_match(Message("hi"))}}}}
+            )
 
 
 class TestResponseValidation:
