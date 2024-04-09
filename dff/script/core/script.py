@@ -59,7 +59,7 @@ def _types_equal(signature_type: Any, expected_types: Tuple[str]) -> bool:
         signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
         signature_empty = signature_type == inspect.Parameter.empty
         expected_string = signature_str == expected_type
-        expected_global = str(signature_type) == str(globals().get(expected_type))
+        expected_global = str(signature_type).lower() == str(globals().get(expected_type)).lower()
         if signature_empty or expected_string or expected_global:
             return True
     return False
