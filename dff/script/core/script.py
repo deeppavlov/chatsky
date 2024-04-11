@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import Enum
 import inspect
 import logging
-from typing import Callable, List, Optional, Any, Dict, Union, TYPE_CHECKING
+from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, field_validator, validate_call
 
@@ -35,12 +35,12 @@ class UserFunctionType(str, Enum):
     RESPONSE_PROCESSING = "pre_response_processing"
 
 
-USER_FUNCTION_TYPES = {
-    UserFunctionType.LABEL: (("Context", "Pipeline"), NodeLabelType),
-    UserFunctionType.RESPONSE: (("Context", "Pipeline"), Message),
-    UserFunctionType.CONDITION: (("Context", "Pipeline"), bool),
-    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), None),
-    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), None),
+USER_FUNCTION_TYPES: Dict[UserFunctionType, Tuple[Tuple[str, ...], str]] = {
+    UserFunctionType.LABEL: (("Context", "Pipeline"), "NodeLabelType"),
+    UserFunctionType.RESPONSE: (("Context", "Pipeline"), "Message"),
+    UserFunctionType.CONDITION: (("Context", "Pipeline"), "bool"),
+    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), "None"),
+    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), "None"),
 }
 
 
@@ -76,7 +76,7 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
 
     error_msgs = list()
     signature = inspect.signature(callable)
-    arguments_type, return_types = USER_FUNCTION_TYPES[func_type]
+    arguments_type, return_type = USER_FUNCTION_TYPES[func_type]
     params = list(signature.parameters.values())
     if len(params) != len(arguments_type):
         msg = (
@@ -94,16 +94,10 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
                 f"Error found at {(flow_label, node_label)!r}."
             )
             error_msgs.append(msg)
-    for potential_type in return_types:
-        if _types_equal(signature.return_annotation, potential_type):
-            break
-    else:
-        expected_type_message = (
-            f"should be one of {return_types!r}" if len(return_types) > 1 else f"should be {return_types[0]!r}"
-        )
+    if not _types_equal(signature.return_annotation, return_type):
         msg = (
             f"Incorrect return type annotation of {callable.__name__!r}: "
-            f"{expected_type_message}, not {signature.return_annotation}. "
+            f"should be {return_type!r}, not {signature.return_annotation}. "
             f"Error found at {(flow_label, node_label)!r}."
         )
         error_msgs.append(msg)
