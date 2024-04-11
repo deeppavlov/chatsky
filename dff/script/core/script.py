@@ -11,7 +11,7 @@ from __future__ import annotations
 from enum import Enum
 import inspect
 import logging
-from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECKING
+from typing import Callable, List, Optional, Any, Dict, Union, TYPE_CHECKING
 
 from pydantic import BaseModel, field_validator, validate_call
 
@@ -36,15 +36,15 @@ class UserFunctionType(str, Enum):
 
 
 USER_FUNCTION_TYPES = {
-    UserFunctionType.LABEL: (("Context", "Pipeline"), ("NodeLabel3Type", "NodeLabel2Type", "NodeLabel1Type", "str", "NodeLabelTupledType", "NodeLabelType")),
-    UserFunctionType.RESPONSE: (("Context", "Pipeline"), ("Message",)),
-    UserFunctionType.CONDITION: (("Context", "Pipeline"), ("bool",)),
-    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), ("None",)),
-    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), ("None",)),
+    UserFunctionType.LABEL: (("Context", "Pipeline"), NodeLabelType),
+    UserFunctionType.RESPONSE: (("Context", "Pipeline"), Message),
+    UserFunctionType.CONDITION: (("Context", "Pipeline"), bool),
+    UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), None),
+    UserFunctionType.TRANSITION_PROCESSING: (("Context", "Pipeline"), None),
 }
 
 
-def _types_equal(signature_type: Any, expected_types: Tuple[str]) -> bool:
+def _types_equal(signature_type: Any, expected_type: str) -> bool:
     """
     This function checks equality of signature type with expected type.
     Three cases are handled. If no signature is present, it is presumed that types are equal.
@@ -55,14 +55,11 @@ def _types_equal(signature_type: Any, expected_types: Tuple[str]) -> bool:
     :param expected_type: expected type - a class.
     :return: true if types are equal, false otherwise.
     """
-    for expected_type in expected_types:
-        signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
-        signature_empty = signature_type == inspect.Parameter.empty
-        expected_string = signature_str == expected_type
-        expected_global = str(signature_type).lower() == str(globals().get(expected_type)).lower()
-        if signature_empty or expected_string or expected_global:
-            return True
-    return False
+    signature_str = signature_type.__name__ if hasattr(signature_type, "__name__") else str(signature_type)
+    signature_empty = signature_type == inspect.Parameter.empty
+    expected_string = signature_str == expected_type
+    expected_global = str(signature_type) == str(globals().get(expected_type))
+    return signature_empty or expected_string or expected_global
 
 
 def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
@@ -79,31 +76,37 @@ def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_lab
 
     error_msgs = list()
     signature = inspect.signature(callable)
-    arguments_type, return_type = USER_FUNCTION_TYPES[func_type]
+    arguments_type, return_types = USER_FUNCTION_TYPES[func_type]
     params = list(signature.parameters.values())
     if len(params) != len(arguments_type):
         msg = (
-            f"Incorrect parameter number of {func_type}={callable.__name__}: "
-            f"should be {len(arguments_type)}, found {len(params)}, "
-            f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+            f"Incorrect parameter number for {callable.__name__!r}: "
+            f"should be {len(arguments_type)}, not {len(params)}. "
+            f"Error found at {(flow_label, node_label)!r}."
         )
-        error_msgs += msg
+        error_msgs.append(msg)
     for idx, param in enumerate(params):
         if not _types_equal(param.annotation, arguments_type[idx]):
             msg = (
                 f"Incorrect parameter annotation for parameter #{idx + 1} "
-                f" of {func_type}={callable.__name__}: "
-                f"should be {arguments_type[idx]} found {param.annotation}, "
-                f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+                f" of {callable.__name__!r}: "
+                f"should be {arguments_type[idx]}, not {param.annotation}. "
+                f"Error found at {(flow_label, node_label)!r}."
             )
-            error_msgs += msg
-    if not _types_equal(signature.return_annotation, return_type):
-        msg = (
-            f"Incorrect return type annotation of {func_type}={callable.__name__}: "
-            f"should be {return_type} found {signature.return_annotation}, "
-            f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
+            error_msgs.append(msg)
+    for potential_type in return_types:
+        if _types_equal(signature.return_annotation, potential_type):
+            break
+    else:
+        expected_type_message = (
+            f"should be one of {return_types!r}" if len(return_types) > 1 else f"should be {return_types[0]!r}"
         )
-        error_msgs += msg
+        msg = (
+            f"Incorrect return type annotation of {callable.__name__!r}: "
+            f"{expected_type_message}, not {signature.return_annotation}. "
+            f"Error found at {(flow_label, node_label)!r}."
+        )
+        error_msgs.append(msg)
     return error_msgs
 
 
@@ -212,8 +215,9 @@ class Script(BaseModel, extra="forbid"):
                                 node_name,
                             )
         if error_msgs:
+            error_number_string = "1 error" if len(error_msgs) == 1 else f"{len(error_msgs)} errors"
             raise ValueError(
-                f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
+                f"Found {error_number_string}:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
             )
         else:
             return script
@@ -231,22 +235,23 @@ class Script(BaseModel, extra="forbid"):
                         norm_flow_label, norm_node_label, _ = normalize_label(label, flow_name)
                         if norm_flow_label not in script.keys():
                             msg = (
-                                f"Flow label {norm_flow_label!r} can not be found for label={label}, "
-                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                                f"Flow {norm_flow_label!r} cannot be found for label={label}. "
+                                f"Error found at {(flow_name, node_name)!r}."
                             )
                         elif norm_node_label not in script[norm_flow_label].keys():
                             msg = (
-                                f"Node label {norm_node_label!r} can not be found for label={label}, "
-                                f"error was found in (flow_label, node_label)={(flow_name, node_name)}"
+                                f"Node {norm_node_label!r} cannot be found for label={label}. "
+                                f"Error found at {(flow_name, node_name)!r}."
                             )
                         else:
                             msg = None
                         if msg is not None:
-                            error_msgs += msg
+                            error_msgs.append(msg)
 
         if error_msgs:
+            error_number_string = "1 error" if len(error_msgs) == 1 else f"{len(error_msgs)} errors"
             raise ValueError(
-                f"Found {len(error_msgs)} errors:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
+                f"Found {error_number_string}:\n" + "\n".join([f"{i}) {er}" for i, er in enumerate(error_msgs, 1)])
             )
         else:
             return script
