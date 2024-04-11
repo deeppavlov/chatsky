@@ -104,7 +104,11 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 )
             ]
         if update.audio is not None:
-            thumbnail = Image(id=update.audio.thumbnail.file_id, title=update.audio.thumbnail.file_unique_id) if update.audio.thumbnail is not None else None
+            thumbnail = (
+                Image(id=update.audio.thumbnail.file_id, title=update.audio.thumbnail.file_unique_id)
+                if update.audio.thumbnail is not None
+                else None
+            )
             message.attachments += [
                 Audio(
                     id=update.audio.file_id,
@@ -117,7 +121,11 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 )
             ]
         if update.video is not None:
-            thumbnail = Image(id=update.video.thumbnail.file_id, title=update.video.thumbnail.file_unique_id) if update.video.thumbnail is not None else None
+            thumbnail = (
+                Image(id=update.video.thumbnail.file_id, title=update.video.thumbnail.file_unique_id)
+                if update.video.thumbnail is not None
+                else None
+            )
             message.attachments += [
                 Video(
                     id=update.video.file_id,
@@ -131,7 +139,11 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 )
             ]
         if update.animation is not None:
-            thumbnail = Image(id=update.animation.thumbnail.file_id, title=update.animation.thumbnail.file_unique_id) if update.animation.thumbnail is not None else None
+            thumbnail = (
+                Image(id=update.animation.thumbnail.file_id, title=update.animation.thumbnail.file_unique_id)
+                if update.animation.thumbnail is not None
+                else None
+            )
             message.attachments += [
                 Animation(
                     id=update.animation.file_id,
@@ -151,10 +163,15 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                     title=picture.file_unique_id,
                     width=picture.width,
                     height=picture.height,
-                ) for picture in update.photo
+                )
+                for picture in update.photo
             ]
         if update.document is not None:
-            thumbnail = Image(id=update.document.thumbnail.file_id, title=update.document.thumbnail.file_unique_id) if update.document.thumbnail is not None else None
+            thumbnail = (
+                Image(id=update.document.thumbnail.file_id, title=update.document.thumbnail.file_unique_id)
+                if update.document.thumbnail is not None
+                else None
+            )
             message.attachments += [
                 Document(
                     id=update.document.file_id,
@@ -203,7 +220,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                         horizontal_accuracy=attachment.__pydantic_extra__.get("horizontal_accuracy", None),
                         disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
                         protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=self._create_keyboard(buttons)
+                        reply_markup=self._create_keyboard(buttons),
                     )
                 if isinstance(attachment, Contact):
                     await bot.send_contact(
@@ -296,7 +313,9 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                                 filename=attachment.__pydantic_extra__.get("filename", None),
                                 caption=attachment.__pydantic_extra__.get("caption", None),
                                 parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                disable_content_type_detection=attachment.__pydantic_extra__.get("disable_content_type_detection", None),
+                                disable_content_type_detection=attachment.__pydantic_extra__.get(
+                                    "disable_content_type_detection", None
+                                ),
                                 thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
                             ),
                         ]
