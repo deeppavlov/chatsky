@@ -41,6 +41,11 @@ def extract_vk_update(update):
     return message, int(id)
 
 
+class VK_Poll():
+    def __init__(self) -> None:
+        raise NotImplementedError()
+
+
 class FilesOpener(object):
     def __init__(self, paths, key_format='file{}'):
         if not isinstance(paths, list):
@@ -87,9 +92,8 @@ class FilesOpener(object):
         self.opened_files = []
 
 
-class PollingVKInterface(PollingMessengerInterface):
+class VK_Bot:
     def __init__(self, token: str, group_id: str) -> None:
-        super().__init__()
         self.token = token
         self.group_id = group_id
         server_request = requests.post(f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}").json()
@@ -103,8 +107,7 @@ class PollingVKInterface(PollingMessengerInterface):
         self.server_key = server_request['response']['key']
         self.last_update_id = None
         self._last_processed_update = None
-
-
+    
     def upload_attachment(
         self, peer_id, attachment, attachment_type: str
     ) -> str:
@@ -184,9 +187,17 @@ class PollingVKInterface(PollingMessengerInterface):
             return saved_doc_data["response"]
         
         elif attachment_type == "video":
-            vid = requests.post(f"https://api.vk.com/method/video.save?link={attachment.source}&group_id={self.group_id}&v=5.81&access_token={self.token}").json()["response"]
-            return vid
-
+            raise NotImplementedError()
+        
+    def request(self):
+        updates = requests.post(f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50").json()
+        self.ts_current = updates['ts']
+        update_list = []
+        for i in updates["updates"]:
+            update_list.append(
+                extract_vk_update((i['object']['message']['text'], i['object']['message']['from_id']))
+            )
+        return update_list
 
     def send_message(self, response, id):
         if response.attachments is not None:
@@ -208,7 +219,7 @@ class PollingVKInterface(PollingMessengerInterface):
                     response.text += f"[{attachment.source}|{attachment.title}]"
                     
                 elif isinstance(attachment, Poll):
-                    poll_obj = requests.post(f"https://api.vk.com/method/polls.create?question={attachment.question}&is_anonymous={attachment.is_anonymous}&is_multiple={attachment.is_multiple}&end_date={attachment.end_date}&owner_id=-{self.group_id}&add_answers={attachment.add_answers}&photo_id={attachment.photo_id}&background_id={attachment.background_id}&disable_unvote={attachment.disable_unvote}&v=5.81&access_token={self.token}").json()
+                    raise NotImplementedError()
 
                 attachment_string = ','.join(attachment_list).strip(',')
             
@@ -217,21 +228,51 @@ class PollingVKInterface(PollingMessengerInterface):
             requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&v=5.81&access_token={self.token}").json()
 
 
-    def _request(self):
+
+class VK_dummy(VK_Bot):
+    # functionality of the VK_Bot but without actual API calls
+    def __init__(self, token, group_id) -> None:
+        self.token = token
+        self.group_id = group_id
+        server_request = requests.post(f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}").json()
+        
+        if "response" not in server_request:
+            raise Exception(f"Errror getting longpoll server\n{server_request}")
+        
+        self.server = server_request['response']['server']
+        self.ts_base = int(server_request['response']['ts'])
+        self.ts_current = self.ts_base
+        self.server_key = server_request['response']['key']
+        self.bot_responses = []
+        self.requests = []
+
+    def request(self):
         updates = requests.post(f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50").json()
-        self.ts_current = updates['ts']
         update_list = []
         for i in updates["updates"]:
             update_list.append(
                 extract_vk_update((i['object']['message']['text'], i['object']['message']['from_id']))
             )
-        return update_list
+        self.requests.append(update_list[-1])
+    
+    def send_message(self, response, id):
+        self.bot_responses.append(response)
+
+
+class PollingVKInterface(PollingMessengerInterface):
+    def __init__(self, token: str, group_id: str) -> None:
+        super().__init__()
+        self.bot = VK_Bot(token, group_id)
+
+
+    def _request(self):
+        return self.bot.request()
 
 
     def _respond(self, response):
         
         for resp in response:
-            self.send_message(resp.last_response, resp.id)
+            self.bot.send_message(resp.last_response, resp.id)
 
         logger.info("Responded.")
 
