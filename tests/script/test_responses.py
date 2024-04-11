@@ -1,20 +1,11 @@
 import random
 
-import pytest
-
-from dff.pipeline import Pipeline
-from dff.script import Message, Context
+from dff.script import Message
 from dff.script.responses import random_choice
 
 
 class TestResponses:
-    pipeline = Pipeline.from_script(script={"flow": {"node": {}}}, start_label=("flow", "node"))
-
-    @pytest.fixture
-    def ctx(self):
-        yield Context()
-
-    def test_random_choice(self, ctx):
+    def test_random_choice(self, ctx, pipeline):
         random.seed(0)
 
         rsp = random_choice(
@@ -25,6 +16,6 @@ class TestResponses:
             ]
         )
 
-        assert rsp(ctx, self.pipeline).text == "2"
-        assert rsp(ctx, self.pipeline).text == "2"
-        assert rsp(ctx, self.pipeline).text == "1"
+        assert rsp(ctx, pipeline).text == "2"
+        assert rsp(ctx, pipeline).text == "2"
+        assert rsp(ctx, pipeline).text == "1"
