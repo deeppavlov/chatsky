@@ -228,44 +228,46 @@ class VK_Bot:
             requests.post(f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&v=5.81&access_token={self.token}").json()
 
 
-
-class VK_dummy(VK_Bot):
+class VK_dummy:
     # functionality of the VK_Bot but without actual API calls
-    def __init__(self, token, group_id) -> None:
-        self.token = token
-        self.group_id = group_id
-        server_request = requests.post(f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}").json()
-        
-        if "response" not in server_request:
-            raise Exception(f"Errror getting longpoll server\n{server_request}")
-        
-        self.server = server_request['response']['server']
-        self.ts_base = int(server_request['response']['ts'])
-        self.ts_current = self.ts_base
-        self.server_key = server_request['response']['key']
+    def __init__(self, *args) -> None:
         self.bot_responses = []
         self.requests = []
 
-    def request(self):
-        updates = requests.post(f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50").json()
-        update_list = []
-        for i in updates["updates"]:
-            update_list.append(
-                extract_vk_update((i['object']['message']['text'], i['object']['message']['from_id']))
-            )
-        self.requests.append(update_list[-1])
+    def request(self, req):
+        # updates = requests.post(f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50").json()
+        # update_list = []
+        # for i in updates["updates"]:
+        #     update_list.append(
+        #         extract_vk_update((i['object']['message']['text'], i['object']['message']['from_id']))
+        #     )
+        self.requests.append(req)
+        return [req]
     
-    def send_message(self, response, id):
+    def send_message(self, response, _):
         self.bot_responses.append(response)
+        return response
+    
+    def get_dialogue(self):
+        return zip(self.requests, self.bot_responses)
 
 
 class PollingVKInterface(PollingMessengerInterface):
-    def __init__(self, token: str, group_id: str) -> None:
+    def __init__(self, token: str, group_id: str, debug=True, test_path=None) -> None:
         super().__init__()
-        self.bot = VK_Bot(token, group_id)
+        self.test_path = test_path
+        self.debug = debug
+        self.step = -1
+        if not debug:
+            self.bot = VK_Bot(token, group_id)
+        else:
+            self.bot = VK_dummy(token, group_id)
 
 
     def _request(self):
+        if self.debug:
+            self.step += 1
+            return self.bot.request(self.test_path[self.step][0])
         return self.bot.request()
 
 
