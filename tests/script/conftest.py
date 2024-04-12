@@ -14,5 +14,23 @@ def pipeline():
 
 
 @pytest.fixture
-def ctx():
-    return Context()
+def context_factory(request):
+    def _context_factory(forbidden_fields=None):
+        ctx = Context()
+        if forbidden_fields is not None:
+
+            class Forbidden:
+                def __init__(self, name):
+                    self.name = name
+
+                class ForbiddenError(Exception):
+                    pass
+
+                def __getattr__(self, item):
+                    raise self.ForbiddenError(f"{self.name!r} is forbidden")
+
+            for forbidden_field in forbidden_fields:
+                ctx.__setattr__(forbidden_field, Forbidden(forbidden_field))
+        return ctx
+
+    return _context_factory

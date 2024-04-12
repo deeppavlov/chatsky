@@ -1,7 +1,13 @@
+import pytest
+
 from dff.script.labels import forward, repeat, previous, to_fallback, to_start, backward
 
 
 class TestLabels:
+    @pytest.fixture
+    def ctx(self, context_factory):
+        return context_factory(forbidden_fields=("requests", "responses", "misc"))
+
     def test_repeat(self, ctx, pipeline):
         assert repeat(5)(ctx, pipeline) == ("service", "start", 5)
 
