@@ -15,7 +15,7 @@ from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECK
 
 from pydantic import BaseModel, field_validator, validate_call
 
-from .types import LabelType, NodeLabelType, ConditionType, NodeLabel3Type
+from .types import LabelType, ConstLabel, ConditionType, NodeLabel3Type
 from .message import Message
 from .keywords import Keywords
 from .normalization import normalize_condition, normalize_label
@@ -36,7 +36,7 @@ class UserFunctionType(str, Enum):
 
 
 USER_FUNCTION_TYPES: Dict[UserFunctionType, Tuple[Tuple[str, ...], str]] = {
-    UserFunctionType.LABEL: (("Context", "Pipeline"), "NodeLabelType"),
+    UserFunctionType.LABEL: (("Context", "Pipeline"), "ConstLabel"),
     UserFunctionType.RESPONSE: (("Context", "Pipeline"), "Message"),
     UserFunctionType.CONDITION: (("Context", "Pipeline"), "bool"),
     UserFunctionType.RESPONSE_PROCESSING: (("Context", "Pipeline"), "None"),
@@ -109,7 +109,7 @@ class Node(BaseModel, extra="forbid", validate_assignment=True):
     The class for the `Node` object.
     """
 
-    transitions: Dict[NodeLabelType, ConditionType] = {}
+    transitions: Dict[ConstLabel, ConditionType] = {}
     response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]] = None
     pre_transitions_processing: Dict[Any, Callable] = {}
     pre_response_processing: Dict[Any, Callable] = {}
@@ -119,7 +119,7 @@ class Node(BaseModel, extra="forbid", validate_assignment=True):
     @classmethod
     @validate_call
     def normalize_transitions(
-        cls, transitions: Dict[NodeLabelType, ConditionType]
+        cls, transitions: Dict[ConstLabel, ConditionType]
     ) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
         """
         The function which is used to normalize transitions and returns normalized dict.

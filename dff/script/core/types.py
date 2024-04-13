@@ -28,8 +28,11 @@ NodeLabel3Type: TypeAlias = Tuple[str, str, float]
 NodeLabelTupledType: TypeAlias = Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type]
 """Label type for transitions can be one of three different types."""
 
-NodeLabelType: TypeAlias = Union[Callable, NodeLabelTupledType, str]
-"""Label type for transitions can be one of three different types."""
+ConstLabel: TypeAlias = Union[NodeLabelTupledType, str]
+"""Label functions should be annotated with this type only."""
+
+Label: TypeAlias = Union[ConstLabel, Callable]
+"""Label type for transitions should be of this type only."""
 
 ConditionType: TypeAlias = Callable
 """Condition type can be only `Callable`."""

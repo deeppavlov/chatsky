@@ -66,22 +66,22 @@ Out of the box `dff.script.core.labels`
 offers the following methods:
 
 * `lbl.repeat()` returns transition handler
-    which returns `NodeLabelType` to the last node,
+    which returns `ConstLabel` to the last node,
 
 * `lbl.previous()` returns transition handler
-    which returns `NodeLabelType` to the previous node,
+    which returns `ConstLabel` to the previous node,
 
 * `lbl.to_start()` returns transition handler
-    which returns `NodeLabelType` to the start node,
+    which returns `ConstLabel` to the start node,
 
 * `lbl.to_fallback()` returns transition
-    handler which returns `NodeLabelType` to the fallback node,
+    handler which returns `ConstLabel` to the fallback node,
 
 * `lbl.forward()` returns transition handler
-    which returns `NodeLabelType` to the forward node,
+    which returns `ConstLabel` to the forward node,
 
 * `lbl.backward()` returns transition handler
-    which returns `NodeLabelType` to the backward node.
+    which returns `ConstLabel` to the backward node.
 
 There are three flows here: `global_flow`, `greeting_flow`, `music_flow`.
 """
