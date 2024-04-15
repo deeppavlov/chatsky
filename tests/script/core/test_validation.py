@@ -199,7 +199,7 @@ class TestProcessingValidation:
         assert e
 
     def test_transition_return_type(self):
-        with pytest.raises(ValidationError, match=r"Found 1 errors:[\w\W]*Incorrect return type annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Incorrect return type annotation") as e:
             Script(
                 script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": UserFunctionSamples.wrong_return_type}}}}
             )
