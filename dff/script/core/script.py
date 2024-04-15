@@ -15,7 +15,7 @@ from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECK
 
 from pydantic import BaseModel, field_validator, validate_call
 
-from .types import Label, LabelType, ConstLabel, ConditionType, NodeLabel3Type
+from .types import Label, LabelType, ConstLabel, ConditionType
 from .message import Message
 from .keywords import Keywords
 from .normalization import normalize_condition, normalize_label
@@ -118,9 +118,7 @@ class Node(BaseModel, extra="forbid", validate_assignment=True):
     @field_validator("transitions", mode="before")
     @classmethod
     @validate_call
-    def normalize_transitions(
-        cls, transitions: Dict[ConstLabel, ConditionType]
-    ) -> Dict[Union[Callable, NodeLabel3Type], Callable]:
+    def normalize_transitions(cls, transitions: Dict[Label, ConditionType]) -> Dict[Label, Callable]:
         """
         The function which is used to normalize transitions and returns normalized dict.
 

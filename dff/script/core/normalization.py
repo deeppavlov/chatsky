@@ -12,7 +12,7 @@ from typing import Union, Callable, Optional, TYPE_CHECKING
 
 from .keywords import Keywords
 from .context import Context
-from .types import ConstLabel, ConditionType, LabelType
+from .types import ConstLabel, ConditionType, Label, LabelType
 from .message import Message
 
 if TYPE_CHECKING:
@@ -22,11 +22,11 @@ logger = logging.getLogger(__name__)
 
 
 def normalize_label(
-    label: ConstLabel, default_flow_label: LabelType = ""
+    label: Label, default_flow_label: LabelType = ""
 ) -> Union[Callable[[Context, Pipeline], ConstLabel], ConstLabel]:
     """
     The function that is used for normalization of
-    :py:const:`default_flow_label <dff.script.ConstLabel>`.
+    :py:const:`default_flow_label <dff.script.Label>`.
 
     :param label: If label is Callable the function is wrapped into try/except
         and normalization is used on the result of the function call with the name label.
@@ -63,7 +63,7 @@ def normalize_label(
         return (flow_label, label[1], label[2])
     else:
         raise TypeError(
-            f"Label '{label!r}' is of incorrect type. It has to follow the `ConstLabel`:\n" f"{ConstLabel!r}"
+            f"Label '{label!r}' is of incorrect type. It has to follow the `Label`:\n" f"{Label!r}"
         )
 
 
