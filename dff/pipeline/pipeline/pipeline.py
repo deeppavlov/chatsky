@@ -53,7 +53,6 @@ class Pipeline:
     :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-    :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
 
@@ -87,7 +86,6 @@ class Pipeline:
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -119,7 +117,6 @@ class Pipeline:
                 fallback_label,
                 label_priority,
                 condition_handler,
-                verbose,
                 handlers,
             )
         if self.actor is None:
@@ -208,7 +205,6 @@ class Pipeline:
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -230,7 +226,6 @@ class Pipeline:
         :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
         :param parallelize_processing: This flag determines whether or not the functions
             defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
             of the script should be parallelized over respective groups.
@@ -259,7 +254,6 @@ class Pipeline:
             fallback_label=fallback_label,
             label_priority=label_priority,
             condition_handler=condition_handler,
-            verbose=verbose,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
@@ -274,7 +268,6 @@ class Pipeline:
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
         """
@@ -287,10 +280,9 @@ class Pipeline:
         :param fallback_label: Actor fallback label. The label of :py:class:`~dff.script.Script`.
             Dialog comes into that label if all other transitions failed,
             or there was an error while executing the scenario.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.Label>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
         :param handlers: This variable is responsible for the usage of external handlers on
             the certain stages of work of :py:class:`~dff.script.Actor`.
 

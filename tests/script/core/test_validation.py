@@ -10,7 +10,7 @@ from dff.script import (
     Context,
     Message,
     Script,
-    NodeLabel3Type,
+    ConstLabel,
 )
 from dff.script.conditions import exact_match
 
@@ -33,7 +33,7 @@ class UserFunctionSamples:
         return 1.0
 
     @staticmethod
-    def correct_label(_: Context, __: Pipeline) -> NodeLabel3Type:
+    def correct_label(_: Context, __: Pipeline) -> ConstLabel:
         return ("root", "start", 1)
 
     @staticmethod

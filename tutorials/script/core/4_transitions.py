@@ -19,7 +19,7 @@ First of all, let's do all the necessary imports from DFF.
 # %%
 import re
 
-from dff.script import TRANSITIONS, RESPONSE, Context, NodeLabel3Type, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, ConstLabel, Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline
@@ -33,7 +33,7 @@ from dff.utils.testing.common import (
 """
 Let's define the functions with a special type of return value:
 
-    NodeLabel3Type == tuple[str, str, float]
+    ConstLabel == tuple[str, str, float] or string
 
 which means that transition returns a `tuple`
 with flow name, node name and priority.
@@ -41,12 +41,12 @@ with flow name, node name and priority.
 
 
 # %%
-def greeting_flow_n2_transition(_: Context, __: Pipeline) -> NodeLabel3Type:
+def greeting_flow_n2_transition(_: Context, __: Pipeline) -> ConstLabel:
     return ("greeting_flow", "node2", 1.0)
 
 
 def high_priority_node_transition(flow_label, label):
-    def transition(_: Context, __: Pipeline) -> NodeLabel3Type:
+    def transition(_: Context, __: Pipeline) -> ConstLabel:
         return (flow_label, label, 2.0)
 
     return transition

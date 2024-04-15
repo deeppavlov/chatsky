@@ -12,7 +12,7 @@ from typing import Union, Callable, Optional, TYPE_CHECKING
 
 from .keywords import Keywords
 from .context import Context
-from .types import NodeLabel3Type, ConstLabel, ConditionType, LabelType
+from .types import ConstLabel, ConditionType, LabelType
 from .message import Message
 
 if TYPE_CHECKING:
@@ -23,7 +23,7 @@ logger = logging.getLogger(__name__)
 
 def normalize_label(
     label: ConstLabel, default_flow_label: LabelType = ""
-) -> Union[Callable[[Context, Pipeline], NodeLabel3Type], NodeLabel3Type]:
+) -> Union[Callable[[Context, Pipeline], ConstLabel], ConstLabel]:
     """
     The function that is used for normalization of
     :py:const:`default_flow_label <dff.script.ConstLabel>`.
@@ -35,7 +35,7 @@ def normalize_label(
     """
     if callable(label):
 
-        def get_label_handler(ctx: Context, pipeline: Pipeline) -> NodeLabel3Type:
+        def get_label_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
             try:
                 new_label = label(ctx, pipeline)
                 new_label = normalize_label(new_label, default_flow_label)
