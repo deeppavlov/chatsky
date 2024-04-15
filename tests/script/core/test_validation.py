@@ -88,12 +88,12 @@ class TestLabelValidation:
         assert e
 
     def test_flow_name(self):
-        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Flow label") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Flow '\w*' cannot be found for label") as e:
             Script(script={"root": {"start": {TRANSITIONS: {("other", "start", 1): exact_match(Message("hi"))}}}})
         assert e
 
     def test_node_name(self):
-        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Node label") as e:
+        with pytest.raises(ValidationError, match=r"Found 1 error:[\w\W]*Node '\w*' cannot be found for label") as e:
             Script(script={"root": {"start": {TRANSITIONS: {("root", "other", 1): exact_match(Message("hi"))}}}})
         assert e
 
@@ -110,7 +110,7 @@ class TestResponseValidation:
         assert e
 
     def test_param_types(self):
-        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter annotation") as e:
             Script(script={"root": {"start": {RESPONSE: UserFunctionSamples.wrong_param_types}}})
         assert e
 
@@ -134,7 +134,7 @@ class TestConditionValidation:
         assert e
 
     def test_param_types(self):
-        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter annotation") as e:
             Script(
                 script={"root": {"start": {TRANSITIONS: {("root", "start", 1): UserFunctionSamples.wrong_param_types}}}}
             )
@@ -160,7 +160,7 @@ class TestProcessingValidation:
         assert e
 
     def test_response_param_types(self):
-        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter annotation") as e:
             Script(
                 script={"root": {"start": {PRE_RESPONSE_PROCESSING: {"PRP": UserFunctionSamples.wrong_param_types}}}}
             )
@@ -192,7 +192,7 @@ class TestProcessingValidation:
         assert e
 
     def test_transition_param_types(self):
-        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect \d+ parameter annotation") as e:
+        with pytest.raises(ValidationError, match=r"Found 3 errors:[\w\W]*Incorrect parameter annotation") as e:
             Script(
                 script={"root": {"start": {PRE_TRANSITIONS_PROCESSING: {"PTP": UserFunctionSamples.wrong_param_types}}}}
             )
