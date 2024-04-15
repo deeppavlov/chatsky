@@ -15,7 +15,7 @@ from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECK
 
 from pydantic import BaseModel, field_validator, validate_call
 
-from .types import LabelType, ConstLabel, ConditionType, NodeLabel3Type
+from .types import Label, LabelType, ConstLabel, ConditionType, NodeLabel3Type
 from .message import Message
 from .keywords import Keywords
 from .normalization import normalize_condition, normalize_label
@@ -109,7 +109,7 @@ class Node(BaseModel, extra="forbid", validate_assignment=True):
     The class for the `Node` object.
     """
 
-    transitions: Dict[ConstLabel, ConditionType] = {}
+    transitions: Dict[Label, ConditionType] = {}
     response: Optional[Union[Message, Callable[[Context, Pipeline], Message]]] = None
     pre_transitions_processing: Dict[Any, Callable] = {}
     pre_response_processing: Dict[Any, Callable] = {}
