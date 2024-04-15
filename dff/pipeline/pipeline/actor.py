@@ -57,7 +57,7 @@ class Actor:
         Dialog comes into that label if all other transitions failed,
         or there was an error while executing the scenario.
         Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
+    :param label_priority: Default priority value for all :py:const:`labels <dff.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
     :param handlers: This variable is responsible for the usage of external handlers on

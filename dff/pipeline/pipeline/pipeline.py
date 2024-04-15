@@ -50,7 +50,7 @@ class Pipeline:
     :param script: (required) A :py:class:`~.Script` instance (object or dict).
     :param start_label: (required) Actor start label.
     :param fallback_label: Actor fallback label.
-    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
     :param handlers: This variable is responsible for the usage of external handlers on
@@ -223,7 +223,7 @@ class Pipeline:
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param parallelize_processing: This flag determines whether or not the functions
@@ -280,7 +280,7 @@ class Pipeline:
         :param fallback_label: Actor fallback label. The label of :py:class:`~dff.script.Script`.
             Dialog comes into that label if all other transitions failed,
             or there was an error while executing the scenario.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.Label>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param handlers: This variable is responsible for the usage of external handlers on

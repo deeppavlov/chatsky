@@ -21,12 +21,10 @@ if TYPE_CHECKING:
 logger = logging.getLogger(__name__)
 
 
-def normalize_label(
-    label: Label, default_flow_label: LabelType = ""
-) -> Union[Callable[[Context, Pipeline], ConstLabel], ConstLabel]:
+def normalize_label(label: Label, default_flow_label: LabelType = "") -> Label:
     """
     The function that is used for normalization of
-    :py:const:`default_flow_label <dff.script.Label>`.
+    :py:const:`label <dff.script.Label>`.
 
     :param label: If label is Callable the function is wrapped into try/except
         and normalization is used on the result of the function call with the name label.

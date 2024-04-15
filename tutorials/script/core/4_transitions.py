@@ -33,21 +33,34 @@ from dff.utils.testing.common import (
 """
 Let's define the functions with a special type of return value:
 
-    ConstLabel == tuple[str, str, float] or string
+    ConstLabel == Flow Name; Node Name; Priority
 
-which means that transition returns a `tuple`
-with flow name, node name and priority.
+These functions return Labels that
+determine destination and priority of a specific transition.
+
+Labels consist of:
+
+1. Flow name of the destination node
+   (optional; defaults to flow name of the current node).
+2. Node name of the destination node
+   (required).
+3. Priority of the transition (more on that later)
+   (optional; defaults to pipeline's
+   [label_priority](%doclink(api,pipeline.pipeline.pipeline))).
+
+An example of omitting optional arguments is shown in the body of the
+`greeting_flow_n2_transition` function:
 """
 
 
 # %%
 def greeting_flow_n2_transition(_: Context, __: Pipeline) -> ConstLabel:
-    return ("greeting_flow", "node2", 1.0)
+    return "greeting_flow", "node2"
 
 
-def high_priority_node_transition(flow_label, label):
+def high_priority_node_transition(flow_name, node_name):
     def transition(_: Context, __: Pipeline) -> ConstLabel:
-        return (flow_label, label, 2.0)
+        return flow_name, node_name, 2.0
 
     return transition
 
