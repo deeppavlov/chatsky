@@ -15,7 +15,7 @@ from typing import Callable, List, Optional, Any, Dict, Tuple, Union, TYPE_CHECK
 
 from pydantic import BaseModel, field_validator, validate_call
 
-from .types import Label, LabelType, ConstLabel, ConditionType
+from .types import Label, LabelType, ConditionType, ConstLabel  # noqa: F401
 from .message import Message
 from .keywords import Keywords
 from .normalization import normalize_condition, normalize_label
