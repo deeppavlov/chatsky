@@ -88,14 +88,6 @@ class Context(BaseModel):
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
-    validation: bool = False
-    """
-    `validation` is a flag that signals that :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`,
-    while being initialized, checks the :py:class:`~dff.script.core.script.Script`.
-    The functions that can give not valid data
-    while being validated must use this flag to take the validation mode into account.
-    Otherwise the validation will not be passed.
-    """
     framework_states: Dict[ModuleName, Dict[str, Any]] = {}
     """
     `framework_states` is used for addons states or for
@@ -142,7 +134,7 @@ class Context(BaseModel):
             ctx = Context.model_validate(ctx)
         elif isinstance(ctx, str):
             ctx = Context.model_validate_json(ctx)
-        elif not issubclass(type(ctx), Context):
+        elif not isinstance(ctx, Context):
             raise ValueError(
                 f"Context expected to be an instance of the Context class "
                 f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
