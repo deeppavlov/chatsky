@@ -62,9 +62,7 @@ def normalize_label(
         flow_label = label[0] or default_flow_label
         return (flow_label, label[1], label[2])
     else:
-        raise TypeError(
-            f"Label '{label!r}' is of incorrect type. It has to follow the `Label`:\n" f"{Label!r}"
-        )
+        raise TypeError(f"Label '{label!r}' is of incorrect type. It has to follow the `Label`:\n" f"{Label!r}")
 
 
 def normalize_condition(condition: ConditionType) -> Callable[[Context, Pipeline], bool]:
