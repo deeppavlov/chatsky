@@ -10,39 +10,44 @@ from tempfile import gettempdir
 from typing import Callable, Optional, Sequence
 from pydantic import FilePath
 
-from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
-    InputMediaAnimation,
-    InputMediaAudio,
-    InputMediaDocument,
-    InputMediaPhoto,
-    InputMediaVideo,
-    Update,
-    Message as TelegramMessage,
-)
-from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
-from telegram.ext.filters import ALL
+try:
+    from telegram import (
+        InlineKeyboardButton,
+        InlineKeyboardMarkup,
+        InputMediaAnimation,
+        InputMediaAudio,
+        InputMediaDocument,
+        InputMediaPhoto,
+        InputMediaVideo,
+        Update,
+        Message as TelegramMessage,
+    )
+    from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
+    from telegram.ext.filters import ALL
 
-from dff.messengers.common import MessengerInterface
-from dff.pipeline.types import PipelineRunnerFunction
-from dff.script.core.message import (
-    Animation,
-    Audio,
-    Button,
-    CallbackQuery,
-    Contact,
-    DataAttachment,
-    Document,
-    Image,
-    Invoice,
-    Keyboard,
-    Location,
-    Message,
-    Poll,
-    PollOption,
-    Video,
-)
+    from dff.messengers.common import MessengerInterface
+    from dff.pipeline.types import PipelineRunnerFunction
+    from dff.script.core.message import (
+        Animation,
+        Audio,
+        Button,
+        CallbackQuery,
+        Contact,
+        DataAttachment,
+        Document,
+        Image,
+        Invoice,
+        Keyboard,
+        Location,
+        Message,
+        Poll,
+        PollOption,
+        Video,
+    )
+
+    telegram_available = True
+except ImportError:
+    telegram_available = False
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
@@ -50,6 +55,9 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
     response_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Keyboard}
 
     def __init__(self, token: str) -> None:
+        if not telegram_available:
+            raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install dff[telegram]`.")
+
         self.application = Application.builder().token(token).build()
         self.application.add_handler(MessageHandler(ALL, self.on_message))
         self.application.add_handler(CallbackQueryHandler(self.on_callback))
