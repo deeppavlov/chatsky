@@ -32,11 +32,18 @@ class MessengerInterface(abc.ABC):
     response_attachments = set()
 
     def __init__(self, attachments_directory: Optional[Path] = None) -> None:
-        if attachments_directory is not None:
+        tempdir = gettempdir()
+        if attachments_directory is not None and not str(attachments_directory.absolute()).startswith(tempdir):
             self.attachments_directory = attachments_directory
         else:
-            self.attachments_directory = Path(gettempdir())
-            logger.warning(f"Attachments directory for {type(self)} messenger interface is set to tempdir!")
+            warning_start = f"Attachments directory for {type(self)} messenger interface"
+            warning_end = "attachment data won't be preserved locally!"
+            if attachments_directory is None:
+                self.attachments_directory = Path(tempdir)
+                logger.warning(f"{warning_start} is None, so will be set to tempdir and {warning_end}")
+            else:
+                self.attachments_directory = attachments_directory
+                logger.warning(f"{warning_start} is in tempdir, so {warning_end}")
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
