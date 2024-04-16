@@ -88,12 +88,12 @@ script = {
         },
         "node3": {
             RESPONSE: Message(text="Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": lambda _, __, ___, ____: True},
+            TRANSITIONS: {"node4": lambda _, __: True},
             # This condition is true for any type of update
         },
         "node4": {
             RESPONSE: Message(text="bye"),
-            TRANSITIONS: {"node1": lambda _, __, ___, ____: True},
+            TRANSITIONS: {"node1": lambda _, __: True},
             # This condition is true if the last update is of type `message`
         },
         "fallback_node": {
