@@ -146,7 +146,7 @@ script = {
             RESPONSE: Message(
                 text="Look at my pictures!",
                 # An HTTP path or a path to a local file can be used here.
-                attachments=list(tuple([Image(source=picture_url)] * 2)),
+                attachments=[Image(source=picture_url)] * 2,
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
