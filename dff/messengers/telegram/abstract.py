@@ -334,7 +334,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
             await bot.send_message(
                 chat_id,
                 message.text,
-                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                parse_mode=message.__pydantic_extra__.get("parse_mode", None),
                 disable_notification=message.__pydantic_extra__.get("disable_notification", None),
                 protect_content=message.__pydantic_extra__.get("protect_content", None),
                 reply_markup=self._create_keyboard(buttons),
