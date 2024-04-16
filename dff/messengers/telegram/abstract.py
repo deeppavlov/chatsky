@@ -51,7 +51,7 @@ except ImportError:
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
-    request_attachments = {Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Document}
+    request_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Invoice}
     response_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Keyboard}
 
     def __init__(self, token: str) -> None:
