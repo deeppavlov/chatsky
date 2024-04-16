@@ -53,7 +53,7 @@ For more information see tutorial `3_buttons_with_callback.py`.
 
 
 # %%
-def check_if_latest_message_test_has_music(ctx: Context, _: Pipeline) -> bool:
+def latest_message_test_has_music(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -84,7 +84,7 @@ script = {
         },
         "node2": {
             RESPONSE: Message(text="Good. What do you want to talk about?"),
-            TRANSITIONS: {"node3": check_if_latest_message_test_has_music},
+            TRANSITIONS: {"node3": latest_message_test_has_music},
         },
         "node3": {
             RESPONSE: Message(text="Sorry, I can not talk about music now."),

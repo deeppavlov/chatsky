@@ -49,7 +49,7 @@ you can use the `content_types` parameter of the
 interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
-def check_if_latest_message_has_photos(ctx: Context, _: Pipeline) -> bool:
+def latest_message_has_photos(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -61,7 +61,7 @@ def check_if_latest_message_has_photos(ctx: Context, _: Pipeline) -> bool:
     return len(ctx.last_request.original_message.message.photo) > 0
 
 
-def check_if_latest_message_has_images(ctx: Context, _: Pipeline) -> bool:
+def latest_message_has_images(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -76,7 +76,7 @@ def check_if_latest_message_has_images(ctx: Context, _: Pipeline) -> bool:
     )
 
 
-def check_if_latest_message_has_text(ctx: Context, _: Pipeline) -> bool:
+def latest_message_has_text(ctx: Context, _: Pipeline) -> bool:
     if ctx.last_request is None:
         return False
     if ctx.last_request.original_message is None:
@@ -123,14 +123,14 @@ script = {
                         # both in 'photo' and 'document' fields.
                         # We should consider both cases
                         # when we check the message for media.
-                        check_if_latest_message_has_photos,
-                        check_if_latest_message_has_images,
+                        latest_message_has_photos,
+                        latest_message_has_images,
                     ]
                 ),
                 (
                     "pics",
                     "send_many",
-                ): check_if_latest_message_has_text,
+                ): latest_message_has_text,
                 ("pics", "ask_picture"): cnd.true(),
             },
         },

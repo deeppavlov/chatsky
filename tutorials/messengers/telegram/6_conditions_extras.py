@@ -56,7 +56,7 @@ or in the docs for the `telebot` library.
 
 
 # %%
-def check_if_latest_message_is_new_chat_member(
+def latest_message_is_new_chat_member(
     ctx: Context, _: Pipeline
 ) -> bool:
     if ctx.last_request is None:
@@ -70,7 +70,7 @@ def check_if_latest_message_is_new_chat_member(
     )
 
 
-def check_if_latest_message_is_callback_query(
+def latest_message_is_callback_query(
     ctx: Context, _: Pipeline
 ) -> bool:
     if ctx.last_request is None:
@@ -88,12 +88,12 @@ script = {
             (
                 "greeting_flow",
                 "node1",
-            ): check_if_latest_message_is_new_chat_member,
+            ): latest_message_is_new_chat_member,
             # send a message when inline query is received
             (
                 "greeting_flow",
                 "node2",
-            ): check_if_latest_message_is_callback_query,
+            ): latest_message_is_callback_query,
         },
     },
     "greeting_flow": {
