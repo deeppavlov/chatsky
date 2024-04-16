@@ -82,7 +82,7 @@ class Invoice(Attachment):
 
 class PollOption(DataModel):
     text: str
-    votes: int
+    votes: int = Field(default=0)
 
 
 class Poll(Attachment):
