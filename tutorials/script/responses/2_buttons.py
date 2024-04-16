@@ -29,8 +29,8 @@ from dff.utils.testing import (
 # %%
 def check_button_payload(value: str):
     def payload_check_inner(ctx: Context, _: Pipeline):
-        if ctx.last_request.misc is not None:
-            return ctx.last_request.misc.get("payload") == value
+        if ctx.last_request.text is not None:
+            return ctx.last_request.text == value
         else:
             return False
 
@@ -54,8 +54,8 @@ toy_script = {
                 **{
                     "text": "Starting test! What's 2 + 2?"
                     " (type in the index of the correct option)",
-                    "misc": {
-                        "ui": Keyboard(
+                    "attachments": [
+                        Keyboard(
                             buttons=[
                                 [
                                     Button(text="5", data="5"),
@@ -63,7 +63,7 @@ toy_script = {
                                 ]
                             ]
                         ),
-                    },
+                    ],
                 }
             ),
             TRANSITIONS: {
@@ -76,8 +76,8 @@ toy_script = {
                 **{
                     "text": "Next question: what's 6 * 8?"
                     " (type in the index of the correct option)",
-                    "misc": {
-                        "ui": Keyboard(
+                    "attachments": [
+                        Keyboard(
                             buttons=[
                                 [
                                     Button(text="38", data="38"),
@@ -85,7 +85,7 @@ toy_script = {
                                 ]
                             ]
                         ),
-                    },
+                    ],
                 }
             ),
             TRANSITIONS: {
@@ -98,8 +98,8 @@ toy_script = {
                 **{
                     "text": "What's 114 + 115? "
                     "(type in the index of the correct option)",
-                    "misc": {
-                        "ui": Keyboard(
+                    "attachments": [
+                        Keyboard(
                             buttons=[
                                 [
                                     Button(text="229", data="229"),
@@ -107,7 +107,7 @@ toy_script = {
                                 ]
                             ]
                         ),
-                    },
+                    ],
                 }
             ),
             TRANSITIONS: {
@@ -129,8 +129,8 @@ happy_path = (
             **{
                 "text": "Starting test! What's 2 + 2? "
                 "(type in the index of the correct option)",
-                "misc": {
-                    "ui": Keyboard(
+                "attachments": [
+                    Keyboard(
                         buttons=[
                             [
                                 Button(text="5", data="5"),
@@ -138,18 +138,18 @@ happy_path = (
                             ]
                         ]
                     )
-                },
+                ],
             }
         ),
     ),
     (
-        Message("0"),
+        Message("5"),
         Message(
             **{
                 "text": "Starting test! What's 2 + 2? "
                 "(type in the index of the correct option)",
-                "misc": {
-                    "ui": Keyboard(
+                "attachments": [
+                    Keyboard(
                         buttons=[
                             [
                                 Button(text="5", data="5"),
@@ -157,18 +157,18 @@ happy_path = (
                             ]
                         ]
                     ),
-                },
+                ],
             }
         ),
     ),
     (
-        Message("1"),
+        Message("4"),
         Message(
             **{
                 "text": "Next question: what's 6 * 8? "
                 "(type in the index of the correct option)",
-                "misc": {
-                    "ui": Keyboard(
+                "attachments": [
+                    Keyboard(
                         buttons=[
                             [
                                 Button(text="38", data="38"),
@@ -176,18 +176,18 @@ happy_path = (
                             ]
                         ]
                     ),
-                },
+                ],
             }
         ),
     ),
     (
-        Message("0"),
+        Message("38"),
         Message(
             **{
                 "text": "Next question: what's 6 * 8? "
                 "(type in the index of the correct option)",
-                "misc": {
-                    "ui": Keyboard(
+                "attachments": [
+                    Keyboard(
                         buttons=[
                             [
                                 Button(text="38", data="38"),
@@ -195,18 +195,18 @@ happy_path = (
                             ]
                         ]
                     ),
-                },
+                ],
             }
         ),
     ),
     (
-        Message("1"),
+        Message("48"),
         Message(
             **{
                 "text": "What's 114 + 115? "
                 "(type in the index of the correct option)",
-                "misc": {
-                    "ui": Keyboard(
+                "attachments": [
+                    Keyboard(
                         buttons=[
                             [
                                 Button(text="229", data="229"),
@@ -214,18 +214,18 @@ happy_path = (
                             ]
                         ]
                     ),
-                },
+                ],
             }
         ),
     ),
     (
-        Message("1"),
+        Message("283"),
         Message(
             **{
                 "text": "What's 114 + 115? "
                 "(type in the index of the correct option)",
-                "misc": {
-                    "ui": Keyboard(
+                "attachments": [
+                    Keyboard(
                         buttons=[
                             [
                                 Button(text="229", data="229"),
@@ -233,30 +233,13 @@ happy_path = (
                             ]
                         ]
                     ),
-                },
+                ],
             }
         ),
     ),
-    (Message("0"), Message("Success!")),
+    (Message("229"), Message("Success!")),
     (Message("ok"), Message("Finishing test")),
 )
-
-
-def process_request(ctx: Context):
-    ui = (
-        ctx.last_response
-        and ctx.last_response.misc
-        and ctx.last_response.misc.get("ui")
-    )
-    if ui and ui.buttons[0]:
-        try:
-            chosen_button = ui.buttons[0][int(ctx.last_request.text)]
-        except (IndexError, ValueError):
-            raise ValueError(
-                "Type in the index of the correct option "
-                "to choose from the buttons."
-            )
-        ctx.last_request = Message(misc={"payload": chosen_button.data})
 
 
 # %%
@@ -264,7 +247,6 @@ pipeline = Pipeline.from_script(
     toy_script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    pre_services=[process_request],
 )
 
 if __name__ == "__main__":
