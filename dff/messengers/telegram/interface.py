@@ -1,3 +1,5 @@
+from pathlib import Path
+from typing import Optional
 from telegram import Update
 
 from dff.pipeline.types import PipelineRunnerFunction
@@ -6,8 +8,8 @@ from .abstract import _AbstractTelegramInterface
 
 
 class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
-    def __init__(self, token: str, interval: int = 2, timeout: int = 20) -> None:
-        super().__init__(token)
+    def __init__(self, token: str, attachments_directory: Optional[Path] = None, interval: int = 2, timeout: int = 20) -> None:
+        super().__init__(token, attachments_directory)
         self.interval = interval
         self.timeout = timeout
 
@@ -19,8 +21,8 @@ class PollingTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
 
 
 class CallbackTelegramInterface(_AbstractTelegramInterface):  # pragma: no cover
-    def __init__(self, token: str, host: str = "localhost", port: int = 844):
-        super().__init__(token)
+    def __init__(self, token: str, attachments_directory: Optional[Path] = None, host: str = "localhost", port: int = 844):
+        super().__init__(token, attachments_directory)
         self.listen = host
         self.port = port
 

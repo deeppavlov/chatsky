@@ -6,7 +6,6 @@ that can be used to interact with the Telegram API.
 """
 
 from pathlib import Path
-from tempfile import gettempdir
 from typing import Callable, Optional, Sequence
 from pydantic import FilePath
 
@@ -54,7 +53,8 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
     request_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Invoice}
     response_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Keyboard}
 
-    def __init__(self, token: str) -> None:
+    def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__(attachments_directory)
         if not telegram_available:
             raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install dff[telegram]`.")
 
@@ -64,7 +64,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
 
     async def populate_attachment(self, attachment: DataAttachment) -> None:  # pragma: no cover
         if attachment.title is not None and attachment.id is not None:
-            file_name = Path(gettempdir()) / str(attachment.title)
+            file_name = self.attachments_directory / str(attachment.title)
             if not file_name.exists():
                 await (await self.application.bot.get_file(attachment.id)).download_to_drive(file_name)
             attachment.source = FilePath(file_name)

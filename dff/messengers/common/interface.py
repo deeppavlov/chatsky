@@ -9,6 +9,8 @@ from __future__ import annotations
 import abc
 import asyncio
 import logging
+from pathlib import Path
+from tempfile import gettempdir
 from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING
 
 if TYPE_CHECKING:
@@ -28,6 +30,13 @@ class MessengerInterface(abc.ABC):
 
     request_attachments = set()
     response_attachments = set()
+
+    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
+        if attachments_directory is not None:
+            self.attachments_directory = attachments_directory
+        else:
+            self.attachments_directory = Path(gettempdir())
+            logger.warning(f"Attachments directory for {type(self)} messenger interface is set to tempdir!")
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
