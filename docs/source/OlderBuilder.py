@@ -1,9 +1,7 @@
 from __future__ import annotations
 import enum
 import os
-import sys
 import shutil
-import importlib.util
 from logging import getLogger
 from pathlib import Path, PurePath
 from subprocess import CalledProcessError
@@ -16,11 +14,12 @@ from sphinx_polyversion.json import GLOBAL_ENCODER, JSONable
 if TYPE_CHECKING:
     import json
 
+from docs.source.setup import setup
 import scripts.doc
 from sphinx_polyversion.sphinx import CommandBuilder, Placeholder
 
 
-class DffSphinxBuilder(CommandBuilder):
+class OlderDffSphinxBuilder(CommandBuilder):
     def __init__(
         self,
         source: str | PurePath,
@@ -82,30 +81,11 @@ class DffSphinxBuilder(CommandBuilder):
         # create output directory
         output_dir.mkdir(exist_ok=True, parents=True)
 
-        # Importing version-dependent module setup.py
-        root_dir = environment.path.absolute()
-        os.system("ls" + str(source_dir))
-        print(str(source_dir) + "/setup.py")
-        spec = importlib.util.spec_from_file_location("setup", str(source_dir) + "/setup.py")
-        print(spec)
-        setup_module = importlib.util.module_from_spec(spec)
-        print(setup_module)
-        sys.modules["setup"] = setup_module
-        print(sys.modules["setup"])
-        spec.loader.exec_module(setup_module)
-
         # doing DFF funcs before doc building
+        root_dir = environment.path.absolute()
         scripts.doc.dff_funcs(str(root_dir))
-        setup_module.setup(str(root_dir), str(output_dir))
+        setup(str(root_dir), str(output_dir))
         print("setup function finished probably")
-        
-        # Replacing old conf.py file with the newest one
-        # This shouldn't be there in builders for older versions.
-        newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
-        print(newer_conf_path)
-        older_conf_path = str(source_dir) + "/conf.py"
-        print(older_conf_path)
-        shutil.copyfile(newer_conf_path, older_conf_path)
         
         # pre hook
         if self.pre_cmd:

@@ -8,9 +8,9 @@ import pydata_sphinx_theme
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from utils.link_misc_files import link_misc_files  # noqa: E402
-from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+# from .utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
+# from .utils.link_misc_files import link_misc_files  # noqa: E402
+# from .utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 from sphinx_polyversion import load
 from sphinx_polyversion.git import GitRef
 
@@ -121,7 +121,9 @@ html_css_files = [
 ]
 
 
-json_url = "https://raw.githubusercontent.com/ZergLev/dialog_flow_framework/master/docs/source/_static/switcher.json"
+json_url = "https://zerglev.github.io/dialog_flow_framework/master/_static/switcher.json"
+# Need to make a better url. Could it be stored in dev? Should it be passed to older versions somehow?
+# It has to be addressed before release.
 
 # Theme options
 html_theme_options = {
@@ -156,7 +158,10 @@ html_theme_options = {
         # "version_match" : version,
         "version_match": current[0],
     },
-    "navbar_start": ["navbar-logo", "version-switcher"],
+    "navbar_persistent": ["search-button.html", "theme-switcher.html"],
+    # "navbar_align": "left",
+    "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
+    "show_version_warning_banner": True,
 }
 
 favicons = [

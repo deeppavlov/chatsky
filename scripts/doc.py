@@ -53,7 +53,7 @@ def docs(docker: Optional[DockerClient]):
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
         _build_drawio(docker)
-	#build_drawio should be called in all revisions and I don't know how yet
+        # build_drawio should be called in all revisions and I don't know how yet
         result = build.make_main(["-M", "clean", "docs/source", "docs/build"])
         poly_path = "docs/source/poly.py"
         poly_main([poly_path, poly_path])
@@ -61,6 +61,8 @@ def docs(docker: Optional[DockerClient]):
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
         exit(1)
+
+
 # Functions to be called from DffSphinxBuilder before build
 def dff_funcs(root_dir: str):
     apiref_dir = root_dir + "/docs/source/apiref"

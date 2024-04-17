@@ -1,17 +1,21 @@
 from pathlib import Path
 from datetime import datetime
+from functools import partial
 from sphinx_polyversion import *
 from sphinx_polyversion.git import *
+from sphinx_polyversion.git import closest_tag
 from sphinx_polyversion.pyvenv import Poetry
 # from sphinx_polyversion.sphinx import SphinxBuilder
 from docs.source.builder import DffSphinxBuilder
+from docs.source.OlderBuilder import OlderDffSphinxBuilder
 
 #: Regex matching the branches to build docs for
 BRANCH_REGEX = r"(dev|master|test_branch|test_branch_2|feat/sphinx_multiversion|sphinx_multiversion_test)"
 
 #: Regex matching the tags to build docs for
-TAG_REGEX = r"(0\.\d*[7-9]\..*)|(\d*[1-9]\..*)"
-# That was just 0.7+, need to change that to 0.8 on release.
+# TAG_REGEX = r"(v0.7.0|v0.8.0)"
+# That was just 0.7.0, need to change that on release to auto tags.
+TAG_REGEX = r"-"
 
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
@@ -45,6 +49,15 @@ apply_overrides(globals())
 root = Git.root(Path(__file__).parent)
 src = Path(SOURCE_DIR)
 
+# Use different builders for different versions
+# Doesn't work for now (polyversion dev's instructions don't work)
+"""
+BUILDER = {
+    None: DffSphinxBuilder(src, args=SPHINX_ARGS),  # default
+    "v0.7.0": OlderDffSphinxBuilder(src, args=SPHINX_ARGS), # only for v0.7.0
+}
+"""
+
 # Setup driver and run it
 DefaultDriver(
     root,
@@ -55,8 +68,10 @@ DefaultDriver(
         buffer_size=1 * 10**9,  # 1 GB
         predicate=file_predicate([src]), # exclude refs without source dir
     ),
+    # builder=BUILDER,
     builder=DffSphinxBuilder(src, args=SPHINX_ARGS),
     env=Poetry.factory(args=POETRY_ARGS),
+    selector=partial(closest_tag, root),
     template_dir=root / src / "templates",
     static_dir=root / src / "static",
     mock=MOCK_DATA,

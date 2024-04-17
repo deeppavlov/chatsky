@@ -18,7 +18,7 @@ def create_notebook_link(source: Path, destination: Path):
     print("destination = ", destination)
     # result = copy(source.resolve(), destination.resolve())
     # print(result)
-    
+
     # Changing this into a create_notebook_copy, cause version-dependent source
     # files get deleted along with a temp directory during polyversion docs build.
 
@@ -38,7 +38,10 @@ def generate_nb_gallery(package: str, files: List[Path]) -> str:
 
 
 def create_index_file(
-    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]], files: List[Path], destination: Path, source_dir: Path = "docs/source",
+    included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]],
+    files: List[Path],
+    destination: Path,
+    source_dir: Path = "docs/source",
 ):
     """
     Create a package index file.
@@ -58,13 +61,15 @@ def create_index_file(
 """
     if len(included) == 2:
         print("included[0] = ", included[0])
+        print("possibly better str tutorial path would be:", f"{str(source_dir)}/{included[0]}")
         print("possibly better tutorial path would be:", source_dir / included[0])
-        contents += generate_nb_gallery((included[0]), files)
+        contents += generate_nb_gallery(included[0], files)
     else:
         for subpackage in included[2]:
             contents += f"\n{subpackage[1]}\n{'-' * len(subpackage[1])}\n"
             print(f"{included[0]}.{subpackage[0]}")
-            contents += generate_nb_gallery(f"{str(source_dir)}/{included[0]}.{subpackage[0]}", files)
+            print(files)
+            contents += generate_nb_gallery(f"{included[0]}.{subpackage[0]}", files)
 
     destination.parent.mkdir(exist_ok=True, parents=True)
     destination.write_text(contents)
@@ -169,4 +174,6 @@ def generate_tutorial_links_for_notebook_creation(
     for included in include:
         print(included)
         print(dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"))
-        create_index_file(included, filtered_links, dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"), dest)
+        create_index_file(
+            included, filtered_links, dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"), dest
+        )
