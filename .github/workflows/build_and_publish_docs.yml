@@ -21,11 +21,6 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
-        with:
-          fetch-depth: 0
-      - run: |
-          git checkout dev
-          git checkout master
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
@@ -48,8 +43,9 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
+          git branch
           python -m poetry run poe docs
-
+        
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
@@ -76,4 +72,4 @@ jobs:
         with:
           branch: gh-pages
           folder: docs/build/
-          single-commit: True
+          clean: False
