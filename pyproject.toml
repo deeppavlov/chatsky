@@ -188,6 +188,12 @@ test_no_deps = "scripts.test:test_no_deps"
 test_all = "scripts.test:test_all"
 docs = "scripts.doc:docs"
 
+[tool.poe.tasks.poe_test]
+cmd = "pytest"
+
+[tool.poe.tasks.coverage]
+cmd = "pytest --cov-fail-under=100 --cov-report html --cov-report term --cov=dff"
+
 
 
 [build-system]
