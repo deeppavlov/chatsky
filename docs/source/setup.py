@@ -5,8 +5,6 @@ from docs.source.utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 from pathlib import Path
 
 def setup(root_dir: str, output_dir: str):
-    print("setup function called")
-    print(root_dir)
     link_misc_files(
         [
             "utils/db_benchmark/benchmark_schema.json",
@@ -14,7 +12,6 @@ def setup(root_dir: str, output_dir: str):
         ],
         root_dir=Path(root_dir),
     )
-    """
     generate_tutorial_links_for_notebook_creation(
         [
             ("tutorials.context_storages", "Context Storages"),
@@ -41,8 +38,6 @@ def setup(root_dir: str, output_dir: str):
         source=(root_dir + "/tutorials"),
         destination=(root_dir + "/docs/source/tutorials"),
     )
-    print(root_dir + "/tutorials")
-    print(root_dir + "/docs/source/tutorials")
     regenerate_apiref(
         [
             ("dff.context_storages", "Context Storages"),
@@ -56,5 +51,3 @@ def setup(root_dir: str, output_dir: str):
         ],
         root_dir=root_dir,
     )
-    """
-    print("setup function called")

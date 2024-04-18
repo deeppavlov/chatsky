@@ -14,13 +14,6 @@ def create_notebook_link(source: Path, destination: Path):
     destination.unlink(missing_ok=True)
     destination.parent.mkdir(exist_ok=True, parents=True)
     destination.symlink_to(source.resolve(), False)
-    print("source = ", source.resolve())
-    print("destination = ", destination)
-    # result = copy(source.resolve(), destination.resolve())
-    # print(result)
-
-    # Changing this into a create_notebook_copy, cause version-dependent source
-    # files get deleted along with a temp directory during polyversion docs build.
 
 
 def generate_nb_gallery(package: str, files: List[Path]) -> str:
@@ -41,7 +34,6 @@ def create_index_file(
     included: Union[Tuple[str, str], Tuple[str, str, List[Tuple[str, str]]]],
     files: List[Path],
     destination: Path,
-    source_dir: Path = "docs/source",
 ):
     """
     Create a package index file.
@@ -60,20 +52,14 @@ def create_index_file(
 {"=" * len(title)}
 """
     if len(included) == 2:
-        print("included[0] = ", included[0])
-        print("possibly better str tutorial path would be:", f"{str(source_dir)}/{included[0]}")
-        print("possibly better tutorial path would be:", source_dir / included[0])
         contents += generate_nb_gallery(included[0], files)
     else:
         for subpackage in included[2]:
             contents += f"\n{subpackage[1]}\n{'-' * len(subpackage[1])}\n"
-            print(f"{included[0]}.{subpackage[0]}")
-            print(files)
             contents += generate_nb_gallery(f"{included[0]}.{subpackage[0]}", files)
 
     destination.parent.mkdir(exist_ok=True, parents=True)
     destination.write_text(contents)
-    print("index file destination = ", destination)
 
 
 def sort_tutorial_file_tree(files: Set[Path]) -> List[Path]:
@@ -108,20 +94,9 @@ def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) 
         raise Exception(f"Entity {source} appeared to be a file during processing!")
     links = list()
     for entity in [obj for obj in sort_tutorial_file_tree(set(source.glob("./*"))) if not obj.name.startswith("__")]:
-        print(entity, "||", f"{base}")
-        print("My destination would be:", f"{base}.{entity.name}")
         base_name = f"{base}.{entity.name}"
-        print("source.name = ", f"{source.name}")
-        print("base_name = ", base_name)
         if entity.is_file() and entity.suffix in (".py", ".ipynb"):
             base_path = Path(base_name)
-            print("base_path = ", base_path)
-            print("dest = ", dest)
-            print("dest = ", dest)
-            print(str(dest))
-            print(str(dest) / base_path)
-            print(dest / str(base_path))
-            print(Path(dest / str(base_path)))
             dest_path = f"{base}"
             create_notebook_link(entity, Path(base_name))
             links += [base_path]
@@ -151,8 +126,6 @@ def generate_tutorial_links_for_notebook_creation(
     include = [("tutorials", "Tutorials")] if include is None else include
     exclude = list() if exclude is None else exclude
     dest = Path(destination)
-    print("dest =", destination)
-    print(dest)
 
     flattened = list()
     for package in include:
@@ -169,11 +142,6 @@ def generate_tutorial_links_for_notebook_creation(
         if link_included and not link_excluded:
             filtered_links += [link]
 
-    print(include)
-    print(filtered_links)
     for included in include:
-        print(included)
-        print(dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"))
         create_index_file(
-            included, filtered_links, dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"), dest
-        )
+            included, filtered_links, dest / Path(f"index_{included[1].replace(' ', '_').lower()}.rst"))

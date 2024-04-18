@@ -24,10 +24,8 @@ jobs:
         with:
           fetch-depth: 0
       - run: |
-          git remote show origin
           git checkout dev
           git checkout master
-          git branch --all
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
@@ -50,7 +48,6 @@ jobs:
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
         run: |
-          git branch
           python -m poetry run poe docs
 
       - name: remove jekyll theming

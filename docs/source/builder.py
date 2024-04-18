@@ -84,27 +84,19 @@ class DffSphinxBuilder(CommandBuilder):
 
         # Importing version-dependent module setup.py
         root_dir = environment.path.absolute()
-        os.system("ls" + str(source_dir))
-        print(str(source_dir) + "/setup.py")
         spec = importlib.util.spec_from_file_location("setup", str(source_dir) + "/setup.py")
-        print(spec)
         setup_module = importlib.util.module_from_spec(spec)
-        print(setup_module)
         sys.modules["setup"] = setup_module
-        print(sys.modules["setup"])
         spec.loader.exec_module(setup_module)
 
         # doing DFF funcs before doc building
         scripts.doc.dff_funcs(str(root_dir))
         setup_module.setup(str(root_dir), str(output_dir))
-        print("setup function finished probably")
         
         # Replacing old conf.py file with the newest one
         # This shouldn't be there in builders for older versions.
         newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
-        print(newer_conf_path)
         older_conf_path = str(source_dir) + "/conf.py"
-        print(older_conf_path)
         shutil.copyfile(newer_conf_path, older_conf_path)
         
         # pre hook

@@ -18,8 +18,6 @@ from sphinx_polyversion.git import GitRef
 
 data = load(globals())  # adds variables `current` and `revisions`
 current: GitRef = data['current']
-print("current is: ", current)
-print("current[0] is: ", current[0])
 
 _distribution_metadata = importlib.metadata.metadata('dff')
 
@@ -64,8 +62,6 @@ language = "en"
 pygments_style = "default"
 
 add_module_names = False
-
-print(os.getcwd())
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -155,11 +151,9 @@ html_theme_options = {
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
     "switcher": {
         "json_url": json_url,
-        # "version_match" : version,
         "version_match": current[0],
     },
     "navbar_persistent": ["search-button.html", "theme-switcher.html"],
-    # "navbar_align": "left",
     "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
     "show_version_warning_banner": True,
 }
