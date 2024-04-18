@@ -232,7 +232,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
+    def condition(ctx: Context, _: Pipeline) -> bool:  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False
