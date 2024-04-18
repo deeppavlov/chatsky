@@ -21,9 +21,7 @@ except ImportError:
     ],
 )
 async def test_get_current_label(context: Context, expected: set):
-    pipeline = Pipeline.from_script(
-        {"greeting_flow": {"start_node": {}}}, ("greeting_flow", "start_node"), validation_stage=False
-    )
+    pipeline = Pipeline.from_script({"greeting_flow": {"start_node": {}}}, ("greeting_flow", "start_node"))
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",

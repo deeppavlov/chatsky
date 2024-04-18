@@ -46,9 +46,7 @@ def cached_response(_):
     return external_data["counter"]
 
 
-def response(ctx: Context, _, *__, **___) -> Message:
-    if ctx.validation:
-        return Message()
+def response(_: Context, __: Pipeline) -> Message:
     return Message(
         text=f"{cached_response(1)}-{cached_response(2)}-{cached_response(3)}-"
         f"{cached_response(2)}-{cached_response(1)}"
