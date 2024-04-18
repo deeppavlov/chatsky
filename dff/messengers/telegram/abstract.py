@@ -7,12 +7,10 @@ that can be used to interact with the Telegram API.
 
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Callable, Optional, Sequence
+from typing import Callable
 from pydantic import FilePath
 
 from telegram import (
-    InlineKeyboardButton,
-    InlineKeyboardMarkup,
     InputMediaAnimation,
     InputMediaAudio,
     InputMediaDocument,
@@ -29,18 +27,17 @@ from dff.pipeline.types import PipelineRunnerFunction
 from dff.script.core.message import (
     Animation,
     Audio,
-    Button,
     CallbackQuery,
     Contact,
     DataAttachment,
     Document,
     Image,
     Invoice,
-    Keyboard,
     Location,
     Message,
     Poll,
     PollOption,
+    Sticker,
     Video,
 )
 
@@ -184,31 +181,9 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
 
         return message
 
-    def _create_keyboard(
-        self, buttons: Sequence[Sequence[Button]]
-    ) -> Optional[InlineKeyboardMarkup]:  # pragma: no cover
-        button_list = None
-        if len(buttons) > 0:
-            button_list = [
-                [
-                    InlineKeyboardButton(
-                        text=button.text,
-                        url=button.__pydantic_extra__.get("url", None),
-                        callback_data=button.data if button.data is not None else button.text,
-                    )
-                    for button in row
-                ]
-                for row in buttons
-            ]
-        if button_list is None:
-            return None
-        else:
-            return InlineKeyboardMarkup(button_list)
-
     async def cast_message_to_telegram_and_send(
         self, bot: ExtBot, chat_id: int, message: Message
     ) -> None:  # pragma: no cover
-        buttons = list()
         if message.attachments is not None:
             files = list()
             for attachment in message.attachments:
@@ -220,7 +195,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                         horizontal_accuracy=attachment.__pydantic_extra__.get("horizontal_accuracy", None),
                         disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
                         protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=self._create_keyboard(buttons),
+                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
                     )
                 if isinstance(attachment, Contact):
                     await bot.send_contact(
@@ -231,7 +206,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                         vcard=attachment.__pydantic_extra__.get("vcard", None),
                         disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
                         protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=self._create_keyboard(buttons),
+                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
                     )
                 if isinstance(attachment, Poll):
                     await bot.send_poll(
@@ -245,82 +220,157 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                         explanation=attachment.__pydantic_extra__.get("explanation", None),
                         explanation_parse_mode=attachment.__pydantic_extra__.get("explanation_parse_mode", None),
                         open_period=attachment.__pydantic_extra__.get("open_period", None),
-                        is_close=attachment.__pydantic_extra__.get("is_close", None),
+                        is_closed=attachment.__pydantic_extra__.get("is_closed", None),
                         disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
                         protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=self._create_keyboard(buttons),
+                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                    )
+                if isinstance(attachment, Sticker):
+                    sticker = await attachment.get_bytes(self) if attachment.id is None else attachment.id
+                    await bot.send_sticker(
+                        chat_id,
+                        sticker,
+                        disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
+                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                        emoji=attachment.__pydantic_extra__.get("emoji", None),
                     )
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        files += [
-                            InputMediaAudio(
-                                attachment_bytes,
-                                filename=attachment.__pydantic_extra__.get("filename", None),
-                                caption=attachment.__pydantic_extra__.get("caption", None),
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
+                        if len(message.attachments) > 1:
+                            files += [
+                                InputMediaAudio(
+                                    attachment_bytes,
+                                    filename=attachment.__pydantic_extra__.get("filename", None),
+                                    caption=attachment.__pydantic_extra__.get("caption", None),
+                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                                    performer=attachment.__pydantic_extra__.get("performer", None),
+                                    title=attachment.__pydantic_extra__.get("title", None),
+                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                ),
+                            ]
+                        else:
+                            await bot.send_audio(
+                                chat_id,
+                                audio=attachment_bytes,
                                 performer=attachment.__pydantic_extra__.get("performer", None),
                                 title=attachment.__pydantic_extra__.get("title", None),
+                                caption=message.text,
+                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
+                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
                                 thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                            ),
-                        ]
+                            )
+                            return
                 if isinstance(attachment, Video):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        files += [
-                            InputMediaVideo(
+                        if len(message.attachments) > 1:
+                            files += [
+                                InputMediaVideo(
+                                    attachment_bytes,
+                                    filename=attachment.__pydantic_extra__.get("filename", None),
+                                    caption=attachment.__pydantic_extra__.get("caption", None),
+                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                                    supports_streaming=attachment.__pydantic_extra__.get("supports_streaming", None),
+                                    has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
+                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                ),
+                            ]
+                        else:
+                            await bot.send_video(
+                                chat_id,
                                 attachment_bytes,
-                                filename=attachment.__pydantic_extra__.get("filename", None),
-                                caption=attachment.__pydantic_extra__.get("caption", None),
+                                caption=message.text,
+                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
+                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
                                 parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
                                 supports_streaming=attachment.__pydantic_extra__.get("supports_streaming", None),
                                 has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
                                 thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                            ),
-                        ]
+                                filename=attachment.__pydantic_extra__.get("filename", None),
+                            )
+                            return
                 if isinstance(attachment, Animation):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        files += [
-                            InputMediaAnimation(
+                        if len(message.attachments) > 1:
+                            files += [
+                                InputMediaAnimation(
+                                    attachment_bytes,
+                                    filename=attachment.__pydantic_extra__.get("filename", None),
+                                    caption=attachment.__pydantic_extra__.get("caption", None),
+                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                                    has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
+                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                ),
+                            ]
+                        else:
+                            await bot.send_animation(
+                                chat_id,
                                 attachment_bytes,
-                                filename=attachment.__pydantic_extra__.get("filename", None),
-                                caption=attachment.__pydantic_extra__.get("caption", None),
+                                caption=message.text,
                                 parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
+                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
                                 has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
                                 thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                            ),
-                        ]
+                                filename=attachment.__pydantic_extra__.get("filename", None),
+                            )
+                            return
                 if isinstance(attachment, Image):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        files += [
-                            InputMediaPhoto(
+                        if len(message.attachments) > 1:
+                            files += [
+                                InputMediaPhoto(
+                                    attachment_bytes,
+                                    filename=attachment.__pydantic_extra__.get("filename", None),
+                                    caption=attachment.__pydantic_extra__.get("caption", None),
+                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                                    has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
+                                ),
+                            ]
+                        else:
+                            await bot.send_photo(
+                                chat_id,
                                 attachment_bytes,
-                                filename=attachment.__pydantic_extra__.get("filename", None),
-                                caption=attachment.__pydantic_extra__.get("caption", None),
+                                caption=message.text,
+                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
+                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
                                 parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
                                 has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
-                            ),
-                        ]
+                                filename=attachment.__pydantic_extra__.get("filename", None),
+                            )
+                            return
                 if isinstance(attachment, Document):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        files += [
-                            InputMediaDocument(
-                                attachment_bytes,
-                                filename=attachment.__pydantic_extra__.get("filename", None),
-                                caption=attachment.__pydantic_extra__.get("caption", None),
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                disable_content_type_detection=attachment.__pydantic_extra__.get(
-                                    "disable_content_type_detection", None
+                        if len(message.attachments) > 1:
+                            files += [
+                                InputMediaDocument(
+                                    attachment_bytes,
+                                    filename=attachment.__pydantic_extra__.get("filename", None),
+                                    caption=attachment.__pydantic_extra__.get("caption", None),
+                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                                    disable_content_type_detection=attachment.__pydantic_extra__.get(
+                                        "disable_content_type_detection", None
+                                    ),
+                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
                                 ),
+                            ]
+                        else:
+                            await bot.send_document(
+                                chat_id,
+                                attachment_bytes,
+                                caption=message.text,
+                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
+                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
                                 thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                            ),
-                        ]
-                if isinstance(attachment, Keyboard):
-                    buttons = attachment.buttons
+                                filename=attachment.__pydantic_extra__.get("filename", None),
+                            )
+                            return
             if len(files) > 0:
                 await bot.send_media_group(
                     chat_id,
@@ -334,10 +384,10 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
             await bot.send_message(
                 chat_id,
                 message.text,
-                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
+                parse_mode=message.__pydantic_extra__.get("parse_mode", None),
                 disable_notification=message.__pydantic_extra__.get("disable_notification", None),
                 protect_content=message.__pydantic_extra__.get("protect_content", None),
-                reply_markup=self._create_keyboard(buttons),
+                reply_markup=message.__pydantic_extra__.get("reply_markup", None),
             )
 
     async def _on_event(
@@ -346,7 +396,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.effective_chat is not None and update.message is not None:
             message = create_message(update)
             message.original_message = update
-            resp = await self.callback(message, update.effective_chat.id)
+            resp = await self.pipeline_runner(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
                     self.application.bot, update.effective_chat.id, resp.last_response
@@ -361,4 +411,4 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         )
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
-        self.callback = pipeline_runner
+        self.pipeline_runner = pipeline_runner

@@ -10,7 +10,7 @@ from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 
-from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
+from pydantic import field_validator, FilePath, HttpUrl, BaseModel, model_validator
 
 from dff.messengers.common.interface import MessengerInterface
 
@@ -162,42 +162,16 @@ class Image(DataAttachment):
     pass
 
 
-class Document(DataAttachment):
-    """Represents a document file attachment."""
+class Sticker(Image):
+    """Represents a sticker as a file attachment."""
 
     pass
 
 
-class Button(DataModel):
-    """Represents a button of an inline keyboard."""
+class Document(DataAttachment):
+    """Represents a document file attachment."""
 
-    text: str
-    data: Optional[str] = None
-
-    @field_validator("data")
-    @classmethod
-    def data_length_should_be_constrained(cls, value: Optional[str]) -> Optional[str]:
-        if value is None:
-            return value
-        value_size = len(value.encode("utf-8"))
-        if 1 <= value_size <= 64 and value:
-            return value
-        else:
-            raise ValueError(f"Unexpected data length: {value_size} bytes")
-
-
-class Keyboard(Attachment):
-    """
-    This class is an Attachment that represents a keyboard object
-    that can be used for a chatbot or messaging application.
-    """
-
-    buttons: List[List[Button]] = Field(default_factory=list, min_length=1)
-
-    def __eq__(self, other):
-        if isinstance(other, Keyboard):
-            return self.buttons == other.buttons
-        return NotImplemented
+    pass
 
 
 class Message(DataModel):
