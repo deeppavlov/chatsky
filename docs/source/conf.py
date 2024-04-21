@@ -2,7 +2,6 @@ import os
 import sys
 import re
 import importlib.metadata
-import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
