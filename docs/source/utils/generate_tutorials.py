@@ -84,8 +84,8 @@ def sort_tutorial_file_tree(files: Set[Path]) -> List[Path]:
 
 def iterate_tutorials_dir_generating_links(source: Path, dest: Path, base: str) -> List[Path]:
     """
-    Recursively travel through tutorials directory, creating copies for all files under /tmp_dir/docs/source/tutorials/ root.
-    Created copied files have absolute path name matching source file tree structure.
+    Recursively travel through tutorials directory, creating links for all files under /tmp_dir/docs/source/tutorials/ root.
+    Created link files have absolute path name matching source file tree structure.
 
     :param source: Tutorials root (usually tutorials/).
     :param dest: Tutorials destination (usually docs/source/tutorials/).
