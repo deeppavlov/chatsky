@@ -8,9 +8,6 @@ import pydata_sphinx_theme
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-# from .utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-# from .utils.link_misc_files import link_misc_files  # noqa: E402
-# from .utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 from sphinx_polyversion import load
 from sphinx_polyversion.git import GitRef
 
@@ -116,10 +113,16 @@ html_css_files = [
     "css/custom.css",
 ]
 
+# Version switcher url
+switcher_url = "https://zerglev.github.io/dialog_flow_framework/master/_static/switcher.json"
+# Could make a better url. Could it be stored in dev? Should it be passed to older versions somehow? This should be addressed before release.
 
-json_url = "https://zerglev.github.io/dialog_flow_framework/master/_static/switcher.json"
-# Need to make a better url. Could it be stored in dev? Should it be passed to older versions somehow?
-# It has to be addressed before release.
+# Checking for dev before passing version to switcher
+if current[0] == "dev":
+    version_data = "dev"
+    # Need to use metadata to show the warning banner for unstable version.
+else:
+    version_data = version
 
 # Theme options
 html_theme_options = {
@@ -150,8 +153,8 @@ html_theme_options = {
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
     "switcher": {
-        "json_url": json_url,
-        "version_match": current[0],
+        "json_url": switcher_url,
+        "version_match" : version_data,
     },
     "navbar_persistent": ["search-button.html", "theme-switcher.html"],
     "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
