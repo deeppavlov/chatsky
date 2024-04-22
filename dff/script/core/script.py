@@ -75,8 +75,9 @@ class Script(BaseModel, extra="forbid"):
         :return: Normalized :py:class:`.Script`.
         """
         if isinstance(script, dict):
-            if Keywords.GLOBAL in script and all(
-                [isinstance(item, Keywords) for item in script[Keywords.GLOBAL].keys()]
+            if Keywords.GLOBAL in script and (
+                isinstance(script[Keywords.GLOBAL], Node)
+                or ([isinstance(item, Keywords) for item in script[Keywords.GLOBAL].keys()])
             ):
                 script[Keywords.GLOBAL] = {Keywords.GLOBAL: script[Keywords.GLOBAL]}
         return script
