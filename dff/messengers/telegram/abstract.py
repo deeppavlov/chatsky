@@ -49,8 +49,8 @@ except ImportError:
 
 
 class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
-    request_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document, Invoice}
-    response_attachments = {Location, Contact, Poll, Audio, Video, Animation, Image, Document}
+    request_attachments = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, Invoice}
+    response_attachments = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document}
 
     def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
         super().__init__(attachments_directory)
@@ -108,6 +108,15 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                     correct_option_id=update.poll.correct_option_id,
                     explanation=update.poll.explanation,
                     open_period=update.poll.open_period,
+                )
+            ]
+        if update.sticker is not None:
+            message.attachments += [
+                Sticker(
+                    id=update.sticker.file_id,
+                    is_animated=update.sticker.is_animated,
+                    is_video=update.sticker.is_video,
+                    type=update.sticker.type,
                 )
             ]
         if update.audio is not None:

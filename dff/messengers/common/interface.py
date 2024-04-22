@@ -36,7 +36,7 @@ class MessengerInterface(abc.ABC):
         if attachments_directory is not None and not str(attachments_directory.absolute()).startswith(tempdir):
             self.attachments_directory = attachments_directory
         else:
-            warning_start = f"Attachments directory for {type(self)} messenger interface"
+            warning_start = f"Attachments directory for {type(self).__name__} messenger interface"
             warning_end = "attachment data won't be preserved locally!"
             if attachments_directory is None:
                 self.attachments_directory = Path(tempdir)

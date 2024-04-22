@@ -10,7 +10,8 @@ from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 
-from pydantic import field_validator, FilePath, HttpUrl, BaseModel, model_validator
+from pydantic import Field, field_validator, FilePath, HttpUrl, BaseModel, model_validator
+from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterface
 
@@ -106,9 +107,9 @@ class DataAttachment(Attachment):
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
-        elif isinstance(self.source, HttpUrl):
-            with urlopen(self.source.unicode_string()) as file:
-                return file.read()
+        elif isinstance(self.source, Url):
+            with urlopen(self.source.unicode_string()) as url:
+                return url.read()
         else:
             return None
 
@@ -162,7 +163,7 @@ class Image(DataAttachment):
     pass
 
 
-class Sticker(Image):
+class Sticker(DataAttachment):
     """Represents a sticker as a file attachment."""
 
     pass
