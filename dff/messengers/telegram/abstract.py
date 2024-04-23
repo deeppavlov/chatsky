@@ -412,7 +412,8 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
     async def _on_event(
         self, update: Update, _: ContextTypes.DEFAULT_TYPE, create_message: Callable[[Update], Message]
     ) -> None:
-        if update.effective_chat is not None and update.message is not None:
+        data_available = update.message is not None or update.callback_query is not None
+        if update.effective_chat is not None and data_available:
             message = create_message(update)
             message.original_message = update
             resp = await self.pipeline_runner(message, update.effective_chat.id)
