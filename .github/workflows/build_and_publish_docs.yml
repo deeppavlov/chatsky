@@ -72,11 +72,16 @@ jobs:
           path: docs/build/
           retention-days: 3
 
-      - name: save branch and checkout to gh-pages
+      - name: save branch, checkout to gh-pages and update switcher.json
         run: |
           git add -f .
           git stash
+          cp docs/source/_static/switcher.json ./switcher.json
+          git add .
+          git stash
           git checkout gh-pages
+          rm -f ./switcher.json
+          git stash pop
 
       - name: delete previous docs build for this branch
         uses: EndBug/add-and-commit@v9.1.4
@@ -93,6 +98,7 @@ jobs:
           git stash pop
 
       - name: deploy website
+        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
