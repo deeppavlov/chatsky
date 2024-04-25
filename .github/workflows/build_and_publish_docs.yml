@@ -24,13 +24,6 @@ jobs:
         with:
           fetch-depth: 0
 
-      - name: fetch gh-pages branch
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: |
-          git checkout gh-pages
-          git checkout ${{ env.BRANCH_NAME }}
-
       - name: set up python 3.9
         uses: actions/setup-python@v5
         with:
@@ -72,33 +65,35 @@ jobs:
           path: docs/build/
           retention-days: 3
 
-      - name: save branch, checkout to gh-pages and update switcher.json
+      - name: get built version name
+        run: |
+          echo "VERSION=$(ls -1 docs/build | head -n 1)" >> "$GITHUB_ENV"
+
+      - name: update switcher.json file
+        run: |
+          cp docs/source/_static/switcher.json ./docs/build/switcher.json
+
+      - name: save changes and checkout to gh-pages
         run: |
           git add -f .
           git stash
-          cp docs/source/_static/switcher.json ./switcher.json
-          git add .
-          git stash
           git checkout gh-pages
-          rm -f ./switcher.json
-          git stash pop
 
       - name: delete previous docs build for this branch
         uses: EndBug/add-and-commit@v9.1.4
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         with:
-          remove: '-r --ignore-unmatch ./${{ env.BRANCH_NAME }}'
+          remove: '-r --ignore-unmatch ./${{ env.VERSION }}'
 
       - name: checkout to original branch and reapply changes
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
-          git checkout ${{ env.BRANCH_NAME }}
+          git checkout -
           git stash pop
 
       - name: deploy website
-        if: ${{ github.ref == 'refs/heads/master' || github.ref == 'refs/heads/dev' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
