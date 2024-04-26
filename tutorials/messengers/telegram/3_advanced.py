@@ -2,11 +2,10 @@
 """
 # Telegram: 3. Advanced
 
-The following tutorial shows how to run a regular DFF script in Telegram.
-It asks users for the '/start' command and then loops in one place.
+The following tutorial shows several advanced cases of user-to-bot interaction.
 
-Here, %mddoclink(api,messengers.telegram,PollingTelegramInterface)
-class and [telebot](https://pytba.readthedocs.io/en/latest/index.html)
+Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+class and [python-telegram-bot](https://docs.python-telegram-bot.org/)
 library are used for accessing telegram API in polling mode.
 
 Telegram API token is required to access telegram API.
@@ -26,6 +25,7 @@ from dff.script import conditions as cnd
 from dff.script import RESPONSE, TRANSITIONS, Message
 from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
+from dff.script.core.context import Context
 from dff.script.core.keywords import GLOBAL
 from dff.script.core.message import Document, Image, Location, Sticker
 from dff.utils.testing.common import is_interactive_mode
@@ -33,16 +33,19 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
-In order to integrate your script with Telegram, you need an instance of
-`TelegramMessenger` class and one of the following interfaces:
-`PollingMessengerInterface` or `WebhookMessengerInterface`.
+This bot shows different special telegram messenger interface use cases,
+such as:
 
-`TelegramMessenger` encapsulates the bot logic. Like Telebot,
-`TelegramMessenger` only requires a token to run. However, all parameters
-from the Telebot class can be passed as keyword arguments.
+1. Interactive keyboard with buttons.
+2. Text formatted with Markdown V2.
+3. Multiple attachments of different kind handling.
+4. Image with a spoiler.
+5. Document with a thumbnail.
+6. Raw representation of different data user can send to the bot.
 
-The two interfaces connect the bot to Telegram. They can be passed directly
-to the DFF `Pipeline` instance.
+Last option ("Raw attachments!") button might be especially interesting,
+because it shows how bot precepts different telegram attachments sent by user
+in terms and datastructures of Dialog Flow Framework.
 """
 
 #%%
@@ -80,6 +83,20 @@ document_data = {
 
 
 # %%
+formatted_request = r"""
+Here's your previous request\!
+```json
+{}
+```
+Run /start command again to restart\.
+"""
+
+def stringify_previous_request(ctx: Context, _: Pipeline) -> Message:
+    dump = ctx.last_request.model_dump_json(indent=4)
+    return Message(formatted_request.format(dump), parse_mode=ParseMode.MARKDOWN_V2)
+
+
+# %%
 script = {
     GLOBAL: {
         TRANSITIONS: {
@@ -109,6 +126,9 @@ script = {
                                     InlineKeyboardButton("Document with thumbnail!", callback_data="thumbnail"),
                                 ],
                                 [
+                                    InlineKeyboardButton("Raw attachments!", callback_data="raw"),
+                                ],
+                                [
                                     InlineKeyboardButton("Restart!", callback_data="restart"),
                                     InlineKeyboardButton("Quit!", callback_data="quit"),
                                 ],
@@ -122,6 +142,7 @@ script = {
                 "attachments_node": cnd.has_callback_query("attachments"),
                 "secret_node": cnd.has_callback_query("secret"),
                 "thumbnail_node": cnd.has_callback_query("thumbnail"),
+                "raw_init_node": cnd.has_callback_query("raw"),
                 "hmmm_node": cnd.has_callback_query("restart"),
                 "fallback_node": cnd.has_callback_query("quit"),
             }
@@ -149,6 +170,13 @@ script = {
                 "Here's your document with tumbnail! Run /start command again to restart.",
                 attachments=[Document(**document_data)],
             ),
+        },
+        "raw_init_node": {
+            RESPONSE: Message("Alright! Now send me any message and I'll send you it's raw data!"),
+            TRANSITIONS: { "raw_request_node": cnd.true },
+        },
+        "raw_request_node": {
+            RESPONSE: stringify_previous_request,
         },
         "fallback_node": {
             RESPONSE: Message("Bot has entered unrecoverable state :/\nRun /start command again to restart."),
