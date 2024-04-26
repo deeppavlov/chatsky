@@ -102,6 +102,7 @@ class DataAttachment(Attachment):
     cached_filename: Optional[FilePath] = None
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
+    use_cache: bool = True
 
     async def _cache_attachment(self, data: bytes, directory: Path) -> None:
         title = str(uuid4()) if self.title is None else self.title
@@ -113,7 +114,7 @@ class DataAttachment(Attachment):
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
-        elif isinstance(self.cached_filename, Path):
+        elif self.cached_filename is not None:
             with open(self.cached_filename, "rb") as file:
                 return file.read()
         elif isinstance(self.source, Url):
@@ -121,7 +122,8 @@ class DataAttachment(Attachment):
                 attachment_data = url.read()
         else:
             attachment_data = await from_interface.populate_attachment(self)
-        await self._cache_attachment(attachment_data, from_interface.attachments_directory)
+        if self.use_cache:
+            await self._cache_attachment(attachment_data, from_interface.attachments_directory)
         return attachment_data
 
     def __eq__(self, other):

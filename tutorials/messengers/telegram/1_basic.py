@@ -57,13 +57,6 @@ script = {
     }
 }
 
-# this variable is only for testing
-happy_path = (
-    (Message("/start"), Message("Hi")),
-    (Message("Hi"), Message("Hi")),
-    (Message("Bye"), Message("Hi")),
-)
-
 
 # %%
 interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
