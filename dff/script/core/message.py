@@ -9,6 +9,7 @@ from typing import Any, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
+from uuid import uuid4
 
 from pydantic import Field, field_validator, FilePath, HttpUrl, BaseModel, model_validator
 from pydantic_core import Url
@@ -98,20 +99,30 @@ class DataAttachment(Attachment):
     """
 
     source: Optional[Union[HttpUrl, FilePath]] = None
+    cached_filename: Optional[FilePath] = None
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
 
-    async def get_bytes(self, from_messenger_interface: MessengerInterface) -> Optional[bytes]:
-        if self.source is None:
-            await from_messenger_interface.populate_attachment(self)
+    async def _cache_attachment(self, data: bytes, directory: Path) -> None:
+        title = str(uuid4()) if self.title is None else self.title
+        self.cached_filename = directory / title
+        with open(self.cached_filename, "wb") as file:
+            file.write(data)
+
+    async def get_bytes(self, from_interface: MessengerInterface) -> Optional[bytes]:
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
+        elif isinstance(self.cached_filename, Path):
+            with open(self.cached_filename, "rb") as file:
+                return file.read()
         elif isinstance(self.source, Url):
             with urlopen(self.source.unicode_string()) as url:
-                return url.read()
+                attachment_data = url.read()
         else:
-            return None
+            attachment_data = await from_interface.populate_attachment(self)
+        await self._cache_attachment(attachment_data, from_interface.attachments_directory)
+        return attachment_data
 
     def __eq__(self, other):
         if isinstance(other, DataAttachment):

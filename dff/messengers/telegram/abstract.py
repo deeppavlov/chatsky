@@ -61,14 +61,13 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         self.application.add_handler(MessageHandler(ALL, self.on_message))
         self.application.add_handler(CallbackQueryHandler(self.on_callback))
 
-    async def populate_attachment(self, attachment: DataAttachment) -> None:  # pragma: no cover
-        if attachment.title is not None and attachment.id is not None:
-            file_name = self.attachments_directory / str(attachment.title)
-            if not file_name.exists():
-                await (await self.application.bot.get_file(attachment.id)).download_to_drive(file_name)
-            attachment.source = FilePath(file_name)
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:  # pragma: no cover
+        if attachment.id is not None:
+            file = await self.application.bot.get_file(attachment.id)
+            data = await file.download_as_bytearray()
+            return bytes(data)
         else:
-            raise ValueError(f"For attachment {attachment} title or id is not defined!")
+            raise ValueError(f"For attachment {attachment} id is not defined!")
 
     def extract_message_from_telegram(self, update: TelegramMessage) -> Message:  # pragma: no cover
         message = Message()

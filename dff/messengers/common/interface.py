@@ -56,9 +56,8 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
-    async def populate_attachment(self, attachment: DataAttachment) -> None:
-        if attachment.source is None:
-            raise NotImplementedError
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
+        raise RuntimeError(f"Messanger interface {type(self).__name__} can't populate attachment {attachment}!")
 
 
 class PollingMessengerInterface(MessengerInterface):
@@ -134,6 +133,9 @@ class PollingMessengerInterface(MessengerInterface):
             except BaseException as e:
                 self._on_exception(e)
                 break
+
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
+        raise RuntimeError(f"Plain pollin")
 
 
 class CallbackMessengerInterface(MessengerInterface):
