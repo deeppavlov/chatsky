@@ -13,20 +13,12 @@ def generate_switcher():
     
     dev_data = {
         "version": "dev",
-        "url": "https://zerglev.github.io/dialog_flow_framework/dev/index.html",
+        "url": "https://deeppavlov.github.io/dialog_flow_framework/dev/index.html",
     }
     switcher_json += [dev_data]
-    
-    master_data = {
-        "name": "master",
-        "version": "v0.7.0",
-        "url": "https://zerglev.github.io/dialog_flow_framework/master/index.html",
-        "preferred": "true",
-    }
-    switcher_json += [master_data]
-    
+
     for tag in tags:
-        url = "https://zerglev.github.io/dialog_flow_framework/" + str(tag) + "/index.html"
+        url = "https://deppavlov.github.io/dialog_flow_framework/" + str(tag) + "/index.html"
         tag_data = {
             "name": str(tag),
             "version": str(tag),
