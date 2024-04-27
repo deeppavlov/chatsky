@@ -2,6 +2,7 @@ import os
 import sys
 import re
 import importlib.metadata
+import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
@@ -113,8 +114,8 @@ html_css_files = [
 ]
 
 # Version switcher url
-switcher_url = "https://zerglev.github.io/dialog_flow_framework/master/_static/switcher.json"
-# Could make a better url. Could it be stored in dev? Should it be passed to older versions somehow? This should be addressed before release.
+switcher_url = "https://zerglev.github.io/dialog_flow_framework/switcher.json"
+# To-do: a separate switcher.json for dev and other branches
 
 # Checking for dev before passing version to switcher
 if current[0] == "dev":

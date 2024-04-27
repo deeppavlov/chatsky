@@ -90,6 +90,11 @@ class DffSphinxBuilder(CommandBuilder):
         sys.modules["setup"] = setup_module
         spec.loader.exec_module(setup_module)
         
+        """
+        # Cleaning outdated documentation build
+        sphinx.make_main(["-M", "clean", str(source_dir), str(output_dir)])
+        """
+        
         # doing DFF funcs before doc building
         scripts.doc.dff_funcs(str(root_dir))
         setup_module.setup(str(root_dir), str(output_dir))

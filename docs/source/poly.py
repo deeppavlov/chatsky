@@ -6,6 +6,11 @@ from sphinx_polyversion.git import *
 from sphinx_polyversion.git import closest_tag
 from sphinx_polyversion.pyvenv import Poetry
 from docs.source.builder import DffSphinxBuilder
+from docs.source.switcher_gen import generate_switcher
+import git
+
+# Generate switcher.json file
+generate_switcher()
 
 #: Regex matching the branches to build docs for
 # BRANCH_REGEX = r"((?!master).)*"
@@ -13,13 +18,25 @@ from docs.source.builder import DffSphinxBuilder
 # if the workflow is launched from it.
 BRANCH_REGEX = r".*"
 
-
 #: Regex matching the tags to build docs for
-TAG_REGEX = r"(v0.8.0)"
-# That was just 0.8.0, should change that to auto tags at some point.
-# Could just check always what version is being released, but I'm not sure how to do that yet.
-# For now this means someone has to change this on every single release to whatever the release tag will be. Potentially, if a mistake is made, this can be changed in dev and launched from there, just don't forget to fetch 'master' branch.
+TAG_REGEX = r"-"
 
+# Switch this to True to build docs for current branch locally.
+LOCAL = False
+
+repo = git.Repo('./')
+branch = repo.active_branch
+"""
+if LOCAL == True:
+# Local builds only build docs for the current branch and no tags, which right now deletes any existing docs for other branches. If you wish to build docs for more branches/tags, you can change it here, or you can also switch off cleaning the /docs/build directory by commenting the "clean_docs()" line in scripts.doc.py
+    BRANCH_REGEX = str(branch)
+    TAG_REGEX = r"-"
+elif str(branch) == "master":
+# Releases are handled here (pushes into master mean a release, so latest tag is built)
+    tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
+    latest_tag = tags[-1]
+    TAG_REGEX = str(latest_tag)
+"""
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
 
