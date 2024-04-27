@@ -84,7 +84,6 @@ class DffSphinxBuilder(CommandBuilder):
 
         # Importing version-dependent module setup.py
         root_dir = environment.path.absolute()
-        os.system("ls" + str(source_dir))
         spec = importlib.util.spec_from_file_location("setup", str(source_dir) + "/setup.py")
         setup_module = importlib.util.module_from_spec(spec)
         sys.modules["setup"] = setup_module
