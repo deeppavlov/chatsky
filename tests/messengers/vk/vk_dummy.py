@@ -1,9 +1,10 @@
 class VKDummy:
     def __init__(self):
-        self.requests = []
+        self.responses = []
     
     def __getattribute__(self, name):
-        def send_message(*args, **kwargs):
-            self.requests.append((name, args, kwargs))
-        return send_message
-    
+        def method(*args, **kwargs):
+            self.responses.append((name, args, kwargs))
+        if name in ("responses",):
+            return super(self).__getattribute__(name)
+        return method

@@ -210,6 +210,7 @@ class PollingVKInterface(PollingMessengerInterface):
 
     def _respond(self, response):
         for resp in response:
+            attachment_list = []
             if response.attachments is not None:
                 attachment_list = []
                 for attachment in response.attachments:
@@ -229,7 +230,9 @@ class PollingVKInterface(PollingMessengerInterface):
                         )
                     # elif isinstance(attachment, Link):
                     #     response.text += f"[{attachment.source}|{attachment.title}]"
-            self.bot.send_message(resp.last_response, resp.id, attachment_list)
+            # self.bot.send_message(resp.last_response, resp.id, attachment_list)
+            self.bot.send_message("resp", "id", attachment_list)
+            
 
         logger.info("Responded.")
 
