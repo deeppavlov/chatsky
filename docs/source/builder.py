@@ -91,7 +91,7 @@ class DffSphinxBuilder(CommandBuilder):
         spec.loader.exec_module(setup_module)
         
         """
-        # Cleaning outdated documentation build
+        # Cleaning outdated documentation build for local versions (not done yet)
         sphinx.make_main(["-M", "clean", str(source_dir), str(output_dir)])
         """
         

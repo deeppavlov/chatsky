@@ -13,10 +13,10 @@ import git
 generate_switcher()
 
 #: Regex matching the branches to build docs for
-# BRANCH_REGEX = r"((?!master).)*"
+BRANCH_REGEX = r"((?!master).)*"
 # Put all branches here except master, so docs can be built for any branch
 # if the workflow is launched from it.
-BRANCH_REGEX = r".*"
+# BRANCH_REGEX = r".*"
 
 #: Regex matching the tags to build docs for
 TAG_REGEX = r"-"
@@ -26,7 +26,7 @@ LOCAL = False
 
 repo = git.Repo('./')
 branch = repo.active_branch
-"""
+
 if LOCAL == True:
 # Local builds only build docs for the current branch and no tags, which right now deletes any existing docs for other branches. If you wish to build docs for more branches/tags, you can change it here, or you can also switch off cleaning the /docs/build directory by commenting the "clean_docs()" line in scripts.doc.py
     BRANCH_REGEX = str(branch)
@@ -36,7 +36,7 @@ elif str(branch) == "master":
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
     latest_tag = tags[-1]
     TAG_REGEX = str(latest_tag)
-"""
+
 #: Output dir relative to project root
 OUTPUT_DIR = "docs/build"
 

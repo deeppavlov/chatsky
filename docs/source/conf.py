@@ -115,12 +115,11 @@ html_css_files = [
 
 # Version switcher url
 switcher_url = "https://zerglev.github.io/dialog_flow_framework/switcher.json"
-# To-do: a separate switcher.json for dev and other branches
 
 # Checking for dev before passing version to switcher
 if current[0] == "dev":
     version_data = "dev"
-    # Need to use metadata to show the warning banner for unstable version.
+    # Possible to-do: show the warning banner for latest(unstable) version.
 else:
     version_data = version
 
