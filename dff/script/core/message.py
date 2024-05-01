@@ -5,7 +5,7 @@ The :py:class:`.Message` class is a universal data model for representing a mess
 DFF. It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Any, Optional, List, Union
+from typing import Any, Literal, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
@@ -49,6 +49,7 @@ class Attachment(DataModel):
 
 class CallbackQuery(Attachment):
     query_string: Optional[str]
+    type: Literal["callback_query"] = "callback_query"
 
 
 class Location(Attachment):
@@ -62,6 +63,7 @@ class Location(Attachment):
 
     longitude: float
     latitude: float
+    type: Literal["location"] = "location"
 
     def __eq__(self, other):
         if isinstance(other, Location):
@@ -73,6 +75,7 @@ class Contact(Attachment):
     phone_number: str
     first_name: str
     last_name: Optional[str]
+    type: Literal["contact"] = "contact"
 
 
 class Invoice(Attachment):
@@ -80,16 +83,19 @@ class Invoice(Attachment):
     description: str
     currency: str
     amount: int
+    type: Literal["invoice"] = "invoice"
 
 
 class PollOption(DataModel):
     text: str
     votes: int = Field(default=0)
+    type: Literal["poll_option"] = "poll_option"
 
 
 class Poll(Attachment):
     question: str
     options: List[PollOption]
+    type: Literal["poll"] = "poll"
 
 
 class DataAttachment(Attachment):
@@ -155,37 +161,37 @@ class DataAttachment(Attachment):
 class Audio(DataAttachment):
     """Represents an audio file attachment."""
 
-    pass
+    type: Literal["audio"] = "audio"
 
 
 class Video(DataAttachment):
     """Represents a video file attachment."""
 
-    pass
+    type: Literal["video"] = "video"
 
 
 class Animation(DataAttachment):
     """Represents an animation file attachment."""
 
-    pass
+    type: Literal["animation"] = "animation"
 
 
 class Image(DataAttachment):
     """Represents an image file attachment."""
 
-    pass
+    type: Literal["image"] = "image"
 
 
 class Sticker(DataAttachment):
     """Represents a sticker as a file attachment."""
 
-    pass
+    type: Literal["sticker"] = "sticker"
 
 
 class Document(DataAttachment):
     """Represents a document file attachment."""
 
-    pass
+    type: Literal["document"] = "document"
 
 
 class Message(DataModel):

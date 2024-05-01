@@ -7,12 +7,9 @@ that can be used to interact with the Telegram API.
 
 from pathlib import Path
 from typing import Callable, Optional
-from pydantic import FilePath
 
 try:
     from telegram import (
-        InlineKeyboardButton,
-        InlineKeyboardMarkup,
         InputMediaAnimation,
         InputMediaAudio,
         InputMediaDocument,
