@@ -44,7 +44,7 @@ jobs:
           TG_API_ID: ${{ secrets.TG_API_ID }}
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
-          LOCAL_BUILD: "True"
+          LOCAL_BUILD: "False"
         run: |
           python -m poetry run poe docs
 
