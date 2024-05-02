@@ -1,7 +1,7 @@
-from docs.source.utils.notebook import py_percent_to_notebook  # noqa: E402
-from docs.source.utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from docs.source.utils.link_misc_files import link_misc_files  # noqa: E402
-from docs.source.utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from docs.source.utils.notebook import py_percent_to_notebook
+from docs.source.utils.generate_tutorials import generate_tutorial_links_for_notebook_creation
+from docs.source.utils.link_misc_files import link_misc_files
+from docs.source.utils.regenerate_apiref import regenerate_apiref
 from pathlib import Path
 
 def setup(root_dir: str, output_dir: str):

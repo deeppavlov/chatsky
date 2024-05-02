@@ -26,10 +26,9 @@ branch = repo.active_branch
 
 # This variable is set to True during workflow build. It is 'False' during local builds.
 LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
-print(LOCAL_BUILD)
 
 if LOCAL_BUILD == "True":
-# Local builds only build docs for the current branch and no tags, which right now deletes any existing docs for other branches. If you wish to build docs for more branches/tags, you can change it here, or you can switch off cleaning the /docs/build directory by commenting the "clean_docs()" line in scripts.doc.py file
+# Local builds only build docs for the current branch and no tags.
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"
 elif str(branch) == "master":
