@@ -11,7 +11,6 @@ from colorama import init, Fore, Style
 from python_on_whales import DockerClient
 
 from .utils import docker_client
-from .clean import clean_docs
 
 from sphinx_polyversion.main import main as poly_main
 
@@ -55,13 +54,11 @@ def _build_drawio(root_dir: str):
 def docs(docker: Optional[DockerClient]):
     init()
     if docker is not None:
-        clean_docs()
         dotenv.load_dotenv(".env_file")
         os.environ["DISABLE_INTERACTIVE_MODE"] = "1"
-        result = build.make_main(["-M", "clean", "docs/source", "docs/build"])
         poly_path = "docs/source/poly.py"
         poly_main([poly_path, poly_path])
-        exit(result)
+        exit(0)
     else:
         print(f"{Fore.RED}Docs can be built on Linux platform only!{Style.RESET_ALL}")
         exit(1)

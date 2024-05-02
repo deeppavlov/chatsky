@@ -8,31 +8,32 @@ from sphinx_polyversion.pyvenv import Poetry
 from docs.source.builder import DffSphinxBuilder
 from docs.source.switcher_gen import generate_switcher
 import git
+import os
 
 # Generate switcher.json file
 generate_switcher()
 
 #: Regex matching the branches to build docs for
+# This regex stands for all branches except master, so docs can be built for any branch on demand. (if the workflow is launched from it)
 BRANCH_REGEX = r"((?!master).)*"
-# Put all branches here except master, so docs can be built for any branch
-# if the workflow is launched from it.
 # BRANCH_REGEX = r".*"
 
 #: Regex matching the tags to build docs for
 TAG_REGEX = r"-"
 
-# Switch this to True to build docs for current branch locally.
-LOCAL = False
-
 repo = git.Repo('./')
 branch = repo.active_branch
 
-if LOCAL == True:
-# Local builds only build docs for the current branch and no tags, which right now deletes any existing docs for other branches. If you wish to build docs for more branches/tags, you can change it here, or you can also switch off cleaning the /docs/build directory by commenting the "clean_docs()" line in scripts.doc.py
+# This variable is set to True during workflow build. It is 'False' during local builds.
+LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
+print(LOCAL_BUILD)
+
+if LOCAL_BUILD == "True":
+# Local builds only build docs for the current branch and no tags, which right now deletes any existing docs for other branches. If you wish to build docs for more branches/tags, you can change it here, or you can switch off cleaning the /docs/build directory by commenting the "clean_docs()" line in scripts.doc.py file
     BRANCH_REGEX = str(branch)
     TAG_REGEX = r"-"
 elif str(branch) == "master":
-# Releases are handled here (pushes into master mean a release, so latest tag is built)
+# Releases are handled here (pushes into master mean a release, so the latest tag is built)
     tags = sorted(repo.tags, key=lambda t: t.commit.committed_datetime)
     latest_tag = tags[-1]
     TAG_REGEX = str(latest_tag)

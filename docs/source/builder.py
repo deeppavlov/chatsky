@@ -17,6 +17,7 @@ if TYPE_CHECKING:
     import json
 
 import scripts.doc
+from scripts.clean import clean_docs
 from sphinx_polyversion.sphinx import CommandBuilder, Placeholder
 
 
@@ -88,22 +89,20 @@ class DffSphinxBuilder(CommandBuilder):
         setup_module = importlib.util.module_from_spec(spec)
         sys.modules["setup"] = setup_module
         spec.loader.exec_module(setup_module)
-        
-        """
-        # Cleaning outdated documentation build for local versions (not done yet)
-        sphinx.make_main(["-M", "clean", str(source_dir), str(output_dir)])
-        """
-        
+
+        # Cleaning outdated documentation build
+        clean_docs(str(output_dir))
+
         # doing DFF funcs before doc building
         scripts.doc.dff_funcs(str(root_dir))
         setup_module.setup(str(root_dir), str(output_dir))
-        
+
         # Replacing old conf.py file with the newest one
         # This shouldn't be there in builders for older versions.
         newer_conf_path = (os.getcwd() + "/docs/source/conf.py")
         older_conf_path = str(source_dir) + "/conf.py"
         shutil.copyfile(newer_conf_path, older_conf_path)
-        
+
         # pre hook
         if self.pre_cmd:
             out, err, rc = await environment.run(*map(replace, self.pre_cmd), env=env)

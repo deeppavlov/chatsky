@@ -115,13 +115,21 @@ html_css_files = [
 
 # Version switcher url
 switcher_url = "https://zerglev.github.io/dialog_flow_framework/switcher.json"
+# To-do: a separate switcher.json for dev and other branches
 
 # Checking for dev before passing version to switcher
 if current[0] == "dev":
     version_data = "dev"
-    # Possible to-do: show the warning banner for latest(unstable) version.
+    # Need to use metadata to show the warning banner for unstable version.
 else:
     version_data = version
+
+# Removing version switcher from local doc builds. (Or it would point to our Github Pages)
+LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
+if LOCAL_BUILD:
+    switcher_url = "./_static/switcher.json"
+# Possible TO-DO: generating switcher.json for local builds separately. Then change the prior url to new switcher. This is probably overkill.
+print(os.getcwd())
 
 # Theme options
 html_theme_options = {
