@@ -51,15 +51,6 @@ jobs:
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: save branch name without slashes
-        if: ${{ github.ref != 'refs/heads/master' }}
-        env:
-          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
-        run: |
-          BRANCH_NAME=${{ env.BRANCH_NAME }}
-          BRANCH_NAME=${BRANCH_NAME////_}
-          echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
-
       - name: get built version name
         run: |
           echo "VERSION=$(ls -1 docs/build | head -n 1)" >> "$GITHUB_ENV"
