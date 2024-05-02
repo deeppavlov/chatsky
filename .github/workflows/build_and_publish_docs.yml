@@ -48,6 +48,9 @@ jobs:
         run: |
           python -m poetry run poe docs
 
+      - name: remove jekyll theming
+        run: touch docs/build/.nojekyll
+
       - name: save branch name without slashes
         if: ${{ github.ref != 'refs/heads/master' }}
         env:
