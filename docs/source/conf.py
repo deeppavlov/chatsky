@@ -129,7 +129,6 @@ LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
 if LOCAL_BUILD:
     switcher_url = "./_static/switcher.json"
 # Possible TO-DO: generating switcher.json for local builds separately. Then change the prior url to new switcher. This is probably overkill.
-print(os.getcwd())
 
 # Theme options
 html_theme_options = {
