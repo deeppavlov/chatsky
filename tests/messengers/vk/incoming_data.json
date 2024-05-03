@@ -1,0 +1,42 @@
+{
+    "case_1": [
+        {
+            "ts": "4",
+            "updates": [
+              {
+                "type": "message_new",
+                "event_id": "c68dfb983247fea8ac98ea0ea59717df71d8064f",
+                "v": "5.131",
+                "object": {
+                  "message": {
+                    "text": "hello",
+                    "from_id": 1234
+                  },
+                  "client_info": {}
+                }
+              }
+            ]
+          },
+        {"text":"hello","commands":null,"attachments":null,"annotations":null,"misc":null}
+    ],
+    "case_2": [
+        {
+            "ts": "4",
+            "updates": [
+              {
+                "type": "message_new",
+                "event_id": "c68dfb983247fea8ac98ea0ea59717df71d8064f",
+                "v": "5.131",
+                "object": {
+                  "message": {
+                    "text": "goodbye",
+                    "from_id": 1234
+                  },
+                  "client_info": {}
+                }
+              }
+            ]
+          },
+        {"text":"hello","commands":null,"attachments":null,"annotations":null,"misc":null}
+    ]
+}
