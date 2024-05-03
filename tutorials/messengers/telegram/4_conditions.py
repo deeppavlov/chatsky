@@ -32,19 +32,23 @@ from dff.utils.testing.common import is_interactive_mode
 In our Telegram module, we adopted the system of filters
 available in the `pytelegrambotapi` library.
 
-You can use `telegram_condition` to filter text messages from telegram in various ways.
+You can use `telegram_condition` to filter
+text messages from telegram in various ways.
 
 - Setting the `update_type` will allow filtering by update type:
-  if you want the condition to trigger only on updates of the type `edited_message`,
-  set it to `UpdateType.EDITED_MESSAGE`.
+  if you want the condition to trigger only on updates of the type
+  `edited_message`, set it to `UpdateType.EDITED_MESSAGE`.
   The field defaults to `message`.
-- Setting the `command` argument will cause the telegram_condition to only react to listed commands.
+- Setting the `command` argument will cause
+  the telegram_condition to only react to listed commands.
 - `func` argument on the other hand allows you to define arbitrary conditions.
 - `regexp` creates a regular expression filter, etc.
 
 Note:
-It is possible to use `cnd.exact_match` as a condition (as seen in previous tutorials).
-However, the functionality of that approach is lacking:
+It is possible to use `cnd.exact_match` as a condition
+(as seen in previous tutorials). However, the functionality
+of that approach is lacking:
+
 At this moment only two fields of `Message` are set during update processing:
 
 - `text` stores the `text` field of `message` updates

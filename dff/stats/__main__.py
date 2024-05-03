@@ -25,6 +25,7 @@ Examples
             --outfile=config_artifact.zip
 
 """
+
 import sys
 import argparse
 from typing import Optional

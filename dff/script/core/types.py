@@ -6,6 +6,7 @@ are used to define the expected input and output of various components of the fr
 The types defined in this module include basic data types such as strings
 and lists, as well as more complex types that are specific to the framework.
 """
+
 from typing import Union, Callable, Tuple
 from enum import Enum, auto
 from typing_extensions import TypeAlias
@@ -14,6 +15,7 @@ from .keywords import Keywords
 
 LabelType: TypeAlias = Union[str, Keywords]
 """Label can be a casual string or :py:class:`~dff.script.Keywords`."""
+# todo: rename these to identifiers
 
 NodeLabel1Type: TypeAlias = Tuple[str, float]
 """Label type for transitions can be `[node_name, transition_priority]`."""
@@ -26,9 +28,13 @@ NodeLabel3Type: TypeAlias = Tuple[str, str, float]
 
 NodeLabelTupledType: TypeAlias = Union[NodeLabel1Type, NodeLabel2Type, NodeLabel3Type]
 """Label type for transitions can be one of three different types."""
+# todo: group all these types into a class
 
-NodeLabelType: TypeAlias = Union[Callable, NodeLabelTupledType, str]
-"""Label type for transitions can be one of three different types."""
+ConstLabel: TypeAlias = Union[NodeLabelTupledType, str]
+"""Label functions should be annotated with this type only."""
+
+Label: TypeAlias = Union[ConstLabel, Callable]
+"""Label type for transitions should be of this type only."""
 
 ConditionType: TypeAlias = Callable
 """Condition type can be only `Callable`."""

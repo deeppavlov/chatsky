@@ -20,37 +20,44 @@ We ask that you adhere to the following
 [commit message format](https://gist.github.com/joshbuchea/6f47e86d2510bce28f8e7f42ae84c716).
 
 ## Managing your workflow
-We use `make` as handy automation tool, which reads `makefile` to get specification for commands.
-`make` is a tool for command running automatization. Usage signature of the `make` is `make COMMAND`.
-If your environment supports `make` autocompletions you can use Tab to complete the `COMMAND`.
+We use `poetry` and `poethepoet` as handy automation tools, which reads `pyproject.toml` to get specification for commands.
+`poetry` is a tool for command running automatization. Usage signature of the `poetry` is `poetry run poe COMMAND`.
+If your environment does not support `poetry`, it can be installed as a regular python package with `pip install poetry`.
+`poethepoet` will be automatically installed upon installation of `devel` dependency group.
 
 ### Platforms
 
 We suggest using a linux-based platform for addon development.
 While the repository can be cloned to any platforms that can run `python`,
-the `make` and `docker` functionality will not be available for Windows out of the box.
+the `docker` functionality will not be available for Windows out of the box.
 
 ### Virtual Environment
 The most essential part is setting up the virtual environment.
-The following command create `venv` dir and installs all the dependencies, which are required for development.
+`poetry` automatically creates and manages it upon any command execution.
+By default, it will try using current virtual environment if there is any in the current directory or it will create a new one.
+You can display information about the current environment using `poetry env info` command.
+You can also switch to system-wide python environment with `poetry env use system` command.
+
+The following command creates a virtual environment dir and installs all the dependencies, which are required for development.
 ```bash
-make venv
+poetry install --with lint,test,devel,tutorials,docs --all-extras
 ```
 
-If you need to update the dependencies, run
+The environment will be activated automatically.
+
+If you want to delete all the virtual environments, run
 ```bash
-make clean && make venv
+poetry env remove --all
 ```
 
-Do not forget to activate the environment, if you aim to install any other dependencies.
-```bash
-source venv/bin/activate
-```
+### Updating Dependencies
 
-### Pre-commit
-We also provide a simple pre-commit hook for `git` that prevents you from committing unformatted code. To use it, run
+We use `poetry.lock` to ensure that all builds with the same lock file have the same 3rd-party library versions.
+This lets us know whether workflow fails due to our part or because a dependency update breaks something.
+
+In order to update versions specified in `poetry.lock`, run
 ```bash
-make pre_commit
+poetry update
 ```
 
 ### Documentation
@@ -59,13 +66,12 @@ to annotate your modules and objects. You can easily build the Sphinx documentat
 by activating the virtual environment and then running
 
 ```bash
-make doc
+poetry run poe docs
 ```
 
-After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.  
-WARNING! Because of the current patching solution, `make doc` modifies some of the source library code (`nbsphinx` and `autosummary`),
-so it is strongly advised to use it carefully and in virtual environment only.
-However, this behavior is likely to be changed in the future.
+Note that you'll need `pandoc` installed on your system in order to build docs.
+
+After that `docs/build` dir will be created and you can open index file `docs/build/index.html` in your browser of choice.
 
 #### Documentation links
 
@@ -93,28 +99,28 @@ It doesn't take previous formatting into account. See more about [black](https:/
 To format your code, run
 
 ```bash
-make format
+poetry run poe format
 ```
 
 ### Test
 We use `black`, `mypy`, `flake8` as code style checkers and `pytest` as unit-test runner.
 To run unit-tests only, use
 ```bash
-make test
+poetry run poe test_no_cov
 ```
 To execute all tests, including integration with DBs and APIs tests, run
 ```bash
-make test_all
+poetry run poe test_all
 ```
 for successful execution of this command `Docker` and `docker compose` are required.
 
 To make sure that the code satisfies only the style requirements, run
 ```bash
-make lint
+poetry run poe lint
 ```
 And if it doesn't, to automatically fix whatever is possible with `black`, run
 ```bash
-make format
+poetry run poe format
 ```
 
 Tests are configured via [`.env_file`](.env_file).
@@ -144,16 +150,12 @@ To launch both groups run
 ```bash
 docker compose --profile context_storage --profile stats up
 ```
-or
-```bash
-make docker_up
-```
 
-This will be done automatically when running `make test_all`.
+This will be done automatically when running `poetry run poe test_all`.
 
 ### Other provided features 
-You can get more info about `make` commands by `help`:
+You can get more info about `poetry` commands by `info`:
 
 ```bash
-make help
+poetry run poe info
 ```

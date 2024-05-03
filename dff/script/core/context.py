@@ -16,18 +16,21 @@ Another important feature of the context is data serialization.
 The context can be easily serialized to a format that can be stored or transmitted, such as JSON.
 This allows developers to save the context data and resume the conversation later.
 """
+
+from __future__ import annotations
 import logging
 from uuid import UUID, uuid4
-from typing import Any, Optional, Union, Dict, List, Set
+from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 
 from .types import NodeLabel2Type, ModuleName
 from .message import Message
 
-logger = logging.getLogger(__name__)
+if TYPE_CHECKING:
+    from dff.script.core.script import Node
 
-Node = BaseModel
+logger = logging.getLogger(__name__)
 
 
 def get_last_index(dictionary: dict) -> int:
@@ -85,14 +88,6 @@ class Context(BaseModel):
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
-    validation: bool = False
-    """
-    `validation` is a flag that signals that :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`,
-    while being initialized, checks the :py:class:`~dff.script.core.script.Script`.
-    The functions that can give not valid data
-    while being validated must use this flag to take the validation mode into account.
-    Otherwise the validation will not be passed.
-    """
     framework_states: Dict[ModuleName, Dict[str, Any]] = {}
     """
     `framework_states` is used for addons states or for
@@ -120,7 +115,7 @@ class Context(BaseModel):
         return {key: dictionary[key] for key in sorted(dictionary)}
 
     @classmethod
-    def cast(cls, ctx: Optional[Union["Context", dict, str]] = None, *args, **kwargs) -> "Context":
+    def cast(cls, ctx: Optional[Union[Context, dict, str]] = None, *args, **kwargs) -> Context:
         """
         Transform different data types to the objects of the
         :py:class:`~.Context` class.
@@ -139,7 +134,7 @@ class Context(BaseModel):
             ctx = Context.model_validate(ctx)
         elif isinstance(ctx, str):
             ctx = Context.model_validate_json(ctx)
-        elif not issubclass(type(ctx), Context):
+        elif not isinstance(ctx, Context):
             raise ValueError(
                 f"Context expected to be an instance of the Context class "
                 f"or an instance of the dict/str(json) type. Got: {type(ctx)}"
@@ -277,6 +272,3 @@ class Context(BaseModel):
             )
 
         return node
-
-
-Context.model_rebuild()

@@ -89,14 +89,14 @@ Example flow & script
                 RESPONSE: Message(),  # the response of the initial node is skipped
                 TRANSITIONS: {
                     ("greeting_flow", "greeting_node"):
-                        cnd.exact_match(Message(text="/start")),
+                        cnd.exact_match(Message("/start")),
                 },
             },
             "greeting_node": {
-                RESPONSE: Message(text="Hi!"),
+                RESPONSE: Message("Hi!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "game_start_node"):
-                        cnd.exact_match(Message(text="Hello!"))
+                        cnd.exact_match(Message("Hello!"))
                 }
             },
             "fallback_node": {
@@ -108,17 +108,17 @@ Example flow & script
         },
         "ping_pong_flow": {
             "game_start_node": {
-                RESPONSE: Message(text="Let's play ping-pong!"),
+                RESPONSE: Message("Let's play ping-pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"):
-                        cnd.exact_match(Message(text="Ping!")),
+                        cnd.exact_match(Message("Ping!")),
                 },
             },
             "response_node": {
-                RESPONSE: Message(text="Pong!"),
+                RESPONSE: Message("Pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"):
-                        cnd.exact_match(Message(text="Ping!")),
+                        cnd.exact_match(Message("Ping!")),
                 },
             },
         },
@@ -240,8 +240,8 @@ The latter allows you to customize the response based on the specific scenario a
 
     def sample_response(ctx: Context, _: Pipeline) -> Message:
         if ctx.misc["user"] == 'vegan':
-            return Message(text="Here is a list of vegan cafes.")
-        return Message(text="Here is a list of cafes.")
+            return Message("Here is a list of vegan cafes.")
+        return Message("Here is a list of cafes.")
 
 Handling Fallbacks
 ==================
@@ -265,7 +265,7 @@ This ensures a smoother user experience even when the bot encounters unexpected 
         if ctx.last_request is not None:
             if ctx.last_request.text != "/start" and ctx.last_label is None:
                 # an empty last_label indicates start_node
-                return Message(text="You should've started the dialog with '/start'")
+                return Message("You should've started the dialog with '/start'")
             else:
                 return Message(
                     text=f"That was against the rules!\n"
@@ -289,9 +289,9 @@ conversational service.
 .. code-block:: python
 
     happy_path = (
-        (Message(text="/start"), Message(text="Hi!")),
-        (Message(text="Hello!"), Message(text="Let's play ping-pong!")),
-        (Message(text="Ping!"), Message(text="Pong!"))
+        (Message("/start"), Message("Hi!")),
+        (Message("Hello!"), Message("Let's play ping-pong!")),
+        (Message("Ping!"), Message("Pong!"))
     )
 
 A special function is then used to ascertain complete identity of the messages taken from

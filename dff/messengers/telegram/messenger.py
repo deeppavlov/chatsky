@@ -6,6 +6,7 @@ The former inherits from the :py:class:`~TeleBot` class from the `pytelegrambota
 Using it, you can put Telegram update handlers inside your script and condition your transitions accordingly.
 
 """
+
 from pathlib import Path
 from typing import Union, List, Optional, Callable
 from enum import Enum
@@ -231,7 +232,7 @@ def telegram_condition(
         **kwargs,
     )
 
-    def condition(ctx: Context, _: Pipeline, *__, **___):  # pragma: no cover
+    def condition(ctx: Context, _: Pipeline) -> bool:  # pragma: no cover
         last_request = ctx.last_request
         if last_request is None:
             return False

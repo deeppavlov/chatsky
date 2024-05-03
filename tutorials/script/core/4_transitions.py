@@ -19,7 +19,7 @@ First of all, let's do all the necessary imports from DFF.
 # %%
 import re
 
-from dff.script import TRANSITIONS, RESPONSE, Context, NodeLabel3Type, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, ConstLabel, Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline
@@ -33,21 +33,34 @@ from dff.utils.testing.common import (
 """
 Let's define the functions with a special type of return value:
 
-    NodeLabel3Type == tuple[str, str, float]
+    ConstLabel == Flow Name; Node Name; Priority
 
-which means that transition returns a `tuple`
-with flow name, node name and priority.
+These functions return Labels that
+determine destination and priority of a specific transition.
+
+Labels consist of:
+
+1. Flow name of the destination node
+   (optional; defaults to flow name of the current node).
+2. Node name of the destination node
+   (required).
+3. Priority of the transition (more on that later)
+   (optional; defaults to pipeline's
+   [label_priority](%doclink(api,pipeline.pipeline.pipeline))).
+
+An example of omitting optional arguments is shown in the body of the
+`greeting_flow_n2_transition` function:
 """
 
 
 # %%
-def greeting_flow_n2_transition(_: Context, __: Pipeline) -> NodeLabel3Type:
-    return ("greeting_flow", "node2", 1.0)
+def greeting_flow_n2_transition(_: Context, __: Pipeline) -> ConstLabel:
+    return "greeting_flow", "node2"
 
 
-def high_priority_node_transition(flow_label, label):
-    def transition(_: Context, __: Pipeline) -> NodeLabel3Type:
-        return (flow_label, label, 2.0)
+def high_priority_node_transition(flow_name, node_name):
+    def transition(_: Context, __: Pipeline) -> ConstLabel:
+        return flow_name, node_name, 2.0
 
     return transition
 
@@ -66,22 +79,22 @@ Out of the box `dff.script.core.labels`
 offers the following methods:
 
 * `lbl.repeat()` returns transition handler
-    which returns `NodeLabelType` to the last node,
+    which returns `ConstLabel` to the last node,
 
 * `lbl.previous()` returns transition handler
-    which returns `NodeLabelType` to the previous node,
+    which returns `ConstLabel` to the previous node,
 
 * `lbl.to_start()` returns transition handler
-    which returns `NodeLabelType` to the start node,
+    which returns `ConstLabel` to the start node,
 
 * `lbl.to_fallback()` returns transition
-    handler which returns `NodeLabelType` to the fallback node,
+    handler which returns `ConstLabel` to the fallback node,
 
 * `lbl.forward()` returns transition handler
-    which returns `NodeLabelType` to the forward node,
+    which returns `ConstLabel` to the forward node,
 
 * `lbl.backward()` returns transition handler
-    which returns `NodeLabelType` to the backward node.
+    which returns `ConstLabel` to the backward node.
 
 There are three flows here: `global_flow`, `greeting_flow`, `music_flow`.
 """
@@ -106,7 +119,7 @@ toy_script = {
         },
         "fallback_node": {  # We get to this node if
             # an error occurred while the agent was running.
-            RESPONSE: Message(text="Ooops"),
+            RESPONSE: Message("Ooops"),
             TRANSITIONS: {
                 ("music_flow", "node1"): cnd.regexp(
                     r"talk about music"
@@ -126,7 +139,7 @@ toy_script = {
     },
     "greeting_flow": {
         "node1": {
-            RESPONSE: Message(text="Hi, how are you?"),
+            RESPONSE: Message("Hi, how are you?"),
             # When the agent goes to node1, we return "Hi, how are you?"
             TRANSITIONS: {
                 (
@@ -139,7 +152,7 @@ toy_script = {
             },
         },
         "node2": {
-            RESPONSE: Message(text="Good. What do you want to talk about?"),
+            RESPONSE: Message("Good. What do you want to talk about?"),
             TRANSITIONS: {
                 lbl.to_fallback(0.1): cnd.true(),  # third check
                 # lbl.to_fallback(0.1) is equivalent
@@ -158,11 +171,11 @@ toy_script = {
             },
         },
         "node3": {
-            RESPONSE: Message(text="Sorry, I can not talk about that now."),
+            RESPONSE: Message("Sorry, I can not talk about that now."),
             TRANSITIONS: {lbl.forward(): cnd.regexp(r"bye")},
         },
         "node4": {
-            RESPONSE: Message(text="Bye"),
+            RESPONSE: Message("Bye"),
             TRANSITIONS: {
                 "node1": cnd.regexp(r"hi|hello", re.IGNORECASE),  # first check
                 lbl.to_fallback(): cnd.true(),  # second check
@@ -204,7 +217,7 @@ toy_script = {
             },
         },
         "node4": {
-            RESPONSE: Message(text="That's all what I know."),
+            RESPONSE: Message("That's all what I know."),
             TRANSITIONS: {
                 greeting_flow_n2_transition: cnd.regexp(
                     r"next", re.IGNORECASE
@@ -222,76 +235,76 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(text="hi"), Message(text="Hi, how are you?")),
+    (Message("hi"), Message("Hi, how are you?")),
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),
     (
-        Message(text="talk about music."),
+        Message("talk about music."),
         Message(
             text="I love `System of a Down` group, "
             "would you like to talk about it?"
         ),
     ),
     (
-        Message(text="yes"),
+        Message("yes"),
         Message(
             text="System of a Down is "
             "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
-        Message(text="next"),
+        Message("next"),
         Message(
             text="The band achieved commercial success "
             "with the release of five studio albums."
         ),
     ),
     (
-        Message(text="back"),
+        Message("back"),
         Message(
             text="System of a Down is "
             "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
-        Message(text="repeat"),
+        Message("repeat"),
         Message(
             text="System of a Down is "
             "an Armenian-American heavy metal band formed in 1994."
         ),
     ),
     (
-        Message(text="next"),
+        Message("next"),
         Message(
             text="The band achieved commercial success "
             "with the release of five studio albums."
         ),
     ),
-    (Message(text="next"), Message(text="That's all what I know.")),
+    (Message("next"), Message("That's all what I know.")),
     (
-        Message(text="next"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("next"),
+        Message("Good. What do you want to talk about?"),
     ),
-    (Message(text="previous"), Message(text="That's all what I know.")),
-    (Message(text="next time"), Message(text="Bye")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="previous"), Message(text="Bye")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="nope"), Message(text="Ooops")),
-    (Message(text="hi"), Message(text="Hi, how are you?")),
-    (Message(text="stop"), Message(text="Ooops")),
-    (Message(text="previous"), Message(text="Hi, how are you?")),
+    (Message("previous"), Message("That's all what I know.")),
+    (Message("next time"), Message("Bye")),
+    (Message("stop"), Message("Ooops")),
+    (Message("previous"), Message("Bye")),
+    (Message("stop"), Message("Ooops")),
+    (Message("nope"), Message("Ooops")),
+    (Message("hi"), Message("Hi, how are you?")),
+    (Message("stop"), Message("Ooops")),
+    (Message("previous"), Message("Hi, how are you?")),
     (
-        Message(text="i'm fine, how are you?"),
-        Message(text="Good. What do you want to talk about?"),
+        Message("i'm fine, how are you?"),
+        Message("Good. What do you want to talk about?"),
     ),
     (
-        Message(text="let's talk about something."),
-        Message(text="Sorry, I can not talk about that now."),
+        Message("let's talk about something."),
+        Message("Sorry, I can not talk about that now."),
     ),
-    (Message(text="Ok, goodbye."), Message(text="Bye")),
+    (Message("Ok, goodbye."), Message("Bye")),
 )
 
 # %%

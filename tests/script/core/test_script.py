@@ -1,8 +1,9 @@
 # %%
 import itertools
 
+import pytest
+
 from dff.script import (
-    GLOBAL,
     TRANSITIONS,
     RESPONSE,
     MISC,
@@ -12,6 +13,7 @@ from dff.script import (
     Node,
     Message,
 )
+from dff.utils.testing.toy_script import TOY_SCRIPT, MULTIFLOW_SCRIPT
 
 
 def positive_test(samples, custom_class):
@@ -46,7 +48,7 @@ def node_creation(pre_response_proc):
     samples = {
         "transition": [std_func, "node", ("flow", "node"), ("node", 2.0), ("flow", "node", 2.0)],
         "condition": [std_func],
-        RESPONSE.name.lower(): [Message(text="text"), std_func, None],
+        RESPONSE.name.lower(): [Message("text"), std_func, None],
         pre_response_proc.name.lower(): [{}, {1: std_func}, None],
         PRE_TRANSITIONS_PROCESSING.name.lower(): [{}, {1: std_func}, None],
         MISC.name.lower(): [{}, {1: "var"}, None],
@@ -97,20 +99,10 @@ def node_test(node: Node):
 
 
 def test_node_exec():
-    # node = Node(
-    #     **{
-    #         TRANSITIONS.name.lower(): {"node": std_func},
-    #         RESPONSE.name.lower(): "text",
-    #         PROCESSING.name.lower(): {1: std_func},
-    #         PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
-    #         MISC.name.lower(): {"key": "val"},
-    #     }
-    # )
-    # node_test(node)
     node = Node(
         **{
             TRANSITIONS.name.lower(): {"node": std_func},
-            RESPONSE.name.lower(): Message(text="text"),
+            RESPONSE.name.lower(): Message("text"),
             PRE_RESPONSE_PROCESSING.name.lower(): {1: std_func},
             PRE_TRANSITIONS_PROCESSING.name.lower(): {1: std_func},
             MISC.name.lower(): {"key": "val"},
@@ -119,22 +111,12 @@ def test_node_exec():
     node_test(node)
 
 
-def test_script():
-    script_test(PRE_RESPONSE_PROCESSING)
-
-
-def script_test(pre_response_proc):
-    node_template = {
-        TRANSITIONS: {"node": std_func},
-        RESPONSE: Message(text="text"),
-        pre_response_proc: {1: std_func},
-        PRE_TRANSITIONS_PROCESSING: {1: std_func},
-        MISC: {"key": "val"},
-    }
-    script = Script(script={GLOBAL: node_template.copy(), "flow": {"node": node_template.copy()}})
-    node_test(script[GLOBAL][GLOBAL])
-    node_test(script["flow"]["node"])
-    assert list(script.keys()) == [GLOBAL, "flow"]
-    assert len(script.values()) == 2
-    assert list(script) == [GLOBAL, "flow"]
-    assert len(list(script.items())) == 2
+@pytest.mark.parametrize(
+    ["script"],
+    [
+        (TOY_SCRIPT,),
+        (MULTIFLOW_SCRIPT,),
+    ],
+)
+def test_script(script):
+    Script(script=script)

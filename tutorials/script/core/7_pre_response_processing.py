@@ -5,7 +5,8 @@
 This tutorial shows pre-response processing feature.
 
 Here, %mddoclink(api,script.core.keywords,Keywords.PRE_RESPONSE_PROCESSING)
-is demonstrated which can be used for additional context processing before response handlers.
+is demonstrated which can be used for
+additional context processing before response handlers.
 
 There are also some other %mddoclink(api,script.core.keywords,Keywords)
 worth attention used in this tutorial.
@@ -61,7 +62,7 @@ toy_script = {
             RESPONSE: Message(),
             TRANSITIONS: {("flow", "step_0"): cnd.true()},
         },
-        "fallback": {RESPONSE: Message(text="the end")},
+        "fallback": {RESPONSE: Message("the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
@@ -77,27 +78,27 @@ toy_script = {
             }
         },
         "step_0": {
-            RESPONSE: Message(text="first"),
+            RESPONSE: Message("first"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_1": {
             PRE_RESPONSE_PROCESSING: {"proc_name_1": add_prefix("l1_step_1")},
-            RESPONSE: Message(text="second"),
+            RESPONSE: Message("second"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_2": {
             PRE_RESPONSE_PROCESSING: {"proc_name_2": add_prefix("l2_step_2")},
-            RESPONSE: Message(text="third"),
+            RESPONSE: Message("third"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_3": {
             PRE_RESPONSE_PROCESSING: {"proc_name_3": add_prefix("l3_step_3")},
-            RESPONSE: Message(text="fourth"),
+            RESPONSE: Message("fourth"),
             TRANSITIONS: {lbl.forward(): cnd.true()},
         },
         "step_4": {
             PRE_RESPONSE_PROCESSING: {"proc_name_4": add_prefix("l4_step_4")},
-            RESPONSE: Message(text="fifth"),
+            RESPONSE: Message("fifth"),
             TRANSITIONS: {"step_0": cnd.true()},
         },
     },
@@ -106,15 +107,15 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message(), Message(text="l3_local: l2_local: l1_global: first")),
-    (Message(), Message(text="l3_local: l2_local: l1_step_1: second")),
-    (Message(), Message(text="l3_local: l2_step_2: l1_global: third")),
-    (Message(), Message(text="l3_step_3: l2_local: l1_global: fourth")),
+    (Message(), Message("l3_local: l2_local: l1_global: first")),
+    (Message(), Message("l3_local: l2_local: l1_step_1: second")),
+    (Message(), Message("l3_local: l2_step_2: l1_global: third")),
+    (Message(), Message("l3_step_3: l2_local: l1_global: fourth")),
     (
         Message(),
-        Message(text="l4_step_4: l3_local: l2_local: l1_global: fifth"),
+        Message("l4_step_4: l3_local: l2_local: l1_global: fifth"),
     ),
-    (Message(), Message(text="l3_local: l2_local: l1_global: first")),
+    (Message(), Message("l3_local: l2_local: l1_global: first")),
 )
 
 

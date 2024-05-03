@@ -18,9 +18,10 @@ from .core.types import (
     NodeLabel2Type,
     NodeLabel3Type,
     NodeLabelTupledType,
-    NodeLabelType,
+    ConstLabel,
+    Label,
     ConditionType,
     ModuleName,
     ActorStage,
 )
-from .core.message import Message, MultiMessage
+from .core.message import Message
