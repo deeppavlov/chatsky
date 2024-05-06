@@ -202,11 +202,7 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
-<<<<<<< HEAD
-    attachments: Optional[List[DataModel]] = None
-=======
     attachments: Optional[List[Attachment]] = None
->>>>>>> origin/feat/telegram_interface_upgrade
     annotations: Optional[dict] = None
     misc: Optional[dict] = None
     original_message: Optional[Any] = None
