@@ -33,7 +33,7 @@ from dff.utils.testing.common import (
 
 
 # %%
-def custom_response(ctx: Context, _: Pipeline, *args, **kwargs) -> Message:
+def custom_response(ctx: Context, _: Pipeline) -> Message:
     if ctx.validation:
         return Message()
     current_node = ctx.current_node
@@ -50,7 +50,7 @@ toy_script = {
             RESPONSE: Message(),
             TRANSITIONS: {("flow", "step_0"): cnd.true()},
         },
-        "fallback": {RESPONSE: Message(text="the end")},
+        "fallback": {RESPONSE: Message("the end")},
     },
     GLOBAL: {
         MISC: {

@@ -3,7 +3,8 @@ import sys
 import pathlib
 
 from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
+from dff.messengers.console import CLIMessengerInterface
+from dff.messengers.common import CallbackMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
 
@@ -13,19 +14,19 @@ SCRIPT = {
             RESPONSE: {
                 "text": "",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Ping"))},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
         },
         "node1": {
             RESPONSE: {
                 "text": "Pong",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Ping"))},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
         },
         "fallback_node": {
             RESPONSE: {
                 "text": "Ooops",
             },
-            TRANSITIONS: {"node1": cnd.exact_match(Message(text="Ping"))},
+            TRANSITIONS: {"node1": cnd.exact_match(Message("Ping"))},
         },
     }
 }
@@ -60,4 +61,4 @@ def test_callback_messenger_interface(monkeypatch):
     pipeline.run()
 
     for _ in range(0, 5):
-        assert interface.on_request(Message(text="Ping"), 0).last_response == Message(text="Pong")
+        assert interface.on_request(Message("Ping"), 0).last_response == Message("Pong")

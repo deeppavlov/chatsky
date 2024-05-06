@@ -4,12 +4,17 @@ Message
 The :py:class:`.Message` class is a universal data model for representing a message that should be supported by
 DFF. It only contains types and properties that are compatible with most messaging services.
 """
-from typing import Any, Optional, List, Union
+
+from typing import Any, Literal, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
+from uuid import uuid4
 
-from pydantic import field_validator, Field, FilePath, HttpUrl, BaseModel, model_validator
+from pydantic import Field, field_validator, FilePath, HttpUrl, BaseModel, model_validator
+from pydantic_core import Url
+
+from dff.messengers.common.interface import MessengerInterface
 
 
 class Session(Enum):
@@ -26,7 +31,7 @@ class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
     This class is a Pydantic BaseModel that serves as a base class for all DFF models.
     """
 
-    ...
+    pass
 
 
 class Command(DataModel):
@@ -35,10 +40,19 @@ class Command(DataModel):
     a command that can be executed in response to a user input.
     """
 
-    ...
+    pass
 
 
-class Location(DataModel):
+class Attachment(DataModel):
+    pass
+
+
+class CallbackQuery(Attachment):
+    query_string: Optional[str]
+    type: Literal["callback_query"] = "callback_query"
+
+
+class Location(Attachment):
     """
     This class is a data model that represents a geographical
     location on the Earth's surface.
@@ -49,6 +63,7 @@ class Location(DataModel):
 
     longitude: float
     latitude: float
+    type: Literal["location"] = "location"
 
     def __eq__(self, other):
         if isinstance(other, Location):
@@ -56,33 +71,74 @@ class Location(DataModel):
         return NotImplemented
 
 
-class Attachment(DataModel):
+class Contact(Attachment):
+    phone_number: str
+    first_name: str
+    last_name: Optional[str]
+    type: Literal["contact"] = "contact"
+
+
+class Invoice(Attachment):
+    title: str
+    description: str
+    currency: str
+    amount: int
+    type: Literal["invoice"] = "invoice"
+
+
+class PollOption(DataModel):
+    text: str
+    votes: int = Field(default=0)
+    type: Literal["poll_option"] = "poll_option"
+
+
+class Poll(Attachment):
+    question: str
+    options: List[PollOption]
+    type: Literal["poll"] = "poll"
+
+
+class DataAttachment(Attachment):
     """
     This class represents an attachment that can be either
     a file or a URL, along with an optional ID and title.
     """
 
     source: Optional[Union[HttpUrl, FilePath]] = None
+    cached_filename: Optional[FilePath] = None
     id: Optional[str] = None  # id field is made separate to simplify type validation
     title: Optional[str] = None
+    use_cache: bool = True
 
-    def get_bytes(self) -> Optional[bytes]:
-        if self.source is None:
-            return None
+    async def _cache_attachment(self, data: bytes, directory: Path) -> None:
+        title = str(uuid4()) if self.title is None else self.title
+        self.cached_filename = directory / title
+        with open(self.cached_filename, "wb") as file:
+            file.write(data)
+
+    async def get_bytes(self, from_interface: MessengerInterface) -> Optional[bytes]:
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
-        else:
-            with urlopen(self.source.unicode_string()) as file:
+        elif self.cached_filename is not None:
+            with open(self.cached_filename, "rb") as file:
                 return file.read()
+        elif isinstance(self.source, Url):
+            with urlopen(self.source.unicode_string()) as url:
+                attachment_data = url.read()
+        else:
+            attachment_data = await from_interface.populate_attachment(self)
+        if self.use_cache:
+            await self._cache_attachment(attachment_data, from_interface.attachments_directory)
+        return attachment_data
 
     def __eq__(self, other):
-        if isinstance(other, Attachment):
-            if self.title != other.title:
-                return False
+        if isinstance(other, DataAttachment):
             if self.id != other.id:
                 return False
-            return self.get_bytes() == other.get_bytes()
+            if self.title != other.title:
+                return False
+            return True
         return NotImplemented
 
     @model_validator(mode="before")
@@ -102,86 +158,40 @@ class Attachment(DataModel):
         return value
 
 
-class Audio(Attachment):
+class Audio(DataAttachment):
     """Represents an audio file attachment."""
 
-    pass
+    type: Literal["audio"] = "audio"
 
 
-class Video(Attachment):
+class Video(DataAttachment):
     """Represents a video file attachment."""
 
-    pass
+    type: Literal["video"] = "video"
 
 
-class Image(Attachment):
+class Animation(DataAttachment):
+    """Represents an animation file attachment."""
+
+    type: Literal["animation"] = "animation"
+
+
+class Image(DataAttachment):
     """Represents an image file attachment."""
 
-    pass
+    type: Literal["image"] = "image"
 
 
-class Document(Attachment):
+class Sticker(DataAttachment):
+    """Represents a sticker as a file attachment."""
+
+    type: Literal["sticker"] = "sticker"
+
+
+class Document(DataAttachment):
     """Represents a document file attachment."""
 
-    pass
-
-
-class Attachments(DataModel):
-    """This class is a data model that represents a list of attachments."""
-
-    files: List[Attachment] = Field(default_factory=list)
-
-    def __eq__(self, other):
-        if isinstance(other, Attachments):
-            return self.files == other.files
-        return NotImplemented
-
-
-class Link(DataModel):
-    """This class is a DataModel representing a hyperlink."""
-
-    source: HttpUrl
-    title: Optional[str] = None
-
-    @property
-    def html(self):
-        return f'<a href="{self.source}">{self.title if self.title else self.source}</a>'
-
-
-class Button(DataModel):
-    """
-    This class allows for the creation of a button object
-    with a source URL, a text description, and a payload.
-    """
-
-    source: Optional[HttpUrl] = None
-    text: str
-    payload: Optional[Any] = None
-
-    def __eq__(self, other):
-        if isinstance(other, Button):
-            if self.source != other.source:
-                return False
-            if self.text != other.text:
-                return False
-            first_payload = bytes(self.payload, encoding="utf-8") if isinstance(self.payload, str) else self.payload
-            second_payload = bytes(other.payload, encoding="utf-8") if isinstance(other.payload, str) else other.payload
-            return first_payload == second_payload
-        return NotImplemented
-
-
-class Keyboard(DataModel):
-    """
-    This class is a DataModel that represents a keyboard object
-    that can be used for a chatbot or messaging application.
-    """
-
-    buttons: List[Button] = Field(default_factory=list, min_length=1)
-
-    def __eq__(self, other):
-        if isinstance(other, Keyboard):
-            return self.buttons == other.buttons
-        return NotImplemented
+    type: Literal["document"] = "document"
 
 
 class Message(DataModel):
@@ -192,13 +202,31 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
+<<<<<<< HEAD
     attachments: Optional[List[DataModel]] = None
+=======
+    attachments: Optional[List[Attachment]] = None
+>>>>>>> origin/feat/telegram_interface_upgrade
     annotations: Optional[dict] = None
     misc: Optional[dict] = None
+    original_message: Optional[Any] = None
     # commands and state options are required for integration with services
     # that use an intermediate backend server, like Yandex's Alice
     # state: Optional[Session] = Session.ACTIVE
     # ui: Optional[Union[Keyboard, DataModel]] = None
+
+    def __init__(
+        self,
+        text: Optional[str] = None,
+        commands: Optional[List[Command]] = None,
+        attachments: Optional[Attachment] = None,
+        annotations: Optional[dict] = None,
+        misc: Optional[dict] = None,
+        **kwargs,
+    ):
+        super().__init__(
+            text=text, commands=commands, attachments=attachments, annotations=annotations, misc=misc, **kwargs
+        )
 
     def __eq__(self, other):
         if isinstance(other, Message):
@@ -212,9 +240,3 @@ class Message(DataModel):
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
-
-
-class MultiMessage(Message):
-    """This class represents a message that contains multiple sub-messages."""
-
-    messages: Optional[List[Message]] = None

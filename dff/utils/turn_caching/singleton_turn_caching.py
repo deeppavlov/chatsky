@@ -3,6 +3,7 @@ Singleton Turn Caching
 ----------------------
 This module contains functions for caching function results on each dialog turn.
 """
+
 import functools
 from typing import Callable, List, Optional
 

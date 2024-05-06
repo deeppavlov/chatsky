@@ -5,7 +5,9 @@ The conditions module contains functions that can be used to determine whether t
 are attached should be executed or not.
 The standard set of them allows user to setup dependencies between pipeline components.
 """
-from typing import Optional, ForwardRef
+
+from __future__ import annotations
+from typing import Optional, TYPE_CHECKING
 
 from dff.script import Context
 
@@ -16,7 +18,8 @@ from .types import (
     StartConditionCheckerAggregationFunction,
 )
 
-Pipeline = ForwardRef("Pipeline")
+if TYPE_CHECKING:
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 
 def always_start_condition(_: Context, __: Pipeline) -> bool:

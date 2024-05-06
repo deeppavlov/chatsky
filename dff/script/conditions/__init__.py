@@ -2,6 +2,7 @@
 
 from .std_conditions import (
     exact_match,
+    has_text,
     regexp,
     check_cond_seq,
     aggregate,
@@ -13,4 +14,5 @@ from .std_conditions import (
     false,
     agg,
     neg,
+    has_callback_query,
 )

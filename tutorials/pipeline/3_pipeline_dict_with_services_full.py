@@ -6,7 +6,9 @@ The following tutorial shows `pipeline` creation from dict
 and most important pipeline components.
 
 This tutorial is a more advanced version of the
-[previous tutorial](%doclink(tutorial,pipeline.3_pipeline_dict_with_services_basic)).
+[previous tutorial](
+%doclink(tutorial,pipeline.3_pipeline_dict_with_services_basic)
+).
 """
 
 # %pip install dff
@@ -17,7 +19,7 @@ import logging
 import urllib.request
 
 from dff.script import Context
-from dff.messengers.common import CLIMessengerInterface
+from dff.messengers.console import CLIMessengerInterface
 from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
 from dff.utils.testing.common import (
     check_happy_path,
@@ -106,9 +108,9 @@ def preprocess(ctx: Context, _, info: ServiceRuntimeInfo):
             webpage.headers.get_content_charset()
         )
         ctx.misc["another_detection"] = {
-            ctx.last_request.text: "online"
-            if "Example Domain" in web_content
-            else "offline"
+            ctx.last_request.text: (
+                "online" if "Example Domain" in web_content else "offline"
+            )
         }
 
 

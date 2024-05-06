@@ -2,9 +2,10 @@
 """
 # Responses: 3. Media
 
-Here, %mddoclink(api,script.core.message,Attachments) class is shown.
+Here, %mddoclink(api,script.core.message,Attachment) class is shown.
 Attachments can be used for attaching different media elements
-(such as %mddoclink(api,script.core.message,Image), %mddoclink(api,script.core.message,Document)
+(such as %mddoclink(api,script.core.message,Image),
+%mddoclink(api,script.core.message,Document)
 or %mddoclink(api,script.core.message,Audio)).
 
 They can be attached to any message but will only work if the chosen
@@ -17,7 +18,7 @@ They can be attached to any message but will only work if the chosen
 from dff.script import RESPONSE, TRANSITIONS
 from dff.script.conditions import std_conditions as cnd
 
-from dff.script.core.message import Attachments, Image, Message
+from dff.script.core.message import Image, Message
 
 from dff.pipeline import Pipeline
 from dff.utils.testing import (
@@ -32,7 +33,7 @@ img_url = "https://www.python.org/static/img/python-logo.png"
 toy_script = {
     "root": {
         "start": {
-            RESPONSE: Message(text=""),
+            RESPONSE: Message(""),
             TRANSITIONS: {("pics", "ask_picture"): cnd.true()},
         },
         "fallback": {
@@ -44,7 +45,7 @@ toy_script = {
     },
     "pics": {
         "ask_picture": {
-            RESPONSE: Message(text="Please, send me a picture url"),
+            RESPONSE: Message("Please, send me a picture url"),
             TRANSITIONS: {
                 ("pics", "send_one", 1.1): cnd.regexp(r"^http.+\.png$"),
                 ("pics", "send_many", 1.0): cnd.regexp(
@@ -56,14 +57,14 @@ toy_script = {
         "send_one": {
             RESPONSE: Message(
                 text="here's my picture!",
-                attachments=Attachments(files=[Image(source=img_url)]),
+                attachments=[Image(source=img_url)],
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
         "send_many": {
             RESPONSE: Message(
                 text="Look at my pictures",
-                attachments=Attachments(files=[Image(source=img_url)] * 10),
+                attachments=[Image(source=img_url)],
             ),
             TRANSITIONS: {("root", "fallback"): cnd.true()},
         },
@@ -83,33 +84,33 @@ toy_script = {
 }
 
 happy_path = (
-    (Message(text="Hi"), Message(text="Please, send me a picture url")),
+    (Message("Hi"), Message("Please, send me a picture url")),
     (
-        Message(text="no"),
-        Message(text="I cannot find the picture. Please, try again."),
+        Message("no"),
+        Message("I cannot find the picture. Please, try again."),
     ),
     (
-        Message(text=img_url),
+        Message(img_url),
         Message(
             text="here's my picture!",
-            attachments=Attachments(files=[Image(source=img_url)]),
+            attachments=[Image(source=img_url)],
         ),
     ),
     (
-        Message(text="ok"),
-        Message(text="Final node reached, send any message to restart."),
+        Message("ok"),
+        Message("Final node reached, send any message to restart."),
     ),
-    (Message(text="ok"), Message(text="Please, send me a picture url")),
+    (Message("ok"), Message("Please, send me a picture url")),
     (
-        Message(text=f"{img_url} repeat 10 times"),
+        Message(f"{img_url} repeat 10 times"),
         Message(
             text="Look at my pictures",
-            attachments=Attachments(files=[Image(source=img_url)] * 10),
+            attachments=[Image(source=img_url)],
         ),
     ),
     (
-        Message(text="ok"),
-        Message(text="Final node reached, send any message to restart."),
+        Message("ok"),
+        Message("Final node reached, send any message to restart."),
     ),
 )
 

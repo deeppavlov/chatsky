@@ -5,27 +5,27 @@ The Script module provides a set of `pydantic` models for representing the dialo
 These models are used to define the conversation flow, and to determine the appropriate response based on
 the user's input and the current state of the conversation.
 """
+
 # %%
-
+from __future__ import annotations
 import logging
-from typing import Callable, Optional, Any, Dict, Union
+from typing import Callable, Optional, Any, Dict, Union, TYPE_CHECKING
 
-from pydantic import BaseModel, field_validator
+from pydantic import BaseModel, field_validator, validate_call
 
 from .types import LabelType, NodeLabelType, ConditionType, NodeLabel3Type
 from .message import Message
 from .keywords import Keywords
-from .normalization import normalize_response, normalize_processing, normalize_condition, normalize_label, validate_call
-from typing import ForwardRef
+from .normalization import normalize_condition, normalize_label
+
+if TYPE_CHECKING:
+    from dff.script.core.context import Context
+    from dff.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
 
-Pipeline = ForwardRef("Pipeline")
-Context = ForwardRef("Context")
-
-
-class Node(BaseModel, extra="forbid"):
+class Node(BaseModel, extra="forbid", validate_assignment=True):
     """
     The class for the `Node` object.
     """
@@ -52,36 +52,6 @@ class Node(BaseModel, extra="forbid"):
             normalize_label(label): normalize_condition(condition) for label, condition in transitions.items()
         }
         return transitions
-
-    def run_response(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        """
-        Executes the normalized response.
-        See details in the :py:func:`~normalize_response` function of `normalization.py`.
-        """
-        response = normalize_response(self.response)
-        return response(ctx, pipeline, *args, **kwargs)
-
-    def run_pre_response_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        """
-        Executes pre-processing of responses.
-        """
-        return self.run_processing(self.pre_response_processing, ctx, pipeline, *args, **kwargs)
-
-    def run_pre_transitions_processing(self, ctx: Context, pipeline: Pipeline, *args, **kwargs) -> Context:
-        """
-        Executes pre-processing of transitions.
-        """
-        return self.run_processing(self.pre_transitions_processing, ctx, pipeline, *args, **kwargs)
-
-    def run_processing(
-        self, processing: Dict[Any, Callable], ctx: Context, pipeline: Pipeline, *args, **kwargs
-    ) -> Context:
-        """
-        Executes the normalized processing.
-        See details in the :py:func:`~normalize_processing` function of `normalization.py`.
-        """
-        processing = normalize_processing(processing)
-        return processing(ctx, pipeline, *args, **kwargs)
 
 
 class Script(BaseModel, extra="forbid"):

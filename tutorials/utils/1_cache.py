@@ -47,7 +47,7 @@ def cached_response(_):
     return external_data["counter"]
 
 
-def response(ctx: Context, _, *__, **___) -> Message:
+def response(ctx: Context, _) -> Message:
     if ctx.validation:
         return Message()
     return Message(
@@ -62,9 +62,9 @@ toy_script = {
 }
 
 happy_path = (
-    (Message(), Message(text="1-2-1-2")),
-    (Message(), Message(text="3-4-3-4")),
-    (Message(), Message(text="5-6-5-6")),
+    (Message(), Message("1-2-1-2")),
+    (Message(), Message("3-4-3-4")),
+    (Message(), Message("5-6-5-6")),
 )
 
 pipeline = Pipeline.from_script(toy_script, start_label=("flow", "node1"))

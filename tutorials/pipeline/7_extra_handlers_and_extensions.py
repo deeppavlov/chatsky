@@ -97,7 +97,7 @@ def after(_, __, info: ExtraHandlerRuntimeInfo):
     pipeline_info.update(
         {
             f"{info.component.path}_duration": datetime.now() - start_time,
-            f"{info.component.path}_success": info.component.execution_state.get(
+            f"{info.component.path}_state": info.component.execution_state.get(
                 info.component.path, ComponentExecutionState.NOT_RUN
             ),
         }

@@ -34,9 +34,7 @@ Let's consider some of the built-in callback instances to see how the context ca
 
       pattern = re.compile("[a-zA-Z]+")
 
-      def regexp_condition_handler(
-          ctx: Context, pipeline: Pipeline, *args, **kwargs
-      ) -> bool:
+      def regexp_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
           # retrieve the current request
           request = ctx.last_request
           if request.text is None:
