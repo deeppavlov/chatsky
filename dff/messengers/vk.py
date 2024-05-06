@@ -173,7 +173,7 @@ class VKWrapper:
         self.ts_current = updates["ts"]
         return updates["updates"]
 
-    def send_message(self, response, id, attachment_list):
+    def send_message(self, response: str, id, attachment_list):
         if attachment_list != []:
             for attachment in attachment_list:
                 data_to_send = self.upload_attachment(
@@ -186,9 +186,9 @@ class VKWrapper:
                 #     response.text += f"[{attachment.source}|{attachment.title}]"
             attachment_string = ",".join(attachment_list).strip(",")
 
-            api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&attachment={attachment_string}&group_id={self.group_id}&v=5.81&access_token={self.token}"
+            api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response}&attachment={attachment_string}&group_id={self.group_id}&v=5.81&access_token={self.token}"
         else:
-            api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response.text}&v=5.81&access_token={self.token}"
+            api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response}&v=5.81&access_token={self.token}"
 
         return requests.post(api_request).json()
 
