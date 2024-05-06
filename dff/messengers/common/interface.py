@@ -83,10 +83,16 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method running the request - response cycle once.
         """
+        exceptions = []
+        polling_loop = asyncio.get_running_loop()
+        polling_loop.add_signal_handler(SIGINT, exceptions.append("SIGINT"))
+        
         user_updates = self._request()
         responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
         self._respond(responses)
         await asyncio.sleep(timeout)
+        if "SIGINT" in exceptions:
+            raise KeyboardInterrupt
 
     async def connect(
         self,
