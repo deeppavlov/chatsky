@@ -27,7 +27,7 @@ from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
 from dff.script.core.context import Context
 from dff.script.core.keywords import GLOBAL
-from dff.script.core.message import Document, Image, Location, Sticker
+from dff.script.core.message import DataAttachment, Document, Image, Location, Sticker
 from dff.utils.testing.common import is_interactive_mode
 
 
@@ -50,7 +50,7 @@ in terms and datastructures of Dialog Flow Framework.
 
 #%%
 
-image_url = HttpUrl("https://avatars.githubusercontent.com/u/29918795?s=200&v=4")
+image_url = HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov.png")
 
 formatted_text = r"""
 Here's your formatted text\!  
@@ -75,7 +75,7 @@ image_data = {
 document_thumbnail = asyncio.run(Image(source=image_url).get_bytes(None))
 
 document_data = {
-    "source": HttpUrl("https://aclanthology.org/P18-4021.pdf"),
+    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
     "thumbnail": document_thumbnail,
@@ -94,6 +94,17 @@ Run /start command again to restart\.
 def stringify_previous_request(ctx: Context, _: Pipeline) -> Message:
     dump = ctx.last_request.model_dump_json(indent=4)
     return Message(formatted_request.format(dump), parse_mode=ParseMode.MARKDOWN_V2)
+
+
+# %%
+def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
+    atch = [a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)]
+    if len(atch) > 0:
+        atch_hash = hash(atch[0].get_bytes(pipe.messenger_interface))
+        resp_format = r"Here's your previous request hash: `{}`\!\nRun /start command again to restart\."
+        return Message(resp_format.format(atch_hash, parse_mode=ParseMode.MARKDOWN_V2))
+    else:
+        return Message("Last request did not contain any data attachment!\nRun /start command again to restart.")
 
 
 # %%
@@ -129,6 +140,9 @@ script = {
                                     InlineKeyboardButton("Raw attachments!", callback_data="raw"),
                                 ],
                                 [
+                                    InlineKeyboardButton("Attachment bytes hash!", callback_data="hash"),
+                                ],
+                                [
                                     InlineKeyboardButton("Restart!", callback_data="restart"),
                                     InlineKeyboardButton("Quit!", callback_data="quit"),
                                 ],
@@ -143,6 +157,7 @@ script = {
                 "secret_node": cnd.has_callback_query("secret"),
                 "thumbnail_node": cnd.has_callback_query("thumbnail"),
                 "raw_init_node": cnd.has_callback_query("raw"),
+                "hash_init_node": cnd.has_callback_query("hash"),
                 "hmmm_node": cnd.has_callback_query("restart"),
                 "fallback_node": cnd.has_callback_query("quit"),
             }
@@ -177,6 +192,13 @@ script = {
         },
         "raw_request_node": {
             RESPONSE: stringify_previous_request,
+        },
+        "hash_init_node": {
+            RESPONSE: Message("Alright! Now send me a message with data attachment (audio, video, animation, image, sticker or document)!"),
+            TRANSITIONS: { "hash_request_node": cnd.true },
+        },
+        "hash_request_node": {
+            RESPONSE: hash_data_attachment_request,
         },
         "fallback_node": {
             RESPONSE: Message("Bot has entered unrecoverable state :/\nRun /start command again to restart."),

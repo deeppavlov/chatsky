@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Responses: 3. Media
+# Responses: 2. Media
 
 Here, %mddoclink(api,script.core.message,Attachment) class is shown.
 Attachments can be used for attaching different media elements
