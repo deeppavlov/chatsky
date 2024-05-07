@@ -52,7 +52,7 @@ class DFFCLIMessengerInterface(CLIMessengerInterface):
 class TestMessage:
     @pytest.fixture
     def json_context_storage(self) -> DBContextStorage:
-        return JSONContextStorage(str(Path(__file__).parent / "serialization_database.json"))
+        return JSONContextStorage(f"file://{Path(__file__).parent / 'serialization_database.json'}")
 
     def clear_and_create_dir(self, dir: Path) -> Path:
         rmtree(dir, ignore_errors=True)
