@@ -51,12 +51,9 @@ class Pipeline:
     :param script: (required) A :py:class:`~.Script` instance (object or dict).
     :param start_label: (required) Actor start label.
     :param fallback_label: Actor fallback label.
-    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
-    :param validation_stage: This flag sets whether the validation stage is executed after actor creation.
-        It is executed by default. Defaults to `None`.
     :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-    :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
 
@@ -89,9 +86,7 @@ class Pipeline:
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
-        validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -122,9 +117,7 @@ class Pipeline:
                 start_label,
                 fallback_label,
                 label_priority,
-                validation_stage,
                 condition_handler,
-                verbose,
                 handlers,
             )
         if self.actor is None:
@@ -212,9 +205,7 @@ class Pipeline:
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
-        validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -233,12 +224,9 @@ class Pipeline:
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
-        :param validation_stage: This flag sets whether the validation stage is executed after actor creation.
-            It is executed by default. Defaults to `None`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
         :param parallelize_processing: This flag determines whether or not the functions
             defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
             of the script should be parallelized over respective groups.
@@ -266,9 +254,7 @@ class Pipeline:
             start_label=start_label,
             fallback_label=fallback_label,
             label_priority=label_priority,
-            validation_stage=validation_stage,
             condition_handler=condition_handler,
-            verbose=verbose,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
@@ -282,9 +268,7 @@ class Pipeline:
         start_label: NodeLabel2Type,
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
-        validation_stage: Optional[bool] = None,
         condition_handler: Optional[Callable] = None,
-        verbose: bool = True,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
         """
@@ -297,26 +281,16 @@ class Pipeline:
         :param fallback_label: Actor fallback label. The label of :py:class:`~dff.script.Script`.
             Dialog comes into that label if all other transitions failed,
             or there was an error while executing the scenario.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.NodeLabel3Type>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
-        :param validation_stage: This flag sets whether the validation stage is executed in actor.
-            It is executed by default. Defaults to `None`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
-        :param verbose: If it is `True`, logging is used in actor. Defaults to `True`.
         :param handlers: This variable is responsible for the usage of external handlers on
             the certain stages of work of :py:class:`~dff.script.Actor`.
 
             - key :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
             - value List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
         """
-        old_actor = self.actor
         self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
-        errors = self.actor.validate_script(self, verbose) if validation_stage is not False else []
-        if errors:
-            self.actor = old_actor
-            raise ValueError(
-                f"Found {len(errors)} errors: " + " ".join([f"{i}) {er}" for i, er in enumerate(errors, 1)])
-            )
 
     @classmethod
     def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":

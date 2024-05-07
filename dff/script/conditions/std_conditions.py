@@ -190,12 +190,13 @@ def has_last_labels(
     Return condition handler. This handler returns `True` if any label from
     last `last_n_indices` context labels is in
     the `flow_labels` list or in
-    the `~dff.script.NodeLabel2Type` list.
+    the `labels` list.
 
     :param flow_labels: List of labels to check. Every label has type `str`. Empty if not set.
     :param labels: List of labels corresponding to the nodes. Empty if not set.
     :param last_n_indices: Number of last utterances to check.
     """
+    # todo: rewrite docs & function itself
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
 
