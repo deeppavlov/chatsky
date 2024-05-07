@@ -50,7 +50,7 @@ in terms and datastructures of Dialog Flow Framework.
 
 #%%
 
-image_url = HttpUrl("https://avatars.githubusercontent.com/u/29918795?s=200&v=4")
+image_url = HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov.png")
 
 formatted_text = r"""
 Here's your formatted text\!  
@@ -75,7 +75,7 @@ image_data = {
 document_thumbnail = asyncio.run(Image(source=image_url).get_bytes(None))
 
 document_data = {
-    "source": HttpUrl("https://aclanthology.org/P18-4021.pdf"),
+    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
     "thumbnail": document_thumbnail,

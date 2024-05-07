@@ -46,30 +46,29 @@ sticker_data = {
 }
 
 audio_data = {
-    "source": HttpUrl("https://commondatastorage.googleapis.com/codeskulptor-assets/Evillaugh.ogg"),
-    "title": "Evil laughter (scary alert!)",
+    "source": HttpUrl("https://github.com/deeppavlov/dialog_flow_framework/blob/example-attachments/separation-william-king.mp3"),
+    "title": '"Separation" melody by William King',
 }
 
 video_data = {
-    # TODO: I need help, this video results in doenloading timeout, we need another example.
-    "source": HttpUrl("https://archive.org/download/Rick_Astley_Never_Gonna_Give_You_Up/Rick_Astley_Never_Gonna_Give_You_Up.mp4"),
-    "title": "Totally not suspicious video...",
+    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/crownfall-lags-nkognit0.mp4"),
+    "title": "Epic Dota2 gameplay by Nkognit0",
 }
 
 animation_data = {
     # For some reason, if we don't define filename explicitly, animation is sent as file.
-    "source": HttpUrl("https://media.giphy.com/media/v1.Y2lkPTc5MGI3NjExMmFuMGk5ODY0dG5pd242ODR6anB4bm4wZGN3cjg1N3A1M2ZxMjluYiZlcD12MV9pbnRlcm5hbF9naWZfYnlfaWQmY3Q9Zw/SvP3FgHsFVm7zwMdH6/giphy.gif"),
-    "title": "Some random free gif :/",
-    "filename": "random.gif",
+    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/hong-kong-simplyart4794.mp4"),
+    "title": "Hong Kong skyscraper views by Simplyart4794",
+    "filename": "hk.mp4",
 }
 
 image_data = {
-    "source": HttpUrl("https://avatars.githubusercontent.com/u/29918795?s=200&v=4"),
+    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov.png"),
     "title": "DeepPavlov logo",
 }
 
 document_data = {
-    "source": HttpUrl("https://aclanthology.org/P18-4021.pdf"),
+    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
 }
 
