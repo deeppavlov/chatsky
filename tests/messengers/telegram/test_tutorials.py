@@ -11,7 +11,7 @@ happy_paths_file = Path(__file__).parent / "test_happy_paths.json"
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     ["tutorial_module_name"],
-    [("1_basic"), ("2_attachments"), ("3_advanced")],
+    [("1_basic",), ("2_attachments",), ("3_advanced",)],
 )
 async def test_tutorials_memory(tutorial_module_name: str):
     module = import_module(f"tutorials.{dot_path_to_addon}.{tutorial_module_name}")
