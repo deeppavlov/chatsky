@@ -10,7 +10,22 @@ from dff.context_storages import DBContextStorage, JSONContextStorage
 from dff.messengers.common.interface import MessengerInterface
 from dff.messengers.console import CLIMessengerInterface
 from dff.script.core.context import Context
-from dff.script.core.message import Animation, Audio, CallbackQuery, Contact, Document, Image, Invoice, Location, DataAttachment, Message, Poll, PollOption, Sticker, Video
+from dff.script.core.message import (
+    Animation,
+    Audio,
+    CallbackQuery,
+    Contact,
+    Document,
+    Image,
+    Invoice,
+    Location,
+    DataAttachment,
+    Message,
+    Poll,
+    PollOption,
+    Sticker,
+    Video,
+)
 
 EXAMPLE_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
 
@@ -60,12 +75,16 @@ class TestMessage:
         [
             (
                 DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
-                DataAttachment(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"),
+                DataAttachment(
+                    source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"
+                ),
                 True,
             ),
             (
                 DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-                DataAttachment(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="2"),
+                DataAttachment(
+                    source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="2"
+                ),
                 False,
             ),
             (
@@ -91,39 +110,17 @@ class TestMessage:
     @pytest.mark.parametrize(
         "attachment",
         [
-            (
-                CallbackQuery(query_string="some_callback_query_data"),
-            ),
-            (
-                Location(longitude=53.055955, latitude=102.891407),
-            ),
-            (
-                Contact(phone_number="8-900-555-35-35", first_name="Hope", last_name="Credit")
-            ),
-            (
-                Invoice(title="Payment", description="No comment", currency="USD", amount=300)
-            ),
-            (
-                Poll(question="Which?", options=[PollOption(text="1", votes=2), PollOption(text="2", votes=5)])
-            ),
-            (
-                Audio(source="https://github.com/deeppavlov/dialog_flow_framework/blob/example-attachments/separation-william-king.mp3")
-            ),
-            (
-                Video(source="https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/crownfall-lags-nkognit0.mp4")
-            ),
-            (
-                Animation(source="https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/hong-kong-simplyart4794.mp4")
-            ),
-            (
-                Image(source="https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov.png")
-            ),
-            (
-                Sticker(id="some_sticker_identifier")
-            ),
-            (
-                Document(source="https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov-article.pdf")
-            ),
+            (CallbackQuery(query_string="some_callback_query_data"),),
+            (Location(longitude=53.055955, latitude=102.891407),),
+            (Contact(phone_number="8-900-555-35-35", first_name="Hope", last_name="Credit")),
+            (Invoice(title="Payment", description="No comment", currency="USD", amount=300)),
+            (Poll(question="Which?", options=[PollOption(text="1", votes=2), PollOption(text="2", votes=5)])),
+            (Audio(source="https://example.com/some_audio.mp3")),
+            (Video(source="https://example.com/some_video.mp4")),
+            (Animation(source="https://example.com/some_animation.gif")),
+            (Image(source="https://example.com/some_image.png")),
+            (Sticker(id="some_sticker_identifier")),
+            (Document(source="https://example.com/some_document.pdf")),
         ],
     )
     def test_attachment_serialize(self, json_context_storage: DBContextStorage, attachment: DataAttachment):

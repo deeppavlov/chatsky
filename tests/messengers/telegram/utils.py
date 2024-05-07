@@ -18,7 +18,7 @@ class MockBot(BaseModel):
 
     async def get_file(self, file_id: str) -> File:
         return await self._original_bot.get_file(file_id)
-    
+
     def __getattribute__(self, name: str) -> Any:
         def set_trace(*args, **kwargs):
             self._latest_trace = (name, args, kwargs)
@@ -42,7 +42,9 @@ class MockApplication(BaseModel):
         interface.pipeline_runner = instance._wrapped_pipeline_runner
         return instance
 
-    async def _wrapped_pipeline_runner(self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None) -> Context:
+    async def _wrapped_pipeline_runner(
+        self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
         self._latest_ctx = await self._interface.pipeline_runner(message, ctx_id, update_ctx_misc)
         return self._latest_ctx
 
@@ -55,7 +57,7 @@ class MockApplication(BaseModel):
             else:
                 update = Update()
                 loop.run_until_complete(self._interface.on_callback(update, None))  # type: ignore
-            assert self._latest_ctx is not None, "During pipeline runner execution, no context was produced!" 
+            assert self._latest_ctx is not None, "During pipeline runner execution, no context was produced!"
             assert self._latest_ctx.last_request == received, "Expected request message is not equal to expected!"
             assert self._latest_ctx.last_response == response, "Expected response message is not equal to expected!"
             assert self.mock_bot._latest_trace == trace, "Expected trace is not equal to expected!"

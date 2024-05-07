@@ -23,22 +23,40 @@ from dff.script import conditions as cnd
 from dff.script import GLOBAL, RESPONSE, TRANSITIONS, Message
 from dff.messengers.telegram import PollingTelegramInterface
 from dff.pipeline import Pipeline
-from dff.script.core.message import Animation, Audio, Contact, Document, Location, Image, Poll, PollOption, Sticker, Video
+from dff.script.core.message import (
+    Animation,
+    Audio,
+    Contact,
+    Document,
+    Location,
+    Image,
+    Poll,
+    PollOption,
+    Sticker,
+    Video,
+)
 from dff.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]
 """
 Example attachment data is specified below in form of dictionaries.
-List of attachments that telegram messenger interface can send can be found here:
+List of attachments that telegram messenger interface can send can
+be found here:
 %mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface#response_attachments).
 """
 
 # %%
 
+EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
+
 location_data = {"latitude": 50.65, "longitude": 3.916667}
 
-contact_data = {"phone_number": "8-900-555-35-35", "first_name": "Hope", "last_name": "Credit"}
+contact_data = {
+    "phone_number": "8-900-555-35-35",
+    "first_name": "Hope",
+    "last_name": "Credit",
+}
 
 sticker_data = {
     "id": "CAACAgIAAxkBAAErAAFXZibO5ksphCKSXSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE",
@@ -46,29 +64,35 @@ sticker_data = {
 }
 
 audio_data = {
-    "source": HttpUrl("https://github.com/deeppavlov/dialog_flow_framework/blob/example-attachments/separation-william-king.mp3"),
+    "source": HttpUrl(
+        f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
+    ),
     "title": '"Separation" melody by William King',
 }
 
 video_data = {
-    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/crownfall-lags-nkognit0.mp4"),
+    "source": HttpUrl(
+        f"{EXAMPLE_ATTACHMENT_SOURCE}/crownfall-lags-nkognit0.mp4"
+    ),
     "title": "Epic Dota2 gameplay by Nkognit0",
 }
 
 animation_data = {
     # For some reason, if we don't define filename explicitly, animation is sent as file.
-    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/hong-kong-simplyart4794.mp4"),
+    "source": HttpUrl(
+        f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.mp4"
+    ),
     "title": "Hong Kong skyscraper views by Simplyart4794",
     "filename": "hk.mp4",
 }
 
 image_data = {
-    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov.png"),
+    "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"),
     "title": "DeepPavlov logo",
 }
 
 document_data = {
-    "source": HttpUrl("https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov-article.pdf"),
+    "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
 }
 
@@ -82,15 +106,21 @@ The bot below sends different attachments on request.
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("main_flow", "location_node"): cnd.exact_match(Message("location")),
+            ("main_flow", "location_node"): cnd.exact_match(
+                Message("location")
+            ),
             ("main_flow", "contact_node"): cnd.exact_match(Message("contact")),
             ("main_flow", "poll_node"): cnd.exact_match(Message("poll")),
             ("main_flow", "sticker_node"): cnd.exact_match(Message("sticker")),
             ("main_flow", "audio_node"): cnd.exact_match(Message("audio")),
             ("main_flow", "video_node"): cnd.exact_match(Message("video")),
-            ("main_flow", "animation_node"): cnd.exact_match(Message("animation")),
+            ("main_flow", "animation_node"): cnd.exact_match(
+                Message("animation")
+            ),
             ("main_flow", "image_node"): cnd.exact_match(Message("image")),
-            ("main_flow", "document_node"): cnd.exact_match(Message("document")),
+            ("main_flow", "document_node"): cnd.exact_match(
+                Message("document")
+            ),
         }
     },
     "main_flow": {
@@ -174,7 +204,7 @@ script = {
                 '"video", "animation", "image" and "document".'
             ),
         },
-    }
+    },
 }
 
 

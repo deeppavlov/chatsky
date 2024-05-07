@@ -134,9 +134,6 @@ class PollingMessengerInterface(MessengerInterface):
                 self._on_exception(e)
                 break
 
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
-        raise RuntimeError(f"Plain pollin")
-
 
 class CallbackMessengerInterface(MessengerInterface):
     """
