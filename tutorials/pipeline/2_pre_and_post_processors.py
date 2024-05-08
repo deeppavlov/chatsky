@@ -70,7 +70,7 @@ pipeline = Pipeline.from_script(
     context_storage={},  # `context_storage` - a dictionary or
     # a `DBContextStorage` instance,
     # a place to store dialog contexts
-    messenger_interface=CLIMessengerInterface(),
+    messenger_interfaces=[CLIMessengerInterface()],
     # `messenger_interface` - a message channel adapter,
     # it's not used in this tutorial
     pre_services=[ping_processor],

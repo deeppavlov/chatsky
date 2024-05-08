@@ -131,11 +131,11 @@ pipeline_dict = {
     "script": TOY_SCRIPT,
     "start_label": ("greeting_flow", "start_node"),
     "fallback_label": ("greeting_flow", "fallback_node"),
-    "messenger_interface": CLIMessengerInterface(
+    "messenger_interfaces": [CLIMessengerInterface(
         intro="Hi, this is a brand new Pipeline running!",
         prompt_request="Request: ",
         prompt_response="Response: ",
-    ),  # `CLIMessengerInterface` has the following constructor parameters:
+    )],  # `CLIMessengerInterface` has the following constructor parameters:
     #     `intro` - a string that will be displayed
     #           on connection to interface (on `pipeline.run`)
     #     `prompt_request` - a string that will be displayed before user input

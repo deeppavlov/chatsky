@@ -10,6 +10,7 @@ from .std_conditions import (
     all,
     negation,
     has_last_labels,
+    from_interface,
     true,
     false,
     agg,

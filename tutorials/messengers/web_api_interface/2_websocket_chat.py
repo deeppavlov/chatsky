@@ -35,9 +35,9 @@ from fastapi.responses import HTMLResponse
 
 
 # %%
-messenger_interface = CallbackMessengerInterface()
+messenger_interfaces = CallbackMessengerInterface()
 pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
+    *TOY_SCRIPT_ARGS, messenger_interfaces=[messenger_interfaces]
 )
 
 
@@ -93,7 +93,7 @@ async def websocket_endpoint(websocket: WebSocket, client_id: int):
             data = await websocket.receive_text()
             await websocket.send_text(f"User: {data}")
             request = Message(data)
-            context = await messenger_interface.on_request_async(
+            context = await messenger_interfaces.on_request_async(
                 request, client_id
             )
             response = context.last_response.text

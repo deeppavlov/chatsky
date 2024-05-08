@@ -41,7 +41,8 @@ def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
-    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
+    interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
+    pipeline.messenger_interfaces = {interface.name: interface}
 
     def loop() -> bool:
         loop.runs_left -= 1
@@ -50,12 +51,12 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
+    asyncio.run(interface.connect(pipeline._run_pipeline, interface.name, loop=loop))
 
 
 def test_callback_messenger_interface(monkeypatch):
     interface = CallbackMessengerInterface()
-    pipeline.messenger_interface = interface
+    pipeline.messenger_interfaces = {interface.name: interface}
 
     pipeline.run()
 

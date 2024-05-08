@@ -50,7 +50,7 @@ happy_path = HAPPY_PATH
 # %%
 pipeline = Pipeline.from_script(
     *TOY_SCRIPT_ARGS,
-    messenger_interface=interface,
+    messenger_interfaces=[interface],
     # The interface can be passed as a pipeline argument
 )
 

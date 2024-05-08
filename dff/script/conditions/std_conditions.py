@@ -9,12 +9,13 @@ These conditions can be used to check the current context, the user's input,
 or other factors that may affect the conversation flow.
 """
 
-from typing import Callable, Pattern, Union, List, Optional
+from typing import Callable, Pattern, Type, Union, List, Optional
 import logging
 import re
 
 from pydantic import validate_call
 
+from dff.messengers.common.interface import MessengerInterface
 from dff.pipeline import Pipeline
 from dff.script import NodeLabel2Type, Context, Message
 
@@ -208,6 +209,21 @@ def has_last_labels(
         return False
 
     return has_last_labels_condition_handler
+
+
+def from_interface(iface: Optional[Type[MessengerInterface]] = None, name: Optional[str] = None) -> Callable[[Context, Pipeline], bool]:
+    def is_from_interface_type(ctx: Context, pipeline: Pipeline) -> bool:
+        if ctx.last_request is None:
+            return False
+        latest_interface = ctx.last_request.interface
+        for interface_name, interface_object in pipeline.messenger_interfaces.items():
+            if interface_name == latest_interface:
+                name_match = name is None or interface_name == name
+                type_match = iface is None or isinstance(interface_object, iface)
+                return name_match and type_match
+        return False
+
+    return is_from_interface_type
 
 
 @validate_call

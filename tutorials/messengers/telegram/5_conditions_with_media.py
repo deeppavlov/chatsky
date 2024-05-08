@@ -190,7 +190,7 @@ pipeline = Pipeline.from_script(
     script=script,
     start_label=("root", "start"),
     fallback_label=("root", "fallback"),
-    messenger_interface=interface,
+    messenger_interfaces=[interface],
     pre_services=[extract_data],
 )
 

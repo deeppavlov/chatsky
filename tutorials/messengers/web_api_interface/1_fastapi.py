@@ -84,7 +84,7 @@ communication between the pipeline on the server side and the messenger client.
 messenger_interface = CallbackMessengerInterface()
 # CallbackMessengerInterface instantiating the dedicated messenger interface
 pipeline = Pipeline.from_script(
-    *TOY_SCRIPT_ARGS, messenger_interface=messenger_interface
+    *TOY_SCRIPT_ARGS, messenger_interfaces=[messenger_interface]
 )
 
 
@@ -102,7 +102,7 @@ async def respond(
     user_id: str,
     user_message: Message,
 ):
-    context = await messenger_interface.on_request_async(user_message, user_id)
+    context = await pipeline.messenger_interfaces[messenger_interface.name].on_request_async(user_message, user_id)
     return {"user_id": user_id, "response": context.last_response}
 
 

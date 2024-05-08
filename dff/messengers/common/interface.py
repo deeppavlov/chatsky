@@ -27,8 +27,12 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
+    def __init__(self, name: Optional[str] = None):
+        self.name = name if name is not None else str(type(self))
+
+
     @abc.abstractmethod
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+    async def connect(self, pipeline_runner: PipelineRunnerFunction, iface_id: str):
         """
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
@@ -43,6 +47,9 @@ class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
+
+    def __init__(self, name: Optional[str] = None):
+        MessengerInterface.__init__(self, name)
 
     @abc.abstractmethod
     def _request(self) -> List[Tuple[Message, Hashable]]:
@@ -91,6 +98,7 @@ class PollingMessengerInterface(MessengerInterface):
     async def connect(
         self,
         pipeline_runner: PipelineRunnerFunction,
+        iface_id: str,
         loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
@@ -105,6 +113,7 @@ class PollingMessengerInterface(MessengerInterface):
             called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
         """
+        self._interface_id = iface_id
         while loop():
             try:
                 await self._polling_loop(pipeline_runner, timeout)
@@ -119,11 +128,13 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self):
+    def __init__(self, name: Optional[str] = None):
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
+        MessengerInterface.__init__(self, name)
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+    async def connect(self, pipeline_runner: PipelineRunnerFunction, iface_id: str):
         self._pipeline_runner = pipeline_runner
+        self._interface_id = iface_id
 
     async def on_request_async(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
@@ -156,8 +167,9 @@ class CLIMessengerInterface(PollingMessengerInterface):
         prompt_request: str = "request: ",
         prompt_response: str = "response: ",
         out_descriptor: Optional[TextIO] = None,
+        name: Optional[str] = None
     ):
-        super().__init__()
+        PollingMessengerInterface.__init__(self, name)
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = intro
         self._prompt_request: str = prompt_request
@@ -165,12 +177,12 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._descriptor: Optional[TextIO] = out_descriptor
 
     def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(input(self._prompt_request)), self._ctx_id)]
+        return [(Message(input(self._prompt_request), interface=self._interface_id), self._ctx_id)]
 
     def _respond(self, responses: List[Context]):
-        print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
+        print(f"{self._prompt_response}{responses[0].last_response_to(self._interface_id).text}", file=self._descriptor)
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
+    async def connect(self, pipeline_runner: PipelineRunnerFunction, iface_id: str, **kwargs):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
@@ -181,4 +193,4 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._ctx_id = uuid.uuid4()
         if self._intro is not None:
             print(self._intro)
-        await super().connect(pipeline_runner, **kwargs)
+        await super().connect(pipeline_runner, iface_id, **kwargs)

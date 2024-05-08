@@ -16,7 +16,8 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
-from typing import Union, List, Dict, Optional, Hashable, Callable
+from typing import Iterable, Union, List, Dict, Optional, Hashable, Callable
+from uuid import uuid4
 
 from dff.context_storages import DBContextStorage
 from dff.script import Script, Context, ActorStage
@@ -59,7 +60,7 @@ class Pipeline:
         - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
 
-    :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
+    :param messenger_interfaces: An `AbsMessagingInterface` instance for this pipeline.
     :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
         a dict to store dialog :py:class:`~.Context`.
     :param services: (required) A :py:data:`~.ServiceGroupBuilder` object,
@@ -87,7 +88,7 @@ class Pipeline:
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
+        messenger_interfaces: Optional[Iterable[MessengerInterface]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
@@ -96,7 +97,6 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
-        self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
             components,
@@ -104,6 +104,12 @@ class Pipeline:
             after_handler=after_handler,
             timeout=timeout,
         )
+
+        if messenger_interfaces is None:
+            interface = CLIMessengerInterface()
+            self.messenger_interfaces = {interface.name: interface}
+        else:
+            self.messenger_interfaces = {iface.name: iface for iface in messenger_interfaces}
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
@@ -181,7 +187,9 @@ class Pipeline:
         """
         return {
             "type": type(self).__name__,
-            "messenger_interface": f"Instance of {type(self.messenger_interface).__name__}",
+            "messenger_interfaces": {
+                k: f"Instance of {type(v).__name__}" for k, v in self.messenger_interfaces.items()
+            },
             "context_storage": f"Instance of {type(self.context_storage).__name__}",
             "services": [self._services_pipeline.info_dict],
         }
@@ -208,7 +216,7 @@ class Pipeline:
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
-        messenger_interface: Optional[MessengerInterface] = None,
+        messenger_interfaces: Optional[Iterable[MessengerInterface]] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
     ) -> "Pipeline":
@@ -237,7 +245,7 @@ class Pipeline:
 
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
             or a dict to store dialog :py:class:`~.Context`.
-        :param messenger_interface: An instance for this pipeline.
+        :param messenger_interfaces: An instance for this pipeline.
         :param pre_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
         :type pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]]
@@ -256,7 +264,7 @@ class Pipeline:
             condition_handler=condition_handler,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
-            messenger_interface=messenger_interface,
+            messenger_interfaces=messenger_interfaces,
             context_storage=context_storage,
             components=[*pre_services, ACTOR, *post_services],
         )
@@ -343,7 +351,7 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+        asyncio.run(asyncio.gather(*[iface.connect(self._run_pipeline, id) for id, iface in self.messenger_interfaces.items()]))
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
