@@ -119,7 +119,7 @@ class PollingMessengerInterface(MessengerInterface):
 
         while loop() and not self.stopped_by_signal:
             try:
-                await self._polling_loop(pipeline, timeout)
+                await self._polling_loop(pipeline_runner, timeout)
 
             except BaseException as e:
                 self._on_exception(e)
