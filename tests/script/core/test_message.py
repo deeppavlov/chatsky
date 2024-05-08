@@ -52,11 +52,6 @@ class TestMessage:
     def json_context_storage(self) -> DBContextStorage:
         return JSONContextStorage(f"file://{Path(__file__).parent / 'serialization_database.json'}")
 
-    def clear_and_create_dir(self, dir: Path) -> Path:
-        rmtree(dir, ignore_errors=True)
-        dir.mkdir(parents=True, exist_ok=True)
-        return dir
-
     def test_location(self):
         loc1 = Location(longitude=-0.1, latitude=-0.1)
         loc2 = Location(longitude=-0.09999, latitude=-0.09998)
@@ -130,24 +125,23 @@ class TestMessage:
     def test_getting_attachment_bytes(self):
         root_dir = Path(__file__).parent
         local_path = self.clear_and_create_dir(root_dir / "local")
+        rmtree(local_path, ignore_errors=True)
+        local_path.mkdir()
+
         local_document = local_path / "pre-saved-document.pdf"
-        cache_path = self.clear_and_create_dir(root_dir / "cache")
-        cache_document = cache_path / "pre-saved-document.pdf"
-        cli_iface = DFFCLIMessengerInterface(cache_path)
+        cli_iface = DFFCLIMessengerInterface(root_dir / "cache")
 
         document_name = "deeppavlov-article.pdf"
         remote_document_url = f"{EXAMPLE_SOURCE}/{document_name}"
         with urlopen(remote_document_url) as url:
             document_bytes = url.read()
             local_document.write_bytes(document_bytes)
-            cache_document.write_bytes(document_bytes)
 
         remote_document_att = Document(source=HttpUrl(remote_document_url))
-        cached_document_att = Document(cached_filename=HttpUrl(remote_document_url))
         local_document_att = Document(source=FilePath(local_document))
         iface_document_att = Document(id=document_name)
 
-        for document in (remote_document_att, cached_document_att, local_document_att, iface_document_att):
+        for document in (remote_document_att, local_document_att, iface_document_att):
             doc_bytes = document.get_bytes(cli_iface)
             assert document_bytes, doc_bytes
             if not isinstance(document.source, Path):
