@@ -1,7 +1,7 @@
 from asyncio import get_event_loop
 from typing import Any, Dict, Hashable, List, Optional, Tuple, TypeAlias
-from pydantic import BaseModel
 
+from pydantic import BaseModel
 from telegram import File, Update
 from telegram.ext import ExtBot
 

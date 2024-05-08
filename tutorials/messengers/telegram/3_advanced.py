@@ -14,8 +14,8 @@ Telegram API token is required to access telegram API.
 # %pip install dff[telegram]
 
 # %%
-import asyncio
 import os
+from urllib.request import urlopen
 
 from pydantic import HttpUrl
 from telegram import InlineKeyboardButton, InlineKeyboardMarkup
@@ -80,13 +80,11 @@ image_data = {
     "filename": "deeppavlov_logo.png",
 }
 
-document_thumbnail = asyncio.run(Image(source=image_url).get_bytes(None))
-
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
-    "thumbnail": document_thumbnail,
+    "thumbnail": urlopen(image_url).read(),
 }
 
 
@@ -264,10 +262,6 @@ pipeline = Pipeline.from_script(
 )
 
 
-def main():
-    pipeline.run()
-
-
 if __name__ == "__main__" and is_interactive_mode():
     # prevent run during doc building
-    main()
+    pipeline.run()

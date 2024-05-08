@@ -124,7 +124,7 @@ class TestMessage:
 
     def test_getting_attachment_bytes(self):
         root_dir = Path(__file__).parent
-        local_path = self.clear_and_create_dir(root_dir / "local")
+        local_path = root_dir / "local"
         rmtree(local_path, ignore_errors=True)
         local_path.mkdir()
 
