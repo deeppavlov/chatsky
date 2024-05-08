@@ -110,17 +110,17 @@ class TestMessage:
     @pytest.mark.parametrize(
         "attachment",
         [
-            (CallbackQuery(query_string="some_callback_query_data"),),
-            (Location(longitude=53.055955, latitude=102.891407),),
-            (Contact(phone_number="8-900-555-35-35", first_name="Hope", last_name="Credit")),
-            (Invoice(title="Payment", description="No comment", currency="USD", amount=300)),
-            (Poll(question="Which?", options=[PollOption(text="1", votes=2), PollOption(text="2", votes=5)])),
-            (Audio(source="https://example.com/some_audio.mp3")),
-            (Video(source="https://example.com/some_video.mp4")),
-            (Animation(source="https://example.com/some_animation.gif")),
-            (Image(source="https://example.com/some_image.png")),
-            (Sticker(id="some_sticker_identifier")),
-            (Document(source="https://example.com/some_document.pdf")),
+            CallbackQuery(query_string="some_callback_query_data"),
+            Location(longitude=53.055955, latitude=102.891407),
+            Contact(phone_number="8-900-555-35-35", first_name="Hope", last_name="Credit"),
+            Invoice(title="Payment", description="No comment", currency="USD", amount=300),
+            Poll(question="Which?", options=[PollOption(text="1", votes=2), PollOption(text="2", votes=5)]),
+            Audio(source="https://example.com/some_audio.mp3"),
+            Video(source="https://example.com/some_video.mp4"),
+            Animation(source="https://example.com/some_animation.gif"),
+            Image(source="https://example.com/some_image.png"),
+            Sticker(id="some_sticker_identifier"),
+            Document(source="https://example.com/some_document.pdf"),
         ],
     )
     def test_attachment_serialize(self, json_context_storage: DBContextStorage, attachment: DataAttachment):
