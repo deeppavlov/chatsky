@@ -2,16 +2,19 @@ import os
 import sys
 import re
 import importlib.metadata
+import pydata_sphinx_theme
 
 # -- Path setup --------------------------------------------------------------
 
 sys.path.append(os.path.abspath("."))
 from utils.notebook import py_percent_to_notebook  # noqa: E402
-from utils.generate_tutorials import generate_tutorial_links_for_notebook_creation  # noqa: E402
-from utils.link_misc_files import link_misc_files  # noqa: E402
-from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
+from sphinx_polyversion import load
+from sphinx_polyversion.git import GitRef
 
 # -- Project information -----------------------------------------------------
+
+data = load(globals())  # adds variables `current` and `revisions`
+current: GitRef = data['current']
 
 _distribution_metadata = importlib.metadata.metadata('dff')
 
@@ -56,7 +59,6 @@ language = "en"
 pygments_style = "default"
 
 add_module_names = False
-
 
 # Add any paths that contain templates here, relative to this directory.
 templates_path = ["_templates"]
@@ -111,6 +113,23 @@ html_css_files = [
     "css/custom.css",
 ]
 
+# Version switcher url
+switcher_url = "https://zerglev.github.io/dialog_flow_framework/switcher.json"
+# To-do: a separate switcher.json for dev and other branches
+
+# Checking for dev before passing version to switcher
+if current[0] == "dev":
+    version_data = "dev"
+    # Possible to-do: show the warning banner for latest(unstable) version.
+else:
+    version_data = version
+
+# Removing version switcher from local doc builds. (Or it would point to our Github Pages)
+LOCAL_BUILD = os.getenv('LOCAL_BUILD', default="True")
+if LOCAL_BUILD:
+    switcher_url = "./_static/switcher.json"
+# Possible TO-DO: generating switcher.json for local builds separately. Then change the prior url to new switcher. This is probably overkill.
+
 # Theme options
 html_theme_options = {
     "header_links_before_dropdown": 5,
@@ -139,8 +158,14 @@ html_theme_options = {
         },
     ],
     "secondary_sidebar_items": ["page-toc", "source-links", "example-links"],
+    "switcher": {
+        "json_url": switcher_url,
+        "version_match" : version_data,
+    },
+    "navbar_persistent": ["search-button.html", "theme-switcher.html"],
+    "navbar_end": ["version-switcher.html", "navbar-icon-links.html"],
+    "show_version_warning_banner": True,
 }
-
 
 favicons = [
     {"href": "images/logo-dff.svg"},
@@ -154,48 +179,3 @@ autodoc_default_options = {
     "member-order": "bysource",
     "exclude-members": "_abc_impl, model_fields",
 }
-
-
-def setup(_):
-    link_misc_files(
-        [
-            "utils/db_benchmark/benchmark_schema.json",
-            "utils/db_benchmark/benchmark_streamlit.py",
-        ]
-    )
-    generate_tutorial_links_for_notebook_creation(
-        [
-            ("tutorials.context_storages", "Context Storages"),
-            (
-                "tutorials.messengers",
-                "Interfaces",
-                [
-                    ("telegram", "Telegram"),
-                    ("web_api_interface", "Web API"),
-                ],
-            ),
-            ("tutorials.pipeline", "Pipeline"),
-            (
-                "tutorials.script",
-                "Script",
-                [
-                    ("core", "Core"),
-                    ("responses", "Responses"),
-                ],
-            ),
-            ("tutorials.utils", "Utils"),
-            ("tutorials.stats", "Stats"),
-        ]
-    )
-    regenerate_apiref(
-        [
-            ("dff.context_storages", "Context Storages"),
-            ("dff.messengers", "Messenger Interfaces"),
-            ("dff.pipeline", "Pipeline"),
-            ("dff.script", "Script"),
-            ("dff.stats", "Stats"),
-            ("dff.utils.testing", "Testing Utils"),
-            ("dff.utils.turn_caching", "Caching"),
-            ("dff.utils.db_benchmark", "DB Benchmark"),
-        ]
-    )

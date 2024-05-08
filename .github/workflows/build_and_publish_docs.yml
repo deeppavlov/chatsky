@@ -21,6 +21,8 @@ jobs:
     runs-on: ubuntu-latest
     steps:
       - uses: actions/checkout@v4
+        with:
+          fetch-depth: 0
 
       - name: set up python 3.9
         uses: actions/setup-python@v5
@@ -42,33 +44,45 @@ jobs:
           TG_API_ID: ${{ secrets.TG_API_ID }}
           TG_API_HASH: ${{ secrets.TG_API_HASH }}
           TG_BOT_USERNAME: ${{ secrets.TG_BOT_USERNAME }}
+          LOCAL_BUILD: "False"
         run: |
           python -m poetry run poe docs
 
       - name: remove jekyll theming
         run: touch docs/build/.nojekyll
 
-      - name: save branch name without slashes
-        if: ${{ github.ref != 'refs/heads/master' }}
+      - name: get built version name
+        run: |
+          echo "VERSION=$(ls -1 docs/build | head -n 1)" >> "$GITHUB_ENV"
+
+      - name: update switcher.json file
+        if: ${{ github.ref == 'refs/heads/master' }}
+        run: |
+          cp docs/source/_static/switcher.json ./docs/build/switcher.json
+
+      - name: save changes and checkout to gh-pages
+        run: |
+          git add -f .
+          git stash
+          git checkout gh-pages
+
+      - name: delete previous docs build for this branch
+        uses: EndBug/add-and-commit@v9.1.4
+        env:
+          BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
+        with:
+          remove: '-r --ignore-unmatch ./${{ env.VERSION }}'
+
+      - name: checkout to original branch and reapply changes
         env:
           BRANCH_NAME: ${{ github.head_ref || github.ref_name }}
         run: |
-          BRANCH_NAME=${{ env.BRANCH_NAME }}
-          BRANCH_NAME=${BRANCH_NAME////_}
-          echo BRANCH_NAME=${BRANCH_NAME} >> $GITHUB_ENV
-
-      - name: save artifact
-        if: ${{ github.ref != 'refs/heads/master' }}
-        uses: actions/upload-artifact@v4
-        with:
-          name: ${{ format('github-pages-for-branch-{0}', env.BRANCH_NAME) }}
-          path: docs/build/
-          retention-days: 3
+          git checkout -
+          git stash pop
 
       - name: deploy website
-        if: ${{ github.ref == 'refs/heads/master' }}
         uses: JamesIves/github-pages-deploy-action@v4
         with:
           branch: gh-pages
           folder: docs/build/
-          single-commit: True
+          clean: False
