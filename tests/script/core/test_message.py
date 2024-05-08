@@ -122,7 +122,7 @@ class TestMessage:
         retrieved = json_context_storage[name].requests[0].attachments[0]
         assert attachment == retrieved
 
-    def test_getting_attachment_bytes(self):
+    async def test_getting_attachment_bytes(self):
         root_dir = Path(__file__).parent
         local_path = root_dir / "local"
         rmtree(local_path, ignore_errors=True)
@@ -142,8 +142,8 @@ class TestMessage:
         iface_document_att = Document(id=document_name)
 
         for document in (remote_document_att, local_document_att, iface_document_att):
-            doc_bytes = document.get_bytes(cli_iface)
-            assert document_bytes, doc_bytes
+            read_bytes = await document.get_bytes(cli_iface)
+            assert document_bytes, read_bytes
             if not isinstance(document.source, Path):
                 cached_bytes = document.cached_filename.read_bytes()
                 assert document_bytes, cached_bytes

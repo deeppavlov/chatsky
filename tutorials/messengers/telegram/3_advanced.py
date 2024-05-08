@@ -225,7 +225,7 @@ script = {
             RESPONSE: Message(
                 "Alright! Now send me any message and I'll send you it's raw data!"
             ),
-            TRANSITIONS: {"raw_request_node": cnd.true},
+            TRANSITIONS: {"raw_request_node": cnd.true()},
         },
         "raw_request_node": {
             RESPONSE: stringify_previous_request,
@@ -234,7 +234,7 @@ script = {
             RESPONSE: Message(
                 "Alright! Now send me a message with data attachment (audio, video, animation, image, sticker or document)!"
             ),
-            TRANSITIONS: {"hash_request_node": cnd.true},
+            TRANSITIONS: {"hash_request_node": cnd.true()},
         },
         "hash_request_node": {
             RESPONSE: hash_data_attachment_request,
