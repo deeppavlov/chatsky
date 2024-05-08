@@ -38,7 +38,7 @@ class MockApplication(BaseModel):
     @classmethod
     def create(cls, interface: _AbstractTelegramInterface, happy_path: List[PathStep]) -> "MockApplication":
         mock_bot = MockBot(_original_bot=interface.application.bot)
-        instance = cls(mock_bot=mock_bot, happy_path=happy_path, _interface=interface)
+        instance = cls(bot=mock_bot, happy_path=happy_path, _interface=interface)
         interface.pipeline_runner = instance._wrapped_pipeline_runner
         return instance
 

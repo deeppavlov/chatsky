@@ -122,6 +122,7 @@ class TestMessage:
         retrieved = json_context_storage[name].requests[0].attachments[0]
         assert attachment == retrieved
 
+    @pytest.mark.asyncio
     async def test_getting_attachment_bytes(self):
         root_dir = Path(__file__).parent
         local_path = root_dir / "local"
