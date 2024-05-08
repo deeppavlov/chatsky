@@ -52,6 +52,11 @@ class TestMessage:
     def json_context_storage(self) -> DBContextStorage:
         return JSONContextStorage(f"file://{Path(__file__).parent / 'serialization_database.json'}")
 
+    def clear_and_create_dir(self, dir: Path) -> Path:
+        rmtree(dir, ignore_errors=True)
+        dir.mkdir()
+        return dir
+
     def test_location(self):
         loc1 = Location(longitude=-0.1, latitude=-0.1)
         loc2 = Location(longitude=-0.09999, latitude=-0.09998)
@@ -125,12 +130,10 @@ class TestMessage:
     @pytest.mark.asyncio
     async def test_getting_attachment_bytes(self):
         root_dir = Path(__file__).parent
-        local_path = root_dir / "local"
-        rmtree(local_path, ignore_errors=True)
-        local_path.mkdir()
+        local_path = self.clear_and_create_dir(root_dir / "local")
 
         local_document = local_path / "pre-saved-document.pdf"
-        cli_iface = DFFCLIMessengerInterface(root_dir / "cache")
+        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(root_dir / "cache"))
 
         document_name = "deeppavlov-article.pdf"
         remote_document_url = f"{EXAMPLE_SOURCE}/{document_name}"
