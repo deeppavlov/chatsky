@@ -84,7 +84,7 @@ document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
-    "thumbnail": urlopen(image_url).read(),
+    "thumbnail": urlopen(str(image_url)).read(),
 }
 
 

@@ -23,14 +23,14 @@ class MockBot(BaseModel):
         def set_trace(*args, **kwargs):
             self._latest_trace = (name, args, kwargs)
 
-        if hasattr(self, name):
-            return super().__getattribute__(name)
-        else:
+        try:
+            return object.__getattribute__(self, name)
+        except AttributeError:
             return set_trace
 
 
 class MockApplication(BaseModel):
-    mock_bot: MockBot
+    bot: MockBot
     happy_path: List[PathStep]
     _interface: _AbstractTelegramInterface
     _latest_ctx: Optional[Context] = None
@@ -60,8 +60,8 @@ class MockApplication(BaseModel):
             assert self._latest_ctx is not None, "During pipeline runner execution, no context was produced!"
             assert self._latest_ctx.last_request == received, "Expected request message is not equal to expected!"
             assert self._latest_ctx.last_response == response, "Expected response message is not equal to expected!"
-            assert self.mock_bot._latest_trace == trace, "Expected trace is not equal to expected!"
-            self.mock_bot._latest_trace = None
+            assert self.bot._latest_trace == trace, "Expected trace is not equal to expected!"
+            self.bot._latest_trace = None
             self._latest_ctx = None
 
     def run_polling(self, poll_interval: float, timeout: int, allowed_updates: List[str]) -> None:
