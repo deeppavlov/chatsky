@@ -31,8 +31,6 @@ EXAMPLE_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@e
 
 
 class DFFCLIMessengerInterface(CLIMessengerInterface):
-    example_attachments_repo = ""
-
     def __init__(self, attachments_directory: Optional[Path] = None):
         MessengerInterface.__init__(self, attachments_directory)
         self._ctx_id: Optional[Hashable] = None
