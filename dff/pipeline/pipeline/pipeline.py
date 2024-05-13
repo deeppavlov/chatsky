@@ -370,7 +370,7 @@ class Pipeline:
         self.stopped_by_signal = True
         logger.info(f"pipeline received SIGINT - stopping pipeline")
 
-    def run(self, stop_function = lambda: None):
+    def run(self, stop_function=lambda: None):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
         It passes `_run_pipeline` to `messenger_interface` as a callbacks,
