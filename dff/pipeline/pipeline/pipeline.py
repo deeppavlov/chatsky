@@ -101,6 +101,7 @@ class Pipeline:
         parallelize_processing: bool = False,
     ):
         self.actor: Actor = None
+        self.stopped_by_signal = False
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(
@@ -361,7 +362,7 @@ class Pipeline:
 
         return ctx
 
-    def run(self):
+    def run(self, stop_function = pass):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
         It passes `_run_pipeline` to `messenger_interface` as a callbacks,
@@ -369,7 +370,21 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+        def signal_handler(self):
+            self.stopped_by_signal = True
+            logger.info(f"{pipeline received SIGINT - stopping pipeline")
+
+        def loop(self):
+            return not self.stopped_by_signal
+
+        running_loop = asyncio.get_running_loop()
+        running_loop.add_signal_handler(SIGINT, register_stop_signal(pipeline))
+        # If the user changes signal handling within _polling_loop(), this will break
+
+        asyncio.run(self.messenger_interface.connect(self._run_pipeline, loop))
+        stop_function()
+        print("finished working because of SIGINT")
+        logger.info(f"{pipeline finished working")
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None

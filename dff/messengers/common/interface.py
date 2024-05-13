@@ -44,9 +44,6 @@ class PollingMessengerInterface(MessengerInterface):
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
 
-    def __init__(self):
-        self.stopped_by_signal = False
-
     @abc.abstractmethod
     def _request(self) -> List[Tuple[Message, Hashable]]:
         """
@@ -109,15 +106,8 @@ class PollingMessengerInterface(MessengerInterface):
             called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
         """
-        def register_stop_signal(pipeline: Pipeline):
-            self.stopped_by_signal = True
 
-        running_loop = asyncio.get_running_loop()
-        running_loop.add_signal_handler(SIGINT, register_stop_signal(pipeline))
-        # If the user changes signal handling within _polling_loop(), this will break
-        # This code is executed once, while within _polling_loop() it would be several times, which is why it's here now
-
-        while loop() and not self.stopped_by_signal:
+        while loop():
             try:
                 await self._polling_loop(pipeline_runner, timeout)
 
