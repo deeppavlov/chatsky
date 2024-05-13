@@ -15,6 +15,7 @@ to structure and manage the messages processing flow.
 """
 
 import asyncio
+import signal
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
@@ -23,7 +24,7 @@ from dff.script import Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
-from dff.messengers.common import MessengerInterface, CLIMessengerInterface
+from dff.messengers.common import MessengerInterface, CLIMessengerInterface, PollingMessengerInterface
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
@@ -362,7 +363,14 @@ class Pipeline:
 
         return ctx
 
-    def run(self, stop_function = pass):
+    def _default_loop(self):
+        return not self.stopped_by_signal
+
+    def _signal_handler(self):
+        self.stopped_by_signal = True
+        logger.info(f"pipeline received SIGINT - stopping pipeline")
+
+    def run(self, stop_function = lambda: None):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
         It passes `_run_pipeline` to `messenger_interface` as a callbacks,
@@ -370,21 +378,17 @@ class Pipeline:
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        def signal_handler(self):
-            self.stopped_by_signal = True
-            logger.info(f"{pipeline received SIGINT - stopping pipeline")
 
-        def loop(self):
-            return not self.stopped_by_signal
-
-        running_loop = asyncio.get_running_loop()
-        running_loop.add_signal_handler(SIGINT, register_stop_signal(pipeline))
+        event_loop = asyncio.get_event_loop()
+        event_loop.add_signal_handler(signal.SIGINT, self._signal_handler)
         # If the user changes signal handling within _polling_loop(), this will break
 
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline, loop))
+        if isinstance(self.messenger_interface, CLIMessengerInterface):
+            asyncio.run(self.messenger_interface.connect(self._run_pipeline, loop=self._default_loop))
+        else:
+            asyncio.run(self.messenger_interface.connect(self._run_pipeline))
         stop_function()
-        print("finished working because of SIGINT")
-        logger.info(f"{pipeline finished working")
+        logger.info(f"pipeline finished working")
 
     def __call__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
