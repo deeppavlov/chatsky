@@ -83,7 +83,6 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method running the request - response cycle once.
         """
-
         user_updates = self._request()
         responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
         self._respond(responses)
@@ -106,7 +105,6 @@ class PollingMessengerInterface(MessengerInterface):
             called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
         """
-
         while loop():
             try:
                 await self._polling_loop(pipeline_runner, timeout)
