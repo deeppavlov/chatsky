@@ -72,10 +72,6 @@ pipeline = Pipeline.from_script(
 )
 
 
-def main():
-    pipeline.run()
-
-
 if __name__ == "__main__" and is_interactive_mode():
     # prevent run during doc building
-    main()
+    pipeline.run()

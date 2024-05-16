@@ -28,8 +28,8 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
-    request_attachments = set()
-    response_attachments = set()
+    supported_request_attachment_types = set()
+    supported_response_attachment_types = set()
 
     def __init__(self, attachments_directory: Optional[Path] = None) -> None:
         tempdir = gettempdir()
@@ -133,9 +133,6 @@ class PollingMessengerInterface(MessengerInterface):
             except BaseException as e:
                 self._on_exception(e)
                 break
-
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
-        raise RuntimeError(f"Plain pollin")
 
 
 class CallbackMessengerInterface(MessengerInterface):

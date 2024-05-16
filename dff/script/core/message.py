@@ -202,7 +202,7 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
-    attachments: Optional[List[Attachment]] = None
+    attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document]]] = None
     annotations: Optional[dict] = None
     misc: Optional[dict] = None
     original_message: Optional[Any] = None

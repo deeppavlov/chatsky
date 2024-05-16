@@ -45,22 +45,6 @@ if TYPE_CHECKING:
     from dff.pipeline.pipeline.pipeline import Pipeline
 
 
-def error_handler(error_msgs: list, msg: str, exception: Optional[Exception] = None, logging_flag: bool = True):
-    """
-    This function handles errors during :py:class:`~dff.script.Script` validation.
-
-    :param error_msgs: List that contains error messages. :py:func:`~dff.script.error_handler`
-        adds every next error message to that list.
-    :param msg: Error message which is to be added into `error_msgs`.
-    :param exception: Invoked exception. If it has been set, it is used to obtain logging traceback.
-        Defaults to `None`.
-    :param logging_flag: The flag which defines whether logging is necessary. Defaults to `True`.
-    """
-    error_msgs.append(msg)
-    if logging_flag:
-        logger.error(msg, exc_info=exception)
-
-
 class Actor:
     """
     The class which is used to process :py:class:`~dff.script.Context`
@@ -73,7 +57,7 @@ class Actor:
         Dialog comes into that label if all other transitions failed,
         or there was an error while executing the scenario.
         Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <dff.script.NodeLabel3Type>`
+    :param label_priority: Default priority value for all :py:const:`labels <dff.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
     :param handlers: This variable is responsible for the usage of external handlers on
@@ -92,11 +76,9 @@ class Actor:
         condition_handler: Optional[Callable] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
     ):
-        # script validation
         self.script = script if isinstance(script, Script) else Script(script=script)
         self.label_priority = label_priority
 
-        # node labels validation
         self.start_label = normalize_label(start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
@@ -388,36 +370,6 @@ class Actor:
         else:
             chosen_label = self.fallback_label
         return chosen_label
-
-    def validate_script(self, pipeline: Pipeline, verbose: bool = True):
-        # TODO: script has to not contain priority == -inf, because it uses for miss values
-        flow_labels = []
-        node_labels = []
-        labels = []
-        conditions = []
-        for flow_name, flow in self.script.items():
-            for node_name, node in flow.items():
-                flow_labels += [flow_name] * len(node.transitions)
-                node_labels += [node_name] * len(node.transitions)
-                labels += list(node.transitions.keys())
-                conditions += list(node.transitions.values())
-
-        error_msgs = []
-        for flow_label, node_label, label, condition in zip(flow_labels, node_labels, labels, conditions):
-            if not callable(label):
-                label = normalize_label(label, flow_label)
-
-                # validate labeling
-                try:
-                    node = self.script[label[0]][label[1]]
-                except Exception as exc:
-                    msg = (
-                        f"Could not find node with label={label}, "
-                        f"error was found in (flow_label, node_label)={(flow_label, node_label)}"
-                    )
-                    error_handler(error_msgs, msg, exc, verbose)
-                    break
-        return error_msgs
 
 
 async def default_condition_handler(

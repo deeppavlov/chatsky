@@ -263,9 +263,7 @@ PipelineBuilder: TypeAlias = TypedDict(
         "start_label": NodeLabel2Type,
         "fallback_label": NotRequired[Optional[NodeLabel2Type]],
         "label_priority": NotRequired[float],
-        "validation_stage": NotRequired[Optional[bool]],
         "condition_handler": NotRequired[Optional[Callable]],
-        "verbose": NotRequired[bool],
         "handlers": NotRequired[Optional[Dict[ActorStage, List[Callable]]]],
     },
 )
