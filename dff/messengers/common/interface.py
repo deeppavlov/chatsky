@@ -29,6 +29,8 @@ class MessengerInterface(abc.ABC):
 
     def __init__(self):
         self.task = None
+        self.running_in_foreground = False
+        
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
@@ -42,11 +44,12 @@ class MessengerInterface(abc.ABC):
         raise NotImplementedError
 
     async def run_in_foreground(self, *args):
+        self.running_in_foreground = True
         self.task = await asyncio.create_task(self.connect(args))
         await self.task
         # Allowing other interfaces (and all async tasks) to work too
 
-    async def shutdown:
+    async def shutdown(self):
         await self.task.cancel()
 
 class PollingMessengerInterface(MessengerInterface):
