@@ -15,13 +15,14 @@ import os
 
 from dff.messengers.common import PollingMessengerInterface
 
-from dff.script.core.message import Audio, Document, Image, Message, Video
+from dff.script.core.message import Audio, Document, Image, Message, Video, DataAttachment
+from dff.script.core.context import Context as ctx
 
 logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-async def vk_api_call(method, payload={}, headers={}):
+async def vk_api_call(method):
     async with aiohttp.ClientSession() as session:
         async with session.post(method) as response:
             return response.json()
@@ -36,7 +37,7 @@ def extract_vk_update(updates):
     return upds
 
 
-class FilesOpener(object):
+class FilesOpener:
     def __init__(self, paths, key_format="file{}"):
         if not isinstance(paths, list):
             paths = [paths]
@@ -51,7 +52,7 @@ class FilesOpener(object):
     def __exit__(self, type, value, traceback):
         self.close_files()
 
-    def open_files(self):
+    def open_files(self, just_bytes=False):
         self.close_files()
 
         files = []
@@ -69,6 +70,9 @@ class FilesOpener(object):
                     f = open(filename, "rb")
                 self.opened_files.append(f)
 
+            if just_bytes:
+                return f.read()
+            
             ext = filename.split(".")[-1]
             _, filename = os.path.split(filename)
             files.append((self.key_format.format(x), (filename, f)))
@@ -101,15 +105,16 @@ class VKWrapper:
         self.last_update_id = None
         self._last_processed_update = None
 
-    def get_longpoll_server(self):
-        return requests.post(
-            f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}"
-        ).json()
+    async def get_longpoll_server(self):
+        return await vk_api_call(f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}")
+        # return requests.post(
+        #     f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}"
+        # ).json()
 
-    def get_upload_server(self, data_type, peer_id):
-        upload_url = requests.post(
+    async def get_upload_server(self, data_type, peer_id):
+        upload_url = await vk_api_call(
             f"https://api.vk.com/method/{data_type}.getMessagesUploadServer?peer_id={peer_id}&group_id={self.group_id}&v=5.81&access_token={self.token}"
-        ).json()
+        )
 
         if "response" not in upload_url:
             logger.error(f"Error getting upload server for attachment\n{upload_url}")
@@ -117,15 +122,15 @@ class VKWrapper:
 
         return upload_url["response"]["upload_url"]
 
-    def save_attachment(self, uploaded_data, data_type):
+    async def save_attachment(self, uploaded_data, data_type):
         if data_type == "photos":
-            saved_data = requests.post(
+            saved_data = await vk_api_call(
                 f"https://api.vk.com/method/{data_type}.saveMessagesPhoto?&group_id={self.group_id}&v=5.81&access_token={self.token}&photo={uploaded_data['photo']}&server={uploaded_data['server']}&hash={uploaded_data['hash']}"
-            ).json()
+            )
         else:
-            saved_data = requests.post(
+            saved_data = await vk_api_call(
                 f"https://api.vk.com/method/docs.save?file={uploaded_data['file']}&group_id={self.group_id}&v=5.81&access_token={self.token}"
-            ).json()
+            )
 
         if "response" not in saved_data:
             logger.error(f"Error saving attachment\n{saved_data}")
@@ -133,7 +138,7 @@ class VKWrapper:
 
         return saved_data["response"]
 
-    def upload_attachment(self, peer_id, attachment, attachment_type: str) -> str:
+    async def upload_attachment(self, peer_id, attachment, attachment_type: str) -> str:
         """
         Return json object with `owner_id` and `photo_id` needed to send it
         """
@@ -157,7 +162,7 @@ class VKWrapper:
 
             logger.info(f"Uploading {attachment_path}")
             with FilesOpener(attachment_path, key_format="file") as files:
-                uploaded_photo_data = requests.post(upload_url, files=files).json()
+                uploaded_photo_data = await vk_api_call(upload_url, files=files).json()
 
             saved_doc_data = self.save_attachment(uploaded_photo_data, "docs")
 
@@ -166,14 +171,14 @@ class VKWrapper:
         elif attachment_type == "video":
             raise NotImplementedError()
 
-    def request(self):
-        updates = requests.post(
+    async def request(self):
+        updates = await vk_api_call(
             f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50"
-        ).json()
+        )
         self.ts_current = updates["ts"]
         return updates["updates"]
 
-    def send_message(self, response: str, id, attachment_list):
+    async def send_message(self, response: str, id, attachment_list):
         if attachment_list != []:
             for attachment in attachment_list:
                 data_to_send = self.upload_attachment(
@@ -190,15 +195,17 @@ class VKWrapper:
         else:
             api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response}&v=5.81&access_token={self.token}"
 
-        return requests.post(api_request).json()
+        return await vk_api_call(api_request)
 
 
 class PollingVKInterface(PollingMessengerInterface):
+    supported_request_attachment_types = {Audio, Image, Document, Image, Document}
+    supported_response_attachment_types = {Audio, Image, Document, Image, Document}
     def __init__(self, token: str, group_id: str) -> None:
         super().__init__()
         self.bot = VKWrapper(token, group_id)
 
-    def _request(self):
+    async def _request(self):
         update_list = []
         for i in self.bot.request():
             update_list.append(
@@ -208,7 +215,7 @@ class PollingVKInterface(PollingMessengerInterface):
             )
         return update_list
 
-    def _respond(self, response):
+    async def _respond(self, response: ctx):
         for resp in response:
             attachment_list = []
             if response.attachments is not None:
@@ -235,6 +242,18 @@ class PollingVKInterface(PollingMessengerInterface):
             
 
         logger.info("Responded.")
+
+    
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:  # pragma: no cover
+        if attachment.id is not None:
+            # attachment.id is not present???
+            # add 
+            file_link = await vk_api_call(f"https://api.vk.com/method/photos.getById?photos={attachment.id}&v=5.81&access_token={self.token}")[0]["sizes"][-1]["url"]
+            data = FilesOpener(file_link, key_format="file").open_files(just_bytes=True)
+            return bytes(data)
+        else:
+            raise ValueError(f"For attachment {attachment} id is not defined!")
+
 
     async def connect(self, callback, loop: Optional[Callable] = None, *args, **kwargs):
         self.bot.connect()

@@ -1,10 +1,10 @@
 {
     "case_1": [
         {"text":"hello","commands":null,"attachments":null,"annotations":null,"misc":null},
-        "https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message=\"hello\"&v=5.81&access_token={self.token}"
+        ["messages.send", ["hello"]]
     ],
     "case_2": [
-        {"text":"hello","commands":null,"attachments":null,"annotations":null,"misc":null},
-        "https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message=\"goodbye\"&v=5.81&access_token={self.token}"
+        {"text":"goodbye","commands":null,"attachments":null,"annotations":null,"misc":null},
+        ["messages.send", ["hello"]]
     ]
 }
