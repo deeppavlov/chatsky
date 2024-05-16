@@ -27,6 +27,9 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
+    def __init__(self):
+        self.task = None
+
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
         """
@@ -38,6 +41,13 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
+    async def run_in_foreground(self, *args):
+        self.task = await asyncio.create_task(self.connect(args))
+        await self.task
+        # Allowing other interfaces (and all async tasks) to work too
+
+    async def shutdown:
+        await self.task.cancel()
 
 class PollingMessengerInterface(MessengerInterface):
     """
@@ -45,7 +55,7 @@ class PollingMessengerInterface(MessengerInterface):
     """
 
     @abc.abstractmethod
-    def _request(self) -> List[Tuple[Message, Hashable]]:
+    async def _request(self) -> List[Tuple[Message, Hashable]]:
         """
         Method used for sending users request for their input.
 
@@ -54,7 +64,7 @@ class PollingMessengerInterface(MessengerInterface):
         raise NotImplementedError
 
     @abc.abstractmethod
-    def _respond(self, responses: List[Context]):
+    async def _respond(self, responses: List[Context]):
         """
         Method used for sending users responses for their last input.
 
@@ -83,9 +93,9 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Method running the request - response cycle once.
         """
-        user_updates = self._request()
+        user_updates = await self._request()
         responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
-        self._respond(responses)
+        await self._respond(responses)
         await asyncio.sleep(timeout)
 
     async def connect(

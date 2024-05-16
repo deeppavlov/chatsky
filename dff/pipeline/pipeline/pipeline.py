@@ -363,14 +363,14 @@ class Pipeline:
 
         return ctx
 
-    def _default_loop(self):
-        return not self.stopped_by_signal
-
-    def _signal_handler(self):
+    def _sigint_handler(self):
         self.stopped_by_signal = True
-        logger.info(f"pipeline received SIGINT - stopping pipeline")
+        # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
+        for interface in messenger_interfaces:
+            interface.shutdown()
+        logger.info(f"pipeline received SIGINT - stopping pipeline and all interfaces")
 
-    def run(self, stop_function=lambda: None):
+    def run(self):
         """
         Method that starts a pipeline and connects to `messenger_interface`.
         It passes `_run_pipeline` to `messenger_interface` as a callbacks,
@@ -380,14 +380,10 @@ class Pipeline:
         """
 
         event_loop = asyncio.get_event_loop()
-        event_loop.add_signal_handler(signal.SIGINT, self._signal_handler)
+        event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
         # If the user changes signal handling within _polling_loop(), this will break
 
-        if isinstance(self.messenger_interface, CLIMessengerInterface):
-            asyncio.run(self.messenger_interface.connect(self._run_pipeline, loop=self._default_loop))
-        else:
-            asyncio.run(self.messenger_interface.connect(self._run_pipeline))
-        stop_function()
+        asyncio.run(self.messenger_interface.run_in_foreground(self._run_pipeline))
         logger.info(f"pipeline finished working")
 
     def __call__(
