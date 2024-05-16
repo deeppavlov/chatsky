@@ -30,7 +30,6 @@ class MessengerInterface(abc.ABC):
     def __init__(self):
         self.task = None
         self.running_in_foreground = False
-        
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
@@ -51,6 +50,7 @@ class MessengerInterface(abc.ABC):
 
     async def shutdown(self):
         await self.task.cancel()
+
 
 class PollingMessengerInterface(MessengerInterface):
     """
