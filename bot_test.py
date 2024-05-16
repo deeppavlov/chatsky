@@ -48,3 +48,4 @@ pipeline = Pipeline.from_script(
 pipeline.run()
 # vk_interface._respond(ctx)
 print(vk_dummy.responses)
+
