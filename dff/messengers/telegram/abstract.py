@@ -419,12 +419,10 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 )
 
     async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        await self._on_event(update, _, lambda u: self.extract_message_from_telegram(u.message))
+        await self._on_event(update, _, lambda s: self.extract_message_from_telegram(s.message))
 
     async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        await self._on_event(
-            update, _, lambda u: Message(attachments=[CallbackQuery(query_string=u.callback_query.data)])
-        )
+        await self._on_event(update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)]))
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
         self.pipeline_runner = pipeline_runner

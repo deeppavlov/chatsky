@@ -80,10 +80,10 @@ video_data = {
 animation_data = {
     # For some reason, if we don't define filename explicitly, animation is sent as file.
     "source": HttpUrl(
-        f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.mp4"
+        f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif"
     ),
     "title": "Hong Kong skyscraper views by Simplyart4794",
-    "filename": "hk.mp4",
+    "filename": "hk.gif",
 }
 
 image_data = {
