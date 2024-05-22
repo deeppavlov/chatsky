@@ -13,6 +13,7 @@ import uuid
 from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
 from dff.script import Context, Message
+from dff.pipeline import Pipeline
 from dff.messengers.common.types import PollingInterfaceLoopFunction
 
 if TYPE_CHECKING:
@@ -50,31 +51,87 @@ class MessengerInterface(abc.ABC):
 
     async def shutdown(self):
         await self.task.cancel()
+        logger.info(f"{type(self).__name__} has stopped working - SIGINT received")
 
 
 class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
+    # Saved Pipeline() as a variable here. But it was said that it's going to be somewhere else due to MultipleInterfaces PR or Triggers PR (don't remember). That needs to be considered later, possibly using the connect() method or in some other way.
+    # self.running seems very similar to self.running_in_foreground. Are they the same thing or not? Maybe not, because connect() can still be called by anyone without running in foreground, though very unlikely - most will use pipeline.run() calling run_in_foreground().
+    def __init__(self):
+        self.request_queue = asyncio.Queue()
+        self.pipeline = None
+        self.running = True
+        super().__init__()
 
-    @abc.abstractmethod
-    async def _request(self) -> List[Tuple[Message, Hashable]]:
-        """
-        Method used for sending users request for their input.
-
-        :return: A list of tuples: user inputs and context ids (any user ids) associated with the inputs.
-        """
-        raise NotImplementedError
-
-    @abc.abstractmethod
-    async def _respond(self, responses: List[Context]):
+    @absractmethod
+    async def _respond(self, ctx_id, last_response):
         """
         Method used for sending users responses for their last input.
 
-        :param responses: A list of contexts, representing dialogs with the users;
-            `last_response`, `id` and some dialog info can be extracted from there.
+        :param ctx_id: Context id, specifies the user id. Without multiple messenger interfaces it's basically a redundant parameter, because this function is just a more complex `print(last_response)`. (Change before merge)
+        :param last_response: Latest response from the pipeline which should be relayed to the specified user.
         """
         raise NotImplementedError
+
+    async def _process_request(ctx_id, update: Message, pipeline: Pipeline):
+    """
+    Process a new update for ctx.
+    """
+        await pipeline._run_pipeline(update, ctx_id)
+        await self._respond(ctx_id, pipeline.last_response)
+
+    async def _worker_job():
+        """
+        Obtain Lock over the current context,
+        Process the update and send it.
+        """
+        # Is this the best order of the variables? They go in a different order in the pipeline._run_pipeline() arguments. Though this may be more logical.
+        (ctx_id, update) = await self.request_queue.get()
+        
+        async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
+            await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
+                self._process_request(ctx_id, update, self.pipeline)
+            )
+
+    async def _worker():
+        while self.running or not self.request_queue.empty():
+            await self._worker_job()
+
+    @abstract
+    async def _get_updates() -> list[tuple[ctx_id, update]]:
+    """
+    Obtain updates from another server
+
+    Example:
+        self.bot.request_updates()
+    """
+
+    async def _polling_job():
+        async for update in self._get_updates():
+            self.request_queue.put(update)
+
+    async def _polling_loop(
+        self,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        timeout: float = 0,
+    ):
+        while loop():
+            await asyncio.shield(self._polling_job())  # shield from cancellation
+            await asyncio.sleep(timeout)
+        finally:
+            self.running = False
+
+    async def connect(
+        self,
+        pipeline: Pipeline,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        timeout: float = 0,
+    ):
+        self.pipeline = pipeline
+        await asyncio.gather([self._polling_loop(loop=loop, timeout=timeout), shield(self._worker()), shield(self._worker())])
 
     def _on_exception(self, e: BaseException):
         """
@@ -87,45 +144,6 @@ class PollingMessengerInterface(MessengerInterface):
             logger.error(f"Exception in {type(self).__name__} loop!", exc_info=e)
         else:
             logger.info(f"{type(self).__name__} has stopped polling.")
-
-    async def _polling_loop(
-        self,
-        pipeline_runner: PipelineRunnerFunction,
-        timeout: float = 0,
-    ):
-        """
-        Method running the request - response cycle once.
-        """
-        user_updates = await self._request()
-        responses = [await pipeline_runner(request, ctx_id) for request, ctx_id in user_updates]
-        await self._respond(responses)
-        await asyncio.sleep(timeout)
-
-    async def connect(
-        self,
-        pipeline_runner: PipelineRunnerFunction,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        timeout: float = 0,
-    ):
-        """
-        Method, running a request - response cycle in a loop.
-        The looping behavior is determined by `loop` and `timeout`,
-        for most cases the loop itself shouldn't be overridden.
-
-        :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
-        :param loop: a function that determines whether polling should be continued;
-            called in each cycle, should return `True` to continue polling or `False` to stop.
-        :param timeout: a time interval between polls (in seconds).
-        """
-        while loop():
-            try:
-                await self._polling_loop(pipeline_runner, timeout)
-
-            except BaseException as e:
-                self._on_exception(e)
-                break
-        logger.info(f"{type(self).__name__} has stopped polling - SIGINT received")
 
 
 class CallbackMessengerInterface(MessengerInterface):
@@ -178,11 +196,13 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._prompt_response: str = prompt_response
         self._descriptor: Optional[TextIO] = out_descriptor
 
+    # TODO: Change into _get_updates()
+    # This method seems like it could just be renamed into _get_updates(), no? Just rearrange the parameters and this should work, I think. Though there would only be one update at a time with this implementation.
     def _request(self) -> List[Tuple[Message, Any]]:
         return [(Message(input(self._prompt_request)), self._ctx_id)]
 
-    def _respond(self, responses: List[Context]):
-        print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
+    def _respond(self, ctx_id, last_response: Message):
+        print(f"{self._prompt_response}{last_response.text()}", file=self._descriptor)
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
         """

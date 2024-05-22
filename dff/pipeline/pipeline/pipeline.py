@@ -33,6 +33,7 @@ from ..types import (
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
     ExtraHandlerBuilder,
+    ContextLock,
 )
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
@@ -103,6 +104,7 @@ class Pipeline:
     ):
         self.actor: Actor = None
         self.stopped_by_signal = False
+        self.context_lock = ContextLock()
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
         self._services_pipeline = ServiceGroup(

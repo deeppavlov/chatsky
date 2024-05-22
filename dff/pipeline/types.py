@@ -9,6 +9,7 @@ data structures, and other types that are defined for type hinting.
 from __future__ import annotations
 from enum import unique, Enum
 from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
+import asyncio
 
 from dff.context_storages import DBContextStorage
 from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
@@ -273,3 +274,9 @@ PipelineBuilder: TypeAlias = TypedDict(
 A type, representing anything that can be transformed to pipeline.
 It can be Dictionary, containing keys that are present in Pipeline constructor parameters.
 """
+class ContextLock:
+    locks: dict[ctx_id, asyncio.Lock]
+    def __get_item__(key):
+        if not key in locks:
+            locks[key] = Lock()
+        return locks[key]
