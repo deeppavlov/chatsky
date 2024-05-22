@@ -76,14 +76,14 @@ class PollingMessengerInterface(MessengerInterface):
         """
         raise NotImplementedError
 
-    async def _process_request(ctx_id, update: Message, pipeline: Pipeline):
+    async def _process_request(self, ctx_id, update: Message, pipeline: Pipeline):
         """
         Process a new update for ctx.
         """
         await pipeline._run_pipeline(update, ctx_id)
         await self._respond(ctx_id, pipeline.last_response)
 
-    async def _worker_job():
+    async def _worker_job(self):
         """
         Obtain Lock over the current context,
         Process the update and send it.
@@ -96,12 +96,12 @@ class PollingMessengerInterface(MessengerInterface):
                 self._process_request(ctx_id, update, self.pipeline)
             )
 
-    async def _worker():
+    async def _worker(self):
         while self.running or not self.request_queue.empty():
             await self._worker_job()
 
     @abstract
-    async def _get_updates() -> list[tuple[ctx_id, update]]:
+    async def _get_updates(self) -> list[tuple[ctx_id, update]]:
         """
         Obtain updates from another server
 
@@ -109,7 +109,7 @@ class PollingMessengerInterface(MessengerInterface):
             self.bot.request_updates()
         """
 
-    async def _polling_job():
+    async def _polling_job(self):
         async for update in self._get_updates():
             self.request_queue.put(update)
 
