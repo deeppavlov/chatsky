@@ -77,9 +77,9 @@ class PollingMessengerInterface(MessengerInterface):
         raise NotImplementedError
 
     async def _process_request(ctx_id, update: Message, pipeline: Pipeline):
-    """
-    Process a new update for ctx.
-    """
+        """
+        Process a new update for ctx.
+        """
         await pipeline._run_pipeline(update, ctx_id)
         await self._respond(ctx_id, pipeline.last_response)
 
@@ -102,12 +102,12 @@ class PollingMessengerInterface(MessengerInterface):
 
     @abstract
     async def _get_updates() -> list[tuple[ctx_id, update]]:
-    """
-    Obtain updates from another server
+        """
+        Obtain updates from another server
 
-    Example:
-        self.bot.request_updates()
-    """
+        Example:
+            self.bot.request_updates()
+        """
 
     async def _polling_job():
         async for update in self._get_updates():
