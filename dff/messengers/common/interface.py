@@ -13,11 +13,11 @@ import uuid
 from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
 from dff.script import Context, Message
-from dff.pipeline import Pipeline
 from dff.messengers.common.types import PollingInterfaceLoopFunction
 
 if TYPE_CHECKING:
     from dff.pipeline.types import PipelineRunnerFunction
+    from dff.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -33,7 +33,7 @@ class MessengerInterface(abc.ABC):
         self.running_in_foreground = False
 
     @abc.abstractmethod
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+    async def connect(self, pipeline: Pipeline, loop: PollingInterfaceLoopFunction, timeout: float):
         """
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
@@ -43,9 +43,14 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
-    async def run_in_foreground(self, *args):
+    async def run_in_foreground(
+        self,
+        pipeline: Pipeline,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        timeout: float = 0,
+    ):
         self.running_in_foreground = True
-        self.task = await asyncio.create_task(self.connect(args))
+        self.task = await asyncio.create_task(self.connect(pipeline, loop, timeout))
         await self.task
         # Allowing other interfaces (and all async tasks) to work too
 
@@ -66,7 +71,7 @@ class PollingMessengerInterface(MessengerInterface):
         self.running = True
         super().__init__()
 
-    @absractmethod
+    @abc.abstractmethod
     async def _respond(self, ctx_id, last_response):
         """
         Method used for sending users responses for their last input.
@@ -100,7 +105,7 @@ class PollingMessengerInterface(MessengerInterface):
         while self.running or not self.request_queue.empty():
             await self._worker_job()
 
-    @abstract
+    @abc.abstractmethod
     async def _get_updates(self) -> list[tuple[ctx_id, update]]:
         """
         Obtain updates from another server
@@ -118,9 +123,10 @@ class PollingMessengerInterface(MessengerInterface):
         loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
-        while loop():
-            await asyncio.shield(self._polling_job())  # shield from cancellation
-            await asyncio.sleep(timeout)
+        try:
+            while loop():
+                await asyncio.shield(self._polling_job())  # shield from cancellation
+                await asyncio.sleep(timeout)
         finally:
             self.running = False
 
@@ -130,6 +136,7 @@ class PollingMessengerInterface(MessengerInterface):
         loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
+        print("connect() started")
         self.pipeline = pipeline
         await asyncio.gather([self._polling_loop(loop=loop, timeout=timeout), shield(self._worker()), shield(self._worker())])
 
@@ -196,10 +203,8 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._prompt_response: str = prompt_response
         self._descriptor: Optional[TextIO] = out_descriptor
 
-    # TODO: Change into _get_updates()
-    # This method seems like it could just be renamed into _get_updates(), no? Just rearrange the parameters and this should work, I think. Though there would only be one update at a time with this implementation.
-    def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(input(self._prompt_request)), self._ctx_id)]
+    def _get_updates(self) -> List[Tuple[Any, Message]]:
+        return [(self._ctx_id, Message(input(self._prompt_request)))]
 
     def _respond(self, ctx_id, last_response: Message):
         print(f"{self._prompt_response}{last_response.text()}", file=self._descriptor)
