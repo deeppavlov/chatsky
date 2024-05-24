@@ -90,13 +90,12 @@ document_data = {
 
 
 # %%
-def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
-    loop = get_event_loop()
+async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
     atch = [
         a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)
     ]
     if len(atch) > 0:
-        atch_hash = hash(loop.run_until_complete(atch[0].get_bytes(pipe.messenger_interface)))
+        atch_hash = hash(await atch[0].get_bytes(pipe.messenger_interface))
         resp_format = "Here's your previous request hash: `{}`!\nRun /start command again to restart."
         return Message(
             resp_format.format(atch_hash, parse_mode=ParseMode.MARKDOWN_V2)

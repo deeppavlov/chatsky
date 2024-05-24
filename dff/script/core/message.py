@@ -162,6 +162,8 @@ class DataAttachment(Attachment):
         if isinstance(other, DataAttachment):
             if self.id != other.id:
                 return False
+            if self.source != other.source:
+                return False
             if self.title != other.title:
                 return False
             return True

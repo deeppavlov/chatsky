@@ -2,34 +2,19 @@ from asyncio import get_event_loop
 from typing import Any, Hashable, List, Optional, Tuple, TypeAlias
 
 from pydantic import BaseModel
-from re import sub
-from telegram import File, Update
-from telegram.ext import ExtBot
+from telegram import Update
 
 from dff.messengers.telegram.abstract import _AbstractTelegramInterface
 from dff.pipeline.types import PipelineRunnerFunction
 from dff.script import Message
 from dff.script.core.context import Context
+from dff.script.core.message import DataAttachment
 
 PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
 
-def _compare_messages(mess1: Message, mess2: Message) -> bool:
-    if mess1.text == None or mess2.text == None:
-        return True
-    m1 = mess1.model_copy(deep=True)
-    m2 = mess2.model_copy(deep=True)
-    m1.text = sub(r"`\d+`", "<<number>>", m1.text)
-    m2.text = sub(r"`\d+`", "<<number>>", m2.text)
-    return m1 == m2
-
-
 class MockBot(BaseModel, arbitrary_types_allowed=True):
-    original_bot: ExtBot
     latest_trace: List[str] = list()
-
-    async def get_file(self, file_id: str) -> File:
-        return await self.original_bot.get_file(file_id)
 
     @staticmethod
     def representation(any: Any) -> str:
@@ -59,8 +44,7 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
 
     @classmethod
     def create(cls, interface: _AbstractTelegramInterface, happy_path: List[PathStep]) -> "MockApplication":
-        mock_bot = MockBot(original_bot=interface.application.bot)
-        instance = cls(bot=mock_bot, happy_path=happy_path, interface=interface)
+        instance = cls(bot=MockBot(), happy_path=happy_path, interface=interface)
         return instance
 
     def _wrap_pipeline_runner(self, runner: PipelineRunnerFunction):
@@ -71,11 +55,22 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
             return self.latest_ctx
         
         wrapped_pipeline_runner.is_wrapped = True
+        wrapped_pipeline_runner.original = runner
         return wrapped_pipeline_runner
+
+    def _wrap_populate_attachment(self, interface: _AbstractTelegramInterface):
+        async def wrapped_populate_attachment(_: DataAttachment) -> bytes:
+            return bytes()
+        
+        wrapped_populate_attachment.is_wrapped = True
+        wrapped_populate_attachment.original = interface.populate_attachment
+        return wrapped_populate_attachment
 
     def _run_bot(self) -> None:
         if not getattr(self.interface.pipeline_runner, "is_wrapped", False):
             self.interface.pipeline_runner = self._wrap_pipeline_runner(self.interface.pipeline_runner)
+        if not getattr(self.interface.populate_attachment, "is_wrapped", False):
+            self.interface.populate_attachment = self._wrap_populate_attachment(self.interface)
 
         loop = get_event_loop()
         for update, received, response, trace in self.happy_path:
@@ -86,11 +81,14 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
             else:
                 raise RuntimeError(f"Update {update} type unknown!")
             assert self.latest_ctx is not None, "During pipeline runner execution, no context was produced!"
-            assert _compare_messages(self.latest_ctx.last_request, received), "Expected request message is not equal to expected!"
-            assert _compare_messages(self.latest_ctx.last_response, response), "Expected response message is not equal to expected!"
+            assert self.latest_ctx.last_request == received, "Expected request message is not equal to expected!"
+            assert self.latest_ctx.last_response == response, "Expected response message is not equal to expected!"
             assert self.bot.latest_trace == trace, "Expected trace is not equal to expected!"
             self.bot.latest_trace = list()
             self.latest_ctx = None
+
+        self.interface.pipeline_runner = self.interface.pipeline_runner.original
+        self.interface.populate_attachment = self.interface.populate_attachment.original
 
     def run_polling(self, poll_interval: float, timeout: int, allowed_updates: List[str]) -> None:
         return self._run_bot()
