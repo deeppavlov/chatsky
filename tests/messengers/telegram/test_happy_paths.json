@@ -65,7 +65,7 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=6, supergroup_chat_created=False, text='audio'), update_id=6)",
             "received_message": "{\"text\":\"audio\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Here's your audio!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":\"\\\"Separation\\\" melody by William King\",\"use_cache\":true,\"dff_attachment_type\":\"audio\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Here's your audio!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":\"\\\"Separation\\\" melody by William King\",\"use_cache\":true,\"dff_attachment_type\":\"audio\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_audio(42, audio=<<bytes>>, performer=None, title=None, caption=\"Here's your audio!\", disable_notification=None, reply_markup=None, parse_mode=None, thumbnail=None)"
             ]
@@ -73,7 +73,7 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 4, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=7, supergroup_chat_created=False, text='video'), update_id=7)",
             "received_message": "{\"text\":\"video\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Here's your video!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/crownfall-lags-nkognit0.mp4\",\"cached_filename\":null,\"id\":null,\"title\":\"Epic Dota2 gameplay by Nkognit0\",\"use_cache\":true,\"dff_attachment_type\":\"video\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Here's your video!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments/crownfall-lags-nkognit0.mp4\",\"cached_filename\":null,\"id\":null,\"title\":\"Epic Dota2 gameplay by Nkognit0\",\"use_cache\":true,\"dff_attachment_type\":\"video\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_video(42, <<bytes>>, caption=\"Here's your video!\", disable_notification=None, reply_markup=None, parse_mode=None, supports_streaming=None, has_spoiler=None, thumbnail=None, filename=None)"
             ]
@@ -81,7 +81,7 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 22, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=8, supergroup_chat_created=False, text='animation'), update_id=8)",
             "received_message": "{\"text\":\"animation\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Here's your animation!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/hong-kong-simplyart4794.gif\",\"cached_filename\":null,\"id\":null,\"title\":\"Hong Kong skyscraper views by Simplyart4794\",\"use_cache\":true,\"dff_attachment_type\":\"animation\",\"filename\":\"hk.gif\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Here's your animation!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments/hong-kong-simplyart4794.gif\",\"cached_filename\":null,\"id\":null,\"title\":\"Hong Kong skyscraper views by Simplyart4794\",\"use_cache\":true,\"dff_attachment_type\":\"animation\",\"filename\":\"hk.gif\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_animation(42, <<bytes>>, caption=\"Here's your animation!\", parse_mode=None, disable_notification=None, reply_markup=None, has_spoiler=None, thumbnail=None, filename='hk.gif')"
             ]
@@ -89,7 +89,7 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 35, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=9, supergroup_chat_created=False, text='image'), update_id=9)",
             "received_message": "{\"text\":\"image\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Here's your image!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov.png\",\"cached_filename\":null,\"id\":null,\"title\":\"DeepPavlov logo\",\"use_cache\":true,\"dff_attachment_type\":\"image\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Here's your image!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments/deeppavlov.png\",\"cached_filename\":null,\"id\":null,\"title\":\"DeepPavlov logo\",\"use_cache\":true,\"dff_attachment_type\":\"image\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_photo(42, <<bytes>>, caption=\"Here's your image!\", disable_notification=None, reply_markup=None, parse_mode=None, has_spoiler=None, filename=None)"
             ]
@@ -97,7 +97,7 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 19, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=10, supergroup_chat_created=False, text='document'), update_id=10)",
             "received_message": "{\"text\":\"document\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Here's your document!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments/deeppavlov-article.pdf\",\"cached_filename\":null,\"id\":null,\"title\":\"DeepPavlov article\",\"use_cache\":true,\"dff_attachment_type\":\"document\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Here's your document!\",\"commands\":null,\"attachments\":[{\"source\":\"https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments/deeppavlov-article.pdf\",\"cached_filename\":null,\"id\":null,\"title\":\"DeepPavlov article\",\"use_cache\":true,\"dff_attachment_type\":\"document\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_document(42, <<bytes>>, caption=\"Here's your document!\", disable_notification=None, reply_markup=None, parse_mode=None, thumbnail=None, filename=None)"
             ]

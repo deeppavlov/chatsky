@@ -57,7 +57,7 @@ in terms and datastructures of Dialog Flow Framework.
 
 # %%
 
-EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
+EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
 
 image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
 

@@ -27,7 +27,7 @@ from dff.script.core.message import (
     Video,
 )
 
-EXAMPLE_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
+EXAMPLE_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
 
 
 class DFFCLIMessengerInterface(CLIMessengerInterface):

@@ -48,7 +48,7 @@ be found here:
 
 # %%
 
-EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
+EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
 
 location_data = {"latitude": 50.65, "longitude": 3.916667}
 
