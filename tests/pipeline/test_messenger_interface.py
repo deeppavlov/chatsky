@@ -50,7 +50,40 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
+    asyncio.run(pipeline.messenger_interface.run_in_foreground(pipeline, loop=loop))
+    # asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
+
+
+def test_echo_responses():
+    def repeat_message_back(ctx: Context, _: Pipeline, *args, **kwargs):
+        return Message(ctx.last_request)
+    ECHO_SCRIPT = {
+        "echo_flow": {
+            "start_node": {
+                RESPONSE: repeat_message_back,
+                TRANSITIONS: {"start_node": True},
+            },
+        }
+    }
+
+    # (respond=request)
+    pipeline = Pipeline.from_script(
+        ECHO_SCRIPT,
+        start_label=("echo_flow", "start_node"),
+        fallback_label=("echo_flow", "start_node"),
+    )
+    
+    obtained_updates = False
+    received_updates = []
+    """
+    get_updates -> if not obtained_updates: [ctx_id, request]
+    respond -> received_updates.append(ctx_id, response)
+    
+    messenger_iface.connect(loop=not obtained_updates)
+    
+    assert received_updates == expected
+    """
+    assert True
 
 
 def test_callback_messenger_interface(monkeypatch):
