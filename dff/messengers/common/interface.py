@@ -32,6 +32,7 @@ class MessengerInterface(abc.ABC):
         self.task = None
         self.running_in_foreground = False
 
+
     @abc.abstractmethod
     async def connect(self, *args):
         """
@@ -61,11 +62,9 @@ class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
-    # Saved Pipeline() as a variable here. But it was said that it's going to be somewhere else due to MultipleInterfaces PR or Triggers PR (don't remember). That needs to be considered later, possibly using the connect() method or in some other way.
     # self.running seems very similar to self.running_in_foreground. Are they the same thing or not? Maybe not, because connect() can still be called by anyone without running in foreground, though very unlikely - most will use pipeline.run() calling run_in_foreground().
     def __init__(self):
         self.request_queue = asyncio.Queue()
-        self.pipeline = None
         self.running = True
         super().__init__()
 
