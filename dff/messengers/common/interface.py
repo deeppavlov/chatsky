@@ -11,13 +11,13 @@ import asyncio
 import logging
 from pathlib import Path
 from tempfile import gettempdir
-from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING
+from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
     from dff.script import Context, Message
     from dff.pipeline.types import PipelineRunnerFunction
     from dff.messengers.common.types import PollingInterfaceLoopFunction
-    from dff.script.core.message import DataAttachment
+    from dff.script.core.message import Attachment, DataAttachment
 
 logger = logging.getLogger(__name__)
 
@@ -28,8 +28,8 @@ class MessengerInterface(abc.ABC):
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
 
-    supported_request_attachment_types = set()
-    supported_response_attachment_types = set()
+    supported_request_attachment_types: set[Type[Attachment]] = set()
+    supported_response_attachment_types: set[type[Attachment]] = set()
 
     def __init__(self, attachments_directory: Optional[Path] = None) -> None:
         tempdir = gettempdir()
@@ -37,13 +37,14 @@ class MessengerInterface(abc.ABC):
             self.attachments_directory = attachments_directory
         else:
             warning_start = f"Attachments directory for {type(self).__name__} messenger interface"
-            warning_end = "attachment data won't be preserved locally!"
+            warning_end = "attachment data won't be cached locally!"
             if attachments_directory is None:
                 self.attachments_directory = Path(tempdir)
                 logger.warning(f"{warning_start} is None, so will be set to tempdir and {warning_end}")
             else:
                 self.attachments_directory = attachments_directory
                 logger.warning(f"{warning_start} is in tempdir, so {warning_end}")
+        self.attachments_directory.mkdir(parents=True, exist_ok=True)
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
@@ -140,7 +141,8 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self):
+    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__(attachments_directory)
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction):

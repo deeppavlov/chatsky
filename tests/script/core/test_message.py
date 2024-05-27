@@ -147,10 +147,10 @@ class TestMessage:
 
         for document in (remote_document_att, local_document_att, iface_document_att):
             read_bytes = await document.get_bytes(cli_iface)
-            assert document_bytes, read_bytes
+            assert document_bytes == read_bytes
             if not isinstance(document.source, Path):
                 cached_bytes = document.cached_filename.read_bytes()
-                assert document_bytes, cached_bytes
+                assert document_bytes == cached_bytes
 
     def test_missing_error(self):
         with pytest.raises(ValidationError) as e:

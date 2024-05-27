@@ -199,6 +199,7 @@ class _AbstractTelegramInterface(MessengerInterface):
     async def cast_message_to_telegram_and_send(self, bot: ExtBot, chat_id: int, message: Message) -> None:
         if message.attachments is not None:
             files = list()
+            media_group_attachments_num = len([att for att in message.attachments if isinstance(att, DataAttachment)])
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(
@@ -250,7 +251,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaAudio(
                                     attachment_bytes,
@@ -278,7 +279,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Video):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaVideo(
                                     attachment_bytes,
@@ -307,7 +308,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Animation):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaAnimation(
                                     attachment_bytes,
@@ -334,7 +335,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Image):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaPhoto(
                                     attachment_bytes,
@@ -359,7 +360,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Document):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaDocument(
                                     attachment_bytes,
@@ -410,7 +411,7 @@ class _AbstractTelegramInterface(MessengerInterface):
         if update.effective_chat is not None and data_available:
             message = create_message(update)
             message.original_message = update
-            resp = await self.pipeline_runner(message, update.effective_chat.id)
+            resp = await self._pipeline_runner(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
                     self.application.bot, update.effective_chat.id, resp.last_response
@@ -423,4 +424,4 @@ class _AbstractTelegramInterface(MessengerInterface):
         await self._on_event(update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)]))
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
-        self.pipeline_runner = pipeline_runner
+        self._pipeline_runner = pipeline_runner
