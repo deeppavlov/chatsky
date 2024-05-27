@@ -2,7 +2,7 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import RESPONSE, TRANSITIONS, Message
+from dff.script import RESPONSE, TRANSITIONS, Message, Context
 from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
@@ -50,7 +50,7 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.run_in_foreground(pipeline, loop=loop))
+    asyncio.run(pipeline.messenger_interface.run_in_foreground(pipeline, loop))
     # asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
 
 
@@ -61,13 +61,13 @@ def test_echo_responses():
         "echo_flow": {
             "start_node": {
                 RESPONSE: repeat_message_back,
-                TRANSITIONS: {"start_node": True},
+                TRANSITIONS: {"start_node": cnd.true()},
             },
         }
     }
 
     # (respond=request)
-    pipeline = Pipeline.from_script(
+    new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,
         start_label=("echo_flow", "start_node"),
         fallback_label=("echo_flow", "start_node"),

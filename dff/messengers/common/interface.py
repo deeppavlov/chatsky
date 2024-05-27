@@ -33,7 +33,7 @@ class MessengerInterface(abc.ABC):
         self.running_in_foreground = False
 
     @abc.abstractmethod
-    async def connect(self, pipeline: Pipeline, loop: PollingInterfaceLoopFunction, timeout: float):
+    async def connect(self, *args):
         """
         Method invoked when message interface is instantiated and connection is established.
         May be used for sending an introduction message or displaying general bot information.
@@ -43,14 +43,12 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
-    async def run_in_foreground(
-        self,
-        pipeline: Pipeline,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        timeout: float = 0,
-    ):
+    async def run_in_foreground(self, pipeline: Pipeline, *args):
         self.running_in_foreground = True
-        self.task = await asyncio.create_task(self.connect(pipeline, loop, timeout))
+        self.pipeline = pipeline
+        print(True)
+        self.task = asyncio.create_task(self.connect(*args))
+        print(self.task)
         await self.task
         # Allowing other interfaces (and all async tasks) to work too
 
@@ -98,7 +96,7 @@ class PollingMessengerInterface(MessengerInterface):
         
         async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
             await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
-                self._process_request(ctx_id, update, self.pipeline)
+                self._process_request, ctx_id, update, self.pipeline
             )
 
     async def _worker(self):
@@ -115,8 +113,8 @@ class PollingMessengerInterface(MessengerInterface):
         """
 
     async def _polling_job(self):
-        async for update in self._get_updates():
-            self.request_queue.put(update)
+        for update in self._get_updates():
+            await self.request_queue.put(update)
 
     async def _polling_loop(
         self,
@@ -132,13 +130,10 @@ class PollingMessengerInterface(MessengerInterface):
 
     async def connect(
         self,
-        pipeline: Pipeline,
         loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
-        print("connect() started")
-        self.pipeline = pipeline
-        await asyncio.gather([self._polling_loop(loop=loop, timeout=timeout), shield(self._worker()), shield(self._worker())])
+        await asyncio.gather(self._polling_loop(loop=loop, timeout=timeout), asyncio.shield(self._worker()), asyncio.shield(self._worker()))
 
     def _on_exception(self, e: BaseException):
         """

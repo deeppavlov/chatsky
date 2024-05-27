@@ -368,7 +368,7 @@ class Pipeline:
     def _sigint_handler(self):
         self.stopped_by_signal = True
         # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
-        for interface in messenger_interface:
+        for interface in self.messenger_interface:
             if interface.running_in_foreground:
                 interface.shutdown()
         # In case someone launched a pipeline with connect() instead of run_in_foreground(), all SIGINTs will be ignored, though the flag self.stopped_by_signal is still changed to True.
@@ -387,7 +387,7 @@ class Pipeline:
         event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
         # If the user changes signal handling within _polling_loop(), this will break
 
-        asyncio.run(self.messenger_interface.run_in_foreground(self))
+        asyncio.run(self.messenger_interface.run_in_foreground(self, self._run_pipeline))
         logger.info(f"pipeline finished working")
 
     def __call__(
