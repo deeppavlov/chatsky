@@ -45,7 +45,7 @@ except ImportError:
     telegram_available = False
 
 
-class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
+class _AbstractTelegramInterface(MessengerInterface):
     supported_request_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, Invoice}
     supported_response_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document}
 
@@ -58,7 +58,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         self.application.add_handler(MessageHandler(ALL, self.on_message))
         self.application.add_handler(CallbackQueryHandler(self.on_callback))
 
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:  # pragma: no cover
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
         if attachment.id is not None:
             file = await self.application.bot.get_file(attachment.id)
             data = await file.download_as_bytearray()
@@ -66,7 +66,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         else:
             raise ValueError(f"For attachment {attachment} id is not defined!")
 
-    def extract_message_from_telegram(self, update: TelegramMessage) -> Message:  # pragma: no cover
+    def extract_message_from_telegram(self, update: TelegramMessage) -> Message:
         message = Message()
         message.attachments = list()
 
@@ -196,9 +196,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
 
         return message
 
-    async def cast_message_to_telegram_and_send(
-        self, bot: ExtBot, chat_id: int, message: Message
-    ) -> None:  # pragma: no cover
+    async def cast_message_to_telegram_and_send(self, bot: ExtBot, chat_id: int, message: Message) -> None:
         if message.attachments is not None:
             files = list()
             for attachment in message.attachments:
