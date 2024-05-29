@@ -14,6 +14,7 @@ Telegram API token is required to access telegram API.
 # %pip install dff[telegram]
 
 # %%
+from asyncio import get_event_loop
 import os
 from urllib.request import urlopen
 
@@ -47,7 +48,7 @@ such as:
 3. Multiple attachments of different kind handling.
 4. Image with a spoiler.
 5. Document with a thumbnail.
-6. Raw representation of different data user can send to the bot.
+6. Attachment bytes hash.
 
 Last option ("Raw attachments!") button might be especially interesting,
 because it shows how bot precepts different telegram attachments sent by user
@@ -56,7 +57,7 @@ in terms and datastructures of Dialog Flow Framework.
 
 # %%
 
-EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
+EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
 
 image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
 
@@ -89,30 +90,13 @@ document_data = {
 
 
 # %%
-formatted_request = r"""
-Here's your previous request\!
-```json
-{}
-```
-Run /start command again to restart\.
-"""
-
-
-def stringify_previous_request(ctx: Context, _: Pipeline) -> Message:
-    dump = ctx.last_request.model_dump_json(indent=4)
-    return Message(
-        formatted_request.format(dump), parse_mode=ParseMode.MARKDOWN_V2
-    )
-
-
-# %%
-def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
+async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
     atch = [
         a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)
     ]
     if len(atch) > 0:
-        atch_hash = hash(atch[0].get_bytes(pipe.messenger_interface))
-        resp_format = r"Here's your previous request hash: `{}`\!\nRun /start command again to restart\."
+        atch_hash = hash(await atch[0].get_bytes(pipe.messenger_interface))
+        resp_format = "Here's your previous request hash: `{}`!\nRun /start command again to restart."
         return Message(
             resp_format.format(atch_hash, parse_mode=ParseMode.MARKDOWN_V2)
         )
@@ -164,11 +148,6 @@ script = {
                                 ],
                                 [
                                     InlineKeyboardButton(
-                                        "Raw attachments!", callback_data="raw"
-                                    ),
-                                ],
-                                [
-                                    InlineKeyboardButton(
                                         "Attachment bytes hash!",
                                         callback_data="hash",
                                     ),
@@ -191,7 +170,6 @@ script = {
                 "attachments_node": cnd.has_callback_query("attachments"),
                 "secret_node": cnd.has_callback_query("secret"),
                 "thumbnail_node": cnd.has_callback_query("thumbnail"),
-                "raw_init_node": cnd.has_callback_query("raw"),
                 "hash_init_node": cnd.has_callback_query("hash"),
                 "hmmm_node": cnd.has_callback_query("restart"),
                 "fallback_node": cnd.has_callback_query("quit"),
@@ -220,15 +198,6 @@ script = {
                 "Here's your document with tumbnail! Run /start command again to restart.",
                 attachments=[Document(**document_data)],
             ),
-        },
-        "raw_init_node": {
-            RESPONSE: Message(
-                "Alright! Now send me any message and I'll send you it's raw data!"
-            ),
-            TRANSITIONS: {"raw_request_node": cnd.true()},
-        },
-        "raw_request_node": {
-            RESPONSE: stringify_previous_request,
         },
         "hash_init_node": {
             RESPONSE: Message(

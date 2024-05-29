@@ -48,7 +48,7 @@ be found here:
 
 # %%
 
-EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@example-attachments"
+EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
 
 location_data = {"latitude": 50.65, "longitude": 3.916667}
 
@@ -80,10 +80,10 @@ video_data = {
 animation_data = {
     # For some reason, if we don't define filename explicitly, animation is sent as file.
     "source": HttpUrl(
-        f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.mp4"
+        f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif"
     ),
     "title": "Hong Kong skyscraper views by Simplyart4794",
-    "filename": "hk.mp4",
+    "filename": "hk.gif",
 }
 
 image_data = {

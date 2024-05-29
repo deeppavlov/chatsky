@@ -45,7 +45,7 @@ except ImportError:
     telegram_available = False
 
 
-class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
+class _AbstractTelegramInterface(MessengerInterface):
     supported_request_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, Invoice}
     supported_response_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document}
 
@@ -58,7 +58,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         self.application.add_handler(MessageHandler(ALL, self.on_message))
         self.application.add_handler(CallbackQueryHandler(self.on_callback))
 
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:  # pragma: no cover
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
         if attachment.id is not None:
             file = await self.application.bot.get_file(attachment.id)
             data = await file.download_as_bytearray()
@@ -66,7 +66,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         else:
             raise ValueError(f"For attachment {attachment} id is not defined!")
 
-    def extract_message_from_telegram(self, update: TelegramMessage) -> Message:  # pragma: no cover
+    def extract_message_from_telegram(self, update: TelegramMessage) -> Message:
         message = Message()
         message.attachments = list()
 
@@ -196,11 +196,10 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
 
         return message
 
-    async def cast_message_to_telegram_and_send(
-        self, bot: ExtBot, chat_id: int, message: Message
-    ) -> None:  # pragma: no cover
+    async def cast_message_to_telegram_and_send(self, bot: ExtBot, chat_id: int, message: Message) -> None:
         if message.attachments is not None:
             files = list()
+            media_group_attachments_num = len([att for att in message.attachments if isinstance(att, DataAttachment)])
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(
@@ -252,7 +251,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaAudio(
                                     attachment_bytes,
@@ -280,7 +279,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 if isinstance(attachment, Video):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaVideo(
                                     attachment_bytes,
@@ -309,7 +308,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 if isinstance(attachment, Animation):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaAnimation(
                                     attachment_bytes,
@@ -336,7 +335,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 if isinstance(attachment, Image):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaPhoto(
                                     attachment_bytes,
@@ -361,7 +360,7 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
                 if isinstance(attachment, Document):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if len(message.attachments) > 1:
+                        if media_group_attachments_num == 1:
                             files += [
                                 InputMediaDocument(
                                     attachment_bytes,
@@ -412,19 +411,17 @@ class _AbstractTelegramInterface(MessengerInterface):  # pragma: no cover
         if update.effective_chat is not None and data_available:
             message = create_message(update)
             message.original_message = update
-            resp = await self.pipeline_runner(message, update.effective_chat.id)
+            resp = await self._pipeline_runner(message, update.effective_chat.id)
             if resp.last_response is not None:
                 await self.cast_message_to_telegram_and_send(
                     self.application.bot, update.effective_chat.id, resp.last_response
                 )
 
     async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        await self._on_event(update, _, lambda u: self.extract_message_from_telegram(u.message))
+        await self._on_event(update, _, lambda s: self.extract_message_from_telegram(s.message))
 
     async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
-        await self._on_event(
-            update, _, lambda u: Message(attachments=[CallbackQuery(query_string=u.callback_query.data)])
-        )
+        await self._on_event(update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)]))
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
-        self.pipeline_runner = pipeline_runner
+        self._pipeline_runner = pipeline_runner

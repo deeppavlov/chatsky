@@ -5,16 +5,41 @@ The :py:class:`.Message` class is a universal data model for representing a mess
 DFF. It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Any, Literal, Optional, List, Union
+from typing import Any, Callable, Dict, Literal, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 from uuid import uuid4
 
-from pydantic import Field, field_validator, FilePath, HttpUrl, BaseModel, model_validator
+from pydantic import Field, field_validator, FilePath, HttpUrl, BaseModel, model_serializer, model_validator
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterface
+from dff.utils.pydantic import json_pickle_serializer, json_pickle_validator
+
+
+class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
+    """
+    This class is a Pydantic BaseModel that serves as a base class for all DFF models.
+    """
+
+    pass
+
+
+# TODO: inline once annotated __pydantic_extra__ will be available in pydantic
+def _json_extra_serializer(model: DataModel, original_serializer: Callable[[DataModel], Dict[str, Any]]) -> Dict[str, Any]:
+    model_copy = model.model_copy(deep=True)
+    for extra_name in model.model_extra.keys():
+        delattr(model_copy, extra_name)
+    model_dict = original_serializer(model_copy)
+    model_dict.update(json_pickle_serializer(model.model_extra, original_serializer))
+    return model_dict
+
+
+# TODO: inline once annotated __pydantic_extra__ will be available in pydantic
+def _json_extra_validator(model: DataModel) -> DataModel:
+    model.__pydantic_extra__ = json_pickle_validator(model.__pydantic_extra__)
+    return model
 
 
 class Session(Enum):
@@ -24,14 +49,6 @@ class Session(Enum):
 
     ACTIVE = auto()
     FINISHED = auto()
-
-
-class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
-    """
-    This class is a Pydantic BaseModel that serves as a base class for all DFF models.
-    """
-
-    pass
 
 
 class Command(DataModel):
@@ -44,12 +61,21 @@ class Command(DataModel):
 
 
 class Attachment(DataModel):
-    pass
+    """
+    """
+
+    @model_validator(mode="after")
+    def extra_validator(self) -> "Attachment":
+        return _json_extra_validator(self)
+
+    @model_serializer(mode="wrap", when_used="json")
+    def extra_serializer(self, original_serializer: Callable[["Attachment"], Dict[str, Any]]) -> Dict[str, Any]:
+        return _json_extra_serializer(self, original_serializer)
 
 
 class CallbackQuery(Attachment):
     query_string: Optional[str]
-    type: Literal["callback_query"] = "callback_query"
+    dff_attachment_type: Literal["callback_query"] = "callback_query"
 
 
 class Location(Attachment):
@@ -63,7 +89,7 @@ class Location(Attachment):
 
     longitude: float
     latitude: float
-    type: Literal["location"] = "location"
+    dff_attachment_type: Literal["location"] = "location"
 
     def __eq__(self, other):
         if isinstance(other, Location):
@@ -75,7 +101,7 @@ class Contact(Attachment):
     phone_number: str
     first_name: str
     last_name: Optional[str]
-    type: Literal["contact"] = "contact"
+    dff_attachment_type: Literal["contact"] = "contact"
 
 
 class Invoice(Attachment):
@@ -83,19 +109,19 @@ class Invoice(Attachment):
     description: str
     currency: str
     amount: int
-    type: Literal["invoice"] = "invoice"
+    dff_attachment_type: Literal["invoice"] = "invoice"
 
 
 class PollOption(DataModel):
     text: str
     votes: int = Field(default=0)
-    type: Literal["poll_option"] = "poll_option"
+    dff_attachment_type: Literal["poll_option"] = "poll_option"
 
 
 class Poll(Attachment):
     question: str
     options: List[PollOption]
-    type: Literal["poll"] = "poll"
+    dff_attachment_type: Literal["poll"] = "poll"
 
 
 class DataAttachment(Attachment):
@@ -136,6 +162,8 @@ class DataAttachment(Attachment):
         if isinstance(other, DataAttachment):
             if self.id != other.id:
                 return False
+            if self.source != other.source:
+                return False
             if self.title != other.title:
                 return False
             return True
@@ -161,37 +189,37 @@ class DataAttachment(Attachment):
 class Audio(DataAttachment):
     """Represents an audio file attachment."""
 
-    type: Literal["audio"] = "audio"
+    dff_attachment_type: Literal["audio"] = "audio"
 
 
 class Video(DataAttachment):
     """Represents a video file attachment."""
 
-    type: Literal["video"] = "video"
+    dff_attachment_type: Literal["video"] = "video"
 
 
 class Animation(DataAttachment):
     """Represents an animation file attachment."""
 
-    type: Literal["animation"] = "animation"
+    dff_attachment_type: Literal["animation"] = "animation"
 
 
 class Image(DataAttachment):
     """Represents an image file attachment."""
 
-    type: Literal["image"] = "image"
+    dff_attachment_type: Literal["image"] = "image"
 
 
 class Sticker(DataAttachment):
     """Represents a sticker as a file attachment."""
 
-    type: Literal["sticker"] = "sticker"
+    dff_attachment_type: Literal["sticker"] = "sticker"
 
 
 class Document(DataAttachment):
     """Represents a document file attachment."""
 
-    type: Literal["document"] = "document"
+    dff_attachment_type: Literal["document"] = "document"
 
 
 class Message(DataModel):
@@ -236,3 +264,11 @@ class Message(DataModel):
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
+
+    @model_validator(mode="after")
+    def extra_validator(self) -> "Message":
+        return _json_extra_validator(self)
+
+    @model_serializer(mode="wrap", when_used="json")
+    def extra_serializer(self, original_serializer: Callable[["Message"], Dict[str, Any]]) -> Dict[str, Any]:
+        return _json_extra_serializer(self, original_serializer)
