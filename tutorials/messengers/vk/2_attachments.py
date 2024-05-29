@@ -45,6 +45,8 @@ Sending images support both URL source and full local path
 
 
 # %%
+EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
+
 script = {
     "greeting_flow": {
         "start_node": {
@@ -60,13 +62,13 @@ script = {
             },
         },
         "cat_image_node": {
-            RESPONSE: Message(text="Two cool cats sent.", attachments=[Image(source="https://media.tenor.com/ff2BZlCK0SwAAAAM/gatin.gif"), Image(source="https://d2ph5fj80uercy.cloudfront.net/04/cat2634.jpg")]),
+            RESPONSE: Message(text="Two cool cats sent.", attachments=[Image(source=f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"), Image(source=f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif")]),
             TRANSITIONS: {
                 "greeting_node": cnd.true()
             }
         },
         "book_file_node": {
-            RESPONSE: Message(text="Here is your book!", attachments=[Document(source="book.pdf")]),
+            RESPONSE: Message(text="Here is your book!", attachments=[Document(source=f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf")]),
             TRANSITIONS: {
                 "greeting_node": cnd.true()
             }

@@ -30,9 +30,25 @@ async def vk_api_call(method):
 
 def extract_vk_update(updates):
     upds = []
-    for i in updates["updates"]:
-        text, id = i["object"]["message"]["text"], i["object"]["message"]["from_id"]
-        message = Message(text=text)
+    for update in updates["updates"]:
+        text, id = update["object"]["message"]["text"], update["object"]["message"]["from_id"]
+        attachments = []
+        attachments_list = update["object"]["message"]["attachments"]
+        
+        if attachments_list != []:
+            for attachment in attachments_list:
+                att_object = attachment[attachment["type"]]
+                if attachment["type"] == "audio" or attachment["type"] == "doc":
+                    attachments.append(DataAttachment(source=att_object["url"], id=str(att_object["id"])))
+                elif attachment["type"] == "photo":
+                    attachments.append(
+                        DataAttachment(
+                            source=att_object["sizes"][-1]["url"],  # last one is the highest resolution
+                            id=str(att_object["id"])
+                        )
+                    )
+                    
+        message = Message(text=text, attachments=attachments)
         upds.append(message, int(id))
     return upds
 
@@ -107,9 +123,6 @@ class VKWrapper:
 
     async def get_longpoll_server(self):
         return await vk_api_call(f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}")
-        # return requests.post(
-        #     f"https://api.vk.com/method/groups.getLongPollServer?group_id={self.group_id}&v=5.81&access_token={self.token}"
-        # ).json()
 
     async def get_upload_server(self, data_type, peer_id):
         upload_url = await vk_api_call(
@@ -221,6 +234,7 @@ class PollingVKInterface(PollingMessengerInterface):
             if response.attachments is not None:
                 attachment_list = []
                 for attachment in response.attachments:
+                    # add id to each attachment that is being generated in upload_attachment method
                     if isinstance(attachment, Image):
                         attachment_list.append(
                             {"type": "photo", "source": attachment.source}
@@ -246,8 +260,6 @@ class PollingVKInterface(PollingMessengerInterface):
     
     async def populate_attachment(self, attachment: DataAttachment) -> bytes:  # pragma: no cover
         if attachment.id is not None:
-            # attachment.id is not present???
-            # add 
             file_link = await vk_api_call(f"https://api.vk.com/method/photos.getById?photos={attachment.id}&v=5.81&access_token={self.token}")[0]["sizes"][-1]["url"]
             data = FilesOpener(file_link, key_format="file").open_files(just_bytes=True)
             return bytes(data)
