@@ -22,13 +22,13 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-async def vk_api_call(method):
+async def vk_api_call(method: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(method) as response:
             return response.json()
 
 
-def extract_vk_update(updates):
+def extract_vk_update(updates: dict):
     upds = []
     for update in updates["updates"]:
         text, id = update["object"]["message"]["text"], update["object"]["message"]["from_id"]
@@ -54,7 +54,7 @@ def extract_vk_update(updates):
 
 
 class FilesOpener:
-    def __init__(self, paths, key_format="file{}"):
+    def __init__(self, paths: list, key_format="file{}") -> list[tuple[str, tuple[str, io.BytesIO]]]:
         if not isinstance(paths, list):
             paths = [paths]
 
@@ -135,14 +135,14 @@ class VKWrapper:
 
         return upload_url["response"]["upload_url"]
 
-    async def save_attachment(self, uploaded_data, data_type):
+    async def save_attachment(self, uploaded_data, data_type, title: str=None):
         if data_type == "photos":
             saved_data = await vk_api_call(
                 f"https://api.vk.com/method/{data_type}.saveMessagesPhoto?&group_id={self.group_id}&v=5.81&access_token={self.token}&photo={uploaded_data['photo']}&server={uploaded_data['server']}&hash={uploaded_data['hash']}"
             )
         else:
             saved_data = await vk_api_call(
-                f"https://api.vk.com/method/docs.save?file={uploaded_data['file']}&group_id={self.group_id}&v=5.81&access_token={self.token}"
+                f"https://api.vk.com/method/docs.save?file={uploaded_data['file']}&title={title}&group_id={self.group_id}&v=5.81&access_token={self.token}"
             )
 
         if "response" not in saved_data:
@@ -177,7 +177,7 @@ class VKWrapper:
             with FilesOpener(attachment_path, key_format="file") as files:
                 uploaded_photo_data = await vk_api_call(upload_url, files=files).json()
 
-            saved_doc_data = self.save_attachment(uploaded_photo_data, "docs")
+            saved_doc_data = self.save_attachment(uploaded_photo_data, "docs", title=attachment.title)
 
             return saved_doc_data["response"]
 
