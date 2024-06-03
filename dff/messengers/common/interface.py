@@ -39,7 +39,7 @@ class MessengerInterface(abc.ABC):
             warning_start = f"Attachments directory for {type(self).__name__} messenger interface"
             warning_end = "attachment data won't be cached locally!"
             if attachments_directory is None:
-                self.attachments_directory = Path(tempdir)
+                self.attachments_directory = Path(tempdir) / f"dff-cache-{type(self).__name__}"
                 logger.warning(f"{warning_start} is None, so will be set to tempdir and {warning_end}")
             else:
                 self.attachments_directory = attachments_directory

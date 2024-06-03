@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.request import urlopen
 from uuid import uuid4
 
-from pydantic import Field, field_validator, FilePath, HttpUrl, BaseModel, model_serializer, model_validator
+from pydantic import Field, JsonValue, field_validator, FilePath, HttpUrl, BaseModel, model_serializer, model_validator
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterface
@@ -23,11 +23,12 @@ class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
     This class is a Pydantic BaseModel that serves as a base class for all DFF models.
     """
 
-    pass
+    def __init__(self, **kwargs):
+        super().__init__(**kwargs)
 
 
 # TODO: inline once annotated __pydantic_extra__ will be available in pydantic
-def _json_extra_serializer(model: DataModel, original_serializer: Callable[[DataModel], Dict[str, Any]]) -> Dict[str, Any]:
+def _json_extra_serializer(model: DataModel, original_serializer: Callable[[DataModel], JsonValue]) -> JsonValue:
     model_copy = model.model_copy(deep=True)
     for extra_name in model.model_extra.keys():
         delattr(model_copy, extra_name)
@@ -146,7 +147,7 @@ class DataAttachment(Attachment):
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
-        elif self.cached_filename is not None:
+        elif self.use_cache and self.cached_filename is not None:
             with open(self.cached_filename, "rb") as file:
                 return file.read()
         elif isinstance(self.source, Url):
@@ -243,7 +244,7 @@ class Message(DataModel):
         self,
         text: Optional[str] = None,
         commands: Optional[List[Command]] = None,
-        attachments: Optional[Attachment] = None,
+        attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document]]] = None,
         annotations: Optional[dict] = None,
         misc: Optional[dict] = None,
         **kwargs,

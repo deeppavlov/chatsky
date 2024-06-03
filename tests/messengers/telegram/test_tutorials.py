@@ -29,6 +29,7 @@ def _cast_dict_to_happy_step(dict: Dict) -> List[PathStep]:
     return path_steps
 
 
+@pytest.mark.telegram
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "tutorial_module_name",

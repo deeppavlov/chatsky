@@ -149,6 +149,7 @@ class TestMessage:
             read_bytes = await document.get_bytes(cli_iface)
             assert document_bytes == read_bytes
             if not isinstance(document.source, Path):
+                assert document.cached_filename is not None
                 cached_bytes = document.cached_filename.read_bytes()
                 assert document_bytes == cached_bytes
 
