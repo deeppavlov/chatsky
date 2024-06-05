@@ -112,7 +112,7 @@ class VKWrapper:
         server_request = self.get_longpoll_server()
 
         if "response" not in server_request:
-            raise Exception(f"Errror getting longpoll server\n{server_request}")
+            raise Exception(f"Error getting longpoll server\n{server_request}")
 
         self.server = server_request["response"]["server"]
         self.ts_base = int(server_request["response"]["ts"])
@@ -135,18 +135,24 @@ class VKWrapper:
 
         return upload_url["response"]["upload_url"]
 
-    async def save_attachment(self, uploaded_data, data_type, title: str=None):
-        if data_type == "photos":
-            saved_data = await vk_api_call(
-                f"https://api.vk.com/method/{data_type}.saveMessagesPhoto?&group_id={self.group_id}&v=5.81&access_token={self.token}&photo={uploaded_data['photo']}&server={uploaded_data['server']}&hash={uploaded_data['hash']}"
-            )
-        else:
-            saved_data = await vk_api_call(
-                f"https://api.vk.com/method/docs.save?file={uploaded_data['file']}&title={title}&group_id={self.group_id}&v=5.81&access_token={self.token}"
-            )
+    async def save_document(self, uploaded_data, title: str=""):
+        saved_data = await vk_api_call(
+            f"https://api.vk.com/method/docs.save?file={uploaded_data['file']}&title={title}&group_id={self.group_id}&v=5.81&access_token={self.token}"
+        )
 
         if "response" not in saved_data:
-            logger.error(f"Error saving attachment\n{saved_data}")
+            logger.error(f"Error saving document\n{saved_data}")
+            raise Exception()
+
+        return saved_data["response"]
+    
+    async def save_photo(self, uploaded_data, caption: str=""):
+        saved_data = await vk_api_call(
+            f"https://api.vk.com/method/photos.saveMessagesPhoto?&group_id={self.group_id}&v=5.81&access_token={self.token}&photo={uploaded_data['photo']}&caption={caption}&server={uploaded_data['server']}&hash={uploaded_data['hash']}"
+        )
+
+        if "response" not in saved_data:
+            logger.error(f"Error saving photo\n{saved_data}")
             raise Exception()
 
         return saved_data["response"]
@@ -165,7 +171,7 @@ class VKWrapper:
                     upload_url, files=photo_files
                 ).json()
 
-            saved_photo_data = self.save_attachment(uploaded_photo_data, "photos")
+            saved_photo_data = self.save_photo(uploaded_photo_data, caption=attachment.title)
 
             return saved_photo_data
 
@@ -177,7 +183,7 @@ class VKWrapper:
             with FilesOpener(attachment_path, key_format="file") as files:
                 uploaded_photo_data = await vk_api_call(upload_url, files=files).json()
 
-            saved_doc_data = self.save_attachment(uploaded_photo_data, "docs", title=attachment.title)
+            saved_doc_data = self.save_document(uploaded_photo_data, title=attachment.title)
 
             return saved_doc_data["response"]
 

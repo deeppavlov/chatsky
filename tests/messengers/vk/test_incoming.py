@@ -2,7 +2,6 @@ import pytest
 import requests
 import json
 from dff.script import Message
-# from vk_dummy import VKDummy
 from dff.messengers.vk import PollingVKInterface
 
 @pytest.fixture
