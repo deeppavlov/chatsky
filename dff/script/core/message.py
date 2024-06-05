@@ -15,7 +15,7 @@ from pydantic import Field, JsonValue, field_validator, FilePath, HttpUrl, BaseM
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterface
-from dff.utils.pydantic import json_pickle_serializer, json_pickle_validator
+from dff.utils.pydantic import JSONSerializableDict, SerializableVaue, json_pickle_serializer, json_pickle_validator
 
 
 class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
@@ -232,9 +232,9 @@ class Message(DataModel):
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
     attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document]]] = None
-    annotations: Optional[dict] = None
-    misc: Optional[dict] = None
-    original_message: Optional[Any] = None
+    annotations: Optional[JSONSerializableDict] = None
+    misc: Optional[JSONSerializableDict] = None
+    original_message: Optional[SerializableVaue] = None
     # commands and state options are required for integration with services
     # that use an intermediate backend server, like Yandex's Alice
     # state: Optional[Session] = Session.ACTIVE
@@ -245,8 +245,8 @@ class Message(DataModel):
         text: Optional[str] = None,
         commands: Optional[List[Command]] = None,
         attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document]]] = None,
-        annotations: Optional[dict] = None,
-        misc: Optional[dict] = None,
+        annotations: Optional[JSONSerializableDict] = None,
+        misc: Optional[JSONSerializableDict] = None,
         **kwargs,
     ):
         super().__init__(

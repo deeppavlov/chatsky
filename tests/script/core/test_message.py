@@ -1,5 +1,6 @@
 from pathlib import Path
 from shutil import rmtree
+from tempfile import gettempdir
 from typing import Hashable, Optional, TextIO
 from urllib.request import urlopen
 
@@ -27,7 +28,8 @@ from dff.script.core.message import (
     Video,
 )
 
-EXAMPLE_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
+TEMP_PATH = Path(gettempdir()) / "dff_script_test"
+EXAMPLE_SOURCE = "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments"
 
 
 class DFFCLIMessengerInterface(CLIMessengerInterface):
@@ -50,7 +52,7 @@ class DFFCLIMessengerInterface(CLIMessengerInterface):
 class TestMessage:
     @pytest.fixture
     def json_context_storage(self) -> DBContextStorage:
-        return JSONContextStorage(f"file://{Path(__file__).parent / 'serialization_database.json'}")
+        return JSONContextStorage(f"file://{TEMP_PATH / 'serialization_database.json'}")
 
     def clear_and_create_dir(self, dir: Path) -> Path:
         rmtree(dir, ignore_errors=True)
@@ -129,11 +131,10 @@ class TestMessage:
 
     @pytest.mark.asyncio
     async def test_getting_attachment_bytes(self):
-        root_dir = Path(__file__).parent
-        local_path = self.clear_and_create_dir(root_dir / "local")
+        local_path = self.clear_and_create_dir(TEMP_PATH / "local")
 
         local_document = local_path / "pre-saved-document.pdf"
-        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(root_dir / "cache"))
+        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(TEMP_PATH / "cache"))
 
         document_name = "deeppavlov-article.pdf"
         remote_document_url = f"{EXAMPLE_SOURCE}/{document_name}"

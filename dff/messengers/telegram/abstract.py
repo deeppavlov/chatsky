@@ -251,7 +251,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if media_group_attachments_num == 1:
+                        if media_group_attachments_num != 1:
                             files += [
                                 InputMediaAudio(
                                     attachment_bytes,
@@ -279,7 +279,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Video):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if media_group_attachments_num == 1:
+                        if media_group_attachments_num != 1:
                             files += [
                                 InputMediaVideo(
                                     attachment_bytes,
@@ -308,7 +308,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Animation):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if media_group_attachments_num == 1:
+                        if media_group_attachments_num != 1:
                             files += [
                                 InputMediaAnimation(
                                     attachment_bytes,
@@ -335,7 +335,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Image):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if media_group_attachments_num == 1:
+                        if media_group_attachments_num != 1:
                             files += [
                                 InputMediaPhoto(
                                     attachment_bytes,
@@ -360,7 +360,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                 if isinstance(attachment, Document):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if media_group_attachments_num == 1:
+                        if media_group_attachments_num != 1:
                             files += [
                                 InputMediaDocument(
                                     attachment_bytes,
