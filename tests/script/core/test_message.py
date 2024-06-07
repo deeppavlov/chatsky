@@ -1,5 +1,6 @@
+from os import urandom
 from pathlib import Path
-from random import randint, randbytes
+from random import randint
 from shutil import rmtree
 from typing import Hashable, Optional, TextIO
 from urllib.request import urlopen
@@ -67,7 +68,7 @@ class TestMessage:
 
     @pytest.fixture
     def random_original_message(self) -> UnserializableObject:
-        return UnserializableObject(randint(0, 256), randbytes(32))
+        return UnserializableObject(randint(0, 256), urandom(32))
 
     def clear_and_create_dir(self, dir: Path) -> Path:
         rmtree(dir, ignore_errors=True)
