@@ -1,7 +1,8 @@
 from base64 import decodebytes, encodebytes
 from copy import deepcopy
 from pickle import dumps, loads
-from typing import Annotated, Any, Callable
+from typing import Any, Callable
+from typing_extensions import Annotated
 from pydantic import AfterValidator, JsonValue, PlainSerializer, PlainValidator, PydanticSchemaGenerationError, TypeAdapter, WrapSerializer
 from pydantic_core import PydanticSerializationError
 
