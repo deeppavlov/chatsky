@@ -65,7 +65,7 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=6, supergroup_chat_created=False, text='audio'), update_id=6)",
             "received_message": "{\"text\":\"audio\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Here's your audio!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":\"\\\"Separation\\\" melody by William King\",\"use_cache\":true,\"dff_attachment_type\":\"audio\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Here's your audio!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":\"Separation melody by William King\",\"use_cache\":true,\"dff_attachment_type\":\"audio\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_audio(42, audio=<<bytes>>, caption=\"Here's your audio!\", performer=None, title=None, disable_notification=None, reply_markup=None, parse_mode=None, thumbnail=None)"
             ]
