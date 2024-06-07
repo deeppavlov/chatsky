@@ -15,7 +15,7 @@ dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
 happy_paths_file = Path(__file__).parent / "test_happy_paths.json"
 
 
-def _cast_dict_to_happy_step(dict: Dict) -> List[PathStep]:
+def _cast_dict_to_happy_step(dict: Dict) -> List["PathStep"]:
     imports = globals().copy()
     imports.update(import_module("telegram").__dict__)
     imports.update(import_module("telegram.ext").__dict__)
