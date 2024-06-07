@@ -67,7 +67,7 @@ audio_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
     ),
-    "title": '"Separation" melody by William King',
+    "title": "Separation melody by William King",
 }
 
 video_data = {
