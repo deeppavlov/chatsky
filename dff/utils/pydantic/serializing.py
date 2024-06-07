@@ -3,6 +3,7 @@ from copy import deepcopy
 from pickle import dumps, loads
 from typing import Annotated, Any, Callable
 from pydantic import AfterValidator, JsonValue, PlainSerializer, PlainValidator, PydanticSchemaGenerationError, TypeAdapter, WrapSerializer
+from pydantic_core import PydanticSerializationError
 
 _JSON_EXTRA_FIELDS_KEYS = "__pickled_extra_fields__"
 
@@ -25,7 +26,8 @@ def json_pickle_serializer(model: JsonValue, original_serializer: Callable[[Json
                 raise PydanticSchemaGenerationError("")
             else:
                 TypeAdapter(type(field_value))
-        except PydanticSchemaGenerationError:
+                model_copy[field_name] = original_serializer(field_value)
+        except (PydanticSchemaGenerationError, PydanticSerializationError):
             model_copy[field_name] = pickle_serializer(field_value)
             extra_fields += [field_name]
 

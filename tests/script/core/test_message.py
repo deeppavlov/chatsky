@@ -89,17 +89,20 @@ class TestMessage:
         "attachment1,attachment2,equal",
         [
             (
+                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                True,
+            ),
+            (
                 DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
                 DataAttachment(
                     source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"
                 ),
-                True,
+                False,
             ),
             (
                 DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-                DataAttachment(
-                    source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="2"
-                ),
+                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="2"),
                 False,
             ),
             (
@@ -147,9 +150,10 @@ class TestMessage:
     def test_field_serializable(self, json_context_storage: DBContextStorage, random_original_message: UnserializableObject):
         name = "serializable_test"
         message = Message(text="sample message")
-        message.misc = {"answer": 42}
+        message.misc = {"answer": 42, "unserializable": random_original_message}
         message.original_message = random_original_message
-        message.some_extra_field = {"unserializable": random_original_message}
+        message.some_extra_field = random_original_message
+        message.other_extra_field = {"unserializable": random_original_message}
         json_context_storage[name] = Context(requests={0: message})
         retrieved = json_context_storage[name].requests[0]
         assert message == retrieved
