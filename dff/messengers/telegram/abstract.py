@@ -8,6 +8,8 @@ that can be used to interact with the Telegram API.
 from pathlib import Path
 from typing import Callable, Optional
 
+from dff.utils.messengers.verify_params import generate_extra_fields
+
 try:
     from telegram import (
         InputMediaAnimation,
@@ -206,10 +208,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                         chat_id,
                         attachment.latitude,
                         attachment.longitude,
-                        horizontal_accuracy=attachment.__pydantic_extra__.get("horizontal_accuracy", None),
-                        disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                        protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                        **generate_extra_fields(attachment, ["horizontal_accuracy", "disable_notification", "protect_content", "reply_markup"]),
                     )
                 if isinstance(attachment, Contact):
                     await bot.send_contact(
@@ -217,36 +216,21 @@ class _AbstractTelegramInterface(MessengerInterface):
                         attachment.phone_number,
                         attachment.first_name,
                         attachment.last_name,
-                        vcard=attachment.__pydantic_extra__.get("vcard", None),
-                        disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                        protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                        **generate_extra_fields(attachment, ["vcard", "disable_notification", "protect_content", "reply_markup"]),
                     )
                 if isinstance(attachment, Poll):
                     await bot.send_poll(
                         chat_id,
                         attachment.question,
                         [option.text for option in attachment.options],
-                        is_anonymous=attachment.__pydantic_extra__.get("is_anonymous", None),
-                        type=attachment.__pydantic_extra__.get("type", None),
-                        allows_multiple_answers=attachment.__pydantic_extra__.get("allows_multiple_answers", None),
-                        correct_option_id=attachment.__pydantic_extra__.get("correct_option_id", None),
-                        explanation=attachment.__pydantic_extra__.get("explanation", None),
-                        explanation_parse_mode=attachment.__pydantic_extra__.get("explanation_parse_mode", None),
-                        open_period=attachment.__pydantic_extra__.get("open_period", None),
-                        is_closed=attachment.__pydantic_extra__.get("is_closed", None),
-                        disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                        protect_content=attachment.__pydantic_extra__.get("protect_content", None),
-                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
+                        **generate_extra_fields(attachment, ["is_anonymous", "type", "allows_multiple_answers", "correct_option_id", "explanation", "explanation_parse_mode", "open_period", "is_closed", "disable_notification", "protect_content", "reply_markup"]),
                     )
                 if isinstance(attachment, Sticker):
                     sticker = await attachment.get_bytes(self) if attachment.id is None else attachment.id
                     await bot.send_sticker(
                         chat_id,
                         sticker,
-                        disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                        reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
-                        emoji=attachment.__pydantic_extra__.get("emoji", None),
+                        **generate_extra_fields(attachment, ["disable_notification", "protect_content", "reply_markup"]),
                     )
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
@@ -255,25 +239,15 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaAudio(
                                     attachment_bytes,
-                                    filename=attachment.__pydantic_extra__.get("filename", None),
-                                    caption=attachment.__pydantic_extra__.get("caption", None),
-                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                    performer=attachment.__pydantic_extra__.get("performer", None),
-                                    title=attachment.__pydantic_extra__.get("title", None),
-                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"]),
                                 ),
                             ]
                         else:
                             await bot.send_audio(
                                 chat_id,
                                 audio=attachment_bytes,
-                                performer=attachment.__pydantic_extra__.get("performer", None),
-                                title=attachment.__pydantic_extra__.get("title", None),
                                 caption=message.text,
-                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                **generate_extra_fields(attachment, ["performer", "title", "disable_notification", "reply_markup", "parse_mode", "thumbnail"]),
                             )
                             return
                 if isinstance(attachment, Video):
@@ -283,12 +257,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaVideo(
                                     attachment_bytes,
-                                    filename=attachment.__pydantic_extra__.get("filename", None),
-                                    caption=attachment.__pydantic_extra__.get("caption", None),
-                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                    supports_streaming=attachment.__pydantic_extra__.get("supports_streaming", None),
-                                    has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
-                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "supports_streaming", "has_spoiler", "thumbnail"]),
                                 ),
                             ]
                         else:
@@ -296,13 +265,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                supports_streaming=attachment.__pydantic_extra__.get("supports_streaming", None),
-                                has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
-                                thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                                filename=attachment.__pydantic_extra__.get("filename", None),
+                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "supports_streaming", "has_spoiler", "thumbnail", "filename"]),
                             )
                             return
                 if isinstance(attachment, Animation):
@@ -312,11 +275,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaAnimation(
                                     attachment_bytes,
-                                    filename=attachment.__pydantic_extra__.get("filename", None),
-                                    caption=attachment.__pydantic_extra__.get("caption", None),
-                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                    has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
-                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail"]),
                                 ),
                             ]
                         else:
@@ -324,12 +283,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
-                                has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
-                                thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                                filename=attachment.__pydantic_extra__.get("filename", None),
+                                **generate_extra_fields(attachment, ["parse_mode", "disable_notification", "reply_markup", "has_spoiler", "thumbnail", "filename"]),
                             )
                             return
                 if isinstance(attachment, Image):
@@ -339,10 +293,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaPhoto(
                                     attachment_bytes,
-                                    filename=attachment.__pydantic_extra__.get("filename", None),
-                                    caption=attachment.__pydantic_extra__.get("caption", None),
-                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                    has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
+                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "has_spoiler"]),
                                 ),
                             ]
                         else:
@@ -350,11 +301,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                has_spoiler=attachment.__pydantic_extra__.get("has_spoiler", None),
-                                filename=attachment.__pydantic_extra__.get("filename", None),
+                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "has_spoiler", "filename"]),
                             )
                             return
                 if isinstance(attachment, Document):
@@ -364,13 +311,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaDocument(
                                     attachment_bytes,
-                                    filename=attachment.__pydantic_extra__.get("filename", None),
-                                    caption=attachment.__pydantic_extra__.get("caption", None),
-                                    parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                    disable_content_type_detection=attachment.__pydantic_extra__.get(
-                                        "disable_content_type_detection", None
-                                    ),
-                                    thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
+                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "disable_content_type_detection", "thumbnail"]),
                                 ),
                             ]
                         else:
@@ -378,30 +319,22 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                disable_notification=attachment.__pydantic_extra__.get("disable_notification", None),
-                                reply_markup=attachment.__pydantic_extra__.get("reply_markup", None),
-                                parse_mode=attachment.__pydantic_extra__.get("parse_mode", None),
-                                thumbnail=attachment.__pydantic_extra__.get("thumbnail", None),
-                                filename=attachment.__pydantic_extra__.get("filename", None),
+                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "thumbnail", "filename"]),
                             )
                             return
             if len(files) > 0:
                 await bot.send_media_group(
                     chat_id,
                     files,
-                    disable_notification=message.__pydantic_extra__.get("disable_notification", None),
-                    protect_content=message.__pydantic_extra__.get("protect_content", None),
                     caption=message.text,
+                    **generate_extra_fields(attachment, ["disable_notification", "protect_content"]),
                 )
                 return
         if message.text is not None:
             await bot.send_message(
                 chat_id,
                 message.text,
-                parse_mode=message.__pydantic_extra__.get("parse_mode", None),
-                disable_notification=message.__pydantic_extra__.get("disable_notification", None),
-                protect_content=message.__pydantic_extra__.get("protect_content", None),
-                reply_markup=message.__pydantic_extra__.get("reply_markup", None),
+                **generate_extra_fields(attachment, ["parse_mode", "disable_notification", "protect_content", "reply_markup"]),
             )
 
     async def _on_event(
