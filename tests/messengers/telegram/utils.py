@@ -1,8 +1,9 @@
 from asyncio import get_event_loop
 from contextlib import contextmanager
-from typing import TYPE_CHECKING, Any, Hashable, Iterator, List, Optional, Tuple
+from typing import Any, Hashable, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel
+from telegram import Update
 from typing_extensions import TypeAlias
 
 from dff.messengers.telegram.abstract import _AbstractTelegramInterface
@@ -10,10 +11,7 @@ from dff.script import Message
 from dff.script.core.context import Context
 from dff.script.core.message import DataAttachment
 
-if TYPE_CHECKING:
-    from telegram import Update
-
-    PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
+PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
 
 class MockBot(BaseModel, arbitrary_types_allowed=True):
