@@ -327,14 +327,14 @@ class _AbstractTelegramInterface(MessengerInterface):
                     chat_id,
                     files,
                     caption=message.text,
-                    **generate_extra_fields(attachment, ["disable_notification", "protect_content"]),
+                    **generate_extra_fields(message, ["disable_notification", "protect_content"]),
                 )
                 return
         if message.text is not None:
             await bot.send_message(
                 chat_id,
                 message.text,
-                **generate_extra_fields(attachment, ["parse_mode", "disable_notification", "protect_content", "reply_markup"]),
+                **generate_extra_fields(message, ["parse_mode", "disable_notification", "protect_content", "reply_markup"]),
             )
 
     async def _on_event(

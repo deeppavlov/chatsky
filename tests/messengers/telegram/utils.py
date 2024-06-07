@@ -1,9 +1,10 @@
 from asyncio import get_event_loop
 from contextlib import contextmanager
-from typing import Any, Hashable, Iterator, List, Optional, Tuple, TypeAlias
+from typing import Any, Hashable, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel
 from telegram import Update
+from typing_extensions import TypeAlias
 
 from dff.messengers.telegram.abstract import _AbstractTelegramInterface
 from dff.script import Message
