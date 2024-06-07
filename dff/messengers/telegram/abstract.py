@@ -230,7 +230,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                     await bot.send_sticker(
                         chat_id,
                         sticker,
-                        **generate_extra_fields(attachment, ["disable_notification", "protect_content", "reply_markup"]),
+                        **generate_extra_fields(attachment, ["disable_notification", "protect_content", "reply_markup", "emoji"]),
                     )
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)

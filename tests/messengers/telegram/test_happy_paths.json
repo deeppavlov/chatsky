@@ -58,7 +58,7 @@
             "received_message": "{\"text\":\"sticker\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_message": "{\"text\":\"Here's your sticker!\",\"commands\":null,\"attachments\":[{\"source\":null,\"cached_filename\":null,\"id\":\"CAACAgIAAxkBAAErAAFXZibO5ksphCKSXSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE\",\"title\":\"A sticker I've just found\",\"use_cache\":true,\"dff_attachment_type\":\"sticker\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
-                "send_sticker(42, 'CAACAgIAAxkBAAErAAFXZibO5ksphCKSXSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE', disable_notification=None, reply_markup=None, emoji=None)",
+                "send_sticker(42, 'CAACAgIAAxkBAAErAAFXZibO5ksphCKSXSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE', disable_notification=None, protect_content=None, reply_markup=None, emoji=None)",
                 "send_message(42, \"Here's your sticker!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None)"
             ]
         },
@@ -67,7 +67,7 @@
             "received_message": "{\"text\":\"audio\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_message": "{\"text\":\"Here's your audio!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":\"\\\"Separation\\\" melody by William King\",\"use_cache\":true,\"dff_attachment_type\":\"audio\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
-                "send_audio(42, audio=<<bytes>>, performer=None, title=None, caption=\"Here's your audio!\", disable_notification=None, reply_markup=None, parse_mode=None, thumbnail=None)"
+                "send_audio(42, audio=<<bytes>>, caption=\"Here's your audio!\", performer=None, title=None, disable_notification=None, reply_markup=None, parse_mode=None, thumbnail=None)"
             ]
         },
         {
@@ -142,7 +142,7 @@
             "response_message": "{\"text\":\"Here's your message with multiple attachments (a location and a sticker)!\\nRun \/start command again to restart.\",\"commands\":null,\"attachments\":[{\"longitude\":30.3141,\"latitude\":59.9386,\"dff_attachment_type\":\"location\",\"__pickled_extra_fields__\":[]},{\"source\":null,\"cached_filename\":null,\"id\":\"CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8vgp1wACRygAAiSjCUtLa7RHZy76ezQE\",\"title\":null,\"use_cache\":true,\"dff_attachment_type\":\"sticker\",\"__pickled_extra_fields__\":[]}],\"annotations\":null,\"misc\":null,\"original_message\":null,\"__pickled_extra_fields__\":[]}",
             "response_functions": [
                "send_location(42, 59.9386, 30.3141, horizontal_accuracy=None, disable_notification=None, protect_content=None, reply_markup=None)",
-               "send_sticker(42, 'CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8vgp1wACRygAAiSjCUtLa7RHZy76ezQE', disable_notification=None, reply_markup=None, emoji=None)",
+               "send_sticker(42, 'CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8vgp1wACRygAAiSjCUtLa7RHZy76ezQE', disable_notification=None, protect_content=None, reply_markup=None, emoji=None)",
                "send_message(42, \"Here's your message with multiple attachments (a location and a sticker)!\\nRun /start command again to restart.\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None)" 
             ]
         },
