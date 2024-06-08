@@ -8,10 +8,8 @@ from urllib.request import urlopen
 import pytest
 from pydantic import ValidationError, HttpUrl, FilePath
 
-from dff.context_storages import DBContextStorage, JSONContextStorage
 from dff.messengers.common.interface import MessengerInterface
 from dff.messengers.console import CLIMessengerInterface
-from dff.script.core.context import Context
 from dff.script.core.message import (
     Animation,
     Audio,
@@ -62,10 +60,6 @@ class DFFCLIMessengerInterface(CLIMessengerInterface):
 
 
 class TestMessage:
-    @pytest.fixture
-    def json_context_storage(self, tmp_path) -> DBContextStorage:
-        return JSONContextStorage(f"file://{tmp_path / 'serialization_database.json'}")
-
     @pytest.fixture
     def random_original_message(self) -> UnserializableObject:
         return UnserializableObject(randint(0, 256), urandom(32))
@@ -142,22 +136,21 @@ class TestMessage:
             Document(source="https://example.com/some_document.pdf"),
         ],
     )
-    def test_attachment_serialize(self, json_context_storage: DBContextStorage, attachment: DataAttachment):
-        name = type(attachment).__name__
-        json_context_storage[name] = Context(requests={0: Message(attachments=[attachment])})
-        retrieved = json_context_storage[name].requests[0].attachments[0]
-        assert attachment == retrieved
+    def test_attachment_serialize(self, attachment: DataAttachment):
+        message = Message(attachments=[attachment])
+        serialized = message.model_dump_json()
+        validated = Message.model_validate_json(serialized)
+        assert message == validated
 
-    def test_field_serializable(self, json_context_storage: DBContextStorage, random_original_message: UnserializableObject):
-        name = "serializable_test"
+    def test_field_serializable(self, random_original_message: UnserializableObject):
         message = Message(text="sample message")
         message.misc = {"answer": 42, "unserializable": random_original_message}
         message.original_message = random_original_message
         message.some_extra_field = random_original_message
         message.other_extra_field = {"unserializable": random_original_message}
-        json_context_storage[name] = Context(requests={0: message})
-        retrieved = json_context_storage[name].requests[0]
-        assert message == retrieved
+        serialized = message.model_dump_json()
+        validated = Message.model_validate_json(serialized)
+        assert message == validated
 
     @pytest.mark.asyncio
     async def test_getting_attachment_bytes(self, tmp_path):
