@@ -1,12 +1,14 @@
 from base64 import decodebytes, encodebytes
 from copy import deepcopy
 from pickle import dumps, loads
-from typing import Any, Callable
-from typing_extensions import Annotated
-from pydantic import AfterValidator, JsonValue, PlainSerializer, PlainValidator, PydanticSchemaGenerationError, TypeAdapter, WrapSerializer
+from typing import Any, Callable, Dict, List, Union
+from typing_extensions import Annotated, TypeAlias
+from pydantic import AfterValidator, BaseModel, JsonValue, PlainSerializer, PlainValidator, PydanticSchemaGenerationError, TypeAdapter, WrapSerializer
 from pydantic_core import PydanticSerializationError
 
 _JSON_EXTRA_FIELDS_KEYS = "__pickled_extra_fields__"
+
+Serializable: TypeAlias = Dict[str, Union[JsonValue, BaseModel, List[BaseModel], Dict[str, BaseModel]]]
 
 
 def pickle_serializer(value: Any) -> JsonValue:
@@ -17,7 +19,7 @@ def pickle_validator(value: JsonValue) -> Any:
     return loads(decodebytes(value.encode()))
 
 
-def json_pickle_serializer(model: JsonValue, original_serializer: Callable[[JsonValue], JsonValue]) -> JsonValue:
+def json_pickle_serializer(model: Serializable, original_serializer: Callable[[Serializable], Serializable]) -> Serializable:
     extra_fields = list()
     model_copy = deepcopy(model)
 
@@ -37,7 +39,7 @@ def json_pickle_serializer(model: JsonValue, original_serializer: Callable[[Json
     return original_dump
 
 
-def json_pickle_validator(model: JsonValue) -> JsonValue:
+def json_pickle_validator(model: SerialDict) -> SerialDict:
     model_copy = deepcopy(model)
 
     if _JSON_EXTRA_FIELDS_KEYS in model.keys():
@@ -55,4 +57,4 @@ SerializableVaue = Annotated[Any, PickleSerializer, PickleValidator]
 
 JSONPickleSerializer = WrapSerializer(json_pickle_serializer, when_used="json")
 JSONPickleValidator = AfterValidator(json_pickle_validator)
-JSONSerializableDict = Annotated[JsonValue, JSONPickleSerializer, JSONPickleValidator]
+JSONSerializableDict = Annotated[SerialDict, JSONPickleSerializer, JSONPickleValidator]
