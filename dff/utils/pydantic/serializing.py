@@ -39,7 +39,7 @@ def json_pickle_serializer(model: Serializable, original_serializer: Callable[[S
     return original_dump
 
 
-def json_pickle_validator(model: SerialDict) -> SerialDict:
+def json_pickle_validator(model: Serializable) -> Serializable:
     model_copy = deepcopy(model)
 
     if _JSON_EXTRA_FIELDS_KEYS in model.keys():
@@ -57,4 +57,4 @@ SerializableVaue = Annotated[Any, PickleSerializer, PickleValidator]
 
 JSONPickleSerializer = WrapSerializer(json_pickle_serializer, when_used="json")
 JSONPickleValidator = AfterValidator(json_pickle_validator)
-JSONSerializableDict = Annotated[SerialDict, JSONPickleSerializer, JSONPickleValidator]
+JSONSerializableDict = Annotated[Serializable, JSONPickleSerializer, JSONPickleValidator]
