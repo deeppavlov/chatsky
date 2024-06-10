@@ -3,12 +3,12 @@ from copy import deepcopy
 from pickle import dumps, loads
 from typing import Any, Callable, Dict, List, Union
 from typing_extensions import Annotated, TypeAlias
-from pydantic import AfterValidator, BaseModel, JsonValue, PlainSerializer, PlainValidator, PydanticSchemaGenerationError, TypeAdapter, WrapSerializer
+from pydantic import AfterValidator, JsonValue, PlainSerializer, PlainValidator, PydanticSchemaGenerationError, TypeAdapter, WrapSerializer
 from pydantic_core import PydanticSerializationError
 
 _JSON_EXTRA_FIELDS_KEYS = "__pickled_extra_fields__"
 
-Serializable: TypeAlias = Dict[str, Union[JsonValue, BaseModel, List[BaseModel], Dict[str, BaseModel]]]
+Serializable: TypeAlias = Dict[str, Union[JsonValue, Any, List[Any], Dict[str, Any]]]
 
 
 def pickle_serializer(value: Any) -> JsonValue:
