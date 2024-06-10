@@ -1,6 +1,7 @@
 from asyncio import get_event_loop
 from contextlib import contextmanager
-from typing import Any, Hashable, Iterator, List, Optional, Tuple
+from importlib import import_module
+from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel
 from telegram import Update
@@ -12,6 +13,22 @@ from dff.script.core.context import Context
 from dff.script.core.message import DataAttachment
 
 PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
+
+
+def cast_dict_to_happy_step(dict: Dict) -> List["PathStep"]:
+    imports = globals().copy()
+    imports.update(import_module("telegram").__dict__)
+    imports.update(import_module("telegram.ext").__dict__)
+    imports.update(import_module("telegram.constants").__dict__)
+
+    path_steps = list()
+    for step in dict:
+        update = eval(step["update"], imports)
+        received = Message.model_validate_json(step["received_message"])
+        received.original_message = update
+        response = Message.model_validate_json(step["response_message"])
+        path_steps += [(update, received, response, step["response_functions"])]
+    return path_steps
 
 
 class MockBot(BaseModel, arbitrary_types_allowed=True):
