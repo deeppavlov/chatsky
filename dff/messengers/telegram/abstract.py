@@ -10,6 +10,25 @@ from typing import Callable, Optional
 
 from dff.utils.messengers.verify_params import generate_extra_fields
 
+from dff.messengers.common import MessengerInterface
+from dff.pipeline.types import PipelineRunnerFunction
+from dff.script.core.message import (
+    Animation,
+    Audio,
+    CallbackQuery,
+    Contact,
+    DataAttachment,
+    Document,
+    Image,
+    Invoice,
+    Location,
+    Message,
+    Poll,
+    PollOption,
+    Sticker,
+    Video,
+)
+
 try:
     from telegram import (
         InputMediaAnimation,
@@ -22,25 +41,6 @@ try:
     )
     from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
     from telegram.ext.filters import ALL
-
-    from dff.messengers.common import MessengerInterface
-    from dff.pipeline.types import PipelineRunnerFunction
-    from dff.script.core.message import (
-        Animation,
-        Audio,
-        CallbackQuery,
-        Contact,
-        DataAttachment,
-        Document,
-        Image,
-        Invoice,
-        Location,
-        Message,
-        Poll,
-        PollOption,
-        Sticker,
-        Video,
-    )
 
     telegram_available = True
 except ImportError:
