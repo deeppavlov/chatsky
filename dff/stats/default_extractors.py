@@ -36,27 +36,22 @@ async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandler
 
 async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     """
-    Extract the pipeline component's start time.
+    Store the pipeline component's start time inside the context.
     This function is required for running the dashboard with the default configuration.
-
-    The function leverages the `framework_data` field of the context to store results.
-    As a result, the function output is cleared on every turn and does not get persisted
-    to the context storage.
     """
     start_time = datetime.now()
-    ctx.framework_data[get_wrapper_field(info, "time")] = start_time
+    ctx.framework_data.stats[get_wrapper_field(info, "time")] = start_time
 
 
 async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
     """
-    Extract the pipeline component's finish time.
+    Extract the pipeline component's execution time.
+    Requires :py:func:`~.get_timing_before` to be called previously in order to calculate the time.
     This function is required for running the dashboard with the default configuration.
-
-    The function leverages the `framework_data` field of the context to store results.
-    As a result, the function output is cleared on every turn and does not get persisted
-    to the context storage.
     """
-    start_time = ctx.framework_data[get_wrapper_field(info, "time")]
+    start_time = ctx.framework_data.stats.pop(get_wrapper_field(info, "time"), None)
+    if start_time is None:
+        return None
     data = {"execution_time": str(datetime.now() - start_time)}
     return data
 

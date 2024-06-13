@@ -24,8 +24,9 @@ from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 
-from .types import NodeLabel2Type, ModuleName
-from .message import Message
+from dff.script.core.message import Message
+from dff.script.core.types import NodeLabel2Type
+from dff.pipeline.types import ComponentExecutionState
 
 if TYPE_CHECKING:
     from dff.script.core.script import Node
@@ -42,6 +43,19 @@ def get_last_index(dictionary: dict) -> int:
     """
     indices = list(dictionary)
     return indices[-1] if indices else -1
+
+
+class FrameworkData(BaseModel):
+    """
+    Framework uses this to store data related to any of its modules.
+    """
+
+    service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
+    "Statuses of all the pipeline services. Cleared at the end of every turn."
+    actor_data: Dict[str, Any] = Field(default_factory=dict, exclude=True)
+    "Actor service data. Cleared at the end of every turn."
+    stats: Dict[str, Any] = Field(default_factory=dict)
+    "Enables complex stats collection across multiple turns."
 
 
 class Context(BaseModel):
@@ -88,7 +102,7 @@ class Context(BaseModel):
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
-    framework_data: Dict[ModuleName, Dict[str, Any]] = {}
+    framework_data: FrameworkData = Field(default_factory=FrameworkData)
     """
     This attribute is used for storing custom data required for pipeline execution.
     It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
@@ -192,7 +206,7 @@ class Context(BaseModel):
             for index in list(self.labels)[:-hold_last_n_indices]:
                 del self.labels[index]
         if "framework_data" in field_names:
-            self.framework_data.clear()
+            self.framework_data = FrameworkData()
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
@@ -248,13 +262,13 @@ class Context(BaseModel):
         """
         Return current :py:class:`~dff.script.core.script.Node`.
         """
-        actor = self.framework_data.get("actor", {})
+        actor_data = self.framework_data.actor_data
         node = (
-            actor.get("processed_node")
-            or actor.get("pre_response_processed_node")
-            or actor.get("next_node")
-            or actor.get("pre_transitions_processed_node")
-            or actor.get("previous_node")
+            actor_data.get("processed_node")
+            or actor_data.get("pre_response_processed_node")
+            or actor_data.get("next_node")
+            or actor_data.get("pre_transitions_processed_node")
+            or actor_data.get("previous_node")
         )
         if node is None:
             logger.warning(

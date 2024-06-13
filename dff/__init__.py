@@ -13,4 +13,4 @@ nest_asyncio.apply()
 from dff.pipeline import Pipeline
 from dff.script import Context, Script
 
-Script.model_rebuild()
+import dff.__rebuild_pydantic_models__
