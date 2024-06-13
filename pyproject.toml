@@ -66,7 +66,6 @@ pandas = { version = "*", optional = true }
 altair = { version = "*", optional = true }
 asyncmy = { version = "*", optional = true }
 asyncpg = { version = "*", optional = true }
-aiohttp = { version = "*", optional = true }
 pympler = { version = "*", optional = true }
 aiofiles = { version = "*", optional = true }
 humanize = { version = "*", optional = true }
@@ -91,7 +90,6 @@ ydb = ["ydb", "six"]
 telegram = ["python-telegram-bot"]
 stats = ["opentelemetry-exporter-otlp", "opentelemetry-instrumentation", "requests", "tqdm", "omegaconf"]
 benchmark = ["pympler", "humanize", "pandas", "altair", "tqdm"]
-vk = ["aiohttp"]
 
 
 [tool.poetry.group.lint]
