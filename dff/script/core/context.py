@@ -88,18 +88,10 @@ class Context(BaseModel):
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
-    framework_states: Dict[ModuleName, Dict[str, Any]] = {}
+    framework_data: Dict[ModuleName, Dict[str, Any]] = {}
     """
-    `framework_states` is used for addons states or for
-    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`'s states.
-    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`
-    records all its intermediate conditions into the `framework_states`.
-    After :py:class:`~.Context` processing is finished,
-    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline` resets `framework_states` and
-    returns :py:class:`~.Context`.
-
-        - key - Temporary variable name.
-        - value - Temporary variable data.
+    This attribute is used for storing custom data required for pipeline execution.
+    It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
     @field_validator("labels", "requests", "responses")
@@ -199,8 +191,8 @@ class Context(BaseModel):
         if "labels" in field_names:
             for index in list(self.labels)[:-hold_last_n_indices]:
                 del self.labels[index]
-        if "framework_states" in field_names:
-            self.framework_states.clear()
+        if "framework_data" in field_names:
+            self.framework_data.clear()
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
@@ -256,7 +248,7 @@ class Context(BaseModel):
         """
         Return current :py:class:`~dff.script.core.script.Node`.
         """
-        actor = self.framework_states.get("actor", {})
+        actor = self.framework_data.get("actor", {})
         node = (
             actor.get("processed_node")
             or actor.get("pre_response_processed_node")

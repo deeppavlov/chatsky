@@ -121,7 +121,7 @@ class Actor:
         self._get_next_node(ctx)
         await self._run_handlers(ctx, pipeline, ActorStage.GET_NEXT_NODE)
 
-        ctx.add_label(ctx.framework_states["actor"]["next_label"][:2])
+        ctx.add_label(ctx.framework_data["actor"]["next_label"][:2])
 
         # rewrite next node
         self._rewrite_next_node(ctx)
@@ -132,89 +132,89 @@ class Actor:
         await self._run_handlers(ctx, pipeline, ActorStage.RUN_PRE_RESPONSE_PROCESSING)
 
         # create response
-        ctx.framework_states["actor"]["response"] = await self.run_response(
-            ctx.framework_states["actor"]["pre_response_processed_node"].response, ctx, pipeline
+        ctx.framework_data["actor"]["response"] = await self.run_response(
+            ctx.framework_data["actor"]["pre_response_processed_node"].response, ctx, pipeline
         )
         await self._run_handlers(ctx, pipeline, ActorStage.CREATE_RESPONSE)
-        ctx.add_response(ctx.framework_states["actor"]["response"])
+        ctx.add_response(ctx.framework_data["actor"]["response"])
 
         await self._run_handlers(ctx, pipeline, ActorStage.FINISH_TURN)
         if self._clean_turn_cache:
             cache_clear()
 
-        del ctx.framework_states["actor"]
+        del ctx.framework_data["actor"]
 
     @staticmethod
     def _context_init(ctx: Optional[Union[Context, dict, str]] = None):
-        ctx.framework_states["actor"] = {}
+        ctx.framework_data["actor"] = {}
 
     def _get_previous_node(self, ctx: Context):
-        ctx.framework_states["actor"]["previous_label"] = (
+        ctx.framework_data["actor"]["previous_label"] = (
             normalize_label(ctx.last_label) if ctx.last_label else self.start_label
         )
-        ctx.framework_states["actor"]["previous_node"] = self.script.get(
-            ctx.framework_states["actor"]["previous_label"][0], {}
-        ).get(ctx.framework_states["actor"]["previous_label"][1], Node())
+        ctx.framework_data["actor"]["previous_node"] = self.script.get(
+            ctx.framework_data["actor"]["previous_label"][0], {}
+        ).get(ctx.framework_data["actor"]["previous_label"][1], Node())
 
     async def _get_true_labels(self, ctx: Context, pipeline: Pipeline):
         # GLOBAL
-        ctx.framework_states["actor"]["global_transitions"] = (
+        ctx.framework_data["actor"]["global_transitions"] = (
             self.script.get(GLOBAL, {}).get(GLOBAL, Node()).transitions
         )
-        ctx.framework_states["actor"]["global_true_label"] = await self._get_true_label(
-            ctx.framework_states["actor"]["global_transitions"], ctx, pipeline, GLOBAL, "global"
+        ctx.framework_data["actor"]["global_true_label"] = await self._get_true_label(
+            ctx.framework_data["actor"]["global_transitions"], ctx, pipeline, GLOBAL, "global"
         )
 
         # LOCAL
-        ctx.framework_states["actor"]["local_transitions"] = (
-            self.script.get(ctx.framework_states["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
+        ctx.framework_data["actor"]["local_transitions"] = (
+            self.script.get(ctx.framework_data["actor"]["previous_label"][0], {}).get(LOCAL, Node()).transitions
         )
-        ctx.framework_states["actor"]["local_true_label"] = await self._get_true_label(
-            ctx.framework_states["actor"]["local_transitions"],
+        ctx.framework_data["actor"]["local_true_label"] = await self._get_true_label(
+            ctx.framework_data["actor"]["local_transitions"],
             ctx,
             pipeline,
-            ctx.framework_states["actor"]["previous_label"][0],
+            ctx.framework_data["actor"]["previous_label"][0],
             "local",
         )
 
         # NODE
-        ctx.framework_states["actor"]["node_transitions"] = ctx.framework_states["actor"][
+        ctx.framework_data["actor"]["node_transitions"] = ctx.framework_data["actor"][
             "pre_transitions_processed_node"
         ].transitions
-        ctx.framework_states["actor"]["node_true_label"] = await self._get_true_label(
-            ctx.framework_states["actor"]["node_transitions"],
+        ctx.framework_data["actor"]["node_true_label"] = await self._get_true_label(
+            ctx.framework_data["actor"]["node_transitions"],
             ctx,
             pipeline,
-            ctx.framework_states["actor"]["previous_label"][0],
+            ctx.framework_data["actor"]["previous_label"][0],
             "node",
         )
 
     def _get_next_node(self, ctx: Context):
         # choose next label
-        ctx.framework_states["actor"]["next_label"] = self._choose_label(
-            ctx.framework_states["actor"]["node_true_label"], ctx.framework_states["actor"]["local_true_label"]
+        ctx.framework_data["actor"]["next_label"] = self._choose_label(
+            ctx.framework_data["actor"]["node_true_label"], ctx.framework_data["actor"]["local_true_label"]
         )
-        ctx.framework_states["actor"]["next_label"] = self._choose_label(
-            ctx.framework_states["actor"]["next_label"], ctx.framework_states["actor"]["global_true_label"]
+        ctx.framework_data["actor"]["next_label"] = self._choose_label(
+            ctx.framework_data["actor"]["next_label"], ctx.framework_data["actor"]["global_true_label"]
         )
         # get next node
-        ctx.framework_states["actor"]["next_node"] = self.script.get(
-            ctx.framework_states["actor"]["next_label"][0], {}
-        ).get(ctx.framework_states["actor"]["next_label"][1])
+        ctx.framework_data["actor"]["next_node"] = self.script.get(
+            ctx.framework_data["actor"]["next_label"][0], {}
+        ).get(ctx.framework_data["actor"]["next_label"][1])
 
     def _rewrite_previous_node(self, ctx: Context):
-        node = ctx.framework_states["actor"]["previous_node"]
-        flow_label = ctx.framework_states["actor"]["previous_label"][0]
-        ctx.framework_states["actor"]["previous_node"] = self._overwrite_node(
+        node = ctx.framework_data["actor"]["previous_node"]
+        flow_label = ctx.framework_data["actor"]["previous_label"][0]
+        ctx.framework_data["actor"]["previous_node"] = self._overwrite_node(
             node,
             flow_label,
             only_current_node_transitions=True,
         )
 
     def _rewrite_next_node(self, ctx: Context):
-        node = ctx.framework_states["actor"]["next_node"]
-        flow_label = ctx.framework_states["actor"]["next_label"][0]
-        ctx.framework_states["actor"]["next_node"] = self._overwrite_node(node, flow_label)
+        node = ctx.framework_data["actor"]["next_node"]
+        flow_label = ctx.framework_data["actor"]["next_label"][0]
+        ctx.framework_data["actor"]["next_node"] = self._overwrite_node(node, flow_label)
 
     def _overwrite_node(
         self,
@@ -290,18 +290,18 @@ class Actor:
         The execution order depends on the value of the :py:class:`.Pipeline`'s
         `parallelize_processing` flag.
         """
-        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["previous_node"])
-        pre_transitions_processing = ctx.framework_states["actor"]["previous_node"].pre_transitions_processing
+        ctx.framework_data["actor"]["processed_node"] = copy.deepcopy(ctx.framework_data["actor"]["previous_node"])
+        pre_transitions_processing = ctx.framework_data["actor"]["previous_node"].pre_transitions_processing
 
         if pipeline.parallelize_processing:
             await self._run_processing_parallel(pre_transitions_processing, ctx, pipeline)
         else:
             await self._run_processing_sequential(pre_transitions_processing, ctx, pipeline)
 
-        ctx.framework_states["actor"]["pre_transitions_processed_node"] = ctx.framework_states["actor"][
+        ctx.framework_data["actor"]["pre_transitions_processed_node"] = ctx.framework_data["actor"][
             "processed_node"
         ]
-        del ctx.framework_states["actor"]["processed_node"]
+        del ctx.framework_data["actor"]["processed_node"]
 
     async def _run_pre_response_processing(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -312,16 +312,16 @@ class Actor:
         The execution order depends on the value of the :py:class:`.Pipeline`'s
         `parallelize_processing` flag.
         """
-        ctx.framework_states["actor"]["processed_node"] = copy.deepcopy(ctx.framework_states["actor"]["next_node"])
-        pre_response_processing = ctx.framework_states["actor"]["next_node"].pre_response_processing
+        ctx.framework_data["actor"]["processed_node"] = copy.deepcopy(ctx.framework_data["actor"]["next_node"])
+        pre_response_processing = ctx.framework_data["actor"]["next_node"].pre_response_processing
 
         if pipeline.parallelize_processing:
             await self._run_processing_parallel(pre_response_processing, ctx, pipeline)
         else:
             await self._run_processing_sequential(pre_response_processing, ctx, pipeline)
 
-        ctx.framework_states["actor"]["pre_response_processed_node"] = ctx.framework_states["actor"]["processed_node"]
-        del ctx.framework_states["actor"]["processed_node"]
+        ctx.framework_data["actor"]["pre_response_processed_node"] = ctx.framework_data["actor"]["processed_node"]
+        del ctx.framework_data["actor"]["processed_node"]
 
     async def _get_true_label(
         self,

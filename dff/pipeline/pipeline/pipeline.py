@@ -324,7 +324,7 @@ class Pipeline:
         if asyncio.iscoroutine(result):
             await result
 
-        del ctx.framework_states[PIPELINE_STATE_KEY]
+        del ctx.framework_data[PIPELINE_STATE_KEY]
 
         if isinstance(self.context_storage, DBContextStorage):
             await self.context_storage.set_item_async(ctx_id, ctx)

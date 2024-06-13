@@ -109,28 +109,26 @@ class PipelineComponent(abc.ABC):
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
-        Method for component runtime state setting, state is preserved in `ctx.framework_states` dict,
-        in subdict, dedicated to this library.
+        Method for component runtime state setting, state is preserved in `ctx.framework_data`.
 
         :param ctx: :py:class:`~.Context` to keep state in.
         :param value: State to set.
         :return: `None`
         """
-        if PIPELINE_STATE_KEY not in ctx.framework_states:
-            ctx.framework_states[PIPELINE_STATE_KEY] = {}
-        ctx.framework_states[PIPELINE_STATE_KEY][self.path] = value
+        if PIPELINE_STATE_KEY not in ctx.framework_data:
+            ctx.framework_data[PIPELINE_STATE_KEY] = {}
+        ctx.framework_data[PIPELINE_STATE_KEY][self.path] = value
 
     def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
         """
-        Method for component runtime state getting, state is preserved in `ctx.framework_states` dict,
-        in subdict, dedicated to this library.
+        Method for component runtime state getting, state is preserved in `ctx.framework_data`.
 
         :param ctx: :py:class:`~.Context` to get state from.
         :param default: Default to return if no record found
             (usually it's :py:attr:`~.pipeline.types.ComponentExecutionState.NOT_RUN`).
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
         """
-        return ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
+        return ctx.framework_data[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
 
     @property
     def asynchronous(self) -> bool:
@@ -218,7 +216,7 @@ class PipelineComponent(abc.ABC):
             path=self.path if self.path is not None else "[None]",
             timeout=self.timeout,
             asynchronous=self.asynchronous,
-            execution_state=copy.deepcopy(ctx.framework_states[PIPELINE_STATE_KEY]),
+            execution_state=copy.deepcopy(ctx.framework_data[PIPELINE_STATE_KEY]),
         )
 
     @property

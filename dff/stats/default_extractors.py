@@ -39,12 +39,12 @@ async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     Extract the pipeline component's start time.
     This function is required for running the dashboard with the default configuration.
 
-    The function leverages the `framework_states` field of the context to store results.
+    The function leverages the `framework_data` field of the context to store results.
     As a result, the function output is cleared on every turn and does not get persisted
     to the context storage.
     """
     start_time = datetime.now()
-    ctx.framework_states[get_wrapper_field(info, "time")] = start_time
+    ctx.framework_data[get_wrapper_field(info, "time")] = start_time
 
 
 async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
@@ -52,11 +52,11 @@ async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # n
     Extract the pipeline component's finish time.
     This function is required for running the dashboard with the default configuration.
 
-    The function leverages the `framework_states` field of the context to store results.
+    The function leverages the `framework_data` field of the context to store results.
     As a result, the function output is cleared on every turn and does not get persisted
     to the context storage.
     """
-    start_time = ctx.framework_states[get_wrapper_field(info, "time")]
+    start_time = ctx.framework_data[get_wrapper_field(info, "time")]
     data = {"execution_time": str(datetime.now() - start_time)}
     return data
 

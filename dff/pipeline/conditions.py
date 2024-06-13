@@ -41,7 +41,7 @@ def service_successful_condition(path: Optional[str] = None) -> StartConditionCh
     """
 
     def check_service_state(ctx: Context, _: Pipeline):
-        state = ctx.framework_states[PIPELINE_STATE_KEY].get(path, ComponentExecutionState.NOT_RUN)
+        state = ctx.framework_data[PIPELINE_STATE_KEY].get(path, ComponentExecutionState.NOT_RUN)
         return ComponentExecutionState[state] == ComponentExecutionState.FINISHED
 
     return check_service_state
