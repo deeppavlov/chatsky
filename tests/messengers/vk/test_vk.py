@@ -30,7 +30,7 @@ def test_post(monkeypatch):
 
 
 def test_data_parsing(patch_interface):
-    with open( pathlib.Path(__file__).parent + "/test_tutorial.json") as f:
+    with open( pathlib.Path(__file__).parent / "/test_tutorial.json") as f:
         incoming_data = json.load(f)
 
     for test_case, data in incoming_data.items():
