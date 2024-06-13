@@ -57,28 +57,28 @@ class Context(BaseModel):
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
     `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
-    labels: Dict[int, NodeLabel2Type] = {}
+    labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
     """
     `labels` stores the history of all passed `labels`
 
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    requests: Dict[int, Message] = {}
+    requests: Dict[int, Message] = Field(default_factory=dict)
     """
     `requests` stores the history of all `requests` received by the agent
 
         - key - `id` of the turn.
         - value - `request` on this turn.
     """
-    responses: Dict[int, Message] = {}
+    responses: Dict[int, Message] = Field(default_factory=dict)
     """
     `responses` stores the history of all agent `responses`
 
         - key - `id` of the turn.
         - value - `response` on this turn.
     """
-    misc: Dict[str, Any] = {}
+    misc: Dict[str, Any] = Field(default_factory=dict)
     """
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
     so storage of any data won't reflect on the work on the internal Dialog Flow Scripting functions.
