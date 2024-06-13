@@ -48,7 +48,7 @@ be found here:
 
 # %%
 
-EXAMPLE_ATTACHMENT_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
+EXAMPLE_ATTACHMENT_SOURCE = "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments"
 
 location_data = {"latitude": 50.65, "longitude": 3.916667}
 
@@ -67,7 +67,7 @@ audio_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
     ),
-    "title": '"Separation" melody by William King',
+    "title": "Separation melody by William King",
 }
 
 video_data = {

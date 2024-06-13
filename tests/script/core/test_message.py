@@ -1,4 +1,6 @@
+from os import urandom
 from pathlib import Path
+from random import randint
 from shutil import rmtree
 from typing import Hashable, Optional, TextIO
 from urllib.request import urlopen
@@ -6,10 +8,8 @@ from urllib.request import urlopen
 import pytest
 from pydantic import ValidationError, HttpUrl, FilePath
 
-from dff.context_storages import DBContextStorage, JSONContextStorage
 from dff.messengers.common.interface import MessengerInterface
 from dff.messengers.console import CLIMessengerInterface
-from dff.script.core.context import Context
 from dff.script.core.message import (
     Animation,
     Audio,
@@ -27,7 +27,19 @@ from dff.script.core.message import (
     Video,
 )
 
-EXAMPLE_SOURCE = "https://cdn.jsdelivr.net/gh/deeppavlov/dialog_flow_framework@wiki/example-attachments"
+EXAMPLE_SOURCE = "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments"
+
+
+class UnserializableObject:
+    def __init__(self, number: int, string: bytes) -> None:
+        self.number = number
+        self.bytes = string
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, UnserializableObject):
+            return self.number == value.number and self.bytes == value.bytes
+        else:
+            return False
 
 
 class DFFCLIMessengerInterface(CLIMessengerInterface):
@@ -49,8 +61,8 @@ class DFFCLIMessengerInterface(CLIMessengerInterface):
 
 class TestMessage:
     @pytest.fixture
-    def json_context_storage(self) -> DBContextStorage:
-        return JSONContextStorage(f"file://{Path(__file__).parent / 'serialization_database.json'}")
+    def random_original_message(self) -> UnserializableObject:
+        return UnserializableObject(randint(0, 256), urandom(32))
 
     def clear_and_create_dir(self, dir: Path) -> Path:
         rmtree(dir, ignore_errors=True)
@@ -72,17 +84,20 @@ class TestMessage:
         "attachment1,attachment2,equal",
         [
             (
+                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                True,
+            ),
+            (
                 DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
                 DataAttachment(
                     source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"
                 ),
-                True,
+                False,
             ),
             (
                 DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-                DataAttachment(
-                    source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="2"
-                ),
+                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="2"),
                 False,
             ),
             (
@@ -121,19 +136,28 @@ class TestMessage:
             Document(source="https://example.com/some_document.pdf"),
         ],
     )
-    def test_attachment_serialize(self, json_context_storage: DBContextStorage, attachment: DataAttachment):
-        name = type(attachment).__name__
-        json_context_storage[name] = Context(requests={0: Message(attachments=[attachment])})
-        retrieved = json_context_storage[name].requests[0].attachments[0]
-        assert attachment == retrieved
+    def test_attachment_serialize(self, attachment: DataAttachment):
+        message = Message(attachments=[attachment])
+        serialized = message.model_dump_json()
+        validated = Message.model_validate_json(serialized)
+        assert message == validated
+
+    def test_field_serializable(self, random_original_message: UnserializableObject):
+        message = Message(text="sample message")
+        message.misc = {"answer": 42, "unserializable": random_original_message}
+        message.original_message = random_original_message
+        message.some_extra_field = random_original_message
+        message.other_extra_field = {"unserializable": random_original_message}
+        serialized = message.model_dump_json()
+        validated = Message.model_validate_json(serialized)
+        assert message == validated
 
     @pytest.mark.asyncio
-    async def test_getting_attachment_bytes(self):
-        root_dir = Path(__file__).parent
-        local_path = self.clear_and_create_dir(root_dir / "local")
+    async def test_getting_attachment_bytes(self, tmp_path):
+        local_path = self.clear_and_create_dir(tmp_path / "local")
 
         local_document = local_path / "pre-saved-document.pdf"
-        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(root_dir / "cache"))
+        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(tmp_path / "cache"))
 
         document_name = "deeppavlov-article.pdf"
         remote_document_url = f"{EXAMPLE_SOURCE}/{document_name}"
@@ -149,6 +173,7 @@ class TestMessage:
             read_bytes = await document.get_bytes(cli_iface)
             assert document_bytes == read_bytes
             if not isinstance(document.source, Path):
+                assert document.cached_filename is not None
                 cached_bytes = document.cached_filename.read_bytes()
                 assert document_bytes == cached_bytes
 

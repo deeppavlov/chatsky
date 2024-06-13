@@ -32,6 +32,3 @@ dbs
 benchmarks
 benchmark_results_files.json
 uploaded_benchmarks
-tests/script/core/serialization_database.json
-tests/script/core/cache/
-tests/script/core/local/
