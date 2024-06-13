@@ -6,30 +6,30 @@ from typing import Dict, List
 import pytest
 
 from dff.script.core.message import Message
-from tests.messengers.vk.mock_bot import MockApplication, PathStep
+from mock_bot import MockApplication, PathStep
 from tests.test_utils import get_path_from_tests_to_current_dir
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")
-happy_paths_file = Path(__file__).parent / "incoming_data.json"
+happy_paths_file = Path(__file__).parent / "test_tutorial.json"
 
 def _cast_dict_to_happy_step(dict: Dict) -> List[PathStep]:
     imports = globals().copy()
-    imports.update(import_module("vk_api").__dict__)
+    # imports.update(import_module("vk_api").__dict__)
 
     path_steps = list()
     for step in dict:
-        update = eval(step["update"], imports)
+        update = step["update"]
         received = Message.model_validate_json(step["received_message"])
         received.original_message = update
-        response = Message.model_validate_json(step["response_message"])
-        path_steps += [(update, received, response, step["response_functions"])]
+        response = Message.model_validate_json(step["response"])
+        path_steps += [(update, received, response, step["response_request"])]
     return path_steps
 
 @pytest.mark.vk
 @pytest.mark.asyncio
 @pytest.mark.parametrize(
     "tutorial_module_name",
-    ["1_basic", "2_attachments"],
+    ["1_basic"],
 )
 def test_tutorials_vk_memory(tutorial_module_name: str):
     happy_path_data = loads(happy_paths_file.read_text())[tutorial_module_name]

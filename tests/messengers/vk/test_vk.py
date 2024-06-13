@@ -12,24 +12,8 @@ def patch_interface():
 
 # custom class to be the mock return value
 # will override the requests.Response returned from requests.get
-class MockResponse:
-    # mock json() method always returns a specific testing dictionary
-    @staticmethod
-    def json():
-        return {"mock_key": "mock_response"}
-
-
 def test_post(monkeypatch):
-    # Any arguments may be passed and mock_get() will always return our
-    # mocked object, which only has the .json() method.
     def dummy_post(request_method: str, *args, **kwargs):
-        """Function for logging POST requests that will override original `requests.post` method.
-        Will return dummy objects for requests that require response.
-
-        Args:
-            request (_str_): method to request
-            data (_dict_): data to post
-        """
         print((request_method, args, kwargs))
         if "getMessagesUploadServer" in request_method:
             return {"response": {"upload_url": "https://dummy_url"}}
@@ -40,13 +24,29 @@ def test_post(monkeypatch):
 
     monkeypatch.setattr(requests, "post", dummy_post)
 
-    # app.get_json, which contains requests.get, uses the monkeypatch
-    # result = app.get_json("https://fakeurl")
-    # assert result["mock_key"] == "mock_response"
-
     iface = PollingVKInterface(token="", group_id="")
     iface._respond(Message(text="test"))
 
+
+def test_data_parsing(patch_interface):
+    with open("test_tutorial.json") as f:
+        incoming_data = json.load(f)
+
+    for test_case, data in incoming_data.items():
+        update = data["update"]
+        received_message = json.loads(data["received_message"])
+        expected_message = Message(
+            text=received_message["text"],
+            commands=received_message["commands"],
+            attachments=received_message["attachments"],
+            annotations=received_message["annotations"],
+            misc=received_message["misc"],
+            original_message=received_message["original_message"]
+        )
+
+        parsed_message = patch_interface._request(update)
+
+        assert parsed_message == expected_message
 
 # with open("incoming_data.json") as f:
 #     incoming_data = json.load(f)
