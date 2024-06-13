@@ -109,10 +109,8 @@ Attributes
   built-in DFF classes or functions, so the values that you write there are guaranteed to persist
   throughout the lifetime of the ``Context`` object.
 
-* **framework_states**: This attribute is used for storing addon or pipeline states.
-  Each turn, the DFF pipeline records the intermediary states of its components into this field,
-  and clears it at the end of the turn. For this reason, developers are discouraged from storing
-  their own data in this field.
+* **framework_data**: This attribute is used for storing custom data required for pipeline execution.
+  It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
 
 Methods
 =======
