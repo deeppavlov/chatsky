@@ -49,8 +49,9 @@ def extract_vk_update(updates: dict):
                     )
                     
         message = Message(text=text, attachments=attachments)
-        upds.append(message, int(id))
-    return upds
+        upds.append(message)
+    # why does it nest arrays?
+    return upds[0]
 
 
 class FilesOpener:
@@ -190,10 +191,11 @@ class VKWrapper:
         elif attachment_type == "video":
             raise NotImplementedError()
 
-    async def request(self):
-        updates = await vk_api_call(
-            f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50"
-        )
+    async def request(self, updates=None):
+        if updates is None:
+            updates = await vk_api_call(
+                f"{self.server}?act=a_check&key={self.server_key}&ts={self.ts_current}&wait=50"
+            )
         self.ts_current = updates["ts"]
         return updates["updates"]
 
