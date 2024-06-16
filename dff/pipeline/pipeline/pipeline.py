@@ -387,7 +387,7 @@ class Pipeline:
         event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
         # If the user changes signal handling within _polling_loop(), this will break
 
-        asyncio.run(self.messenger_interface.run_in_foreground(self))
+        asyncio.run(self.messenger_interface.run_in_foreground(self, self._run_pipeline))
         logger.info(f"pipeline finished working")
 
     def __call__(
