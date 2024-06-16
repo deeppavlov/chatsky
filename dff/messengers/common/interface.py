@@ -44,10 +44,24 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
-    async def run_in_foreground(self, pipeline: Pipeline, *args):
+    async def run_in_foreground(
+        self, 
+        pipeline: Pipeline,
+        loop: PollingInterfaceLoopFunction = lambda: True,
+        timeout: float = 0,
+        *args
+    ):
         self.running_in_foreground = True
         self.pipeline = pipeline
-        self.task = asyncio.create_task(self.connect(*args))
+        print(self)
+        print("pipeline = ", pipeline)
+        print("args = ", *args)
+        if isinstance(self.pipeline.messenger_interface, PollingMessengerInterface):
+            self.task = asyncio.create_task(self.connect(loop=loop, timeout=timeout, *args))
+        elif isinstance(self.pipeline.messenger_interface, CallbackMessengerInterface):
+            self.task = asyncio.create_task(self.connect(self.pipeline._run_pipeline, *args))
+        else:
+            self.task = asyncio.create_task(self.connect(self.pipeline._run_pipeline, *args))
         await self.task
         # Allowing other interfaces (and all async tasks) to work too
 
@@ -202,7 +216,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
     def _respond(self, ctx_id, last_response: Message):
         print(f"{self._prompt_response}{last_response.text()}", file=self._descriptor)
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
+    async def connect(self, *args, **kwargs):
         """
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
@@ -213,4 +227,4 @@ class CLIMessengerInterface(PollingMessengerInterface):
         self._ctx_id = uuid.uuid4()
         if self._intro is not None:
             print(self._intro)
-        await super().connect(pipeline_runner, **kwargs)
+        await super().connect(*args, **kwargs)

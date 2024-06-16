@@ -1,9 +1,10 @@
 import asyncio
 import sys
 import pathlib
+import uuid
 
 from dff.script import RESPONSE, TRANSITIONS, Message, Context
-from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
+from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface, PollingMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
 
@@ -67,22 +68,36 @@ def test_echo_responses():
     }
     # (respond=request)
 
-    requests = ["some request", "another request", "gkjln;s!", "foobarraboof"]
-    request_num = -1
-    obtained_updates = False
-    received_updates = []
+    # make an asyncio queue for requests? so that Nonetype isn't returned
 
-    def not_obtained_updates():
-        return not obtained_updates
-    class TestCLIInterface(CLIMessengerInterface):
-        def _get_updates(self):
-            if len(received_updates) >= 4:
-                obtained_updates = True
-            if not_obtained_updates and request_num < 3:
-                request_num += 1
-                return [self._ctx_id, requests[request_num]]
+    """
+    requests_queue = asyncio.Queue()
+    for item in requests:
+        requests_queue.put(item)
+    """
+
+    class TestCLIInterface(PollingMessengerInterface):
+        def __init__(self):
+            self.ctx_id = uuid.uuid4()
+            self.requests = ["some request", "another request", "gkjln;s!", "foobarraboof"]
+            self.requests_copy = self.requests.copy()
+            self.received_updates = []
+            self.obtained_updates = False
+            super().__init__()
+
+        def not_obtained_updates(self):
+            if len(self.received_updates) == len(self.requests_copy):
+                self.obtained_updates = True
+            return not self.obtained_updates
+
+        async def _get_updates(self):
+            # request = await requests_queue.get()
+            if len(self.requests) > 0:
+                return [(self.ctx_id, self.requests.pop(0))]
+            else:
+                await asyncio.sleep(0.05)
         def _respond(self, ctx_id, response):
-            received_updates.append([ctx_id, response])
+            self.received_updates.append((ctx_id, response))
 
     new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,
@@ -90,11 +105,12 @@ def test_echo_responses():
         fallback_label=("echo_flow", "start_node"),
         messenger_interface=TestCLIInterface()
     )
-    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=not_obtained_updates, timeout=3))
-    print(not_obtained_updates())
+    interface = new_pipeline.messenger_interface
+    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=interface.not_obtained_updates, timeout=3))
     for i in range(4):
-        assert requests[i] == received_updates[i]
-    assert not_obtained_updates() == False
+        assert interface.requests_copy[i] == interface.received_updates[i][1]
+    assert interface.obtained_updates() == False
+    assert False
     """
     get_updates -> if not obtained_updates: [ctx_id, request]
     respond -> received_updates.append(ctx_id, response)
