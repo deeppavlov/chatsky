@@ -65,21 +65,33 @@ def test_echo_responses():
             },
         }
     }
-
     # (respond=request)
+
+    obtained_updates = False
+    received_updates = []
+    def not_obtained_updates():
+        return not obtained_updates
+    class TestCLIInterface(CLIMessengerInterface):
+        def _get_updates(self):
+            if not_obtained_updates:
+                return [ctx_id, request]
+        def _respond(self, ctx_id, response):
+            received_updates.append([ctx_id, response])
+
     new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,
         start_label=("echo_flow", "start_node"),
         fallback_label=("echo_flow", "start_node"),
+        messenger_interface=TestCLIInterface()
     )
-    
-    obtained_updates = False
-    received_updates = []
+    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, not_obtained_updates))
+    print(not_obtained_updates())
+    assert not_obtained_updates() == False
     """
     get_updates -> if not obtained_updates: [ctx_id, request]
     respond -> received_updates.append(ctx_id, response)
     
-    messenger_iface.connect(loop=not obtained_updates)
+    new_pipeline.messenger_interface.connect(loop=not_obtained_updates)
     
     assert received_updates == expected
     """

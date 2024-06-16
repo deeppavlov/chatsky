@@ -47,13 +47,12 @@ class MessengerInterface(abc.ABC):
     async def run_in_foreground(self, pipeline: Pipeline, *args):
         self.running_in_foreground = True
         self.pipeline = pipeline
-        print(True)
         self.task = asyncio.create_task(self.connect(*args))
-        print(self.task)
         await self.task
         # Allowing other interfaces (and all async tasks) to work too
 
     async def shutdown(self):
+        logger.info(f"messenger_interface.shutdown() called - shutting down interface")
         await self.task.cancel()
         logger.info(f"{type(self).__name__} has stopped working - SIGINT received")
 
