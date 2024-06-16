@@ -67,14 +67,20 @@ def test_echo_responses():
     }
     # (respond=request)
 
+    requests = ["some request", "another request", "gkjln;s!", "foobarraboof"]
+    request_num = -1
     obtained_updates = False
     received_updates = []
+
     def not_obtained_updates():
         return not obtained_updates
     class TestCLIInterface(CLIMessengerInterface):
         def _get_updates(self):
-            if not_obtained_updates:
-                return [ctx_id, request]
+            if len(received_updates) >= 4:
+                obtained_updates = True
+            if not_obtained_updates and request_num < 3:
+                request_num += 1
+                return [self._ctx_id, requests[request_num]]
         def _respond(self, ctx_id, response):
             received_updates.append([ctx_id, response])
 
@@ -84,8 +90,10 @@ def test_echo_responses():
         fallback_label=("echo_flow", "start_node"),
         messenger_interface=TestCLIInterface()
     )
-    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, not_obtained_updates))
+    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=not_obtained_updates, timeout=3))
     print(not_obtained_updates())
+    for i in range(4):
+        assert requests[i] == received_updates[i]
     assert not_obtained_updates() == False
     """
     get_updates -> if not obtained_updates: [ctx_id, request]
