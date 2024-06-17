@@ -163,7 +163,7 @@ class VKWrapper:
         Return json object with `owner_id` and `photo_id` needed to send it
         """
         if attachment_type == "photo":
-            upload_url = self.get_upload_server("photos", peer_id)
+            upload_url = await self.get_upload_server("photos", peer_id)
             attachment_path = str(attachment.source)
 
             logger.info(f"Uploading {attachment_path}")
@@ -172,19 +172,19 @@ class VKWrapper:
                     upload_url, files=photo_files
                 ).json()
 
-            saved_photo_data = self.save_photo(uploaded_photo_data, caption=attachment.title)
+            saved_photo_data = await self.save_photo(uploaded_photo_data, caption=attachment.title)
 
             return saved_photo_data
 
         elif attachment_type == "doc" or attachment_type == "audio":
-            upload_url = self.get_upload_server("docs", peer_id)
+            upload_url = await self.get_upload_server("docs", peer_id)
             attachment_path = str(attachment.source)
 
             logger.info(f"Uploading {attachment_path}")
             with FilesOpener(attachment_path, key_format="file") as files:
                 uploaded_photo_data = await vk_api_call(upload_url, files=files).json()
 
-            saved_doc_data = self.save_document(uploaded_photo_data, title=attachment.title)
+            saved_doc_data = await self.save_document(uploaded_photo_data, title=attachment.title)
 
             return saved_doc_data["response"]
 
@@ -202,7 +202,7 @@ class VKWrapper:
     async def send_message(self, response: str, id, attachment_list):
         if attachment_list != []:
             for attachment in attachment_list:
-                data_to_send = self.upload_attachment(
+                data_to_send = await self.upload_attachment(
                     id, attachment["source"], attachment["type"]
                 )
                 attachment_list.append(
@@ -249,13 +249,13 @@ class PollingVKInterface(PollingMessengerInterface):
                         )
                     elif isinstance(attachment, Document):
                         attachment_list.append(
-                            {"doc": "photo", "source": attachment.source}
+                            {"type": "doc", "source": attachment.source}
                         )
                     elif isinstance(attachment, Video):
                         raise NotImplementedError()
                     elif isinstance(attachment, Audio):
                         attachment_list.append(
-                            {"audio": "photo", "source": attachment.source}
+                            {"type": "audio", "source": attachment.source}
                         )
                     # elif isinstance(attachment, Link):
                     #     response.text += f"[{attachment.source}|{attachment.title}]"
