@@ -5,24 +5,7 @@ The Utility Functions module contains several utility functions that are commonl
 These functions provide a variety of utility functionality.
 """
 
-import asyncio
-from typing import Callable, Any, Optional, Tuple, Mapping
-
-
-async def wrap_sync_function_in_async(func: Callable, *args, **kwargs) -> Any:
-    """
-    Utility function, that wraps both functions and coroutines in coroutines.
-    Invokes `func` if it is just a callable and awaits, if this is a coroutine.
-
-    :param func: Callable to wrap.
-    :param \\*args: Function args.
-    :param \\**kwargs: Function kwargs.
-    :return: What function returns.
-    """
-    if asyncio.iscoroutinefunction(func):
-        return await func(*args, **kwargs)
-    else:
-        return func(*args, **kwargs)
+from typing import Any, Optional, Tuple, Mapping
 
 
 def _get_attrs_with_updates(

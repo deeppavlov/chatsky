@@ -14,7 +14,8 @@ from typing import Optional, List, TYPE_CHECKING
 
 from dff.script import Context
 
-from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates, wrap_sync_function_in_async
+from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
+from dff.utils.async_helper import wrap_sync_function_in_async
 from ..types import (
     ServiceRuntimeInfo,
     ExtraHandlerType,
