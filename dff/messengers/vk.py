@@ -158,33 +158,31 @@ class VKWrapper:
 
         return saved_data["response"]
 
-    async def upload_attachment(self, peer_id, attachment, attachment_type: str) -> str:
+    async def upload_attachment(self, peer_id, attachment_source: str, attachment_type: str, title: str="") -> str:
         """
         Return json object with `owner_id` and `photo_id` needed to send it
         """
         if attachment_type == "photo":
             upload_url = await self.get_upload_server("photos", peer_id)
-            attachment_path = str(attachment.source)
 
-            logger.info(f"Uploading {attachment_path}")
-            with FilesOpener(attachment_path) as photo_files:
+            logger.info(f"Uploading {attachment_source}")
+            with FilesOpener(attachment_source) as photo_files:
                 uploaded_photo_data = requests.post(
                     upload_url, files=photo_files
                 ).json()
 
-            saved_photo_data = await self.save_photo(uploaded_photo_data, caption=attachment.title)
+            saved_photo_data = await self.save_photo(uploaded_photo_data, caption=title)
 
             return saved_photo_data
 
         elif attachment_type == "doc" or attachment_type == "audio":
             upload_url = await self.get_upload_server("docs", peer_id)
-            attachment_path = str(attachment.source)
 
-            logger.info(f"Uploading {attachment_path}")
-            with FilesOpener(attachment_path, key_format="file") as files:
+            logger.info(f"Uploading {attachment_source}")
+            with FilesOpener(attachment_source, key_format="file") as files:
                 uploaded_photo_data = await vk_api_call(upload_url, files=files).json()
 
-            saved_doc_data = await self.save_document(uploaded_photo_data, title=attachment.title)
+            saved_doc_data = await self.save_document(uploaded_photo_data, title=title)
 
             return saved_doc_data["response"]
 
