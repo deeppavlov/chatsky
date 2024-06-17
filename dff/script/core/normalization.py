@@ -33,9 +33,11 @@ def normalize_label(label: Label, default_flow_label: LabelType = "") -> Label:
     """
     if callable(label):
 
-        def get_label_handler(ctx: Context, pipeline: Pipeline) -> ConstLabel:
+        def get_label_handler(ctx: Context, pipeline: Pipeline) -> Optional[ConstLabel]:
             try:
                 new_label = label(ctx, pipeline)
+                if new_label is None:
+                    return None
                 new_label = normalize_label(new_label, default_flow_label)
                 flow_label, node_label, _ = new_label
                 node = pipeline.script.get(flow_label, {}).get(node_label)
