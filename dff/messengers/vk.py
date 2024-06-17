@@ -25,7 +25,7 @@ logging.basicConfig(level=logging.INFO)
 async def vk_api_call(method: str):
     async with aiohttp.ClientSession() as session:
         async with session.post(method) as response:
-            return response.json()
+            return await response.json()
 
 
 def extract_vk_update(updates: dict):
@@ -259,8 +259,8 @@ class PollingVKInterface(PollingMessengerInterface):
                         )
                     # elif isinstance(attachment, Link):
                     #     response.text += f"[{attachment.source}|{attachment.title}]"
-            # self.bot.send_message(resp.last_response, resp.id, attachment_list)
-            self.bot.send_message("resp", "id", attachment_list)
+            self.bot.send_message(resp.text, resp.id, attachment_list)
+            # return await self.bot.send_message("resp", "id", attachment_list)
             
 
         logger.info("Responded.")
