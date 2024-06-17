@@ -23,7 +23,8 @@ from dff.script import Script, Context, ActorStage
 from dff.script import NodeLabel2Type, Message
 from dff.utils.turn_caching import cache_clear
 
-from dff.messengers.common import MessengerInterface, CLIMessengerInterface
+from dff.messengers.console import CLIMessengerInterface
+from dff.messengers.common import MessengerInterface
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,

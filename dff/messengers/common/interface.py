@@ -9,14 +9,15 @@ from __future__ import annotations
 import abc
 import asyncio
 import logging
-import uuid
-from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
-
-from dff.script import Context, Message
-from dff.messengers.common.types import PollingInterfaceLoopFunction
+from pathlib import Path
+from tempfile import gettempdir
+from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
+    from dff.script import Context, Message
     from dff.pipeline.types import PipelineRunnerFunction
+    from dff.messengers.common.types import PollingInterfaceLoopFunction
+    from dff.script.core.message import Attachment, DataAttachment
 
 logger = logging.getLogger(__name__)
 
@@ -26,6 +27,24 @@ class MessengerInterface(abc.ABC):
     Class that represents a message interface used for communication between pipeline and users.
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
     """
+
+    supported_request_attachment_types: set[Type[Attachment]] = set()
+    supported_response_attachment_types: set[type[Attachment]] = set()
+
+    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
+        tempdir = gettempdir()
+        if attachments_directory is not None and not str(attachments_directory.absolute()).startswith(tempdir):
+            self.attachments_directory = attachments_directory
+        else:
+            warning_start = f"Attachments directory for {type(self).__name__} messenger interface"
+            warning_end = "attachment data won't be cached locally!"
+            if attachments_directory is None:
+                self.attachments_directory = Path(tempdir) / f"dff-cache-{type(self).__name__}"
+                logger.warning(f"{warning_start} is None, so will be set to tempdir and {warning_end}")
+            else:
+                self.attachments_directory = attachments_directory
+                logger.warning(f"{warning_start} is in tempdir, so {warning_end}")
+        self.attachments_directory.mkdir(parents=True, exist_ok=True)
 
     @abc.abstractmethod
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
@@ -37,6 +56,9 @@ class MessengerInterface(abc.ABC):
             usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         """
         raise NotImplementedError
+
+    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
+        raise RuntimeError(f"Messanger interface {type(self).__name__} can't populate attachment {attachment}!")
 
 
 class PollingMessengerInterface(MessengerInterface):
@@ -119,7 +141,8 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self):
+    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
+        super().__init__(attachments_directory)
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
@@ -142,43 +165,3 @@ class CallbackMessengerInterface(MessengerInterface):
         This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self.on_request_async(request, ctx_id, update_ctx_misc))
-
-
-class CLIMessengerInterface(PollingMessengerInterface):
-    """
-    Command line message interface is the default message interface, communicating with user via `STDIN/STDOUT`.
-    This message interface can maintain dialog with one user at a time only.
-    """
-
-    def __init__(
-        self,
-        intro: Optional[str] = None,
-        prompt_request: str = "request: ",
-        prompt_response: str = "response: ",
-        out_descriptor: Optional[TextIO] = None,
-    ):
-        super().__init__()
-        self._ctx_id: Optional[Hashable] = None
-        self._intro: Optional[str] = intro
-        self._prompt_request: str = prompt_request
-        self._prompt_response: str = prompt_response
-        self._descriptor: Optional[TextIO] = out_descriptor
-
-    def _request(self) -> List[Tuple[Message, Any]]:
-        return [(Message(input(self._prompt_request)), self._ctx_id)]
-
-    def _respond(self, responses: List[Context]):
-        print(f"{self._prompt_response}{responses[0].last_response.text}", file=self._descriptor)
-
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, **kwargs):
-        """
-        The CLIProvider generates new dialog id used to user identification on each `connect` call.
-
-        :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
-        :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
-        """
-        self._ctx_id = uuid.uuid4()
-        if self._intro is not None:
-            print(self._intro)
-        await super().connect(pipeline_runner, **kwargs)
