@@ -9,7 +9,8 @@ from __future__ import annotations
 import asyncio
 import re
 from abc import ABC, abstractmethod
-from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union, TypeAlias
+from typing import Callable, Any, Awaitable, TYPE_CHECKING, Union
+from typing_extensions import TypeAlias
 import logging
 from functools import reduce
 
@@ -195,7 +196,7 @@ class ValueSlot(BaseSlot, frozen=True):
     default_value: Any = None
 
     @abstractmethod
-    async def extract_value(self, ctx: Context, pipeline: Pipeline) -> Any | SlotNotExtracted:
+    async def extract_value(self, ctx: Context, pipeline: Pipeline) -> Union[Any, SlotNotExtracted]:
         """
         Return value extracted from context.
 
@@ -279,7 +280,7 @@ class RegexpSlot(ValueSlot, frozen=True):
     match_group_idx: int = 0
     "Index of the group to match."
 
-    async def extract_value(self, ctx: Context, _: Pipeline) -> str | SlotNotExtracted:
+    async def extract_value(self, ctx: Context, _: Pipeline) -> Union[str, SlotNotExtracted]:
         request_text = ctx.last_request.text
         search = re.search(self.regexp, request_text)
         return (
@@ -296,9 +297,9 @@ class FunctionSlot(ValueSlot, frozen=True):
     Uses a user-defined `func` to extract slot value from the :py:attr:`~.Context.last_request` Message.
     """
 
-    func: Callable[[Message], Awaitable[Any | SlotNotExtracted] | Union[Any, SlotNotExtracted]]
+    func: Callable[[Message], Union[Awaitable[Union[Any, SlotNotExtracted]], Any, SlotNotExtracted]]
 
-    async def extract_value(self, ctx: Context, _: Pipeline) -> Any | SlotNotExtracted:
+    async def extract_value(self, ctx: Context, _: Pipeline) -> Union[Any, SlotNotExtracted]:
         return await wrap_sync_function_in_async(self.func, ctx.last_request)
 
 
