@@ -211,6 +211,7 @@ markers = [
     "all: reserved by allow-skip",
     "none: reserved by allow-skip",
 ]
+asyncio_mode = "auto"
 
 
 [tool.coverage.run]
