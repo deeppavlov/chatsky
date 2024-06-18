@@ -97,7 +97,9 @@ class TestSlotManager:
 
     @pytest.fixture(scope="function")
     def empty_slot_manager(self):
-        return SlotManager(root_slot=root_slot)
+        manager = SlotManager()
+        manager.set_root_slot(root_slot)
+        return manager
 
     @pytest.fixture(scope="function")
     def extracted_slot_manager(self):

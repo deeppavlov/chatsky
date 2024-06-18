@@ -331,10 +331,6 @@ class SlotManager(BaseModel):
         new_slot_storage.update(self.slot_storage)
         self.slot_storage = new_slot_storage
 
-    @model_validator(mode="after")
-    def call_set_root_slot(self):
-        self.set_root_slot(self.root_slot)
-
     def get_slot(self, slot_name: SlotName) -> BaseSlot:
         """
         Get slot configuration from the slot name.
