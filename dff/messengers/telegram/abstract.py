@@ -48,6 +48,10 @@ except ImportError:
 
 
 class _AbstractTelegramInterface(MessengerInterface):
+    """
+    Messenger interface mixin for Telegram API usage.
+    """
+
     supported_request_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, Invoice}
     supported_response_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document}
 
@@ -69,6 +73,14 @@ class _AbstractTelegramInterface(MessengerInterface):
             raise ValueError(f"For attachment {attachment} id is not defined!")
 
     def extract_message_from_telegram(self, update: TelegramMessage) -> Message:
+        """
+        Convert Telegram update to DFF message.
+        Extract text and supported attachments.
+
+        :param update: Telegram update object.
+        :return: DFF message object.
+        """
+
         message = Message()
         message.attachments = list()
 
@@ -199,6 +211,18 @@ class _AbstractTelegramInterface(MessengerInterface):
         return message
 
     async def cast_message_to_telegram_and_send(self, bot: ExtBot, chat_id: int, message: Message) -> None:
+        """
+        Send DFF message to Telegram.
+        Sometimes, if several attachments included into message can not be sent as one update,
+        several Telegram updates will be produced.
+        Sometimes, if no text and none of the supported attachments are included,
+        nothing will happen.
+
+        :param bot: Telegram bot, that is used for connection to Telegram API.
+        :param chat_id: Telegram dialog ID that the message will be sent to.
+        :param message: DFF message that will be processed into Telegram updates.
+        """
+
         if message.attachments is not None:
             files = list()
             media_group_attachments_num = len([att for att in message.attachments if isinstance(att, DataAttachment)])
@@ -340,6 +364,13 @@ class _AbstractTelegramInterface(MessengerInterface):
     async def _on_event(
         self, update: Update, _: ContextTypes.DEFAULT_TYPE, create_message: Callable[[Update], Message]
     ) -> None:
+        """
+        Process Telegram update, run pipeline and send response to Telegram.
+
+        :param update: Telegram update that will be processed.
+        :param create_message: function that converts Telegram update to DFF message.
+        """
+
         data_available = update.message is not None or update.callback_query is not None
         if update.effective_chat is not None and data_available:
             message = create_message(update)
@@ -351,9 +382,23 @@ class _AbstractTelegramInterface(MessengerInterface):
                 )
 
     async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        """
+        Process normal Telegram update, extracting DFF message from it
+        using :py:meth:`~._AbstractTelegramInterface.extract_message_from_telegram`.
+
+        :param update: Telegram update that will be processed.
+        """
+
         await self._on_event(update, _, lambda s: self.extract_message_from_telegram(s.message))
 
     async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+        """
+        Process Telegram callback update, creating empty DFF message
+        with only one callback query attachment from `callback_query.data` field.
+
+        :param update: Telegram update that will be processed.
+        """
+
         await self._on_event(update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)]))
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):

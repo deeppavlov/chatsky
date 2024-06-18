@@ -246,9 +246,12 @@ neg = negation
 """
 
 
-def has_callback_query(expected_query_string: str):
+def has_callback_query(expected_query_string: str) -> Callable[[Context, Pipeline], bool]:
     """
-    Condition that checks if :py:attr:`~.CallbackQuery.query_string` of the last message matches `expected`.
+    Condition that checks if :py:attr:`~.CallbackQuery.query_string` of the last message matches `expected_query_string`.
+
+    :param expected_query_string: The expected query string to compare with.
+    :return: The callback query comparator function.
     """
 
     def has_callback_query_handler(ctx: Context, _: Pipeline) -> bool:

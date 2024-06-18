@@ -26,10 +26,22 @@ class MessengerInterface(abc.ABC):
     """
     Class that represents a message interface used for communication between pipeline and users.
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
+
+    :param attachments_directory: Directory where attachments will be stored.
+        If not specified, the temporary directory will be used.
     """
 
     supported_request_attachment_types: set[Type[Attachment]] = set()
+    """
+    Types of attachment that this messenger interface can receive.
+    Attachments not in this list will be neglected.
+    """
+
     supported_response_attachment_types: set[type[Attachment]] = set()
+    """
+    Types of attachment that this messenger interface can send.
+    Attachments not in this list will be neglected.
+    """
 
     def __init__(self, attachments_directory: Optional[Path] = None) -> None:
         tempdir = gettempdir()
@@ -58,6 +70,16 @@ class MessengerInterface(abc.ABC):
         raise NotImplementedError
 
     async def populate_attachment(self, attachment: DataAttachment) -> bytes:
+        """
+        Method that can be used by some messenger interfaces for attachment population.
+        E.g. if a file attachment consists of an URL of the file uploaded to the messenger servers,
+        this method is the right place to call the messenger API for the file downloading.
+        Since many messenger interfaces don't have built-in attachment population functionality,
+        this method is not abstract and thus should not always be overridden.
+
+        :param attachment: Attachment that should be populated.
+        :return: The attachment bytes.
+        """
         raise RuntimeError(f"Messanger interface {type(self).__name__} can't populate attachment {attachment}!")
 
 

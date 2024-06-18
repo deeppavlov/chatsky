@@ -73,7 +73,7 @@ aiosqlite = { version = "*", optional = true }
 omegaconf = { version = "*", optional = true }
 cryptography = { version = "*", optional = true }
 requests = { version = "*", optional = true }
-python-telegram-bot = { version = "*", optional = true }
+python-telegram-bot = { version = "*", extras = ["all"], optional = true }
 opentelemetry-instrumentation = { version = "*", optional = true }
 sqlalchemy = { version = "*", extras = ["asyncio"], optional = true }
 opentelemetry-exporter-otlp = { version = ">=1.20.0", optional = true }  # log body serialization is required

@@ -11,7 +11,7 @@ from pathlib import Path
 from urllib.request import urlopen
 from uuid import uuid4
 
-from pydantic import Field, JsonValue, field_validator, FilePath, HttpUrl, BaseModel, model_serializer, model_validator
+from pydantic import BaseModel, Field, JsonValue, field_validator, FilePath, HttpUrl, model_serializer, model_validator
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterface
@@ -20,7 +20,7 @@ from dff.utils.pydantic import JSONSerializableDict, SerializableVaue, json_pick
 
 class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
     """
-    This class is a Pydantic BaseModel that serves as a base class for all DFF models.
+    This class is a Pydantic BaseModel that can have any type and number of extras.
     """
 
     def __init__(self, **kwargs):
@@ -29,6 +29,15 @@ class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
 
 # TODO: inline once annotated __pydantic_extra__ will be available in pydantic
 def _json_extra_serializer(model: DataModel, original_serializer: Callable[[DataModel], JsonValue]) -> JsonValue:
+    """
+    Serialize model along with the `extras` field: i.e. all the fields not listed in the model.
+    This function should be used as "wrap" serializer.
+
+    :param model: Pydantic model for serialization.
+    :param original_serializer: Function originally used for serialization by Pydantic.
+    :return: Serialized model.
+    """
+
     model_copy = model.model_copy(deep=True)
     for extra_name in model.model_extra.keys():
         delattr(model_copy, extra_name)
@@ -39,6 +48,14 @@ def _json_extra_serializer(model: DataModel, original_serializer: Callable[[Data
 
 # TODO: inline once annotated __pydantic_extra__ will be available in pydantic
 def _json_extra_validator(model: DataModel) -> DataModel:
+    """
+    Validate model along with the `extras` field: i.e. all the fields not listed in the model.
+    This function should be used as "after" validator.
+
+    :param model: Pydantic model for validation.
+    :return: Validated model.
+    """
+
     model.__pydantic_extra__ = json_pickle_validator(model.__pydantic_extra__)
     return model
 
@@ -63,6 +80,8 @@ class Command(DataModel):
 
 class Attachment(DataModel):
     """
+    DFF Message attachment base class.
+    It is capable of serializing and validating all the model fields to JSON.
     """
 
     @model_validator(mode="after")
@@ -75,6 +94,12 @@ class Attachment(DataModel):
 
 
 class CallbackQuery(Attachment):
+    """
+    This class is a data model that represents a callback query attachment.
+    It is sent as a response to non-message events, e.g. keyboard UI interactions.
+    It has query string attribute, that represents the response data string.
+    """
+
     query_string: Optional[str]
     dff_attachment_type: Literal["callback_query"] = "callback_query"
 
@@ -99,6 +124,11 @@ class Location(Attachment):
 
 
 class Contact(Attachment):
+    """
+    This class is a data model that represents a contact.
+    It includes phone number, and user first and last name.
+    """
+
     phone_number: str
     first_name: str
     last_name: Optional[str]
@@ -106,6 +136,11 @@ class Contact(Attachment):
 
 
 class Invoice(Attachment):
+    """
+    This class is a data model that represents an invoice.
+    It includes title, description, currency name and amount.
+    """
+
     title: str
     description: str
     currency: str
@@ -114,12 +149,22 @@ class Invoice(Attachment):
 
 
 class PollOption(DataModel):
+    """
+    This class is a data model that represents a poll option.
+    It includes the option name and votes number.
+    """
+
     text: str
     votes: int = Field(default=0)
     dff_attachment_type: Literal["poll_option"] = "poll_option"
 
 
 class Poll(Attachment):
+    """
+    This class is a data model that represents a poll.
+    It includes a list of poll options.
+    """
+
     question: str
     options: List[PollOption]
     dff_attachment_type: Literal["poll"] = "poll"
@@ -129,21 +174,39 @@ class DataAttachment(Attachment):
     """
     This class represents an attachment that can be either
     a file or a URL, along with an optional ID and title.
+    This attachment can also be optionally cached for future use.
     """
 
     source: Optional[Union[HttpUrl, FilePath]] = None
     cached_filename: Optional[FilePath] = None
-    id: Optional[str] = None  # id field is made separate to simplify type validation
+    id: Optional[str] = None
     title: Optional[str] = None
     use_cache: bool = True
 
     async def _cache_attachment(self, data: bytes, directory: Path) -> None:
+        """
+        Cache attachment, save bytes into a file.
+
+        :param data: attachment data bytes.
+        :param directory: cache file where attachment will be saved.
+        """
+
         title = str(uuid4()) if self.title is None else self.title
         self.cached_filename = directory / title
         with open(self.cached_filename, "wb") as file:
             file.write(data)
 
     async def get_bytes(self, from_interface: MessengerInterface) -> Optional[bytes]:
+        """
+        Download attachment bytes.
+        If the attachment is represented by URL or saved in a file,
+        it will be downloaded or read automatically.
+        Otherwise, a :py:meth:`~dff.messengers.common.MessengerInterface.populate_attachment`
+        will be used for receiving attachment bytes by ID and title.
+
+        :param from_interface: messenger interface the attachment was received from.
+        """
+
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
@@ -227,6 +290,11 @@ class Message(DataModel):
     """
     Class representing a message and contains several
     class level variables to store message information.
+
+    It includes message text, list of commands included in the message,
+    list of attachments, annotations, MISC dictionary (that consists of
+    user-defined parameters) and original message field that somehow represent
+    the update received from messenger interface API.
     """
 
     text: Optional[str] = None
@@ -235,10 +303,6 @@ class Message(DataModel):
     annotations: Optional[JSONSerializableDict] = None
     misc: Optional[JSONSerializableDict] = None
     original_message: Optional[SerializableVaue] = None
-    # commands and state options are required for integration with services
-    # that use an intermediate backend server, like Yandex's Alice
-    # state: Optional[Session] = Session.ACTIVE
-    # ui: Optional[Union[Keyboard, DataModel]] = None
 
     def __init__(
         self,
