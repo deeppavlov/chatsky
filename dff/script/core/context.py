@@ -27,6 +27,7 @@ from pydantic import BaseModel, Field, field_validator
 from dff.script.core.message import Message
 from dff.script.core.types import NodeLabel2Type
 from dff.pipeline.types import ComponentExecutionState
+from dff.slots.slots import SlotManager
 
 if TYPE_CHECKING:
     from dff.script.core.script import Node
@@ -56,6 +57,8 @@ class FrameworkData(BaseModel):
     "Actor service data. Cleared at the end of every turn."
     stats: Dict[str, Any] = Field(default_factory=dict)
     "Enables complex stats collection across multiple turns."
+    slot_manager: SlotManager = Field(default_factory=SlotManager)
+    "Stores extracted slots."
 
 
 class Context(BaseModel):

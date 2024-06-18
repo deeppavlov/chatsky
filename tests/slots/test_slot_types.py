@@ -1,157 +1,145 @@
 import pytest
+from pydantic import ValidationError
+
 from dff.script import Message
-from dff.script.slots import RegexpSlot, GroupSlot, FunctionSlot
-from dff.script.slots.types import RootSlot, root_slot
-
-# pytest.skip(allow_module_level=True)
-
-
-@pytest.mark.parametrize(
-    ("input", "regexp", "expected", "_set"),
-    [
-        (Message(text="I am Groot"), "(?<=am ).+", "Groot", True),
-        (Message(text="My email is groot@gmail.com"), "(?<=email is ).+", "groot@gmail.com", True),
-        (Message(text="I won't tell you my name"), "(?<=name is ).+$", None, False),
-    ],
+from dff.slots.slots import (
+    RegexpSlot,
+    GroupSlot,
+    FunctionSlot,
+    SlotNotExtracted,
+    ExtractedValueSlot,
+    ExtractedGroupSlot,
 )
-def test_regexp(input, regexp, expected, _set, testing_context, testing_pipeline):
-    testing_context = testing_context.model_copy()
-    testing_context.add_request(input)
-    slot = RegexpSlot(name="test", regexp=regexp)
-    result = slot.extract_value(testing_context, testing_pipeline)
-    assert result == expected
-    testing_context.framework_states["slot_storage"][slot.name] = result
-    assert slot.is_set()(testing_context, testing_pipeline) == _set
 
 
 @pytest.mark.parametrize(
-    ("input", "children", "expected", "is_set"),
+    ("user_request", "regexp", "expected"),
     [
         (
-            Message(text="I am Groot. My email is groot@gmail.com"),
-            [
-                RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
-                RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
-            ],
-            {"test/name": "Groot", "test/email": "groot@gmail.com"},
-            True,
-        ),
-        (
-            Message(text="I am Groot. I won't tell you my name"),
-            [
-                RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
-                RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
-            ],
-            {"test/name": "Groot", "test/email": None},
-            False,
-        ),
-    ],
-)
-def test_group(input, children, expected, is_set, testing_context, testing_pipeline):
-    testing_context = testing_context.model_copy()
-    testing_context.add_request(input)
-    slot = GroupSlot(name="test", children=children)
-    assert len(slot.children) == len(children)
-    result = slot.extract_value(testing_context, testing_pipeline)
-    assert result == expected
-    testing_context.framework_states["slot_storage"].update(result)
-    assert slot.is_set()(testing_context, testing_pipeline) == is_set
-
-
-@pytest.mark.parametrize(
-    ("input", "func", "expected", "_set"),
-    [
-        (Message(text="I am Groot"), lambda msg: msg.split(" ")[2], "Groot", True),
-        (
-            Message(text="My email is groot@gmail.com"),
-            lambda msg: [i for i in msg.split(" ") if "@" in i][0],
-            "groot@gmail.com",
-            True,
+            Message(text="My name is Bot"),
+            "(?<=name is ).+",
+            ExtractedValueSlot(extracted_value="Bot", is_slot_extracted=True, default_value=None),
         ),
         (
             Message(text="I won't tell you my name"),
-            lambda msg: [i for i in msg.split(" ") if "@" in i] or None,
-            None,
+            "(?<=name is ).+$",
+            ExtractedValueSlot(
+                extracted_value=SlotNotExtracted(
+                    "Failed to match pattern {regexp!r} in {request_text!r}.".format(
+                        regexp="(?<=name is ).+$", request_text="I won't tell you my name"
+                    )
+                ),
+                is_slot_extracted=False,
+                default_value=None,
+            ),
+        ),
+    ],
+)
+async def test_regexp(user_request, regexp, expected, context, pipeline):
+    context.add_request(user_request)
+    slot = RegexpSlot(regexp=regexp)
+    result = await slot.get_value(context, pipeline)
+    assert result == expected
+
+
+@pytest.mark.parametrize(
+    ("user_request", "func", "expected"),
+    [
+        (
+            Message(text="I am bot"),
+            lambda msg: msg.text.split(" ")[2],
+            ExtractedValueSlot(extracted_value="bot", is_slot_extracted=True, default_value=None),
+        ),
+        (
+            Message(text="My email is bot@bot"),
+            lambda msg: [i for i in msg.text.split(" ") if "@" in i][0],
+            ExtractedValueSlot(extracted_value="bot@bot", is_slot_extracted=True, default_value=None),
+        ),
+    ],
+)
+async def test_function(user_request, func, expected, context, pipeline):
+    context.add_request(user_request)
+    slot = FunctionSlot(func=func)
+    result = await slot.get_value(context, pipeline)
+    assert result == expected
+
+    async def async_func(*args, **kwargs):
+        return func(*args, **kwargs)
+
+    slot = FunctionSlot(func=async_func)
+    result = await slot.get_value(context, pipeline)
+    assert result == expected
+
+
+async def test_function_exception(context, pipeline):
+    def func(msg: Message):
+        raise RuntimeError("error")
+
+    slot = FunctionSlot(func=func)
+    result = await slot.get_value(context, pipeline)
+    assert result.is_slot_extracted is False
+    assert isinstance(result.extracted_value, RuntimeError)
+
+
+@pytest.mark.parametrize(
+    ("user_request", "slot", "expected", "is_extracted"),
+    [
+        (
+            Message(text="I am Bot. My email is bot@bot"),
+            GroupSlot(
+                name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
+                email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
+            ),
+            ExtractedGroupSlot(
+                name=ExtractedValueSlot(is_slot_extracted=True, extracted_value="Bot", default_value=None),
+                email=ExtractedValueSlot(is_slot_extracted=True, extracted_value="bot@bot", default_value=None),
+            ),
+            True,
+        ),
+        (
+            Message(text="I am Bot. I won't tell you my email"),
+            GroupSlot(
+                name=RegexpSlot(regexp=r"(?<=am ).+?(?=\.)"),
+                email=RegexpSlot(regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
+            ),
+            ExtractedGroupSlot(
+                name=ExtractedValueSlot(is_slot_extracted=True, extracted_value="Bot", default_value=None),
+                email=ExtractedValueSlot(
+                    is_slot_extracted=False,
+                    extracted_value=SlotNotExtracted(
+                        "Failed to match pattern {regexp!r} in {request_text!r}.".format(
+                            regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+", request_text="I am Bot. I won't tell you my email"
+                        )
+                    ),
+                    default_value=None,
+                ),
+            ),
             False,
         ),
     ],
 )
-def test_function(input, func, expected, _set, testing_context, testing_pipeline):
-    new_testing_context = testing_context.model_copy()
-    new_testing_context.add_request(input)
-    slot = FunctionSlot(name="test", func=func)
-    result = slot.extract_value(new_testing_context, testing_pipeline)
+async def test_group_slot_extraction(user_request, slot, expected, is_extracted, context, pipeline):
+    context.add_request(user_request)
+    result = await slot.get_value(context, pipeline)
     assert result == expected
-    new_testing_context.framework_states["slot_storage"][slot.name] = result
-    assert slot.is_set()(new_testing_context, testing_pipeline) == _set
+    assert result.__slot_extracted__ == is_extracted
 
 
-def test_children():
-    slot = GroupSlot(name="test", children=[RegexpSlot(name="test", regexp="(?<=am ).+")])
-    assert slot.has_children() is True
-    slot.children.pop("test")
-    assert slot.has_children() is False
+@pytest.mark.parametrize("forbidden_name", ["__dunder__", "contains.dot"])
+def test_group_subslot_name_validation(forbidden_name):
+    with pytest.raises(ValidationError):
+        GroupSlot(**{forbidden_name: RegexpSlot(regexp="")})
 
 
-@pytest.mark.parametrize(
-    ("root_name", "length", "children", "names"),
-    [
-        (
-            "root",
-            3,
-            [
-                RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
-                RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
-            ],
-            ["root/name", "root/email", "root"],
-        ),
-        (
-            "root",
-            4,
-            [
-                GroupSlot(
-                    name="person",
-                    children=[
-                        RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
-                        RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
-                    ],
-                )
-            ],
-            ["root/person/name", "root/person/email", "root/person", "root"],
-        ),
-        (
-            "root",
-            7,
-            [
-                GroupSlot(
-                    name="person_1",
-                    children=[
-                        RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
-                        RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
-                    ],
-                ),
-                GroupSlot(
-                    name="person_2",
-                    children=[
-                        RegexpSlot(name="name", regexp=r"(?<=am ).+?(?=\.)"),
-                        RegexpSlot(name="email", regexp=r"[a-zA-Z\.]+@[a-zA-Z\.]+"),
-                    ],
-                ),
-            ],
-            None,
-        ),
-    ],
-)
-def test_flatten(root_name, length, children, names):
-    slot = GroupSlot(name=root_name, children=children)
-    flatten_result, _ = root_slot.flatten_slot_tree(slot)
-    assert len(flatten_result) == length
-    assert all(map(lambda x: x.startswith(root_name), flatten_result.keys()))
-    if names:
-        assert all(map(lambda x: x in flatten_result, names))
-
-
-def test_slot_root(root: RootSlot):
-    slot = RegexpSlot(name="test", regexp=r".+")
-    root.add_slots([slot])
-    assert slot.name in root.children
+async def test_str_representation():
+    assert str(ExtractedValueSlot(is_slot_extracted=True, extracted_value="hello", default_value=None)) == "hello"
+    assert str(ExtractedValueSlot(is_slot_extracted=False, extracted_value=None, default_value="hello")) == "hello"
+    assert (
+        str(
+            ExtractedGroupSlot(
+                first_name=ExtractedValueSlot(is_slot_extracted=True, extracted_value="Tom", default_value="John"),
+                last_name=ExtractedValueSlot(is_slot_extracted=False, extracted_value=None, default_value="Smith"),
+            )
+        )
+        == "{'first_name': 'Tom', 'last_name': 'Smith'}"
+    )

@@ -194,6 +194,7 @@ def setup(_):
             ("dff.messengers", "Messenger Interfaces"),
             ("dff.pipeline", "Pipeline"),
             ("dff.script", "Script"),
+            ("dff.slots", "Slots"),
             ("dff.stats", "Stats"),
             ("dff.utils.testing", "Testing Utils"),
             ("dff.utils.turn_caching", "Caching"),

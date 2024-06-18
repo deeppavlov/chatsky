@@ -12,10 +12,11 @@ about current script execution.
 :doc:`Slot extraction <./user_guides/slot_extraction>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
-The ``slot extraction`` tutorial demonstrates the slot extraction functionality
+The ``slot extraction`` guide demonstrates the slot extraction functionality
 currently integrated in the library. ``DFF`` only provides basic building blocks for this task,
 which can be trivially extended to support any NLU engine or slot extraction model
 of your liking.
+
 :doc:`Context guide <./user_guides/context_guide>`
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
