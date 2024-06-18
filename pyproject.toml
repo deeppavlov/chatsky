@@ -55,6 +55,7 @@ python = "^3.8.1,!=3.9.7"  # `streamlit` package does not support python 3.9.7, 
 pydantic = ">=2.0"  # `pydantic` version more than 2 required
 nest-asyncio = "*"
 typing-extensions = "*"
+eval_type_backport = "*"
 wrapt = "*"
 colorama = "*"
 ydb = { version = "*", optional = true }
