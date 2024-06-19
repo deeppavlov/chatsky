@@ -53,7 +53,7 @@ class MessengerInterface(abc.ABC):
     ):
         self.running_in_foreground = True
         self.pipeline = pipeline
-        # TO-DO: Clean this up and/or think this through
+        # TO-DO: Clean this up and/or think this through (connect() methods are different for various MessengerInterface() classes)
         if isinstance(self.pipeline.messenger_interface, PollingMessengerInterface):
             self.task = asyncio.create_task(self.connect(loop=loop, timeout=timeout, *args))
         elif isinstance(self.pipeline.messenger_interface, CallbackMessengerInterface):
