@@ -89,7 +89,7 @@ def set_tracer_destination(exporter: Optional[SpanExporter] = None):
     get_tracer_provider().add_span_processor(BatchSpanProcessor(exporter))
 
 
-def get_wrapper_field(info: ExtraHandlerRuntimeInfo, postfix: str = "") -> str:
+def get_extra_handler_name(info: ExtraHandlerRuntimeInfo, postfix: str = "") -> str:
     """
     This function can be used to obtain a key, under which the wrapper data will be stored
     in the context.
@@ -97,6 +97,7 @@ def get_wrapper_field(info: ExtraHandlerRuntimeInfo, postfix: str = "") -> str:
     :param info: Handler runtime info obtained from the pipeline.
     :param postfix: Field-specific postfix that will be appended to the field name.
     """
+
     path = info.component.path.replace(".", "-")
     return f"{path}" + (f"-{postfix}" if postfix else "")
 

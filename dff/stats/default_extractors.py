@@ -15,7 +15,7 @@ from datetime import datetime
 
 from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo, Pipeline
-from .utils import get_wrapper_field
+from .utils import get_extra_handler_name
 
 
 async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandlerRuntimeInfo):
@@ -44,7 +44,7 @@ async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     to the context storage.
     """
     start_time = datetime.now()
-    ctx.framework_states[get_wrapper_field(info, "time")] = start_time
+    ctx.framework_states[get_extra_handler_name(info, "time")] = start_time
 
 
 async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
@@ -56,7 +56,7 @@ async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # n
     As a result, the function output is cleared on every turn and does not get persisted
     to the context storage.
     """
-    start_time = ctx.framework_states[get_wrapper_field(info, "time")]
+    start_time = ctx.framework_states[get_extra_handler_name(info, "time")]
     data = {"execution_time": str(datetime.now() - start_time)}
     return data
 
