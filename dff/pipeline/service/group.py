@@ -200,7 +200,7 @@ class ServiceGroup(PipelineComponent):
         """
         Method for adding a global extra handler to this group.
         Adds extra handler to itself and propagates it to all inner components.
-        Uses a special condition function to determine whether to add extra handler to any particular inner component or not.
+        Uses a special condition function to determine whether to add extra handler to any particular inner component.
         Condition checks components path to be in whitelist (if defined) and not to be in blacklist (if defined).
 
         :param global_extra_handler_type: A type of extra handler to add.

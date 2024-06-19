@@ -46,9 +46,11 @@ Alternatively, the groups can be defined as objects
 
 * `components` (required) - A list of `ServiceBuilder` objects,
     `ServiceGroupBuilder` objects and lists of them.
-* `before_handler` - a list of `ExtraHandlerFunction` objects, `ExtraHandlerBuilder` objects and lists of them.
+* `before_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
         See tutorials 6 and 7.
-* `after_handler` - a list of `ExtraHandlerFunction` objects, `ExtraHandlerBuilder` objects and lists of them.
+* `after_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
         See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
 * `asynchronous` - Whether or not this service group _should_ be asynchronous

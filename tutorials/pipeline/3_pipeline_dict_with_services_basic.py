@@ -33,7 +33,7 @@ logger = logging.getLogger(__name__)
 """
 When Pipeline is created using `from_dict` method,
 pipeline should be defined as a dictionary.
-It should contain `components` - a `ServiceGroupBuilder` object, 
+It should contain `components` - a `ServiceGroupBuilder` object,
 basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
 see tutorial 4.
 

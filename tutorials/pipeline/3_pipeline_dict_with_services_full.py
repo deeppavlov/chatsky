@@ -46,9 +46,11 @@ These objects are dictionaries of particular structure:
 * `components` (required) - A `ServiceGroupBuilder` object,
         basically a list of `ServiceBuilder` or `ServiceGroupBuilder` objects,
         see tutorial 4.
-* `before_handler` - a list of `ExtraHandlerFunction` objects, `ExtraHandlerBuilder` objects and lists of them.
+* `before_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
         See tutorials 6 and 7.
-* `after_handler` - a list of `ExtraHandlerFunction` objects, `ExtraHandlerBuilder` objects and lists of them.
+* `after_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
         See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
 * `optimization_warnings` - Whether pipeline asynchronous structure
@@ -67,9 +69,11 @@ with dict of structure / object with following constructor arguments:
         it will be used instead of base ServiceBuilder.
     NB! Fields of nested ServiceBuilder will be overridden
         by defined fields of the base ServiceBuilder.
-* `before_handler` - a list of `ExtraHandlerFunction` objects, `ExtraHandlerBuilder` objects and lists of them.
+* `before_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
         See tutorials 6 and 7.
-* `after_handler` - a list of `ExtraHandlerFunction` objects, `ExtraHandlerBuilder` objects and lists of them.
+* `after_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
         See tutorials 6 and 7.
 * `timeout` - service timeout, see tutorial 5.
 * `asynchronous` - whether or not this service _should_ be asynchronous
