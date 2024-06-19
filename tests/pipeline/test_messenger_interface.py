@@ -150,12 +150,6 @@ def test_context_lock():
     }
     # (respond=request)
 
-    """
-    requests_queue = asyncio.Queue()
-    for item in requests:
-        requests_queue.put(item)
-    """
-
     class TestCLIInterface(PollingMessengerInterface):
         def __init__(self):
             self.obtained_updates = False
@@ -175,17 +169,15 @@ def test_context_lock():
                 return [(request[0], Message(str(request[1])))]
         
         async def _respond(self, ctx_id, last_response):
-            print("response received!")
             self.received_updates.append(str(last_response.text))
-            print("requests=", self.requests, ", received_updates=", self.received_updates, ", response=", last_response)
             
+        # First worker is ordered to hand over control to (0, id: 2), which immediately gives it back because of the ContextLock(). Then, id: 3 gets completed right away, due to there not being any more 'await' statements there. 
+        # What's important here is that the worker for the "id: 2" couldn't start working on it's task immediately, because of ContextLock(), proving it's function. Even though it was given control with an 'await' just below.
     async def _process_request(self, ctx_id, update: Message, pipeline: Pipeline):
-        # First worker hands over control to (0, id: 2) first, which immediately gives it back because of the ContextLock(). Then, id: 3 gets completed immediately, due to there not being any more 'await' statements there. What's important here is that worker for the "id: 2" couldn't start working on it's task immediately, because of ContextLock(), proving it's function.
         context = await pipeline._run_pipeline(update, ctx_id)
         if context.last_response.text == "id: 1":
             await asyncio.sleep(0)
         await self._respond(ctx_id, context.last_response)
-
 
     new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,
