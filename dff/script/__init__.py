@@ -21,7 +21,6 @@ from .core.types import (
     ConstLabel,
     Label,
     ConditionType,
-    ModuleName,
     ActorStage,
 )
 from .core.message import Message
