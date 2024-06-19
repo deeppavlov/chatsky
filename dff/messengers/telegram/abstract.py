@@ -14,6 +14,7 @@ from dff.messengers.common import MessengerInterface
 from dff.pipeline.types import PipelineRunnerFunction
 from dff.script.core.message import (
     Animation,
+    Attachment,
     Audio,
     CallbackQuery,
     Contact,
@@ -27,6 +28,8 @@ from dff.script.core.message import (
     PollOption,
     Sticker,
     Video,
+    VideoMessage,
+    VoiceMessage
 )
 
 try:
@@ -47,13 +50,24 @@ except ImportError:
     telegram_available = False
 
 
+def _is_attachment_mediagroup_combinable(attachment: Attachment):
+    """
+    Return true if the attachment can be sent in a mediagroup, false otherwise.
+
+    :param attachment: Attachment to check.
+    :return: If the attachment can belong to a mediagroup.
+    """
+
+    return isinstance(attachment, DataAttachment) and not isinstance(attachment, VoiceMessage) and not isinstance(attachment, VideoMessage)
+
+
 class _AbstractTelegramInterface(MessengerInterface):
     """
     Messenger interface mixin for Telegram API usage.
     """
 
-    supported_request_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, Invoice}
-    supported_response_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document}
+    supported_request_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, VoiceMessage, VideoMessage, Invoice}
+    supported_response_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, VoiceMessage, VideoMessage}
 
     def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
         super().__init__(attachments_directory)
@@ -207,6 +221,27 @@ class _AbstractTelegramInterface(MessengerInterface):
                     thumbnail=thumbnail,
                 )
             ]
+        if update.voice is not None:
+            message.attachments += [
+                VoiceMessage(
+                    id=update.voice.file_id,
+                    title=update.voice.file_unique_id,
+                    mime_type=update.voice.mime_type,
+                )
+            ]
+        if update.video_note is not None:
+            thumbnail = (
+                Image(id=update.video_note.thumbnail.file_id, title=update.video_note.thumbnail.file_unique_id)
+                if update.video_note.thumbnail is not None
+                else None
+            )
+            message.attachments += [
+                VideoMessage(
+                    id=update.video_note.file_id,
+                    title=update.video_note.file_unique_id,
+                    thumbnail=thumbnail,
+                )
+            ]
 
         return message
 
@@ -223,16 +258,17 @@ class _AbstractTelegramInterface(MessengerInterface):
         :param message: DFF message that will be processed into Telegram updates.
         """
 
+        message_text_covered = False
         if message.attachments is not None:
             files = list()
-            media_group_attachments_num = len([att for att in message.attachments if isinstance(att, DataAttachment)])
+            media_group_attachments_num = len([att for att in message.attachments if _is_attachment_mediagroup_combinable(att)])
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(
                         chat_id,
                         attachment.latitude,
                         attachment.longitude,
-                        **generate_extra_fields(attachment, ["horizontal_accuracy", "disable_notification", "protect_content", "reply_markup"]),
+                        **generate_extra_fields(attachment, ["horizontal_accuracy", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
                     )
                 if isinstance(attachment, Contact):
                     await bot.send_contact(
@@ -240,21 +276,21 @@ class _AbstractTelegramInterface(MessengerInterface):
                         attachment.phone_number,
                         attachment.first_name,
                         attachment.last_name,
-                        **generate_extra_fields(attachment, ["vcard", "disable_notification", "protect_content", "reply_markup"]),
+                        **generate_extra_fields(attachment, ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
                     )
                 if isinstance(attachment, Poll):
                     await bot.send_poll(
                         chat_id,
                         attachment.question,
                         [option.text for option in attachment.options],
-                        **generate_extra_fields(attachment, ["is_anonymous", "type", "allows_multiple_answers", "correct_option_id", "explanation", "explanation_parse_mode", "open_period", "is_closed", "disable_notification", "protect_content", "reply_markup"]),
+                        **generate_extra_fields(attachment, ["is_anonymous", "type", "allows_multiple_answers", "correct_option_id", "explanation", "explanation_parse_mode", "open_period", "is_closed", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
                     )
                 if isinstance(attachment, Sticker):
                     sticker = await attachment.get_bytes(self) if attachment.id is None else attachment.id
                     await bot.send_sticker(
                         chat_id,
                         sticker,
-                        **generate_extra_fields(attachment, ["disable_notification", "protect_content", "reply_markup", "emoji"]),
+                        **generate_extra_fields(attachment, ["disable_notification", "protect_content", "reply_markup", "emoji", "message_effect_id"]),
                     )
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
@@ -269,11 +305,11 @@ class _AbstractTelegramInterface(MessengerInterface):
                         else:
                             await bot.send_audio(
                                 chat_id,
-                                audio=attachment_bytes,
+                                attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["performer", "title", "disable_notification", "reply_markup", "parse_mode", "thumbnail"]),
+                                **generate_extra_fields(attachment, ["performer", "title", "disable_notification", "reply_markup", "parse_mode", "thumbnail", "message_effect_id"]),
                             )
-                            return
+                            message_text_covered = True
                 if isinstance(attachment, Video):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
@@ -289,9 +325,9 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "supports_streaming", "has_spoiler", "thumbnail", "filename"]),
+                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "supports_streaming", "has_spoiler", "thumbnail", "filename", "message_effect_id"]),
                             )
-                            return
+                            message_text_covered = True
                 if isinstance(attachment, Animation):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
@@ -307,9 +343,9 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["parse_mode", "disable_notification", "reply_markup", "has_spoiler", "thumbnail", "filename"]),
+                                **generate_extra_fields(attachment, ["parse_mode", "disable_notification", "reply_markup", "has_spoiler", "thumbnail", "filename", "message_effect_id"]),
                             )
-                            return
+                            message_text_covered = True
                 if isinstance(attachment, Image):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
@@ -325,9 +361,9 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "has_spoiler", "filename"]),
+                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "has_spoiler", "filename", "message_effect_id"]),
                             )
-                            return
+                            message_text_covered = True
                 if isinstance(attachment, Document):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
@@ -343,22 +379,42 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "thumbnail", "filename"]),
+                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "thumbnail", "filename", "message_effect_id"]),
                             )
-                            return
+                            message_text_covered = True
+                if isinstance(attachment, VoiceMessage):
+                    attachment_bytes = await attachment.get_bytes(self)
+                    if attachment_bytes is not None:
+                        await bot.send_voice(
+                            chat_id,
+                            attachment_bytes,
+                            caption=message.text,
+                            **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "filename", "protect_content", "message_effect_id"]),
+                        )
+                        message_text_covered = True
+                if isinstance(attachment, VideoMessage):
+                    attachment_bytes = await attachment.get_bytes(self)
+                    if attachment_bytes is not None:
+                        await bot.send_video_note(
+                            chat_id,
+                            attachment_bytes,
+                            caption=message.text,
+                            **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "thumbnail", "filename", "protect_content", "message_effect_id"]),
+                        )
+                        message_text_covered = True
             if len(files) > 0:
                 await bot.send_media_group(
                     chat_id,
                     files,
                     caption=message.text,
-                    **generate_extra_fields(message, ["disable_notification", "protect_content"]),
+                    **generate_extra_fields(message, ["disable_notification", "protect_content", "message_effect_id"]),
                 )
-                return
-        if message.text is not None:
+                message_text_covered = True
+        if message.text is not None and not message_text_covered:
             await bot.send_message(
                 chat_id,
                 message.text,
-                **generate_extra_fields(message, ["parse_mode", "disable_notification", "protect_content", "reply_markup"]),
+                **generate_extra_fields(message, ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
             )
 
     async def _on_event(

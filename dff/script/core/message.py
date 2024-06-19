@@ -286,6 +286,18 @@ class Document(DataAttachment):
     dff_attachment_type: Literal["document"] = "document"
 
 
+class VoiceMessage(DataAttachment):
+    """Represents a voice message."""
+
+    dff_attachment_type: Literal["voice_message"] = "voice_message"
+
+
+class VideoMessage(DataAttachment):
+    """Represents a video message."""
+
+    dff_attachment_type: Literal["video_message"] = "video_message"
+
+
 class Message(DataModel):
     """
     Class representing a message and contains several
@@ -299,7 +311,7 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
-    attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document]]] = None
+    attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document, VoiceMessage, VideoMessage]]] = None
     annotations: Optional[JSONSerializableDict] = None
     misc: Optional[JSONSerializableDict] = None
     original_message: Optional[SerializableVaue] = None
@@ -308,7 +320,7 @@ class Message(DataModel):
         self,
         text: Optional[str] = None,
         commands: Optional[List[Command]] = None,
-        attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document]]] = None,
+        attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document, VoiceMessage, VideoMessage]]] = None,
         annotations: Optional[JSONSerializableDict] = None,
         misc: Optional[JSONSerializableDict] = None,
         **kwargs,

@@ -21,7 +21,7 @@ from pydantic import HttpUrl
 
 from dff.script import conditions as cnd
 from dff.script import GLOBAL, RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import PollingTelegramInterface
+from dff.messengers.telegram import LongpollingTelegramInterface
 from dff.pipeline import Pipeline
 from dff.script.core.message import (
     Animation,
@@ -34,6 +34,8 @@ from dff.script.core.message import (
     PollOption,
     Sticker,
     Video,
+    VideoMessage,
+    VoiceMessage
 )
 from dff.utils.testing.common import is_interactive_mode
 
@@ -121,6 +123,12 @@ script = {
             ("main_flow", "document_node"): cnd.exact_match(
                 Message("document")
             ),
+            ("main_flow", "voice_message_node"): cnd.exact_match(
+                Message("voice message")
+            ),
+            ("main_flow", "video_message_node"): cnd.exact_match(
+                Message("video message")
+            ),
         }
     },
     "main_flow": {
@@ -196,6 +204,18 @@ script = {
                 attachments=[Document(**document_data)],
             ),
         },
+        "voice_message_node": {
+            RESPONSE: Message(
+                "Here's your voice message!",
+                attachments=[VoiceMessage(source=audio_data["source"])],
+            ),
+        },
+        "video_message_node": {
+            RESPONSE: Message(
+                "Here's your video message!",
+                attachments=[VideoMessage(source=video_data["source"])],
+            ),
+        },
         "fallback_node": {
             RESPONSE: Message(
                 "Unknown attachment type, try again! "
@@ -209,7 +229,7 @@ script = {
 
 
 # %%
-interface = PollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
+interface = LongpollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%

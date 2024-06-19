@@ -43,6 +43,8 @@ class UnserializableObject:
 
 
 class DFFCLIMessengerInterface(CLIMessengerInterface):
+    supported_response_attachment_types = {Document}
+
     def __init__(self, attachments_directory: Optional[Path] = None):
         MessengerInterface.__init__(self, attachments_directory)
         self._ctx_id: Optional[Hashable] = None
