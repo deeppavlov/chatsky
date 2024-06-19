@@ -19,7 +19,7 @@ First of all, let's do all the necessary imports from DFF.
 # %%
 import re
 
-from dff.script import TRANSITIONS, RESPONSE, Context, NodeLabel3Type, Message
+from dff.script import TRANSITIONS, RESPONSE, Context, ConstLabel, Message
 import dff.script.conditions as cnd
 import dff.script.labels as lbl
 from dff.pipeline import Pipeline
@@ -33,21 +33,34 @@ from dff.utils.testing.common import (
 """
 Let's define the functions with a special type of return value:
 
-    NodeLabel3Type == tuple[str, str, float]
+    ConstLabel == Flow Name; Node Name; Priority
 
-which means that transition returns a `tuple`
-with flow name, node name and priority.
+These functions return Labels that
+determine destination and priority of a specific transition.
+
+Labels consist of:
+
+1. Flow name of the destination node
+   (optional; defaults to flow name of the current node).
+2. Node name of the destination node
+   (required).
+3. Priority of the transition (more on that later)
+   (optional; defaults to pipeline's
+   [label_priority](%doclink(api,pipeline.pipeline.pipeline))).
+
+An example of omitting optional arguments is shown in the body of the
+`greeting_flow_n2_transition` function:
 """
 
 
 # %%
-def greeting_flow_n2_transition(_: Context, __: Pipeline) -> NodeLabel3Type:
-    return ("greeting_flow", "node2", 1.0)
+def greeting_flow_n2_transition(_: Context, __: Pipeline) -> ConstLabel:
+    return "greeting_flow", "node2"
 
 
-def high_priority_node_transition(flow_label, label):
-    def transition(_: Context, __: Pipeline) -> NodeLabel3Type:
-        return (flow_label, label, 2.0)
+def high_priority_node_transition(flow_name, node_name):
+    def transition(_: Context, __: Pipeline) -> ConstLabel:
+        return flow_name, node_name, 2.0
 
     return transition
 
@@ -66,22 +79,22 @@ Out of the box `dff.script.core.labels`
 offers the following methods:
 
 * `lbl.repeat()` returns transition handler
-    which returns `NodeLabelType` to the last node,
+    which returns `ConstLabel` to the last node,
 
 * `lbl.previous()` returns transition handler
-    which returns `NodeLabelType` to the previous node,
+    which returns `ConstLabel` to the previous node,
 
 * `lbl.to_start()` returns transition handler
-    which returns `NodeLabelType` to the start node,
+    which returns `ConstLabel` to the start node,
 
 * `lbl.to_fallback()` returns transition
-    handler which returns `NodeLabelType` to the fallback node,
+    handler which returns `ConstLabel` to the fallback node,
 
 * `lbl.forward()` returns transition handler
-    which returns `NodeLabelType` to the forward node,
+    which returns `ConstLabel` to the forward node,
 
 * `lbl.backward()` returns transition handler
-    which returns `NodeLabelType` to the backward node.
+    which returns `ConstLabel` to the backward node.
 
 There are three flows here: `global_flow`, `greeting_flow`, `music_flow`.
 """

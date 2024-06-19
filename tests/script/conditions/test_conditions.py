@@ -23,6 +23,11 @@ def test_conditions():
     assert cnd.exact_match("text")(ctx, pipeline)
     assert not cnd.exact_match("text1")(ctx, pipeline)
 
+    assert cnd.has_text("text")(ctx, pipeline)
+    assert cnd.has_text("te")(ctx, pipeline)
+    assert not cnd.has_text("text1")(ctx, pipeline)
+    assert cnd.has_text("")(ctx, pipeline)
+
     assert cnd.regexp("t.*t")(ctx, pipeline)
     assert not cnd.regexp("t.*t1")(ctx, pipeline)
     assert not cnd.regexp("t.*t1")(failed_ctx, pipeline)

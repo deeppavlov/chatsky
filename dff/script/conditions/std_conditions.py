@@ -25,8 +25,8 @@ logger = logging.getLogger(__name__)
 def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[[Context, Pipeline], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase
-    is the same `Message` or `str` as the :py:const:`match`.
-    If :py:const:`skip_none` the handler will not compare `None` fields of :py:const:`match`.
+    is the same `Message` or `str` as the `match`.
+    If `skip_none` the handler will not compare `None` fields of `match`.
 
     :param match: A `Message` variable to compare user request with. Can also accept `str`, which will be converted into a `Message` with it's text field equal to `match`.
     :param skip_none: Whether fields should be compared if they are `None` in :py:const:`match`.
@@ -54,10 +54,26 @@ def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[
 
 
 @validate_call
+def has_text(text: str) -> Callable[[Context, Pipeline], bool]:
+    """
+    Return function handler. This handler returns `True` only if the last user phrase
+    contains the phrase specified in `text`.
+
+    :param text: A `str` variable to look for within the user request.
+    """
+
+    def has_text_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
+        request = ctx.last_request
+        return text in request.text
+
+    return has_text_condition_handler
+
+
+@validate_call
 def regexp(pattern: Union[str, Pattern], flags: Union[int, re.RegexFlag] = 0) -> Callable[[Context, Pipeline], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase contains
-    :py:const:`pattern <Union[str, Pattern]>` with :py:const:`flags <Union[int, re.RegexFlag]>`.
+    `pattern` with `flags`.
 
     :param pattern: The `RegExp` pattern.
     :param flags: Flags for this pattern. Defaults to 0.
@@ -174,14 +190,15 @@ def has_last_labels(
 ) -> Callable[[Context, Pipeline], bool]:
     """
     Return condition handler. This handler returns `True` if any label from
-    last :py:const:`last_n_indices` context labels is in
-    the :py:const:`flow_labels` list or in
-    the :py:const:`~dff.script.NodeLabel2Type` list.
+    last `last_n_indices` context labels is in
+    the `flow_labels` list or in
+    the `labels` list.
 
     :param flow_labels: List of labels to check. Every label has type `str`. Empty if not set.
     :param labels: List of labels corresponding to the nodes. Empty if not set.
     :param last_n_indices: Number of last utterances to check.
     """
+    # todo: rewrite docs & function itself
     flow_labels = [] if flow_labels is None else flow_labels
     labels = [] if labels is None else labels
 
