@@ -114,10 +114,9 @@ class _ComponentExtraHandler:
 
     async def _run(self, ctx: Context, pipeline: Pipeline, component_info: ServiceRuntimeInfo):
         """
-        Method for executing one of the wrapper functions (before or after).
+        Method for executing one of the extra handler functions (before or after).
         If the function is not set, nothing happens.
 
-        :param stage: current `WrapperStage` (before or after).
         :param ctx: current dialog context.
         :param pipeline: the current pipeline.
         :param component_info: associated component's info dictionary.
@@ -155,7 +154,7 @@ class _ComponentExtraHandler:
     @property
     def info_dict(self) -> dict:
         """
-        Property for retrieving info dictionary about this wrapper.
+        Property for retrieving info dictionary about this extra handler.
 
         :return: Info dict, containing its fields as well as its type.
             All not set fields there are replaced with `None`.

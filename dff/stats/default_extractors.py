@@ -15,7 +15,7 @@ from datetime import datetime
 
 from dff.script import Context
 from dff.pipeline import ExtraHandlerRuntimeInfo, Pipeline
-from .utils import get_wrapper_field
+from .utils import get_extra_handler_name
 
 
 async def get_current_label(ctx: Context, pipeline: Pipeline, info: ExtraHandlerRuntimeInfo):
@@ -40,7 +40,7 @@ async def get_timing_before(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     This function is required for running the dashboard with the default configuration.
     """
     start_time = datetime.now()
-    ctx.framework_data.stats[get_wrapper_field(info, "time")] = start_time
+    ctx.framework_data.stats[get_extra_handler_name(info, "time")] = start_time
 
 
 async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # noqa: F811
@@ -49,7 +49,7 @@ async def get_timing_after(ctx: Context, _, info: ExtraHandlerRuntimeInfo):  # n
     Requires :py:func:`~.get_timing_before` to be called previously in order to calculate the time.
     This function is required for running the dashboard with the default configuration.
     """
-    start_time = ctx.framework_data.stats.pop(get_wrapper_field(info, "time"), None)
+    start_time = ctx.framework_data.stats.pop(get_extra_handler_name(info, "time"), None)
     if start_time is None:
         return None
     data = {"execution_time": str(datetime.now() - start_time)}

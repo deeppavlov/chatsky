@@ -46,10 +46,10 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message("hi"), Message("answer 1")),
-    (Message("how are you?"), Message("answer 2")),
-    (Message("ok"), Message("answer 3")),
-    (Message("good"), Message("answer 4")),
+    ("hi", "answer 1"),
+    ("how are you?", "answer 2"),
+    ("ok", "answer 3"),
+    ("good", "answer 4"),
 )
 
 # %% [markdown]
