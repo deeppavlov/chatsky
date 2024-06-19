@@ -134,7 +134,6 @@ class PollingMessengerInterface(MessengerInterface):
         """
 
     # When _get_updates() returns None, the program would break.
-    # What if there's a list of a single tuple?
     async def _polling_job(self):
         received_updates = self._get_updates()
         if received_updates is not None:
