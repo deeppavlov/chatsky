@@ -277,7 +277,9 @@ It can be Dictionary, containing keys that are present in Pipeline constructor p
 
 
 class ContextLock:
-    locks: dict[ctx_id, asyncio.Lock] = {}
+    # locks: dict[ctx_id, asyncio.Lock] = {}
+    def __init__(self):
+        self.locks = {}
 
     def __getitem__(self, key):
         if not key in self.locks:

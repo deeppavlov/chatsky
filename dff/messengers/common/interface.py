@@ -95,28 +95,50 @@ class PollingMessengerInterface(MessengerInterface):
         """
         Process a new update for ctx.
         """
-        await pipeline._run_pipeline(update, ctx_id)
-        await self._respond(ctx_id, pipeline.last_response)
+        print("processing request")
+        context = await pipeline._run_pipeline(update, ctx_id)
+        print("current Context: ", context, "current ctx_id: ", ctx_id)
+        print("pipeline runner executed")
+        print("last_response=", context.last_response)
+        await self._respond(ctx_id, context.last_response)
+        print("finished responding to user")
 
     async def _worker_job(self):
         """
         Obtain Lock over the current context,
         Process the update and send it.
         """
-        # Is this the best order of the variables? They go in a different order in the pipeline._run_pipeline() arguments. Though this may be more logical.
-        (ctx_id, update) = await self.request_queue.get()
-        
-        async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
-            await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
-                self._process_request, ctx_id, update, self.pipeline
-            )
+        # So, I added a break if there're no more jobs. It's accomplished by sending a special 'None' request to the queue (one for each worker), because otherwise _worker_job() will forever be awaiting a queue.get() function, even though self.running = False. I don't see any other obvious solutions. Some code could be moved to the `worker()`, actually, for code style.
+        print("within _worker_job()")
+        request = await self.request_queue.get()
+        print("request: ", request)
+        if request is not None:
+            (ctx_id, update) = request
+            async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
+                print("Lock:", self.pipeline.context_lock[ctx_id])
+                # Trying to see if _process_request works at all. Looks like it does it just fine, actually
+                await self._process_request(ctx_id, update, self.pipeline)
+                # Doesn't work in a thread for some reason - it goes into an infinite cycle.
+                """
+                await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
+                    self._process_request, ctx_id, update, self.pipeline
+                )
+                """
+                print("asyncio.to_thread finished supposedly")
+            print("_worker_job() finished")
+            return False
+        else:
+            return True
 
     async def _worker(self):
         while self.running or not self.request_queue.empty():
-            await self._worker_job()
+            print("self.running = ", self.running)
+            no_more_jobs = await self._worker_job()
+            if no_more_jobs:
+                break
 
     @abc.abstractmethod
-    async def _get_updates(self) -> list[tuple[ctx_id, update]]:
+    async def _get_updates(self) -> list[tuple[Any, Message]]:
         """
         Obtain updates from another server
 
@@ -124,9 +146,13 @@ class PollingMessengerInterface(MessengerInterface):
             self.bot.request_updates()
         """
 
+    # When _get_updates() returns None, the program would break.
+    # What if there's a list of a single tuple?
     async def _polling_job(self):
-        for update in self._get_updates():
-            await self.request_queue.put(update)
+        received_updates = self._get_updates()
+        if received_updates is not None:
+            for update in received_updates:
+                await self.request_queue.put(update)
 
     async def _polling_loop(
         self,
@@ -135,10 +161,14 @@ class PollingMessengerInterface(MessengerInterface):
     ):
         try:
             while loop():
+                print("loop() = ", loop())
                 await asyncio.shield(self._polling_job())  # shield from cancellation
                 await asyncio.sleep(timeout)
         finally:
             self.running = False
+            # In case of more workers than two, change the number of 'None' requests to the new number of workers.
+            self.request_queue.put_nowait(None)
+            self.request_queue.put_nowait(None)
 
     async def connect(
         self,
@@ -146,6 +176,7 @@ class PollingMessengerInterface(MessengerInterface):
         timeout: float = 0,
     ):
         await asyncio.gather(self._polling_loop(loop=loop, timeout=timeout), asyncio.shield(self._worker()), asyncio.shield(self._worker()))
+        print("connect() ended!")
 
     def _on_exception(self, e: BaseException):
         """
@@ -213,8 +244,8 @@ class CLIMessengerInterface(PollingMessengerInterface):
     def _get_updates(self) -> List[Tuple[Any, Message]]:
         return [(self._ctx_id, Message(input(self._prompt_request)))]
 
-    def _respond(self, ctx_id, last_response: Message):
-        print(f"{self._prompt_response}{last_response.text()}", file=self._descriptor)
+    async def _respond(self, ctx_id, last_response: Message):
+        print(f"{self._prompt_response}{last_response.text}", file=self._descriptor)
 
     async def connect(self, *args, **kwargs):
         """

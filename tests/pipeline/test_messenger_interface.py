@@ -3,6 +3,9 @@ import sys
 import pathlib
 import uuid
 
+# Must be removed, used only for debug purposes
+import logging
+
 from dff.script import RESPONSE, TRANSITIONS, Message, Context
 from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface, PollingMessengerInterface
 from dff.pipeline import Pipeline
@@ -51,13 +54,15 @@ def test_cli_messenger_interface(monkeypatch):
     loop.runs_left = 5
 
     # Literally what happens in pipeline.run()
-    asyncio.run(pipeline.messenger_interface.run_in_foreground(pipeline, loop))
+    asyncio.run(pipeline.messenger_interface.run_in_foreground(pipeline, loop=loop))
     # asyncio.run(pipeline.messenger_interface.connect(pipeline._run_pipeline, loop=loop))
 
 
 def test_echo_responses():
+    # logger = logging.getLogger(__name__)
+    # logging.basicConfig(level=logging.DEBUG, filename="test_log.log",filemode="w", format="%(asctime)s %(levelname)s %(message)s")
     def repeat_message_back(ctx: Context, _: Pipeline, *args, **kwargs):
-        return Message(ctx.last_request)
+        return ctx.last_request
     ECHO_SCRIPT = {
         "echo_flow": {
             "start_node": {
@@ -67,8 +72,6 @@ def test_echo_responses():
         }
     }
     # (respond=request)
-
-    # make an asyncio queue for requests? so that Nonetype isn't returned
 
     """
     requests_queue = asyncio.Queue()
@@ -82,7 +85,9 @@ def test_echo_responses():
             self.requests = ["some request", "another request", "gkjln;s!", "foobarraboof"]
             self.requests_copy = self.requests.copy()
             self.received_updates = []
+            # self.received_updates = self.requests.copy()
             self.obtained_updates = False
+            self.count = 0
             super().__init__()
 
         def not_obtained_updates(self):
@@ -90,14 +95,18 @@ def test_echo_responses():
                 self.obtained_updates = True
             return not self.obtained_updates
 
-        async def _get_updates(self):
-            # request = await requests_queue.get()
+        def _get_updates(self):
+            print("_get_updates() called! ctx_id=", self.ctx_id)
+            print("requests=", self.requests, ", received_updates=", self.received_updates)
+            print("request_queue=", self.request_queue)
             if len(self.requests) > 0:
-                return [(self.ctx_id, self.requests.pop(0))]
+                return [(self.ctx_id, Message(text=str(self.requests.pop(0))))]
             else:
-                await asyncio.sleep(0.05)
-        def _respond(self, ctx_id, response):
-            self.received_updates.append((ctx_id, response))
+                pass
+        async def _respond(self, ctx_id, last_response):
+            print("response received!")
+            self.received_updates.append(str(last_response.text))
+            print("requests=", self.requests, ", received_updates=", self.received_updates, ", response=", last_response)
 
     new_pipeline = Pipeline.from_script(
         ECHO_SCRIPT,
@@ -106,11 +115,18 @@ def test_echo_responses():
         messenger_interface=TestCLIInterface()
     )
     interface = new_pipeline.messenger_interface
-    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=interface.not_obtained_updates, timeout=3))
-    for i in range(4):
-        assert interface.requests_copy[i] == interface.received_updates[i][1]
-    assert interface.obtained_updates() == False
+    """
+    interface.obtained_updates = False
+    print("before: ", interface.not_obtained_updates())
+    interface.obtained_updates = True
+    print("after: ", interface.not_obtained_updates())
     assert False
+    """
+    asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=interface.not_obtained_updates))
+    print("run_in_foreground passed!")
+    for i in range(4):
+        assert interface.requests_copy[i] == interface.received_updates[i]
+    assert interface.not_obtained_updates() == False
     """
     get_updates -> if not obtained_updates: [ctx_id, request]
     respond -> received_updates.append(ctx_id, response)
@@ -119,7 +135,6 @@ def test_echo_responses():
     
     assert received_updates == expected
     """
-    assert True
 
 
 def test_callback_messenger_interface(monkeypatch):
