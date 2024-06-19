@@ -23,18 +23,22 @@ logger = logging.getLogger(__name__)
 
 
 @validate_call
-def exact_match(match: Message, skip_none: bool = True) -> Callable[[Context, Pipeline], bool]:
+def exact_match(match: Union[str, Message], skip_none: bool = True) -> Callable[[Context, Pipeline], bool]:
     """
     Return function handler. This handler returns `True` only if the last user phrase
-    is the same Message as the `match`.
+    is the same `Message` as the `match`.
     If `skip_none` the handler will not compare `None` fields of `match`.
 
-    :param match: A Message variable to compare user request with.
+    :param match: A `Message` variable to compare user request with.
+        Can also accept `str`, which will be converted into a `Message` with its text field equal to `match`.
     :param skip_none: Whether fields should be compared if they are `None` in :py:const:`match`.
     """
 
     def exact_match_condition_handler(ctx: Context, pipeline: Pipeline) -> bool:
         request = ctx.last_request
+        nonlocal match
+        if isinstance(match, str):
+            match = Message(text=match)
         if request is None:
             return False
         for field in match.model_fields:

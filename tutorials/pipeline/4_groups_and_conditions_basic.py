@@ -39,8 +39,8 @@ logger = logging.getLogger(__name__)
 Pipeline can contain not only single services, but also service groups.
 Service groups can be defined as `ServiceGroupBuilder` objects:
       lists of `ServiceBuilders` and `ServiceGroupBuilders` or objects.
-The objects should contain `services` -
-a ServiceBuilder and ServiceGroupBuilder object list.
+The objects should contain `components` -
+a `ServiceBuilder` and `ServiceGroupBuilder` object list.
 
 To receive serialized information about service,
     service group or pipeline a property `info_dict` can be used,

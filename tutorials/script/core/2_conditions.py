@@ -107,7 +107,7 @@ toy_script = {
         "start_node": {  # This is the initial node,
             # it doesn't contain a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -137,7 +137,7 @@ toy_script = {
                 "node1": cnd.any(
                     [
                         hi_lower_case_condition,
-                        cnd.exact_match(Message("hello")),
+                        cnd.exact_match("hello"),
                     ]
                 )
             },
@@ -170,45 +170,45 @@ toy_script = {
 # testing
 happy_path = (
     (
-        Message("Hi"),
-        Message("Hi, how are you?"),
+        "Hi",
+        "Hi, how are you?",
     ),  # start_node -> node1
     (
-        Message("i'm fine, how are you?"),
-        Message("Good. What do you want to talk about?"),
+        "i'm fine, how are you?",
+        "Good. What do you want to talk about?",
     ),  # node1 -> node2
     (
-        Message("Let's talk about music."),
-        Message("Sorry, I can not talk about music now."),
+        "Let's talk about music.",
+        "Sorry, I can not talk about music now.",
     ),  # node2 -> node3
-    (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
-    (Message("Hi"), Message("Hi, how are you?")),  # node4 -> node1
-    (Message("stop"), Message("Ooops")),  # node1 -> fallback_node
+    ("Ok, goodbye.", "bye"),  # node3 -> node4
+    ("Hi", "Hi, how are you?"),  # node4 -> node1
+    ("stop", "Ooops"),  # node1 -> fallback_node
     (
-        Message("one"),
-        Message("Ooops"),
+        "one",
+        "Ooops",
     ),  # fallback_node -> fallback_node
     (
-        Message("help"),
-        Message("Ooops"),
+        "help",
+        "Ooops",
     ),  # fallback_node -> fallback_node
     (
-        Message("nope"),
-        Message("Ooops"),
+        "nope",
+        "Ooops",
     ),  # fallback_node -> fallback_node
     (
         Message(misc={"some_key": "some_value"}),
-        Message("Hi, how are you?"),
+        "Hi, how are you?",
     ),  # fallback_node -> node1
     (
-        Message("i'm fine, how are you?"),
-        Message("Good. What do you want to talk about?"),
+        "i'm fine, how are you?",
+        "Good. What do you want to talk about?",
     ),  # node1 -> node2
     (
-        Message("Let's talk about music."),
-        Message("Sorry, I can not talk about music now."),
+        "Let's talk about music.",
+        "Sorry, I can not talk about music now.",
     ),  # node2 -> node3
-    (Message("Ok, goodbye."), Message("bye")),  # node3 -> node4
+    ("Ok, goodbye.", "bye"),  # node3 -> node4
 )
 
 # %%
