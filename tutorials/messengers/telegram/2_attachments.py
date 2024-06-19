@@ -21,7 +21,7 @@ from pydantic import HttpUrl
 
 from dff.script import conditions as cnd
 from dff.script import GLOBAL, RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import LongpollingTelegramInterface
+from dff.messengers.telegram import LongpollingInterface
 from dff.pipeline import Pipeline
 from dff.script.core.message import (
     Animation,
@@ -229,7 +229,7 @@ script = {
 
 
 # %%
-interface = LongpollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
+interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%

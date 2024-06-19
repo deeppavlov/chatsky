@@ -7,7 +7,7 @@ from dff.pipeline.types import PipelineRunnerFunction
 from .abstract import _AbstractTelegramInterface
 
 
-class LongpollingTelegramInterface(_AbstractTelegramInterface):
+class LongpollingInterface(_AbstractTelegramInterface):
     """
     Telegram messenger interface, that requests Telegram API in a loop.
 
@@ -31,7 +31,7 @@ class LongpollingTelegramInterface(_AbstractTelegramInterface):
         )
 
 
-class WebhookTelegramInterface(_AbstractTelegramInterface):
+class WebhookInterface(_AbstractTelegramInterface):
     """
     Telegram messenger interface, that brings a special webserver up
     and registers up for listening for Telegram updates.

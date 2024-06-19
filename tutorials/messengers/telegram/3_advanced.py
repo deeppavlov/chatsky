@@ -24,7 +24,7 @@ from telegram.constants import ParseMode
 
 from dff.script import conditions as cnd
 from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import LongpollingTelegramInterface
+from dff.messengers.telegram import LongpollingInterface
 from dff.pipeline import Pipeline
 from dff.script.core.context import Context
 from dff.script.core.keywords import GLOBAL
@@ -218,7 +218,7 @@ script = {
 
 
 # %%
-interface = LongpollingTelegramInterface(token=os.environ["TG_BOT_TOKEN"])
+interface = LongpollingInterface(token=os.environ["TG_BOT_TOKEN"])
 
 
 # %%

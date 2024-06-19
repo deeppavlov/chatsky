@@ -1,4 +1,4 @@
 # -*- coding: utf-8 -*-
 
 from .abstract import telegram_available
-from .interface import LongpollingTelegramInterface, WebhookTelegramInterface
+from .interface import LongpollingInterface, WebhookInterface
