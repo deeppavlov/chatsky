@@ -5,7 +5,7 @@
 The following tutorial shows how to run a regular DFF script in Telegram.
 It asks users for the '/start' command and then loops in one place.
 
-Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+Here, %mddoclink(api,messengers.telegram.interface,LongpollingInterface)
 class and [python-telegram-bot](https://docs.python-telegram-bot.org/)
 library are used for accessing telegram API in polling mode.
 
@@ -28,10 +28,11 @@ from dff.utils.testing.common import is_interactive_mode
 # %% [markdown]
 """
 In order to integrate your script with Telegram, you need an instance of
-`TelegramMessenger` class and one of the following interfaces:
-`PollingMessengerInterface` or `CallbackTelegramInterface`.
+`_AbstractTelegramMessenger` class and one of the following interfaces:
+`LongpollingInterface` or `WebhookInterface`.
+The latter requires a webserver, so here we use long polling interface.
 
-`TelegramMessenger` encapsulates the bot logic. The` only required
+`_AbstractTelegramMessenger` encapsulates the bot logic. The only required
 argument for a bot to run is a token. Some other parameters
 (such as host, port, interval, etc.) can be passed as keyword arguments.
 

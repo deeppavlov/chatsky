@@ -4,7 +4,7 @@
 
 The following tutorial shows several advanced cases of user-to-bot interaction.
 
-Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+Here, %mddoclink(api,messengers.telegram.interface,LongpollingInterface)
 class and [python-telegram-bot](https://docs.python-telegram-bot.org/)
 library are used for accessing telegram API in polling mode.
 
@@ -14,7 +14,6 @@ Telegram API token is required to access telegram API.
 # %pip install dff[telegram]
 
 # %%
-from asyncio import get_event_loop
 import os
 from urllib.request import urlopen
 
@@ -49,6 +48,9 @@ such as:
 4. Image with a spoiler.
 5. Document with a thumbnail.
 6. Attachment bytes hash.
+
+Check out [this](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot)
+class for information about different arguments for sending attachments, `send_...` methods.
 
 Last option ("Raw attachments!") button might be especially interesting,
 because it shows how bot precepts different telegram attachments sent by user

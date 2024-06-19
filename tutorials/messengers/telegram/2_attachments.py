@@ -5,7 +5,7 @@
 The following tutorial shows how to send different attachments using
 telegram interfaces.
 
-Here, %mddoclink(api,messengers.telegram.interface,PollingTelegramInterface)
+Here, %mddoclink(api,messengers.telegram.interface,LongpollingInterface)
 class and [python-telegram-bot](https://docs.python-telegram-bot.org/)
 library are used for accessing telegram API in polling mode.
 
@@ -45,7 +45,7 @@ from dff.utils.testing.common import is_interactive_mode
 Example attachment data is specified below in form of dictionaries.
 List of attachments that telegram messenger interface can send can
 be found here:
-%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface#response_attachments).
+%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface#supported_request_attachment_types).
 """
 
 # %%
@@ -102,6 +102,9 @@ document_data = {
 # %% [markdown]
 """
 The bot below sends different attachments on request.
+
+[Here](%doclink(api,script.core.message)) you can find
+all the attachment options available.
 """
 
 # %%
