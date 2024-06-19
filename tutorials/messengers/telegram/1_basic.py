@@ -44,7 +44,7 @@ to the DFF `Pipeline` instance.
 script = {
     "greeting_flow": {
         "start_node": {
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
         },
         "greeting_node": {
             RESPONSE: Message("Hi"),
@@ -52,7 +52,7 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message("Please, repeat the request"),
-            TRANSITIONS: {"greeting_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: {"greeting_node": cnd.exact_match("/start")},
         },
     }
 }

@@ -84,7 +84,7 @@ toy_script = {
         "start_node": {  # This is an initial node,
             # it doesn't need a `RESPONSE`.
             RESPONSE: Message(),
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
             # If "Hi" == request of user then we make the transition
         },
         "node1": {
@@ -95,28 +95,24 @@ toy_script = {
                 ]
             ),
             # Random choice from candidate list.
-            TRANSITIONS: {
-                "node2": cnd.exact_match(Message("I'm fine, how are you?"))
-            },
+            TRANSITIONS: {"node2": cnd.exact_match("I'm fine, how are you?")},
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {
-                "node3": cnd.exact_match(Message("Let's talk about music."))
-            },
+            TRANSITIONS: {"node3": cnd.exact_match("Let's talk about music.")},
         },
         "node3": {
             RESPONSE: cannot_talk_about_topic_response,
-            TRANSITIONS: {"node4": cnd.exact_match(Message("Ok, goodbye."))},
+            TRANSITIONS: {"node4": cnd.exact_match("Ok, goodbye.")},
         },
         "node4": {
             RESPONSE: upper_case_response(Message("bye")),
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
         "fallback_node": {  # We get to this node
             # if an error occurred while the agent was running.
             RESPONSE: fallback_trace_response,
-            TRANSITIONS: {"node1": cnd.exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": cnd.exact_match("Hi")},
         },
     }
 }
@@ -124,19 +120,19 @@ toy_script = {
 # testing
 happy_path = (
     (
-        Message("Hi"),
-        Message("Hello, how are you?"),
+        "Hi",
+        "Hello, how are you?",
     ),  # start_node -> node1
     (
-        Message("I'm fine, how are you?"),
-        Message("Good. What do you want to talk about?"),
+        "I'm fine, how are you?",
+        "Good. What do you want to talk about?",
     ),  # node1 -> node2
     (
-        Message("Let's talk about music."),
-        Message("Sorry, I can not talk about music now."),
+        "Let's talk about music.",
+        "Sorry, I can not talk about music now.",
     ),  # node2 -> node3
-    (Message("Ok, goodbye."), Message("BYE")),  # node3 -> node4
-    (Message("Hi"), Message("Hello, how are you?")),  # node4 -> node1
+    ("Ok, goodbye.", "BYE"),  # node3 -> node4
+    ("Hi", "Hello, how are you?"),  # node4 -> node1
     (
         Message("stop"),
         Message(
@@ -175,18 +171,18 @@ happy_path = (
         ),
     ),  # f_n->f_n
     (
-        Message("Hi"),
-        Message("Hi, what is up?"),
+        "Hi",
+        "Hi, what is up?",
     ),  # fallback_node -> node1
     (
-        Message("I'm fine, how are you?"),
-        Message("Good. What do you want to talk about?"),
+        "I'm fine, how are you?",
+        "Good. What do you want to talk about?",
     ),  # node1 -> node2
     (
-        Message("Let's talk about music."),
-        Message("Sorry, I can not talk about music now."),
+        "Let's talk about music.",
+        "Sorry, I can not talk about music now.",
     ),  # node2 -> node3
-    (Message("Ok, goodbye."), Message("BYE")),  # node3 -> node4
+    ("Ok, goodbye.", "BYE"),  # node3 -> node4
 )
 
 # %%

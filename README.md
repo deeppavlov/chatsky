@@ -87,7 +87,7 @@ import dff.script.conditions.std_conditions as cnd
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("flow", "node_hi"): cnd.exact_match(Message("Hi")),
+            ("flow", "node_hi"): cnd.exact_match("Hi"),
             ("flow", "node_ok"): cnd.true()
         }
     },

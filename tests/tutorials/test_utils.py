@@ -2,14 +2,13 @@ import os
 import re
 
 import pytest
-from dff.script import Message
 from dff.utils.testing.common import check_happy_path, is_interactive_mode
 from tests.pipeline.test_messenger_interface import pipeline
 
 
 def test_unhappy_path():
     with pytest.raises(Exception) as e:
-        check_happy_path(pipeline, ((Message("Hi"), Message("false_response")),))
+        check_happy_path(pipeline, (("Hi", "false_response"),))
     assert e
     msg = str(e)
     assert msg

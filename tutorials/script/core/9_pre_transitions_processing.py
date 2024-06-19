@@ -78,11 +78,11 @@ toy_script = {
 
 # testing
 happy_path = (
-    (Message("1"), Message("previous=None: current=first")),
-    (Message("2"), Message("previous=first: current=second")),
-    (Message("3"), Message("previous=second: current=third")),
-    (Message("4"), Message("previous=third: current=fourth")),
-    (Message("5"), Message("previous=fourth: current=fifth")),
+    ("1", "previous=None: current=first"),
+    ("2", "previous=first: current=second"),
+    ("3", "previous=second: current=third"),
+    ("4", "previous=third: current=fourth"),
+    ("5", "previous=fourth: current=fifth"),
 )
 
 
