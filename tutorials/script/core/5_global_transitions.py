@@ -176,9 +176,9 @@ happy_path = (
         "Good. What do you want to talk about?",
     ),
     ("previous", "That's all what I know."),
-    ("next time", "Bye"),
+    ("next time", "bye"),
     ("stop", "Ooops"),
-    ("previous", "Bye"),
+    ("previous", "bye"),
     ("stop", "Ooops"),
     ("nope", "Ooops"),
     ("hi", "Hi, how are you?"),
@@ -192,7 +192,7 @@ happy_path = (
         "let's talk about something.",
         "Sorry, I can not talk about that now.",
     ),
-    ("Ok, goodbye.", "Bye"),
+    ("Ok, goodbye.", "bye"),
 )
 
 # %%
