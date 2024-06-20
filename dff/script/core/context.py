@@ -24,8 +24,9 @@ from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 
-from .types import NodeLabel2Type, ModuleName
-from .message import Message
+from dff.script.core.message import Message
+from dff.script.core.types import NodeLabel2Type
+from dff.pipeline.types import ComponentExecutionState
 
 if TYPE_CHECKING:
     from dff.script.core.script import Node
@@ -44,6 +45,19 @@ def get_last_index(dictionary: dict) -> int:
     return indices[-1] if indices else -1
 
 
+class FrameworkData(BaseModel):
+    """
+    Framework uses this to store data related to any of its modules.
+    """
+
+    service_states: Dict[str, ComponentExecutionState] = Field(default_factory=dict, exclude=True)
+    "Statuses of all the pipeline services. Cleared at the end of every turn."
+    actor_data: Dict[str, Any] = Field(default_factory=dict, exclude=True)
+    "Actor service data. Cleared at the end of every turn."
+    stats: Dict[str, Any] = Field(default_factory=dict)
+    "Enables complex stats collection across multiple turns."
+
+
 class Context(BaseModel):
     """
     A structure that is used to store data about the context of a dialog.
@@ -57,28 +71,28 @@ class Context(BaseModel):
     `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
     `id` can be used to trace the user behavior, e.g while collecting the statistical data.
     """
-    labels: Dict[int, NodeLabel2Type] = {}
+    labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
     """
     `labels` stores the history of all passed `labels`
 
         - key - `id` of the turn.
         - value - `label` on this turn.
     """
-    requests: Dict[int, Message] = {}
+    requests: Dict[int, Message] = Field(default_factory=dict)
     """
     `requests` stores the history of all `requests` received by the agent
 
         - key - `id` of the turn.
         - value - `request` on this turn.
     """
-    responses: Dict[int, Message] = {}
+    responses: Dict[int, Message] = Field(default_factory=dict)
     """
     `responses` stores the history of all agent `responses`
 
         - key - `id` of the turn.
         - value - `response` on this turn.
     """
-    misc: Dict[str, Any] = {}
+    misc: Dict[str, Any] = Field(default_factory=dict)
     """
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
     so storage of any data won't reflect on the work on the internal Dialog Flow Scripting functions.
@@ -88,18 +102,10 @@ class Context(BaseModel):
         - key - Arbitrary data name.
         - value - Arbitrary data.
     """
-    framework_states: Dict[ModuleName, Dict[str, Any]] = {}
+    framework_data: FrameworkData = Field(default_factory=FrameworkData)
     """
-    `framework_states` is used for addons states or for
-    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`'s states.
-    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline`
-    records all its intermediate conditions into the `framework_states`.
-    After :py:class:`~.Context` processing is finished,
-    :py:class:`~dff.pipeline.pipeline.pipeline.Pipeline` resets `framework_states` and
-    returns :py:class:`~.Context`.
-
-        - key - Temporary variable name.
-        - value - Temporary variable data.
+    This attribute is used for storing custom data required for pipeline execution.
+    It is meant to be used by the framework only. Accessing it may result in pipeline breakage.
     """
 
     @field_validator("labels", "requests", "responses")
@@ -199,8 +205,8 @@ class Context(BaseModel):
         if "labels" in field_names:
             for index in list(self.labels)[:-hold_last_n_indices]:
                 del self.labels[index]
-        if "framework_states" in field_names:
-            self.framework_states.clear()
+        if "framework_data" in field_names:
+            self.framework_data = FrameworkData()
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
@@ -256,13 +262,13 @@ class Context(BaseModel):
         """
         Return current :py:class:`~dff.script.core.script.Node`.
         """
-        actor = self.framework_states.get("actor", {})
+        actor_data = self.framework_data.actor_data
         node = (
-            actor.get("processed_node")
-            or actor.get("pre_response_processed_node")
-            or actor.get("next_node")
-            or actor.get("pre_transitions_processed_node")
-            or actor.get("previous_node")
+            actor_data.get("processed_node")
+            or actor_data.get("pre_response_processed_node")
+            or actor_data.get("next_node")
+            or actor_data.get("pre_transitions_processed_node")
+            or actor_data.get("previous_node")
         )
         if node is None:
             logger.warning(

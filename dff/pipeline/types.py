@@ -9,11 +9,9 @@ data structures, and other types that are defined for type hinting.
 from __future__ import annotations
 from enum import unique, Enum
 from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
-
-from dff.context_storages import DBContextStorage
-from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
 from typing_extensions import NotRequired, TypedDict, TypeAlias
 from pydantic import BaseModel
+
 
 if TYPE_CHECKING:
     from dff.pipeline.pipeline.pipeline import Pipeline
@@ -21,6 +19,8 @@ if TYPE_CHECKING:
     from dff.pipeline.service.group import ServiceGroup
     from dff.pipeline.service.extra import _ComponentExtraHandler
     from dff.messengers.common.interface import MessengerInterface
+    from dff.context_storages import DBContextStorage
+    from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
 
 
 class PipelineRunnerFunction(Protocol):
@@ -53,7 +53,7 @@ class PipelineRunnerFunction(Protocol):
 class ComponentExecutionState(str, Enum):
     """
     Enum, representing pipeline component execution state.
-    These states are stored in `ctx.framework_keys[PIPELINE_STATE_KEY]`,
+    These states are stored in `ctx.framework_keys.service_states`,
     that should always be requested with `NOT_RUN` being default fallback.
     Following states are supported:
 
@@ -103,14 +103,7 @@ class ExtraHandlerType(str, Enum):
     AFTER = "AFTER"
 
 
-PIPELINE_STATE_KEY = "PIPELINE"
-"""
-PIPELINE: storage for services and groups execution status.
-Should be used in `ctx.framework_keys[PIPELINE_STATE_KEY]`.
-"""
-
-
-StartConditionCheckerFunction: TypeAlias = Callable[[Context, "Pipeline"], bool]
+StartConditionCheckerFunction: TypeAlias = Callable[["Context", "Pipeline"], bool]
 """
 A function type for components `start_conditions`.
 Accepts context and pipeline, returns boolean (whether service can be launched).
@@ -149,9 +142,9 @@ class ServiceRuntimeInfo(BaseModel):
 
 
 ExtraHandlerFunction: TypeAlias = Union[
-    Callable[[Context], Any],
-    Callable[[Context, "Pipeline"], Any],
-    Callable[[Context, "Pipeline", "ExtraHandlerRuntimeInfo"], Any],
+    Callable[["Context"], Any],
+    Callable[["Context", "Pipeline"], Any],
+    Callable[["Context", "Pipeline", "ExtraHandlerRuntimeInfo"], Any],
 ]
 """
 A function type for creating extra handler (before and after functions).
@@ -173,12 +166,12 @@ Also contains `component` - runtime info of the component this wrapper is attach
 
 
 ServiceFunction: TypeAlias = Union[
-    Callable[[Context], None],
-    Callable[[Context], Awaitable[None]],
-    Callable[[Context, "Pipeline"], None],
-    Callable[[Context, "Pipeline"], Awaitable[None]],
-    Callable[[Context, "Pipeline", ServiceRuntimeInfo], None],
-    Callable[[Context, "Pipeline", ServiceRuntimeInfo], Awaitable[None]],
+    Callable[["Context"], None],
+    Callable[["Context"], Awaitable[None]],
+    Callable[["Context", "Pipeline"], None],
+    Callable[["Context", "Pipeline"], Awaitable[None]],
+    Callable[["Context", "Pipeline", ServiceRuntimeInfo], None],
+    Callable[["Context", "Pipeline", ServiceRuntimeInfo], Awaitable[None]],
 ]
 """
 A function type for creating service handlers.
@@ -253,18 +246,18 @@ PipelineBuilder: TypeAlias = TypedDict(
     "PipelineBuilder",
     {
         "messenger_interface": NotRequired[Optional["MessengerInterface"]],
-        "context_storage": NotRequired[Optional[Union[DBContextStorage, Dict]]],
+        "context_storage": NotRequired[Optional[Union["DBContextStorage", Dict]]],
         "components": ServiceGroupBuilder,
         "before_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "after_handler": NotRequired[Optional[ExtraHandlerBuilder]],
         "optimization_warnings": NotRequired[bool],
         "parallelize_processing": NotRequired[bool],
-        "script": Union[Script, Dict],
-        "start_label": NodeLabel2Type,
-        "fallback_label": NotRequired[Optional[NodeLabel2Type]],
+        "script": Union["Script", Dict],
+        "start_label": "NodeLabel2Type",
+        "fallback_label": NotRequired[Optional["NodeLabel2Type"]],
         "label_priority": NotRequired[float],
         "condition_handler": NotRequired[Optional[Callable]],
-        "handlers": NotRequired[Optional[Dict[ActorStage, List[Callable]]]],
+        "handlers": NotRequired[Optional[Dict["ActorStage", List[Callable]]]],
     },
 )
 """

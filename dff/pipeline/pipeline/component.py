@@ -13,7 +13,6 @@ from __future__ import annotations
 import logging
 import abc
 import asyncio
-import copy
 from typing import Optional, Awaitable, TYPE_CHECKING
 
 from dff.script import Context
@@ -21,7 +20,6 @@ from dff.script import Context
 from ..service.extra import BeforeHandler, AfterHandler
 from ..conditions import always_start_condition
 from ..types import (
-    PIPELINE_STATE_KEY,
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ServiceRuntimeInfo,
@@ -109,28 +107,24 @@ class PipelineComponent(abc.ABC):
 
     def _set_state(self, ctx: Context, value: ComponentExecutionState):
         """
-        Method for component runtime state setting, state is preserved in `ctx.framework_states` dict,
-        in subdict, dedicated to this library.
+        Method for component runtime state setting, state is preserved in `ctx.framework_data`.
 
         :param ctx: :py:class:`~.Context` to keep state in.
         :param value: State to set.
         :return: `None`
         """
-        if PIPELINE_STATE_KEY not in ctx.framework_states:
-            ctx.framework_states[PIPELINE_STATE_KEY] = {}
-        ctx.framework_states[PIPELINE_STATE_KEY][self.path] = value
+        ctx.framework_data.service_states[self.path] = value
 
     def get_state(self, ctx: Context, default: Optional[ComponentExecutionState] = None) -> ComponentExecutionState:
         """
-        Method for component runtime state getting, state is preserved in `ctx.framework_states` dict,
-        in subdict, dedicated to this library.
+        Method for component runtime state getting, state is preserved in `ctx.framework_data`.
 
         :param ctx: :py:class:`~.Context` to get state from.
         :param default: Default to return if no record found
             (usually it's :py:attr:`~.pipeline.types.ComponentExecutionState.NOT_RUN`).
         :return: :py:class:`~pipeline.types.ComponentExecutionState` of this service or default if not found.
         """
-        return ctx.framework_states[PIPELINE_STATE_KEY].get(self.path, default if default is not None else None)
+        return ctx.framework_data.service_states.get(self.path, default if default is not None else None)
 
     @property
     def asynchronous(self) -> bool:
@@ -218,7 +212,7 @@ class PipelineComponent(abc.ABC):
             path=self.path if self.path is not None else "[None]",
             timeout=self.timeout,
             asynchronous=self.asynchronous,
-            execution_state=copy.deepcopy(ctx.framework_states[PIPELINE_STATE_KEY]),
+            execution_state=ctx.framework_data.service_states.copy(),
         )
 
     @property
