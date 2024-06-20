@@ -311,7 +311,25 @@ class Message(DataModel):
 
     text: Optional[str] = None
     commands: Optional[List[Command]] = None
-    attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document, VoiceMessage, VideoMessage]]] = None
+    attachments: Optional[
+        List[
+            Union[
+                CallbackQuery,
+                Location,
+                Contact,
+                Invoice,
+                Poll,
+                Audio,
+                Video,
+                Animation,
+                Image,
+                Sticker,
+                Document,
+                VoiceMessage,
+                VideoMessage,
+            ]
+        ]
+    ] = None
     annotations: Optional[JSONSerializableDict] = None
     misc: Optional[JSONSerializableDict] = None
     original_message: Optional[SerializableVaue] = None
@@ -320,7 +338,25 @@ class Message(DataModel):
         self,
         text: Optional[str] = None,
         commands: Optional[List[Command]] = None,
-        attachments: Optional[List[Union[CallbackQuery, Location, Contact, Invoice, Poll, Audio, Video, Animation, Image, Sticker, Document, VoiceMessage, VideoMessage]]] = None,
+        attachments: Optional[
+            List[
+                Union[
+                    CallbackQuery,
+                    Location,
+                    Contact,
+                    Invoice,
+                    Poll,
+                    Audio,
+                    Video,
+                    Animation,
+                    Image,
+                    Sticker,
+                    Document,
+                    VoiceMessage,
+                    VideoMessage,
+                ]
+            ]
+        ] = None,
         annotations: Optional[JSONSerializableDict] = None,
         misc: Optional[JSONSerializableDict] = None,
         **kwargs,

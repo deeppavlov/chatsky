@@ -49,8 +49,10 @@ such as:
 5. Document with a thumbnail.
 6. Attachment bytes hash.
 
-Check out [this](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot)
-class for information about different arguments for sending attachments, `send_...` methods.
+Check out
+[this](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot)
+class for information about different arguments
+for sending attachments, `send_...` methods.
 
 Last option ("Raw attachments!") button might be especially interesting,
 because it shows how bot precepts different telegram attachments sent by user
@@ -104,7 +106,8 @@ async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
         )
     else:
         return Message(
-            "Last request did not contain any data attachment!\nRun /start command again to restart."
+            "Last request did not contain any data attachment!\n"
+            "Run /start command again to restart."
         )
 
 
@@ -182,7 +185,9 @@ script = {
         },
         "attachments_node": {
             RESPONSE: Message(
-                "Here's your message with multiple attachments (a location and a sticker)!\nRun /start command again to restart.",
+                "Here's your message with multiple attachments "
+                "(a location and a sticker)!\n"
+                "Run /start command again to restart.",
                 attachments=[
                     Location(**location_data),
                     Sticker(**sticker_data),
@@ -191,19 +196,22 @@ script = {
         },
         "secret_node": {
             RESPONSE: Message(
-                "Here's your secret image! Run /start command again to restart.",
+                "Here's your secret image!"
+                "Run /start command again to restart.",
                 attachments=[Image(**image_data)],
             ),
         },
         "thumbnail_node": {
             RESPONSE: Message(
-                "Here's your document with tumbnail! Run /start command again to restart.",
+                "Here's your document with tumbnail!"
+                "Run /start command again to restart.",
                 attachments=[Document(**document_data)],
             ),
         },
         "hash_init_node": {
             RESPONSE: Message(
-                "Alright! Now send me a message with data attachment (audio, video, animation, image, sticker or document)!"
+                "Alright! Now send me a message with data attachment"
+                "(audio, video, animation, image, sticker or document)!"
             ),
             TRANSITIONS: {"hash_request_node": cnd.true()},
         },
@@ -212,7 +220,8 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message(
-                "Bot has entered unrecoverable state :/\nRun /start command again to restart."
+                "Bot has entered unrecoverable state:"
+                "/\nRun /start command again to restart."
             ),
         },
     },

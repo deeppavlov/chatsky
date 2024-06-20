@@ -29,7 +29,7 @@ from dff.script.core.message import (
     Sticker,
     Video,
     VideoMessage,
-    VoiceMessage
+    VoiceMessage,
 )
 
 try:
@@ -42,7 +42,7 @@ try:
         Update,
         Message as TelegramMessage,
     )
-    from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler, ContextTypes
+    from telegram.ext import Application, ExtBot, MessageHandler, CallbackQueryHandler
     from telegram.ext.filters import ALL
 
     telegram_available = True
@@ -62,7 +62,11 @@ def _is_attachment_mediagroup_combinable(attachment: Attachment):
     :return: If the attachment can belong to a mediagroup.
     """
 
-    return isinstance(attachment, DataAttachment) and not isinstance(attachment, VoiceMessage) and not isinstance(attachment, VideoMessage)
+    return (
+        isinstance(attachment, DataAttachment)
+        and not isinstance(attachment, VoiceMessage)
+        and not isinstance(attachment, VideoMessage)
+    )
 
 
 class _AbstractTelegramInterface(MessengerInterface):
@@ -70,8 +74,33 @@ class _AbstractTelegramInterface(MessengerInterface):
     Messenger interface mixin for Telegram API usage.
     """
 
-    supported_request_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, VoiceMessage, VideoMessage, Invoice}
-    supported_response_attachment_types = {Location, Contact, Poll, Sticker, Audio, Video, Animation, Image, Document, VoiceMessage, VideoMessage}
+    supported_request_attachment_types = {
+        Location,
+        Contact,
+        Poll,
+        Sticker,
+        Audio,
+        Video,
+        Animation,
+        Image,
+        Document,
+        VoiceMessage,
+        VideoMessage,
+        Invoice,
+    }
+    supported_response_attachment_types = {
+        Location,
+        Contact,
+        Poll,
+        Sticker,
+        Audio,
+        Video,
+        Animation,
+        Image,
+        Document,
+        VoiceMessage,
+        VideoMessage,
+    }
 
     def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
         super().__init__(attachments_directory)
@@ -265,14 +294,25 @@ class _AbstractTelegramInterface(MessengerInterface):
         message_text_covered = False
         if message.attachments is not None:
             files = list()
-            media_group_attachments_num = len([att for att in message.attachments if _is_attachment_mediagroup_combinable(att)])
+            media_group_attachments_num = len(
+                [att for att in message.attachments if _is_attachment_mediagroup_combinable(att)]
+            )
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(
                         chat_id,
                         attachment.latitude,
                         attachment.longitude,
-                        **generate_extra_fields(attachment, ["horizontal_accuracy", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
+                        **generate_extra_fields(
+                            attachment,
+                            [
+                                "horizontal_accuracy",
+                                "disable_notification",
+                                "protect_content",
+                                "reply_markup",
+                                "message_effect_id",
+                            ],
+                        ),
                     )
                 if isinstance(attachment, Contact):
                     await bot.send_contact(
@@ -280,21 +320,43 @@ class _AbstractTelegramInterface(MessengerInterface):
                         attachment.phone_number,
                         attachment.first_name,
                         attachment.last_name,
-                        **generate_extra_fields(attachment, ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
+                        **generate_extra_fields(
+                            attachment,
+                            ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id"],
+                        ),
                     )
                 if isinstance(attachment, Poll):
                     await bot.send_poll(
                         chat_id,
                         attachment.question,
                         [option.text for option in attachment.options],
-                        **generate_extra_fields(attachment, ["is_anonymous", "type", "allows_multiple_answers", "correct_option_id", "explanation", "explanation_parse_mode", "open_period", "is_closed", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
+                        **generate_extra_fields(
+                            attachment,
+                            [
+                                "is_anonymous",
+                                "type",
+                                "allows_multiple_answers",
+                                "correct_option_id",
+                                "explanation",
+                                "explanation_parse_mode",
+                                "open_period",
+                                "is_closed",
+                                "disable_notification",
+                                "protect_content",
+                                "reply_markup",
+                                "message_effect_id",
+                            ],
+                        ),
                     )
                 if isinstance(attachment, Sticker):
                     sticker = await attachment.get_bytes(self) if attachment.id is None else attachment.id
                     await bot.send_sticker(
                         chat_id,
                         sticker,
-                        **generate_extra_fields(attachment, ["disable_notification", "protect_content", "reply_markup", "emoji", "message_effect_id"]),
+                        **generate_extra_fields(
+                            attachment,
+                            ["disable_notification", "protect_content", "reply_markup", "emoji", "message_effect_id"],
+                        ),
                     )
                 if isinstance(attachment, Audio):
                     attachment_bytes = await attachment.get_bytes(self)
@@ -303,7 +365,10 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaAudio(
                                     attachment_bytes,
-                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"]),
+                                    **generate_extra_fields(
+                                        attachment,
+                                        ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"],
+                                    ),
                                 ),
                             ]
                         else:
@@ -311,7 +376,18 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["performer", "title", "disable_notification", "reply_markup", "parse_mode", "thumbnail", "message_effect_id"]),
+                                **generate_extra_fields(
+                                    attachment,
+                                    [
+                                        "performer",
+                                        "title",
+                                        "disable_notification",
+                                        "reply_markup",
+                                        "parse_mode",
+                                        "thumbnail",
+                                        "message_effect_id",
+                                    ],
+                                ),
                             )
                             message_text_covered = True
                 if isinstance(attachment, Video):
@@ -321,7 +397,17 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaVideo(
                                     attachment_bytes,
-                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "supports_streaming", "has_spoiler", "thumbnail"]),
+                                    **generate_extra_fields(
+                                        attachment,
+                                        [
+                                            "filename",
+                                            "caption",
+                                            "parse_mode",
+                                            "supports_streaming",
+                                            "has_spoiler",
+                                            "thumbnail",
+                                        ],
+                                    ),
                                 ),
                             ]
                         else:
@@ -329,7 +415,19 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "supports_streaming", "has_spoiler", "thumbnail", "filename", "message_effect_id"]),
+                                **generate_extra_fields(
+                                    attachment,
+                                    [
+                                        "disable_notification",
+                                        "reply_markup",
+                                        "parse_mode",
+                                        "supports_streaming",
+                                        "has_spoiler",
+                                        "thumbnail",
+                                        "filename",
+                                        "message_effect_id",
+                                    ],
+                                ),
                             )
                             message_text_covered = True
                 if isinstance(attachment, Animation):
@@ -339,7 +437,9 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaAnimation(
                                     attachment_bytes,
-                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail"]),
+                                    **generate_extra_fields(
+                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail"]
+                                    ),
                                 ),
                             ]
                         else:
@@ -347,7 +447,18 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["parse_mode", "disable_notification", "reply_markup", "has_spoiler", "thumbnail", "filename", "message_effect_id"]),
+                                **generate_extra_fields(
+                                    attachment,
+                                    [
+                                        "parse_mode",
+                                        "disable_notification",
+                                        "reply_markup",
+                                        "has_spoiler",
+                                        "thumbnail",
+                                        "filename",
+                                        "message_effect_id",
+                                    ],
+                                ),
                             )
                             message_text_covered = True
                 if isinstance(attachment, Image):
@@ -357,7 +468,9 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaPhoto(
                                     attachment_bytes,
-                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "has_spoiler"]),
+                                    **generate_extra_fields(
+                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler"]
+                                    ),
                                 ),
                             ]
                         else:
@@ -365,7 +478,17 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "has_spoiler", "filename", "message_effect_id"]),
+                                **generate_extra_fields(
+                                    attachment,
+                                    [
+                                        "disable_notification",
+                                        "reply_markup",
+                                        "parse_mode",
+                                        "has_spoiler",
+                                        "filename",
+                                        "message_effect_id",
+                                    ],
+                                ),
                             )
                             message_text_covered = True
                 if isinstance(attachment, Document):
@@ -375,7 +498,16 @@ class _AbstractTelegramInterface(MessengerInterface):
                             files += [
                                 InputMediaDocument(
                                     attachment_bytes,
-                                    **generate_extra_fields(attachment, ["filename", "caption", "parse_mode", "disable_content_type_detection", "thumbnail"]),
+                                    **generate_extra_fields(
+                                        attachment,
+                                        [
+                                            "filename",
+                                            "caption",
+                                            "parse_mode",
+                                            "disable_content_type_detection",
+                                            "thumbnail",
+                                        ],
+                                    ),
                                 ),
                             ]
                         else:
@@ -383,7 +515,17 @@ class _AbstractTelegramInterface(MessengerInterface):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "thumbnail", "filename", "message_effect_id"]),
+                                **generate_extra_fields(
+                                    attachment,
+                                    [
+                                        "disable_notification",
+                                        "reply_markup",
+                                        "parse_mode",
+                                        "thumbnail",
+                                        "filename",
+                                        "message_effect_id",
+                                    ],
+                                ),
                             )
                             message_text_covered = True
                 if isinstance(attachment, VoiceMessage):
@@ -393,7 +535,17 @@ class _AbstractTelegramInterface(MessengerInterface):
                             chat_id,
                             attachment_bytes,
                             caption=message.text,
-                            **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "filename", "protect_content", "message_effect_id"]),
+                            **generate_extra_fields(
+                                attachment,
+                                [
+                                    "disable_notification",
+                                    "reply_markup",
+                                    "parse_mode",
+                                    "filename",
+                                    "protect_content",
+                                    "message_effect_id",
+                                ],
+                            ),
                         )
                         message_text_covered = True
                 if isinstance(attachment, VideoMessage):
@@ -403,7 +555,18 @@ class _AbstractTelegramInterface(MessengerInterface):
                             chat_id,
                             attachment_bytes,
                             caption=message.text,
-                            **generate_extra_fields(attachment, ["disable_notification", "reply_markup", "parse_mode", "thumbnail", "filename", "protect_content", "message_effect_id"]),
+                            **generate_extra_fields(
+                                attachment,
+                                [
+                                    "disable_notification",
+                                    "reply_markup",
+                                    "parse_mode",
+                                    "thumbnail",
+                                    "filename",
+                                    "protect_content",
+                                    "message_effect_id",
+                                ],
+                            ),
                         )
                         message_text_covered = True
             if len(files) > 0:
@@ -418,12 +581,13 @@ class _AbstractTelegramInterface(MessengerInterface):
             await bot.send_message(
                 chat_id,
                 message.text,
-                **generate_extra_fields(message, ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id"]),
+                **generate_extra_fields(
+                    message,
+                    ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id"],
+                ),
             )
 
-    async def _on_event(
-        self, update: Update, _: ContextTypes.DEFAULT_TYPE, create_message: Callable[[Update], Message]
-    ) -> None:
+    async def _on_event(self, update: Update, _: Any, create_message: Callable[[Update], Message]) -> None:
         """
         Process Telegram update, run pipeline and send response to Telegram.
 
@@ -441,7 +605,7 @@ class _AbstractTelegramInterface(MessengerInterface):
                     self.application.bot, update.effective_chat.id, resp.last_response
                 )
 
-    async def on_message(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    async def on_message(self, update: Update, _: Any) -> None:
         """
         Process normal Telegram update, extracting DFF message from it
         using :py:meth:`~._AbstractTelegramInterface.extract_message_from_telegram`.
@@ -451,7 +615,7 @@ class _AbstractTelegramInterface(MessengerInterface):
 
         await self._on_event(update, _, lambda s: self.extract_message_from_telegram(s.message))
 
-    async def on_callback(self, update: Update, _: ContextTypes.DEFAULT_TYPE) -> None:
+    async def on_callback(self, update: Update, _: Any) -> None:
         """
         Process Telegram callback update, creating empty DFF message
         with only one callback query attachment from `callback_query.data` field.
@@ -459,7 +623,9 @@ class _AbstractTelegramInterface(MessengerInterface):
         :param update: Telegram update that will be processed.
         """
 
-        await self._on_event(update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)]))
+        await self._on_event(
+            update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)])
+        )
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
         self._pipeline_runner = pipeline_runner

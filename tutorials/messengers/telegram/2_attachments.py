@@ -35,7 +35,7 @@ from dff.script.core.message import (
     Sticker,
     Video,
     VideoMessage,
-    VoiceMessage
+    VoiceMessage,
 )
 from dff.utils.testing.common import is_interactive_mode
 

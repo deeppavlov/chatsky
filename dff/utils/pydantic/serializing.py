@@ -15,6 +15,7 @@ class WrapperModel(RootModel):
     """
     Wrapper model for testing whether an object is serializable to JSON.
     """
+
     root: Any
 
 
@@ -42,7 +43,9 @@ def pickle_validator(value: JsonValue) -> Any:
     return loads(decodebytes(value.encode()))
 
 
-def json_pickle_serializer(model: Serializable, original_serializer: Callable[[Serializable], Serializable]) -> Serializable:
+def json_pickle_serializer(
+    model: Serializable, original_serializer: Callable[[Serializable], Serializable]
+) -> Serializable:
     """
     Serializer function that serializes a dictionary or Pydantic object to JSON.
     For every object field, it checks whether the field is JSON serializable,

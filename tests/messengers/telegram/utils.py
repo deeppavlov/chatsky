@@ -66,7 +66,9 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
         return instance
 
     @contextmanager
-    def _check_context_and_trace(self, last_request: Message, last_response: Message, last_trace: List[str]) -> Iterator[None]:
+    def _check_context_and_trace(
+        self, last_request: Message, last_response: Message, last_trace: List[str]
+    ) -> Iterator[None]:
         self.bot.latest_trace = list()
         self.latest_ctx = None
         yield
@@ -84,7 +86,7 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
         ) -> Context:
             self.latest_ctx = await original_pipeline_runner(message, ctx_id, update_ctx_misc)
             return self.latest_ctx
-        
+
         self.interface._pipeline_runner = wrapped_pipeline_runner
         yield
         self.interface._pipeline_runner = original_pipeline_runner
