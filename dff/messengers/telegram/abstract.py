@@ -6,7 +6,7 @@ that can be used to interact with the Telegram API.
 """
 
 from pathlib import Path
-from typing import Callable, Optional
+from typing import Any, Callable, Optional
 
 from dff.utils.messengers.verify_params import generate_extra_fields
 
@@ -47,6 +47,10 @@ try:
 
     telegram_available = True
 except ImportError:
+    ExtBot = Any
+    Update = Any
+    TelegramMessage = Any
+
     telegram_available = False
 
 
