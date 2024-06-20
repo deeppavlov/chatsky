@@ -45,7 +45,7 @@ from dff.utils.testing.common import is_interactive_mode
 Example attachment data is specified below in form of dictionaries.
 List of attachments that telegram messenger interface can send can
 be found here:
-%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface#supported_request_attachment_types).
+%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface.supported_request_attachment_types).
 """
 
 # %%
