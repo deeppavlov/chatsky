@@ -365,12 +365,12 @@ class Pipeline:
 
         return ctx
 
-    def _sigint_handler(self):
+    def sigint_handler(self, signum, frame):
         self.stopped_by_signal = True
+        print("_sigint_handler() called")
         # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
-        for interface in self.messenger_interface:
-            if interface.running_in_foreground:
-                interface.shutdown()
+        if self.messenger_interface.running_in_foreground:
+            asyncio.run(self.messenger_interface.shutdown())
         # In case someone launched a pipeline with connect() instead of run_in_foreground(), all SIGINTs will be ignored, though the flag self.stopped_by_signal is still changed to True.
         logger.info(f"pipeline received SIGINT - stopping pipeline and all interfaces")
 
@@ -383,9 +383,14 @@ class Pipeline:
         Message interfaces that run in a loop block current thread.
         """
 
-        event_loop = asyncio.get_event_loop()
-        event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
-        # If the user changes signal handling within _polling_loop(), this will break
+        # event_loop = asyncio.get_event_loop()
+        # event_loop.add_signal_handler(signal.SIGINT, self._sigint_handler)
+
+        # This doesn't work for now, because _sigint_handler is just added to the queue of async tasks, waiting for the program, which it shouldn't, in order to shut it down at all.
+        # I'm using a different solution fow now, but the original one has the benefit of utilising the event loop (not ending other asyncio tasks) and "being thread-safe" according to some sources, not sure if that's true or needed, though.
+        # TO-DO: Do graceful termination via the event loop. I'm thinking if the _sigint_handler() task could be added to the start of the asyncio queue and not the end, it would've worked. But I know neither if that'll work nor how to do it.
+
+        # signal.signal(signal.SIGINT, self.sigint_handler)
 
         asyncio.run(self.messenger_interface.run_in_foreground(self, self._run_pipeline))
         logger.info(f"pipeline finished working")
