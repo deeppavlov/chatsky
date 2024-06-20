@@ -28,9 +28,9 @@ def pretty_format_component_info_dict(
     However, most preferable usage is via `pipeline.pretty_format`.
 
     :param service: (required) Pipeline components info dictionary.
-    :param show_wrappers: (required) Whether to include Wrappers or not (could be many and/or generated).
+    :param show_extra_handlers: (required) Whether to include Extra Handlers or not (could be many and/or generated).
     :param offset: Current level new line offset.
-    :param wrappers_key: Key that is mapped to Wrappers lists.
+    :param extra_handlers_key: Key that is mapped to Extra Handlers lists.
     :param type_key: Key that is mapped to components type name.
     :param name_key: Key that is mapped to components name.
     :param indent: Current level new line offset (whitespace number).

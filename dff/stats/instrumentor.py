@@ -29,7 +29,7 @@ from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 from dff.script.core.context import get_last_index
 from dff.stats.utils import (
     resource,
-    get_wrapper_field,
+    get_extra_handler_name,
     set_logger_destination,
     set_meter_destination,
     set_tracer_destination,
@@ -158,7 +158,7 @@ class OtelInstrumentor(BaseInstrumentor):
         :param kwargs: Keyword arguments of the decorated function.
         """
         ctx, _, info = args
-        pipeline_component = get_wrapper_field(info)
+        pipeline_component = get_extra_handler_name(info)
         attributes = {
             "context_id": str(ctx.id),
             "request_id": get_last_index(ctx.requests),

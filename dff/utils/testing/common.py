@@ -5,7 +5,7 @@ This module contains several functions which are used to run demonstrations in t
 """
 
 from os import getenv
-from typing import Callable, Tuple, Optional
+from typing import Callable, Tuple, Optional, Union
 from uuid import uuid4
 
 from dff.script import Context, Message
@@ -32,7 +32,7 @@ def is_interactive_mode() -> bool:  # pragma: no cover
 
 def check_happy_path(
     pipeline: Pipeline,
-    happy_path: Tuple[Tuple[Message, Message], ...],
+    happy_path: Tuple[Tuple[Union[str, Message], Union[str, Message]], ...],
     # This optional argument is used for additional processing of candidate responses and reference responses
     response_comparer: Callable[[Message, Message, Context], Optional[str]] = default_comparer,
     printout_enable: bool = True,
@@ -51,7 +51,11 @@ def check_happy_path(
     """
 
     ctx_id = uuid4()  # get random ID for current context
-    for step_id, (request, reference_response) in enumerate(happy_path):
+    for step_id, (request_raw, reference_response_raw) in enumerate(happy_path):
+        request = Message(text=request_raw) if isinstance(request_raw, str) else request_raw
+        reference_response = (
+            Message(text=reference_response_raw) if isinstance(reference_response_raw, str) else reference_response_raw
+        )
         ctx = pipeline(request, ctx_id)
         candidate_response = ctx.last_response
         if printout_enable:

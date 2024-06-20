@@ -89,14 +89,14 @@ Example flow & script
                 RESPONSE: Message(),  # the response of the initial node is skipped
                 TRANSITIONS: {
                     ("greeting_flow", "greeting_node"):
-                        cnd.exact_match(Message("/start")),
+                        cnd.exact_match("/start"),
                 },
             },
             "greeting_node": {
                 RESPONSE: Message("Hi!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "game_start_node"):
-                        cnd.exact_match(Message("Hello!"))
+                        cnd.exact_match("Hello!")
                 }
             },
             "fallback_node": {
@@ -111,14 +111,14 @@ Example flow & script
                 RESPONSE: Message("Let's play ping-pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"):
-                        cnd.exact_match(Message("Ping!")),
+                        cnd.exact_match("Ping!"),
                 },
             },
             "response_node": {
                 RESPONSE: Message("Pong!"),
                 TRANSITIONS: {
                     ("ping_pong_flow", "response_node"):
-                        cnd.exact_match(Message("Ping!")),
+                        cnd.exact_match("Ping!"),
                 },
             },
         },
@@ -289,9 +289,9 @@ conversational service.
 .. code-block:: python
 
     happy_path = (
-        (Message("/start"), Message("Hi!")),
-        (Message("Hello!"), Message("Let's play ping-pong!")),
-        (Message("Ping!"), Message("Pong!"))
+        ("/start", "Hi!"),
+        ("Hello!", "Let's play ping-pong!"),
+        ("Ping!", "Pong!")
     )
 
 A special function is then used to ascertain complete identity of the messages taken from

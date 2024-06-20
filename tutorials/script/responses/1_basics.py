@@ -29,31 +29,27 @@ toy_script = {
     "greeting_flow": {
         "start_node": {
             RESPONSE: Message(""),
-            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": exact_match("Hi")},
         },
         "node1": {
             RESPONSE: Message("Hi, how are you?"),
-            TRANSITIONS: {
-                "node2": exact_match(Message("i'm fine, how are you?"))
-            },
+            TRANSITIONS: {"node2": exact_match("i'm fine, how are you?")},
         },
         "node2": {
             RESPONSE: Message("Good. What do you want to talk about?"),
-            TRANSITIONS: {
-                "node3": exact_match(Message("Let's talk about music."))
-            },
+            TRANSITIONS: {"node3": exact_match("Let's talk about music.")},
         },
         "node3": {
             RESPONSE: Message("Sorry, I can not talk about music now."),
-            TRANSITIONS: {"node4": exact_match(Message("Ok, goodbye."))},
+            TRANSITIONS: {"node4": exact_match("Ok, goodbye.")},
         },
         "node4": {
             RESPONSE: Message("bye"),
-            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": exact_match("Hi")},
         },
         "fallback_node": {
             RESPONSE: Message("Ooops"),
-            TRANSITIONS: {"node1": exact_match(Message("Hi"))},
+            TRANSITIONS: {"node1": exact_match("Hi")},
         },
     }
 }
