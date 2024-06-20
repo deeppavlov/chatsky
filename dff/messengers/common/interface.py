@@ -32,7 +32,6 @@ class MessengerInterface(abc.ABC):
         self.task = None
         self.running_in_foreground = False
 
-
     @abc.abstractmethod
     async def connect(self, *args):
         """
@@ -45,11 +44,7 @@ class MessengerInterface(abc.ABC):
         raise NotImplementedError
 
     async def run_in_foreground(
-        self, 
-        pipeline: Pipeline,
-        loop: PollingInterfaceLoopFunction = lambda: True,
-        timeout: float = 0,
-        *args
+        self, pipeline: Pipeline, loop: PollingInterfaceLoopFunction = lambda: True, timeout: float = 0, *args
     ):
         self.running_in_foreground = True
         self.pipeline = pipeline
@@ -73,6 +68,7 @@ class PollingMessengerInterface(MessengerInterface):
     """
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
+
     # self.running seems very similar to self.running_in_foreground. Are they the same thing or not? Maybe not, because connect() can still be called by anyone without running in foreground, though very unlikely - most will use pipeline.run() calling run_in_foreground().
     def __init__(self):
         self.request_queue = asyncio.Queue()
@@ -160,8 +156,11 @@ class PollingMessengerInterface(MessengerInterface):
         loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
-        await asyncio.gather(self._polling_loop(loop=loop, timeout=timeout), asyncio.shield(self._worker()), asyncio.shield(self._worker()))
-        print("connect() ended!")
+        await asyncio.gather(
+            self._polling_loop(loop=loop, timeout=timeout),
+            asyncio.shield(self._worker()),
+            asyncio.shield(self._worker()),
+        )
 
     def _on_exception(self, e: BaseException):
         """
