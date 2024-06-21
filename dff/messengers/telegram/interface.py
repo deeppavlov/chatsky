@@ -1,10 +1,14 @@
 from pathlib import Path
-from typing import Optional
-from telegram import Update
+from typing import Any, Optional
 
 from dff.pipeline.types import PipelineRunnerFunction
 
 from .abstract import _AbstractTelegramInterface
+
+try:
+    from telegram import Update
+except ImportError:
+    Update = Any
 
 
 class LongpollingInterface(_AbstractTelegramInterface):
