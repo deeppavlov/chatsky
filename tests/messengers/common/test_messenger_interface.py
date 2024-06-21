@@ -42,7 +42,7 @@ class BaseTestPollingInterface(PollingMessengerInterface):
             self.obtained_updates = True
         return not self.obtained_updates
 
-    def _get_updates(self):
+    async def _get_updates(self):
         if len(self.requests) > 0:
             request = self.requests.pop(0)
             return [(request[0], Message(str(request[1])))]
@@ -63,7 +63,7 @@ def test_echo_responses():
             self.received_updates = []
             self.obtained_updates = False
 
-        def _get_updates(self):
+        async def _get_updates(self):
             if len(self.requests) > 0:
                 request = self.requests.pop(0)
                 return [(self.ctx_id, Message(text=str(request)))]
@@ -125,31 +125,24 @@ def test_worker_shielding():
         def not_obtained_requests(self):
             if self.requests_count == len(self.expected_updates):
                 self.obtained_requests = True
+                self.shutdown()
+                # This shuts down the interface via the main method. The asyncio.CancelledError won't affect the workers due to shielding. If all the messages still get processed, then the workers are shielded.
             return not self.obtained_requests
 
-        def _get_updates(self):
+        async def _get_updates(self):
             if len(self.requests) > 0:
                 self.requests_count += 1
                 request = self.requests.pop(0)
                 return [(self.ctx_id, Message(text=str(request)))]
 
-        async def _polling_loop(
-            self,
-            loop = lambda: True,
-            # poll_timeout: float = 0,
-            timeout: float = 0,
-        ):
-            try:
-                while loop() and self.running:
-                    await asyncio.shield(self._polling_job())  # shield from cancellation
-                    await asyncio.sleep(timeout)
-            finally:
-                self.running = False
-                print(loop(), self.running)
-                for i in range(2):
-                    self.request_queue.put_nowait(None)
-                # This shuts down the interface via the main method. The asyncio.CancelledError won't affect the workers due to shielding. If all the messages still get processed, then the workers are shielded.
-                asyncio.run(self.shutdown())
+        async def _process_request(self, ctx_id, update: Message, pipeline: Pipeline):
+            while self.running:
+                await asyncio.sleep(0.05)
+            context = await pipeline._run_pipeline(update, ctx_id)
+            if context.last_response.text == "id: 1":
+                await asyncio.sleep(0)
+            await self._respond(ctx_id, context.last_response)
+                
 
         async def cleanup(self, *args):
             await asyncio.sleep(0.1)
@@ -212,10 +205,13 @@ def test_shielding():
 
                 # asyncio.run(self.shutdown())
                 # raise KeyboardInterrupt
+                await asyncio.sleep(0)
                 # await asyncio.sleep(20)
-                time.sleep(20)
+                # time.sleep(20)
+                # await asyncio.sleep(0)
+                # time.sleep(20)
                 os.kill(os.getpid(), signal.SIGINT)
-                await asyncio.sleep(20)
+                # await asyncio.sleep(20)
 
         async def cleanup(self, *args):
             await asyncio.sleep(0.1)
@@ -231,6 +227,8 @@ def test_shielding():
     )
     interface = new_pipeline.messenger_interface
     asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=interface.not_obtained_requests))
+    print(interface.expected_updates)
+    print(interface.received_updates)
     for i in range(len(interface.expected_updates)):
         assert interface.expected_updates[i] == interface.received_updates[i]
     assert interface.not_obtained_updates() == False

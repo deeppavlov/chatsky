@@ -12,6 +12,7 @@ import logging
 import uuid
 import signal
 import time # Don't forget to remove this
+import contextlib
 
 from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
 
@@ -35,6 +36,8 @@ class MessengerInterface(abc.ABC):
         self.task = None
         self.running_in_foreground = False
         self.running = True
+        self.stopped = False
+        self.shielded = False # This determines whether the interface wants to be shut down with task.cancel() or just switching a flag. Let's say PollingMessengerInterface wants task.cancel()
 
     @abc.abstractmethod
     async def connect(self, *args):
@@ -47,11 +50,16 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
+# This is an optional method, so no need to make it abstract, I think.
+    async def cleanup(self, *args):
+        pass
+
     async def run_in_foreground(
         self, pipeline: Pipeline, loop: PollingInterfaceLoopFunction = lambda: True, timeout: float = 0, *args
     ):
         self.running_in_foreground = True
         self.pipeline = pipeline
+        self.original_sigint_handler = signal.getsignal(signal.SIGINT)
         signal.signal(signal.SIGINT, pipeline.sigint_handler)
         # TO-DO: Clean this up and/or think this through (connect() methods are different for various MessengerInterface() classes)
         if isinstance(self.pipeline.messenger_interface, PollingMessengerInterface):
@@ -60,27 +68,60 @@ class MessengerInterface(abc.ABC):
             self.task = asyncio.create_task(self.connect(self.pipeline._run_pipeline, *args))
         else:
             self.task = asyncio.create_task(self.connect(self.pipeline._run_pipeline, *args))
+        # await self.task
+        #"""
         try:
             await self.task
         except asyncio.CancelledError:
             await self.cleanup()
-        # So, apparently, Ctrl+C throws this exception, but it just isn't caught here. Where does it go?
-
-            # Placeholder for any other cleanup code.
+        #"""
         # Allowing other interfaces (and all async tasks) to work too
+        """
+        with contextlib.suppress(asyncio.CancelledError):
+            await self.task
+        await asyncio.sleep(0)
+        """
+        self.stopped = True
+       
+        # Placeholder for any cleanup code.
 
-# This is an optional method, so no need to make it abstract, I think.
-    async def cleanup(self, *args):
-        pass
 
     # I can make shutdown() work for PollingMessengerInterface, but I don't know the structure of Telegram Messenger Interfaces. Right now, this ends the main task and sets a flag self.running to False, so that any async tasks in loops can see that and turn off as soon as they are done.
     async def shutdown(self):
         logger.info(f"messenger_interface.shutdown() called - shutting down interface")
         self.running = False
+        try:
+            await self.task
+        except asyncio.CancelledError:
+            # raise asyncio.CancelledError
+            # await asyncio.sleep(0)
+            if not self.stopped:
+                raise asyncio.CancelledError
+
+        """
+        def raise_exception(signum, frame):
+            raise ZeroDivisionError
+        signal.signal(signal.SIGINT, raise_exception)
+        """
+        """
         print(self.task)
-        # time.sleep(0.1)
         self.task.cancel()
-        await self.task
+        # time.sleep(0.1)
+        # await self.task
+        """
+        """
+
+        print("this should've stopped")
+        
+        """
+        """
+        await asyncio.sleep(0)
+        with contextlib.suppress(asyncio.CancelledError):
+            await self.task
+        await self.cleanup()
+        """
+        # raise HelloException
+        
         # raise asyncio.CancelledError
         """
         self.task.cancel()
@@ -97,6 +138,7 @@ class PollingMessengerInterface(MessengerInterface):
     # self.running seems very similar to self.running_in_foreground. Are they the same thing or not? Maybe not, because connect() can still be called by anyone without running in foreground, though very unlikely - most will use pipeline.run() calling run_in_foreground().
     def __init__(self):
         self.request_queue = asyncio.Queue()
+        self.shielded = True # Would like task.cancel()
         super().__init__()
 
     @abc.abstractmethod
@@ -121,7 +163,6 @@ class PollingMessengerInterface(MessengerInterface):
         Obtain Lock over the current context,
         Process the update and send it.
         """
-        # So, I added a break if there're no more jobs. It's accomplished by sending a special 'None' request to the queue (one for each worker), because otherwise _worker_job() will forever be awaiting a queue.get() function, even though self.running = False. I don't see any other obvious solutions. Some code could be moved to the `worker()`, actually, for code style.
         request = await self.request_queue.get()
         if request is not None:
             (ctx_id, update) = request
@@ -155,27 +196,35 @@ class PollingMessengerInterface(MessengerInterface):
             self.bot.request_updates()
         """
 
-    # When _get_updates() returns None, the program would break.
-    async def _polling_job(self):
-        received_updates = self._get_updates()
-        if received_updates is not None:
-            for update in received_updates:
-                await self.request_queue.put(update)
+    async def _polling_job(self, poll_timeout: float):
+        try:
+            coroutine = asyncio.wait_for(self._get_updates(), timeout=poll_timeout)
+            received_updates = await coroutine
+            if received_updates is not None:
+                for update in received_updates:
+                    await self.request_queue.put(update)
+        except TimeoutError:
+            # self.shutdown()
+            # Shutting down is probably too extreme, unless it's several times in a row maybe.
+            logger.info("polling_job failed - timed out")
 
     async def _polling_loop(
         self,
         loop: PollingInterfaceLoopFunction = lambda: True,
-        # poll_timeout: float = 0,
+        poll_timeout: float = None,
         timeout: float = 0,
     ):
         try:
             while loop() and self.running:
-                await asyncio.shield(self._polling_job())  # shield from cancellation
+                await asyncio.shield(self._polling_job(poll_timeout))  # shield from cancellation
                 await asyncio.sleep(timeout)
         finally:
             self.running = False
             print("loop ending")
+            logger.info(f"polling_loop stopped working - either the stop signal was received or the loop() condition was false.")
+            # If there're no more jobs/stop signal received, a special 'None' request is sent to the queue (one for each worker), they shut down the workers.
             # In case of more workers than two, change the number of 'None' requests to the new number of workers.
+            # for i in range(number_of_workers)
             for i in range(2):
                 self.request_queue.put_nowait(None)
 
@@ -184,11 +233,13 @@ class PollingMessengerInterface(MessengerInterface):
         loop: PollingInterfaceLoopFunction = lambda: True,
         timeout: float = 0,
     ):
+        #"""
         await asyncio.gather(
             self._polling_loop(loop=loop, timeout=timeout),
             asyncio.shield(self._worker()),
             asyncio.shield(self._worker()),
         )
+        #"""
         """
         try:
             await asyncio.gather(
@@ -198,6 +249,7 @@ class PollingMessengerInterface(MessengerInterface):
             )
         except asyncio.CancelledError:
             await self.cleanup()
+            raise
         """
 
     def _on_exception(self, e: BaseException):
