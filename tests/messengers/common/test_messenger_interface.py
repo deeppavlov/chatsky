@@ -111,12 +111,13 @@ def test_context_lock():
         assert interface.expected_updates[i][1] == interface.received_updates[i]
     assert interface.not_obtained_updates() == False
 
+
 def test_worker_shielding():
     class TestPollingInterface(BaseTestPollingInterface):
         def __init__(self):
             super().__init__()
             self.ctx_id = uuid.uuid4()
-            self.requests = ["1sa","nb2","3fdg","g46","2sh2","h31","m56", "72ds"]
+            self.requests = ["1sa", "nb2", "3fdg", "g46", "2sh2", "h31", "m56", "72ds"]
             self.expected_updates = self.requests.copy()
             self.received_updates = []
             self.obtained_requests = False
@@ -142,7 +143,6 @@ def test_worker_shielding():
             if context.last_response.text == "id: 1":
                 await asyncio.sleep(0)
             await self._respond(ctx_id, context.last_response)
-                
 
         async def cleanup(self, *args):
             await asyncio.sleep(0.1)
@@ -162,12 +162,13 @@ def test_worker_shielding():
     assert interface.not_obtained_updates() == False
     assert interface.not_obtained_requests() == False
 
+
 def test_shielding():
     class TestPollingInterface(BaseTestPollingInterface):
         def __init__(self):
             super().__init__()
             self.ctx_id = uuid.uuid4()
-            self.requests = ["1sa","nb2","3fdg","g46","2sh2","h31","m56", "72ds"]
+            self.requests = ["1sa", "nb2", "3fdg", "g46", "2sh2", "h31", "m56", "72ds"]
             self.expected_updates = self.requests.copy()
             self.received_updates = []
             self.obtained_requests = False
@@ -178,28 +179,28 @@ def test_shielding():
                 self.obtained_requests = True
             return not self.obtained_requests
 
-        def _get_updates(self):
+        async def _get_updates(self):
             if len(self.requests) > 0:
                 self.requests_count += 1
                 request = self.requests.pop(0)
                 return [(self.ctx_id, Message(text=str(request)))]
 
         async def _polling_loop(
-            self,
-            loop = lambda: True,
-            # poll_timeout: float = 0,
-            timeout: float = 0,
+                self,
+                loop=lambda: True,
+                poll_timeout: float = None,
+                timeout: float = 0,
         ):
             try:
                 while loop() and self.running:
-                    await asyncio.shield(self._polling_job())  # shield from cancellation
+                    await asyncio.shield(self._polling_job(poll_timeout))  # shield from cancellation
                     await asyncio.sleep(timeout)
             finally:
                 self.running = False
                 print(loop(), self.running)
                 for i in range(2):
                     self.request_queue.put_nowait(None)
-                
+
                 # This shuts down the entire program via graceful termination. If the received messages are correct even after a SIGINT, the program has working graceful termination.
                 # Ok, so it's interesting. When using time.sleep() graceful termination works, but when using an 'await asyncio.sleep()' the test breaks, because the exception from 'shutdown()' isn't caught. I couldn't figure it out, but now I think it's logical. When SIGINT is received by a new signal handler that I made, the program throws an exception into whichever async function it's currently in, could be any of them.
 
