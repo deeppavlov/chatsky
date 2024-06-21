@@ -52,7 +52,32 @@
     "outgoing": {
         "simple_message": {
             "message": "{\"text\":\"Hi\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "methods_called":[ "https://api.vk.com/method/messages.send?user_id=42&random_id=0&message=Hi&v=5.81&access_token=token"]
+            "trace":[
+                {
+                    "request_method": "https://api.vk.com/method/messages.send?user_id=42&random_id=0&message=Hi&v=5.81&access_token=token"
+                }
+            ]
+        },
+        "file_attached": {
+            "message": "{\"text\":\"Here is your file\",\"commands\":null,\"attachments\":[{\"source\":\"/home/askatasuna/Documents/DeepPavlov/DFF/dialog_flow_framework/tests/messengers/vk/test_tutorial.json\",\"cached_filename\":null,\"id\":null,\"title\":null,\"use_cache\":true,\"dff_attachment_type\":\"document\",\"__pickled_extra_fields__\":[]}],\"annotations\":null,\"misc\":null,\"original_message\":null,\"__pickled_extra_fields__\":[]}",
+            "trace": [
+                {
+                    "request_method": "https://api.vk.com/method/messages.send?user_id=42&random_id=0&message=Hi&v=5.81&access_token=token"
+                },
+                {
+                    "request_method": "https://api.vk.com/method/docs.getMessagesUploadServer?peer_id=42&group_id=&v=5.81&access_token=token"
+                },
+                {
+                    "request_method": "https://dummy_upload_url",
+                    "file": -348252432389113352
+                },
+                {
+                    "request_method": "https://api.vk.com/method/docs.save?file=dummy_file&title=&group_id=&v=5.81&access_token=token"
+                },
+                {
+                    "request_method": "https://api.vk.com/method/messages.send?user_id=42&random_id=0&message=Here is your file&attachment=doc4321_1234&group_id=&v=5.81&access_token=token"
+                }
+            ]
         }
     }
 }

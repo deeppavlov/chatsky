@@ -7,6 +7,7 @@ from typing import Callable, Optional
 # import asyncio
 # import aiofiles
 import aiohttp
+from aiohttp import FormData
 
 import logging
 import requests
@@ -22,9 +23,15 @@ logger = logging.getLogger(__name__)
 logging.basicConfig(level=logging.INFO)
 
 
-async def vk_api_call(method: str):
+async def vk_api_call(method: str, file: list = []) -> dict:
     async with aiohttp.ClientSession() as session:
-        async with session.post(method) as response:
+        if file != []:
+            name, file_bytes, filename = file[0][0], file[0][1][1], file[0][1][0]
+            data = FormData()
+            data.add_field(name, file_bytes, filename=filename)
+        else:
+            data = None
+        async with session.post(method, data=data) as response:
             return await response.json()
 
 
@@ -80,7 +87,7 @@ class FilesOpener:
 
                 filename = file.name if hasattr(file, "name") else ".jpg"
             else:
-                filename = file
+                filename = str(file)
                 if "http" in filename:
                     f = io.BytesIO(requests.get(filename).content)
                 else:
@@ -167,11 +174,9 @@ class VKWrapper:
 
             logger.info(f"Uploading {attachment_source}")
             with FilesOpener(attachment_source) as photo_files:
-                uploaded_photo_data = requests.post(
-                    upload_url, files=photo_files
-                ).json()
+                uploaded_data = await vk_api_call(upload_url, file=photo_files)
 
-            saved_photo_data = await self.save_photo(uploaded_photo_data, caption=title)
+            saved_photo_data = await self.save_photo(uploaded_data, caption=title)
 
             return saved_photo_data
 
@@ -180,11 +185,11 @@ class VKWrapper:
 
             logger.info(f"Uploading {attachment_source}")
             with FilesOpener(attachment_source, key_format="file") as files:
-                uploaded_photo_data = await vk_api_call(upload_url, files=files).json()
+                uploaded_data = await vk_api_call(upload_url, file=files)
 
-            saved_doc_data = await self.save_document(uploaded_photo_data, title=title)
+            saved_doc_data = await self.save_document(uploaded_data, title=title)
 
-            return saved_doc_data["response"]
+            return saved_doc_data
 
         elif attachment_type == "video":
             raise NotImplementedError()
@@ -198,17 +203,23 @@ class VKWrapper:
         return updates["updates"]
 
     async def send_message(self, response: str, id, attachment_list):
+        attachments  = []
         if attachment_list != []:
             for attachment in attachment_list:
                 data_to_send = await self.upload_attachment(
                     id, attachment["source"], attachment["type"]
                 )
-                attachment_list.append(
-                    f"photo{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}"
+                if attachment['type'] == "doc":
+                    attachments.append(
+                    f"{attachment['type']}{data_to_send['doc']['owner_id']}_{data_to_send['doc']['id']}"
                 )
+                else:    
+                    attachments.append(
+                        f"{attachment['type']}{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}"
+                    )
                 # elif isinstance(attachment, Link):
                 #     response.text += f"[{attachment.source}|{attachment.title}]"
-            attachment_string = ",".join(attachment_list).strip(",")
+            attachment_string = ",".join(attachments).strip(",")
 
             api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response}&attachment={attachment_string}&group_id={self.group_id}&v=5.81&access_token={self.token}"
         else:
@@ -242,10 +253,12 @@ class PollingVKInterface(PollingMessengerInterface):
                 for attachment in response.attachments:
                     # add id to each attachment that is being generated in upload_attachment method
                     if isinstance(attachment, Image):
+                        print("Photo Attachment", attachment)
                         attachment_list.append(
                             {"type": "photo", "source": attachment.source}
                         )
                     elif isinstance(attachment, Document):
+                        print("Document Attachment", attachment)
                         attachment_list.append(
                             {"type": "doc", "source": attachment.source}
                         )
@@ -255,10 +268,8 @@ class PollingVKInterface(PollingMessengerInterface):
                         attachment_list.append(
                             {"type": "audio", "source": attachment.source}
                         )
-                    # elif isinstance(attachment, Link):
-                    #     response.text += f"[{attachment.source}|{attachment.title}]"
+            print("Attachment list", attachment_list, len(attachment_list))
             self.bot.send_message(resp.text, resp.id, attachment_list)
-            # return await self.bot.send_message("resp", "id", attachment_list)
             
 
         logger.info("Responded.")
