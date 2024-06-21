@@ -90,6 +90,7 @@ class MessengerInterface(abc.ABC):
     async def shutdown(self):
         logger.info(f"messenger_interface.shutdown() called - shutting down interface")
         self.running = False
+        self.task.cancel()
         try:
             await self.task
         except asyncio.CancelledError:
