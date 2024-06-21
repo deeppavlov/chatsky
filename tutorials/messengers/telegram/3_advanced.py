@@ -212,7 +212,7 @@ script = {
         },
         "thumbnail_node": {
             RESPONSE: Message(
-                "Here's your document with tumbnail!"
+                "Here's your document with tumbnail! "
                 + "Run /start command again to restart.",
                 attachments=[Document(**document_data)],
             ),
