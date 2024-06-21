@@ -63,7 +63,7 @@ in terms and datastructures of Dialog Flow Framework.
 
 EXAMPLE_ATTACHMENT_SOURCE = (
     "https://github.com/deeppavlov/"
-    "dialog_flow_framework/wiki/example_attachments"
+    + "dialog_flow_framework/wiki/example_attachments"
 )
 
 image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
@@ -78,8 +78,10 @@ Run /start command again to restart\.
 location_data = {"latitude": 59.9386, "longitude": 30.3141}
 
 sticker_data = {
-    "id": "CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8v"
-    "gp1wACRygAAiSjCUtLa7RHZy76ezQE",
+    "id": (
+        "CAACAgIAAxkBAAErBZ1mKAbZvEOmhscojaIL5q0u8v"
+        + "gp1wACRygAAiSjCUtLa7RHZy76ezQE"
+    ),
 }
 
 image_data = {
@@ -106,7 +108,7 @@ async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
         atch_hash = hash(await atch[0].get_bytes(pipe.messenger_interface))
         resp_format = (
             "Here's your previous request hash: `{}`!\n"
-            "Run /start command again to restart."
+            + "Run /start command again to restart."
         )
         return Message(
             resp_format.format(atch_hash, parse_mode=ParseMode.MARKDOWN_V2)
@@ -114,7 +116,7 @@ async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
     else:
         return Message(
             "Last request did not contain any data attachment!\n"
-            "Run /start command again to restart."
+            + "Run /start command again to restart."
         )
 
 
@@ -193,8 +195,8 @@ script = {
         "attachments_node": {
             RESPONSE: Message(
                 "Here's your message with multiple attachments "
-                "(a location and a sticker)!\n"
-                "Run /start command again to restart.",
+                + "(a location and a sticker)!\n"
+                + "Run /start command again to restart.",
                 attachments=[
                     Location(**location_data),
                     Sticker(**sticker_data),
@@ -203,22 +205,22 @@ script = {
         },
         "secret_node": {
             RESPONSE: Message(
-                "Here's your secret image!"
-                "Run /start command again to restart.",
+                "Here's your secret image! "
+                + "Run /start command again to restart.",
                 attachments=[Image(**image_data)],
             ),
         },
         "thumbnail_node": {
             RESPONSE: Message(
                 "Here's your document with tumbnail!"
-                "Run /start command again to restart.",
+                + "Run /start command again to restart.",
                 attachments=[Document(**document_data)],
             ),
         },
         "hash_init_node": {
             RESPONSE: Message(
                 "Alright! Now send me a message with data attachment "
-                "(audio, video, animation, image, sticker or document)!"
+                + "(audio, video, animation, image, sticker or document)!"
             ),
             TRANSITIONS: {"hash_request_node": cnd.true()},
         },
@@ -228,7 +230,7 @@ script = {
         "fallback_node": {
             RESPONSE: Message(
                 "Bot has entered unrecoverable state:"
-                "/\nRun /start command again to restart."
+                + "/\nRun /start command again to restart."
             ),
         },
     },

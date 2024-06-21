@@ -52,7 +52,7 @@ be found here:
 
 EXAMPLE_ATTACHMENT_SOURCE = (
     "https://github.com/deeppavlov/"
-    "dialog_flow_framework/wiki/example_attachments"
+    + "dialog_flow_framework/wiki/example_attachments"
 )
 
 location_data = {"latitude": 50.65, "longitude": 3.916667}
@@ -64,8 +64,10 @@ contact_data = {
 }
 
 sticker_data = {
-    "id": "CAACAgIAAxkBAAErAAFXZibO5ksphCKS"
-    "XSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE",
+    "id": (
+        "CAACAgIAAxkBAAErAAFXZibO5ksphCKS"
+        + "XSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE"
+    ),
     "title": "A sticker I've just found",
 }
 
@@ -146,8 +148,8 @@ script = {
         "intro_node": {
             RESPONSE: Message(
                 'Type "location", "contact", "poll", "sticker" '
-                '"audio", "video", "animation", "image", '
-                '"document" or to receive a corresponding attachment!'
+                + '"audio", "video", "animation", "image", '
+                + '"document" or to receive a corresponding attachment!'
             ),
         },
         "location_node": {
@@ -227,9 +229,9 @@ script = {
         "fallback_node": {
             RESPONSE: Message(
                 "Unknown attachment type, try again! "
-                'Supported attachments are: "location", '
-                '"contact", "poll", "sticker", "audio", '
-                '"video", "animation", "image" and "document".'
+                + 'Supported attachments are: "location", '
+                + '"contact", "poll", "sticker", "audio", '
+                + '"video", "animation", "image" and "document".'
             ),
         },
     },
