@@ -109,7 +109,7 @@ async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
         atch = await atch[0].get_bytes(pipe.messenger_interface)
         atch_hash = sha256(atch).hexdigest()
         resp_format = (
-            "Here's your previous request hash: `{}`!\n"
+            "Here's your previous request first attachment sha256 hash: `{}`!\n"
             + "Run /start command again to restart."
         )
         return Message(
@@ -164,7 +164,7 @@ script = {
                                 ],
                                 [
                                     InlineKeyboardButton(
-                                        "Attachment bytes hash!",
+                                        "First attachment bytes hash!",
                                         callback_data="hash",
                                     ),
                                 ],
