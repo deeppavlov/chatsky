@@ -1,6 +1,7 @@
 from asyncio import get_event_loop
 from contextlib import contextmanager
 from importlib import import_module
+from hashlib import sha256
 from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel
@@ -37,9 +38,8 @@ class MockBot(BaseModel, arbitrary_types_allowed=True):
     @staticmethod
     def representation(any: Any) -> str:
         if isinstance(any, bytes):
-            return "<<bytes>>"
-        else:
-            return any.__repr__()
+            any = sha256(any).hexdigest()
+        return any.__repr__()
 
     def __getattribute__(self, name: str) -> Any:
         async def set_trace(*args, **kwargs):
@@ -93,8 +93,8 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
 
     @contextmanager
     def _wrap_populate_attachment(self) -> Iterator[None]:
-        async def wrapped_populate_attachment(_: DataAttachment) -> bytes:
-            return bytes()
+        async def wrapped_populate_attachment(att: DataAttachment) -> bytes:
+            return str(att.id).encode()
 
         original_populate_attachment = self.interface.populate_attachment
         self.interface.populate_attachment = wrapped_populate_attachment

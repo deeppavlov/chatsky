@@ -15,6 +15,7 @@ Telegram API token is required to access telegram API.
 
 # %%
 import os
+from hashlib import sha256
 from urllib.request import urlopen
 
 from pydantic import HttpUrl
@@ -105,7 +106,8 @@ async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
         a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)
     ]
     if len(atch) > 0:
-        atch_hash = hash(await atch[0].get_bytes(pipe.messenger_interface))
+        atch = await atch[0].get_bytes(pipe.messenger_interface)
+        atch_hash = sha256(atch).hexdigest()
         resp_format = (
             "Here's your previous request hash: `{}`!\n"
             + "Run /start command again to restart."
