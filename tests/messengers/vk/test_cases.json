@@ -59,7 +59,7 @@
             ]
         },
         "file_attached": {
-            "message": "{\"text\":\"Here is your file\",\"commands\":null,\"attachments\":[{\"source\":\"/home/askatasuna/Documents/DeepPavlov/DFF/dialog_flow_framework/tests/messengers/vk/test_tutorial.json\",\"cached_filename\":null,\"id\":null,\"title\":null,\"use_cache\":true,\"dff_attachment_type\":\"document\",\"__pickled_extra_fields__\":[]}],\"annotations\":null,\"misc\":null,\"original_message\":null,\"__pickled_extra_fields__\":[]}",
+            "message": "{\"text\":\"Here is your file\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov-article.pdf\",\"cached_filename\":null,\"id\":null,\"title\":null,\"use_cache\":true,\"dff_attachment_type\":\"document\",\"__pickled_extra_fields__\":[]}],\"annotations\":null,\"misc\":null,\"original_message\":null,\"__pickled_extra_fields__\":[]}",
             "trace": [
                 {
                     "request_method": "https://api.vk.com/method/messages.send?user_id=42&random_id=0&message=Hi&v=5.81&access_token=token"

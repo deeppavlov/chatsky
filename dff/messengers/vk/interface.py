@@ -1,13 +1,12 @@
 """
 Interface
 ------------
+This module implements Polling Interface
+that can be used to interact with the VK API.
 """
 
 from typing import Callable, Optional
-# import asyncio
-# import aiofiles
 import aiohttp
-from aiohttp import FormData
 
 import logging
 import requests
@@ -27,7 +26,7 @@ async def vk_api_call(method: str, file: list = []) -> dict:
     async with aiohttp.ClientSession() as session:
         if file != []:
             name, file_bytes, filename = file[0][0], file[0][1][1], file[0][1][0]
-            data = FormData()
+            data = aiohttp.FormData()
             data.add_field(name, file_bytes, filename=filename)
         else:
             data = None
@@ -111,6 +110,9 @@ class FilesOpener:
 
 
 class VKWrapper:
+    """
+    Class that handles interaction with VK API.
+    """
     def __init__(self, token: str, group_id: str) -> None:
         self.token = token
         self.group_id = group_id
@@ -217,8 +219,6 @@ class VKWrapper:
                     attachments.append(
                         f"{attachment['type']}{data_to_send[0]['owner_id']}_{data_to_send[0]['id']}"
                     )
-                # elif isinstance(attachment, Link):
-                #     response.text += f"[{attachment.source}|{attachment.title}]"
             attachment_string = ",".join(attachments).strip(",")
 
             api_request = f"https://api.vk.com/method/messages.send?user_id={id}&random_id=0&message={response}&attachment={attachment_string}&group_id={self.group_id}&v=5.81&access_token={self.token}"
