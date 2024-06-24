@@ -22,6 +22,7 @@ GlobalUserTableAccessor*
 memory_debugging*
 opening_database*
 _globals.py
+venv*
 .vscode
 .coverage
 .coverage.*
