@@ -10,7 +10,7 @@ from typing import Any, Callable, Optional
 
 from dff.utils.messengers.verify_params import generate_extra_fields
 
-from dff.messengers.common import MessengerInterface
+from dff.messengers.common import MessengerInterfaceWithAttachments
 from dff.pipeline.types import PipelineRunnerFunction
 from dff.script.core.message import (
     Animation,
@@ -69,7 +69,7 @@ def _is_attachment_mediagroup_combinable(attachment: Attachment):
     )
 
 
-class _AbstractTelegramInterface(MessengerInterface):
+class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
     """
     Messenger interface mixin for Telegram API usage.
     """

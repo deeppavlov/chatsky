@@ -14,7 +14,7 @@ from uuid import uuid4
 from pydantic import BaseModel, Field, JsonValue, field_validator, FilePath, HttpUrl, model_serializer, model_validator
 from pydantic_core import Url
 
-from dff.messengers.common.interface import MessengerInterface
+from dff.messengers.common.interface import MessengerInterfaceWithAttachments
 from dff.utils.pydantic import JSONSerializableDict, SerializableVaue, json_pickle_serializer, json_pickle_validator
 
 
@@ -196,12 +196,12 @@ class DataAttachment(Attachment):
         with open(self.cached_filename, "wb") as file:
             file.write(data)
 
-    async def get_bytes(self, from_interface: MessengerInterface) -> Optional[bytes]:
+    async def get_bytes(self, from_interface: MessengerInterfaceWithAttachments) -> Optional[bytes]:
         """
         Download attachment bytes.
         If the attachment is represented by URL or saved in a file,
         it will be downloaded or read automatically.
-        Otherwise, a :py:meth:`~dff.messengers.common.MessengerInterface.populate_attachment`
+        Otherwise, a :py:meth:`~dff.messengers.common.MessengerInterfaceWithAttachments.populate_attachment`
         will be used for receiving attachment bytes by ID and title.
 
         :param from_interface: messenger interface the attachment was received from.

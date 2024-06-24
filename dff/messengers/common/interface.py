@@ -26,6 +26,23 @@ class MessengerInterface(abc.ABC):
     """
     Class that represents a message interface used for communication between pipeline and users.
     It is responsible for connection between user and pipeline, as well as for request-response transactions.
+    """
+
+    @abc.abstractmethod
+    async def connect(self, pipeline_runner: PipelineRunnerFunction):
+        """
+        Method invoked when message interface is instantiated and connection is established.
+        May be used for sending an introduction message or displaying general bot information.
+
+        :param pipeline_runner: A function that should process user request and return context;
+            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+        """
+        raise NotImplementedError
+
+
+class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
+    """
+    MessengerInterface subclass that has methods for attachment handling.
 
     :param attachments_directory: Directory where attachments will be stored.
         If not specified, the temporary directory will be used.
@@ -37,7 +54,7 @@ class MessengerInterface(abc.ABC):
     Attachments not in this list will be neglected.
     """
 
-    supported_response_attachment_types: set[type[Attachment]] = set()
+    supported_response_attachment_types: set[Type[Attachment]] = set()
     """
     Types of attachment that this messenger interface can send.
     Attachments not in this list will be neglected.
@@ -59,28 +76,16 @@ class MessengerInterface(abc.ABC):
         self.attachments_directory.mkdir(parents=True, exist_ok=True)
 
     @abc.abstractmethod
-    async def connect(self, pipeline_runner: PipelineRunnerFunction):
-        """
-        Method invoked when message interface is instantiated and connection is established.
-        May be used for sending an introduction message or displaying general bot information.
-
-        :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
-        """
-        raise NotImplementedError
-
     async def populate_attachment(self, attachment: DataAttachment) -> bytes:
         """
         Method that can be used by some messenger interfaces for attachment population.
-        E.g. if a file attachment consists of an URL of the file uploaded to the messenger servers,
+        E.g. if a file attachment consists of a URL of the file uploaded to the messenger servers,
         this method is the right place to call the messenger API for the file downloading.
-        Since many messenger interfaces don't have built-in attachment population functionality,
-        this method is not abstract and thus should not always be overridden.
 
         :param attachment: Attachment that should be populated.
         :return: The attachment bytes.
         """
-        raise RuntimeError(f"Messanger interface {type(self).__name__} can't populate attachment {attachment}!")
+        raise NotImplementedError
 
 
 class PollingMessengerInterface(MessengerInterface):
@@ -163,8 +168,7 @@ class CallbackMessengerInterface(MessengerInterface):
     Callback message interface is waiting for user input and answers once it gets one.
     """
 
-    def __init__(self, attachments_directory: Optional[Path] = None) -> None:
-        super().__init__(attachments_directory)
+    def __init__(self) -> None:
         self._pipeline_runner: Optional[PipelineRunnerFunction] = None
 
     async def connect(self, pipeline_runner: PipelineRunnerFunction):
