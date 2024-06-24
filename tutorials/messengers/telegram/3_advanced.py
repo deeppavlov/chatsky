@@ -56,7 +56,7 @@ class for information about different arguments
 for sending attachments, `send_...` methods.
 
 Last option ("Raw attachments!") button might be especially interesting,
-because it shows how bot precepts different telegram attachments sent by user
+because it shows how bot percepts different telegram attachments sent by user
 in terms and datastructures of Dialog Flow Framework.
 """
 

@@ -1,8 +1,8 @@
 """
-Interface
-------------
-This module implements various interfaces for :py:class:`~dff.messengers.telegram.messenger.TelegramMessenger`
-that can be used to interact with the Telegram API.
+Telegram Base
+-------------
+This module implements a base interface for interactions with the
+Telegram API.
 """
 
 from pathlib import Path

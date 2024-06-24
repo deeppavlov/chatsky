@@ -178,17 +178,28 @@ class DataAttachment(Attachment):
     """
 
     source: Optional[Union[HttpUrl, FilePath]] = None
-    cached_filename: Optional[FilePath] = None
-    id: Optional[str] = None
+    """Attachment source -- either a URL to a file or a local filepath."""
     title: Optional[str] = None
+    """Text accompanying the data."""
     use_cache: bool = True
+    """
+    Whether to cache the file (only for URL and ID files).
+    Disable this if you want to always respond with the most up-to-date version of the file.
+    """
+    cached_filename: Optional[FilePath] = None
+    """This field stores a path to cached version of this file (retrieved from id or URL)."""
+    id: Optional[str] = None
+    """
+    ID of the file on a file server.
+    :py:meth:`~.MessengerInterfaceWithAttachments.populate_attachment` is used to retrieve bytes from ID.
+    """
 
     async def _cache_attachment(self, data: bytes, directory: Path) -> None:
         """
         Cache attachment, save bytes into a file.
 
         :param data: attachment data bytes.
-        :param directory: cache file where attachment will be saved.
+        :param directory: cache directory where attachment will be saved.
         """
 
         title = str(uuid4()) if self.title is None else self.title
@@ -198,11 +209,14 @@ class DataAttachment(Attachment):
 
     async def get_bytes(self, from_interface: MessengerInterfaceWithAttachments) -> Optional[bytes]:
         """
-        Download attachment bytes.
+        Retrieve attachment bytes.
         If the attachment is represented by URL or saved in a file,
         it will be downloaded or read automatically.
-        Otherwise, a :py:meth:`~dff.messengers.common.MessengerInterfaceWithAttachments.populate_attachment`
+        If cache use is allowed and the attachment is cached, cached file will be used.
+        Otherwise, a :py:meth:`~.MessengerInterfaceWithAttachments.populate_attachment`
         will be used for receiving attachment bytes by ID and title.
+
+        If cache use is allowed and the attachment is a URL or an ID, bytes will be cached locally.
 
         :param from_interface: messenger interface the attachment was received from.
         """
@@ -305,7 +319,7 @@ class Message(DataModel):
 
     It includes message text, list of commands included in the message,
     list of attachments, annotations, MISC dictionary (that consists of
-    user-defined parameters) and original message field that somehow represent
+    user-defined parameters) and original message field that represents
     the update received from messenger interface API.
     """
 

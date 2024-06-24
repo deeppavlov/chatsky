@@ -27,17 +27,23 @@ from dff.utils.testing.common import is_interactive_mode
 
 # %% [markdown]
 """
-In order to integrate your script with Telegram, you need an instance of
-`_AbstractTelegramMessenger` class and one of the following interfaces:
-`LongpollingInterface` or `WebhookInterface`.
+In order to integrate your script with Telegram, you need an instance of the
+%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface) class.
+Two of its child subclasses that can be instantiated
+are %mddoclink(api,messengers.telegram.interface,LongpollingInterface) and
+%mddoclink(api,messengers.telegram.interface,WebhookInterface).
 The latter requires a webserver, so here we use long polling interface.
 
-`_AbstractTelegramMessenger` encapsulates the bot logic. The only required
+%mddoclink(api,messengers.telegram.abstract,_AbstractTelegramInterface)
+encapsulates the bot logic. The only required
 argument for a bot to run is a token. Some other parameters
-(such as host, port, interval, etc.) can be passed as keyword arguments.
+(such as host, port, interval, etc.) can be passed as keyword arguments
+(for their specs see [documentations of the child subclasses](
+%doclink(api,messengers.telegram.interface)
+).
 
-The two interfaces connect the bot to Telegram. They can be passed directly
-to the DFF `Pipeline` instance.
+Either of the two interfaces connect the bot to Telegram.
+They can be passed directly to the DFF `Pipeline` instance.
 """
 
 
