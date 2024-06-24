@@ -100,7 +100,7 @@ def json_pickle_validator(model: Serializable) -> Serializable:
 
 PickleSerializer = PlainSerializer(pickle_serializer, when_used="json")
 PickleValidator = PlainValidator(pickle_validator)
-SerializableVaue = Annotated[Any, PickleSerializer, PickleValidator]
+SerializableValue = Annotated[Any, PickleSerializer, PickleValidator]
 """Annotation for field that makes it JSON serializable"""
 
 JSONPickleSerializer = WrapSerializer(json_pickle_serializer, when_used="json")

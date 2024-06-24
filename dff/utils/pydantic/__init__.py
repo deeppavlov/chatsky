@@ -1,6 +1,6 @@
 from .serializing import (
     JSONSerializableDict,
-    SerializableVaue,
+    SerializableValue,
     json_pickle_serializer,
     json_pickle_validator,
     pickle_serializer,

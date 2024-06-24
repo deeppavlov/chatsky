@@ -15,7 +15,7 @@ from pydantic import BaseModel, Field, JsonValue, field_validator, FilePath, Htt
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterfaceWithAttachments
-from dff.utils.pydantic import JSONSerializableDict, SerializableVaue, json_pickle_serializer, json_pickle_validator
+from dff.utils.pydantic import JSONSerializableDict, SerializableValue, json_pickle_serializer, json_pickle_validator
 
 
 class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
@@ -332,7 +332,7 @@ class Message(DataModel):
     ] = None
     annotations: Optional[JSONSerializableDict] = None
     misc: Optional[JSONSerializableDict] = None
-    original_message: Optional[SerializableVaue] = None
+    original_message: Optional[SerializableValue] = None
 
     def __init__(
         self,
