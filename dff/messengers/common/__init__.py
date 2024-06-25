@@ -4,6 +4,6 @@ from .interface import (
     MessengerInterface,
     MessengerInterfaceWithAttachments,
     PollingMessengerInterface,
-    CallbackMessengerInterface
+    CallbackMessengerInterface,
 )
 from .types import PollingInterfaceLoopFunction

@@ -4,6 +4,7 @@ Telegram Interfaces
 This module provides concrete implementations of the
 :py:class:`~._AbstractTelegramInterface`.
 """
+
 from pathlib import Path
 from typing import Any, Optional
 
