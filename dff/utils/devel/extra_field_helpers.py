@@ -1,9 +1,15 @@
+"""
+Extra field helpers
+-------------------
+Helpers for managing pydantic extra fields.
+"""
+
 from typing import List
 
 from pydantic import BaseModel
 
 
-def generate_extra_fields(attachment: BaseModel, extra_fields: List[str]):
+def grab_extra_fields(attachment: BaseModel, extra_fields: List[str]):
     """
     Convenience method for passing attachment extras as named arguments to API functions.
     This might be useful for making sure no typos appear in code.

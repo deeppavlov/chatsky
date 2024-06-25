@@ -8,7 +8,7 @@ Telegram API.
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from dff.utils.messengers.verify_params import generate_extra_fields
+from dff.utils.devel.extra_field_helpers import grab_extra_fields
 
 from dff.messengers.common import MessengerInterfaceWithAttachments
 from dff.pipeline.types import PipelineRunnerFunction
@@ -303,7 +303,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         chat_id,
                         attachment.latitude,
                         attachment.longitude,
-                        **generate_extra_fields(
+                        **grab_extra_fields(
                             attachment,
                             [
                                 "horizontal_accuracy",
@@ -320,7 +320,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         attachment.phone_number,
                         attachment.first_name,
                         attachment.last_name,
-                        **generate_extra_fields(
+                        **grab_extra_fields(
                             attachment,
                             ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id"],
                         ),
@@ -330,7 +330,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         chat_id,
                         attachment.question,
                         [option.text for option in attachment.options],
-                        **generate_extra_fields(
+                        **grab_extra_fields(
                             attachment,
                             [
                                 "is_anonymous",
@@ -353,7 +353,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                     await bot.send_sticker(
                         chat_id,
                         sticker,
-                        **generate_extra_fields(
+                        **grab_extra_fields(
                             attachment,
                             ["disable_notification", "protect_content", "reply_markup", "emoji", "message_effect_id"],
                         ),
@@ -365,7 +365,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaAudio(
                                     attachment_bytes,
-                                    **generate_extra_fields(
+                                    **grab_extra_fields(
                                         attachment,
                                         ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"],
                                     ),
@@ -376,7 +376,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(
+                                **grab_extra_fields(
                                     attachment,
                                     [
                                         "performer",
@@ -397,7 +397,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaVideo(
                                     attachment_bytes,
-                                    **generate_extra_fields(
+                                    **grab_extra_fields(
                                         attachment,
                                         [
                                             "filename",
@@ -415,7 +415,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(
+                                **grab_extra_fields(
                                     attachment,
                                     [
                                         "disable_notification",
@@ -437,7 +437,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaAnimation(
                                     attachment_bytes,
-                                    **generate_extra_fields(
+                                    **grab_extra_fields(
                                         attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail"]
                                     ),
                                 ),
@@ -447,7 +447,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(
+                                **grab_extra_fields(
                                     attachment,
                                     [
                                         "parse_mode",
@@ -468,7 +468,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaPhoto(
                                     attachment_bytes,
-                                    **generate_extra_fields(
+                                    **grab_extra_fields(
                                         attachment, ["filename", "caption", "parse_mode", "has_spoiler"]
                                     ),
                                 ),
@@ -478,7 +478,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(
+                                **grab_extra_fields(
                                     attachment,
                                     [
                                         "disable_notification",
@@ -498,7 +498,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaDocument(
                                     attachment_bytes,
-                                    **generate_extra_fields(
+                                    **grab_extra_fields(
                                         attachment,
                                         [
                                             "filename",
@@ -515,7 +515,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 chat_id,
                                 attachment_bytes,
                                 caption=message.text,
-                                **generate_extra_fields(
+                                **grab_extra_fields(
                                     attachment,
                                     [
                                         "disable_notification",
@@ -535,7 +535,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             chat_id,
                             attachment_bytes,
                             caption=message.text,
-                            **generate_extra_fields(
+                            **grab_extra_fields(
                                 attachment,
                                 [
                                     "disable_notification",
@@ -555,7 +555,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             chat_id,
                             attachment_bytes,
                             caption=message.text,
-                            **generate_extra_fields(
+                            **grab_extra_fields(
                                 attachment,
                                 [
                                     "disable_notification",
@@ -574,14 +574,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                     chat_id,
                     files,
                     caption=message.text,
-                    **generate_extra_fields(message, ["disable_notification", "protect_content", "message_effect_id"]),
+                    **grab_extra_fields(message, ["disable_notification", "protect_content", "message_effect_id"]),
                 )
                 message_text_covered = True
         if message.text is not None and not message_text_covered:
             await bot.send_message(
                 chat_id,
                 message.text,
-                **generate_extra_fields(
+                **grab_extra_fields(
                     message,
                     ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id"],
                 ),

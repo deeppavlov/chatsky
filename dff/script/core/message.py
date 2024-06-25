@@ -15,7 +15,7 @@ from pydantic import Field, field_validator, FilePath, HttpUrl, model_validator
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterfaceWithAttachments
-from dff.utils.pydantic import JSONSerializableDict, SerializableValue, JSONSerializableExtras
+from dff.utils.devel import JSONSerializableDict, SerializableValue, JSONSerializableExtras
 
 
 class DataModel(JSONSerializableExtras):

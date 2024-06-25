@@ -3,9 +3,9 @@ Serialization
 -------------
 Tools that provide JSON serialization via Pickle for unserializable objects.
 
-- :py:const:`~.SerializableValue`:
+- :py:data:`~.SerializableValue`:
     A field annotated with this will be pickled/unpickled during JSON-serialization/validation.
-- :py:const:`~.JSONSerializableDict`:
+- :py:data:`~.JSONSerializableDict`:
     A dictionary field annotated with this will make all its items smart-serializable:
     If an item is serializable -- nothing would change.
     Otherwise -- it will be serialized via pickle.
@@ -33,7 +33,7 @@ from pydantic_core import PydanticSerializationError
 
 _JSON_EXTRA_FIELDS_KEYS = "__pickled_extra_fields__"
 """
-This key is used in :py:const:`~.JSONSerializableDict` to remember pickled items.
+This key is used in :py:data:`~.JSONSerializableDict` to remember pickled items.
 """
 
 Serializable: TypeAlias = Dict[str, Union[JsonValue, Any, List[Any], Dict[str, Any]]]
@@ -137,7 +137,7 @@ JSONSerializableDict = Annotated[Serializable, JSONPickleSerializer, JSONPickleV
 """
 Annotation for dictionary or Pydantic model that makes all its fields JSON serializable.
 
-This uses a reserved dictionary key :py:const:`~._JSON_EXTRA_FIELDS_KEYS` to store
+This uses a reserved dictionary key :py:data:`~._JSON_EXTRA_FIELDS_KEYS` to store
 fields serialized that way.
 """
 
@@ -145,7 +145,7 @@ fields serialized that way.
 class JSONSerializableExtras(BaseModel, extra="allow"):
     """
     This model makes extra fields pickle-serializable.
-    Do not use :py:const:`~._JSON_EXTRA_FIELDS_KEYS` as an extra field name.
+    Do not use :py:data:`~._JSON_EXTRA_FIELDS_KEYS` as an extra field name.
     """
 
     def __init__(self, **kwargs):  # supress unknown arg warnings
