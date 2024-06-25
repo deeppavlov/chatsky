@@ -8,7 +8,7 @@ from urllib.request import urlopen
 import pytest
 from pydantic import ValidationError, HttpUrl, FilePath
 
-from dff.messengers.common.interface import MessengerInterface
+from dff.messengers.common.interface import MessengerInterfaceWithAttachments
 from dff.messengers.console import CLIMessengerInterface
 from dff.script.core.message import (
     Animation,
@@ -42,11 +42,11 @@ class UnserializableObject:
             return False
 
 
-class DFFCLIMessengerInterface(CLIMessengerInterface):
+class DFFCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAttachments):
     supported_response_attachment_types = {Document}
 
     def __init__(self, attachments_directory: Optional[Path] = None):
-        MessengerInterface.__init__(self, attachments_directory)
+        MessengerInterfaceWithAttachments.__init__(self, attachments_directory)
         self._ctx_id: Optional[Hashable] = None
         self._intro: Optional[str] = None
         self._prompt_request: str = "request: "
