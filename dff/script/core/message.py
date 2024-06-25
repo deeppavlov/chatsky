@@ -5,59 +5,25 @@ The :py:class:`.Message` class is a universal data model for representing a mess
 DFF. It only contains types and properties that are compatible with most messaging services.
 """
 
-from typing import Any, Callable, Dict, Literal, Optional, List, Union
+from typing import Literal, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 from uuid import uuid4
 
-from pydantic import BaseModel, Field, JsonValue, field_validator, FilePath, HttpUrl, model_serializer, model_validator
+from pydantic import Field, field_validator, FilePath, HttpUrl, model_validator
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterfaceWithAttachments
-from dff.utils.pydantic import JSONSerializableDict, SerializableValue, json_pickle_serializer, json_pickle_validator
+from dff.utils.pydantic import JSONSerializableDict, SerializableValue, JSONSerializableExtras
 
 
-class DataModel(BaseModel, extra="allow", arbitrary_types_allowed=True):
+class DataModel(JSONSerializableExtras):
     """
     This class is a Pydantic BaseModel that can have any type and number of extras.
     """
 
-    def __init__(self, **kwargs):
-        super().__init__(**kwargs)
-
-
-# TODO: inline once annotated __pydantic_extra__ will be available in pydantic
-def _json_extra_serializer(model: DataModel, original_serializer: Callable[[DataModel], JsonValue]) -> JsonValue:
-    """
-    Serialize model along with the `extras` field: i.e. all the fields not listed in the model.
-    This function should be used as "wrap" serializer.
-
-    :param model: Pydantic model for serialization.
-    :param original_serializer: Function originally used for serialization by Pydantic.
-    :return: Serialized model.
-    """
-
-    model_copy = model.model_copy(deep=True)
-    for extra_name in model.model_extra.keys():
-        delattr(model_copy, extra_name)
-    model_dict = original_serializer(model_copy)
-    model_dict.update(json_pickle_serializer(model.model_extra, original_serializer))
-    return model_dict
-
-
-# TODO: inline once annotated __pydantic_extra__ will be available in pydantic
-def _json_extra_validator(model: DataModel) -> DataModel:
-    """
-    Validate model along with the `extras` field: i.e. all the fields not listed in the model.
-    This function should be used as "after" validator.
-
-    :param model: Pydantic model for validation.
-    :return: Validated model.
-    """
-
-    model.__pydantic_extra__ = json_pickle_validator(model.__pydantic_extra__)
-    return model
+    pass
 
 
 class Session(Enum):
@@ -84,13 +50,7 @@ class Attachment(DataModel):
     It is capable of serializing and validating all the model fields to JSON.
     """
 
-    @model_validator(mode="after")
-    def extra_validator(self) -> "Attachment":
-        return _json_extra_validator(self)
-
-    @model_serializer(mode="wrap", when_used="json")
-    def extra_serializer(self, original_serializer: Callable[["Attachment"], Dict[str, Any]]) -> Dict[str, Any]:
-        return _json_extra_serializer(self, original_serializer)
+    pass
 
 
 class CallbackQuery(Attachment):
@@ -391,11 +351,3 @@ class Message(DataModel):
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
-
-    @model_validator(mode="after")
-    def extra_validator(self) -> "Message":
-        return _json_extra_validator(self)
-
-    @model_serializer(mode="wrap", when_used="json")
-    def extra_serializer(self, original_serializer: Callable[["Message"], Dict[str, Any]]) -> Dict[str, Any]:
-        return _json_extra_serializer(self, original_serializer)

@@ -1,17 +1,45 @@
+"""
+Serialization
+-------------
+Tools that provide JSON serialization via Pickle for unserializable objects.
+
+- :py:const:`~.SerializableValue`:
+    A field annotated with this will be pickled/unpickled during JSON-serialization/validation.
+- :py:const:`~.JSONSerializableDict`:
+    A dictionary field annotated with this will make all its items smart-serializable:
+    If an item is serializable -- nothing would change.
+    Otherwise -- it will be serialized via pickle.
+- :py:class:`~.JSONSerializableExtras`:
+    A pydantic base class that makes its extra fields a `JSONSerializableDict`.
+"""
+
 from base64 import decodebytes, encodebytes
 from copy import deepcopy
 from pickle import dumps, loads
 from typing import Any, Callable, Dict, List, Union
 from typing_extensions import Annotated, TypeAlias
-from pydantic import AfterValidator, JsonValue, PlainSerializer, PlainValidator, RootModel, WrapSerializer
+from pydantic import (
+    AfterValidator,
+    JsonValue,
+    PlainSerializer,
+    PlainValidator,
+    RootModel,
+    WrapSerializer,
+    BaseModel,
+    model_validator,
+    model_serializer,
+)
 from pydantic_core import PydanticSerializationError
 
 _JSON_EXTRA_FIELDS_KEYS = "__pickled_extra_fields__"
+"""
+This key is used in :py:const:`~.JSONSerializableDict` to remember pickled items.
+"""
 
 Serializable: TypeAlias = Dict[str, Union[JsonValue, Any, List[Any], Dict[str, Any]]]
 
 
-class WrapperModel(RootModel):
+class _WrapperModel(RootModel):
     """
     Wrapper model for testing whether an object is serializable to JSON.
     """
@@ -21,7 +49,7 @@ class WrapperModel(RootModel):
 
 def pickle_serializer(value: Any) -> JsonValue:
     """
-    Serializer funtion that serializes any pickle-serializable value into JSON-serializable.
+    Serializer function that serializes any pickle-serializable value into JSON-serializable.
     Serializes value with pickle and encodes bytes as base64 string.
 
     :param value: Pickle-serializable object.
@@ -33,7 +61,7 @@ def pickle_serializer(value: Any) -> JsonValue:
 
 def pickle_validator(value: JsonValue) -> Any:
     """
-    Validator funtion that validates base64 string encoded bytes as a pickle-serializable value.
+    Validator function that validates base64 string encoded bytes as a pickle-serializable value.
     Decodes base64 string and validates value with pickle.
 
     :param value: String-encoded string.
@@ -65,7 +93,7 @@ def json_pickle_serializer(
             if isinstance(field_value, bytes):
                 raise PydanticSerializationError("")
             else:
-                WrapperModel(root=field_value).model_dump_json()
+                _WrapperModel(root=field_value).model_dump_json()
         except PydanticSerializationError:
             model_copy[field_name] = pickle_serializer(field_value)
             extra_fields += [field_name]
@@ -106,4 +134,44 @@ SerializableValue = Annotated[Any, PickleSerializer, PickleValidator]
 JSONPickleSerializer = WrapSerializer(json_pickle_serializer, when_used="json")
 JSONPickleValidator = AfterValidator(json_pickle_validator)
 JSONSerializableDict = Annotated[Serializable, JSONPickleSerializer, JSONPickleValidator]
-"""Annotation for dictionary or Pydantic model that makes all its fields JSON serializable"""
+"""
+Annotation for dictionary or Pydantic model that makes all its fields JSON serializable.
+
+This uses a reserved dictionary key :py:const:`~._JSON_EXTRA_FIELDS_KEYS` to store
+fields serialized that way.
+"""
+
+
+class JSONSerializableExtras(BaseModel, extra="allow"):
+    """
+    This model makes extra fields pickle-serializable.
+    Do not use :py:const:`~._JSON_EXTRA_FIELDS_KEYS` as an extra field name.
+    """
+
+    def __init__(self, **kwargs):  # supress unknown arg warnings
+        super().__init__(**kwargs)
+
+    @model_validator(mode="after")
+    def extra_validator(self):
+        """
+        Validate model along with the `extras` field: i.e. all the fields not listed in the model.
+
+        :return: Validated model.
+        """
+        self.__pydantic_extra__ = json_pickle_validator(self.__pydantic_extra__)
+        return self
+
+    @model_serializer(mode="wrap", when_used="json")
+    def extra_serializer(self, original_serializer) -> Dict[str, Any]:
+        """
+        Serialize model along with the `extras` field: i.e. all the fields not listed in the model.
+
+        :param original_serializer: Function originally used for serialization by Pydantic.
+        :return: Serialized model.
+        """
+        model_copy = self.model_copy(deep=True)
+        for extra_name in self.model_extra.keys():
+            delattr(model_copy, extra_name)
+        model_dict = original_serializer(model_copy)
+        model_dict.update(json_pickle_serializer(self.model_extra, original_serializer))
+        return model_dict
