@@ -184,7 +184,7 @@ class DataAttachment(Attachment):
         if isinstance(self.source, Path):
             with open(self.source, "rb") as file:
                 return file.read()
-        elif self.use_cache and self.cached_filename is not None:
+        elif self.use_cache and self.cached_filename is not None and self.cached_filename.exists():
             with open(self.cached_filename, "rb") as file:
                 return file.read()
         elif isinstance(self.source, Url):
