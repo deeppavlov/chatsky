@@ -111,7 +111,6 @@ def json_pickle_validator(model: Serializable) -> Serializable:
     and if it is, validates it using pickle.
 
     :param model: Pydantic model object or a dictionary.
-    :original_serializer: Original serializer function for model.
     :return: model with all the fields serialized to JSON.
     """
 
