@@ -311,6 +311,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 "protect_content",
                                 "reply_markup",
                                 "message_effect_id",
+                                "reply_to_message_id",
                             ],
                         ),
                     )
@@ -322,7 +323,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         attachment.last_name,
                         **grab_extra_fields(
                             attachment,
-                            ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id"],
+                            ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
                         ),
                     )
                 if isinstance(attachment, Poll):
@@ -344,7 +345,9 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 "disable_notification",
                                 "protect_content",
                                 "reply_markup",
+                                "question_parse_mode",
                                 "message_effect_id",
+                                "reply_to_message_id",
                             ],
                         ),
                     )
@@ -355,7 +358,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         sticker,
                         **grab_extra_fields(
                             attachment,
-                            ["disable_notification", "protect_content", "reply_markup", "emoji", "message_effect_id"],
+                            ["emoji", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
                         ),
                     )
                 if isinstance(attachment, Audio):
@@ -379,13 +382,16 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 **grab_extra_fields(
                                     attachment,
                                     [
+                                        "parse_mode",
                                         "performer",
                                         "title",
                                         "disable_notification",
+                                        "protect_content",
                                         "reply_markup",
-                                        "parse_mode",
                                         "thumbnail",
                                         "message_effect_id",
+                                        "reply_to_message_id",
+                                        "filename",
                                     ],
                                 ),
                             )
@@ -418,14 +424,17 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 **grab_extra_fields(
                                     attachment,
                                     [
-                                        "disable_notification",
-                                        "reply_markup",
                                         "parse_mode",
                                         "supports_streaming",
+                                        "disable_notification",
+                                        "protect_content",
+                                        "reply_markup",
                                         "has_spoiler",
                                         "thumbnail",
-                                        "filename",
                                         "message_effect_id",
+                                        "show_caption_above_media",
+                                        "reply_to_message_id",
+                                        "filename",
                                     ],
                                 ),
                             )
@@ -452,11 +461,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                     [
                                         "parse_mode",
                                         "disable_notification",
+                                        "protect_content",
                                         "reply_markup",
                                         "has_spoiler",
                                         "thumbnail",
-                                        "filename",
                                         "message_effect_id",
+                                        "show_caption_above_media",
+                                        "reply_to_message_id",
+                                        "filename",
                                     ],
                                 ),
                             )
@@ -481,12 +493,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 **grab_extra_fields(
                                     attachment,
                                     [
-                                        "disable_notification",
-                                        "reply_markup",
                                         "parse_mode",
+                                        "disable_notification",
+                                        "protect_content",
+                                        "reply_markup",
                                         "has_spoiler",
-                                        "filename",
                                         "message_effect_id",
+                                        "reply_to_message_id",
+                                        "filename",
                                     ],
                                 ),
                             )
@@ -518,12 +532,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 **grab_extra_fields(
                                     attachment,
                                     [
-                                        "disable_notification",
-                                        "reply_markup",
                                         "parse_mode",
+                                        "disable_notification",
+                                        "protect_content",
+                                        "reply_markup",
                                         "thumbnail",
-                                        "filename",
                                         "message_effect_id",
+                                        "reply_to_message_id",
+                                        "filename",
                                     ],
                                 ),
                             )
@@ -538,12 +554,13 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             **grab_extra_fields(
                                 attachment,
                                 [
-                                    "disable_notification",
-                                    "reply_markup",
                                     "parse_mode",
-                                    "filename",
+                                    "disable_notification",
                                     "protect_content",
+                                    "reply_markup",
                                     "message_effect_id",
+                                    "reply_to_message_id",
+                                    "filename",
                                 ],
                             ),
                         )
@@ -554,17 +571,16 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         await bot.send_video_note(
                             chat_id,
                             attachment_bytes,
-                            caption=message.text,
                             **grab_extra_fields(
                                 attachment,
                                 [
                                     "disable_notification",
-                                    "reply_markup",
-                                    "parse_mode",
-                                    "thumbnail",
-                                    "filename",
                                     "protect_content",
+                                    "reply_markup",
+                                    "thumbnail",
                                     "message_effect_id",
+                                    "reply_to_message_id",
+                                    "filename",
                                 ],
                             ),
                         )
@@ -574,7 +590,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                     chat_id,
                     files,
                     caption=message.text,
-                    **grab_extra_fields(message, ["disable_notification", "protect_content", "message_effect_id"]),
+                    **grab_extra_fields(message, ["disable_notification", "protect_content", "message_effect_id", "reply_to_message_id", "parse_mode"]),
                 )
                 message_text_covered = True
         if message.text is not None and not message_text_covered:
@@ -583,7 +599,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 message.text,
                 **grab_extra_fields(
                     message,
-                    ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id"],
+                    ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id", "disable_web_page_preview"],
                 ),
             )
 
