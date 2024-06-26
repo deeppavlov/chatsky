@@ -36,7 +36,7 @@ _JSON_EXTRA_FIELDS_KEYS = "__pickled_extra_fields__"
 This key is used in :py:data:`~.JSONSerializableDict` to remember pickled items.
 """
 
-Serializable: TypeAlias = Dict[str, Union[JsonValue, Any, List[Any], Dict[str, Any]]]
+Serializable: TypeAlias = Dict[str, Union[JsonValue, List[Any], Dict[str, Any], Any]]
 
 
 class _WrapperModel(RootModel):
