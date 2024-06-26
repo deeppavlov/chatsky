@@ -365,12 +365,12 @@ class Pipeline:
 
         return ctx
 
-    def sigint_handler(self, signum, frame):
+    def sigint_handler(self, loop):
         self.stopped_by_signal = True
         print("_sigint_handler() called")
         # asyncio.run(asyncio.gather(*[iface.shutdown() for iface in self.messenger_interfaces]))
         if self.messenger_interface.running_in_foreground:
-            asyncio.run(self.messenger_interface.shutdown())
+            loop.run_until_complete(self.messenger_interface.shutdown())
         # In case someone launched a pipeline with connect() instead of run_in_foreground(), all SIGINTs will be ignored, though the flag self.stopped_by_signal is still changed to True.
         logger.info(f"pipeline received SIGINT - stopping pipeline and all interfaces")
 

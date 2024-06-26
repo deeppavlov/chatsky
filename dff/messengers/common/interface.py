@@ -11,6 +11,7 @@ import asyncio
 import logging
 import uuid
 import signal
+from functools import partial
 import time # Don't forget to remove this
 import contextlib
 
@@ -59,8 +60,9 @@ class MessengerInterface(abc.ABC):
     ):
         self.running_in_foreground = True
         self.pipeline = pipeline
-        self.original_sigint_handler = signal.getsignal(signal.SIGINT)
-        signal.signal(signal.SIGINT, pipeline.sigint_handler)
+
+        async_loop = asyncio.get_running_loop()
+        async_loop.add_signal_handler(signal.SIGINT, partial(pipeline.sigint_handler, async_loop))
         # TO-DO: Clean this up and/or think this through (connect() methods are different for various MessengerInterface() classes)
         if isinstance(self.pipeline.messenger_interface, PollingMessengerInterface):
             self.task = asyncio.create_task(self.connect(loop=loop, timeout=timeout, *args))
