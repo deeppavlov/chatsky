@@ -73,6 +73,7 @@ class MessengerInterface(abc.ABC):
         try:
             await self.task
         except asyncio.CancelledError:
+            await asyncio.sleep(0)
             await self.cleanup()
         #"""
         # Allowing other interfaces (and all async tasks) to work too
@@ -81,6 +82,7 @@ class MessengerInterface(abc.ABC):
             await self.task
         await asyncio.sleep(0)
         """
+
         self.stopped = True
        
         # Placeholder for any cleanup code.
@@ -136,10 +138,12 @@ class PollingMessengerInterface(MessengerInterface):
     Polling message interface runs in a loop, constantly asking users for a new input.
     """
 
-    # self.running seems very similar to self.running_in_foreground. Are they the same thing or not? Maybe not, because connect() can still be called by anyone without running in foreground, though very unlikely - most will use pipeline.run() calling run_in_foreground().
     def __init__(self):
         self.request_queue = asyncio.Queue()
-        self.shielded = True # Would like task.cancel()
+        self.cancel_on_shutdown = True # Would like task.cancel(). (Not done yet)
+        self.number_of_workers = 2
+        # Could make this an argument of connect(), but people can just type interface.number_of_workers = their_number before creating pipeline. Interface features like timeouts could be a tutorial, actually. But it's not really necessary or in demand.
+        self._worker_tasks = []
         super().__init__()
 
     @abc.abstractmethod
@@ -180,13 +184,19 @@ class PollingMessengerInterface(MessengerInterface):
         else:
             return True
 
-    async def _worker(self):
+    # This worker doesn't save the request and basically deletes it from the queue in case it can't process it. An option to save the request may be fitting? Maybe with an amount of retries.
+    async def _worker(self, worker_timeout: float):
         while self.running or not self.request_queue.empty():
-            no_more_jobs = await self._worker_job()
-            if no_more_jobs:
-                print("worker stopping")
-                logger.info(f"Worker finished working - stop signal received and remaining requests have been processed.")
-                break
+            try:
+                no_more_jobs = await asyncio.wait_for(self._worker_job(), timeout=worker_timeout)
+                if no_more_jobs:
+                    logger.info(f"Worker finished working - stop signal received and remaining requests have been processed.")
+                    # This logging is incorrect right now, request queue running out isn't handled and it's mistakenly called a stop signal.
+                    break
+            except TimeoutError:
+                # If there's just no requests coming, worker will keep sending this log message.
+                # Looks really bad.
+                logger.info("worker just timed out. A request *may* have been lost.")
 
     @abc.abstractmethod
     async def _get_updates(self) -> list[tuple[Any, Message]]:
@@ -225,33 +235,29 @@ class PollingMessengerInterface(MessengerInterface):
             logger.info(f"polling_loop stopped working - either the stop signal was received or the loop() condition was false.")
             # If there're no more jobs/stop signal received, a special 'None' request is sent to the queue (one for each worker), they shut down the workers.
             # In case of more workers than two, change the number of 'None' requests to the new number of workers.
-            # for i in range(number_of_workers)
-            for i in range(2):
+            for i in range(self.number_of_workers):
                 self.request_queue.put_nowait(None)
 
     async def connect(
         self,
         loop: PollingInterfaceLoopFunction = lambda: True,
+        poll_timeout: float = None,
+        worker_timeout: float = None,
         timeout: float = 0,
     ):
-        #"""
-        await asyncio.gather(
-            self._polling_loop(loop=loop, timeout=timeout),
-            asyncio.shield(self._worker()),
-            asyncio.shield(self._worker()),
-        )
-        #"""
-        """
-        try:
-            await asyncio.gather(
-                self._polling_loop(loop=loop, timeout=timeout),
-                asyncio.shield(self._worker()),
-                asyncio.shield(self._worker()),
-            )
-        except asyncio.CancelledError:
-            await self.cleanup()
-            raise
-        """
+        # Saving strong references to workers, so that they can be cleaned up properly.
+        # shield() creates a task just like create_task()
+        for i in range(self.number_of_workers):
+            task = asyncio.shield(self._worker(worker_timeout))
+            self._worker_tasks.append(task)
+        await self._polling_loop(loop=loop, poll_timeout=poll_timeout, timeout=timeout)
+
+    # Workers for PollingMessengerInterface are awaited here.
+    async def cleanup(self):
+        super().cleanup()
+        await asyncio.gather(*self._worker_tasks)
+        # Blocks until all workers are done
+
 
     def _on_exception(self, e: BaseException):
         """
