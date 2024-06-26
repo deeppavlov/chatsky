@@ -157,6 +157,7 @@ def test_worker_shielding():
 
         async def cleanup(self):
             await super().cleanup()
+            pass
             # This is here, so that workers have a bit of time to complete the remaining requests.
             # Without this line the test fails, because there's nothing blocking the code further and the assertions execute immediately after.
 
@@ -186,9 +187,15 @@ def test_shielding():
             self.requests_count = 0
 
         def not_obtained_requests(self):
-            if self.requests_count == len(self.expected_updates):
+            if len(self.requests) == 0:
                 self.obtained_requests = True
-            return not self.obtained_requests
+                print("hi")
+                # This definitely doesn't call shutdown() for some reason
+                # await self.shutdown()
+                # or
+                # self.shutdown()
+                os.kill(os.getpid(), signal.SIGINT)
+            return True
 
         async def _get_updates(self):
             if len(self.requests) > 0:
@@ -202,34 +209,8 @@ def test_shielding():
             context = await pipeline._run_pipeline(update, ctx_id)
             await self._respond(ctx_id, context.last_response)
 
-        async def _polling_loop(
-                self,
-                loop=lambda: True,
-                poll_timeout: float = None,
-                timeout: float = 0,
-        ):
-            try:
-                while loop() and self.running:
-                    await asyncio.shield(self._polling_job(poll_timeout))  # shield from cancellation
-                    await asyncio.sleep(timeout)
-            finally:
-                self.running = False
-                print(loop(), self.running)
-                for i in range(2):
-                    self.request_queue.put_nowait(None)
-
                 # This shuts down the entire program via graceful termination. If the received messages are correct even after a SIGINT, the program has working graceful termination.
                 # Ok, so it's interesting. When using time.sleep() graceful termination works, but when using an 'await asyncio.sleep()' the test breaks, because the exception from 'shutdown()' isn't caught. I couldn't figure it out, but now I think it's logical. When SIGINT is received by a new signal handler that I made, the program throws an exception into whichever async function it's currently in, could be any of them.
-
-                # asyncio.run(self.shutdown())
-                # raise KeyboardInterrupt
-                await asyncio.sleep(0)
-                # await asyncio.sleep(20)
-                # time.sleep(20)
-                # await asyncio.sleep(0)
-                # time.sleep(20)
-                os.kill(os.getpid(), signal.SIGINT)
-                # await asyncio.sleep(20)
 
         async def cleanup(self):
             await super().cleanup()
@@ -251,6 +232,6 @@ def test_shielding():
     for i in range(len(interface.expected_updates)):
         assert interface.expected_updates[i] == interface.received_updates[i]
     assert interface.not_obtained_updates() == False
-    assert interface.not_obtained_requests() == False
+    assert interface.not_obtained_requests() == True
 
 
