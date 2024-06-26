@@ -272,6 +272,25 @@ class VideoMessage(DataAttachment):
     dff_attachment_type: Literal["video_message"] = "video_message"
 
 
+class MediaGroup(DataModel):
+    """
+    Represents a group of media attachments.
+    """
+
+    group: List[Union[Audio, Video, Animation, Image, Document]] = Field(default_factory=list)
+    dff_attachment_type: Literal["media_group"] = "media_group"
+
+    def __eq__(self, other):
+        if isinstance(other, MediaGroup):
+            if len(self.group) != len(other.group):
+                return False
+            for attachment1, attachment2 in zip(self.group, other.group):
+                if attachment1 != attachment2:
+                    return False
+            return True
+        return NotImplemented
+
+
 class Message(DataModel):
     """
     Class representing a message and contains several
@@ -301,6 +320,7 @@ class Message(DataModel):
                 Document,
                 VoiceMessage,
                 VideoMessage,
+                MediaGroup,
             ]
         ]
     ] = None
@@ -328,6 +348,7 @@ class Message(DataModel):
                     Document,
                     VoiceMessage,
                     VideoMessage,
+                    MediaGroup,
                 ]
             ]
         ] = None,

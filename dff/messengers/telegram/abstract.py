@@ -30,6 +30,7 @@ from dff.script.core.message import (
     Video,
     VideoMessage,
     VoiceMessage,
+    MediaGroup,
 )
 
 try:
@@ -52,21 +53,6 @@ except ImportError:
     TelegramMessage = Any
 
     telegram_available = False
-
-
-def _is_attachment_mediagroup_combinable(attachment: Attachment):
-    """
-    Return true if the attachment can be sent in a mediagroup, false otherwise.
-
-    :param attachment: Attachment to check.
-    :return: If the attachment can belong to a mediagroup.
-    """
-
-    return (
-        isinstance(attachment, DataAttachment)
-        and not isinstance(attachment, VoiceMessage)
-        and not isinstance(attachment, VideoMessage)
-    )
 
 
 class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
@@ -100,6 +86,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         Document,
         VoiceMessage,
         VideoMessage,
+        MediaGroup,
     }
 
     def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
@@ -291,12 +278,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         :param message: DFF message that will be processed into Telegram updates.
         """
 
-        message_text_covered = False
         if message.attachments is not None:
-            files = list()
-            media_group_attachments_num = len(
-                [att for att in message.attachments if _is_attachment_mediagroup_combinable(att)]
-            )
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
                     await bot.send_location(
@@ -315,7 +297,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             ],
                         ),
                     )
-                if isinstance(attachment, Contact):
+                elif isinstance(attachment, Contact):
                     await bot.send_contact(
                         chat_id,
                         attachment.phone_number,
@@ -326,7 +308,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
                         ),
                     )
-                if isinstance(attachment, Poll):
+                elif isinstance(attachment, Poll):
                     await bot.send_poll(
                         chat_id,
                         attachment.question,
@@ -351,209 +333,139 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             ],
                         ),
                     )
-                if isinstance(attachment, Sticker):
+                elif isinstance(attachment, Audio):
+                    attachment_bytes = await attachment.get_bytes(self)
+                    if attachment_bytes is not None:
+                        await bot.send_audio(
+                            chat_id,
+                            attachment_bytes,
+                            **grab_extra_fields(
+                                attachment,
+                                [
+                                    "caption",
+                                    "parse_mode",
+                                    "performer",
+                                    "title",
+                                    "disable_notification",
+                                    "protect_content",
+                                    "reply_markup",
+                                    "thumbnail",
+                                    "message_effect_id",
+                                    "reply_to_message_id",
+                                    "filename",
+                                ],
+                            ),
+                        )
+                elif isinstance(attachment, Video):
+                    attachment_bytes = await attachment.get_bytes(self)
+                    if attachment_bytes is not None:
+                        await bot.send_video(
+                            chat_id,
+                            attachment_bytes,
+                            **grab_extra_fields(
+                                attachment,
+                                [
+                                    "caption",
+                                    "parse_mode",
+                                    "supports_streaming",
+                                    "disable_notification",
+                                    "protect_content",
+                                    "reply_markup",
+                                    "has_spoiler",
+                                    "thumbnail",
+                                    "message_effect_id",
+                                    "show_caption_above_media",
+                                    "reply_to_message_id",
+                                    "filename",
+                                ],
+                            ),
+                        )
+                elif isinstance(attachment, Animation):
+                    attachment_bytes = await attachment.get_bytes(self)
+                    if attachment_bytes is not None:
+                        await bot.send_animation(
+                            chat_id,
+                            attachment_bytes,
+                            **grab_extra_fields(
+                                attachment,
+                                [
+                                    "caption",
+                                    "parse_mode",
+                                    "disable_notification",
+                                    "protect_content",
+                                    "reply_markup",
+                                    "has_spoiler",
+                                    "thumbnail",
+                                    "message_effect_id",
+                                    "show_caption_above_media",
+                                    "reply_to_message_id",
+                                    "filename",
+                                ],
+                            ),
+                        )
+                elif isinstance(attachment, Image):
+                    attachment_bytes = await attachment.get_bytes(self)
+                    if attachment_bytes is not None:    
+                        await bot.send_photo(
+                            chat_id,
+                            attachment_bytes,
+                            **grab_extra_fields(
+                                attachment,
+                                [
+                                    "caption",
+                                    "parse_mode",
+                                    "disable_notification",
+                                    "protect_content",
+                                    "reply_markup",
+                                    "has_spoiler",
+                                    "message_effect_id",
+                                    "reply_to_message_id",
+                                    "filename",
+                                ],
+                            ),
+                        )
+                elif isinstance(attachment, Sticker):
                     sticker = await attachment.get_bytes(self) if attachment.id is None else attachment.id
-                    await bot.send_sticker(
-                        chat_id,
-                        sticker,
-                        **grab_extra_fields(
-                            attachment,
-                            ["emoji", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
-                        ),
-                    )
-                if isinstance(attachment, Audio):
+                    if sticker is not None:
+                        await bot.send_sticker(
+                            chat_id,
+                            sticker,
+                            **grab_extra_fields(
+                                attachment,
+                                ["emoji", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
+                            ),
+                        )
+                elif isinstance(attachment, Document):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
-                        if media_group_attachments_num != 1:
-                            files += [
-                                InputMediaAudio(
-                                    attachment_bytes,
-                                    **grab_extra_fields(
-                                        attachment,
-                                        ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"],
-                                    ),
-                                ),
-                            ]
-                        else:
-                            await bot.send_audio(
-                                chat_id,
-                                attachment_bytes,
-                                caption=message.text,
-                                **grab_extra_fields(
-                                    attachment,
-                                    [
-                                        "parse_mode",
-                                        "performer",
-                                        "title",
-                                        "disable_notification",
-                                        "protect_content",
-                                        "reply_markup",
-                                        "thumbnail",
-                                        "message_effect_id",
-                                        "reply_to_message_id",
-                                        "filename",
-                                    ],
-                                ),
-                            )
-                            message_text_covered = True
-                if isinstance(attachment, Video):
-                    attachment_bytes = await attachment.get_bytes(self)
-                    if attachment_bytes is not None:
-                        if media_group_attachments_num != 1:
-                            files += [
-                                InputMediaVideo(
-                                    attachment_bytes,
-                                    **grab_extra_fields(
-                                        attachment,
-                                        [
-                                            "filename",
-                                            "caption",
-                                            "parse_mode",
-                                            "supports_streaming",
-                                            "has_spoiler",
-                                            "thumbnail",
-                                        ],
-                                    ),
-                                ),
-                            ]
-                        else:
-                            await bot.send_video(
-                                chat_id,
-                                attachment_bytes,
-                                caption=message.text,
-                                **grab_extra_fields(
-                                    attachment,
-                                    [
-                                        "parse_mode",
-                                        "supports_streaming",
-                                        "disable_notification",
-                                        "protect_content",
-                                        "reply_markup",
-                                        "has_spoiler",
-                                        "thumbnail",
-                                        "message_effect_id",
-                                        "show_caption_above_media",
-                                        "reply_to_message_id",
-                                        "filename",
-                                    ],
-                                ),
-                            )
-                            message_text_covered = True
-                if isinstance(attachment, Animation):
-                    attachment_bytes = await attachment.get_bytes(self)
-                    if attachment_bytes is not None:
-                        if media_group_attachments_num != 1:
-                            files += [
-                                InputMediaAnimation(
-                                    attachment_bytes,
-                                    **grab_extra_fields(
-                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail"]
-                                    ),
-                                ),
-                            ]
-                        else:
-                            await bot.send_animation(
-                                chat_id,
-                                attachment_bytes,
-                                caption=message.text,
-                                **grab_extra_fields(
-                                    attachment,
-                                    [
-                                        "parse_mode",
-                                        "disable_notification",
-                                        "protect_content",
-                                        "reply_markup",
-                                        "has_spoiler",
-                                        "thumbnail",
-                                        "message_effect_id",
-                                        "show_caption_above_media",
-                                        "reply_to_message_id",
-                                        "filename",
-                                    ],
-                                ),
-                            )
-                            message_text_covered = True
-                if isinstance(attachment, Image):
-                    attachment_bytes = await attachment.get_bytes(self)
-                    if attachment_bytes is not None:
-                        if media_group_attachments_num != 1:
-                            files += [
-                                InputMediaPhoto(
-                                    attachment_bytes,
-                                    **grab_extra_fields(
-                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler"]
-                                    ),
-                                ),
-                            ]
-                        else:
-                            await bot.send_photo(
-                                chat_id,
-                                attachment_bytes,
-                                caption=message.text,
-                                **grab_extra_fields(
-                                    attachment,
-                                    [
-                                        "parse_mode",
-                                        "disable_notification",
-                                        "protect_content",
-                                        "reply_markup",
-                                        "has_spoiler",
-                                        "message_effect_id",
-                                        "reply_to_message_id",
-                                        "filename",
-                                    ],
-                                ),
-                            )
-                            message_text_covered = True
-                if isinstance(attachment, Document):
-                    attachment_bytes = await attachment.get_bytes(self)
-                    if attachment_bytes is not None:
-                        if media_group_attachments_num != 1:
-                            files += [
-                                InputMediaDocument(
-                                    attachment_bytes,
-                                    **grab_extra_fields(
-                                        attachment,
-                                        [
-                                            "filename",
-                                            "caption",
-                                            "parse_mode",
-                                            "disable_content_type_detection",
-                                            "thumbnail",
-                                        ],
-                                    ),
-                                ),
-                            ]
-                        else:
-                            await bot.send_document(
-                                chat_id,
-                                attachment_bytes,
-                                caption=message.text,
-                                **grab_extra_fields(
-                                    attachment,
-                                    [
-                                        "parse_mode",
-                                        "disable_notification",
-                                        "protect_content",
-                                        "reply_markup",
-                                        "thumbnail",
-                                        "message_effect_id",
-                                        "reply_to_message_id",
-                                        "filename",
-                                    ],
-                                ),
-                            )
-                            message_text_covered = True
-                if isinstance(attachment, VoiceMessage):
+                        await bot.send_document(
+                            chat_id,
+                            attachment_bytes,
+                            **grab_extra_fields(
+                                attachment,
+                                [
+                                    "caption",
+                                    "parse_mode",
+                                    "disable_notification",
+                                    "protect_content",
+                                    "reply_markup",
+                                    "thumbnail",
+                                    "message_effect_id",
+                                    "reply_to_message_id",
+                                    "filename",
+                                ],
+                            ),
+                        )
+                elif isinstance(attachment, VoiceMessage):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         await bot.send_voice(
                             chat_id,
                             attachment_bytes,
-                            caption=message.text,
                             **grab_extra_fields(
                                 attachment,
                                 [
+                                    "caption",
                                     "parse_mode",
                                     "disable_notification",
                                     "protect_content",
@@ -564,8 +476,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 ],
                             ),
                         )
-                        message_text_covered = True
-                if isinstance(attachment, VideoMessage):
+                elif isinstance(attachment, VideoMessage):
                     attachment_bytes = await attachment.get_bytes(self)
                     if attachment_bytes is not None:
                         await bot.send_video_note(
@@ -584,16 +495,69 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 ],
                             ),
                         )
-                        message_text_covered = True
-            if len(files) > 0:
-                await bot.send_media_group(
-                    chat_id,
-                    files,
-                    caption=message.text,
-                    **grab_extra_fields(message, ["disable_notification", "protect_content", "message_effect_id", "reply_to_message_id", "parse_mode"]),
-                )
-                message_text_covered = True
-        if message.text is not None and not message_text_covered:
+                elif isinstance(attachment, MediaGroup):
+                    files = list()
+                    for media in attachment.media:
+                        if isinstance(media, Image):
+                            files += [
+                                InputMediaPhoto(
+                                    attachment_bytes,
+                                    **grab_extra_fields(
+                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler", "show_caption_above_media"]
+                                    ),
+                                ),
+                            ]
+                        elif isinstance(media, Video):
+                            files += [
+                                InputMediaVideo(
+                                    attachment_bytes,
+                                    **grab_extra_fields(
+                                        attachment,
+                                        [
+                                            "filename",
+                                            "caption",
+                                            "parse_mode",
+                                            "supports_streaming",
+                                            "has_spoiler",
+                                            "thumbnail",
+                                            "show_caption_above_media",
+                                        ],
+                                    ),
+                                ),
+                            ]
+                        elif isinstance(media, Animation):
+                            files += [
+                                InputMediaAnimation(
+                                    attachment_bytes,
+                                    **grab_extra_fields(
+                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail", "show_caption_above_media"]
+                                    ),
+                                ),
+                            ]
+                        elif isinstance(media, Audio):
+                            files += [
+                                InputMediaAudio(
+                                    attachment_bytes,
+                                    **grab_extra_fields(attachment, ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"]),
+                                ),
+                            ]
+                        elif isinstance(media, Document):
+                            files += [
+                                InputMediaDocument(
+                                    attachment_bytes,
+                                    **grab_extra_fields(attachment, ["filename", "caption", "parse_mode", "thumbnail"]),
+                                ),
+                            ]
+                        else:
+                            raise ValueError(f"Attachment {type(media).__name__} can not be sent in a media group!")
+                    await bot.send_media_group(
+                        chat_id,
+                        files,
+                        **grab_extra_fields(attachment, ["caption", "disable_notification", "protect_content", "message_effect_id", "reply_to_message_id", "parse_mode"]),
+                    )
+                else:
+                    raise ValueError(f"Attachment {type(attachment).__name__} is not supported!")
+        if message.text is not None:
             await bot.send_message(
                 chat_id,
                 message.text,
