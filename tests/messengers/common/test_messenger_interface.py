@@ -131,15 +131,9 @@ def test_worker_shielding():
             if len(self.requests) == 0:
                 self.obtained_requests = True
                 print("hi")
-                # This definitely doesn't call shutdown() for some reason
-                # await self.shutdown()
-                # or
-                # self.shutdown()
-                os.kill(os.getpid(), signal.SIGINT)
-                """
-                async_loop = asyncio.get_running_loop()
-                async_loop.run_until_complete(self.shutdown())
-                """
+                # Is this the right way to run a random async function?
+                asyncio.create_task(self.shutdown())
+
                 # This shuts down the interface via the main method. The asyncio.CancelledError won't affect the workers due to shielding. If all the messages still get processed, then the workers are shielded.
             return True
 
@@ -214,7 +208,6 @@ def test_shielding():
 
         async def cleanup(self):
             await super().cleanup()
-            await asyncio.sleep(0.5)
             pass
             # This is here, so that workers have a bit of time to complete the remaining requests.
             # Without this line the test fails, because there's nothing blocking the code further and the assertions execute immediately after.
