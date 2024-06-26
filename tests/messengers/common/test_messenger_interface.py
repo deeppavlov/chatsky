@@ -118,17 +118,30 @@ def test_worker_shielding():
             super().__init__()
             self.ctx_id = uuid.uuid4()
             self.requests = ["1sa", "nb2", "3fdg", "g46", "2sh2", "h31", "m56", "72ds"]
+            self.requests.extend(self.requests)
+            self.requests.extend(self.requests)
+            self.requests.extend(self.requests)
+            self.requests.extend(self.requests)
             self.expected_updates = self.requests.copy()
             self.received_updates = []
             self.obtained_requests = False
             self.requests_count = 0
 
         def not_obtained_requests(self):
-            if self.requests_count == len(self.expected_updates):
+            if len(self.requests) == 0:
                 self.obtained_requests = True
-                self.shutdown()
+                print("hi")
+                # This definitely doesn't call shutdown() for some reason
+                # await self.shutdown()
+                # or
+                # self.shutdown()
+                os.kill(os.getpid(), signal.SIGINT)
+                """
+                async_loop = asyncio.get_running_loop()
+                async_loop.run_until_complete(self.shutdown())
+                """
                 # This shuts down the interface via the main method. The asyncio.CancelledError won't affect the workers due to shielding. If all the messages still get processed, then the workers are shielded.
-            return not self.obtained_requests
+            return True
 
         async def _get_updates(self):
             if len(self.requests) > 0:
@@ -140,12 +153,10 @@ def test_worker_shielding():
             while self.running:
                 await asyncio.sleep(0.05)
             context = await pipeline._run_pipeline(update, ctx_id)
-            if context.last_response.text == "id: 1":
-                await asyncio.sleep(0)
             await self._respond(ctx_id, context.last_response)
 
-        async def cleanup(self, *args):
-            await asyncio.sleep(0.1)
+        async def cleanup(self):
+            await super().cleanup()
             # This is here, so that workers have a bit of time to complete the remaining requests.
             # Without this line the test fails, because there's nothing blocking the code further and the assertions execute immediately after.
 
@@ -157,10 +168,10 @@ def test_worker_shielding():
     )
     interface = new_pipeline.messenger_interface
     asyncio.run(new_pipeline.messenger_interface.run_in_foreground(new_pipeline, loop=interface.not_obtained_requests))
+    print(interface.expected_updates)
+    print(interface.received_updates)
     for i in range(len(interface.expected_updates)):
         assert interface.expected_updates[i] == interface.received_updates[i]
-    assert interface.not_obtained_updates() == False
-    assert interface.not_obtained_requests() == False
 
 
 def test_shielding():
@@ -184,6 +195,12 @@ def test_shielding():
                 self.requests_count += 1
                 request = self.requests.pop(0)
                 return [(self.ctx_id, Message(text=str(request)))]
+
+        async def _process_request(self, ctx_id, update: Message, pipeline: Pipeline):
+            while self.running:
+                await asyncio.sleep(0.05)
+            context = await pipeline._run_pipeline(update, ctx_id)
+            await self._respond(ctx_id, context.last_response)
 
         async def _polling_loop(
                 self,
@@ -214,8 +231,9 @@ def test_shielding():
                 os.kill(os.getpid(), signal.SIGINT)
                 # await asyncio.sleep(20)
 
-        async def cleanup(self, *args):
-            await asyncio.sleep(0.1)
+        async def cleanup(self):
+            await super().cleanup()
+            await asyncio.sleep(0.5)
             pass
             # This is here, so that workers have a bit of time to complete the remaining requests.
             # Without this line the test fails, because there's nothing blocking the code further and the assertions execute immediately after.

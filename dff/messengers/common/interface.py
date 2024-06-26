@@ -70,20 +70,12 @@ class MessengerInterface(abc.ABC):
             self.task = asyncio.create_task(self.connect(self.pipeline._run_pipeline, *args))
         else:
             self.task = asyncio.create_task(self.connect(self.pipeline._run_pipeline, *args))
-        # await self.task
-        #"""
+
         try:
             await self.task
         except asyncio.CancelledError:
             await asyncio.sleep(0)
             await self.cleanup()
-        #"""
-        # Allowing other interfaces (and all async tasks) to work too
-        """
-        with contextlib.suppress(asyncio.CancelledError):
-            await self.task
-        await asyncio.sleep(0)
-        """
 
         self.stopped = True
        
@@ -102,36 +94,6 @@ class MessengerInterface(abc.ABC):
             # await asyncio.sleep(0)
             if not self.stopped:
                 raise asyncio.CancelledError
-
-        """
-        def raise_exception(signum, frame):
-            raise ZeroDivisionError
-        signal.signal(signal.SIGINT, raise_exception)
-        """
-        """
-        print(self.task)
-        self.task.cancel()
-        # time.sleep(0.1)
-        # await self.task
-        """
-        """
-
-        print("this should've stopped")
-        
-        """
-        """
-        await asyncio.sleep(0)
-        with contextlib.suppress(asyncio.CancelledError):
-            await self.task
-        await self.cleanup()
-        """
-        # raise HelloException
-        
-        # raise asyncio.CancelledError
-        """
-        self.task.cancel()
-        await self.task
-        """
         logger.info(f"{type(self).__name__} has stopped working - SIGINT received")
 
 
@@ -256,8 +218,9 @@ class PollingMessengerInterface(MessengerInterface):
 
     # Workers for PollingMessengerInterface are awaited here.
     async def cleanup(self):
-        super().cleanup()
-        await asyncio.gather(*self._worker_tasks)
+        await super().cleanup()
+        await asyncio.wait(self._worker_tasks)
+        # await asyncio.gather(*self._worker_tasks)
         # Blocks until all workers are done
 
 
