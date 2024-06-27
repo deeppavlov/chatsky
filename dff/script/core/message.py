@@ -273,12 +273,17 @@ class VideoMessage(DataAttachment):
     dff_attachment_type: Literal["video_message"] = "video_message"
 
 
-class MediaGroup(DataModel):
+class MediaGroup(Attachment):
     """
     Represents a group of media attachments.
+    Without this class attachments are sent one-by-one.
+
+    Be mindful of limitations that certain services apply
+    (e.g. Telegram does not allow audio or document files to be mixed with other types when using media groups,
+    so you should send them separately by putting them directly in :py:attr:`~.Message.attachments`).
     """
 
-    group: List[Union[Audio, Video, Animation, Image, Document]] = Field(default_factory=list)
+    group: List[Union[Audio, Video, Image, Document]] = Field(default_factory=list)
     dff_attachment_type: Literal["media_group"] = "media_group"
 
     def __eq__(self, other):

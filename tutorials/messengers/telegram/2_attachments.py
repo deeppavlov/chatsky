@@ -238,8 +238,6 @@ script = {
                         group=[
                             Image(**image_data),
                             Video(**video_data),
-                            Animation(**animation_data),
-                            Audio(**audio_data),
                         ],
                     )
                 ],
