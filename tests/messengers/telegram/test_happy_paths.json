@@ -68,7 +68,7 @@
             "response_message": "{\"text\":\"Here's your audio!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":\"Separation melody by William King\",\"use_cache\":true,\"dff_attachment_type\":\"audio\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your audio!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
-                "send_audio(42, '75ff19e65eef262114e1a6d93794ed8b4af6135a0cd0620f58023fd5b57204f4', caption=None, parse_mode=None, performer=None, title=None, disable_notification=None, protect_content=None, reply_markup=None, thumbnail=None, message_effect_id=None, reply_to_message_id=None, filename=None)"
+                "send_audio(42, '75ff19e65eef262114e1a6d93794ed8b4af6135a0cd0620f58023fd5b57204f4', caption=None, parse_mode=None, performer=None, title=None, disable_notification=None, protect_content=None, reply_markup=None, thumbnail=None, message_effect_id=None, reply_to_message_id=None, filename='separation-william-king.mp3')"
             ]
         },
         {
@@ -77,7 +77,7 @@
             "response_message": "{\"text\":\"Here's your video!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4\",\"cached_filename\":null,\"id\":null,\"title\":\"Epic Dota2 gameplay by Nkognit0\",\"use_cache\":true,\"dff_attachment_type\":\"video\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your video!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
-                "send_video(42, '11d3472ad8534d632beca6a452e2dc03b7ec9f4aba19fbb3346da43bac7389d6', caption=None, parse_mode=None, supports_streaming=None, disable_notification=None, protect_content=None, reply_markup=None, has_spoiler=None, thumbnail=None, message_effect_id=None, show_caption_above_media=None, reply_to_message_id=None, filename=None)"
+                "send_video(42, '11d3472ad8534d632beca6a452e2dc03b7ec9f4aba19fbb3346da43bac7389d6', caption=None, parse_mode=None, supports_streaming=None, disable_notification=None, protect_content=None, reply_markup=None, has_spoiler=None, thumbnail=None, message_effect_id=None, show_caption_above_media=None, reply_to_message_id=None, filename='crownfall-lags-nkognit0.mp4')"
             ]
         },
         {
@@ -86,7 +86,7 @@
             "response_message": "{\"text\":\"Here's your animation!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/hong-kong-simplyart4794.gif\",\"cached_filename\":null,\"id\":null,\"title\":\"Hong Kong skyscraper views by Simplyart4794\",\"use_cache\":true,\"dff_attachment_type\":\"animation\",\"filename\":\"hk.gif\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your animation!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
-                "send_animation(42, '033391bab1eaefd6d8aa6ceb667b5dbaada7c4d6b1649a726541924a74539dc5', caption=None, parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, has_spoiler=None, thumbnail=None, message_effect_id=None, show_caption_above_media=None, reply_to_message_id=None, filename='hk.gif')"
+                "send_animation(42, '033391bab1eaefd6d8aa6ceb667b5dbaada7c4d6b1649a726541924a74539dc5', caption=None, parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, has_spoiler=None, thumbnail=None, message_effect_id=None, show_caption_above_media=None, reply_to_message_id=None, filename='hong-kong-simplyart4794.gif')"
             ]
         },
         {
@@ -95,7 +95,7 @@
             "response_message": "{\"text\":\"Here's your image!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png\",\"cached_filename\":null,\"id\":null,\"title\":\"DeepPavlov logo\",\"use_cache\":true,\"dff_attachment_type\":\"image\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your image!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
-                "send_photo(42, '9f39f64560e6415032325cae1fec1ca06b3cc1a3549208a8a35564c0d3749062', caption=None, parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, has_spoiler=None, message_effect_id=None, reply_to_message_id=None, filename=None)"
+                "send_photo(42, '9f39f64560e6415032325cae1fec1ca06b3cc1a3549208a8a35564c0d3749062', caption=None, parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, has_spoiler=None, message_effect_id=None, reply_to_message_id=None, filename='deeppavlov.png')"
             ]
         },
         {
@@ -104,7 +104,7 @@
             "response_message": "{\"text\":\"Here's your document!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov-article.pdf\",\"cached_filename\":null,\"id\":null,\"title\":\"DeepPavlov article\",\"use_cache\":true,\"dff_attachment_type\":\"document\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your document!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
-                "send_document(42, '08a7a36671950baba722d94a87dea286f03d7a6f7d0c32d5707d877cd211739a', caption=None, parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, thumbnail=None, message_effect_id=None, reply_to_message_id=None, filename=None)"
+                "send_document(42, '08a7a36671950baba722d94a87dea286f03d7a6f7d0c32d5707d877cd211739a', caption=None, parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, thumbnail=None, message_effect_id=None, reply_to_message_id=None, filename='deeppavlov-article.pdf')"
             ]
         },
         {

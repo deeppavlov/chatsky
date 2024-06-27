@@ -77,6 +77,7 @@ audio_data = {
         f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
     ),
     "title": "Separation melody by William King",
+    "filename": "separation-william-king.mp3",
 }
 
 video_data = {
@@ -84,6 +85,7 @@ video_data = {
         f"{EXAMPLE_ATTACHMENT_SOURCE}/crownfall-lags-nkognit0.mp4"
     ),
     "title": "Epic Dota2 gameplay by Nkognit0",
+    "filename": "crownfall-lags-nkognit0.mp4",
 }
 
 animation_data = {
@@ -93,17 +95,19 @@ animation_data = {
         f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif"
     ),
     "title": "Hong Kong skyscraper views by Simplyart4794",
-    "filename": "hk.gif",
+    "filename": "hong-kong-simplyart4794.gif",
 }
 
 image_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"),
     "title": "DeepPavlov logo",
+    "filename": "deeppavlov.png",
 }
 
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
     "title": "DeepPavlov article",
+    "filename": "deeppavlov-article.pdf",
 }
 
 
