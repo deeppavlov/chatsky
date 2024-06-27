@@ -110,6 +110,23 @@ document_data = {
     "filename": "deeppavlov-article.pdf",
 }
 
+ATTACHMENTS = [
+    "location",
+    "contact",
+    "poll",
+    "sticker",
+    "audio",
+    "video",
+    "animation",
+    "image",
+    "document",
+    "voice_message",
+    "video_message",
+    "media_group",
+]
+
+QUOTED_ATTACHMENTS = [f'"{attachment}"' for attachment in ATTACHMENTS]
+
 
 # %% [markdown]
 """
@@ -123,30 +140,8 @@ all the attachment options available.
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("main_flow", "location_node"): cnd.exact_match(
-                Message("location")
-            ),
-            ("main_flow", "contact_node"): cnd.exact_match(Message("contact")),
-            ("main_flow", "poll_node"): cnd.exact_match(Message("poll")),
-            ("main_flow", "sticker_node"): cnd.exact_match(Message("sticker")),
-            ("main_flow", "audio_node"): cnd.exact_match(Message("audio")),
-            ("main_flow", "video_node"): cnd.exact_match(Message("video")),
-            ("main_flow", "animation_node"): cnd.exact_match(
-                Message("animation")
-            ),
-            ("main_flow", "image_node"): cnd.exact_match(Message("image")),
-            ("main_flow", "document_node"): cnd.exact_match(
-                Message("document")
-            ),
-            ("main_flow", "voice_message_node"): cnd.exact_match(
-                Message("voice message")
-            ),
-            ("main_flow", "video_message_node"): cnd.exact_match(
-                Message("video message")
-            ),
-            ("main_flow", "media_group"): cnd.exact_match(
-                Message("media group")
-            ),
+            ("main_flow", f"{attachment}_node"): cnd.exact_match(attachment)
+            for attachment in ATTACHMENTS
         }
     },
     "main_flow": {
@@ -155,9 +150,9 @@ script = {
         },
         "intro_node": {
             RESPONSE: Message(
-                'Type "location", "contact", "poll", "sticker" '
-                + '"audio", "video", "animation", "image", '
-                + '"document" or to receive a corresponding attachment!'
+                f'Type {", ".join(QUOTED_ATTACHMENTS[:-1])}'
+                f" or {QUOTED_ATTACHMENTS[-1]}"
+                f" to receive a corresponding attachment!"
             ),
         },
         "location_node": {
@@ -234,7 +229,7 @@ script = {
                 attachments=[VideoMessage(source=video_data["source"])],
             ),
         },
-        "media_group": {
+        "media_group_node": {
             RESPONSE: Message(
                 "Here's your media group!",
                 attachments=[
@@ -249,10 +244,10 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message(
-                "Unknown attachment type, try again! "
-                + 'Supported attachments are: "location", '
-                + '"contact", "poll", "sticker", "audio", '
-                + '"video", "animation", "image" and "document".'
+                f"Unknown attachment type, try again! "
+                f"Supported attachments are: "
+                f'{", ".join(QUOTED_ATTACHMENTS[:-1])} '
+                f"and {QUOTED_ATTACHMENTS[-1]}."
             ),
         },
     },

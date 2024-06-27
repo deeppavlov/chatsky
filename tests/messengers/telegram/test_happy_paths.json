@@ -21,9 +21,9 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 14, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": "{\"text\":\"/start\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Type \\\"location\\\", \\\"contact\\\", \\\"poll\\\", \\\"sticker\\\" \\\"audio\\\", \\\"video\\\", \\\"animation\\\", \\\"image\\\", \\\"document\\\" or to receive a corresponding attachment!\",\"commands\":null,\"attachments\":null,\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Type \\\"location\\\", \\\"contact\\\", \\\"poll\\\", \\\"sticker\\\", \\\"audio\\\", \\\"video\\\", \\\"animation\\\", \\\"image\\\", \\\"document\\\", \\\"voice_message\\\", \\\"video_message\\\" or \\\"media_group\\\" to receive a corresponding attachment!\",\"commands\":null,\"attachments\":null,\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
-                "send_message(42, 'Type \"location\", \"contact\", \"poll\", \"sticker\" \"audio\", \"video\", \"animation\", \"image\", \"document\" or to receive a corresponding attachment!', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
+                "send_message(42, 'Type \"location\", \"contact\", \"poll\", \"sticker\", \"audio\", \"video\", \"animation\", \"image\", \"document\", \"voice_message\", \"video_message\" or \"media_group\" to receive a corresponding attachment!', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
             ]
         },
         {
@@ -108,8 +108,8 @@
             ]
         },
         {
-            "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=11, supergroup_chat_created=False, text='voice message'), update_id=11)",
-            "received_message": "{\"text\":\"voice message\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=11, supergroup_chat_created=False, text='voice_message'), update_id=11)",
+            "received_message": "{\"text\":\"voice_message\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_message": "{\"text\":\"Here's your voice message!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3\",\"cached_filename\":null,\"id\":null,\"title\":null,\"use_cache\":true,\"dff_attachment_type\":\"voice_message\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your voice message!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
@@ -117,8 +117,8 @@
             ]
         },
         {
-            "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 3, 16, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=12, supergroup_chat_created=False, text='video message'), update_id=12)",
-            "received_message": "{\"text\":\"video message\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 3, 16, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=12, supergroup_chat_created=False, text='video_message'), update_id=12)",
+            "received_message": "{\"text\":\"video_message\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_message": "{\"text\":\"Here's your video message!\",\"commands\":null,\"attachments\":[{\"source\":\"https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4\",\"cached_filename\":null,\"id\":null,\"title\":null,\"use_cache\":true,\"dff_attachment_type\":\"video_message\"}],\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
                 "send_message(42, \"Here's your video message!\", parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)",
@@ -137,9 +137,9 @@
         {
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=14, supergroup_chat_created=False, text='something else'), update_id=14)",
             "received_message": "{\"text\":\"something else\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-            "response_message": "{\"text\":\"Unknown attachment type, try again! Supported attachments are: \\\"location\\\", \\\"contact\\\", \\\"poll\\\", \\\"sticker\\\", \\\"audio\\\", \\\"video\\\", \\\"animation\\\", \\\"image\\\" and \\\"document\\\".\",\"commands\":null,\"attachments\":null,\"annotations\":null,\"misc\":null,\"original_message\":null}",
+            "response_message": "{\"text\":\"Unknown attachment type, try again! Supported attachments are: \\\"location\\\", \\\"contact\\\", \\\"poll\\\", \\\"sticker\\\", \\\"audio\\\", \\\"video\\\", \\\"animation\\\", \\\"image\\\", \\\"document\\\", \\\"voice_message\\\", \\\"video_message\\\" and \\\"media_group\\\".\",\"commands\":null,\"attachments\":null,\"annotations\":null,\"misc\":null,\"original_message\":null}",
             "response_functions": [
-                "send_message(42, 'Unknown attachment type, try again! Supported attachments are: \"location\", \"contact\", \"poll\", \"sticker\", \"audio\", \"video\", \"animation\", \"image\" and \"document\".', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
+                "send_message(42, 'Unknown attachment type, try again! Supported attachments are: \"location\", \"contact\", \"poll\", \"sticker\", \"audio\", \"video\", \"animation\", \"image\", \"document\", \"voice_message\", \"video_message\" and \"media_group\".', parse_mode=None, disable_notification=None, protect_content=None, reply_markup=None, message_effect_id=None, reply_to_message_id=None, disable_web_page_preview=None)"
             ]
         }
     ],
