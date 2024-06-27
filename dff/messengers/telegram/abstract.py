@@ -277,6 +277,23 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         :param message: DFF message that will be processed into Telegram updates.
         """
 
+        if message.text is not None:
+            await bot.send_message(
+                chat_id,
+                message.text,
+                **grab_extra_fields(
+                    message,
+                    [
+                        "parse_mode",
+                        "disable_notification",
+                        "protect_content",
+                        "reply_markup",
+                        "message_effect_id",
+                        "reply_to_message_id",
+                        "disable_web_page_preview",
+                    ],
+                ),
+            )
         if message.attachments is not None:
             for attachment in message.attachments:
                 if isinstance(attachment, Location):
@@ -603,23 +620,6 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                     )
                 else:
                     raise ValueError(f"Attachment {type(attachment).__name__} is not supported!")
-        if message.text is not None:
-            await bot.send_message(
-                chat_id,
-                message.text,
-                **grab_extra_fields(
-                    message,
-                    [
-                        "parse_mode",
-                        "disable_notification",
-                        "protect_content",
-                        "reply_markup",
-                        "message_effect_id",
-                        "reply_to_message_id",
-                        "disable_web_page_preview",
-                    ],
-                ),
-            )
 
     async def _on_event(self, update: Update, _: Any, create_message: Callable[[Update], Message]) -> None:
         """
