@@ -14,7 +14,6 @@ from dff.messengers.common import MessengerInterfaceWithAttachments
 from dff.pipeline.types import PipelineRunnerFunction
 from dff.script.core.message import (
     Animation,
-    Attachment,
     Audio,
     CallbackQuery,
     Contact,
@@ -305,7 +304,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         attachment.last_name,
                         **grab_extra_fields(
                             attachment,
-                            ["vcard", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
+                            [
+                                "vcard",
+                                "disable_notification",
+                                "protect_content",
+                                "reply_markup",
+                                "message_effect_id",
+                                "reply_to_message_id",
+                            ],
                         ),
                     )
                 elif isinstance(attachment, Poll):
@@ -405,7 +411,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         )
                 elif isinstance(attachment, Image):
                     attachment_bytes = await attachment.get_bytes(self)
-                    if attachment_bytes is not None:    
+                    if attachment_bytes is not None:
                         await bot.send_photo(
                             chat_id,
                             attachment_bytes,
@@ -432,7 +438,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             sticker,
                             **grab_extra_fields(
                                 attachment,
-                                ["emoji", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id"],
+                                [
+                                    "emoji",
+                                    "disable_notification",
+                                    "protect_content",
+                                    "reply_markup",
+                                    "message_effect_id",
+                                    "reply_to_message_id",
+                                ],
                             ),
                         )
                 elif isinstance(attachment, Document):
@@ -504,7 +517,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 InputMediaPhoto(
                                     media_bytes,
                                     **grab_extra_fields(
-                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler", "show_caption_above_media"]
+                                        attachment,
+                                        [
+                                            "filename",
+                                            "caption",
+                                            "parse_mode",
+                                            "has_spoiler",
+                                            "show_caption_above_media",
+                                        ],
                                     ),
                                 ),
                             ]
@@ -533,7 +553,15 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 InputMediaAnimation(
                                     media_bytes,
                                     **grab_extra_fields(
-                                        attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail", "show_caption_above_media"]
+                                        attachment,
+                                        [
+                                            "filename",
+                                            "caption",
+                                            "parse_mode",
+                                            "has_spoiler",
+                                            "thumbnail",
+                                            "show_caption_above_media",
+                                        ],
                                     ),
                                 ),
                             ]
@@ -542,7 +570,10 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaAudio(
                                     media_bytes,
-                                    **grab_extra_fields(attachment, ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"]),
+                                    **grab_extra_fields(
+                                        attachment,
+                                        ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"],
+                                    ),
                                 ),
                             ]
                         elif isinstance(media, Document):
@@ -558,7 +589,17 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                     await bot.send_media_group(
                         chat_id,
                         files,
-                        **grab_extra_fields(attachment, ["caption", "disable_notification", "protect_content", "message_effect_id", "reply_to_message_id", "parse_mode"]),
+                        **grab_extra_fields(
+                            attachment,
+                            [
+                                "caption",
+                                "disable_notification",
+                                "protect_content",
+                                "message_effect_id",
+                                "reply_to_message_id",
+                                "parse_mode",
+                            ],
+                        ),
                     )
                 else:
                     raise ValueError(f"Attachment {type(attachment).__name__} is not supported!")
@@ -568,7 +609,15 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                 message.text,
                 **grab_extra_fields(
                     message,
-                    ["parse_mode", "disable_notification", "protect_content", "reply_markup", "message_effect_id", "reply_to_message_id", "disable_web_page_preview"],
+                    [
+                        "parse_mode",
+                        "disable_notification",
+                        "protect_content",
+                        "reply_markup",
+                        "message_effect_id",
+                        "reply_to_message_id",
+                        "disable_web_page_preview",
+                    ],
                 ),
             )
 

@@ -37,11 +37,15 @@ class MockBot(BaseModel, arbitrary_types_allowed=True):
 
     @staticmethod
     def representation(any: Any) -> str:
-        if isinstance(any, bytes):
+        if isinstance(any, InputFile):
+            return sha256(any.input_file_content).hexdigest()
+        elif isinstance(any, InputMedia):
+            data = MockBot.representation(any.media) if isinstance(any.media, InputFile) else "<<bytes>>"
+            return f"{type(any).__name__}(data='{data}', type={any.type.__repr__()})"
+        elif isinstance(any, bytes):
             return sha256(any).hexdigest().__repr__()
         elif isinstance(any, list):
-            lst = [f"{type(a).__name__}(data='{sha256(a.media.input_file_content).hexdigest() if isinstance(a.media, InputFile) else '<<bytes>>'}', type={a.type.__repr__()})" if isinstance(a, InputMedia) else a.__repr__() for a in any]
-            return f"[{', '.join(lst)}]"
+            return f"[{', '.join([MockBot.representation(a) for a in any])}]"
         else:
             return any.__repr__()
 
