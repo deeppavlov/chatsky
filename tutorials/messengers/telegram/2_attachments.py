@@ -146,7 +146,7 @@ script = {
     },
     "main_flow": {
         "start_node": {
-            TRANSITIONS: {"intro_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: {"intro_node": cnd.exact_match("/start")},
         },
         "intro_node": {
             RESPONSE: Message(
