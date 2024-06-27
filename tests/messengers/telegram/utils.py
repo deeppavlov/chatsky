@@ -5,7 +5,7 @@ from hashlib import sha256
 from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple
 
 from pydantic import BaseModel
-from telegram import Update
+from telegram import InputFile, InputMedia, Update
 from typing_extensions import TypeAlias
 
 from dff.messengers.telegram.abstract import _AbstractTelegramInterface
@@ -38,8 +38,12 @@ class MockBot(BaseModel, arbitrary_types_allowed=True):
     @staticmethod
     def representation(any: Any) -> str:
         if isinstance(any, bytes):
-            any = sha256(any).hexdigest()
-        return any.__repr__()
+            return sha256(any).hexdigest().__repr__()
+        elif isinstance(any, list):
+            lst = [f"{type(a).__name__}(data='{sha256(a.media.input_file_content).hexdigest() if isinstance(a.media, InputFile) else '<<bytes>>'}', type={a.type.__repr__()})" if isinstance(a, InputMedia) else a.__repr__() for a in any]
+            return f"[{', '.join(lst)}]"
+        else:
+            return any.__repr__()
 
     def __getattribute__(self, name: str) -> Any:
         async def set_trace(*args, **kwargs):

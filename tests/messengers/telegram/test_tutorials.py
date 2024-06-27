@@ -15,7 +15,6 @@ happy_paths_file = Path(__file__).parent / "test_happy_paths.json"
 
 
 @pytest.mark.skipif(not telegram_available, reason="Telegram dependencies missing")
-@pytest.mark.asyncio
 @pytest.mark.parametrize(
     "tutorial_module_name",
     ["1_basic", "2_attachments", "3_advanced"],

@@ -497,20 +497,22 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                         )
                 elif isinstance(attachment, MediaGroup):
                     files = list()
-                    for media in attachment.media:
+                    for media in attachment.group:
                         if isinstance(media, Image):
+                            media_bytes = await media.get_bytes(self)
                             files += [
                                 InputMediaPhoto(
-                                    attachment_bytes,
+                                    media_bytes,
                                     **grab_extra_fields(
                                         attachment, ["filename", "caption", "parse_mode", "has_spoiler", "show_caption_above_media"]
                                     ),
                                 ),
                             ]
                         elif isinstance(media, Video):
+                            media_bytes = await media.get_bytes(self)
                             files += [
                                 InputMediaVideo(
-                                    attachment_bytes,
+                                    media_bytes,
                                     **grab_extra_fields(
                                         attachment,
                                         [
@@ -526,25 +528,28 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 ),
                             ]
                         elif isinstance(media, Animation):
+                            media_bytes = await media.get_bytes(self)
                             files += [
                                 InputMediaAnimation(
-                                    attachment_bytes,
+                                    media_bytes,
                                     **grab_extra_fields(
                                         attachment, ["filename", "caption", "parse_mode", "has_spoiler", "thumbnail", "show_caption_above_media"]
                                     ),
                                 ),
                             ]
                         elif isinstance(media, Audio):
+                            media_bytes = await media.get_bytes(self)
                             files += [
                                 InputMediaAudio(
-                                    attachment_bytes,
+                                    media_bytes,
                                     **grab_extra_fields(attachment, ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"]),
                                 ),
                             ]
                         elif isinstance(media, Document):
+                            media_bytes = await media.get_bytes(self)
                             files += [
                                 InputMediaDocument(
-                                    attachment_bytes,
+                                    media_bytes,
                                     **grab_extra_fields(attachment, ["filename", "caption", "parse_mode", "thumbnail"]),
                                 ),
                             ]

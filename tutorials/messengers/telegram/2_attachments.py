@@ -30,6 +30,7 @@ from dff.script.core.message import (
     Document,
     Location,
     Image,
+    MediaGroup,
     Poll,
     PollOption,
     Sticker,
@@ -139,6 +140,9 @@ script = {
             ("main_flow", "video_message_node"): cnd.exact_match(
                 Message("video message")
             ),
+            ("main_flow", "media_group"): cnd.exact_match(
+                Message("media group")
+            ),
         }
     },
     "main_flow": {
@@ -224,6 +228,21 @@ script = {
             RESPONSE: Message(
                 "Here's your video message!",
                 attachments=[VideoMessage(source=video_data["source"])],
+            ),
+        },
+        "media_group": {
+            RESPONSE: Message(
+                "Here's your media group!",
+                attachments=[
+                    MediaGroup(
+                        group=[
+                            Image(**image_data),
+                            Video(**video_data),
+                            Animation(**animation_data),
+                            Audio(**audio_data),
+                        ],
+                    )
+                ],
             ),
         },
         "fallback_node": {
