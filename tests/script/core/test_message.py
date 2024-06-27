@@ -86,35 +86,33 @@ class TestMessage:
         "attachment1,attachment2,equal",
         [
             (
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
                 True,
             ),
             (
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
-                DataAttachment(
-                    source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"
-                ),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
+                Document(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"),
                 False,
             ),
             (
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="2"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="2"),
                 False,
             ),
             (
-                DataAttachment(source=__file__, title="File"),
-                DataAttachment(source=__file__, title="File"),
+                Document(source=__file__, title="File"),
+                Document(source=__file__, title="File"),
                 True,
             ),
             (
-                DataAttachment(source=__file__, title="1"),
-                DataAttachment(source=__file__, title="2"),
+                Document(source=__file__, title="1"),
+                Document(source=__file__, title="2"),
                 False,
             ),
             (
-                DataAttachment(id="1", title="File"),
-                DataAttachment(id="2", title="File"),
+                Document(id="1", title="File"),
+                Document(id="2", title="File"),
                 False,
             ),
         ],

@@ -10,6 +10,7 @@ from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 from uuid import uuid4
+import abc
 
 from pydantic import Field, field_validator, FilePath, HttpUrl, model_validator
 from pydantic_core import Url
@@ -44,13 +45,13 @@ class Command(DataModel):
     pass
 
 
-class Attachment(DataModel):
+class Attachment(DataModel, abc.ABC):
     """
     DFF Message attachment base class.
     It is capable of serializing and validating all the model fields to JSON.
     """
 
-    pass
+    dff_attachment_type: str
 
 
 class CallbackQuery(Attachment):
