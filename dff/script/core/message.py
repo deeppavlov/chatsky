@@ -283,7 +283,7 @@ class MediaGroup(Attachment):
     so you should send them separately by putting them directly in :py:attr:`~.Message.attachments`).
     """
 
-    group: List[Union[Audio, Video, Image, Document]] = Field(default_factory=list)
+    group: List[Union[Audio, Video, Image, Document, DataAttachment]] = Field(default_factory=list)
     dff_attachment_type: Literal["media_group"] = "media_group"
 
     def __eq__(self, other):
