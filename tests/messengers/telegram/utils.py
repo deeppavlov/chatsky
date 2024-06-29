@@ -2,7 +2,7 @@ from asyncio import get_event_loop
 from contextlib import contextmanager
 from importlib import import_module
 from hashlib import sha256
-from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple
+from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple, Union
 
 from pydantic import BaseModel
 from telegram import InputFile, InputMedia, Update
@@ -16,19 +16,22 @@ from dff.script.core.message import DataAttachment
 PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
 
-def cast_dict_to_happy_step(dict: Dict) -> List["PathStep"]:
+def cast_dict_to_happy_step(dictionary: Dict, update_only: bool = False) -> Union[List["PathStep"]]:
     imports = globals().copy()
     imports.update(import_module("telegram").__dict__)
     imports.update(import_module("telegram.ext").__dict__)
     imports.update(import_module("telegram.constants").__dict__)
 
     path_steps = list()
-    for step in dict:
+    for step in dictionary:
         update = eval(step["update"], imports)
-        received = Message.model_validate_json(step["received_message"])
-        received.original_message = update
-        response = Message.model_validate_json(step["response_message"])
-        path_steps += [(update, received, response, step["response_functions"])]
+        if not update_only:
+            received = Message.model_validate(step["received_message"])
+            received.original_message = update
+            response = Message.model_validate(step["response_message"])
+            path_steps += [(update, received, response, step["response_functions"])]
+        else:
+            path_steps += [(update, Message(), Message(), list())]
     return path_steps
 
 
