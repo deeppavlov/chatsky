@@ -29,7 +29,7 @@ Import necessary modules:
 """
 
 # %%
-from dff.messengers.vk import PollingVKInterface
+from dff.messengers.vk.interface import PollingVKInterface
 from dff.script import conditions as cnd
 from dff.script import labels as lbl
 from dff.script import RESPONSE, TRANSITIONS, Message

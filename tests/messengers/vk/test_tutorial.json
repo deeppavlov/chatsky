@@ -1,52 +1,8 @@
 {
-    "1_basic": {
-        "update": {
-            "ts": "300",
-            "updates": [
-                
-                {
-                    "group_id": 224377718,
-                    "type": "message_new",
-                    "event_id": "ef2d8a225e5c10a4c88692a2a471c00eaacb451b",
-                    "v": "5.199",
-                    "object": {
-                        "message": {
-                            "date": 1718015647,
-                            "from_id": 355442652,
-                            "id": 388,
-                            "out": 0,
-                            "version": 10000792,
-                            "attachments": [],
-                            "conversation_message_id": 388,
-                            "fwd_messages": [],
-                            "important": false,
-                            "is_hidden": false,
-                            "peer_id": 355442652,
-                            "random_id": 0,
-                            "text": "Hello"
-                        },
-                        "client_info": {
-                            "button_actions": [
-                                "text",
-                                "vkpay",
-                                "open_app",
-                                "location",
-                                "open_link",
-                                "callback",
-                                "intent_subscribe",
-                                "intent_unsubscribe"
-                            ],
-                            "keyboard": true,
-                            "inline_keyboard": true,
-                            "carousel": true,
-                            "lang_id": 0
-                        }
-                    }
-                }
-            ]
-        },
-        "received_message": "{\"text\":\"Hello\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-        "response": "{\"text\":\"Hi\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
-        "response_request": "https://api.vk.com/method/messages.send?user_id=355442652&random_id=0&message=Hi&v=5.81&access_token=token"
-    }
+    "1_basic": [
+        ["{\"text\":\"Hello\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+        "{\"text\":\"Hi\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}"],
+        ["{\"text\":\"Goodbye\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}",
+        "{\"text\":\"Please, repeat the request\",\"commands\":null,\"attachments\":[],\"annotations\":null,\"misc\":null,\"original_message\":null}"]
+    ]
 }

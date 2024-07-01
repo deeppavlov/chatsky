@@ -4,8 +4,8 @@ import json
 import pathlib
 from dff.script import Message
 from dff.script.core.message import Document, Image
-from dff.messengers.vk import PollingVKInterface, extract_vk_update
-import dff.messengers.vk as dff_vk
+from dff.messengers.vk.interface import PollingVKInterface, extract_vk_update
+import dff.messengers.vk.interface as dff_vk
 import logging
 
 logging.basicConfig(level=logging.DEBUG)
@@ -37,7 +37,7 @@ def patch_interface(monkeypatch):
             return {"response": {"upload_url": "https://dummy_upload_url"}}
         elif "upload_url" in request_method:
             # hashing bytes of the file
-            req.update({"file": hash(kwargs['file'][0][1][0])})
+            req.update({"file": kwargs['file'][0][1][0]})
             trace.append(req)
             return {"file": "dummy_file"}
         elif "saveMessagesPhoto" in request_method:
@@ -122,4 +122,3 @@ async def test_tutorials(patch_interface):
         await patch_interface._respond(message_to_send)
         trace = patch_interface.trace
         assert trace == data["trace"]
-
