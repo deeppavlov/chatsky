@@ -148,10 +148,13 @@ class DataAttachment(Attachment):
     Disable this if you want to always respond with the most up-to-date version of the file.
     """
     cached_filename: Optional[FilePath] = None
-    """This field stores a path to cached version of this file (retrieved from id or URL)."""
+    """
+    This field is used to store a path to cached version of this file (retrieved from id or URL).
+    This field is managed by framework.
+    """
     id: Optional[str] = None
     """
-    ID of the file on a file server.
+    ID of the file on a file server (e.g. file_id for telegram attachments).
     :py:meth:`~.MessengerInterfaceWithAttachments.populate_attachment` is used to retrieve bytes from ID.
     """
 
