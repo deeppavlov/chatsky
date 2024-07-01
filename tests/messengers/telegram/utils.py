@@ -4,6 +4,7 @@ from importlib import import_module
 from hashlib import sha256
 from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple
 
+from dff.pipeline.types import PipelineRunnerFunction
 from pydantic import BaseModel
 from telegram import InputFile, InputMedia, Update
 from typing_extensions import TypeAlias
@@ -71,6 +72,7 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
     @classmethod
     def create(cls, interface: _AbstractTelegramInterface, happy_path: List[PathStep]) -> "MockApplication":
         instance = cls(bot=MockBot(), happy_path=happy_path, interface=interface)
+        interface.connect = instance.pseudo_connect
         return instance
 
     @contextmanager
@@ -121,8 +123,6 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
                     else:
                         raise RuntimeError(f"Update {update} type unknown!")
 
-    def run_polling(self, poll_interval: float, timeout: int, allowed_updates: List[str]) -> None:
-        return self._run_bot()
-
-    def run_webhook(self, listen: str, port: str, allowed_updates: List[str]) -> None:
+    async def pseudo_connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs) -> None:
+        self.interface._pipeline_runner = pipeline_runner
         return self._run_bot()

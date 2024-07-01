@@ -5,17 +5,19 @@ This module provides concrete implementations of the
 :py:class:`~._AbstractTelegramInterface`.
 """
 
+from asyncio import get_event_loop
 from pathlib import Path
 from typing import Any, Optional
-
-from dff.pipeline.types import PipelineRunnerFunction
 
 from .abstract import _AbstractTelegramInterface
 
 try:
     from telegram import Update
+    from telegram.error import TelegramError
+
 except ImportError:
     Update = Any
+    TelegramError = Any
 
 
 class LongpollingInterface(_AbstractTelegramInterface):
@@ -35,10 +37,15 @@ class LongpollingInterface(_AbstractTelegramInterface):
         self.interval = interval
         self.timeout = timeout
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
-        await super().connect(pipeline_runner, *args, **kwargs)
-        self.application.run_polling(
-            poll_interval=self.interval, timeout=self.timeout, allowed_updates=Update.ALL_TYPES
+    def error_callback(self, exc: TelegramError) -> None:
+        get_event_loop().create_task(self.application.process_error(error=exc, update=None))
+
+    async def updater_coroutine(self):
+        await self.application.updater.start_polling(
+            poll_interval=self.interval,
+            timeout=self.timeout,
+            allowed_updates=Update.ALL_TYPES,
+            error_callback=self.error_callback,
         )
 
 
@@ -60,6 +67,9 @@ class WebhookInterface(_AbstractTelegramInterface):
         self.listen = host
         self.port = port
 
-    async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
-        await super().connect(pipeline_runner, *args, **kwargs)
-        self.application.run_webhook(listen=self.listen, port=self.port, allowed_updates=Update.ALL_TYPES)
+    async def updater_coroutine(self):
+        await self.application.updater.start_webhook(
+            listen=self.listen,
+            port=self.port,
+            allowed_updates=Update.ALL_TYPES,
+        )

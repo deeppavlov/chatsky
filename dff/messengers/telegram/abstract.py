@@ -5,6 +5,8 @@ This module implements a base interface for interactions with the
 Telegram API.
 """
 
+from abc import abstractmethod, ABC
+from asyncio import Future
 from pathlib import Path
 from typing import Any, Callable, Optional
 
@@ -54,7 +56,7 @@ except ImportError:
     telegram_available = False
 
 
-class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
+class _AbstractTelegramInterface(MessengerInterfaceWithAttachments, ABC):
     """
     Messenger interface mixin for Telegram API usage.
     """
@@ -661,5 +663,28 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             update, _, lambda s: Message(attachments=[CallbackQuery(query_string=s.callback_query.data)])
         )
 
+    @abstractmethod
+    async def updater_coroutine(self):
+        raise NotImplementedError
+
     async def connect(self, pipeline_runner: PipelineRunnerFunction, *args, **kwargs):
         self._pipeline_runner = pipeline_runner
+
+        try:
+            await self.application.initialize()
+            if self.application.post_init:
+                await self.application.post_init(self.application)
+            await self.updater_coroutine()
+            await self.application.start()
+            await Future()
+
+        finally:
+            if self.application.updater.running:
+                await self.application.updater.stop()
+            if self.application.running:
+                await self.application.stop()
+                if self.application.post_stop:
+                    await self.application.post_stop(self.application)
+            await self.application.shutdown()
+            if self.application.post_shutdown:
+                await self.application.post_shutdown(self.application)
