@@ -141,7 +141,7 @@ docker compose --profile stats up
 
 This will download and launch Superset Dashboard, Clickhouse, OpenTelemetry Collector.
 
-The third group canbe launched via
+The third group can be launched via
 
 ```bash
 docker compose --profile ext up
