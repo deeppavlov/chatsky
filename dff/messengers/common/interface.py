@@ -12,7 +12,7 @@ import logging
 import uuid
 import signal
 from functools import partial
-import time # Don't forget to remove this
+import time  # Don't forget to remove this
 import contextlib
 
 from typing import Optional, Any, List, Tuple, TextIO, Hashable, TYPE_CHECKING
@@ -38,7 +38,7 @@ class MessengerInterface(abc.ABC):
         self.running_in_foreground = False
         self.running = True
         self.stopped = False
-        self.shielded = False # This determines whether the interface wants to be shut down with task.cancel() or just switching a flag. Let's say PollingMessengerInterface wants task.cancel()
+        self.shielded = False  # This determines whether the interface wants to be shut down with task.cancel() or just switching a flag. Let's say PollingMessengerInterface wants task.cancel()
 
     @abc.abstractmethod
     async def connect(self, *args):
@@ -51,7 +51,7 @@ class MessengerInterface(abc.ABC):
         """
         raise NotImplementedError
 
-# This is an optional method, so no need to make it abstract, I think.
+    # This is an optional method, so no need to make it abstract, I think.
     async def cleanup(self, *args):
         pass
 
@@ -78,9 +78,8 @@ class MessengerInterface(abc.ABC):
             await self.cleanup()
 
         self.stopped = True
-       
-        # Placeholder for any cleanup code.
 
+        # Placeholder for any cleanup code.
 
     # I can make shutdown() work for PollingMessengerInterface, but I don't know the structure of Telegram Messenger Interfaces. Right now, this ends the main task and sets a flag self.running to False, so that any async tasks in loops can see that and turn off as soon as they are done.
     async def shutdown(self):
@@ -104,7 +103,7 @@ class PollingMessengerInterface(MessengerInterface):
 
     def __init__(self):
         self.request_queue = asyncio.Queue()
-        self.cancel_on_shutdown = True # Would like task.cancel(). (Not done yet)
+        self.cancel_on_shutdown = True  # Would like task.cancel(). (Not done yet)
         self.number_of_workers = 2
         # Could make this an argument of connect(), but people can just type interface.number_of_workers = their_number before creating pipeline. Interface features like timeouts could be a tutorial, actually. But it's not really necessary or in demand.
         self._worker_tasks = []
@@ -137,13 +136,13 @@ class PollingMessengerInterface(MessengerInterface):
             (ctx_id, update) = request
             async with self.pipeline.context_lock[ctx_id]:  # get exclusive access to this context among interfaces
                 # Trying to see if _process_request works at all. Looks like it does it just fine, actually
-                await self._process_request(ctx_id, update, self.pipeline)
+                # await self._process_request(ctx_id, update, self.pipeline)
                 # Doesn't work in a thread for some reason - it goes into an infinite cycle.
-                """
+                # """
                 await asyncio.to_thread(  # [optional] execute in a separate thread to avoid blocking
                     self._process_request, ctx_id, update, self.pipeline
                 )
-                """
+                # """
             return False
         else:
             return True
@@ -154,7 +153,9 @@ class PollingMessengerInterface(MessengerInterface):
             try:
                 no_more_jobs = await asyncio.wait_for(self._worker_job(), timeout=worker_timeout)
                 if no_more_jobs:
-                    logger.info(f"Worker finished working - stop signal received and remaining requests have been processed.")
+                    logger.info(
+                        f"Worker finished working - stop signal received and remaining requests have been processed."
+                    )
                     # This logging is incorrect right now, request queue running out isn't handled and it's mistakenly called a stop signal.
                     break
             except TimeoutError:
@@ -196,7 +197,9 @@ class PollingMessengerInterface(MessengerInterface):
         finally:
             self.running = False
             print("loop ending")
-            logger.info(f"polling_loop stopped working - either the stop signal was received or the loop() condition was false.")
+            logger.info(
+                f"polling_loop stopped working - either the stop signal was received or the loop() condition was false."
+            )
             # If there're no more jobs/stop signal received, a special 'None' request is sent to the queue (one for each worker), they shut down the workers.
             # In case of more workers than two, change the number of 'None' requests to the new number of workers.
             for i in range(self.number_of_workers):
@@ -222,7 +225,6 @@ class PollingMessengerInterface(MessengerInterface):
         await asyncio.wait(self._worker_tasks)
         # await asyncio.gather(*self._worker_tasks)
         # Blocks until all workers are done
-
 
     def _on_exception(self, e: BaseException):
         """

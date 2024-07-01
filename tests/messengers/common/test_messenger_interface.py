@@ -203,8 +203,8 @@ def test_shielding():
             context = await pipeline._run_pipeline(update, ctx_id)
             await self._respond(ctx_id, context.last_response)
 
-                # This shuts down the entire program via graceful termination. If the received messages are correct even after a SIGINT, the program has working graceful termination.
-                # Ok, so it's interesting. When using time.sleep() graceful termination works, but when using an 'await asyncio.sleep()' the test breaks, because the exception from 'shutdown()' isn't caught. I couldn't figure it out, but now I think it's logical. When SIGINT is received by a new signal handler that I made, the program throws an exception into whichever async function it's currently in, could be any of them.
+            # This shuts down the entire program via graceful termination. If the received messages are correct even after a SIGINT, the program has working graceful termination.
+            # Ok, so it's interesting. When using time.sleep() graceful termination works, but when using an 'await asyncio.sleep()' the test breaks, because the exception from 'shutdown()' isn't caught. I couldn't figure it out, but now I think it's logical. When SIGINT is received by a new signal handler that I made, the program throws an exception into whichever async function it's currently in, could be any of them.
 
         async def cleanup(self):
             await super().cleanup()
@@ -226,5 +226,3 @@ def test_shielding():
         assert interface.expected_updates[i] == interface.received_updates[i]
     assert interface.not_obtained_updates() == False
     assert interface.not_obtained_requests() == True
-
-

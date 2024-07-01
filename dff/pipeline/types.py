@@ -274,4 +274,3 @@ PipelineBuilder: TypeAlias = TypedDict(
 A type, representing anything that can be transformed to pipeline.
 It can be Dictionary, containing keys that are present in Pipeline constructor parameters.
 """
-

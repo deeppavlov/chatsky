@@ -410,6 +410,7 @@ class Pipeline:
     def script(self) -> Script:
         return self.actor.script
 
+
 class ContextLock:
     # locks: dict[ctx_id, asyncio.Lock] = {}
     def __init__(self):
