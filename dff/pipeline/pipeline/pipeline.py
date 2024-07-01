@@ -33,7 +33,6 @@ from ..types import (
     GlobalExtraHandlerType,
     ExtraHandlerFunction,
     ExtraHandlerBuilder,
-    ContextLock,
 )
 from ..types import PIPELINE_STATE_KEY
 from .utils import finalize_service_group, pretty_format_component_info_dict
@@ -410,3 +409,13 @@ class Pipeline:
     @property
     def script(self) -> Script:
         return self.actor.script
+
+class ContextLock:
+    # locks: dict[ctx_id, asyncio.Lock] = {}
+    def __init__(self):
+        self.locks = {}
+
+    def __getitem__(self, key):
+        if not key in self.locks:
+            self.locks[key] = asyncio.Lock()
+        return self.locks[key]

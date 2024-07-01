@@ -275,13 +275,3 @@ A type, representing anything that can be transformed to pipeline.
 It can be Dictionary, containing keys that are present in Pipeline constructor parameters.
 """
 
-
-class ContextLock:
-    # locks: dict[ctx_id, asyncio.Lock] = {}
-    def __init__(self):
-        self.locks = {}
-
-    def __getitem__(self, key):
-        if not key in self.locks:
-            self.locks[key] = asyncio.Lock()
-        return self.locks[key]
