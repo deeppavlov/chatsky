@@ -11,7 +11,6 @@ from typing_extensions import TypeAlias
 from dff.messengers.telegram.abstract import _AbstractTelegramInterface
 from dff.script import Message
 from dff.script.core.context import Context
-from dff.script.core.message import DataAttachment
 
 PathStep: TypeAlias = Tuple[Update, Message, Message, List[str]]
 
@@ -103,18 +102,18 @@ class MockApplication(BaseModel, arbitrary_types_allowed=True):
         self.interface._pipeline_runner = original_pipeline_runner
 
     @contextmanager
-    def _wrap_populate_attachment(self) -> Iterator[None]:
-        async def wrapped_populate_attachment(att: DataAttachment) -> bytes:
-            return str(att.id).encode()
+    def _wrap_get_attachment_bytes(self) -> Iterator[None]:
+        async def wrapped_get_attachment_bytes(source: str) -> bytes:
+            return source.encode()
 
-        original_populate_attachment = self.interface.populate_attachment
-        self.interface.populate_attachment = wrapped_populate_attachment
+        original_populate_attachment = self.interface.get_attachment_bytes
+        self.interface.get_attachment_bytes = wrapped_get_attachment_bytes
         yield
-        self.interface.populate_attachment = original_populate_attachment
+        self.interface.get_attachment_bytes = original_populate_attachment
 
     def _run_bot(self) -> None:
         loop = get_event_loop()
-        with self._wrap_pipeline_runner(), self._wrap_populate_attachment():
+        with self._wrap_pipeline_runner(), self._wrap_get_attachment_bytes():
             for update, received, response, trace in self.happy_path:
                 with self._check_context_and_trace(received, response, trace):
                     if update.message is not None:

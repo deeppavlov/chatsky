@@ -53,12 +53,9 @@ class DFFCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAtta
         self._prompt_response: str = "response: "
         self._descriptor: Optional[TextIO] = None
 
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
-        if attachment.id is not None:
-            with urlopen(f"{EXAMPLE_SOURCE}/{attachment.id}") as url:
-                return url.read()
-        else:
-            raise ValueError(f"For attachment {attachment} id is not defined!")
+    async def get_attachment_bytes(self, attachment: str) -> bytes:
+        with urlopen(f"{EXAMPLE_SOURCE}/{attachment}") as url:
+            return url.read()
 
 
 class TestMessage:

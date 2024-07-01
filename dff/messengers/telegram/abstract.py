@@ -17,7 +17,6 @@ from dff.script.core.message import (
     Audio,
     CallbackQuery,
     Contact,
-    DataAttachment,
     Document,
     Image,
     Invoice,
@@ -97,13 +96,10 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         self.application.add_handler(MessageHandler(ALL, self.on_message))
         self.application.add_handler(CallbackQueryHandler(self.on_callback))
 
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
-        if attachment.id is not None:
-            file = await self.application.bot.get_file(attachment.id)
-            data = await file.download_as_bytearray()
-            return bytes(data)
-        else:
-            raise ValueError(f"For attachment {attachment} id is not defined!")
+    async def get_attachment_bytes(self, source: str) -> bytes:
+        file = await self.application.bot.get_file(source)
+        data = await file.download_as_bytearray()
+        return bytes(data)
 
     def extract_message_from_telegram(self, update: TelegramMessage) -> Message:
         """

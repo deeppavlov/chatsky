@@ -155,7 +155,7 @@ class DataAttachment(Attachment):
     id: Optional[str] = None
     """
     ID of the file on a file server (e.g. file_id for telegram attachments).
-    :py:meth:`~.MessengerInterfaceWithAttachments.populate_attachment` is used to retrieve bytes from ID.
+    :py:meth:`~.MessengerInterfaceWithAttachments.get_attachment_bytes` is used to retrieve bytes from ID.
     """
 
     async def _cache_attachment(self, data: bytes, directory: Path) -> None:
@@ -177,7 +177,7 @@ class DataAttachment(Attachment):
         If the attachment is represented by URL or saved in a file,
         it will be downloaded or read automatically.
         If cache use is allowed and the attachment is cached, cached file will be used.
-        Otherwise, a :py:meth:`~.MessengerInterfaceWithAttachments.populate_attachment`
+        Otherwise, a :py:meth:`~.MessengerInterfaceWithAttachments.get_attachment_bytes`
         will be used for receiving attachment bytes by ID and title.
 
         If cache use is allowed and the attachment is a URL or an ID, bytes will be cached locally.
@@ -195,7 +195,7 @@ class DataAttachment(Attachment):
             with urlopen(self.source.unicode_string()) as url:
                 attachment_data = url.read()
         else:
-            attachment_data = await from_interface.populate_attachment(self)
+            attachment_data = await from_interface.get_attachment_bytes(self.id)
         if self.use_cache:
             await self._cache_attachment(attachment_data, from_interface.attachments_directory)
         return attachment_data
