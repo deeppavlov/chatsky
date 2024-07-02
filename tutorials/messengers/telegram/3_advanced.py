@@ -75,7 +75,7 @@ You can see **text in bold**, _text in italic_ and a \`code snippet\`\.
 \> Here's a [link](https://core.telegram.org/bots/api\#formatting-options) in a quote\.
 \> Visit the link for more information about formatting options in telegram\.
 Run /start command again to restart\.
-"""  # noqa: W605
+"""  # noqa: E501
 
 location_data = {"latitude": 59.9386, "longitude": 30.3141}
 

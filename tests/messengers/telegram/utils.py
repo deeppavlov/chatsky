@@ -2,7 +2,7 @@ from asyncio import get_event_loop
 from contextlib import contextmanager
 from importlib import import_module
 from hashlib import sha256
-from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple, Union
+from typing import Any, Dict, Hashable, Iterator, List, Optional, Tuple
 
 from dff.pipeline.types import PipelineRunnerFunction
 from pydantic import BaseModel
