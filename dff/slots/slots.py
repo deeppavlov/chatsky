@@ -16,7 +16,7 @@ from functools import reduce
 
 from pydantic import BaseModel, model_validator, Field
 
-from dff.utils.async_helper import wrap_sync_function_in_async
+from dff.utils.devel.async_helpers import wrap_sync_function_in_async
 
 if TYPE_CHECKING:
     from dff.script import Context, Message
