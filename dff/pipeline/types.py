@@ -30,7 +30,7 @@ class PipelineRunnerFunction(Protocol):
 
     def __call__(
         self, message: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
-    ) -> Context:
+    ) -> Awaitable[Context]:
         """
         :param message: User request for pipeline to process.
         :param ctx_id:

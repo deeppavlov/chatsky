@@ -159,7 +159,7 @@ services:
       start_period: 30s
 
   otelcol:
-    image: otel/opentelemetry-collector-contrib:latest
+    image: otel/opentelemetry-collector-contrib:0.103.1
     profiles:
       - stats
     container_name: otel-col

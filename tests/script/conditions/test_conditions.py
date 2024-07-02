@@ -16,7 +16,7 @@ def test_conditions():
 
     assert cnd.exact_match("text")(ctx, pipeline)
     assert cnd.exact_match(Message("text", misc={}))(ctx, pipeline)
-    assert not cnd.exact_match(Message("text", misc={1: 1}))(ctx, pipeline)
+    assert not cnd.exact_match(Message("text", misc={"one": 1}))(ctx, pipeline)
     assert not cnd.exact_match("text1")(ctx, pipeline)
     assert cnd.exact_match(Message())(ctx, pipeline)
     assert not cnd.exact_match(Message(), skip_none=False)(ctx, pipeline)

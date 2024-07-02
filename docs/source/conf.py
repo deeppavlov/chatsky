@@ -199,5 +199,6 @@ def setup(_):
             ("dff.utils.testing", "Testing Utils"),
             ("dff.utils.turn_caching", "Caching"),
             ("dff.utils.db_benchmark", "DB Benchmark"),
+            ("dff.utils.devel", "Development Utils"),
         ]
     )

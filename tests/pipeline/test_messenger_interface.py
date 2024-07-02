@@ -3,7 +3,8 @@ import sys
 import pathlib
 
 from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.common import CLIMessengerInterface, CallbackMessengerInterface
+from dff.messengers.console import CLIMessengerInterface
+from dff.messengers.common import CallbackMessengerInterface
 from dff.pipeline import Pipeline
 import dff.script.conditions as cnd
 

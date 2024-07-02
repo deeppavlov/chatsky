@@ -19,7 +19,7 @@ import logging
 import urllib.request
 
 from dff.script import Context
-from dff.messengers.common import CLIMessengerInterface
+from dff.messengers.console import CLIMessengerInterface
 from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
 from dff.utils.testing.common import (
     check_happy_path,
