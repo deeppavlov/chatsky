@@ -145,7 +145,7 @@ class DataAttachment(Attachment):
     Whether to cache the file (only for URL and ID files).
     Disable this if you want to always respond with the most up-to-date version of the file.
     """
-    cached_filename: Optional[FilePath] = None
+    cached_filename: Optional[Path] = None
     """
     This field is used to store a path to cached version of this file (retrieved from id or URL).
     This field is managed by framework.
@@ -159,6 +159,7 @@ class DataAttachment(Attachment):
     async def _cache_attachment(self, data: bytes, directory: Path) -> None:
         """
         Cache attachment, save bytes into a file.
+        File has a UUID name based on its `self.source` or `self.id`.
 
         :param data: attachment data bytes.
         :param directory: cache directory where attachment will be saved.
@@ -166,8 +167,7 @@ class DataAttachment(Attachment):
 
         filename = str(uuid.uuid5(uuid.NAMESPACE_URL, str(self.source or self.id)))
         self.cached_filename = directory / filename
-        with open(self.cached_filename, "wb") as file:
-            file.write(data)
+        self.cached_filename.write_bytes(data)
 
     async def get_bytes(self, from_interface: MessengerInterfaceWithAttachments) -> Optional[bytes]:
         """
