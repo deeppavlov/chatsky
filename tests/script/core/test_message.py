@@ -8,9 +8,9 @@ from urllib.request import urlopen
 import pytest
 from pydantic import ValidationError, HttpUrl, FilePath
 
-from dff.messengers.common.interface import MessengerInterfaceWithAttachments
-from dff.messengers.console import CLIMessengerInterface
-from dff.script.core.message import (
+from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.script.core.message import (
     Animation,
     Audio,
     CallbackQuery,

@@ -4,8 +4,8 @@ from pathlib import Path
 
 import pytest
 
-from dff.messengers.telegram import telegram_available
-from dff.script.core.message import DataAttachment
+from chatsky.messengers.telegram import telegram_available
+from chatsky.script.core.message import DataAttachment
 from tests.test_utils import get_path_from_tests_to_current_dir
 
 if telegram_available:

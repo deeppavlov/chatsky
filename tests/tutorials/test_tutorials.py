@@ -32,17 +32,17 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
         fd.write(tutorial_source_code)
 
     for deps in re.findall(InstallationCell.pattern, tutorial_source_code):
-        venv.run(f"python -m pip install {deps}".replace("dff", "."), check_rc=True, cd=os.getcwd())
+        venv.run(f"python -m pip install {deps}".replace("chatsky", "."), check_rc=True, cd=os.getcwd())
 
     venv.run(f"python {tutorial_path}", check_rc=True)
 
 
-@pytest.mark.parametrize("dff_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
+@pytest.mark.parametrize("chatsky_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
 @pytest.mark.slow
 @pytest.mark.docker
 @pytest.mark.no_coverage
-def test_tutorials(dff_tutorial_py_file, virtualenv):
-    with open(dff_tutorial_py_file, "r", encoding="utf-8") as fd:
+def test_tutorials(chatsky_tutorial_py_file, virtualenv):
+    with open(chatsky_tutorial_py_file, "r", encoding="utf-8") as fd:
         source_code = fd.read()
 
     check_tutorial_dependencies(

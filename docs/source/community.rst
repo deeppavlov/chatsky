@@ -17,5 +17,5 @@ get help from the community.
 `GitHub Issues <https://github.com/deeppavlov/dialog_flow_framework/issues>`_ is a platform where users
 can report issues, suggest features, and track the progress of DFF development.
 
-`Stack Overflow <https://stackoverflow.com/questions/tagged/dff>`_ is a platform where DFF users can ask
+`Stack Overflow <https://stackoverflow.com/questions/tagged/chatsky>`_ is a platform where DFF users can ask
 technical questions and get answers from the community.

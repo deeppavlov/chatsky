@@ -13,7 +13,7 @@ Examples
 
         # Create and import a configuration archive.
         # The import overrides existing dashboard configurations.
-        dff.stats config.yaml \\
+        chatsky.stats config.yaml \\
             -U superset_user \\
             -P superset_password \\
             -dP database_password \\
@@ -47,7 +47,7 @@ def main(parsed_args: Optional[argparse.Namespace] = None):
         The function accepts a yaml file; also, all of the options can also be overridden
         via the command line. Setting passwords interactively is supported.
 
-        dff.stats config.yaml \\
+        chatsky.stats config.yaml \\
             -U superset_user \\
             -P superset_password \\
             -dP database_password \\

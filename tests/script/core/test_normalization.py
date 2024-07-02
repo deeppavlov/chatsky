@@ -1,8 +1,8 @@
 # %%
 from typing import Tuple
 
-from dff.pipeline import Pipeline
-from dff.script import (
+from chatsky.pipeline import Pipeline
+from chatsky.script import (
     GLOBAL,
     TRANSITIONS,
     RESPONSE,
@@ -15,10 +15,10 @@ from dff.script import (
     ConstLabel,
     Message,
 )
-from dff.script.labels import repeat
-from dff.script.conditions import true
+from chatsky.script.labels import repeat
+from chatsky.script.conditions import true
 
-from dff.script.core.normalization import normalize_condition, normalize_label, normalize_response
+from chatsky.script.core.normalization import normalize_condition, normalize_label, normalize_response
 
 
 def std_func(ctx, pipeline):

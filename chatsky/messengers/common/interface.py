@@ -14,10 +14,10 @@ from tempfile import gettempdir
 from typing import Optional, Any, List, Tuple, Hashable, TYPE_CHECKING, Type
 
 if TYPE_CHECKING:
-    from dff.script import Context, Message
-    from dff.pipeline.types import PipelineRunnerFunction
-    from dff.messengers.common.types import PollingInterfaceLoopFunction
-    from dff.script.core.message import Attachment
+    from chatsky.script import Context, Message
+    from chatsky.pipeline.types import PipelineRunnerFunction
+    from chatsky.messengers.common.types import PollingInterfaceLoopFunction
+    from chatsky.script.core.message import Attachment
 
 logger = logging.getLogger(__name__)
 
@@ -35,7 +35,7 @@ class MessengerInterface(abc.ABC):
         May be used for sending an introduction message or displaying general bot information.
 
         :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         """
         raise NotImplementedError
 
@@ -68,7 +68,7 @@ class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
             warning_start = f"Attachments directory for {type(self).__name__} messenger interface"
             warning_end = "attachment data won't be cached locally!"
             if attachments_directory is None:
-                self.attachments_directory = Path(tempdir) / f"dff-cache-{type(self).__name__}"
+                self.attachments_directory = Path(tempdir) / f"chatsky-cache-{type(self).__name__}"
                 logger.info(f"{warning_start} is None, so will be set to tempdir and {warning_end}")
             else:
                 self.attachments_directory = attachments_directory
@@ -150,7 +150,7 @@ class PollingMessengerInterface(MessengerInterface):
         for most cases the loop itself shouldn't be overridden.
 
         :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         :param loop: a function that determines whether polling should be continued;
             called in each cycle, should return `True` to continue polling or `False` to stop.
         :param timeout: a time interval between polls (in seconds).
@@ -180,7 +180,7 @@ class CallbackMessengerInterface(MessengerInterface):
     ) -> Context:
         """
         Method that should be invoked on user input.
-        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         return await self._pipeline_runner(request, ctx_id, update_ctx_misc)
 
@@ -189,6 +189,6 @@ class CallbackMessengerInterface(MessengerInterface):
     ) -> Context:
         """
         Method that should be invoked on user input.
-        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self.on_request_async(request, ctx_id, update_ctx_misc))

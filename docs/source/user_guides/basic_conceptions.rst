@@ -26,7 +26,7 @@ To get started with DFF, you need to install its core dependencies, which can be
 
 .. code-block:: shell
 
-    pip3 install dff
+    pip3 install chatsky
 
 Defining Dialogue Goals and User Scenarios
 ==========================================
@@ -79,9 +79,9 @@ Example flow & script
 .. code-block:: python
     :linenos:
 
-    from dff.pipeline import Pipeline
-    from dff.script import TRANSITIONS, RESPONSE, Message
-    import dff.script.conditions as cnd
+    from chatsky.pipeline import Pipeline
+    from chatsky.script import TRANSITIONS, RESPONSE, Message
+    import chatsky.script.conditions as cnd
 
     ping_pong_script = {
         "greeting_flow": {
@@ -299,7 +299,7 @@ the happy path and the pipeline. The function will play out a dialog with the pi
 
 .. code-block:: python
 
-    from dff.utils.testing.common import check_happy_path
+    from chatsky.utils.testing.common import check_happy_path
 
     check_happy_path(pipeline, happy_path)
 

@@ -15,10 +15,10 @@ import logging
 import inspect
 from typing import Optional, TYPE_CHECKING
 
-from dff.script import Context
+from chatsky.script import Context
 
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
-from dff.utils.devel.async_helpers import wrap_sync_function_in_async
+from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from ..types import (
     ServiceBuilder,
     StartConditionCheckerFunction,
@@ -31,7 +31,7 @@ from ..pipeline.component import PipelineComponent
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
 class Service(PipelineComponent):

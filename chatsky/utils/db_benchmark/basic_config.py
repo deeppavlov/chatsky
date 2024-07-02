@@ -15,8 +15,8 @@ import random
 from humanize import naturalsize
 from pympler import asizeof
 
-from dff.script import Message, Context
-from dff.utils.db_benchmark.benchmark import BenchmarkConfig
+from chatsky.script import Message, Context
+from chatsky.utils.db_benchmark.benchmark import BenchmarkConfig
 
 
 def get_dict(dimensions: Tuple[int, ...]):

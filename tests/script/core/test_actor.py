@@ -1,7 +1,7 @@
 # %%
 import pytest
-from dff.pipeline import Pipeline
-from dff.script import (
+from chatsky.pipeline import Pipeline
+from chatsky.script import (
     TRANSITIONS,
     RESPONSE,
     GLOBAL,
@@ -11,8 +11,8 @@ from dff.script import (
     Context,
     Message,
 )
-from dff.script.conditions import true
-from dff.script.labels import repeat
+from chatsky.script.conditions import true
+from chatsky.script.labels import repeat
 
 
 def positive_test(samples, custom_class):

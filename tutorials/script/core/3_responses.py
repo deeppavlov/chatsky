@@ -10,18 +10,18 @@ that allow giving custom answers to users are shown.
 Let's do all the necessary imports from DFF.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import re
 import random
 
-from dff.script import TRANSITIONS, RESPONSE, Context, Message
-import dff.script.responses as rsp
-import dff.script.conditions as cnd
+from chatsky.script import TRANSITIONS, RESPONSE, Context, Message
+import chatsky.script.responses as rsp
+import chatsky.script.conditions as cnd
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

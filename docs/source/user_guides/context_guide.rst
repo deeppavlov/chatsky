@@ -84,7 +84,7 @@ API
 This sections describes the API of the ``Context`` class.
 
 For more information, such as method signatures, see
-`API reference <../apiref/dff.script.core.context.html#dff.script.core.context.Context>`__.
+`API reference <../apiref/chatsky.script.core.context.html#chatsky.script.core.context.Context>`__.
 
 Attributes
 ==========
@@ -158,21 +158,21 @@ Private methods
 * **add_request**: Add a request to the context.
   It updates the `requests` dictionary. This method is called by the `Pipeline` component
   before any of the `pipeline services <../tutorials/tutorials.pipeline.3_pipeline_dict_with_services_basic.py>`__ are executed,
-  including `Actor <../apiref/dff.pipeline.pipeline.actor.html>`__.
+  including `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`__.
 
 * **add_response**: Add a response to the context.
-  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`__ pipeline component at the end of the turn, after it has run
+  It updates the `responses` dictionary. This function is run by the `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`__ pipeline component at the end of the turn, after it has run
   the `PRE_RESPONSE_PROCESSING <../tutorials/tutorials.script.core.7_pre_response_processing.py>`__ functions.
 
   To be more precise, this method is called between the ``CREATE_RESPONSE`` and ``FINISH_TURN`` stages.
-  For more information about stages, see `ActorStages <../apiref/dff.script.core.types.html#dff.script.core.types.ActorStage>`__.
+  For more information about stages, see `ActorStages <../apiref/chatsky.script.core.types.html#chatsky.script.core.types.ActorStage>`__.
 
 * **add_label**: Add a label to the context.
-  It updates the `labels` field. This method is called by the `Actor <../apiref/dff.pipeline.pipeline.actor.html>`_ component when transition conditions
+  It updates the `labels` field. This method is called by the `Actor <../apiref/chatsky.pipeline.pipeline.actor.html>`_ component when transition conditions
   have been resolved, and when `PRE_TRANSITIONS_PROCESSING <../tutorials/tutorials.script.core.9_pre_transitions_processing.py>`__ callbacks have been run.
 
   To be more precise, this method is called between the ``GET_NEXT_NODE`` and ``REWRITE_NEXT_NODE`` stages.
-  For more information about stages, see `ActorStages <../apiref/dff.script.core.types.html#dff.script.core.types.ActorStage>`__.
+  For more information about stages, see `ActorStages <../apiref/chatsky.script.core.types.html#chatsky.script.core.types.ActorStage>`__.
 
 * **current_node**: Return the current node of the context. This is particularly useful for tracking the node during the conversation flow.
   This method only returns a node inside ``PROCESSING`` callbacks yielding ``None`` in other contexts.
@@ -185,7 +185,7 @@ to persistently store that information and to make it accessible in different us
 This functionality is implemented by the ``context storages`` module that provides 
 the uniform ``DBContextStorage`` interface as well as child classes thereof that integrate
 various database types (see the
-`api reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.DBContextStorage>`_).
+`api reference <../apiref/chatsky.context_storages.database.html#chatsky.context_storages.database.DBContextStorage>`_).
 
 The supported storage options are as follows:
 
@@ -202,7 +202,7 @@ The supported storage options are as follows:
 ``DBContextStorage`` instances can be uniformly constructed using the ``context_storage_factory`` function.
 The function's only parameter is a connection string that specifies both the database type
 and the connection parameters, for example, *mongodb://admin:pass@localhost:27016/admin*.
-(`see the reference <../apiref/dff.context_storages.database.html#dff.context_storages.database.context_storage_factory>`_)
+(`see the reference <../apiref/chatsky.context_storages.database.html#chatsky.context_storages.database.context_storage_factory>`_)
 
 .. note::
     To learn how to use ``context_storage_factory`` in your pipeline, see our `Context Storage Tutorials <../tutorials/index_context_storages.html>`__.

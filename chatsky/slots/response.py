@@ -8,8 +8,8 @@ from __future__ import annotations
 from typing import Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from dff.script import Context, Message
-    from dff.pipeline import Pipeline
+    from chatsky.script import Context, Message
+    from chatsky.pipeline import Pipeline
 
 
 def filled_template(template: Message) -> Callable[[Context, Pipeline], Message]:

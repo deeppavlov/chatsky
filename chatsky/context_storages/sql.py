@@ -18,7 +18,7 @@ import importlib
 import json
 from typing import Hashable
 
-from dff.script import Context
+from chatsky.script import Context
 
 from .database import DBContextStorage, threadsafe_method
 from .protocol import get_protocol_install_suggestion

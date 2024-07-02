@@ -1,7 +1,7 @@
 import importlib
 import pytest
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.utils.testing.common import check_happy_path
+from chatsky.utils.testing.common import check_happy_path
 
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")

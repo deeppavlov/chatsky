@@ -8,7 +8,7 @@ DFF can be easily installed on your system using the ``pip`` package manager:
 
 .. code-block:: console
    
-   pip install dff
+   pip install chatsky
 
 This framework is compatible with Python 3.8 and newer versions.
 
@@ -17,16 +17,16 @@ The installation process allows the user to choose from different packages based
 
 .. code-block:: console
 
-   pip install dff[json]  # dependencies for using JSON
-   pip install dff[pickle] # dependencies for using Pickle
-   pip install dff[redis]  # dependencies for using Redis
-   pip install dff[mongodb]  # dependencies for using MongoDB
-   pip install dff[mysql]  # dependencies for using MySQL
-   pip install dff[postgresql]  # dependencies for using PostgreSQL
-   pip install dff[sqlite]  # dependencies for using SQLite
-   pip install dff[ydb]  # dependencies for using Yandex Database
-   pip install dff[telegram]  # dependencies for using Telegram
-   pip install dff[benchmark]  # dependencies for benchmarking
+   pip install chatsky[json]  # dependencies for using JSON
+   pip install chatsky[pickle] # dependencies for using Pickle
+   pip install chatsky[redis]  # dependencies for using Redis
+   pip install chatsky[mongodb]  # dependencies for using MongoDB
+   pip install chatsky[mysql]  # dependencies for using MySQL
+   pip install chatsky[postgresql]  # dependencies for using PostgreSQL
+   pip install chatsky[sqlite]  # dependencies for using SQLite
+   pip install chatsky[ydb]  # dependencies for using Yandex Database
+   pip install chatsky[telegram]  # dependencies for using Telegram
+   pip install chatsky[benchmark]  # dependencies for benchmarking
 
 For example, if you are going to use one of the database backends,
 you can specify the corresponding requirements yourself.
@@ -55,7 +55,7 @@ range of applications, such as social networks, call centers, websites, personal
 DFF has several important concepts:
 
 **Script**: First of all, to create a dialog agent it is necessary
-to create a dialog :py:class:`~dff.script.core.script.Script`.
+to create a dialog :py:class:`~chatsky.script.core.script.Script`.
 A dialog `script` is a dictionary, where keys correspond to different `flows`.
 A script can contain multiple scripts, which are flows too, what is needed in order to divide
 a dialog into sub-dialogs and process them separately.

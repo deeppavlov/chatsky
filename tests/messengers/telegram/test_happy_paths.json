@@ -75,7 +75,7 @@
                 "text": "Here's your location!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 3.916667,
                         "latitude": 50.65
                     }
@@ -102,7 +102,7 @@
                 "text": "Here's your contact!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "contact",
+                        "chatsky_attachment_type": "contact",
                         "phone_number": "8-900-555-35-35",
                         "first_name": "Hope",
                         "last_name": "Credit"
@@ -130,18 +130,18 @@
                 "text": "Here's your poll!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "poll",
+                        "chatsky_attachment_type": "poll",
                         "question": "What is the poll question?",
                         "options": [
                             {
                                 "text": "This one!",
                                 "votes": 0,
-                                "dff_attachment_type": "poll_option"
+                                "chatsky_attachment_type": "poll_option"
                             },
                             {
                                 "text": "Not this one :(",
                                 "votes": 0,
-                                "dff_attachment_type": "poll_option"
+                                "chatsky_attachment_type": "poll_option"
                             }
                         ]
                     }
@@ -168,7 +168,7 @@
                 "text": "Here's your sticker!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "sticker",
+                        "chatsky_attachment_type": "sticker",
                         "source": null,
                         "use_cache": true,
                         "cached_filename": null,
@@ -198,10 +198,10 @@
                 "text": "Here's your audio!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "audio",
+                        "chatsky_attachment_type": "audio",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/9130a836-ac1c-5989-bb12-4e831c89f524",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/9130a836-ac1c-5989-bb12-4e831c89f524",
                         "id": null,
                         "caption": "Separation melody by William King",
                         "filename": "separation-william-king.mp3"
@@ -229,10 +229,10 @@
                 "text": "Here's your video!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "video",
+                        "chatsky_attachment_type": "video",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
                         "id": null,
                         "caption": "Epic Dota2 gameplay by Nkognit0",
                         "filename": "crownfall-lags-nkognit0.mp4"
@@ -260,10 +260,10 @@
                 "text": "Here's your animation!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "animation",
+                        "chatsky_attachment_type": "animation",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/hong-kong-simplyart4794.gif",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/68ffd3ce-1c85-5e63-9aa1-aaa9347ccd63",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/68ffd3ce-1c85-5e63-9aa1-aaa9347ccd63",
                         "id": null,
                         "caption": "Hong Kong skyscraper views by Simplyart4794",
                         "filename": "hong-kong-simplyart4794.gif"
@@ -291,10 +291,10 @@
                 "text": "Here's your image!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "image",
+                        "chatsky_attachment_type": "image",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
                         "id": null,
                         "caption": "DeepPavlov logo",
                         "filename": "deeppavlov.png"
@@ -322,10 +322,10 @@
                 "text": "Here's your document!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "document",
+                        "chatsky_attachment_type": "document",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov-article.pdf",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/ff2b4361-417f-5fa1-be67-79e68a3f2e80",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/ff2b4361-417f-5fa1-be67-79e68a3f2e80",
                         "id": null,
                         "caption": "DeepPavlov article",
                         "filename": "deeppavlov-article.pdf"
@@ -353,10 +353,10 @@
                 "text": "Here's your voice message!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "voice_message",
+                        "chatsky_attachment_type": "voice_message",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/9130a836-ac1c-5989-bb12-4e831c89f524",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/9130a836-ac1c-5989-bb12-4e831c89f524",
                         "id": null
                     }
                 ],
@@ -382,10 +382,10 @@
                 "text": "Here's your video message!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "video_message",
+                        "chatsky_attachment_type": "video_message",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
                         "id": null
                     }
                 ],
@@ -411,22 +411,22 @@
                 "text": "Here's your media group!",
                 "attachments": [
                     {
-                        "dff_attachment_type": "media_group",
+                        "chatsky_attachment_type": "media_group",
                         "group": [
                             {
-                                "dff_attachment_type": "image",
+                                "chatsky_attachment_type": "image",
                                 "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png",
                                 "use_cache": true,
-                                "cached_filename": "/tmp/dff-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
+                                "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
                                 "id": null,
                                 "caption": "DeepPavlov logo",
                                 "filename": "deeppavlov.png"
                             },
                             {
-                                "dff_attachment_type": "video",
+                                "chatsky_attachment_type": "video",
                                 "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                                 "use_cache": true,
-                                "cached_filename": "/tmp/dff-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
+                                "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
                                 "id": null,
                                 "caption": "Epic Dota2 gameplay by Nkognit0",
                                 "filename": "crownfall-lags-nkognit0.mp4"
@@ -478,7 +478,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -496,12 +496,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='formatted', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='1', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 20, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=2, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=2)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='formatted', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='1', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 20, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=2, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=2)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "formatted"
                     }
                 ],
@@ -534,7 +534,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -552,12 +552,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='attachments', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='3', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 24, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=4, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=4)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='attachments', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='3', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 24, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=4, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=4)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "attachments"
                     }
                 ],
@@ -569,12 +569,12 @@
                 "text": "Here's your message with multiple attachments (a location and a sticker)!\nRun /start command again to restart.",
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 30.3141,
                         "latitude": 59.9386
                     },
                     {
-                        "dff_attachment_type": "sticker",
+                        "chatsky_attachment_type": "sticker",
                         "source": null,
                         "use_cache": true,
                         "cached_filename": null,
@@ -604,7 +604,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -622,12 +622,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='secret', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='5', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 28, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=6, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=6)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='secret', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='5', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 28, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=6, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=6)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "secret"
                     }
                 ],
@@ -639,10 +639,10 @@
                 "text": "Here's your secret image! Run /start command again to restart.",
                 "attachments": [
                     {
-                        "dff_attachment_type": "image",
+                        "chatsky_attachment_type": "image",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
                         "id": null,
                         "caption": "DeepPavlov logo",
                         "has_spoiler": true,
@@ -671,7 +671,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -689,12 +689,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='thumbnail', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='7', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 34, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=8, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=8)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='thumbnail', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='7', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 34, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=8, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=8)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "thumbnail"
                     }
                 ],
@@ -706,10 +706,10 @@
                 "text": "Here's your document with tumbnail! Run /start command again to restart.",
                 "attachments": [
                     {
-                        "dff_attachment_type": "document",
+                        "chatsky_attachment_type": "document",
                         "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov-article.pdf",
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/ff2b4361-417f-5fa1-be67-79e68a3f2e80",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/ff2b4361-417f-5fa1-be67-79e68a3f2e80",
                         "id": null,
                         "caption": "DeepPavlov article",
                         "filename": "deeppavlov_article.pdf",
@@ -741,7 +741,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -759,12 +759,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='hash', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='9', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 22, 19, 53, 42, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=6601664672, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=10, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=10)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='hash', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='9', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 22, 19, 53, 42, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=6601664672, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=10, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=10)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "hash"
                     }
                 ],
@@ -789,10 +789,10 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "sticker",
+                        "chatsky_attachment_type": "sticker",
                         "source": null,
                         "use_cache": true,
-                        "cached_filename": "/tmp/dff-cache-LongpollingInterface/7733311b-05ed-5102-8885-67c2530e446e",
+                        "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/7733311b-05ed-5102-8885-67c2530e446e",
                         "id": "CAACAgIAAxkBAAIEtGZOUac-j5GbuhH9xH-xsJ8QGWKHAAIsAgACRwZDBdGLCpfBS4KvNQQ",
                         "is_animated": false,
                         "is_video": false,
@@ -827,7 +827,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -877,7 +877,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -895,12 +895,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='restart', from_user=User(first_name='AlexaTestnder', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='14', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 59, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=15, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=15)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='restart', from_user=User(first_name='AlexaTestnder', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='14', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 59, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=15, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=15)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "restart"
                     }
                 ],
@@ -912,7 +912,7 @@
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "location",
+                        "chatsky_attachment_type": "location",
                         "longitude": 27.792887,
                         "latitude": 58.43161,
                         "reply_markup": "gASV4gMAAAAAAACMJXRlbGVncmFtLl9pbmxpbmUuaW5saW5la2V5Ym9hcmRtYXJrdXCUjBRJbmxp\nbmVLZXlib2FyZE1hcmt1cJSTlCmBlH2UKIwPaW5saW5lX2tleWJvYXJklCiMJXRlbGVncmFtLl9p\nbmxpbmUuaW5saW5la2V5Ym9hcmRidXR0b26UjBRJbmxpbmVLZXlib2FyZEJ1dHRvbpSTlCmBlH2U\nKIwNY2FsbGJhY2tfZGF0YZSMCWZvcm1hdHRlZJSMDWNhbGxiYWNrX2dhbWWUTowJbG9naW5fdXJs\nlE6MA3BheZROjBNzd2l0Y2hfaW5saW5lX3F1ZXJ5lE6MH3N3aXRjaF9pbmxpbmVfcXVlcnlfY2hv\nc2VuX2NoYXSUTowgc3dpdGNoX2lubGluZV9xdWVyeV9jdXJyZW50X2NoYXSUTowEdGV4dJSMFEN1\ndGUgZm9ybWF0dGVkIHRleHQhlIwDdXJslE6MB3dlYl9hcHCUTowHX2Zyb3plbpSIjAlfaWRfYXR0\ncnOUKGgUTk5oDE5OTk5OdJSMCmFwaV9rd2FyZ3OUfZR1YoWUaAgpgZR9lChoC4wLYXR0YWNobWVu\ndHOUaA1OaA5OaA9OaBBOaBFOaBJOaBOMFU11bHRpcGxlIGF0dGFjaG1lbnRzIZRoFU5oFk5oF4ho\nGChoIE5OaB9OTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAZzZWNyZXSUaA1OaA5OaA9OaBBOaBFO\naBJOaBOMDVNlY3JldCBpbWFnZSGUaBVOaBZOaBeIaBgoaCdOTmgmTk5OTk50lGgafZR1YoWUaAgp\ngZR9lChoC4wJdGh1bWJuYWlslGgNTmgOTmgPTmgQTmgRTmgSTmgTjBhEb2N1bWVudCB3aXRoIHRo\ndW1ibmFpbCGUaBVOaBZOaBeIaBgoaC5OTmgtTk5OTk50lGgafZR1YoWUaAgpgZR9lChoC4wEaGFz\naJRoDU5oDk5oD05oEE5oEU5oEk5oE4wcRmlyc3QgYXR0YWNobWVudCBieXRlcyBoYXNoIZRoFU5o\nFk5oF4hoGChoNU5OaDROTk5OTnSUaBp9lHVihZRoCCmBlH2UKGgLjAdyZXN0YXJ0lGgNTmgOTmgP\nTmgQTmgRTmgSTmgTjAhSZXN0YXJ0IZRoFU5oFk5oF4hoGChoPE5OaDtOTk5OTnSUaBp9lHViaAgp\ngZR9lChoC4wEcXVpdJRoDU5oDk5oD05oEE5oEU5oEk5oE4wFUXVpdCGUaBVOaBZOaBeIaBgoaEJO\nTmhBTk5OTk50lGgafZR1YoaUdJRoF4hoGGhGhZRoGn2UdWIu\n",
@@ -930,12 +930,12 @@
             ]
         },
         {
-            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='quit', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='15', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 10, 1, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=16, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=16)",
+            "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='quit', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='15', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 10, 1, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='chatsky_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=16, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=16)",
             "received_message": {
                 "text": null,
                 "attachments": [
                     {
-                        "dff_attachment_type": "callback_query",
+                        "chatsky_attachment_type": "callback_query",
                         "query_string": "quit"
                     }
                 ],

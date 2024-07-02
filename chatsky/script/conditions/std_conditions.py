@@ -15,9 +15,9 @@ import re
 
 from pydantic import validate_call
 
-from dff.pipeline import Pipeline
-from dff.script import NodeLabel2Type, Context, Message
-from dff.script.core.message import CallbackQuery
+from chatsky.pipeline import Pipeline
+from chatsky.script import NodeLabel2Type, Context, Message
+from chatsky.script.core.message import CallbackQuery
 
 logger = logging.getLogger(__name__)
 

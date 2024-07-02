@@ -21,7 +21,7 @@ from ..script import Context
 
 class DBContextStorage(ABC):
     r"""
-    An abstract interface for `dff` DB context storages.
+    An abstract interface for `chatsky` DB context storages.
     It includes the most essential methods of the python `dict` class.
     Can not be instantiated.
 
@@ -224,5 +224,5 @@ def context_storage_factory(path: str, **kwargs) -> DBContextStorage:
     For more information, see the function doc:\n{context_storage_factory.__doc__}
     """
     _class, module = PROTOCOLS[prefix]["class"], PROTOCOLS[prefix]["module"]
-    target_class = getattr(importlib.import_module(f".{module}", package="dff.context_storages"), _class)
+    target_class = getattr(importlib.import_module(f".{module}", package="chatsky.context_storages"), _class)
     return target_class(path, **kwargs)

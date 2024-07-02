@@ -2,11 +2,11 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.console import CLIMessengerInterface
-from dff.messengers.common import CallbackMessengerInterface
-from dff.pipeline import Pipeline
-import dff.script.conditions as cnd
+from chatsky.script import RESPONSE, TRANSITIONS, Message
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.messengers.common import CallbackMessengerInterface
+from chatsky.pipeline import Pipeline
+import chatsky.script.conditions as cnd
 
 SCRIPT = {
     "pingpong_flow": {

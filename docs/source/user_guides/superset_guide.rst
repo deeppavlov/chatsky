@@ -74,11 +74,11 @@ The file can then be used to parametrize the configuration script.
 
 .. code-block:: shell
 
-    dff.stats tutorials/stats/example_config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
+    chatsky.stats tutorials/stats/example_config.yaml -P superset -dP pass -U superset --outfile=config_artifact.zip
 
 .. warning::
     
-    Here we passed passwords via CLI, which is not recommended. For enhanced security, call the command above omitting the passwords (`dff.stats -P -dP -U superset ...`) and you will be prompted to enter them interactively.
+    Here we passed passwords via CLI, which is not recommended. For enhanced security, call the command above omitting the passwords (`chatsky.stats -P -dP -U superset ...`) and you will be prompted to enter them interactively.
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
@@ -116,7 +116,7 @@ Using Superset
     Plots for pipeline-produced dialog annotations.
 
 On some occasions, Superset can show warnings about the database connection being faulty.
-In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `dff_database` instance updating the credentials.
+In that case, you can navigate to the `Database Connections` section through the `Settings` menu and edit the `chatsky_database` instance updating the credentials.
 
 .. figure:: ../_static/images/databases.png
 
@@ -131,15 +131,15 @@ an easy and intuitive way to create your own charts and to customize the dashboa
 **Datasets**
 
 If you aim to create your own chart, Superset will prompt you to select a dataset to draw data from.
-The current configuration provides three datasets `dff-node-stats`, `dff-stats`, and `dff-final-nodes`.
-However, in most cases, you would use `dff-stats` or `dff-node-stats`. The former contains all data points,
+The current configuration provides three datasets `chatsky-node-stats`, `chatsky-stats`, and `chatsky-final-nodes`.
+However, in most cases, you would use `chatsky-stats` or `chatsky-node-stats`. The former contains all data points,
 while the latter only includes the logs produced by `get_current_label` extractor
-(`see the API reference <../apiref/dff.stats.default_extractors.html#dff.stats.default_extractors.get_current_label>`_).
-`dff-final-nodes` contains the same information as the said datasources,
+(`see the API reference <../apiref/chatsky.stats.default_extractors.html#chatsky.stats.default_extractors.get_current_label>`_).
+`chatsky-final-nodes` contains the same information as the said datasources,
 but only aggregates the labels of nodes visited at the end of dialog graph traversal,
 i.e. nodes that terminate the dialog.
 
-`dff-nodes-stats` uses the following variables to store the data:
+`chatsky-nodes-stats` uses the following variables to store the data:
 
 * The `context_id` field can be used to distinguish dialog contexts from each other and serves as a user identifier.
 * `request_id` is the number of the dialog turn at which the data record was emitted. The data points can be aggregated over this field, showing the distribution of a variable over the dialog history.

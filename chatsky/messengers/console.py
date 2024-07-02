@@ -1,9 +1,9 @@
 from typing import Any, Hashable, List, Optional, TextIO, Tuple
 from uuid import uuid4
-from dff.messengers.common.interface import PollingMessengerInterface
-from dff.pipeline.types import PipelineRunnerFunction
-from dff.script.core.context import Context
-from dff.script.core.message import Message
+from chatsky.messengers.common.interface import PollingMessengerInterface
+from chatsky.pipeline.types import PipelineRunnerFunction
+from chatsky.script.core.context import Context
+from chatsky.script.core.message import Message
 
 
 class CLIMessengerInterface(PollingMessengerInterface):
@@ -40,7 +40,7 @@ class CLIMessengerInterface(PollingMessengerInterface):
         The CLIProvider generates new dialog id used to user identification on each `connect` call.
 
         :param pipeline_runner: A function that should process user request and return context;
-            usually it's a :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
+            usually it's a :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline._run_pipeline` function.
         :param \\**kwargs: argument, added for compatibility with super class, it shouldn't be used normally.
         """
         self._ctx_id = uuid4()

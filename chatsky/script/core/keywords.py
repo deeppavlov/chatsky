@@ -11,7 +11,7 @@ from enum import Enum
 
 class Keywords(str, Enum):
     """
-    Keywords used to define the dialog script (:py:class:`~dff.script.Script`).
+    Keywords used to define the dialog script (:py:class:`~chatsky.script.Script`).
     The data type `dict` is used to describe the scenario.
     `Enums` of this class are used as keys in this `dict`.
     Different keys correspond to the different value types aimed at different purposes.
@@ -23,7 +23,7 @@ class Keywords(str, Enum):
         The value that corresponds to this key has the `dict` type with keywords:
 
         `{TRANSITIONS:..., RESPONSE:..., PRE_RESPONSE_PROCESSING:..., MISC:...}`.
-        There can be only one global node in a script :py:class:`~dff.script.Script`.
+        There can be only one global node in a script :py:class:`~chatsky.script.Script`.
         The global node is defined at the flow level as opposed to regular nodes.
         This node allows to define default global values for all nodes.
 
@@ -65,7 +65,7 @@ class Keywords(str, Enum):
         `{"PRE_RESPONSE_PROC_0": pre_response_proc_func_0, ..., "PRE_RESPONSE_PROC_N": pre_response_proc__func_N}`,
 
         where `"PRE_RESPONSE_PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
-        Unless the :py:class:`~dff.pipeline.pipeline.Pipeline`'s `parallelize_processing` flag
+        Unless the :py:class:`~chatsky.pipeline.pipeline.Pipeline`'s `parallelize_processing` flag
         is set to `True`, calls to `pre_response_proc__func_i` are made in-order.
 
     PRE_TRANSITIONS_PROCESSING: Enum(auto)
@@ -76,7 +76,7 @@ class Keywords(str, Enum):
         "PRE_TRANSITIONS_PROC_N": pre_transitions_proc_func_N}`,
 
         where `"PRE_TRANSITIONS_PROC_i"` is an arbitrary name of the preprocessing stage in the pipeline.
-        Unless the :py:class:`~dff.pipeline.pipeline.Pipeline`'s `parallelize_processing` flag
+        Unless the :py:class:`~chatsky.pipeline.pipeline.Pipeline`'s `parallelize_processing` flag
         is set to `True`, calls to `pre_transitions_proc_func_i` are made in-order.
 
     """

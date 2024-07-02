@@ -24,13 +24,13 @@ from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
 from pydantic import BaseModel, Field, field_validator
 
-from dff.script.core.message import Message
-from dff.script.core.types import NodeLabel2Type
-from dff.pipeline.types import ComponentExecutionState
-from dff.slots.slots import SlotManager
+from chatsky.script.core.message import Message
+from chatsky.script.core.types import NodeLabel2Type
+from chatsky.pipeline.types import ComponentExecutionState
+from chatsky.slots.slots import SlotManager
 
 if TYPE_CHECKING:
-    from dff.script.core.script import Node
+    from chatsky.script.core.script import Node
 
 logger = logging.getLogger(__name__)
 
@@ -263,7 +263,7 @@ class Context(BaseModel):
     @property
     def current_node(self) -> Optional[Node]:
         """
-        Return current :py:class:`~dff.script.core.script.Node`.
+        Return current :py:class:`~chatsky.script.core.script.Node`.
         """
         actor_data = self.framework_data.actor_data
         node = (

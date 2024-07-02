@@ -1,8 +1,8 @@
 from pydantic import ValidationError
 import pytest
 
-from dff.pipeline import Pipeline
-from dff.script import (
+from chatsky.pipeline import Pipeline
+from chatsky.script import (
     PRE_RESPONSE_PROCESSING,
     PRE_TRANSITIONS_PROCESSING,
     RESPONSE,
@@ -12,7 +12,7 @@ from dff.script import (
     Script,
     ConstLabel,
 )
-from dff.script.conditions import exact_match
+from chatsky.script.conditions import exact_match
 
 
 class UserFunctionSamples:

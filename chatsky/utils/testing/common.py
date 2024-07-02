@@ -8,9 +8,9 @@ from os import getenv
 from typing import Callable, Tuple, Optional, Union
 from uuid import uuid4
 
-from dff.script import Context, Message
-from dff.pipeline import Pipeline
-from dff.utils.testing.response_comparers import default_comparer
+from chatsky.script import Context, Message
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.response_comparers import default_comparer
 
 
 def is_interactive_mode() -> bool:  # pragma: no cover

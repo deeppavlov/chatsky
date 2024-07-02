@@ -12,16 +12,16 @@ They can be attached to any message but will only work if the chosen
 [messenger interface](%doclink(api,index_messenger_interfaces)) supports them.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import RESPONSE, TRANSITIONS
-from dff.script.conditions import std_conditions as cnd
+from chatsky.script import RESPONSE, TRANSITIONS
+from chatsky.script.conditions import std_conditions as cnd
 
-from dff.script.core.message import Image, Message
+from chatsky.script.core.message import Image, Message
 
-from dff.pipeline import Pipeline
-from dff.utils.testing import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

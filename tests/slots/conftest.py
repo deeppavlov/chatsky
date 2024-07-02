@@ -1,9 +1,9 @@
 import pytest
 
-from dff.script import Message, TRANSITIONS, RESPONSE, Context
-from dff.script import conditions as cnd
-from dff.pipeline import Pipeline
-from dff.slots.slots import SlotNotExtracted
+from chatsky.script import Message, TRANSITIONS, RESPONSE, Context
+from chatsky.script import conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.slots.slots import SlotNotExtracted
 
 
 @pytest.fixture(scope="function", autouse=True)

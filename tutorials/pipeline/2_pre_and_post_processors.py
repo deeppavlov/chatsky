@@ -3,23 +3,23 @@
 # 2. Pre- and postprocessors
 
 The following tutorial shows more advanced usage of `pipeline`
-module as an extension to `dff.script.core`.
+module as an extension to `chatsky.script.core`.
 
 Here, %mddoclink(api,script.core.context,Context.misc)
 dictionary of context is used for storing additional data.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.messengers.console import CLIMessengerInterface
-from dff.script import Context, Message
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.script import Context, Message
 
-from dff.pipeline import Pipeline
+from chatsky.pipeline import Pipeline
 
-from dff.utils.testing import (
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     HAPPY_PATH,

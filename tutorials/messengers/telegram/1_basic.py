@@ -12,17 +12,17 @@ library are used for accessing telegram API in polling mode.
 Telegram API token is required to access telegram API.
 """
 
-# %pip install dff[telegram]
+# %pip install chatsky[telegram]
 
 # %%
 import os
 
-from dff.script import conditions as cnd
-from dff.script import labels as lbl
-from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.telegram import LongpollingInterface
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import is_interactive_mode
+from chatsky.script import conditions as cnd
+from chatsky.script import labels as lbl
+from chatsky.script import RESPONSE, TRANSITIONS, Message
+from chatsky.messengers.telegram import LongpollingInterface
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import is_interactive_mode
 
 
 # %% [markdown]

@@ -12,8 +12,8 @@ respond to the user and keep the conversation flowing.
 import random
 from typing import List
 
-from dff.pipeline import Pipeline
-from dff.script import Context, Message
+from chatsky.pipeline import Pipeline
+from chatsky.script import Context, Message
 
 
 def choice(responses: List[Message]):

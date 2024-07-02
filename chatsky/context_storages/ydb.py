@@ -16,7 +16,7 @@ from typing import Hashable
 from urllib.parse import urlsplit
 
 
-from dff.script import Context
+from chatsky.script import Context
 
 from .database import DBContextStorage
 from .protocol import get_protocol_install_suggestion

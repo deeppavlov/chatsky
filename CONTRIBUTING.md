@@ -83,7 +83,7 @@ to the local documentation and verified during build.
 - `%pip install {args}`
     This directive generates dependency installation cell, adds a comment and sets up "quiet" flag.
   
-    It should be used in tutorials, like this: `# %pip install dff[...]`.
+    It should be used in tutorials, like this: `# %pip install chatsky[...]`.
 - `%doclink({args})`
     This directive generates a documentation link. It supports 2 or three arguments and the generated link will look like: `ARG1/ARG2#ARG3`.
     

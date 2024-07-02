@@ -8,7 +8,7 @@ This tutorial is a more advanced version of the
 [previous tutorial](%doclink(tutorial,pipeline.6_extra_handlers_basic)).
 """
 
-# %pip install dff psutil
+# %pip install chatsky psutil
 
 # %%
 import json
@@ -17,9 +17,9 @@ import random
 from datetime import datetime
 
 import psutil
-from dff.script import Context
+from chatsky.script import Context
 
-from dff.pipeline import (
+from chatsky.pipeline import (
     Pipeline,
     ServiceGroup,
     to_service,
@@ -28,12 +28,12 @@ from dff.pipeline import (
     ACTOR,
 )
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

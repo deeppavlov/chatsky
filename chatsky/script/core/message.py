@@ -14,8 +14,8 @@ import abc
 from pydantic import Field, FilePath, HttpUrl, model_validator
 from pydantic_core import Url
 
-from dff.messengers.common.interface import MessengerInterfaceWithAttachments
-from dff.utils.devel import JSONSerializableDict, PickleEncodedValue, JSONSerializableExtras
+from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
+from chatsky.utils.devel import JSONSerializableDict, PickleEncodedValue, JSONSerializableExtras
 
 
 class DataModel(JSONSerializableExtras):
@@ -32,7 +32,7 @@ class Attachment(DataModel, abc.ABC):
     It is capable of serializing and validating all the model fields to JSON.
     """
 
-    dff_attachment_type: str
+    chatsky_attachment_type: str
 
 
 class CallbackQuery(Attachment):
@@ -43,7 +43,7 @@ class CallbackQuery(Attachment):
     """
 
     query_string: Optional[str]
-    dff_attachment_type: Literal["callback_query"] = "callback_query"
+    chatsky_attachment_type: Literal["callback_query"] = "callback_query"
 
 
 class Location(Attachment):
@@ -57,7 +57,7 @@ class Location(Attachment):
 
     longitude: float
     latitude: float
-    dff_attachment_type: Literal["location"] = "location"
+    chatsky_attachment_type: Literal["location"] = "location"
 
 
 class Contact(Attachment):
@@ -69,7 +69,7 @@ class Contact(Attachment):
     phone_number: str
     first_name: str
     last_name: Optional[str]
-    dff_attachment_type: Literal["contact"] = "contact"
+    chatsky_attachment_type: Literal["contact"] = "contact"
 
 
 class Invoice(Attachment):
@@ -82,7 +82,7 @@ class Invoice(Attachment):
     description: str
     currency: str
     amount: int
-    dff_attachment_type: Literal["invoice"] = "invoice"
+    chatsky_attachment_type: Literal["invoice"] = "invoice"
 
 
 class PollOption(DataModel):
@@ -93,7 +93,7 @@ class PollOption(DataModel):
 
     text: str
     votes: int = Field(default=0)
-    dff_attachment_type: Literal["poll_option"] = "poll_option"
+    chatsky_attachment_type: Literal["poll_option"] = "poll_option"
 
 
 class Poll(Attachment):
@@ -104,7 +104,7 @@ class Poll(Attachment):
 
     question: str
     options: List[PollOption]
-    dff_attachment_type: Literal["poll"] = "poll"
+    chatsky_attachment_type: Literal["poll"] = "poll"
 
 
 class DataAttachment(Attachment):
@@ -187,49 +187,49 @@ class DataAttachment(Attachment):
 class Audio(DataAttachment):
     """Represents an audio file attachment."""
 
-    dff_attachment_type: Literal["audio"] = "audio"
+    chatsky_attachment_type: Literal["audio"] = "audio"
 
 
 class Video(DataAttachment):
     """Represents a video file attachment."""
 
-    dff_attachment_type: Literal["video"] = "video"
+    chatsky_attachment_type: Literal["video"] = "video"
 
 
 class Animation(DataAttachment):
     """Represents an animation file attachment."""
 
-    dff_attachment_type: Literal["animation"] = "animation"
+    chatsky_attachment_type: Literal["animation"] = "animation"
 
 
 class Image(DataAttachment):
     """Represents an image file attachment."""
 
-    dff_attachment_type: Literal["image"] = "image"
+    chatsky_attachment_type: Literal["image"] = "image"
 
 
 class Sticker(DataAttachment):
     """Represents a sticker as a file attachment."""
 
-    dff_attachment_type: Literal["sticker"] = "sticker"
+    chatsky_attachment_type: Literal["sticker"] = "sticker"
 
 
 class Document(DataAttachment):
     """Represents a document file attachment."""
 
-    dff_attachment_type: Literal["document"] = "document"
+    chatsky_attachment_type: Literal["document"] = "document"
 
 
 class VoiceMessage(DataAttachment):
     """Represents a voice message."""
 
-    dff_attachment_type: Literal["voice_message"] = "voice_message"
+    chatsky_attachment_type: Literal["voice_message"] = "voice_message"
 
 
 class VideoMessage(DataAttachment):
     """Represents a video message."""
 
-    dff_attachment_type: Literal["video_message"] = "video_message"
+    chatsky_attachment_type: Literal["video_message"] = "video_message"
 
 
 class MediaGroup(Attachment):
@@ -243,7 +243,7 @@ class MediaGroup(Attachment):
     """
 
     group: List[Union[Audio, Video, Image, Document, DataAttachment]] = Field(default_factory=list)
-    dff_attachment_type: Literal["media_group"] = "media_group"
+    chatsky_attachment_type: Literal["media_group"] = "media_group"
 
 
 class Message(DataModel):

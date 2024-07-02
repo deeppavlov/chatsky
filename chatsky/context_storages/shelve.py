@@ -17,7 +17,7 @@ import pickle
 from shelve import DbfilenameShelf
 from typing import Hashable
 
-from dff.script import Context
+from chatsky.script import Context
 
 from .database import DBContextStorage
 

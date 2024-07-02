@@ -3,14 +3,14 @@
 # 1. Basic Example
 
 The following tutorial shows basic usage of slots extraction
-module packaged with `dff`.
+module packaged with `chatsky`.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import conditions as cnd
-from dff.script import (
+from chatsky.script import conditions as cnd
+from chatsky.script import (
     RESPONSE,
     TRANSITIONS,
     PRE_TRANSITIONS_PROCESSING,
@@ -20,13 +20,13 @@ from dff.script import (
     Message,
 )
 
-from dff.pipeline import Pipeline
-from dff.slots import GroupSlot, RegexpSlot
-from dff.slots import processing as slot_procs
-from dff.slots import response as slot_rsp
-from dff.slots import conditions as slot_cnd
+from chatsky.pipeline import Pipeline
+from chatsky.slots import GroupSlot, RegexpSlot
+from chatsky.slots import processing as slot_procs
+from chatsky.slots import response as slot_rsp
+from chatsky.slots import conditions as slot_cnd
 
-from dff.utils.testing import (
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

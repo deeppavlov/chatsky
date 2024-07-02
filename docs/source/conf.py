@@ -13,7 +13,7 @@ from utils.regenerate_apiref import regenerate_apiref  # noqa: E402
 
 # -- Project information -----------------------------------------------------
 
-_distribution_metadata = importlib.metadata.metadata('dff')
+_distribution_metadata = importlib.metadata.metadata('chatsky')
 
 project = _distribution_metadata["Name"]
 copyright = "2023, DeepPavlov"
@@ -190,15 +190,15 @@ def setup(_):
     )
     regenerate_apiref(
         [
-            ("dff.context_storages", "Context Storages"),
-            ("dff.messengers", "Messenger Interfaces"),
-            ("dff.pipeline", "Pipeline"),
-            ("dff.script", "Script"),
-            ("dff.slots", "Slots"),
-            ("dff.stats", "Stats"),
-            ("dff.utils.testing", "Testing Utils"),
-            ("dff.utils.turn_caching", "Caching"),
-            ("dff.utils.db_benchmark", "DB Benchmark"),
-            ("dff.utils.devel", "Development Utils"),
+            ("chatsky.context_storages", "Context Storages"),
+            ("chatsky.messengers", "Messenger Interfaces"),
+            ("chatsky.pipeline", "Pipeline"),
+            ("chatsky.script", "Script"),
+            ("chatsky.slots", "Slots"),
+            ("chatsky.stats", "Stats"),
+            ("chatsky.utils.testing", "Testing Utils"),
+            ("chatsky.utils.turn_caching", "Caching"),
+            ("chatsky.utils.db_benchmark", "DB Benchmark"),
+            ("chatsky.utils.devel", "Development Utils"),
         ]
     )

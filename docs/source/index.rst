@@ -7,9 +7,9 @@ Dialog Flow Framework
 
 *Date*: |today| *Version*: |version|
 
-.. image:: https://pepy.tech/badge/dff
+.. image:: https://pepy.tech/badge/chatsky
    :alt: Number of downloads
-   :target: https://pypi.org/project/dff/
+   :target: https://pypi.org/project/chatsky/
 
 .. image:: https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg
    :alt: Supported python versions

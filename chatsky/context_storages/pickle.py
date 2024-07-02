@@ -24,7 +24,7 @@ except ImportError:
     pickle_available = False
 
 from .database import DBContextStorage, threadsafe_method
-from dff.script import Context
+from chatsky.script import Context
 
 
 class PickleContextStorage(DBContextStorage):

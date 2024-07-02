@@ -8,11 +8,11 @@ Telegram API.
 from pathlib import Path
 from typing import Any, Callable, Optional
 
-from dff.utils.devel.extra_field_helpers import grab_extra_fields
+from chatsky.utils.devel.extra_field_helpers import grab_extra_fields
 
-from dff.messengers.common import MessengerInterfaceWithAttachments
-from dff.pipeline.types import PipelineRunnerFunction
-from dff.script.core.message import (
+from chatsky.messengers.common import MessengerInterfaceWithAttachments
+from chatsky.pipeline.types import PipelineRunnerFunction
+from chatsky.script.core.message import (
     Animation,
     Audio,
     CallbackQuery,
@@ -90,7 +90,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
     def __init__(self, token: str, attachments_directory: Optional[Path] = None) -> None:
         super().__init__(attachments_directory)
         if not telegram_available:
-            raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install dff[telegram]`.")
+            raise ImportError("`python-telegram-bot` package is missing.\nTry to run `pip install chatsky[telegram]`.")
 
         self.application = Application.builder().token(token).build()
         self.application.add_handler(MessageHandler(ALL, self.on_message))

@@ -29,41 +29,41 @@ import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
 import copy
 
-from dff.utils.turn_caching import cache_clear
-from dff.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
-from dff.script.core.message import Message
+from chatsky.utils.turn_caching import cache_clear
+from chatsky.script.core.types import ActorStage, NodeLabel2Type, NodeLabel3Type, LabelType
+from chatsky.script.core.message import Message
 
-from dff.script.core.context import Context
-from dff.script.core.script import Script, Node
-from dff.script.core.normalization import normalize_label, normalize_response
-from dff.script.core.keywords import GLOBAL, LOCAL
-from dff.utils.devel.async_helpers import wrap_sync_function_in_async
+from chatsky.script.core.context import Context
+from chatsky.script.core.script import Script, Node
+from chatsky.script.core.normalization import normalize_label, normalize_response
+from chatsky.script.core.keywords import GLOBAL, LOCAL
+from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
 class Actor:
     """
-    The class which is used to process :py:class:`~dff.script.Context`
-    according to the :py:class:`~dff.script.Script`.
+    The class which is used to process :py:class:`~chatsky.script.Context`
+    according to the :py:class:`~chatsky.script.Script`.
 
     :param script: The dialog scenario: a graph described by the :py:class:`.Keywords`.
         While the graph is being initialized, it is validated and then used for the dialog.
-    :param start_label: The start node of :py:class:`~dff.script.Script`. The execution begins with it.
-    :param fallback_label: The label of :py:class:`~dff.script.Script`.
+    :param start_label: The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
+    :param fallback_label: The label of :py:class:`~chatsky.script.Script`.
         Dialog comes into that label if all other transitions failed,
         or there was an error while executing the scenario.
         Defaults to `None`.
-    :param label_priority: Default priority value for all :py:const:`labels <dff.script.ConstLabel>`
+    :param label_priority: Default priority value for all :py:const:`labels <chatsky.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of condition functions. Defaults to `None`.
     :param handlers: This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~dff.script.Actor`.
+        the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-        - key (:py:class:`~dff.script.ActorStage`) - Stage in which the handler is called.
+        - key (:py:class:`~chatsky.script.ActorStage`) - Stage in which the handler is called.
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 

@@ -20,14 +20,14 @@ try:
     from omegaconf import OmegaConf
     from .utils import get_superset_session, drop_superset_assets
 except ImportError:
-    raise ImportError("Some packages are not found. Run `pip install dff[stats]`")
+    raise ImportError("Some packages are not found. Run `pip install chatsky[stats]`")
 
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
 DFF_DIR = Path(__file__).absolute().parent.parent
 """
-Root directory of the local `dff` installation.
+Root directory of the local `chatsky` installation.
 
 :meta hide-value:
 """
@@ -37,7 +37,7 @@ Local path to superset dashboard files to import.
 
 :meta hide-value:
 """
-DASHBOARD_SLUG = "dff-stats"
+DASHBOARD_SLUG = "chatsky-stats"
 """
 This variable stores a slug used for building the http address of the DFF dashboard.
 """
@@ -133,9 +133,9 @@ WHERE otel_traces.SpanName = 'get_current_label'
 """
 
 SQL_STATEMENT_MAPPING = {
-    "dff_stats.yaml": DFF_STATS_STATEMENT,
-    "dff_node_stats.yaml": DFF_NODE_STATS_STATEMENT,
-    "dff_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
+    "chatsky_stats.yaml": DFF_STATS_STATEMENT,
+    "chatsky_node_stats.yaml": DFF_NODE_STATS_STATEMENT,
+    "chatsky_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
 }
 """
 Select statements for dashboard configuration with names and types represented as placeholders.
@@ -171,7 +171,7 @@ def import_dashboard(parsed_args: Optional[argparse.Namespace] = None, zip_file:
             import_dashboard_url,
             headers=headers,
             data={
-                "passwords": '{"databases/dff_database.yaml":"' + db_password + '"}',
+                "passwords": '{"databases/chatsky_database.yaml":"' + db_password + '"}',
                 "overwrite": "true",
             },
             files=[("formData", (zip_filename, f, "application/zip"))],
@@ -236,7 +236,7 @@ def make_zip_config(parsed_args: argparse.Namespace) -> Path:
 
         shutil.copytree(DASHBOARD_DIR, nested_temp_dir)
         database_dir = Path(os.path.join(nested_temp_dir, "databases"))
-        dataset_dir = Path(os.path.join(nested_temp_dir, "datasets/dff_database"))
+        dataset_dir = Path(os.path.join(nested_temp_dir, "datasets/chatsky_database"))
 
         logger.info("Overriding the initial configuration.")
         # overwrite sqlalchemy uri

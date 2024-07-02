@@ -5,8 +5,8 @@ This module contains a simple script and a dialog which are used
 in tutorials.
 """
 
-from dff.script.conditions import exact_match
-from dff.script import TRANSITIONS, RESPONSE, Message
+from chatsky.script.conditions import exact_match
+from chatsky.script import TRANSITIONS, RESPONSE, Message
 
 TOY_SCRIPT = {
     "greeting_flow": {
@@ -41,7 +41,7 @@ An example of a simple script.
 
 TOY_SCRIPT_ARGS = (TOY_SCRIPT, ("greeting_flow", "start_node"), ("greeting_flow", "fallback_node"))
 """
-Arguments to pass to :py:meth:`~dff.pipeline.pipeline.pipeline.Pipeline.from_script` in order to
+Arguments to pass to :py:meth:`~chatsky.pipeline.pipeline.pipeline.Pipeline.from_script` in order to
 use :py:data:`~.TOY_SCRIPT`:
 
 .. code-block::

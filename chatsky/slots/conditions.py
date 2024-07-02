@@ -8,9 +8,9 @@ from __future__ import annotations
 from typing import TYPE_CHECKING, Literal
 
 if TYPE_CHECKING:
-    from dff.script import Context
-    from dff.slots.slots import SlotName
-    from dff.pipeline import Pipeline
+    from chatsky.script import Context
+    from chatsky.slots.slots import SlotName
+    from chatsky.pipeline import Pipeline
 
 
 def slots_extracted(*slots: SlotName, mode: Literal["any", "all"] = "all"):

@@ -14,21 +14,21 @@ libraries for asynchronous access to SQLite DB.
 Note that protocol separator for windows differs from one for linux.
 """
 
-# %pip install dff[sqlite]
+# %pip install chatsky[sqlite]
 
 # %%
 import pathlib
 from platform import system
 
-from dff.context_storages import context_storage_factory
+from chatsky.context_storages import context_storage_factory
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 
 # %%

@@ -21,8 +21,8 @@ from .keywords import Keywords
 from .normalization import normalize_condition, normalize_label
 
 if TYPE_CHECKING:
-    from dff.script.core.context import Context
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.script.core.context import Context
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -64,7 +64,7 @@ def _types_equal(signature_type: Any, expected_type: str) -> bool:
 
 def _validate_callable(callable: Callable, func_type: UserFunctionType, flow_label: str, node_label: str) -> List:
     """
-    This function validates a function during :py:class:`~dff.script.Script` validation.
+    This function validates a function during :py:class:`~chatsky.script.Script` validation.
     It checks parameter number (unconditionally), parameter types (if specified) and return type (if specified).
 
     :param callable: Function to validate.

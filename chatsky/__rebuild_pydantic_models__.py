@@ -1,8 +1,8 @@
 # flake8: noqa: F401
 
-from dff.pipeline import Pipeline
-from dff.pipeline.types import ExtraHandlerRuntimeInfo
-from dff.script import Context, Script
+from chatsky.pipeline import Pipeline
+from chatsky.pipeline.types import ExtraHandlerRuntimeInfo
+from chatsky.script import Context, Script
 
 Script.model_rebuild()
 Context.model_rebuild()

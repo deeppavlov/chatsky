@@ -15,7 +15,7 @@ import abc
 import asyncio
 from typing import Optional, Awaitable, TYPE_CHECKING
 
-from dff.script import Context
+from chatsky.script import Context
 
 from ..service.extra import BeforeHandler, AfterHandler
 from ..conditions import always_start_condition
@@ -32,7 +32,7 @@ from ..types import (
 logger = logging.getLogger(__name__)
 
 if TYPE_CHECKING:
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
 class PipelineComponent(abc.ABC):
@@ -93,7 +93,7 @@ class PipelineComponent(abc.ABC):
         self.path = path
         """
         Dot-separated path to component (is universally unique).
-        This attribute is set in :py:func:`~dff.pipeline.pipeline.utils.finalize_service_group`.
+        This attribute is set in :py:func:`~chatsky.pipeline.pipeline.utils.finalize_service_group`.
         """
 
         self.before_handler = BeforeHandler([] if before_handler is None else before_handler)
@@ -204,7 +204,7 @@ class PipelineComponent(abc.ABC):
         Method for retrieving runtime info about this component.
 
         :param ctx: Current dialog :py:class:`~.Context`.
-        :return: :py:class:`~.dff.script.typing.ServiceRuntimeInfo`
+        :return: :py:class:`~.chatsky.script.typing.ServiceRuntimeInfo`
             object where all not set fields are replaced with `[None]`.
         """
         return ServiceRuntimeInfo(

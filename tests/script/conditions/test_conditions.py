@@ -1,7 +1,7 @@
 # %%
-from dff.pipeline import Pipeline
-from dff.script import Context, Message
-import dff.script.conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.script import Context, Message
+import chatsky.script.conditions as cnd
 
 
 def test_conditions():

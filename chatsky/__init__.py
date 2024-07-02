@@ -10,7 +10,7 @@ import nest_asyncio
 
 nest_asyncio.apply()
 
-from dff.pipeline import Pipeline
-from dff.script import Context, Script
+from chatsky.pipeline import Pipeline
+from chatsky.script import Context, Script
 
-import dff.__rebuild_pydantic_models__
+import chatsky.__rebuild_pydantic_models__

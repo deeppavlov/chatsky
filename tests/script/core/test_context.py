@@ -1,7 +1,7 @@
 # %%
 import random
 
-from dff.script import Context, Message
+from chatsky.script import Context, Message
 
 
 def shuffle_dict_keys(dictionary: dict) -> dict:

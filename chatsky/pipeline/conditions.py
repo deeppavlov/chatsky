@@ -9,7 +9,7 @@ The standard set of them allows user to setup dependencies between pipeline comp
 from __future__ import annotations
 from typing import Optional, TYPE_CHECKING
 
-from dff.script import Context
+from chatsky.script import Context
 
 from .types import (
     StartConditionCheckerFunction,
@@ -18,7 +18,7 @@ from .types import (
 )
 
 if TYPE_CHECKING:
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
 def always_start_condition(_: Context, __: Pipeline) -> bool:

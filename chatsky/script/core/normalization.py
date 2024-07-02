@@ -16,7 +16,7 @@ from .types import ConstLabel, ConditionType, Label, LabelType
 from .message import Message
 
 if TYPE_CHECKING:
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 
@@ -24,7 +24,7 @@ logger = logging.getLogger(__name__)
 def normalize_label(label: Label, default_flow_label: LabelType = "") -> Label:
     """
     The function that is used for normalization of
-    :py:const:`label <dff.script.Label>`.
+    :py:const:`label <chatsky.script.Label>`.
 
     :param label: If label is Callable the function is wrapped into try/except
         and normalization is used on the result of the function call with the name label.

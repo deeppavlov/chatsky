@@ -5,8 +5,8 @@
 [![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
 [![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
 ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
-[![PyPI](https://img.shields.io/pypi/v/dff)](https://pypi.org/project/dff/)
-[![Downloads](https://pepy.tech/badge/dff)](https://pepy.tech/project/dff)
+[![PyPI](https://img.shields.io/pypi/v/chatsky)](https://pypi.org/project/chatsky/)
+[![Downloads](https://pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
 
 The Dialog Flow Framework (DFF) allows you to develop conversational services.
 DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
@@ -47,28 +47,28 @@ in the evolving landscape of Python applications and IoT connectivity.
 DFF can be installed via pip:
 
 ```bash
-pip install dff
+pip install chatsky
 ```
 
 The above command will set the minimum dependencies to start working with DFF. 
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 ```bash
-pip install dff[json]  # dependencies for using JSON
-pip install dff[pickle] # dependencies for using Pickle
-pip install dff[redis]  # dependencies for using Redis
-pip install dff[mongodb]  # dependencies for using MongoDB
-pip install dff[mysql]  # dependencies for using MySQL
-pip install dff[postgresql]  # dependencies for using PostgreSQL
-pip install dff[sqlite]  # dependencies for using SQLite
-pip install dff[ydb]  # dependencies for using Yandex Database
-pip install dff[telegram]  # dependencies for using Telegram
-pip install dff[benchmark]  # dependencies for benchmarking
+pip install chatsky[json]  # dependencies for using JSON
+pip install chatsky[pickle] # dependencies for using Pickle
+pip install chatsky[redis]  # dependencies for using Redis
+pip install chatsky[mongodb]  # dependencies for using MongoDB
+pip install chatsky[mysql]  # dependencies for using MySQL
+pip install chatsky[postgresql]  # dependencies for using PostgreSQL
+pip install chatsky[sqlite]  # dependencies for using SQLite
+pip install chatsky[ydb]  # dependencies for using Yandex Database
+pip install chatsky[telegram]  # dependencies for using Telegram
+pip install chatsky[benchmark]  # dependencies for benchmarking
 ```
 
 For example, if you are going to use one of the database backends,
 you can specify the corresponding requirements yourself. Multiple dependencies can be installed at once, e.g.
 ```bash
-pip install dff[postgresql,mysql]
+pip install chatsky[postgresql,mysql]
 ```
 
 ## Basic example
@@ -79,9 +79,9 @@ All the abstractions used in this example are thoroughly explained in the dedica
 [user guide](https://deeppavlov.github.io/dialog_flow_framework/user_guides/basic_conceptions.html).
 
 ```python
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Message
-from dff.pipeline import Pipeline
-import dff.script.conditions.std_conditions as cnd
+from chatsky.script import GLOBAL, TRANSITIONS, RESPONSE, Message
+from chatsky.pipeline import Pipeline
+import chatsky.script.conditions.std_conditions as cnd
 
 # create a dialog script
 script = {

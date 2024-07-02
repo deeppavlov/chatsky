@@ -33,7 +33,7 @@ from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExport
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter, LogExporter
 from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExporter, MetricExporter
 
-from dff.pipeline import ExtraHandlerRuntimeInfo
+from chatsky.pipeline import ExtraHandlerRuntimeInfo
 
 SERVICE_NAME = "dialog_flow_framework"
 

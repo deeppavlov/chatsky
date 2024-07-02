@@ -6,6 +6,6 @@ from .response_comparers import default_comparer
 try:
     import pytest
 
-    pytest.register_assert_rewrite("dff.utils.testing.telegram")
+    pytest.register_assert_rewrite("chatsky.utils.testing.telegram")
 except ImportError:
     ...

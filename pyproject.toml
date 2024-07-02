@@ -1,5 +1,5 @@
 [tool.poetry]
-name = "dff"
+name = "chatsky"
 version = "0.7.0"
 description = "Dialog Flow Framework is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
 license = "Apache-2.0"
@@ -33,7 +33,7 @@ classifiers = [
 
 include = [
     { path = "CONTRIBUTING.md" },
-    { path = "dff/" },
+    { path = "chatsky/" },
 ]
 exclude = [
     { path = "tests" },
@@ -127,7 +127,7 @@ jsonschema = "*"
 optional = false
 
 [tool.poetry.group.devel.dependencies]
-urllib3 = "<2.0"  # ensure dff doesn't update urllib which breaks poetry
+urllib3 = "<2.0"  # ensure chatsky doesn't update urllib which breaks poetry
 python-on-whales = "*"
 python-dotenv = "*"
 poethepoet = { version = "*", extras = ["poetry_plugin"] }
@@ -168,7 +168,7 @@ jupyter = "*"
 
 
 [tool.poetry.scripts]
-"dff.stats" = { callable = "dff.stats.__main__:main", extras = ["stats"] }
+"chatsky.stats" = { callable = "chatsky.stats.__main__:main", extras = ["stats"] }
 
 
 

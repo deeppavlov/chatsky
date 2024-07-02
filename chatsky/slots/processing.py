@@ -1,7 +1,7 @@
 """
 Processing
 ---------------------------
-This module provides wrappers for :py:class:`~dff.slots.slots.SlotManager`'s API.
+This module provides wrappers for :py:class:`~chatsky.slots.slots.SlotManager`'s API.
 """
 
 from __future__ import annotations
@@ -10,9 +10,9 @@ import logging
 from typing import Awaitable, Callable, TYPE_CHECKING
 
 if TYPE_CHECKING:
-    from dff.slots.slots import SlotName
-    from dff.script import Context
-    from dff.pipeline import Pipeline
+    from chatsky.slots.slots import SlotName
+    from chatsky.script import Context
+    from chatsky.pipeline import Pipeline
 
 logger = logging.getLogger(__name__)
 

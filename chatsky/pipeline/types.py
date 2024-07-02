@@ -14,13 +14,13 @@ from pydantic import BaseModel
 
 
 if TYPE_CHECKING:
-    from dff.pipeline.pipeline.pipeline import Pipeline
-    from dff.pipeline.service.service import Service
-    from dff.pipeline.service.group import ServiceGroup
-    from dff.pipeline.service.extra import _ComponentExtraHandler
-    from dff.messengers.common.interface import MessengerInterface
-    from dff.context_storages import DBContextStorage
-    from dff.script import Context, ActorStage, NodeLabel2Type, Script, Message
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.pipeline.service.service import Service
+    from chatsky.pipeline.service.group import ServiceGroup
+    from chatsky.pipeline.service.extra import _ComponentExtraHandler
+    from chatsky.messengers.common.interface import MessengerInterface
+    from chatsky.context_storages import DBContextStorage
+    from chatsky.script import Context, ActorStage, NodeLabel2Type, Script, Message
 
 
 class PipelineRunnerFunction(Protocol):

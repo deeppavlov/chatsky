@@ -11,16 +11,16 @@ First of all, let's do all the necessary imports from DFF.
 """
 
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import re
 
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Message
-import dff.script.conditions as cnd
-import dff.script.labels as lbl
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.script import GLOBAL, TRANSITIONS, RESPONSE, Message
+import chatsky.script.conditions as cnd
+import chatsky.script.labels as lbl
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

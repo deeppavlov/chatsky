@@ -8,16 +8,16 @@ and %mddoclink(api,script.core.keywords,Keywords.TRANSITIONS)
 are used for that.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 from typing import NamedTuple
 
-from dff.script import Message
-from dff.script.conditions import exact_match
-from dff.script import RESPONSE, TRANSITIONS
-from dff.pipeline import Pipeline
-from dff.utils.testing import (
+from chatsky.script import Message
+from chatsky.script.conditions import exact_match
+from chatsky.script import RESPONSE, TRANSITIONS
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

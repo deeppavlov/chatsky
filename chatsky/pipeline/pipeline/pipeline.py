@@ -18,14 +18,14 @@ import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
-from dff.context_storages import DBContextStorage
-from dff.script import Script, Context, ActorStage
-from dff.script import NodeLabel2Type, Message
-from dff.utils.turn_caching import cache_clear
+from chatsky.context_storages import DBContextStorage
+from chatsky.script import Script, Context, ActorStage
+from chatsky.script import NodeLabel2Type, Message
+from chatsky.utils.turn_caching import cache_clear
 
-from dff.messengers.console import CLIMessengerInterface
-from dff.messengers.common import MessengerInterface
-from dff.slots.slots import GroupSlot
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.messengers.common import MessengerInterface
+from chatsky.slots.slots import GroupSlot
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
@@ -36,7 +36,7 @@ from ..types import (
     ExtraHandlerBuilder,
 )
 from .utils import finalize_service_group, pretty_format_component_info_dict
-from dff.pipeline.pipeline.actor import Actor
+from chatsky.pipeline.pipeline.actor import Actor
 
 logger = logging.getLogger(__name__)
 
@@ -54,14 +54,14 @@ class Pipeline:
     :param script: (required) A :py:class:`~.Script` instance (object or dict).
     :param start_label: (required) Actor start label.
     :param fallback_label: Actor fallback label.
-    :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+    :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
     :param slots: Slots configuration.
     :param handlers: This variable is responsible for the usage of external handlers on
-        the certain stages of work of :py:class:`~dff.script.Actor`.
+        the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-        - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+        - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
         - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
 
     :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
@@ -231,7 +231,7 @@ class Pipeline:
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
         :param fallback_label: Actor fallback label.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param slots: Slots configuration.
@@ -239,9 +239,9 @@ class Pipeline:
             defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
             of the script should be parallelized over respective groups.
         :param handlers: This variable is responsible for the usage of external handlers on
-            the certain stages of work of :py:class:`~dff.script.Actor`.
+            the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-            - key: :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+            - key: :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
             - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
 
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
@@ -286,17 +286,17 @@ class Pipeline:
 
         :param script: (required) A :py:class:`~.Script` instance (object or dict).
         :param start_label: (required) Actor start label.
-            The start node of :py:class:`~dff.script.Script`. The execution begins with it.
-        :param fallback_label: Actor fallback label. The label of :py:class:`~dff.script.Script`.
+            The start node of :py:class:`~chatsky.script.Script`. The execution begins with it.
+        :param fallback_label: Actor fallback label. The label of :py:class:`~chatsky.script.Script`.
             Dialog comes into that label if all other transitions failed,
             or there was an error while executing the scenario.
-        :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
+        :param label_priority: Default priority value for all actor :py:const:`labels <chatsky.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
         :param handlers: This variable is responsible for the usage of external handlers on
-            the certain stages of work of :py:class:`~dff.script.Actor`.
+            the certain stages of work of :py:class:`~chatsky.script.Actor`.
 
-            - key :py:class:`~dff.script.ActorStage` - Stage in which the handler is called.
+            - key :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
             - value List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
         """
         self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
@@ -315,7 +315,7 @@ class Pipeline:
     ) -> Context:
         """
         Method that should be invoked on user input.
-        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         if ctx_id is None:
             ctx = Context()
@@ -365,7 +365,7 @@ class Pipeline:
         Basically, it is a shortcut for `_run_pipeline`.
         NB! When pipeline is executed this way, `messenger_interface` won't be initiated nor connected.
 
-        This method has the same signature as :py:class:`~dff.pipeline.types.PipelineRunnerFunction`.
+        This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
         return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))
 

@@ -7,7 +7,7 @@ including JSON, MongoDB, Pickle, Redis, Shelve, SQL, and YDB databases.
 
 import os
 
-from dff.context_storages import (
+from chatsky.context_storages import (
     JSONContextStorage,
     MongoContextStorage,
     PickleContextStorage,

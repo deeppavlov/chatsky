@@ -26,18 +26,18 @@ from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExp
 from opentelemetry.exporter.otlp.proto.grpc.trace_exporter import OTLPSpanExporter
 from opentelemetry.exporter.otlp.proto.grpc._log_exporter import OTLPLogExporter
 
-from dff.script.core.context import get_last_index
-from dff.stats.utils import (
+from chatsky.script.core.context import get_last_index
+from chatsky.stats.utils import (
     resource,
     get_extra_handler_name,
     set_logger_destination,
     set_meter_destination,
     set_tracer_destination,
 )
-from dff.stats import default_extractors
+from chatsky.stats import default_extractors
 
 
-INSTRUMENTS = ["dff"]
+INSTRUMENTS = ["chatsky"]
 
 
 class OtelInstrumentor(BaseInstrumentor):
@@ -50,9 +50,9 @@ class OtelInstrumentor(BaseInstrumentor):
 
     .. code-block::
 
-        dff_instrumentor = OtelInstrumentor()
-        dff_instrumentor.instrument()
-        dff_instrumentor.uninstrument()
+        chatsky_instrumentor = OtelInstrumentor()
+        chatsky_instrumentor.instrument()
+        chatsky_instrumentor.uninstrument()
 
     Opentelemetry provider instances can be optionally passed to the class constructor.
     Otherwise, the global logger, tracer and meter providers are leveraged.
@@ -62,7 +62,7 @@ class OtelInstrumentor(BaseInstrumentor):
 
     .. code-block::
 
-        @dff_instrumentor
+        @chatsky_instrumentor
         async def function(context, pipeline, runtime_info):
             ...
 
@@ -145,7 +145,7 @@ class OtelInstrumentor(BaseInstrumentor):
     @decorator
     async def __call__(self, wrapped, _, args, kwargs):
         """
-        Regular functions that match the :py:class:`~dff.pipeline.types.ExtraHandlerFunction`
+        Regular functions that match the :py:class:`~chatsky.pipeline.types.ExtraHandlerFunction`
         signature can be decorated with the class instance to log the returned value.
         This method implements the logging procedure.
         The returned value is assumed to be `dict` or `NoneType`.

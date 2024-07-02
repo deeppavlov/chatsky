@@ -16,12 +16,12 @@ from functools import reduce
 
 from pydantic import BaseModel, model_validator, Field
 
-from dff.utils.devel.async_helpers import wrap_sync_function_in_async
-from dff.utils.devel.json_serialization import PickleEncodedValue
+from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
+from chatsky.utils.devel.json_serialization import PickleEncodedValue
 
 if TYPE_CHECKING:
-    from dff.script import Context, Message
-    from dff.pipeline.pipeline.pipeline import Pipeline
+    from chatsky.script import Context, Message
+    from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
 logger = logging.getLogger(__name__)
@@ -88,7 +88,7 @@ class ExtractedSlot(BaseModel, ABC):
     Represents value of an extracted slot.
 
     Instances of this class are managed by framework and
-    are stored in :py:attr:`~dff.script.core.context.FrameworkData.slot_manager`.
+    are stored in :py:attr:`~chatsky.script.core.context.FrameworkData.slot_manager`.
     They can be accessed via the ``ctx.framework_data.slot_manager.get_extracted_slot`` method.
     """
 

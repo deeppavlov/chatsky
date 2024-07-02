@@ -31,5 +31,5 @@ def get_protocol_install_suggestion(protocol_name: str) -> str:
     protocol = PROTOCOLS.get(protocol_name, {})
     slug = protocol.get("slug")
     if slug:
-        return f"Try to run `pip install dff[{slug}]`"
+        return f"Try to run `pip install chatsky[{slug}]`"
     return ""

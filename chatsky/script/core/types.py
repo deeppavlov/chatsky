@@ -14,7 +14,7 @@ from typing_extensions import TypeAlias
 from .keywords import Keywords
 
 LabelType: TypeAlias = Union[str, Keywords]
-"""Label can be a casual string or :py:class:`~dff.script.Keywords`."""
+"""Label can be a casual string or :py:class:`~chatsky.script.Keywords`."""
 # todo: rename these to identifiers
 
 NodeLabel1Type: TypeAlias = Tuple[str, float]
