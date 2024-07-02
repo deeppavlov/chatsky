@@ -17,6 +17,7 @@ from functools import reduce
 from pydantic import BaseModel, model_validator, Field
 
 from dff.utils.devel.async_helpers import wrap_sync_function_in_async
+from dff.utils.devel.json_serialization import PickleEncodedValue
 
 if TYPE_CHECKING:
     from dff.script import Context, Message
@@ -111,8 +112,8 @@ class ExtractedValueSlot(ExtractedSlot):
     """Value extracted from :py:class:`~.ValueSlot`."""
 
     is_slot_extracted: bool
-    extracted_value: Any
-    default_value: Any = None
+    extracted_value: PickleEncodedValue
+    default_value: PickleEncodedValue = None
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -132,10 +133,7 @@ class ExtractedValueSlot(ExtractedSlot):
 
 
 class ExtractedGroupSlot(ExtractedSlot, extra="allow"):
-    __pydantic_extra__: dict[str, Union["ExtractedGroupSlot", "ExtractedValueSlot"]]
-
-    def __init__(self, **kwargs):  # supress unexpected argument warnings
-        super().__init__(**kwargs)
+    __pydantic_extra__: dict[str, Union["ExtractedValueSlot", "ExtractedGroupSlot"]]
 
     @property
     def __slot_extracted__(self) -> bool:
@@ -218,14 +216,14 @@ class ValueSlot(BaseSlot, frozen=True):
             logger.exception(f"Exception occurred during {self.__class__.__name__!r} extraction.", exc_info=error)
             extracted_value = error
         finally:
-            return ExtractedValueSlot(
+            return ExtractedValueSlot.model_construct(
                 is_slot_extracted=is_slot_extracted,
                 extracted_value=extracted_value,
                 default_value=self.default_value,
             )
 
     def init_value(self) -> ExtractedValueSlot:
-        return ExtractedValueSlot(
+        return ExtractedValueSlot.model_construct(
             is_slot_extracted=False,
             extracted_value=SlotNotExtracted("Initial slot extraction."),
             default_value=self.default_value,
@@ -237,7 +235,7 @@ class GroupSlot(BaseSlot, extra="allow", frozen=True):
     Base class for :py:class:`~.RootSlot` and :py:class:`~.GroupSlot`.
     """
 
-    __pydantic_extra__: dict[str, Union["GroupSlot", "ValueSlot"]]
+    __pydantic_extra__: dict[str, Union["ValueSlot", "GroupSlot"]]
 
     def __init__(self, **kwargs):  # supress unexpected argument warnings
         super().__init__(**kwargs)

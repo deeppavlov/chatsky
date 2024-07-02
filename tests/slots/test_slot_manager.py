@@ -16,7 +16,7 @@ def faulty_func(_):
     raise SlotNotExtracted("Error.")
 
 
-init_value_slot = ExtractedValueSlot(
+init_value_slot = ExtractedValueSlot.model_construct(
     is_slot_extracted=False,
     extracted_value=SlotNotExtracted("Initial slot extraction."),
     default_value=None,
@@ -34,12 +34,16 @@ root_slot = GroupSlot(
 
 
 extracted_slot_values = {
-    "person.name": ExtractedValueSlot(is_slot_extracted=True, extracted_value="Bot", default_value=None),
-    "person.surname": ExtractedValueSlot(
+    "person.name": ExtractedValueSlot.model_construct(
+        is_slot_extracted=True, extracted_value="Bot", default_value=None
+    ),
+    "person.surname": ExtractedValueSlot.model_construct(
         is_slot_extracted=False, extracted_value=SlotNotExtracted("Error."), default_value=None
     ),
-    "person.email": ExtractedValueSlot(is_slot_extracted=True, extracted_value="bot@bot", default_value=None),
-    "msg_len": ExtractedValueSlot(is_slot_extracted=True, extracted_value=29, default_value=None),
+    "person.email": ExtractedValueSlot.model_construct(
+        is_slot_extracted=True, extracted_value="bot@bot", default_value=None
+    ),
+    "msg_len": ExtractedValueSlot.model_construct(is_slot_extracted=True, extracted_value=29, default_value=None),
 }
 
 
@@ -50,7 +54,7 @@ extracted_slot_values["person"] = ExtractedGroupSlot(
 )
 
 
-unset_slot = ExtractedValueSlot(
+unset_slot = ExtractedValueSlot.model_construct(
     is_slot_extracted=False, extracted_value=SlotNotExtracted("Slot manually unset."), default_value=None
 )
 
@@ -109,7 +113,7 @@ class TestSlotManager:
     @pytest.fixture(scope="function")
     def fully_extracted_slot_manager(self):
         slot_storage = full_slot_storage.model_copy(deep=True)
-        slot_storage.person.surname = ExtractedValueSlot(
+        slot_storage.person.surname = ExtractedValueSlot.model_construct(
             extracted_value="Bot", is_slot_extracted=True, default_value=None
         )
         return SlotManager(root_slot=root_slot, slot_storage=slot_storage)
@@ -252,3 +256,7 @@ class TestSlotManager:
     )
     def test_template_filling(self, extracted_slot_manager, template, filled_value):
         assert extracted_slot_manager.fill_template(template) == filled_value
+
+    def test_serializable(self):
+        serialized = full_slot_storage.model_dump_json()
+        assert full_slot_storage == ExtractedGroupSlot.model_validate_json(serialized)
