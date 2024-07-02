@@ -20,7 +20,6 @@ happy_paths_file = Path(__file__).parent / "test_happy_paths.json"
     "tutorial_module_name",
     ["1_basic", "2_attachments", "3_advanced"],
 )
-
 def test_tutorials(tutorial_module_name: str, monkeypatch):
     def patched_data_attachment_eq(self: DataAttachment, other: DataAttachment):
         first_copy = self.model_copy()
