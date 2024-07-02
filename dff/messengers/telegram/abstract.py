@@ -113,8 +113,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         message = Message()
         message.attachments = list()
 
-        if update.text is not None:
-            message.text = update.text
+        message.text = update.text or update.caption
         if update.location is not None:
             message.attachments += [Location(latitude=update.location.latitude, longitude=update.location.longitude)]
         if update.contact is not None:
@@ -160,14 +159,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             ]
         if update.audio is not None:
             thumbnail = (
-                Image(id=update.audio.thumbnail.file_id, title=update.audio.thumbnail.file_unique_id)
+                Image(id=update.audio.thumbnail.file_id, file_unique_id=update.audio.thumbnail.file_unique_id)
                 if update.audio.thumbnail is not None
                 else None
             )
             message.attachments += [
                 Audio(
                     id=update.audio.file_id,
-                    title=update.audio.file_unique_id,
+                    file_unique_id=update.audio.file_unique_id,
                     duration=update.audio.duration,
                     performer=update.audio.performer,
                     file_name=update.audio.file_name,
@@ -177,14 +176,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             ]
         if update.video is not None:
             thumbnail = (
-                Image(id=update.video.thumbnail.file_id, title=update.video.thumbnail.file_unique_id)
+                Image(id=update.video.thumbnail.file_id, file_unique_id=update.video.thumbnail.file_unique_id)
                 if update.video.thumbnail is not None
                 else None
             )
             message.attachments += [
                 Video(
                     id=update.video.file_id,
-                    title=update.video.file_unique_id,
+                    file_unique_id=update.video.file_unique_id,
                     width=update.video.width,
                     height=update.video.height,
                     duration=update.video.duration,
@@ -195,14 +194,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             ]
         if update.animation is not None:
             thumbnail = (
-                Image(id=update.animation.thumbnail.file_id, title=update.animation.thumbnail.file_unique_id)
+                Image(id=update.animation.thumbnail.file_id, file_unique_id=update.animation.thumbnail.file_unique_id)
                 if update.animation.thumbnail is not None
                 else None
             )
             message.attachments += [
                 Animation(
                     id=update.animation.file_id,
-                    title=update.animation.file_unique_id,
+                    file_unique_id=update.animation.file_unique_id,
                     width=update.animation.width,
                     height=update.animation.height,
                     duration=update.animation.duration,
@@ -215,7 +214,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             message.attachments += [
                 Image(
                     id=picture.file_id,
-                    title=picture.file_unique_id,
+                    file_unique_id=picture.file_unique_id,
                     width=picture.width,
                     height=picture.height,
                 )
@@ -223,14 +222,14 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             ]
         if update.document is not None:
             thumbnail = (
-                Image(id=update.document.thumbnail.file_id, title=update.document.thumbnail.file_unique_id)
+                Image(id=update.document.thumbnail.file_id, file_unique_id=update.document.thumbnail.file_unique_id)
                 if update.document.thumbnail is not None
                 else None
             )
             message.attachments += [
                 Document(
                     id=update.document.file_id,
-                    title=update.document.file_unique_id,
+                    file_unique_id=update.document.file_unique_id,
                     file_name=update.document.file_name,
                     mime_type=update.document.mime_type,
                     thumbnail=thumbnail,
@@ -240,20 +239,20 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
             message.attachments += [
                 VoiceMessage(
                     id=update.voice.file_id,
-                    title=update.voice.file_unique_id,
+                    file_unique_id=update.voice.file_unique_id,
                     mime_type=update.voice.mime_type,
                 )
             ]
         if update.video_note is not None:
             thumbnail = (
-                Image(id=update.video_note.thumbnail.file_id, title=update.video_note.thumbnail.file_unique_id)
+                Image(id=update.video_note.thumbnail.file_id, file_unique_id=update.video_note.thumbnail.file_unique_id)
                 if update.video_note.thumbnail is not None
                 else None
             )
             message.attachments += [
                 VideoMessage(
                     id=update.video_note.file_id,
-                    title=update.video_note.file_unique_id,
+                    file_unique_id=update.video_note.file_unique_id,
                     thumbnail=thumbnail,
                 )
             ]
@@ -530,7 +529,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 InputMediaPhoto(
                                     media_bytes,
                                     **grab_extra_fields(
-                                        attachment,
+                                        media,
                                         [
                                             "filename",
                                             "caption",
@@ -547,7 +546,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 InputMediaVideo(
                                     media_bytes,
                                     **grab_extra_fields(
-                                        attachment,
+                                        media,
                                         [
                                             "filename",
                                             "caption",
@@ -566,7 +565,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 InputMediaAnimation(
                                     media_bytes,
                                     **grab_extra_fields(
-                                        attachment,
+                                        media,
                                         [
                                             "filename",
                                             "caption",
@@ -584,7 +583,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                                 InputMediaAudio(
                                     media_bytes,
                                     **grab_extra_fields(
-                                        attachment,
+                                        media,
                                         ["filename", "caption", "parse_mode", "performer", "title", "thumbnail"],
                                     ),
                                 ),
@@ -594,7 +593,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
                             files += [
                                 InputMediaDocument(
                                     media_bytes,
-                                    **grab_extra_fields(attachment, ["filename", "caption", "parse_mode", "thumbnail"]),
+                                    **grab_extra_fields(media, ["filename", "caption", "parse_mode", "thumbnail"]),
                                 ),
                             ]
                         else:

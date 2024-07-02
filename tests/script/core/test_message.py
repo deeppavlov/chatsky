@@ -83,33 +83,23 @@ class TestMessage:
         "attachment1,attachment2,equal",
         [
             (
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf"),
                 True,
             ),
             (
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
-                Document(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"),
+                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf"),
+                Document(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf"),
                 False,
             ),
             (
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="2"),
-                False,
-            ),
-            (
-                Document(source=__file__, title="File"),
-                Document(source=__file__, title="File"),
+                Document(source=__file__),
+                Document(source=__file__),
                 True,
             ),
             (
-                Document(source=__file__, title="1"),
-                Document(source=__file__, title="2"),
-                False,
-            ),
-            (
-                Document(id="1", title="File"),
-                Document(id="2", title="File"),
+                Document(id="1"),
+                Document(id="2"),
                 False,
             ),
         ],

@@ -9,7 +9,7 @@ from typing import Literal, Optional, List, Union
 from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
-from uuid import uuid4
+import uuid
 import abc
 
 from pydantic import Field, FilePath, HttpUrl, model_validator
@@ -134,14 +134,12 @@ class Poll(Attachment):
 class DataAttachment(Attachment):
     """
     This class represents an attachment that can be either
-    a file or a URL, along with an optional ID and title.
+    a local file, a URL to a file or a ID of a file on a certain server (such as telegram).
     This attachment can also be optionally cached for future use.
     """
 
     source: Optional[Union[HttpUrl, FilePath]] = None
     """Attachment source -- either a URL to a file or a local filepath."""
-    title: Optional[str] = None
-    """Text accompanying the data."""
     use_cache: bool = True
     """
     Whether to cache the file (only for URL and ID files).
@@ -166,8 +164,8 @@ class DataAttachment(Attachment):
         :param directory: cache directory where attachment will be saved.
         """
 
-        title = str(uuid4()) if self.title is None else self.title
-        self.cached_filename = directory / title
+        filename = str(uuid.uuid5(uuid.NAMESPACE_URL, str(self.source or self.id)))
+        self.cached_filename = directory / filename
         with open(self.cached_filename, "wb") as file:
             file.write(data)
 
@@ -178,7 +176,7 @@ class DataAttachment(Attachment):
         it will be downloaded or read automatically.
         If cache use is allowed and the attachment is cached, cached file will be used.
         Otherwise, a :py:meth:`~.MessengerInterfaceWithAttachments.get_attachment_bytes`
-        will be used for receiving attachment bytes by ID and title.
+        will be used for receiving attachment bytes via ID.
 
         If cache use is allowed and the attachment is a URL or an ID, bytes will be cached locally.
 
@@ -205,8 +203,6 @@ class DataAttachment(Attachment):
             if self.id != other.id:
                 return False
             if self.source != other.source:
-                return False
-            if self.title != other.title:
                 return False
             return True
         return NotImplemented

@@ -69,14 +69,14 @@ sticker_data = {
         "CAACAgIAAxkBAAErAAFXZibO5ksphCKS"
         + "XSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE"
     ),
-    "title": "A sticker I've just found",
+    "caption": "A sticker I've just found",
 }
 
 audio_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
     ),
-    "title": "Separation melody by William King",
+    "caption": "Separation melody by William King",
     "filename": "separation-william-king.mp3",
 }
 
@@ -84,7 +84,7 @@ video_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/crownfall-lags-nkognit0.mp4"
     ),
-    "title": "Epic Dota2 gameplay by Nkognit0",
+    "caption": "Epic Dota2 gameplay by Nkognit0",
     "filename": "crownfall-lags-nkognit0.mp4",
 }
 
@@ -94,19 +94,19 @@ animation_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif"
     ),
-    "title": "Hong Kong skyscraper views by Simplyart4794",
+    "caption": "Hong Kong skyscraper views by Simplyart4794",
     "filename": "hong-kong-simplyart4794.gif",
 }
 
 image_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"),
-    "title": "DeepPavlov logo",
+    "caption": "DeepPavlov logo",
     "filename": "deeppavlov.png",
 }
 
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
-    "title": "DeepPavlov article",
+    "caption": "DeepPavlov article",
     "filename": "deeppavlov-article.pdf",
 }
 

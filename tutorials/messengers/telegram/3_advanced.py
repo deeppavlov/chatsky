@@ -87,14 +87,14 @@ sticker_data = {
 
 image_data = {
     "source": image_url,
-    "title": "DeepPavlov logo",
+    "caption": "DeepPavlov logo",
     "has_spoiler": True,
     "filename": "deeppavlov_logo.png",
 }
 
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
-    "title": "DeepPavlov article",
+    "caption": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
     "thumbnail": urlopen(str(image_url)).read(),
 }
