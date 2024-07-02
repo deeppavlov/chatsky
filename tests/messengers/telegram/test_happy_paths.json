@@ -4,7 +4,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 8, 21, 5, 30, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -12,7 +11,6 @@
             },
             "response_message": {
                 "text": "Hi",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -26,7 +24,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 8, 21, 5, 31, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=2, supergroup_chat_created=False, text='Hi'), update_id=2)",
             "received_message": {
                 "text": "Hi",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -34,7 +31,6 @@
             },
             "response_message": {
                 "text": "Hi",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -50,7 +46,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 14, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -58,7 +53,6 @@
             },
             "response_message": {
                 "text": "Type \"location\", \"contact\", \"poll\", \"sticker\", \"audio\", \"video\", \"animation\", \"image\", \"document\", \"voice_message\", \"video_message\" or \"media_group\" to receive a corresponding attachment!",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -72,7 +66,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 25, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=2, supergroup_chat_created=False, text='location'), update_id=2)",
             "received_message": {
                 "text": "location",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -80,7 +73,6 @@
             },
             "response_message": {
                 "text": "Here's your location!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -101,7 +93,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 32, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=3, supergroup_chat_created=False, text='contact'), update_id=3)",
             "received_message": {
                 "text": "contact",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -109,7 +100,6 @@
             },
             "response_message": {
                 "text": "Here's your contact!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "contact",
@@ -131,7 +121,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 36, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=4, supergroup_chat_created=False, text='poll'), update_id=4)",
             "received_message": {
                 "text": "poll",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -139,7 +128,6 @@
             },
             "response_message": {
                 "text": "Here's your poll!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "poll",
@@ -171,7 +159,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 43, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=5, supergroup_chat_created=False, text='sticker'), update_id=5)",
             "received_message": {
                 "text": "sticker",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -179,7 +166,6 @@
             },
             "response_message": {
                 "text": "Here's your sticker!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "sticker",
@@ -203,7 +189,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 0, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=6, supergroup_chat_created=False, text='audio'), update_id=6)",
             "received_message": {
                 "text": "audio",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -211,7 +196,6 @@
             },
             "response_message": {
                 "text": "Here's your audio!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "audio",
@@ -236,7 +220,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 4, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=7, supergroup_chat_created=False, text='video'), update_id=7)",
             "received_message": {
                 "text": "video",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -244,7 +227,6 @@
             },
             "response_message": {
                 "text": "Here's your video!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "video",
@@ -269,7 +251,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 22, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=8, supergroup_chat_created=False, text='animation'), update_id=8)",
             "received_message": {
                 "text": "animation",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -277,7 +258,6 @@
             },
             "response_message": {
                 "text": "Here's your animation!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "animation",
@@ -302,7 +282,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 1, 35, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=9, supergroup_chat_created=False, text='image'), update_id=9)",
             "received_message": {
                 "text": "image",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -310,7 +289,6 @@
             },
             "response_message": {
                 "text": "Here's your image!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "image",
@@ -335,7 +313,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 19, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=10, supergroup_chat_created=False, text='document'), update_id=10)",
             "received_message": {
                 "text": "document",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -343,7 +320,6 @@
             },
             "response_message": {
                 "text": "Here's your document!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "document",
@@ -368,7 +344,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=11, supergroup_chat_created=False, text='voice_message'), update_id=11)",
             "received_message": {
                 "text": "voice_message",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -376,7 +351,6 @@
             },
             "response_message": {
                 "text": "Here's your voice message!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "voice_message",
@@ -399,7 +373,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 3, 16, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=12, supergroup_chat_created=False, text='video_message'), update_id=12)",
             "received_message": {
                 "text": "video_message",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -407,7 +380,6 @@
             },
             "response_message": {
                 "text": "Here's your video message!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "video_message",
@@ -430,7 +402,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 32, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=13, supergroup_chat_created=False, text='media_group'), update_id=13)",
             "received_message": {
                 "text": "media_group",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -438,7 +409,6 @@
             },
             "response_message": {
                 "text": "Here's your media group!",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "media_group",
@@ -477,7 +447,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 15, 19, 2, 46, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=14, supergroup_chat_created=False, text='something else'), update_id=14)",
             "received_message": {
                 "text": "something else",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -485,7 +454,6 @@
             },
             "response_message": {
                 "text": "Unknown attachment type, try again! Supported attachments are: \"location\", \"contact\", \"poll\", \"sticker\", \"audio\", \"video\", \"animation\", \"image\", \"document\", \"voice_message\", \"video_message\" and \"media_group\".",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -501,7 +469,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 20, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=1, supergroup_chat_created=False, text='/start'), update_id=1)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -509,7 +476,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -533,7 +499,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='formatted', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='1', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 20, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=2, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=2)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -546,7 +511,6 @@
             },
             "response_message": {
                 "text": "\nVisit [this link](https://core.telegram.org/bots/api#formatting-options)\nfor more information about formatting options in telegram\\.\n\nRun /start command again to restart\\.\n",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -561,7 +525,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 24, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=3, supergroup_chat_created=False, text='/start'), update_id=3)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -569,7 +532,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -593,7 +555,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='attachments', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='3', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 24, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=4, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=4)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -606,7 +567,6 @@
             },
             "response_message": {
                 "text": "Here's your message with multiple attachments (a location and a sticker)!\nRun /start command again to restart.",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -635,7 +595,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 28, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=5, supergroup_chat_created=False, text='/start'), update_id=5)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -643,7 +602,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -667,7 +625,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='secret', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='5', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 28, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=6, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=6)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -680,7 +637,6 @@
             },
             "response_message": {
                 "text": "Here's your secret image! Run /start command again to restart.",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "image",
@@ -706,7 +662,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 34, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=7, supergroup_chat_created=False, text='/start'), update_id=7)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -714,7 +669,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -738,7 +692,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='thumbnail', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='7', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 34, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=8, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=8)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -751,7 +704,6 @@
             },
             "response_message": {
                 "text": "Here's your document with tumbnail! Run /start command again to restart.",
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "document",
@@ -780,7 +732,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 22, 19, 53, 42, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=9, supergroup_chat_created=False, text='/start'), update_id=9)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -788,7 +739,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -812,7 +762,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='hash', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='9', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 22, 19, 53, 42, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=6601664672, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=10, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=10)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -825,7 +774,6 @@
             },
             "response_message": {
                 "text": "Alright! Now send me a message with data attachment (audio, video, animation, image, sticker or document)!",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -839,7 +787,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 22, 20, 12, 23, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=12, sticker=Sticker(api_kwargs={'thumb': {'file_id': 'AAMCAgADGQEAAgS0Zk5Rpz6PkZu6Ef3Ef7GwnxAZYocAAiwCAAJHBkMF0YsKl8FLgq8BAAdtAAM1BA', 'file_unique_id': 'AQADLAIAAkcGQwVy', 'file_size': 5416, 'width': 128, 'height': 128}}, emoji='\ud83d\udc68', file_id='CAACAgIAAxkBAAIEtGZOUac-j5GbuhH9xH-xsJ8QGWKHAAIsAgACRwZDBdGLCpfBS4KvNQQ', file_size=29492, file_unique_id='AgADLAIAAkcGQwU', height=512, is_animated=False, is_video=False, set_name='citati_prosto', thumbnail=PhotoSize(file_id='AAMCAgADGQEAAgS0Zk5Rpz6PkZu6Ef3Ef7GwnxAZYocAAiwCAAJHBkMF0YsKl8FLgq8BAAdtAAM1BA', file_size=5416, file_unique_id='AQADLAIAAkcGQwVy', height=128, width=128), type=StickerType.REGULAR, width=512), supergroup_chat_created=False), update_id=11)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "sticker",
@@ -858,7 +805,6 @@
             },
             "response_message": {
                 "text": "Here's your previous request first attachment sha256 hash: `75681742958b21061e6d5ebb80340d62de4c7348e71fb8c1d2c356a2239b2334`!\nRun /start command again to restart.",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -872,7 +818,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 39, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=12, supergroup_chat_created=False, text='/start'), update_id=12)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -880,7 +825,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -904,7 +848,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 57, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=13, supergroup_chat_created=False, text='some text'), update_id=13)",
             "received_message": {
                 "text": "some text",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -912,7 +855,6 @@
             },
             "response_message": {
                 "text": "Bot has entered unrecoverable state:/\nRun /start command again to restart.",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,
@@ -926,7 +868,6 @@
             "update": "Update(message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 59, tzinfo=UTC), delete_chat_photo=False, entities=(MessageEntity(length=6, offset=0, type=MessageEntityType.BOT_COMMAND),), from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), group_chat_created=False, message_id=14, supergroup_chat_created=False, text='/start'), update_id=14)",
             "received_message": {
                 "text": "/start",
-                "commands": null,
                 "attachments": [],
                 "annotations": null,
                 "misc": null,
@@ -934,7 +875,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -958,7 +898,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='restart', from_user=User(first_name='AlexaTestnder', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='14', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 9, 59, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=15, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=15)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -971,7 +910,6 @@
             },
             "response_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "location",
@@ -995,7 +933,6 @@
             "update": "Update(callback_query=CallbackQuery(chat_instance='-1', data='quit', from_user=User(first_name='Test', id=42, is_bot=False, language_code='en', last_name='User', username='test_user'), id='15', message=Message(channel_chat_created=False, chat=Chat(first_name='Test', id=42, last_name='User', type=ChatType.PRIVATE, username='test_user'), date=datetime.datetime(2024, 5, 21, 19, 10, 1, tzinfo=UTC), delete_chat_photo=False, from_user=User(first_name='Bot', id=16, is_bot=True, username='dff_bot'), group_chat_created=False, location=Location(latitude=58.43162, longitude=27.792879), message_id=16, reply_markup=InlineKeyboardMarkup(inline_keyboard=((InlineKeyboardButton(callback_data='formatted', text='Cute formatted text!'),), (InlineKeyboardButton(callback_data='attachments', text='Multiple attachments!'),), (InlineKeyboardButton(callback_data='secret', text='Secret image!'),), (InlineKeyboardButton(callback_data='thumbnail', text='Document with thumbnail!'),), (InlineKeyboardButton(callback_data='hash', text='First attachment bytes hash!'),), (InlineKeyboardButton(callback_data='restart', text='Restart!'), InlineKeyboardButton(callback_data='quit', text='Quit!')))), supergroup_chat_created=False)), update_id=16)",
             "received_message": {
                 "text": null,
-                "commands": null,
                 "attachments": [
                     {
                         "dff_attachment_type": "callback_query",
@@ -1008,7 +945,6 @@
             },
             "response_message": {
                 "text": "Bot has entered unrecoverable state:/\nRun /start command again to restart.",
-                "commands": null,
                 "attachments": null,
                 "annotations": null,
                 "misc": null,

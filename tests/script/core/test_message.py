@@ -68,45 +68,6 @@ class TestMessage:
         dir.mkdir()
         return dir
 
-    def test_location(self):
-        loc1 = Location(longitude=-0.1, latitude=-0.1)
-        loc2 = Location(longitude=-0.09999, latitude=-0.09998)
-        loc3 = Location(longitude=-0.10002, latitude=-0.10001)
-
-        assert loc1 == loc2
-        assert loc3 == loc1
-        assert loc2 != loc3
-
-        assert loc1 != 1
-
-    @pytest.mark.parametrize(
-        "attachment1,attachment2,equal",
-        [
-            (
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf"),
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf"),
-                True,
-            ),
-            (
-                Document(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf"),
-                Document(source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf"),
-                False,
-            ),
-            (
-                Document(source=__file__),
-                Document(source=__file__),
-                True,
-            ),
-            (
-                Document(id="1"),
-                Document(id="2"),
-                False,
-            ),
-        ],
-    )
-    def test_attachment_equal(self, attachment1: DataAttachment, attachment2: DataAttachment, equal: bool):
-        assert (attachment1 == attachment2) == equal
-
     @pytest.mark.parametrize(
         "attachment",
         [

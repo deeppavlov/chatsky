@@ -6,7 +6,6 @@ DFF. It only contains types and properties that are compatible with most messagi
 """
 
 from typing import Literal, Optional, List, Union
-from enum import Enum, auto
 from pathlib import Path
 from urllib.request import urlopen
 import uuid
@@ -22,24 +21,6 @@ from dff.utils.devel import JSONSerializableDict, PickleEncodedValue, JSONSerial
 class DataModel(JSONSerializableExtras):
     """
     This class is a Pydantic BaseModel that can have any type and number of extras.
-    """
-
-    pass
-
-
-class Session(Enum):
-    """
-    An enumeration that defines two possible states of a session.
-    """
-
-    ACTIVE = auto()
-    FINISHED = auto()
-
-
-class Command(DataModel):
-    """
-    This class is a subclass of DataModel and represents
-    a command that can be executed in response to a user input.
     """
 
     pass
@@ -77,11 +58,6 @@ class Location(Attachment):
     longitude: float
     latitude: float
     dff_attachment_type: Literal["location"] = "location"
-
-    def __eq__(self, other):
-        if isinstance(other, Location):
-            return abs(self.latitude - other.latitude) + abs(self.longitude - other.longitude) < 0.00004
-        return NotImplemented
 
 
 class Contact(Attachment):
@@ -198,15 +174,6 @@ class DataAttachment(Attachment):
             await self._cache_attachment(attachment_data, from_interface.attachments_directory)
         return attachment_data
 
-    def __eq__(self, other):
-        if isinstance(other, DataAttachment):
-            if self.id != other.id:
-                return False
-            if self.source != other.source:
-                return False
-            return True
-        return NotImplemented
-
     @model_validator(mode="before")
     @classmethod
     def validate_source_or_id(cls, values: dict):
@@ -278,30 +245,19 @@ class MediaGroup(Attachment):
     group: List[Union[Audio, Video, Image, Document, DataAttachment]] = Field(default_factory=list)
     dff_attachment_type: Literal["media_group"] = "media_group"
 
-    def __eq__(self, other):
-        if isinstance(other, MediaGroup):
-            if len(self.group) != len(other.group):
-                return False
-            for attachment1, attachment2 in zip(self.group, other.group):
-                if attachment1 != attachment2:
-                    return False
-            return True
-        return NotImplemented
-
 
 class Message(DataModel):
     """
     Class representing a message and contains several
     class level variables to store message information.
 
-    It includes message text, list of commands included in the message,
-    list of attachments, annotations, MISC dictionary (that consists of
-    user-defined parameters) and original message field that represents
+    It includes message text, list of attachments, annotations,
+    MISC dictionary (that consists of user-defined parameters)
+    and original message field that represents
     the update received from messenger interface API.
     """
 
     text: Optional[str] = None
-    commands: Optional[List[Command]] = None
     attachments: Optional[
         List[
             Union[
@@ -329,7 +285,6 @@ class Message(DataModel):
     def __init__(
         self,
         text: Optional[str] = None,
-        commands: Optional[List[Command]] = None,
         attachments: Optional[
             List[
                 Union[
@@ -354,19 +309,7 @@ class Message(DataModel):
         misc: Optional[JSONSerializableDict] = None,
         **kwargs,
     ):
-        super().__init__(
-            text=text, commands=commands, attachments=attachments, annotations=annotations, misc=misc, **kwargs
-        )
-
-    def __eq__(self, other):
-        if isinstance(other, Message):
-            for field in self.model_fields:
-                if field not in other.model_fields:
-                    return False
-                if self.__getattribute__(field) != other.__getattribute__(field):
-                    return False
-            return True
-        return NotImplemented
+        super().__init__(text=text, attachments=attachments, annotations=annotations, misc=misc, **kwargs)
 
     def __repr__(self) -> str:
         return " ".join([f"{key}='{value}'" for key, value in self.model_dump(exclude_none=True).items()])
