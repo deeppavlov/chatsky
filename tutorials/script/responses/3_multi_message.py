@@ -1,6 +1,6 @@
 # %% [markdown]
 """
-# Responses: 4. Multi Message
+# Responses: 3. Multi Message
 
 This tutorial shows how to store several messages inside a single one.
 This might be useful if you want DFF Pipeline to send `response` candidates

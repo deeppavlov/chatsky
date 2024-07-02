@@ -14,7 +14,7 @@ dictionary of context is used for storing additional data.
 # %%
 import logging
 
-from dff.messengers.common import CLIMessengerInterface
+from dff.messengers.console import CLIMessengerInterface
 from dff.script import Context, Message
 
 from dff.pipeline import Pipeline

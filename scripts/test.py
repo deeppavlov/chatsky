@@ -12,10 +12,9 @@ def _test(coverage: bool = False, dependencies: bool = False, quick: bool = Fals
     Run framework tests, located in `tests/` dir, using env defined in `.env_file`.
     Please keep in mind that:
 
-    1. Skipping `telegram` tests is **always** allowed.
-    2. Enabling dependencies is effectively same as enabling docker
+    1. Enabling dependencies is effectively same as enabling docker
         (docker containers **should** be running in that case).
-    3. Coverage requires all dependencies and docker (will have no effect otherwise).
+    2. Coverage requires all dependencies and docker (will have no effect otherwise).
 
     :param coverage: Enable coverage calculation
     :param dependencies: Disallow skipping tests
@@ -39,12 +38,11 @@ def _test(coverage: bool = False, dependencies: bool = False, quick: bool = Fals
         args = [
             "-m",
             "not no_coverage",
-            "--allow-skip=telegram",
             *args,
         ]
     elif dependencies:
         args = [
-            "--allow-skip=telegram,docker",
+            "--allow-skip=docker",
             *args,
         ]
     else:
