@@ -7,7 +7,7 @@ parts of the framework.
 
 from .json_serialization import (
     JSONSerializableDict,
-    SerializableValue,
+    PickleEncodedValue,
     JSONSerializableExtras,
 )
 from .extra_field_helpers import grab_extra_fields

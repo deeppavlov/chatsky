@@ -69,21 +69,23 @@ sticker_data = {
         "CAACAgIAAxkBAAErAAFXZibO5ksphCKS"
         + "XSe1CYiw5588yqsAAkEAAzyKVxogmx2BPCogYDQE"
     ),
-    "title": "A sticker I've just found",
+    "caption": "A sticker I've just found",
 }
 
 audio_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/separation-william-king.mp3"
     ),
-    "title": "Separation melody by William King",
+    "caption": "Separation melody by William King",
+    "filename": "separation-william-king.mp3",
 }
 
 video_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/crownfall-lags-nkognit0.mp4"
     ),
-    "title": "Epic Dota2 gameplay by Nkognit0",
+    "caption": "Epic Dota2 gameplay by Nkognit0",
+    "filename": "crownfall-lags-nkognit0.mp4",
 }
 
 animation_data = {
@@ -92,20 +94,38 @@ animation_data = {
     "source": HttpUrl(
         f"{EXAMPLE_ATTACHMENT_SOURCE}/hong-kong-simplyart4794.gif"
     ),
-    "title": "Hong Kong skyscraper views by Simplyart4794",
-    "filename": "hk.gif",
+    "caption": "Hong Kong skyscraper views by Simplyart4794",
+    "filename": "hong-kong-simplyart4794.gif",
 }
 
 image_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png"),
-    "title": "DeepPavlov logo",
+    "caption": "DeepPavlov logo",
+    "filename": "deeppavlov.png",
 }
 
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
-    "title": "DeepPavlov article",
+    "caption": "DeepPavlov article",
+    "filename": "deeppavlov-article.pdf",
 }
 
+ATTACHMENTS = [
+    "location",
+    "contact",
+    "poll",
+    "sticker",
+    "audio",
+    "video",
+    "animation",
+    "image",
+    "document",
+    "voice_message",
+    "video_message",
+    "media_group",
+]
+
+QUOTED_ATTACHMENTS = [f'"{attachment}"' for attachment in ATTACHMENTS]
 
 # %% [markdown]
 """
@@ -119,41 +139,19 @@ all the attachment options available.
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("main_flow", "location_node"): cnd.exact_match(
-                Message("location")
-            ),
-            ("main_flow", "contact_node"): cnd.exact_match(Message("contact")),
-            ("main_flow", "poll_node"): cnd.exact_match(Message("poll")),
-            ("main_flow", "sticker_node"): cnd.exact_match(Message("sticker")),
-            ("main_flow", "audio_node"): cnd.exact_match(Message("audio")),
-            ("main_flow", "video_node"): cnd.exact_match(Message("video")),
-            ("main_flow", "animation_node"): cnd.exact_match(
-                Message("animation")
-            ),
-            ("main_flow", "image_node"): cnd.exact_match(Message("image")),
-            ("main_flow", "document_node"): cnd.exact_match(
-                Message("document")
-            ),
-            ("main_flow", "voice_message_node"): cnd.exact_match(
-                Message("voice message")
-            ),
-            ("main_flow", "video_message_node"): cnd.exact_match(
-                Message("video message")
-            ),
-            ("main_flow", "media_group"): cnd.exact_match(
-                Message("media group")
-            ),
+            ("main_flow", f"{attachment}_node"): cnd.exact_match(attachment)
+            for attachment in ATTACHMENTS
         }
     },
     "main_flow": {
         "start_node": {
-            TRANSITIONS: {"intro_node": cnd.exact_match(Message("/start"))},
+            TRANSITIONS: {"intro_node": cnd.exact_match("/start")},
         },
         "intro_node": {
             RESPONSE: Message(
-                'Type "location", "contact", "poll", "sticker" '
-                + '"audio", "video", "animation", "image", '
-                + '"document" or to receive a corresponding attachment!'
+                f'Type {", ".join(QUOTED_ATTACHMENTS[:-1])}'
+                f" or {QUOTED_ATTACHMENTS[-1]}"
+                f" to receive a corresponding attachment!"
             ),
         },
         "location_node": {
@@ -230,7 +228,7 @@ script = {
                 attachments=[VideoMessage(source=video_data["source"])],
             ),
         },
-        "media_group": {
+        "media_group_node": {
             RESPONSE: Message(
                 "Here's your media group!",
                 attachments=[
@@ -238,8 +236,6 @@ script = {
                         group=[
                             Image(**image_data),
                             Video(**video_data),
-                            Animation(**animation_data),
-                            Audio(**audio_data),
                         ],
                     )
                 ],
@@ -247,10 +243,10 @@ script = {
         },
         "fallback_node": {
             RESPONSE: Message(
-                "Unknown attachment type, try again! "
-                + 'Supported attachments are: "location", '
-                + '"contact", "poll", "sticker", "audio", '
-                + '"video", "animation", "image" and "document".'
+                f"Unknown attachment type, try again! "
+                f"Supported attachments are: "
+                f'{", ".join(QUOTED_ATTACHMENTS[:-1])} '
+                f"and {QUOTED_ATTACHMENTS[-1]}."
             ),
         },
     },

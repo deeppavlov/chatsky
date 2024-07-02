@@ -53,12 +53,9 @@ class DFFCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAtta
         self._prompt_response: str = "response: "
         self._descriptor: Optional[TextIO] = None
 
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
-        if attachment.id is not None:
-            with urlopen(f"{EXAMPLE_SOURCE}/{attachment.id}") as url:
-                return url.read()
-        else:
-            raise ValueError(f"For attachment {attachment} id is not defined!")
+    async def get_attachment_bytes(self, attachment: str) -> bytes:
+        with urlopen(f"{EXAMPLE_SOURCE}/{attachment}") as url:
+            return url.read()
 
 
 class TestMessage:
@@ -70,57 +67,6 @@ class TestMessage:
         rmtree(dir, ignore_errors=True)
         dir.mkdir()
         return dir
-
-    def test_location(self):
-        loc1 = Location(longitude=-0.1, latitude=-0.1)
-        loc2 = Location(longitude=-0.09999, latitude=-0.09998)
-        loc3 = Location(longitude=-0.10002, latitude=-0.10001)
-
-        assert loc1 == loc2
-        assert loc3 == loc1
-        assert loc2 != loc3
-
-        assert loc1 != 1
-
-    @pytest.mark.parametrize(
-        "attachment1,attachment2,equal",
-        [
-            (
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="Title"),
-                True,
-            ),
-            (
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="File"),
-                DataAttachment(
-                    source="https://raw.githubusercontent.com/mathiasbynens/small/master/pdf.pdf", title="File"
-                ),
-                False,
-            ),
-            (
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="1"),
-                DataAttachment(source="https://github.com/mathiasbynens/small/raw/master/pdf.pdf", title="2"),
-                False,
-            ),
-            (
-                DataAttachment(source=__file__, title="File"),
-                DataAttachment(source=__file__, title="File"),
-                True,
-            ),
-            (
-                DataAttachment(source=__file__, title="1"),
-                DataAttachment(source=__file__, title="2"),
-                False,
-            ),
-            (
-                DataAttachment(id="1", title="File"),
-                DataAttachment(id="2", title="File"),
-                False,
-            ),
-        ],
-    )
-    def test_attachment_equal(self, attachment1: DataAttachment, attachment2: DataAttachment, equal: bool):
-        assert (attachment1 == attachment2) == equal
 
     @pytest.mark.parametrize(
         "attachment",
@@ -167,8 +113,8 @@ class TestMessage:
             document_bytes = url.read()
             local_document.write_bytes(document_bytes)
 
-        remote_document_att = Document(source=HttpUrl(remote_document_url))
-        local_document_att = Document(source=FilePath(local_document))
+        remote_document_att = Document(source=str(remote_document_url))
+        local_document_att = Document(source=str(local_document))
         iface_document_att = Document(id=document_name)
 
         for document in (remote_document_att, local_document_att, iface_document_att):

@@ -8,7 +8,6 @@ This module provides concrete implementations of the
 from asyncio import get_event_loop
 from pathlib import Path
 from typing import Any, Optional
-
 from .abstract import _AbstractTelegramInterface
 
 try:

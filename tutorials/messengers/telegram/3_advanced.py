@@ -51,7 +51,7 @@ such as:
 6. Attachment bytes hash.
 
 Check out
-[this](https://docs.python-telegram-bot.org/en/v21.3/telegram.bot.html#telegram.Bot)
+[this](https://docs.python-telegram-bot.org/en/latest/telegram.bot.html#telegram.Bot)
 class for information about different arguments
 for sending attachments, `send_...` methods.
 
@@ -71,10 +71,11 @@ image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")
 
 formatted_text = r"""
 Here's your formatted text\!
-You can see **text in bold** and _text in italic_\.
-\> Here's a [link](https://deeppavlov.ai/) in a quote\.
+You can see **text in bold**, _text in italic_ and a \`code snippet\`\.
+\> Here's a [link](https://core.telegram.org/bots/api\#formatting-options) in a quote\.
+\> Visit the link for more information about formatting options in telegram\.
 Run /start command again to restart\.
-"""
+"""  # noqa: W605
 
 location_data = {"latitude": 59.9386, "longitude": 30.3141}
 
@@ -87,14 +88,14 @@ sticker_data = {
 
 image_data = {
     "source": image_url,
-    "title": "DeepPavlov logo",
+    "caption": "DeepPavlov logo",
     "has_spoiler": True,
     "filename": "deeppavlov_logo.png",
 }
 
 document_data = {
     "source": HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov-article.pdf"),
-    "title": "DeepPavlov article",
+    "caption": "DeepPavlov article",
     "filename": "deeppavlov_article.pdf",
     "thumbnail": urlopen(str(image_url)).read(),
 }
@@ -102,18 +103,22 @@ document_data = {
 
 # %%
 async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
-    atch = [
+    attachment = [
         a for a in ctx.last_request.attachments if isinstance(a, DataAttachment)
     ]
-    if len(atch) > 0:
-        atch = await atch[0].get_bytes(pipe.messenger_interface)
-        atch_hash = sha256(atch).hexdigest()
+    if len(attachment) > 0:
+        attachment_bytes = await attachment[0].get_bytes(
+            pipe.messenger_interface
+        )
+        attachment_hash = sha256(attachment_bytes).hexdigest()
         resp_format = (
             "Here's your previous request first attachment sha256 hash: `{}`!\n"
             + "Run /start command again to restart."
         )
         return Message(
-            resp_format.format(atch_hash, parse_mode=ParseMode.MARKDOWN_V2)
+            resp_format.format(
+                attachment_hash, parse_mode=ParseMode.MARKDOWN_V2
+            )
         )
     else:
         return Message(
@@ -126,12 +131,12 @@ async def hash_data_attachment_request(ctx: Context, pipe: Pipeline) -> Message:
 script = {
     GLOBAL: {
         TRANSITIONS: {
-            ("main_flow", "hmmm_node"): cnd.exact_match(Message("/start")),
+            ("main_flow", "main_node"): cnd.exact_match("/start"),
         }
     },
     "main_flow": {
         "start_node": {},
-        "hmmm_node": {
+        "main_node": {
             RESPONSE: Message(
                 attachments=[
                     Location(
@@ -187,7 +192,7 @@ script = {
                 "secret_node": cnd.has_callback_query("secret"),
                 "thumbnail_node": cnd.has_callback_query("thumbnail"),
                 "hash_init_node": cnd.has_callback_query("hash"),
-                "hmmm_node": cnd.has_callback_query("restart"),
+                "main_node": cnd.has_callback_query("restart"),
                 "fallback_node": cnd.has_callback_query("quit"),
             },
         },

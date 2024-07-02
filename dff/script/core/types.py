@@ -39,12 +39,6 @@ Label: TypeAlias = Union[ConstLabel, Callable]
 ConditionType: TypeAlias = Callable
 """Condition type can be only `Callable`."""
 
-ModuleName: TypeAlias = "str"
-"""
-Module name names addon state, or your own module state. For example module name can be `"dff_context_storages"`.
-"""
-# TODO: change example
-
 
 class ActorStage(Enum):
     """

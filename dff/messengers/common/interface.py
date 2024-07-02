@@ -17,7 +17,7 @@ if TYPE_CHECKING:
     from dff.script import Context, Message
     from dff.pipeline.types import PipelineRunnerFunction
     from dff.messengers.common.types import PollingInterfaceLoopFunction
-    from dff.script.core.message import Attachment, DataAttachment
+    from dff.script.core.message import Attachment
 
 logger = logging.getLogger(__name__)
 
@@ -76,13 +76,14 @@ class MessengerInterfaceWithAttachments(MessengerInterface, abc.ABC):
         self.attachments_directory.mkdir(parents=True, exist_ok=True)
 
     @abc.abstractmethod
-    async def populate_attachment(self, attachment: DataAttachment) -> bytes:
+    async def get_attachment_bytes(self, source: str) -> bytes:
         """
-        Method that can be used by some messenger interfaces for attachment population.
+        Get attachment bytes from file source.
+
         E.g. if a file attachment consists of a URL of the file uploaded to the messenger servers,
         this method is the right place to call the messenger API for the file downloading.
 
-        :param attachment: Attachment that should be populated.
+        :param source: Identifying string for the file.
         :return: The attachment bytes.
         """
         raise NotImplementedError
