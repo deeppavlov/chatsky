@@ -25,13 +25,13 @@ except ImportError:
 logger = logging.getLogger(__name__)
 logger.setLevel(logging.INFO)
 
-DFF_DIR = Path(__file__).absolute().parent.parent
+CHATSKY_DIR = Path(__file__).absolute().parent.parent
 """
 Root directory of the local `chatsky` installation.
 
 :meta hide-value:
 """
-DASHBOARD_DIR = str(DFF_DIR / "config" / "superset_dashboard")
+DASHBOARD_DIR = str(CHATSKY_DIR / "config" / "superset_dashboard")
 """
 Local path to superset dashboard files to import.
 
@@ -59,7 +59,7 @@ Mapping of standard sql column types to Clickhouse native types.
 :meta hide-value:
 """
 
-DFF_NODE_STATS_STATEMENT = """
+CHATSKY_NODE_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
     toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
@@ -85,7 +85,7 @@ WITH main AS (
     node_label
 FROM main
 """
-DFF_STATS_STATEMENT = """
+CHATSKY_STATS_STATEMENT = """
 WITH main AS (
     SELECT DISTINCT {table}.LogAttributes['context_id'] as context_id,
     toUInt64OrNull({table}.LogAttributes['request_id']) as request_id,
@@ -111,7 +111,7 @@ WITH main AS (
     node_label
 FROM main
 """
-DFF_FINAL_NODES_STATEMENT = """
+CHATSKY_FINAL_NODES_STATEMENT = """
 WITH main AS (
     SELECT LogAttributes['context_id'] AS context_id,
     max(toUInt64OrNull(LogAttributes['request_id'])) AS max_history
@@ -133,9 +133,9 @@ WHERE otel_traces.SpanName = 'get_current_label'
 """
 
 SQL_STATEMENT_MAPPING = {
-    "chatsky_stats.yaml": DFF_STATS_STATEMENT,
-    "chatsky_node_stats.yaml": DFF_NODE_STATS_STATEMENT,
-    "chatsky_final_nodes.yaml": DFF_FINAL_NODES_STATEMENT,
+    "chatsky_stats.yaml": CHATSKY_STATS_STATEMENT,
+    "chatsky_node_stats.yaml": CHATSKY_NODE_STATS_STATEMENT,
+    "chatsky_final_nodes.yaml": CHATSKY_FINAL_NODES_STATEMENT,
 }
 """
 Select statements for dashboard configuration with names and types represented as placeholders.

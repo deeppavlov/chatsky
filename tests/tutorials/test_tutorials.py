@@ -12,7 +12,7 @@ from docs.source.utils.notebook import InstallationCell
 
 
 PROJECT_ROOT_DIR = Path(__file__).parent.parent.parent
-DFF_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
+CHATSKY_TUTORIAL_PY_FILES = map(str, (PROJECT_ROOT_DIR / "tutorials").glob("./**/*.py"))
 
 
 def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
@@ -37,7 +37,7 @@ def check_tutorial_dependencies(venv: "VirtualEnv", tutorial_source_code: str):
     venv.run(f"python {tutorial_path}", check_rc=True)
 
 
-@pytest.mark.parametrize("chatsky_tutorial_py_file", DFF_TUTORIAL_PY_FILES)
+@pytest.mark.parametrize("chatsky_tutorial_py_file", CHATSKY_TUTORIAL_PY_FILES)
 @pytest.mark.slow
 @pytest.mark.docker
 @pytest.mark.no_coverage
