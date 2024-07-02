@@ -162,8 +162,8 @@ class TestMessage:
             document_bytes = url.read()
             local_document.write_bytes(document_bytes)
 
-        remote_document_att = Document(source=HttpUrl(remote_document_url))
-        local_document_att = Document(source=FilePath(local_document))
+        remote_document_att = Document(source=str(remote_document_url))
+        local_document_att = Document(source=str(local_document))
         iface_document_att = Document(id=document_name)
 
         for document in (remote_document_att, local_document_att, iface_document_att):

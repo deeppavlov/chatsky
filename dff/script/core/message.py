@@ -12,7 +12,7 @@ from urllib.request import urlopen
 from uuid import uuid4
 import abc
 
-from pydantic import Field, field_validator, FilePath, HttpUrl, model_validator
+from pydantic import Field, FilePath, HttpUrl, model_validator
 from pydantic_core import Url
 
 from dff.messengers.common.interface import MessengerInterfaceWithAttachments
@@ -219,13 +219,6 @@ class DataAttachment(Attachment):
         if bool(values.get("source")) == bool(values.get("id")):
             raise AssertionError("Attachment type requires exactly one parameter, `source` or `id`, to be set.")
         return values
-
-    @field_validator("source", mode="before")
-    @classmethod
-    def validate_source(cls, value):
-        if isinstance(value, Path):
-            return Path(value)
-        return value
 
 
 class Audio(DataAttachment):
