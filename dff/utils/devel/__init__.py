@@ -11,3 +11,4 @@ from .json_serialization import (
     JSONSerializableExtras,
 )
 from .extra_field_helpers import grab_extra_fields
+from .async_helpers import wrap_sync_function_in_async

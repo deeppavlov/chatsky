@@ -141,6 +141,8 @@ As such this field cannot be used during initialization and the only way to use 
     my_obj = MyClass()  # the field cannot be set during init
     my_obj.my_field = unserializable_object  # can be set manually to avoid validation
 
+Alternatively, ``BaseModel.model_construct`` may be used to bypass validation,
+though it would bypass validation of all fields.
 """
 
 JSONPickleSerializer = PlainSerializer(json_pickle_serializer, when_used="json")

@@ -25,6 +25,7 @@ from dff.utils.turn_caching import cache_clear
 
 from dff.messengers.console import CLIMessengerInterface
 from dff.messengers.common import MessengerInterface
+from dff.slots.slots import GroupSlot
 from ..service.group import ServiceGroup
 from ..types import (
     ServiceBuilder,
@@ -56,6 +57,7 @@ class Pipeline:
     :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
         where there is no priority. Defaults to `1.0`.
     :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
+    :param slots: Slots configuration.
     :param handlers: This variable is responsible for the usage of external handlers on
         the certain stages of work of :py:class:`~dff.script.Actor`.
 
@@ -89,6 +91,7 @@ class Pipeline:
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
+        slots: Optional[Union[GroupSlot, Dict]] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -101,6 +104,7 @@ class Pipeline:
         self.actor: Actor = None
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
         self.context_storage = {} if context_storage is None else context_storage
+        self.slots = GroupSlot.model_validate(slots) if slots is not None else None
         self._services_pipeline = ServiceGroup(
             components,
             before_handler=before_handler,
@@ -208,6 +212,7 @@ class Pipeline:
         fallback_label: Optional[NodeLabel2Type] = None,
         label_priority: float = 1.0,
         condition_handler: Optional[Callable] = None,
+        slots: Optional[Union[GroupSlot, Dict]] = None,
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
@@ -229,6 +234,7 @@ class Pipeline:
         :param label_priority: Default priority value for all actor :py:const:`labels <dff.script.ConstLabel>`
             where there is no priority. Defaults to `1.0`.
         :param condition_handler: Handler that processes a call of actor condition functions. Defaults to `None`.
+        :param slots: Slots configuration.
         :param parallelize_processing: This flag determines whether or not the functions
             defined in the ``PRE_RESPONSE_PROCESSING`` and ``PRE_TRANSITIONS_PROCESSING`` sections
             of the script should be parallelized over respective groups.
@@ -257,6 +263,7 @@ class Pipeline:
             fallback_label=fallback_label,
             label_priority=label_priority,
             condition_handler=condition_handler,
+            slots=slots,
             parallelize_processing=parallelize_processing,
             handlers=handlers,
             messenger_interface=messenger_interface,
@@ -319,6 +326,9 @@ class Pipeline:
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)
+
+        if self.slots is not None:
+            ctx.framework_data.slot_manager.set_root_slot(self.slots)
 
         ctx.add_request(request)
         result = await self._services_pipeline(ctx, self)

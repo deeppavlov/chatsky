@@ -17,7 +17,8 @@ from typing import Optional, TYPE_CHECKING
 
 from dff.script import Context
 
-from .utils import wrap_sync_function_in_async, collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
+from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
+from dff.utils.devel.async_helpers import wrap_sync_function_in_async
 from ..types import (
     ServiceBuilder,
     StartConditionCheckerFunction,

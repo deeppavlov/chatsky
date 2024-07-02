@@ -2,6 +2,7 @@ from typing import Optional
 
 import pytest
 from pydantic import BaseModel
+from copy import deepcopy
 
 import dff.utils.devel.json_serialization as json_ser
 
@@ -63,7 +64,11 @@ class TestJSONPickleSerialization:
         assert json_ser.pickle_validator(serialized) == unserializable_obj
 
     def test_json_pickle(self, unserializable_dict, non_serializable_fields, deserialized_dict):
-        serialized = json_ser.json_pickle_serializer(unserializable_dict)
+        dict_copy = deepcopy(unserializable_dict)
+
+        serialized = json_ser.json_pickle_serializer(dict_copy)
+
+        assert dict_copy == unserializable_dict, "Dict changed by serializer"
 
         assert serialized[json_ser._JSON_EXTRA_FIELDS_KEYS] == non_serializable_fields
         assert all(isinstance(serialized[field], str) for field in non_serializable_fields)
@@ -80,7 +85,11 @@ class TestJSONPickleSerialization:
         obj = Class()
         obj.field = unserializable_obj
 
-        dump = obj.model_dump(mode="json")
+        obj_copy = obj.model_copy(deep=True)
+
+        dump = obj_copy.model_dump(mode="json")
+
+        assert obj == obj_copy, "Object changed by serializer"
 
         assert isinstance(dump["field"], str)
 
@@ -94,7 +103,12 @@ class TestJSONPickleSerialization:
 
         obj = Class(field=unserializable_dict)
 
-        dump = obj.model_dump(mode="json")
+        obj_copy = obj.model_copy(deep=True)
+
+        dump = obj_copy.model_dump(mode="json")
+
+        assert obj == obj_copy, "Object changed by serializer"
+
         assert dump["field"][json_ser._JSON_EXTRA_FIELDS_KEYS] == non_serializable_fields
 
         reconstructed_obj = Class.model_validate(dump)
@@ -107,7 +121,12 @@ class TestJSONPickleSerialization:
 
         obj = Class(**unserializable_dict)
 
-        dump = obj.model_dump(mode="json")
+        obj_copy = obj.model_copy(deep=True)
+
+        dump = obj_copy.model_dump(mode="json")
+
+        assert obj == obj_copy, "Object changed by serializer"
+
         assert dump[json_ser._JSON_EXTRA_FIELDS_KEYS] == non_serializable_fields
 
         reconstructed_obj = Class.model_validate(dump)

@@ -91,6 +91,18 @@ services:
       retries: 5
       start_period: 30s
 
+  ner:
+    image: deeppavlov/deeppavlov:latest
+    profiles:
+      - extras
+    environment:
+      - CONFIG=ner_conll2003_bert
+    restart: unless-stopped
+    ports:
+      - 5000:5000
+    volumes:
+      - ~/.deeppavlov:/root/.deeppavlov/
+      - ~/.cache:/root/.cache/
   dashboard:
     env_file: [.env_file]
     build:
