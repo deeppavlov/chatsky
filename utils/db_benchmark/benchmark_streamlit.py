@@ -20,7 +20,7 @@ Benchmark result files added via this module are not changed (only read).
 
 You can install all the dependencies of this module with
 ```
-pip install dff[benchmark]
+pip install chatsky[benchmark]
 ```
 """
 

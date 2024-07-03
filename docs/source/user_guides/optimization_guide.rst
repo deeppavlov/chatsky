@@ -10,10 +10,10 @@ Similar to any complex system, a dialog service can have performance bottlenecks
 These bottlenecks can occur during I/O operations like receiving and sending messages,
 as well as when synchronizing service states with a database.
 As the number of callbacks in the script and pipeline increases,
-the performance of DFF classes can degrade leading to longer response time.
+the performance of Chatsky classes can degrade leading to longer response time.
 
 As a result, it becomes necessary to locate the part of the pipeline that is causing issues, so that
-further optimization steps can be taken. DFF provides several tools that address the need for
+further optimization steps can be taken. Chatsky provides several tools that address the need for
 profiling individual system components. This guide will walk you through the process
 of using these tools in practice and optimizing the profiled application.
 
@@ -93,9 +93,9 @@ that may help you improve the efficiency of your service.
 
 * Using caching for resource-consuming callbacks and actions may also prove to be a helpful strategy.
   In this manner, you can improve the computational efficiency of your pipeline,
-  while making very few changes to the code itself. DFF includes a caching mechanism
+  while making very few changes to the code itself. Chatsky includes a caching mechanism
   for response functions. However, the simplicity
-  of the DFF API makes it easy to integrate any custom caching solutions that you may come up with.
+  of the Chatsky API makes it easy to integrate any custom caching solutions that you may come up with.
   See the `Cache tutorial <../tutorials/tutorials.utils.1_cache.py>`__.
 
 * Finally, be mindful about the use of computationally expensive algorithms, like NLU classifiers
