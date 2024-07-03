@@ -3,7 +3,7 @@ SQL
 ---
 The SQL module provides a SQL-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data from SQL databases.
-It allows the DFF to easily store and retrieve context data in a format that is highly scalable
+It allows Chatsky to easily store and retrieve context data in a format that is highly scalable
 and easy to work with.
 
 The SQL module provides the ability to choose the backend of your choice from

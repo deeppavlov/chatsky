@@ -1,7 +1,7 @@
 """
 Response
 ---------------------------
-Slot-related DFF responses.
+Slot-related Chatsky responses.
 """
 
 from __future__ import annotations

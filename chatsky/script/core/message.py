@@ -2,7 +2,7 @@
 Message
 -------
 The :py:class:`.Message` class is a universal data model for representing a message that should be supported by
-DFF. It only contains types and properties that are compatible with most messaging services.
+Chatsky. It only contains types and properties that are compatible with most messaging services.
 """
 
 from typing import Literal, Optional, List, Union
@@ -28,7 +28,7 @@ class DataModel(JSONSerializableExtras):
 
 class Attachment(DataModel, abc.ABC):
     """
-    DFF Message attachment base class.
+    Chatsky Message attachment base class.
     It is capable of serializing and validating all the model fields to JSON.
     """
 

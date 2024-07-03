@@ -1,7 +1,7 @@
 """
 Utility Functions
 -----------------
-The Utility Functions module contains several utility functions that are commonly used throughout the DFF.
+The Utility Functions module contains several utility functions that are commonly used throughout Chatsky.
 These functions provide a variety of utility functionality.
 """
 

@@ -89,7 +89,7 @@ to configure benchmark behaviour.
 Its most basic implementation is
 %mddoclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig).
 
-DFF provides configuration presets in the
+Chatsky provides configuration presets in the
 %mddoclink(api,utils.db_benchmark.basic_config) module,
 covering various contexts, messages, and edge cases.
 You can use these presets by passing them to the benchmark functions or create

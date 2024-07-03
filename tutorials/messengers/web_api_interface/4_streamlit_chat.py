@@ -76,9 +76,9 @@ def query(payload, user_id) -> requests.Response:
 
 
 # %%
-st.set_page_config(page_title="Streamlit DFF Chat", page_icon=":robot:")
+st.set_page_config(page_title="Streamlit Chatsky Chat", page_icon=":robot:")
 
-st.header("Streamlit DFF Chat")
+st.header("Streamlit Chatsky Chat")
 
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = str(uuid.uuid4())

@@ -27,7 +27,7 @@ in its turn batches and persists data to Clickhouse or other OLAP storages.
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
 during statistics collection.
-If you cloned the DFF repo, launch them using `docker compose`:
+If you cloned the Chatsky repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```

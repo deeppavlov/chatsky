@@ -1,4 +1,4 @@
-dashboard_title: DFF statistics dashboard
+dashboard_title: Chatsky statistics dashboard
 description: null
 css: ''
 slug: chatsky-stats
@@ -297,7 +297,7 @@ position:
   HEADER_ID:
     id: HEADER_ID
     meta:
-      text: DFF statistics dashboard
+      text: Chatsky statistics dashboard
     type: HEADER
   MARKDOWN-8Q9BhcEwva:
     children: []
@@ -621,7 +621,7 @@ position:
         ## Service users
 
 
-        This plot aggregates the count of unique users querying the DFF service at
+        This plot aggregates the count of unique users querying the Chatsky service at
         any given point in time. The time periods to aggregate over can be changed
         using the filter on the left.
 

@@ -2,7 +2,7 @@
 """
 # Web API: 1. FastAPI
 
-This tutorial shows how to create an API for DFF using FastAPI and
+This tutorial shows how to create an API for Chatsky using FastAPI and
 introduces messenger interfaces.
 
 You can see the result at http://127.0.0.1:8000/docs.

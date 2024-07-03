@@ -11,7 +11,7 @@ additional context processing before response handlers.
 There are also some other %mddoclink(api,script.core.keywords,Keywords)
 worth attention used in this tutorial.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
 # %pip install chatsky

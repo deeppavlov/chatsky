@@ -2,7 +2,7 @@
 Message Interfaces
 ------------------
 The Message Interfaces module contains several basic classes that define the message interfaces.
-These classes provide a way to define the structure of the messengers that are used to communicate with the DFF.
+These classes provide a way to define the structure of the messengers that are used to communicate with Chatsky.
 """
 
 from __future__ import annotations

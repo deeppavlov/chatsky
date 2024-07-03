@@ -2,7 +2,7 @@
 """
 # Telegram: 1. Basic
 
-The following tutorial shows how to run a regular DFF script in Telegram.
+The following tutorial shows how to run a regular Chatsky script in Telegram.
 It asks users for the '/start' command and then loops in one place.
 
 Here, %mddoclink(api,messengers.telegram.interface,LongpollingInterface)
@@ -43,7 +43,7 @@ argument for a bot to run is a token. Some other parameters
 ).
 
 Either of the two interfaces connect the bot to Telegram.
-They can be passed directly to the DFF `Pipeline` instance.
+They can be passed directly to a Chatsky `Pipeline` instance.
 """
 
 

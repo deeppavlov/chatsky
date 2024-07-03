@@ -6,7 +6,7 @@ Yandex and other databases. Yandex DataBase is a fully-managed cloud-native SQL 
 operate, and scale high-performance and high-availability databases for your applications.
 
 The Yandex DB module uses the Yandex Cloud SDK, which is a python library that allows you to work
-with Yandex Cloud services using python. This allows the DFF to easily integrate with the Yandex DataBase and
+with Yandex Cloud services using python. This allows Chatsky to easily integrate with the Yandex DataBase and
 take advantage of the scalability and high-availability features provided by the service.
 """
 

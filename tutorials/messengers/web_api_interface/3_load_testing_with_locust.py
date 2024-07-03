@@ -57,7 +57,7 @@ from chatsky.utils.testing import HAPPY_PATH, is_interactive_mode
 
 
 # %%
-class DFFUser(FastHttpUser):
+class ChatskyUser(FastHttpUser):
     wait_time = constant(1)
 
     def check_happy_path(self, happy_path):

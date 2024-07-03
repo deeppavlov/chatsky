@@ -103,11 +103,11 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
     def extract_message_from_telegram(self, update: TelegramMessage) -> Message:
         """
-        Convert Telegram update to DFF message.
+        Convert Telegram update to Chatsky message.
         Extract text and supported attachments.
 
         :param update: Telegram update object.
-        :return: DFF message object.
+        :return: Chatsky message object.
         """
 
         message = Message()
@@ -261,7 +261,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
     async def cast_message_to_telegram_and_send(self, bot: ExtBot, chat_id: int, message: Message) -> None:
         """
-        Send DFF message to Telegram.
+        Send Chatsky message to Telegram.
         Sometimes, if several attachments included into message can not be sent as one update,
         several Telegram updates will be produced.
         Sometimes, if no text and none of the supported attachments are included,
@@ -269,7 +269,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
         :param bot: Telegram bot, that is used for connection to Telegram API.
         :param chat_id: Telegram dialog ID that the message will be sent to.
-        :param message: DFF message that will be processed into Telegram updates.
+        :param message: Chatsky message that will be processed into Telegram updates.
         """
 
         if message.text is not None:
@@ -621,7 +621,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
         Process Telegram update, run pipeline and send response to Telegram.
 
         :param update: Telegram update that will be processed.
-        :param create_message: function that converts Telegram update to DFF message.
+        :param create_message: function that converts Telegram update to Chatsky message.
         """
 
         data_available = update.message is not None or update.callback_query is not None
@@ -636,7 +636,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
     async def on_message(self, update: Update, _: Any) -> None:
         """
-        Process normal Telegram update, extracting DFF message from it
+        Process normal Telegram update, extracting Chatsky message from it
         using :py:meth:`~._AbstractTelegramInterface.extract_message_from_telegram`.
 
         :param update: Telegram update that will be processed.
@@ -646,7 +646,7 @@ class _AbstractTelegramInterface(MessengerInterfaceWithAttachments):
 
     async def on_callback(self, update: Update, _: Any) -> None:
         """
-        Process Telegram callback update, creating empty DFF message
+        Process Telegram callback update, creating empty Chatsky message
         with only one callback query attachment from `callback_query.data` field.
 
         :param update: Telegram update that will be processed.

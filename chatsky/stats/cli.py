@@ -39,7 +39,7 @@ Local path to superset dashboard files to import.
 """
 DASHBOARD_SLUG = "chatsky-stats"
 """
-This variable stores a slug used for building the http address of the DFF dashboard.
+This variable stores a slug used for building the http address of the Chatsky dashboard.
 """
 DEFAULT_SUPERSET_URL = parse.urlunsplit(("http", "localhost:8088", "/", "", ""))
 """

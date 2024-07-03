@@ -12,12 +12,12 @@ Project roadmap
 ~~~~~~~~~~~~~~~
 
 `Project roadmap <https://github.com/deeppavlov/dialog_flow_framework/milestones>`_
-outlines the future development plans for DFF, including new features and enhancements
+outlines the future development plans for Chatsky, including new features and enhancements
 that are planned for upcoming releases.
 
 Release notes
 ~~~~~~~~~~~~~
 
 `Release notes <https://github.com/deeppavlov/dialog_flow_framework/releases>`_
-contain information about the latest releases of DFF, including new features, improvements, and bug fixes.
+contain information about the latest releases of Chatsky, including new features, improvements, and bug fixes.
 

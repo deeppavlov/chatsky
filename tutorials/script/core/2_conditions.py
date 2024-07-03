@@ -8,7 +8,7 @@ setting transition conditions from one node to another.
 Here, [conditions](%doclink(api,script.conditions.std_conditions))
 for script transitions are shown.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
 # %pip install chatsky

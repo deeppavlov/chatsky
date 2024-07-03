@@ -42,7 +42,7 @@ INSTRUMENTS = ["chatsky"]
 
 class OtelInstrumentor(BaseInstrumentor):
     """
-    Utility class for instrumenting DFF-related functions
+    Utility class for instrumenting Chatsky-related functions
     that implements the :py:class:`~BaseInstrumentor` interface.
     :py:meth:`~instrument` and :py:meth:`~uninstrument` methods
     are available to apply and revert the instrumentation effects,

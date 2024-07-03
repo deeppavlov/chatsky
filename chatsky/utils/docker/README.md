@@ -1,11 +1,11 @@
-# DFF Docker utils
+# Chatsky Docker utils
 
 ## Description
 
 This directory provides Docker files, necessary for deployment 
-of various DFF utilities.
+of various Chatsky utilities.
 
 ## Contents
 
-* dockerfile_stats - Dockerfile for DFF statistics dashboard.
-* entrypoint_stats.sh - Entrypoint script for DFF statistics dashboard.
+* dockerfile_stats - Dockerfile for Chatsky statistics dashboard.
+* entrypoint_stats.sh - Entrypoint script for Chatsky statistics dashboard.

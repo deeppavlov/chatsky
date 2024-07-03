@@ -8,28 +8,28 @@
 [![PyPI](https://img.shields.io/pypi/v/chatsky)](https://pypi.org/project/chatsky/)
 [![Downloads](https://pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
 
-The Dialog Flow Framework (DFF) allows you to develop conversational services.
-DFF offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the DFF pipeline.
+Chatsky allows you to develop conversational services.
+Chatsky offers a specialized domain-specific language (DSL) for quickly writing dialogs in pure Python. The service is created by defining a special dialog graph that determines the behavior of the dialog agent. The latter is then leveraged in the Chatsky pipeline.
 You can use the framework in various services such as social networks, call centers, websites, personal assistants, etc.
 
-DFF, a versatile Python-based conversational service framework, can be deployed across a spectrum of platforms,
+Chatsky, a versatile Python-based conversational service framework, can be deployed across a spectrum of platforms,
 ensuring flexibility for both novice and seasoned developers:
 
-- Cloud platforms like AWS, Azure, and GCP offer scalable environments for DFF,
+- Cloud platforms like AWS, Azure, and GCP offer scalable environments for Chatsky,
   with options such as AWS Lambda and Azure Functions providing serverless execution.
-- For containerized deployment, Docker and Kubernetes streamline the orchestration of DFF applications.
+- For containerized deployment, Docker and Kubernetes streamline the orchestration of Chatsky applications.
 - Furthermore, the framework's adaptability extends to IoT ecosystems,
   making it suitable for integration with edge devices in scenarios like smart homes or industrial automation.
 
 Whether deployed on cloud platforms, containerized environments, or directly on IoT devices,
-DFF's accessibility and customization options make it a robust choice for developing conversational services
+Chatsky's accessibility and customization options make it a robust choice for developing conversational services
 in the evolving landscape of Python applications and IoT connectivity.
 
-## Why choose DFF
+## Why choose Chatsky
 
 * Written in pure Python, the framework is easily accessible for both beginners and experienced developers.
-* For the same reason, all the abstractions used in DFF can be easily customized and extended using regular language synthax.
-* DFF offers easy and straightforward tools for state management which is as easy as setting values of a Python dictionary.
+* For the same reason, all the abstractions used in Chatsky can be easily customized and extended using regular language synthax.
+* Chatsky offers easy and straightforward tools for state management which is as easy as setting values of a Python dictionary.
 * The framework is being actively maintained and thoroughly tested. The team is open to suggestions and quickly reacts to bug reports.
 
 # Quick Start
@@ -44,13 +44,13 @@ in the evolving landscape of Python applications and IoT connectivity.
 
 ## Installation
 
-DFF can be installed via pip:
+Chatsky can be installed via pip:
 
 ```bash
 pip install chatsky
 ```
 
-The above command will set the minimum dependencies to start working with DFF. 
+The above command will set the minimum dependencies to start working with Chatsky. 
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 ```bash
 pip install chatsky[json]  # dependencies for using JSON
@@ -134,7 +134,7 @@ More advanced examples are available as a part of documentation:
 ## Further steps
 
 To further explore the API of the framework, you can make use of the [detailed documentation](https://deeppavlov.github.io/dialog_flow_framework/index.html). 
-Broken down into several sections to highlight all the aspects of development with DFF,
+Broken down into several sections to highlight all the aspects of development with Chatsky,
 the documentation for the library is constantly available online.
 
 # Contributing to the Dialog Flow Framework
@@ -144,4 +144,4 @@ Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_fram
 
 # License
 
-DFF is distributed under the terms of the [Apache License 2.0](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE).
+Chatsky is distributed under the terms of the [Apache License 2.0](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE).

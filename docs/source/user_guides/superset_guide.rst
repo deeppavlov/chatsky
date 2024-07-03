@@ -41,7 +41,7 @@ Collection procedure
 **Collecting data**
 
 Collecting data is done by means of instrumenting your conversational service before you run it.
-DFF tutorials (`1 <../tutorials/tutorials.stats.1_extractor_functions.py>`_, `2 <../tutorials/tutorials.stats.2_pipeline_integration.py>`_)
+Chatsky tutorials (`1 <../tutorials/tutorials.stats.1_extractor_functions.py>`_, `2 <../tutorials/tutorials.stats.2_pipeline_integration.py>`_)
 showcase all the steps needed to achieve that. We will run 
 a special script in order to obtain richly-annotated sample data points to visualize.
 
@@ -82,13 +82,13 @@ The file can then be used to parametrize the configuration script.
 
 Running the command will automatically import the dashboard as well as the data sources
 into the running superset server. If you are using a version of Superset different from the one
-shipped with DFF, make sure that your access rights are sufficient to edit the workspace.
+shipped with Chatsky, make sure that your access rights are sufficient to edit the workspace.
 
 Using Superset
 ~~~~~~~~~~~~~~
 
 | In order to view the imported dashboard, log into `Superset <http://localhost:8088/>`_ using your username and password (which are both `superset` by default and can be configured via `.env_file`).
-| The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **DFF stats**.
+| The dashboard will then be available in the **Dashboards** section of the Superset UI under the name of **Chatsky stats**.
 | The dashboard is split into four sections based on the types of charts and on the chart topic.
 
 *  The **Overview** section summarizes the information about user interaction with your script. And displays a weighted graph of transitions from one node to another. The data is also shown in the form of a table for better introspection capabilities.
@@ -178,7 +178,7 @@ and put in the extraction expression, as shown in the examples above.
 
 The configuration of a Superset dashboard can be easily exported and then reused
 in other Superset instances. This can be done using the GUI: navigate to the
-`Dashboards` section of the Superset application, locate your dashboard (named `DFF statistics` per default).
+`Dashboards` section of the Superset application, locate your dashboard (named `Chatsky statistics` per default).
 Then press the `export` button on the right and save the zip file to any convenient location.
 
 **Importing existing configuration files**

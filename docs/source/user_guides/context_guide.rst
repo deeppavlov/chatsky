@@ -4,7 +4,7 @@ Context guide
 Introduction
 ~~~~~~~~~~~~
 
-The ``Context`` class is a backbone component of the DFF API. 
+The ``Context`` class is a backbone component of the Chatsky API.
 Like the name suggests, this data structure is used to store information
 about the current state, or context, of a particular conversation.
 Each individual user has their own ``Context`` instance and can be identified by it.
@@ -15,7 +15,7 @@ that is relevant to the conversation with the user.
 
 .. note::
 
-    Since most callback functions used in DFF script and DFF pipeline (see the `basic guide <./basic_conceptions.rst>`__)
+    Since most callback functions used in Chatsky script and Chatsky pipeline (see the `basic guide <./basic_conceptions.rst>`__)
     need to either read or update the current dialog state,
     the framework-level convention is that all functions of this kind
     use ``Context`` as their first parameter. This dependency is being
@@ -106,7 +106,7 @@ Attributes
   Stores the responses in-order.
 
 * **misc**: The misc attribute is a dictionary for storing custom data. This field is not used by any of the
-  built-in DFF classes or functions, so the values that you write there are guaranteed to persist
+  built-in Chatsky classes or functions, so the values that you write there are guaranteed to persist
   throughout the lifetime of the ``Context`` object.
 
 * **framework_data**: This attribute is used for storing custom data required for pipeline execution.
@@ -119,7 +119,7 @@ The methods of the ``Context`` class can be divided into two categories:
 
 * Public methods that get called manually in custom callbacks and in functions that depend on the context.
 * Methods that are not designed for manual calls and get called automatically during pipeline runs,
-  i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying DFF.
+  i.e. quasi-private methods. You may still need them when developing extensions or heavily modifying Chatsky.
 
 Public methods
 ^^^^^^^^^^^^^^
@@ -207,7 +207,7 @@ and the connection parameters, for example, *mongodb://admin:pass@localhost:2701
 .. note::
     To learn how to use ``context_storage_factory`` in your pipeline, see our `Context Storage Tutorials <../tutorials/index_context_storages.html>`__.
 
-The GitHub-based distribution of DFF includes Docker images for each of the supported database types.
+The GitHub-based distribution of Chatsky includes Docker images for each of the supported database types.
 Therefore, the easiest way to deploy your service together with a database is to clone the GitHub
 distribution and to take advantage of the packaged
 `docker compose file <https://github.com/deeppavlov/dialog_flow_framework/blob/master/compose.yml>`_.
@@ -226,7 +226,7 @@ also available in the distribution. Consult these files for more options.
 
 .. warning::
 
-  The data transmission protocols require the data to be JSON-serializable. DFF tackles this problem
+  The data transmission protocols require the data to be JSON-serializable. Chatsky tackles this problem
   through utilization of ``pydantic`` as described in the next section.
 
 Serialization
@@ -243,4 +243,4 @@ becomes as easy as calling the `model_dump_json` method:
     context = Context()
     serialized_context = context.model_dump_json()
 
-Knowing that, you can easily extend DFF to work with storages like Memcache or web APIs of your liking.
+Knowing that, you can easily extend Chatsky to work with storages like Memcache or web APIs of your liking.

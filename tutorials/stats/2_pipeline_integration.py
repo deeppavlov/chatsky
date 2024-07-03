@@ -2,7 +2,7 @@
 """
 # 2. Pipeline Integration
 
-In the DFF ecosystem, extractor functions act as regular extra handlers (
+In the Chatsky ecosystem, extractor functions act as regular extra handlers (
 [see the pipeline module documentation](
 %doclink(tutorial,pipeline.6_extra_handlers_basic)
 )
@@ -16,7 +16,7 @@ are showcased in this tutorial.
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
 during statistics collection.
-If you cloned the DFF repo, launch them using `docker compose`:
+If you cloned the Chatsky repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```

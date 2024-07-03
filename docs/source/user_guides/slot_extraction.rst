@@ -5,7 +5,7 @@ Introduction
 ~~~~~~~~~~~~
 
 Extracting and filling slots is an essential part of any conversational service
-that comprises the inherent business logic. Like most frameworks, DFF
+that comprises the inherent business logic. Like most frameworks, Chatsky
 provides components that address this task as a part of its ``slots`` module.
 These can be easily customized to leverage neural networks specifically designed
 for slot extraction or any other logic you might want to integrate.

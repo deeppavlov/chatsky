@@ -73,7 +73,7 @@ def dashboard_display_test(args: Namespace, session, headers, base_url: str):
         "Transition ratio [chord]",
     ]
     assert dashboard_json["result"]["url"] == "/superset/dashboard/chatsky-stats/"
-    assert dashboard_json["result"]["dashboard_title"] == "DFF statistics dashboard"
+    assert dashboard_json["result"]["dashboard_title"] == "Chatsky statistics dashboard"
     datasets_result = session.get(datasets_url, headers=headers)
     datasets_json = datasets_result.json()
     assert datasets_json["count"] == 3

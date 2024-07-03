@@ -10,7 +10,7 @@ for transition between many different script steps are shown.
 Some of the destination steps can be set using
 [labels](%doclink(api,script.labels.std_labels)).
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
 

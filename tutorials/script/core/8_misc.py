@@ -7,7 +7,7 @@ This tutorial shows `MISC` (miscellaneous) keyword usage.
 See %mddoclink(api,script.core.keywords,Keywords.MISC)
 for more information.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
 # %pip install chatsky

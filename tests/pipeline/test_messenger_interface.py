@@ -42,7 +42,7 @@ def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
-    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
+    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's Chatsky powered bot, let's chat!")
 
     def loop() -> bool:
         loop.runs_left -= 1

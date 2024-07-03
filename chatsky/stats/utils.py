@@ -43,11 +43,11 @@ Singletone :py:class:`~Resource` instance shared inside the framework.
 """
 tracer_provider = TracerProvider(resource=resource)
 """
-Global tracer provider bound to the DFF resource.
+Global tracer provider bound to the Chatsky resource.
 """
 logger_provider = LoggerProvider(resource=resource)
 """
-Global logger provider bound to the DFF resource.
+Global logger provider bound to the Chatsky resource.
 """
 set_logger_provider(logger_provider)
 set_tracer_provider(tracer_provider)

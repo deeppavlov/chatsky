@@ -3,7 +3,7 @@ Pickle
 ------
 The Pickle module provides a pickle-based version of the :py:class:`.DBContextStorage` class.
 This class is used to store and retrieve context data in a pickle format.
-It allows the DFF to easily store and retrieve context data in a format that is efficient
+It allows Chatsky to easily store and retrieve context data in a format that is efficient
 for serialization and deserialization and can be easily used in python.
 
 Pickle is a python library that allows to serialize and deserialize python objects.

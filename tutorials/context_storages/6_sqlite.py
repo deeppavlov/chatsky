@@ -7,7 +7,7 @@ This is a tutorial on using SQLite.
 See %mddoclink(api,context_storages.sql,SQLContextStorage) class
 for storing you users' contexts in SQL databases.
 
-DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+Chatsky uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
 and [aiosqlite](https://readthedocs.org/projects/aiosqlite/)
 libraries for asynchronous access to SQLite DB.
 

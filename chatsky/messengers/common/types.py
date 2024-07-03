@@ -1,7 +1,7 @@
 """
 Types
 -----
-The Types module contains special types that are used throughout the `DFF Messengers`.
+The Types module contains special types that are used throughout `Chatsky Messengers`.
 """
 
 from typing import Callable

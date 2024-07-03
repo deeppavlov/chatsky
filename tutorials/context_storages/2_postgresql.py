@@ -7,7 +7,7 @@ This is a tutorial on using PostgreSQL.
 See %mddoclink(api,context_storages.sql,SQLContextStorage) class
 for storing your users' contexts in SQL databases.
 
-DFF uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
+Chatsky uses [sqlalchemy](https://docs.sqlalchemy.org/en/20/)
 and [asyncpg](https://magicstack.github.io/asyncpg/current/)
 libraries for asynchronous access to PostgreSQL DB.
 """

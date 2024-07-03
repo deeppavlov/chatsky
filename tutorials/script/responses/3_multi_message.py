@@ -3,7 +3,7 @@
 # Responses: 3. Multi Message
 
 This tutorial shows how to store several messages inside a single one.
-This might be useful if you want DFF Pipeline to send `response` candidates
+This might be useful if you want Chatsky Pipeline to send `response` candidates
 to the messenger interface instead of a final response.
 
 However, this approach is not recommended due to history incompleteness.

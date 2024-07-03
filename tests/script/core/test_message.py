@@ -42,7 +42,7 @@ class UnserializableObject:
             return False
 
 
-class DFFCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAttachments):
+class ChatskyCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAttachments):
     supported_response_attachment_types = {Document}
 
     def __init__(self, attachments_directory: Optional[Path] = None):
@@ -105,7 +105,7 @@ class TestMessage:
         local_path = self.clear_and_create_dir(tmp_path / "local")
 
         local_document = local_path / "pre-saved-document.pdf"
-        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(tmp_path / "cache"))
+        cli_iface = ChatskyCLIMessengerInterface(self.clear_and_create_dir(tmp_path / "cache"))
 
         document_name = "deeppavlov-article.pdf"
         remote_document_url = f"{EXAMPLE_SOURCE}/{document_name}"

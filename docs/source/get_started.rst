@@ -4,7 +4,7 @@ Getting started
 Installation
 ~~~~~~~~~~~~
 
-DFF can be easily installed on your system using the ``pip`` package manager:
+Chatsky can be easily installed on your system using the ``pip`` package manager:
 
 .. code-block:: console
    
@@ -12,7 +12,7 @@ DFF can be easily installed on your system using the ``pip`` package manager:
 
 This framework is compatible with Python 3.8 and newer versions.
 
-The above command will set the minimum dependencies to start working with DFF. 
+The above command will set the minimum dependencies to start working with Chatsky.
 The installation process allows the user to choose from different packages based on their dependencies, which are:
 
 .. code-block:: console
@@ -45,14 +45,14 @@ If you need to update the requirements, use the command ``make clean`` to remove
 Key concepts
 ~~~~~~~~~~~~
 
-DFF is a powerful tool for creating conversational services.
+Chatsky is a powerful tool for creating conversational services.
 It allows developers to easily write and manage dialog systems by defining a special
 dialog graph that describes the behavior of the service.
-DFF offers a specialized language (DSL) for quickly writing dialog graphs,
+Chatsky offers a specialized language (DSL) for quickly writing dialog graphs,
 making it easy for developers to create chatbots for a wide
 range of applications, such as social networks, call centers, websites, personal assistants, etc.
 
-DFF has several important concepts:
+Chatsky has several important concepts:
 
 **Script**: First of all, to create a dialog agent it is necessary
 to create a dialog :py:class:`~chatsky.script.core.script.Script`.
@@ -68,7 +68,7 @@ Each flow is also a dictionary, where the keys are the `nodes`.
 to a user's input as well as a `condition` that determines
 the `transition` to another node, whether it's within the current or another flow.
 
-**Keywords**: DFF uses several special `keywords`. These keywords are the keys in the dictionaries inside the script.
+**Keywords**: Chatsky uses several special `keywords`. These keywords are the keys in the dictionaries inside the script.
 The most important for using the framework are `RESPONSE` and `TRANSITIONS` keywords.
 The first one corresponds to the response that the bot will send to the user from the current node.
 The second corresponds to the transition conditions from the current node to other nodes.
