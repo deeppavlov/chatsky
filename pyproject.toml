@@ -11,9 +11,8 @@ authors = [
 ]
 
 readme = "README.md"
-homepage = "https://deeppavlov.github.io/chatsky/index.html"
-repository = "https://github.com/deeppavlov/chatsky"
-documentation = "https://deeppavlov.github.io/chatsky/reference.html"
+homepage = "https://github.com/deeppavlov/chatsky"
+documentation = "https://deeppavlov.github.io/chatsky/"
 keywords = ["chatbots"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -43,10 +42,7 @@ exclude = [
 
 
 [tool.poetry.urls]
-"Getting Started" = "https://deeppavlov.github.io/chatsky/get_started.html"
-"Tutorials" = "https://deeppavlov.github.io/chatsky/tutorials.html"
-"User Guides" = "https://deeppavlov.github.io/chatsky/user_guides.html"
-"Examples" = "https://github.com/deeppavlov/dialog_flow_demo"
+"Project Template" = "https://github.com/deeppavlov/chatsky-template"
 
 
 
