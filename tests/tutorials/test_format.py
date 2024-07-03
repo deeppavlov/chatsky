@@ -22,7 +22,8 @@ def regexp_format_checker(chatsky_tutorial_py_file: pathlib.Path):
     for pattern in patterns:
         if not pattern.search("".join(file_lines)):
             raise Exception(
-                f"Pattern `{pattern}` is not found in `{chatsky_tutorial_py_file.relative_to(chatsky_tutorials_dir.parent)}`."
+                f"Pattern `{pattern}` is not found in "
+                f"`{chatsky_tutorial_py_file.relative_to(chatsky_tutorials_dir.parent)}`."
             )
     return True
 

@@ -138,7 +138,9 @@ def test_main(testing_cfg_dir, args):
     assert os.path.getsize(args.outfile) > 2200
     with ZipFile(args.outfile) as file:
         file.extractall(testing_cfg_dir)
-    database = omegaconf.OmegaConf.load(os.path.join(testing_cfg_dir, "superset_dashboard/databases/chatsky_database.yaml"))
+    database = omegaconf.OmegaConf.load(
+        os.path.join(testing_cfg_dir, "superset_dashboard/databases/chatsky_database.yaml")
+    )
     sqlalchemy_uri = omegaconf.OmegaConf.select(database, "sqlalchemy_uri")
     arg_vars = vars(args)
     driver, user, host, port, name = (
