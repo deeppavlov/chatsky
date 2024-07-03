@@ -116,7 +116,7 @@ html_theme_options = {
     "header_links_before_dropdown": 5,
     "logo": {
         "alt_text": "Chatsky logo (simple and nice)",
-        "text": "Dialog Flow Framework",
+        "text": "Chatsky",
     },
     "icon_links": [
         {

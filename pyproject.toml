@@ -1,7 +1,7 @@
 [tool.poetry]
 name = "chatsky"
 version = "0.7.0"
-description = "Dialog Flow Framework is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
+description = "Chatsky is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
 license = "Apache-2.0"
 authors = [
     "Denis Kuznetsov <kuznetsov.den.p@gmail.com>",

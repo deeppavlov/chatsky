@@ -1,4 +1,4 @@
-# Dialog Flow Framework
+# Chatsky
 
 [![Documentation Status](https://github.com/deeppavlov/chatsky/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/chatsky)
 [![Codestyle](https://github.com/deeppavlov/chatsky/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/codestyle.yml)
@@ -137,7 +137,7 @@ To further explore the API of the framework, you can make use of the [detailed d
 Broken down into several sections to highlight all the aspects of development with Chatsky,
 the documentation for the library is constantly available online.
 
-# Contributing to the Dialog Flow Framework
+# Contributing to Chatsky
 
 We are open to accepting pull requests and bug reports.
 Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/chatsky/blob/master/CONTRIBUTING.md).

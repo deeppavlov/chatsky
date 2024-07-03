@@ -3,7 +3,7 @@ Instrumentor
 -------------
 This modules contains the :py:class:`~OtelInstrumentor` class that implements
 Opentelemetry's `BaseInstrumentor` interface and allows for automated
-instrumentation of Dialog Flow Framework applications,
+instrumentation of Chatsky applications,
 e.g. for automated logging and log export.
 
 For detailed reference, see `~OtelInstrumentor` class.

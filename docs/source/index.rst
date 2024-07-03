@@ -1,9 +1,9 @@
-.. Dialog Flow Framework documentation master file, created by
+.. Chatsky documentation master file, created by
    You can adapt this file completely to your liking, but it should at least
    contain the root `toctree` directive.
 
-Dialog Flow Framework
-=====================
+Chatsky
+=======
 
 *Date*: |today| *Version*: |version|
 

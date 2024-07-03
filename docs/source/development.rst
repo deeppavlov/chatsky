@@ -5,7 +5,7 @@ Contribution
 ~~~~~~~~~~~~~~~
 
 `Contribution rules <https://github.com/deeppavlov/chatsky/blob/master/CONTRIBUTING.md>`_  provide
-guidelines and rules for contributing to the Dialog Flow Framework project. It includes information on
+guidelines and rules for contributing to the Chatsky project. It includes information on
 how to contribute code to the project, manage your workflow, use tests, and so on.
 
 Project roadmap
