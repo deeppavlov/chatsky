@@ -98,7 +98,7 @@ class Context(BaseModel):
     misc: Dict[str, Any] = Field(default_factory=dict)
     """
     `misc` stores any custom data. The scripting doesn't use this dictionary by default,
-    so storage of any data won't reflect on the work on the internal Dialog Flow Scripting functions.
+    so storage of any data won't reflect on the work on the internal Chatsky Scripting functions.
 
     Avoid storing unserializable data in order for context storages to work.
 

@@ -4,7 +4,7 @@ Superset guide
 Description
 ~~~~~~~~~~~
 
-| The Dialog Flow Stats module can be used to obtain and visualize usage statistics for your service.
+| The Chatsky Stats module can be used to obtain and visualize usage statistics for your service.
 | The module relies on several open source solutions that allow for data persistence and visualization
 
 * `Clickhouse <https://clickhouse.com/>`_ serves as an OLAP storage for data.
