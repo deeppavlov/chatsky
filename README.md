@@ -1,9 +1,9 @@
 # Dialog Flow Framework
 
-[![Documentation Status](https://github.com/deeppavlov/dialog_flow_framework/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/dialog_flow_framework)
-[![Codestyle](https://github.com/deeppavlov/dialog_flow_framework/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/codestyle.yml)
-[![Tests](https://github.com/deeppavlov/dialog_flow_framework/workflows/test_coverage/badge.svg?branch=dev)](https://github.com/deeppavlov/dialog_flow_framework/actions/workflows/test_coverage.yml)
-[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE)
+[![Documentation Status](https://github.com/deeppavlov/chatsky/workflows/build_and_publish_docs/badge.svg?branch=dev)](https://deeppavlov.github.io/chatsky)
+[![Codestyle](https://github.com/deeppavlov/chatsky/workflows/codestyle/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/codestyle.yml)
+[![Tests](https://github.com/deeppavlov/chatsky/workflows/test_coverage/badge.svg?branch=dev)](https://github.com/deeppavlov/chatsky/actions/workflows/test_coverage.yml)
+[![License Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue.svg)](https://github.com/deeppavlov/chatsky/blob/master/LICENSE)
 ![Python 3.8, 3.9, 3.10, 3.11](https://img.shields.io/badge/python-3.8%20%7C%203.9%20%7C%203.10%20%7C%203.11-green.svg)
 [![PyPI](https://img.shields.io/pypi/v/chatsky)](https://pypi.org/project/chatsky/)
 [![Downloads](https://pepy.tech/badge/chatsky)](https://pepy.tech/project/chatsky)
@@ -76,7 +76,7 @@ pip install chatsky[postgresql,mysql]
 The following code snippet builds a simplistic chat bot that replies with messages
 ``Hi!`` and ``OK`` depending on user input, which only takes a few lines of code.
 All the abstractions used in this example are thoroughly explained in the dedicated
-[user guide](https://deeppavlov.github.io/dialog_flow_framework/user_guides/basic_conceptions.html).
+[user guide](https://deeppavlov.github.io/chatsky/user_guides/basic_conceptions.html).
 
 ```python
 from chatsky.script import GLOBAL, TRANSITIONS, RESPONSE, Message
@@ -129,19 +129,19 @@ Response:  OK
 ```
 
 More advanced examples are available as a part of documentation:
-[tutorials](https://deeppavlov.github.io/dialog_flow_framework/tutorials.html).
+[tutorials](https://deeppavlov.github.io/chatsky/tutorials.html).
 
 ## Further steps
 
-To further explore the API of the framework, you can make use of the [detailed documentation](https://deeppavlov.github.io/dialog_flow_framework/index.html). 
+To further explore the API of the framework, you can make use of the [detailed documentation](https://deeppavlov.github.io/chatsky/index.html). 
 Broken down into several sections to highlight all the aspects of development with Chatsky,
 the documentation for the library is constantly available online.
 
 # Contributing to the Dialog Flow Framework
 
 We are open to accepting pull requests and bug reports.
-Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/dialog_flow_framework/blob/master/CONTRIBUTING.md).
+Please refer to [CONTRIBUTING.md](https://github.com/deeppavlov/chatsky/blob/master/CONTRIBUTING.md).
 
 # License
 
-Chatsky is distributed under the terms of the [Apache License 2.0](https://github.com/deeppavlov/dialog_flow_framework/blob/master/LICENSE).
+Chatsky is distributed under the terms of the [Apache License 2.0](https://github.com/deeppavlov/chatsky/blob/master/LICENSE).

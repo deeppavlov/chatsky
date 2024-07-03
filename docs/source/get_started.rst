@@ -32,12 +32,12 @@ For example, if you are going to use one of the database backends,
 you can specify the corresponding requirements yourself.
 
 Additionally, you also have the option to download the source code directly from the
-`GitHub <https://github.com/deeppavlov/dialog_flow_framework>`_ repository using the commands:
+`GitHub <https://github.com/deeppavlov/chatsky>`_ repository using the commands:
 
 .. code-block:: console
 
-   git clone https://github.com/deeppavlov/dialog_flow_framework.git
-   cd dialog_flow_framework
+   git clone https://github.com/deeppavlov/chatsky.git
+   cd chatsky
 
 Once you are in the directory, you can run the command ``make venv`` to set up all the necessary requirements for the library.
 If you need to update the requirements, use the command ``make clean`` to remove `venv` first.

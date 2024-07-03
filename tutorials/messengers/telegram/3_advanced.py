@@ -64,7 +64,7 @@ in terms and datastructures of Dialog Flow Framework.
 
 EXAMPLE_ATTACHMENT_SOURCE = (
     "https://github.com/deeppavlov/"
-    + "dialog_flow_framework/wiki/example_attachments"
+    + "chatsky/wiki/example_attachments"
 )
 
 image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")

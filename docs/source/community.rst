@@ -14,7 +14,7 @@ which includes Chatsky.
 `Telegram <https://t.me/DeepPavlovDreamDiscussions>`_ is a group chat where Chatsky users can ask questions and
 get help from the community.
 
-`GitHub Issues <https://github.com/deeppavlov/dialog_flow_framework/issues>`_ is a platform where users
+`GitHub Issues <https://github.com/deeppavlov/chatsky/issues>`_ is a platform where users
 can report issues, suggest features, and track the progress of Chatsky development.
 
 `Stack Overflow <https://stackoverflow.com/questions/tagged/chatsky>`_ is a platform where Chatsky users can ask

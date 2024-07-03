@@ -22,9 +22,9 @@ Collection procedure
     :linenos:
 
     # clone the original repository to access the docker compose file
-    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    git clone https://github.com/deeppavlov/chatsky.git
     # install with the stats extra
-    cd dialog_flow_framework
+    cd chatsky
     pip install .[stats]
 
 **Launching services**
@@ -33,9 +33,9 @@ Collection procedure
     :linenos:
 
     # clone the original repository to access the docker compose file
-    git clone https://github.com/deeppavlov/dialog_flow_framework.git
+    git clone https://github.com/deeppavlov/chatsky.git
     # launch the required services
-    cd dialog_flow_framework
+    cd chatsky
     docker compose --profile stats up
 
 **Collecting data**

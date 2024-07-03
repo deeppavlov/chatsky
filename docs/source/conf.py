@@ -102,7 +102,7 @@ nbsphinx_thumbnails = {
 
 html_context = {
     "github_user": "deeppavlov",
-    "github_repo": "dialog_flow_framework",
+    "github_repo": "chatsky",
     "github_version": "master",
     "doc_path": "docs/source",
 }
@@ -133,7 +133,7 @@ html_theme_options = {
         },
         {
             "name": "GitHub",
-            "url": "https://github.com/deeppavlov/dialog_flow_framework",
+            "url": "https://github.com/deeppavlov/chatsky",
             "icon": "fa-brands fa-github",
             "type": "fontawesome",
         },

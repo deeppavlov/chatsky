@@ -199,7 +199,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "audio",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/separation-william-king.mp3",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/9130a836-ac1c-5989-bb12-4e831c89f524",
                         "id": null,
@@ -230,7 +230,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "video",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
                         "id": null,
@@ -261,7 +261,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "animation",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/hong-kong-simplyart4794.gif",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/hong-kong-simplyart4794.gif",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/68ffd3ce-1c85-5e63-9aa1-aaa9347ccd63",
                         "id": null,
@@ -292,7 +292,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "image",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov.png",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
                         "id": null,
@@ -323,7 +323,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "document",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov-article.pdf",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov-article.pdf",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/ff2b4361-417f-5fa1-be67-79e68a3f2e80",
                         "id": null,
@@ -354,7 +354,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "voice_message",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/separation-william-king.mp3",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/separation-william-king.mp3",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/9130a836-ac1c-5989-bb12-4e831c89f524",
                         "id": null
@@ -383,7 +383,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "video_message",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
                         "id": null
@@ -415,7 +415,7 @@
                         "group": [
                             {
                                 "chatsky_attachment_type": "image",
-                                "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png",
+                                "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov.png",
                                 "use_cache": true,
                                 "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
                                 "id": null,
@@ -424,7 +424,7 @@
                             },
                             {
                                 "chatsky_attachment_type": "video",
-                                "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
+                                "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/crownfall-lags-nkognit0.mp4",
                                 "use_cache": true,
                                 "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/8eeccc49-60ae-5e50-8699-cce6cc4144cc",
                                 "id": null,
@@ -640,7 +640,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "image",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov.png",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov.png",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/f5b9f966-df04-50fa-b6e1-e46fccd889bc",
                         "id": null,
@@ -707,7 +707,7 @@
                 "attachments": [
                     {
                         "chatsky_attachment_type": "document",
-                        "source": "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments/deeppavlov-article.pdf",
+                        "source": "https://github.com/deeppavlov/chatsky/wiki/example_attachments/deeppavlov-article.pdf",
                         "use_cache": true,
                         "cached_filename": "/tmp/chatsky-cache-LongpollingInterface/ff2b4361-417f-5fa1-be67-79e68a3f2e80",
                         "id": null,

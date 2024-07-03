@@ -378,7 +378,7 @@ position:
 
 
         To make them available in the dashboard, you need to define a custom extractor
-        function for them (see the [Extractor functions](https://deeppavlov.github.io/dialog_flow_framework/tutorials/tutorials.stats.1_extractor_functions.html) ).
+        function for them (see the [Extractor functions](https://deeppavlov.github.io/chatsky/tutorials/tutorials.stats.1_extractor_functions.html) ).
         The output of that function will then be persisted to the `data` column of
         the logs table, while the name of the function will be available in the `data
         key` column. That makes it easy to filter the relevant log entries and use

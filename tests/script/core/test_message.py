@@ -27,7 +27,7 @@ from chatsky.script.core.message import (
     Video,
 )
 
-EXAMPLE_SOURCE = "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments"
+EXAMPLE_SOURCE = "https://github.com/deeppavlov/chatsky/wiki/example_attachments"
 
 
 class UnserializableObject:

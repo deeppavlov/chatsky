@@ -176,7 +176,7 @@ To run the app, execute:
 
 ```
 # download file
-curl "https://deeppavlov.github.io/dialog_flow_framework/"\
+curl "https://deeppavlov.github.io/chatsky/"\
 "_misc/benchmark_streamlit.py" -o benchmark_streamlit.py
 # install dependencies
 pip install chatsky[benchmark]

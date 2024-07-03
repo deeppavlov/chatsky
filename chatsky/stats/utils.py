@@ -35,7 +35,7 @@ from opentelemetry.exporter.otlp.proto.grpc.metric_exporter import OTLPMetricExp
 
 from chatsky.pipeline import ExtraHandlerRuntimeInfo
 
-SERVICE_NAME = "dialog_flow_framework"
+SERVICE_NAME = "chatsky"
 
 resource = Resource.create({"service.name": SERVICE_NAME})
 """
