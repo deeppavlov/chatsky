@@ -1,7 +1,7 @@
 [tool.poetry]
-name = "dff"
+name = "chatsky"
 version = "0.7.0"
-description = "Dialog Flow Framework is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
+description = "Chatsky is a free and open-source software stack for creating chatbots, released under the terms of Apache License 2.0."
 license = "Apache-2.0"
 authors = [
     "Denis Kuznetsov <kuznetsov.den.p@gmail.com>",
@@ -11,9 +11,9 @@ authors = [
 ]
 
 readme = "README.md"
-homepage = "https://deeppavlov.github.io/dialog_flow_framework/index.html"
-repository = "https://github.com/deeppavlov/dialog_flow_framework"
-documentation = "https://deeppavlov.github.io/dialog_flow_framework/reference.html"
+homepage = "https://deeppavlov.github.io/chatsky/index.html"
+repository = "https://github.com/deeppavlov/chatsky"
+documentation = "https://deeppavlov.github.io/chatsky/reference.html"
 keywords = ["chatbots"]
 classifiers = [
     "Development Status :: 5 - Production/Stable",
@@ -33,7 +33,7 @@ classifiers = [
 
 include = [
     { path = "CONTRIBUTING.md" },
-    { path = "dff/" },
+    { path = "chatsky/" },
 ]
 exclude = [
     { path = "tests" },
@@ -43,9 +43,9 @@ exclude = [
 
 
 [tool.poetry.urls]
-"Getting Started" = "https://deeppavlov.github.io/dialog_flow_framework/get_started.html"
-"Tutorials" = "https://deeppavlov.github.io/dialog_flow_framework/tutorials.html"
-"User Guides" = "https://deeppavlov.github.io/dialog_flow_framework/user_guides.html"
+"Getting Started" = "https://deeppavlov.github.io/chatsky/get_started.html"
+"Tutorials" = "https://deeppavlov.github.io/chatsky/tutorials.html"
+"User Guides" = "https://deeppavlov.github.io/chatsky/user_guides.html"
 "Examples" = "https://github.com/deeppavlov/dialog_flow_demo"
 
 
@@ -127,7 +127,7 @@ jsonschema = "*"
 optional = false
 
 [tool.poetry.group.devel.dependencies]
-urllib3 = "<2.0"  # ensure dff doesn't update urllib which breaks poetry
+urllib3 = "<2.0"  # ensure chatsky doesn't update urllib which breaks poetry
 python-on-whales = "*"
 python-dotenv = "*"
 poethepoet = { version = "*", extras = ["poetry_plugin"] }
@@ -168,7 +168,7 @@ jupyter = "*"
 
 
 [tool.poetry.scripts]
-"dff.stats" = { callable = "dff.stats.__main__:main", extras = ["stats"] }
+"chatsky.stats" = { callable = "chatsky.stats.__main__:main", extras = ["stats"] }
 
 
 

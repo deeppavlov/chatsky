@@ -7,13 +7,13 @@ This tutorial shows `MISC` (miscellaneous) keyword usage.
 See %mddoclink(api,script.core.keywords,Keywords.MISC)
 for more information.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import (
+from chatsky.script import (
     GLOBAL,
     LOCAL,
     RESPONSE,
@@ -22,10 +22,10 @@ from dff.script import (
     Context,
     Message,
 )
-import dff.script.labels as lbl
-import dff.script.conditions as cnd
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+import chatsky.script.labels as lbl
+import chatsky.script.conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

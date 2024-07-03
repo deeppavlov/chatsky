@@ -3,7 +3,7 @@ import itertools
 
 import pytest
 
-from dff.script import (
+from chatsky.script import (
     TRANSITIONS,
     RESPONSE,
     MISC,
@@ -13,7 +13,7 @@ from dff.script import (
     Node,
     Message,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, MULTIFLOW_SCRIPT
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, MULTIFLOW_SCRIPT
 
 
 def positive_test(samples, custom_class):

@@ -2,7 +2,7 @@ import os
 import re
 
 import pytest
-from dff.utils.testing.common import check_happy_path, is_interactive_mode
+from chatsky.utils.testing.common import check_happy_path, is_interactive_mode
 from tests.pipeline.test_messenger_interface import pipeline
 
 

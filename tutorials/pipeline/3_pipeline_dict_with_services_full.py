@@ -11,23 +11,23 @@ This tutorial is a more advanced version of the
 ).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import json
 import logging
 import urllib.request
 
-from dff.script import Context
-from dff.messengers.console import CLIMessengerInterface
-from dff.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
-from dff.utils.testing.common import (
+from chatsky.script import Context
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.pipeline import Service, Pipeline, ServiceRuntimeInfo, ACTOR
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
 
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
 
 logger = logging.getLogger(__name__)
 

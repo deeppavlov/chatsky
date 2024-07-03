@@ -1,8 +1,8 @@
 import pytest
 from pydantic import ValidationError
 
-from dff.script import Message
-from dff.slots.slots import (
+from chatsky.script import Message
+from chatsky.slots.slots import (
     RegexpSlot,
     GroupSlot,
     FunctionSlot,

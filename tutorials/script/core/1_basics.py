@@ -12,17 +12,17 @@ and execution.
 Additionally, function %mddoclink(api,utils.testing.common,check_happy_path)
 that can be used for Pipeline testing is presented.
 
-Let's do all the necessary imports from DFF:
+Let's do all the necessary imports from Chatsky:
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import TRANSITIONS, RESPONSE, Message
-from dff.pipeline import Pipeline
-import dff.script.conditions as cnd
+from chatsky.script import TRANSITIONS, RESPONSE, Message
+from chatsky.pipeline import Pipeline
+import chatsky.script.conditions as cnd
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

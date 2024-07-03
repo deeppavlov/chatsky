@@ -17,7 +17,7 @@ from pathlib import Path
 import os
 from contextlib import contextmanager
 
-from dff.script import Message
+from chatsky.script import Message
 
 
 ROOT = Path(__file__).parent.parent.parent

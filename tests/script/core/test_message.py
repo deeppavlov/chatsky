@@ -8,9 +8,9 @@ from urllib.request import urlopen
 import pytest
 from pydantic import ValidationError, HttpUrl, FilePath
 
-from dff.messengers.common.interface import MessengerInterfaceWithAttachments
-from dff.messengers.console import CLIMessengerInterface
-from dff.script.core.message import (
+from chatsky.messengers.common.interface import MessengerInterfaceWithAttachments
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.script.core.message import (
     Animation,
     Audio,
     CallbackQuery,
@@ -27,7 +27,7 @@ from dff.script.core.message import (
     Video,
 )
 
-EXAMPLE_SOURCE = "https://github.com/deeppavlov/dialog_flow_framework/wiki/example_attachments"
+EXAMPLE_SOURCE = "https://github.com/deeppavlov/chatsky/wiki/example_attachments"
 
 
 class UnserializableObject:
@@ -42,7 +42,7 @@ class UnserializableObject:
             return False
 
 
-class DFFCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAttachments):
+class ChatskyCLIMessengerInterface(CLIMessengerInterface, MessengerInterfaceWithAttachments):
     supported_response_attachment_types = {Document}
 
     def __init__(self, attachments_directory: Optional[Path] = None):
@@ -105,7 +105,7 @@ class TestMessage:
         local_path = self.clear_and_create_dir(tmp_path / "local")
 
         local_document = local_path / "pre-saved-document.pdf"
-        cli_iface = DFFCLIMessengerInterface(self.clear_and_create_dir(tmp_path / "cache"))
+        cli_iface = ChatskyCLIMessengerInterface(self.clear_and_create_dir(tmp_path / "cache"))
 
         document_name = "deeppavlov-article.pdf"
         remote_document_url = f"{EXAMPLE_SOURCE}/{document_name}"

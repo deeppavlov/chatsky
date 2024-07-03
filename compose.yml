@@ -106,7 +106,7 @@ services:
   dashboard:
     env_file: [.env_file]
     build:
-      context: ./dff/utils/docker
+      context: ./chatsky/utils/docker
       dockerfile: dockerfile_stats
     image: ghcr.io/deeppavlov/superset_df_dashboard:latest
     depends_on:
@@ -169,8 +169,8 @@ services:
       clickhouse:
         condition: service_healthy
     volumes:
-      - ./dff/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
-      - ./dff/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
+      - ./chatsky/utils/otel/otelcol-config.yml:/etc/otelcol-config.yml:ro
+      - ./chatsky/utils/otel/otelcol-config-extras.yml:/etc/otelcol-config-extras.yml:ro
     ports:
       - "4317:4317"    # OTLP over gRPC receiver
       - "4318:4318"    # OTLP over HTTP receiver

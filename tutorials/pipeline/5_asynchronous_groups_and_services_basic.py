@@ -9,19 +9,19 @@ Here, %mddoclink(api,pipeline.service.group,ServiceGroup)s
 are shown for advanced and asynchronous data pre- and postprocessing.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import asyncio
 
-from dff.pipeline import Pipeline, ACTOR
+from chatsky.pipeline import Pipeline, ACTOR
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     is_interactive_mode,
     check_happy_path,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 # %% [markdown]
 """

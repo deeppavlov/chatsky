@@ -4,36 +4,36 @@ Basic Concepts
 Introduction
 ~~~~~~~~~~~~
 
-The Dialog Flow Framework (DFF) is a modern tool for designing conversational services.
+Chatsky is a modern tool for designing conversational services.
 
-DFF introduces a specialized Domain-Specific Language (DSL) based on standard Python functions and data structures
+Chatsky introduces a specialized Domain-Specific Language (DSL) based on standard Python functions and data structures
 which makes it very easy for developers with any level of expertise to design a script for user - bot interaction. 
 The script comes in a form of a *dialog graph* where
 each node equals a specific state of the dialog, i.e. a specific conversation turn.
 The graph includes the majority of the conversation logic, and covers one or several user scenarios, all in a single Python dict.
 
-In this tutorial, we describe the basics of DFF API,
-and walk you through the process of creating and maintaining a conversational service with the help of DFF.
+In this tutorial, we describe the basics of Chatsky API,
+and walk you through the process of creating and maintaining a conversational service with the help of Chatsky.
 
 
-Creating Conversational Services with DFF
+Creating Conversational Services with Chatsky
 ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Installation
 ============
 
-To get started with DFF, you need to install its core dependencies, which can be done using the following command:
+To get started with Chatsky, you need to install its core dependencies, which can be done using the following command:
 
 .. code-block:: shell
 
-    pip3 install dff
+    pip3 install chatsky
 
 Defining Dialogue Goals and User Scenarios
 ==========================================
 
-To create a conversational service using Dialog Flow Framework (DFF), you start by defining the overall dialogue goal 
+To create a conversational service using Chatsky, you start by defining the overall dialogue goal
 and breaking down the dialogue into smaller scenarios based on the user intents or actions that you want to cover.
-DFF's Domain-Specific Language makes it easy to break down the dialog script into `flows`, i.e. named groups of nodes
+Chatsky's Domain-Specific Language makes it easy to break down the dialog script into `flows`, i.e. named groups of nodes
 unified by a specific purpose.
 
 For instance, if one of the dialog options that we provide to the user is to play a game,
@@ -44,7 +44,7 @@ cover other topics, e.g. 'time' flow can include questions and answers related t
 Creating Dialogue Flows for User Scenarios
 ==========================================
 
-Once you have DFF installed, you can define dialog flows targeting various user scenarios
+Once you have Chatsky installed, you can define dialog flows targeting various user scenarios
 and combine them in a global script object. A flow consists of one or more nodes
 that represent conversation turns.
 
@@ -79,9 +79,9 @@ Example flow & script
 .. code-block:: python
     :linenos:
 
-    from dff.pipeline import Pipeline
-    from dff.script import TRANSITIONS, RESPONSE, Message
-    import dff.script.conditions as cnd
+    from chatsky.pipeline import Pipeline
+    from chatsky.script import TRANSITIONS, RESPONSE, Message
+    import chatsky.script.conditions as cnd
 
     ping_pong_script = {
         "greeting_flow": {
@@ -191,7 +191,7 @@ Processing Definition
     * `Pipeline processors <../tutorials/tutorials.pipeline.2_pre_and_post_processors.html>`_
 
 Processing user requests and extracting additional parameters is a crucial part of building a conversational bot. 
-DFF allows you to define how user requests will be processed to extract additional parameters.
+Chatsky allows you to define how user requests will be processed to extract additional parameters.
 This is done by passing callbacks to a special ``PROCESSING`` fields in a Node dict.
 
 * User input can be altered with ``PRE_RESPONSE_PROCESSING`` and will happen **before** response generation. See `tutorial on pre-response processing`_.
@@ -223,7 +223,7 @@ For instance, if a user wants to know a schedule, you may need to access a datab
 
 If you retrieve data from the database or API, it's important to validate it to ensure it meets expectations.
 
-Since DFF extensively leverages pydantic, you can resort to the validation tools of this feature-rich library.
+Since Chatsky extensively leverages pydantic, you can resort to the validation tools of this feature-rich library.
 For instance, given that each processing routine is a callback, you can use tools like pydantic's `validate_call`
 to ensure that the returned values match the function signature.
 Error handling logic can also be incorporated into these callbacks.
@@ -246,9 +246,9 @@ The latter allows you to customize the response based on the specific scenario a
 Handling Fallbacks
 ==================
 
-In DFF, you should provide handling for situations where the user makes requests
+In Chatsky, you should provide handling for situations where the user makes requests
 that do not trigger any of the transitions specified in the script graph. 
-To cover that use case, DFF requires you to define a fallback node that the agent will move to
+To cover that use case, Chatsky requires you to define a fallback node that the agent will move to
 when no adequate transition has been found.
 
 Like other nodes, the fallback node can either use a message or a callback to produce a response
@@ -281,7 +281,7 @@ Periodically testing the conversational service is crucial to ensure it works co
 You should also be prepared to debug the code and dialogue logic if problems are discovered during testing. 
 Thorough testing helps identify and resolve any potential problems in the conversation flow.
 
-The basic testing procedure offered by DFF is end-to-end testing of the pipeline and the script
+The basic testing procedure offered by Chatsky is end-to-end testing of the pipeline and the script
 which ensures that the pipeline yields correct responses for any given input.
 It requires a sequence of user request - bot response pairs that form the happy path of your
 conversational service.
@@ -299,7 +299,7 @@ the happy path and the pipeline. The function will play out a dialog with the pi
 
 .. code-block:: python
 
-    from dff.utils.testing.common import check_happy_path
+    from chatsky.utils.testing.common import check_happy_path
 
     check_happy_path(pipeline, happy_path)
 
@@ -310,7 +310,7 @@ Setting up bot performance monitoring and usage analytics is essential to monito
 Monitoring helps you understand how users are interacting with the bot and whether any improvements are needed.
 Analytics data can provide valuable insights for refining the bot's behavior and responses.
 
-DFF provides a `statistics` module as an out-of-the-box solution for collecting arbitrary statistical metrics
+Chatsky provides a `statistics` module as an out-of-the-box solution for collecting arbitrary statistical metrics
 from your service. Setting up the data collection is as easy as instantiating the relevant class in the same
 context with the pipeline. 
 What's more, the data you obtain can be visualized right away using Apache Superset as a charting engine.
@@ -337,7 +337,7 @@ Data protection is a critical consideration in bot development, especially when 
 
 .. note::
 
-    The DFF framework helps ensure the safety of your application by storing the history and other user data present
+    The Chatsky framework helps ensure the safety of your application by storing the history and other user data present
     in the ``Context`` object under unique ids and abstracting the storage logic away from the user interface.
     As a result, it offers the basic level of data protection making it impossible to gain unlawful access to personal information.
 
@@ -368,7 +368,7 @@ Scalability ensures that the bot can handle a growing user base without performa
 While having only one application instance will suffice in most cases, there are many ways
 how you can adapt the application to a high load environment.
 
-* With the database connection support that DFF offers out of the box, DFF projects can be easily scaled through sharing the same database between multiple application instances. However, using an external database is required due to the fact that this is the only kind of storage that can be efficiently shared between processes.
+* With the database connection support that Chatsky offers out of the box, Chatsky projects can be easily scaled through sharing the same database between multiple application instances. However, using an external database is required due to the fact that this is the only kind of storage that can be efficiently shared between processes.
 * Likewise, using multiple database instances to ensure the availability of data is also an option.
 * The structure of the `Context` object makes it easy to vertically partition the data storing different subsets of data across multiple database instances.
 

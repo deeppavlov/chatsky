@@ -7,20 +7,20 @@ This tutorial shows the global setting of transitions.
 Here, global [conditions](%doclink(api,script.conditions.std_conditions))
 for default transition between many different script steps are shown.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import re
 
-from dff.script import GLOBAL, TRANSITIONS, RESPONSE, Message
-import dff.script.conditions as cnd
-import dff.script.labels as lbl
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.script import GLOBAL, TRANSITIONS, RESPONSE, Message
+import chatsky.script.conditions as cnd
+import chatsky.script.labels as lbl
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

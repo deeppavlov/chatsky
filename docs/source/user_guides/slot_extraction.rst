@@ -5,7 +5,7 @@ Introduction
 ~~~~~~~~~~~~
 
 Extracting and filling slots is an essential part of any conversational service
-that comprises the inherent business logic. Like most frameworks, DFF
+that comprises the inherent business logic. Like most frameworks, Chatsky
 provides components that address this task as a part of its ``slots`` module.
 These can be easily customized to leverage neural networks specifically designed
 for slot extraction or any other logic you might want to integrate.
@@ -17,16 +17,16 @@ Defining slots
 ==============
 
 The basic building block of the API is the
-`BaseSlot <../apiref/dff.slots.slots.html#dff.slots.slots.BaseSlot>`_ class
+`BaseSlot <../apiref/chatsky.slots.slots.html#chatsky.slots.slots.BaseSlot>`_ class
 and its descendants that vary depending on the value extraction logic.
 Each slot has a name by which it can be accessed and a method for extracting values.
 Below, we demonstrate the most basic class that extracts values
 from user utterances using a regular expression:
-`RegexpSlot <../apiref/dff.slots.slots.html#dff.slots.types.RegexpSlot>`_.
+`RegexpSlot <../apiref/chatsky.slots.slots.html#chatsky.slots.types.RegexpSlot>`_.
 
 .. code-block:: python
 
-    from dff.slots import RegexpSlot
+    from chatsky.slots import RegexpSlot
     ...
     email_slot = RegexpSlot(regexp=r"[a-z@\.A-Z]+")
 
@@ -52,8 +52,8 @@ full advantage of its predictions.
 .. code-block:: python
 
     import requests
-    from dff.slots import FunctionSlot
-    from dff.script import Message
+    from chatsky.slots import FunctionSlot
+    from chatsky.script import Message
 
     # we assume that there is a 'NER' service running on port 5000 
     def extract_first_name(utterance: Message) -> str:
@@ -71,14 +71,14 @@ full advantage of its predictions.
 
 Individual slots can be grouped allowing the developer to access them together
 as a namespace. This can be achieved using the
-`GroupSlot <../apiref/dff.slots.slots.html#dff.slots.slots.GroupSlot>`_
+`GroupSlot <../apiref/chatsky.slots.slots.html#chatsky.slots.slots.GroupSlot>`_
 component that is initialized with other slot instances as its children.
 The group slots also allows for arbitrary nesting, i.e. it is possible to include
 group slots in other group slots.
 
 .. code-block:: python
 
-    from dff.slots import GroupSlot
+    from chatsky.slots import GroupSlot
 
     profile_slot = GroupSlot(name=name_slot, email=email_slot)
 
@@ -87,7 +87,7 @@ That slot is a root slot: it contains all other group and value slots.
 
 .. code-block:: python
 
-    from dff.pipeline import Pipeline
+    from chatsky.pipeline import Pipeline
 
     pipeline = Pipeline.from_script(..., slots=profile_slot)
 
@@ -104,7 +104,7 @@ If you have a nested structure (of ``GroupSlots``) separate the names with dots:
 
 .. code-block:: python
 
-    from dff.slots import GroupSlot
+    from chatsky.slots import GroupSlot
 
     root_slot = GroupSlot(profile=GroupSlot(name=name_slot, email=email_slot))
 
@@ -114,13 +114,13 @@ Using slots
 ===========
 
 Slots can be extracted at the ``PRE_TRANSITIONS_PROCESSING`` stage
-using the `extract <../apiref/dff.slots.processing.html#dff.slots.processing.extract>`_
+using the `extract <../apiref/chatsky.slots.processing.html#chatsky.slots.processing.extract>`_
 function from the `processing` submodule.
 You can pass any number of names of the slots that you want to extract to this function.
 
 .. code-block:: python
 
-    from dff.slots.processing import extract
+    from chatsky.slots.processing import extract
 
     PRE_TRANSITIONS_PROCESSING: {"extract_first_name": extract("name", "email")}
 
@@ -128,7 +128,7 @@ The `conditions` submodule provides a function for checking if specific slots ha
 
 .. code-block:: python
     
-    from dff.slots.conditions import slots_extracted
+    from chatsky.slots.conditions import slots_extracted
 
     TRANSITIONS: {"all_information": slots_extracted("name", "email", mode="all")}
     TRANSITIONS: {"partial_information": slots_extracted("name", "email", mode="any")}
@@ -136,7 +136,7 @@ The `conditions` submodule provides a function for checking if specific slots ha
 .. note::
 
     You can combine ``slots_extracted`` with the
-    `negation <../apiref/dff.script.conditions.std_conditions.html#dff.script.conditions.std_conditions.negation>`_
+    `negation <../apiref/chatsky.script.conditions.std_conditions.html#chatsky.script.conditions.std_conditions.negation>`_
     condition to make a transition to an extractor node if a slot has not been extracted yet.
 
 Both `processing` and `response` submodules provide functions for filling templates with
@@ -145,8 +145,8 @@ Choose whichever one you like, there's not much difference between them at the m
 
 .. code-block:: python
     
-    from dff.slots.processing import fill_template
-    from dff.slots.response import filled_template
+    from chatsky.slots.processing import fill_template
+    from chatsky.slots.response import filled_template
 
     PRE_RESPONSE_PROCESSING: {"fill_response_slots": slot_procs.fill_template()}
     RESPONSE: Message(text="Your first name: {name}")
@@ -161,7 +161,7 @@ Further reading
 ===============
 
 All of the functions described in the previous sections call methods of the
-`SlotManager <../apiref/dff.slots.slots.html#dff.slots.slots.SlotManager>`_
+`SlotManager <../apiref/chatsky.slots.slots.html#chatsky.slots.slots.SlotManager>`_
 class under the hood.
 
 An instance of this class can be accessed in runtime via ``ctx.framework_data.slot_manager``.

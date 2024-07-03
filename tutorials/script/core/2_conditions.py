@@ -8,19 +8,19 @@ setting transition conditions from one node to another.
 Here, [conditions](%doclink(api,script.conditions.std_conditions))
 for script transitions are shown.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import re
 
-from dff.script import Context, TRANSITIONS, RESPONSE, Message
-import dff.script.conditions as cnd
-from dff.pipeline import Pipeline
+from chatsky.script import Context, TRANSITIONS, RESPONSE, Message
+import chatsky.script.conditions as cnd
+from chatsky.pipeline import Pipeline
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -38,7 +38,7 @@ Condition functions have signature
 
     def func(ctx: Context, pipeline: Pipeline) -> bool
 
-Out of the box `dff.script.conditions` offers the
+Out of the box `chatsky.script.conditions` offers the
     following options for setting conditions:
 
 * `exact_match` returns `True` if the user's request completely
@@ -68,7 +68,7 @@ def always_true_condition(ctx: Context, pipeline: Pipeline) -> bool:
     return True
 ```
 always returns `True` and `always_true_condition` function
-is the same as `dff.script.conditions.std_conditions.true()`.
+is the same as `chatsky.script.conditions.std_conditions.true()`.
 
 The functions to be used in the `toy_script` are declared here.
 """

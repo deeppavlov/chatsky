@@ -2,12 +2,12 @@ import importlib
 
 import pytest
 
-from dff.script import Context
-from dff.pipeline import Pipeline
-from dff.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
+from chatsky.script import Context
+from chatsky.pipeline import Pipeline
+from chatsky.pipeline.types import ExtraHandlerRuntimeInfo, ServiceRuntimeInfo
 
 try:
-    from dff.stats import default_extractors
+    from chatsky.stats import default_extractors
 except ImportError:
     pytest.skip(allow_module_level=True, reason="One of the Opentelemetry packages is missing.")
 
@@ -45,8 +45,8 @@ async def test_otlp_integration(context, tracer_exporter_and_provider, log_expor
     _, tracer_provider = tracer_exporter_and_provider
     log_exporter, logger_provider = log_exporter_and_provider
     tutorial_module = importlib.import_module("tutorials.stats.1_extractor_functions")
-    tutorial_module.dff_instrumentor.uninstrument()
-    tutorial_module.dff_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
+    tutorial_module.chatsky_instrumentor.uninstrument()
+    tutorial_module.chatsky_instrumentor.instrument(logger_provider=logger_provider, tracer_provider=tracer_provider)
     runtime_info = ExtraHandlerRuntimeInfo(
         func=lambda x: x,
         stage="BEFORE",

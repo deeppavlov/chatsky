@@ -1,10 +1,10 @@
 import importlib
 
-from dff.script import Message
+from chatsky.script import Message
 from tests.test_utils import get_path_from_tests_to_current_dir
-from dff.pipeline import Pipeline
-from dff.script.core.keywords import RESPONSE, TRANSITIONS
-import dff.script.conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.script.core.keywords import RESPONSE, TRANSITIONS
+import chatsky.script.conditions as cnd
 
 
 dot_path_to_addon = get_path_from_tests_to_current_dir(__file__, separator=".")

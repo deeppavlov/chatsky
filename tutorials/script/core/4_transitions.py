@@ -10,20 +10,20 @@ for transition between many different script steps are shown.
 Some of the destination steps can be set using
 [labels](%doclink(api,script.labels.std_labels)).
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import re
 
-from dff.script import TRANSITIONS, RESPONSE, Context, ConstLabel, Message
-import dff.script.conditions as cnd
-import dff.script.labels as lbl
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.script import TRANSITIONS, RESPONSE, Context, ConstLabel, Message
+import chatsky.script.conditions as cnd
+import chatsky.script.labels as lbl
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -75,7 +75,7 @@ the one that has the highest priority will be executed.
 Of the set of `True` conditions with largest
 priority the first met condition will be executed.
 
-Out of the box `dff.script.core.labels`
+Out of the box `chatsky.script.core.labels`
 offers the following methods:
 
 * `lbl.repeat()` returns transition handler

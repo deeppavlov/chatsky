@@ -2,11 +2,11 @@ import asyncio
 import sys
 import pathlib
 
-from dff.script import RESPONSE, TRANSITIONS, Message
-from dff.messengers.console import CLIMessengerInterface
-from dff.messengers.common import CallbackMessengerInterface
-from dff.pipeline import Pipeline
-import dff.script.conditions as cnd
+from chatsky.script import RESPONSE, TRANSITIONS, Message
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.messengers.common import CallbackMessengerInterface
+from chatsky.pipeline import Pipeline
+import chatsky.script.conditions as cnd
 
 SCRIPT = {
     "pingpong_flow": {
@@ -42,7 +42,7 @@ def test_cli_messenger_interface(monkeypatch):
     monkeypatch.setattr("builtins.input", lambda _: "Ping")
     sys.path.append(str(pathlib.Path(__file__).parent.absolute()))
 
-    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's DFF powered bot, let's chat!")
+    pipeline.messenger_interface = CLIMessengerInterface(intro="Hi, it's Chatsky powered bot, let's chat!")
 
     def loop() -> bool:
         loop.runs_left -= 1

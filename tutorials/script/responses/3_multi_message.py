@@ -3,21 +3,21 @@
 # Responses: 3. Multi Message
 
 This tutorial shows how to store several messages inside a single one.
-This might be useful if you want DFF Pipeline to send `response` candidates
+This might be useful if you want Chatsky Pipeline to send `response` candidates
 to the messenger interface instead of a final response.
 
 However, this approach is not recommended due to history incompleteness.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 
-from dff.script import TRANSITIONS, RESPONSE, Message
-import dff.script.conditions as cnd
+from chatsky.script import TRANSITIONS, RESPONSE, Message
+import chatsky.script.conditions as cnd
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

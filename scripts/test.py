@@ -64,7 +64,7 @@ def _test(coverage: bool = False, dependencies: bool = False, quick: bool = Fals
             "html",
             "--cov-report",
             "term",
-            "--cov=dff",
+            "--cov=chatsky",
             *args,
         ]
     else:

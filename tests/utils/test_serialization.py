@@ -4,7 +4,7 @@ import pytest
 from pydantic import BaseModel
 from copy import deepcopy
 
-import dff.utils.devel.json_serialization as json_ser
+import chatsky.utils.devel.json_serialization as json_ser
 
 
 class UnserializableClass:

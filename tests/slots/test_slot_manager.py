@@ -1,6 +1,6 @@
 import pytest
 
-from dff.slots.slots import (
+from chatsky.slots.slots import (
     SlotManager,
     RegexpSlot,
     GroupSlot,
@@ -9,7 +9,7 @@ from dff.slots.slots import (
     ExtractedValueSlot,
     SlotNotExtracted,
 )
-from dff.script import Message
+from chatsky.script import Message
 
 
 def faulty_func(_):

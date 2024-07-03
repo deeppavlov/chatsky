@@ -13,15 +13,15 @@ Caches are kept in a library-wide singleton
 and are cleared at the end of each turn.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script.conditions import true
-from dff.script import Context, TRANSITIONS, RESPONSE, Message
-from dff.script.labels import repeat
-from dff.pipeline import Pipeline
-from dff.utils.turn_caching import cache
-from dff.utils.testing.common import (
+from chatsky.script.conditions import true
+from chatsky.script import Context, TRANSITIONS, RESPONSE, Message
+from chatsky.script.labels import repeat
+from chatsky.pipeline import Pipeline
+from chatsky.utils.turn_caching import cache
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,

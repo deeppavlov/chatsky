@@ -12,19 +12,19 @@ Pipeline's %mddoclink(api,pipeline.pipeline.pipeline,Pipeline.from_dict)
 static method is used for pipeline creation (from dictionary).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.pipeline import Service, Pipeline, ACTOR
+from chatsky.pipeline import Service, Pipeline, ACTOR
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

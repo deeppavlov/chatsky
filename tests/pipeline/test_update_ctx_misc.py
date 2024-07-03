@@ -1,7 +1,7 @@
 import pytest
 
-from dff.pipeline import Pipeline
-from dff.script import Message, RESPONSE, TRANSITIONS
+from chatsky.pipeline import Pipeline
+from chatsky.script import Message, RESPONSE, TRANSITIONS
 
 
 @pytest.mark.asyncio
