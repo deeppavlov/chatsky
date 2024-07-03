@@ -20,7 +20,7 @@ making sure that the conversation follows the expected flow and providing a pers
 Below you can see a diagram of user request processing with Actor.
 Both `request` and `response` are saved to :py:class:`.Context`.
 
-.. figure:: /_static/drawio/dfe/user_actor.png
+.. figure:: /_static/drawio/core/user_actor.png
 """
 
 from __future__ import annotations

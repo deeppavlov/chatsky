@@ -17,7 +17,7 @@ and walk you through the process of creating and maintaining a conversational se
 
 
 Creating Conversational Services with Chatsky
-~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
 
 Installation
 ============
