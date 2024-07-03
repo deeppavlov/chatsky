@@ -63,7 +63,7 @@ in terms and datastructures of Chatsky.
 # %%
 
 EXAMPLE_ATTACHMENT_SOURCE = (
-    "https://github.com/deeppavlov/" + "chatsky/wiki/example_attachments"
+    "https://github.com/deeppavlov/chatsky/wiki/example_attachments"
 )
 
 image_url = HttpUrl(f"{EXAMPLE_ATTACHMENT_SOURCE}/deeppavlov.png")

@@ -52,7 +52,7 @@ be found here:
 # %%
 
 EXAMPLE_ATTACHMENT_SOURCE = (
-    "https://github.com/deeppavlov/" + "chatsky/wiki/example_attachments"
+    "https://github.com/deeppavlov/chatsky/wiki/example_attachments"
 )
 
 location_data = {"latitude": 50.65, "longitude": 3.916667}
