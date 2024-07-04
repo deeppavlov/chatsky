@@ -16,7 +16,7 @@ from pydantic import BaseModel, Field, PositiveInt
 from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
-from dff.script import Context
+from chatsky.script import Context
 
 ALL_ITEMS = "__all__"
 """
