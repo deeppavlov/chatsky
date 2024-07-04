@@ -253,7 +253,7 @@ class DBContextStorage(ABC):
 
         :param storage_key: Hashable key used to retrieve Context instance.
         :return: Tuple of context dictionary and its primary ID,
-        if no context is found dictionary will be empty and ID will be None.
+            if no context is found dictionary will be empty and ID will be None.
         """
         raise NotImplementedError
 
