@@ -160,7 +160,7 @@ class OtelInstrumentor(BaseInstrumentor):
         ctx, _, info = args
         pipeline_component = get_extra_handler_name(info)
         attributes = {
-            "context_id": str(ctx.id),
+            "context_id": str(ctx._primary_id),
             "request_id": get_last_index(ctx.requests),
             "pipeline_component": pipeline_component,
         }

@@ -33,13 +33,14 @@ def test_get_dict():
 def test_get_context():
     random.seed(42)
     context = get_context(2, (1, 2), (2, 3))
-    assert context == Context(
-        _primary_id=context._primary_id,
+    copy_ctx = Context(
         labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
         requests={0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "3 "})},
         responses={0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})},
         misc={"0": " d]", "1": " (b"},
     )
+    copy_ctx._primary_id = context._primary_id
+    assert context == copy_ctx
 
 
 def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):

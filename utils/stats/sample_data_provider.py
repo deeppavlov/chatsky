@@ -101,7 +101,7 @@ async def worker(queue: asyncio.Queue):
     in_text = random.choice(answers) if answers else "go to fallback"
     in_message = Message(in_text)
     await asyncio.sleep(random.random() * 3)
-    ctx = await pipeline._run_pipeline(in_message, ctx.id)
+    ctx = await pipeline._run_pipeline(in_message, ctx._primary_id)
     await asyncio.sleep(random.random() * 3)
     await queue.put(ctx)
 
