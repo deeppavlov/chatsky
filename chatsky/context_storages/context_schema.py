@@ -13,7 +13,7 @@ from asyncio import gather
 from uuid import uuid4
 from enum import Enum
 from pydantic import BaseModel, Field, PositiveInt
-from typing import Any, Coroutine, List, Dict, Optional, Callable, Tuple, Union, Awaitable
+from typing import Any, List, Dict, Optional, Callable, Tuple, Union, Awaitable
 from typing_extensions import Literal
 
 from chatsky.script import Context

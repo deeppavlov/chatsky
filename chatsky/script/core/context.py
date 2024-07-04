@@ -310,11 +310,11 @@ class Context(BaseModel):
     def __eq__(self, value: object) -> bool:
         if isinstance(value, Context):
             return (
-                self._primary_id == value._primary_id and
-                self.labels == value.labels and
-                self.requests == value.requests and
-                self.responses == value.responses and
-                self.misc == value.misc
+                self._primary_id == value._primary_id
+                and self.labels == value.labels
+                and self.requests == value.requests
+                and self.responses == value.responses
+                and self.misc == value.misc
             )
         else:
             return False

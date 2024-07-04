@@ -335,6 +335,7 @@ async def _does_table_exist(pool, path, table_name) -> bool:
     :param table_name: the table name.
     :returns: True if table exists, False otherwise.
     """
+
     async def callee(session):
         await session.describe_table(join(path, table_name))
 
@@ -353,6 +354,7 @@ async def _create_contexts_table(pool, path, table_name):
     :param path: path to table being checked.
     :param table_name: the table name.
     """
+
     async def callee(session):
         await session.create_table(
             "/".join([path, table_name]),
@@ -379,6 +381,7 @@ async def _create_logs_table(pool, path, table_name):
     :param path: path to table being checked.
     :param table_name: the table name.
     """
+
     async def callee(session):
         await session.create_table(
             "/".join([path, table_name]),
