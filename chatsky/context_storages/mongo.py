@@ -54,7 +54,7 @@ class MongoContextStorage(DBContextStorage):
         path: str,
         context_schema: Optional[ContextSchema] = None,
         serializer: Any = DefaultSerializer(),
-        collection_prefix: str = "dff_collection",
+        collection_prefix: str = "chatsky_collection",
     ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True

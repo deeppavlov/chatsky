@@ -58,7 +58,7 @@ class RedisContextStorage(DBContextStorage):
         path: str,
         context_schema: Optional[ContextSchema] = None,
         serializer: Any = DefaultSerializer(),
-        key_prefix: str = "dff_keys",
+        key_prefix: str = "chatsky_keys",
     ):
         DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = True

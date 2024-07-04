@@ -170,7 +170,7 @@ def test_ydb(testing_context, context_id):
             os.environ["YDB_ENDPOINT"],
             os.environ["YDB_DATABASE"],
         ),
-        table_name_prefix="test_dff_table",
+        table_name_prefix="test_chatsky_table",
     )
     run_all_functions(db, testing_context, context_id)
     asyncio.run(delete_ydb(db))

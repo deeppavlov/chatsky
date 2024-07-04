@@ -69,7 +69,7 @@ class YDBContextStorage(DBContextStorage):
         path: str,
         context_schema: Optional[ContextSchema] = None,
         serializer: Any = DefaultSerializer(),
-        table_name_prefix: str = "dff_table",
+        table_name_prefix: str = "chatsky_table",
         timeout=5,
     ):
         DBContextStorage.__init__(self, path, context_schema, serializer)

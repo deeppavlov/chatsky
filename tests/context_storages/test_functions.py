@@ -1,10 +1,10 @@
 from time import sleep
 from typing import Dict, Union
-from dff.context_storages import DBContextStorage, ALL_ITEMS
-from dff.context_storages.context_schema import SchemaField
-from dff.pipeline import Pipeline
-from dff.script import Context, Message
-from dff.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
+from chatsky.context_storages import DBContextStorage, ALL_ITEMS
+from chatsky.context_storages.context_schema import SchemaField
+from chatsky.pipeline import Pipeline
+from chatsky.script import Context, Message
+from chatsky.utils.testing import TOY_SCRIPT_ARGS, HAPPY_PATH, check_happy_path
 
 
 def simple_test(db: DBContextStorage, testing_context: Context, context_id: str):

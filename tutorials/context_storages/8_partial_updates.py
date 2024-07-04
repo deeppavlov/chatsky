@@ -5,23 +5,23 @@
 The following tutorial shows the advanced usage of context storage and context storage schema.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import pathlib
 
-from dff.context_storages import (
+from chatsky.context_storages import (
     context_storage_factory,
     ALL_ITEMS,
 )
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 # %%
 pathlib.Path("dbs").mkdir(exist_ok=True)
@@ -103,7 +103,7 @@ db.context_schema.duplicate_context_in_logs = False
 # `supports_async` if set will try to perform *some* operations asynchroneously.
 # It is set automatically for different context storages to True or False according to their
 # capabilities. You should change it only if you use some external DB distribution that was not
-# tested by DFF development team.
+# tested by Chatsky development team.
 # NB! Here it is set to True because we use pickle context storage, backed up be `aiofiles` library.
 db.context_schema.supports_async = True
 

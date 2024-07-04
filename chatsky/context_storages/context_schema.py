@@ -148,7 +148,7 @@ class ContextSchema(BaseModel, validate_assignment=True, arbitrary_types_allowed
     If set will try to perform *some* operations asynchronously.
 
     WARNING! Be careful with this flag. Some databases support asynchronous reads and writes,
-    and some do not. For all `DFF` context storages it will be set automatically during `__init__`.
+    and some do not. For all `Chatsky` context storages it will be set automatically during `__init__`.
     Change it only if you implement a custom context storage.
     """
 
