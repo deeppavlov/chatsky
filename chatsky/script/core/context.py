@@ -313,8 +313,7 @@ class Context(BaseModel):
                 self._primary_id == value._primary_id and
                 self.labels == value.labels and
                 self.requests == value.requests and
-                self.responses == value.responses and
-                self.framework_data == value.framework_data
+                self.responses == value.responses
             )
         else:
             return False
