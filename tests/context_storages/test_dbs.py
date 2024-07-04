@@ -5,7 +5,7 @@ import socket
 import os
 from platform import system
 
-from dff.context_storages import (
+from chatsky.context_storages import (
     get_protocol_install_suggestion,
     json_available,
     pickle_available,
@@ -19,7 +19,7 @@ from dff.context_storages import (
     context_storage_factory,
 )
 
-from dff.utils.testing.cleanup_db import (
+from chatsky.utils.testing.cleanup_db import (
     delete_shelve,
     delete_json,
     delete_pickle,
@@ -61,8 +61,8 @@ YDB_ACTIVE = ping_localhost(2136)
 @pytest.mark.parametrize(
     ["protocol", "expected"],
     [
-        ("pickle", "Try to run `pip install dff[pickle]`"),
-        ("postgresql", "Try to run `pip install dff[postgresql]`"),
+        ("pickle", "Try to run `pip install chatsky[pickle]`"),
+        ("postgresql", "Try to run `pip install chatsky[postgresql]`"),
         ("false", ""),
     ],
 )

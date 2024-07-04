@@ -7,14 +7,14 @@ This tutorial shows how to benchmark context storages.
 For more info see [API reference](%doclink(api,utils.db_benchmark.benchmark)).
 """
 
-# %pip install dff[benchmark,postgresql,mongodb,redis,mysql,sqlite,ydb]
+# %pip install chatsky[benchmark,postgresql,mongodb,redis,mysql,sqlite,ydb]
 
 # %%
 from pathlib import Path
 from platform import system
 import tempfile
 
-import dff.utils.db_benchmark as benchmark
+import chatsky.utils.db_benchmark as benchmark
 
 # %% [markdown]
 """
@@ -89,7 +89,7 @@ to configure benchmark behaviour.
 Its most basic implementation is
 %mddoclink(api,utils.db_benchmark.basic_config,BasicBenchmarkConfig).
 
-DFF provides configuration presets in the
+Chatsky provides configuration presets in the
 %mddoclink(api,utils.db_benchmark.basic_config) module,
 covering various contexts, messages, and edge cases.
 You can use these presets by passing them to the benchmark functions or create
@@ -176,10 +176,10 @@ To run the app, execute:
 
 ```
 # download file
-curl "https://deeppavlov.github.io/dialog_flow_framework/"\
+curl "https://deeppavlov.github.io/chatsky/"\
 "_misc/benchmark_streamlit.py" -o benchmark_streamlit.py
 # install dependencies
-pip install dff[benchmark]
+pip install chatsky[benchmark]
 # run
 streamlit run benchmark_streamlit.py
 ```

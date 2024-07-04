@@ -1,6 +1,6 @@
 import uuid
 
-from dff.script import Context, Message
+from chatsky.script import Context, Message
 import pytest
 
 

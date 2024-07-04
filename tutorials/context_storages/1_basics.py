@@ -10,20 +10,20 @@ for creating a context storage by path.
 In this example JSON file is used as a storage.
 """
 
-# %pip install dff[json,pickle]
+# %pip install chatsky[json,pickle]
 
 # %%
 import pathlib
 
-from dff.context_storages import context_storage_factory
+from chatsky.context_storages import context_storage_factory
 
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
+from chatsky.utils.testing.toy_script import TOY_SCRIPT_ARGS, HAPPY_PATH
 
 pathlib.Path("dbs").mkdir(exist_ok=True)
 db = context_storage_factory("json://dbs/file.json")

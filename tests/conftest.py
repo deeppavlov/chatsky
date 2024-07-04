@@ -1,7 +1,7 @@
 import pytest
 
 
-def pytest_report_header(config, start_path, startdir):
+def pytest_report_header(config, start_path):
     print(f"allow_skip: {config.getoption('--allow-skip') }")
 
 

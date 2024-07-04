@@ -9,12 +9,12 @@ This tutorial is a more advanced version of the
 [previous tutorial](%doclink(tutorial,pipeline.4_groups_and_conditions_basic)).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.pipeline import (
+from chatsky.pipeline import (
     Service,
     Pipeline,
     ServiceGroup,
@@ -25,12 +25,12 @@ from dff.pipeline import (
     ACTOR,
 )
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 
@@ -44,9 +44,14 @@ Service groups can be defined as lists of `ServiceBuilders`
 Alternatively, the groups can be defined as objects
     with following constructor arguments:
 
-* `components` (required) - A list of ServiceBuilder objects,
-    ServiceGroup objects and lists of them.
-* `wrappers` - A list of pipeline wrappers, see tutorial 7.
+* `components` (required) - A list of `ServiceBuilder` objects,
+    `ServiceGroupBuilder` objects and lists of them.
+* `before_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
+        See tutorials 6 and 7.
+* `after_handler` - a list of `ExtraHandlerFunction` objects,
+        `ExtraHandlerBuilder` objects and lists of them.
+        See tutorials 6 and 7.
 * `timeout` - Pipeline timeout, see tutorial 5.
 * `asynchronous` - Whether or not this service group _should_ be asynchronous
     (keep in mind that not all service groups _can_ be asynchronous),
