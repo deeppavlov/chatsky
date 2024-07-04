@@ -34,6 +34,7 @@ def test_get_context():
     random.seed(42)
     context = get_context(2, (1, 2), (2, 3))
     assert context == Context(
+        _primary_id=context._primary_id,
         labels={0: ("flow_0", "node_0"), 1: ("flow_1", "node_1")},
         requests={0: Message(misc={"0": ">e"}), 1: Message(misc={"0": "3 "})},
         responses={0: Message(misc={"0": "zv"}), 1: Message(misc={"0": "sh"})},
@@ -49,6 +50,7 @@ def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
     )
     context = config.get_context()
     actual_context = get_context(1, (2, 2), (3, 3, 3))
+    actual_context._primary_id = context._primary_id
     assert context == actual_context
 
     info = config.info()
@@ -69,6 +71,7 @@ def test_benchmark_config(monkeypatch: pytest.MonkeyPatch):
             assert len(context.labels) == len(context.requests) == len(context.responses) == index + 1
 
             actual_context = get_context(index + 1, (2, 2), (3, 3, 3))
+            actual_context._primary_id = context._primary_id
             assert context == actual_context
 
 
@@ -93,6 +96,7 @@ def test_context_updater_with_steps(monkeypatch: pytest.MonkeyPatch):
             assert len(context.labels) == len(context.requests) == len(context.responses) == index
 
             actual_context = get_context(index, (2, 2), (3, 3, 3))
+            actual_context._primary_id = context._primary_id
             assert context == actual_context
 
 

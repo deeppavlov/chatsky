@@ -306,3 +306,15 @@ class Context(BaseModel):
             )
 
         return node
+
+    def __eq__(self, value: object) -> bool:
+        if isinstance(value, Context):
+            return (
+                self._primary_id == value._primary_id and
+                self.labels == value.labels and
+                self.requests == value.requests and
+                self.responses == value.responses and
+                self.framework_data == value.framework_data
+            )
+        else:
+            return False
