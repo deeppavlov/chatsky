@@ -83,12 +83,12 @@ class Context(BaseModel):
     """
     _created_at: int = PrivateAttr(default_factory=time_ns)
     """
-    Timestamp when the context was _first time saved to database_.
+    Timestamp when the context was **first time saved to database**.
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
     _updated_at: int = PrivateAttr(default_factory=time_ns)
     """
-    Timestamp when the context was _last time saved to database_.
+    Timestamp when the context was **last time saved to database**.
     It is set (and managed) by :py:class:`~chatsky.context_storages.DBContextStorage`.
     """
     labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
