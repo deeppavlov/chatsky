@@ -19,10 +19,11 @@ This allows developers to save the context data and resume the conversation late
 
 from __future__ import annotations
 import logging
-from uuid import UUID, uuid4
+from uuid import uuid4
+from time import time_ns
 from typing import Any, Optional, Union, Dict, List, Set, TYPE_CHECKING
 
-from pydantic import BaseModel, Field, field_validator
+from pydantic import BaseModel, Field, PrivateAttr, field_validator
 
 from chatsky.script.core.message import Message
 from chatsky.script.core.types import NodeLabel2Type
@@ -69,10 +70,26 @@ class Context(BaseModel):
     context storages to work.
     """
 
-    id: Union[UUID, int, str] = Field(default_factory=uuid4)
+    _storage_key: Optional[str] = PrivateAttr(default=None)
     """
-    `id` is the unique context identifier. By default, randomly generated using `uuid4` `id` is used.
-    `id` can be used to trace the user behavior, e.g while collecting the statistical data.
+    `_storage_key` is the storage-unique context identifier, by which it's stored in context storage.
+    By default, randomly generated using `uuid4` `_storage_key` is used.
+    `_storage_key` can be used to trace the user behavior, e.g while collecting the statistical data.
+    """
+    _primary_id: str = PrivateAttr(default_factory=lambda: str(uuid4()))
+    """
+    `_primary_id` is the unique context identifier. By default, randomly generated using `uuid4` `_primary_id` is used.
+    `_primary_id` can be used to trace the user behavior, e.g while collecting the statistical data.
+    """
+    _created_at: int = PrivateAttr(default_factory=time_ns)
+    """
+    Timestamp when the context was _first time saved to database_.
+    It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
+    """
+    _updated_at: int = PrivateAttr(default_factory=time_ns)
+    """
+    Timestamp when the context was _last time saved to database_.
+    It is set (and managed) by :py:class:`~dff.context_storages.DBContextStorage`.
     """
     labels: Dict[int, NodeLabel2Type] = Field(default_factory=dict)
     """
@@ -210,6 +227,14 @@ class Context(BaseModel):
                 del self.labels[index]
         if "framework_data" in field_names:
             self.framework_data = FrameworkData()
+
+    @property
+    def storage_key(self) -> Optional[str]:
+        """
+        Returns the key the context was saved in storage the last time.
+        Returns None if the context wasn't saved yet.
+        """
+        return self._storage_key
 
     @property
     def last_label(self) -> Optional[NodeLabel2Type]:
