@@ -1,7 +1,7 @@
 import pytest
 
-from dff.pipeline import Pipeline
-from dff.script import Message, RESPONSE, TRANSITIONS
+from chatsky.pipeline import Pipeline
+from chatsky.script import Message, RESPONSE, TRANSITIONS
 
 
 @pytest.mark.asyncio
@@ -12,9 +12,9 @@ async def test_update_ctx_misc():
     toy_script = {
         "root": {
             "start": {TRANSITIONS: {"success": condition}},
-            "success": {RESPONSE: Message(text="success"), TRANSITIONS: {"success": condition}},
+            "success": {RESPONSE: Message("success"), TRANSITIONS: {"success": condition}},
             "failure": {
-                RESPONSE: Message(text="failure"),
+                RESPONSE: Message("failure"),
             },
         }
     }

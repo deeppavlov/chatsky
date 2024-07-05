@@ -1,7 +1,7 @@
 # %%
-from dff.pipeline import Pipeline
-from dff.script import Context
-from dff.script.responses import choice
+from chatsky.pipeline import Pipeline
+from chatsky.script import Context
+from chatsky.script.responses import choice
 
 
 def test_response():

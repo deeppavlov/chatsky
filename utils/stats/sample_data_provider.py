@@ -11,18 +11,18 @@ to the service by multiple users.
 import random
 import asyncio
 from tqdm import tqdm
-from dff.script import Context, Message
-from dff.pipeline import Pipeline, Service, ACTOR, ExtraHandlerRuntimeInfo
-from dff.stats import (
+from chatsky.script import Context, Message
+from chatsky.pipeline import Pipeline, Service, ACTOR, ExtraHandlerRuntimeInfo
+from chatsky.stats import (
     default_extractors,
     OtelInstrumentor,
 )
-from dff.utils.testing.toy_script import MULTIFLOW_SCRIPT, MULTIFLOW_REQUEST_OPTIONS
+from chatsky.utils.testing.toy_script import MULTIFLOW_SCRIPT, MULTIFLOW_REQUEST_OPTIONS
 
 # %%
 # instrumentation code
-dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
-dff_instrumentor.instrument()
+chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317", insecure=True)
+chatsky_instrumentor.instrument()
 
 
 def slot_processor_1(ctx: Context):
@@ -36,7 +36,7 @@ def slot_processor_2(ctx: Context):
     }
 
 
-@dff_instrumentor
+@chatsky_instrumentor
 async def get_slots(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     return ctx.misc["slots"]
 
@@ -45,7 +45,7 @@ def confidence_processor(ctx: Context):
     ctx.misc["response_confidence"] = random.random()
 
 
-@dff_instrumentor
+@chatsky_instrumentor
 async def get_confidence(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     data = {"response_confidence": ctx.misc["response_confidence"]}
     return data
@@ -99,7 +99,7 @@ async def worker(queue: asyncio.Queue):
         flow, node = ["root", "start"]
     answers = list(MULTIFLOW_REQUEST_OPTIONS.get(flow, {}).get(node, []))
     in_text = random.choice(answers) if answers else "go to fallback"
-    in_message = Message(text=in_text)
+    in_message = Message(in_text)
     await asyncio.sleep(random.random() * 3)
     ctx = await pipeline._run_pipeline(in_message, ctx.id)
     await asyncio.sleep(random.random() * 3)

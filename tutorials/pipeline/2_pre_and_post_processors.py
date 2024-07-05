@@ -3,23 +3,23 @@
 # 2. Pre- and postprocessors
 
 The following tutorial shows more advanced usage of `pipeline`
-module as an extension to `dff.script.core`.
+module as an extension to `chatsky.script.core`.
 
 Here, %mddoclink(api,script.core.context,Context.misc)
 dictionary of context is used for storing additional data.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import logging
 
-from dff.messengers.common import CLIMessengerInterface
-from dff.script import Context, Message
+from chatsky.messengers.console import CLIMessengerInterface
+from chatsky.script import Context, Message
 
-from dff.pipeline import Pipeline
+from chatsky.pipeline import Pipeline
 
-from dff.utils.testing import (
+from chatsky.utils.testing import (
     check_happy_path,
     is_interactive_mode,
     HAPPY_PATH,
@@ -83,7 +83,7 @@ if __name__ == "__main__":
     if is_interactive_mode():
         ctx_id = 0  # 0 will be current dialog (context) identification.
         while True:
-            message = Message(text=input("Send request: "))
+            message = Message(input("Send request: "))
             ctx: Context = pipeline(message, ctx_id)
             print(f"Response: {ctx.last_response}")
             ping_pong = ctx.misc.get("ping", False) and ctx.misc.get(

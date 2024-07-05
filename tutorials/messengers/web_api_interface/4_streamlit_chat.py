@@ -7,7 +7,7 @@
 # A demonstration of the chat:
 # ![demo](https://user-images.githubusercontent.com/61429541/238721597-ef88261d-e9e6-497d-ba68-0bcc9a765808.png)
 
-# %pip install dff streamlit streamlit-chat
+# %pip install chatsky streamlit streamlit-chat
 
 # %% [markdown]
 # ## Running Streamlit:
@@ -23,7 +23,7 @@
 
 # %%
 ###########################################################
-# This patch is only needed to import Message from dff.
+# This patch is only needed to import Message from chatsky.
 # Streamlit Chat interface can be written without using it.
 import asyncio
 
@@ -40,7 +40,7 @@ import requests
 import streamlit as st
 from streamlit_chat import message
 import streamlit.components.v1 as components
-from dff.script import Message
+from chatsky.script import Message
 
 
 # %% [markdown]
@@ -76,9 +76,9 @@ def query(payload, user_id) -> requests.Response:
 
 
 # %%
-st.set_page_config(page_title="Streamlit DFF Chat", page_icon=":robot:")
+st.set_page_config(page_title="Streamlit Chatsky Chat", page_icon=":robot:")
 
-st.header("Streamlit DFF Chat")
+st.header("Streamlit Chatsky Chat")
 
 if "user_id" not in st.session_state:
     st.session_state["user_id"] = str(uuid.uuid4())
@@ -93,10 +93,13 @@ if "user_requests" not in st.session_state:
 # %% [markdown]
 # ## UI setup
 #
-# Here we configure elements that will be used in Streamlit to interact with the API.
+# Here we configure elements that will be used
+# in Streamlit to interact with the API.
 #
-# First we define a text input field which a user is supposed to type his requests into.
-# Then we define a button that sends a query to the API, logs requests and responses,
+# First we define a text input field which
+# a user is supposed to type his requests into.
+# Then we define a button that sends a query
+# to the API, logs requests and responses,
 # and clears the text field.
 
 
@@ -119,7 +122,7 @@ def send_and_receive():
     st.session_state["user_requests"].append(user_request)
 
     bot_response = query(
-        Message(text=user_request).model_dump(),
+        Message(user_request).model_dump(),
         user_id=st.session_state["user_id"],
     )
     bot_response.raise_for_status()
@@ -148,7 +151,8 @@ st.button("Send", on_click=send_and_receive)
 # %% [markdown]
 # ### Component patch
 #
-# Here we add a component that presses the `Send` button whenever user presses the `Enter` key.
+# Here we add a component that presses the
+# `Send` button whenever user presses the `Enter` key.
 
 
 # %%
@@ -175,7 +179,8 @@ doc.addEventListener('keypress', function(e) {
 # %% [markdown]
 # ### Message display
 #
-# Here we use the `streamlit-chat` package to display user requests and bot responses.
+# Here we use the `streamlit-chat` package to
+# display user requests and bot responses.
 
 
 # %%

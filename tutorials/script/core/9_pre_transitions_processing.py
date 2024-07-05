@@ -8,13 +8,13 @@ Here, %mddoclink(api,script.core.keywords,Keywords.PRE_TRANSITIONS_PROCESSING)
 is demonstrated which can be used for additional context
 processing before transitioning to the next step.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import (
+from chatsky.script import (
     GLOBAL,
     RESPONSE,
     TRANSITIONS,
@@ -23,10 +23,10 @@ from dff.script import (
     Context,
     Message,
 )
-import dff.script.labels as lbl
-import dff.script.conditions as cnd
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+import chatsky.script.labels as lbl
+import chatsky.script.conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -55,7 +55,7 @@ toy_script = {
             RESPONSE: Message(),
             TRANSITIONS: {("flow", "step_0"): cnd.true()},
         },
-        "fallback": {RESPONSE: Message(text="the end")},
+        "fallback": {RESPONSE: Message("the end")},
     },
     GLOBAL: {
         PRE_RESPONSE_PROCESSING: {
@@ -67,22 +67,22 @@ toy_script = {
         TRANSITIONS: {lbl.forward(0.1): cnd.true()},
     },
     "flow": {
-        "step_0": {RESPONSE: Message(text="first")},
-        "step_1": {RESPONSE: Message(text="second")},
-        "step_2": {RESPONSE: Message(text="third")},
-        "step_3": {RESPONSE: Message(text="fourth")},
-        "step_4": {RESPONSE: Message(text="fifth")},
+        "step_0": {RESPONSE: Message("first")},
+        "step_1": {RESPONSE: Message("second")},
+        "step_2": {RESPONSE: Message("third")},
+        "step_3": {RESPONSE: Message("fourth")},
+        "step_4": {RESPONSE: Message("fifth")},
     },
 }
 
 
 # testing
 happy_path = (
-    (Message(text="1"), Message(text="previous=None: current=first")),
-    (Message(text="2"), Message(text="previous=first: current=second")),
-    (Message(text="3"), Message(text="previous=second: current=third")),
-    (Message(text="4"), Message(text="previous=third: current=fourth")),
-    (Message(text="5"), Message(text="previous=fourth: current=fifth")),
+    ("1", "previous=None: current=first"),
+    ("2", "previous=first: current=second"),
+    ("3", "previous=second: current=third"),
+    ("4", "previous=third: current=fourth"),
+    ("5", "previous=fourth: current=fifth"),
 )
 
 

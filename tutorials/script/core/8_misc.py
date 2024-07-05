@@ -7,13 +7,13 @@ This tutorial shows `MISC` (miscellaneous) keyword usage.
 See %mddoclink(api,script.core.keywords,Keywords.MISC)
 for more information.
 
-First of all, let's do all the necessary imports from DFF.
+First of all, let's do all the necessary imports from Chatsky.
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
-from dff.script import (
+from chatsky.script import (
     GLOBAL,
     LOCAL,
     RESPONSE,
@@ -22,10 +22,10 @@ from dff.script import (
     Context,
     Message,
 )
-import dff.script.labels as lbl
-import dff.script.conditions as cnd
-from dff.pipeline import Pipeline
-from dff.utils.testing.common import (
+import chatsky.script.labels as lbl
+import chatsky.script.conditions as cnd
+from chatsky.pipeline import Pipeline
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
@@ -34,12 +34,11 @@ from dff.utils.testing.common import (
 
 # %%
 def custom_response(ctx: Context, _: Pipeline) -> Message:
-    if ctx.validation:
-        return Message()
     current_node = ctx.current_node
+    current_misc = current_node.misc if current_node is not None else None
     return Message(
         text=f"ctx.last_label={ctx.last_label}: "
-        f"current_node.misc={current_node.misc}"
+        f"current_node.misc={current_misc}"
     )
 
 
@@ -50,7 +49,7 @@ toy_script = {
             RESPONSE: Message(),
             TRANSITIONS: {("flow", "step_0"): cnd.true()},
         },
-        "fallback": {RESPONSE: Message(text="the end")},
+        "fallback": {RESPONSE: Message("the end")},
     },
     GLOBAL: {
         MISC: {
@@ -99,57 +98,45 @@ toy_script = {
 happy_path = (
     (
         Message(),
-        Message(
-            text="ctx.last_label=('flow', 'step_0'): current_node.misc="
-            "{'var1': 'global_data', "
-            "'var2': 'rewrite_by_local', "
-            "'var3': 'info_of_step_0'}"
-        ),
+        "ctx.last_label=('flow', 'step_0'): current_node.misc="
+        "{'var1': 'global_data', "
+        "'var2': 'rewrite_by_local', "
+        "'var3': 'info_of_step_0'}",
     ),
     (
         Message(),
-        Message(
-            text="ctx.last_label=('flow', 'step_1'): current_node.misc="
-            "{'var1': 'global_data', "
-            "'var2': 'rewrite_by_local', "
-            "'var3': 'info_of_step_1'}"
-        ),
+        "ctx.last_label=('flow', 'step_1'): current_node.misc="
+        "{'var1': 'global_data', "
+        "'var2': 'rewrite_by_local', "
+        "'var3': 'info_of_step_1'}",
     ),
     (
         Message(),
-        Message(
-            text="ctx.last_label=('flow', 'step_2'): current_node.misc="
-            "{'var1': 'global_data', "
-            "'var2': 'rewrite_by_local', "
-            "'var3': 'info_of_step_2'}"
-        ),
+        "ctx.last_label=('flow', 'step_2'): current_node.misc="
+        "{'var1': 'global_data', "
+        "'var2': 'rewrite_by_local', "
+        "'var3': 'info_of_step_2'}",
     ),
     (
         Message(),
-        Message(
-            text="ctx.last_label=('flow', 'step_3'): current_node.misc="
-            "{'var1': 'global_data', "
-            "'var2': 'rewrite_by_local', "
-            "'var3': 'info_of_step_3'}"
-        ),
+        "ctx.last_label=('flow', 'step_3'): current_node.misc="
+        "{'var1': 'global_data', "
+        "'var2': 'rewrite_by_local', "
+        "'var3': 'info_of_step_3'}",
     ),
     (
         Message(),
-        Message(
-            text="ctx.last_label=('flow', 'step_4'): current_node.misc="
-            "{'var1': 'global_data', "
-            "'var2': 'rewrite_by_local', "
-            "'var3': 'info_of_step_4'}"
-        ),
+        "ctx.last_label=('flow', 'step_4'): current_node.misc="
+        "{'var1': 'global_data', "
+        "'var2': 'rewrite_by_local', "
+        "'var3': 'info_of_step_4'}",
     ),
     (
         Message(),
-        Message(
-            text="ctx.last_label=('flow', 'step_0'): current_node.misc="
-            "{'var1': 'global_data', "
-            "'var2': 'rewrite_by_local', "
-            "'var3': 'info_of_step_0'}"
-        ),
+        "ctx.last_label=('flow', 'step_0'): current_node.misc="
+        "{'var1': 'global_data', "
+        "'var2': 'rewrite_by_local', "
+        "'var3': 'info_of_step_0'}",
     ),
 )
 

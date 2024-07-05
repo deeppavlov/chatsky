@@ -25,6 +25,7 @@ _globals.py
 venv*
 .vscode
 .coverage
+.coverage.*
 .pytest_cache
 htmlcov
 tutorials/context_storages/dbs

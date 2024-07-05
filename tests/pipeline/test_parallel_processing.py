@@ -2,8 +2,8 @@ import asyncio
 
 import pytest
 
-from dff.script import Message, GLOBAL, RESPONSE, PRE_RESPONSE_PROCESSING, TRANSITIONS, conditions as cnd
-from dff.pipeline import Pipeline
+from chatsky.script import Message, GLOBAL, RESPONSE, PRE_RESPONSE_PROCESSING, TRANSITIONS, conditions as cnd
+from chatsky.pipeline import Pipeline
 
 
 @pytest.mark.asyncio
@@ -11,12 +11,12 @@ async def test_parallel_processing():
     async def fast_processing(ctx, _):
         processed_node = ctx.current_node
         await asyncio.sleep(1)
-        processed_node.response = Message(text=f"fast: {processed_node.response.text}")
+        processed_node.response = Message(f"fast: {processed_node.response.text}")
 
     async def slow_processing(ctx, _):
         processed_node = ctx.current_node
         await asyncio.sleep(2)
-        processed_node.response = Message(text=f"slow: {processed_node.response.text}")
+        processed_node.response = Message(f"slow: {processed_node.response.text}")
 
     toy_script = {
         GLOBAL: {
@@ -25,7 +25,7 @@ async def test_parallel_processing():
                 "second": fast_processing,
             }
         },
-        "root": {"start": {TRANSITIONS: {"main": cnd.true()}}, "main": {RESPONSE: Message(text="text")}},
+        "root": {"start": {TRANSITIONS: {"main": cnd.true()}}, "main": {RESPONSE: Message("text")}},
     }
 
     # test sequential processing

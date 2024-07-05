@@ -6,10 +6,12 @@ The following tutorial shows `pipeline`
 asynchronous service and service group usage.
 
 This tutorial is a more advanced version of the
-[previous tutorial](%doclink(tutorial,pipeline.5_asynchronous_groups_and_services_basic)).
+[previous tutorial](
+%doclink(tutorial,pipeline.5_asynchronous_groups_and_services_basic)
+).
 """
 
-# %pip install dff
+# %pip install chatsky
 
 # %%
 import asyncio
@@ -17,16 +19,16 @@ import json
 import logging
 import urllib.request
 
-from dff.script import Context
+from chatsky.script import Context
 
-from dff.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo, ACTOR
+from chatsky.pipeline import ServiceGroup, Pipeline, ServiceRuntimeInfo, ACTOR
 
-from dff.utils.testing.common import (
+from chatsky.utils.testing.common import (
     check_happy_path,
     is_interactive_mode,
     run_interactive_mode,
 )
-from dff.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
+from chatsky.utils.testing.toy_script import HAPPY_PATH, TOY_SCRIPT
 
 logger = logging.getLogger(__name__)
 

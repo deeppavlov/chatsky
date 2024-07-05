@@ -20,9 +20,10 @@ Benchmark result files added via this module are not changed (only read).
 
 You can install all the dependencies of this module with
 ```
-pip install dff[benchmark]
+pip install chatsky[benchmark]
 ```
 """
+
 import json
 from pathlib import Path
 from uuid import uuid4
@@ -299,9 +300,11 @@ with view_tab:
         compare.button(
             "Add to Compare" if item_in_compare else "Remove from Compare",
             on_click=add_results_to_compare_tab,
-            help="Add current benchmark to the 'Compare' tab."
-            if item_in_compare
-            else "Remove current benchmark from the 'Compare' tab.",
+            help=(
+                "Add current benchmark to the 'Compare' tab."
+                if item_in_compare
+                else "Remove current benchmark from the 'Compare' tab."
+            ),
         )
 
         select_graph, graph = st.columns([1, 3])

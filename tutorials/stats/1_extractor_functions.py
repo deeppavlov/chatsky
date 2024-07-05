@@ -12,20 +12,22 @@ extractor functions. You can find API reference for default extractors
 
 It is a preferred practice to define extractors as asynchronous functions.
 Extractors need to have the following uniform signature:
-the expected arguments are always `Context`, `Pipeline`, and `ExtraHandlerRuntimeInfo`,
+the expected arguments are always `Context`,
+`Pipeline`, and `ExtraHandlerRuntimeInfo`,
 while the expected return value is an arbitrary `dict` or a `None`.
 The returned value gets persisted to Clickhouse as JSON
 which is why it can contain arbitrarily nested dictionaries,
 but it cannot contain any complex objects that cannot be trivially serialized.
 
-The output of these functions will be captured by an OpenTelemetry instrumentor and directed to
-the Opentelemetry collector server which in its turn batches and persists data
-to Clickhouse or other OLAP storages.
+The output of these functions will be captured by an OpenTelemetry
+instrumentor and directed to the Opentelemetry collector server which
+in its turn batches and persists data to Clickhouse or other OLAP storages.
 
 <div class="alert alert-info">
 
 Both the Opentelemetry collector and the Clickhouse instance must be running
-during statistics collection. If you cloned the DFF repo, launch them using `docker compose`:
+during statistics collection.
+If you cloned the Chatsky repo, launch them using `docker compose`:
 ```bash
 docker compose --profile stats up
 ```
@@ -39,22 +41,22 @@ https://opentelemetry.io/docs/instrumentation/python/manual/
 
 """
 
-# %pip install dff[stats]
+# %pip install chatsky[stats]
 
 # %%
 import asyncio
 
-from dff.script import Context
-from dff.pipeline import (
+from chatsky.script import Context
+from chatsky.pipeline import (
     Pipeline,
     ACTOR,
     Service,
     ExtraHandlerRuntimeInfo,
     to_service,
 )
-from dff.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
-from dff.stats import OtelInstrumentor, default_extractors
-from dff.utils.testing import is_interactive_mode, check_happy_path
+from chatsky.utils.testing.toy_script import TOY_SCRIPT, HAPPY_PATH
+from chatsky.stats import OtelInstrumentor, default_extractors
+from chatsky.utils.testing import is_interactive_mode, check_happy_path
 
 
 # %% [markdown]
@@ -65,9 +67,11 @@ The cells below configure log export with the help of OTLP instrumentation.
 `from_url` method of the `OtelInstrumentor` class simplifies this task
 allowing you to only pass the url of the OTLP Collector server.
 
-* Alternatively, you can use the utility functions provided by the `stats` module:
-`set_logger_destination`, `set_tracer_destination`, or `set_meter_destination`. These accept
-an appropriate Opentelemetry exporter instance and bind it to provider classes.
+* Alternatively, you can use the utility functions
+provided by the `stats` module:
+`set_logger_destination`, `set_tracer_destination`, or `set_meter_destination`.
+These accept an appropriate Opentelemetry exporter instance
+and bind it to provider classes.
 
 * Nextly, the `OtelInstrumentor` class should be constructed to log the output
 of extractor functions. Custom extractors need to be decorated
@@ -80,14 +84,14 @@ by calling the `instrument` method.
 
 
 # %%
-dff_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
-dff_instrumentor.instrument()
+chatsky_instrumentor = OtelInstrumentor.from_url("grpc://localhost:4317")
+chatsky_instrumentor.instrument()
 
 # %% [markdown]
 """
 The following cell shows a custom extractor function. The data obtained from
 the context and the runtime information gets shaped as a dict and returned
-from the function body. The `dff_instrumentor` decorator then ensures
+from the function body. The `chatsky_instrumentor` decorator then ensures
 that the output is logged by OpenTelemetry.
 
 """
@@ -95,7 +99,7 @@ that the output is logged by OpenTelemetry.
 
 # %%
 # decorated by an OTLP Instrumentor instance
-@dff_instrumentor
+@chatsky_instrumentor
 async def get_service_state(ctx: Context, _, info: ExtraHandlerRuntimeInfo):
     # extract the execution state of a target service
     data = {
