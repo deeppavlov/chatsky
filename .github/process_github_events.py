@@ -48,6 +48,7 @@ Here's a release checklist:
 - [ ] Update package version
 - [ ] Update `poetry.lock`
 - [ ] Change PR merge option
+- [ ] Update template repo
 - [ ] Search for objects to be deprecated
 """
 
