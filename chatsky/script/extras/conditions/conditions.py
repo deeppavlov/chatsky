@@ -18,10 +18,22 @@ from chatsky.pipeline import Pipeline
 from chatsky.script.extras.conditions.dataset import DatasetItem
 from chatsky.script.extras.conditions.utils import LABEL_KEY
 from chatsky.script.extras.conditions.models.base_model import ExtrasBaseModel
+from pydantic import BaseModel, model_validator, Field
+from typing import Dict, Any
 
+
+class LabelManager(BaseModel):
+    """Class for storing labels for different models for extended conditions.
+    """
+    models_labels: Dict[str, Dict[str, Any]] = {}
+    """
+    `models_labels` should look like {"model_uuid_1": {"label_1": 0.1, "label_2": 0.5}, "model_uuid_2": {...}}
+    As keys there should be uuids generated and stored in ExtrasBaseModel.model_id (namespaces now).
+    """
+    
 
 @singledispatch
-def has_cls_label(label, namespace: Optional[str] = None, threshold: float = 0.9):
+def has_cls_label(model: ExtrasBaseModel, label, threshold: float = 0.9):
     """
     Use this condition, when you need to check, whether the probability
     of a particular label for the last annotated user utterance surpasses the threshold.
@@ -36,12 +48,15 @@ def has_cls_label(label, namespace: Optional[str] = None, threshold: float = 0.9
 
 
 @has_cls_label.register(str)
-def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
+def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
     def has_cls_label_innner(ctx: Context, _) -> bool:
-        if LABEL_KEY not in ctx.framework_states:
+        # Predict labels for the last request
+        # and store them in framework_data with uuid of the model as a key
+        model.predict(ctx.last_request.text)
+        if LABEL_KEY not in ctx.framework_data:
             return False
-        if namespace is not None:
-            return ctx.framework_states[LABEL_KEY].get(namespace, {}).get(label, 0) >= threshold
+        if model.model_id is not None:
+            return ctx.framework_states[LABEL_KEY].get(model.model_id, {}).get(label, 0) >= threshold
         scores = [item.get(label, 0) for item in ctx.framework_states[LABEL_KEY].values()]
         comparison_array = [item >= threshold for item in scores]
         return any(comparison_array)
@@ -50,12 +65,13 @@ def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
 
 
 @has_cls_label.register(DatasetItem)
-def _(label, namespace: Optional[str] = None, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
+def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
     def has_cls_label_innner(ctx: Context, _) -> bool:
-        if LABEL_KEY not in ctx.framework_states:
+        model.predict(ctx.last_request.text)
+        if LABEL_KEY not in ctx.framework_data:
             return False
-        if namespace is not None:
-            return ctx.framework_states[LABEL_KEY].get(namespace, {}).get(label.label, 0) >= threshold
+        if model.model_id is not None:
+            return ctx.framework_states[LABEL_KEY].get(model.model_id, {}).get(label.label, 0) >= threshold
         scores = [item.get(label.label, 0) for item in ctx.framework_states[LABEL_KEY].values()]
         comparison_array = [item >= threshold for item in scores]
         return any(comparison_array)
@@ -64,11 +80,12 @@ def _(label, namespace: Optional[str] = None, threshold: float = 0.9) -> Callabl
 
 
 @has_cls_label.register(list)
-def _(label, namespace: Optional[str] = None, threshold: float = 0.9):
+def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
     def has_cls_label_innner(ctx: Context, pipeline: Pipeline) -> bool:
-        if LABEL_KEY not in ctx.framework_states:
+        model.predict(ctx.last_request.text)
+        if LABEL_KEY not in ctx.framework_data:
             return False
-        scores = [has_cls_label(item, namespace, threshold)(ctx, pipeline) for item in label]
+        scores = [has_cls_label(item, model.model_id, threshold)(ctx, pipeline) for item in label]
         for score in scores:
             if score >= threshold:
                 return True

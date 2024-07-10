@@ -10,8 +10,8 @@ from abc import ABC, abstractmethod
 from chatsky.script import Context
 
 from chatsky.script.extras.conditions.dataset import Dataset
-from chatsky.script.extras.conditions.utils import LABEL_KEY
 
+import uuid
 
 class ExtrasBaseModel(ABC):
     """
@@ -24,6 +24,7 @@ class ExtrasBaseModel(ABC):
 
     def __init__(self, namespace_key: str = "default") -> None:
         self.namespace_key = namespace_key
+        self.model_id = uuid.uuid4()
 
     def __deepcopy__(self, *args, **kwargs):
         return copy(self)
@@ -63,12 +64,8 @@ class ExtrasBaseModel(ABC):
             labels: dict = self.predict(ctx.last_request.text)
         else:
             labels = dict()
-        if LABEL_KEY not in ctx.framework_states:
-            ctx.framework_states[LABEL_KEY] = dict()
 
-        namespace = self.namespace_key
-
-        ctx.framework_states[LABEL_KEY][namespace] = labels
+        ctx.framework_data.llm_labels[self.model_id] = labels
 
         return ctx
 
@@ -82,7 +79,7 @@ class ExtrasBaseModel(ABC):
         raise NotImplementedError
 
     @classmethod
-    def load(cls, path: str, namespace_key: str) -> __qualname__:
+    def load(cls, path: str, namespace_key: str):
         """
         Load a model from the specified location and instantiate the model.
 
