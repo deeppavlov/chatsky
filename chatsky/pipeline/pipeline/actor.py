@@ -27,6 +27,7 @@ from __future__ import annotations
 import logging
 import asyncio
 from typing import Union, Callable, Optional, Dict, List, TYPE_CHECKING
+from pydantic import BaseModel, Field, model_validator
 import copy
 
 from chatsky.utils.turn_caching import cache_clear
@@ -45,7 +46,8 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class Actor:
+# arbitrary_types_allowed for testing, will remove later
+class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     The class which is used to process :py:class:`~chatsky.script.Context`
     according to the :py:class:`~chatsky.script.Script`.

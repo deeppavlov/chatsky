@@ -11,6 +11,7 @@ import asyncio
 import logging
 import inspect
 from typing import Optional, List, TYPE_CHECKING
+from pydantic import BaseModel, computed_field
 
 from chatsky.script import Context
 
@@ -29,7 +30,8 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
-class _ComponentExtraHandler:
+# arbitrary_types_allowed for testing, will remove later
+class _ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class, representing an extra pipeline component handler.
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
