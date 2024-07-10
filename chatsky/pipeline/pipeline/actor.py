@@ -46,6 +46,21 @@ if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
 
+# Had to define this earlier, because when Pydantic starts it's __init__ it thinks of this function as
+# being referenced before assignment
+async def default_condition_handler(
+    condition: Callable, ctx: Context, pipeline: Pipeline
+) -> Callable[[Context, Pipeline], bool]:
+    """
+    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
+
+    :param condition: Condition to copy.
+    :param ctx: Context of current condition.
+    :param pipeline: Pipeline we use in this condition.
+    """
+    return await wrap_sync_function_in_async(condition, ctx, pipeline)
+
+
 # arbitrary_types_allowed for testing, will remove later
 class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
@@ -75,7 +90,9 @@ class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
-    condition_handler: Optional[Callable] = Field(default=default_condition_handler)
+    condition_handler: Optional[Callable] = default_condition_handler
+    # Is this Field(default=) right here?
+    # condition_handler: Optional[Callable] = Field(default=default_condition_handler)
     handlers: Optional[Dict[ActorStage, List[Callable]]] = {}
     _clean_turn_cache: Optional[bool] = True
     # Making a 'computed field' for this feels overkill, a 'private' field is probably fine?
@@ -380,16 +397,3 @@ class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         else:
             chosen_label = self.fallback_label
         return chosen_label
-
-
-async def default_condition_handler(
-    condition: Callable, ctx: Context, pipeline: Pipeline
-) -> Callable[[Context, Pipeline], bool]:
-    """
-    The simplest and quickest condition handler for trivial condition handling returns the callable condition:
-
-    :param condition: Condition to copy.
-    :param ctx: Context of current condition.
-    :param pipeline: Pipeline we use in this condition.
-    """
-    return await wrap_sync_function_in_async(condition, ctx, pipeline)

@@ -14,6 +14,7 @@ from __future__ import annotations
 import logging
 import inspect
 from typing import Optional, TYPE_CHECKING, Union, List
+from pydantic import BaseModel, model_validator
 
 from chatsky.script import Context
 

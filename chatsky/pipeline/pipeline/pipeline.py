@@ -35,6 +35,7 @@ from ..types import (
     ExtraHandlerFunction,
 )
 from .utils import finalize_service_group, pretty_format_component_info_dict
+from .component import PipelineComponent
 from chatsky.pipeline.pipeline.actor import Actor
 
 # """
@@ -220,8 +221,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         context_storage: Optional[Union[DBContextStorage, Dict]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
-        pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
-        post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
+        pre_services: Optional[List[Union[ServiceFunction, ServiceGroup]]] = None,
+        post_services: Optional[List[Union[ServiceFunction, ServiceGroup]]] = None,
     ) -> "Pipeline":
         """
         Pipeline script-based constructor.

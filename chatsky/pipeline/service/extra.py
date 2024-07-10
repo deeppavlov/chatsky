@@ -180,7 +180,7 @@ class BeforeHandler(ComponentExtraHandler):
         )
 
 
-class AfterHandler(_ComponentExtraHandler):
+class AfterHandler(ComponentExtraHandler):
     """
     A handler for extra functions that are executed after the component's main function.
 

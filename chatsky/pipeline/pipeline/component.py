@@ -147,7 +147,7 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     # themselves. My problem: centralizing Extra Handlers within PipelineComponent feels right. Why should Services
     # have the right to run Extra Handlers however they want? They were already run there without checking the
     # start_condition, which was a mistake.
-    @abstractmethod
+    @abc.abstractmethod
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         raise NotImplementedError
 
