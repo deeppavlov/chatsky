@@ -19,7 +19,6 @@ from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from ..types import (
     ServiceRuntimeInfo,
     ExtraHandlerType,
-    ExtraHandlerBuilder,
     ExtraHandlerFunction,
     ExtraHandlerRuntimeInfo,
 )
@@ -47,36 +46,14 @@ class _ComponentExtraHandler:
     :param asynchronous: Requested asynchronous property.
     """
 
-    def __init__(
-        self,
-        functions: ExtraHandlerBuilder,
-        stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED,
-        timeout: Optional[float] = None,
-        asynchronous: Optional[bool] = None,
-    ):
-        overridden_parameters = collect_defined_constructor_parameters_to_dict(
-            timeout=timeout, asynchronous=asynchronous
-        )
-        if isinstance(functions, _ComponentExtraHandler):
-            self.__init__(
-                **_get_attrs_with_updates(
-                    functions,
-                    ("calculated_async_flag", "stage"),
-                    {"requested_async_flag": "asynchronous"},
-                    overridden_parameters,
-                )
-            )
-        elif isinstance(functions, dict):
-            functions.update(overridden_parameters)
-            self.__init__(**functions)
-        elif isinstance(functions, List):
-            self.functions = functions
-            self.timeout = timeout
-            self.requested_async_flag = asynchronous
-            self.calculated_async_flag = all([asyncio.iscoroutinefunction(func) for func in self.functions])
-            self.stage = stage
-        else:
-            raise Exception(f"Unknown type for {type(self).__name__} {functions}")
+    functions: ExtraHandlerFunction
+    stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED
+    timeout: Optional[float] = None
+    requested_async_flag: Optional[bool] = None
+
+    @computed_field(alias="calculated_async_flag", repr=False)
+    def calculate_async_flag(self) -> bool:
+        return all([asyncio.iscoroutinefunction(func) for func in self.functions])
 
     @property
     def asynchronous(self) -> bool:

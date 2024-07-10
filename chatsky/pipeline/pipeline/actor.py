@@ -67,18 +67,20 @@ class Actor:
         - value (List[Callable]) - The list of called handlers for each stage.  Defaults to an empty `dict`.
     """
 
-    def __init__(
-        self,
-        script: Union[Script, dict],
-        start_label: NodeLabel2Type,
-        fallback_label: Optional[NodeLabel2Type] = None,
-        label_priority: float = 1.0,
-        condition_handler: Optional[Callable] = None,
-        handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-    ):
-        self.script = script if isinstance(script, Script) else Script(script=script)
-        self.label_priority = label_priority
+    # Can this just be Script, since Actor is now pydantic BaseModel?
+    # I feel like this is a bit different and is already handled.
+    script: Union[Script, dict]
+    start_label: NodeLabel2Type
+    fallback_label: Optional[NodeLabel2Type] = None
+    label_priority: float = 1.0
+    condition_handler: Optional[Callable] = Field(default=default_condition_handler)
+    handlers: Optional[Dict[ActorStage, List[Callable]]] = {}
+    _clean_turn_cache: Optional[bool] = True
+    # Making a 'computed field' for this feels overkill, a 'private' field is probably fine?
 
+    @model_validator(mode="after")
+    def actor_validator(self):
+        self.script = script if isinstance(script, Script) else Script(script=script)
         self.start_label = normalize_label(start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
@@ -89,12 +91,24 @@ class Actor:
             self.fallback_label = normalize_label(fallback_label)
             if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
-        self.condition_handler = default_condition_handler if condition_handler is None else condition_handler
-
-        self.handlers = {} if handlers is None else handlers
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
+
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+        """
+        Method for running an `Actor`.
+        Catches runtime exceptions and logs them.
+
+        :param ctx: Current dialog context.
+        :param pipeline: Current pipeline.
+        """
+        try:
+            # This line could be: "await self(pipeline, ctx)", but I'm not sure.
+            await pipeline.actor(pipeline, ctx)
+        except Exception as exc:
+            self._set_state(ctx, ComponentExecutionState.FAILED)
+            logger.error(f"Actor '{self.name}' execution failed!", exc_info=exc)
 
     async def __call__(self, pipeline: Pipeline, ctx: Context):
         await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT)

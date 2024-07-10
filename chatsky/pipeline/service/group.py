@@ -12,19 +12,18 @@ from __future__ import annotations
 import asyncio
 import logging
 from typing import Optional, List, Union, Awaitable, TYPE_CHECKING
+from pydantic import model_validator
 
 from chatsky.script import Context
+from .extra import ComponentExtraHandler
 
-from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from ..pipeline.component import PipelineComponent
 from ..types import (
     StartConditionCheckerFunction,
     ComponentExecutionState,
-    ServiceGroupBuilder,
     GlobalExtraHandlerType,
     ExtraHandlerConditionFunction,
     ExtraHandlerFunction,
-    ExtraHandlerBuilder,
     ExtraHandlerType,
 )
 from .service import Service
@@ -34,8 +33,8 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
-
-class ServiceGroup(PipelineComponent):
+# arbitrary_types_allowed for testing, will remove later
+class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
     A service group class.
     Service group can be included into pipeline as an object or a pipeline component list.
@@ -44,12 +43,12 @@ class ServiceGroup(PipelineComponent):
     Components in asynchronous groups are executed simultaneously.
     Group can be asynchronous only if all components in it are asynchronous.
 
-    :param components: A `ServiceGroupBuilder` object, that will be added to the group.
-    :type components: :py:data:`~.ServiceGroupBuilder`
-    :param before_handler: List of `ExtraHandlerBuilder` to add to the group.
-    :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
-    :param after_handler: List of `ExtraHandlerBuilder` to add to the group.
-    :type after_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
+    :param components: A `ServiceGroup` object, that will be added to the group.
+    :type components: :py:data:`~.ServiceGroup`
+    :param before_handler: List of `_ComponentExtraHandler` to add to the group.
+    :type before_handler: Optional[:py:data:`~._ComponentExtraHandler`]
+    :param after_handler: List of `_ComponentExtraHandler` to add to the group.
+    :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
     :param asynchronous: Requested asynchronous property.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
@@ -57,47 +56,22 @@ class ServiceGroup(PipelineComponent):
     :param name: Requested group name.
     """
 
-    def __init__(
-        self,
-        components: ServiceGroupBuilder,
-        before_handler: Optional[ExtraHandlerBuilder] = None,
-        after_handler: Optional[ExtraHandlerBuilder] = None,
-        timeout: Optional[float] = None,
-        asynchronous: Optional[bool] = None,
-        start_condition: Optional[StartConditionCheckerFunction] = None,
-        name: Optional[str] = None,
-    ):
-        overridden_parameters = collect_defined_constructor_parameters_to_dict(
-            before_handler=before_handler,
-            after_handler=after_handler,
-            timeout=timeout,
-            asynchronous=asynchronous,
-            start_condition=start_condition,
-            name=name,
-        )
-        if isinstance(components, ServiceGroup):
-            self.__init__(
-                **_get_attrs_with_updates(
-                    components,
-                    (
-                        "calculated_async_flag",
-                        "path",
-                    ),
-                    {"requested_async_flag": "asynchronous"},
-                    overridden_parameters,
-                )
-            )
-        elif isinstance(components, dict):
-            components.update(overridden_parameters)
-            self.__init__(**components)
-        elif isinstance(components, List):
-            self.components = self._create_components(components)
-            calc_async = all([service.asynchronous for service in self.components])
-            super(ServiceGroup, self).__init__(
-                before_handler, after_handler, timeout, asynchronous, calc_async, start_condition, name
-            )
-        else:
-            raise Exception(f"Unknown type for ServiceGroup {components}")
+    components: List[PipelineComponent]
+
+    # Should these be removed from API reference?
+    # before_handler: Optional[ComponentExtraHandler] = None
+    # after_handler: Optional[ComponentExtraHandler] = None
+    # timeout: Optional[float] = None
+    # asynchronous: Optional[bool] = None
+    # start_condition: Optional[StartConditionCheckerFunction] = None
+    # name: Optional[str] = None
+
+    # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
+    # Of course, they might not want to break their own program, but what if.
+    # Maybe I could just make this a 'private' field, like '_calc_async'
+    @model_validator(mode="after")
+    def calculate_async_flag(self):
+        self.calculated_async_flag = all([service.asynchronous for service in self.components])
 
     async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> None:
         """
@@ -110,8 +84,6 @@ class ServiceGroup(PipelineComponent):
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
         """
-        self._set_state(ctx, ComponentExecutionState.RUNNING)
-
         if self.asynchronous:
             service_futures = [service(ctx, pipeline) for service in self.components]
             for service, future in zip(self.components, await asyncio.gather(*service_futures, return_exceptions=True)):
@@ -127,34 +99,28 @@ class ServiceGroup(PipelineComponent):
                 if service.asynchronous and isinstance(service_result, Awaitable):
                     await service_result
 
+        # This gets overwritten with "FINISHED" at PipelineComponent.run().
+        # TODO: resolve this conflict.
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
 
-    async def _run(
+    async def run_component(
         self,
         ctx: Context,
         pipeline: Pipeline,
     ) -> None:
         """
         Method for handling this group execution.
-        Executes extra handlers before and after execution, checks start condition and catches runtime exceptions.
+        Catches runtime exceptions and logs them.
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
         """
-        await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
-
         try:
-            if self.start_condition(ctx, pipeline):
-                await self._run_services_group(ctx, pipeline)
-            else:
-                self._set_state(ctx, ComponentExecutionState.NOT_RUN)
-
+            await self._run_services_group(ctx, pipeline)
         except Exception as exc:
             self._set_state(ctx, ComponentExecutionState.FAILED)
             logger.error(f"ServiceGroup '{self.name}' execution failed!", exc_info=exc)
-
-        await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
 
     def log_optimization_warnings(self):
         """
@@ -228,21 +194,3 @@ class ServiceGroup(PipelineComponent):
         representation.update({"services": [service.info_dict for service in self.components]})
         return representation
 
-    @staticmethod
-    def _create_components(services: ServiceGroupBuilder) -> List[Union[Service, "ServiceGroup"]]:
-        """
-        Utility method, used to create inner components, judging by their nature.
-        Services are created from services and dictionaries.
-        ServiceGroups are created from service groups and lists.
-
-        :param services: ServiceGroupBuilder object (a `ServiceGroup` instance or a list).
-        :type services: :py:data:`~.ServiceGroupBuilder`
-        :return: List of services and service groups.
-        """
-        handled_services: List[Union[Service, "ServiceGroup"]] = []
-        for service in services:
-            if isinstance(service, List) or isinstance(service, ServiceGroup):
-                handled_services.append(ServiceGroup(service))
-            else:
-                handled_services.append(Service(service))
-        return handled_services
