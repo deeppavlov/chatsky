@@ -33,6 +33,7 @@ logger = logging.getLogger(__name__)
 if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
 
+
 # arbitrary_types_allowed for testing, will remove later
 class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
@@ -193,4 +194,3 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
         representation = super(ServiceGroup, self).info_dict
         representation.update({"services": [service.info_dict for service in self.components]})
         return representation
-

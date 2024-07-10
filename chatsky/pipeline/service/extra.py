@@ -31,16 +31,15 @@ if TYPE_CHECKING:
 
 
 # arbitrary_types_allowed for testing, will remove later
-class _ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
+class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     """
     Class, representing an extra pipeline component handler.
     A component extra handler is a set of functions, attached to pipeline component (before or after it).
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
 
-    :param functions: An `ExtraHandlerBuilder` object, an `_ComponentExtraHandler` instance,
-        a dict or a list of :py:data:`~.ExtraHandlerFunction`.
-    :type functions: :py:data:`~.ExtraHandlerBuilder`
+    :param functions: A list of :py:data:`~.ExtraHandlerFunction`.
+    :type functions: :py:data:`~.ExtraHandlerFunction`
     :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
         after pipeline component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
@@ -48,7 +47,7 @@ class _ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=
     :param asynchronous: Requested asynchronous property.
     """
 
-    functions: ExtraHandlerFunction
+    functions: List[ExtraHandlerFunction]
     stage: ExtraHandlerType = ExtraHandlerType.UNDEFINED
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
@@ -147,13 +146,13 @@ class _ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=
         }
 
 
-class BeforeHandler(_ComponentExtraHandler):
+class BeforeHandler(ComponentExtraHandler):
     """
     A handler for extra functions that are executed before the component's main function.
 
-    :param functions: A callable or a list of callables that will be executed
+    :param functions: A list of callables that will be executed
         before the component's main function.
-    :type functions: ExtraHandlerBuilder
+    :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
@@ -161,22 +160,33 @@ class BeforeHandler(_ComponentExtraHandler):
         if all the functions in this handler are asynchronous.
     """
 
+    # Instead of __init__ here, this could look like a one-liner.
+    # The problem would be that BeforeHandlers would need to be initialized differently.
+    # Like BeforeHandler(functions=functions) instead of BeforeHandler(functions)
+    # That would break tests, tutorials and programs.
+    # Instead, this here could be a wrapper meant to keep the status quo.
+
+    # The possible one-liner:
+    # stage: ExtraHandlerType = ExtraHandlerType.BEFORE
+
     def __init__(
         self,
-        functions: ExtraHandlerBuilder,
+        functions: List[ExtraHandlerFunction],
         timeout: Optional[int] = None,
         asynchronous: Optional[bool] = None,
     ):
-        super().__init__(functions, ExtraHandlerType.BEFORE, timeout, asynchronous)
+        super().__init__(
+            functions=functions, stage=ExtraHandlerType.BEFORE, timeout=timeout, requested_async_flag=asynchronous
+        )
 
 
 class AfterHandler(_ComponentExtraHandler):
     """
     A handler for extra functions that are executed after the component's main function.
 
-    :param functions: A callable or a list of callables that will be executed
+    :param functions: A list of callables that will be executed
         after the component's main function.
-    :type functions: ExtraHandlerBuilder
+    :type functions: List[ExtraHandlerFunction]
     :param timeout: Optional timeout for the execution of the extra functions, in
         seconds.
     :param asynchronous: Optional flag that indicates whether the extra functions
@@ -186,8 +196,10 @@ class AfterHandler(_ComponentExtraHandler):
 
     def __init__(
         self,
-        functions: ExtraHandlerBuilder,
+        functions: List[ExtraHandlerFunction],
         timeout: Optional[int] = None,
         asynchronous: Optional[bool] = None,
     ):
-        super().__init__(functions, ExtraHandlerType.AFTER, timeout, asynchronous)
+        super().__init__(
+            functions=functions, stage=ExtraHandlerType.AFTER, timeout=timeout, requested_async_flag=asynchronous
+        )

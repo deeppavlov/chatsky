@@ -22,7 +22,7 @@ from .extra import ComponentExtraHandler
 from .utils import collect_defined_constructor_parameters_to_dict, _get_attrs_with_updates
 from chatsky.utils.devel.async_helpers import wrap_sync_function_in_async
 from ..types import (
-    ServiceBuilder,
+    ServiceFunction,
     StartConditionCheckerFunction,
     ComponentExecutionState,
     ExtraHandlerType,
@@ -58,7 +58,8 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     """
 
     handler: ServiceFunction
-    # Should these be removed from the above API reference? I think they're still useful for users if included in API reference.
+    # Should these be removed from the above API reference?
+    # I think they're still useful for users if included in API reference.
     # before_handler: Optional[ComponentExtraHandler] = None
     # after_handler: Optional[ComponentExtraHandler] = None
     # timeout: Optional[float] = None

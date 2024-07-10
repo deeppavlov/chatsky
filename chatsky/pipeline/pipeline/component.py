@@ -61,12 +61,15 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
     :param path: Separated by dots path to component, is universally unique.
     """
 
+    # I think before this you could pass a List[ExtraHandlerFunction] which would be turned into a ComponentExtraHandler
+    # Now you can't, option removed. Is that correct? Seems easy to do with field_validator.
+    # Possible TODO: Implement a Pydantic field_validator here for keeping that option.
     before_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: BeforeHandler([]))
     after_handler: Optional[ComponentExtraHandler] = Field(default_factory=lambda: AfterHandler([]))
     timeout: Optional[float] = None
     requested_async_flag: Optional[bool] = None
     calculated_async_flag: bool = False
-    # Is the Field here correct? I'll check later.
+    # Is this field really Optional[]? Also, is the Field(default=) done right?
     start_condition: Optional[StartConditionCheckerFunction] = Field(default=always_start_condition)
     name: Optional[str] = None
     path: Optional[str] = None
@@ -138,20 +141,20 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         except asyncio.TimeoutError:
             logger.warning(f"{type(self).__name__} '{self.name}' {extra_handler.stage} extra handler timed out!")
 
-    # Named this run_component, because ServiceGroup and Actor are components now too,
-    # and naming this run_service wouldn't be on point, they're not just services.
-    # The only problem I have is that this is kind of too generic, even confusingly generic, since _run() exists.
-    # Possible solution: implement _run within these classes themselves.
-    # My problem: centralizing Extra Handlers within PipelineComponent feels right. Why should Services have the right to run Extra Handlers however they want? They were already run there without checking the start_condition, which was a mistake.
+    # Named this run_component, because ServiceGroup and Actor are components now too, and naming this run_service
+    # wouldn't be on point, they're not just services. The only problem I have is that this is kind of too generic,
+    # even confusingly generic, since _run() exists. Possible solution: implement _run within these classes
+    # themselves. My problem: centralizing Extra Handlers within PipelineComponent feels right. Why should Services
+    # have the right to run Extra Handlers however they want? They were already run there without checking the
+    # start_condition, which was a mistake.
     @abstractmethod
     async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         raise NotImplementedError
 
-    @abc.abstractmethod
     async def _run(self, ctx: Context, pipeline: Pipeline) -> None:
         """
-        A method for running a pipeline component. Executes extra handlers before and after execution, launches `run_component` method.
-        This method is run after the component's timeout is set (if needed).
+        A method for running a pipeline component. Executes extra handlers before and after execution,
+        launches `run_component` method. This method is run after the component's timeout is set (if needed).
 
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.

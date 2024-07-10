@@ -28,7 +28,7 @@ from chatsky.messengers.console import CLIMessengerInterface
 from chatsky.messengers.common import MessengerInterface
 from chatsky.slots.slots import GroupSlot
 from ..service.group import ServiceGroup
-from ..service.extra import _ComponentExtraHandler
+from ..service.extra import ComponentExtraHandler
 from ..types import (
     ServiceFunction,
     GlobalExtraHandlerType,
@@ -88,7 +88,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     """
 
-    components: Union[ServiceGroup, dict, List]
+    components: List[PipelineComponent]
     script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
@@ -97,8 +97,8 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     handlers: Optional[Dict[ActorStage, List[Callable]]] = None
     messenger_interface: Optional[MessengerInterface] = Field(default_factory=CLIMessengerInterface)
     context_storage: Optional[Union[DBContextStorage, Dict]] = None
-    before_handler: Optional[_ComponentExtraHandler] = None
-    after_handler: Optional[_ComponentExtraHandler] = None
+    before_handler: Optional[List[ExtraHandlerFunction]] = None
+    after_handler: Optional[List[ExtraHandlerFunction]] = None
     timeout: Optional[float] = None
     optimization_warnings: bool = False
     parallelize_processing: bool = False
@@ -202,7 +202,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         Resulting string structure is somewhat similar to YAML string.
         Should be used in debugging/logging purposes and should not be parsed.
 
-        :param show_wrappers: Whether to include Wrappers or not (could be many and/or generated).
+        :param show_extra_handlers: Whether to include Wrappers or not (could be many and/or generated).
         :param indent: Offset from new line to add before component children.
         """
         return pretty_format_component_info_dict(self.info_dict, show_extra_handlers, indent=indent)
