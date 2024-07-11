@@ -8,19 +8,14 @@ data structures, and other types that are defined for type hinting.
 
 from __future__ import annotations
 from enum import unique, Enum
-from typing import Callable, Union, Awaitable, Dict, List, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
-from typing_extensions import NotRequired, TypedDict, TypeAlias
+from typing import Callable, Union, Awaitable, Dict, Optional, Iterable, Any, Protocol, Hashable, TYPE_CHECKING
+from typing_extensions import TypeAlias
 from pydantic import BaseModel
 
 
 if TYPE_CHECKING:
     from chatsky.pipeline.pipeline.pipeline import Pipeline
-    from chatsky.pipeline.service.service import Service
-    from chatsky.pipeline.service.group import ServiceGroup
-    from chatsky.pipeline.service.extra import ComponentExtraHandler
-    from chatsky.messengers.common.interface import MessengerInterface
-    from chatsky.context_storages import DBContextStorage
-    from chatsky.script import Context, ActorStage, NodeLabel2Type, Script, Message
+    from chatsky.script import Context, Message
 
 
 class PipelineRunnerFunction(Protocol):

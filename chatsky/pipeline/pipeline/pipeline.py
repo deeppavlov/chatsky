@@ -17,7 +17,7 @@ to structure and manage the messages processing flow.
 import asyncio
 import logging
 from typing import Union, List, Dict, Optional, Hashable, Callable
-from pydantic import BaseModel, Field, model_validator
+from pydantic import BaseModel, Field, model_validator, computed_field
 
 from chatsky.context_storages import DBContextStorage
 from chatsky.script import Script, Context, ActorStage
@@ -89,7 +89,9 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
 
     """
 
-    components: List[PipelineComponent]
+    # If Actor is passed here, program will break. Should Actor be a private class somehow?
+    pre_services: List[PipelineComponent]
+    post_services: List[PipelineComponent]
     script: Union[Script, Dict]
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
@@ -108,29 +110,35 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     _services_pipeline: Optional[ServiceGroup]
     _clean_turn_cache: Optional[bool]
 
-    @model_validator(mode="after")
-    def pipeline_init(self):
-        self.actor = None
-        self._services_pipeline = ServiceGroup(
-            components=self.components,
+    @computed_field(alias="_services_pipeline", repr=False)
+    def create_main_service_group(self) -> ServiceGroup:
+        components = [self.pre_services, self.actor, self.post_services]
+        services_pipeline = ServiceGroup(
+            components=components,
             before_handler=self.before_handler,
             after_handler=self.after_handler,
             timeout=self.timeout,
         )
-        self._services_pipeline.name = "pipeline"
-        self._services_pipeline.path = ".pipeline"
+        services_pipeline.name = "pipeline"
+        services_pipeline.path = ".pipeline"
+        return services_pipeline
+
+    @model_validator(mode="after")
+    def pipeline_init(self):
+        # Here Actor can be initialized, pretty sure.
+        self.set_actor(
+            self.script,
+            self.start_label,
+            self.fallback_label,
+            self.label_priority,
+            self.condition_handler,
+            self.handlers,
+        )
+        # finalize_service_group() needs to have the search for Actor removed.
+        # Though this should work too.
         actor_exists = finalize_service_group(self._services_pipeline, path=self._services_pipeline.path)
         if not actor_exists:
             raise Exception("Actor not found in the pipeline!")
-        else:
-            self.set_actor(
-                self.script,
-                self.start_label,
-                self.fallback_label,
-                self.label_priority,
-                self.condition_handler,
-                self.handlers,
-            )
         if self.actor is None:
             raise Exception("Actor wasn't initialized correctly!")
 
@@ -303,7 +311,14 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
             - key :py:class:`~chatsky.script.ActorStage` - Stage in which the handler is called.
             - value List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
         """
-        self.actor = Actor(script, start_label, fallback_label, label_priority, condition_handler, handlers)
+        self.actor = Actor(
+            script=script,
+            start_label=start_label,
+            fallback_label=fallback_label,
+            label_priority=label_priority,
+            condition_handler=condition_handler,
+            handlers=handlers,
+        )
 
     @classmethod
     def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":

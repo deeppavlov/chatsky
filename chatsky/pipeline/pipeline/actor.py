@@ -90,46 +90,39 @@ class Actor(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     start_label: NodeLabel2Type
     fallback_label: Optional[NodeLabel2Type] = None
     label_priority: float = 1.0
-    condition_handler: Optional[Callable] = default_condition_handler
-    # Is this Field(default=) right here?
-    # condition_handler: Optional[Callable] = Field(default=default_condition_handler)
+    condition_handler: Callable = Field(default=default_condition_handler)
     handlers: Optional[Dict[ActorStage, List[Callable]]] = {}
     _clean_turn_cache: Optional[bool] = True
     # Making a 'computed field' for this feels overkill, a 'private' field is probably fine?
 
     @model_validator(mode="after")
     def actor_validator(self):
-        self.script = script if isinstance(script, Script) else Script(script=script)
-        self.start_label = normalize_label(start_label)
+        if not isinstance(self.script, Script):
+            self.script = Script(script=self.script)
+        self.start_label = normalize_label(self.start_label)
         if self.script.get(self.start_label[0], {}).get(self.start_label[1]) is None:
             raise ValueError(f"Unknown start_label={self.start_label}")
 
-        if fallback_label is None:
+        if self.fallback_label is None:
             self.fallback_label = self.start_label
         else:
-            self.fallback_label = normalize_label(fallback_label)
+            self.fallback_label = normalize_label(self.fallback_label)
             if self.script.get(self.fallback_label[0], {}).get(self.fallback_label[1]) is None:
                 raise ValueError(f"Unknown fallback_label={self.fallback_label}")
 
         # NB! The following API is highly experimental and may be removed at ANY time WITHOUT FURTHER NOTICE!!
         self._clean_turn_cache = True
 
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def __call__(self, pipeline: Pipeline, ctx: Context):
+        await self.run_component(pipeline, ctx)
+
+    async def run_component(self, pipeline: Pipeline, ctx: Context) -> None:
         """
         Method for running an `Actor`.
-        Catches runtime exceptions and logs them.
 
-        :param ctx: Current dialog context.
         :param pipeline: Current pipeline.
+        :param ctx: Current dialog context.
         """
-        try:
-            # This line could be: "await self(pipeline, ctx)", but I'm not sure.
-            await pipeline.actor(pipeline, ctx)
-        except Exception as exc:
-            self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"Actor '{self.name}' execution failed!", exc_info=exc)
-
-    async def __call__(self, pipeline: Pipeline, ctx: Context):
         await self._run_handlers(ctx, pipeline, ActorStage.CONTEXT_INIT)
 
         # get previous node

@@ -14,7 +14,7 @@ from __future__ import annotations
 import logging
 import inspect
 from typing import Optional, TYPE_CHECKING, Union, List
-from pydantic import BaseModel, model_validator
+from pydantic import model_validator
 
 from chatsky.script import Context
 
@@ -73,11 +73,10 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     def tick_async_flag(self):
         self.calculated_async_flag = True
 
-    async def _run_handler(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
-        Method for service `handler` execution.
-        Handler has three possible signatures, so this method picks the right one to invoke.
-        These possible signatures are:
+        Method for running this service. Service 'handler' has three possible signatures,
+        so this method picks the right one to invoke. These possible signatures are:
 
         - (ctx: Context) - accepts current dialog context only.
         - (ctx: Context, pipeline: Pipeline) - accepts context and current pipeline.
@@ -97,20 +96,6 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
             await wrap_sync_function_in_async(self.handler, ctx, pipeline, self._get_runtime_info(ctx))
         else:
             raise Exception(f"Too many parameters required for service '{self.name}' handler: {handler_params}!")
-
-    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
-        """
-        Method for running this service.
-        Catches runtime exceptions and logs them.
-
-        :param ctx: Current dialog context.
-        :param pipeline: Current pipeline.
-        """
-        try:
-            await self._run_handler(ctx, pipeline)
-        except Exception as exc:
-            self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
 
     @property
     def info_dict(self) -> dict:

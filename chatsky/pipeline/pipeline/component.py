@@ -159,14 +159,22 @@ class PipelineComponent(abc.ABC, BaseModel, extra="forbid", arbitrary_types_allo
         :param ctx: Current dialog :py:class:`~.Context`.
         :param pipeline: This :py:class:`~.Pipeline`.
         """
-        if await self.start_condition(ctx, pipeline):
-            await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
+        # In the draft there was an 'await' before the start_condition, but my IDE gives a warning about this.
+        # Plus, previous implementation also doesn't have an await expression there.
+        # Though I understand why it's a good idea. (could be some slow function)
+        if self.start_condition(ctx, pipeline):
+            try:
+                await self.run_extra_handler(ExtraHandlerType.BEFORE, ctx, pipeline)
 
-            self._set_state(ctx, ComponentExecutionState.RUNNING)
-            await self.run_component(ctx, pipeline)
-            self._set_state(ctx, ComponentExecutionState.FINISHED)
+                self._set_state(ctx, ComponentExecutionState.RUNNING)
+                await self.run_component(ctx, pipeline)
+                if self.get_state(ctx) is not ComponentExecutionState.FAILED:
+                    self._set_state(ctx, ComponentExecutionState.FINISHED)
 
-            await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+                await self.run_extra_handler(ExtraHandlerType.AFTER, ctx, pipeline)
+            except Exception as exc:
+                self._set_state(ctx, ComponentExecutionState.FAILED)
+                logger.error(f"Service '{self.name}' execution failed!", exc_info=exc)
         else:
             self._set_state(ctx, ComponentExecutionState.NOT_RUN)
 

@@ -74,13 +74,16 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     def calculate_async_flag(self):
         self.calculated_async_flag = all([service.asynchronous for service in self.components])
 
-    async def _run_services_group(self, ctx: Context, pipeline: Pipeline) -> None:
+    async def run_component(self, ctx: Context, pipeline: Pipeline) -> None:
         """
-        Method for running this service group.
+        Method for running this service group. Catches runtime exceptions and logs them.
         It doesn't include extra handlers execution, start condition checking or error handling - pure execution only.
         Executes components inside the group based on its `asynchronous` property.
         Collects information about their execution state - group is finished successfully
         only if all components in it finished successfully.
+
+        :param ctx: Current dialog context.
+        :param pipeline: The current pipeline.
 
         :param ctx: Current dialog context.
         :param pipeline: The current pipeline.
@@ -100,28 +103,8 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
                 if service.asynchronous and isinstance(service_result, Awaitable):
                     await service_result
 
-        # This gets overwritten with "FINISHED" at PipelineComponent.run().
-        # TODO: resolve this conflict.
         failed = any([service.get_state(ctx) == ComponentExecutionState.FAILED for service in self.components])
         self._set_state(ctx, ComponentExecutionState.FAILED if failed else ComponentExecutionState.FINISHED)
-
-    async def run_component(
-        self,
-        ctx: Context,
-        pipeline: Pipeline,
-    ) -> None:
-        """
-        Method for handling this group execution.
-        Catches runtime exceptions and logs them.
-
-        :param ctx: Current dialog context.
-        :param pipeline: The current pipeline.
-        """
-        try:
-            await self._run_services_group(ctx, pipeline)
-        except Exception as exc:
-            self._set_state(ctx, ComponentExecutionState.FAILED)
-            logger.error(f"ServiceGroup '{self.name}' execution failed!", exc_info=exc)
 
     def log_optimization_warnings(self):
         """
