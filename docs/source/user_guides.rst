@@ -38,6 +38,13 @@ The ``optimization guide`` demonstrates various tools provided by the library
 that you can use to profile your conversational service,
 and to locate and remove performance bottlenecks.
 
+:doc:`Advanced features guide <./user_guides/advanced_features>`
+~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~
+
+``Best practices guide`` demonstrates the best practices of development with the DFF library.
+Not strictly necessary for starter projects, these practices come into play when
+scaling the project up or improving performance is desired.
+
 .. toctree::
    :hidden:
 
@@ -46,3 +53,4 @@ and to locate and remove performance bottlenecks.
    user_guides/context_guide
    user_guides/superset_guide
    user_guides/optimization_guide
+   user_guides/advanced_features
