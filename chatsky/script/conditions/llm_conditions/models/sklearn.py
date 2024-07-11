@@ -6,7 +6,7 @@ built on top of Sklearn models.
 """
 from typing import Optional, Union
 
-from chatsky.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 try:
     from sklearn.base import BaseEstimator
@@ -23,7 +23,7 @@ except ImportError:
     joblib = object
     sklearn_available = False
 
-from chatsky.script.extras.conditions.models.base_model import ExtrasBaseModel
+from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
 
 
 class BaseSklearnModel(ExtrasBaseModel):

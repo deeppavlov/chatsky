@@ -16,8 +16,8 @@ try:
 except ImportError:
     hf_available = False
 
-from chatsky.script.extras.conditions.models.base_model import ExtrasBaseModel
-from chatsky.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 
 class BaseHFModel(ExtrasBaseModel):
@@ -89,7 +89,7 @@ class BaseHFModel(ExtrasBaseModel):
         self.tokenizer.save_pretrained(path)
 
     @classmethod
-    def load(cls, path: str, namespace_key: str) -> __qualname__:
+    def load(cls, path: str, namespace_key: str):
         """
         :param str: Path to saving directory.
         :param namespace_key: Name of the namespace in that the model will be using.

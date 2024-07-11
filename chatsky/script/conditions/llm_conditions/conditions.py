@@ -15,9 +15,8 @@ except ImportError:
     sklearn_available = False
 from chatsky.script import Context
 from chatsky.pipeline import Pipeline
-from chatsky.script.extras.conditions.dataset import DatasetItem
-from chatsky.script.extras.conditions.utils import LABEL_KEY
-from chatsky.script.extras.conditions.models.base_model import ExtrasBaseModel
+from chatsky.script.conditions.llm_conditions.dataset import DatasetItem
+from chatsky.script.conditions.llm_conditions.models.base_model import ExtrasBaseModel
 from pydantic import BaseModel, model_validator, Field
 from typing import Dict, Any
 
@@ -53,11 +52,11 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
         # Predict labels for the last request
         # and store them in framework_data with uuid of the model as a key
         model.predict(ctx.last_request.text)
-        if LABEL_KEY not in ctx.framework_data:
+        if model.model_id not in ctx.framework_data:
             return False
         if model.model_id is not None:
-            return ctx.framework_states[LABEL_KEY].get(model.model_id, {}).get(label, 0) >= threshold
-        scores = [item.get(label, 0) for item in ctx.framework_states[LABEL_KEY].values()]
+            return ctx.framework_data.get(model.model_id, {}).get(label, 0) >= threshold
+        scores = [item.get(label, 0) for item in ctx.framework_data.values()]
         comparison_array = [item >= threshold for item in scores]
         return any(comparison_array)
 
@@ -68,11 +67,11 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
 def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Context, Pipeline], bool]:
     def has_cls_label_innner(ctx: Context, _) -> bool:
         model.predict(ctx.last_request.text)
-        if LABEL_KEY not in ctx.framework_data:
+        if model.model_id not in ctx.framework_data:
             return False
         if model.model_id is not None:
-            return ctx.framework_states[LABEL_KEY].get(model.model_id, {}).get(label.label, 0) >= threshold
-        scores = [item.get(label.label, 0) for item in ctx.framework_states[LABEL_KEY].values()]
+            return ctx.framework_data.get(model.model_id, {}).get(label, 0) >= threshold
+        scores = [item.get(label, 0) for item in ctx.framework_data.values()]
         comparison_array = [item >= threshold for item in scores]
         return any(comparison_array)
 
@@ -83,7 +82,7 @@ def _(model: ExtrasBaseModel, label, threshold: float = 0.9) -> Callable[[Contex
 def _(model: ExtrasBaseModel, label, threshold: float = 0.9):
     def has_cls_label_innner(ctx: Context, pipeline: Pipeline) -> bool:
         model.predict(ctx.last_request.text)
-        if LABEL_KEY not in ctx.framework_data:
+        if model.model_id not in ctx.framework_data:
             return False
         scores = [has_cls_label(item, model.model_id, threshold)(ctx, pipeline) for item in label]
         for score in scores:

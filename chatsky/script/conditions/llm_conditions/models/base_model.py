@@ -9,7 +9,7 @@ from abc import ABC, abstractmethod
 
 from chatsky.script import Context
 
-from chatsky.script.extras.conditions.dataset import Dataset
+from chatsky.script.conditions.llm_conditions.dataset import Dataset
 
 import uuid
 
