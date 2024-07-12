@@ -51,7 +51,7 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
-    :param asynchronous: Requested asynchronous property.
+    :param requested_async_flag: Requested asynchronous property.
     :param start_condition: StartConditionCheckerFunction that is invoked before each service execution;
         service is executed only if it returns `True`.
     :type start_condition: Optional[:py:data:`~.StartConditionCheckerFunction`]
@@ -65,7 +65,6 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
     # after_handler: Optional[ComponentExtraHandler] = None
     # timeout: Optional[float] = None
     # asynchronous: Optional[bool] = None
-    calculated_async_flag: Optional[bool] = True
     # start_condition: Optional[StartConditionCheckerFunction] = None
     # name: Optional[str] = None
 
@@ -113,10 +112,10 @@ class Service(PipelineComponent, extra="forbid", arbitrary_types_allowed=True):
         representation.update({"handler": service_representation})
         return representation
 
-
+# If this function will continue existing.
 def to_service(
-    before_handler: Optional[ExtraHandlerBuilder] = None,
-    after_handler: Optional[ExtraHandlerBuilder] = None,
+    before_handler: Optional[ComponentExtraHandler] = None,
+    after_handler: Optional[ComponentExtraHandler] = None,
     timeout: Optional[int] = None,
     asynchronous: Optional[bool] = None,
     start_condition: Optional[StartConditionCheckerFunction] = None,
@@ -128,7 +127,7 @@ def to_service(
     All arguments are passed directly to `Service` constructor.
     """
 
-    def inner(handler: ServiceBuilder) -> Service:
+    def inner(handler: ServiceFunction) -> Service:
         return Service(
             handler=handler,
             before_handler=before_handler,

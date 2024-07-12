@@ -37,13 +37,13 @@ class ComponentExtraHandler(BaseModel, extra="forbid", arbitrary_types_allowed=T
     Extra handlers should execute supportive tasks (like time or resources measurement, minor data transformations).
     Extra handlers should NOT edit context or pipeline, use services for that purpose instead.
 
-    :param functions: A list of :py:data:`~.ExtraHandlerFunction`.
+    :param functions: A list or instance of :py:data:`~.ExtraHandlerFunction`.
     :type functions: :py:data:`~.ExtraHandlerFunction`
     :param stage: An :py:class:`~.ExtraHandlerType`, specifying whether this handler will be executed before or
         after pipeline component.
     :param timeout: (for asynchronous only!) Maximum component execution time (in seconds),
         if it exceeds this time, it is interrupted.
-    :param asynchronous: Requested asynchronous property.
+    :param requested_async_flag: Requested asynchronous property.
     """
 
     functions: List[ExtraHandlerFunction]

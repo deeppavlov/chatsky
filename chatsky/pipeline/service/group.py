@@ -11,8 +11,8 @@ The :py:class:`~.ServiceGroup` serves the important function of grouping service
 from __future__ import annotations
 import asyncio
 import logging
-from typing import Optional, List, Union, Awaitable, TYPE_CHECKING
-from pydantic import model_validator
+from typing import Optional, List, Union, Awaitable, TYPE_CHECKING, Any
+from pydantic import model_validator, field_validator
 
 from chatsky.script import Context
 from .extra import ComponentExtraHandler
@@ -51,7 +51,7 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     :param after_handler: List of `_ComponentExtraHandler` to add to the group.
     :type after_handler: Optional[:py:data:`~._ComponentExtraHandler`]
     :param timeout: Timeout to add to the group.
-    :param asynchronous: Requested asynchronous property.
+    :param requested_async_flag: Requested asynchronous property.
     :param start_condition: :py:data:`~.StartConditionCheckerFunction` that is invoked before each group execution;
         group is executed only if it returns `True`.
     :param name: Requested group name.
@@ -66,6 +66,14 @@ class ServiceGroup(PipelineComponent, extra="forbid", arbitrary_types_allowed=Tr
     # asynchronous: Optional[bool] = None
     # start_condition: Optional[StartConditionCheckerFunction] = None
     # name: Optional[str] = None
+
+    @field_validator("functions")
+    @classmethod
+    # Note to self: Here Script class has "@validate_call". Is it needed here?
+    def single_component_init(cls, comp: Any):
+        if isinstance(comp, PipelineComponent):
+            return [comp]
+        return comp
 
     # Is there a better way to do this? calculated_async_flag is exposed to the user right now.
     # Of course, they might not want to break their own program, but what if.

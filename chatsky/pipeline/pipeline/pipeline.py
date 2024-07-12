@@ -98,7 +98,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
     label_priority: float = 1.0
     condition_handler: Optional[Callable] = None
     handlers: Optional[Dict[ActorStage, List[Callable]]] = None
-    messenger_interface: Optional[MessengerInterface] = Field(default_factory=CLIMessengerInterface)
+    messenger_interface: MessengerInterface = Field(default_factory=CLIMessengerInterface)
     context_storage: Optional[Union[DBContextStorage, Dict]] = None
     before_handler: Optional[List[ExtraHandlerFunction]] = None
     after_handler: Optional[List[ExtraHandlerFunction]] = None
@@ -321,7 +321,7 @@ class Pipeline(BaseModel, extra="forbid", arbitrary_types_allowed=True):
         )
 
     @classmethod
-    def from_dict(cls, dictionary: PipelineBuilder) -> "Pipeline":
+    def from_dict(cls, dictionary: dict) -> "Pipeline":
         """
         Pipeline dictionary-based constructor.
         Dictionary should have the fields defined in Pipeline main constructor,
