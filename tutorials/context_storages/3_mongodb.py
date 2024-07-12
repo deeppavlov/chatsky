@@ -14,6 +14,7 @@ library for asynchronous access to MongoDB.
 # %pip install chatsky[mongodb]
 
 # %%
+import asyncio
 import os
 
 from chatsky.context_storages import context_storage_factory
@@ -33,7 +34,7 @@ db_uri = "mongodb://{}:{}@localhost:27017/{}".format(
     os.environ["MONGO_INITDB_ROOT_PASSWORD"],
     os.environ["MONGO_INITDB_ROOT_USERNAME"],
 )
-db = context_storage_factory(db_uri)
+db = asyncio.run(context_storage_factory(db_uri))
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)
 

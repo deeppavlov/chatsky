@@ -15,6 +15,7 @@ libraries for asynchronous access to PostgreSQL DB.
 # %pip install chatsky[postgresql]
 
 # %%
+import asyncio
 import os
 
 from chatsky.context_storages import context_storage_factory
@@ -34,7 +35,7 @@ db_uri = "postgresql+asyncpg://{}:{}@localhost:5432/{}".format(
     os.environ["POSTGRES_PASSWORD"],
     os.environ["POSTGRES_DB"],
 )
-db = context_storage_factory(db_uri)
+db = asyncio.run(context_storage_factory(db_uri))
 
 
 pipeline = Pipeline.from_script(*TOY_SCRIPT_ARGS, context_storage=db)

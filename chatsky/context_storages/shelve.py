@@ -34,10 +34,10 @@ class ShelveContextStorage(DBContextStorage):
     _VALUE_COLUMN = "value"
     _PACKED_COLUMN = "data"
 
-    def __init__(
+    async def __init__(
         self, path: str, context_schema: Optional[ContextSchema] = None, serializer: Any = DefaultSerializer()
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        await DBContextStorage.__init__(self, path, context_schema, serializer)
         self.context_schema.supports_async = False
         file_path = Path(self.path)
         context_file = file_path.with_name(f"{file_path.stem}_{self._CONTEXTS_TABLE}{file_path.suffix}")
@@ -46,21 +46,21 @@ class ShelveContextStorage(DBContextStorage):
         self.log_db = DbfilenameShelf(str(log_file.resolve()), writeback=True)
 
     @cast_key_to_string()
-    async def del_item_async(self, key: str):
+    async def delete(self, key: str):
         for id in self.context_db.keys():
             if self.context_db[id][ExtraFields.storage_key.value] == key:
                 self.context_db[id][ExtraFields.active_ctx.value] = False
 
     @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         return await self._get_last_ctx(key) is not None
 
-    async def len_async(self) -> int:
+    async def length(self) -> int:
         return len(
             {v[ExtraFields.storage_key.value] for v in self.context_db.values() if v[ExtraFields.active_ctx.value]}
         )
 
-    async def clear_async(self, prune_history: bool = False):
+    async def clear(self, prune_history: bool = False):
         if prune_history:
             self.context_db.clear()
             self.log_db.clear()
@@ -68,7 +68,7 @@ class ShelveContextStorage(DBContextStorage):
             for key in self.context_db.keys():
                 self.context_db[key][ExtraFields.active_ctx.value] = False
 
-    async def keys_async(self) -> Set[str]:
+    async def keys(self) -> Set[str]:
         return {
             ctx[ExtraFields.storage_key.value] for ctx in self.context_db.values() if ctx[ExtraFields.active_ctx.value]
         }

@@ -157,7 +157,7 @@ class SQLContextStorage(DBContextStorage):
     _UUID_LENGTH = 64
     _FIELD_LENGTH = 256
 
-    def __init__(
+    async def __init__(
         self,
         path: str,
         context_schema: Optional[ContextSchema] = None,
@@ -165,7 +165,7 @@ class SQLContextStorage(DBContextStorage):
         table_name_prefix: str = "chatsky_table",
         custom_driver: bool = False,
     ):
-        DBContextStorage.__init__(self, path, context_schema, serializer)
+        await DBContextStorage.__init__(self, path, context_schema, serializer)
 
         self._check_availability(custom_driver)
         self.engine = create_async_engine(self.full_path, pool_pre_ping=True)
@@ -201,11 +201,11 @@ class SQLContextStorage(DBContextStorage):
             Index("logs_index", ExtraFields.primary_id.value, self._FIELD_COLUMN, self._KEY_COLUMN, unique=True),
         )
 
-        asyncio.run(self._create_self_tables())
+        await self._create_self_tables()
 
     @threadsafe_method
     @cast_key_to_string()
-    async def del_item_async(self, key: str):
+    async def delete(self, key: str):
         stmt = update(self.tables[self._CONTEXTS_TABLE])
         stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
         stmt = stmt.values({ExtraFields.active_ctx.value: False})
@@ -214,7 +214,7 @@ class SQLContextStorage(DBContextStorage):
 
     @threadsafe_method
     @cast_key_to_string()
-    async def contains_async(self, key: str) -> bool:
+    async def contains(self, key: str) -> bool:
         subq = select(self.tables[self._CONTEXTS_TABLE])
         subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value] == key)
         subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value])
@@ -226,7 +226,7 @@ class SQLContextStorage(DBContextStorage):
             return result[0] != 0
 
     @threadsafe_method
-    async def len_async(self) -> int:
+    async def length(self) -> int:
         subq = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
         subq = subq.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
         stmt = select(func.count()).select_from(subq.subquery())
@@ -237,7 +237,7 @@ class SQLContextStorage(DBContextStorage):
             return result[0]
 
     @threadsafe_method
-    async def clear_async(self, prune_history: bool = False):
+    async def clear(self, prune_history: bool = False):
         if prune_history:
             stmt = delete(self.tables[self._CONTEXTS_TABLE])
         else:
@@ -247,7 +247,7 @@ class SQLContextStorage(DBContextStorage):
             await conn.execute(stmt)
 
     @threadsafe_method
-    async def keys_async(self) -> Set[str]:
+    async def keys(self) -> Set[str]:
         stmt = select(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.storage_key.value])
         stmt = stmt.where(self.tables[self._CONTEXTS_TABLE].c[ExtraFields.active_ctx.value]).distinct()
         async with self.engine.begin() as conn:

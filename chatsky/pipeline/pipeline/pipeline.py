@@ -16,9 +16,10 @@ to structure and manage the messages processing flow.
 
 import asyncio
 import logging
+from inspect import getmro
 from typing import Union, List, Dict, Optional, Hashable, Callable
 
-from chatsky.context_storages import DBContextStorage
+from chatsky.context_storages import DBContextStorage, MemoryContextStorage
 from chatsky.script import Script, Context, ActorStage
 from chatsky.script import NodeLabel2Type, Message
 from chatsky.utils.turn_caching import cache_clear
@@ -65,8 +66,8 @@ class Pipeline:
         - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
 
     :param messenger_interface: An `AbsMessagingInterface` instance for this pipeline.
-    :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline or
-        a dict to store dialog :py:class:`~.Context`.
+    :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
+        to store dialog :py:class:`~.Context`.
     :param before_handler: List of `ExtraHandlerBuilder` to add to the group.
     :type before_handler: Optional[:py:data:`~.ExtraHandlerBuilder`]
     :param after_handler: List of `ExtraHandlerBuilder` to add to the group.
@@ -94,7 +95,7 @@ class Pipeline:
         slots: Optional[Union[GroupSlot, Dict]] = None,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
         messenger_interface: Optional[MessengerInterface] = None,
-        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
+        context_storage: Optional[DBContextStorage] = None,
         before_handler: Optional[ExtraHandlerBuilder] = None,
         after_handler: Optional[ExtraHandlerBuilder] = None,
         timeout: Optional[float] = None,
@@ -103,7 +104,6 @@ class Pipeline:
     ):
         self.actor: Actor = None
         self.messenger_interface = CLIMessengerInterface() if messenger_interface is None else messenger_interface
-        self.context_storage = {} if context_storage is None else context_storage
         self.slots = GroupSlot.model_validate(slots) if slots is not None else None
         self._services_pipeline = ServiceGroup(
             components,
@@ -111,6 +111,11 @@ class Pipeline:
             after_handler=after_handler,
             timeout=timeout,
         )
+        if context_storage is None:
+            self.context_storage = getmro(DBContextStorage)[1].__new__(MemoryContextStorage)
+            self.context_storage.__sync_init__()
+        else:
+            self.context_storage = context_storage
 
         self._services_pipeline.name = "pipeline"
         self._services_pipeline.path = ".pipeline"
@@ -215,7 +220,7 @@ class Pipeline:
         slots: Optional[Union[GroupSlot, Dict]] = None,
         parallelize_processing: bool = False,
         handlers: Optional[Dict[ActorStage, List[Callable]]] = None,
-        context_storage: Optional[Union[DBContextStorage, Dict]] = None,
+        context_storage: Optional[DBContextStorage] = None,
         messenger_interface: Optional[MessengerInterface] = None,
         pre_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
         post_services: Optional[List[Union[ServiceBuilder, ServiceGroupBuilder]]] = None,
@@ -245,7 +250,7 @@ class Pipeline:
             - value: List[Callable] - The list of called handlers for each stage. Defaults to an empty `dict`.
 
         :param context_storage: An :py:class:`~.DBContextStorage` instance for this pipeline
-            or a dict to store dialog :py:class:`~.Context`.
+            to store dialog :py:class:`~.Context`.
         :param messenger_interface: An instance for this pipeline.
         :param pre_services: List of :py:data:`~.ServiceBuilder` or
             :py:data:`~.ServiceGroupBuilder` that will be executed before Actor.
@@ -319,10 +324,8 @@ class Pipeline:
         """
         if ctx_id is None:
             ctx = Context()
-        elif isinstance(self.context_storage, DBContextStorage):
-            ctx = await self.context_storage.get_async(ctx_id, Context(id=ctx_id))
         else:
-            ctx = self.context_storage.get(ctx_id, Context(id=ctx_id))
+            ctx = await self.context_storage.get_default(ctx_id, Context(id=ctx_id))
 
         if update_ctx_misc is not None:
             ctx.misc.update(update_ctx_misc)
@@ -337,11 +340,8 @@ class Pipeline:
             await result
 
         ctx.framework_data.service_states.clear()
+        await self.context_storage.set(ctx_id, ctx)
 
-        if isinstance(self.context_storage, DBContextStorage):
-            await self.context_storage.set_item_async(ctx_id, ctx)
-        else:
-            self.context_storage[ctx_id] = ctx
         if self._clean_turn_cache:
             cache_clear()
 
@@ -349,15 +349,29 @@ class Pipeline:
 
     def run(self):
         """
+        Synchronous version of `run_async` method.
+        """
+        asyncio.run(self.run_async())
+
+    async def run_async(self):
+        """
         Method that starts a pipeline and connects to `messenger_interface`.
         It passes `_run_pipeline` to `messenger_interface` as a callbacks,
         so every time user request is received, `_run_pipeline` will be called.
         This method can be both blocking and non-blocking. It depends on current `messenger_interface` nature.
         Message interfaces that run in a loop block current thread.
         """
-        asyncio.run(self.messenger_interface.connect(self._run_pipeline))
+        await self.messenger_interface.connect(self._run_pipeline)
 
     def __call__(
+        self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
+    ) -> Context:
+        """
+        Synchronous version of `__call_async__` method.
+        """
+        return asyncio.run(self.__call_async__(request, ctx_id, update_ctx_misc))
+
+    async def __call_async__(
         self, request: Message, ctx_id: Optional[Hashable] = None, update_ctx_misc: Optional[dict] = None
     ) -> Context:
         """
@@ -367,7 +381,7 @@ class Pipeline:
 
         This method has the same signature as :py:class:`~chatsky.pipeline.types.PipelineRunnerFunction`.
         """
-        return asyncio.run(self._run_pipeline(request, ctx_id, update_ctx_misc))
+        return await self._run_pipeline(request, ctx_id, update_ctx_misc)
 
     @property
     def script(self) -> Script:
